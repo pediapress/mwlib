@@ -62,6 +62,8 @@ def show():
 def buildzip():
     parser = optparse.OptionParser(usage="%prog [--conf CONF] -o OUTPUT ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
+    parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
+
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     options, args = parser.parse_args()
     
@@ -78,7 +80,8 @@ def buildzip():
     from mwlib import wiki, recorddb
 
     w = wiki.makewiki(conf)
-
+    if options.noimages:
+        w['images'] = None
 
     z = recorddb.ZipfileCreator(w['wiki'], w['images'])
 
