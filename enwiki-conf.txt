@@ -1,0 +1,9 @@
+[images]
+type = download
+url = http://upload.wikimedia.org/wikipedia/commons/
+localpath = ~/en-images
+
+[wiki]
+type = net
+url = http://en.wikipedia.org/wiki/@TITLE@?action=raw
+

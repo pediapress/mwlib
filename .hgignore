@@ -1,0 +1,10 @@
+syntax: glob
+
+*.so
+*.o
+*.pyc
+*~
+ID
+mwlib.egg-info
+build
+trunk
