@@ -322,7 +322,7 @@ class Expander(object):
                 arg = u"".join(arg)
                 splitted = arg.split('=', 1)
                 if len(splitted)>1:
-                    if re.match("^\w+$", splitted[0].strip()):
+                    if re.match("^(\w+|#default)$", splitted[0].strip()):
                         var[splitted[0].strip()] = splitted[1].strip()
                     else:
                         var[str(varcount)] = arg.strip()

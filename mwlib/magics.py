@@ -250,7 +250,7 @@ class ParserFunctions(object):
 
     def SWITCH(self, args):
         v  = args.get("1", "")
-        res = args.get(v, '')
+        res = args.get(v, args.get("#default", ""))
         return res
     
 for x in dir(ParserFunctions):
