@@ -47,7 +47,7 @@ The remaining parts are distributed under the BSD license:
 
 License
 ======================================================================
-Copyright (c) 2007, pediapress GMBH
+Copyright (c) 2007, PediaPress GmbH
 
 All rights reserved.
 
@@ -63,7 +63,7 @@ met:
   disclaimer in the documentation and/or other materials provided
   with the distribution. 
 
-* Neither the name of pediapress GMBH nor the names of its
+* Neither the name of PediaPress GmbH nor the names of its
   contributors may be used to endorse or promote products derived
   from this software without specific prior written permission. 
 
