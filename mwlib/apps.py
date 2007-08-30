@@ -32,7 +32,7 @@ localpath = ~/images
 """ % (os.path.abspath(output),))
 
 def show():
-    parser = optparse.OptionParser(usage="%prog [-e|--expand] [--conf CONF] ARTICLE [...]")
+    parser = optparse.OptionParser(usage="%prog [-e|--expand] --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-e", "--expand", action="store_true", help="expand templates")
 
@@ -44,6 +44,8 @@ def show():
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
+    if not conf:
+        parser.error("missing --conf argument")
 
     from mwlib import wiki, expander
     
@@ -60,7 +62,7 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog [--conf CONF] -o OUTPUT ARTICLE [...]")
+    parser = optparse.OptionParser(usage="%prog --conf CONF -o OUTPUT ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
 
@@ -73,6 +75,9 @@ def buildzip():
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
+    if not options.conf:
+        parser.error("missing --conf argument")
+
     output = options.output
     if not output:
         parser.error("missing -o/--output argument.")
@@ -140,7 +145,7 @@ def parse():
             print >>sys.stderr, "+", repr(x)
 
 def html():
-    parser = optparse.OptionParser(usage="%prog [--conf CONF] ARTICLE [...]")
+    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
 
     options, args = parser.parse_args()
@@ -151,6 +156,8 @@ def html():
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
+    if not options.conf:
+        parser.error("missing --conf argument")
     
     import StringIO
     import tempfile
