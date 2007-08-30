@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 
 import sys
-from mwlib import dummydb, parser, scanner
+from mwlib import dummydb, parser, scanner, expander
 
 
 def parse(raw):    
@@ -60,3 +60,40 @@ def test_self_closing_nowiki():
     parse(u"<nowiki  />")
     parse(u"<nowiki       />")
     parse(u"<NOWIKI>[. . .]</NOWIKI>")
+
+
+class DictDB(object):
+    def __init__(self, d):
+        self.d = d
+
+    def getRawArticle(self, title):
+        return self.d[title]
+
+    def getTemplate(self, title, dummy):
+        return self.d[title]
+
+
+
+def test_switch_default():
+
+    db=DictDB(dict(Bonn="""
+{{Infobox
+|Bundesland         = Nordrhein-Westfalen
+}}
+""",
+           Infobox="""
+{{#switch: {{{Bundesland}}}
+	| Bremen = [[Bremen (Land)|Bremen]]
+	| #default = [[{{{Bundesland|Bayern}}}]]
+}}
+"""))
+
+    te = expander.Expander(db.getRawArticle("Bonn"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+
+    
+    print "EXPANDED:", repr(res)
+    assert "Nordrhein-Westfalen" in res
+
+
+    
