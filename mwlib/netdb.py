@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007, pediapress GMBH
+# See README.txt for additional licensing information.
+
 ## http://mw/index.php?title=Image:Bla.jpg&action=raw
 ## http://mw/index.php?title=Template:MYHEADER&action=raw
 

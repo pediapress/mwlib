@@ -1,3 +1,7 @@
+
+# Copyright (c) 2007, pediapress GMBH
+# See README.txt for additional licensing information.
+
 import optparse
 
 def buildcdb():

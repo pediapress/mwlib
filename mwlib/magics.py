@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007, pediapress GMBH
+# See README.txt for additional licensing information.
+
 """expand magic variables/colon functions
 http://meta.wikimedia.org/wiki/Help:Colon_function
 http://meta.wikimedia.org/wiki/Help:Magic_words
