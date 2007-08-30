@@ -69,4 +69,11 @@ def makewiki(conf):
         res[s] = m(**args)
 
     assert "wiki" in res
+    try:
+        overlaydir = os.environ['MWOVERLAY']
+        assert os.path.isdir(overlaydir)
+        import mwlib.overlay
+        res['wiki'] = mwlib.overlay.OverlayDB(res['wiki'], overlaydir)
+    except:
+        pass
     return res
