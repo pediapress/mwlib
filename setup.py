@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007, PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import os
 import ez_setup
 ez_setup.use_setuptools()
@@ -28,4 +31,3 @@ setup(
     description="mediawiki parser and utility library",
     long_description = read_long_description()
 )
-

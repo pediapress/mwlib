@@ -1,5 +1,8 @@
 #! /usr/bin/env py.test
 
+# Copyright (c) 2007, PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import sys
 from mwlib import dummydb, parser, scanner, expander
 
