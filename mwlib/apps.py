@@ -35,7 +35,8 @@ def show():
     parser = optparse.OptionParser(usage="%prog [-e|--expand] --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-e", "--expand", action="store_true", help="expand templates")
-
+    parser.add_option("-t", "--template", action="store_true", help="show template")
+    
     options, args = parser.parse_args()
     
     if not args:
@@ -52,7 +53,11 @@ def show():
     db = wiki.makewiki(conf)['wiki']
     
     for a in articles:
-        raw=db.getRawArticle(a)
+        if options.template:
+            raw=db.getTemplate(a)
+        else:
+            raw=db.getRawArticle(a)
+
         if raw:
             if options.expand:
                 te = expander.Expander(raw, pagename=a, wikidb=db)
