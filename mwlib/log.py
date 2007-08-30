@@ -13,8 +13,16 @@ class Stdout(object):
     def flush(self):
         sys.stdout.flush()
 
+class Stderr(object):
+    """late-bound sys.stderr"""
+    def write(self, msg):
+        sys.stderr.write(msg)
+
+    def flush(self):
+        sys.stderr.flush()
+
 class Log(object):
-    logfile = Stdout()
+    logfile = Stderr()
     
     def __init__(self, prefix=None):
         if prefix is None:
