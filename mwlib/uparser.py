@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2007, pediapress GMBH
+# Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
 """usable/user parser"""
