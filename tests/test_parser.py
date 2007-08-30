@@ -86,8 +86,8 @@ def test_switch_default():
 """,
            Infobox="""
 {{#switch: {{{Bundesland}}}
-	| Bremen = [[Bremen (Land)|Bremen]]
-	| #default = [[{{{Bundesland|Bayern}}}]]
+        | Bremen = [[Bremen (Land)|Bremen]]
+        | #default = [[{{{Bundesland|Bayern}}}]]
 }}
 """))
 
@@ -100,3 +100,11 @@ def test_switch_default():
 
 
     
+def test_too_many_args():
+    db = dummydb.DummyDB()
+    te = expander.Expander("{{LC:AB|CD}}", pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPANDED:", repr(res)
+    assert "ab" in res
+    assert "cd" not in res.lower()
+
