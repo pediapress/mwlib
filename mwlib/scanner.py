@@ -3,6 +3,11 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+"""this file implements a lexical scanner for mediawiki markup.
+Note that it currently is lossy, i.e. some constructs such as 
+comments won't appear in it's output.
+"""
+
 import sys
 import StringIO
 import htmlentitydefs

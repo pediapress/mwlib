@@ -2,6 +2,8 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+"""main programs - installed via setuptools' entry_points"""
+
 import optparse
 
 def buildcdb():
