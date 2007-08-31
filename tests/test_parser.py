@@ -125,3 +125,21 @@ blubb
     print "EXPANDED:", repr(res)
     assert "bla" in res
     assert "blubb" in res
+
+def test_pipe_begin_table():
+
+    db=DictDB(dict(Foo="""
+bla
+{{{Pipe}} |}
+blubb
+""",
+                   Pipe="|"))
+
+    te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    
+    
+    print "EXPANDED:", repr(res)
+    assert "bla" in res
+    assert "blubb" in res
+    assert "{|" in res
