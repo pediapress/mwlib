@@ -200,7 +200,6 @@ class WikiDB(object):
         return zlib.decompress(d)
 
     def getRawArticle(self, title):
-        title = normname(title)
         res = self._readobj(":"+title)
         if res is None:
             return  None
@@ -216,19 +215,7 @@ class WikiDB(object):
         return res
 
     def getTemplate(self, title, followRedirects=False):
-        title = normname(title)
-        res = unicode(self._readobj(u"T:"+title) or "", 'utf-8')
-        if not res:
-            return res
-
-        mo = self.redirect_rex.search(res)
-        if mo:
-            redirect = mo.group('redirect')
-            redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
-            return self.getTemplate(redirect)
-
-        return res
-
+        return unicode(self._readobj(u"T:"+title) or "", 'utf-8')
 
     def articles(self):
         for k, v in self.cdb:

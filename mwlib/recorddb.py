@@ -5,9 +5,9 @@
 
 import simplejson
 import zipfile
-from mwlib import uparser, parser
-import mwlib.log
-log = mwlib.log.Log("zip")
+from mwlib import uparser, parser, Log
+
+log = Log("zip")
 
 
 class RecordDB(object):

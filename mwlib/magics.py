@@ -13,7 +13,7 @@ import re
 import datetime
 import urllib
 
-from mwlib.log import Log
+from mwlib import Log
 log = Log("expander")
 
 def singlearg(fun):

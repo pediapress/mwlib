@@ -4,7 +4,7 @@
 # See README.txt for additional licensing information.
 
 import os
-from mwlib import parser, rendermath, timeline
+from mwlib import parser, rendermath
 
 import urllib
 import cgi
@@ -32,7 +32,8 @@ class HTMLWriter(object):
         self.out.write(cgi.escape(s))
 
     def getCategoryList(self, obj):
-        categories = list(set(c.target for c in obj.find(parser.CategoryLink)))
+        categories = parser.getChildrenByClass(obj, parser.CategoryLink)
+        categories = list(set(c.target for c in categories))
         categories.sort()
         return categories
                     
@@ -166,7 +167,7 @@ class HTMLWriter(object):
         else:
             self.out.write(obj.caption)
             
-        self.out.write('&nbsp;<img src="/resources/outgoing_link.gif" /></a>')
+        self.out.write('&nbsp;<img src="/resources/pics/outgoing_link.gif" /></a>')
 
     def writeNamedURL(self, obj):
         self.out.write('<a href="%s" class="hastooltip" ttid="externallink">' % obj.caption)
@@ -178,7 +179,7 @@ class HTMLWriter(object):
             self.namedLinkCount += 1
             self.out.write(name)
                         
-        self.out.write('&nbsp;<img src="/resources/outgoing_link.gif" /></a>')
+        self.out.write('&nbsp;<img src="/resources/pics/outgoing_link.gif" /></a>')
 
         
     def writeParagraph(self, obj):
@@ -188,11 +189,7 @@ class HTMLWriter(object):
         self.out.write("</p>\n")
 
     def getHREF(self, obj):
-        parts = obj.target.encode('utf-8').split('#')
-        parts[0] = parts[0].replace(" ", "_")
-        
-
-        return '../%s/' % ("#".join([urllib.quote(x) for x in parts]))
+        return '../%s/' % urllib.quote(obj.target.encode('utf-8'))
 
     writeLangLink = ignore
 
@@ -247,9 +244,6 @@ class HTMLWriter(object):
           <span/>
         <span/>
         """
-        
-        if self.images is None:
-            return
 
         width = obj.width
         height = obj.height
@@ -290,7 +284,6 @@ class HTMLWriter(object):
                     size = img.size
                     height = size[1]*width/size[0]
             except IOError, err:
-                self.imglevel -= 1
                 log.warn("Image.open failed:", err, "path=", repr(path))
                 return
 
@@ -300,7 +293,7 @@ class HTMLWriter(object):
                 align = obj.align
                 if obj.thumb == True and not obj.align:
                     obj.align= "clear right"
-                self.out.write('''<div  class="bbotstyle image %s" style="width:%spx">'''% (obj.align, width))
+                self.out.write('''<div  class="bbotstyle image %s" bbotstyle="{'width':'%spx'}">'''% (obj.align, width))
                 self.out.write('<img src="%s" width="%s" height="%s" />' % (targetsrc, width, height))
                 
                 self.out.write('<span class="imagecaption">')

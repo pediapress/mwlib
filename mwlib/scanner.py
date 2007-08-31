@@ -3,11 +3,6 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-"""this file implements a lexical scanner for mediawiki markup.
-Note that it currently is lossy, i.e. some constructs such as 
-comments won't appear in it's output.
-"""
-
 import sys
 import StringIO
 import htmlentitydefs
@@ -90,7 +85,7 @@ tag_values = Rep(tag_value)
 ##     * <var>
 ##     * <!-- ... -->
 
-tagnames = """timeline imagemap table nowiki i br hr b sup sub big small u span s li ol ul cite code font
+tagnames = """timeline table nowiki i br hr b sup sub big small u span s li ol ul cite code font
 div includeonly tt center references math ref gallery td tr th p blockquote pre
 strong var caption""".split()
 
@@ -134,11 +129,8 @@ def maybe_vlist(token):
                 scanner.produce("PRE", " ")
                 scanner.produce("TEXT", text[1:])
             else:
-                for x in text:
-                    if x in _special:
-                        scanner.produce("SPECIAL", x)
-                    else:
-                        scanner.produce("TEXT", x)        
+                return "TEXT"
+        
     return f
 
 def endpre(scanner, text):
@@ -175,11 +167,6 @@ def end_math(scanner, text):
 def end_timeline(scanner, text):
     scanner.begin("")
     scanner.produce("TIMELINE")
-
-def end_imagemap(scanner, text):
-    scanner.begin("")
-    scanner.produce("IMAGEMAP")
-
 
 def hrule(scanner, text):
     scanner.produce(TagToken("hr", "<hr>"), "<hr>")
@@ -280,13 +267,7 @@ class TagAnalyzer(object):
                 scanner.begin("TIMELINE")
                 scanner.produce("TIMELINE")
             return
-
-        if name=='imagemap':
-            if not isEndToken:
-                scanner.begin("IMAGEMAP")
-                scanner.produce("IMAGEMAP")
-            return
-
+        
         if name=="math":
             if isEndToken:
                 return
@@ -409,12 +390,6 @@ lex = Lexicon(default+[
         ident("\n"),
     ]),
     
-    State("IMAGEMAP", [
-          (end_tag("imagemap"), end_imagemap),
-          (Rep1(AnyBut("<")), "TEXT"),
-          (Str("<"), "TEXT"),
-          ]),
-
     State('comment', [
           (Str("-->"), Begin('')),
           (AnyChar, IGNORE)])

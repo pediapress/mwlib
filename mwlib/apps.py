@@ -2,8 +2,6 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-"""main programs - installed via setuptools' entry_points"""
-
 import optparse
 
 def buildcdb():
@@ -108,6 +106,7 @@ def buildzip():
 
 
 def parse():
+    import sys
     parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
     parser.add_option("-a", "--all", action="store_true", help="parse all articles")
     parser.add_option("--tb", action="store_true", help="show traceback on error")
@@ -148,41 +147,12 @@ def parse():
                 continue
             a=uparser.parseString(x, raw=raw, wikidb=db)
         except Exception, err:
-            print "-", repr(x), err
+            print >>sys.stderr, "-", repr(x), err
             if options.tb:
                 traceback.print_exc()
         else:
-            print "+", repr(x)
+            print >>sys.stderr, "+", repr(x)
 
-def serve():
-    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
-    parser.add_option("-c", "--conf", help="config file")
-
-    options, args = parser.parse_args()
-    
-
-    conf = options.conf
-    if not options.conf:
-        parser.error("missing --conf argument")
-    
-    from mwlib import wiki, web
-    
-    res = wiki.makewiki(conf)
-    db = res['wiki']
-    images = res['images']
-    from wsgiref.simple_server import make_server, WSGIServer
-
-    from SocketServer import ThreadingMixIn, ForkingMixIn
-    class MyServer(ForkingMixIn, WSGIServer):
-        pass
-
-    iface, port = '0.0.0.0', 8080
-    print "serving on %s:%s" % (iface, port)
-    http = make_server(iface, port, web.Serve(db, res['images']), server_class=MyServer)
-    http.serve_forever()
-    
-
-    
 def html():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")

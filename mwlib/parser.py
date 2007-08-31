@@ -8,7 +8,7 @@ import os
 import re
 
 from mwlib.scanner import tokenize, TagToken, EndTagToken
-from mwlib.log import Log
+from mwlib import Log
 
 log = Log("parser")
 
@@ -122,11 +122,6 @@ class Node(object):
             for x in c.allchildren():
                 yield x        
 
-    def find(self, tp):
-        """find instances of type tp in self.allchildren()"""
-        return [x for x in self.allchildren() if isinstance(x, tp)]
-
-
     def filter(self, fun):
         for x in self.allchildren():
             if fun(x):
@@ -142,26 +137,17 @@ class Node(object):
         out = StringIO()
         self._asText(out)
         return out.getvalue()
-                    
-class Math(Node): pass
-class PreFormatted(Node): pass
-class Ref(Node): pass
-class Item(Node): pass
-class ItemList(Node):
-    numbered = False
-class Style(Node): pass
-class Style(Node): pass
-class Book(Node): pass
-class Magic(Node): pass
-class Chapter(Node): pass
-class Article(Node): pass
-class Paragraph(Node): pass
-class Section(Node): pass
-class Timeline(Node): pass
-class TagNode(Node): pass
-class URL(Node): pass
-class NamedURL(Node): pass
+        
+            
+def _buildClasses():
+    g=globals()
+    for x in '''Math PreFormatted Ref Item ItemList Style Book Magic
+Chapter Article Paragraph Section Timeline TagNode URL NamedURL'''.split():
+        g[x]=type(x, (Node,), {})
 
+_buildClasses()
+del _buildClasses
+ItemList.numbered = False
 
 
 class _VListNode(Node):
@@ -354,13 +340,6 @@ class Text(Node):
     
 class Control(Text):
     pass
-
-def append_br_tag(node):
-    """append a self-closing 'br' TagNode"""
-    br = TagNode("br")
-    br.starttext = '<br />'
-    br.endtext = ''
-    node.append(br)
             
 class Parser(object):
     def __init__(self, tokens, name=''):
@@ -555,12 +534,18 @@ class Parser(object):
     def parsePRETag(self):
         p = self.parseTag()
         p.__class__ = PreFormatted
-        txt = "".join([x.caption for x in p.allchildren() if isinstance(x, Text)])
+        txt = []
+        for x in p.allchildren():
+            if isinstance(x, Text):
+                txt.append(x.caption)
+                
+        txt = "".join(txt)        
         # braindamaged, but let's do it.
         # Note: that this does remove <nowiki> without a closing </nowiki>
         # php mediawiki does not do that.
         txt = txt.replace("<nowiki>", "").replace("</nowiki>", "")    
-        p.children[:] = [Text(txt)]        
+        p.children[:] = [Text(txt)]
+        
         return p
 
     parseCODETag = parsePRETag
@@ -897,7 +882,10 @@ class Parser(object):
         if last:
             self.tokens[last[0]] = last[1]
 
-        append_br_tag(p)
+        br = TagNode("br")
+        br.starttext = '<br />'
+        br.endtext = ''
+        p.append(br)
         
         return retval
             
@@ -920,7 +908,9 @@ class Parser(object):
                 p.__class__ = Paragraph
                 break            
             elif token[0] == 'SECTION':
-                p.__class__ = Paragraph
+                break
+            elif token[0] == 'BREAK':
+                self.next()
                 break
             elif token[0] == 'ENDSECTION':
                 p.append(Text(token[1]))
@@ -929,9 +919,6 @@ class Parser(object):
                 p.append(self.parseAtom())
             else:
                 break
-
-        if not self.left:
-            p.__class__ = Paragraph
 
         if p.children:
             return p
@@ -1092,7 +1079,7 @@ class Parser(object):
             elif token[0] == 'EOLSTYLE':
                 p.append(self.parseEOLStyle())
             elif token[0]=='BREAK':
-                append_br_tag(p)
+                p.append(TagNode("br"))
                 self.next()
             elif token[0]==tag_li:
                 break
@@ -1194,6 +1181,9 @@ class Parser(object):
             log.error("error while parsing article", repr(self.name), repr(err))
             raise
 
+def getChildrenByClass(startNode, klass):
+    return list(startNode.filter(lambda x: type(x)==klass))
+        
 def main():
     #import htmlwriter
     from mwlib.dummydb import DummyDB

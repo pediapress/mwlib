@@ -77,13 +77,6 @@ class Renderer(object):
             elif format=='pdf':
                 mysystem("epstopdf %s.ps" % srcbase)
         finally:
-            for x in ['.dvi', '.aux', '.log', '.ps']:
-                p = os.path.join(self.basedir, name+x)
-                try:
-                    os.unlink(p)
-                except OSError, err:
-                    pass
-
             os.chdir(cwd)
 
     def _normalizeLatex(self, latexsource):
