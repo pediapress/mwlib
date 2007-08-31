@@ -155,3 +155,6 @@ dv
 got
 haw
 wo
+tet
+qu
+lmo
