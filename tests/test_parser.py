@@ -108,3 +108,20 @@ def test_too_many_args():
     assert "ab" in res
     assert "cd" not in res.lower()
 
+
+def test_pipe_table():
+
+    db=DictDB(dict(Foo="""
+bla
+{{{ {{Pipe}}}
+blubb
+""",
+                   Pipe="|"))
+
+    te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+
+    
+    print "EXPANDED:", repr(res)
+    assert "bla" in res
+    assert "blubb" in res
