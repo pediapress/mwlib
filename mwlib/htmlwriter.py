@@ -167,7 +167,7 @@ class HTMLWriter(object):
         else:
             self.out.write(obj.caption)
             
-        self.out.write('&nbsp;<img src="/resources/pics/outgoing_link.gif" /></a>')
+        self.out.write('&nbsp;<img src="/resources/outgoing_link.gif" /></a>')
 
     def writeNamedURL(self, obj):
         self.out.write('<a href="%s" class="hastooltip" ttid="externallink">' % obj.caption)
@@ -179,7 +179,7 @@ class HTMLWriter(object):
             self.namedLinkCount += 1
             self.out.write(name)
                         
-        self.out.write('&nbsp;<img src="/resources/pics/outgoing_link.gif" /></a>')
+        self.out.write('&nbsp;<img src="/resources/outgoing_link.gif" /></a>')
 
         
     def writeParagraph(self, obj):
