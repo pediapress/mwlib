@@ -82,7 +82,9 @@ class Serve(object):
         self.timeline = Files(os.path.expanduser("~/timeline")) # FIXME
 
     def show(self, env, start_response):
-        article = unicode(env['PATH_INFO'], 'utf-8').strip('/')
+        article = unicode(env['PATH_INFO'], 'utf-8').strip('/').replace("_", " ")
+        article = article[:1].upper()+article[1:] # FIXME: we should redirect instead.
+        
         raw=self.db.getRawArticle(article)
         if not raw:
             start_response('404 Not found', [('Content-Type', 'text/plain')])
