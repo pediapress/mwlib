@@ -76,7 +76,8 @@ class Serve(object):
     def __init__(self, db, images):
         self.db = db
         self.images = images
-        self.resources = Files(os.path.expanduser("~/resources")) # FIXME
+        from mwlib import resources
+        self.resources = Files(os.path.dirname(resources.__file__)) # FIXME
         self.image_files = Files(os.path.expanduser("~/images")) # FIXME
         self.pngmath = Pngmath(os.path.expanduser("~/pngmath")) # FIXME
         self.timeline = Files(os.path.expanduser("~/timeline")) # FIXME
