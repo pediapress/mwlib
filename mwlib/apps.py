@@ -155,6 +155,31 @@ def parse():
         else:
             print "+", repr(x)
 
+def serve():
+    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
+    parser.add_option("-c", "--conf", help="config file")
+
+    options, args = parser.parse_args()
+    
+
+    conf = options.conf
+    if not options.conf:
+        parser.error("missing --conf argument")
+    
+    from mwlib import wiki, web
+    
+    res = wiki.makewiki(conf)
+    db = res['wiki']
+    images = res['images']
+
+    from wsgiref.simple_server import make_server
+    iface, port = '0.0.0.0', 8080
+    print "serving on %s:%s" % (iface, port)
+    http = make_server(iface, port, web.Serve(db, res['images']))
+    http.serve_forever()
+    
+
+    
 def html():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")

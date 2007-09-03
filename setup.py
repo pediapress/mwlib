@@ -22,6 +22,7 @@ setup(
                                          'mw-parse = mwlib.apps:parse',
                                          'mw-show = mwlib.apps:show',
                                          'mw-html = mwlib.apps:html',
+                                         'mw-serve = mwlib.apps:serve',
                                          ]),
     install_requires=install_requires,
 
