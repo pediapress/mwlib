@@ -6,15 +6,41 @@
 import os
 import mimetypes
 import StringIO
-from mwlib import uparser, htmlwriter
+from mwlib import uparser, htmlwriter, rendermath
 
+class Pngmath(object):
+    def __init__(self, basedir):
+        self.basedir = basedir
+        
+    def __call__(self, env, start_response):
+        pi = env['PATH_INFO']
+        path = pi.split('/', 2)[-1]
+        path = path.strip("/")
+        path = path[:-len(".png")]
+        
+        pngfile = os.path.join(self.basedir, path+'.png')
+        if not os.path.exists(pngfile):
+            texfile = os.path.join(self.basedir, path+'.tex')
+            if not os.path.exists(texfile):
+                start_response('404 Not found', [('Content-Type', 'text/plain')])
+                return ["404 not found"]
+            
+            r = rendermath.Renderer()
+            r._render_file(path, 'png')
+            
+        
+        d=open(pngfile, 'rb').read()
+
+
+        start_response('200 Ok', [('Content-Type', 'image/png')])
+        return [d]
+        
 class Files(object):
     def __init__(self, basedir):
         self.basedir = basedir
     
     def __call__(self, env, start_response):
         pi = env['PATH_INFO']
-        print "PATHINFO:", pi
         path = pi.split('/', 2)[-1]
         path = path.strip("/")
         assert ".." not in path, "path must not contain '..'"
@@ -52,6 +78,7 @@ class Serve(object):
         self.images = images
         self.resources = Files(os.path.expanduser("~/resources")) # FIXME
         self.image_files = Files(os.path.expanduser("~/images")) # FIXME
+        self.pngmath = Pngmath(os.path.expanduser("~/pngmath"))
 
     def show(self, env, start_response):
         article = unicode(env['PATH_INFO'], 'utf-8').strip('/')
@@ -79,7 +106,9 @@ class Serve(object):
             return self.resources(env, start_response)
         if path.startswith("/images"):
             return self.image_files(env, start_response)
-
+        if path.startswith("/pngmath/"):
+            return self.pngmath(env, start_response)
+            
         return self.show(env, start_response)
 
 
