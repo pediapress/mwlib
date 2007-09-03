@@ -29,13 +29,16 @@ include mwlib/lang.txt
 include mwlib/log.py
 include mwlib/magics.py
 include mwlib/netdb.py
+include mwlib/overlay.py
 include mwlib/parser.py
 include mwlib/pedia.css
 include mwlib/recorddb.py
 include mwlib/rendermath.py
 include mwlib/scanner.py
 include mwlib/texmap.py
+include mwlib/timeline.py
 include mwlib/uparser.py
+include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/zipwiki.py
 include setup.py
