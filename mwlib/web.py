@@ -78,7 +78,8 @@ class Serve(object):
         self.images = images
         self.resources = Files(os.path.expanduser("~/resources")) # FIXME
         self.image_files = Files(os.path.expanduser("~/images")) # FIXME
-        self.pngmath = Pngmath(os.path.expanduser("~/pngmath"))
+        self.pngmath = Pngmath(os.path.expanduser("~/pngmath")) # FIXME
+        self.timeline = Files(os.path.expanduser("~/timeline")) # FIXME
 
     def show(self, env, start_response):
         article = unicode(env['PATH_INFO'], 'utf-8').strip('/')
@@ -108,7 +109,9 @@ class Serve(object):
             return self.image_files(env, start_response)
         if path.startswith("/pngmath/"):
             return self.pngmath(env, start_response)
-            
+        if path.startswith("/timeline/"):
+            return self.timeline(env, start_response)
+
         return self.show(env, start_response)
 
 

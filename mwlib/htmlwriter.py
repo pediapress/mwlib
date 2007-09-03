@@ -4,7 +4,7 @@
 # See README.txt for additional licensing information.
 
 import os
-from mwlib import parser, rendermath
+from mwlib import parser, rendermath, timeline
 
 import urllib
 import cgi

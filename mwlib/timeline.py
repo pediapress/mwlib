@@ -3,6 +3,9 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+"""implement http://meta.wikimedia.org/wiki/EasyTimeline
+"""
+
 import os
 import md5
 
@@ -24,7 +27,7 @@ def drawTimeline(script):
 
     scriptfile = os.path.join(basedir, ident+'.txt')
     open(scriptfile, 'w').write(script)
-    err = os.system("easy-timeline.pl -T /tmp/ -i %s" % scriptfile)
+    err = os.system("EasyTimeline.pl -P /usr/bin/ploticus -T /tmp/ -i %s" % scriptfile)
     if err != 0:
         return None
 
