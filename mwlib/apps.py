@@ -149,11 +149,11 @@ def parse():
                 continue
             a=uparser.parseString(x, raw=raw, wikidb=db)
         except Exception, err:
-            print >>sys.stderr, "-", repr(x), err
+            print "-", repr(x), err
             if options.tb:
                 traceback.print_exc()
         else:
-            print >>sys.stderr, "+", repr(x)
+            print "+", repr(x)
 
 def html():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
