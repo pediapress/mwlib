@@ -284,6 +284,7 @@ class HTMLWriter(object):
                     size = img.size
                     height = size[1]*width/size[0]
             except IOError, err:
+                self.imglevel -= 1
                 log.warn("Image.open failed:", err, "path=", repr(path))
                 return
 
