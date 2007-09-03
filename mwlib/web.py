@@ -51,6 +51,7 @@ class Serve(object):
         self.db = db
         self.images = images
         self.resources = Files(os.path.expanduser("~/resources")) # FIXME
+        self.image_files = Files(os.path.expanduser("~/images")) # FIXME
 
     def show(self, env, start_response):
         article = unicode(env['PATH_INFO'], 'utf-8').strip('/')
@@ -76,6 +77,8 @@ class Serve(object):
 
         if path.startswith("/resources/"):
             return self.resources(env, start_response)
+        if path.startswith("/images"):
+            return self.image_files(env, start_response)
 
         return self.show(env, start_response)
 
