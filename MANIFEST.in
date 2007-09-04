@@ -31,9 +31,11 @@ include mwlib/magics.py
 include mwlib/netdb.py
 include mwlib/overlay.py
 include mwlib/parser.py
-include mwlib/pedia.css
 include mwlib/recorddb.py
 include mwlib/rendermath.py
+include mwlib/resources/__init__.py
+include mwlib/resources/outgoing_link.gif
+include mwlib/resources/pedia.css
 include mwlib/scanner.py
 include mwlib/texmap.py
 include mwlib/timeline.py
