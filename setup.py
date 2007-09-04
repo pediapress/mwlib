@@ -3,12 +3,16 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import sys
 import os
 import ez_setup
 ez_setup.use_setuptools()
 from setuptools import setup
 
 install_requires=["simplejson>=1.7"]
+if sys.version_info[:2] < (2,5):
+    install_requires.append("wsgiref>=0.1.2")
+
 
 def read_long_description():
     fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.txt")
@@ -27,6 +31,7 @@ setup(
     install_requires=install_requires,
 
     packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
+    include_package_data = True,
     zip_safe = False,
     url = "http://code.pediapress.com/",
     description="mediawiki parser and utility library",
