@@ -10,6 +10,9 @@ body {
     font-size:10pt;  
 }
 
+img {
+    border:0;
+ }
 
 * { 
  font-size:10pt;
@@ -36,6 +39,8 @@ h3, h3 * {
 * a, * a:hover, * a:visited, * a:active { 
  color:rgb(29,48,161);
  }
+
+
 
 #header {
     text-align:right;
