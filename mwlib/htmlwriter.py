@@ -294,7 +294,7 @@ class HTMLWriter(object):
                 align = obj.align
                 if obj.thumb == True and not obj.align:
                     obj.align= "clear right"
-                self.out.write('''<div  class="bbotstyle image %s" bbotstyle="{'width':'%spx'}">'''% (obj.align, width))
+                self.out.write('''<div  class="bbotstyle image %s" style="width:%spx">'''% (obj.align, width))
                 self.out.write('<img src="%s" width="%s" height="%s" />' % (targetsrc, width, height))
                 
                 self.out.write('<span class="imagecaption">')
