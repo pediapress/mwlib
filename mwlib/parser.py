@@ -137,17 +137,26 @@ class Node(object):
         out = StringIO()
         self._asText(out)
         return out.getvalue()
-        
-            
-def _buildClasses():
-    g=globals()
-    for x in '''Math PreFormatted Ref Item ItemList Style Book Magic
-Chapter Article Paragraph Section Timeline TagNode URL NamedURL'''.split():
-        g[x]=type(x, (Node,), {})
+                    
+class Math(Node): pass
+class PreFormatted(Node): pass
+class Ref(Node): pass
+class Item(Node): pass
+class ItemList(Node):
+    numbered = False
+class Style(Node): pass
+class Style(Node): pass
+class Book(Node): pass
+class Magic(Node): pass
+class Chapter(Node): pass
+class Article(Node): pass
+class Paragraph(Node): pass
+class Section(Node): pass
+class Timeline(Node): pass
+class TagNode(Node): pass
+class URL(Node): pass
+class NamedURL(Node): pass
 
-_buildClasses()
-del _buildClasses
-ItemList.numbered = False
 
 
 class _VListNode(Node):
