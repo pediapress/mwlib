@@ -26,7 +26,7 @@ setup(
                                          ]),
     install_requires=install_requires,
 
-    packages=["mwlib", "mwlib.Plex"],
+    packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
     zip_safe = False,
     url = "http://code.pediapress.com/",
     description="mediawiki parser and utility library",
