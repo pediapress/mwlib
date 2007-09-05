@@ -99,7 +99,6 @@ class Parser(object):
         return copy.deepcopy(self.__dict__)
 
     def _restore(self, state):
-        print "RESTORE:", state
         self.__dict__ = state
 
     def getToken(self):
@@ -121,11 +120,7 @@ class Parser(object):
                     self._eatBrace(3)
                     break
                 else:
-                    print "raising BACKTRACK exception"
                     raise Backtrack()
-
-                    n.children.append(txt)
-                    self.pos += 1
             elif ty==symbols.link:
                 n.children.append(txt)
                 self.pos += 1                
