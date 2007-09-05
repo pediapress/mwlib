@@ -94,15 +94,25 @@ class Parser(object):
         self.txt = txt
         self.tokens = tokenize(txt)
         self.pos = 0
+        self.changes = {}
 
     def _save(self):
-        return copy.deepcopy(self.__dict__)
+        r = self.__dict__.copy()
+        r['changes'] = self.changes.copy()
+        return r
 
     def _restore(self, state):
         self.__dict__ = state
-
+        
     def getToken(self):
-        return self.tokens[self.pos]
+        try:
+            return self.changes[self.pos]
+        except KeyError:
+            return self.tokens[self.pos]
+
+    def setToken(self, tok):
+        self.changes[self.pos] = tok
+
 
     def parseVariable(self):
         v=Variable()
@@ -112,7 +122,7 @@ class Parser(object):
         self.pos += 1
 
         while 1:
-            ty, txt = self.tokens[self.pos]
+            ty, txt = self.getToken()
             if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
             elif ty==symbols.bra_close:
@@ -140,7 +150,7 @@ class Parser(object):
     
         
     def _eatBrace(self, num):
-        ty, txt = self.tokens[self.pos]
+        ty, txt = self.getToken()
         assert ty == symbols.bra_close
         assert len(txt)>= num
         newlen = len(txt)-num
@@ -152,7 +162,7 @@ class Parser(object):
             ty = symbols.txt
 
         txt = txt[:newlen]
-        self.tokens[self.pos] = (ty, txt)        
+        self.setToken((ty, txt))
         
         
     def parseTemplate(self):
@@ -161,7 +171,7 @@ class Parser(object):
         t.children.append(n)
 
         self.pos += 1
-        ty, txt = self.tokens[self.pos]
+        ty, txt = self.getToken()
 
         if txt == ':':
             n.children.append(":")
@@ -172,7 +182,7 @@ class Parser(object):
             
             
         while 1:
-            ty, txt = self.tokens[self.pos]
+            ty, txt = self.getToken()
             if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
             elif ty==symbols.bra_close:
@@ -195,7 +205,7 @@ class Parser(object):
         linkcount = 0   # count open braces...
         
         while 1:
-            ty, txt = self.tokens[self.pos]
+            ty, txt = self.getToken()
             if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
             elif ty==symbols.bra_close:
@@ -227,7 +237,7 @@ class Parser(object):
     
 
     def parseOpenBrace(self):
-        ty, txt = self.tokens[self.pos]
+        ty, txt = self.getToken()
         if len(txt)==2:
             try:
                 state = self._save()
@@ -249,7 +259,7 @@ class Parser(object):
                 self._restore(state)
                 n = Node()
                 n.children.append("{")
-                self.tokens[self.pos] = (ty, txt[1:])
+                self.setToken((ty, txt[1:]))
                 n.children.append(self.parseOpenBrace())
                 return n
             
@@ -259,7 +269,7 @@ class Parser(object):
     def parse(self):
         n = Node()
         while 1:
-            ty, txt = self.tokens[self.pos]
+            ty, txt = self.getToken()
             if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
             elif ty==symbols.bra_close:
