@@ -8,7 +8,7 @@ import os
 import re
 
 from mwlib.scanner import tokenize, TagToken, EndTagToken
-from mwlib import Log
+from mwlib.log import Log
 
 log = Log("parser")
 

@@ -6,9 +6,10 @@
 import sys
 import re
 
-from mwlib import magics, Log
+from mwlib import magics
+import mwlib.log
 
-log = Log("expander")
+log = mwlib.log.Log("expander")
 
 splitpattern = """
 ({{+)                     # opening braces

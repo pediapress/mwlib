@@ -14,7 +14,8 @@ import urllib2
 import md5
 import time
 
-from mwlib import uparser, Log
+from mwlib import uparser
+from mwlib.log import Log
 
 log = Log("netdb")
 
