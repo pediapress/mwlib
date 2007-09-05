@@ -5,6 +5,7 @@
 
 import sys
 import re
+import copy
 
 from mwlib import magics, Log
 
@@ -82,6 +83,8 @@ class Variable(Node):
 class Template(Node):
     pass
     
+class Backtrack(Exception):
+    pass
 
 class Parser(object):
     template_ns = [(5, u'Template'), (5, u':')]
@@ -90,7 +93,14 @@ class Parser(object):
         self.txt = txt
         self.tokens = tokenize(txt)
         self.pos = 0
-        
+
+    def _save(self):
+        return copy.deepcopy(self.__dict__)
+
+    def _restore(self, state):
+        print "RESTORE:", state
+        self.__dict__ = state
+
     def getToken(self):
         return self.tokens[self.pos]
 
@@ -110,6 +120,9 @@ class Parser(object):
                     self._eatBrace(3)
                     break
                 else:
+                    print "raising BACKTRACK exception"
+                    raise Backtrack()
+
                     n.children.append(txt)
                     self.pos += 1
             elif ty==symbols.link:
@@ -124,6 +137,7 @@ class Parser(object):
                 else:
                     n.children.append(txt)
             elif ty==None:
+                raise Backtrack()
                 break
 
         return v
@@ -179,7 +193,7 @@ class Parser(object):
                     break                
                 n.children.append(txt)
             elif ty==None:
-                break
+                raise Backtrack()
 
         n = Node()
         linkcount = 0   # count open braces...
@@ -219,29 +233,31 @@ class Parser(object):
     def parseOpenBrace(self):
         ty, txt = self.tokens[self.pos]
         if len(txt)==2:
-            return self.parseTemplate()
-        if len(txt)==3:
-            return self.parseVariable()
-        if len(txt)==4:
-            # two templates, parse away the first pair of braces.
-            self.tokens[self.pos] = (ty, "{{")
-            self.pos -= 1
-            return self.parseTemplate()
+            try:
+                state = self._save()
+                return self.parseTemplate()
+            except Backtrack:
+                self._restore(state)
+                n = Node()
+                n.children.append("{{")
+                self.pos += 1
 
-        # FIXME: only wild guess
-        if len(txt)==5:
-            self.tokens[self.pos] = (ty, "{{{")
-            self.pos -= 1
-            return self.parseTemplate()
-
-        if len(txt)==6:
-            self.tokens[self.pos] = (ty, "{{{")
-            self.pos -= 1
-            return self.parseVariable()
+                n.children.append(self.parse())
+                return n
+        
+        if len(txt)>=3:
+            try:
+                state = self._save()
+                return self.parseVariable()
+            except Backtrack:
+                self._restore(state)
+                n = Node()
+                n.children.append("{")
+                self.tokens[self.pos] = (ty, txt[1:])
+                n.children.append(self.parseOpenBrace())
+                return n
             
-        # implement the hard part later
-        raise NotImplementedError("too many braces: %s %r" % (len(txt), txt))
-            
+        assert 0
             
         
     def parse(self):

@@ -73,7 +73,8 @@ class DictDB(object):
         return self.d[title]
 
     def getTemplate(self, title, dummy):
-        return self.d[title]
+        return self.d.get(title, u"")
+
 
 
 
