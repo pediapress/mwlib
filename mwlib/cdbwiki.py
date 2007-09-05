@@ -225,6 +225,8 @@ class WikiDB(object):
             redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
             return self.getTemplate(redirect)
 
+        return res
+
 
     def articles(self):
         for k, v in self.cdb:
