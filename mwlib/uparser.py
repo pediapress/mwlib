@@ -101,7 +101,6 @@ def main():
     from mwlib.dummydb import DummyDB
 
     import os
-    import time
     import sys
     
     db = DummyDB()

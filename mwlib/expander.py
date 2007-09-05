@@ -5,7 +5,6 @@
 
 import sys
 import re
-import copy
 
 from mwlib import magics
 import mwlib.log

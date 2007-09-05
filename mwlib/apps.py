@@ -108,7 +108,6 @@ def buildzip():
 
 
 def parse():
-    import sys
     parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
     parser.add_option("-a", "--all", action="store_true", help="parse all articles")
     parser.add_option("--tb", action="store_true", help="show traceback on error")
