@@ -120,15 +120,3 @@ class Serve(object):
 
         start_response('404 Not found', [('Content-Type', 'text/plain')])
         return ["404 Not found"]
-        
-
-def main():
-    iface, port = '0.0.0.0', 8080
-
-    from wsgiref.simple_server import make_server
-    print "serving on %s:%s" % (iface, port)
-    http = make_server(iface, port, Serve(None))
-    http.serve_forever()
-
-if __name__ == '__main__':
-    main()
