@@ -189,7 +189,11 @@ class HTMLWriter(object):
         self.out.write("</p>\n")
 
     def getHREF(self, obj):
-        return '../%s/' % ("#".join([urllib.quote(x) for x in obj.target.encode('utf-8').split('#')]))
+        parts = obj.target.encode('utf-8').split('#')
+        parts[0] = parts[0].replace(" ", "_")
+        
+
+        return '../%s/' % ("#".join([urllib.quote(x) for x in parts]))
 
     writeLangLink = ignore
 
