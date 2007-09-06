@@ -170,11 +170,15 @@ def serve():
     res = wiki.makewiki(conf)
     db = res['wiki']
     images = res['images']
+    from wsgiref.simple_server import make_server, WSGIServer
 
-    from wsgiref.simple_server import make_server
+    from SocketServer import ThreadingMixIn, ForkingMixIn
+    class MyServer(ForkingMixIn, WSGIServer):
+        pass
+
     iface, port = '0.0.0.0', 8080
     print "serving on %s:%s" % (iface, port)
-    http = make_server(iface, port, web.Serve(db, res['images']))
+    http = make_server(iface, port, web.Serve(db, res['images']), server_class=MyServer)
     http.serve_forever()
     
 
