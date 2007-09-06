@@ -87,7 +87,10 @@ class Backtrack(Exception):
     pass
 
 class Parser(object):
-    template_ns = [(5, u'Template'), (5, u':')]
+    template_ns = set([ ((5, u'Template'), (5, u':')),
+                        ((5, u'Vorlage'), (5, u':')),
+                        ])
+
 
     def __init__(self, txt):
         self.txt = txt
@@ -176,7 +179,7 @@ class Parser(object):
             n.children.append(":")
             self.pos += 1
             
-        if self.tokens[self.pos:self.pos+2] == self.template_ns:
+        if tuple(self.tokens[self.pos:self.pos+2]) in self.template_ns:
             self.pos += 2
             
             
