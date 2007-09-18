@@ -41,7 +41,7 @@ class ImageDB(object):
         name = name[0].upper() + name[1:]
         return name.replace(' ', '_').encode('utf8')
 
-    def getDiskPath(self, name, width=None):
+    def downloadImage(self, name, width=None):
         p = self.getPath(name, width=width)
         if p:
             p = os.path.join(self.basedir, p)
@@ -53,16 +53,28 @@ class ImageDB(object):
         name = name[:1].upper()+name[1:]
         
         hp = hashpath(name)
-        print "HP:", hp
 
+        if width:
+            if name.endswith('svg'):
+                name = "%s.png" % name
+            hpWidth = 'thumb/%s/%dpx-%s' % (hp,width,self._transform_name(name))
+        elif name.endswith('svg'):
+            return
+        
         p = os.path.join(self.basedir, hp)
         if os.path.exists(p):
             d = open(p).read()
         elif isinstance(self.baseurl, basestring):
-            d = self._fetchURL(self.baseurl, hp)
+            if width:
+                d = self._fetchURL(self.baseurl, hpWidth)
+            if d is None:
+                d = self._fetchURL(self.baseurl, hp)
         else: 
             for bu in self.baseurl:
-                d = self._fetchURL(bu, hp)
+                if width:
+                    d = self._fetchURL(bu, hpWidth)
+                if d is None:
+                    d = self._fetchURL(bu, hp)
                 if d is not None:
                     break
 
