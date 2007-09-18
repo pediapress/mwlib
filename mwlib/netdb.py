@@ -98,7 +98,7 @@ class ImageDB(object):
                  
 class NetDB(object):
     def __init__(self, pagename, imagedescription=None):
-        self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s")
+        self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
         
         if imagedescription is None:
             self.imagedescription = pagename.replace("%", "%%").replace("@TITLE@", "Image:%(NAME)s")
@@ -106,7 +106,7 @@ class NetDB(object):
             self.imagedescription = imagedescription.replace("%", "%%").replace("@TITLE@", "%(NAME)s")
             
         
-        #self.pagename = "http://mw/index.php?title=%(NAME)s&action=raw"
+        #self.pagename = "http://mw/index.php?title=%(NAME)s&action=raw&oldid=%(REVISION)s"
         #self.imagedescription = "http://mw/index.php?title=Image:%(NAME)s&action=raw"
         
         self.pages = {}
@@ -130,9 +130,12 @@ class NetDB(object):
     
     startCache = _dummy
 
-    def getURL(self, title):        
-        NAME = urllib.quote(title.replace(" ", "_").encode('utf8'))
-        return self.pagename % dict(NAME=NAME)
+    def getURL(self, title, revision=None):        
+        name = urllib.quote(title.replace(" ", "_").encode('utf8'))
+        if revision is None:
+            return self.pagename % dict(NAME=name, REVISION='0')
+        else:
+            return self.pagename % dict(NAME=name, REVISION=revision)
     
     def title2db(self, title):
         assert isinstance(title, unicode), 'title must be of type unicode'
@@ -153,8 +156,8 @@ class NetDB(object):
     def getTemplate(self, name, followRedirects=False):
         return self.getRawArticle(u'Template:%s' % name)
 
-    def getRawArticle(self, title):
-        r = self._getpage(self.getURL(title))
+    def getRawArticle(self, title, revision=None):
+        r = self._getpage(self.getURL(title, revision=revision))
         return unicode(r, 'utf8')
     
     def getRedirect(self, title):
