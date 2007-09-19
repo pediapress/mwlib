@@ -8,7 +8,7 @@
 
 
 import os
-
+import sys
 import urllib
 import urllib2
 import md5
@@ -19,11 +19,13 @@ from mwlib.log import Log
 
 log = Log("netdb")
 
+sys.getfilesystemencoding = lambda: 'utf-8'
+
 def hashpath(name):
     assert isinstance(name, unicode), "must pass unicode object to hashpath"    
     name = name.replace(" ", "_")
     m=md5.new()
-    m.update(name.encode('utf8'))
+    m.update(name.encode('utf-8'))
     d = m.hexdigest()
     return "/".join([d[0], d[:2], name])
 
@@ -34,13 +36,25 @@ class ImageDB(object):
         @type baseurl: str or (str,)
         """
         
+        if isinstance(baseurl, unicode):
+            baseurl = baseurl.encode('ascii')
+        elif isinstance(baseurl, tuple):
+            baseurl = tuple([bu.encode('ascii') for bu in baseurl if isinstance(bu, unicode)])
         self.baseurl = baseurl
+            
         self.basedir = basedir
         
     def _transform_name(self, name):
+        """
+        @type: unicode
+        
+        @rtype: unicode
+        """
+        
+        assert isinstance(name, unicode), 'name must be unicode'
         name = name[0].upper() + name[1:]
-        return name.replace(' ', '_').encode('utf8')
-
+        return name.replace(' ', '_')
+    
     def downloadImage(self, name, width=None):
         p = self.getPath(name, width=width)
         if p:
@@ -61,10 +75,10 @@ class ImageDB(object):
         elif name.endswith('svg'):
             return
         
-        p = os.path.join(self.basedir, hp)
+        p = os.path.join(self.basedir, hp).encode(sys.getfilesystemencoding() or 'utf-8')
         if os.path.exists(p):
             d = open(p).read()
-        elif isinstance(self.baseurl, basestring):
+        elif isinstance(self.baseurl, str):
             if width:
                 d = self._fetchURL(self.baseurl, hpWidth)
             if d is None:
@@ -81,7 +95,7 @@ class ImageDB(object):
         if d is None:
             return
         
-        dest = os.path.join(self.basedir, hp)
+        dest = os.path.join(self.basedir, hp).encode(sys.getfilesystemencoding() or 'utf-8')
         dn = os.path.dirname(dest)
         if not os.path.exists(dn):
             os.makedirs(dn)
@@ -89,11 +103,13 @@ class ImageDB(object):
         return hp
 
     def _fetchURL(self, baseurl, hp):
+        assert isinstance(baseurl, str)
+        assert isinstance(hp, unicode)
         url = "%s/%s" % (baseurl, urllib.quote(hp.encode('utf-8')))
         log.info("fetching %r" % (url,))
 
         opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'PediaPress.com')]
+        opener.addheaders = [('User-agent', 'mwlib')]
         try:
             d = opener.open(url).read()
         except urllib2.HTTPError, err:

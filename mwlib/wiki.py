@@ -37,20 +37,14 @@ dispatch = dict(
 def makewiki(conf):
     res = {}
 
-    wc = os.path.join(conf, "wikiconf.txt")
-    if os.path.exists(wc):
-        conf = wc
-    
     if conf.lower().endswith(".zip"):
         from mwlib import zipwiki
         res['wiki'] = zipwiki.Wiki(conf)
         res['images'] = zipwiki.ImageDB(conf)
         return res
 
-    
     cp=ConfigParser()
     cp.read(conf)
-
     
     for s in ['images', 'wiki']:
         if not cp.has_section(s):
