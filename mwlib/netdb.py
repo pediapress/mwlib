@@ -139,19 +139,26 @@ class NetDB(object):
         
         self.pages = {}
         
-    def _getpage(self, url):
+    def _getpage(self, url, expectedContentType='text/x-wiki'):
         try:
             return self.pages[url]
         except KeyError:
             pass
         
         stime=time.time()
-        d=urllib.urlopen(url).read()
-        log.info('fetched %r in %ss' % (url,time.time()-stime))
+        response = urllib.urlopen(url)
+        data = response.read()
+        log.info('fetched %r in %ss' % (url, time.time()-stime))
 
-        self.pages[url] = d
-        return d
+        if expectedContentType:
+            ct = response.info().gettype()
+            if ct != expectedContentType:
+                log.warn('Skipping page %r with content-type %r (%r was expected). Skipping.'\
+                        % (url, ct, expectedContentType))
+                return None
         
+        self.pages[url] = data
+        return data
         
     def _dummy(self, *args, **kwargs):
         pass
@@ -186,6 +193,8 @@ class NetDB(object):
 
     def getRawArticle(self, title, revision=None):
         r = self._getpage(self.getURL(title, revision=revision))
+        if r is None:
+            return None
         return unicode(r, 'utf8')
     
     def getRedirect(self, title):
@@ -193,6 +202,8 @@ class NetDB(object):
 
     def getParsedArticle(self, title):
         raw = self.getRawArticle(title)
+        if raw is None:
+            return None
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
 
