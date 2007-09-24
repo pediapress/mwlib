@@ -60,7 +60,12 @@ class MetaBook(object):
     def readJsonFile(self,jsonFile):
         jsonBookStr = open(jsonFile).read()
         self.loadJson(jsonBookStr)
-        
+    
+    def getArticles(self):
+        for item in self.getItems():
+            if item['type'] == 'article':
+                yield item['title'], item.get('revision', None)
+    
     def getItems(self):
         items = []
         for item in self.items:

@@ -75,9 +75,10 @@ def show():
 def buildzip():
     parser = optparse.OptionParser(usage="%prog --conf CONF -o OUTPUT ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
+    parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
-
     parser.add_option("-o", "--output", help="write output to OUTPUT")
+    parser.add_option("-p", "--posturl", help="http post to POSTURL")
     options, args = parser.parse_args()
     
     if not args:
@@ -90,21 +91,46 @@ def buildzip():
         parser.error("missing --conf argument")
 
     output = options.output
-    if not output:
-        parser.error("missing -o/--output argument.")
 
     from mwlib import wiki, recorddb
 
     w = wiki.makewiki(conf)
     if options.noimages:
         w['images'] = None
-
-    z = recorddb.ZipfileCreator(w['wiki'], w['images'])
-
+        
+    if output:
+        zipfilename = output
+    else:
+        fd, zipfilename = tempfile.mkstemp()
+        os.close(fd)
+    
+    zf = zipfile.ZipFile(zipfilename, 'w')
+    z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
+    
+    if options.metabook:
+        mb = metabook.MetaBook()
+        mb.readJsonFile(options.metabook)
+        z.addObject('outline.json', mb.dumpJson())
+        for title, revision in mb.getArticles():
+            z.addArticle(title, revision=revision)
+    
     for x in articles:
         z.addArticle(x)
-
-    z.createArchive(output)
+    
+    z.createArchive()
+    zf.close()
+    
+    if posturl:
+        zipfile = open(output, "rb")
+        result = post_url(posturl, zipfile.read())
+        log.info('POST result:' + result)
+        post(tmpPath, metabook, posturl)
+    
+    if w['images']:
+        w['images'].clear()
+    
+    if not output:
+        os.unlink(zipfilename)
 
 
 def parse():
