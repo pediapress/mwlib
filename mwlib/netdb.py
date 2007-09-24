@@ -13,6 +13,7 @@ import urllib
 import urllib2
 import md5
 import time
+import tempfile
 
 from mwlib import uparser
 from mwlib.log import Log
@@ -30,20 +31,26 @@ def hashpath(name):
     return "/".join([d[0], d[:2], name])
 
 class ImageDB(object):
-    def __init__(self, baseurl, basedir):
+    def __init__(self, baseurl, tmpdir=None):
         """
         @param baseurl: base URL or tuple containing several base URLs
-        @type baseurl: str or (str,)
+        @type tmpdir: str
         """
         
         if isinstance(baseurl, unicode):
-            baseurl = baseurl.encode('ascii')
+            baseurl = (baseurl.encode('ascii'),)
         elif isinstance(baseurl, tuple):
             baseurl = tuple([bu.encode('ascii') for bu in baseurl if isinstance(bu, unicode)])
         self.baseurl = baseurl
             
-        self.basedir = basedir
-        
+        self._tmpdir = tmpdir
+
+    @property
+    def tmpdir(self):
+        if self._tmpdir is None:
+            self._tmpdir = unicode(tempfile.mkdtemp())
+        return self._tmpdir
+
     def _transform_name(self, name):
         """
         @type: unicode
@@ -58,7 +65,7 @@ class ImageDB(object):
     def downloadImage(self, name, width=None):
         p = self.getPath(name, width=width)
         if p:
-            p = os.path.join(self.basedir, p)
+            p = os.path.join(self.tmpdir, p)
         return p
 
     def getPath(self, name, width=None):
@@ -75,27 +82,20 @@ class ImageDB(object):
         elif name.endswith('svg'):
             return
         
-        p = os.path.join(self.basedir, hp).encode(sys.getfilesystemencoding() or 'utf-8')
-        if os.path.exists(p):
-            d = open(p).read()
-        elif isinstance(self.baseurl, str):
+        for bu in self.baseurl:
+            filename = hpWidth
             if width:
-                d = self._fetchURL(self.baseurl, hpWidth)
+                d = self._fetchURL(bu, hpWidth)
             if d is None:
-                d = self._fetchURL(self.baseurl, hp)
-        else: 
-            for bu in self.baseurl:
-                if width:
-                    d = self._fetchURL(bu, hpWidth)
-                if d is None:
-                    d = self._fetchURL(bu, hp)
-                if d is not None:
-                    break
+                filename = hp
+                d = self._fetchURL(bu, hp)
+            if d is not None:
+                break
 
         if d is None:
             return
         
-        dest = os.path.join(self.basedir, hp).encode(sys.getfilesystemencoding() or 'utf-8')
+        dest = os.path.join(self.tmpdir, filename).encode(sys.getfilesystemencoding() or 'utf-8')
         dn = os.path.dirname(dest)
         if not os.path.exists(dn):
             os.makedirs(dn)
@@ -105,6 +105,11 @@ class ImageDB(object):
     def _fetchURL(self, baseurl, hp):
         assert isinstance(baseurl, str)
         assert isinstance(hp, unicode)
+        
+        p = os.path.join(self.tmpdir, hp).encode(sys.getfilesystemencoding() or 'utf-8')
+        if os.path.exists(p):
+            return open(p).read()
+        
         url = "%s/%s" % (baseurl, urllib.quote(hp.encode('utf-8')))
         log.info("fetching %r" % (url,))
 
