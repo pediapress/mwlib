@@ -6,9 +6,9 @@
 import os
 from ConfigParser import ConfigParser
 
-def wiki_net(url=None):
+def wiki_net(articleurl=None, url=None, name=None):
     from mwlib import netdb
-    return netdb.NetDB(url)
+    return netdb.NetDB(articleurl)
 
 def wiki_cdb(path=None):
     from mwlib import cdbwiki
