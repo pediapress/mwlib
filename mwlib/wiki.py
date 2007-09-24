@@ -6,6 +6,10 @@
 import os
 from ConfigParser import ConfigParser
 
+def wiki_zip(path=None, url=None, name=None):
+    from mwlib import zipwiki
+    return zipwiki.Wiki(path)
+
 def wiki_net(articleurl=None, url=None, name=None):
     from mwlib import netdb
     return netdb.NetDB(articleurl)
@@ -17,21 +21,26 @@ def wiki_cdb(path=None):
     return db
 
 def image_download(url=None, localpath=None):
-    assert url and localpath, "must supply url and localpath in [images] section"
+    assert url, "must supply url in [images] section"
     from mwlib import netdb
 
-    localpath = os.path.expanduser(localpath)
+    if localpath:
+        tmpdir = os.path.expanduser(localpath)
     urls = [x for x in url.split() if x]
     assert urls
     
-    imgdb = netdb.ImageDB(urls, localpath)
+    imgdb = netdb.ImageDB(urls, tmpdir=tmpdir)
     return imgdb
+
+def image_zip(path=None):
+    from mwlib import zipwiki
+    return zipwiki.ImageDB(path)
 
 
 
 dispatch = dict(
-    images = dict(download = image_download),
-    wiki = dict(cdb=wiki_cdb, net=wiki_net)
+    images = dict(download=image_download, zip=image_zip),
+    wiki = dict(cdb=wiki_cdb, net=wiki_net, zip=wiki_zip)
 )
 
 def makewiki(conf):
