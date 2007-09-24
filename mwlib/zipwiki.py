@@ -36,11 +36,13 @@ class Wiki(object):
     
     def getRawArticle(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
-        return article['content']
+        if article:
+            return article['content']
     
     def getURL(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
-        return article['url']
+        if article:
+            return article['url']
     
     def getTemplate(self, name, followRedirects=True):
         return self.templates[name]
