@@ -73,17 +73,18 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog --conf CONF -o OUTPUT ARTICLE [...]")
+    parser = optparse.OptionParser(usage="%prog -c CONF [-o OUTPUT] [-m METABOOK] [-p POSTURL] [ARTICLE] ...")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL")
     options, args = parser.parse_args()
+
+    import tempfile
+    import os
+    import zipfile
     
-    if not args:
-        parser.error("missing ARTICLE argument")
-        
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
@@ -92,12 +93,12 @@ def buildzip():
 
     output = options.output
 
-    from mwlib import wiki, recorddb
+    from mwlib import wiki, recorddb, metabook
 
     w = wiki.makewiki(conf)
     if options.noimages:
         w['images'] = None
-        
+    
     if output:
         zipfilename = output
     else:
@@ -117,12 +118,14 @@ def buildzip():
     for x in articles:
         z.addArticle(x)
     
-    z.createArchive()
+    z.writeImages()
+    z.writeContent()
     zf.close()
     
+    posturl = options.posturl
     if posturl:
-        zipfile = open(output, "rb")
-        result = post_url(posturl, zipfile.read())
+        zf = open(output, "rb")
+        result = post_url(posturl, zf.read())
         log.info('POST result:' + result)
         post(tmpPath, metabook, posturl)
     

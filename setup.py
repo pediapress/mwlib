@@ -22,7 +22,7 @@ setup(
     name="mwlib",
     version="0.0.2",
     entry_points = dict(console_scripts=['mw-buildcdb = mwlib.apps:buildcdb',
-                                         'mw-zipwiki = mwlib.apps:buildzip',
+                                         'mw-zip = mwlib.apps:buildzip',
                                          'mw-parse = mwlib.apps:parse',
                                          'mw-show = mwlib.apps:show',
                                          'mw-html = mwlib.apps:html',

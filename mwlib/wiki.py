@@ -25,11 +25,11 @@ def image_download(url=None, localpath=None):
     from mwlib import netdb
 
     if localpath:
-        tmpdir = os.path.expanduser(localpath)
+        localpath = os.path.expanduser(localpath)
     urls = [x for x in url.split() if x]
     assert urls
     
-    imgdb = netdb.ImageDB(urls, tmpdir=tmpdir)
+    imgdb = netdb.ImageDB(urls, localpath=localpath)
     return imgdb
 
 def image_zip(path=None):

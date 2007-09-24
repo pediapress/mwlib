@@ -47,7 +47,7 @@ class ZipfileCreator(object):
         @type value: str
         """
         
-        zf.writestr(name.encode('utf-8'), value)
+        self.zf.writestr(name.encode('utf-8'), value)
     
     def addArticle(self, title, revision=None):
         a=uparser.parseString(title, revision=revision, wikidb=self.db)
@@ -65,7 +65,7 @@ class ZipfileCreator(object):
         images.sort()
         image_map = {}
         for i in images:
-            dp = self.imgdb.getDiskPath(i, width=width)
+            dp = self.imgdb.getPath(i, width=width)
             if dp:
                 self.zf.write(dp, (u"images/%s" % i).encode("utf-8"))
     
