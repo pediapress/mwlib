@@ -109,8 +109,18 @@ def buildzip():
     z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
     
     if options.metabook:
+        from ConfigParser import ConfigParser
+        
         mb = metabook.MetaBook()
         mb.readJsonFile(options.metabook)
+        
+        cp=ConfigParser()
+        cp.read(conf)      
+
+        mb.source = {
+            'name': cp.get('wiki', 'name'),
+            'url': cp.get('wiki', 'url'),
+        }
         z.addObject('outline.json', mb.dumpJson())
         for title, revision in mb.getArticles():
             z.addArticle(title, revision=revision)
@@ -124,10 +134,37 @@ def buildzip():
     
     posturl = options.posturl
     if posturl:
-        zf = open(output, "rb")
+        def get_multipart(filename, data, name='collection'):
+            import time
+            
+            boundary = "-"*20 + ("%f" % time.time()) + "-"*20
+
+            items = []
+            items.append("--" + boundary)
+            items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
+                         % {'name': name, 'filename': filename})
+            items.append('Content-Type: application/octet-stream')
+            items.append('')
+            items.append(data)
+            items.append('--' + boundary + '--')
+            items.append('')
+
+            body = "\r\n".join(items)
+            content_type = 'multipart/form-data; boundary=%s' % boundary
+
+            return content_type, body
+        
+        def post_url(url, data, filename='collection.zip'):
+            import urllib2
+            
+            ct, data = get_multipart(filename, data)
+            headers = {"Content-Type": ct}
+            req = urllib2.Request(url.encode('utf8'), data=data, headers=headers)
+            return urllib2.urlopen(req).read()
+        
+        zf = open(zipfilename, "rb")
         result = post_url(posturl, zf.read())
-        log.info('POST result:' + result)
-        post(tmpPath, metabook, posturl)
+        print 'POST result:', repr(result)
     
     if w['images']:
         w['images'].clear()
