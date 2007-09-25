@@ -8,7 +8,8 @@ mwlib - mediawiki parser and utility library
 Overview
 ======================================================================
 mwlib provides a library for parsing mediawiki_ articles.
-
+It is currently aimed at developers, who have a need to somehow handle
+mediawiki articles.
 
 Installation
 ======================================================================
@@ -37,6 +38,11 @@ You will also need:
  PIL is the Python Imaging Library and is used for image handling
  (http://www.pythonware.com/products/pil/).
     
+Contact/Further Information
+======================================================================
+For further information please visit our trac instance running at
+http://code.pediapress.com
+The current development version can also be found there.
 
 Credits
 ======================================================================
