@@ -3,57 +3,72 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import collections
 import os
+import shutil
 import simplejson
 import tempfile
-import zipfile
+from zipfile import ZipFile
 
 from mwlib.metabook import MetaBook
 
 class Wiki(object):
-    def __init__(self, path):
-        self.zf = zipfile.ZipFile(path)
+    def __init__(self, zipfile):
+        """
+        @type zipfile: basestring or ZipFile
+        """
+        
+        if isinstance(zipfile, ZipFile):
+            self.zf = zipfile
+        else:
+            self.zf = ZipFile(zipfile)
         mb = MetaBook()
-        mb.loadJson(self.zf.read("collection.json"))
-        self.articles = collections.defaultdict(list)
-        for item in mb.getItems():
-            if item['type'] != 'article':
-                continue
-            self.articles[item['title']].append(item)
-        self.templates = {}
+        mb.loadJson(self.zf.read("outline.json"))
+        content = simplejson.loads(self.zf.read('content.json'))
+        self.articles = content['articles']
+        self.templates = content['templates']
     
     def _getArticle(self, title, revision=None):
-        articles = sorted(self.articles[title], key=lambda item: item.get('revision', None), reverse=True)
-        if not articles:
-            return None
-        if revision is None:
-            return articles[0]
-        for article in articles:
-            if article.get('revision', None) == revision:
+        try:
+            article = self.articles[title]
+            if revision is None or article['revision'] == revision:
                 return article
+        except KeyError:
+            pass
         return None
     
     def getRawArticle(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
         if article:
             return article['content']
+        return None
     
     def getURL(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
         if article:
             return article['url']
+        return None
     
     def getTemplate(self, name, followRedirects=True):
-        return self.templates[name]
+        try:
+            return self.templates[name]['content']
+        except KeyError:
+            pass
+        return None
     
 
 class ImageDB(object):
-    def __init__(self, zipfilename, tmpdir=None):
-        self.zf = zipfile.ZipFile(zipfilename)
+    def __init__(self, zipfile, tmpdir=None):
+        """
+        @type zipfile: basestring or ZipFile
+        """
+        
+        if isinstance(zipfile, ZipFile):
+            self.zf = zipfile
+        else:
+            self.zf = ZipFile(zipfile)
         self._tmpdir = tmpdir
         mb = MetaBook()
-        mb.loadJson(self.zf.read('collection.json'))
+        mb.loadJson(self.zf.read('outline.json'))
         self.imageMap = mb.imageMap
     
     @property
@@ -73,5 +88,11 @@ class ImageDB(object):
         f.write(data)
         f.close()
         return res
+    
+    def clean(self):
+        if self._tmpdir:
+            shutil.rmtree(self._tmpdir, ignore_errors=True)
+    
+
 
 

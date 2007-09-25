@@ -100,6 +100,7 @@ class ImageDB(object):
         if not os.path.exists(dn):
             os.makedirs(dn)
         open(dest, 'wb').write(d)
+        print >>sys.stderr, 'RETURNING:', repr(dest)
         return dest
 
     def _fetchURL(self, baseurl, hp):
