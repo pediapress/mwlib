@@ -20,7 +20,7 @@ def read_long_description():
 
 setup(
     name="mwlib",
-    version="0.0.2",
+    version="0.1.0",
     entry_points = dict(console_scripts=['mw-buildcdb = mwlib.apps:buildcdb',
                                          'mw-zip = mwlib.apps:buildzip',
                                          'mw-parse = mwlib.apps:parse',
@@ -35,5 +35,8 @@ setup(
     zip_safe = False,
     url = "http://code.pediapress.com/",
     description="mediawiki parser and utility library",
+    license="BSD License",
+    maintainer="pediapress.com",
+    maintainer_email="info@pediapress.com",
     long_description = read_long_description()
 )
