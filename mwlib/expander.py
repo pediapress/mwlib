@@ -18,6 +18,7 @@ splitpattern = """
 |((?:<noinclude>.*?</noinclude>)|(?:<!--.*?-->)|(?:</?includeonly>))  # noinclude, comments: usually ignore
 |(?P<text>(?:<nowiki>.*?</nowiki>)          # nowiki
 |(?:<math>.*?</math>)
+|(?:<pre.*?>.*?</pre>)
 |(?:[:\[\]\|{}<])                                  # all special characters
 |(?:[^\[\]\|:{}<]*))                               # all others
 """
