@@ -46,6 +46,11 @@ dispatch = dict(
 def makewiki(conf):
     res = {}
 
+    # yes, I really don't want to type this everytime
+    wc = os.path.join(conf, "wikiconf.txt")
+    if os.path.exists(wc):
+        conf = wc 
+
     if conf.lower().endswith(".zip"):
         from mwlib import zipwiki
         res['wiki'] = zipwiki.Wiki(conf)
@@ -53,8 +58,11 @@ def makewiki(conf):
         return res
 
     cp=ConfigParser()
-    cp.read(conf)
-    
+
+    if not cp.read(conf):
+        raise RuntimeError("could not read config file %r" % (conf,))
+
+        
     for s in ['images', 'wiki']:
         if not cp.has_section(s):
             continue
