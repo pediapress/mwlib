@@ -134,11 +134,8 @@ def maybe_vlist(token):
                 scanner.produce("PRE", " ")
                 scanner.produce("TEXT", text[1:])
             else:
-                for x in text:
-                    if x in _special:
-                        scanner.produce("SPECIAL", x)
-                    else:
-                        scanner.produce("TEXT", x)        
+                return "TEXT"
+        
     return f
 
 def endpre(scanner, text):

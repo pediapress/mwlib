@@ -1,7 +1,10 @@
 #! /usr/bin/env py.test
 
+# Copyright (c) 2007, PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import sys
-from mwlib import dummydb, parser, scanner
+from mwlib import dummydb, parser, scanner, expander
 
 
 def parse(raw):    
@@ -60,3 +63,84 @@ def test_self_closing_nowiki():
     parse(u"<nowiki  />")
     parse(u"<nowiki       />")
     parse(u"<NOWIKI>[. . .]</NOWIKI>")
+
+
+class DictDB(object):
+    def __init__(self, d):
+        self.d = d
+
+    def getRawArticle(self, title):
+        return self.d[title]
+
+    def getTemplate(self, title, dummy):
+        return self.d.get(title, u"")
+
+
+
+
+def test_switch_default():
+
+    db=DictDB(dict(Bonn="""
+{{Infobox
+|Bundesland         = Nordrhein-Westfalen
+}}
+""",
+           Infobox="""
+{{#switch: {{{Bundesland}}}
+        | Bremen = [[Bremen (Land)|Bremen]]
+        | #default = [[{{{Bundesland|Bayern}}}]]
+}}
+"""))
+
+    te = expander.Expander(db.getRawArticle("Bonn"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+
+    
+    print "EXPANDED:", repr(res)
+    assert "Nordrhein-Westfalen" in res
+
+
+    
+def test_too_many_args():
+    db = dummydb.DummyDB()
+    te = expander.Expander("{{LC:AB|CD}}", pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPANDED:", repr(res)
+    assert "ab" in res
+    assert "cd" not in res.lower()
+
+
+def test_pipe_table():
+
+    db=DictDB(dict(Foo="""
+bla
+{{{ {{Pipe}}}
+blubb
+""",
+                   Pipe="|"))
+
+    te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+
+    
+    print "EXPANDED:", repr(res)
+    assert "bla" in res
+    assert "blubb" in res
+
+def test_pipe_begin_table():
+
+    db=DictDB(dict(Foo="""
+bla
+{{{Pipe}} |}
+blubb
+""",
+                   Pipe="|"))
+
+    te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    
+    
+    print "EXPANDED:", repr(res)
+    assert "bla" in res
+    assert "blubb" in res
+    assert "{|" in res

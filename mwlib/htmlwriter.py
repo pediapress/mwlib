@@ -32,7 +32,8 @@ class HTMLWriter(object):
         self.out.write(cgi.escape(s))
 
     def getCategoryList(self, obj):
-        categories = list(set(c.target for c in obj.find(parser.CategoryLink)))
+        categories = parser.getChildrenByClass(obj, parser.CategoryLink)
+        categories = list(set(c.target for c in categories))
         categories.sort()
         return categories
                     
@@ -247,9 +248,6 @@ class HTMLWriter(object):
           <span/>
         <span/>
         """
-        
-        if self.images is None:
-            return
 
         width = obj.width
         height = obj.height

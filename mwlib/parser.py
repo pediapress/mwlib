@@ -122,11 +122,6 @@ class Node(object):
             for x in c.allchildren():
                 yield x        
 
-    def find(self, tp):
-        """find instances of type tp in self.allchildren()"""
-        return [x for x in self.allchildren() if isinstance(x, tp)]
-
-
     def filter(self, fun):
         for x in self.allchildren():
             if fun(x):
@@ -354,13 +349,6 @@ class Text(Node):
     
 class Control(Text):
     pass
-
-def append_br_tag(node):
-    """append a self-closing 'br' TagNode"""
-    br = TagNode("br")
-    br.starttext = '<br />'
-    br.endtext = ''
-    node.append(br)
             
 class Parser(object):
     def __init__(self, tokens, name=''):
@@ -555,12 +543,18 @@ class Parser(object):
     def parsePRETag(self):
         p = self.parseTag()
         p.__class__ = PreFormatted
-        txt = "".join([x.caption for x in p.allchildren() if isinstance(x, Text)])
+        txt = []
+        for x in p.allchildren():
+            if isinstance(x, Text):
+                txt.append(x.caption)
+                
+        txt = "".join(txt)        
         # braindamaged, but let's do it.
         # Note: that this does remove <nowiki> without a closing </nowiki>
         # php mediawiki does not do that.
         txt = txt.replace("<nowiki>", "").replace("</nowiki>", "")    
-        p.children[:] = [Text(txt)]        
+        p.children[:] = [Text(txt)]
+        
         return p
 
     parseCODETag = parsePRETag
@@ -897,7 +891,10 @@ class Parser(object):
         if last:
             self.tokens[last[0]] = last[1]
 
-        append_br_tag(p)
+        br = TagNode("br")
+        br.starttext = '<br />'
+        br.endtext = ''
+        p.append(br)
         
         return retval
             
@@ -920,7 +917,9 @@ class Parser(object):
                 p.__class__ = Paragraph
                 break            
             elif token[0] == 'SECTION':
-                p.__class__ = Paragraph
+                break
+            elif token[0] == 'BREAK':
+                self.next()
                 break
             elif token[0] == 'ENDSECTION':
                 p.append(Text(token[1]))
@@ -929,9 +928,6 @@ class Parser(object):
                 p.append(self.parseAtom())
             else:
                 break
-
-        if not self.left:
-            p.__class__ = Paragraph
 
         if p.children:
             return p
@@ -1092,7 +1088,7 @@ class Parser(object):
             elif token[0] == 'EOLSTYLE':
                 p.append(self.parseEOLStyle())
             elif token[0]=='BREAK':
-                append_br_tag(p)
+                p.append(TagNode("br"))
                 self.next()
             elif token[0]==tag_li:
                 break
@@ -1194,6 +1190,9 @@ class Parser(object):
             log.error("error while parsing article", repr(self.name), repr(err))
             raise
 
+def getChildrenByClass(startNode, klass):
+    return list(startNode.filter(lambda x: type(x)==klass))
+        
 def main():
     #import htmlwriter
     from mwlib.dummydb import DummyDB

@@ -17,50 +17,62 @@ class RecordDB(object):
         self.articles = {}
         self.templates = {}
         
-    def getRawArticle(self, name):
-        r = self.db.getRawArticle(name)
-        self.articles[name] = r
+    def getRawArticle(self, name, revision=None):
+        r = self.db.getRawArticle(name, revision=revision)
+        self.articles[name] = {
+            'revision': revision,
+            'contenttype': 'text/x-mediawiki',
+            'content': r,
+            'url': self.db.getURL(name, revision=revision),
+        }
         return r
 
     def getTemplate(self, name, followRedirects=False):
         r = self.db.getTemplate(name, followRedirects=followRedirects)
-        self.templates[name] = r
+        self.templates[name] = {'contenttype': 'text/x-mediawiki', 'content': r}
         return r
 
     
 class ZipfileCreator(object):
-    def __init__(self, wikidb=None, imgdb=None):
+    def __init__(self, zf, wikidb=None, imgdb=None):
+        self.zf = zf
         self.db = RecordDB(wikidb)
         self.images = set()
         self.imgdb = imgdb
 
-    def addArticle(self, title):
-        a=uparser.parseString(title, wikidb=self.db)
+    def addObject(self, name, value):
+        """
+        @type name: unicode
+        
+        @type value: str
+        """
+        
+        self.zf.writestr(name.encode('utf-8'), value)
+    
+    def addArticle(self, title, revision=None):
+        a=uparser.parseString(title, revision=revision, wikidb=self.db)
         log.info("searching for images")
         for x in a.allchildren():
             if isinstance(x, parser.ImageLink):
                 self.images.add(x.target)
                 log.info("found", x.target)
 
-
-    def _writeImages(self, zf):
+    def writeImages(self, width=None):
         if self.imgdb is None:
             return
             
         images = list(self.images)
         images.sort()
+        image_map = {}
         for i in images:
-            dp = self.imgdb.getDiskPath(i)
+            dp = self.imgdb.getPath(i, width=width)
             if dp:
-                zf.write(dp, (u"images/%s" % i).encode("utf-8"))
-            print i, dp
-            
-
-    def createArchive(self, name):
-        zf = zipfile.ZipFile(name, "w", compression=zipfile.ZIP_DEFLATED)
-        contents = simplejson.dumps(dict(articles=self.db.articles, templates=self.db.templates))
-        zf.writestr("contents.json", contents)
-        self._writeImages(zf)
-        zf.close()
+                self.zf.write(dp, (u"images/%s" % i).encode("utf-8"))
+    
+    def writeContent(self):
+        self.addObject('content.json', simplejson.dumps(dict(
+            articles=self.db.articles,
+            templates=self.db.templates,
+        )))
         
         

@@ -17,7 +17,6 @@ include mwlib/Plex/Transitions.py
 include mwlib/Plex/__init__.py
 include mwlib/Plex/test_tm.py
 include mwlib/__init__.py
-include mwlib/_version.py
 include mwlib/apps.py
 include mwlib/caller.py
 include mwlib/cdb.py
@@ -45,6 +44,5 @@ include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/zipwiki.py
 include setup.py
-include tests/test_expander.py
 include tests/test_parser.py
 include tests/test_scanner.py
