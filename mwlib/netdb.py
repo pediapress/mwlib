@@ -61,7 +61,7 @@ class ImageDB(object):
         name = name[0].upper() + name[1:]
         return name.replace(' ', '_')
     
-    def downloadImage(self, name, width=None):
+    def getDiskPath(self, name, width=None):
         p = self.getPath(name, width=width)
         if p:
             p = os.path.join(self.localpath, p)
