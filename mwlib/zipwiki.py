@@ -21,8 +21,8 @@ class Wiki(object):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
-        mb = MetaBook()
-        mb.loadJson(self.zf.read("outline.json"))
+        self.metabook = MetaBook()
+        self.metabook.loadJson(self.zf.read("outline.json"))
         content = simplejson.loads(self.zf.read('content.json'))
         self.articles = content['articles']
         self.templates = content['templates']
@@ -67,19 +67,16 @@ class ImageDB(object):
         else:
             self.zf = ZipFile(zipfile)
         self._tmpdir = tmpdir
-        mb = MetaBook()
-        mb.loadJson(self.zf.read('outline.json'))
-        self.imageMap = mb.imageMap
-    
+        
     @property
     def tmpdir(self):
         if self._tmpdir is None:
             self._tmpdir = unicode(tempfile.mkdtemp())
         return self._tmpdir
 
-    def getDiskPath(self, name):
+    def getDiskPath(self, name, width=None):
         try:
-            data = self.zf.read(self.imageMap[name].encode('utf-8'))
+            data = self.zf.read('images/%s' % name.encode('utf-8'))
         except KeyError: # no such file
             return None
         
