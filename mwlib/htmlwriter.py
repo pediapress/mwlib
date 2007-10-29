@@ -248,6 +248,9 @@ class HTMLWriter(object):
           <span/>
         <span/>
         """
+        
+        if self.images is None:
+            return
 
         width = obj.width
         height = obj.height
