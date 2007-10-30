@@ -1088,7 +1088,10 @@ class Parser(object):
             elif token[0] == 'EOLSTYLE':
                 p.append(self.parseEOLStyle())
             elif token[0]=='BREAK':
-                p.append(TagNode("br"))
+                br = TagNode("br")
+                br.starttext = '<br />'
+                br.endtext = ''
+                p.append(br)
                 self.next()
             elif token[0]==tag_li:
                 break

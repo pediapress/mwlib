@@ -84,6 +84,11 @@ class DictDB(object):
         return self.d.get(title, u"")
 
 
+def test_break_in_li():
+    r=parse("<LI> foo\n\n\nbla")
+    tagnode = [x for x in r.allchildren() if isinstance(x, parser.TagNode)][0]
+    assert hasattr(tagnode, "starttext")
+    assert hasattr(tagnode, "endtext")
 
 
 def test_switch_default():
