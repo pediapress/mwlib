@@ -56,6 +56,14 @@ def test_parse_image_inline():
         print "-->Image:", i, i.isInline()
 
 
+def test_parse_image_6():
+    """http://code.pediapress.com/wiki/ticket/6"""
+    r=parse("[[Bild:img.jpg|thumb|+some text]] [[Bild:img.jpg|thumb|some text]]")
+
+    images = [x for x in r.allchildren() if isinstance(x, parser.ImageLink)]
+    assert len(images)==2
+    print images
+    assert images[0].isInline() == images[1].isInline()
 
 
 def test_self_closing_nowiki():
