@@ -349,6 +349,13 @@ class Text(Node):
     
 class Control(Text):
     pass
+
+def append_br_tag(node):
+    """append a self-close 'br' TagNode"""
+    br = TagNode("br")
+    br.starttext = '<br />'
+    br.endtext = ''
+    node.append(br)
             
 class Parser(object):
     def __init__(self, tokens, name=''):
@@ -891,10 +898,7 @@ class Parser(object):
         if last:
             self.tokens[last[0]] = last[1]
 
-        br = TagNode("br")
-        br.starttext = '<br />'
-        br.endtext = ''
-        p.append(br)
+        append_br_tag(p)
         
         return retval
             
@@ -1085,10 +1089,7 @@ class Parser(object):
             elif token[0] == 'EOLSTYLE':
                 p.append(self.parseEOLStyle())
             elif token[0]=='BREAK':
-                br = TagNode("br")
-                br.starttext = '<br />'
-                br.endtext = ''
-                p.append(br)
+                append_br_tag(p)
                 self.next()
             elif token[0]==tag_li:
                 break
