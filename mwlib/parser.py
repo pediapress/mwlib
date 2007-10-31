@@ -1190,9 +1190,6 @@ class Parser(object):
             log.error("error while parsing article", repr(self.name), repr(err))
             raise
 
-def getChildrenByClass(startNode, klass):
-    return list(startNode.filter(lambda x: type(x)==klass))
-        
 def main():
     #import htmlwriter
     from mwlib.dummydb import DummyDB
