@@ -4,17 +4,9 @@
 # See README.txt for additional licensing information.
 
 import sys
-from mwlib import dummydb, parser, scanner, expander
+from mwlib import dummydb, parser, scanner, expander, uparser
 
-
-def parse(raw):    
-    db = dummydb.DummyDB()
-    
-    tokens = scanner.tokenize("unknown", raw)
-    r=parser.Parser(tokens, "unknown").parse()
-    parser.show(sys.stdout, r, 0)
-    return r
-
+parse = uparser.simpleparse
     
 def test_headings():
     r=parse(u"""
