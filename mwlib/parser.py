@@ -550,18 +550,12 @@ class Parser(object):
     def parsePRETag(self):
         p = self.parseTag()
         p.__class__ = PreFormatted
-        txt = []
-        for x in p.allchildren():
-            if isinstance(x, Text):
-                txt.append(x.caption)
-                
-        txt = "".join(txt)        
+        txt = "".join([x.caption for x in p.allchildren() if isinstance(x, Text)])
         # braindamaged, but let's do it.
         # Note: that this does remove <nowiki> without a closing </nowiki>
         # php mediawiki does not do that.
         txt = txt.replace("<nowiki>", "").replace("</nowiki>", "")    
-        p.children[:] = [Text(txt)]
-        
+        p.children[:] = [Text(txt)]        
         return p
 
     parseCODETag = parsePRETag
