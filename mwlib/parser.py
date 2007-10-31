@@ -351,7 +351,7 @@ class Control(Text):
     pass
 
 def append_br_tag(node):
-    """append a self-close 'br' TagNode"""
+    """append a self-closing 'br' TagNode"""
     br = TagNode("br")
     br.starttext = '<br />'
     br.endtext = ''
