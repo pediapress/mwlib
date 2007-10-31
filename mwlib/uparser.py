@@ -97,6 +97,16 @@ def parseString(title=None, raw=None, wikidb=None):
         x(a)
     return a
 
+def simpleparse(raw):    
+    import sys
+    from mwlib import dummydb
+    db = dummydb.DummyDB()
+    
+    tokens = scanner.tokenize("unknown", raw)
+    r=parser.Parser(tokens, "unknown").parse()
+    parser.show(sys.stdout, r, 0)
+    return r
+
 def main():
     from mwlib.dummydb import DummyDB
 
