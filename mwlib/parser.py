@@ -918,9 +918,6 @@ class Parser(object):
                 break            
             elif token[0] == 'SECTION':
                 break
-            elif token[0] == 'BREAK':
-                self.next()
-                break
             elif token[0] == 'ENDSECTION':
                 p.append(Text(token[1]))
                 self.next()
