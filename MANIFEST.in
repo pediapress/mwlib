@@ -44,5 +44,6 @@ include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/zipwiki.py
 include setup.py
+include tests/test_expander.py
 include tests/test_parser.py
 include tests/test_scanner.py
