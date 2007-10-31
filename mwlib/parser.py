@@ -122,6 +122,11 @@ class Node(object):
             for x in c.allchildren():
                 yield x        
 
+    def find(self, tp):
+        """find instances of type tp in self.allchildren()"""
+        return [x for x in self.allchildren() if isinstance(x, tp)]
+
+
     def filter(self, fun):
         for x in self.allchildren():
             if fun(x):

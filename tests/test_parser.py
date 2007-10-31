@@ -14,7 +14,7 @@ def test_headings():
 == 2 ==
 = 3 =
 """)
-
+    
     sections = [x.children[0].asText() for x in r.children if isinstance(x, parser.Section)]
     assert sections == [u" 1 ", u" 3 "]
 
@@ -40,7 +40,7 @@ def test_parse_image_inline():
     #print "IMAGE:", img, img.isInline()
 
     r=parse(u'{| cellspacing="2" border="0" cellpadding="3" bgcolor="#EFEFFF" width="100%"\n|-\n| width="12%" bgcolor="#EEEEEE"| 9. Juli 2006\n| width="13%" bgcolor="#EEEEEE"| Berlin\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of Italy.svg|30px]] \'\'\'Italien\'\'\'\n| width="3%" bgcolor="#EEEEEE"| \u2013\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of France.svg|30px]] Frankreich\n| width="3%" bgcolor="#EEEEEE"|\n| width="25%" bgcolor="#EEEEEE"| [[Fu\xdfball-Weltmeisterschaft 2006/Finalrunde#Finale: Italien .E2.80.93 Frankreich 6:4 n. E..2C 1:1 n. V. .281:1.2C 1:1.29|6:4 n. E., (1:1, 1:1, 1:1)]]\n|}\n')
-    images = [x for x in r.allchildren() if isinstance(x, parser.ImageLink)]
+    images = r.find(parser.ImageLink)
 
     assert len(images)==2
 
@@ -52,7 +52,7 @@ def test_parse_image_6():
     """http://code.pediapress.com/wiki/ticket/6"""
     r=parse("[[Bild:img.jpg|thumb|+some text]] [[Bild:img.jpg|thumb|some text]]")
 
-    images = [x for x in r.allchildren() if isinstance(x, parser.ImageLink)]
+    images = r.find(parser.ImageLink)
     assert len(images)==2
     print images
     assert images[0].isInline() == images[1].isInline()
@@ -78,7 +78,7 @@ class DictDB(object):
 
 def test_break_in_li():
     r=parse("<LI> foo\n\n\nbla")
-    tagnode = [x for x in r.allchildren() if isinstance(x, parser.TagNode)][0]
+    tagnode = r.find(parser.TagNode)[0]
     assert hasattr(tagnode, "starttext")
     assert hasattr(tagnode, "endtext")
 
