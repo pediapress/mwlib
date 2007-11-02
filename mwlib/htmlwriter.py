@@ -32,8 +32,7 @@ class HTMLWriter(object):
         self.out.write(cgi.escape(s))
 
     def getCategoryList(self, obj):
-        categories = parser.getChildrenByClass(obj, parser.CategoryLink)
-        categories = list(set(c.target for c in categories))
+        categories = list(set(c.target for c in obj.find(parser.CategoryLink)))
         categories.sort()
         return categories
                     
