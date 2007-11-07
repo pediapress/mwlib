@@ -55,7 +55,10 @@ class Wiki(object):
             pass
         return None
     
+    def getImageMetaInfos(self, imgname):
+        return {}
 
+    
 class ImageDB(object):
     def __init__(self, zipfile, tmpdir=None):
         """
