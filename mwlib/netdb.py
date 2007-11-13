@@ -117,6 +117,7 @@ class ImageDB(object):
         opener.addheaders = [('User-agent', 'mwlib')]
         try:
             d = opener.open(url).read()
+            log.info("got image:", url)
         except urllib2.HTTPError, err:
             if err.code == 404:
                 log.error("404 - while fetching %r" % (url,))
