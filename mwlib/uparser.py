@@ -76,12 +76,12 @@ def removeBoilerplate(node):
 
 postprocessors = [removeBoilerplate, simplify, fixlitags]
 
-def parseString(title=None, raw=None, wikidb=None):
+def parseString(title=None, raw=None, wikidb=None, revision=None):
     """parse article with title from raw mediawiki text"""
     assert title is not None 
 
     if raw is None:
-        raw = wikidb.getRawArticle(title)
+        raw = wikidb.getRawArticle(title, revision=revision)
         assert raw is not None, "cannot get article %r" % (title,)
     if wikidb:
         te = expander.Expander(raw, pagename=title, wikidb=wikidb)
