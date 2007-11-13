@@ -85,6 +85,8 @@ def buildzip():
     import os
     import zipfile
     
+    from mwlib.utils import daemonize
+    
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
@@ -132,6 +134,10 @@ def buildzip():
     z.writeContent()
     zf.close()
     
+    #daemonize()
+    
+    # TODO: error handling?
+    
     posturl = options.posturl
     if posturl:
         def get_multipart(filename, data, name='collection'):
@@ -164,7 +170,7 @@ def buildzip():
         
         zf = open(zipfilename, "rb")
         result = post_url(posturl, zf.read())
-        print 'POST result:', repr(result)
+        #print 'POST result:', repr(result)
     
     if w['images']:
         w['images'].clear()
