@@ -9,7 +9,7 @@ import ez_setup
 ez_setup.use_setuptools()
 from setuptools import setup
 
-install_requires=["simplejson>=1.7"]
+install_requires=["simplejson>=1.3"]
 if sys.version_info[:2] < (2,5):
     install_requires.append("wsgiref>=0.1.2")
 
