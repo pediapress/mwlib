@@ -109,8 +109,7 @@ class ImageDB(object):
         p = os.path.join(self.localpath, hp).encode(sys.getfilesystemencoding() or 'utf-8')
         if os.path.exists(p):
             return open(p).read()
-        
-        url = "%s/%s" % (baseurl, urllib.quote(hp.encode('utf-8')))
+        url=urllib.basejoin(baseurl, urllib.quote(hp.encode('utf-8')))
         log.info("fetching %r" % (url,))
 
         opener = urllib2.build_opener()
