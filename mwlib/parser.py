@@ -920,6 +920,7 @@ class Parser(object):
                 p.__class__ = Paragraph
                 break            
             elif token[0] == 'SECTION':
+                p.__class__ = Paragraph
                 break
             elif token[0] == 'ENDSECTION':
                 p.append(Text(token[1]))
@@ -928,6 +929,9 @@ class Parser(object):
                 p.append(self.parseAtom())
             else:
                 break
+
+        if not self.left:
+            p.__class__ = Paragraph
 
         if p.children:
             return p
