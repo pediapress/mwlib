@@ -33,8 +33,9 @@ setup(
                                          'mw-serve = mwlib.apps:serve',
                                          ]),
     install_requires=install_requires,
-
+    
     packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
+    namespace_packages=['mwlib'],
     include_package_data = True,
     zip_safe = False,
     url = "http://code.pediapress.com/",
