@@ -6,13 +6,17 @@
 import sys
 import os
 import ez_setup
+import distutils.util
+
 ez_setup.use_setuptools()
 from setuptools import setup
 
-install_requires=["simplejson>=1.7"]
+install_requires=["simplejson>=1.3"]
 if sys.version_info[:2] < (2,5):
     install_requires.append("wsgiref>=0.1.2")
 
+execfile(distutils.util.convert_path('mwlib/_version.py')) 
+# adds 'version' to local namespace
 
 def read_long_description():
     fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.txt")
@@ -20,7 +24,7 @@ def read_long_description():
 
 setup(
     name="mwlib",
-    version="0.1.0",
+    version=str(version),
     entry_points = dict(console_scripts=['mw-buildcdb = mwlib.apps:buildcdb',
                                          'mw-zip = mwlib.apps:buildzip',
                                          'mw-parse = mwlib.apps:parse',
@@ -29,8 +33,9 @@ setup(
                                          'mw-serve = mwlib.apps:serve',
                                          ]),
     install_requires=install_requires,
-
+    
     packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
+    namespace_packages=['mwlib'],
     include_package_data = True,
     zip_safe = False,
     url = "http://code.pediapress.com/",
