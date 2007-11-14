@@ -73,16 +73,20 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog --conf CONF -o OUTPUT ARTICLE [...]")
+    parser = optparse.OptionParser(usage="%prog -c CONF [-o OUTPUT] [-m METABOOK] [-p POSTURL] [ARTICLE] ...")
     parser.add_option("-c", "--conf", help="config file")
+    parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
-
     parser.add_option("-o", "--output", help="write output to OUTPUT")
+    parser.add_option("-p", "--posturl", help="http post to POSTURL")
     options, args = parser.parse_args()
+
+    import tempfile
+    import os
+    import zipfile
     
-    if not args:
-        parser.error("missing ARTICLE argument")
-        
+    from mwlib.utils import daemonize
+    
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
@@ -90,21 +94,89 @@ def buildzip():
         parser.error("missing --conf argument")
 
     output = options.output
-    if not output:
-        parser.error("missing -o/--output argument.")
 
-    from mwlib import wiki, recorddb
+    from mwlib import wiki, recorddb, metabook
 
     w = wiki.makewiki(conf)
     if options.noimages:
         w['images'] = None
+    
+    if output:
+        zipfilename = output
+    else:
+        fd, zipfilename = tempfile.mkstemp()
+        os.close(fd)
+    
+    zf = zipfile.ZipFile(zipfilename, 'w')
+    z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
+    
+    if options.metabook:
+        from ConfigParser import ConfigParser
+        
+        mb = metabook.MetaBook()
+        mb.readJsonFile(options.metabook)
+        
+        cp=ConfigParser()
+        cp.read(conf)      
 
-    z = recorddb.ZipfileCreator(w['wiki'], w['images'])
-
+        mb.source = {
+            'name': cp.get('wiki', 'name'),
+            'url': cp.get('wiki', 'url'),
+        }
+        z.addObject('outline.json', mb.dumpJson())
+        for title, revision in mb.getArticles():
+            z.addArticle(title, revision=revision)
+    
     for x in articles:
         z.addArticle(x)
+    
+    z.writeImages()
+    z.writeContent()
+    zf.close()
+    
+    #daemonize()
+    
+    # TODO: error handling?
+    
+    posturl = options.posturl
+    if posturl:
+        def get_multipart(filename, data, name='collection'):
+            import time
+            
+            boundary = "-"*20 + ("%f" % time.time()) + "-"*20
 
-    z.createArchive(output)
+            items = []
+            items.append("--" + boundary)
+            items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
+                         % {'name': name, 'filename': filename})
+            items.append('Content-Type: application/octet-stream')
+            items.append('')
+            items.append(data)
+            items.append('--' + boundary + '--')
+            items.append('')
+
+            body = "\r\n".join(items)
+            content_type = 'multipart/form-data; boundary=%s' % boundary
+
+            return content_type, body
+        
+        def post_url(url, data, filename='collection.zip'):
+            import urllib2
+            
+            ct, data = get_multipart(filename, data)
+            headers = {"Content-Type": ct}
+            req = urllib2.Request(url.encode('utf8'), data=data, headers=headers)
+            return urllib2.urlopen(req).read()
+        
+        zf = open(zipfilename, "rb")
+        result = post_url(posturl, zf.read())
+        #print 'POST result:', repr(result)
+    
+    if w['images']:
+        w['images'].clear()
+    
+    if not output:
+        os.unlink(zipfilename)
 
 
 def parse():

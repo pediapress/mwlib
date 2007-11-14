@@ -29,6 +29,7 @@ include mwlib/lang.py
 include mwlib/lang.txt
 include mwlib/log.py
 include mwlib/magics.py
+include mwlib/metabook.py
 include mwlib/netdb.py
 include mwlib/overlay.py
 include mwlib/parser.py
@@ -41,6 +42,7 @@ include mwlib/scanner.py
 include mwlib/texmap.py
 include mwlib/timeline.py
 include mwlib/uparser.py
+include mwlib/utils.py
 include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/zipwiki.py

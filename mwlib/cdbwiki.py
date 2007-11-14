@@ -199,7 +199,7 @@ class WikiDB(object):
         f.close()
         return zlib.decompress(d)
 
-    def getRawArticle(self, title):
+    def getRawArticle(self, title, raw=None, revision=None):
         title = normname(title)
         res = self._readobj(":"+title)
         if res is None:

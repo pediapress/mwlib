@@ -73,7 +73,7 @@ class Renderer(object):
             mysystem("latex -interaction=batchmode %s" % texfile)
             mysystem("dvips -E %s.dvi" % srcbase)
             if format=='png':
-                mysystem("convert +adjoin -density 100x100 %s.ps %s.png" % (srcbase, srcbase))
+                mysystem("convert +adjoin -transparent white -density 300x300 %s.ps %s.png" % (srcbase, srcbase))
             elif format=='pdf':
                 mysystem("epstopdf %s.ps" % srcbase)
         finally:
