@@ -109,6 +109,7 @@ class ImageDB(object):
         p = os.path.join(self.localpath, hp).encode(sys.getfilesystemencoding() or 'utf-8')
         if os.path.exists(p):
             return open(p).read()
+
         url=urllib.basejoin(baseurl, urllib.quote(hp.encode('utf-8')))
         log.info("fetching %r" % (url,))
 
@@ -121,6 +122,9 @@ class ImageDB(object):
             if err.code == 404:
                 log.error("404 - while fetching %r" % (url,))
                 print '404'
+                return
+            if err.code == 500:
+                log.error("500 - while fetching %r" % (url,))
                 return
             raise
         return d
