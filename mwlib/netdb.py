@@ -138,9 +138,11 @@ class ImageDB(object):
         
                  
 class NetDB(object):
-    def __init__(self, pagename, imagedescription=None):
+    def __init__(self, pagename, imagedescription=None, templateurls=None):
         self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
-        
+
+        self.templateurls = [x.replace("%", "%%").replace("@TITLE@", "%(NAME)s") for x in templateurls]
+
         if imagedescription is None:
             self.imagedescription = pagename.replace("%", "%%").replace("@TITLE@", "Image:%(NAME)s")
         else:
@@ -202,7 +204,18 @@ class NetDB(object):
         return {}
 
     def getTemplate(self, name, followRedirects=False):
-        return self.getRawArticle(u'Template:%s' % name)
+        name = urllib.quote(name.replace(" ", "_").encode('utf8'))
+        for u in self.templateurls:
+            url = u % dict(NAME=name)
+            print "Trying", url
+            c=self._getpage(url)
+            print "got content from", url
+            return c
+
+
+
+
+        #return self.getRawArticle(u'Template:%s' % name)
 
     def getRawArticle(self, title, revision=None):
         r = self._getpage(self.getURL(title, revision=revision))
