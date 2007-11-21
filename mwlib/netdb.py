@@ -209,8 +209,9 @@ class NetDB(object):
             url = u % dict(NAME=name)
             print "Trying", url
             c=self._getpage(url)
-            print "got content from", url
-            return c
+            if c:
+                print "got content from", url
+                return unicode(c, 'utf8')
 
 
 
