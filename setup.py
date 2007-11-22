@@ -5,11 +5,16 @@
 
 import sys
 import os
-import ez_setup
+
+try:
+    from setuptools import setup
+except ImportError:
+    import ez_setup
+    ez_setup.use_setuptools(version="0.6c1")
+
+from setuptools import setup
 import distutils.util
 
-ez_setup.use_setuptools()
-from setuptools import setup
 
 install_requires=["simplejson>=1.3"]
 if sys.version_info[:2] < (2,5):
