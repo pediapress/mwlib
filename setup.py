@@ -14,7 +14,7 @@ try:
     # so, only import it if setuptools is not already installed
 except ImportError:
     import ez_setup
-    ez_setup.use_setuptools()
+    ez_setup.use_setuptools(version="0.6c1")
 
 from setuptools import setup
 import distutils.util
