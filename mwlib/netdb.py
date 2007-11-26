@@ -183,6 +183,7 @@ class NetDB(object):
         try:
             return [unicode(t,'utf-8').strip() for t in open(templateblacklist).readlines()]
         except IOError:
+            log.error('IOError reading template blacklist:',repr(templateblacklist)
             return []
         
     def _dummy(self, *args, **kwargs):
