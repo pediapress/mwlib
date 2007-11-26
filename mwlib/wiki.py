@@ -10,13 +10,13 @@ def wiki_zip(path=None, url=None, name=None):
     from mwlib import zipwiki
     return zipwiki.Wiki(path)
 
-def wiki_net(articleurl=None, url=None, name=None, templateurls=None):
+def wiki_net(articleurl=None, url=None, name=None, templateurls=None, templateblacklist=None):
     from mwlib import netdb
     if templateurls:
         templateurls = [x for x in templateurls.split() if x]
     else:
         raise RuntimeError("templateurls parameter for netdb not set in [wiki] section")
-    return netdb.NetDB(articleurl, templateurls=templateurls)
+    return netdb.NetDB(articleurl, templateurls=templateurls, templateblacklist=templateblacklist)
 
 def wiki_cdb(path=None):
     from mwlib import cdbwiki

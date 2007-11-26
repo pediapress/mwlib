@@ -138,7 +138,7 @@ class ImageDB(object):
         
                  
 class NetDB(object):
-    def __init__(self, pagename, imagedescription=None, templateurls=None):
+    def __init__(self, pagename, imagedescription=None, templateurls=None, templateblacklist=None):
         self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
 
         self.templateurls = [x.replace("%", "%%").replace("@TITLE@", "%(NAME)s") for x in templateurls]
@@ -148,7 +148,11 @@ class NetDB(object):
         else:
             self.imagedescription = imagedescription.replace("%", "%%").replace("@TITLE@", "%(NAME)s")
             
-        
+        if templateblacklist:
+            self.templateblacklist = self._readTemplateBlacklist(templateblacklist)
+        else:
+            self.templateblacklist = []
+
         #self.pagename = "http://mw/index.php?title=%(NAME)s&action=raw&oldid=%(REVISION)s"
         #self.imagedescription = "http://mw/index.php?title=Image:%(NAME)s&action=raw"
         
@@ -174,6 +178,12 @@ class NetDB(object):
         
         self.pages[url] = data
         return data
+
+    def _readTemplateBlacklist(self,templateblacklist):
+        try:
+            return [unicode(t,'utf-8').strip() for t in open(templateblacklist).readlines()]
+        except IOError:
+            return []
         
     def _dummy(self, *args, **kwargs):
         pass
@@ -204,13 +214,16 @@ class NetDB(object):
         return {}
 
     def getTemplate(self, name, followRedirects=False):
+        if name.lower() in self.templateblacklist:
+            log.info("ignoring blacklisted template:" , repr(name))
+            return None
         name = urllib.quote(name.replace(" ", "_").encode('utf8'))
         for u in self.templateurls:
             url = u % dict(NAME=name)
             print "Trying", url
             c=self._getpage(url)
             if c:
-                print "got content from", url
+                log.info("got content from", url)
                 return unicode(c, 'utf8')
 
 
