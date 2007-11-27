@@ -217,6 +217,9 @@ class WikiDB(object):
         return res
 
     def getTemplate(self, title, followRedirects=False):
+        if ":" in title:
+            title = title.split(':', 1)[1]
+
         title = normname(title)
         res = unicode(self._readobj(u"T:"+title) or "", 'utf-8')
         if not res:
@@ -227,7 +230,6 @@ class WikiDB(object):
             redirect = mo.group('redirect')
             redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
             return self.getTemplate(redirect)
-
         return res
 
 

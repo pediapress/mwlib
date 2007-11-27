@@ -15,6 +15,7 @@ import urllib2
 import md5
 import time
 import tempfile
+import re
 
 from mwlib import uparser
 from mwlib.log import Log
@@ -135,9 +136,15 @@ class ImageDB(object):
              shutil.rmtree(self.tmpdir, ignore_errors=True)
     
 
+def normname(name):
+    name = name.strip().replace("_", " ")
+    name = name[:1].upper()+name[1:]
+    return name
         
                  
 class NetDB(object):
+    redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+
     def __init__(self, pagename, imagedescription=None, templateurls=None, templateblacklist=None):
         self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
 
@@ -215,6 +222,10 @@ class NetDB(object):
         return {}
 
     def getTemplate(self, name, followRedirects=False):
+        if ":" in name:
+            name = name.split(':', 1)[1]
+
+        
         if name.lower() in self.templateblacklist:
             log.info("ignoring blacklisted template:" , repr(name))
             return None
@@ -225,7 +236,13 @@ class NetDB(object):
             c=self._getpage(url)
             if c:
                 log.info("got content from", url)
-                return unicode(c, 'utf8')
+                res=unicode(c, 'utf8')
+                mo = self.redirect_rex.search(res)
+                if mo:
+                    redirect = mo.group('redirect')
+                    redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
+                    return self.getTemplate(redirect)
+                return res
 
 
 
