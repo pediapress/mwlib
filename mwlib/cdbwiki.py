@@ -95,9 +95,10 @@ class DumpParser(object):
     
     def handlePageElement(self, page):
         title = page.find(self.tags.title).text
-        revision = page.find(self.tags.revision)
-        if revision is None:
+        revisions = page.findall(self.tags.revision)
+        if not revisions:
             return
+        revision = revisions[-1]
         
         texttag = revision.find(self.tags.text)
         timestamptag = revision.find(self.tags.timestamp)
