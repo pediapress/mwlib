@@ -222,12 +222,36 @@ class StringMagic(object):
         return a[:1].upper()+a[1:]
 
 class ParserFunctions(object):
+    wikidb = None
+
     def IF(self, args):
         if args.get("1", ""):
             return args.get("2", "")
         else:
             return args.get("3", "")
 
+    def IFEXIST(self, args):
+        name = args.get("1", "")
+        if not self.wikidb:
+            return args.get("3", "")
+        
+        # wrong place. FIXME.
+        if ':' in name:
+            ns, name = name.split(':', 1)
+            if ns.lower() in ['vorlage', 'template']:
+                r=self.wikidb.getTemplate(name)
+            else:
+                r=None
+        else:
+            r=self.wikidb.getRawArticle(name)
+
+        if r:
+            return args.get("2", "")
+        else:
+            return args.get("3", "")
+
+
+            
     def IFEQ(self, args):
         pass
 

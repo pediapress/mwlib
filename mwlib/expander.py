@@ -296,7 +296,8 @@ class Expander(object):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
         self.db = wikidb
         self.resolver = magics.MagicResolver(pagename=pagename)
-        
+        self.resolver.wikidb = wikidb
+
         self.parsed = Parser(txt).parse()
         #show(sys.stdout, self.parsed)
         self.variables = {}
