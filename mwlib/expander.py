@@ -89,6 +89,17 @@ def show(node, indent=0, out=None):
 class Backtrack(Exception):
     pass
 
+def optimize(node):
+    if isinstance(node, basestring):
+        return node
+    if type(node) is Node and len(node.children)==1:
+        return node.children[0]
+
+    for i, x in enumerate(node.children):
+        node.children[i] = optimize(x)
+    return node
+
+
 class Parser(object):
     template_ns = set([ ((5, u'Template'), (5, u':')),
                         ((5, u'Vorlage'), (5, u':')),
