@@ -312,6 +312,6 @@ def _populate_dummy():
     if missing:
         missing = list(missing)
         missing.sort()
-        log.info("installed dummy resolvers for %s" % (", ".join(missing),))
+        #log.info("installed dummy resolvers for %s" % (", ".join(missing),))
 
 _populate_dummy()
