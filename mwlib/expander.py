@@ -35,14 +35,6 @@ class symbols:
     noi = 4
     txt = 5
 
-def show(out, node, indent=0):
-    print >>out, "  "*indent, node
-    for x in node:
-        if isinstance(x, basestring):
-            print >>out, "  "*(indent+1), repr(x)
-        else:
-            show(out, x, indent+1)
-
 def tokenize(txt):
     
     if "<onlyinclude>" in txt:
@@ -83,7 +75,17 @@ class Variable(Node):
 
 class Template(Node):
     pass
-    
+
+def show(node, indent=0, out=None):
+    if out is None:
+        out=sys.stdout
+
+    print >>out, "  "*indent, repr(node)
+    if isinstance(node, basestring):
+        return
+    for x in node.children:
+        show(x, indent+1, out)
+
 class Backtrack(Exception):
     pass
 
@@ -299,7 +301,7 @@ class Expander(object):
         self.resolver.wikidb = wikidb
 
         self.parsed = Parser(txt).parse()
-        #show(sys.stdout, self.parsed)
+        #show(self.parsed)
         self.variables = {}
         self.parsedTemplateCache = {}
         
