@@ -92,8 +92,9 @@ class Backtrack(Exception):
 def optimize(node):
     if isinstance(node, basestring):
         return node
+
     if type(node) is Node and len(node.children)==1:
-        return node.children[0]
+        return optimize(node.children[0])
 
     for i, x in enumerate(node.children):
         node.children[i] = optimize(x)
