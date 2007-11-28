@@ -248,3 +248,4 @@ kv
 sg
 sd
 roa-tara
+zh-classical
