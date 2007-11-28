@@ -25,3 +25,13 @@ def test_noexpansion_inside_pre():
     print "EXPANDED:", repr(res)
     assert u"ACB" not in res
     assert u"A{{Pipe}}B" in res
+
+
+def test_undefined_variable():
+    db = DictDB(dict(Art="{{Pipe}}",
+                     Pipe="{{{undefined_variable}}}"))
+    
+    te = expander.Expander(db.getRawArticle("Art"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPANDED:", repr(res)
+    assert u"{{{undefined_variable}}}" in res, "wrong expansion for undefined variable"

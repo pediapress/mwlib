@@ -391,7 +391,8 @@ class Expander(object):
             if v is None:
                 if len(n.children)>1:
                     self.flatten(n.children[1:], res)
-                    
+                else:
+                    res.append(u"{{{%s}}}" % (name,))
             else:
                 res.append(v)
         else:        
