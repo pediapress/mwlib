@@ -31,7 +31,7 @@ class ExpressionParser(object):
                "!=":    lambda a, b: int(a!=b),
                "and":   lambda a, b: int(bool(a) and bool(b)),
                "or":    lambda a, b: int(bool(a) or bool(b)),
-               "round": lambda a, b: a
+               "round": lambda a, b: round(a, int(b))
                }
 
     unaops = {"not": lambda a: int(not bool(a))}
@@ -71,8 +71,10 @@ class ExpressionParser(object):
 
         term = factor + ZeroOrMore( ( multop + factor ).setParseAction( self._push_first ) )
         adds = term + ZeroOrMore( ( addop + term ).setParseAction( self._push_first ) )
+        
+        rounds = adds + ZeroOrMore( (CaselessLiteral("round") + adds).setParseAction(self._push_first)) 
 
-        cmps = adds + ZeroOrMore( (cmpop + adds).setParseAction(self._push_first) )
+        cmps = rounds + ZeroOrMore( (cmpop + rounds).setParseAction(self._push_first) )
 
         ands = cmps + ZeroOrMore( (CaselessLiteral("and")+cmps).setParseAction(self._push_first))
         ors = ands + ZeroOrMore( (CaselessLiteral("or")+ands).setParseAction(self._push_first))
