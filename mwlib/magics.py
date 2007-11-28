@@ -12,8 +12,9 @@ http://meta.wikimedia.org/wiki/ParserFunctions
 import re
 import datetime
 import urllib
-
 from mwlib.log import Log
+from mwlib import expr
+
 log = Log("expander")
 
 def singlearg(fun):
@@ -257,16 +258,11 @@ class ParserFunctions(object):
 
     def EXPR(self, args):
         e = args.get("1", "0")
-        rx = re.compile("^[-+/*. ()0-9]*$")
-        if rx.match(e):
-            try:
-                retval = str(eval(e))
-            except:
-                retval = "0"
-        else:
-            retval = "0"
-            
-        return retval
+        ep=expr.ExpressionParser()
+        try:
+            return str(ep(e))
+        except Exception, err:
+            return str(err)
     
 
     def IFEXPR(self, args):
