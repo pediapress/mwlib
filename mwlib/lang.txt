@@ -249,3 +249,4 @@ sg
 sd
 roa-tara
 zh-classical
+zh-cn
