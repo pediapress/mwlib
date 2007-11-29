@@ -304,6 +304,10 @@ class Parser(object):
                 break
         return n
 
+def parse(txt):
+    return optimize(Parser(txt).parse())
+
+
 
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):

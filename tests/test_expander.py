@@ -69,3 +69,8 @@ def test_five():
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
     assert res==txt
+
+def test_five_parser():
+    n=expander.parse("{{{{{1}}}}}")
+    expander.show(n)
+    assert isinstance(n, expander.Template)
