@@ -132,15 +132,16 @@ class Parser(object):
 
     def variableFromChildren(self, children):
         v=Variable()
+        name = Node()
+        v.children.append(name)
+
         try:
             idx = children.index(u"|")
         except ValueError:
-            v.children = children
+            name.children = children
         else:
-            name = Node()
-            name.children = children[:idx]
-            
-            v.children = [name] + children[idx+1:]
+            name.children = children[:idx]            
+            v.children.extend(children[idx+1:])
         return v
         
     def _eatBrace(self, num):
