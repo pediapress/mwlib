@@ -282,7 +282,6 @@ class Expander(object):
         self.parsedTemplateCache = {}
         
     def getParsedTemplate(self, name):
-        log.info("getParsedTemplate", repr(name))
         try:
             return self.parsedTemplateCache[name]
         except KeyError:
