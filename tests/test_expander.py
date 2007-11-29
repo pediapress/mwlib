@@ -59,3 +59,45 @@ def test_birth_date_and_age():
 
     assert u"February" in res
     
+def test_five():
+    txt = "text of the tnext template"
+    db=DictDB(dict(
+            a="{{t1|tnext}}",
+            t1="{{{{{1}}}}}",
+            tnext=txt))
+    te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPANDED:", repr(res)
+    assert res==txt
+
+def test_five_parser():
+    n=expander.parse("{{{{{1}}}}}")
+    expander.show(n)
+    assert isinstance(n, expander.Template)
+
+def test_five_parser():
+    n=expander.parse("{{{{{1}}}}}")
+    n.show()
+    assert isinstance(n, expander.Template)
+
+def test_five_two_three():
+    n=expander.parse("{{{{{1}} }}}")
+    n.show()
+    assert isinstance(n, expander.Variable)
+
+def test_five_three_two():
+    n=expander.parse("{{{{{1}}} }}")
+    n.show()
+    assert isinstance(n, expander.Template)
+
+    
+def test_alfred():
+    """I start to hate that Alfred_Gusenbauer"""
+    db = DictDB({
+            "a": "{{ibox2|birth_date=1960}}",
+            "ibox2": "{{{birth{{#if:{{{birthdate|}}}||_}}date}}}"
+            })
+    te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPANDED:", repr(res)
+    assert "1960" in res

@@ -69,7 +69,10 @@ class Node(object):
     def __iter__(self):
         for x in self.children:
             yield x
-            
+
+    def show(self, out=None):
+        show(self, out=out)
+
 class Variable(Node):
     pass
 
@@ -86,9 +89,6 @@ def show(node, indent=0, out=None):
     for x in node.children:
         show(x, indent+1, out)
 
-class Backtrack(Exception):
-    pass
-
 def optimize(node):
     if isinstance(node, basestring):
         return node
@@ -99,7 +99,6 @@ def optimize(node):
     for i, x in enumerate(node.children):
         node.children[i] = optimize(x)
     return node
-
 
 class Parser(object):
     template_ns = set([ ((5, u'Template'), (5, u':')),
@@ -131,40 +130,19 @@ class Parser(object):
         self.changes[self.pos] = tok
 
 
-    def parseVariable(self):
+    def variableFromChildren(self, children):
         v=Variable()
-        n = Node()
-        v.children.append(n)
-        
-        self.pos += 1
+        name = Node()
+        v.children.append(name)
 
-        while 1:
-            ty, txt = self.getToken()
-            if ty==symbols.bra_open:
-                n.children.append(self.parseOpenBrace())
-            elif ty==symbols.bra_close:
-                if len(txt)>=3:
-                    self._eatBrace(3)
-                    break
-                else:
-                    raise Backtrack()
-            elif ty==symbols.link:
-                n.children.append(txt)
-                self.pos += 1                
-            elif ty==symbols.noi:
-                self.pos += 1   # ignore <noinclude>
-            elif ty==symbols.txt:
-                self.pos += 1                
-                if txt == '|' and n is not v:
-                    n = v
-                else:
-                    n.children.append(txt)
-            elif ty==None:
-                raise Backtrack()
-                break
-
+        try:
+            idx = children.index(u"|")
+        except ValueError:
+            name.children = children
+        else:
+            name.children = children[:idx]            
+            v.children.extend(children[idx+1:])
         return v
-    
         
     def _eatBrace(self, num):
         ty, txt = self.getToken()
@@ -181,107 +159,89 @@ class Parser(object):
         txt = txt[:newlen]
         self.setToken((ty, txt))
         
-        
-    def parseTemplate(self):
-        t = Template()
-        n = Node()
-        t.children.append(n)
 
-        self.pos += 1
-        ty, txt = self.getToken()
-
-        if txt == ':':
-            n.children.append(":")
-            self.pos += 1
-            
-        if tuple(self.tokens[self.pos:self.pos+2]) in self.template_ns:
-            self.pos += 2
-            
-            
-        while 1:
-            ty, txt = self.getToken()
-            if ty==symbols.bra_open:
-                n.children.append(self.parseOpenBrace())
-            elif ty==symbols.bra_close:
-                self._eatBrace(2)
-                return t
-            elif ty==symbols.link:
-                n.children.append(txt)
-                self.pos += 1       
-            elif ty==symbols.noi:
-                self.pos += 1   # ignore <noinclude>
-            elif ty==symbols.txt:
-                self.pos += 1
-                if txt=='|' or txt==':':
-                    break                
-                n.children.append(txt)
-            elif ty==None:
-                raise Backtrack()
-
-        n = Node()
-        linkcount = 0   # count open braces...
-        
-        while 1:
-            ty, txt = self.getToken()
-            if ty==symbols.bra_open:
-                n.children.append(self.parseOpenBrace())
-            elif ty==symbols.bra_close:
-                self._eatBrace(2)
-                if n.children:
-                    t.children.append(n)
+    def templateFromChildren(self, children):
+        t=Template()
+        # find the name
+        name = Node()
+        t.children.append(name)
+        for idx, c in enumerate(children):
+            if c==u'|' or c==u':':
                 break
-            elif ty==symbols.link:
-                if txt=='[[':
-                    linkcount += 1
-                else:
-                    linkcount -= 1                    
-                n.children.append(txt)
-                self.pos += 1
-            elif ty==symbols.noi:
-                self.pos += 1   # ignore <noinclude>
-            elif ty==symbols.txt:
-                if linkcount==0 and txt=='|':
-                    t.children.append(n)
-                    n = Node()
-                else:
-                    n.children.append(txt)
-                self.pos += 1
-                
-            elif ty==None:
-                break
+            name.children.append(c)
+
+
+        # find the arguments
+        
+
+        arg = Node()
+
+        linkcount = 0
+        for idx, c in enumerate(children[idx+1:]):
+            if c==u'[[':
+                linkcount += 1
+            elif c==']]':
+                linkcount -= 1
+            elif c==u'|' and linkcount==0:
+                t.children.append(arg)
+                arg = Node()
+                continue
+            arg.children.append(c)
+
+
+        if arg.children:
+            t.children.append(arg)
+
 
         return t
+
+        
+        
     
 
     def parseOpenBrace(self):
         ty, txt = self.getToken()
-        if len(txt)==2:
-            try:
-                state = self._save()
-                return self.parseTemplate()
-            except Backtrack:
-                self._restore(state)
-                n = Node()
-                n.children.append("{{")
-                self.pos += 1
+        n = Node()
 
-                n.children.append(self.parse())
-                return n
+        numbraces = len(txt)
+        self.pos += 1
         
-        if len(txt)>=3:
-            try:
-                state = self._save()
-                return self.parseVariable()
-            except Backtrack:
-                self._restore(state)
-                n = Node()
-                n.children.append("{")
-                self.setToken((ty, txt[1:]))
+        while 1:
+            ty, txt = self.getToken()
+            if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
-                return n
-            
-        assert 0
-            
+            elif ty==symbols.bra_close:
+                closelen = len(txt)
+                if closelen==2 or numbraces==2:
+                    t=self.templateFromChildren(n.children)
+                    n=Node()
+                    n.children.append(t)
+                    self._eatBrace(2)
+                    numbraces-=2
+                else:
+                    v=self.variableFromChildren(n.children)
+                    n=Node()
+                    n.children.append(v)
+                    self._eatBrace(3)
+                    numbraces -= 3
+
+                if numbraces==0:
+                    break
+                elif numbraces==1:
+                    n.children.insert(0, "{")
+                    break
+            elif ty==symbols.noi:
+                self.pos += 1 # ignore <noinclude>
+            elif ty==symbols.link:
+                n.children.append(txt)
+                self.pos += 1                
+            elif ty==symbols.txt:
+                n.children.append(txt)
+                self.pos += 1
+            elif ty==None:
+                break
+
+        return n
         
     def parse(self):
         n = Node()
@@ -304,6 +264,10 @@ class Parser(object):
                 break
         return n
 
+def parse(txt):
+    return optimize(Parser(txt).parse())
+
+
 
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
@@ -318,7 +282,6 @@ class Expander(object):
         self.parsedTemplateCache = {}
         
     def getParsedTemplate(self, name):
-        log.info("getParsedTemplate", repr(name))
         try:
             return self.parsedTemplateCache[name]
         except KeyError:
@@ -370,7 +333,6 @@ class Expander(object):
                 else:
                     var[str(varcount)] = arg.strip()
                     varcount += 1
-                    
 
             rep = self.resolver(name, var)
             if rep is not None:
@@ -393,7 +355,9 @@ class Expander(object):
                 if len(n.children)>1:
                     self.flatten(n.children[1:], res)
                 else:
-                    res.append(u"{{{%s}}}" % (name,))
+                    pass
+                    # FIXME. breaks If
+                    #res.append(u"{{{%s}}}" % (name,))
             else:
                 res.append(v)
         else:        
@@ -414,4 +378,3 @@ if __name__=="__main__":
     d=unicode(open(sys.argv[1]).read(), 'utf8')
     e = Expander(d)
     print e.expandTemplates()
-    
