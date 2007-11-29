@@ -59,3 +59,13 @@ def test_birth_date_and_age():
 
     assert u"February" in res
     
+def test_five():
+    txt = "text of the tnext template"
+    db=DictDB(dict(
+            a="{{t1|tnext}}",
+            t1="{{{{{1}}}}}",
+            tnext=txt))
+    te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPANDED:", repr(res)
+    assert res==txt
