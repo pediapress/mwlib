@@ -111,7 +111,7 @@ def test_alfred():
     print "EXPANDED:", repr(res)
     assert "1960" in res
 
-def test_numeric_comparison():
+def test_switch_numeric_comparison():
     expandstr("{{ #switch: +07 | 7 = Yes | 007 = Bond | No }}", "Yes")
 
 def test_switch_case_sensitive1():
@@ -125,3 +125,16 @@ def test_switch_case_sensitive3():
 
 def test_names_insensitive():
     expandstr("{{ #SWItch: A | a=lower | UPPER }}", "UPPER")
+
+def test_ifeq_numeric_comparison():
+    expandstr("{{ #ifeq: +07 | 007 | 1 | 0 }}", "1")
+
+def test_ifeq_numeric_comparison2():
+    expandstr('{{ #ifeq: "+07" | "007" | 1 | 0 }}', '0')
+
+def test_ifeq_case_sensitive():
+    expandstr("{{ #ifeq: A | a | 1 | 0 }}", "0")
+
+def test_ifexpr():
+    expandstr("{{ #ifexpr: 10 > 9 | yes | no }}", "yes")
+ 

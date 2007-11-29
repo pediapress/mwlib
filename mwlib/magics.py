@@ -282,7 +282,12 @@ class ParserFunctions(object):
 
             
     def IFEQ(self, args):
-        pass
+        rl = args.rawlist
+        rl += [u'', u'', u'', u'']
+        if maybe_numeric_compare(rl[0], rl[1]):
+            return rl[2]
+        else:
+            return rl[3]
 
     def EXPR(self, args):
         e = args.get("1", "0")
@@ -294,7 +299,18 @@ class ParserFunctions(object):
     
 
     def IFEXPR(self, args):
-        return ""
+        rl=args.rawlist
+        rl+=['0', '', '']
+        ep=expr.ExpressionParser()
+        try:
+            r = ep(rl[0])
+        except Exception, err:
+            return str(err)
+
+        if r:
+            return rl[1]
+        else:
+            return rl[2]
 
     def SWITCH(self, args):
         """see http://meta.wikimedia.org/wiki/ParserFunctions#.23switch:"""
