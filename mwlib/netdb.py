@@ -187,10 +187,13 @@ class NetDB(object):
         return data
 
     def _readTemplateBlacklist(self,templateblacklist):
+        if not templateblacklist:
+            return []
         try:
-            return [unicode(t,'utf-8').strip() for t in open(templateblacklist).readlines()]
-        except IOError:
-            log.error('IOError reading template blacklist:',repr(templateblacklist))
+            content = urllib.urlopen("%s?action=raw" % templateblacklist).read()
+            return [template.lower().strip() for template in re.findall('\* *\[\[.*?:(.*?)\]\]', content)]
+        except: # fixme: more sensible error handling...
+            log.error('Error fetching template blacklist from url:', templateblacklist)
             return []
         
     def _dummy(self, *args, **kwargs):
