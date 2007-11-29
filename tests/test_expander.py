@@ -138,3 +138,10 @@ def test_ifeq_case_sensitive():
 def test_ifexpr():
     expandstr("{{ #ifexpr: 10 > 9 | yes | no }}", "yes")
  
+def test_expr_round():
+    """round creates integers if it can"""
+    expandstr("{{#expr: 10.0443 round -1}}", "10")
+
+def test_expr_round2():
+    expandstr("{{#expr: 10.0443 round 2}}", "10.04")
+

@@ -14,6 +14,12 @@ import re
 from pyparsing import (ParseException, Word, Literal, CaselessLiteral, 
                        Combine, Optional, nums, Forward, ZeroOrMore, StringEnd)
 
+def _myround(a,b):
+    r=round(a, int(b))
+    if int(r)==r:
+        return int(r)
+    return r
+
 class ExpressionParser(object):
     binops = { "+" :    lambda a, b: a+b ,
                "-" :    lambda a, b: a-b,
@@ -31,7 +37,7 @@ class ExpressionParser(object):
                "!=":    lambda a, b: int(a!=b),
                "and":   lambda a, b: int(bool(a) and bool(b)),
                "or":    lambda a, b: int(bool(a) or bool(b)),
-               "round": lambda a, b: round(a, int(b))
+               "round": _myround,
                }
 
     unaops = {"not": lambda a: int(not bool(a))}
