@@ -28,6 +28,25 @@ def noarg(fun):
         return fun(self)
     return wrap
 
+def as_numeric(x):
+    try:
+        return int(x)
+    except ValueError:
+        pass
+    return float(x)
+
+
+def maybe_numeric_compare(a,b):
+    if a==b:
+        return True
+    try:
+        a=as_numeric(a)
+        b=as_numeric(b)
+    except ValueError:
+        return False
+
+    return a==b
+
 
 class OtherMagic(object):
     def DEFAULTSORT(self, args):
@@ -278,9 +297,36 @@ class ParserFunctions(object):
         return ""
 
     def SWITCH(self, args):
-        v  = args.get("1", "")
-        res = args.get(v, args.get("#default", ""))
-        return res
+        """see http://meta.wikimedia.org/wiki/ParserFunctions#.23switch:"""
+        rawlist = args.rawlist
+
+        cmpval = args.get("1", "").strip()
+
+
+        cmplist = rawlist[1:]
+        found=False # used for fall through 
+        for c in cmplist:
+            if '=' in c:
+                val, result = c.split('=', 1)
+                val=val.strip()
+                result=result.strip()
+                if found or maybe_numeric_compare(val, cmpval):
+                    return result
+            else:
+                if maybe_numeric_compare(cmpval,c.strip()):
+                    found=True
+
+        if '#default' in args:
+            return args.get('#default')
+
+        if not cmplist:
+            return u''
+        
+        last = cmplist[-1]
+
+        if '=' not in last:
+            return last
+        return u''
     
 for x in dir(ParserFunctions):
     if x.startswith("_"):
@@ -329,7 +375,7 @@ def _populate_dummy():
     def get_dummy(name):
         def resolve(*args):
             log.warn("using dummy resolver for %s" % (name,))
-            return ""
+            return u""
         return resolve
 
     missing = set()

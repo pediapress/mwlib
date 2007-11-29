@@ -2,6 +2,15 @@
 
 from mwlib import expander
 
+def expandstr(s, expected=None):
+    db = DictDB(dict(a=s))
+    te = expander.Expander(s, pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPAND: %r -> %r" % (s, res)
+    if expected:
+        assert res==expected, "expected %r, got %r" % (expected, res)
+    return res
+
     
 class DictDB(object):
     def __init__(self, d):
@@ -101,3 +110,18 @@ def test_alfred():
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
     assert "1960" in res
+
+def test_numeric_comparison():
+    expandstr("{{ #switch: +07 | 7 = Yes | 007 = Bond | No }}", "Yes")
+
+def test_switch_case_sensitive1():
+    expandstr("{{ #switch: A | a=lower | A=UPPER }}", "UPPER")
+
+def test_switch_case_sensitive2():
+    expandstr("{{ #switch: A | a=lower | UPPER }}", "UPPER")
+
+def test_switch_case_sensitive3():
+    expandstr("{{ #switch: a | a=lower | UPPER }}", "lower")
+
+def test_names_insensitive():
+    expandstr("{{ #SWItch: A | a=lower | UPPER }}", "UPPER")

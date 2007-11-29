@@ -36,7 +36,6 @@ class symbols:
     txt = 5
 
 def tokenize(txt):
-    
     if "<onlyinclude>" in txt:
         # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
         txt = "".join(onlyincluderx.findall(txt))
@@ -100,6 +99,13 @@ def optimize(node):
         node.children[i] = optimize(x)
     return node
 
+class ArgumentList(dict):
+    """used for passing template arguments around. subclasses dict,
+    and uses rawlist as the list of unparsed arguments (i.e. not splitted 
+    at equal signs.
+    """
+    rawlist=None
+    
 class Parser(object):
     template_ns = set([ ((5, u'Template'), (5, u':')),
                         ((5, u'Vorlage'), (5, u':')),
@@ -194,11 +200,7 @@ class Parser(object):
 
 
         return t
-
         
-        
-    
-
     def parseOpenBrace(self):
         ty, txt = self.getToken()
         n = Node()
@@ -317,12 +319,17 @@ class Expander(object):
             name = u"".join(name).strip()
 
 
-            var = {}
-            varcount = 1
+            var = ArgumentList()
+            var.rawlist = []
+
+            varcount = 1   #unnamed vars
+
             for x in n.children[1:]:
                 arg = []
                 self.flatten(x, arg)
                 arg = u"".join(arg)
+                var.rawlist.append(arg.strip())
+
                 splitted = arg.split('=', 1)
                 if len(splitted)>1:
                     if re.match("^(\w+|#default)$", splitted[0].strip()):
