@@ -93,6 +93,15 @@ class TimeMagic(object):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
         return self.now.strftime("%Y%m%d%H%M%S")
 
+    def MONTHNAME(self, args):
+        m=args.get("1", None)
+        if m is None:
+            return u"Missing required parameter 1=month!"
+        try:
+            m=int(m.strip()) % 12
+        except ValueError:
+            return u"month should be an integer"
+        return datetime.datetime(2000, m, 1).strftime("%B")
 
 class PageMagic(object):
     def __init__(self, pagename='', server="http://en.wikipedia.org", revisionid=0):
