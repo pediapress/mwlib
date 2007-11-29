@@ -69,7 +69,10 @@ class Node(object):
     def __iter__(self):
         for x in self.children:
             yield x
-            
+
+    def show(self, out=None):
+        show(self, out=out)
+
 class Variable(Node):
     pass
 
