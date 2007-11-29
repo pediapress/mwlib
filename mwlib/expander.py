@@ -92,8 +92,9 @@ class Backtrack(Exception):
 def optimize(node):
     if isinstance(node, basestring):
         return node
+
     if type(node) is Node and len(node.children)==1:
-        return node.children[0]
+        return optimize(node.children[0])
 
     for i, x in enumerate(node.children):
         node.children[i] = optimize(x)
@@ -391,7 +392,8 @@ class Expander(object):
             if v is None:
                 if len(n.children)>1:
                     self.flatten(n.children[1:], res)
-                    
+                else:
+                    res.append(u"{{{%s}}}" % (name,))
             else:
                 res.append(v)
         else:        
