@@ -4,8 +4,8 @@ from mwlib import expander
 from mwlib.expander import expandstr, DictDB
 
 def test_noexpansion_inside_pre():
-    db = DictDB(dict(Art="<pre>A{{Pipe}}B</pre>",
-                     Pipe="C"))
+    db = DictDB(Art="<pre>A{{Pipe}}B</pre>",
+                Pipe="C")
 
     te = expander.Expander(db.getRawArticle("Art"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()
@@ -17,8 +17,8 @@ def test_noexpansion_inside_pre():
 
 
 def test_undefined_variable():
-    db = DictDB(dict(Art="{{Pipe}}",
-                     Pipe="{{{undefined_variable}}}"))
+    db = DictDB(Art="{{Pipe}}",
+                Pipe="{{{undefined_variable}}}")
     
     te = expander.Expander(db.getRawArticle("Art"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()
@@ -49,10 +49,10 @@ def test_birth_date_and_age():
     
 def test_five():
     txt = "text of the tnext template"
-    db=DictDB(dict(
-            a="{{t1|tnext}}",
-            t1="{{{{{1}}}}}",
-            tnext=txt))
+    db=DictDB(
+        a="{{t1|tnext}}",
+        t1="{{{{{1}}}}}",
+        tnext=txt)
     te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
@@ -81,10 +81,10 @@ def test_five_three_two():
     
 def test_alfred():
     """I start to hate that Alfred_Gusenbauer"""
-    db = DictDB({
-            "a": "{{ibox2|birth_date=1960}}",
-            "ibox2": "{{{birth{{#if:{{{birthdate|}}}||_}}date}}}"
-            })
+    db = DictDB(
+        a="{{ibox2|birth_date=1960}}",
+        ibox2="{{{birth{{#if:{{{birthdate|}}}||_}}date}}}"
+        )
     te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)

@@ -75,17 +75,16 @@ def test_break_in_li():
 
 def test_switch_default():
 
-    db=DictDB(dict(Bonn="""
-{{Infobox
+    db=DictDB(
+        Bonn="""{{Infobox
 |Bundesland         = Nordrhein-Westfalen
 }}
 """,
-           Infobox="""
-{{#switch: {{{Bundesland}}}
+        Infobox="""{{#switch: {{{Bundesland}}}
         | Bremen = [[Bremen (Land)|Bremen]]
         | #default = [[{{{Bundesland|Bayern}}}]]
 }}
-"""))
+""")
 
     te = expander.Expander(db.getRawArticle("Bonn"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()
@@ -107,12 +106,12 @@ def test_too_many_args():
 
 def test_pipe_table():
 
-    db=DictDB(dict(Foo="""
+    db=DictDB(Foo="""
 bla
 {{{ {{Pipe}}}
 blubb
 """,
-                   Pipe="|"))
+                   Pipe="|")
 
     te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()
@@ -124,12 +123,12 @@ blubb
 
 def test_pipe_begin_table():
 
-    db=DictDB(dict(Foo="""
+    db=DictDB(Foo="""
 bla
 {{{Pipe}} |}
 blubb
 """,
-                   Pipe="|"))
+              Pipe="|")
 
     te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
     res = te.expandTemplates()

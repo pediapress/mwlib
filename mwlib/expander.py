@@ -361,8 +361,13 @@ class Expander(object):
 
 class DictDB(object):
     """wikidb implementation used for testing"""
-    def __init__(self, d):
-        self.d = d
+    def __init__(self, *args, **kw):
+        if args:
+            self.d, = args
+        else:
+            self.d = {}
+        
+        self.d.update(kw)
 
     def getRawArticle(self, title):
         return self.d[title]
