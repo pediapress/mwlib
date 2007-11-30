@@ -93,17 +93,6 @@ def test_switch_default():
     print "EXPANDED:", repr(res)
     assert "Nordrhein-Westfalen" in res
 
-
-    
-def test_too_many_args():
-    db = dummydb.DummyDB()
-    te = expander.Expander("{{LC:AB|CD}}", pagename="thispage", wikidb=db)
-    res = te.expandTemplates()
-    print "EXPANDED:", repr(res)
-    assert "ab" in res
-    assert "cd" not in res.lower()
-
-
 def test_pipe_table():
 
     db=DictDB(Foo="""

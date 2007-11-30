@@ -124,3 +124,8 @@ def test_expr_round():
 def test_expr_round2():
     expandstr("{{#expr: 10.0443 round 2}}", "10.04")
 
+def test_too_many_args():
+    expandstr("{{LC:AB|CD}}", "ab")
+
+def test_lc_named_arg():
+    expandstr("{{LC:a=AB|CD}}", "a=ab")
