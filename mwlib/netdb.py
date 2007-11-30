@@ -120,14 +120,8 @@ class ImageDB(object):
             d = opener.open(url).read()
             log.info("got image:", url)
         except urllib2.HTTPError, err:
-            if err.code == 404:
-                log.error("404 - while fetching %r" % (url,))
-                print '404'
-                return
-            if err.code == 500:
-                log.error("500 - while fetching %r" % (url,))
-                return
-            raise
+            log.error("%s - while fetching %r" % (err,url))
+            return            
         return d
     
     def clear(self):
