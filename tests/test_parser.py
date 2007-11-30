@@ -3,8 +3,8 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import sys
-from mwlib import dummydb, parser, scanner, expander, uparser
+from mwlib import dummydb, parser, expander, uparser
+from mwlib.expander import DictDB
 
 parse = uparser.simpleparse
     
@@ -64,16 +64,6 @@ def test_self_closing_nowiki():
     parse(u"<nowiki       />")
     parse(u"<NOWIKI>[. . .]</NOWIKI>")
 
-
-class DictDB(object):
-    def __init__(self, d):
-        self.d = d
-
-    def getRawArticle(self, title):
-        return self.d[title]
-
-    def getTemplate(self, title, dummy):
-        return self.d.get(title, u"")
 
 
 def test_break_in_li():

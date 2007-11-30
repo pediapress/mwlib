@@ -1,28 +1,7 @@
 #! /usr/bin/env py.test
 
 from mwlib import expander
-
-def expandstr(s, expected=None):
-    db = DictDB(dict(a=s))
-    te = expander.Expander(s, pagename="thispage", wikidb=db)
-    res = te.expandTemplates()
-    print "EXPAND: %r -> %r" % (s, res)
-    if expected:
-        assert res==expected, "expected %r, got %r" % (expected, res)
-    return res
-
-    
-class DictDB(object):
-    def __init__(self, d):
-        self.d = d
-
-    def getRawArticle(self, title):
-        return self.d[title]
-
-    def getTemplate(self, title, dummy):
-        return self.d.get(title, u"")
-
-
+from mwlib.expander import expandstr, DictDB
 
 def test_noexpansion_inside_pre():
     db = DictDB(dict(Art="<pre>A{{Pipe}}B</pre>",

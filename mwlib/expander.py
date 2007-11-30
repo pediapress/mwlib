@@ -82,7 +82,7 @@ def show(node, indent=0, out=None):
     if out is None:
         out=sys.stdout
 
-    print >>out, "  "*indent, repr(node)
+    out.write("%s%r\n" % ("  "*indent, node))
     if isinstance(node, basestring):
         return
     for x in node.children:
@@ -200,6 +200,8 @@ class Parser(object):
             ty, txt = self.getToken()
             if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
+            elif ty is None:
+                break
             elif ty==symbols.bra_close:
                 closelen = len(txt)
                 if closelen==2 or numbraces==2:
@@ -222,14 +224,9 @@ class Parser(object):
                     break
             elif ty==symbols.noi:
                 self.pos += 1 # ignore <noinclude>
-            elif ty==symbols.link:
+            else: # link, txt
                 n.children.append(txt)
                 self.pos += 1                
-            elif ty==symbols.txt:
-                n.children.append(txt)
-                self.pos += 1
-            elif ty==None:
-                break
 
         return n
         
@@ -239,19 +236,13 @@ class Parser(object):
             ty, txt = self.getToken()
             if ty==symbols.bra_open:
                 n.children.append(self.parseOpenBrace())
-            elif ty==symbols.bra_close:
-                n.children.append(txt)
-                self.pos += 1
-            elif ty==symbols.link:
-                n.children.append(txt)
-                self.pos += 1                
+            elif ty is None:
+                break
             elif ty==symbols.noi:
                 self.pos += 1   # ignore <noinclude>
-            elif ty==symbols.txt:
+            else: # bra_close, link, txt                
                 n.children.append(txt)
                 self.pos += 1
-            elif ty==None:
-                break
         return n
 
 def parse(txt):
@@ -366,7 +357,28 @@ class Expander(object):
         res = []
         self.flatten(self.parsed, res)
         return u"".join(res)
+
+
+class DictDB(object):
+    """wikidb implementation used for testing"""
+    def __init__(self, d):
+        self.d = d
+
+    def getRawArticle(self, title):
+        return self.d[title]
+
+    def getTemplate(self, title, dummy):
+        return self.d.get(title, u"")
     
+def expandstr(s, expected=None):
+    """debug function. expand templates in string s"""
+    db = DictDB(dict(a=s))
+    te = Expander(s, pagename="thispage", wikidb=db)
+    res = te.expandTemplates()
+    print "EXPAND: %r -> %r" % (s, res)
+    if expected:
+        assert res==expected, "expected %r, got %r" % (expected, res)
+    return res
 
 if __name__=="__main__":
     #print splitrx.groupindex
