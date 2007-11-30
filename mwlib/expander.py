@@ -116,24 +116,12 @@ class Parser(object):
         self.txt = txt
         self.tokens = tokenize(txt)
         self.pos = 0
-        self.changes = {}
 
-    def _save(self):
-        r = self.__dict__.copy()
-        r['changes'] = self.changes.copy()
-        return r
-
-    def _restore(self, state):
-        self.__dict__ = state
-        
     def getToken(self):
-        try:
-            return self.changes[self.pos]
-        except KeyError:
-            return self.tokens[self.pos]
+        return self.tokens[self.pos]
 
     def setToken(self, tok):
-        self.changes[self.pos] = tok
+        self.tokens[self.pos] = tok
 
 
     def variableFromChildren(self, children):
