@@ -129,3 +129,8 @@ def test_too_many_args():
 
 def test_lc_named_arg():
     expandstr("{{LC:a=AB|CD}}", "a=ab")
+
+def test_named_variable_whitespace():
+    expandstr("{{doit|notable roles=these are the notable roles}}",
+              "these are the notable roles",
+              wikidb=DictDB(doit="{{{notable roles}}}"))
