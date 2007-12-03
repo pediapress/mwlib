@@ -99,12 +99,6 @@ def optimize(node):
         node.children[i] = optimize(x)
     return node
 
-class ArgumentList(dict):
-    """used for passing template arguments around. subclasses dict,
-    and uses rawlist as the list of unparsed arguments (i.e. not splitted 
-    at equal signs.
-    """
-    rawlist=None
     
 class Parser(object):
     template_ns = set([ ((5, u'Template'), (5, u':')),
@@ -250,6 +244,82 @@ def parse(txt):
 
 
 
+class LazyArgument(object):
+    def __init__(self, node, expander, variables):
+        self.node = node
+        self.expander = expander
+        self._flatten = None
+        self.variables = variables
+
+    def flatten(self):
+        if self._flatten is None:            
+            arg=[]
+            self.expander.flatten(self.node, arg, self.variables)
+
+            arg = u"".join(arg).strip()
+
+            self._flatten = arg
+        return self._flatten
+
+class ArgumentList(object):
+    class notfound: pass
+
+    def __init__(self):
+        self.args = []
+        self.namedargs = {}
+
+    def append(self, a):
+        self.args.append(a)
+
+    def get(self, n, default):
+        return self.__getitem__(n) or default
+
+    def __iter__(self):
+        for x in self.args:
+            yield x
+
+    def __getslice__(self, i, j):
+        for x in self.args[i:j]:
+            yield x.flatten()
+        
+    def __len__(self):
+        return len(self.args)
+
+    def __getitem__(self, n):
+        if isinstance(n, (int, long)):
+            try:
+                a=self.args[n]
+            except IndexError:
+                return u""
+            return a.flatten()
+
+        assert isinstance(n, basestring), "expected int or string"
+
+        varcount=1
+        if n not in self.namedargs:
+            for x in self.args:
+                f=x.flatten()
+                if u"=" in f:
+                    name, val = f.split(u"=", 1)
+                    name = name.strip()
+                    val = val.strip()
+                    self.namedargs[name] = val
+                    if n==name:
+                        return val
+                else:
+                    name = str(varcount)
+                    varcount+=1
+                    self.namedargs[name] = f
+
+                    if n==name:
+                        return f
+            self.namedargs[n] = u''
+
+        val = self.namedargs[n]
+
+        return val
+    
+            
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
@@ -259,7 +329,6 @@ class Expander(object):
 
         self.parsed = Parser(txt).parse()
         #show(self.parsed)
-        self.variables = {}
         self.parsedTemplateCache = {}
         
     def getParsedTemplate(self, name):
@@ -291,51 +360,43 @@ class Expander(object):
         return res
             
         
-    def flatten(self, n, res):
+    def flatten(self, n, res, variables):
         if isinstance(n, Template):
             name = []
-            self.flatten(n.children[0], name)
+            self.flatten(n.children[0], name, variables)
             name = u"".join(name).strip()
 
 
             var = ArgumentList()
-            var.rawlist = []
 
             varcount = 1   #unnamed vars
 
             for x in n.children[1:]:
-                arg = []
-                self.flatten(x, arg)
-                arg = u"".join(arg)
-                var.rawlist.append(arg.strip())
-
-                splitted = arg.split('=', 1)
-                if len(splitted)>1:
-                    var[splitted[0].strip()] = splitted[1].strip()
-                else:
-                    var[str(varcount)] = arg.strip()
-                    varcount += 1
+                var.append(LazyArgument(x, self, variables))
 
             rep = self.resolver(name, var)
+
             if rep is not None:
                 res.append(rep)
             else:            
                 p = self.getParsedTemplate(name)
                 if p:
-                    oldvar = self.variables
-                    self.variables = var
-                    self.flatten(p, res)
-                    self.variables = oldvar
+                    self.flatten(p, res, var)
                 
         elif isinstance(n, Variable):
             name = []
-            self.flatten(n.children[0], name)
+            self.flatten(n.children[0], name, variables)
             name = u"".join(name).strip()
 
-            v = self.variables.get(name, None)
+            v = variables.get(name, None)
+            if name=='Bundesland' and v is None:
+                print variables.args
+                print variables.namedargs
+                assert 0
+
             if v is None:
                 if len(n.children)>1:
-                    self.flatten(n.children[1:], res)
+                    self.flatten(n.children[1:], res, variables)
                 else:
                     pass
                     # FIXME. breaks If
@@ -347,11 +408,11 @@ class Expander(object):
                 if isinstance(x, basestring):
                     res.append(x)
                 else:
-                    self.flatten(x, res)
+                    self.flatten(x, res, variables)
 
     def expandTemplates(self):
         res = []
-        self.flatten(self.parsed, res)
+        self.flatten(self.parsed, res, ArgumentList())
         return u"".join(res)
 
 

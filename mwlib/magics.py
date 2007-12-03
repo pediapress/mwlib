@@ -19,7 +19,7 @@ log = Log("expander")
 
 def singlearg(fun):
     def wrap(self, args):
-        rl=args.rawlist
+        rl=args
         if not rl:
             a=u''
         else:
@@ -119,7 +119,7 @@ class TimeMagic(object):
         return self.now.strftime("%Y%m%d%H%M%S")
 
     def MONTHNAME(self, args):
-        rl = args.rawlist
+        rl = args
         if not rl:
             return u"Missing required parameter 1=month!"
         try:
@@ -207,6 +207,7 @@ class PageMagic(object):
         return self.server
 
     def FULLURL(self, args):
+        return u''
         u = "".join(args)
         self.SERVERNAME({})
 
@@ -268,20 +269,19 @@ class ParserFunctions(object):
             self._expp = expr.ExpressionParser()
         return self._expp
 
+    def IF(self, rl):
+        r=repr((rl[0], rl[1], rl[2]))
 
 
-    def IF(self, args):
-        rl=args.rawlist
-        rl+=[u'',u'',u'']
         if rl[0]:
             return rl[1]
         else:
             return rl[2]
 
     def IFEXIST(self, args):
-        name = args.get("1", "")
+        name = args[0]
         if not self.wikidb:
-            return args.get("3", "")
+            return args.get(args[2], "")
         
         # wrong place. FIXME.
         if ':' in name:
@@ -294,22 +294,19 @@ class ParserFunctions(object):
             r=self.wikidb.getRawArticle(name)
 
         if r:
-            return args.get("2", "")
+            return args[1]
         else:
-            return args.get("3", "")
+            return args[2]
 
 
             
-    def IFEQ(self, args):
-        rl = args.rawlist
-        rl += [u'', u'', u'', u'']
+    def IFEQ(self, rl):
         if maybe_numeric_compare(rl[0], rl[1]):
             return rl[2]
         else:
             return rl[3]
 
-    def EXPR(self, args):
-        rl = args.rawlist
+    def EXPR(self, rl):
         if rl:
             ep=self._expressionParser
             try:
@@ -320,9 +317,7 @@ class ParserFunctions(object):
         return u"0"
     
 
-    def IFEXPR(self, args):
-        rl=args.rawlist
-        rl+=['0', '', '']
+    def IFEXPR(self, rl):
         ep=self._expressionParser
         try:
             r = ep(rl[0])
@@ -336,14 +331,9 @@ class ParserFunctions(object):
 
     def SWITCH(self, args):
         """see http://meta.wikimedia.org/wiki/ParserFunctions#.23switch:"""
-        rawlist = args.rawlist
-
-        cmpval = args.get("1", "").strip()
-
-
-        cmplist = rawlist[1:]
+        cmpval = args[0].strip()
         found=False # used for fall through 
-        for c in cmplist:
+        for c in args[1:]:
             if '=' in c:
                 val, result = c.split('=', 1)
                 val=val.strip()
@@ -354,13 +344,12 @@ class ParserFunctions(object):
                 if maybe_numeric_compare(cmpval,c.strip()):
                     found=True
 
-        if '#default' in args:
-            return args.get('#default')
+        d=args["#default"]
+        if d:
+            return d
 
-        if not cmplist:
-            return u''
         
-        last = cmplist[-1]
+        last = args[-1]
 
         if '=' not in last:
             return last
