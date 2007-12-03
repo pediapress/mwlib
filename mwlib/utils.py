@@ -1,6 +1,6 @@
 import os
 
-def daemonize(dev_null=False):
+def daemonize(dev_null=True):
     # See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
     if os.fork():   # launch child and...
         os._exit(0) # kill off parent
