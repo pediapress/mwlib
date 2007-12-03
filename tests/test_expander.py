@@ -7,13 +7,7 @@ def test_noexpansion_inside_pre():
     db = DictDB(Art="<pre>A{{Pipe}}B</pre>",
                 Pipe="C")
 
-    te = expander.Expander(db.getRawArticle("Art"), pagename="thispage", wikidb=db)
-    res = te.expandTemplates()
-
-    
-    print "EXPANDED:", repr(res)
-    assert u"ACB" not in res
-    assert u"A{{Pipe}}B" in res
+    res = expandstr("<pre>A{{Pipe}}B</pre>", "<pre>A{{Pipe}}B</pre>", wikidb=DictDB(Pipe="C"))
 
 
 def test_undefined_variable():
@@ -30,10 +24,9 @@ def test_birth_date_and_age():
             "birth date and age": '[[{{MONTHNAME|{{{2|{{{month|{{{2}}}}}}}}}}} {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
             
             "age" : '<includeonly>{{#expr:({{{4|{{CURRENTYEAR}}}}})-({{{1}}})-(({{{5|{{CURRENTMONTH}}}}})<({{{2}}})or({{{5|{{CURRENTMONTH}}}}})=({{{2}}})and({{{6|{{CURRENTDAY}}}}})<({{{3}}}))}}</includeonly>',
-            'a': '{{birth date and age|1960|02|8}}'
             })
-    te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
-    res = te.expandTemplates()
+    res=expandstr('{{birth date and age|1960|02|8}}', wikidb=db)
+
     print "EXPANDED:", repr(res)
     import datetime
     now=datetime.datetime.now()
@@ -50,13 +43,9 @@ def test_birth_date_and_age():
 def test_five():
     txt = "text of the tnext template"
     db=DictDB(
-        a="{{t1|tnext}}",
         t1="{{{{{1}}}}}",
         tnext=txt)
-    te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
-    res = te.expandTemplates()
-    print "EXPANDED:", repr(res)
-    assert res==txt
+    expandstr("{{t1|tnext}}", expected=txt, wikidb=db)
 
 def test_five_parser():
     n=expander.parse("{{{{{1}}}}}")
@@ -131,6 +120,8 @@ def test_lc_named_arg():
     expandstr("{{LC:a=AB|CD}}", "a=ab")
 
 def test_named_variable_whitespace():
+    """http://code.pediapress.com/wiki/ticket/23"""
+
     expandstr("{{doit|notable roles=these are the notable roles}}",
               "these are the notable roles",
               wikidb=DictDB(doit="{{{notable roles}}}"))
