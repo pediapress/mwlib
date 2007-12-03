@@ -260,6 +260,10 @@ class StringMagic(object):
     def UCFIRST(self, a):
         return a[:1].upper()+a[1:]
 
+    @singlearg
+    def FORMATNUM(self, a):
+        return a
+
 class ParserFunctions(object):
     wikidb = None
     _expp = None
