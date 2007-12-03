@@ -311,11 +311,7 @@ class Expander(object):
 
                 splitted = arg.split('=', 1)
                 if len(splitted)>1:
-                    if re.match("^(\w+|#default)$", splitted[0].strip()):
-                        var[splitted[0].strip()] = splitted[1].strip()
-                    else:
-                        var[str(varcount)] = arg.strip()
-                        varcount += 1
+                    var[splitted[0].strip()] = splitted[1].strip()
                 else:
                     var[str(varcount)] = arg.strip()
                     varcount += 1
