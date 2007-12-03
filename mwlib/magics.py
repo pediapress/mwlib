@@ -199,7 +199,7 @@ class PageMagic(object):
     
     def URLENCODE(self, args):
         """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
-        return urllib.quote_plus("".join(args))
+        return urllib.quote_plus("".join(args[0]))
 
     @noarg
     def SERVER(self):
