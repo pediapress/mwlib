@@ -119,13 +119,16 @@ class TimeMagic(object):
         return self.now.strftime("%Y%m%d%H%M%S")
 
     def MONTHNAME(self, args):
-        m=args.get("1", None)
-        if m is None:
+        rl = args.rawlist
+        if not rl:
             return u"Missing required parameter 1=month!"
         try:
-            m=int(m.strip()) % 12
+            m=int(rl[0].strip()) % 12
         except ValueError:
             return u"month should be an integer"
+        if m==0:
+            m=12
+
         return datetime.datetime(2000, m, 1).strftime("%B")
 
 class PageMagic(object):
@@ -260,10 +263,12 @@ class ParserFunctions(object):
     wikidb = None
 
     def IF(self, args):
-        if args.get("1", ""):
-            return args.get("2", "")
+        rl=args.rawlist
+        rl+=[u'',u'',u'']
+        if rl[0]:
+            return rl[1]
         else:
-            return args.get("3", "")
+            return rl[2]
 
     def IFEXIST(self, args):
         name = args.get("1", "")

@@ -125,3 +125,12 @@ def test_named_variable_whitespace():
     expandstr("{{doit|notable roles=these are the notable roles}}",
               "these are the notable roles",
               wikidb=DictDB(doit="{{{notable roles}}}"))
+
+def test_monthname():
+    expandstr("{{MONTHNAME|1}}", "January")
+    expandstr("{{MONTHNAME|2}}", "February")
+    expandstr("{{MONTHNAME|12}}", "December")
+    expandstr("{{MONTHNAME|13}}", "January")
+
+    expandstr("{{MONTHNAME|0}}", "December")
+
