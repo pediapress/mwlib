@@ -24,6 +24,18 @@ def test_style():
     s=r.children[0].children[0]
     assert isinstance(s, parser.Style)
     assert s.caption == "'''"
+
+def test_single_quote_after_style():
+    """http://code.pediapress.com/wiki/ticket/20"""
+    
+    r=parse(u"''pp'''s")
+    styles = r.find(parser.Style)
+    assert len(styles)==1, "should be pp's"
+    
+    
+    s=r.children[0].children[0]
+    assert isinstance(s, parser.Style)
+    assert s.caption == "'''"
     
 
 def test_links_in_style():
