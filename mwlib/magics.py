@@ -261,6 +261,14 @@ class StringMagic(object):
 
 class ParserFunctions(object):
     wikidb = None
+    _expp = None
+    @property
+    def _expressionParser(self):
+        if self._expp is None:
+            self._expp = expr.ExpressionParser()
+        return self._expp
+
+
 
     def IF(self, args):
         rl=args.rawlist
@@ -303,7 +311,7 @@ class ParserFunctions(object):
     def EXPR(self, args):
         rl = args.rawlist
         if rl:
-            ep=expr.ExpressionParser()
+            ep=self._expressionParser
             try:
                 return str(ep(rl[0]))
             except Exception, err:
@@ -315,7 +323,7 @@ class ParserFunctions(object):
     def IFEXPR(self, args):
         rl=args.rawlist
         rl+=['0', '', '']
-        ep=expr.ExpressionParser()
+        ep=self._expressionParser
         try:
             r = ep(rl[0])
         except Exception, err:
