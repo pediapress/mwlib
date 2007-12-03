@@ -19,8 +19,14 @@ log = Log("expander")
 
 def singlearg(fun):
     def wrap(self, args):
-        a=args.get("1", "")
+        rl=args.rawlist
+        if not rl:
+            a=u''
+        else:
+            a=rl[0]
+
         return fun(self, a)
+
     return wrap
 
 def noarg(fun):
