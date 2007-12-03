@@ -296,12 +296,15 @@ class ParserFunctions(object):
             return rl[3]
 
     def EXPR(self, args):
-        e = args.get("1", "0")
-        ep=expr.ExpressionParser()
-        try:
-            return str(ep(e))
-        except Exception, err:
-            return str(err)
+        rl = args.rawlist
+        if rl:
+            ep=expr.ExpressionParser()
+            try:
+                return str(ep(rl[0]))
+            except Exception, err:
+                return str(err)
+
+        return u"0"
     
 
     def IFEXPR(self, args):
