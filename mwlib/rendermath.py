@@ -57,7 +57,9 @@ def mysystem(cmd):
 class Renderer(object):
     basedir = os.path.expanduser("~/pngmath/")
     
-    def __init__(self):
+    def __init__(self, basedir=None):
+        if basedir:
+            self.basedir = os.path.join(basedir,'pngmath/')
         if not os.path.exists(self.basedir):
             os.mkdir(self.basedir)
 
