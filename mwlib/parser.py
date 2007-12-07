@@ -577,7 +577,16 @@ class Parser(object):
     parseSPANTag = parseTag
     parseINDEXTag = parseTag
     parseTTTag = parseTag
+
+    parseH1Tag = parseTag
+    parseH2Tag = parseTag
+    parseH3Tag = parseTag
+    parseH4Tag = parseTag
+    parseH5Tag = parseTag
+    parseH6Tag = parseTag
     
+    parseINPUTBOXTag = parseTag
+
     def parseSection(self):
         s = Section()
         
