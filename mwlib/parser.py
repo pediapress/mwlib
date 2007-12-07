@@ -683,15 +683,19 @@ class Parser(object):
     
 
     def parseColumn(self):
+        print "COL:", self.tokens[self.pos:]
         token = self.token
-        self.next()
-        c = Cell()
 
+        c = Cell()
+        
+        
         params = ''
         if "|" in token[1] or "!" in token[1]: # not a html cell
             # search for the first occurence of "||", "|", "\n" in the next tokens
             # if it's a "|" we have a parameter list
             savepos = self.pos
+            self.next()
+
             while self.left:
                 token = self.token
                 self.next()
@@ -704,6 +708,8 @@ class Parser(object):
                 params += token[1]
 
         c.vlist = parseParams(params)        
+
+        print "COL2:", self.tokens[self.pos:]
         
         while self.left:
             token = self.token
@@ -745,6 +751,7 @@ class Parser(object):
 
         r.vlist = parseParams(params)
             
+        print "ROW:", self.tokens[self.pos:]
         while self.left:
             token = self.token
             if token[0] == 'COLUMN':
