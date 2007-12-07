@@ -139,3 +139,17 @@ blubb
     assert "bla" in res
     assert "blubb" in res
     assert "{|" in res
+
+
+
+def test_cell_parse_bug():
+    """http://code.pediapress.com/wiki/ticket/17"""
+    r=parse("""{|
+|-
+[[Image:bla.png|bla]]
+|}""")
+    print r
+    
+    images = r.find(parser.ImageLink)
+    assert images
+
