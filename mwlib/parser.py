@@ -683,7 +683,6 @@ class Parser(object):
     
 
     def parseColumn(self):
-        print "COL:", self.tokens[self.pos:]
         token = self.token
 
         c = Cell()
@@ -709,8 +708,6 @@ class Parser(object):
 
         c.vlist = parseParams(params)        
 
-        print "COL2:", self.tokens[self.pos:]
-        
         while self.left:
             token = self.token
             if token[0] in ("COLUMN", "ENDTABLE", "ROW"):
@@ -751,7 +748,6 @@ class Parser(object):
 
         r.vlist = parseParams(params)
             
-        print "ROW:", self.tokens[self.pos:]
         while self.left:
             token = self.token
             if token[0] == 'COLUMN':
