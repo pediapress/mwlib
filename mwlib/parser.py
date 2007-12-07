@@ -684,7 +684,6 @@ class Parser(object):
 
     def parseColumn(self):
         token = self.token
-
         c = Cell()
         
         
@@ -692,8 +691,8 @@ class Parser(object):
         if "|" in token[1] or "!" in token[1]: # not a html cell
             # search for the first occurence of "||", "|", "\n" in the next tokens
             # if it's a "|" we have a parameter list
-            savepos = self.pos
             self.next()
+            savepos = self.pos
 
             while self.left:
                 token = self.token
