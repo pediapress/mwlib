@@ -202,7 +202,7 @@ class PageMagic(object):
         try:
             url = urllib.quote_plus("".join(args[0]))
         except:
-            url = "".join(args[0]) # fixme: maybe unsafe
+            url = "".join(args[0])
         return url
 
     @noarg
