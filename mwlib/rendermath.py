@@ -57,12 +57,13 @@ def mysystem(cmd):
 class Renderer(object):
     basedir = os.path.expanduser("~/pngmath/")
     
-    def __init__(self, basedir=None):
+    def __init__(self, basedir=None, lazy=True):
         if basedir:
-            self.basedir = os.path.join(basedir,'pngmath/')
+            self.basedir = os.path.realpath(os.path.join(basedir, 'pngmath/'))
         if not os.path.exists(self.basedir):
-            os.mkdir(self.basedir)
-
+            os.makedirs(self.basedir)
+        self.lazy = lazy
+    
     def _render_file(self, name, format):
         assert format in ('pdf', 'png'), "rendermath: format %r not supported" % format
         
@@ -128,5 +129,8 @@ class Renderer(object):
             
         return outfile
 
-    def render(self, latexsource, lazy=True):
+    def render(self, latexsource, lazy=None):
+        if lazy is None:
+            lazy = self.lazy
         return self.convert(latexsource, lazy=lazy, format='png')
+    

@@ -15,19 +15,20 @@ from mwlib.log import Log
 
 log = Log("htmlwriter")
 
-renderer = rendermath.Renderer()
-
-
 class HTMLWriter(object):
     imglevel = 0
     namedLinkCount = 1
-    def __init__(self, out, images):
+    def __init__(self, out, images=None, math_renderer=None):
         self.out = out
         self.level = 0
         self.images = images
         # self.images = imgdb.ImageDB(os.path.expanduser("~/images"))
         self.references = []
-
+        if math_renderer is None:
+            self.math_renderer = rendermath.Renderer()
+        else:
+            self.math_renderer = math_renderer
+    
     def _write(self, s):
         self.out.write(cgi.escape(s))
 
@@ -153,9 +154,7 @@ class HTMLWriter(object):
 
     def writeMath(self, obj):
         latex = obj.caption
-        #renderer = rendermath.Renderer()
-        p=renderer.render(latex)  # FIXME
-                
+        p = self.math_renderer.render(latex)
         self.out.write('<img src="/pngmath/%s/" class="formula">' % os.path.basename(p))
 
     def writeURL(self, obj):
