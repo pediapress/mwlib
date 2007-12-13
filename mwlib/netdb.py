@@ -50,6 +50,7 @@ class ImageDB(object):
         if not localpath:
             self.tmpdir = unicode(tempfile.mkdtemp())
             self.localpath = self.tmpdir
+        self.imageCache = {}
     
     def _transform_name(self, name):
         """
@@ -63,12 +64,17 @@ class ImageDB(object):
         return name.replace(' ', '_')
     
     def getDiskPath(self, name, width=None):
-        p = self.getPath(name, width=width)
+        p = self.getPath(name, width=width)       
         if p:
-            p = os.path.join(self.localpath, p)
+            self.imageCache[ (name,width)] = p
+            p = os.path.join(self.localpath, p)            
         return p
 
     def getPath(self, name, width=None):
+        _p = self.imageCache.get( (name,width), None)
+        if _p:
+            return _p
+
         if not name:
             return None
         name = name[:1].upper()+name[1:]
