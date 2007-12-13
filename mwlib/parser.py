@@ -587,6 +587,8 @@ class Parser(object):
     
     parseINPUTBOXTag = parseTag
 
+    parseRSSTag = parseTag
+
     def parseSection(self):
         s = Section()
         
