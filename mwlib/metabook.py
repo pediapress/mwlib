@@ -119,10 +119,8 @@ def mwcollection_to_metabook(config, mwcollection):
         if not res:
             continue
         if res.group('title'):
-            print 'TITLE:', res.group('title')
             metabook.title = res.group('title')
         elif res.group('subtitle'):
-            print 'SUBTITLE:', res.group('subtitle')
             metabook.subtitle = res.group('subtitle')
         elif res.group('chapter'):
             if len(articles):
