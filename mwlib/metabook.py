@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 #! -*- coding:utf-8 -*-
 
+import re
 import simplejson
 
 ## book = {'type':'collection',
@@ -81,6 +82,60 @@ class MetaBook(object):
         for item in self.getItems():
             if item['type'] == 'article':
                 return item['title']
+
+
+def mwcollection_to_metabook(config, mwcollection):
+    """Convert wikitext of a MediaWiki collection page to a MetaBook instance
+    
+    @param config: mwlib config
+    @type config: L{ConfigParser.ConfigParser}
+    
+    @param mwcollection: wikitext of a MediaWiki collection page as created by
+        the Collection extension for MediaWiki
+    @type mwcollection: unicode
+    
+    @returns: MetaBook instance
+    @rtype: L{MetaBook}
+    """
+    
+    metabook = MetaBook()
+    metabook.source = {
+        'name': config.get('wiki', 'name'),
+        'url': config.get('wiki', 'url'),
+    }
+    if config.has_section('pdf'):
+        metabook.coverimage = config.get('pdf', 'coverimage', None)
+    
+    titleRe = '^==\s+(?P<title>.*?)\s+==$'
+    subtitleRe = '^===\s+(?P<subtitle>.*?)\s+===$'
+    chapterRe = '^;\[\[(?P<chapter>.*?)\]\]$'
+    articleRe = '^:\[\[(?P<article>.*?)\]\]$'
+    alltogetherRe = re.compile("(%s)|(%s)|(%s)|(%s)" % (titleRe, subtitleRe, chapterRe, articleRe))
+    gotChapter = False
+    chapter = ''
+    articles =  []
+    for line in mwcollection.splitlines():
+        res = alltogetherRe.search(line.strip())
+        if not res:
+            continue
+        if res.group('title'):
+            print 'TITLE:', res.group('title')
+            metabook.title = res.group('title')
+        elif res.group('subtitle'):
+            print 'SUBTITLE:', res.group('subtitle')
+            metabook.subtitle = res.group('subtitle')
+        elif res.group('chapter'):
+            if len(articles):
+                metabook.addArticles(articles, chapter)
+                articles = []
+            chapter = res.group('chapter')
+        elif res.group('article'):
+            articles.append(res.group('article'))
+    
+    if len(articles):
+        metabook.addArticles(articles, chapter)
+    
+    return metabook
 
 
 if __name__ == '__main__':
