@@ -134,3 +134,12 @@ def test_monthname():
 
     expandstr("{{MONTHNAME|0}}", "December")
 
+def test_br_tag_inside_param():
+    """http://code.pediapress.com/wiki/ticket/35"""
+
+    db = DictDB(
+        Tip="'''Tip:''' {{{1}}}"
+        )        
+    result=expandstr('{{Tip|sample text<br style="clear:both;"/> some more}}', wikidb=db)
+    assert "some more" in result
+        
