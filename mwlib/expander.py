@@ -389,10 +389,6 @@ class Expander(object):
             name = u"".join(name).strip()
 
             v = variables.get(name, None)
-            if name=='Bundesland' and v is None:
-                print variables.args
-                print variables.namedargs
-                assert 0
 
             if v is None:
                 if len(n.children)>1:
