@@ -73,12 +73,15 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog -c CONF [-o OUTPUT] [-m METABOOK] [-p POSTURL] [ARTICLE] ...")
+    parser = optparse.OptionParser(usage="%prog -c CONF [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
+    parser.add_option('--collectionpage', help='Title of a collection page')
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL")
+    parser.add_option('-d', '--daemonize', action="store_true",
+                      help='become daemon after collection articles (before POST request)')
     options, args = parser.parse_args()
 
     import tempfile
@@ -110,19 +113,29 @@ def buildzip():
     zf = zipfile.ZipFile(zipfilename, 'w')
     z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
     
-    if options.metabook:
-        from ConfigParser import ConfigParser
-        
-        mb = metabook.MetaBook()
-        mb.readJsonFile(options.metabook)
+    from ConfigParser import ConfigParser
+
+    mb = None
+
+    if options.collectionpage:
+        from mwlib.metabook import mwcollection_to_metabook
         
         cp=ConfigParser()
-        cp.read(conf)      
+        cp.read(conf)
+        collection = w['wiki'].getRawArticle(options.collectionpage)
+        mb = mwcollection_to_metabook(cp, collection)
 
+    if options.metabook:
+        cp=ConfigParser()
+        cp.read(conf)      
+        mb = metabook.MetaBook()
+        mb.readJsonFile(options.metabook)
         mb.source = {
             'name': cp.get('wiki', 'name'),
             'url': cp.get('wiki', 'url'),
         }
+    
+    if mb is not None:
         z.addObject('outline.json', mb.dumpJson())
         for title, revision in mb.getArticles():
             z.addArticle(title, revision=revision)
@@ -134,7 +147,8 @@ def buildzip():
     z.writeContent()
     zf.close()
     
-    #daemonize()
+    if options.daemonize:
+        daemonize()
     
     # TODO: error handling?
     
