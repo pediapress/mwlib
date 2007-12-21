@@ -38,8 +38,11 @@ class MetaBook(object):
     def addArticles(self, articleTitles, chapterTitle=None):
         articleList = []
         for title in articleTitles:
-            article = {'type': 'article',
-                       'title': title}
+            article = {'type': 'article'}
+            if isinstance(title, dict):
+                article.update(title)
+            else:
+                article['title'] = title
             articleList.append(article)
         if chapterTitle:
             chapter = {'type': 'chapter',
@@ -109,7 +112,7 @@ def mwcollection_to_metabook(config, mwcollection):
     titleRe = '^==\s+(?P<title>.*?)\s+==$'
     subtitleRe = '^===\s+(?P<subtitle>.*?)\s+===$'
     chapterRe = '^;\[\[(?P<chapter>.*?)\]\]$'
-    articleRe = '^:\[\[(?P<article>.*?)\]\]$'
+    articleRe = '^:\[\[(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
     alltogetherRe = re.compile("(%s)|(%s)|(%s)|(%s)" % (titleRe, subtitleRe, chapterRe, articleRe))
     gotChapter = False
     chapter = ''
@@ -128,7 +131,10 @@ def mwcollection_to_metabook(config, mwcollection):
                 articles = []
             chapter = res.group('chapter')
         elif res.group('article'):
-            articles.append(res.group('article'))
+            d = {'title': res.group('article')}
+            if res.group('displaytitle'):
+                d['displaytitle'] = res.group('displaytitle')
+            articles.append(d)
     
     if len(articles):
         metabook.addArticles(articles, chapter)
