@@ -112,7 +112,7 @@ def mwcollection_to_metabook(config, mwcollection):
     titleRe = '^==\s+(?P<title>.*?)\s+==$'
     subtitleRe = '^===\s+(?P<subtitle>.*?)\s+===$'
     chapterRe = '^;\[\[(?P<chapter>.*?)\]\]$'
-    articleRe = '^:\[\[(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
+    articleRe = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
     alltogetherRe = re.compile("(%s)|(%s)|(%s)|(%s)" % (titleRe, subtitleRe, chapterRe, articleRe))
     gotChapter = False
     chapter = ''
