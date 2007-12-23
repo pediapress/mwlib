@@ -153,3 +153,11 @@ def test_cell_parse_bug():
     images = r.find(parser.ImageLink)
     assert images
 
+def test_table_not_eating():
+    """internal parser error.
+    http://code.pediapress.com/wiki/ticket/32
+    http://code.pediapress.com/wiki/ticket/29    
+"""
+    uparser.simpleparse("""{|)
+|10<sup>10<sup>100</sup></sup>||gsdfgsdfg
+|}""")
