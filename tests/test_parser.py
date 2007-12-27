@@ -161,3 +161,13 @@ def test_table_not_eating():
     uparser.simpleparse("""{|)
 |10<sup>10<sup>100</sup></sup>||gsdfgsdfg
 |}""")
+
+def test_table_not_eating2():
+    """internal parser error.
+    http://code.pediapress.com/wiki/ticket/32
+    http://code.pediapress.com/wiki/ticket/29    
+"""
+    uparser.simpleparse("""{| 
+<tr><td>'''Birth&nbsp;name'''</td><td colspan="2">Alanis Nadine Morissette</td></tr><tr><td>'''Born'''</td>
+|}
+""")
