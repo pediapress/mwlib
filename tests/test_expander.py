@@ -145,7 +145,11 @@ def test_br_tag_inside_param():
         
 
 def test_pipe_inside_imagemap():
-    """pipes inside image maps should not separate template arguments"""
+    """pipes inside image maps should not separate template arguments
+    well, they do not separate arguments with the version running on en.wikipedia.org.
+    they do separate arguments with the version running on pediapress.com:8080.
+    (which is hopefully a newer version)
+    """
 
     db = DictDB(
         sp="""{{#ifeq: {{{1}}} | 1 
