@@ -705,6 +705,9 @@ class Parser(object):
                 elif token[0]=='SPECIAL' and token[1]=='|':
                     break
                 params += token[1]
+        elif token[0]=='COLUMN':   # html cell
+            self.next()
+
 
         c.vlist = parseParams(params)        
 
