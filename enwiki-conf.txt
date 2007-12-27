@@ -5,5 +5,5 @@ localpath = ~/en-images
 
 [wiki]
 type = net
-url = http://en.wikipedia.org/wiki/@TITLE@?action=raw
-
+articleurl = http://en.wikipedia.org/wiki/@TITLE@?action=raw
+templateurls = http://en.wikipedia.org/wiki/Template:@TITLE@?action=raw
