@@ -143,3 +143,21 @@ def test_br_tag_inside_param():
     result=expandstr('{{Tip|sample text<br style="clear:both;"/> some more}}', wikidb=db)
     assert "some more" in result
         
+
+def test_pipe_inside_imagemap():
+    """pipes inside image maps should not separate template arguments"""
+
+    db = DictDB(
+        sp="""{{#ifeq: {{{1}}} | 1 
+| <imagemap>
+ Image:Padlock-silver-medium.svg|20px
+ rect 0 0 1000 1000 [[Wikipedia:Protection policy|This page has been semi-protected from editing]]
+ desc none
+ </imagemap> 
+|bla
+}}
+""")
+    result=expandstr("{{sp|1}}", wikidb=db)
+    assert "</imagemap>" in result
+
+
