@@ -388,11 +388,12 @@ class Expander(object):
             self.flatten(n.children[0], name, variables)
             name = u"".join(name).strip()
 
-            v = variables.get(name, None)
-            if name=='Bundesland' and v is None:
-                print variables.args
-                print variables.namedargs
-                assert 0
+            try:
+                num = int(name)-1
+            except ValueError:
+                v = variables.get(name, None)
+            else:
+                v = variables.get(num, None)
 
             if v is None:
                 if len(n.children)>1:
