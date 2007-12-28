@@ -24,8 +24,7 @@ import os
 import sys
 import types
 import xml.etree.ElementTree as ET
-from mwlib import parser, rendermath # , timeline
-from mathml import latex2mathml
+from mwlib import parser, rendermath, mathml # , timeline
 
 
 def log(err):
@@ -256,7 +255,7 @@ class MWXHTMLWriter(object):
     def xwriteMath(self, obj):
         "adds mathml w/ namespace"
         # FIXME, return verbose error
-        r = latex2mathml(obj.caption)
+        r = mathml.latex2mathml(obj.caption)
         if not r:
             r = ET.Element("mwx:math", error="an error occured in blahtexml")
             r.text = obj.caption
