@@ -692,8 +692,7 @@ class Parser(object):
     def parseColumn(self):
         token = self.token
         c = Cell()
-        
-        
+
         params = ''
         if "|" in token[1] or "!" in token[1]: # not a html cell
             # search for the first occurence of "||", "|", "\n" in the next tokens
@@ -711,6 +710,9 @@ class Parser(object):
                 elif token[0]=='SPECIAL' and token[1]=='|':
                     break
                 params += token[1]
+        elif token[0]=='COLUMN':   # html cell
+            self.next()
+
 
         c.vlist = parseParams(params)        
 
@@ -728,11 +730,13 @@ class Parser(object):
             elif token[0] in FirstParagraph:
                 c.append(self.parseParagraph())
             elif isinstance(token[0], EndTagToken):
-                break
+                log.info("ignoring %r in parseColumn" % (token,))
+                self.next()
             else:
                 log.info("assuming text in parseColumn", token)
                 c.append(Text(token[1]))
                 self.next()
+
         return c
     
                 
