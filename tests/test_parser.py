@@ -171,3 +171,16 @@ def test_table_not_eating2():
 <tr><td>'''Birth&nbsp;name'''</td><td colspan="2">Alanis Nadine Morissette</td></tr><tr><td>'''Born'''</td>
 |}
 """)
+
+
+def test_parse_comment():
+    ex = """foo
+<!-- comment --->
+bar"""
+
+    def check(node):
+        paras = node.find(parser.Paragraph)
+        assert len(paras)==1, 'expected exactly one paragraph node'
+    
+    check(parse(ex))
+    check(parse(expander.expandstr(ex)))

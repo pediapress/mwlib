@@ -165,3 +165,6 @@ def test_pipe_inside_imagemap():
     assert "</imagemap>" in result
 
 
+def test_expand_comment():
+    s="foo\n<!-- comment --->\nbar"
+    expandstr(s, s)
