@@ -92,7 +92,7 @@ tag_values = Rep(tag_value)
 
 tagnames = """timeline imagemap table nowiki i br hr b sup sub big small u span s li ol ul cite code font
 div includeonly tt center references math ref gallery td tr th p blockquote pre
-strong var caption h1 h2 h3 h4 h5 h6 inputbox rss""".split()
+strong var caption h1 h2 h3 h4 h5 h6 inputbox rss strike startfeed endfeed""".split()
 
 tagnames.append(magic_tag)
 tagnames.append("index")
