@@ -190,3 +190,9 @@ def test_nowiki_entities():
     node = parse("<nowiki>&amp;</nowiki>")
     txt = node.find(parser.Text)[0]
     assert txt.caption==u'&', "expected an ampersand"
+
+def test_blockquote_with_newline():
+    """http://code.pediapress.com/wiki/ticket/41"""
+    node = parse("<blockquote>\nblockquoted</blockquote>").find(parser.Style)[0]
+    print "STYLE:", node
+    assert "blockquoted" in node.asText(), "expected 'blockquoted'"
