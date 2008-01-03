@@ -53,7 +53,7 @@ The remaining parts are distributed under the BSD license:
 
 License
 ======================================================================
-Copyright (c) 2007, PediaPress GmbH
+Copyright (c) 2007, 2008 PediaPress GmbH
 
 All rights reserved.
 
