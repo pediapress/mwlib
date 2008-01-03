@@ -190,7 +190,7 @@ class NetDB(object):
         if not templateblacklist:
             return []
         try:
-            content = urllib.urlopen("%s?action=raw" % templateblacklist).read()
+            content = urllib.urlopen(templateblacklist).read()
             return [template.lower().strip() for template in re.findall('\* *\[\[.*?:(.*?)\]\]', content)]
         except: # fixme: more sensible error handling...
             log.error('Error fetching template blacklist from url:', templateblacklist)
