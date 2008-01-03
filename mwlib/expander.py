@@ -15,8 +15,9 @@ splitpattern = """
 ({{+)                     # opening braces
 |(}}+)                    # closing braces
 |(\[\[|\]\])              # link
-|((?:<noinclude>.*?</noinclude>)|(?:<!--.*?-->)|(?:</?includeonly>))  # noinclude, comments: usually ignore
+|((?:<noinclude>.*?</noinclude>)|(?:</?includeonly>))  # noinclude, comments: usually ignore
 |(?P<text>(?:<nowiki>.*?</nowiki>)          # nowiki
+|(?:<!--.*?-->)
 |(?:<math>.*?</math>)
 |(?:<pre.*?>.*?</pre>)
 |(?:[:\[\]\|{}<])                                  # all special characters
