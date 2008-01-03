@@ -184,3 +184,9 @@ bar"""
     
     check(parse(ex))
     check(parse(expander.expandstr(ex)))
+
+def test_nowiki_entities():
+    """http://code.pediapress.com/wiki/ticket/40"""
+    node = parse("<nowiki>&amp;</nowiki>")
+    txt = node.find(parser.Text)[0]
+    assert txt.caption==u'&', "expected an ampersand"
