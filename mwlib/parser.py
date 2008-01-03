@@ -990,8 +990,11 @@ class Parser(object):
 
         while self.left:
             token = self.token
-            if token[0]=='BREAK' or token[0]=='\n':
+            if token[0]=='BREAK':
                 break
+            elif token[0]=='\n':
+                b.append(Text(token[1]))
+                self.next()
             elif token[0]=='SECTION':
                 break
             elif token[0]==end:
