@@ -101,8 +101,7 @@ tagnames.append("index")
 assert "" not in tagnames
 assert len(set(tagnames)) == len(tagnames), "duplicate entries"
 
-# htmltag = NoCase(Str("<")+Opt(Str("/"))+Alt(*[Str(x) for x in tagnames])+Opt(Rep1(Any(" \n"))+Opt(tag_values)) + Rep(Any(" \n"))+Opt(Str("/"))+Str(">"))
-htmltagval = Rep(Rep(AnyBut('<>"')) | Str('"')+Rep(AnyBut('"'))+Str('"'))
+htmltagval = Rep(AnyBut('<>'))
 htmltag = NoCase(Str("<")+Opt(Str("/"))+Alt(*[Str(x) for x in tagnames])+Opt(Any(" \n")+htmltagval)+Opt(Str("/"))+Str(">"))
                  
 def resolveEntity(scanner, text):
