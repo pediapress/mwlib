@@ -196,3 +196,16 @@ def test_blockquote_with_newline():
     node = parse("<blockquote>\nblockquoted</blockquote>").find(parser.Style)[0]
     print "STYLE:", node
     assert "blockquoted" in node.asText(), "expected 'blockquoted'"
+
+def test_table_style(): 
+    """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
+    
+    def check(s):
+        r = parse(s)
+        t=r.find(parser.Table)[0]
+        print t
+        assert t.vlist['width'] == u'80%', "got wrong value %r" % (t.vlist['width'],)
+
+
+    check('{| class="toccolours" width="80%" |}')
+    check('{| class="toccolours" width=80% |}')
