@@ -367,8 +367,10 @@ default = [
 lex = Lexicon(default+[    
     State("nowiki", [
           (NoCase(Str("</nowiki>")), Begin('')),
-          (Rep1(AnyBut("<")), "TEXT"),
-          (Str("<"), "TEXT"),
+          (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
+          (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
+          (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
+          (Rep1(AnyBut("<&")), "TEXT"),
     ]),
 
     State("pre", [
