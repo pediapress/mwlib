@@ -209,3 +209,14 @@ def test_table_style():
 
     check('{| class="toccolours" width="80%" |}')
     check('{| class="toccolours" width=80% |}')
+
+def test_ol_ul():
+    """http://code.pediapress.com/wiki/ticket/33"""
+
+    r=parse("#num\n*bul\n")
+    lists = r.find(parser.ItemList)    
+    assert len(lists)==2
+
+    r=parse("*num\n#bul\n")
+    lists = r.find(parser.ItemList)    
+    assert len(lists)==2
