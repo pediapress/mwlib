@@ -220,3 +220,16 @@ def test_ol_ul():
     r=parse("*num\n#bul\n")
     lists = r.find(parser.ItemList)    
     assert len(lists)==2
+
+def test_image_link_colon():
+    """http://code.pediapress.com/wiki/ticket/28"""
+    img = uparser.simpleparse("[[:Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
+    print img, img.colon
+    assert img.colon, "expected colon attribute to be True"
+
+    img = uparser.simpleparse("[[Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
+    print img, img.colon
+    assert not img.colon, "expected colon attribute to be False"
+
+
+
