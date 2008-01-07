@@ -306,7 +306,7 @@ def test_table_rowspan():
     """http://code.pediapress.com/wiki/ticket/19"""
     s="""
 <table>
-  <tr>
+  <tr align="right">
     <td rowspan=3 colspan=18>1</td>
   </tr>
 </table>"""
@@ -317,5 +317,6 @@ def test_table_rowspan():
     print "VLIST:", cell.vlist
     assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist"
 
-
-    
+    row = r.find(parser.Row)[0]
+    print "ROW:", row
+    assert row.vlist == dict(align="right"), "bad vlist"

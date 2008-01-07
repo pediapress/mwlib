@@ -751,6 +751,8 @@ class Parser(object):
                 
     def parseRow(self):
         r = Row()
+        r.vlist={}
+
         token = self.token
         params = ''
         if token[0]=='ROW':
@@ -764,8 +766,12 @@ class Parser(object):
                     else:
                         params += token[1]
                     self.next()
+                r.vlist = parseParams(params)
 
-        r.vlist = parseParams(params)
+            else:
+                # html row
+                r.vlist = parseParams(token[1])
+
             
         while self.left:
             token = self.token
