@@ -305,7 +305,7 @@ def test_table_extra_cells_and_rows():
 def test_table_rowspan():
     """http://code.pediapress.com/wiki/ticket/19"""
     s="""
-<table>
+<table align="left">
   <tr align="right">
     <td rowspan=3 colspan=18>1</td>
   </tr>
@@ -315,8 +315,12 @@ def test_table_rowspan():
     assert len(cells)==1, "expected exactly one cell"
     cell = cells[0]
     print "VLIST:", cell.vlist
-    assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist"
+    assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist in cell"
 
     row = r.find(parser.Row)[0]
     print "ROW:", row
-    assert row.vlist == dict(align="right"), "bad vlist"
+    assert row.vlist == dict(align="right"), "bad vlist in row"
+
+    table=r.find(parser.Table)[0]
+    print "TABLE.VLIST:", table.vlist
+    assert table.vlist == dict(align="left"), "bad vlist in table"

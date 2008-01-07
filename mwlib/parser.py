@@ -843,8 +843,9 @@ class Parser(object):
                 else:
                     params += token[1]
                 self.next()
-
-        t.vlist = parseParams(params)
+            t.vlist = parseParams(params)
+        else:
+            t.vlist = parseParams(token[1])
 
         while self.left:
             token = self.token
