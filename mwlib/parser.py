@@ -602,6 +602,8 @@ class Parser(object):
         
         level = len(self.token[1])
         s.level = level
+        closelevel = 0
+
         self.next()
 
         title = Node()
@@ -609,6 +611,7 @@ class Parser(object):
             token = self.token
             
             if token[0] == 'ENDSECTION':
+                closelevel = len(self.token[1])
                 self.next()
                 break
             elif token[0] == '[[':
@@ -628,6 +631,17 @@ class Parser(object):
                 self.next()
                 title.append(Text(token[1]))
 
+        s.level = min(level, closelevel)
+        if s.level==0:
+            title.children.insert(0, Text("="*level))
+            s.__class__ = Node
+        else:
+            diff = closelevel-level
+            if diff>0:
+                title.append(Text("="*diff))
+            elif diff<0:
+                title.children.insert(0, Text("="*(-diff)))
+            
         s.append(title)
 
 

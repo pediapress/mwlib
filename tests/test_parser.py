@@ -261,7 +261,7 @@ def test_center_tag():
     checktag("center")
 
 def test_headings_nonclosed():
-    r=parse("= nohead\n")
+    r=parse("= nohead\nbla")
     print "R:", r
     sections = r.find(parser.Section)
     assert sections==[], "expected no sections"
