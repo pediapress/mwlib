@@ -197,7 +197,7 @@ def test_blockquote_with_newline():
     print "STYLE:", node
     assert "blockquoted" in node.asText(), "expected 'blockquoted'"
 
-def test_table_style(): 
+def test_percent_table_style(): 
     """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
     
     def check(s):
