@@ -232,4 +232,27 @@ def test_image_link_colon():
     assert not img.colon, "expected colon attribute to be False"
 
 
+def checktag(tagname):
+    source = "<%s>foobar</%s>" % (tagname, tagname)
+    r=parse(source)
+    print "R:", r
+    nodes=r.find(parser.TagNode)
+    print "NODES:", nodes
+    assert len(nodes)==1, "expected a TagNode"
+    n = nodes[0]
+    assert n.caption==tagname, "expected another node"
+    
+def test_strike_tag():
+    checktag("strike")
 
+def test_del_tag():
+    checktag("del")
+
+def test_ins_tag():
+    checktag("ins")
+
+def test_tt_tag():
+    checktag("tt")
+
+def test_code_tag():
+    checktag("code")
