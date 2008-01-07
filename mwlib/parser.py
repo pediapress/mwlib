@@ -590,7 +590,10 @@ class Parser(object):
     parseRSSTag = parseTag
 
     parseSTRIKETag = parseTag
-
+    parseCODETag = parseTag
+    parseDELTag = parseTag
+    parseINSTag = parseTag
+    parseCENTERTag = parseTag
     parseSTARTFEEDTag = parseTag
     parseENDFEEDTag = parseTag
 
