@@ -301,3 +301,21 @@ def test_table_extra_cells_and_rows():
     
     rows=r.find(parser.Row)
     assert len(rows)==1, "expected exactly one row"
+
+def test_table_rowspan():
+    """http://code.pediapress.com/wiki/ticket/19"""
+    s="""
+<table>
+  <tr>
+    <td rowspan=3 colspan=18>1</td>
+  </tr>
+</table>"""
+    r=parse(s)
+    cells=r.find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
+    cell = cells[0]
+    print "VLIST:", cell.vlist
+    assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist"
+
+
+    
