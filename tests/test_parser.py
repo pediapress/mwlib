@@ -259,3 +259,31 @@ def test_code_tag():
 
 def test_center_tag():
     checktag("center")
+
+def test_headings_nonclosed():
+    r=parse("= nohead\n")
+    print "R:", r
+    sections = r.find(parser.Section)
+    assert sections==[], "expected no sections"
+
+def test_headings_unbalanced_1():
+    r=parse("==head=")  # section caption should '=head'
+    print "R:", r
+    section = r.find(parser.Section)[0]
+    print "SECTION:", section
+    print "ASTEXT:", section.asText()
+
+    assert section.level==1, 'expected level 1 section'
+    assert section.asText()=='=head'
+
+
+def test_headings_unbalanced_2():
+    r=parse("=head==")  # section caption should 'head='
+    print "R:", r
+    section = r.find(parser.Section)[0]
+    print "SECTION:", section
+    print "ASTEXT:", section.asText()
+
+    assert section.level==1, 'expected level 1 section'
+    assert section.asText()=='head='
+
