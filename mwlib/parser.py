@@ -45,7 +45,7 @@ def show(out, node, indent=0):
         show(out, x, indent+1)
 
 
-paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:\w+)))")
+paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:(?:\w|%)+)))")
 def parseParams(s):
     def style2dict(s):
         res = {}
