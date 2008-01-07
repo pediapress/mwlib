@@ -287,3 +287,17 @@ def test_headings_unbalanced_2():
     assert section.level==1, 'expected level 1 section'
     assert section.asText()=='head='
 
+def test_table_extra_cells_and_rows():
+    """http://code.pediapress.com/wiki/ticket/19"""
+    s="""
+<table>
+  <tr>
+    <td>1</td>
+  </tr>
+</table>"""
+    r=parse(s)
+    cells=r.find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
+    
+    rows=r.find(parser.Row)
+    assert len(rows)==1, "expected exactly one row"
