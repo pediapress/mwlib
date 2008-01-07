@@ -713,11 +713,17 @@ class Parser(object):
                 elif token[0]=='SPECIAL' and token[1]=='|':
                     break
                 params += token[1]
+
+            c.vlist = parseParams(params)
+
         elif token[0]=='COLUMN':   # html cell
+            params=parseParams(token[1])
+            #print "CELLTOKEN:", token
+            #print "PARAMS:", params
+            c.vlist = params
             self.next()
 
 
-        c.vlist = parseParams(params)        
 
         while self.left:
             token = self.token
