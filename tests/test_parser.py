@@ -256,3 +256,6 @@ def test_tt_tag():
 
 def test_code_tag():
     checktag("code")
+
+def test_center_tag():
+    checktag("center")
