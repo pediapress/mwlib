@@ -774,7 +774,8 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                r.append(self.parseColumn())
+                log.warn("skipping in parseRow: %r" % (token,))
+                self.next()
         return r
     
     def parseCaption(self):
@@ -845,8 +846,10 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                #log.warn("skipping in parseTable", token)                
-                t.append(self.parseRow())
+                print "SKIP:", token
+                log.warn("skipping in parseTable", token)
+                self.next()
+                #t.append(self.parseRow())
 
         return t
 
