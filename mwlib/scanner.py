@@ -441,21 +441,3 @@ def tokenize(input, name="unknown"):
         tokens.append(token)
         
     return tokens
-
-    
-
-def main():
-    import time
-    
-    for x in sys.argv[1:]:
-        stime = time.time()
-        tokens = tokenize(sys.argv[1], None)
-        print "tokenizing:", time.time()-stime, "%s tokens" % len(tokens)
-        for t in tokens:
-            print t
-        print "---------------"    
-        
-        
-    
-if __name__=="__main__":
-    main()
