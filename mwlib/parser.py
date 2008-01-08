@@ -873,7 +873,6 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                print "SKIP:", token
                 log.warn("skipping in parseTable", token)
                 self.next()
                 #t.append(self.parseRow())
