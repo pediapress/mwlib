@@ -127,3 +127,13 @@ blubb
     assert "bla" in res
     assert "blubb" in res
     assert "{|" in res
+
+def test_extra_cell_stray_tag():
+    """http://code.pediapress.com/wiki/ticket/18"""
+    cells = parse("""
+{|
+| bla bla </sub> dfg sdfg
+|}""").find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
+
+
