@@ -600,7 +600,7 @@ class Parser(object):
     def parseSection(self):
         s = Section()
         
-        level = len(self.token[1])
+        level = self.token[1].count('=')
         s.level = level
         closelevel = 0
 
@@ -611,7 +611,7 @@ class Parser(object):
             token = self.token
             
             if token[0] == 'ENDSECTION':
-                closelevel = len(self.token[1])
+                closelevel = self.token[1].count('=')
                 self.next()
                 break
             elif token[0] == '[[':

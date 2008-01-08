@@ -339,7 +339,7 @@ default = [
     (Str("'''"), "STYLE"),
     (Str("'''''"), "STYLE"),
     (Bol+Rep1(Str('=')), 'SECTION'),
-    (Rep1(Str('=')), 'ENDSECTION'),
+    (Rep1(Str('='))+Rep(Str(" "))+Eol, 'ENDSECTION'),
     (Rep(Str(" "))+Str("{|"), begin_table),
     (Rep(Str(" "))+Str("|}"), end_table),
     (Bol+Rep(Str(" "))+Str("|"), maybe_vlist("COLUMN")),
