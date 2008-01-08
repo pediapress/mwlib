@@ -371,6 +371,7 @@ lex = Lexicon(default+[
           (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
           (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
           (Rep1(AnyBut("<&")), "TEXT"),
+          (Any("<&"), "TEXT"),
     ]),
 
     State("pre", [
