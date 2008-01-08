@@ -2,7 +2,7 @@
 
 from mwlib import scanner
 def tokenize(s):
-    tokens = scanner.tokenize("test", s)
+    tokens = scanner.tokenize(s, "test")
     print "TOKENIZE", repr(s)
     print "  ---->", tokens
     return tokens

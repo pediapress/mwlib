@@ -1264,7 +1264,7 @@ def main():
         input = te.expandTemplates()
 
         
-        tokens = tokenize(x, input)
+        tokens = tokenize(input, x)
         
         p=Parser(tokens, os.path.basename(x))
         r = p.parse()

@@ -424,12 +424,8 @@ lex = Lexicon(default+[
 
 
 
-def tokenize(name, input):
+def tokenize(input, name="unknown"):
     assert input is not None, "must specify input argument in tokenize"
-    if input is None:
-        input = unicode(open(name).read(), 'utf8')
-
-    
 
     if isinstance(input, basestring):
         input = StringIO.StringIO(input)
