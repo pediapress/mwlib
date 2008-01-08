@@ -442,3 +442,12 @@ def tokenize(input, name="unknown"):
         tokens.append(token)
         
     return tokens
+
+def main():
+    tokens = tokenize(sys.stdin.read())
+    for i,t in enumerate(tokens):
+        print i,t
+
+
+if __name__=='__main__':
+    main()
