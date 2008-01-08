@@ -140,8 +140,6 @@ blubb
     assert "blubb" in res
     assert "{|" in res
 
-
-
 def test_cell_parse_bug():
     """http://code.pediapress.com/wiki/ticket/17"""
     r=parse("""{|
@@ -324,3 +322,11 @@ def test_table_rowspan():
     table=r.find(parser.Table)[0]
     print "TABLE.VLIST:", table.vlist
     assert table.vlist == dict(align="left"), "bad vlist in table"
+
+def test_extra_cell_stray_tag():
+    """http://code.pediapress.com/wiki/ticket/18"""
+    cells = parse("""
+{|
+| bla bla </sub> dfg sdfg
+|}""").find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
