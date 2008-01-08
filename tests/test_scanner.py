@@ -33,3 +33,8 @@ def test_fucked_up_html_tags():
     assert isinstance(t[0], scanner.TagToken)
     assert t[0].t == 'div'
     assert t[1]==s
+
+def test_nowiki_gt_lt():
+    tokenize("<nowiki>< lt</nowiki>")
+    tokenize("<nowiki>> gt</nowiki>")
+    
