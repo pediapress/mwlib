@@ -37,4 +37,22 @@ def test_fucked_up_html_tags():
 def test_nowiki_gt_lt():
     tokenize("<nowiki>< lt</nowiki>")
     tokenize("<nowiki>> gt</nowiki>")
+
     
+def test_only_ws_after_endsection():
+    tokens = tokenize("= foo = bar")
+    token_types = [x[0] for x in tokens]
+
+    assert 'ENDSECTION' not in token_types, "not an endsection"
+
+def test_endsection_whitespace():
+    tokens = tokenize("= foo =  ")
+    token_types = [x[0] for x in tokens]
+    
+    assert ('ENDSECTION', '=  ') in tokens, "missing endsection token"
+
+def test_endsection():
+    tokens = tokenize("= foo =")
+    token_types = [x[0] for x in tokens]
+    
+    assert ('ENDSECTION', '=') in tokens, "missing endsection token"
