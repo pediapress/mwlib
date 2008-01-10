@@ -227,7 +227,7 @@ class EndTagToken(_BaseTagToken):
 
 
 class TagAnalyzer(object):
-    ignore_tags = set(['code', 'font', 'includeonly', 'center', 'p', 'caption'])
+    ignore_tags = set(['code', 'font', 'includeonly',  'p', 'caption'])
     def analyzeTag(self, scanner, text):
         selfClosing = False
         if text.startswith(u"</"):

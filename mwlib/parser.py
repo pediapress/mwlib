@@ -593,6 +593,7 @@ class Parser(object):
 
     parseSTARTFEEDTag = parseTag
     parseENDFEEDTag = parseTag
+    parseCENTERTag = parseTag
 
     def parseSection(self):
         s = Section()
