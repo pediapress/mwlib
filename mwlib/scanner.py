@@ -92,7 +92,7 @@ tag_values = Rep(tag_value)
 
 tagnames = """timeline imagemap table nowiki i br hr b sup sub big small u span s li ol ul cite code font
 div includeonly tt center references math ref gallery td tr th p blockquote pre
-strong var caption h1 h2 h3 h4 h5 h6 inputbox rss strike startfeed endfeed""".split()
+strong var caption h1 h2 h3 h4 h5 h6 inputbox rss strike del ins startfeed endfeed""".split()
 
 tagnames.append(magic_tag)
 tagnames.append("index")
@@ -101,8 +101,7 @@ tagnames.append("index")
 assert "" not in tagnames
 assert len(set(tagnames)) == len(tagnames), "duplicate entries"
 
-# htmltag = NoCase(Str("<")+Opt(Str("/"))+Alt(*[Str(x) for x in tagnames])+Opt(Rep1(Any(" \n"))+Opt(tag_values)) + Rep(Any(" \n"))+Opt(Str("/"))+Str(">"))
-htmltagval = Rep(Rep(AnyBut('<>"')) | Str('"')+Rep(AnyBut('"'))+Str('"'))
+htmltagval = Rep(AnyBut('<>'))
 htmltag = NoCase(Str("<")+Opt(Str("/"))+Alt(*[Str(x) for x in tagnames])+Opt(Any(" \n")+htmltagval)+Opt(Str("/"))+Str(">"))
                  
 def resolveEntity(scanner, text):
@@ -227,7 +226,7 @@ class EndTagToken(_BaseTagToken):
 
 
 class TagAnalyzer(object):
-    ignore_tags = set(['code', 'font', 'includeonly',  'p', 'caption'])
+    ignore_tags = set(['font', 'includeonly', 'p', 'caption'])
     def analyzeTag(self, scanner, text):
         selfClosing = False
         if text.startswith(u"</"):
@@ -340,7 +339,7 @@ default = [
     (Str("'''"), "STYLE"),
     (Str("'''''"), "STYLE"),
     (Bol+Rep1(Str('=')), 'SECTION'),
-    (Rep1(Str('=')), 'ENDSECTION'),
+    (Rep1(Str('='))+Rep(Str(" "))+Eol, 'ENDSECTION'),
     (Rep(Str(" "))+Str("{|"), begin_table),
     (Rep(Str(" "))+Str("|}"), end_table),
     (Bol+Rep(Str(" "))+Str("|"), maybe_vlist("COLUMN")),
@@ -368,8 +367,11 @@ default = [
 lex = Lexicon(default+[    
     State("nowiki", [
           (NoCase(Str("</nowiki>")), Begin('')),
-          (Rep1(AnyBut("<")), "TEXT"),
-          (Str("<"), "TEXT"),
+          (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
+          (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
+          (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
+          (Rep1(AnyBut("<&")), "TEXT"),
+          (Any("<&"), "TEXT"),
     ]),
 
     State("pre", [
@@ -423,12 +425,8 @@ lex = Lexicon(default+[
 
 
 
-def tokenize(name, input):
+def tokenize(input, name="unknown"):
     assert input is not None, "must specify input argument in tokenize"
-    if input is None:
-        input = unicode(open(name).read(), 'utf8')
-
-    
 
     if isinstance(input, basestring):
         input = StringIO.StringIO(input)
@@ -445,20 +443,11 @@ def tokenize(name, input):
         
     return tokens
 
-    
-
 def main():
-    import time
-    
-    for x in sys.argv[1:]:
-        stime = time.time()
-        tokens = tokenize(sys.argv[1], None)
-        print "tokenizing:", time.time()-stime, "%s tokens" % len(tokens)
-        for t in tokens:
-            print t
-        print "---------------"    
-        
-        
-    
-if __name__=="__main__":
+    tokens = tokenize(sys.stdin.read())
+    for i,t in enumerate(tokens):
+        print i,t
+
+
+if __name__=='__main__':
     main()

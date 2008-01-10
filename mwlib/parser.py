@@ -45,7 +45,7 @@ def show(out, node, indent=0):
         show(out, x, indent+1)
 
 
-paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:\w+)))")
+paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:(?:\w|%)+)))")
 def parseParams(s):
     def style2dict(s):
         res = {}
@@ -590,7 +590,10 @@ class Parser(object):
     parseRSSTag = parseTag
 
     parseSTRIKETag = parseTag
-
+    parseCODETag = parseTag
+    parseDELTag = parseTag
+    parseINSTag = parseTag
+    parseCENTERTag = parseTag
     parseSTARTFEEDTag = parseTag
     parseENDFEEDTag = parseTag
     parseCENTERTag = parseTag
@@ -598,8 +601,10 @@ class Parser(object):
     def parseSection(self):
         s = Section()
         
-        level = len(self.token[1])
+        level = self.token[1].count('=')
         s.level = level
+        closelevel = 0
+
         self.next()
 
         title = Node()
@@ -607,6 +612,7 @@ class Parser(object):
             token = self.token
             
             if token[0] == 'ENDSECTION':
+                closelevel = self.token[1].count('=')
                 self.next()
                 break
             elif token[0] == '[[':
@@ -626,6 +632,17 @@ class Parser(object):
                 self.next()
                 title.append(Text(token[1]))
 
+        s.level = min(level, closelevel)
+        if s.level==0:
+            title.children.insert(0, Text("="*level))
+            s.__class__ = Node
+        else:
+            diff = closelevel-level
+            if diff>0:
+                title.append(Text("="*diff))
+            elif diff<0:
+                title.children.insert(0, Text("="*(-diff)))
+            
         s.append(title)
 
 
@@ -711,11 +728,17 @@ class Parser(object):
                 elif token[0]=='SPECIAL' and token[1]=='|':
                     break
                 params += token[1]
+
+            c.vlist = parseParams(params)
+
         elif token[0]=='COLUMN':   # html cell
+            params=parseParams(token[1])
+            #print "CELLTOKEN:", token
+            #print "PARAMS:", params
+            c.vlist = params
             self.next()
 
 
-        c.vlist = parseParams(params)        
 
         while self.left:
             token = self.token
@@ -743,6 +766,8 @@ class Parser(object):
                 
     def parseRow(self):
         r = Row()
+        r.vlist={}
+
         token = self.token
         params = ''
         if token[0]=='ROW':
@@ -756,8 +781,12 @@ class Parser(object):
                     else:
                         params += token[1]
                     self.next()
+                r.vlist = parseParams(params)
 
-        r.vlist = parseParams(params)
+            else:
+                # html row
+                r.vlist = parseParams(token[1])
+
             
         while self.left:
             token = self.token
@@ -772,7 +801,8 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                r.append(self.parseColumn())
+                log.warn("skipping in parseRow: %r" % (token,))
+                self.next()
         return r
     
     def parseCaption(self):
@@ -828,8 +858,9 @@ class Parser(object):
                 else:
                     params += token[1]
                 self.next()
-
-        t.vlist = parseParams(params)
+            t.vlist = parseParams(params)
+        else:
+            t.vlist = parseParams(token[1])
 
         while self.left:
             token = self.token
@@ -843,8 +874,9 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                #log.warn("skipping in parseTable", token)                
-                t.append(self.parseRow())
+                log.warn("skipping in parseTable", token)
+                self.next()
+                #t.append(self.parseRow())
 
         return t
 
@@ -991,8 +1023,11 @@ class Parser(object):
 
         while self.left:
             token = self.token
-            if token[0]=='BREAK' or token[0]=='\n':
+            if token[0]=='BREAK':
                 break
+            elif token[0]=='\n':
+                b.append(Text(token[1]))
+                self.next()
             elif token[0]=='SECTION':
                 break
             elif token[0]==end:
@@ -1229,7 +1264,7 @@ def main():
         input = te.expandTemplates()
 
         
-        tokens = tokenize(x, input)
+        tokens = tokenize(input, x)
         
         p=Parser(tokens, os.path.basename(x))
         r = p.parse()

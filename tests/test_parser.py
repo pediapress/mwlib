@@ -140,8 +140,6 @@ blubb
     assert "blubb" in res
     assert "{|" in res
 
-
-
 def test_cell_parse_bug():
     """http://code.pediapress.com/wiki/ticket/17"""
     r=parse("""{|
@@ -184,3 +182,151 @@ bar"""
     
     check(parse(ex))
     check(parse(expander.expandstr(ex)))
+
+def test_nowiki_entities():
+    """http://code.pediapress.com/wiki/ticket/40"""
+    node = parse("<nowiki>&amp;</nowiki>")
+    txt = node.find(parser.Text)[0]
+    assert txt.caption==u'&', "expected an ampersand"
+
+def test_blockquote_with_newline():
+    """http://code.pediapress.com/wiki/ticket/41"""
+    node = parse("<blockquote>\nblockquoted</blockquote>").find(parser.Style)[0]
+    print "STYLE:", node
+    assert "blockquoted" in node.asText(), "expected 'blockquoted'"
+
+def test_percent_table_style(): 
+    """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
+    
+    def check(s):
+        r = parse(s)
+        t=r.find(parser.Table)[0]
+        print t
+        assert t.vlist['width'] == u'80%', "got wrong value %r" % (t.vlist['width'],)
+
+
+    check('{| class="toccolours" width="80%" |}')
+    check('{| class="toccolours" width=80% |}')
+
+def test_ol_ul():
+    """http://code.pediapress.com/wiki/ticket/33"""
+
+    r=parse("#num\n*bul\n")
+    lists = r.find(parser.ItemList)    
+    assert len(lists)==2
+
+    r=parse("*num\n#bul\n")
+    lists = r.find(parser.ItemList)    
+    assert len(lists)==2
+
+def test_image_link_colon():
+    """http://code.pediapress.com/wiki/ticket/28"""
+    img = uparser.simpleparse("[[:Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
+    print img, img.colon
+    assert img.colon, "expected colon attribute to be True"
+
+    img = uparser.simpleparse("[[Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
+    print img, img.colon
+    assert not img.colon, "expected colon attribute to be False"
+
+
+def checktag(tagname):
+    source = "<%s>foobar</%s>" % (tagname, tagname)
+    r=parse(source)
+    print "R:", r
+    nodes=r.find(parser.TagNode)
+    print "NODES:", nodes
+    assert len(nodes)==1, "expected a TagNode"
+    n = nodes[0]
+    assert n.caption==tagname, "expected another node"
+    
+def test_strike_tag():
+    checktag("strike")
+
+def test_del_tag():
+    checktag("del")
+
+def test_ins_tag():
+    checktag("ins")
+
+def test_tt_tag():
+    checktag("tt")
+
+def test_code_tag():
+    checktag("code")
+
+def test_center_tag():
+    checktag("center")
+
+def test_headings_nonclosed():
+    r=parse("= nohead\nbla")
+    print "R:", r
+    sections = r.find(parser.Section)
+    assert sections==[], "expected no sections"
+
+def test_headings_unbalanced_1():
+    r=parse("==head=")  # section caption should '=head'
+    print "R:", r
+    section = r.find(parser.Section)[0]
+    print "SECTION:", section
+    print "ASTEXT:", section.asText()
+
+    assert section.level==1, 'expected level 1 section'
+    assert section.asText()=='=head'
+
+
+def test_headings_unbalanced_2():
+    r=parse("=head==")  # section caption should 'head='
+    print "R:", r
+    section = r.find(parser.Section)[0]
+    print "SECTION:", section
+    print "ASTEXT:", section.asText()
+
+    assert section.level==1, 'expected level 1 section'
+    assert section.asText()=='head='
+
+def test_table_extra_cells_and_rows():
+    """http://code.pediapress.com/wiki/ticket/19"""
+    s="""
+<table>
+  <tr>
+    <td>1</td>
+  </tr>
+</table>"""
+    r=parse(s)
+    cells=r.find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
+    
+    rows=r.find(parser.Row)
+    assert len(rows)==1, "expected exactly one row"
+
+def test_table_rowspan():
+    """http://code.pediapress.com/wiki/ticket/19"""
+    s="""
+<table align="left">
+  <tr align="right">
+    <td rowspan=3 colspan=18>1</td>
+  </tr>
+</table>"""
+    r=parse(s)
+    cells=r.find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
+    cell = cells[0]
+    print "VLIST:", cell.vlist
+    assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist in cell"
+
+    row = r.find(parser.Row)[0]
+    print "ROW:", row
+    assert row.vlist == dict(align="right"), "bad vlist in row"
+
+    table=r.find(parser.Table)[0]
+    print "TABLE.VLIST:", table.vlist
+    assert table.vlist == dict(align="left"), "bad vlist in table"
+
+def test_extra_cell_stray_tag():
+    """http://code.pediapress.com/wiki/ticket/18"""
+    cells = parse("""
+{|
+| bla bla </sub> dfg sdfg
+|}""").find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"

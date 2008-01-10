@@ -19,6 +19,8 @@ splitpattern = """
 |(?P<text>(?:<nowiki>.*?</nowiki>)          # nowiki
 |(?:<!--.*?-->)
 |(?:<math>.*?</math>)
+|(?:<imagemap[^<>]*>.*?</imagemap>)
+|(?:<gallery[^<>]*>.*?</gallery>)
 |(?:<pre.*?>.*?</pre>)
 |(?:[:\[\]\|{}<])                                  # all special characters
 |(?:[^\[\]\|:{}<]*))                               # all others

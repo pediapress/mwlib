@@ -7,3 +7,5 @@ localpath = ~/en-images
 type = net
 articleurl = http://en.wikipedia.org/wiki/@TITLE@?action=raw
 templateurls = http://en.wikipedia.org/wiki/Template:@TITLE@?action=raw
+name = The Free Encyclopedia
+url = http://en.wikipedia.org/

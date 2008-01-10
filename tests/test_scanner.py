@@ -1,6 +1,12 @@
 #! /usr/bin/env py.test
 
 from mwlib import scanner
+def tokenize(s):
+    tokens = scanner.tokenize(s, "test")
+    print "TOKENIZE", repr(s)
+    print "  ---->", tokens
+    return tokens
+
 
 def test_imagemap():
     s=u"""<imagemap>
@@ -12,7 +18,41 @@ rect 15 95 94 176   [[Foo type A]]
 circle 57 57 20    [[Foo type B]]
 desc bottom-left
 </imagemap>"""
-    tokens = scanner.tokenize('test', s)
+    tokens = tokenize(s)
     print "TOKENS:", tokens
     assert tokens[0] == ("IMAGEMAP", u"<imagemap>")
     assert tokens[-1] == ("IMAGEMAP", u"</imagemap>")
+
+def test_fucked_up_html_tags():
+    """http://code.pediapress.com/wiki/ticket/25"""
+
+    s='<div };">'
+    tokens=tokenize(s)
+    t=tokens[0]
+    print "T:", t
+    assert isinstance(t[0], scanner.TagToken)
+    assert t[0].t == 'div'
+    assert t[1]==s
+
+def test_nowiki_gt_lt():
+    tokenize("<nowiki>< lt</nowiki>")
+    tokenize("<nowiki>> gt</nowiki>")
+
+    
+def test_only_ws_after_endsection():
+    tokens = tokenize("= foo = bar")
+    token_types = [x[0] for x in tokens]
+
+    assert 'ENDSECTION' not in token_types, "not an endsection"
+
+def test_endsection_whitespace():
+    tokens = tokenize("= foo =  ")
+    token_types = [x[0] for x in tokens]
+    
+    assert ('ENDSECTION', '=  ') in tokens, "missing endsection token"
+
+def test_endsection():
+    tokens = tokenize("= foo =")
+    token_types = [x[0] for x in tokens]
+    
+    assert ('ENDSECTION', '=') in tokens, "missing endsection token"

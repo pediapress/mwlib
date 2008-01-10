@@ -89,7 +89,7 @@ def parseString(title=None, raw=None, wikidb=None, revision=None):
     else:
         input = raw
 
-    tokens = scanner.tokenize(title, input)
+    tokens = scanner.tokenize(input, title)
 
     a = parser.Parser(tokens, title).parse()
     a.caption = title
@@ -102,7 +102,7 @@ def simpleparse(raw):
     from mwlib import dummydb
     db = dummydb.DummyDB()
     
-    tokens = scanner.tokenize("unknown", raw)
+    tokens = scanner.tokenize(raw)
     r=parser.Parser(tokens, "unknown").parse()
     parser.show(sys.stdout, r, 0)
     return r

@@ -168,3 +168,19 @@ def test_pipe_inside_imagemap():
 def test_expand_comment():
     s="foo\n<!-- comment --->\nbar"
     expandstr(s, s)
+
+
+def test_tokenize_gallery():
+    gall = """
+<gallery caption="Sample gallery" widths="100px" heights="100px" perrow="6">
+Image:Drenthe-Position.png|[[w:Drenthe|Drenthe]], the least crowded province
+Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
+</gallery>
+"""
+    tokens = expander.tokenize(gall)
+    g = tokens[1][1]
+    assert g.startswith("<gallery")
+    assert g.endswith("</gallery>")
+
+
+    
