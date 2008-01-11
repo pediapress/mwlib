@@ -355,7 +355,8 @@ Image:Limburg-Position.png
 Image:Noord_Brabant-Position.png 
 Image:Noord_Holland-Position.png
 Image:Overijssel-Position.png
-Image:Zuid_Holland-Position.png|[[w:South Holland|South Holland]], the most crowded provincelakes
+Image:Zuid_Holland-Position.png|[[w:South Holland|South Holland]], the most crowded province
+lakes
 Image:Zeeland-Position.png
 </gallery>
 """
@@ -364,5 +365,8 @@ Image:Zeeland-Position.png
     print "RES:", res
 
     assert res.vlist=={'caption': 'Sample gallery', 'heights': '100px', 'perrow': 6, 'widths': '100px'}
+    assert len(res.children)==12, 'expected 12 children'
+    assert isinstance(res.children[10], parser.Text), "expected text for the 'lakes' line"
+
 
     

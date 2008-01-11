@@ -605,7 +605,24 @@ class Parser(object):
     def parseGALLERYTag(self):
         node = self.parseTag()
         txt = "".join(x.caption for x in node.find(Text))
-        print "GALLERY:", repr(txt)
+        #print "GALLERY:", repr(txt)
+
+        children=[]
+
+        lines = [x.strip() for x in txt.split("\n")]
+        for x in lines:
+            if not x:
+                continue
+
+            # either image link or text inside
+            n=_parseAtomFromString(u'[['+x+']]')
+
+            if isinstance(n, ImageLink):
+                children.append(n)
+            else:
+                children.append(Text(x))
+
+        node.children=children
 
         return node
     
