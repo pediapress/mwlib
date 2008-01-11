@@ -43,7 +43,7 @@ def _makeimagemap(tokens):
         if isinstance(x, basestring):
             image = x
             break
-    return ImageMap(entries=tokens, image=image)
+    return ImageMap(entries=list(tokens), image=image)
 
         
 comment = (Literal('#')+restOfLine).setParseAction(_makecomment)
