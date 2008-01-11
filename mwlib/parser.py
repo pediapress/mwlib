@@ -359,7 +359,13 @@ def _parseAtomFromString(s):
     from mwlib import scanner
     tokens = scanner.tokenize(s)
     p=Parser(tokens)
-    return p.parseAtom()
+    try:
+        return p.parseAtom()
+    except Exception, err:
+        log.error("exception while parsing %r: %r" % (s, err))
+        return None
+
+                  
     
 def parse_fields_in_imagemap(imap):
     
