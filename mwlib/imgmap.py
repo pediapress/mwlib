@@ -83,6 +83,11 @@ line = Suppress(LineStart()) + (comment | poly | rect | circle | desc | default 
 imagemap = ZeroOrMore(line) + StringEnd()
 imagemap.setParseAction(_makeimagemap)
 
+def ImageMapFromString(s):
+    return imagemap.parseString(s)[0]
+
+    
+    
 def main():
     ex="""
 
@@ -98,8 +103,7 @@ default [[Mainz]]
 ---dfg-sdfg--sdfg
 blubb
 """
-    
-    res = imagemap.parseString(ex)
+    res = ImageMapFromString(ex)
 
     for x in res:
         print x

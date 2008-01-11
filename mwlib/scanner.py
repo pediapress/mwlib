@@ -177,7 +177,7 @@ def end_timeline(scanner, text):
 
 def end_imagemap(scanner, text):
     scanner.begin("")
-    scanner.produce("IMAGEMAP")
+    scanner.produce(EndTagToken("imagemap"))
 
 
 def hrule(scanner, text):
@@ -209,6 +209,8 @@ class _BaseTagToken(object):
 
 class TagToken(_BaseTagToken):
     values = {}
+    selfClosing=False
+
     def __init__(self, t, text=''):
         self.t = t
         self.text = text
@@ -283,7 +285,8 @@ class TagAnalyzer(object):
         if name=='imagemap':
             if not isEndToken:
                 scanner.begin("IMAGEMAP")
-                scanner.produce("IMAGEMAP")
+                scanner.produce(TagToken("imagemap"))
+                #scanner.produce("IMAGEMAP")
             return
 
         if name=="math":

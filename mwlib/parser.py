@@ -161,6 +161,7 @@ class Timeline(Node): pass
 class TagNode(Node): pass
 class URL(Node): pass
 class NamedURL(Node): pass
+class ImageMap(TagNode): pass
 
 
 
@@ -596,6 +597,15 @@ class Parser(object):
     parseCENTERTag = parseTag
     parseSTARTFEEDTag = parseTag
     parseENDFEEDTag = parseTag
+    
+    def parseIMAGEMAPTag(self):
+        node = self.parseTag()
+        print "IMAGEMAP:", node
+        txt = "".join(x.caption for x in node.find(Text))
+        from mwlib import imgmap
+        node.imagemap = imgmap.ImageMapFromString(txt)
+        print node.imagemap
+        return node
 
     def parseSection(self):
         s = Section()
