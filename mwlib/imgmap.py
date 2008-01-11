@@ -29,10 +29,10 @@ def _makerect(tokens):
     return Rect(caption=tokens[-1].strip(), top_left=tuple(tokens[1]), bottom_right=tuple(tokens[2]))
 
 def _makecomment(tokens):
-    return Comment(caption=tokens[1])
+    return Comment(comment=tokens[1])
 
 def _makecircle(tokens):
-    return Circle(caption=tokens[3], center=tokens[1], radius=tokens[2])
+    return Circle(caption=tokens[3].strip(), center=tokens[1], radius=tokens[2])
 
 def _makedesc(tokens):
     return Desc(location=tokens[1])
@@ -67,7 +67,7 @@ desc = Literal("desc") + (Literal("top-right")
                           |Literal("none"))
 desc = desc.setParseAction(_makedesc)
 default = Literal("default")+restOfLine
-default.setParseAction(lambda t: Default(caption=t[1]))
+default.setParseAction(lambda t: Default(caption=t[1].strip()))
 
 
 def _makeother(tokens):
