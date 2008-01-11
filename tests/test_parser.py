@@ -341,3 +341,28 @@ def test_extra_cell_stray_tag():
 | bla bla </sub> dfg sdfg
 |}""").find(parser.Cell)
     assert len(cells)==1, "expected exactly one cell"
+
+
+
+def test_gallery_complex():
+    gall="""<gallery caption="Sample gallery" widths="100px" heights="100px" perrow="6">
+Image:Drenthe-Position.png|[[w:Drenthe|Drenthe]], the least crowded province
+Image:Flevoland-Position.png
+Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
+Image:Gelderland-Position.png
+Image:Groningen-Position.png
+Image:Limburg-Position.png
+Image:Noord_Brabant-Position.png 
+Image:Noord_Holland-Position.png
+Image:Overijssel-Position.png
+Image:Zuid_Holland-Position.png|[[w:South Holland|South Holland]], the most crowded provincelakes
+Image:Zeeland-Position.png
+</gallery>
+"""
+    res=parse(gall).find(parser.TagNode)[0]
+    print "VLIST:", res.vlist
+    print "RES:", res
+
+    assert res.vlist=={'caption': 'Sample gallery', 'heights': '100px', 'perrow': 6, 'widths': '100px'}
+
+    

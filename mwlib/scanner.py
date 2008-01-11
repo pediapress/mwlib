@@ -145,13 +145,9 @@ def endpre(scanner, text):
     scanner.produce(EndTagToken("pre", text))
 
     
-def begin_gallery(scanner, text):
-    scanner.produce("GALLERY")
-    scanner.begin("GALLERY")
-
 def end_gallery(scanner, text):
-    scanner.produce("ENDGALLERY")
     scanner.begin("")
+    scanner.produce(EndTagToken("gallery"))
     
     
 def begin_table(scanner, text):
@@ -287,7 +283,13 @@ class TagAnalyzer(object):
                 scanner.begin("IMAGEMAP")
                 scanner.produce(TagToken("imagemap"))
                 #scanner.produce("IMAGEMAP")
-            return
+                return
+
+        if name=='gallery':
+            if not isEndToken:
+                scanner.begin("GALLERY")
+                scanner.produce(TagToken("gallery"))
+                return
 
         if name=="math":
             if isEndToken:
@@ -295,12 +297,6 @@ class TagAnalyzer(object):
             else:
                 return begin_math(scanner, text)
             
-        if name=="gallery":
-            if isEndToken:
-                return
-            else:
-                return begin_gallery(scanner, text)
-
         if name == "pre":
             scanner.begin("pre")
             
@@ -406,12 +402,9 @@ lex = Lexicon(default+[
 
 
     State("GALLERY", [
-        ident("[["),
-        ident("]]"),
-        (end_tag("gallery"), end_gallery),        
-        (special, 'SPECIAL'),        
-        (Rep1(notspecial), "TEXT"),
-        ident("\n"),
+          (end_tag("gallery"), end_gallery),
+          (Rep1(AnyBut("<")), "TEXT"),
+          (Str("<"), "TEXT"),
     ]),
     
     State("IMAGEMAP", [
