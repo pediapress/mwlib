@@ -20,8 +20,8 @@ desc bottom-left
 </imagemap>"""
     tokens = tokenize(s)
     print "TOKENS:", tokens
-    assert tokens[0] == ("IMAGEMAP", u"<imagemap>")
-    assert tokens[-1] == ("IMAGEMAP", u"</imagemap>")
+    assert tokens[0] == (scanner.TagToken("imagemap"), u"<imagemap>")
+    assert tokens[-1] == (scanner.EndTagToken("imagemap"), u"</imagemap>")
 
 def test_fucked_up_html_tags():
     """http://code.pediapress.com/wiki/ticket/25"""
