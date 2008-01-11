@@ -208,6 +208,17 @@ def test_percent_table_style():
     check('{| class="toccolours" width="80%" |}')
     check('{| class="toccolours" width=80% |}')
 
+def test_parseParams():
+    pp = parser.parseParams
+    def check(s, expected):
+        res= parser.parseParams(s)
+        print repr(s), "-->", res, "expected:", expected
+
+        assert res==expected, "bad result"
+
+    check("width=80pt", dict(width="80pt"))
+    check("width=80ex", dict(width="80ex"))
+
 def test_ol_ul():
     """http://code.pediapress.com/wiki/ticket/33"""
 
