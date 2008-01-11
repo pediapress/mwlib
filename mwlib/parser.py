@@ -161,7 +161,6 @@ class Timeline(Node): pass
 class TagNode(Node): pass
 class URL(Node): pass
 class NamedURL(Node): pass
-class ImageMap(TagNode): pass
 
 
 
@@ -356,6 +355,22 @@ class Text(Node):
 class Control(Text):
     pass
 
+def _parseAtomFromString(s):
+    from mwlib import scanner
+    tokens = scanner.tokenize(s)
+    p=Parser(tokens)
+    return p.parseAtom()
+    
+def parse_fields_in_imagemap(imap):
+    
+    if imap.image:
+        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]')
+        if not isinstance(imap.imagelink, ImageLink):
+            imap.imagelink = None
+
+    # FIXME: the links of objects inside 'entries' array should also be parsed
+    
+    
 def append_br_tag(node):
     """append a self-closing 'br' TagNode"""
     br = TagNode("br")
@@ -600,11 +615,12 @@ class Parser(object):
     
     def parseIMAGEMAPTag(self):
         node = self.parseTag()
-        print "IMAGEMAP:", node
         txt = "".join(x.caption for x in node.find(Text))
         from mwlib import imgmap
         node.imagemap = imgmap.ImageMapFromString(txt)
-        print node.imagemap
+        parse_fields_in_imagemap(node.imagemap)
+
+        #print node.imagemap
         return node
 
     def parseSection(self):

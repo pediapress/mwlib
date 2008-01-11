@@ -120,7 +120,13 @@ class HTMLWriter(object):
                            
             self.references = []            
             return
-            
+        elif t.caption=='imagemap':
+            # FIXME. this is not complete. t.imagemap.entries should also be handled.
+            print "WRITEIMAGEMAP:", t.imagemap
+            if t.imagemap.imagelink:
+                self.write(t.imagemap.imagelink)
+            return
+
         
         self.out.write(t.starttext)
         for x in t:
