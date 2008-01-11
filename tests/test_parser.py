@@ -208,6 +208,17 @@ def test_percent_table_style():
     check('{| class="toccolours" width="80%" |}')
     check('{| class="toccolours" width=80% |}')
 
+def test_parseParams():
+    pp = parser.parseParams
+    def check(s, expected):
+        res= parser.parseParams(s)
+        print repr(s), "-->", res, "expected:", expected
+
+        assert res==expected, "bad result"
+
+    check("width=80pt", dict(width="80pt"))
+    check("width=80ex", dict(width="80ex"))
+
 def test_ol_ul():
     """http://code.pediapress.com/wiki/ticket/33"""
 
@@ -330,3 +341,32 @@ def test_extra_cell_stray_tag():
 | bla bla </sub> dfg sdfg
 |}""").find(parser.Cell)
     assert len(cells)==1, "expected exactly one cell"
+
+
+
+def test_gallery_complex():
+    gall="""<gallery caption="Sample gallery" widths="100px" heights="100px" perrow="6">
+Image:Drenthe-Position.png|[[w:Drenthe|Drenthe]], the least crowded province
+Image:Flevoland-Position.png
+Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
+Image:Gelderland-Position.png
+Image:Groningen-Position.png
+Image:Limburg-Position.png
+Image:Noord_Brabant-Position.png 
+Image:Noord_Holland-Position.png
+Image:Overijssel-Position.png
+Image:Zuid_Holland-Position.png|[[w:South Holland|South Holland]], the most crowded province
+lakes
+Image:Zeeland-Position.png
+</gallery>
+"""
+    res=parse(gall).find(parser.TagNode)[0]
+    print "VLIST:", res.vlist
+    print "RES:", res
+
+    assert res.vlist=={'caption': 'Sample gallery', 'heights': '100px', 'perrow': 6, 'widths': '100px'}
+    assert len(res.children)==12, 'expected 12 children'
+    assert isinstance(res.children[10], parser.Text), "expected text for the 'lakes' line"
+
+
+    

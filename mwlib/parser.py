@@ -31,11 +31,11 @@ class TokenSet(object):
         return x in self.values or type(x) in self.types
         
 FirstAtom = TokenSet(['TEXT', 'URL', 'SPECIAL', '[[', 'MATH', '\n',
-                      'BEGINTABLE', 'STYLE', 'TIMELINE', 'GALLERY', 'ITEM', 'URLLINK',
+                      'BEGINTABLE', 'STYLE', 'TIMELINE', 'ITEM', 'URLLINK',
                       TagToken])
 
 FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'STYLE', 'BEGINTABLE', 'ITEM',
-                           'PRE', 'GALLERY', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
+                           'PRE', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
                            TagToken])
 
     
@@ -355,6 +355,28 @@ class Text(Node):
 class Control(Text):
     pass
 
+def _parseAtomFromString(s):
+    from mwlib import scanner
+    tokens = scanner.tokenize(s)
+    p=Parser(tokens)
+    try:
+        return p.parseAtom()
+    except Exception, err:
+        log.error("exception while parsing %r: %r" % (s, err))
+        return None
+
+                  
+    
+def parse_fields_in_imagemap(imap):
+    
+    if imap.image:
+        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]')
+        if not isinstance(imap.imagelink, ImageLink):
+            imap.imagelink = None
+
+    # FIXME: the links of objects inside 'entries' array should also be parsed
+    
+    
 def append_br_tag(node):
     """append a self-closing 'br' TagNode"""
     br = TagNode("br")
@@ -422,8 +444,6 @@ class Parser(object):
             return self.parseStyle()
         elif token[0]=='TIMELINE':
             return self.parseTimeline()
-        elif token[0]=='GALLERY':
-            return self.parseGallery()
         elif token[0]=='ITEM':
             return self.parseItemList()
         elif isinstance(token[0], TagToken):
@@ -476,16 +496,6 @@ class Parser(object):
                 self.next()
                 
         return a
-
-
-    def parseGallery(self):
-        self.next()
-        while self.left:
-            token = self.token
-            self.next()
-
-            if token[0] == 'ENDGALLERY':
-                break
             
     def parseLink(self):
         break_at = TokenSet(['BREAK', EndTagToken, 'SECTION'])
@@ -525,7 +535,8 @@ class Parser(object):
         n = TagNode(token.t)
         if token.values:
             n.values = token.values
-        
+        n.vlist = parseParams(self.token[1])
+
         n.starttext = token.text
         n.endtext = u'</%s>' % token.t
         self.next()
@@ -597,6 +608,40 @@ class Parser(object):
     parseSTARTFEEDTag = parseTag
     parseENDFEEDTag = parseTag
     parseCENTERTag = parseTag
+
+    def parseGALLERYTag(self):
+        node = self.parseTag()
+        txt = "".join(x.caption for x in node.find(Text))
+        #print "GALLERY:", repr(txt)
+
+        children=[]
+
+        lines = [x.strip() for x in txt.split("\n")]
+        for x in lines:
+            if not x:
+                continue
+
+            # either image link or text inside
+            n=_parseAtomFromString(u'[['+x+']]')
+
+            if isinstance(n, ImageLink):
+                children.append(n)
+            else:
+                children.append(Text(x))
+
+        node.children=children
+
+        return node
+    
+    def parseIMAGEMAPTag(self):
+        node = self.parseTag()
+        txt = "".join(x.caption for x in node.find(Text))
+        from mwlib import imgmap
+        node.imagemap = imgmap.ImageMapFromString(txt)
+        parse_fields_in_imagemap(node.imagemap)
+
+        #print node.imagemap
+        return node
 
     def parseSection(self):
         s = Section()
