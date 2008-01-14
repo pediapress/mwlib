@@ -3,6 +3,12 @@
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
 
+def parse_and_show(s):
+    res=expander.parse(s)
+    print "PARSE:", repr(s)    
+    expander.show(res)
+    return res
+
 def test_noexpansion_inside_pre():
     db = DictDB(Art="<pre>A{{Pipe}}B</pre>",
                 Pipe="C")
@@ -48,23 +54,19 @@ def test_five():
     expandstr("{{t1|tnext}}", expected=txt, wikidb=db)
 
 def test_five_parser():
-    n=expander.parse("{{{{{1}}}}}")
-    expander.show(n)
+    n=parse_and_show("{{{{{1}}}}}")
     assert isinstance(n, expander.Template)
 
 def test_five_parser():
-    n=expander.parse("{{{{{1}}}}}")
-    n.show()
+    n=parse_and_show("{{{{{1}}}}}")
     assert isinstance(n, expander.Template)
 
 def test_five_two_three():
-    n=expander.parse("{{{{{1}} }}}")
-    n.show()
+    n=parse_and_show("{{{{{1}} }}}")
     assert isinstance(n, expander.Variable)
 
 def test_five_three_two():
-    n=expander.parse("{{{{{1}}} }}")
-    n.show()
+    n=parse_and_show("{{{{{1}}} }}")
     assert isinstance(n, expander.Template)
 
     
@@ -181,6 +183,11 @@ Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
     g = tokens[1][1]
     assert g.startswith("<gallery")
     assert g.endswith("</gallery>")
-
-
+    
+def test_template_name_colon():    
+    """http://code.pediapress.com/wiki/ticket/36
+    """
+    p=parse_and_show("{{Template:foobar}}")
+    assert isinstance(p, expander.Template), 'expected a template'
+    assert len(p.children)==1, 'expected exactly one child'
     
