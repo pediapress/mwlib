@@ -157,7 +157,7 @@ class Parser(object):
         name = Node()
         t.children.append(name)
         for idx, c in enumerate(children):
-            if c==u'|' or c==u':':
+            if c==u'|':
                 break
             name.children.append(c)
 
@@ -369,12 +369,26 @@ class Expander(object):
             self.flatten(n.children[0], name, variables)
             name = u"".join(name).strip()
 
+            remainder = None
+            if ":" in name:
+                try_name, try_remainder = name.split(':', 1)
+                if self.resolver.has_magic(try_name):
+                    name=try_name
+                    remainder = try_remainder
 
             var = ArgumentList()
 
             varcount = 1   #unnamed vars
 
-            for x in n.children[1:]:
+            def args():
+                if remainder is not None:
+                    tmpnode=Node()
+                    tmpnode.children.append(remainder)
+                    yield tmpnode
+                for x in n.children[1:]:
+                    yield x
+
+            for x in args():
                 var.append(LazyArgument(x, self, variables))
 
             rep = self.resolver(name, var)
