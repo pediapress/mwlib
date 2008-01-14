@@ -57,10 +57,6 @@ def test_five_parser():
     n=parse_and_show("{{{{{1}}}}}")
     assert isinstance(n, expander.Template)
 
-def test_five_parser():
-    n=parse_and_show("{{{{{1}}}}}")
-    assert isinstance(n, expander.Template)
-
 def test_five_two_three():
     n=parse_and_show("{{{{{1}} }}}")
     assert isinstance(n, expander.Variable)
