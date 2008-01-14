@@ -84,6 +84,9 @@ imagemap = ZeroOrMore(line) + StringEnd()
 imagemap.setParseAction(_makeimagemap)
 
 def ImageMapFromString(s):
+    print s
+
+    print "ImageMapFromString(%r)" % (s,)
     return imagemap.parseString(s)[0]
 
     
