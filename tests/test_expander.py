@@ -200,3 +200,8 @@ def test_expand_name_with_colon():
 
 def test_parser_func_from_template():
     expandstr("{{ {{bla}} 1 + 1}}", "2", wikidb=DictDB(bla="#expr:"))
+
+def test_bad_expr_name():
+    s=expandstr("{{expr:1+1}}")  # '#' missing
+    assert s!='2', "bad result"
+
