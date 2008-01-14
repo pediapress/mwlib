@@ -191,3 +191,16 @@ def test_template_name_colon():
     assert isinstance(p, expander.Template), 'expected a template'
     assert len(p.children)==1, 'expected exactly one child'
     
+
+
+def test_expand_parser_func_name():
+    expandstr("{{ {{NZ}}expr: 1+1}}", "2",
+              wikidb=DictDB(NZ="#"))
+
+def test_expand_name_with_colon():
+    wikidb = DictDB()
+    wikidb.d['bla:blubb'] = 'foo'
+    expandstr("{{bla:blubb}}", "foo", wikidb=wikidb)
+
+def test_parser_func_from_template():
+    expandstr("{{ {{bla}} 1 + 1}}", "2", wikidb=DictDB(bla="#expr:"))
