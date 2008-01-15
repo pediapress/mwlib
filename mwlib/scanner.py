@@ -241,7 +241,7 @@ class TagAnalyzer(object):
             if isEndToken:
                 return
             else:
-                return begin_math(scanner, text)
+                return scanner.begin_math(text)
             
         if name == "pre":
             scanner.begin("pre")
