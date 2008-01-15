@@ -335,6 +335,9 @@ class Expander(object):
         self.parsedTemplateCache = {}
         
     def getParsedTemplate(self, name):
+        if name.startswith("[["):
+            return None
+
         try:
             return self.parsedTemplateCache[name]
         except KeyError:
