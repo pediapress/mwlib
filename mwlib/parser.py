@@ -1240,27 +1240,41 @@ class Parser(object):
             
                        
     def parseItemList(self):
-        lst = ItemList()
-        token = self.token
-        level = len(token[1])
-        lst.numbered = token[1][0]=='#'
-        
+        # actually this parses multiple nested item lists..
+        items = []
         while self.left:
             token = self.token
             if token[0]=='ITEM':
-                newlevel = len(token[1])
-                if newlevel==level:
-                    lst.append(self.parseItem())
-                elif newlevel > level:
-                    lst.append(self.parseItemList())
-                else:
-                    return lst
+                items.append(self.parseItem())
             else:
-                return lst
-        return lst
+                break
+
+        # hack
+        commonprefix = lambda x,y : os.path.commonprefix([x,y])
+        
+        current_prefix = u''
+        stack = [Node()]
+        for item in items:
+            prefix = item.prefix.strip(":")
+            common = commonprefix(current_prefix, item.prefix)
+
+            stack = stack[:len(common)+1]
+
+            create = prefix[len(common):]
+            for x in create:
+                itemlist = ItemList()
+                itemlist.numbered = (x=='#')
+                stack[-1].append(itemlist)
+                stack.append(itemlist)
+            stack[-1].append(item)
+            current_prefix = prefix
+
+        return stack[0]
     
     def parseItem(self):
         p = item = Item()
+        p.prefix = self.token[1]
+
         self.token[1]
         break_at = TokenSet(["ENDTABLE", "COLUMN", "ROW"])
         
