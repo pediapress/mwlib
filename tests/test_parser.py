@@ -230,6 +230,23 @@ def test_ol_ul():
     lists = r.find(parser.ItemList)    
     assert len(lists)==2
 
+def test_nested_lists():
+    """http://code.pediapress.com/wiki/ticket/33"""
+    r=parse("""
+# lvl 1
+#* lvl 2
+#* lvl 2
+# lvl 1
+""")
+    lists = r.find(parser.ItemList)
+    assert len(lists)==2, "expected two lists"
+
+    outer = lists[0]
+    inner = lists[1]
+    assert len(outer.children)==3, "outer list must have 3 children"
+    assert outer.children[1] is inner
+    assert len(inner.children)==2, "inner list must have 2 children"
+
 def test_image_link_colon():
     """http://code.pediapress.com/wiki/ticket/28"""
     img = uparser.simpleparse("[[:Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
