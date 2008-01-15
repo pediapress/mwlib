@@ -370,6 +370,7 @@ for x in dir(ParserFunctions):
     if x.startswith("_"):
         continue    
     setattr(ParserFunctions, "#"+x, getattr(ParserFunctions, x))
+    delattr(ParserFunctions, x)
 
 class DummyResolver(object):
     pass

@@ -4,8 +4,8 @@
 # See README.txt for additional licensing information.
 
 from pyparsing import (Literal, restOfLine, Word, nums, Group, 
-                       ZeroOrMore, And, Suppress, LineStart, 
-                       LineEnd, StringEnd)
+                       ZeroOrMore, OneOrMore, And, Suppress, LineStart, 
+                       LineEnd, StringEnd, ParseException, Optional, White)
 
 class gob(object): 
     def __init__(self, **kw):
@@ -84,10 +84,21 @@ imagemap = ZeroOrMore(line) + StringEnd()
 imagemap.setParseAction(_makeimagemap)
 
 def ImageMapFromString(s):
-    return imagemap.parseString(s)[0]
+    # uhh. damn. can't get pyparsing to parse
+    # commands, other lines (i.e. syntax errors strictly speaking)
+    # and lines containing only whitespace...
+    lines = []
+    for x in s.split("\n"):
+        x=x.strip()
+        if x:
+            lines.append(x)
+    s="\n".join(lines)
 
-    
-    
+    try:
+        return imagemap.parseString(s)[0]
+    except ParseException, err:
+        return ImageMap(entries=[], image=None)
+
 def main():
     ex="""
 
@@ -104,8 +115,7 @@ default [[Mainz]]
 blubb
 """
     res = ImageMapFromString(ex)
-
-    for x in res:
+    for x in res.entries:
         print x
 
 if __name__=='__main__':
