@@ -103,23 +103,6 @@ assert len(set(tagnames)) == len(tagnames), "duplicate entries"
 
 htmltagval = Rep(AnyBut('<>'))
 htmltag = NoCase(Str("<")+Opt(Str("/"))+Alt(*[Str(x) for x in tagnames])+Opt(Any(" \n")+htmltagval)+Opt(Str("/"))+Str(">"))
-                 
-def resolveEntity(scanner, text):
-    e = text[1:-1]
-    cp = htmlentitydefs.name2codepoint.get(e, None)
-    if cp:
-        scanner.produce("TEXT", unichr(cp))
-
-def resolveNumericEntity(scanner, text):
-    e = text[2:-1]    
-    cp = int(e)
-    scanner.produce("TEXT", unichr(cp))
-
-def resolveHexEntity(scanner, text):
-    cp = int(text[3:-1], 16)
-    scanner.produce("TEXT", unichr(cp))
-    
-    
 
 def ident(s):
     return (Str(s), s)
@@ -140,44 +123,6 @@ def maybe_vlist(token):
                         scanner.produce("TEXT", x)        
     return f
 
-def endpre(scanner, text):
-    scanner.begin("")
-    scanner.produce(EndTagToken("pre", text))
-
-    
-def end_gallery(scanner, text):
-    scanner.begin("")
-    scanner.produce(EndTagToken("gallery"))
-    
-    
-def begin_table(scanner, text):
-    scanner.tablemode += 1
-    return "BEGINTABLE"
-
-def end_table(scanner, text):
-    scanner.tablemode -= 1
-    return "ENDTABLE"
-    
-
-def begin_math(scanner, text):
-    scanner.begin("MATH")
-    scanner.produce("MATH")
-
-def end_math(scanner, text):
-    scanner.begin("")
-    scanner.produce("ENDMATH")    
-
-def end_timeline(scanner, text):
-    scanner.begin("")
-    scanner.produce("TIMELINE")
-
-def end_imagemap(scanner, text):
-    scanner.begin("")
-    scanner.produce(EndTagToken("imagemap"))
-
-
-def hrule(scanner, text):
-    scanner.produce(TagToken("hr", "<hr>"), "<hr>")
 
 def tag(name):
     return NoCase(Str("<")+Opt(Str("/"))+Str(name)+Rep(Str(" "))
@@ -188,6 +133,7 @@ def begin_tag(name):
 
 def end_tag(name):
     return NoCase(Str("</")+Str(name)+Rep(AnyBut(">"))+Str(">"))
+
 
 class _BaseTagToken(object):
     def __eq__(self, other):
@@ -307,115 +253,173 @@ class TagAnalyzer(object):
 
 analyzeTag = TagAnalyzer().analyzeTag        
 
+class MWScanner(Scanner):
+    tablemode = 0
 
-def eolstyle(scanner, text):
-    text = text[1:]
-    scanner.produce("EOLSTYLE", text)
+    def __init__(self, file, name):
+        Scanner.__init__(self, self.lexicon, file, name)
+
+    def resolveEntity(scanner, text):
+        e = text[1:-1]
+        cp = htmlentitydefs.name2codepoint.get(e, None)
+        if cp:
+            scanner.produce("TEXT", unichr(cp))
+
+    def resolveNumericEntity(scanner, text):
+        e = text[2:-1]    
+        cp = int(e)
+        scanner.produce("TEXT", unichr(cp))
+
+    def resolveHexEntity(scanner, text):
+        cp = int(text[3:-1], 16)
+        scanner.produce("TEXT", unichr(cp))
+    
+    def endpre(scanner, text):
+        scanner.begin("")
+        scanner.produce(EndTagToken("pre", text))
+
+
+    def end_gallery(scanner, text):
+        scanner.begin("")
+        scanner.produce(EndTagToken("gallery"))
+
+
+    def begin_table(scanner, text):
+        scanner.tablemode += 1
+        return "BEGINTABLE"
+
+    def end_table(scanner, text):
+        scanner.tablemode -= 1
+        return "ENDTABLE"
+
+
+    def begin_math(scanner, text):
+        scanner.begin("MATH")
+        scanner.produce("MATH")
+
+    def end_math(scanner, text):
+        scanner.begin("")
+        scanner.produce("ENDMATH")    
+
+    def end_timeline(scanner, text):
+        scanner.begin("")
+        scanner.produce("TIMELINE")
+
+    def end_imagemap(scanner, text):
+        scanner.begin("")
+        scanner.produce(EndTagToken("imagemap"))
+
+    def hrule(scanner, text):
+        scanner.produce(TagToken("hr", "<hr>"), "<hr>")
+
+    def eolstyle(scanner, text):
+        text = text[1:]
+        scanner.produce("EOLSTYLE", text)
     
 
-default = [
-    (Str("{{"), Begin('WIKI_SPECIAL')),
-    (Str("<!--"), Begin('comment')),
-    (NoCase(Str("<nowiki>")), Begin("nowiki")),
-    (NoCase(Str("<nowiki"))+Rep(Str(" ")) +Str("/>"), IGNORE),
-    (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
-    (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
-    (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),
-    
-    (Str("__TOC__"), IGNORE),
-    (Str("__NOTOC__"), IGNORE),
-    (Str("__FORCETOC__"), IGNORE),
-    (Str("__NOEDITSECTION__"), IGNORE),
-    (Str("__START__"), IGNORE),
-    (Str("__END__"), IGNORE),
-    ident("[["),
-    ident("]]"),
-    (Str("[")+url, "URLLINK"),
-    (Str("[#")+Rep1(Range("AZaz09")|Str("_"))+Str("]"), IGNORE),
-    (url, "URL"),
-    (Bol+Str("----")+Rep(Str("-")), hrule),
-    (Str("''"), "STYLE"),
-    (Str("'''"), "STYLE"),
-    (Str("'''''"), "STYLE"),
-    (Bol+Rep1(Str('=')), 'SECTION'),
-    (Rep1(Str('='))+Rep(Str(" "))+Eol, 'ENDSECTION'),
-    (Rep(Str(" "))+Str("{|"), begin_table),
-    (Rep(Str(" "))+Str("|}"), end_table),
-    (Bol+Rep(Str(" "))+Str("|"), maybe_vlist("COLUMN")),
-    (Bol+Rep(Str(" "))+Str("!"), maybe_vlist("COLUMN")),
-    (Str("||"), maybe_vlist("COLUMN")),
-    (Str("|!"), maybe_vlist("COLUMN")),
-    (Str("!!"), maybe_vlist("COLUMN")),
-    (Str("|+"), maybe_vlist("TABLECAPTION")),
-    (Bol+Rep(Str(" "))+Str("|")+Rep1(Str("-")), maybe_vlist("ROW")),
-    (Str("\n\n")+Rep(Str("\n")), "BREAK"),
-    ident("\n"),
-    (Bol+Rep(Str(":"))+Rep1(Any("#*")), 'ITEM'),
-    (Str("\x00")+Rep1(Str(":")), eolstyle),
-    (Str("\x00")+Rep1(Str(";")), eolstyle),    
-    (Bol+Rep1(Str(":")), "EOLSTYLE"),
-    (Bol+Rep1(Str(";")), "EOLSTYLE"),
-    (Bol+Str(' '), 'PRE'),
-    (htmltag, analyzeTag),    
-    (Rep1(notspecial), "TEXT"),
-    (special, 'SPECIAL'),
-]
+    default = [
+        (Str("{{"), Begin('WIKI_SPECIAL')),
+        (Str("<!--"), Begin('comment')),
+        (NoCase(Str("<nowiki>")), Begin("nowiki")),
+        (NoCase(Str("<nowiki"))+Rep(Str(" ")) +Str("/>"), IGNORE),
+        (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
+        (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
+        (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),
+
+        (Str("__TOC__"), IGNORE),
+        (Str("__NOTOC__"), IGNORE),
+        (Str("__FORCETOC__"), IGNORE),
+        (Str("__NOEDITSECTION__"), IGNORE),
+        (Str("__START__"), IGNORE),
+        (Str("__END__"), IGNORE),
+        ident("[["),
+        ident("]]"),
+        (Str("[")+url, "URLLINK"),
+        (Str("[#")+Rep1(Range("AZaz09")|Str("_"))+Str("]"), IGNORE),
+        (url, "URL"),
+        (Bol+Str("----")+Rep(Str("-")), hrule),
+        (Str("''"), "STYLE"),
+        (Str("'''"), "STYLE"),
+        (Str("'''''"), "STYLE"),
+        (Bol+Rep1(Str('=')), 'SECTION'),
+        (Rep1(Str('='))+Rep(Str(" "))+Eol, 'ENDSECTION'),
+        (Rep(Str(" "))+Str("{|"), begin_table),
+        (Rep(Str(" "))+Str("|}"), end_table),
+        (Bol+Rep(Str(" "))+Str("|"), maybe_vlist("COLUMN")),
+        (Bol+Rep(Str(" "))+Str("!"), maybe_vlist("COLUMN")),
+        (Str("||"), maybe_vlist("COLUMN")),
+        (Str("|!"), maybe_vlist("COLUMN")),
+        (Str("!!"), maybe_vlist("COLUMN")),
+        (Str("|+"), maybe_vlist("TABLECAPTION")),
+        (Bol+Rep(Str(" "))+Str("|")+Rep1(Str("-")), maybe_vlist("ROW")),
+        (Str("\n\n")+Rep(Str("\n")), "BREAK"),
+        ident("\n"),
+        (Bol+Rep(Str(":"))+Rep1(Any("#*")), 'ITEM'),
+        (Str("\x00")+Rep1(Str(":")), eolstyle),
+        (Str("\x00")+Rep1(Str(";")), eolstyle),    
+        (Bol+Rep1(Str(":")), "EOLSTYLE"),
+        (Bol+Rep1(Str(";")), "EOLSTYLE"),
+        (Bol+Str(' '), 'PRE'),
+        (htmltag, analyzeTag),    
+        (Rep1(notspecial), "TEXT"),
+        (special, 'SPECIAL'),
+    ]
 
 
-lex = Lexicon(default+[    
-    State("nowiki", [
-          (NoCase(Str("</nowiki>")), Begin('')),
-          (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
-          (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
-          (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
-          (Rep1(AnyBut("<&")), "TEXT"),
-          (Any("<&"), "TEXT"),
-    ]),
-
-    State("pre", [
-          (Str("</pre>"), endpre),
-          (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
-          (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
-          (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
-          (Rep1(AnyBut("<&")), "TEXT"),
-          (Any("<&"), "TEXT"),
-    ]),
-    
-
-    State("TIMELINE",[
-          (end_tag("timeline"), end_timeline),
-          (Rep1(AnyBut("<")), "TEXT"),
-          (Str("<"), "TEXT"),
-    ]),
-    
-    
-    State("MATH", [
-        (Rep1(AnyBut("<")), "LATEX"),
-        (Str("<"), "LATEX"),
-        (end_tag("math"), end_math),
+    lexicon = Lexicon(default+[    
+        State("nowiki", [
+              (NoCase(Str("</nowiki>")), Begin('')),
+              (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
+              (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
+              (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
+              (Rep1(AnyBut("<&")), "TEXT"),
+              (Any("<&"), "TEXT"),
         ]),
-        
-    State('WIKI_SPECIAL', [
-          (Str("}}"), Begin('')),
-          (AnyChar, IGNORE)]),
+
+        State("pre", [
+              (Str("</pre>"), endpre),
+              (Str("&")+Rep1(Range("AZaz09"))+Str(";"), resolveEntity),
+              (Str("&#")+Rep1(Range("09"))+Str(";"), resolveNumericEntity),
+              (Str("&#")+NoCase(Str('x'))+Rep1(Range("afAF09"))+Str(";"), resolveHexEntity),          
+              (Rep1(AnyBut("<&")), "TEXT"),
+              (Any("<&"), "TEXT"),
+        ]),
 
 
-    State("GALLERY", [
-          (end_tag("gallery"), end_gallery),
-          (Rep1(AnyBut("<")), "TEXT"),
-          (Str("<"), "TEXT"),
-    ]),
-    
-    State("IMAGEMAP", [
-          (end_tag("imagemap"), end_imagemap),
-          (Rep1(AnyBut("<")), "TEXT"),
-          (Str("<"), "TEXT"),
-          ]),
+        State("TIMELINE",[
+              (end_tag("timeline"), end_timeline),
+              (Rep1(AnyBut("<")), "TEXT"),
+              (Str("<"), "TEXT"),
+        ]),
 
-    State('comment', [
-          (Str("-->"), Begin('')),
-          (AnyChar, IGNORE)])
-    ])
+
+        State("MATH", [
+            (Rep1(AnyBut("<")), "LATEX"),
+            (Str("<"), "LATEX"),
+            (end_tag("math"), end_math),
+            ]),
+
+        State('WIKI_SPECIAL', [
+              (Str("}}"), Begin('')),
+              (AnyChar, IGNORE)]),
+
+
+        State("GALLERY", [
+              (end_tag("gallery"), end_gallery),
+              (Rep1(AnyBut("<")), "TEXT"),
+              (Str("<"), "TEXT"),
+        ]),
+
+        State("IMAGEMAP", [
+              (end_tag("imagemap"), end_imagemap),
+              (Rep1(AnyBut("<")), "TEXT"),
+              (Str("<"), "TEXT"),
+              ]),
+
+        State('comment', [
+              (Str("-->"), Begin('')),
+              (AnyChar, IGNORE)])
+        ])
 
 
 
@@ -425,8 +429,7 @@ def tokenize(input, name="unknown"):
 
     if isinstance(input, basestring):
         input = StringIO.StringIO(input)
-    s=Scanner(lex, input, name)
-    s.tablemode = 0
+    s=MWScanner(input, name)
     
     
     tokens = []
