@@ -385,5 +385,8 @@ Image:Zeeland-Position.png
     assert len(res.children)==12, 'expected 12 children'
     assert isinstance(res.children[10], parser.Text), "expected text for the 'lakes' line"
 
+def test_colon_nobr():
+    tagnodes = parse(";foo\n:bar\n").find(parser.TagNode)
+    assert not tagnodes, "should have no br tagnodes"
 
-    
+
