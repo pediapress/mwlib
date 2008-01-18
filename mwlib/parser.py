@@ -607,6 +607,7 @@ class Parser(object):
     parseCENTERTag = parseTag
     parseSTARTFEEDTag = parseTag
     parseENDFEEDTag = parseTag
+    parseCENTERTag = parseTag
 
     def parseGALLERYTag(self):
         node = self.parseTag()
