@@ -996,8 +996,6 @@ class Parser(object):
         if last:
             self.tokens[last[0]] = last[1]
 
-        append_br_tag(p)
-        
         return retval
             
     def parseParagraph(self):
