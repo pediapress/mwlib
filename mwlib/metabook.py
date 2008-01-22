@@ -77,7 +77,7 @@ class MetaBook(object):
                 items.append(item)
             elif item['type'] == 'chapter':
                 items.append(item)
-                for article in item['items']:
+                for article in item.get('items', []):
                     items.append(article)
         return items
 
