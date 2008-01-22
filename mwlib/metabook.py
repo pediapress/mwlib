@@ -77,7 +77,7 @@ class MetaBook(object):
                 items.append(item)
             elif item['type'] == 'chapter':
                 items.append(item)
-                for article in item['items']:
+                for article in item.get('items', []):
                     items.append(article)
         return items
 
@@ -111,7 +111,7 @@ def mwcollection_to_metabook(config, mwcollection):
     
     titleRe = '^==\s+(?P<title>.*?)\s+==$'
     subtitleRe = '^===\s+(?P<subtitle>.*?)\s+===$'
-    chapterRe = '^;\[\[(?P<chapter>.*?)\]\]$'
+    chapterRe = '^;(?P<chapter>.*?)$'
     articleRe = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
     alltogetherRe = re.compile("(%s)|(%s)|(%s)|(%s)" % (titleRe, subtitleRe, chapterRe, articleRe))
     gotChapter = False
@@ -126,9 +126,8 @@ def mwcollection_to_metabook(config, mwcollection):
         elif res.group('subtitle'):
             metabook.subtitle = res.group('subtitle')
         elif res.group('chapter'):
-            if len(articles):
-                metabook.addArticles(articles, chapter)
-                articles = []
+            metabook.addArticles(articles, chapter)
+            articles = []
             chapter = res.group('chapter')
         elif res.group('article'):
             d = {'title': res.group('article')}
