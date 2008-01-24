@@ -91,6 +91,9 @@ class ImageDB(object):
         f.close()
         return res
     
+    def getPath(self):
+        raise NotImplemented('getPath() does not work with zipwiki.ImageDB!')
+    
     def getURL(self, name):
         try:
             return self.images[name]['url']
