@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2007, PediaPress GmbH
+# Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
 ## http://mw/index.php?title=Image:Bla.jpg&action=raw
@@ -8,11 +8,11 @@
 
 
 import os
-import shutil
 import sys
 import urllib
 import urllib2
 import md5
+import shutil
 import time
 import tempfile
 import re
@@ -22,118 +22,255 @@ from mwlib.log import Log
 
 log = Log("netdb")
 
-sys.getfilesystemencoding = lambda: 'utf-8'
+# ==============================================================================
 
 def hashpath(name):
-    assert isinstance(name, unicode), "must pass unicode object to hashpath"    
-    name = name.replace(" ", "_")
-    m=md5.new()
-    m.update(name.encode('utf-8'))
-    d = m.hexdigest()
+    """Compute hashpath for an image in the same way as MediaWiki does
+    
+    @param name: name of an image
+    @type name: unicode
+    
+    @returns: hashpath to image
+    @type: str
+    """
+    
+    d = md5.new(name.replace(" ", "_").encode('utf-8')).hexdigest()
     return "/".join([d[0], d[:2], name])
 
 class ImageDB(object):
-    def __init__(self, baseurl, localpath=None):
-        """
-        @param baseurl: base URL or tuple containing several base URLs
-        @type localpath: str
+    convert_command = 'convert' # name of/path to ImageMagick's convert tool
+    
+    def __init__(self, baseurl, cachedir=None):
+        """Init ImageDB with a base URL (or a list of base URLs) and optionally
+        with a cache directory.
+        
+        @param baseurl: base URL or sequence containing several base URLs
+        @type baseurl: unicode or (unicode,)
+        
+        @param cachedir: image cache directory (optional)
+        @type cachedir: basestring or None
         """
         
         if isinstance(baseurl, unicode):
             baseurl = (baseurl.encode('ascii'),)
         elif isinstance(baseurl, tuple):
             baseurl = tuple([bu.encode('ascii') for bu in baseurl if isinstance(bu, unicode)])
-        self.baseurl = baseurl
-            
-        self.localpath = localpath
-        self.tmpdir = None
-        if not localpath:
-            self.tmpdir = unicode(tempfile.mkdtemp())
-            self.localpath = self.tmpdir
-        self.imageCache = {}
-    
-    def _transform_name(self, name):
-        """
-        @type: unicode
+        self.baseurls = baseurl
         
-        @rtype: unicode
+        if cachedir:
+            self.cachedir = cachedir
+            self.tempcache = False
+        else:
+            self.cachedir = tempfile.mkdtemp()
+            self.tempcache = True
+    
+    def clear(self):
+        """Delete temporary cache directory (i.e. only if no cachedir has been
+        passed to __init__().
         """
         
-        assert isinstance(name, unicode), 'name must be unicode'
-        name = name[0].upper() + name[1:]
-        return name.replace(' ', '_')
+        if self.tempcache:
+            shutil.rmtree(self.cachedir)
     
-    def getDiskPath(self, name, width=None):
-        p = self.getPath(name, width=width)       
-        if p:
-            self.imageCache[ (name,width)] = p
-            p = os.path.join(self.localpath, p)            
-        return p
-
-    def getPath(self, name, width=None):
-        _p = self.imageCache.get( (name,width), None)
-        if _p:
-            return _p
-
-        if not name:
+    def getURL(self, name):
+        """Return image URL for image with given name
+        
+        @param name: image name (without namespace, i.e. without 'Image:')
+        @type name: unicode
+        
+        @returns: URL to original image
+        @rtype: str
+        """
+        
+        assert isinstance(name, unicode), 'name must be of type unicode'
+        
+        # first, look for a cached image with that name (in any size)
+        for baseurl in self.baseurls:
+            urldir = self._getCacheDirForBaseURL(baseurl)
+            if not os.path.isdir(urldir):
+                continue
+            for sizedir in os.listdir(urldir):
+                mo = re.match(r'^(?P<size>\d+)px$', sizedir)
+                if mo is None:
+                    continue
+                size = int(mo.group('size'))
+                filename = self._getCachedImagePath(baseurl, name, size=size)
+                if os.path.exists(filename):
+                    return self._getImageURLForBaseURL(baseurl, name)
+    
+        # resort to HTTP requests:
+        tempfile, baseurl = self._fetchImage(name)
+        if tempfile is not None:
+            try:
+                os.unlink(tempfile)
+            except IOError:
+                log.warn('Could not delete temp file %r' % tempfile)
+            return self._getImageURLForBaseURL(baseurl, name)
+        return None
+    
+    def getDiskPath(self, name, size=None, grayscale=False):
+        """Return filename for image with given name. If the image is not found
+        in the cache, it is fetched per HTTP and converted.
+        
+        @param name: image name (without namespace, i.e. without 'Image:')
+        @type name: unicode
+        
+        @param size: if given, the image is converted to the given maximum size
+            (i.e. the image is scaled so that neither its  width nor its height
+            exceed size)
+        @type size: int or NoneType
+        
+        @param grayscale: if True, the image is converted to grayscale
+        @type grayscale: bool
+        
+        @returns: filename of image
+        @rtype: basestring
+        """
+        
+        assert isinstance(name, unicode), 'name must be of type unicode'
+        
+        path = self._getImageFromCache(name, size=size, grayscale=grayscale)
+        if path:
+            return path
+    
+        tmpfile, baseurl = self._fetchImage(name)
+        if tmpfile is None:
             return None
-        name = name[:1].upper()+name[1:]
         
-        hp = hashpath(name)
-
-        if width:
-            if name.endswith('svg'):
-                name = "%s.png" % name
-            hpWidth = 'thumb/%s/%dpx-%s' % (hp,width,self._transform_name(name))
-        elif name.endswith('svg'):
-            return
+        colorpath, graypath = self._convertToCache(tmpfile, baseurl, name, size=size)
         
-        d = None
-        for bu in self.baseurl:
-            if width:
-                filename = hpWidth
-                d = self._fetchURL(bu, hpWidth)
-            if d is None:
-                filename = hp
-                d = self._fetchURL(bu, hp)
-            if d is not None:
-                break
-
-        if d is None:
-            return
+        try:
+            os.unlink(tmpfile)
+        except IOError:
+            log.warn('Could not delete temp file %r' % tmpfile)
         
-        dest = os.path.join(self.localpath, filename).encode(sys.getfilesystemencoding() or 'utf-8')
-        dn = os.path.dirname(dest)
-        if not os.path.exists(dn):
-            os.makedirs(dn)
-        open(dest, 'wb').write(d)
-        return dest
-
-    def _fetchURL(self, baseurl, hp):
-        assert isinstance(baseurl, str)
-        assert isinstance(hp, unicode)
+        return graypath if grayscale else colorpath
+    
+    def _getImageFromCache(self, name, size=None, grayscale=False):
+        """Look in cachedir for an image with the given parameters"""
         
-        p = os.path.join(self.localpath, hp).encode(sys.getfilesystemencoding() or 'utf-8')
-        if os.path.exists(p):
-            return open(p).read()
-
-        url=urllib.basejoin(baseurl, urllib.quote(hp.encode('utf-8')))
+        for baseurl in self.baseurls:
+            path = self._getCachedImagePath(baseurl, name, size=size, grayscale=grayscale)
+            if os.path.exists(path):
+                return path
+        return None
+    
+    def _getCacheDirForBaseURL(self, baseurl):
+        """Construct the path of the cache directory for the given base URL.
+        This directory doesn't need to exist.
+        """
+        
+        return os.path.join(self.cachedir,
+                            md5.new(baseurl.encode('utf-8')).hexdigest()[:8])
+    
+    def _getCachedImagePath(self, baseurl, name, size=None, grayscale=False, makedirs=False):
+        """Construct a filename for an image with the given parameters inside
+        the cache directory. The file doesn't need to exist. If makedirs is True
+        create all directories up to filename.
+        """
+        
+        urlpart = self._getCacheDirForBaseURL(baseurl)
+        sizepart = '%dpx' % size if size is not None else 'orig'
+        graypart = 'gray' if grayscale else 'color'
+        
+        if name.endswith('.svg'):
+            if size is None:
+                log.warn('Cannot get SVG image when no size is given')
+                return None
+            name += '.png'
+        name = (name[0].upper() + name[1:]).replace(' ', '_')
+        
+        d = os.path.join(urlpart, sizepart, graypart)
+        if makedirs and not os.path.isdir(d):
+            os.makedirs(d)
+        return os.path.join(d, name)
+    
+    def _fetchImage(self, name):
+        """Fetch image with given name in original (i.e. biggest) size per HTTP.
+        
+        @returns: filename of written image and base URL used to retrieve the
+            image or (None, None) if the image could not be fetched
+        @rtype: (basestring, str) or (NoneType, NoneType)
+        """
+        
+        for baseurl in self.baseurls:
+            path = self._fetchImageFromBaseURL(baseurl, name)
+            if path:
+                return path, baseurl
+        return None, None
+    
+    def _getImageURLForBaseURL(self, baseurl, name):
+        """Construct a URL for the image with given name under given base URL"""
+        
+        hp = hashpath(name).encode('utf-8')
+        return urllib.basejoin(baseurl, urllib.quote(hp))
+    
+    def _fetchImageFromBaseURL(self, baseurl, name):
+        """Fetch image with given name under given baseurl and write it to a
+        tempfile.
+        
+        @returns: filename of written image or None if image could not be fetched
+        @rtype: basestring or NoneType
+        """
+        
+        url = self._getImageURLForBaseURL(baseurl, name)
         log.info("fetching %r" % (url,))
-
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'mwlib')]
         try:
-            d = opener.open(url).read()
-            log.info("got image:", url)
-        except urllib2.HTTPError, err:
-            log.error("%s - while fetching %r" % (err,url))
-            return            
-        return d
+            data = opener.open(url).read()
+            log.info("got image: %r" % url)
+            fd, filename = tempfile.mkstemp()
+            os.write(fd, data)
+            os.close(fd)
+            return filename
+        except urllib2.URLError, err:
+            log.error("%s - while fetching %r" % (err, url))
+            return None
     
-    def clear(self):
-         if self.tmpdir:
-             log.info('removing %r' % self.tmpdir)
-             shutil.rmtree(self.tmpdir, ignore_errors=True)
+    def _convertToCache(self, srcfile, baseurl, name, size=None):
+        """Convert image in file named srcfile to have the given maximum size
+        and additionally convert it to grayscale. Save the converted image in
+        the cache directory for the given baseurl.
+        
+        @returns: filenames of color and grayscale version of converted image
+        @rtype: (basestring, basestring)
+        """
+        
+        convertcmd = 'convert' # FIXME
+        
+        colorpath = self._getCachedImagePath(baseurl, name, size=size, grayscale=False, makedirs=True)
+        opts = '-background white -coalesce %(resize)s' % {
+            'resize': '-resize %dx%d' % (size, size) if size is not None else '',
+        }
+        cmd = '%(convert)s %(opts)s "%(src)s" "%(dest)s"' % {
+            'convert': convertcmd,
+            'opts': opts,
+            'src': srcfile,
+            'dest': colorpath,
+        }
+        log.info('executing %r' % cmd)
+        rc = os.system(cmd)
+        if rc != 0:
+            log.error('Could not convert %r: convert returned %d' % (name, rc))
+            return None, None
+        
+        graypath = self._getCachedImagePath(baseurl, name, size=size, grayscale=True, makedirs=True)
+        cmd = '%(convert)s -type GrayScale "%(src)s" "%(dest)s"' % {
+            'convert': convertcmd,
+            'src': colorpath,
+            'dest': graypath,
+        }
+        log.info('executing %r' % cmd)
+        rc = os.system(cmd)
+        if rc != 0:
+            log.error('Could not convert %r to grayscale: convert returned %d' % (name, rc))
+            graypath = None
+        
+        return colorpath, graypath
+    
+
+# ==============================================================================
     
 
 def normname(name):
@@ -283,3 +420,4 @@ class Overlay(NetDB):
             pass
         
         return super(Overlay, self).getTemplate(name, followRedirects=followRedirects)
+    
