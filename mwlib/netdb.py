@@ -248,14 +248,12 @@ class ImageDB(object):
         @rtype: (basestring, basestring)
         """
         
-        convertcmd = 'convert' # FIXME
-        
         colorpath = self._getCachedImagePath(baseurl, name, size=size, grayscale=False, makedirs=True)
         opts = '-background white -flatten %(resize)s' % {
             'resize': '-resize %dx%d' % (size, size) if size is not None else '',
         }
         cmd = '%(convert)s %(opts)s "%(src)s" "%(dest)s"' % {
-            'convert': convertcmd,
+            'convert': self.convert_command,
             'opts': opts,
             'src': srcfile,
             'dest': colorpath,
@@ -268,7 +266,7 @@ class ImageDB(object):
         
         graypath = self._getCachedImagePath(baseurl, name, size=size, grayscale=True, makedirs=True)
         cmd = '%(convert)s -type GrayScale "%(src)s" "%(dest)s"' % {
-            'convert': convertcmd,
+            'convert': self.convert_command,
             'src': colorpath,
             'dest': graypath,
         }
