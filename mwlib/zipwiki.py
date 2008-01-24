@@ -69,15 +69,17 @@ class ImageDB(object):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
+        content = simplejson.loads(self.zf.read('content.json'))
+        self.images = content['images']
         self._tmpdir = tmpdir
-        
+    
     @property
     def tmpdir(self):
         if self._tmpdir is None:
             self._tmpdir = unicode(tempfile.mkdtemp())
         return self._tmpdir
-
-    def getDiskPath(self, name, width=None):
+    
+    def getDiskPath(self, name, size=None):
         try:
             data = self.zf.read('images/%s' % name.encode('utf-8'))
         except KeyError: # no such file
@@ -89,10 +91,13 @@ class ImageDB(object):
         f.close()
         return res
     
+    def getURL(self, name):
+        try:
+            return self.images[name]['url']
+        except KeyError:
+            None
+    
     def clean(self):
         if self._tmpdir:
             shutil.rmtree(self._tmpdir, ignore_errors=True)
     
-
-
-
