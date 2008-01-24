@@ -37,7 +37,7 @@ class ZipfileCreator(object):
     def __init__(self, zf, wikidb=None, imgdb=None):
         self.zf = zf
         self.db = RecordDB(wikidb)
-        self.images = set()
+        self.images = {}
         self.imgdb = imgdb
 
     def addObject(self, name, value):
@@ -54,18 +54,21 @@ class ZipfileCreator(object):
         log.info("searching for images")
         for x in a.allchildren():
             if isinstance(x, parser.ImageLink):
-                self.images.add(x.target)
-                log.info("found", x.target)
-
-    def writeImages(self, width=None):
+                name = x.target
+                self.images[name] = {
+                    'url': self.imgdb.getURL(name)
+                }
+                log.info("found", name)
+    
+    def writeImages(self, size=None):
         if self.imgdb is None:
             return
-            
+        
         images = list(self.images)
         images.sort()
         image_map = {}
         for i in images:
-            dp = self.imgdb.getPath(i, width=width)
+            dp = self.imgdb.getDiskPath(i, size=size)
             if dp:
                 self.zf.write(dp, (u"images/%s" % i).encode("utf-8"))
     
@@ -73,6 +76,6 @@ class ZipfileCreator(object):
         self.addObject('content.json', simplejson.dumps(dict(
             articles=self.db.articles,
             templates=self.db.templates,
+            images=self.images,
         )))
-        
-        
+    
