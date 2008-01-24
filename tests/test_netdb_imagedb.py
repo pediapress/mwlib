@@ -3,6 +3,7 @@
 import os
 import shutil
 import tempfile
+import time
 
 from mwlib.netdb import ImageDB
 
@@ -31,11 +32,16 @@ class TestImageDB(object):
             name = self.nonexisting_image_name
             check_url = None
         
+        time.sleep(0.5)
         imagedb = ImageDB(self.baseurls, cachedir)
         p = imagedb.getDiskPath(name, size=size, grayscale=grayscale)
+        relpath = imagedb.getPath(name, size=size, grayscale=grayscale)
         assert imagedb.getURL(name) == check_url
         if success:
             assert os.path.exists(p)
+            assert p.endswith(relpath)
+            assert p != relpath
+            assert relpath[0] != '/'
             imagedb.clear()
             if cachedir:
                 assert p.startswith(cachedir)
