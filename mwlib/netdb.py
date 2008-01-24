@@ -63,6 +63,8 @@ class ImageDB(object):
         else:
             self.cachedir = tempfile.mkdtemp()
             self.tempcache = True
+        if self.cachedir[-1] != '/':
+            self.cachedir += '/' # needed for getPath() to work correctly
     
     def clear(self):
         """Delete temporary cache directory (i.e. only if no cachedir has been
@@ -107,6 +109,15 @@ class ImageDB(object):
                 log.warn('Could not delete temp file %r' % tempfile)
             return self._getImageURLForBaseURL(baseurl, name)
         return None
+    
+    def getPath(self, name, size=None, grayscale=False):
+        """Return path to image with given parameters relative to cachedir"""
+        
+        path = self.getDiskPath(name, size=size, grayscale=grayscale)
+        if path is None:
+            return None
+        assert path.startswith(self.cachedir), 'invalid path from getDiskPath()'
+        return path[len(self.cachedir):]
     
     def getDiskPath(self, name, size=None, grayscale=False):
         """Return filename for image with given name. If the image is not found
