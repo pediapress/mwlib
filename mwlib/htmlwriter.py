@@ -261,9 +261,9 @@ class HTMLWriter(object):
         #    width = 400  # what could be a sensible default if no width is given? maybe better 0?
 
         if width:
-            path = self.images.getPath(obj.target, width=width)
+            path = self.images.getDiskPath(obj.target, size=max(width, height))
         else:
-            path = self.images.getPath(obj.target)
+            path = self.images.getDiskPath(obj.target)
 
         if path is None:
             return
