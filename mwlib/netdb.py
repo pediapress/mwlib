@@ -255,7 +255,7 @@ class ImageDB(object):
         opts = '-background white -coalesce -flatten %(resize)s' % {
             'resize': '-resize %dx%d' % (size, size) if size is not None else '',
         }
-        cmd = '%(convert)s %(opts)s "%(src)s" "%(dest)s"' % {
+        cmd = "%(convert)s %(opts)s '%(src)s[0]' '%(dest)s'" % {
             'convert': self.convert_command,
             'opts': opts,
             'src': srcfile,
