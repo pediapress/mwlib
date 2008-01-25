@@ -13,6 +13,7 @@ import urllib
 import urllib2
 import md5
 import shutil
+import sys
 import time
 import tempfile
 import re
@@ -57,6 +58,8 @@ class ImageDB(object):
         elif isinstance(baseurl, tuple):
             baseurl = tuple([bu.encode('ascii') for bu in baseurl if isinstance(bu, unicode)])
         self.baseurls = baseurl
+        
+        assert sys.getfilesystemencoding() is not None, 'cannot find out filesystem encoding (set LANG environment variable)'
         
         if cachedir:
             self.cachedir = cachedir
@@ -262,7 +265,7 @@ class ImageDB(object):
             'dest': colorpath,
         }
         log.info('executing %r' % cmd)
-        rc = os.system(cmd)
+        rc = os.system(cmd.encode(sys.getfilesystemencoding()))
         if rc != 0:
             log.error('Could not convert %r: convert returned %d' % (name, rc))
             return None, None
@@ -274,7 +277,7 @@ class ImageDB(object):
             'dest': graypath,
         }
         log.info('executing %r' % cmd)
-        rc = os.system(cmd)
+        rc = os.system(cmd.encode(sys.getfilesystemencoding()))
         if rc != 0:
             log.error('Could not convert %r to grayscale: convert returned %d' % (name, rc))
             graypath = None

@@ -1,4 +1,5 @@
 #! /usr/bin/env py.test
+# -*- coding: utf-8 -*-
 
 import os
 import shutil
@@ -76,6 +77,13 @@ class TestImageDB(object):
         p = imagedb.getDiskPath(name, size=size, grayscale=grayscale)
         assert p is not None
     
-
+    def test_unicode_imagename(self):
+        imagedb = ImageDB(self.baseurls, self.tempdir)
+        name = u'Balneario_Iporá_lago_02.jpg'
+        size = 100
+        grayscale = True
+        p = imagedb.getDiskPath(name, size=size, grayscale=grayscale)
+        assert p is not None
+    
     
         
