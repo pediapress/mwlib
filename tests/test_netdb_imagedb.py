@@ -68,7 +68,14 @@ class TestImageDB(object):
                 for grayscale in (False, True):
                     yield self.check, cachedir, size, grayscale, False
     
-        
+    def test_spaces_in_imagename(self):
+        imagedb = ImageDB(self.baseurls, self.tempdir)
+        name = u'DNA As Structure Formula (German).PNG'
+        size = 100
+        grayscale = True
+        p = imagedb.getDiskPath(name, size=size, grayscale=grayscale)
+        assert p is not None
     
+
     
         

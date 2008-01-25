@@ -34,7 +34,8 @@ def hashpath(name):
     @type: str
     """
     
-    d = md5.new(name.replace(" ", "_").encode('utf-8')).hexdigest()
+    name = name.replace(' ', '_')
+    d = md5.new(name.encode('utf-8')).hexdigest()
     return "/".join([d[0], d[:2], name])
 
 class ImageDB(object):
