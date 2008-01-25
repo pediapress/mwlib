@@ -166,7 +166,7 @@ class ImageDB(object):
         
         for baseurl in self.baseurls:
             path = self._getCachedImagePath(baseurl, name, size=size, grayscale=grayscale)
-            if os.path.exists(path):
+            if path is not None and os.path.exists(path):
                 return path
         return None
     
