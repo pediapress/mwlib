@@ -256,7 +256,7 @@ class ImageDB(object):
         """
         
         colorpath = self._getCachedImagePath(baseurl, name, size=size, grayscale=False, makedirs=True)
-        opts = '-background white -coalesce -flatten %(resize)s' % {
+        opts = '-background white -coalesce -density 100 -flatten %(resize)s' % {
             'resize': '-resize %dx%d' % (size, size) if size is not None else '',
         }
         cmd = "%(convert)s %(opts)s '%(src)s[0]' '%(dest)s'" % {
