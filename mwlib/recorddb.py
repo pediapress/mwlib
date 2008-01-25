@@ -60,7 +60,7 @@ class ZipfileCreator(object):
                 }
                 log.info("found", name)
     
-    def writeImages(self, size=None):
+    def writeImages(self, size=None, grayscale=False):
         if self.imgdb is None:
             return
         
@@ -68,7 +68,7 @@ class ZipfileCreator(object):
         images.sort()
         image_map = {}
         for i in images:
-            dp = self.imgdb.getDiskPath(i, size=size)
+            dp = self.imgdb.getDiskPath(i, size=size, grayscale=grayscale)
             if dp:
                 self.zf.write(dp, (u"images/%s" % i).encode("utf-8"))
     
