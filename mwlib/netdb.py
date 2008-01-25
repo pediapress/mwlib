@@ -190,6 +190,8 @@ class ImageDB(object):
                 log.warn('Cannot get SVG image when no size is given')
                 return None
             name += '.png'
+        if name.endswith('.gif'):
+            name += '.png'
         name = (name[0].upper() + name[1:]).replace(' ', '_')
         
         d = os.path.join(urlpart, sizepart, graypart)
@@ -250,7 +252,7 @@ class ImageDB(object):
         """
         
         colorpath = self._getCachedImagePath(baseurl, name, size=size, grayscale=False, makedirs=True)
-        opts = '-background white -flatten %(resize)s' % {
+        opts = '-background white -coalesce -flatten %(resize)s' % {
             'resize': '-resize %dx%d' % (size, size) if size is not None else '',
         }
         cmd = '%(convert)s %(opts)s "%(src)s" "%(dest)s"' % {
