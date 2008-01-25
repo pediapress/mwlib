@@ -191,7 +191,8 @@ class ImageDB(object):
         if name.endswith('.svg'):
             if size is None:
                 log.warn('Cannot get SVG image when no size is given')
-                return None
+                size = 1000 # fixme: get this from config - e.g. faulbackImgSize 
+                #return None
             name += '.png'
         if name.endswith('.gif'):
             name += '.png'
