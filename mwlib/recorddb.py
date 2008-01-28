@@ -3,6 +3,7 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import base64
 import pickle
 import simplejson
 import zipfile
@@ -55,7 +56,7 @@ class ZipfileCreator(object):
     
     def addArticle(self, title, revision=None):
         a = uparser.parseString(title, revision=revision, wikidb=self.db)
-        self.db.articles[title]['parsetree'] = a
+        self.db.articles[title]['parsetree'] = base64.b64encode(pickle.dumps(a))
         for x in a.allchildren():
             if isinstance(x, parser.ImageLink):
                 name = x.target

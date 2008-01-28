@@ -3,6 +3,7 @@
 # Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import base64
 import os
 import pickle
 import shutil
@@ -46,7 +47,7 @@ class Wiki(object):
     def getParsedArticle(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
         if article:
-            return pickle.loads(article['parsetree'])
+            return pickle.loads(base64.b64decode(article['parsetree']))
         return None
     
     def getURL(self, title, revision=None):
@@ -79,7 +80,7 @@ class ImageDB(object):
         content = simplejson.loads(self.zf.read('content.json'))
         self.images = content['images']
         self._tmpdir = tmpdir
-        self.diskpaths = []
+        self.diskpaths = {}
     
     @property
     def tmpdir(self):
