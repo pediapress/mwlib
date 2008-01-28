@@ -3,6 +3,7 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import pickle
 import simplejson
 import zipfile
 from mwlib import uparser, parser
@@ -29,10 +30,13 @@ class RecordDB(object):
 
     def getTemplate(self, name, followRedirects=False):
         r = self.db.getTemplate(name, followRedirects=followRedirects)
-        self.templates[name] = {'contenttype': 'text/x-mediawiki', 'content': r}
+        self.templates[name] = {
+            'contenttype': 'text/x-mediawiki',
+            'content': r,
+        }
         return r
-
     
+
 class ZipfileCreator(object):
     def __init__(self, zf, wikidb=None, imgdb=None):
         self.zf = zf
@@ -50,15 +54,14 @@ class ZipfileCreator(object):
         self.zf.writestr(name.encode('utf-8'), value)
     
     def addArticle(self, title, revision=None):
-        a=uparser.parseString(title, revision=revision, wikidb=self.db)
-        log.info("searching for images")
+        a = uparser.parseString(title, revision=revision, wikidb=self.db)
+        self.db.articles[title]['parsetree'] = a
         for x in a.allchildren():
             if isinstance(x, parser.ImageLink):
                 name = x.target
                 self.images[name] = {
                     'url': self.imgdb.getURL(name)
                 }
-                log.info("found", name)
     
     def writeImages(self, size=None, grayscale=False):
         if self.imgdb is None:
