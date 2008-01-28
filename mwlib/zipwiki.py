@@ -79,6 +79,7 @@ class ImageDB(object):
         content = simplejson.loads(self.zf.read('content.json'))
         self.images = content['images']
         self._tmpdir = tmpdir
+        self.diskpaths = []
     
     @property
     def tmpdir(self):
@@ -88,11 +89,20 @@ class ImageDB(object):
     
     def getDiskPath(self, name, size=None):
         try:
+            return self.diskpaths[name]
+        except KeyError:
+            pass
+        try:
             data = self.zf.read('images/%s' % name.encode('utf-8'))
         except KeyError: # no such file
             return None
         
-        res = os.path.join(self.tmpdir, name)
+        try:
+            ext = '.' + name.rsplit('.', 1)[1]
+        except IndexError:
+            ext = ''
+        res = os.path.join(self.tmpdir, 'image%04d%s' % (len(self.diskpaths), ext))
+        self.diskpaths[name] = res
         f=open(res, "wb")
         f.write(data)
         f.close()
