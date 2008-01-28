@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2007, PediaPress GmbH
+# Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
 import os
+import pickle
 import shutil
 import simplejson
 import tempfile
@@ -40,6 +41,12 @@ class Wiki(object):
         article = self._getArticle(title, revision=revision)
         if article:
             return article['content']
+        return None
+    
+    def getParsedArticle(self, title, revision=None):
+        article = self._getArticle(title, revision=revision)
+        if article:
+            return pickle.loads(article['parsetree'])
         return None
     
     def getURL(self, title, revision=None):
