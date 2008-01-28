@@ -38,6 +38,7 @@ class MetaBook(object):
     def __init__(self):
         self.type = 'collection'
         self.version = 1
+        self.items = []
     
     def addArticles(self, articleTitles, chapterTitle=None, format='text/x-wiki'):
         articles = []
