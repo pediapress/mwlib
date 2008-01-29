@@ -33,7 +33,7 @@ def image_download(url=None, localpath=None):
     urls = [x for x in url.split() if x]
     assert urls
     
-    imgdb = netdb.ImageDB(urls, localpath=localpath)
+    imgdb = netdb.ImageDB(urls, cachedir=localpath)
     return imgdb
 
 def image_zip(path=None):

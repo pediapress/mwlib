@@ -3,6 +3,12 @@
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
 
+def parse_and_show(s):
+    res=expander.parse(s)
+    print "PARSE:", repr(s)    
+    expander.show(res)
+    return res
+
 def test_noexpansion_inside_pre():
     db = DictDB(Art="<pre>A{{Pipe}}B</pre>",
                 Pipe="C")
@@ -48,23 +54,15 @@ def test_five():
     expandstr("{{t1|tnext}}", expected=txt, wikidb=db)
 
 def test_five_parser():
-    n=expander.parse("{{{{{1}}}}}")
-    expander.show(n)
-    assert isinstance(n, expander.Template)
-
-def test_five_parser():
-    n=expander.parse("{{{{{1}}}}}")
-    n.show()
+    n=parse_and_show("{{{{{1}}}}}")
     assert isinstance(n, expander.Template)
 
 def test_five_two_three():
-    n=expander.parse("{{{{{1}} }}}")
-    n.show()
+    n=parse_and_show("{{{{{1}} }}}")
     assert isinstance(n, expander.Variable)
 
 def test_five_three_two():
-    n=expander.parse("{{{{{1}}} }}")
-    n.show()
+    n=parse_and_show("{{{{{1}}} }}")
     assert isinstance(n, expander.Template)
 
     
@@ -164,4 +162,46 @@ def test_pipe_inside_imagemap():
     result=expandstr("{{sp|1}}", wikidb=db)
     assert "</imagemap>" in result
 
+
+def test_expand_comment():
+    s="foo\n<!-- comment --->\nbar"
+    expandstr(s, s)
+
+
+def test_tokenize_gallery():
+    gall = """
+<gallery caption="Sample gallery" widths="100px" heights="100px" perrow="6">
+Image:Drenthe-Position.png|[[w:Drenthe|Drenthe]], the least crowded province
+Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
+</gallery>
+"""
+    tokens = expander.tokenize(gall)
+    g = tokens[1][1]
+    assert g.startswith("<gallery")
+    assert g.endswith("</gallery>")
+    
+def test_template_name_colon():    
+    """http://code.pediapress.com/wiki/ticket/36
+    """
+    p=parse_and_show("{{Template:foobar}}")
+    assert isinstance(p, expander.Template), 'expected a template'
+    assert len(p.children)==1, 'expected exactly one child'
+    
+
+
+def test_expand_parser_func_name():
+    expandstr("{{ {{NZ}}expr: 1+1}}", "2",
+              wikidb=DictDB(NZ="#"))
+
+def test_expand_name_with_colon():
+    wikidb = DictDB()
+    wikidb.d['bla:blubb'] = 'foo'
+    expandstr("{{bla:blubb}}", "foo", wikidb=wikidb)
+
+def test_parser_func_from_template():
+    expandstr("{{ {{bla}} 1 + 1}}", "2", wikidb=DictDB(bla="#expr:"))
+
+def test_bad_expr_name():
+    s=expandstr("{{expr:1+1}}")  # '#' missing
+    assert s!='2', "bad result"
 

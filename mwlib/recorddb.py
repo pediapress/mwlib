@@ -3,6 +3,8 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import base64
+import pickle
 import simplejson
 import zipfile
 from mwlib import uparser, parser
@@ -29,15 +31,18 @@ class RecordDB(object):
 
     def getTemplate(self, name, followRedirects=False):
         r = self.db.getTemplate(name, followRedirects=followRedirects)
-        self.templates[name] = {'contenttype': 'text/x-mediawiki', 'content': r}
+        self.templates[name] = {
+            'contenttype': 'text/x-mediawiki',
+            'content': r,
+        }
         return r
-
     
+
 class ZipfileCreator(object):
     def __init__(self, zf, wikidb=None, imgdb=None):
         self.zf = zf
         self.db = RecordDB(wikidb)
-        self.images = set()
+        self.images = {}
         self.imgdb = imgdb
 
     def addObject(self, name, value):
@@ -50,22 +55,24 @@ class ZipfileCreator(object):
         self.zf.writestr(name.encode('utf-8'), value)
     
     def addArticle(self, title, revision=None):
-        a=uparser.parseString(title, revision=revision, wikidb=self.db)
-        log.info("searching for images")
+        a = uparser.parseString(title, revision=revision, wikidb=self.db)
+        self.db.articles[title]['parsetree'] = base64.b64encode(pickle.dumps(a))
         for x in a.allchildren():
             if isinstance(x, parser.ImageLink):
-                self.images.add(x.target)
-                log.info("found", x.target)
-
-    def writeImages(self, width=None):
+                name = x.target
+                self.images[name] = {
+                    'url': self.imgdb.getURL(name)
+                }
+    
+    def writeImages(self, size=None, grayscale=False):
         if self.imgdb is None:
             return
-            
+        
         images = list(self.images)
         images.sort()
         image_map = {}
         for i in images:
-            dp = self.imgdb.getPath(i, width=width)
+            dp = self.imgdb.getDiskPath(i, size=size, grayscale=grayscale)
             if dp:
                 self.zf.write(dp, (u"images/%s" % i).encode("utf-8"))
     
@@ -73,6 +80,6 @@ class ZipfileCreator(object):
         self.addObject('content.json', simplejson.dumps(dict(
             articles=self.db.articles,
             templates=self.db.templates,
+            images=self.images,
         )))
-        
-        
+    

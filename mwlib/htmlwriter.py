@@ -53,17 +53,15 @@ class HTMLWriter(object):
         for (key,value) in vlist.items():
             if isinstance(value, (basestring, int)):
                 if key=="class":
-                    args.append('%s="bbotstyle %s"' % (key, value))
+                    args.append('%s="%s"' % (key, value))
                     gotClass = 1
                 else:
                     args.append('%s="%s"' % (key, value))
             if isinstance(value, dict) and key=="style":
                 for (_key,_value) in value.items():
-                    styleArgs.append("'%s':'%s'" % (_key, _value))
-                args.append(' bbotstyle="{%s}"' % ','.join(styleArgs))
+                    styleArgs.append("%s:%s" % (_key, _value))
+                args.append(' style="%s"' % ';'.join(styleArgs))
                 gotExtraClass = 1
-        if not gotClass and gotExtraClass:
-            args.append(' class="bbotstyle"')
         return ' '.join(args)
 
 
@@ -122,7 +120,13 @@ class HTMLWriter(object):
                            
             self.references = []            
             return
-            
+        elif t.caption=='imagemap':
+            # FIXME. this is not complete. t.imagemap.entries should also be handled.
+            print "WRITEIMAGEMAP:", t.imagemap
+            if t.imagemap.imagelink:
+                self.write(t.imagemap.imagelink)
+            return
+
         
         self.out.write(t.starttext)
         for x in t:
@@ -257,7 +261,7 @@ class HTMLWriter(object):
         #    width = 400  # what could be a sensible default if no width is given? maybe better 0?
 
         if width:
-            path = self.images.getPath(obj.target, width=width)
+            path = self.images.getPath(obj.target, size=max(width, height))
         else:
             path = self.images.getPath(obj.target)
 

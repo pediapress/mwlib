@@ -80,7 +80,11 @@ def buildzip():
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL")
-    parser.add_option('-d', '--daemonize', action="store_true",
+    parser.add_option("-i", "--imagesize",
+                      help="max. pixel size (width or height) for images (default: 800)")
+    parser.add_option("-g", "--grayscale", action="store_true",
+                      help="include grayscale images")
+    parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
     options, args = parser.parse_args()
 
@@ -99,10 +103,16 @@ def buildzip():
     output = options.output
 
     from mwlib import wiki, recorddb, metabook
-
+    
     w = wiki.makewiki(conf)
     if options.noimages:
         w['images'] = None
+    else:
+        if options.imagesize:
+            imagesize = int(options.imagesize)
+        else:
+            imagesize = 800
+        grayscale = bool(options.grayscale)
     
     if output:
         zipfilename = output
@@ -110,40 +120,33 @@ def buildzip():
         fd, zipfilename = tempfile.mkstemp()
         os.close(fd)
     
+    from ConfigParser import ConfigParser
+
+    cp = ConfigParser()
+    cp.read(conf)
+    
+    mb = metabook.MetaBook()
+    mb.source = {
+        'name': cp.get('wiki', 'name'),
+        'url': cp.get('wiki', 'url'),
+    }
+    if options.collectionpage:
+        mwcollection = w['wiki'].getRawArticle(options.collectionpage)
+        mb.loadCollectionPage(mwcollection)
+    elif options.metabook:
+        mb.readJsonFile(options.metabook)
+    
     zf = zipfile.ZipFile(zipfilename, 'w')
     z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
     
-    from ConfigParser import ConfigParser
-
-    mb = None
-
-    if options.collectionpage:
-        from mwlib.metabook import mwcollection_to_metabook
-        
-        cp=ConfigParser()
-        cp.read(conf)
-        collection = w['wiki'].getRawArticle(options.collectionpage)
-        mb = mwcollection_to_metabook(cp, collection)
-
-    if options.metabook:
-        cp=ConfigParser()
-        cp.read(conf)      
-        mb = metabook.MetaBook()
-        mb.readJsonFile(options.metabook)
-        mb.source = {
-            'name': cp.get('wiki', 'name'),
-            'url': cp.get('wiki', 'url'),
-        }
-    
-    if mb is not None:
-        z.addObject('outline.json', mb.dumpJson())
-        for title, revision in mb.getArticles():
-            z.addArticle(title, revision=revision)
+    z.addObject('outline.json', mb.dumpJson())
+    for title, revision in mb.getArticles():
+        z.addArticle(title, revision=revision)
     
     for x in articles:
         z.addArticle(x)
     
-    z.writeImages()
+    z.writeImages(size=imagesize, grayscale=grayscale)
     z.writeContent()
     zf.close()
     

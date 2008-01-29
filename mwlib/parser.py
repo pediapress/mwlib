@@ -31,11 +31,11 @@ class TokenSet(object):
         return x in self.values or type(x) in self.types
         
 FirstAtom = TokenSet(['TEXT', 'URL', 'SPECIAL', '[[', 'MATH', '\n',
-                      'BEGINTABLE', 'STYLE', 'TIMELINE', 'GALLERY', 'ITEM', 'URLLINK',
+                      'BEGINTABLE', 'STYLE', 'TIMELINE', 'ITEM', 'URLLINK',
                       TagToken])
 
 FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'STYLE', 'BEGINTABLE', 'ITEM',
-                           'PRE', 'GALLERY', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
+                           'PRE', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
                            TagToken])
 
     
@@ -45,7 +45,7 @@ def show(out, node, indent=0):
         show(out, x, indent+1)
 
 
-paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:\w+)))")
+paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:(?:\w|%)+)))")
 def parseParams(s):
     def style2dict(s):
         res = {}
@@ -355,6 +355,28 @@ class Text(Node):
 class Control(Text):
     pass
 
+def _parseAtomFromString(s):
+    from mwlib import scanner
+    tokens = scanner.tokenize(s)
+    p=Parser(tokens)
+    try:
+        return p.parseAtom()
+    except Exception, err:
+        log.error("exception while parsing %r: %r" % (s, err))
+        return None
+
+                  
+    
+def parse_fields_in_imagemap(imap):
+    
+    if imap.image:
+        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]')
+        if not isinstance(imap.imagelink, ImageLink):
+            imap.imagelink = None
+
+    # FIXME: the links of objects inside 'entries' array should also be parsed
+    
+    
 def append_br_tag(node):
     """append a self-closing 'br' TagNode"""
     br = TagNode("br")
@@ -422,8 +444,6 @@ class Parser(object):
             return self.parseStyle()
         elif token[0]=='TIMELINE':
             return self.parseTimeline()
-        elif token[0]=='GALLERY':
-            return self.parseGallery()
         elif token[0]=='ITEM':
             return self.parseItemList()
         elif isinstance(token[0], TagToken):
@@ -476,16 +496,6 @@ class Parser(object):
                 self.next()
                 
         return a
-
-
-    def parseGallery(self):
-        self.next()
-        while self.left:
-            token = self.token
-            self.next()
-
-            if token[0] == 'ENDGALLERY':
-                break
             
     def parseLink(self):
         break_at = TokenSet(['BREAK', EndTagToken, 'SECTION'])
@@ -525,7 +535,8 @@ class Parser(object):
         n = TagNode(token.t)
         if token.values:
             n.values = token.values
-        
+        n.vlist = parseParams(self.token[1])
+
         n.starttext = token.text
         n.endtext = u'</%s>' % token.t
         self.next()
@@ -589,11 +600,56 @@ class Parser(object):
 
     parseRSSTag = parseTag
 
+    parseSTRIKETag = parseTag
+    parseCODETag = parseTag
+    parseDELTag = parseTag
+    parseINSTag = parseTag
+    parseCENTERTag = parseTag
+    parseSTARTFEEDTag = parseTag
+    parseENDFEEDTag = parseTag
+    parseCENTERTag = parseTag
+
+    def parseGALLERYTag(self):
+        node = self.parseTag()
+        txt = "".join(x.caption for x in node.find(Text))
+        #print "GALLERY:", repr(txt)
+
+        children=[]
+
+        lines = [x.strip() for x in txt.split("\n")]
+        for x in lines:
+            if not x:
+                continue
+
+            # either image link or text inside
+            n=_parseAtomFromString(u'[['+x+']]')
+
+            if isinstance(n, ImageLink):
+                children.append(n)
+            else:
+                children.append(Text(x))
+
+        node.children=children
+
+        return node
+    
+    def parseIMAGEMAPTag(self):
+        node = self.parseTag()
+        txt = "".join(x.caption for x in node.find(Text))
+        from mwlib import imgmap
+        node.imagemap = imgmap.ImageMapFromString(txt)
+        parse_fields_in_imagemap(node.imagemap)
+
+        #print node.imagemap
+        return node
+
     def parseSection(self):
         s = Section()
         
-        level = len(self.token[1])
+        level = self.token[1].count('=')
         s.level = level
+        closelevel = 0
+
         self.next()
 
         title = Node()
@@ -601,6 +657,7 @@ class Parser(object):
             token = self.token
             
             if token[0] == 'ENDSECTION':
+                closelevel = self.token[1].count('=')
                 self.next()
                 break
             elif token[0] == '[[':
@@ -620,6 +677,17 @@ class Parser(object):
                 self.next()
                 title.append(Text(token[1]))
 
+        s.level = min(level, closelevel)
+        if s.level==0:
+            title.children.insert(0, Text("="*level))
+            s.__class__ = Node
+        else:
+            diff = closelevel-level
+            if diff>0:
+                title.append(Text("="*diff))
+            elif diff<0:
+                title.children.insert(0, Text("="*(-diff)))
+            
         s.append(title)
 
 
@@ -705,11 +773,17 @@ class Parser(object):
                 elif token[0]=='SPECIAL' and token[1]=='|':
                     break
                 params += token[1]
+
+            c.vlist = parseParams(params)
+
         elif token[0]=='COLUMN':   # html cell
+            params=parseParams(token[1])
+            #print "CELLTOKEN:", token
+            #print "PARAMS:", params
+            c.vlist = params
             self.next()
 
 
-        c.vlist = parseParams(params)        
 
         while self.left:
             token = self.token
@@ -737,6 +811,8 @@ class Parser(object):
                 
     def parseRow(self):
         r = Row()
+        r.vlist={}
+
         token = self.token
         params = ''
         if token[0]=='ROW':
@@ -750,8 +826,12 @@ class Parser(object):
                     else:
                         params += token[1]
                     self.next()
+                r.vlist = parseParams(params)
 
-        r.vlist = parseParams(params)
+            else:
+                # html row
+                r.vlist = parseParams(token[1])
+
             
         while self.left:
             token = self.token
@@ -766,7 +846,8 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                r.append(self.parseColumn())
+                log.warn("skipping in parseRow: %r" % (token,))
+                self.next()
         return r
     
     def parseCaption(self):
@@ -822,8 +903,9 @@ class Parser(object):
                 else:
                     params += token[1]
                 self.next()
-
-        t.vlist = parseParams(params)
+            t.vlist = parseParams(params)
+        else:
+            t.vlist = parseParams(token[1])
 
         while self.left:
             token = self.token
@@ -837,8 +919,9 @@ class Parser(object):
             elif token[0]=='\n':
                 self.next()
             else:
-                #log.warn("skipping in parseTable", token)                
-                t.append(self.parseRow())
+                log.warn("skipping in parseTable", token)
+                self.next()
+                #t.append(self.parseRow())
 
         return t
 
@@ -914,8 +997,6 @@ class Parser(object):
         if last:
             self.tokens[last[0]] = last[1]
 
-        append_br_tag(p)
-        
         return retval
             
     def parseParagraph(self):
@@ -985,8 +1066,11 @@ class Parser(object):
 
         while self.left:
             token = self.token
-            if token[0]=='BREAK' or token[0]=='\n':
+            if token[0]=='BREAK':
                 break
+            elif token[0]=='\n':
+                b.append(Text(token[1]))
+                self.next()
             elif token[0]=='SECTION':
                 break
             elif token[0]==end:
@@ -1155,27 +1239,41 @@ class Parser(object):
             
                        
     def parseItemList(self):
-        lst = ItemList()
-        token = self.token
-        level = len(token[1])
-        lst.numbered = token[1][0]=='#'
-        
+        # actually this parses multiple nested item lists..
+        items = []
         while self.left:
             token = self.token
             if token[0]=='ITEM':
-                newlevel = len(token[1])
-                if newlevel==level:
-                    lst.append(self.parseItem())
-                elif newlevel > level:
-                    lst.append(self.parseItemList())
-                else:
-                    return lst
+                items.append(self.parseItem())
             else:
-                return lst
-        return lst
+                break
+
+        # hack
+        commonprefix = lambda x,y : os.path.commonprefix([x,y])
+        
+        current_prefix = u''
+        stack = [Node()]
+        for item in items:
+            prefix = item.prefix.strip(":")
+            common = commonprefix(current_prefix, item.prefix)
+
+            stack = stack[:len(common)+1]
+
+            create = prefix[len(common):]
+            for x in create:
+                itemlist = ItemList()
+                itemlist.numbered = (x=='#')
+                stack[-1].append(itemlist)
+                stack.append(itemlist)
+            stack[-1].append(item)
+            current_prefix = prefix
+
+        return stack[0]
     
     def parseItem(self):
         p = item = Item()
+        p.prefix = self.token[1]
+
         self.token[1]
         break_at = TokenSet(["ENDTABLE", "COLUMN", "ROW"])
         
@@ -1223,7 +1321,7 @@ def main():
         input = te.expandTemplates()
 
         
-        tokens = tokenize(x, input)
+        tokens = tokenize(input, x)
         
         p=Parser(tokens, os.path.basename(x))
         r = p.parse()
