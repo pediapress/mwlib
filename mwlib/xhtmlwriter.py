@@ -22,9 +22,8 @@ ToDo:
 
 import os
 import sys
-import types
 import xml.etree.ElementTree as ET
-from mwlib import parser, rendermath, mathml # , timeline
+from mwlib import parser,  mathml # , timeline
 
 
 def log(err):
@@ -77,7 +76,7 @@ class MWXHTMLWriter(object):
 
     def getTree(self):
         self.annotateSections()
-        indent(self.root)
+        # indent(self.root) # breaks XHTML (proper rendering at least) if activated!
         return self.root
     
     def asstring(self):
@@ -247,7 +246,18 @@ class MWXHTMLWriter(object):
             return
         
         # parse html and return ET elements
-        p =  ET.fromstring(t.starttext + t.endtext)
+        try:
+            stuff = t.starttext + t.endtext
+            if not t.endtext and not "/" in t.starttext:
+                stuff = t.starttext[:-1] + "/>"
+            p =  ET.fromstring(stuff)
+        except Exception, e:
+            log("failed to parse %r \n" % stuff)
+            #raise e
+            p = None
+
+            
+
         return p
 
 
@@ -299,13 +309,10 @@ class MWXHTMLWriter(object):
 
 
     def xwriteSpecialLink(self, obj): # whats that?
+        a = ET.Element("a", href=obj.target)
+        a.set("mwx:linktype", "special")
         if not obj.children:
-            a = ET.Element("a", href=obj.target)
-            a.set("mwx:linktype", "special")
             a.text = obj.target
-        else:
-            a = ET.Element("mwx:debug")
-            a.text = "special link w/ children"
         return a
 
     def xwriteCategoryLink(self, obj):
@@ -347,7 +354,7 @@ class MWXHTMLWriter(object):
             if obj.align:
                 e.set("align", obj.align)
             if obj.caption:
-                e.text = img.caption
+                e.text = obj.caption
 
         href ="/wiki/Image:" + obj.target # i18n
         e = ET.SubElement(e, "a", href=href)
@@ -366,11 +373,11 @@ class MWXHTMLWriter(object):
             return e
         elif s.caption == "'''":
             tag = 'strong'
-        elif s.caption == ";":
+        elif s.caption == ";": # this starts a definition list ? DL [DT->DD, ...]
             e = ET.Element("div")
-            e = ET.SubElement(e, "strong")
+            e.set("mwx:type", "definition")
             return e        
-        elif s.caption.startswith(":"):
+        elif s.caption.startswith(":"): # this is a definition ? 
             e = ET.Element("blockquote")
             for i in range(len(s.caption)-1):
                 e = ET.SubElement(e, "blockquote")
