@@ -36,6 +36,7 @@ def hashpath(name):
     """
     
     name = name.replace(' ', '_')
+    name = name[:1].upper()+name[1:]
     d = md5.new(name.encode('utf-8')).hexdigest()
     return "/".join([d[0], d[:2], name])
 
@@ -287,7 +288,6 @@ class ImageDB(object):
 
 # ==============================================================================
     
-
 def normname(name):
     name = name.strip().replace("_", " ")
     name = name[:1].upper()+name[1:]
