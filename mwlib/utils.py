@@ -1,4 +1,5 @@
 import os
+import sys
 
 def daemonize(dev_null=True):
     # See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
@@ -18,3 +19,11 @@ def daemonize(dev_null=True):
                     raise
         os.close(null)
 
+def shell_exec(cmd, maxmem=1024*1024):
+    if isinstance(cmd, unicode):
+        enc = sys.getfilesystemencoding()
+        assert enc is not None, 'no filesystem encoding (set LANG)'
+        cmd = cmd.encode(enc)
+    if sys.platform in ('darwin', 'linux2'):
+        cmd = 'ulimit -v %d && %s' % (maxmem, cmd)
+    return os.system(cmd)
