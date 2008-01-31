@@ -142,12 +142,15 @@ def buildzip():
     z.addObject('outline.json', mb.dumpJson())
     for title, revision in mb.getArticles():
         z.addArticle(title, revision=revision)
-    
+        
     for x in articles:
         z.addArticle(x)
-    
+
+    print "got articles"
     z.writeImages(size=imagesize, grayscale=grayscale)
+    print "got images"
     z.writeContent()
+    print "written content"
     zf.close()
     
     if options.daemonize:
@@ -194,7 +197,7 @@ def buildzip():
     
     if not output:
         os.unlink(zipfilename)
-
+    print "finished"
 
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
