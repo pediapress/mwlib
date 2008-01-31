@@ -141,7 +141,7 @@ def buildzip():
     
     for x in articles:
         z.addArticle(x)
-        mb.addArticles(x)
+    mb.addArticles(articles)
     
     z.addObject('outline.json', mb.dumpJson())
     for title, revision in mb.getArticles():
