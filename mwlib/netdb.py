@@ -78,7 +78,7 @@ class ImageDB(object):
         if self.tempcache:
             shutil.rmtree(self.cachedir)
     
-    def getURL(self, name):
+    def getURL(self, name, size=None, grayscale=False):
         """Return image URL for image with given name
         
         @param name: image name (without namespace, i.e. without 'Image:')
@@ -90,29 +90,17 @@ class ImageDB(object):
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
+        # use getDiskPath() to fetch and cache (!) image
+        path = self.getDiskPath(name, size=size, grayscale=grayscale)
+        if path is None:
+            return None
+        
         # first, look for a cached image with that name (in any size)
         for baseurl in self.baseurls:
             urldir = self._getCacheDirForBaseURL(baseurl)
-            if not os.path.isdir(urldir):
+            if not path.startswith(urldir):
                 continue
-            for sizedir in os.listdir(urldir):
-                mo = re.match(r'^(?P<size>\d+)px$', sizedir)
-                if mo is None:
-                    continue
-                size = int(mo.group('size'))
-                filename = self._getCachedImagePath(baseurl, name, size=size)
-                if os.path.exists(filename):
-                    return self._getImageURLForBaseURL(baseurl, name)
-    
-        # resort to HTTP requests:
-        tempfile, baseurl = self._fetchImage(name)
-        if tempfile is not None:
-            try:
-                os.unlink(tempfile)
-            except IOError:
-                log.warn('Could not delete temp file %r' % tempfile)
             return self._getImageURLForBaseURL(baseurl, name)
-        return None
     
     def getPath(self, name, size=None, grayscale=False):
         """Return path to image with given parameters relative to cachedir"""
