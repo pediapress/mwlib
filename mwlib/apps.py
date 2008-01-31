@@ -139,13 +139,14 @@ def buildzip():
     zf = zipfile.ZipFile(zipfilename, 'w')
     z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
     
+    for x in articles:
+        z.addArticle(x)
+        mb.addArticles(x)
+    
     z.addObject('outline.json', mb.dumpJson())
     for title, revision in mb.getArticles():
         z.addArticle(title, revision=revision)
         
-    for x in articles:
-        z.addArticle(x)
-
     print "got articles"
     z.writeImages(size=imagesize, grayscale=grayscale)
     print "got images"
