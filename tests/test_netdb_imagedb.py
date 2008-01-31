@@ -37,7 +37,7 @@ class TestImageDB(object):
         imagedb = ImageDB(self.baseurls, cachedir)
         p = imagedb.getDiskPath(name, size=size, grayscale=grayscale)
         relpath = imagedb.getPath(name, size=size, grayscale=grayscale)
-        assert imagedb.getURL(name) == check_url
+        assert imagedb.getURL(name, size=size, grayscale=grayscale) == check_url
         if success:
             assert os.path.exists(p)
             assert p.endswith(relpath)

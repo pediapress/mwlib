@@ -60,21 +60,18 @@ class ZipfileCreator(object):
         for x in a.allchildren():
             if isinstance(x, parser.ImageLink):
                 name = x.target
-                self.images[name] = {
-                    'url': self.imgdb.getURL(name)
-                }
+                self.images[name] = {}
     
     def writeImages(self, size=None, grayscale=False):
         if self.imgdb is None:
             return
         
-        images = list(self.images)
-        images.sort()
-        image_map = {}
-        for i in images:
-            dp = self.imgdb.getDiskPath(i, size=size, grayscale=grayscale)
-            if dp:
-                self.zf.write(dp, (u"images/%s" % i).encode("utf-8"))
+        for name in sorted(self.images.keys()):
+            dp = self.imgdb.getDiskPath(name, size=size, grayscale=grayscale)
+            if dp is None:
+                continue
+            self.zf.write(dp, (u"images/%s" % name).encode("utf-8"))
+            self.images[name]['url'] = self.imgdb.getURL(name, size=size, grayscale=grayscale)
     
     def writeContent(self):
         self.addObject('content.json', simplejson.dumps(dict(
