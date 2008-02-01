@@ -24,7 +24,7 @@ class Wiki(object):
         else:
             self.zf = ZipFile(zipfile)
         self.metabook = MetaBook()
-        self.metabook.loadJson(self.zf.read("outline.json"))
+        self.metabook.loadJson(self.zf.read("metabook.json"))
         content = simplejson.loads(self.zf.read('content.json'))
         self.articles = content['articles']
         self.templates = content['templates']
