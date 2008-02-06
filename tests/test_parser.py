@@ -313,6 +313,11 @@ def test_headings_unbalanced_2():
     assert section.level==1, 'expected level 1 section'
     assert section.asText()=='head='
 
+def test_headings_tab_end():
+    r=parse("=heading=\t")
+    print "R:", r
+    assert isinstance(r.children[0], parser.Section)
+    
 def test_table_extra_cells_and_rows():
     """http://code.pediapress.com/wiki/ticket/19"""
     s="""
