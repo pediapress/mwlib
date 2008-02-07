@@ -6,6 +6,8 @@ import shutil
 import tempfile
 import time
 
+from PIL import Image
+
 from mwlib.netdb import ImageDB
 
 class TestImageDB(object):
@@ -85,5 +87,28 @@ class TestImageDB(object):
         p = imagedb.getDiskPath(name, size=size, grayscale=grayscale)
         assert p is not None
     
+    def test_resize(self):
+        big_size = 2000
+        
+        imagedb = ImageDB(self.baseurls, self.tempdir)
+        p = imagedb.getDiskPath(self.existing_image_name)
+        img = Image.open(p)
+        orig_size = img.size
+        print 'ORIG', orig_size
+        assert orig_size[0] < big_size
+        assert orig_size[1] < big_size
+
+        p = imagedb.getDiskPath(self.existing_image_name, size=100)
+        img = Image.open(p)
+        print 'CONVERTED1', img.size
+        assert img.size[0] == 100
+        assert img.size[1] < 100
+        
+        p = imagedb.getDiskPath(self.existing_image_name, size=big_size)
+        img = Image.open(p)
+        print 'CONVERTED2', img.size
+        assert img.size == orig_size
     
+
+        
         
