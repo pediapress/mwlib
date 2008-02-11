@@ -176,12 +176,12 @@ class ImageDB(object):
         sizepart = '%dpx' % size if size is not None else 'orig'
         graypart = 'gray' if grayscale else 'color'
         
-        if name.endswith('.svg'):
+        if name.lower().endswith('.svg'):
             if size is None:
                 log.warn('Cannot get SVG image when no size is given')
                 return None
             name += '.png'
-        if name.endswith('.gif'):
+        if name.lower().endswith('.gif'):
             name += '.png'
         name = (name[0].upper() + name[1:]).replace(' ', '_')
         
