@@ -199,7 +199,7 @@ def buildzip():
         if not output:
             os.unlink(zipfilename)
         print "finished"
-    except:
+    except Exception, e:
         if options.errorfile:
             errorfile = open(options.errorfile, 'w')
             print 'writing errors to %r' % options.errorfile
