@@ -93,13 +93,16 @@ def buildzip():
     import zipfile
     
     from mwlib.utils import daemonize
-    
+
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.conf
     if not options.conf:
         parser.error("missing --conf argument")
-
+    
+    if options.daemonize:
+        daemonize()
+    
     output = options.output
 
     from mwlib import wiki, recorddb, metabook
@@ -153,11 +156,6 @@ def buildzip():
     z.writeContent()
     print "written content"
     zf.close()
-    
-    if options.daemonize:
-        daemonize()
-    
-    # TODO: error handling?
     
     posturl = options.posturl
     if posturl:
