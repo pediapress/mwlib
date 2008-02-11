@@ -247,6 +247,12 @@ def test_nested_lists():
     assert outer.children[1] is inner
     assert len(inner.children)==2, "inner list must have 2 children"
 
+def test_nested_list_listitem():
+    r=parse("** wurst\n")
+    outer = r.find(parser.ItemList)[0]
+    assert isinstance(outer.children[0], parser.Item), "expected an Item inside ItemList"
+    
+    
 def test_image_link_colon():
     """http://code.pediapress.com/wiki/ticket/28"""
     img = uparser.simpleparse("[[:Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
