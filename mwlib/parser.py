@@ -149,6 +149,14 @@ class Ref(Node): pass
 class Item(Node): pass
 class ItemList(Node):
     numbered = False
+    def append(self, node, merge=False):
+        if not isinstance(node, Item):
+            c=Item()
+            c.append(node)
+            self.children.append(c)
+        else:
+            self.children.append(node)
+
 class Style(Node): pass
 class Style(Node): pass
 class Book(Node): pass
