@@ -86,7 +86,7 @@ def buildzip():
                       help="include grayscale images")
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
-    optparser.add_option("-e", "--errorfile", help="write errors to this file")
+    parser.add_option("-e", "--errorfile", help="write errors to this file")
     options, args = parser.parse_args()
 
     import tempfile
