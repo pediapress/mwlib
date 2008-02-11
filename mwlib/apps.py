@@ -101,9 +101,6 @@ def buildzip():
     if not options.conf:
         parser.error("missing --conf argument")
     
-    if options.daemonize:
-        daemonize()
-    
     try:
         output = options.output
 
@@ -140,6 +137,10 @@ def buildzip():
             mb.loadCollectionPage(mwcollection)
         elif options.metabook:
             mb.readJsonFile(options.metabook)
+
+        # do not daemonize earlier: Collection extension deletes input metabook file!
+        if options.daemonize:
+            daemonize()
     
         zf = zipfile.ZipFile(zipfilename, 'w')
         z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
