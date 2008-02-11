@@ -204,6 +204,9 @@ def buildzip():
             errorfile = open(options.errorfile, 'w')
             print 'writing errors to %r' % options.errorfile
             errorfile.write('Caught: %s %s' % (e, type(e)))
+            import traceback
+            traceback.print_exc(file=errorfile)
+            errorfile.close()
         else:
             raise
     
