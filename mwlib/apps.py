@@ -86,6 +86,7 @@ def buildzip():
                       help="include grayscale images")
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
+    optparser.add_option("-e", "--errorfile", help="write errors to this file")
     options, args = parser.parse_args()
 
     import tempfile
@@ -103,100 +104,109 @@ def buildzip():
     if options.daemonize:
         daemonize()
     
-    output = options.output
+    try:
+        output = options.output
 
-    from mwlib import wiki, recorddb, metabook
+        from mwlib import wiki, recorddb, metabook
     
-    w = wiki.makewiki(conf)
-    if options.noimages:
-        w['images'] = None
-    else:
-        if options.imagesize:
-            imagesize = int(options.imagesize)
+        w = wiki.makewiki(conf)
+        if options.noimages:
+            w['images'] = None
         else:
-            imagesize = 800
-        grayscale = bool(options.grayscale)
+            if options.imagesize:
+                imagesize = int(options.imagesize)
+            else:
+                imagesize = 800
+            grayscale = bool(options.grayscale)
     
-    if output:
-        zipfilename = output
-    else:
-        fd, zipfilename = tempfile.mkstemp()
-        os.close(fd)
+        if output:
+            zipfilename = output
+        else:
+            fd, zipfilename = tempfile.mkstemp()
+            os.close(fd)
     
-    from ConfigParser import ConfigParser
+        from ConfigParser import ConfigParser
 
-    cp = ConfigParser()
-    cp.read(conf)
+        cp = ConfigParser()
+        cp.read(conf)
     
-    mb = metabook.MetaBook()
-    mb.source = {
-        'name': cp.get('wiki', 'name'),
-        'url': cp.get('wiki', 'url'),
-    }
-    if options.collectionpage:
-        mwcollection = w['wiki'].getRawArticle(options.collectionpage)
-        mb.loadCollectionPage(mwcollection)
-    elif options.metabook:
-        mb.readJsonFile(options.metabook)
+        mb = metabook.MetaBook()
+        mb.source = {
+            'name': cp.get('wiki', 'name'),
+            'url': cp.get('wiki', 'url'),
+        }
+        if options.collectionpage:
+            mwcollection = w['wiki'].getRawArticle(options.collectionpage)
+            mb.loadCollectionPage(mwcollection)
+        elif options.metabook:
+            mb.readJsonFile(options.metabook)
     
-    zf = zipfile.ZipFile(zipfilename, 'w')
-    z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
+        zf = zipfile.ZipFile(zipfilename, 'w')
+        z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
     
-    for x in articles:
-        z.addArticle(x)
-    mb.addArticles(articles)
+        for x in articles:
+            z.addArticle(x)
+        mb.addArticles(articles)
     
-    z.addObject('metabook.json', mb.dumpJson())
-    for title, revision in mb.getArticles():
-        z.addArticle(title, revision=revision)
+        z.addObject('metabook.json', mb.dumpJson())
+        for title, revision in mb.getArticles():
+            z.addArticle(title, revision=revision)
         
-    print "got articles"
-    z.writeImages(size=imagesize, grayscale=grayscale)
-    print "got images"
-    z.writeContent()
-    print "written content"
-    zf.close()
+        print "got articles"
+        z.writeImages(size=imagesize, grayscale=grayscale)
+        print "got images"
+        z.writeContent()
+        print "written content"
+        zf.close()
     
-    posturl = options.posturl
-    if posturl:
-        def get_multipart(filename, data, name='collection'):
-            import time
+        posturl = options.posturl
+        if posturl:
+            def get_multipart(filename, data, name='collection'):
+                import time
             
-            boundary = "-"*20 + ("%f" % time.time()) + "-"*20
+                boundary = "-"*20 + ("%f" % time.time()) + "-"*20
 
-            items = []
-            items.append("--" + boundary)
-            items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
-                         % {'name': name, 'filename': filename})
-            items.append('Content-Type: application/octet-stream')
-            items.append('')
-            items.append(data)
-            items.append('--' + boundary + '--')
-            items.append('')
+                items = []
+                items.append("--" + boundary)
+                items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
+                             % {'name': name, 'filename': filename})
+                items.append('Content-Type: application/octet-stream')
+                items.append('')
+                items.append(data)
+                items.append('--' + boundary + '--')
+                items.append('')
 
-            body = "\r\n".join(items)
-            content_type = 'multipart/form-data; boundary=%s' % boundary
+                body = "\r\n".join(items)
+                content_type = 'multipart/form-data; boundary=%s' % boundary
 
-            return content_type, body
+                return content_type, body
         
-        def post_url(url, data, filename='collection.zip'):
-            import urllib2
+            def post_url(url, data, filename='collection.zip'):
+                import urllib2
             
-            ct, data = get_multipart(filename, data)
-            headers = {"Content-Type": ct}
-            req = urllib2.Request(url.encode('utf8'), data=data, headers=headers)
-            return urllib2.urlopen(req).read()
+                ct, data = get_multipart(filename, data)
+                headers = {"Content-Type": ct}
+                req = urllib2.Request(url.encode('utf8'), data=data, headers=headers)
+                return urllib2.urlopen(req).read()
         
-        zf = open(zipfilename, "rb")
-        result = post_url(posturl, zf.read())
-        #print 'POST result:', repr(result)
+            zf = open(zipfilename, "rb")
+            result = post_url(posturl, zf.read())
+            #print 'POST result:', repr(result)
     
-    if w['images']:
-        w['images'].clear()
+        if w['images']:
+            w['images'].clear()
     
-    if not output:
-        os.unlink(zipfilename)
-    print "finished"
+        if not output:
+            os.unlink(zipfilename)
+        print "finished"
+    except:
+        if options.errorfile:
+            errorfile = open(options.errorfile, 'w')
+            print 'writing errors to %r' % options.errorfile
+            errorfile.write('Caught: %s %s' % (e, type(e)))
+        else:
+            raise
+    
 
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
