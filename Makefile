@@ -1,4 +1,4 @@
-# Copyright (c) 2007, PediaPress GmbH
+# Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
 all:: README.html MANIFEST.in
