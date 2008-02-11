@@ -158,7 +158,6 @@ class ItemList(Node):
             self.children.append(node)
 
 class Style(Node): pass
-class Style(Node): pass
 class Book(Node): pass
 class Magic(Node): pass
 class Chapter(Node): pass
