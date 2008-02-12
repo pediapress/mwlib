@@ -27,6 +27,7 @@ include mwlib/dummydb.py
 include mwlib/expander.py
 include mwlib/expr.py
 include mwlib/htmlwriter.py
+include mwlib/imgmap.py
 include mwlib/lang.py
 include mwlib/lang.txt
 include mwlib/log.py
@@ -52,5 +53,7 @@ include setup.py
 include simple-conf.txt
 include tests/test_expander.py
 include tests/test_html.py
+include tests/test_imgmap.py
+include tests/test_netdb_imagedb.py
 include tests/test_parser.py
 include tests/test_scanner.py
