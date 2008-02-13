@@ -91,5 +91,6 @@ symbolMap = {'\\Bbb': '\\mathbb',
              '\\Nu': 'N{}',
              '\\Rho': 'P{}',
              '\\Tau': 'T{}',
-             '\\Chi': 'C{}',             
+             '\\Chi': 'C{}',
+             '\\boldsymbol':'\\boldsymbol{}'
              }
