@@ -122,3 +122,29 @@ class ImageDB(object):
         if self._tmpdir:
             shutil.rmtree(self._tmpdir, ignore_errors=True)
     
+
+
+
+class DummyImageDB(ImageDB):
+
+    imagedata = '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x03 \x00\x00\x01\xe0\x01\x03\x00\x00\x00g\xc9\x9b\xb6\x00\x00\x00\x01sRGB\x00\xae\xce\x1c\xe9\x00\x00\x00\x06PLTE\xff\xff\xff\x00\x00\x00U\xc2\xd3~\x00\x00\x00\tpHYs\x00\x00\x0b\x13\x00\x00\x0b\x13\x01\x00\x9a\x9c\x18\x00\x00\x00EIDATx\xda\xed\xc1\x01\x01\x00\x00\x00\x82 \xff\xafnH@\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00/\x06\xbd`\x00\x01`<5\x84\x00\x00\x00\x00IEND\xaeB`\x82'
+
+    def __init__(self, tmpdir=None):
+        """
+        @type zipfile: basestring or ZipFile
+        """
+        self._tmpdir = tmpdir        
+    
+    def getDiskPath(self, name, size=None):
+        res = os.path.join(self.tmpdir, 'blank.png')
+        if not os.path.exists(res):
+            open(res, "w").write(self.imagedata)
+        return res
+    
+    def getPath(self):
+        raise NotImplemented('getPath() does not work with zipwiki.FakeImageDB!')
+    
+    def getURL(self, name):
+        raise NotImplemented('getURL() does not work with zipwiki.FakeImageDB!')
+    
+
