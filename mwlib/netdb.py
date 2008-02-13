@@ -78,7 +78,7 @@ class ImageDB(object):
         if self.tempcache:
             shutil.rmtree(self.cachedir)
     
-    def getURL(self, name, size=None, grayscale=False):
+    def getURL(self, name, size=None):
         """Return image URL for image with given name
         
         @param name: image name (without namespace, i.e. without 'Image:')
@@ -91,7 +91,7 @@ class ImageDB(object):
         assert isinstance(name, unicode), 'name must be of type unicode'
         
         # use getDiskPath() to fetch and cache (!) image
-        path = self.getDiskPath(name, size=size, grayscale=grayscale)
+        path = self.getDiskPath(name, size=size)
         if path is None:
             return None
         
@@ -102,16 +102,16 @@ class ImageDB(object):
                 continue
             return self._getImageURLForBaseURL(baseurl, name)
     
-    def getPath(self, name, size=None, grayscale=False):
+    def getPath(self, name, size=None):
         """Return path to image with given parameters relative to cachedir"""
         
-        path = self.getDiskPath(name, size=size, grayscale=grayscale)
+        path = self.getDiskPath(name, size=size)
         if path is None:
             return None
         assert path.startswith(self.cachedir), 'invalid path from getDiskPath()'
         return path[len(self.cachedir):]
     
-    def getDiskPath(self, name, size=None, grayscale=False):
+    def getDiskPath(self, name, size=None):
         """Return filename for image with given name. If the image is not found
         in the cache, it is fetched per HTTP and converted.
         
@@ -123,16 +123,13 @@ class ImageDB(object):
             exceed size)
         @type size: int or NoneType
         
-        @param grayscale: if True, the image is converted to grayscale
-        @type grayscale: bool
-        
         @returns: filename of image
         @rtype: basestring
         """
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
-        path = self._getImageFromCache(name, size=size, grayscale=grayscale)
+        path = self._getImageFromCache(name, size=size)
         if path:
             return path
     
@@ -140,20 +137,20 @@ class ImageDB(object):
         if tmpfile is None:
             return None
         
-        colorpath, graypath = self._convertToCache(tmpfile, baseurl, name, size=size)
+        path = self._convertToCache(tmpfile, baseurl, name, size=size)
         
         try:
             os.unlink(tmpfile)
         except IOError:
             log.warn('Could not delete temp file %r' % tmpfile)
         
-        return graypath if grayscale else colorpath
+        return path
     
-    def _getImageFromCache(self, name, size=None, grayscale=False):
+    def _getImageFromCache(self, name, size=None):
         """Look in cachedir for an image with the given parameters"""
         
         for baseurl in self.baseurls:
-            path = self._getCachedImagePath(baseurl, name, size=size, grayscale=grayscale)
+            path = self._getCachedImagePath(baseurl, name, size=size)
             if path is not None and os.path.exists(path):
                 return path
         return None
@@ -166,7 +163,7 @@ class ImageDB(object):
         return os.path.join(self.cachedir,
                             md5.new(baseurl.encode('utf-8')).hexdigest()[:8])
     
-    def _getCachedImagePath(self, baseurl, name, size=None, grayscale=False, makedirs=False):
+    def _getCachedImagePath(self, baseurl, name, size=None, makedirs=False):
         """Construct a filename for an image with the given parameters inside
         the cache directory. The file doesn't need to exist. If makedirs is True
         create all directories up to filename.
@@ -174,7 +171,6 @@ class ImageDB(object):
         
         urlpart = self._getCacheDirForBaseURL(baseurl)
         sizepart = '%dpx' % size if size is not None else 'orig'
-        graypart = 'gray' if grayscale else 'color'
         
         if name.lower().endswith('.svg'):
             if size is None:
@@ -185,7 +181,7 @@ class ImageDB(object):
             name += '.png'
         name = (name[0].upper() + name[1:]).replace(' ', '_')
         
-        d = os.path.join(urlpart, sizepart, graypart)
+        d = os.path.join(urlpart, sizepart)
         if makedirs and not os.path.isdir(d):
             os.makedirs(d)
         return os.path.join(d, name)
@@ -234,15 +230,14 @@ class ImageDB(object):
             return None
     
     def _convertToCache(self, srcfile, baseurl, name, size=None):
-        """Convert image in file named srcfile to have the given maximum size
-        and additionally convert it to grayscale. Save the converted image in
-        the cache directory for the given baseurl.
+        """Convert image in file named srcfile to have the given maximum size.
+        Save the converted image in the cache directory for the given baseurl.
         
-        @returns: filenames of color and grayscale version of converted image
-        @rtype: (basestring, basestring)
+        @returns: filename of converted image
+        @rtype: basestring
         """
         
-        colorpath = self._getCachedImagePath(baseurl, name, size=size, grayscale=False, makedirs=True)
+        destfile = self._getCachedImagePath(baseurl, name, size=size, makedirs=True)
         opts = '-background white -coalesce -density 100 -flatten %(thumbnail)s' % {
             'thumbnail': '-thumbnail "%dx%d>"' % (size, size) if size is not None else '-strip',
         }
@@ -250,27 +245,15 @@ class ImageDB(object):
             'convert': self.convert_command,
             'opts': opts,
             'src': srcfile,
-            'dest': colorpath,
+            'dest': destfile,
         }
         log.info('executing %r' % cmd)
         rc = shell_exec(cmd)
         if rc != 0:
             log.error('Could not convert %r: convert returned %d' % (name, rc))
-            return None, None
+            return None
         
-        graypath = self._getCachedImagePath(baseurl, name, size=size, grayscale=True, makedirs=True)
-        cmd = '%(convert)s -type GrayScale "%(src)s" "%(dest)s"' % {
-            'convert': self.convert_command,
-            'src': colorpath,
-            'dest': graypath,
-        }
-        log.info('executing %r' % cmd)
-        rc = shell_exec(cmd)
-        if rc != 0:
-            log.error('Could not convert %r to grayscale: convert returned %d' % (name, rc))
-            graypath = None
-        
-        return colorpath, graypath
+        return destfile
     
 
 # ==============================================================================

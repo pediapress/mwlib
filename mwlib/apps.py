@@ -82,8 +82,6 @@ def buildzip():
     parser.add_option("-p", "--posturl", help="http post to POSTURL")
     parser.add_option("-i", "--imagesize",
                       help="max. pixel size (width or height) for images (default: 800)")
-    parser.add_option("-g", "--grayscale", action="store_true",
-                      help="include grayscale images")
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
     parser.add_option("-e", "--errorfile", help="write errors to this file")
@@ -114,7 +112,6 @@ def buildzip():
                 imagesize = int(options.imagesize)
             else:
                 imagesize = 800
-            grayscale = bool(options.grayscale)
     
         if output:
             zipfilename = output
@@ -154,7 +151,7 @@ def buildzip():
             z.addArticle(title, revision=revision)
         
         print "got articles"
-        z.writeImages(size=imagesize, grayscale=grayscale)
+        z.writeImages(size=imagesize)
         print "got images"
         z.writeContent()
         print "written content"
