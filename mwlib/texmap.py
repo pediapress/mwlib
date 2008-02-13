@@ -92,5 +92,4 @@ symbolMap = {'\\Bbb': '\\mathbb',
              '\\Rho': 'P{}',
              '\\Tau': 'T{}',
              '\\Chi': 'C{}',
-             '\\boldsymbol':'\\boldsymbol{}'
              }
