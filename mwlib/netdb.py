@@ -243,9 +243,8 @@ class ImageDB(object):
         """
         
         colorpath = self._getCachedImagePath(baseurl, name, size=size, grayscale=False, makedirs=True)
-        opts = ' %(limits)s -background white -coalesce -density 100 -flatten %(thumbnail)s' % {
+        opts = '-background white -coalesce -density 100 -flatten %(thumbnail)s' % {
             'thumbnail': '-thumbnail "%dx%d>"' % (size, size) if size is not None else '-strip',
-            'limits': '-limit disk 16mb -limit map 1gb -limit memory 512mb',
         }
         cmd = "%(convert)s %(opts)s '%(src)s[0]' '%(dest)s'" % {
             'convert': self.convert_command,
@@ -260,11 +259,10 @@ class ImageDB(object):
             return None, None
         
         graypath = self._getCachedImagePath(baseurl, name, size=size, grayscale=True, makedirs=True)
-        cmd = '%(convert)s %(limits)s -type GrayScale "%(src)s" "%(dest)s"' % {
+        cmd = '%(convert)s -type GrayScale "%(src)s" "%(dest)s"' % {
             'convert': self.convert_command,
             'src': colorpath,
             'dest': graypath,
-            'limits': '-limit disk 16mb -limit map 1gb -limit memory 512mb',
         }
         log.info('executing %r' % cmd)
         rc = shell_exec(cmd)
