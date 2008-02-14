@@ -19,7 +19,7 @@ def daemonize(dev_null=True):
                     raise
         os.close(null)
 
-def shell_exec(cmd, maxmem=1024*1024, maxtime=60):
+def shell_exec(cmd, maxmem=1024*1024, maxtime=60, maxfile=32*1024):
     """Execute cmd in a subshell. On Linux and Mac OS X the time and memory
     consumption is limited with ulimit.
     
@@ -33,6 +33,9 @@ def shell_exec(cmd, maxmem=1024*1024, maxtime=60):
     @param maxtime: max. CPU time in seconds
     @type maxtime: int
     
+    @param maxfile: max. KBytes of files written to disk
+    @type maxfile: int
+    
     @returns: exit code of command
     @rtype: int
     """
@@ -41,5 +44,5 @@ def shell_exec(cmd, maxmem=1024*1024, maxtime=60):
         assert enc is not None, 'no filesystem encoding (set LANG)'
         cmd = cmd.encode(enc)
     if sys.platform in ('darwin', 'linux2'):
-        cmd = 'ulimit -v %d -t %d && %s' % (maxmem, maxtime, cmd)
+        cmd = 'ulimit -v %d -t %d -f %d && %s' % (maxmem, maxtime, maxfile, cmd)
     return os.system(cmd)
