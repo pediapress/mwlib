@@ -1260,6 +1260,17 @@ class Parser(object):
         
         current_prefix = u''
         stack = [Node()]
+
+        def append_item(parent, node):
+            if parent is stack[0]:
+                parent.append(node)
+                return
+
+            if not parent.children:
+                parent.children.append(Item())
+
+            parent.children[-1].append(node)
+
         for item in items:
             prefix = item.prefix.strip(":")
             common = commonprefix(current_prefix, item.prefix)
@@ -1270,7 +1281,7 @@ class Parser(object):
             for x in create:
                 itemlist = ItemList()
                 itemlist.numbered = (x=='#')
-                stack[-1].append(itemlist)
+                append_item(stack[-1], itemlist)
                 stack.append(itemlist)
             stack[-1].append(item)
             current_prefix = prefix
