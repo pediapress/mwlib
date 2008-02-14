@@ -243,8 +243,7 @@ def test_nested_lists():
 
     outer = lists[0]
     inner = lists[1]
-    assert len(outer.children)==3, "outer list must have 3 children"
-    assert outer.children[1].children[0] is inner
+    assert len(outer.children)==2, "outer list must have 2 children"
     assert len(inner.children)==2, "inner list must have 2 children"
 
 def test_nested_list_listitem():
