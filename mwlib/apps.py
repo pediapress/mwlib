@@ -73,7 +73,7 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog -c CONF [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
+    parser = optparse.OptionParser(usage="%prog -c CONF [--help] [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option('--collectionpage', help='Title of a collection page')
@@ -97,7 +97,7 @@ def buildzip():
 
     conf = options.conf
     if not options.conf:
-        parser.error("missing --conf argument")
+        parser.error("missing --conf argument\nuse --help for all options")
     
     try:
         output = options.output
@@ -148,11 +148,13 @@ def buildzip():
     
         z.addObject('metabook.json', mb.dumpJson())
         for title, revision in mb.getArticles():
-            z.addArticle(title, revision=revision)
-        
+            z.addArticle(title, revision=revision)        
         print "got articles"
-        z.writeImages(size=imagesize)
-        print "got images"
+
+        if not options.noimages:
+            z.writeImages(size=imagesize)
+            print "got images"
+
         z.writeContent()
         print "written content"
         zf.close()
@@ -274,7 +276,7 @@ def serve():
     images = res['images']
     from wsgiref.simple_server import make_server, WSGIServer
 
-    from SocketServer import ThreadingMixIn, ForkingMixIn
+    from SocketServer import  ForkingMixIn
     class MyServer(ForkingMixIn, WSGIServer):
         pass
 
