@@ -31,7 +31,7 @@ class TestZipWiki(object):
         assert url == 'http://mw/dewiki/index.php?title=Mamo_Wolde&oldid=0&action=raw'
     
     def test_getTemplate(self):
-        t = self.wikidb.getTemplate(u'Navigationsleiste')
+        t = self.wikidb.getTemplate(u'Navigationsleiste Olympiasieger im Marathon')
         assert isinstance(t, unicode)
         t = self.wikidb.getTemplate(u'no-such-template')
         assert t is None
