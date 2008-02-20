@@ -98,8 +98,6 @@ def parseString(title=None, raw=None, wikidb=None, revision=None):
     return a
 
 def simpleparse(raw):    
-    import exceptions
-    raise exceptions.DeprecationWarning
     import sys
     from mwlib import dummydb
     db = dummydb.DummyDB()
