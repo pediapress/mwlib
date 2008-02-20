@@ -5,6 +5,11 @@
 
 """
 we use XHTML 1.0 and add our own mwx xmlns for MW specialities.
+
+
+check: 
+http://tools.wikimedia.de/~magnus/wiki2xml/w2x.php 
+
 """
 
 
@@ -18,16 +23,13 @@ ToDo:
  * References?
 """
 
-
-
-import os
 import sys
 import xml.etree.ElementTree as ET
 from mwlib import parser,  mathml # , timeline
 
 
 def log(err):
-    sys.stderr.write(err + " ")
+    sys.stderr.write("mwlib.xhtmlwriter: " + err + " ")
     pass
 
 
@@ -195,8 +197,8 @@ class MWXHTMLWriter(object):
     def xwriteRow(self, row):
         return ET.Element("tr")
 
-    def xwriteTable(self, t):           
 
+    def xwriteTable(self, t):           
         table = ET.Element("table")
         if t.vlist:
             for k,v in self.xserializeVList(t.vlist):
@@ -373,7 +375,7 @@ class MWXHTMLWriter(object):
             return e
         elif s.caption == "'''":
             tag = 'strong'
-        elif s.caption == ";": # this starts a definition list ? DL [DT->DD, ...]
+        elif s.caption == ";": # this starts a definition list ? DL [DT->DD, 4...]
             e = ET.Element("div")
             e.set("mwx:type", "definition")
             return e        
@@ -390,6 +392,36 @@ class MWXHTMLWriter(object):
         return ET.Element(tag)
 
 
+    def xwriteDefinitionList(self, s):
+        return ET.Element("dl")
+
+    def xwriteDefinitionTerm(self, s):
+        return ET.Element("dt")
+
+    def xwriteDefinitionDefinition(self, s):
+        return ET.Element("dd")
+
+    def xwriteStrong(self, s):
+        return ET.Element("strong")
+
+
+    def xwriteEmphasized(self, s):
+        return ET.Element("em")
+
+    def xwriteBlockquote(self, s): 
+        e = ET.Element("blockquote")
+        for i in range(len(s.caption)-1):
+            e = ET.SubElement(e, "blockquote")
+        return e
+    
+    xwriteIndented = xwriteBlockquote # FIXME
+        
+    def xwriteOverline(self, s):
+        return ET.Element("u", style="text-decoration: overline;")
+
+
+
+
     def xwriteItem(self, item):
         return ET.Element("li")
 
@@ -404,20 +436,13 @@ class MWXHTMLWriter(object):
 
 def main():
     from mwlib.dummydb import DummyDB
+    from mwlib.uparser import parseString
     db = DummyDB()
     
     for x in sys.argv[1:]:
         input = unicode(open(x).read(), 'utf8')
+        r = parseString(title=x, raw=input, wikidb=db)
         
-        if True: 
-            from mwlib import expander
-            te = expander.Expander(input, pagename=x, wikidb=db)
-            input = te.expandTemplates()
-        
-        tokens = parser.tokenize(x, input)
-        
-        p = parser.Parser(tokens, os.path.basename(x))
-        r = p.parse()
 
         parser.show(sys.stderr, r, 0)
         
