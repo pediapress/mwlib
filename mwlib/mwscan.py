@@ -138,12 +138,45 @@ class _compat_scanner(object):
             elif type==token.t_end_table:
                 pass # XXX
             elif type==token.t_html_tag:
-                pass # XXX
+                s = g()
+                res.append((self.tagtoken(s), s))
             else:
                 a(type)
 
         return res
 
+    def tagtoken(self, text):
+        selfClosing = False
+        if text.startswith(u"</"):
+            name = text[2:-1]
+            klass = EndTagToken
+            isEndToken = True
+        elif text.endswith("/>"):
+            name = text[1:-2]
+            klass = TagToken
+            selfClosing = True
+            isEndToken = False # ???
+        else:
+            name = text[1:-1]
+            klass = TagToken
+            isEndToken = False
+
+        name, values = (name.split(None, 1)+[u''])[:2]
+        from mwlib.parser import paramrx
+        values = dict(paramrx.findall(values))
+        name = name.lower()
+
+        if name=='br' or name=='references':
+            isEndToken = False
+            klass = TagToken
+
+        r = klass(name, text)
+        r.selfClosing = selfClosing
+        r.values = values
+        return r
+
+        
+        
 compat_scan = _compat_scanner()
 
 from plexscanner import _BaseTagToken, TagToken, EndTagToken
