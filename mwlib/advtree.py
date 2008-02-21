@@ -18,7 +18,9 @@ http://meta.wikimedia.org/wiki/Help:Advanced_editing
 
 """
 import weakref
-import mwlib.parser as parser
+from mwlib.parser import Article, Book, Chapter, Item, ItemList, Link, Magic, Math, NamedURL, Node, Table, Row, Cell
+from mwlib.parser import Paragraph, PreFormatted, Ref, Section, Style, TagNode, Text, Timeline, URL, _VListNode
+from mwlib.parser import CategoryLink, SpecialLink
 
 
 def MixIn(pyClass, mixInClass, makeFirst=False):
@@ -167,73 +169,73 @@ class AdvancedSection(AdvancedNode):
         return 1 + [p.__class__ for p in self.getParents()].count(self.__class__)
         
     
-class Emphasized(parser.Style, AdvancedNode):
+class Emphasized(Style, AdvancedNode):
     "EM"
     pass
 
-class Strong(parser.Style, AdvancedNode):
+class Strong(Style, AdvancedNode):
     pass
 
-class DefinitionList(parser.Style, AdvancedNode):
+class DefinitionList(Style, AdvancedNode):
     "DL"
     pass
 
-class DefinitionTerm(parser.Style, AdvancedNode):
+class DefinitionTerm(Style, AdvancedNode):
     "DT"
     pass
 
-class DefinitionDefinition(parser.Style, AdvancedNode):
+class DefinitionDefinition(Style, AdvancedNode):
     "DD"
     pass
 
-class Blockquote(parser.Style, AdvancedNode):
+class Blockquote(Style, AdvancedNode):
     "margins to left &  right"
     pass
 
-class Indented(parser.Style, AdvancedNode):
+class Indented(Style, AdvancedNode):
     "margin to the left"
 
-class Overline(parser.Style, AdvancedNode):
+class Overline(Style, AdvancedNode):
     _style = "overline"
 
-class Underline(parser.Style, AdvancedNode):
+class Underline(Style, AdvancedNode):
     _style = "underline"
 
-class Sub(parser.Style, AdvancedNode):
+class Sub(Style, AdvancedNode):
     _style = "sub"
 
-class Sup(parser.Style, AdvancedNode):
+class Sup(Style, AdvancedNode):
     _style = "sup"
 
-class Small(parser.Style, AdvancedNode):
+class Small(Style, AdvancedNode):
     _style = "small"
 
-class Cite(parser.Style, AdvancedNode):
+class Cite(Style, AdvancedNode):
     _style = "cite"
 
 
-class BreakingReturn(parser.TagNode, AdvancedNode):
+class BreakingReturn(TagNode, AdvancedNode):
     _tag = "code"
 
-class BreakingReturn(parser.TagNode, AdvancedNode):
+class BreakingReturn(TagNode, AdvancedNode):
     _tag = "br"
 
-class HorizontalRule(parser.TagNode, AdvancedNode):
+class HorizontalRule(TagNode, AdvancedNode):
     _tag = "hr"
 
-class Index(parser.TagNode, AdvancedNode):
+class Index(TagNode, AdvancedNode):
     _tag = "index"
 
-class Teletyped(parser.TagNode, AdvancedNode):
+class Teletyped(TagNode, AdvancedNode):
     _tag = "tt"
 
-class Reference(parser.TagNode, AdvancedNode):
+class Reference(TagNode, AdvancedNode):
     _tag = "tt"
 
-class Gallery(parser.TagNode, AdvancedNode):
+class Gallery(TagNode, AdvancedNode):
     _tag = "gallery"
 
-class Center(parser.TagNode, AdvancedNode):
+class Center(TagNode, AdvancedNode):
     _tag = "center"
     
 
@@ -242,16 +244,16 @@ tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, T
 styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Small, Cite] )
 
 advancedNodes = {"Section": AdvancedSection}
-inLineNodes = (parser.Style, parser.Text)
+inLineNodes = (Style, Text)
 
 
-blockNodes = (parser.Book, parser.Chapter, parser.Article, parser.Section, parser.Paragraph, 
-              parser.PreFormatted, parser.Cell, parser.Row, parser.Table, parser.Item, 
-              parser.ItemList, parser.Timeline, Cite, HorizontalRule, Gallery, Indented, 
+blockNodes = (Book, Chapter, Article, Section, Paragraph, 
+              PreFormatted, Cell, Row, Table, Item, 
+              ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
               DefinitionList, DefinitionTerm, DefinitionDefinition)
 
-inlineNodes = (parser.URL, parser.NamedURL, parser.Link, parser.CategoryLink, parser.SpecialLink, 
-               parser.Text, Index, Teletyped, BreakingReturn, Reference, Strong,Emphasized, 
+inlineNodes = (URL, NamedURL, Link, CategoryLink, SpecialLink, 
+               Text, Index, Teletyped, BreakingReturn, Reference, Strong,Emphasized, 
                Sub, Sup, Small, Underline, Overline)
 
 # hmm, this is global, fixme
@@ -263,15 +265,13 @@ for k in inlineNodes:
 
 """
 not clear what to do
-specialNode = [parser.Node, parser.Math, parser.Magic, parser.TagNode, parser.Style, parser.Image ]
+specialNode = [Node, Math, Magic, TagNode, Style, Image ]
 Image.isInline()
 """
 
 
-
-
 def fixStyle(node):
-    if not node.__class__ == parser.Style:
+    if not node.__class__ == Style:
         return
     # replace this node by a more apporiate
     if node.caption == "''": 
@@ -315,14 +315,14 @@ def fixStyle(node):
 
 
 def fixStyles(node):
-    if node.__class__ == parser.Style:
+    if node.__class__ == Style:
         fixStyle(node)
     for c in node.children[:]:
         fixStyles(c)
 
 
 def removeNodes(node):
-    if node.__class__ == parser.Node:
+    if node.__class__ == Node:
         node.parent.replaceChild(node, node.children)
     for c in node.children[:]:
         removeNodes(c)
@@ -331,7 +331,7 @@ def removeNewlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
-    if node.__class__ == parser.Text and node.caption.strip() == u"":
+    if node.__class__ == Text and node.caption.strip() == u"":
         prev = node.previous or node.parent # previous sibling node or parentnode 
         next = node.next or node.parent.next
         if isinstance(next, BlockNode) or isinstance(prev, BlockNode) :
@@ -344,7 +344,7 @@ def fixBreakingReturns(node):
         if c.__class__ == BreakingReturn:
             prev = c.previous or c.parent # previous sibling node or parentnode 
             next = c.next or c.parent.next
-            if isinstance(next, BlockNode) or isinstance(prev, BlockNode) :
+            if isinstance(next, BlockNode) or isinstance(prev, BlockNode) \
                 or isinstance(c.previous or c.parent, BlockNode):
                 node.removeChild(c)
         fixBreakingReturns(c)
@@ -352,11 +352,11 @@ def fixBreakingReturns(node):
 
 def fixTagNodes(node):
     for c in node.children:
-        if c.__class__ == parser.TagNode:
+        if c.__class__ == TagNode:
             if c.caption in tagNodeMap:
                 c.__class__ = tagNodeMap[c.caption]
             elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"):
-                c.__class__ = parser.Section 
+                c.__class__ = Section 
                 MixIn(c.__class__, AdvancedSection)
                 c._h_level = int(c.caption[1])
                 c.caption = ""
@@ -388,7 +388,7 @@ def test():
 
 def main():
     import sys
-    import parser
+    from mwlib import parser
     from mwlib.dummydb import DummyDB
     import xhtmlwriter
     db = DummyDB()
