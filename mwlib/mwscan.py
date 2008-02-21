@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007-2008 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import time
 import _mwscan
 import htmlentitydefs
