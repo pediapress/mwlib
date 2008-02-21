@@ -26,7 +26,18 @@ class token(object):
     t_colon = 18
     t_semicolon = 19
     t_hrule = 20
+    
+    tok2name = {}
 
+for d in dir(token):
+    tok2name = token.tok2name
+    if d.startswith("t_"):
+        tok2name[getattr(token, d)] = d
+del d
+
+        
+        
+    
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
         print type, repr(text[start:start+len])
@@ -52,7 +63,7 @@ class scan_result(object):
     def __init__(self, source, toks):
         self.source = source
         self.toks = toks
-    
+        
     def rawtext(self, (type, start, tlen)):
         return self.source[start:start+tlen]
 
@@ -63,11 +74,18 @@ class scan_result(object):
         else:
             return r
 
+    def repr(self, t):
+        return "(%s, %r)" % (token.tok2name.get(t[0]), self.rawtext(t))
+
+
     def __len__(self):     
         return len(self.toks)
 
     def __iter__(self):
         return iter(self.toks)
+
+    def __getitem__(self, idx):
+        return self.toks[idx]
 
 
 class _compat_scanner(object):
