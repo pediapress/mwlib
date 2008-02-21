@@ -154,6 +154,8 @@ class _compat_scanner(object):
                 s = g()
 
                 tt = self.tagtoken(s)
+                isEndToken = isinstance(tt, EndTagToken)
+
                 if tt.t=="math":
                     res.append(("MATH", g()))
                     i+=1
@@ -167,6 +169,21 @@ class _compat_scanner(object):
                                 break
                         res.append(("LATEX", g()))
                         i+=1
+                elif tt.t=="table":
+                    if isEndToken:
+                        res.append(("ENDTABLE", g()))
+                    else:
+                        res.append(("BEGINTABLE", g()))
+                elif tt.t in ['th', 'td']:
+                    if isEndToken:
+                        pass
+                    else:
+                        res.append(("COLUMN", g()))
+                elif tt.t=='tr':
+                    if isEndToken:
+                        pass
+                    else:
+                        res.append(("ROW", g()))
                 else:
                     res.append((tt, s))
             else:
