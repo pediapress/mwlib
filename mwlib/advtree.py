@@ -37,6 +37,8 @@ class AdvancedNode():
     build derived convinience functions
     """
     _parentref = None
+    isinlinenode = False # set this before usage   
+    isblocknode = property(lambda s:not s.isinlinenode)
 
     def moveto(self, targetnode, prefix=False):
         """"
@@ -153,21 +155,15 @@ class AdvancedNode():
     firstchild = property(getFirstChild)
     
 
-class InlineNode():
-    """
-    class indicates that these elements should be inline
-    """
-
-class BlockNode():
-    """
-    class indicates that these elements block 
-    """
     
 class AdvancedSection(AdvancedNode):
     h_level = 0 # sthis is set if it originates from an H1, H2, ... TagNode
     def getSectionLevel(self):
         return 1 + [p.__class__ for p in self.getParents()].count(self.__class__)
-        
+
+class AdvancedImageLink(AdvancedNode):
+  isinlinenode = property( lambda s: s.isInline() )
+       
     
 class Emphasized(Style, AdvancedNode):
     "EM"
@@ -243,25 +239,23 @@ class Center(TagNode, AdvancedNode):
 tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, Gallery, Center] )
 styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Small, Cite] )
 
-advancedNodes = {"Section": AdvancedSection}
-inLineNodes = (Style, Text)
-
+advancedNodes = {Section: AdvancedSection, ImageLink:AdvancedImageLink}
 
 blockNodes = (Book, Chapter, Article, Section, Paragraph, 
               PreFormatted, Cell, Row, Table, Item, 
               ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
               DefinitionList, DefinitionTerm, DefinitionDefinition)
 
-inlineNodes = (URL, NamedURL, Link, CategoryLink, SpecialLink, 
+inlineNodes = (URL, NamedURL, Link, CategoryLink, SpecialLink, Style
                Text, Index, Teletyped, BreakingReturn, Reference, Strong,Emphasized, 
                Sub, Sup, Small, Underline, Overline)
 
 # hmm, this is global, fixme
 for k in blockNodes:
-    MixIn(k, BlockNode)
+  k.isinlinenode = False
 
 for k in inlineNodes:
-    MixIn(k, InlineNode)
+  k.isinlinenode = True
 
 """
 not clear what to do
@@ -334,7 +328,7 @@ def removeNewlines(node):
     if node.__class__ == Text and node.caption.strip() == u"":
         prev = node.previous or node.parent # previous sibling node or parentnode 
         next = node.next or node.parent.next
-        if isinstance(next, BlockNode) or isinstance(prev, BlockNode) :
+        if next.isblocknode or prev.isblocknode: 
             node.parent.removeChild(node)    
     for c in node.children[:]:
         removeNewlines(c)
@@ -344,8 +338,7 @@ def fixBreakingReturns(node):
         if c.__class__ == BreakingReturn:
             prev = c.previous or c.parent # previous sibling node or parentnode 
             next = c.next or c.parent.next
-            if isinstance(next, BlockNode) or isinstance(prev, BlockNode) \
-                or isinstance(c.previous or c.parent, BlockNode):
+            if next.isblocknode or prev.isblocknode: 
                 node.removeChild(c)
         fixBreakingReturns(c)
         
@@ -367,7 +360,7 @@ def fixTagNodes(node):
 
 
 def extendClasses(node):
-    MixIn(node.__class__, advancedNodes.get(node.__class__.__name__, AdvancedNode))
+    MixIn(node.__class__, advancedNodes.get(node.__class__, AdvancedNode))
     for c in node.children[:]:
         extendClasses(c)
         c._parentref = weakref.ref(node)            
