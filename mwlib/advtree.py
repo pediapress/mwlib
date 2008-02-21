@@ -75,16 +75,21 @@ class AdvancedNode():
         if not x:
             raise weakref.ReferenceError
         return x
-    
-    def getClassInParents(self, klass):
-        "returns first parent w/ klass"
-        for p in self.parents:
-            if p.__class__ == klass:
-                return p
+   
+    def getParentNodesByClass(self, klass):
+        "returns parents w/ klass"
+        return [p for p in self.parents if p.__class__ == klass]
 
-    def getClassInChildren(self, klass):
+    def getChildNodesByClass(self, klass):
         "returns all children /including self)  w/ klass"
-        return [p for p in self.allchildren() if p.__class__ == klass]
+        return [p for p in self.getAllChildren() if p.__class__ == klass]
+
+    def getAllChildren(self):
+        "don't confuse w/ Node.allchildren() which returns allchildren + self"
+        for c in self.children:
+            yield c
+            for x in c.allchildren():
+                yield x        
         
     def getSiblings(self):
         return (c for c in self.getAllSiblings() if c!=self)
