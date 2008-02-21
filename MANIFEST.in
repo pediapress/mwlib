@@ -2,8 +2,10 @@ include .hgignore
 include MANIFEST.in
 include README.html
 include README.txt
+include dewiki-conf.txt
 include enwiki-conf.txt
 include ez_setup.py
+include mwlib/Makefile
 include mwlib/Plex/Actions.py
 include mwlib/Plex/DFA.py
 include mwlib/Plex/Errors.py
@@ -18,6 +20,7 @@ include mwlib/Plex/__init__.py
 include mwlib/Plex/conftest.py
 include mwlib/Plex/test_tm.py
 include mwlib/__init__.py
+include mwlib/_mwscan.re
 include mwlib/_version.py
 include mwlib/apps.py
 include mwlib/caller.py
@@ -33,6 +36,7 @@ include mwlib/lang.txt
 include mwlib/log.py
 include mwlib/magics.py
 include mwlib/metabook.py
+include mwlib/mwscan.py
 include mwlib/netdb.py
 include mwlib/overlay.py
 include mwlib/parser.py
