@@ -15,6 +15,8 @@ http://en.wikipedia.org/wiki/Wikipedia:Don%27t_use_line_breaks
 http://meta.wikimedia.org/wiki/Help:Advanced_editing
 """
 
+# HALLO VOLKER
+
 import weakref
 from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
 from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
@@ -34,7 +36,7 @@ class AdvancedNode():
     isblocknode = property(lambda s:not s.isinlinenode)
 
     def moveto(self, targetnode, prefix=False):
-        """"
+        """
         moves this node after target node
         if prefix is true, move in front of target node
         """
