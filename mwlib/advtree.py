@@ -34,7 +34,7 @@ class AdvancedNode():
     isblocknode = property(lambda s:not s.isinlinenode)
 
     def moveto(self, targetnode, prefix=False):
-        """"
+        """
         moves this node after target node
         if prefix is true, move in front of target node
         """
@@ -204,7 +204,7 @@ class DefinitionTerm(Style, AdvancedNode):
     "DT"
     pass
 
-class DefinitionDefinition(Style, AdvancedNode):
+class DefinitionDescription(Style, AdvancedNode):
     "DD"
     pass
 
@@ -240,7 +240,7 @@ _styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Smal
 # -------------------------------------------------------------------------
 
 
-class BreakingReturn(TagNode, AdvancedNode):
+class Code(TagNode, AdvancedNode):
     _tag = "code"
 
 class BreakingReturn(TagNode, AdvancedNode):
@@ -256,15 +256,24 @@ class Teletyped(TagNode, AdvancedNode):
     _tag = "tt"
 
 class Reference(TagNode, AdvancedNode):
-    _tag = "tt"
+    _tag = "ref"
+
+class ReferenceList(TagNode, AdvancedNode):
+    _tag = "references"
 
 class Gallery(TagNode, AdvancedNode):
     _tag = "gallery"
 
 class Center(TagNode, AdvancedNode):
     _tag = "center"
+
+class Div(TagNode, AdvancedNode):
+    _tag = "div"
+
+class Strike(TagNode,AdvancedNode):
+    _tag = "strike"
     
-_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, Gallery, Center] )
+_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Strike] )
 
 
 
@@ -287,7 +296,7 @@ Open Issues: Math, Magic, (unknown) TagNode
 _blockNodesMap = (Book, Chapter, Article, Section, Paragraph, 
                   PreFormatted, Cell, Row, Table, Item, 
                   ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
-                  DefinitionList, DefinitionTerm, DefinitionDefinition)
+                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Div)
 
 for k in _blockNodesMap:  
   k.isinlinenode = False
@@ -376,7 +385,7 @@ def fixStyle(node):
             node.appendChild(dt)
     elif node.caption.startswith(":"): 
         if node.previous.__class__ == DefinitionList:
-            node.__class__ = DefinitionDefinition
+            node.__class__ = DefinitionDescription
             node.moveto(node.previous.lastchild)
             node.caption = ""
         else:
@@ -412,7 +421,7 @@ def removeNewlines(node):
         if node.caption.strip() == u"":
             prev = node.previous or node.parent # previous sibling node or parentnode 
             next = node.next or node.parent.next
-            if next.isblocknode or prev.isblocknode: 
+            if not next or next.isblocknode or prev.isblocknode: 
                 node.parent.removeChild(node)    
         else:
           node.caption = node.caption.replace("\n", " ")
