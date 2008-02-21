@@ -120,21 +120,25 @@ class _compat_scanner(object):
         token.t_colon: "EOLSTYLE",
         token.t_semicolon: "EOLSTYLE",
         }
-    
+
+
     def __call__(self, text):
         tokens = scan(text)
 
         res = []
 
         def g():
-            return text[start:start+len]
+            return text[start:start+tlen]
         a = lambda x: res.append((x,g()))
 
 
         ignore = self.ignore
         tok2compat = self.tok2compat
 
-        for type, start, len in tokens:
+        i = 0
+        numtokens = len(tokens)
+        while i < numtokens:
+            type, start, tlen = tokens[i]
             n=tok2compat.get(type)
             if n is ignore:
                 pass
@@ -148,9 +152,27 @@ class _compat_scanner(object):
                 pass # XXX
             elif type==token.t_html_tag:
                 s = g()
-                res.append((self.tagtoken(s), s))
+
+                tt = self.tagtoken(s)
+                if tt.t=="math":
+                    res.append(("MATH", g()))
+                    i+=1
+                    while i<numtokens:
+                        type, start, tlen = tokens[i]
+                        if type==token.t_html_tag:
+                            tt = self.tagtoken(g())
+                            if tt.t=="math":
+                                res.append(("ENDMATH", g()))
+                                i+=1
+                                break
+                        res.append(("LATEX", g()))
+                        i+=1
+                else:
+                    res.append((tt, s))
             else:
                 a(type)
+            i+=1
+
 
         return res
 
