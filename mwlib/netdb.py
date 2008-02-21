@@ -357,7 +357,7 @@ class NetDB(object):
         name = urllib.quote(name.replace(" ", "_").encode('utf8'))
         for u in self.templateurls:
             url = u % dict(NAME=name)
-            print "Trying", url
+            log.info("Trying %r" %(url,))
             c=self._getpage(url)
             if c:
                 log.info("got content from", url)

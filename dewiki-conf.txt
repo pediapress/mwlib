@@ -1,0 +1,11 @@
+[images]
+type = download
+url = http://upload.wikimedia.org/wikipedia/commons/
+localpath = ~/en-images
+
+[wiki]
+type = net
+articleurl=http://de.wikipedia.org/w/index.php?title=@TITLE@&action=raw
+templateurls = http://de.wikipedia.org/w/index.php?title=Template:@TITLE@&action=raw
+name = The Free Encyclopedia
+url = http://de.wikipedia.org/
