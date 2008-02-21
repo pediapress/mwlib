@@ -81,7 +81,7 @@ class AdvancedNode():
         return [p for p in self.parents if p.__class__ == klass]
 
     def getChildNodesByClass(self, klass):
-        "returns all children /including self)  w/ klass"
+        "returns all children  w/ klass"
         return [p for p in self.getAllChildren() if p.__class__ == klass]
 
     def getAllChildren(self):
@@ -467,10 +467,8 @@ def main():
         buildAdvancedTree(r)
         parser.show(sys.stderr, r, 0)
         
-        """
-        x =  r.getClassInChildren(BreakingReturn)
-        print x
-        """
+        assert not r.getChildNodesByClass(Article)
+        assert not r.getParentNodesByClass(Article)
         
         dbw = xhtmlwriter.MWXHTMLWriter()
         dbw.write(r)
