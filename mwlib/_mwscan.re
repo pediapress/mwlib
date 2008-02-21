@@ -50,14 +50,15 @@ public:
 		source = start = _start;
 		end = _end;
 		cursor = start;
+		line_startswith_section = -1;
 	}
 
-	void found(mwtok val) {
+	int found(mwtok val) {
 		if (val==t_text && tokens.size()) {
 			Token &previous_token (tokens[tokens.size()-1]);
 			if (previous_token.type==val) {
 				previous_token.len += cursor-start;
-				return;
+				return tokens.size()-1;
 			}
 		}
 		Token t;
@@ -65,14 +66,24 @@ public:
 		t.start = (start-source);
 		t.len = cursor-start;			
 		tokens.push_back(t);
+		return tokens.size()-1;
 	}
+
 	bool bol() const {
-		return (start==source) || (start[-1]=='\n'); // XXX
+		return (start==source) || (start[-1]=='\n');
 	}
 
 	bool eol() const {
-		return cursor>=end || *cursor=='\n' || *cursor==0;
+		return *cursor=='\n' || *cursor==0;
 	}
+
+	void newline() {
+		if (line_startswith_section>=0) {
+			tokens[line_startswith_section].type = t_text;
+		}
+		line_startswith_section = -1;
+	}
+
 	inline int scan();
 
 	Py_UNICODE *source;
@@ -81,6 +92,9 @@ public:
 	Py_UNICODE *cursor;
 	Py_UNICODE *end;
 	vector<Token> tokens;
+
+
+	int line_startswith_section;
 };
 
 
@@ -131,9 +145,15 @@ int Scanner::scan()
   "]]"              {RET(t_2box_close);}
   "="+ [ \t]*       {
 			if (bol()) {
-				RET(t_section);
+			        line_startswith_section = found(t_section);
+				return t_section;
 			} else if (eol()) {
-				RET(t_section_end);
+			        if (line_startswith_section>=0) {
+				     line_startswith_section=-1;
+				     RET(t_section_end);
+                                } else {
+				     RET(t_text);
+                                }
 			} else {
 				RET(t_text);
 			}
@@ -142,8 +162,8 @@ int Scanner::scan()
   ":"+              {if (bol()) RET(t_colon) else RET(t_text);}
   ";"+              {if (bol()) RET(t_semicolon) else RET(t_text);}
   "-"{4,}           {if (bol()) RET(t_hrule) else RET(t_text);}
-  "\n"{2,}	    {RET(t_break);}
-  "\n"		    {RET(t_text);}
+  "\n"{2,}	    {newline(); RET(t_break);}
+  "\n"		    {newline(); RET(t_text);}
   "{|"              {RET(t_begin_table);}
   "|}"              {RET(t_end_table);}
   "'''''" | "'''" | "''"  {RET(t_style);}
@@ -161,8 +181,7 @@ int Scanner::scan()
 			   RET(t_text);
 			}
 		}
-
-  "\000"  {return t_end;}
+  "\000"  {newline(); return t_end;}
     .		    {RET(t_text);}
 */
 }
