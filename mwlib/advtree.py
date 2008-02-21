@@ -19,7 +19,7 @@ import weakref
 from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
 from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
-from mwlib.parser import CategoryLink, SpecialLink, ImageLink,  Article, Book, Chapter,
+from mwlib.parser import CategoryLink, SpecialLink, ImageLink,  Article, Book, Chapter
 
 
 class AdvancedNode():
@@ -77,10 +77,15 @@ class AdvancedNode():
         return x
     
     def getClassInParents(self, klass):
+        "returns first parent w/ klass"
         for p in self.parents:
             if p.__class__ == klass:
                 return p
 
+    def getClassInChildren(self, klass):
+        "returns all children /including self)  w/ klass"
+        return [p for p in self.allchildren() if p.__class__ == klass]
+        
     def getSiblings(self):
         return (c for c in self.getAllSiblings() if c!=self)
 
@@ -456,6 +461,11 @@ def main():
         #parser.show(sys.stderr, r, 0)
         buildAdvancedTree(r)
         parser.show(sys.stderr, r, 0)
+        
+        """
+        x =  r.getClassInChildren(BreakingReturn)
+        print x
+        """
         
         dbw = xhtmlwriter.MWXHTMLWriter()
         dbw.write(r)
