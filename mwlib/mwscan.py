@@ -4,7 +4,7 @@ import time
 import _mwscan
 import htmlentitydefs
 
-class token:
+class token(object):
     t_end = 0
     t_text = 1
     t_entity = 2
@@ -36,7 +36,7 @@ def scan(text):
     text += u"\0"*32    
     tokens = _mwscan.scan(text)
     print "scan took:", time.time()-stime
-    return tokens
+    return scan_result(text, tokens)
 
 def resolve_entity(e):
     if e[1]=='#':
@@ -47,7 +47,28 @@ def resolve_entity(e):
 
     else:
         return htmlentitydefs.name2codepoint.get(e, e)
+
+class scan_result(object):
+    def __init__(self, source, toks):
+        self.source = source
+        self.toks = toks
     
+    def rawtext(self, (type, start, tlen)):
+        return self.source[start:start+tlen]
+
+    def text(self, t):
+        r=self.rawtext(t)
+        if t[0] == token.t_entity:
+            return resolve_entity(r)
+        else:
+            return r
+
+    def __len__(self):     
+        return len(self.toks)
+
+    def __iter__(self):
+        return iter(self.toks)
+
 
 class _compat_scanner(object):
     class ignore: pass
