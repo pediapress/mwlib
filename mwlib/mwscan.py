@@ -27,12 +27,12 @@ class token(object):
     t_semicolon = 19
     t_hrule = 20
     
-    tok2name = {}
+    token2name = {}
 
 for d in dir(token):
-    tok2name = token.tok2name
+    token2name = token.token2name
     if d.startswith("t_"):
-        tok2name[getattr(token, d)] = d
+        token2name[getattr(token, d)] = d
 del d
 
         
@@ -75,7 +75,7 @@ class scan_result(object):
             return r
 
     def repr(self, t):
-        return "(%s, %r)" % (token.tok2name.get(t[0]), self.rawtext(t))
+        return "(%s, %r)" % (token.token2name.get(t[0]), self.rawtext(t))
 
 
     def __len__(self):     
