@@ -145,3 +145,9 @@ class _compat_scanner(object):
         return res
 
 compat_scan = _compat_scanner()
+
+
+
+def tokenize(input, name="unknown"):
+    assert input is not None, "must specify input argument in tokenize"
+    return compat_scan(input)
