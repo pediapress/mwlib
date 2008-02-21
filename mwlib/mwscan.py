@@ -3,6 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import sys
 import time
 import _mwscan
 import htmlentitydefs
@@ -77,6 +78,14 @@ class scan_result(object):
         else:
             return r
 
+    def dump(self, out=None):
+        if out is None:
+            out = sys.stdout
+        for x in self:
+            out.write("%s\n" % self.repr(x))
+
+            
+        
     def repr(self, t):
         return "(%s, %r)" % (token.token2name.get(t[0]), self.rawtext(t))
 
