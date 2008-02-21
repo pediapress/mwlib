@@ -146,7 +146,7 @@ class _compat_scanner(object):
 
 compat_scan = _compat_scanner()
 
-
+from plexscanner import _BaseTagToken, TagToken, EndTagToken
 
 def tokenize(input, name="unknown"):
     assert input is not None, "must specify input argument in tokenize"
