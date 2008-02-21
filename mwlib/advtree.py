@@ -152,17 +152,26 @@ class AdvancedNode():
 # MixinClasses w/ special behaviour
 # -------------------------------------------------------------------------
 
-
 class AdvancedSection(AdvancedNode):
     h_level = 0 # sthis is set if it originates from an H1, H2, ... TagNode
     def getSectionLevel(self):
         return 1 + [p.__class__ for p in self.getParents()].count(self.__class__)
 
 class AdvancedImageLink(AdvancedNode):
-  isinlinenode = property( lambda s: s.isInline() )
+    isinlinenode = property( lambda s: s.isInline() )
+
+
+class AdvancedMath(AdvancedNode):
+    def _isinlinenode(self):
+        if self.caption.strip().startswith("\\begin{align}")  or \
+                self.caption.strip().startswith("\\begin{alignat}"):
+            return False
+        return True
+    isinlinenode = property( lambda s: s._isinlinenode() )
 
 # Nodes we defined above and that are separetly handled in extendClasses
-_advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink}
+_advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
+                     Math:AdvancedMath}
        
 
 # --------------------------------------------------------------------------
