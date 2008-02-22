@@ -131,7 +131,7 @@ re2c:yyfill:enable = 0 ;
 
 /*!re2c
   any = [^\000];
-  url = "http" "s"? "://" [-a-zA-Z_0-9./?=&:%:~()]+ ;
+  url = "http" "s"? "://" [-a-zA-Z_0-9./?=&:%:~()#]+ ;
   entity_name = "&" [a-zA-Z0-9]+ ";";
   entity_hex = "&#" 'x' [a-fA-F0-9]+ ";";
   entity_dec = "&#" [0-9]+ ";";
