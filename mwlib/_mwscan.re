@@ -203,7 +203,7 @@ not_bol:
   "\n"		    {newline(); RET(t_newline);}
   "||" | "|!" | "!!"              {if (tablemode) RET(t_column) else RET(t_special);}
   "|+"              {if (tablemode) RET(t_tablecaption) else RET(t_special);}
-  [:|]              {RET(t_special);}
+  [:|\[\]]              {RET(t_special);}
   "{|"              {++tablemode; RET(t_begin_table);}
   "|}"              {--tablemode; RET(t_end_table);}
   "'''''" | "'''" | "''"  {RET(t_style);}
