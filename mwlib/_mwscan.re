@@ -102,7 +102,11 @@ public:
 int Scanner::scan()
 {
 	start=cursor;
+	
 	Py_UNICODE *marker=cursor;
+
+	Py_UNICODE *save_cursor = cursor;
+
 
 #define YYCTYPE         Py_UNICODE
 #define YYCURSOR        cursor
@@ -142,17 +146,37 @@ re2c:yyfill:enable = 0 ;
 	      | "__END__" 
 	      | "__START__"
 	      );
+*/
+	if (!bol()) {
+		goto not_bol;
+	}
+/*!re2c
+  " "		{RET(t_pre);}
+  "="+ [ \t]*   {
+			line_startswith_section = found(t_section);
+			return t_section;
+		}
+  ":"* [#*]+    {RET(t_item);}
+  ":"+          {RET(t_colon);}
+  ";"+          {RET(t_semicolon);}
+  "-"{4,}       {RET(t_hrule);}
 
+  [^]           {goto not_bol;}
+ */
+
+
+not_bol:
+	cursor = save_cursor;
+	marker = cursor;
+
+/*!re2c
   "http" "s"? "://" [-a-zA-Z_0-9./?=&:%]+		{RET(t_http_url);}
   magicword		{RET(t_magicword);}
-  [a-zA-Z0-9_]+				{RET(t_text);}
+  [a-zA-Z0-9_ ]+				{RET(t_text);}
   "[["              {RET(t_2box_open);}
   "]]"              {RET(t_2box_close);}
   "="+ [ \t]*       {
-			if (bol()) {
-			        line_startswith_section = found(t_section);
-				return t_section;
-			} else if (eol()) {
+			if (eol()) {
 			        if (line_startswith_section>=0) {
 				     line_startswith_section=-1;
 				     RET(t_section_end);
@@ -163,10 +187,6 @@ re2c:yyfill:enable = 0 ;
 				RET(t_text);
 			}
 		    }
-  ":"* [#*]+        {if (bol()) RET(t_item) else RET(t_text);}
-  ":"+              {if (bol()) RET(t_colon) else RET(t_text);}
-  ";"+              {if (bol()) RET(t_semicolon) else RET(t_text);}
-  "-"{4,}           {if (bol()) RET(t_hrule) else RET(t_text);}
   "\n"{2,}	    {newline(); RET(t_break);}
   "\n"		    {newline(); RET(t_newline);}
   [:|]              {RET(t_special);}
@@ -180,13 +200,6 @@ re2c:yyfill:enable = 0 ;
                 {RET(t_comment);}
   entity        {RET(t_entity);}
 
-  " "		{
-			if (bol()) { 
-			   RET(t_pre);
-			} else {
-			   RET(t_text);
-			}
-		}
   "\000"  {newline(); return t_end;}
     .		    {RET(t_text);}
 */
