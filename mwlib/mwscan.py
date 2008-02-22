@@ -61,7 +61,11 @@ def resolve_entity(e):
             return unichr(int(e[2:-1]))
 
     else:
-        return htmlentitydefs.name2codepoint.get(e, e)
+        try:
+            return unichr(htmlentitydefs.name2codepoint[e[1:-1]])
+        except KeyError:
+            return e
+                         
 
 class scan_result(object):
     def __init__(self, source, toks):
