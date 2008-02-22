@@ -108,7 +108,11 @@ int Scanner::scan()
 #define YYCURSOR        cursor
 #define YYMARKER	marker
 #define YYLIMIT   (end)
-#define YYFILL(n) return 0;
+// #define YYFILL(n) return 0;
+
+/*!re2c
+re2c:yyfill:enable = 0 ;
+*/
 
 /*
   the re2c manpage says:
