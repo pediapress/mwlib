@@ -15,8 +15,8 @@ def test_headings():
 = 3 =
 """)
     
-    sections = [x.children[0].asText() for x in r.children if isinstance(x, parser.Section)]
-    assert sections == [u" 1 ", u" 3 "]
+    sections = [x.children[0].asText().strip() for x in r.children if isinstance(x, parser.Section)]
+    assert sections == [u"1", u"3"]
 
 
 def test_style():
