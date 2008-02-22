@@ -34,6 +34,8 @@ typedef enum {
 	t_semicolon,
 	t_hrule,
 	t_newline,
+	t_column,
+	t_row,
 } mwtok;
 
 struct Token
@@ -52,6 +54,7 @@ public:
 		end = _end;
 		cursor = start;
 		line_startswith_section = -1;
+		tablemode=0;
 	}
 
 	int found(mwtok val) {
@@ -94,8 +97,8 @@ public:
 	Py_UNICODE *end;
 	vector<Token> tokens;
 
-
 	int line_startswith_section;
+	int tablemode;
 };
 
 
@@ -151,6 +154,9 @@ re2c:yyfill:enable = 0 ;
 		goto not_bol;
 	}
 /*!re2c
+  " "* "|" "-"+         {if (tablemode) RET(t_row) else RET(t_text);}
+  " "* ("|" | "!")      {if (tablemode) RET(t_column) else RET(t_text);}
+  
   " "		{RET(t_pre);}
   "="+ [ \t]*   {
 			line_startswith_section = found(t_section);
@@ -190,8 +196,8 @@ not_bol:
   "\n"{2,}	    {newline(); RET(t_break);}
   "\n"		    {newline(); RET(t_newline);}
   [:|]              {RET(t_special);}
-  "{|"              {RET(t_begin_table);}
-  "|}"              {RET(t_end_table);}
+  "{|"              {++tablemode; RET(t_begin_table);}
+  "|}"              {--tablemode; RET(t_end_table);}
   "'''''" | "'''" | "''"  {RET(t_style);}
   "<" "/"? [a-zA-Z]+ [^\000<>]* "/"? ">" 
 		{RET(t_html_tag);}

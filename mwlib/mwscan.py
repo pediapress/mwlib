@@ -31,6 +31,8 @@ class token(object):
     t_semicolon = 19
     t_hrule = 20
     t_newline = 21
+    t_column = 22
+    t_row = 23
 
     token2name = {}
 
@@ -127,6 +129,8 @@ class _compat_scanner(object):
         token.t_newline: "\n",
         token.t_begin_table: "BEGINTABLE",
         token.t_end_table: "ENDTABLE",
+        token.t_column: "COLUMN",
+        token.t_row: "ROW",
         }
 
 
@@ -186,6 +190,8 @@ class _compat_scanner(object):
                                 break
                         res.append(("TEXT", scanres.text((type, start, tlen))))                    
                         i+=1
+                elif tt.t in ["font", "noinclude"]:
+                    pass
                 elif tt.t=="table":
                     if isEndToken:
                         res.append(("ENDTABLE", g()))
