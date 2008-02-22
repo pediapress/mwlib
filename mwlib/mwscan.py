@@ -33,6 +33,8 @@ class token(object):
     t_newline = 21
     t_column = 22
     t_row = 23
+    t_tablecaption = 24
+    t_urllink = 25
 
     token2name = {}
 
@@ -131,6 +133,8 @@ class _compat_scanner(object):
         token.t_end_table: "ENDTABLE",
         token.t_column: "COLUMN",
         token.t_row: "ROW",
+        token.t_tablecaption: "TABLECAPTION",
+        token.t_urllink: "URLLINK",
         }
 
 

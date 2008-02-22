@@ -36,6 +36,8 @@ typedef enum {
 	t_newline,
 	t_column,
 	t_row,
+	t_tablecaption,
+	t_urllink,
 } mwtok;
 
 struct Token
@@ -129,6 +131,7 @@ re2c:yyfill:enable = 0 ;
 
 /*!re2c
   any = [^\000];
+  url = "http" "s"? "://" [-a-zA-Z_0-9./?=&:%:~()]+ ;
   entity_name = "&" [a-zA-Z0-9]+ ";";
   entity_hex = "&#" 'x' [a-fA-F0-9]+ ";";
   entity_dec = "&#" [0-9]+ ";";
@@ -178,9 +181,10 @@ not_bol:
 	marker = cursor;
 
 /*!re2c
-  "http" "s"? "://" [-a-zA-Z_0-9./?=&:%]+		{RET(t_http_url);}
+  "[" url {RET(t_urllink);}
+  url 		{RET(t_http_url);}
   magicword		{RET(t_magicword);}
-  [a-zA-Z0-9_ ]+				{RET(t_text);}
+  [a-zA-Z0-9_]+				{RET(t_text);}
   "[["              {RET(t_2box_open);}
   "]]"              {RET(t_2box_close);}
   "="+ [ \t]*       {
@@ -197,7 +201,8 @@ not_bol:
 		    }
   "\n"{2,}	    {newline(); RET(t_break);}
   "\n"		    {newline(); RET(t_newline);}
-  "||"              {if (tablemode) RET(t_column) else RET(t_special);}
+  "||" | "|!" | "!!"              {if (tablemode) RET(t_column) else RET(t_special);}
+  "|+"              {if (tablemode) RET(t_tablecaption) else RET(t_special);}
   [:|]              {RET(t_special);}
   "{|"              {++tablemode; RET(t_begin_table);}
   "|}"              {--tablemode; RET(t_end_table);}
