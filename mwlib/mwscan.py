@@ -194,7 +194,7 @@ class _compat_scanner(object):
                                 break
                         res.append(("TEXT", scanres.text((type, start, tlen))))                    
                         i+=1
-                elif tt.t in ["font", "noinclude"]:
+                elif tt.t in ["font", "noinclude", 'p', 'caption']:
                     pass
                 elif tt.t=="table":
                     if isEndToken:
