@@ -157,7 +157,7 @@ re2c:yyfill:enable = 0 ;
 		goto not_bol;
 	}
 /*!re2c
-  "|}"              {--tablemode; RET(t_end_table);}
+  " "* "|}"              {--tablemode; RET(t_end_table);}
 
   " "* "|" "-"+         {if (tablemode) RET(t_row) else RET(t_text);}
   " "* ("|" | "!")      {if (tablemode) RET(t_column) else RET(t_text);}
