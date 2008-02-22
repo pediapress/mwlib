@@ -30,7 +30,8 @@ class token(object):
     t_colon = 18
     t_semicolon = 19
     t_hrule = 20
-    
+    t_newline = 21
+
     token2name = {}
 
 for d in dir(token):
@@ -123,6 +124,7 @@ class _compat_scanner(object):
         token.t_item: "ITEM",
         token.t_colon: "EOLSTYLE",
         token.t_semicolon: "EOLSTYLE",
+        token.t_newline: "\n",
         }
 
 

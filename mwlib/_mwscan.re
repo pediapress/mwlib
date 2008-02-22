@@ -33,6 +33,7 @@ typedef enum {
 	t_colon,
 	t_semicolon,
 	t_hrule,
+	t_newline,
 } mwtok;
 
 struct Token
@@ -163,7 +164,7 @@ int Scanner::scan()
   ";"+              {if (bol()) RET(t_semicolon) else RET(t_text);}
   "-"{4,}           {if (bol()) RET(t_hrule) else RET(t_text);}
   "\n"{2,}	    {newline(); RET(t_break);}
-  "\n"		    {newline(); RET(t_special);}
+  "\n"		    {newline(); RET(t_newline);}
   [:|]              {RET(t_special);}
   "{|"              {RET(t_begin_table);}
   "|}"              {RET(t_end_table);}
