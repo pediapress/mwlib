@@ -1,8 +1,6 @@
 #! /usr/bin/env python
 
 if 0:
-    print "USING OLD PLEXSCANNER"
-    from plexscanner import *
+    from plexscanner import TagToken, EndTagToken, tokenize
 else:
-    print "USING NEW MWSCAN"
-    from mwscan import *
+    from mwscan import TagToken, EndTagToken, tokenize
