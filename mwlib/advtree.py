@@ -28,7 +28,7 @@ class AdvancedNode():
 
     allows to traverse the tree in any direction and 
     build derived convinience functions
-    """
+   """
     _parentref = None # weak referece to parent element
     isinlinenode = False # must be set before instancing (see below)
     isblocknode = property(lambda s:not s.isinlinenode)
@@ -417,11 +417,11 @@ def removeNewlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
-    if node.__class__ == Text:
+    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted):
         if node.caption.strip() == u"":
             prev = node.previous or node.parent # previous sibling node or parentnode 
             next = node.next or node.parent.next
-            if not next or next.isblocknode or prev.isblocknode: 
+            if not next or next.isblocknode or prev or prev.isblocknode: 
                 node.parent.removeChild(node)    
         else:
           node.caption = node.caption.replace("\n", " ")
@@ -437,7 +437,7 @@ def removeBreakingReturns(node):
         if c.__class__ == BreakingReturn:
             prev = c.previous or c.parent # previous sibling node or parentnode 
             next = c.next or c.parent.next
-            if next.isblocknode or prev.isblocknode: 
+            if not next or next.isblocknode or not prev or prev.isblocknode: 
                 node.removeChild(c)
         removeBreakingReturns(c)
         
