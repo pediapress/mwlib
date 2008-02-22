@@ -154,6 +154,8 @@ re2c:yyfill:enable = 0 ;
 		goto not_bol;
 	}
 /*!re2c
+  "|}"              {--tablemode; RET(t_end_table);}
+
   " "* "|" "-"+         {if (tablemode) RET(t_row) else RET(t_text);}
   " "* ("|" | "!")      {if (tablemode) RET(t_column) else RET(t_text);}
   
@@ -195,6 +197,7 @@ not_bol:
 		    }
   "\n"{2,}	    {newline(); RET(t_break);}
   "\n"		    {newline(); RET(t_newline);}
+  "||"              {if (tablemode) RET(t_column) else RET(t_special);}
   [:|]              {RET(t_special);}
   "{|"              {++tablemode; RET(t_begin_table);}
   "|}"              {--tablemode; RET(t_end_table);}
