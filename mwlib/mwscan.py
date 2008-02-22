@@ -125,6 +125,8 @@ class _compat_scanner(object):
         token.t_colon: "EOLSTYLE",
         token.t_semicolon: "EOLSTYLE",
         token.t_newline: "\n",
+        token.t_begin_table: "BEGINTABLE",
+        token.t_end_table: "ENDTABLE",
         }
 
 
@@ -154,10 +156,6 @@ class _compat_scanner(object):
                 a(n)
             elif type==token.t_entity:
                 res.append(("TEXT", resolve_entity(g())))
-            elif type==token.t_begin_table:
-                pass # XXX
-            elif type==token.t_end_table:
-                pass # XXX
             elif type==token.t_html_tag:
                 s = g()
 
