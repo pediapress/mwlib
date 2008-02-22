@@ -457,6 +457,16 @@ def buildAdvancedTree(root): # DO NOT USE WITHOUT CARE
     removeBreakingReturns(root) 
 
 
+def getAdvTree(fn):
+    from mwlib.dummydb import DummyDB
+    from mwlib.uparser import parseString
+    db = DummyDB()
+    input = unicode(open(fn).read(), 'utf8')
+    r = parseString(title=fn, raw=input, wikidb=db)
+    buildAdvancedTree(r)
+    return r
+
+
 
 def main():
     import sys
@@ -465,15 +475,8 @@ def main():
     import xhtmlwriter
     db = DummyDB()
     
-    from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parseString
-    db = DummyDB()
-    
     for x in sys.argv[1:]:
-        input = unicode(open(x).read(), 'utf8')
-        r = parseString(title=x, raw=input, wikidb=db)
-        #parser.show(sys.stderr, r, 0)
-        buildAdvancedTree(r)
+        r = getAdvTree(x)
         parser.show(sys.stderr, r, 0)
         
         assert not r.getChildNodesByClass(Article)
