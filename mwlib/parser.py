@@ -701,7 +701,7 @@ class Parser(object):
         while self.left:
             token = self.token
             if token[0] == 'SECTION':
-                if len(self.token[1]) <= level:
+                if token[1].count('=') <= level:
                     return s
                 
                 s.append(self.parseSection())
