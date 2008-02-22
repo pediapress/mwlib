@@ -128,6 +128,8 @@ class _compat_scanner(object):
 
     def __call__(self, text):
         tokens = scan(text)
+        scanres = scan_result(text, tokens)
+
 
         res = []
 
@@ -172,6 +174,17 @@ class _compat_scanner(object):
                                 i+=1
                                 break
                         res.append(("LATEX", g()))
+                        i+=1
+                elif tt.t=="nowiki":
+                    i+=1
+                    while i<numtokens:
+                        type, start, tlen = tokens[i]
+                        if type==token.t_html_tag:
+                            tt = self.tagtoken(g())
+                            if tt.t=="nowiki":
+                                i+=1
+                                break
+                        res.append(("TEXT", scanres.text((type, start, tlen))))                    
                         i+=1
                 elif tt.t=="table":
                     if isEndToken:
