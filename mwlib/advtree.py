@@ -234,10 +234,13 @@ class Sup(Style, AdvancedNode):
 class Small(Style, AdvancedNode):
     _style = "small"
 
+class Big(Style, AdvancedNode):
+    _style = "big"
+
 class Cite(Style, AdvancedNode):
     _style = "cite"
 
-_styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Small, Cite] )
+_styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Small, Big, Cite] )
 
 # --------------------------------------------------------------------------
 # Missing as Classes derived from parser.TagNode
@@ -274,10 +277,13 @@ class Center(TagNode, AdvancedNode):
 class Div(TagNode, AdvancedNode):
     _tag = "div"
 
+class Span(TagNode, AdvancedNode): # span is defined as inline node which is in theory correct. MW-Cracksmokers my abuse it as block node...
+    _tag = "span"
+
 class Strike(TagNode,AdvancedNode):
     _tag = "strike"
     
-_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Strike] )
+_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike] )
 
 
 
@@ -307,7 +313,7 @@ for k in _blockNodesMap:
 
 _inlineNodesMap = (URL, NamedURL, Link, CategoryLink, SpecialLink, Style,
                Text, Index, Teletyped, BreakingReturn, Reference, Strong,Emphasized, 
-               Sub, Sup, Small, Underline, Overline)
+               Sub, Sup, Small, Underline, Overline, Span, Big)
 
 for k in _inlineNodesMap:  
   k.isinlinenode = True
