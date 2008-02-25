@@ -151,7 +151,7 @@ def removecb(rule, node=None, parentnode=None):
 # Container for sanity rules
 # -----------------------------------------------------------
 
-class SanityChecker():
+class SanityChecker(object):
 
     def __init__(self):
         self.rules = []
@@ -164,15 +164,18 @@ class SanityChecker():
         check each node with each rule
         on failure call callback
         """
-        for node in tree.allchildren():
-            for r,cb in self.rules:
-                passed, errnode = r.test(node)
-                if not passed and cb:
-                    print "failed, calling cb", cb
-                    modified = cb(r, errnode or node)
-                    if modified:
-                        self.check(tree)
-                        break
+        modified = True
+        while modified:
+            modified = False
+            for node in tree.allchildren():
+                for r,cb in self.rules:
+                    passed, errnode = r.test(node)
+                    if not passed and cb:
+                        if cb(r, errnode or node):
+                            modified = True
+                            break
+                if modified:
+                    break
 
 def demo(tree):
     "for documentation only, see tests for more demos"

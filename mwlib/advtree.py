@@ -277,13 +277,16 @@ class Center(TagNode, AdvancedNode):
 class Div(TagNode, AdvancedNode):
     _tag = "div"
 
-class Span(TagNode, AdvancedNode): # span is defined as inline node which is in theory correct. MW-Cracksmokers my abuse it as block node...
+class Span(TagNode, AdvancedNode): # span is defined as inline node which is in theory correct. 
     _tag = "span"
 
 class Strike(TagNode,AdvancedNode):
     _tag = "strike"
+
+class ImageMap(TagNode, AdvancedNode): # defined as block node, maybe incorrect
+    _tag = "imagemap"
     
-_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike] )
+_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap] )
 
 
 
@@ -306,7 +309,7 @@ Open Issues: Math, Magic, (unknown) TagNode
 _blockNodesMap = (Book, Chapter, Article, Section, Paragraph, 
                   PreFormatted, Cell, Row, Table, Item, 
                   ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
-                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Div)
+                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Div, ImageMap)
 
 for k in _blockNodesMap:  
   k.isinlinenode = False
