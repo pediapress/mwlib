@@ -5,6 +5,8 @@ import os
 def main():
     files = [x.strip() for x in os.popen("hg manifest")]
     files.append("README.html")
+    files.append("mwlib/_mwscan.cc")
+
     def remove(n):
         try:
             files.remove(n)

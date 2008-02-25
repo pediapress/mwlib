@@ -12,7 +12,7 @@ except ImportError:
     import ez_setup
     ez_setup.use_setuptools(version="0.6c1")
 
-from setuptools import setup
+from setuptools import setup, Extension
 import distutils.util
 
 
@@ -38,6 +38,7 @@ setup(
                                          'mw-serve = mwlib.apps:serve',
                                          ]),
     install_requires=install_requires,
+    ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"])],
     
     packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
     namespace_packages=['mwlib'],
