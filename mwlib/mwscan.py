@@ -253,7 +253,40 @@ class _compat_scanner(object):
         
 compat_scan = _compat_scanner()
 
-from plexscanner import _BaseTagToken, TagToken, EndTagToken
+# from plexscanner import _BaseTagToken, TagToken, EndTagToken
+
+class _BaseTagToken(object):
+    def __eq__(self, other):
+        if isinstance(other, basestring):
+            return self.t == other
+        if isinstance(other, self.__class__):
+            return self.t == other.t
+        return False
+
+    def __ne__(self, other):
+        return not(self==other)
+    
+    def __hash__(self):
+        return hash(self.t)
+
+class TagToken(_BaseTagToken):
+    values = {}
+    selfClosing=False
+
+    def __init__(self, t, text=''):
+        self.t = t
+        self.text = text
+
+    def __repr__(self):
+        return "<Tag:%s %r>" % (self.t, self.text)
+
+class EndTagToken(_BaseTagToken):
+    def __init__(self, t, text=''):
+        self.t = t
+        self.text = text
+        
+    def __repr__(self):
+        return "<EndTag:%s>" % self.t
 
 def tokenize(input, name="unknown"):
     assert input is not None, "must specify input argument in tokenize"
