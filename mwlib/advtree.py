@@ -25,6 +25,7 @@ from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
 from mwlib.parser import CategoryLink, SpecialLink, ImageLink,  Article, Book, Chapter
 
 
+
 class AdvancedNode():
     """
     MixIn Class that extends Nodes so they become easier accessible
