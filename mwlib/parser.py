@@ -1045,7 +1045,14 @@ class Parser(object):
 
     def parseTagToken(self):
         tag = self.token[0].t
-        return getattr(self, 'parse'+tag.upper()+'Tag')()
+        try:
+            m=getattr(self, 'parse'+tag.upper()+'Tag')
+        except AttributeError:
+            t=Text(self.token[1])
+            self.next()
+            return t
+        else:
+            return m()
 
     def parseITag(self):
         return self._parseStyledTag(Style("''"))
