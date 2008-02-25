@@ -55,7 +55,6 @@ def scan(text):
     stime=time.time()
     text += u"\0"*32    
     tokens = _mwscan.scan(text)
-    print "scan took:", time.time()-stime
     return scan_result(text, tokens)
 
 def resolve_entity(e):
