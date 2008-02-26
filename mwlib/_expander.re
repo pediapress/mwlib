@@ -106,7 +106,7 @@ noinclude:
 /*!re2c
 	'</noinclude>' {goto std;}
 	[^\000] {goto noinclude;}
-	"\000" {RET(0);}
+	"\000" {cursor=start+11; RET(5);}
  */
 
 nowiki:
