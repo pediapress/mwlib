@@ -24,6 +24,8 @@ from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell,
 from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
 from mwlib.parser import CategoryLink, SpecialLink, ImageLink,  Article, Book, Chapter
 
+from mwlib.log import Log
+log = Log("advtree")
 
 
 class AdvancedNode():
@@ -286,7 +288,7 @@ class Strike(TagNode,AdvancedNode):
 class ImageMap(TagNode, AdvancedNode): # defined as block node, maybe incorrect
     _tag = "imagemap"
     
-_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap] )
+_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike] )
 
 
 
@@ -309,7 +311,7 @@ Open Issues: Math, Magic, (unknown) TagNode
 _blockNodesMap = (Book, Chapter, Article, Section, Paragraph, 
                   PreFormatted, Cell, Row, Table, Item, 
                   ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
-                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Div, ImageMap)
+                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList)
 
 for k in _blockNodesMap:  
   k.isinlinenode = False
@@ -358,8 +360,8 @@ def fixTagNodes(node):
                 c._h_level = int(c.caption[1])
                 c.caption = ""
             else:
-                print "unknowntagnode", c
-                raise Exception, "unknown tag %s" % c.caption # FIXME
+                log.warn("fixTagNodes, unknowntagnode %r" % c)
+                #raise Exception, "unknown tag %s" % c.caption # FIXME
         fixTagNodes(c)
 
 
@@ -407,7 +409,9 @@ def fixStyle(node):
         node.__class__ = _styleNodeMap[node.caption]
         node.caption = ""
     else:
-        raise Exception, "unknown style %s" % node.caption # FIXME
+        log.warn("fixStyle, unknownstyle %r" % node)
+        #raise Exception, "unknown style %s" % node.caption # FIXME
+        pass
     return node
 
 def fixStyles(node):
