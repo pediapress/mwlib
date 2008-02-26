@@ -8,4 +8,3 @@ ID
 mwlib.egg-info
 build
 trunk
-mwlib/_mwscan.cc

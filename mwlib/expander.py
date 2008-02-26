@@ -38,7 +38,7 @@ class symbols:
     noi = 4
     txt = 5
 
-def tokenize(txt):
+def old_tokenize(txt):
     if "<onlyinclude>" in txt:
         # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
         txt = "".join(onlyincluderx.findall(txt))
@@ -60,6 +60,32 @@ def tokenize(txt):
     tokens.append((None, ''))
     
     return tokens
+
+
+def new_tokenize(txt):
+    import _expander
+
+    if "<onlyinclude>" in txt:
+        # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
+        txt = "".join(onlyincluderx.findall(txt))
+    
+    txt=txt+u'\0'
+    tokens = _expander.scan(txt)
+    
+    res = []
+    for t in tokens:
+        type,start,len=t
+        if type:
+            res.append((type, txt[start:start+len]))
+        else:
+            res.append((None, ''))
+            
+    
+    return res
+
+tokenize = old_tokenize
+
+
 
 class Node(object):
     def __init__(self):

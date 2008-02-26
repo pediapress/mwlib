@@ -21,6 +21,7 @@ include mwlib/Plex/conftest.py
 include mwlib/Plex/test_tm.py
 include mwlib/__init__.py
 include mwlib/_mwscan.cc
+include mwlib/_mwscan.cc
 include mwlib/_mwscan.re
 include mwlib/_version.py
 include mwlib/apps.py

@@ -38,7 +38,9 @@ setup(
                                          'mw-serve = mwlib.apps:serve',
                                          ]),
     install_requires=install_requires,
-    ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"])],
+    ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
+                   Extension("mwlib._expander", ["mwlib/_expander.cc"]),
+                   ],
     
     packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
     namespace_packages=['mwlib'],
