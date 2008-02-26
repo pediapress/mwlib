@@ -103,7 +103,7 @@ class AdvancedNode():
                 yield x        
         
     def getSiblings(self):
-        return (c for c in self.getAllSiblings() if c!=self)
+        return [c for c in self.getAllSiblings() if c!=self]
 
     def getAllSiblings(self):
         "all siblings plus me my self and i"
@@ -425,6 +425,20 @@ def fixStyles(node):
     for c in node.children[:]:
         fixStyles(c)
 
+
+def fixLists(node):
+    """
+    all ItemList Nodes that are the only children of a paragraph are moved out of the paragraph.
+    the - now empty - paragraph node is removed afterwards
+    """
+    parent = node.parent
+    if node.__class__ == ItemList and parent and parent.__class__ == Paragraph and not (node.getSiblings()):
+        node.moveto(parent)
+        parent.parent.removeChild(parent)
+    for c in node.children[:]:
+        fixLists(c)        
+
+
 def removeNodes(node):
     """
     the parser generates empty Node elements that do 
@@ -464,7 +478,7 @@ def removeBreakingReturns(node):
         
 
 
-def buildAdvancedTree(root): # DO NOT USE WITHOUT CARE
+def buildAdvancedTree(root): # USE WITH CARE
     """
     extends and cleans parse trees
     do not use this funcs without knowing whether these 
@@ -476,6 +490,7 @@ def buildAdvancedTree(root): # DO NOT USE WITHOUT CARE
     removeNewlines(root)
     fixStyles(root) 
     removeBreakingReturns(root) 
+    fixLists(root)
 
 
 def getAdvTree(fn):
