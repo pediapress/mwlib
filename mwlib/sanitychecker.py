@@ -141,7 +141,7 @@ def warncb(rule, node=None, parentnode=None):
     return False
 
 def removecb(rule, node=None, parentnode=None):
-    assert node
+    assert node and node.parent
     node.parent.removeChild(node)
     return True
 

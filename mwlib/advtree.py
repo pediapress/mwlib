@@ -400,7 +400,8 @@ def fixStyle(node):
         else:
             node.__class__ = DefinitionList
             dt = DefinitionTerm()
-            dt.children = node.children
+            for c in node.children:
+                dt.appendChild(c)
             node.children = []
             node.appendChild(dt)
     elif node.caption.startswith(":"): 
@@ -475,7 +476,8 @@ def buildAdvancedTree(root): # DO NOT USE WITHOUT CARE
     removeNodes(root)
     removeNewlines(root)
     fixStyles(root) 
-    removeBreakingReturns(root) 
+
+
 
 
 def getAdvTree(fn):

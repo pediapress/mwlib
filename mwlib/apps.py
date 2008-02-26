@@ -338,3 +338,4 @@ def html():
         open(htmlfile, "wb").write(out.getvalue().encode('utf-8'))
         webbrowser.open("file://"+htmlfile)
 
+
