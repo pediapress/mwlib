@@ -81,6 +81,11 @@ class AdvancedNode():
         if not x:
             raise weakref.ReferenceError
         return x
+
+    def getLevel(self):
+        "returns the number of nodes of same class in parents"
+        return [p.__class__ for p in self.getParents()].count(self.__class__)
+
    
     def getParentNodesByClass(self, klass):
         "returns parents w/ klass"
@@ -169,9 +174,9 @@ class AdvancedNode():
 # -------------------------------------------------------------------------
 
 class AdvancedSection(AdvancedNode):
-    h_level = 0 # sthis is set if it originates from an H1, H2, ... TagNode
+    h_level = 0 # this is set if it originates from an H1, H2, ... TagNode
     def getSectionLevel(self):
-        return 1 + [p.__class__ for p in self.getParents()].count(self.__class__)
+        return 1 + self.getLevels()
 
 class AdvancedImageLink(AdvancedNode):
     isinlinenode = property( lambda s: s.isInline() )
