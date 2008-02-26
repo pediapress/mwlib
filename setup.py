@@ -42,7 +42,7 @@ setup(
                    Extension("mwlib._expander", ["mwlib/_expander.cc"]),
                    ],
     
-    packages=["mwlib", "mwlib.Plex", "mwlib.resources"],
+    packages=["mwlib", "mwlib.resources"],
     namespace_packages=['mwlib'],
     include_package_data = True,
     zip_safe = False,
