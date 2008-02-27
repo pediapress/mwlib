@@ -170,8 +170,8 @@ class SanityChecker(object):
         while modified:
             modified = False
             for node in tree.allchildren():
-                if node.__class__ == Article:
-                    log.info("checking article:", node.caption.encode('utf-8'))
+                #if node.__class__ == Article:
+                #    log.info("checking article:", node.caption.encode('utf-8'))
                 for r,cb in self.rules:
                     passed, errnode = r.test(node)
                     if not passed and cb:
