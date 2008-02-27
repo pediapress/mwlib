@@ -22,7 +22,7 @@ import weakref
 from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
 from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
-from mwlib.parser import CategoryLink, SpecialLink, ImageLink,  Article, Book, Chapter
+from mwlib.parser import CategoryLink, SpecialLink, ImageLink, Article, Book, Chapter
 
 from mwlib.log import Log
 log = Log("advtree")
@@ -434,9 +434,11 @@ def fixLists(node):
     the - now empty - paragraph node is removed afterwards
     """
     parent = node.parent
-    if node.__class__ == ItemList and parent and parent.__class__ == Paragraph and not (node.getSiblings()):
-        node.moveto(parent)
-        parent.parent.removeChild(parent)
+    if parent:
+        grandparent = parent.parent
+        if grandparent:
+            if node.__class__ == ItemList and parent and parent.__class__ == Paragraph and not (node.getSiblings()):
+                grandparent.replaceChild(parent,[node])        
     for c in node.children[:]:
         fixLists(c)        
 
