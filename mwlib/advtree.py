@@ -230,7 +230,7 @@ class Overline(Style, AdvancedNode):
     _style = "overline"
 
 class Underline(Style, AdvancedNode):
-    _style = "underline"
+    _style = "u"
 
 class Sub(Style, AdvancedNode):
     _style = "sub"
@@ -246,6 +246,7 @@ class Big(Style, AdvancedNode):
 
 class Cite(Style, AdvancedNode):
     _style = "cite"
+
 
 _styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Small, Big, Cite] )
 
@@ -293,8 +294,8 @@ class Strike(TagNode,AdvancedNode):
 class ImageMap(TagNode, AdvancedNode): # defined as block node, maybe incorrect
     _tag = "imagemap"
     
-_tagNodeMap = dict( (k._tag,k) for k in [BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike] )
-
+_tagNodeMap = dict( (k._tag,k) for k in [Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap] )
+_styleNodeMap["s"] = Strike # Special Handling for deprecated s style
 
 
 # --------------------------------------------------------------------------
@@ -359,7 +360,8 @@ def fixTagNodes(node):
         if c.__class__ == TagNode:
             if c.caption in _tagNodeMap:
                 c.__class__ = _tagNodeMap[c.caption]
-            elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"):
+            elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"): # FICME
+                # NEED TO MOVE NODE IF IT REALLY STARTS A SECTION
                 c.__class__ = Section 
                 MixIn(c.__class__, AdvancedSection)
                 c._h_level = int(c.caption[1])
