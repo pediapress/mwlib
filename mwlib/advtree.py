@@ -387,7 +387,8 @@ def fixStyle(node):
         node.caption = ""
         em = Emphasized("''")
         em.children = node.children
-        node.children = [em]
+        node.children = []
+        node.appendChild(em)
     elif node.caption == "'''":
         node.__class__ = Strong
         node.caption = ""

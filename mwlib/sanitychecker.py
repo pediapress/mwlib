@@ -3,6 +3,8 @@
 """
 class for defining DTD-Like Rules for the tree
 """
+from advtree import Article
+
 from mwlib.log import Log
 log = Log("sanitychecker")
 
@@ -168,6 +170,8 @@ class SanityChecker(object):
         while modified:
             modified = False
             for node in tree.allchildren():
+                if node.__class__ == Article:
+                    log.info("checking article:", node.caption.encode('utf-8'))
                 for r,cb in self.rules:
                     passed, errnode = r.test(node)
                     if not passed and cb:
