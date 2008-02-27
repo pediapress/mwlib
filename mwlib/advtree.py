@@ -461,7 +461,7 @@ def removeNewlines(node):
         if node.caption.strip() == u"":
             prev = node.previous or node.parent # previous sibling node or parentnode 
             next = node.next or node.parent.next
-            if not next or next.isblocknode or prev or prev.isblocknode: 
+            if not next or next.isblocknode or not prev or prev.isblocknode: 
                 node.parent.removeChild(node)    
         node.caption = node.caption.replace("\n", " ")
       
