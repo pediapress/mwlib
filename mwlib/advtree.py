@@ -176,7 +176,7 @@ class AdvancedNode():
 class AdvancedSection(AdvancedNode):
     h_level = 0 # this is set if it originates from an H1, H2, ... TagNode
     def getSectionLevel(self):
-        return 1 + self.getLevels()
+        return 1 + self.getLevel()
 
 class AdvancedImageLink(AdvancedNode):
     isinlinenode = property( lambda s: s.isInline() )
