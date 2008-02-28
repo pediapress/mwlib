@@ -108,13 +108,13 @@ class Node(object):
     def __repr__(self):
         return "%s %r: %s children" % (self.__class__.__name__, self.caption, len(self.children))
 
-    def __eq__(self, other):
-        return (isinstance(other, self.__class__)
-                and self.caption == other.caption
-                and self.children == other.children)
+#    def __eq__(self, other):
+#        return (isinstance(other, self.__class__)
+#                and self.caption == other.caption
+#                and self.children == other.children)
 
-    def __ne__(self, other):
-        return not(self==other)
+#    def __ne__(self, other):
+#        return not(self==other)
 
     def allchildren(self): # name is broken, returns self, which is not a child
         yield self 
