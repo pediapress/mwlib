@@ -161,7 +161,7 @@ re2c:yyfill:enable = 0 ;
 
   " "* "|" "-"+         {if (tablemode) RET(t_row) else RET(t_text);}
   " "* ("|" | "!")      {if (tablemode) RET(t_column) else RET(t_text);}
-  
+  " "* "|" "+"+         {if (tablemode) RET(t_tablecaption) else RET(t_text);}
   " "		{RET(t_pre);}
   "="+ [ \t]*   {
 			line_startswith_section = found(t_section);
