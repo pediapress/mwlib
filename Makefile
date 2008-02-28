@@ -1,7 +1,10 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-all:: README.html MANIFEST.in
+all:: subdirs README.html MANIFEST.in
+
+subdirs:: 
+	cd mwlib; make all
 
 MANIFEST.in::
 	./make_manifest.py
