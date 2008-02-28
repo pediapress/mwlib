@@ -5,7 +5,16 @@
 
 from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn
 
-
+def _treesanity(r):
+    "check that parents match their children"
+    for c in r.allchildren():
+        if c.parent:
+            assert c in c.parent.children
+            assert c.parent.children.count(c) == 1
+        for cc in c:
+            assert cc.parent
+            assert cc.parent == c
+            
 def test_removeNewlines():
 
     # test no action within preformattet
@@ -14,6 +23,7 @@ def test_removeNewlines():
     tn = Text(text)
     t.children.append( tn )
     buildAdvancedTree(t)
+    _treesanity(t)
     assert tn.caption == text
 
     # tests remove node w/ whitespace only if at border
@@ -21,6 +31,7 @@ def test_removeNewlines():
     tn = Text(text)
     t.children.append( tn )
     buildAdvancedTree(t)
+    _treesanity(t)
     #assert tn.caption == u""
     assert not t.children 
 
@@ -30,6 +41,7 @@ def test_removeNewlines():
     tn = Text(text)
     t.children.append( tn )
     buildAdvancedTree(t)
+    _treesanity(t)
     assert tn.caption.count("\n") == 0 
     assert len(tn.caption) == len(text)
     assert t.children 
@@ -44,11 +56,10 @@ B
 """.decode("utf8")
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parseString
-    from mwlib.parser import show
-    import sys
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
     buildAdvancedTree(r)
+    _treesanity(r)
     assert len(r.getChildNodesByClass(BreakingReturn)) == 1
 
 
