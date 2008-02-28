@@ -188,6 +188,9 @@ class Row(_VListNode):
 class Cell(_VListNode):
     pass
 
+class Caption(_VListNode):
+    pass
+
 class Link(Node):
     target = None
     specialPrefixes = set(["wikipedia", "wiktionary", "wikibooks", "wikisource",
@@ -860,9 +863,9 @@ class Parser(object):
     def parseCaption(self):
         token = self.token
         self.next()
-        n = Node()
+        n = Caption()
         params = ""
-        if token[1].startswith("|+"):
+        if token[1].strip().startswith("|+"):
             # search for the first occurence of "||", "|", "\n" in the next tokens
             # if it's a "|" we have a parameter list
             savepos = self.pos
@@ -919,7 +922,7 @@ class Parser(object):
             if token[0]=='ROW' or token[0]=='COLUMN':
                 t.append(self.parseRow())
             elif token[0]=='TABLECAPTION':
-                t.caption = self.parseCaption()
+                t.append(self.parseCaption())
             elif token[0]=='ENDTABLE':
                 self.next()
                 break
