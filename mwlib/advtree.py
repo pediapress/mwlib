@@ -180,8 +180,8 @@ class AdvancedSection(AdvancedNode):
 
 class AdvancedImageLink(AdvancedNode):
     isinlinenode = property( lambda s: s.isInline() )
-
-
+    isblocknode = property ( lambda s: not s.isInline() )
+    
 class AdvancedMath(AdvancedNode):
     def _isinlinenode(self):
         if self.caption.strip().startswith("\\begin{align}")  or \
@@ -189,6 +189,7 @@ class AdvancedMath(AdvancedNode):
             return False
         return True
     isinlinenode = property( lambda s: s._isinlinenode() )
+    isblocknode = property( lambda s: not s._isinlinenode() )
 
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
@@ -315,7 +316,7 @@ Open Issues: Math, Magic, (unknown) TagNode
 
 """
 _blockNodesMap = (Book, Chapter, Article, Section, Paragraph, 
-                  PreFormatted, Cell, Row, Table, Item, 
+                  PreFormatted, Cell, Row, Table, Item, BreakingReturn,
                   ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
                   DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList)
 
@@ -323,7 +324,7 @@ for k in _blockNodesMap:
   k.isinlinenode = False
 
 _inlineNodesMap = (URL, NamedURL, Link, CategoryLink, SpecialLink, Style,
-               Text, Index, Teletyped, BreakingReturn, Reference, Strong,Emphasized, 
+               Text, Index, Teletyped, Reference, Strong, Emphasized, 
                Sub, Sup, Small, Underline, Overline, Span, Big)
 
 for k in _inlineNodesMap:  
