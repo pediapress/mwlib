@@ -1,4 +1,4 @@
-g feinclude .hgignore
+include .hgignore
 include MANIFEST.in
 include README.html
 include README.txt
@@ -10,7 +10,7 @@ include mwlib/__init__.py
 include mwlib/_expander.cc
 include mwlib/_expander.re
 include mwlib/_mwscan.cc
-include mwlib/_mwscan.cc
+include mwlib/_mwscan.re
 include mwlib/_version.py
 include mwlib/advtree.py
 include mwlib/allnodes.py
