@@ -22,8 +22,11 @@ import weakref
 from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
 from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
-from mwlib.parser import CategoryLink, SpecialLink, ImageLink, Article, Book, Chapter
+from mwlib.parser import CategoryLink, SpecialLink, ImageLink, Article, Book, Chapter, Caption
 import copy
+
+
+
 
 from mwlib.log import Log
 log = Log("advtree")
@@ -372,7 +375,7 @@ def fixTagNodes(node):
         if c.__class__ == TagNode:
             if c.caption in _tagNodeMap:
                 c.__class__ = _tagNodeMap[c.caption]
-            elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"): # FICME
+            elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"): # FIXME
                 # NEED TO MOVE NODE IF IT REALLY STARTS A SECTION
                 c.__class__ = Section 
                 MixIn(c.__class__, AdvancedSection)
@@ -487,6 +490,9 @@ def removeBreakingReturns(node):
         if c.__class__ == BreakingReturn:
             prev = c.previous or c.parent # previous sibling node or parentnode 
             next = c.next or c.parent.next
+            print "*"*30
+            print "P", prev, "\nN", next
+            
             if not next or next.isblocknode or not prev or prev.isblocknode: 
                 node.removeChild(c)
         removeBreakingReturns(c)

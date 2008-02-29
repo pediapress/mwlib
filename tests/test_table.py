@@ -19,3 +19,14 @@ def test_simple_table():
     for x in table.children:
         assert len(x.children)==2, "expected 2 cells"
 
+
+
+def test_parse_caption():
+    s="""{|
+|+ caption
+|}
+"""
+    n=parse(s)
+    t=n.find(parser.Table)[0]
+    assert isinstance(t.children[0], parser.Caption), "expected a caption node"
+    
