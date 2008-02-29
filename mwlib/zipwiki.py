@@ -102,6 +102,10 @@ class ImageDB(object):
             ext = '.' + name.rsplit('.', 1)[1]
         except IndexError:
             ext = ''
+        if ext.lower() == '.svg':
+            ext = '.svg.png'
+        elif ext.lower() == '.gif':
+            ext = '.gif.png'
         res = os.path.join(self.tmpdir, 'image%04d%s' % (len(self.diskpaths), ext))
         self.diskpaths[name] = res
         f=open(res, "wb")
