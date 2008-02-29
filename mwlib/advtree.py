@@ -23,6 +23,7 @@ from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
 from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
 from mwlib.parser import CategoryLink, SpecialLink, ImageLink, Article, Book, Chapter
+import copy
 
 from mwlib.log import Log
 log = Log("advtree")
@@ -38,6 +39,16 @@ class AdvancedNode():
     _parentref = None # weak referece to parent element
     isinlinenode = False # must be set before instancing (see below)
     isblocknode = property(lambda s:not s.isinlinenode)
+
+    def copy(self):
+        "return a copy of this node and all its children"
+        n = copy.copy(self)
+        n.children = []
+        n._parentref = None
+        for c in self:
+            n.appendChild(c.copy())
+        return n
+
 
     def moveto(self, targetnode, prefix=False):
         """
@@ -431,17 +442,14 @@ def fixStyles(node):
         fixStyles(c)
 
 
-def fixLists(node):
+def fixLists(node): # FIXME if this is XLWriter specific move it!
     """
     all ItemList Nodes that are the only children of a paragraph are moved out of the paragraph.
     the - now empty - paragraph node is removed afterwards
     """
-    parent = node.parent
-    if parent:
-        grandparent = parent.parent
-        if grandparent:
-            if node.__class__ == ItemList and parent and parent.__class__ == Paragraph and not (node.getSiblings()):
-                grandparent.replaceChild(parent,[node])        
+    if node.__class__ == ItemList and node.parent and node.parent.__class__ == Paragraph:
+        if not node.siblings and node.parent.parent:
+            node.parent.parent.replaceChild(node.parent,[node])        
     for c in node.children[:]:
         fixLists(c)        
 

@@ -4,6 +4,10 @@
 # See README.txt for additional licensing information.
 
 from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn
+from mwlib.dummydb import DummyDB
+from mwlib.uparser import parseString
+from mwlib import parser
+import sys
 
 def _treesanity(r):
     "check that parents match their children"
@@ -14,6 +18,34 @@ def _treesanity(r):
         for cc in c:
             assert cc.parent
             assert cc.parent == c
+
+
+def test_copy():
+    raw = """
+===[[Leuchtturm|Leuchttürme]] auf Fehmarn===
+*[[Leuchtturm Flügge]] super da
+*[[Leuchtturm Marienleuchte]] da auch
+*[[Leuchtturm Strukkamphuk]] spitze
+*[[Leuchtturm Staberhuk]] supi
+*[[Leuchtturm Westermarkelsdorf]]
+""".decode("utf8")
+
+    db = DummyDB()
+    r = parseString(title="X33", raw=raw, wikidb=db)
+    buildAdvancedTree(r)
+    c = r.copy()
+    _treesanity(c)    
+    
+    def _check(n1, n2):
+        assert n1.caption == n2.caption
+        assert n1.__class__ == n2.__class__
+        assert len(n1.children) == len(n2.children)
+        for i,c1 in enumerate(n1):
+            _check(c1, n2.children[i])
+    
+    _check(r,c)
+    
+
             
 def test_removeNewlines():
 
@@ -54,12 +86,21 @@ B
 :C 
 <br />D
 """.decode("utf8")
-    from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parseString
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
     buildAdvancedTree(r)
     _treesanity(r)
     assert len(r.getChildNodesByClass(BreakingReturn)) == 1
+    # test copy
+    c = r.copy()
+    #parser.show(sys.stderr, c, 0)
+    _treesanity(c)
+    r.appendChild(c)
+    
+    #parser.show(sys.stderr, r, 0)
+
+    _treesanity(r)
+    assert len(r.getChildNodesByClass(BreakingReturn)) == 2
+    
 
 
