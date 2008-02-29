@@ -3,15 +3,14 @@
 # Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import base64
 import os
-import pickle
 import shutil
 import simplejson
 import tempfile
 from zipfile import ZipFile
 
 from mwlib.metabook import MetaBook
+from mwlib import uparser
 
 class Wiki(object):
     def __init__(self, zipfile):
@@ -45,10 +44,11 @@ class Wiki(object):
         return None
     
     def getParsedArticle(self, title, revision=None):
-        article = self._getArticle(title, revision=revision)
-        if article:
-            return pickle.loads(base64.b64decode(article['parsetree']))
-        return None
+        raw = self.getRawArticle(title, revision=revision)
+        if raw is None:
+            return None
+        a = uparser.parseString(title=title, raw=raw, wikidb=self)
+        return a
     
     def getURL(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
