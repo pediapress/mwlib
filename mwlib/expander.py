@@ -38,7 +38,11 @@ def remove_comments(txt):
             return '\n'
         return (m.group(1) or "")+(m.group(2) or "")
     return commentrx.sub(repl, txt)
-    
+
+def preprocess(txt):
+    txt=txt.replace("\t", " ")
+    txt=remove_comments(txt)
+    return txt
 
 class symbols:
     bra_open = 1
@@ -48,7 +52,7 @@ class symbols:
     txt = 5
 
 def old_tokenize(txt):
-    txt = remove_comments(txt)
+    txt = preprocess(txt)
                          
     if "<onlyinclude>" in txt:
         # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
@@ -74,7 +78,7 @@ def old_tokenize(txt):
 
 
 def new_tokenize(txt):
-    txt = remove_comments(txt)
+    txt = preprocess(txt)
     
     import _expander
     
