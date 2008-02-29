@@ -33,7 +33,7 @@ commentrx = re.compile(r"(\n *)?<!--.*?-->( *\n)?", re.DOTALL)
 
 def remove_comments(txt):
     def repl(m):
-        print "M:", repr(txt[m.start():m.end()])
+        #print "M:", repr(txt[m.start():m.end()])
         if txt[m.start()]=='\n' and txt[m.end()-1]=='\n':
             return '\n'
         return (m.group(1) or "")+(m.group(2) or "")
