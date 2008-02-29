@@ -40,7 +40,7 @@ latex = r"""
 \usepackage[dvips]{graphicx}
 \pagestyle{empty}
 \begin{document}
-$%(source)s$
+%(source)s
 \end{document}
 """
 
@@ -93,9 +93,11 @@ class Renderer(object):
         latexsource = re.compile("\n+").sub("\n", latexsource)
         return latexsource
     
-    def convert(self, latexsource, lazy=True, format='pdf'):
+    def convert(self, latexsource, lazy=True, format='pdf', addMathEnv=True):
         assert format in ('pdf', 'png'), "rendermath: format %r not supported" % format
         latexsource = self._normalizeLatex(latexsource)
+        if addMathEnv:
+            latexsource = '$' + latexsource + '$'
         if format=='pdf':
             extra_header = '\usepackage{geometry}\n\geometry{textwidth=3.0in}\n'
             fontsize = 10
@@ -129,8 +131,8 @@ class Renderer(object):
             
         return outfile
 
-    def render(self, latexsource, lazy=None):
+    def render(self, latexsource, lazy=None, addMathEnv=True):
         if lazy is None:
             lazy = self.lazy
-        return self.convert(latexsource, lazy=lazy, format='png')
+        return self.convert(latexsource, lazy=lazy, format='png', addMathEnv=addMathEnv)
     
