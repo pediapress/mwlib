@@ -178,7 +178,6 @@ class _compat_scanner(object):
                             tt = self.tagtoken(g())
                             if tt.t=="math":
                                 res.append(("ENDMATH", g()))
-                                i+=1
                                 break
                         res.append(("LATEX", g()))
                         i+=1
@@ -189,7 +188,6 @@ class _compat_scanner(object):
                         if type==token.t_html_tag:
                             tt = self.tagtoken(g())
                             if tt.t=="nowiki":
-                                i+=1
                                 break
                         res.append(("TEXT", scanres.text((type, start, tlen))))                    
                         i+=1
