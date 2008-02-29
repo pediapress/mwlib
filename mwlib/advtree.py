@@ -40,8 +40,7 @@ class AdvancedNode():
     build derived convinience functions
    """
     _parentref = None # weak referece to parent element
-    isinlinenode = False # must be set before instancing (see below)
-    isblocknode = property(lambda s:not s.isinlinenode)
+    isblocknode = False
 
     def copy(self):
         "return a copy of this node and all its children"
@@ -193,17 +192,15 @@ class AdvancedSection(AdvancedNode):
         return 1 + self.getLevel()
 
 class AdvancedImageLink(AdvancedNode):
-    isinlinenode = property( lambda s: s.isInline() )
     isblocknode = property ( lambda s: not s.isInline() )
     
 class AdvancedMath(AdvancedNode):
-    def _isinlinenode(self):
+    @property
+    def isblocknode(self):
         if self.caption.strip().startswith("\\begin{align}")  or \
                 self.caption.strip().startswith("\\begin{alignat}"):
-            return False
-        return True
-    isinlinenode = property( lambda s: s._isinlinenode() )
-    isblocknode = property( lambda s: not s._isinlinenode() )
+            return True
+        return False
 
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
@@ -314,14 +311,13 @@ _styleNodeMap["s"] = Strike # Special Handling for deprecated s style
 
 
 # --------------------------------------------------------------------------
-# InlineNode and BlockNode separation for AdvancedNode.isinlinenode
+# BlockNode separation for AdvancedNode.isblocknode
 # -------------------------------------------------------------------------
 
 """
 For writers it is usefull to know whether elements are inline (within a paragraph) or not.
-We define list for both, which are used in AdvancedNode as:
+We define list for blocknodes, which are used in AdvancedNode as:
 
-AdvancedNode.isinlinenode
 AdvancedNode.isblocknode
 
 Image depends on result of Image.isInline() see above
@@ -335,14 +331,8 @@ _blockNodesMap = (Book, Chapter, Article, Section, Paragraph,
                   DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList)
 
 for k in _blockNodesMap:  
-  k.isinlinenode = False
+  k.isblocknode = True
 
-_inlineNodesMap = (URL, NamedURL, Link, CategoryLink, SpecialLink, Style,
-               Text, Index, Teletyped, Reference, Strong, Emphasized, 
-               Sub, Sup, Small, Underline, Overline, Span, Big)
-
-for k in _inlineNodesMap:  
-  k.isinlinenode = True
 
 
 # --------------------------------------------------------------------------
@@ -490,9 +480,6 @@ def removeBreakingReturns(node):
         if c.__class__ == BreakingReturn:
             prev = c.previous or c.parent # previous sibling node or parentnode 
             next = c.next or c.parent.next
-            print "*"*30
-            print "P", prev, "\nN", next
-            
             if not next or next.isblocknode or not prev or prev.isblocknode: 
                 node.removeChild(c)
         removeBreakingReturns(c)
