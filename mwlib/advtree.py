@@ -435,18 +435,6 @@ def fixStyles(node):
         fixStyles(c)
 
 
-def fixLists(node): # FIXME if this is XLWriter specific move it!
-    """
-    all ItemList Nodes that are the only children of a paragraph are moved out of the paragraph.
-    the - now empty - paragraph node is removed afterwards
-    """
-    if node.__class__ == ItemList and node.parent and node.parent.__class__ == Paragraph:
-        if not node.siblings and node.parent.parent:
-            node.parent.parent.replaceChild(node.parent,[node])        
-    for c in node.children[:]:
-        fixLists(c)        
-
-
 def removeNodes(node):
     """
     the parser generates empty Node elements that do 
@@ -497,7 +485,6 @@ def buildAdvancedTree(root): # USE WITH CARE
     removeNodes(root)
     removeNewlines(root)
     fixStyles(root) 
-    fixLists(root)
     removeBreakingReturns(root) 
 
 def getAdvTree(fn):

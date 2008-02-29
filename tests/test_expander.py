@@ -164,8 +164,9 @@ def test_pipe_inside_imagemap():
 
 
 def test_expand_comment():
-    s="foo\n<!-- comment --->\nbar"
-    expandstr(s, s)
+    s="foo\n     <!-- comment --->     \nbar"
+    e="foo\nbar"
+    expandstr(s, e)
 
 
 def test_tokenize_gallery():

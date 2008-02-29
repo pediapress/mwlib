@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib import dummydb, parser, expander, uparser
+from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
 
 parse = uparser.simpleparse

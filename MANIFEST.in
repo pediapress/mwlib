@@ -7,6 +7,7 @@ include enwiki-conf.txt
 include ez_setup.py
 include mwlib/Makefile
 include mwlib/__init__.py
+include mwlib/_expander.cc
 include mwlib/_expander.re
 include mwlib/_mwscan.cc
 include mwlib/_mwscan.re

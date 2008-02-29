@@ -383,8 +383,8 @@ class NetDB(object):
     def getRedirect(self, title):
         return u""
 
-    def getParsedArticle(self, title):
-        raw = self.getRawArticle(title)
+    def getParsedArticle(self, title, revision=None):
+        raw = self.getRawArticle(title, revision=revision)
         if raw is None:
             return None
         a = uparser.parseString(title=title, raw=raw, wikidb=self)

@@ -19,3 +19,7 @@ def test_url():
     assert len(s)==1, "expected one url"
 
 
+def test_tokenize_math():
+    toks = mwscan.tokenize("<math> bla </math> blubb")
+    assert toks==[('MATH', '<math>'), ('LATEX', ' bla '), ('ENDMATH', '</math>'), ('TEXT', ' blubb')], "bad tokenization"
+
