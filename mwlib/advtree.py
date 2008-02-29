@@ -460,17 +460,6 @@ def removeNewlines(node):
     for c in node.children[:]:
         removeNewlines(c)
 
-def removeBreakingReturns(node):
-    """
-    remove breakingReturns  if we are next to a blockNode
-    """
-    for c in node.children[:]:
-        if c.__class__ == BreakingReturn:
-            prev = c.previous or c.parent # previous sibling node or parentnode 
-            next = c.next or c.parent.next
-            if not next or next.isblocknode or not prev or prev.isblocknode: 
-                node.removeChild(c)
-        removeBreakingReturns(c)
         
 
 
@@ -485,7 +474,6 @@ def buildAdvancedTree(root): # USE WITH CARE
     removeNodes(root)
     removeNewlines(root)
     fixStyles(root) 
-    removeBreakingReturns(root) 
 
 def getAdvTree(fn):
     from mwlib.dummydb import DummyDB
