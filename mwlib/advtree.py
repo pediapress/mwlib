@@ -478,9 +478,6 @@ def removeBreakingReturns(node):
         if c.__class__ == BreakingReturn:
             prev = c.previous or c.parent # previous sibling node or parentnode 
             next = c.next or c.parent.next
-            print "*"*30
-            print "P", prev, "\nN", next
-            
             if not next or next.isblocknode or not prev or prev.isblocknode: 
                 node.removeChild(c)
         removeBreakingReturns(c)

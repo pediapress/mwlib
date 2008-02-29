@@ -139,7 +139,7 @@ def exceptioncb(rule, node=None, parentnode=None):
     raise SanityException("%r  err:%r" %(rule, node or parentnode) )
 
 def warncb(rule, node=None, parentnode=None):
-    log.warn("%r  err:%r" %(rule, node or parentnode))
+    log.warn("%r node:%r parent:%r" %(rule, node, parentnode))
     return False
 
 def removecb(rule, node=None, parentnode=None):
