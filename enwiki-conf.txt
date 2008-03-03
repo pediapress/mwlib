@@ -2,10 +2,12 @@
 type = download
 url = http://upload.wikimedia.org/wikipedia/commons/
 localpath = ~/en-images
+knownlicenses = GFDL cc-by-sa
 
 [wiki]
 type = net
 articleurl=http://en.wikipedia.org/w/index.php?title=@TITLE@&action=raw
+imagedescriptionurls = http://commons.wikipedia.org/w/index.php?title=Image:@TITLE@&action=raw
 templateurls = http://en.wikipedia.org/w/index.php?title=Template:@TITLE@&action=raw
 name = The Free Encyclopedia
 url = http://en.wikipedia.org/

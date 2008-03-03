@@ -66,8 +66,11 @@ class ImageDB(object):
         if isinstance(baseurl, unicode):
             self.baseurls = [baseurl.encode('ascii')]
         else:
-            self.baseurls = [bu.encode('ascii')
-                             for bu in baseurl if isinstance(bu, unicode)]
+            self.baseurls = []
+            for bu in baseurl:
+                if isinstance(bu, unicode):
+                    bu = bu.encode('ascii')
+                self.baseurls.append(bu)
         
         if cachedir:
             self.cachedir = cachedir
@@ -142,13 +145,13 @@ class ImageDB(object):
         @returns: filename of image
         @rtype: basestring
         """
-        
+
         assert isinstance(name, unicode), 'name must be of type unicode'
         
         path = self._getImageFromCache(name, size=size)
         if path:
             return path
-    
+        
         tmpfile, baseurl = self._fetchImage(name)
         if tmpfile is None:
             return None
