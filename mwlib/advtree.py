@@ -115,7 +115,7 @@ class AdvancedNode():
         "don't confuse w/ Node.allchildren() which returns allchildren + self"
         for c in self.children:
             yield c
-            for x in c.allchildren():
+            for x in c.getAllChildren():
                 yield x        
         
     def getSiblings(self):
