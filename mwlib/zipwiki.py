@@ -63,10 +63,7 @@ class Wiki(object):
             pass
         return None
     
-    def getImageMetaInfos(self, imgname):
-        return {}
 
-    
 class ImageDB(object):
     def __init__(self, zipfile, tmpdir=None):
         """
@@ -113,6 +110,12 @@ class ImageDB(object):
         f.close()
         return res
     
+    def getLicense(self, name):
+        try:
+            return self.images[name]['license']
+        except KeyError:
+            return None
+    
     def getPath(self):
         raise NotImplemented('getPath() does not work with zipwiki.ImageDB!')
     
@@ -120,7 +123,7 @@ class ImageDB(object):
         try:
             return self.images[name]['url']
         except KeyError:
-            None
+            return None
     
     def clean(self):
         if self._tmpdir:
@@ -151,4 +154,8 @@ class FakeImageDB(ImageDB):
     def getURL(self, name):
         raise NotImplemented('getURL() does not work with zipwiki.FakeImageDB!')
     
+    def getLicense(self, name):
+        raise NotImplemented('getLicense() does not work with zipwiki.FakeImageDB!')
+    
+
 

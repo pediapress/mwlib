@@ -69,6 +69,9 @@ class ZipfileCreator(object):
                 continue
             self.zf.write(dp, (u"images/%s" % name).encode("utf-8"))
             self.images[name]['url'] = self.imgdb.getURL(name, size=size)
+            license = self.imagedb.getLicense(name)
+            if license:
+                self.images[name]['license'] = license
     
     def writeContent(self):
         self.addObject('content.json', simplejson.dumps(dict(

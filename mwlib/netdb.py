@@ -444,9 +444,6 @@ class NetDB(object):
         
         return unicode(raw, 'utf-8')
     
-    def getImageMetaInfos(self, imgname):
-        return {}
-
     def getTemplate(self, name, followRedirects=False):
         if ":" in name:
             name = name.split(':', 1)[1]
