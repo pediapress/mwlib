@@ -23,6 +23,7 @@ from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
 from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
 from mwlib.parser import CategoryLink, SpecialLink, ImageLink, Article, Book, Chapter, Caption
+from mwlib.parser import LangLink
 import copy
 
 
