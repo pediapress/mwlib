@@ -7,7 +7,7 @@ import simplejson
 """
 {
     'type': 'collection',
-    'version': COLLECTION FORMAT VERSION, # an integer value, 1 for now
+    'version': COLLECTION_FORMAT_VERSION, # an integer value, 1 for now
     'title': 'COLLECTION TITLE',
     'subtitle': 'COLLECTION SUBTITLE', # optional
     'editor': 'COLLECTION EDITOR', # optional

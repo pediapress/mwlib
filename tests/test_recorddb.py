@@ -69,7 +69,6 @@ class TestZipFileCreator(object):
     def test_addArticle(self):
         self.creator.addArticle(u'article1')
         assert self.creator.images
-        assert self.creator.db.articles[u'article1']['parsetree']
         assert u'template1' in self.creator.db.templates
     
     def test_addObject(self):
