@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn
+from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn, Indented
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
@@ -79,28 +79,16 @@ def test_removeNewlines():
     assert t.children 
     
 
-def test_removeBrakingSpaces():
+def xtest_sectioncaption():
     raw = """
-A<br />
+=== ''Stitle'' ===
 B
-:C 
-<br />D
+=== Stitle2 ===
+stuff
 """.decode("utf8")
     db = DummyDB()
-    r = parseString(title="X33", raw=raw, wikidb=db)
+    r = parseString(title="Any", raw=raw, wikidb=db)
     buildAdvancedTree(r)
     _treesanity(r)
-    assert len(r.getChildNodesByClass(BreakingReturn)) == 1
-    # test copy
-    c = r.copy()
-    #parser.show(sys.stderr, c, 0)
-    _treesanity(c)
-    r.appendChild(c)
-    
-    #parser.show(sys.stderr, r, 0)
-
-    _treesanity(r)
-    assert len(r.getChildNodesByClass(BreakingReturn)) == 2
-    
-
+    parser.show(sys.stderr, r, 0)
 

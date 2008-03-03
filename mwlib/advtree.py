@@ -57,7 +57,8 @@ class AdvancedNode():
         moves this node after target node
         if prefix is true, move in front of target node
         """
-        self.parent.removeChild(self)
+        if self.parent:
+            self.parent.removeChild(self)
         tp = targetnode.parent
         idx = tp.children.index(targetnode)
         if not prefix:

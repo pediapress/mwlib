@@ -34,6 +34,9 @@ import simplejson
 
 class MetaBook(object):
     """Encapsulate meta information about an article collection"""
+
+    title = u""
+    subtitle = u""
     
     def __init__(self):
         self.type = 'collection'
