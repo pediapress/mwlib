@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn, Indented
+from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
@@ -14,10 +14,10 @@ def _treesanity(r):
     for c in r.allchildren():
         if c.parent:
             assert c in c.parent.children
-            assert c.parent.children.count(c) == 1
+            assert _idIndex(c.parent.children, c) >= 0
         for cc in c:
             assert cc.parent
-            assert cc.parent == c
+            assert cc.parent is c
 
 
 def test_copy():
@@ -79,16 +79,33 @@ def test_removeNewlines():
     assert t.children 
     
 
-def xtest_sectioncaption():
-    raw = """
-=== ''Stitle'' ===
-B
-=== Stitle2 ===
-stuff
-""".decode("utf8")
-    db = DummyDB()
-    r = parseString(title="Any", raw=raw, wikidb=db)
-    buildAdvancedTree(r)
-    _treesanity(r)
-    parser.show(sys.stderr, r, 0)
 
+def test_identity():
+    raw = """
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+""".decode("utf8")
+
+    db = DummyDB()
+    r = parseString(title="X33", raw=raw, wikidb=db)
+    buildAdvancedTree(r)
+    _treesanity(r)    
+    
+    brs = r.getChildNodesByClass(BreakingReturn)
+    for i,br in enumerate(brs):
+        assert br in br.siblings
+        assert i == _idIndex(br.parent.children, br)
+        assert len([x for x in br.parent.children if x is not br]) == len(brs)-1
+        for bbr in brs:
+            if br is bbr:
+                continue
+            assert br == bbr
+            assert br is not bbr
+            
+            

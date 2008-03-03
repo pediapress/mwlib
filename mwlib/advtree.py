@@ -19,19 +19,20 @@ http://meta.wikimedia.org/wiki/Help:Advanced_editing
 """
 
 import weakref
-from mwlib.parser import Magic, Math,  _VListNode, Ref # not used but imported
-from mwlib.parser import Item, ItemList, Link, NamedURL, Node, Table, Row, Cell, Paragraph, PreFormatted
-from mwlib.parser import Section, Style, TagNode, Text, URL, Timeline
-from mwlib.parser import CategoryLink, SpecialLink, ImageLink, Article, Book, Chapter, Caption
-from mwlib.parser import LangLink
+from mwlib.parser import Magic, Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
+from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
+from mwlib.parser import Item, ItemList,  Node, Table, Row, Cell, Paragraph, PreFormatted
+from mwlib.parser import Section, Style, TagNode, Text, Timeline
+from mwlib.parser import  ImageLink, Article, Book, Chapter
 import copy
-
-
-
-
 from mwlib.log import Log
+
 log = Log("advtree")
 
+
+def _idIndex(lst, el):
+    # return first appeareance of element in list
+    return ([i for i,e in enumerate(lst) if e is el] or [-1])[0]
 
 class AdvancedNode():
     """
@@ -61,7 +62,7 @@ class AdvancedNode():
         if self.parent:
             self.parent.removeChild(self)
         tp = targetnode.parent
-        idx = tp.children.index(targetnode)
+        idx = _idIndex(tp.children, targetnode)
         if not prefix:
             idx+=1
         tp.children = tp.children[:idx] + [self] + tp.children[idx:]
@@ -75,7 +76,7 @@ class AdvancedNode():
         self.replaceChild(c, [])
 
     def replaceChild(self, c, newchildren = []):
-        idx = self.children.index(c)
+        idx = _idIndex(self.children, c)
         self.children.remove(c)
         c._parentref = None
         if newchildren:
@@ -118,7 +119,7 @@ class AdvancedNode():
                 yield x        
         
     def getSiblings(self):
-        return [c for c in self.getAllSiblings() if c!=self]
+        return [c for c in self.getAllSiblings() if c is not self]
 
     def getAllSiblings(self):
         "all siblings plus me my self and i"
@@ -130,7 +131,7 @@ class AdvancedNode():
         "return previous sibling"
         s = self.getAllSiblings()
         try:
-            idx = s.index(self)
+            idx = _idIndex(s,self)
         except ValueError:
             return None
         if idx -1 <0:
@@ -142,7 +143,7 @@ class AdvancedNode():
         "return next sibling"
         s = self.getAllSiblings()
         try:
-            idx = s.index(self)
+            idx = _idIndex(s,self)
         except ValueError:
             return None
         if idx+1 >= len(s):
