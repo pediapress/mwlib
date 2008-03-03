@@ -3,9 +3,9 @@
 # Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-## http://mw/index.php?title=Image:Bla.jpg&action=raw
-## http://mw/index.php?title=Template:MYHEADER&action=raw
-
+# An alternative solution to construct the hashpath of images would be to use
+# api.php, e.g.
+# fetch the page http://de.wikipedia.org/w/api.php?action=query&titles=Bild:SomePic.jpg&prop=imageinfo&iiprop=url&format=json
 
 import os
 import sys
@@ -44,7 +44,7 @@ def hashpath(name):
 class ImageDB(object):
     convert_command = 'convert' # name of/path to ImageMagick's convert tool
     
-    def __init__(self, baseurl, cachedir=None):
+    def __init__(self, baseurl, cachedir=None, wikidb=None, knownLicenses=None):
         """Init ImageDB with a base URL (or a list of base URLs) and optionally
         with a cache directory.
         
@@ -53,13 +53,21 @@ class ImageDB(object):
         
         @param cachedir: image cache directory (optional)
         @type cachedir: basestring or None
+        
+        @param wikidb: WikiDB instance used to fetch image description pages to
+            find out image licenses
+        @type wikidb: object
+        
+        @param knownLicenses: list of known license templates (whose name is the
+            name of the license) which may appear on image description pages
+        @type knownLicenses: [unicode]
         """
         
         if isinstance(baseurl, unicode):
-            baseurl = (baseurl.encode('ascii'),)
-        elif isinstance(baseurl, tuple):
-            baseurl = tuple([bu.encode('ascii') for bu in baseurl if isinstance(bu, unicode)])
-        self.baseurls = baseurl
+            self.baseurls = [baseurl.encode('ascii')]
+        else:
+            self.baseurls = [bu.encode('ascii')
+                             for bu in baseurl if isinstance(bu, unicode)]
         
         if cachedir:
             self.cachedir = cachedir
@@ -69,6 +77,14 @@ class ImageDB(object):
             self.tempcache = True
         if self.cachedir[-1] != '/':
             self.cachedir += '/' # needed for getPath() to work correctly
+        
+        self.wikidb = wikidb
+
+        oredLicenses = '|'.join(['(%s)' % re.escape(license)
+                                 for license in (knownLicenses or [])])
+        self.licenseRegexp = re.compile(r'{{(?P<license>%s)}}' % oredLicenses)
+        
+        self.name2license = {}
     
     def clear(self):
         """Delete temporary cache directory (i.e. only if no cachedir has been
@@ -137,6 +153,8 @@ class ImageDB(object):
         if tmpfile is None:
             return None
         
+        self.name2license[name] = self._fetchLicense(baseurl, name)
+        
         path = self._convertToCache(tmpfile, baseurl, name, size=size)
         
         try:
@@ -145,6 +163,35 @@ class ImageDB(object):
             log.warn('Could not delete temp file %r' % tmpfile)
         
         return path
+    
+    def _fetchLicense(self, baseurl, name):
+        if self.wikidb is None:
+            return None
+        
+        raw = self.wikidb.getImageDescription(name,
+            urlIndex=self.baseurls.index(baseurl),
+        )
+        if raw is None:
+            return None
+        
+        mo = re.search(self.licenseRegexp, raw)
+        if mo is None:
+            return None
+        
+        return mo.group('license')
+    
+    def getLicense(self, name):
+        """Return license of image as stated on image description page
+        
+        @param name: image name without namespace (e.g. without "Image:")
+        @type name: unicode
+        
+        @returns: license of image of None, if no valid license could be found
+        @rtype: str
+        """
+        
+        assert isinstance(name, unicode), 'name must be of type unicode'
+        return self.name2license.get(name)
     
     def _getImageFromCache(self, name, size=None):
         """Look in cachedir for an image with the given parameters"""
@@ -267,26 +314,59 @@ def normname(name):
 class NetDB(object):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
 
-    def __init__(self, pagename, imagedescription=None, templateurls=None, templateblacklist=None):
-        self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
+    def __init__(self, pagename,
+        imagedescriptionurls=None,
+        templateurls=None,
+        templateblacklist=None,
+    ):
+        """
+        @param pagename: URL to page in wikitext format. @TITLE@ gets replaced
+            with the page name and @REVISION@ gets replaced with the requested
+            revision/oldid. E.g.
 
-        self.templateurls = [x.replace("%", "%%").replace("@TITLE@", "%(NAME)s") for x in templateurls]
-
-        if imagedescription is None:
-            self.imagedescription = pagename.replace("%", "%%").replace("@TITLE@", "Image:%(NAME)s")
-        else:
-            self.imagedescription = imagedescription.replace("%", "%%").replace("@TITLE@", "%(NAME)s")
+                "http://mw/index.php?title=@TITLE@&action=raw&oldid=@TITLE@"
+        
+        @type pagename: str
+        
+        @param imagedescriptionurls: list of URLs to image description pages in
+            wikitext format. @TITLE@ gets replaced with the image title w/out
+            its prefix. E.g.
             
+                ["http://mw/index.php?title=Image:@TITLE@s&action=raw"]
+            
+            The list must be of the same length as the baseurl list of the
+            accompanying ImageDB, and the URL with the corresponding position
+            in the list is used to retrieve the description page.
+        @type imagedescriptionurls: [str]
+        
+        @param templateurls: list of URLs to template pages in wikitext format.
+            @TITLE@ gets replaced with the template title. E.g.
+            
+                ["http://mw/index.php?title=Template:@TITLE@s&action=raw"]
+            
+            If more than one URL is specified, URLs are tried in given order.
+        @type templateurls: [str]
+        """
+        
+        self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
+        
+        if templateurls is None:
+            templateurls = []
+        self.templateurls = [x.replace("%", "%%").replace("@TITLE@", "%(NAME)s")
+                             for x in templateurls]
+        
+        if imagedescriptionurls is None:
+            imagedescriptionurls = []
+        self.imagedescriptionurls = [x.replace("%", "%%").replace("@TITLE@", "%(NAME)s")
+                                     for x in imagedescriptionurls]
+        
         if templateblacklist:
             self.templateblacklist = self._readTemplateBlacklist(templateblacklist)
         else:
             self.templateblacklist = []
-
-        #self.pagename = "http://mw/index.php?title=%(NAME)s&action=raw&oldid=%(REVISION)s"
-        #self.imagedescription = "http://mw/index.php?title=Image:%(NAME)s&action=raw"
         
         self.pages = {}
-        
+    
     def _getpage(self, url, expectedContentType='text/x-wiki'):
         try:
             return self.pages[url]
@@ -338,11 +418,32 @@ class NetDB(object):
         assert isinstance(dbtitle, str), 'dbtitle must be of type str'
         return unicode(dbtitle, 'utf-8')
 
-    def getImageDescription(self, title):
-        NAME = urllib.quote(title.replace(" ", "_").encode('utf8'))
-        url = self.imagedescription % dict(NAME=NAME)
-        return self._getpage(url)
-
+    def getImageDescription(self, title, urlIndex=0):
+        """Fetch the image description page for the image with the given title.
+        If baseurl and self.imagedescriptions contains more than one URL, use
+        the one which starts with baseurl.
+        
+        @param title: title of the image w/out prefix (like Image:)
+        @type title: unicode
+        
+        @param urlIndex: index for imagedescriptionurls
+        @type urlIndex: int
+        
+        @returns: wikitext of image description page or None
+        @rtype: unicode or None
+        """
+        
+        if not self.imagedescriptionurls:
+            return None
+        
+        raw = self._getpage(self.imagedescriptionurls[urlIndex] % {
+            'NAME': urllib.quote(title.replace(" ", "_").encode('utf8')),
+        })
+        if raw is None:
+            return None
+        
+        return unicode(raw, 'utf-8')
+    
     def getImageMetaInfos(self, imgname):
         return {}
 
