@@ -19,7 +19,7 @@ class MetaBook(object):
         self.version = 1
         self.items = []
     
-    def addArticles(self, articleTitles, chapterTitle=None, format='text/x-wiki'):
+    def addArticles(self, articleTitles, chapterTitle=None, contentType='text/x-wiki'):
         """
         @param articleTitles: sequence of article titles or dicts containing
             article title (value for key 'title') and optionally display title
@@ -31,6 +31,7 @@ class MetaBook(object):
         for title in articleTitles:
             article = {
                 'type': 'article',
+                'content-type': format,
             }
             if isinstance(title, dict):
                 article.update(title)
