@@ -1,13 +1,34 @@
 [images]
 type = download
+
+# list of base URLs to original image files:
 url = http://upload.wikimedia.org/wikipedia/commons/
+
+# local cache directory (can become very large):
 localpath = ~/en-images
+
+# list of known templates used for declaring image licenses on image description
+# pages:
 knownlicenses = GFDL cc-by-sa
+
 
 [wiki]
 type = net
-articleurl=http://en.wikipedia.org/w/index.php?title=@TITLE@&action=raw
-imagedescriptionurls = http://commons.wikipedia.org/w/index.php?title=Image:@TITLE@&action=raw
-templateurls = http://en.wikipedia.org/w/index.php?title=Template:@TITLE@&action=raw
+
 name = The Free Encyclopedia
 url = http://en.wikipedia.org/
+
+# URL for article pages:
+articleurl=http://en.wikipedia.org/w/index.php?title=@TITLE@&action=raw
+
+# whitespace-separated list of URLs for image description pages (if more than
+# one URL is specified, the order must match the order of the list of URLs in
+# the url attribute of the [images] section):
+imagedescriptionurls = http://commons.wikipedia.org/w/index.php?title=Image:@TITLE@&action=raw
+
+# URLs for template pages. The URLs are tried in order, thus it's possible to
+# override temlates later in this list:
+templateurls = http://en.wikipedia.org/w/index.php?title=Template:@TITLE@&action=raw
+
+# title of article containing the license text for articles in this MediaWiki:
+defaultarticlelicense = GFDL

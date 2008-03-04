@@ -43,14 +43,24 @@ Articles
 ========
 
 type (string):
-   Fixed value 'article'.
+    Fixed value 'article'.
+
+content-type (string):
+    Fixed value 'text/x-wiki'.
 
 title (string):
-   Title of this article.
+    Title of this article.
 
-revision (string, optional):
-   Revision of article, i.e. oldid for MediaWiki. If omitted, the latest
-   revision is used.
+displaytitle (string, optional):
+    Title to be used in rendered output instead of the real title.
+
+revision (string):
+    Revision of article, i.e. oldid for MediaWiki. If omitted, the latest
+    revision is used.
+
+timestamp (integer):
+    UNIX timestamp (seconds since 1970-1-1) of the revision of this article.
+
 
 Chapters
 ========
