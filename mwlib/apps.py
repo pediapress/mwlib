@@ -131,9 +131,7 @@ def buildzip():
             'type': 'MediaWiki',
             'name': cp.get('wiki', 'name'),
             'url': cp.get('wiki', 'url'),
-            'defaultarticlelicense': {
-                license,
-            }
+            'defaultarticlelicense': license,
         }
         
         if options.collectionpage:
