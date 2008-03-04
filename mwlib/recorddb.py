@@ -67,7 +67,7 @@ class ZipfileCreator(object):
             dp = self.imgdb.getDiskPath(name, size=size)
             if dp is None:
                 continue
-            self.zf.write(dp, (u"images/%s" % name).encode("utf-8"))
+            self.zf.write(dp, (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
             self.images[name]['url'] = self.imgdb.getURL(name, size=size)
             license = self.imgdb.getLicense(name)
             if license:

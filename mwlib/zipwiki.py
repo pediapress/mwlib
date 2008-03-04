@@ -91,7 +91,7 @@ class ImageDB(object):
         except KeyError:
             pass
         try:
-            data = self.zf.read('images/%s' % name.encode('utf-8'))
+            data = self.zf.read('images/%s' % name.replace("'", '-').encode('utf-8'))
         except KeyError: # no such file
             return None
         
