@@ -5,31 +5,7 @@ import re
 import simplejson
 
 """
-{
-    'type': 'collection',
-    'version': COLLECTION_FORMAT_VERSION, # an integer value, 1 for now
-    'title': 'COLLECTION TITLE',
-    'subtitle': 'COLLECTION SUBTITLE', # optional
-    'editor': 'COLLECTION EDITOR', # optional
-    'items': [
-        {
-            'type': 'chapter',
-            'title': 'CHAPTER TITLE',
-            'items': [
-                {
-                    'type': 'article',
-                    'title': 'ARTICLE TITLE',   
-                    'revision': 'ARTITLE REVISION', # e.g. oldid for MediaWiki articles
-                },
-            ],
-            ...
-        },
-    ],
-    'source': {
-        'name': 'UNIQUE NAME OF WIKI', # e.g. 'Wikipedia EN'
-        'url': 'UNIQUE URL OF WIKI', # e.g. 'http://en.wikipedia.org/wiki/'
-    },
-}
+See METABOOK.txt for description of Metabook data
 """
 
 class MetaBook(object):

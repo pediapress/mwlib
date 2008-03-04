@@ -126,6 +126,7 @@ def buildzip():
     
         mb = metabook.MetaBook()
         mb.source = {
+            'type': 'MediaWiki',
             'name': cp.get('wiki', 'name'),
             'url': cp.get('wiki', 'url'),
         }
