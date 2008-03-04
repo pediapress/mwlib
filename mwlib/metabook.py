@@ -5,42 +5,21 @@ import re
 import simplejson
 
 """
-{
-    'type': 'collection',
-    'version': COLLECTION FORMAT VERSION, # an integer value, 1 for now
-    'title': 'COLLECTION TITLE',
-    'subtitle': 'COLLECTION SUBTITLE', # optional
-    'editor': 'COLLECTION EDITOR', # optional
-    'items': [
-        {
-            'type': 'chapter',
-            'title': 'CHAPTER TITLE',
-            'items': [
-                {
-                    'type': 'article',
-                    'title': 'ARTICLE TITLE',   
-                    'revision': 'ARTITLE REVISION', # e.g. oldid for MediaWiki articles
-                },
-            ],
-            ...
-        },
-    ],
-    'source': {
-        'name': 'UNIQUE NAME OF WIKI', # e.g. 'Wikipedia EN'
-        'url': 'UNIQUE URL OF WIKI', # e.g. 'http://en.wikipedia.org/wiki/'
-    },
-}
+See METABOOK.txt for description of Metabook data
 """
 
 class MetaBook(object):
     """Encapsulate meta information about an article collection"""
+
+    title = u""
+    subtitle = u""
     
     def __init__(self):
         self.type = 'collection'
         self.version = 1
         self.items = []
     
-    def addArticles(self, articleTitles, chapterTitle=None, format='text/x-wiki'):
+    def addArticles(self, articleTitles, chapterTitle=None, contentType='text/x-wiki'):
         """
         @param articleTitles: sequence of article titles or dicts containing
             article title (value for key 'title') and optionally display title
@@ -52,6 +31,7 @@ class MetaBook(object):
         for title in articleTitles:
             article = {
                 'type': 'article',
+                'content-type': contentType,
             }
             if isinstance(title, dict):
                 article.update(title)

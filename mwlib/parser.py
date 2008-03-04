@@ -116,8 +116,8 @@ class Node(object):
     def __ne__(self, other):
         return not(self==other)
 
-    def allchildren(self):
-        yield self
+    def allchildren(self): # name is broken, returns self, which is not a child
+        yield self 
         for c in self.children:
             for x in c.allchildren():
                 yield x        

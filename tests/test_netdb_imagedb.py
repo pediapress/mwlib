@@ -8,7 +8,7 @@ import time
 
 from PIL import Image
 
-from mwlib.netdb import ImageDB
+from mwlib.netdb import ImageDB, NetDB
 
 class TestImageDB(object):
     baseurls = (
@@ -20,6 +20,20 @@ class TestImageDB(object):
     existing_image_name = u'Serra_de_Cals.jpg'
     existing_image_url = 'http://upload.wikimedia.org/wikipedia/commons/6/6b/Serra_de_Cals.jpg'
     nonexisting_image_name = u'Test12123213.jpg'
+    
+    # config for NetDB:
+    articleurl = 'http://en.wikipedia.org/w/index.php?title=@TITLE@&action=raw'
+    templateurls = [
+        'http://en.wikipedia.org/w/index.php?title=Template:@TITLE@&action=raw',
+    ]
+    imagedescriptionurls = [
+        'http://gibsjagarnicht.xyz/test/bla/@TITLE@',
+        'http://de.wikipedia.org/w/index.php?title=Bild:@TITLE@&action=raw',
+        'http://commons.wikipedia.org/w/index.php?title=Image:@TITLE@&action=raw',
+    ]
+    knownLicenses = [
+        'GFDL', 'cc-by-sa',
+    ]
     
     def setup_class(cls):
         cls.tempdir = tempfile.mkdtemp()
@@ -105,6 +119,19 @@ class TestImageDB(object):
         print 'CONVERTED2', img.size
         assert img.size == orig_size
     
+    def test_license(self):
+        wikidb = NetDB(
+            pagename=self.articleurl,
+            templateurls=self.templateurls,
+            imagedescriptionurls=self.imagedescriptionurls,
+        )
+        imagedb = ImageDB(self.baseurls, self.tempdir,
+            wikidb=wikidb,
+            knownLicenses=self.knownLicenses,
+        )
+        p = imagedb.getDiskPath(self.existing_image_name, size=100)
+        license = imagedb.getLicense(self.existing_image_name)
+        print 'LICENSE:', license
+    
 
-        
-        
+    

@@ -10,13 +10,25 @@ def wiki_zip(path=None, url=None, name=None):
     from mwlib import zipwiki
     return zipwiki.Wiki(path)
 
-def wiki_net(articleurl=None, url=None, name=None, templateurls=None, templateblacklist=None):
+def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
+    templateurls=None, templateblacklist=None, **kwargs):
     from mwlib import netdb
+
     if templateurls:
         templateurls = [x for x in templateurls.split() if x]
     else:
         raise RuntimeError("templateurls parameter for netdb not set in [wiki] section")
-    return netdb.NetDB(articleurl, templateurls=templateurls, templateblacklist=templateblacklist)
+
+    if imagedescriptionurls:
+        imagedescriptionurls = [x for x in imagedescriptionurls.split() if x]
+    else:
+        raise RuntimeError("imagedescriptionurls parameter for netdb not set in [wiki] section")
+    
+    return netdb.NetDB(articleurl,
+        imagedescriptionurls=imagedescriptionurls,
+        templateurls=templateurls,
+        templateblacklist=templateblacklist,
+    )
 
 def wiki_cdb(path=None):
     from mwlib import cdbwiki
@@ -24,7 +36,7 @@ def wiki_cdb(path=None):
     db=cdbwiki.WikiDB(path)
     return db
 
-def image_download(url=None, localpath=None):
+def image_download(url=None, localpath=None, knownlicenses=None):
     assert url, "must supply url in [images] section"
     from mwlib import netdb
 
@@ -33,7 +45,12 @@ def image_download(url=None, localpath=None):
     urls = [x for x in url.split() if x]
     assert urls
     
-    imgdb = netdb.ImageDB(urls, cachedir=localpath)
+    if knownlicenses:
+        knownlicenses = [x for x in knownlicenses.split() if x]
+    else:
+        knownlicenses = None
+    
+    imgdb = netdb.ImageDB(urls, cachedir=localpath, knownLicenses=knownlicenses)
     return imgdb
 
 def image_zip(path=None):
