@@ -1050,7 +1050,7 @@ class Parser(object):
         tag = self.token[0].t
         try:
             m=getattr(self, 'parse'+tag.upper()+'Tag')
-        except AttributeError:
+        except (AttributeError, UnicodeEncodeError):
             t=Text(self.token[1])
             self.next()
             return t
