@@ -118,17 +118,22 @@ def buildzip():
         else:
             fd, zipfilename = tempfile.mkstemp()
             os.close(fd)
-    
+        
         from ConfigParser import ConfigParser
-
+        
         cp = ConfigParser()
         cp.read(conf)
-    
+        
+        license = w['wiki'].getRawArticle(cp.get('wiki', 'defaultarticlelicense'))
+        
         mb = metabook.MetaBook()
         mb.source = {
+            'type': 'MediaWiki',
             'name': cp.get('wiki', 'name'),
             'url': cp.get('wiki', 'url'),
+            'defaultarticlelicense': license,
         }
+        
         if options.collectionpage:
             mwcollection = w['wiki'].getRawArticle(options.collectionpage)
             mb.loadCollectionPage(mwcollection)
