@@ -1,5 +1,6 @@
 include .hgignore
 include MANIFEST.in
+include METABOOK.txt
 include README.html
 include README.txt
 include dewiki-conf.txt
