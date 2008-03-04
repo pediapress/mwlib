@@ -32,7 +32,10 @@ log = Log("advtree")
 
 def _idIndex(lst, el):
     # return first appeareance of element in list
-    return ([i for i,e in enumerate(lst) if e is el] or [-1])[0]
+    for i, e in enumerate(lst):
+        if e is el:
+            return i
+    return -1
 
 class AdvancedNode():
     """
@@ -172,6 +175,17 @@ class AdvancedNode():
         "return first child of this node"
         if self.children:
             return self.children[0]
+
+    def getAllDisplayText(self, amap = None):
+        "return all text that is intended for display"
+        text = []
+        if not amap:
+            amap = {Text:"caption", Link:"target", URL:"caption", Math:"caption", ImageLink:"caption" }
+        for n in self.allchildren():
+            access = amap.get(n.__class__, "")
+            if access:
+                text.append( getattr(n, access) )
+        return u"".join(text)
 
     parent = property(getParent)
     parents = property(getParents)
