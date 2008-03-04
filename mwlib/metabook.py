@@ -31,7 +31,7 @@ class MetaBook(object):
         for title in articleTitles:
             article = {
                 'type': 'article',
-                'content-type': format,
+                'content-type': contentType,
             }
             if isinstance(title, dict):
                 article.update(title)
