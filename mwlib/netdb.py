@@ -230,7 +230,7 @@ class ImageDB(object):
             name += '.png'
         if name.lower().endswith('.gif'):
             name += '.png'
-        name = (name[0].upper() + name[1:]).replace(' ', '_')
+        name = (name[0].upper() + name[1:]).replace(' ', '_').replace("'", "-")
         
         d = os.path.join(urlpart, sizepart)
         if makedirs and not os.path.isdir(d):
