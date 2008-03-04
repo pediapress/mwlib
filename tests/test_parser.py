@@ -400,3 +400,5 @@ def test_colon_nobr():
     assert not tagnodes, "should have no br tagnodes"
 
 
+def test_nonascii_in_tags():
+    r = parse(u"<dfg\u0147>")
