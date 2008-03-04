@@ -11,7 +11,7 @@ def wiki_zip(path=None, url=None, name=None):
     return zipwiki.Wiki(path)
 
 def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
-    templateurls=None, templateblacklist=None):
+    templateurls=None, templateblacklist=None, **kwargs):
     from mwlib import netdb
 
     if templateurls:
