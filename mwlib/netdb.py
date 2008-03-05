@@ -289,7 +289,7 @@ class ImageDB(object):
         """
         
         destfile = self._getCachedImagePath(baseurl, name, size=size, makedirs=True)
-        opts = '-background white -coalesce -density 100 -flatten %(thumbnail)s' % {
+        opts = '-background white -density 100 -flatten -coalesce %(thumbnail)s' % {
             'thumbnail': '-thumbnail "%dx%d>"' % (size, size) if size is not None else '-strip',
         }
         cmd = "%(convert)s %(opts)s '%(src)s[0]' '%(dest)s'" % {
