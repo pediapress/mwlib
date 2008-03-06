@@ -80,7 +80,7 @@ class AdvancedNode():
 
     def replaceChild(self, c, newchildren = []):
         idx = _idIndex(self.children, c)
-        self.children.remove(c)
+        self.children.remove(c)           
         c._parentref = None
         if newchildren:
             self.children = self.children[:idx] + newchildren + self.children[idx:]
@@ -410,7 +410,8 @@ def fixStyle(node):
         node.__class__ = Strong
         node.caption = ""
         em = Emphasized("''")
-        em.children = node.children
+        for c in node.children:
+            em.appendChild(c)
         node.children = []
         node.appendChild(em)
     elif node.caption == "'''":
