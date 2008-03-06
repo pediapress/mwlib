@@ -203,6 +203,21 @@ class AdvancedNode():
 # MixinClasses w/ special behaviour
 # -------------------------------------------------------------------------
 
+class AdvancedTable(AdvancedNode):    
+    @property 
+    def rows(self):
+        return [r for r in self if r.__class__ == Row]
+
+    @property 
+    def numcols(self):
+        return max([[n.__class__ for n in row].count(Cell) for row in self.rows])
+
+class AdvancedRow(AdvancedNode):    
+    @property 
+    def cells(self):
+        return [c for c in self if c.__class__ == Cell]
+    
+
 class AdvancedSection(AdvancedNode):
     h_level = 0 # this is set if it originates from an H1, H2, ... TagNode
     def getSectionLevel(self):
@@ -221,7 +236,7 @@ class AdvancedMath(AdvancedNode):
 
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
-                     Math:AdvancedMath}
+                     Math:AdvancedMath, Row:AdvancedRow, Table:AdvancedTable}
        
 
 # --------------------------------------------------------------------------
