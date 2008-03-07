@@ -1,0 +1,105 @@
+
+General
+=======
+
+TODO: collection / metabook etc.
+
+
+Top-Level Attributes
+====================
+
+type (string):
+    fixed value 'collection'
+
+version (int):
+    protocol version, 1 for now
+
+title (string, optional):
+    Title of the collection
+
+subtitle (string, optional):
+    Subtitle of the collection
+
+editor (string, optional):
+    Editor of the collection
+
+items (list of dictionaries):
+    Contains chapters and articles contained in the collection (see below).
+    
+source (dictionary):
+    Information about the source this collection has been created of:
+    
+    type (string):
+       Type of source, fixed value 'MediaWiki' for now
+       
+    url (string):
+       unique "home" URL of source, e.g. http://en.wikipedia.org/
+      
+    name (string):
+       unique name of source, e.g. "Wikipedia en"
+
+
+Articles
+========
+
+type (string):
+    Fixed value 'article'.
+
+content-type (string):
+    Fixed value 'text/x-wiki'.
+
+title (string):
+    Title of this article.
+
+displaytitle (string, optional):
+    Title to be used in rendered output instead of the real title.
+
+revision (string):
+    Revision of article, i.e. oldid for MediaWiki. If omitted, the latest
+    revision is used.
+
+timestamp (integer):
+    UNIX timestamp (seconds since 1970-1-1) of the revision of this article.
+
+
+Chapters
+========
+
+type (string):
+    Fixed value 'chapter'.
+
+title (string):
+    Title of this chapter.
+
+items (list of article dictionaries):
+    List of articles contained in this chapter.
+
+
+Example:
+
+{
+    'type': 'collection',
+    'version': COLLECTION_FORMAT_VERSION, # an integer value, 1 for now
+    'title': 'COLLECTION TITLE',
+    'subtitle': 'COLLECTION SUBTITLE', # optional
+    'editor': 'COLLECTION EDITOR', # optional
+    'items': [
+        {
+            'type': 'chapter',
+            'title': 'CHAPTER TITLE',
+            'items': [
+                {
+                    'type': 'article',
+                    'title': 'ARTICLE TITLE',   
+                    'revision': 'ARTITLE REVISION', # e.g. oldid for MediaWiki articles
+                },
+            ],
+            ...
+        },
+    ],
+    'source': {
+        'type': 'MediaWiki',
+        'name': 'UNIQUE NAME OF WIKI', # e.g. 'Wikipedia EN'
+        'url': 'UNIQUE URL OF WIKI', # e.g. 'http://en.wikipedia.org/wiki/'
+    },
+}

@@ -73,7 +73,7 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog -c CONF [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
+    parser = optparse.OptionParser(usage="%prog -c CONF [--help] [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option('--collectionpage', help='Title of a collection page')
@@ -97,7 +97,7 @@ def buildzip():
 
     conf = options.conf
     if not options.conf:
-        parser.error("missing --conf argument")
+        parser.error("missing --conf argument\nuse --help for all options")
     
     try:
         output = options.output
@@ -118,17 +118,22 @@ def buildzip():
         else:
             fd, zipfilename = tempfile.mkstemp()
             os.close(fd)
-    
+        
         from ConfigParser import ConfigParser
-
+        
         cp = ConfigParser()
         cp.read(conf)
-    
+        
+        license = w['wiki'].getRawArticle(cp.get('wiki', 'defaultarticlelicense'))
+        
         mb = metabook.MetaBook()
         mb.source = {
+            'type': 'MediaWiki',
             'name': cp.get('wiki', 'name'),
             'url': cp.get('wiki', 'url'),
+            'defaultarticlelicense': license,
         }
+        
         if options.collectionpage:
             mwcollection = w['wiki'].getRawArticle(options.collectionpage)
             mb.loadCollectionPage(mwcollection)
@@ -148,11 +153,13 @@ def buildzip():
     
         z.addObject('metabook.json', mb.dumpJson())
         for title, revision in mb.getArticles():
-            z.addArticle(title, revision=revision)
-        
+            z.addArticle(title, revision=revision)        
         print "got articles"
-        z.writeImages(size=imagesize)
-        print "got images"
+
+        if not options.noimages:
+            z.writeImages(size=imagesize)
+            print "got images"
+
         z.writeContent()
         print "written content"
         zf.close()
@@ -202,9 +209,10 @@ def buildzip():
             errorfile = open(options.errorfile, 'w')
             print 'writing errors to %r' % options.errorfile
             errorfile.write('Caught: %s %s' % (e, type(e)))
-            import traceback
+            import traceback, sys
             traceback.print_exc(file=errorfile)
             errorfile.close()
+            sys.exit(1)
         else:
             raise
     
@@ -274,7 +282,7 @@ def serve():
     images = res['images']
     from wsgiref.simple_server import make_server, WSGIServer
 
-    from SocketServer import ThreadingMixIn, ForkingMixIn
+    from SocketServer import  ForkingMixIn
     class MyServer(ForkingMixIn, WSGIServer):
         pass
 
@@ -335,4 +343,5 @@ def html():
         os.close(fd)
         open(htmlfile, "wb").write(out.getvalue().encode('utf-8'))
         webbrowser.open("file://"+htmlfile)
+
 

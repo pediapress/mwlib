@@ -97,7 +97,8 @@ def parseString(title=None, raw=None, wikidb=None, revision=None):
         x(a)
     return a
 
-def simpleparse(raw):    
+
+def simpleparse(raw):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
     import sys
     from mwlib import dummydb
     db = dummydb.DummyDB()
