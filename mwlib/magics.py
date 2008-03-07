@@ -281,9 +281,6 @@ class ParserFunctions(object):
         return self._expp
 
     def IF(self, rl):
-        r=repr((rl[0], rl[1], rl[2]))
-
-
         if rl[0]:
             return rl[1]
         else:
