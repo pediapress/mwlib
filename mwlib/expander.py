@@ -288,7 +288,8 @@ class Parser(object):
 def parse(txt):
     return optimize(Parser(txt).parse())
 
-
+class MemoryLimitError(Exception):
+    pass
 
 class LazyArgument(object):
     def __init__(self, node, expander, variables):
@@ -303,7 +304,9 @@ class LazyArgument(object):
             self.expander.flatten(self.node, arg, self.variables)
 
             arg = u"".join(arg).strip()
-
+            if len(arg)>256*1024:
+                raise MemoryLimitError("template argument too long: %s bytes" % (len(arg),))
+            
             self._flatten = arg
         return self._flatten
 
@@ -414,7 +417,9 @@ class Expander(object):
             name = []
             self.flatten(n.children[0], name, variables)
             name = u"".join(name).strip()
-
+            if len(name)>256*1024:
+                raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
+            
             remainder = None
             if ":" in name:
                 try_name, try_remainder = name.split(':', 1)
@@ -450,7 +455,9 @@ class Expander(object):
             name = []
             self.flatten(n.children[0], name, variables)
             name = u"".join(name).strip()
-
+            if len(name)>256*1024:
+                raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
+            
             try:
                 num = int(name)-1
             except ValueError:
