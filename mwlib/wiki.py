@@ -10,7 +10,7 @@ def wiki_zip(path=None, url=None, name=None):
     from mwlib import zipwiki
     return zipwiki.Wiki(path)
 
-def wiki_net(articleurl=None, url=None, name=None, templateurls=None, templateblacklist=None):
+def wiki_net(articleurl=None, url=None, name=None, templateurls=None, templateblacklist=None, **kw):
     from mwlib import netdb
     if templateurls:
         templateurls = [x for x in templateurls.split() if x]
