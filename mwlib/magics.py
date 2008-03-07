@@ -280,6 +280,12 @@ class ParserFunctions(object):
             self._expp = expr.ExpressionParser()
         return self._expp
 
+    def TAG(self, args):
+        name = args[0].strip()
+        r= u"<%s>%s</%s>" % (name, args[1], name)
+        return r
+    
+
     def IF(self, rl):
         if rl[0]:
             return rl[1]
