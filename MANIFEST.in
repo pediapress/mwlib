@@ -52,6 +52,7 @@ include mwlib/zipwiki.py
 include setup.py
 include simple-conf.txt
 include tests/data/test.zip
+include tests/memeater.py
 include tests/test_advtree.py
 include tests/test_expander.py
 include tests/test_html.py

@@ -391,7 +391,7 @@ def extendClasses(node):
 
 def fixTagNodes(node):
     """
-    detect known TagNode(s) and assoiciate aprroriate Nodes
+    detect known TagNode(s) and associate appropriate Nodes
     """
     for c in node.children:
         if c.__class__ == TagNode:
@@ -412,7 +412,7 @@ def fixTagNodes(node):
 def fixStyle(node):
     """
     parser.Style Nodes are mapped to logical markup
-    dection of DefinitionList depends on removeNodes
+    detection of DefinitionList depends on removeNodes
     and removeNewlines
     """
     if not node.__class__ == Style:
@@ -474,7 +474,9 @@ def removeNodes(node):
     nothing but group other nodes. we remove them here
     """
     if node.__class__ == Node:
-        node.parent.replaceChild(node, node.children)
+        # first child of section groups heading text - grouping Node must not be removed
+        if not (node.previous == None and node.parent.__class__ == Section): 
+            node.parent.replaceChild(node, node.children)
     for c in node.children[:]:
         removeNodes(c)
 

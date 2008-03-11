@@ -1080,16 +1080,15 @@ class Parser(object):
         start = TagToken(token.t)
         self.next()
         
-
+        break_at = set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "BREAK", "SECTION", "BEGINTABLE"])
+        
         while self.left:
             token = self.token
-            if token[0]=='BREAK':
+            if token[0] in break_at:
                 break
             elif token[0]=='\n':
                 b.append(Text(token[1]))
                 self.next()
-            elif token[0]=='SECTION':
-                break
             elif token[0]==end:
                 self.next()
                 break
@@ -1100,8 +1099,6 @@ class Parser(object):
                     self.next()  # 'Nuclear fuel' looks strange otherwise
                     break
                 b.append(self.parseTagToken())
-            elif token[0]=="BEGINTABLE":
-                break
             elif token[0] in FirstAtom:
                 b.append(self.parseAtom())
             else:
