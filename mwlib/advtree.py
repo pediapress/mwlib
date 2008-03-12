@@ -521,26 +521,3 @@ def getAdvTree(fn):
 
 
 
-def main():
-    import sys
-    from mwlib import parser
-    from mwlib.dummydb import DummyDB
-    import xhtmlwriter
-    db = DummyDB()
-    
-    for x in sys.argv[1:]:
-        r = getAdvTree(x)
-        parser.show(sys.stderr, r, 0)
-        
-        assert not r.getChildNodesByClass(Article)
-        assert not r.getParentNodesByClass(Article)
-        
-        dbw = xhtmlwriter.MWXHTMLWriter()
-        dbw.write(r)
-        xhtmlwriter.indent(dbw.root)
-        print dbw.asstring()
-        
-
-
-if __name__=="__main__":
-    main()
