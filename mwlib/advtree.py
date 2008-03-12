@@ -185,7 +185,11 @@ class AdvancedNode():
             access = amap.get(n.__class__, "")
             if access:
                 text.append( getattr(n, access) )
-        return u"".join(text)
+        alltext = [t for t in text if t]
+        if alltext:
+            return u''.join(alltext)
+        else:
+            return ''
 
     parent = property(getParent)
     parents = property(getParents)
@@ -210,7 +214,11 @@ class AdvancedTable(AdvancedNode):
 
     @property 
     def numcols(self):
-        return max([[n.__class__ for n in row].count(Cell) for row in self.rows])
+        cols = [[n.__class__ for n in row].count(Cell) for row in self.rows]
+        if cols:
+            return max(cols)
+        else:
+            return 0
 
 class AdvancedRow(AdvancedNode):    
     @property 
