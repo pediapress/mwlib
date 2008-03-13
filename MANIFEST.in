@@ -47,7 +47,6 @@ include mwlib/uparser.py
 include mwlib/utils.py
 include mwlib/web.py
 include mwlib/wiki.py
-include mwlib/xhtmlwriter.py
 include mwlib/zipwiki.py
 include setup.py
 include simple-conf.txt
