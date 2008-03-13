@@ -2,6 +2,16 @@ import os
 import sys
 import errno
 
+# provide all for python 2.4
+try:
+    from __builtin__ import all
+except ImportError:
+    def all(items):
+        for x in items:
+            if not x:
+                return False
+        return True
+    
 def daemonize(dev_null=True):
     # See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
     if os.fork():   # launch child and...
