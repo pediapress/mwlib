@@ -1,3 +1,5 @@
+# the configuration below is an example configuration for the english wikipedia
+
 [images]
 type = download
 
@@ -32,3 +34,11 @@ templateurls = http://en.wikipedia.org/w/index.php?title=Template:@TITLE@&action
 
 # title of article containing the license text for articles in this MediaWiki:
 defaultarticlelicense = GFDL
+
+# the template blacklist is an ordinary mediawiki article which contains a list
+# of templates which are ignored (and not expanded) by mwlib
+# the template blacklist needs to contain a list of links to the blacklisted templates
+# example:
+# * [[Template:refimprove]]
+# * [[Template:pp-semi]]
+templateblacklist = http://en.wikipedia.org/w/index.php?title=Templateblacklist&action=raw
