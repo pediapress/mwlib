@@ -221,7 +221,10 @@ class ImageDB(object):
         """
         
         urlpart = self._getCacheDirForBaseURL(baseurl)
-        sizepart = '%dpx' % size if size is not None else 'orig'
+        if size is not None:
+            sizepart = '%dpx' % size
+        else:
+            sizepart = 'orig'
         
         if name.lower().endswith('.svg'):
             if size is None:
@@ -289,8 +292,13 @@ class ImageDB(object):
         """
         
         destfile = self._getCachedImagePath(baseurl, name, size=size, makedirs=True)
+        if size is not None:
+            thumbnail = '-thumbnail "%dx%d>"' % (size, size)
+        else:
+            thumbnail = '-strip'
+            
         opts = '-background white -density 100 -flatten -coalesce %(thumbnail)s' % {
-            'thumbnail': '-thumbnail "%dx%d>"' % (size, size) if size is not None else '-strip',
+            'thumbnail': thumbnail,
         }
         cmd = "%(convert)s %(opts)s '%(src)s[0]' '%(dest)s'" % {
             'convert': self.convert_command,

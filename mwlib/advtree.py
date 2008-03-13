@@ -37,7 +37,7 @@ def _idIndex(lst, el):
             return i
     return -1
 
-class AdvancedNode():
+class AdvancedNode:
     """
     MixIn Class that extends Nodes so they become easier accessible
 

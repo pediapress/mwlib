@@ -64,7 +64,7 @@ class Equal(ConstraintBase):
 # Rules regarding [Children, AllChildren, Parents, ...]
 # -----------------------------------------------------------
 
-class RuleBase():
+class RuleBase:
     def __init__(self, klass, constraint):
         self.klass = klass
         self.constraint = constraint
