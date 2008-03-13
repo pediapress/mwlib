@@ -1,5 +1,6 @@
 import os
 import sys
+import errno
 
 def daemonize(dev_null=True):
     # See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
