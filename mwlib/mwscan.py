@@ -163,6 +163,8 @@ class _compat_scanner(object):
                 a(n)
             elif type==token.t_entity:
                 res.append(("TEXT", resolve_entity(g())))
+            elif type==token.t_hrule:
+                res.append((self.tagtoken("<hr />"), g()))
             elif type==token.t_html_tag:
                 s = g()
 
