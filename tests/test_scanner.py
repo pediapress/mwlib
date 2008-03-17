@@ -56,3 +56,20 @@ def test_endsection():
     token_types = [x[0] for x in tokens]
     
     assert ('ENDSECTION', '=') in tokens, "missing endsection token"
+
+def test_negative_tablecount():
+    """test for http://code.pediapress.com/wiki/ticket/73"""
+    
+    s=r"""{|
+|-
+|<math>|}</math>
+|}
+
+{|
+|-
+| foobar
+|}
+"""
+    tokens=scanner.tokenize(s)
+    count = tokens.count(("ROW", "|-"))
+    assert count==2, "expected two row symbols. got %s" % (count,)

@@ -402,3 +402,12 @@ def test_colon_nobr():
 
 def test_nonascii_in_tags():
     r = parse(u"<dfg\u0147>")
+
+def test_mailto_named():
+    r = parse("[mailto:ralf@brainbot.com me]")
+    assert r.find(parser.NamedURL), "expected a NamedLink"
+    
+def test_mailto():
+    r=parse("mailto:ralf@brainbot.com")
+    assert r.find(parser.URL), "expected a URL node"
+
