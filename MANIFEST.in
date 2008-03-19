@@ -3,8 +3,7 @@ include MANIFEST.in
 include METABOOK.txt
 include README.html
 include README.txt
-include dewiki-conf.txt
-include enwiki-conf.txt
+include example_conf.txt
 include ez_setup.py
 include mwlib/Makefile
 include mwlib/__init__.py
@@ -49,7 +48,6 @@ include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/zipwiki.py
 include setup.py
-include simple-conf.txt
 include tests/data/test.zip
 include tests/memeater.py
 include tests/test_advtree.py
