@@ -37,7 +37,11 @@ You will also need:
 *PIL*
  PIL is the Python Imaging Library and is used for image handling
  (http://www.pythonware.com/products/pil/).
-    
+
+Configuration
+======================================================================
+See example_conf.py for an example configuration.
+
 Contact/Further Information
 ======================================================================
 For further information please visit our trac instance running at
