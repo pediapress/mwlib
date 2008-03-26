@@ -273,9 +273,11 @@ static PyMethodDef module_functions[] = {
 
 
 
-extern "C" void init_mwscan(void);
+extern "C" {
+	DL_EXPORT(void) init_mwscan();
+}
 
-DL_EXPORT(void) init_mwscan(void)
+DL_EXPORT(void) init_mwscan()
 {
 	/*PyObject *m =*/ Py_InitModule("_mwscan", module_functions);
 }

@@ -196,9 +196,11 @@ static PyMethodDef module_functions[] = {
 
 
 
-extern "C" void init_expander(void);
+extern "C" {
+	DL_EXPORT(void) init_expander();
+}
 
-DL_EXPORT(void) init_expander(void)
+DL_EXPORT(void) init_expander()
 {
 	/*PyObject *m =*/ Py_InitModule("_expander", module_functions);
 }
