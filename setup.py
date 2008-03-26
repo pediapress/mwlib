@@ -23,6 +23,22 @@ if sys.version_info[:2] < (2,5):
 execfile(distutils.util.convert_path('mwlib/_version.py')) 
 # adds 'version' to local namespace
 
+# we will *not* add support for automatic generation of those files as that
+# might break with source distributions from pypi
+
+if not os.path.exists(distutils.util.convert_path('mwlib/_mwscan.cc')):
+    print "Error: please install re2c from http://re2c.org/ and run make"
+    sys.exit(10)
+
+def mtime(fn):
+    return os.stat(distutils.util.convert_path(fn)).st_mtime
+
+if mtime("mwlib/_mwscan.cc") < mtime("mwlib/_mwscan.re"):
+    print "Warning: _mwscan.cc is older than _mwscan.re. please run make.\n"
+    import time
+    time.sleep(2)
+    
+    
 def read_long_description():
     fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.txt")
     return open(fn).read()
