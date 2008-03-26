@@ -4,9 +4,12 @@
 # See README.txt for additional licensing information.
 
 import os
-import md5
 import re
-
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+    
 from mwlib import texmap
 import mwlib.log
 
@@ -112,7 +115,7 @@ class Renderer(object):
                               fontsize=fontsize,
                               extra_header=extra_header)
             
-        m=md5.new()
+        m=md5()
         m.update(source)
         name = m.hexdigest()
 

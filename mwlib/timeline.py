@@ -7,7 +7,11 @@
 """
 
 import os
-import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+    
 
 basedir = os.path.expanduser("~/timeline")
 assert os.path.isdir(basedir), "make sure %s exists and is a directory" % basedir
@@ -16,7 +20,7 @@ def drawTimeline(script):
     if isinstance(script, unicode):
         script = script.encode('utf8')
     
-    m=md5.new()
+    m=md5()
     m.update(script)
     ident = m.hexdigest()
 
