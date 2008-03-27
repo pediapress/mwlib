@@ -411,3 +411,22 @@ def test_mailto():
     r=parse("mailto:ralf@brainbot.com")
     assert r.find(parser.URL), "expected a URL node"
 
+def _check_text_in_pretag(txt):
+    r=parse("<pre>%s</pre>" % txt)
+    p=r.find(parser.PreFormatted)[0]
+    assert len(p.children)==1
+    t=p.children[0]
+    assert t==parser.Text(txt)
+    
+def test_pre_tag_newlines():
+    """http://code.pediapress.com/wiki/ticket/79"""
+    _check_text_in_pretag("\ntext1\ntext2\n\ntext3")
+
+
+def test_pre_tag_list():
+    """http://code.pediapress.com/wiki/ticket/82"""
+    _check_text_in_pretag("\n* item1\n* item2")
+
+def test_pre_tag_link():
+    """http://code.pediapress.com/wiki/ticket/78"""
+    _check_text_in_pretag("\ntext [[link]] text\n")
