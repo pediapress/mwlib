@@ -37,7 +37,11 @@ You will also need:
 *PIL*
  PIL is the Python Imaging Library and is used for image handling
  (http://www.pythonware.com/products/pil/).
-    
+
+Configuration
+======================================================================
+See example_conf.py for an example configuration.
+
 Contact/Further Information
 ======================================================================
 For further information please visit our trac instance running at
@@ -46,7 +50,6 @@ The current development version can also be found there.
 
 Credits
 ======================================================================
-This software contains a copy of Plex_ written by Greg Ewing.
 mwlib/cdb.py is based on the cdb implementation from the spambayes_
 project ( (C) 2002-2004 Python Software Foundation ).
 The remaining parts are distributed under the BSD license:
@@ -86,5 +89,4 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 .. _mediawiki: http://www.mediawiki.org
-.. _Plex: http://www.cosc.canterbury.ac.nz/greg.ewing/python/Plex/
 .. _spambayes: http://spambayes.sourceforge.net/

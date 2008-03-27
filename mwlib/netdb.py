@@ -12,7 +12,10 @@ import os
 import sys
 import urllib
 import urllib2
-import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 import shutil
 import sys
 import time
@@ -39,7 +42,7 @@ def hashpath(name):
     
     name = name.replace(' ', '_')
     name = name[:1].upper()+name[1:]
-    d = md5.new(name.encode('utf-8')).hexdigest()
+    d = md5(name.encode('utf-8')).hexdigest()
     return "/".join([d[0], d[:2], name])
 
 class ImageDB(object):
@@ -212,7 +215,7 @@ class ImageDB(object):
         """
         
         return os.path.join(self.cachedir,
-                            md5.new(baseurl.encode('utf-8')).hexdigest()[:8])
+                            md5(baseurl.encode('utf-8')).hexdigest()[:8])
     
     def _getCachedImagePath(self, baseurl, name, size=None, makedirs=False):
         """Construct a filename for an image with the given parameters inside
