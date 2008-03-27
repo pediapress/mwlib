@@ -316,7 +316,8 @@ class ArgumentList(object):
     def __init__(self):
         self.args = []
         self.namedargs = {}
-
+    def __repr__(self):
+        return "<ARGLIST args=%r>" % ([x.flatten() for x in self.args],)
     def append(self, a):
         self.args.append(a)
 
@@ -447,6 +448,8 @@ class Expander(object):
             else:            
                 p = self.getParsedTemplate(name)
                 if p:
+                    #print "EXPANDING", repr(name), var
+                    
                     self.flatten(p, res, var)
                 
         elif isinstance(n, Variable):
