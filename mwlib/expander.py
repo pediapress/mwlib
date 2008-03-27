@@ -399,11 +399,9 @@ class Expander(object):
             log.warn("no template", repr(name))
             res = None
         else:
-            # great hack:
-            #   add zero byte to templates starting with a (semi)colon,
-            #   and interpret zero byte + (semi)colon as EOLSTYLE
+            #   add newline to templates starting with a (semi)colon,
             if raw.startswith(":") or raw.startswith(";"):
-                raw = '\x00'+raw
+                raw = '\n'+raw
                 
             log.info("parsing template", repr(name))
             res = Parser(raw).parse()
