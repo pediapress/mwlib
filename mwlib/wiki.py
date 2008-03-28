@@ -30,7 +30,7 @@ def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
         templateblacklist=templateblacklist,
     )
 
-def wiki_cdb(path=None):
+def wiki_cdb(path=None, **kwargs):
     from mwlib import cdbwiki
     path = os.path.expanduser(path)
     db=cdbwiki.WikiDB(path)
