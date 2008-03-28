@@ -459,12 +459,7 @@ class Expander(object):
             if len(name)>256*1024:
                 raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
             
-            try:
-                num = int(name)-1
-            except ValueError:
-                v = variables.get(name, None)
-            else:
-                v = variables.get(num, None)
+            v = variables.get(name, None)
 
             if v is None:
                 if len(n.children)>1:
