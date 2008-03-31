@@ -115,6 +115,19 @@ Used by {{tiw|rnd}}:
 *{{xpd|#expr:2.0004 round 3}}
 *{{xpd|rnd|2.0004|3}}
 </noinclude>""",
+
+"precision/1":
+    """{{precision/-1{{#expr:{{{1}}}5={{{1}}}5round7}}|{{{1}}}5}}""",
+
+"precision/-11":
+    """6-({{{1}}}={{{1}}}round2)-({{{1}}}={{{1}}}round3)-({{{1}}}={{{1}}}round4)-({{{1}}}={{{1}}}round5)-({{{1}}}={{{1}}}round6)""",
+"precision/-10":
+    """{{precision/-2{{#expr:{{{1}}}={{{1}}}round13}}|{{{1}}}}}""",
+"args":
+    """1={{{1}}}
+2={{{2}}}
+3={{{3}}}
+""",
 }
 
 def getdb():
@@ -142,4 +155,8 @@ def test_round_plus_3():
 
 def test_precision_plus_1():
     expandstr("{{precision/+|0.77}}", "2", wikidb=getdb())
+    
+def test_convert_ft_in_m():
+    expandstr("{{convert|2.5|ft|m}}", wikidb=getdb())
+    
     
