@@ -242,9 +242,6 @@ class AdvancedMath(AdvancedNode):
             return True
         return False
 
-# Nodes we defined above and that are separetly handled in extendClasses
-_advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
-                     Math:AdvancedMath, Row:AdvancedRow, Table:AdvancedTable}
        
 
 # --------------------------------------------------------------------------
@@ -387,11 +384,17 @@ def MixIn(pyClass, mixInClass, makeFirst=False):
       pyClass.__bases__ += (mixInClass,)
 
 def extendClasses(node):
-    MixIn(node.__class__, _advancedNodesMap.get(node.__class__, AdvancedNode))
     for c in node.children[:]:
         extendClasses(c)
         c._parentref = weakref.ref(node)            
 
+# Nodes we defined above and that are separetly handled in extendClasses
+_advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
+                     Math:AdvancedMath, Row:AdvancedRow, Table:AdvancedTable}
+MixIn(Node, AdvancedNode)
+for k, v in _advancedNodesMap.items():
+    MixIn(k,v)
+    
 # --------------------------------------------------------------------------
 # funcs for repairing the tree
 # -------------------------------------------------------------------------
