@@ -139,3 +139,7 @@ def test_round_plus_2():
 
 def test_round_plus_3():
     expandstr("{{rnd/+|1.056|2|abc}}", "1.06", wikidb=getdb())
+
+def test_precision_plus_1():
+    expandstr("{{precision/+|0.77}}", "2", wikidb=getdb())
+    
