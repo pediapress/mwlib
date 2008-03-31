@@ -493,11 +493,16 @@ class DictDB(object):
         
         self.d.update(kw)
 
+        normd = {}
+        for k, v in self.d.items():
+            normd[k.lower()] = v
+        self.d = normd
+        
     def getRawArticle(self, title):
-        return self.d[title]
+        return self.d[title.lower()]
 
     def getTemplate(self, title, dummy):
-        return self.d.get(title, u"")
+        return self.d.get(title.lower(), u"")
     
 def expandstr(s, expected=None, wikidb=None):
     """debug function. expand templates in string s"""
