@@ -1,3 +1,4 @@
+# -*- mode: ini -*-
 # configuration file for mwlib
 #
 # this file is in .INI format and assumed to be UTF-8 encoded
