@@ -324,10 +324,15 @@ class ParserFunctions(object):
         if rl:
             ep=self._expressionParser
             try:
-                return str(ep(rl[0]))
+                r=str(ep(rl[0]))
             except Exception, err:
                 return str(err)
 
+            if "e" in r:
+                f,i = r.split("e")
+                fixed=str(float(f))+"E"+str(int(i))
+                return fixed
+            return r
         return u"0"
     
 
