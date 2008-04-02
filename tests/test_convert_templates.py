@@ -160,3 +160,6 @@ def test_convert_ft_in_m():
     expandstr("{{convert|2.5|ft|m}}", wikidb=getdb())
     
     
+def test_round_minus():
+    expandstr("{{rnd/-|0.00002|8}}", "2.0E-5000", wikidb=getdb())
+    
