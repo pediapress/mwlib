@@ -74,7 +74,16 @@ class AdvancedNode:
     def appendChild(self, c):
         self.children.append(c)
         c._parentref = weakref.ref(self)
-        
+
+    def remove(self):
+        if self.parent:
+            for (idx, n) in enumerate(self.parent.children):
+                if n is self:
+                    self.parent.children = self.parent.children[:idx] + self.parent.children[idx+1:]
+                    return 0
+        else:
+            return 1
+            
     def removeChild(self, c):
         self.replaceChild(c, [])
 
