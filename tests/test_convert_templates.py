@@ -156,9 +156,11 @@ def test_round_plus_3():
 def test_precision_plus_1():
     expandstr("{{precision/+|0.77}}", "2", wikidb=getdb())
     
-def test_convert_ft_in_m():
+def test_convert_ft_in_m_float():
     expandstr("{{convert|2.5|ft|m}}", "2.5&nbsp;feet (0.76&nbsp;m)\n", wikidb=getdb())
     
+def test_convert_ft_in_m_int():
+    expandstr("{{convert|12|ft|m}}", "12&nbsp;feet (3.7&nbsp;m)\n", wikidb=getdb())
     
 def test_round_minus():
     expandstr("{{rnd/-|0.00002|8}}", "2.0E-5000", wikidb=getdb())
