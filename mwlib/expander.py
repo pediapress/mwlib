@@ -409,7 +409,10 @@ class Expander(object):
                 
             log.info("parsing template", repr(name))
             res = Parser(raw).parse()
-            
+            if DEBUG:
+                print "TEMPLATE:", name, repr(raw)
+                res.show()
+                
         self.parsedTemplateCache[name] = res
         return res
             
