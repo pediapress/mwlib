@@ -51,6 +51,7 @@ include setup.py
 include tests/data/test.zip
 include tests/memeater.py
 include tests/test_advtree.py
+include tests/test_convert_templates.py
 include tests/test_expander.py
 include tests/test_html.py
 include tests/test_imgmap.py
