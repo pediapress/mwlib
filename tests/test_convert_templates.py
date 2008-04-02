@@ -31,7 +31,7 @@ db = {
 """{{formatnum:{{{1}}}}}&nbsp;{{#ifeq:{{{1}}}|1|{{{n}}}|{{{l|{{{n}}}s}}}}} ({{convert/{{#if:{{{2|}}}|{{{o}}}|{{{3}}}}}|{{{1}}}|{{{1}}}*{{{b}}}|{{#if:{{{2|}}}|{{{3|}}}|{{{4|}}}}}|{{{s|}}}|r={{{r}}}|j={{{j}}}|d=LoffAonSoff}})<noinclude>
 [[Category:Subtemplates of Template Convert]]{{pp-template|small=yes}}
 </noinclude>""",
-"convert":
+"convert/m":
 """{{convert/{{{d}}}|{{{1}}}|{{{2|}}}|{{{3|}}}|{{{4|}}}|s={{{s|}}}|r={{{r}}}
 |u=m
 |n=met{{{r}}}
@@ -157,7 +157,7 @@ def test_precision_plus_1():
     expandstr("{{precision/+|0.77}}", "2", wikidb=getdb())
     
 def test_convert_ft_in_m():
-    expandstr("{{convert|2.5|ft|m}}", wikidb=getdb())
+    expandstr("{{convert|2.5|ft|m}}", "2.5&nbsp;feet (0.76&nbsp;m)\n", wikidb=getdb())
     
     
 def test_round_minus():
