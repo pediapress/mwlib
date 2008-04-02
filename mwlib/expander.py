@@ -5,9 +5,12 @@
 
 import sys
 import re
-
+import os
 from mwlib import magics
 import mwlib.log
+
+DEBUG = "DEBUG_EXPANDER" in os.environ
+
 
 log = mwlib.log.Log("expander")
 
@@ -448,10 +451,16 @@ class Expander(object):
             else:            
                 p = self.getParsedTemplate(name)
                 if p:
-                    #print "EXPANDING", repr(name), var
-                    
+                    if DEBUG:
+                        msg = "EXPANDING %r %s  ===> " % (name, var)
+                        oldidx = len(res)
                     self.flatten(p, res, var)
-                
+
+                    if DEBUG:
+                        msg += "".join(res[oldidx:])
+                        print msg
+                    
+                    
         elif isinstance(n, Variable):
             name = []
             self.flatten(n.children[0], name, variables)
