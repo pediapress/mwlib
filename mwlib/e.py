@@ -96,7 +96,19 @@ def evalExpr(r):
     
 def evalString(s):
     return evalExpr(expr.parseString(s))
-    
+
+class ExpressionParser(object):
+    def parse(self, s):
+        self.result = expr.parseString(s)
+        return self.result
+
+    def eval(self):
+        return evalExpr(self.result)
+
+    def __call__(self, s):
+        self.parse(s)
+        return self.eval()
+
 def main():
     import time
     try:
