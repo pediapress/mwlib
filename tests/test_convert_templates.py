@@ -137,7 +137,7 @@ def getdb():
 def test_round():
     expandstr("{{rnd|2.0004|3}}", "2.000", wikidb=getdb())
     expandstr("{{rnd|0.000020004|8}}", "2.0E-5", wikidb=getdb())
-    expandstr("{{rnd|0|8}", "0.00000000", wikidb=getdb())
+    expandstr("{{rnd|0|8}}", "0.00000000", wikidb=getdb())
     
 def test_max_2():
     expandstr("{{max/2|-1|1}}", "1", wikidb=getdb())
