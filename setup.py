@@ -16,7 +16,7 @@ from setuptools import setup, Extension
 import distutils.util
 
 
-install_requires=["simplejson>=1.3", "pyparsing>=1.4"]
+install_requires=["simplejson>=1.3", "pyparsing>=1.4.11"]
 if sys.version_info[:2] < (2,5):
     install_requires.append("wsgiref>=0.1.2")
 
