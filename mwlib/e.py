@@ -3,9 +3,13 @@
 """#expr parser using pyparsing's operatorPrecedence.
 not used and not usable at the moment
 """
-
+import sys
 from pyparsing import (ParseException, Word, Literal, CaselessLiteral, 
-                       Combine, Optional, nums, StringEnd, operatorPrecedence, oneOf, opAssoc)
+                       Combine, Optional, nums, StringEnd,
+                       operatorPrecedence, opAssoc, ParserElement)
+ParserElement.enablePackrat()
+if sys.version_info>=(2,6):
+    ParserElement.__hash__ = lambda self: hash(id(self))
 
 # define grammar 
 point = Literal('.')
