@@ -97,9 +97,14 @@ def evalExpr(r):
 def evalString(s):
     return evalExpr(expr.parseString(s))
 
+import time
 class ExpressionParser(object):
     def parse(self, s):
+        stime=time.time()
         self.result = expr.parseString(s)
+        needed = time.time()-stime
+        if needed>0.05:
+            print "NEEDED:", needed, repr(s)
         return self.result
 
     def eval(self):

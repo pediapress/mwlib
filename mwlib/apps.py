@@ -249,20 +249,21 @@ def parse():
         articles = db.articles()
 
 
-    
+    import time
     for x in articles:
         try:
             raw = db.getRawArticle(x)
             # yes, raw can be None, when we have a redirect to a non-existing article.
             if raw is None: 
                 continue
+            stime=time.time()
             a=uparser.parseString(x, raw=raw, wikidb=db)
         except Exception, err:
-            print "-", repr(x), err
+            print "F", repr(x), err
             if options.tb:
                 traceback.print_exc()
         else:
-            print "+", repr(x)
+            print "G", time.time()-stime, repr(x)
 
 def serve():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
