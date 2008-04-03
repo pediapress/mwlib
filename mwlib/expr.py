@@ -129,17 +129,19 @@ def main():
         pass
 
     ep = ExpressionParser()
-  
+    import time
+    
     while 1:
         input_string = raw_input("> ")
         if not input_string:
             continue
-    
+        stime = time.time()
         try:
             ep.parse(input_string)
         except ParseException, err:
             print "ERROR:", err
             continue
+        print "[%s]" % (time.time()-stime,)
         print ep.exprStack
         print ep.eval()
 
