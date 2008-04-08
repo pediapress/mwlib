@@ -77,5 +77,5 @@ def test_negative_tablecount():
 def test_preformatted_pipe():
     """http://code.pediapress.com/wiki/ticket/92"""
     tokens=scanner.tokenize("   |foo")
-    assert tokens==[('PRE', ' '), ('TEXT', '  |')]
+    assert tokens==[('PRE', ' '), ('TEXT', '  '), ('SPECIAL', '|'), ('TEXT', 'foo')]
     

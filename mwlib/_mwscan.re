@@ -160,9 +160,40 @@ re2c:yyfill:enable = 0 ;
 /*!re2c
   " "* "|}"              {--tablemode; RET(t_end_table);}
 
-  " "* "|" "-"+         {if (tablemode) RET(t_row) else RET(t_text);}
-  " "* ("|" | "!")      {if (tablemode) RET(t_column) else RET(t_text);}
-  " "* "|" "+"+         {if (tablemode) RET(t_tablecaption) else RET(t_text);}
+  " "* "|" "-"+         
+	{
+		if (tablemode) 
+			RET(t_row);
+		if (*start==' ') {
+			cursor = start+1;
+			RET(t_pre);
+		}
+		RET(t_text);
+	}
+
+  " "* ("|" | "!")      
+	{
+		if (tablemode)
+			RET(t_column);
+
+		if (*start==' ') {
+			cursor = start+1;
+			RET(t_pre);
+		}
+		RET(t_text);
+	}
+
+  " "* "|" "+"+         
+	{
+		if (tablemode) 
+			RET(t_tablecaption);
+		if (*start==' ') {
+			cursor = start+1;
+			RET(t_pre);
+		}
+		RET(t_text);
+	}
+
   " "		{RET(t_pre);}
   "="+ [ \t]*   {
 			line_startswith_section = found(t_section);
