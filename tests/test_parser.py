@@ -430,3 +430,8 @@ def test_pre_tag_list():
 def test_pre_tag_link():
     """http://code.pediapress.com/wiki/ticket/78"""
     _check_text_in_pretag("\ntext [[link]] text\n")
+
+def test_parse_preformatted_pipe():
+    """http://code.pediapress.com/wiki/ticket/92"""
+    r=parse(" |foobar")
+    assert r.find(parser.PreFormatted), "expected a preformatted node"

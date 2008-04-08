@@ -73,3 +73,9 @@ def test_negative_tablecount():
     tokens=scanner.tokenize(s)
     count = tokens.count(("ROW", "|-"))
     assert count==2, "expected two row symbols. got %s" % (count,)
+
+def test_preformatted_pipe():
+    """http://code.pediapress.com/wiki/ticket/92"""
+    tokens=scanner.tokenize("   |foo")
+    assert tokens==[('PRE', ' '), ('TEXT', '  |')]
+    
