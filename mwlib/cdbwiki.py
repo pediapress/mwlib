@@ -51,6 +51,7 @@ class Tags:
     # <revision><text> inside <page>
     revision_text = ns + 'revision/' + ns + 'text'
 
+    siteinfo = ns + "siteinfo"
 
 class DumpParser(object):
     category_ns = set(['category', 'kategorie'])
@@ -68,16 +69,18 @@ class DumpParser(object):
         sys.stdout.write(msg)
         sys.stdout.flush()
 
-    def __call__(self):
-        if not os.path.exists(self.outputdir):
-            os.makedirs(self.outputdir)
-        
+    def openInputStream(self):
         if self.xmlfilename.lower().endswith(".bz2"):
             f = os.popen("bunzip2 -c %s" % self.xmlfilename, "r")
         elif self.xmlfilename.lower().endswith(".7z"):
             f = os.popen("7z -so x %s" % self.xmlfilename, "r")
         else:
             f = open(self.xmlfilename, "r")        
+
+        return f
+
+    def __call__(self):
+        f = self.openInputStream()    
         
         count = 0
         for event, elem in cElementTree.iterparse(f):
