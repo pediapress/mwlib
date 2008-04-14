@@ -20,6 +20,7 @@ include mwlib/cdb.py
 include mwlib/cdbwiki.py
 include mwlib/dummydb.py
 include mwlib/expander.py
+include mwlib/expr.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
 include mwlib/lang.py
