@@ -487,3 +487,11 @@ def test_source_tag():
     r=parse(s).find(parser.TagNode)[0]
     print r
     assert r.children==[parser.Text(source)]
+
+def test_self_closing_style():
+    "http://code.pediapress.com/wiki/ticket/93"
+    s=parse("<b />bla").find(parser.Style)[0]
+    assert s.children==[], 'expected empty style node'
+    
+    
+    
