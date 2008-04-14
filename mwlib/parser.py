@@ -1090,11 +1090,15 @@ class Parser(object):
         token = self.token[0]
         if style is None:
             style = Style(token.t)
-
+        
         b = style        
         end = EndTagToken(token.t)
         start = TagToken(token.t)
         self.next()
+
+        
+        if token.selfClosing:
+            return style 
         
         break_at = set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "BREAK", "SECTION", "BEGINTABLE"])
         
