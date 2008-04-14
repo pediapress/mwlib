@@ -13,7 +13,7 @@ import re
 import datetime
 import urllib
 from mwlib.log import Log
-from mwlib import e as expr
+from mwlib import expr
 
 log = Log("expander")
 
@@ -273,12 +273,6 @@ class StringMagic(object):
 
 class ParserFunctions(object):
     wikidb = None
-    _expp = None
-    @property
-    def _expressionParser(self):
-        if self._expp is None:
-            self._expp = expr.ExpressionParser()
-        return self._expp
 
     def TAG(self, args):
         name = args[0].strip()
@@ -322,9 +316,8 @@ class ParserFunctions(object):
 
     def EXPR(self, rl):
         if rl:
-            ep=self._expressionParser
             try:
-                r=str(ep(rl[0]))
+                r=str(expr.expr(rl[0]))
             except Exception, err:
                 return str(err)
 
@@ -337,9 +330,8 @@ class ParserFunctions(object):
     
 
     def IFEXPR(self, rl):
-        ep=self._expressionParser
         try:
-            r = ep(rl[0])
+            r = expr.expr(rl[0])
         except Exception, err:
             return str(err)
 
