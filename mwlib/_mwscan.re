@@ -236,8 +236,20 @@ not_bol:
 		    }
   "\n"{2,}	    {newline(); RET(t_break);}
   "\n"		    {newline(); RET(t_newline);}
-  "||" | "|!" | "!!"              {if (tablemode) RET(t_column) else RET(t_special);}
-  "|+"              {if (tablemode) RET(t_tablecaption) else RET(t_special);}
+  "||" | "|!" | "!!"              
+	{
+		if (tablemode) 
+			RET(t_column);
+		cursor = start+1;
+		RET(t_special);
+	}
+  "|+"              
+	{
+		if (tablemode) 
+			RET(t_tablecaption);
+		cursor = start+1;
+		RET(t_special);
+	}
   [:|\[\]]              {RET(t_special);}
   "{|"              {++tablemode; RET(t_begin_table);}
   "|}"              {--tablemode; RET(t_end_table);}
