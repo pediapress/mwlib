@@ -11,8 +11,10 @@ http://meta.wikimedia.org/wiki/ParserFunctions#.23expr:
 from __future__ import division
 
 import re
-from pyparsing import (ParseException, Word, Literal, CaselessLiteral, 
-                       Combine, Optional, nums, Forward, ZeroOrMore, StringEnd)
+import inspect
+
+class ExprError(Exception):
+    pass
 
 def _myround(a,b):
     r=round(a, int(b))
@@ -20,131 +22,163 @@ def _myround(a,b):
         return int(r)
     return r
 
-class ExpressionParser(object):
-    binops = { "+" :    lambda a, b: a+b ,
-               "-" :    lambda a, b: a-b,
-               "*" :    lambda a, b: a*b,
-               "/" :    lambda a, b: a/b,
-               "div" :  lambda a, b: a/b,
-               "mod" :  lambda a, b: int(a)%int(b),
-#               "^" :    lambda a, b: a ** b,
-               "<=":    lambda a, b: int(a<=b),
-               ">=":    lambda a, b: int(a>=b),
-               "<":     lambda a, b: int(a<b),
-               ">":     lambda a, b: int(a>b),
-               "=":     lambda a, b: int(a==b),
-               "<>":    lambda a, b: int(a!=b),
-               "!=":    lambda a, b: int(a!=b),
-               "and":   lambda a, b: int(bool(a) and bool(b)),
-               "or":    lambda a, b: int(bool(a) or bool(b)),
-               "round": _myround,
-               }
 
-    unaops = {"not": lambda a: int(not bool(a))}
+pattern = """
+(?:\s+)
+|((?:\d+)(?:\.\d+)?
+ |(?:\.\d+))
+|(\+|-|\*|/|>=|<=|<>|!=|[a-zA-Z]+|.)
+"""
 
-    def __init__(self):        
-        self.exprStack = []
+rxpattern = re.compile(pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+def tokenize(s):
+    return [(v1,v2.lower()) for (v1,v2) in rxpattern.findall(s) if v1 or v2]
 
-        # define grammar
-        point = Literal('.')
-        plusorminus = Literal('+') | Literal('-')
-        number = Word(nums) 
-        integer = Combine( Optional(plusorminus) + number )
-        floatnumber = Combine( (integer +
-                               Optional( point + Optional(number) ) +
-                               Optional(  CaselessLiteral('e') + integer )) 
-                               | (point + Optional(number) + Optional(  CaselessLiteral('e') + integer ))
-                             )
+class uminus: pass
+class uplus: pass
 
-        plus  = Literal("+")
-        minus = Literal("-")
-        mult  = Literal("*")
-        div   = Literal("/") | CaselessLiteral("div") | CaselessLiteral("mod")
-        lpar  = Literal("(").suppress()
-        rpar  = Literal(")").suppress()
-        addop  = plus | minus
-        multop = mult | div
+precedence = {"(":-1, ")":-1}
+functions = {}
 
-        cmpop = Literal("<>") | Literal("!=") | Literal("=") | Literal("<=") | Literal(">=") | Literal(">") | Literal("<")
-
-        expr = Forward()
-        atom = ( ( floatnumber | integer ).setParseAction(self._push_first) | 
-                 ( lpar + expr.suppress() + rpar )
-               )
-
-        factor = Forward()
-        factor << ((CaselessLiteral("not") + factor).setParseAction(self._push_first) | atom)
-
-        term = factor + ZeroOrMore( ( multop + factor ).setParseAction( self._push_first ) )
-        adds = term + ZeroOrMore( ( addop + term ).setParseAction( self._push_first ) )
-        
-        rounds = adds + ZeroOrMore( (CaselessLiteral("round") + adds).setParseAction(self._push_first)) 
-
-        cmps = rounds + ZeroOrMore( (cmpop + rounds).setParseAction(self._push_first) )
-
-        ands = cmps + ZeroOrMore( (CaselessLiteral("and")+cmps).setParseAction(self._push_first))
-        ors = ands + ZeroOrMore( (CaselessLiteral("or")+ands).setParseAction(self._push_first))
-
-        expr << ors
-
-        self.pattern =  expr + StringEnd()
-
-    def parse(self, s):
-        self.exprStack[:] = []
-        return self.pattern.parseString(s)
-
-    def eval(self):
-        return self._eval(self.exprStack[:])
-
-    def __call__(self, s):
-        self.parse(s)
-        return self.eval()
-
-    def _eval(self, s=None):
-        opn = self.binops
-        uop = self.unaops
-
-        op = s.pop()
-        if op in opn:
-            op2 = self._eval( s )
-            op1 = self._eval( s )
-            return opn[op]( op1, op2 )
-        elif op in uop:
-            op1 = self._eval(s)
-            return uop[op](op1)
-        elif re.search('^[-+]?[0-9]+$',op):
-            return long( op )
-        else:
-            return float( op )
+def addop(op, prec, fun):
+    precedence[op] = prec
+    numargs = len(inspect.getargspec(fun).args)
     
+    
+    def wrap(stack):
+        assert len(stack)>=numargs
+        
+        args = tuple(stack[-numargs:])
+        del stack[-numargs:]
 
-    def _push_first(self, str, loc, toks ):
-        self.exprStack.append(toks[0])
+        stack.append(fun(*args))
 
+    functions[op] = wrap
+        
+a=addop
+a(uminus, 10, lambda x: -x)
+a(uplus, 10, lambda x: x)
+
+a("not", 9, lambda x:int(not(bool(x))))
+
+a("*", 8, lambda x,y: x*y)
+a("/", 8, lambda x,y: x/y)
+a("div", 8, lambda x,y: x/y)
+a("mod", 8, lambda x,y: int(x)%int(y))
+
+
+a("+", 6, lambda x,y: x+y)
+a("-", 6, lambda x,y: x-y)
+
+a("round", 5, _myround)
+
+a("<", 4, lambda x,y: int(x<y))
+a(">", 4, lambda x,y: int(x>y))
+a("<=", 4, lambda x,y: int(x<=y))
+a(">=", 4, lambda x,y: int(x>=y))
+a("!=", 4, lambda x,y: int(x!=y))
+a("<>", 4, lambda x,y: int(x!=y))
+a("=", 4, lambda x,y: int(x==y))
+
+a("and", 3, lambda x,y: int(bool(x) and bool(y)))
+a("or", 2, lambda x,y: int(bool(x) or bool(y)))
+del a
+
+class Expr(object):
+    
+    def as_float_or_int(self, s):
+        if "." in s or "e" in s.lower():
+            return float(s)
+        return long(s)
+    
+    def output_operator(self, op):
+        return functions[op](self.operand_stack)
+    
+    def output_operand(self, operand):
+        self.operand_stack.append(operand)
+            
+    def parse_expr(self, s):
+        tokens = tokenize(s)
+
+        self.operand_stack = []
+        operator_stack = []
+
+        seen_operand=False
+        
+        last_operand, last_operator = False, True
+        
+        for operand, operator in tokens:
+            if operand:
+                if last_operand:
+                    raise ExprError("expected operator")
+                self.output_operand(self.as_float_or_int(operand))
+            elif operator=="(":
+                operator_stack.append("(")
+            elif operator==")":
+                while 1:
+                    if not operator_stack:
+                        raise ExprError("unbalanced parenthesis")
+                    t = operator_stack.pop()
+                    if t=="(":
+                        break
+                    self.output_operator(t)
+            elif operator in precedence:
+                if last_operator and last_operator!=")":
+                    if operator=='-':
+                        operator = uminus
+                    elif operator=='+':
+                        operator = uplus
+
+                prec = precedence[operator]
+                while operator_stack and prec<=precedence[operator_stack[-1]]:
+                    p = operator_stack.pop()
+                    self.output_operator(p)
+                operator_stack.append(operator)
+            else:
+                raise ExprError("unknown operator: %r" % (operator,))
+
+            last_operand, last_operator = operand, operator
+            
+            
+        while operator_stack:
+            p=operator_stack.pop()
+            if p=="(":
+                raise ExprError("unbalanced parenthesis")
+            self.output_operator(p)
+            
+        if len(self.operand_stack)!=1:
+            raise ExprError("bad stack: %s" % (self.operand_stack,))
+
+        return self.operand_stack[-1]
+    
+def expr(s):
+    return Expr().parse_expr(s)
 
 def main():
+    ParseException = ExprError
+    import time
     try:
         import readline  # do not remove. makes raw_input use readline
+        readline
     except ImportError:
         pass
 
-    ep = ExpressionParser()
-    import time
-    
+    ep = expr
+  
     while 1:
         input_string = raw_input("> ")
         if not input_string:
             continue
+    
         stime = time.time()
         try:
-            ep.parse(input_string)
+            res=expr(input_string)
         except ParseException, err:
             print "ERROR:", err
             continue
-        print "[%s]" % (time.time()-stime,)
-        print ep.exprStack
-        print ep.eval()
+        print res
+        print time.time()-stime, "s"
 
-
-if __name__ == '__main__':
+if __name__=='__main__':
     main()
+    
