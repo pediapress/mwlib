@@ -23,6 +23,7 @@ splitpattern = """
 |(?:<math>.*?</math>)
 |(?:<imagemap[^<>]*>.*?</imagemap>)
 |(?:<gallery[^<>]*>.*?</gallery>)
+|(?:<source[^<>]*>.*?</source>)
 |(?:<pre.*?>.*?</pre>)
 |(?:[:\[\]\|{}<])                                  # all special characters
 |(?:[^\[\]\|:{}<]*))                               # all others

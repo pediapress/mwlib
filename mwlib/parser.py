@@ -144,7 +144,6 @@ class Node(object):
         return out.getvalue()
                     
 class Math(Node): pass
-class PreFormatted(Node): pass
 class Ref(Node): pass
 class Item(Node): pass
 class ItemList(Node):
@@ -166,6 +165,7 @@ class Paragraph(Node): pass
 class Section(Node): pass
 class Timeline(Node): pass
 class TagNode(Node): pass
+class PreFormatted(TagNode): pass
 class URL(Node): pass
 class NamedURL(Node): pass
 
@@ -578,8 +578,13 @@ class Parser(object):
         return n
 
     def parsePRETag(self):
-        n=PreFormatted()
-        print "PARSEPRE:", self.token
+        token = self.token[0]
+        if token.t.lower()=='pre':
+            n=PreFormatted()
+        else:
+            n=TagNode(token.t)
+            
+        print "PARSEPRE:", self.token, n
         end = EndTagToken(self.token[0].t)
         self.next()
         
@@ -596,12 +601,12 @@ class Parser(object):
         return n
 
     parseCODETag = parsePRETag
-
+    parseSOURCETag = parsePRETag
     def parseA7831D532A30DF0CD772BBC895944EC1Tag(self):
         p = self.parseTag()
         p.__class__ = Magic
         return p    
-    
+
     parseREFTag = parseTag
     parseREFERENCESTag = parseTag
     
