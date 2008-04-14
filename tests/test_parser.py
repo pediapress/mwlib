@@ -453,6 +453,16 @@ def test_table_markup_in_link_pipe_plus():
     
 def test_table_markup_in_link_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/54"""
-    r=parse("[[bla|+blubb]]").find(parser.Link)[0]
+    r=parse("[[bla||blubb]]").find(parser.Link)[0]
     assert r.target=='bla'
     
+
+def test_table_markup_in_link_table_pipe_plus():
+    """http://code.pediapress.com/wiki/ticket/11"""
+    r=parse("{|\n|+\n|[[bla|+blubb]]\n|}").find(parser.Link)[0]
+    assert r.target=='bla'
+    
+def test_table_markup_in_link_table_pipe_pipe():
+    """http://code.pediapress.com/wiki/ticket/11"""
+    r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
+    assert r.target=='bla'
