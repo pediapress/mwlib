@@ -1,4 +1,5 @@
 #! /usr/bin/env py.test
+# -*- coding: utf-8 -*-
 
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
@@ -437,7 +438,7 @@ def test_parse_preformatted_pipe():
     assert r.find(parser.PreFormatted), "expected a preformatted node"
 
 def _parse_url(u):
-    url = parse(" %s " % u).find(parser.URL)[0]
+    url = parse("url: %s " % u).find(parser.URL)[0]
     assert url.caption == u
 
 def test_url_parsing_plus():
@@ -445,6 +446,18 @@ def test_url_parsing_plus():
 
 def test_url_parsing_comma():
     _parse_url("http://mw/foo,bar")
+
+def test_url_parsing_umlauts():
+    "http://code.pediapress.com/wiki/ticket/77"
+    
+    _parse_url(u"http:://aÄfoo.de")
+    _parse_url(u"http:://aäfoo.de")
+    
+    _parse_url(u"http:://aüfoo.de")
+    _parse_url(u"http:://aÜfoo.de")
+    
+    _parse_url(u"http:://aöfoo.de")
+    _parse_url(u"http:://aÖfoo.de")
 
 def test_table_markup_in_link_pipe_plus():
     """http://code.pediapress.com/wiki/ticket/54"""
