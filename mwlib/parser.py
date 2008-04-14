@@ -530,6 +530,10 @@ class Parser(object):
                 break
             elif token[0] in FirstAtom:
                 obj.append(self.parseAtom())
+            elif token[1].startswith("|"):
+                obj.append(Control("|"))
+                obj.append(Text(token[1][1:]))
+                self.next()
             else:
                 log.info("assuming text in parseLink", token)
                 obj.append(Text(token[1]), merge=True)
