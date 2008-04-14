@@ -450,14 +450,14 @@ def test_url_parsing_comma():
 def test_url_parsing_umlauts():
     "http://code.pediapress.com/wiki/ticket/77"
     
-    _parse_url(u"http:://aÄfoo.de")
-    _parse_url(u"http:://aäfoo.de")
+    _parse_url(u"http://aÄfoo.de")
+    _parse_url(u"http://aäfoo.de")
     
-    _parse_url(u"http:://aüfoo.de")
-    _parse_url(u"http:://aÜfoo.de")
+    _parse_url(u"http://aüfoo.de")
+    _parse_url(u"http://aÜfoo.de")
     
-    _parse_url(u"http:://aöfoo.de")
-    _parse_url(u"http:://aÖfoo.de")
+    _parse_url(u"http://aöfoo.de")
+    _parse_url(u"http://aÖfoo.de")
 
 def test_table_markup_in_link_pipe_plus():
     """http://code.pediapress.com/wiki/ticket/54"""
