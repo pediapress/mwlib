@@ -445,3 +445,14 @@ def test_url_parsing_plus():
 
 def test_url_parsing_comma():
     _parse_url("http://mw/foo,bar")
+
+def test_table_markup_in_link_pipe_plus():
+    """http://code.pediapress.com/wiki/ticket/54"""
+    r=parse("[[bla|+blubb]]").find(parser.Link)[0]
+    assert r.target=='bla'
+    
+def test_table_markup_in_link_pipe_pipe():
+    """http://code.pediapress.com/wiki/ticket/54"""
+    r=parse("[[bla|+blubb]]").find(parser.Link)[0]
+    assert r.target=='bla'
+    
