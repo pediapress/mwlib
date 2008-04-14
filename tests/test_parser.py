@@ -440,5 +440,8 @@ def _parse_url(u):
     url = parse(" %s " % u).find(parser.URL)[0]
     assert url.caption == u
 
-def test_url_parsing():
+def test_url_parsing_plus():
     _parse_url("http://mw/foo+bar")
+
+def test_url_parsing_comma():
+    _parse_url("http://mw/foo,bar")
