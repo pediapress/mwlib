@@ -132,16 +132,6 @@ def test_monthname():
 
     expandstr("{{MONTHNAME|0}}", "December")
 
-def test_br_tag_inside_param():
-    """http://code.pediapress.com/wiki/ticket/35"""
-
-    db = DictDB(
-        Tip="'''Tip:''' {{{1}}}"
-        )        
-    result=expandstr('{{Tip|sample text<br style="clear:both;"/> some more}}', wikidb=db)
-    assert "some more" in result
-        
-
 def test_pipe_inside_imagemap():
     """pipes inside image maps should not separate template arguments
     well, they do not separate arguments with the version running on en.wikipedia.org.
