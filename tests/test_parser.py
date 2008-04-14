@@ -435,3 +435,10 @@ def test_parse_preformatted_pipe():
     """http://code.pediapress.com/wiki/ticket/92"""
     r=parse(" |foobar")
     assert r.find(parser.PreFormatted), "expected a preformatted node"
+
+def _parse_url(u):
+    url = parse(" %s " % u).find(parser.URL)[0]
+    assert url.caption == u
+
+def test_url_parsing():
+    _parse_url("http://mw/foo+bar")
