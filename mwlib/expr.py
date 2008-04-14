@@ -42,7 +42,7 @@ functions = {}
 
 def addop(op, prec, fun):
     precedence[op] = prec
-    numargs = len(inspect.getargspec(fun).args)
+    numargs = len(inspect.getargspec(fun)[0])
     
     
     def wrap(stack):
