@@ -183,6 +183,18 @@ class _compat_scanner(object):
                                 break
                         res.append(("LATEX", g()))
                         i+=1
+                elif tt.t=="timeline":
+                    res.append(("TIMELINE", g()))
+                    i+=1
+                    while i<numtokens:
+                        type, start, tlen = tokens[i]
+                        if type==token.t_html_tag:
+                            tt = self.tagtoken(g())
+                            if tt.t=="timeline":
+                                res.append(("TIMELINE", g()))
+                                break
+                        res.append(("TEXT", g()))
+                        i+=1
                 elif tt.t=="nowiki":
                     i+=1
                     while i<numtokens:
