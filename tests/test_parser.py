@@ -493,5 +493,14 @@ def test_self_closing_style():
     s=parse("<b />bla").find(parser.Style)[0]
     assert s.children==[], 'expected empty style node'
     
+def test_timeline():
+    """http://code.pediapress.com/wiki/ticket/86 """
+    source = "\nthis is the timeline script!\n"
+    r=parse("<timeline>%s</timeline>" % source).find(parser.Timeline)[0]
+    print r
+    assert r.children==[], "expected no children"
+    assert r.caption==source, "bad script"
+    
+    
     
     
