@@ -7,19 +7,21 @@
 """
 
 import os
+import tempfile
 try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
     
 
-basedir = os.path.expanduser("~/timeline")
-assert os.path.isdir(basedir), "make sure %s exists and is a directory" % basedir
-
-def drawTimeline(script):
+def drawTimeline(script, basedir=None):
     if isinstance(script, unicode):
         script = script.encode('utf8')
-    
+    if basedir is None:
+        basedir = os.path.join(tempfile.gettempdir(), "timeline-%s" % (os.getuid(),))
+    if not os.path.exists(basedir):
+        os.mkdir(basedir)
+        
     m=md5()
     m.update(script)
     ident = m.hexdigest()
@@ -31,7 +33,9 @@ def drawTimeline(script):
 
     scriptfile = os.path.join(basedir, ident+'.txt')
     open(scriptfile, 'w').write(script)
-    err = os.system("EasyTimeline.pl -P /usr/bin/ploticus -T /tmp/ -i %s" % scriptfile)
+    et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
+    
+    err = os.system("perl %s -P /usr/bin/ploticus -T /tmp/ -i %s" % (et, scriptfile))
     if err != 0:
         return None
 
