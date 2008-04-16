@@ -143,68 +143,62 @@ def buildzip():
         # do not daemonize earlier: Collection extension deletes input metabook file!
         if options.daemonize:
             daemonize()
-    
+        
+        posturl = options.posturl
+        if posturl:
+            posturl = posturl.encode('utf-8')
+        
+        from mwlib.utils import get_multipart
+        import urllib
+        import urllib2
+        
+        def post_status(status):
+            print 'status:', status
+            if not posturl:
+                return
+            try:
+                return urllib2.urlopen(posturl, urllib.urlencode({'status': status})).read()
+            except Exception, e:
+                print 'ERROR posting status %r to %r' % (status, posturl)
+        
         zf = zipfile.ZipFile(zipfilename, 'w')
         z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
-    
+        
+        post_status('parsing')
+        
         for x in articles:
             z.addArticle(x)
         mb.addArticles(articles)
-    
+        
         z.addObject('metabook.json', mb.dumpJson())
         for title, revision in mb.getArticles():
             z.addArticle(title, revision=revision)        
-        print "got articles"
+
+        post_status('packaging')
 
         if not options.noimages:
             z.writeImages(size=imagesize)
-            print "got images"
-
+        
         z.writeContent()
-        print "written content"
         zf.close()
-    
-        posturl = options.posturl
+        
         if posturl:
-            def get_multipart(filename, data, name='collection'):
-                import time
-            
-                boundary = "-"*20 + ("%f" % time.time()) + "-"*20
-
-                items = []
-                items.append("--" + boundary)
-                items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
-                             % {'name': name, 'filename': filename})
-                items.append('Content-Type: application/octet-stream')
-                items.append('')
-                items.append(data)
-                items.append('--' + boundary + '--')
-                items.append('')
-
-                body = "\r\n".join(items)
-                content_type = 'multipart/form-data; boundary=%s' % boundary
-
-                return content_type, body
-        
-            def post_url(url, data, filename='collection.zip'):
-                import urllib2
-            
-                ct, data = get_multipart(filename, data)
-                headers = {"Content-Type": ct}
-                req = urllib2.Request(url.encode('utf8'), data=data, headers=headers)
-                return urllib2.urlopen(req).read()
-        
+            post_status('uploading')
             zf = open(zipfilename, "rb")
-            result = post_url(posturl, zf.read())
-            #print 'POST result:', repr(result)
-    
+            ct, data = get_multipart('collection.zip', zf.read(), 'collection')
+            zf.close()
+            req = urllib2.Request(posturl, data=data, headers={"Content-Type": ct})
+            result = urllib2.urlopen(req).read()
+        
         if w['images']:
             w['images'].clear()
-    
+        
         if not output:
             os.unlink(zipfilename)
-        print "finished"
+        
+        post_status('finished')
     except Exception, e:
+        post_status('error')
         if options.errorfile:
             errorfile = open(options.errorfile, 'w')
             print 'writing errors to %r' % options.errorfile

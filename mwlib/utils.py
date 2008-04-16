@@ -1,6 +1,7 @@
 import os
 import sys
 import errno
+import time
 
 # provide all for python 2.4
 try:
@@ -57,3 +58,42 @@ def shell_exec(cmd, maxmem=1024*1024, maxtime=60, maxfile=32*1024):
     if sys.platform in ('darwin', 'linux2'):
         cmd = 'ulimit -v %d -t %d -f %d && %s' % (maxmem, maxtime, maxfile, cmd)
     return os.system(cmd)
+
+
+def get_multipart(filename, data, name):
+    """Build data in format multipart/form-data to be used to POST binary data.
+    
+    @param filename: filename to be used in multipart request
+    @type filenaem: basestring
+    
+    @param data: binary data to include
+    @type data: str
+    
+    @param name: name to be used in multipart request
+    @type name: basestring
+    
+    @returns: tuple containing content-type and body for the request
+    @rtype: (str, str)
+    """
+    
+    if isinstance(filename, unicode):
+        filename = filename.encode('utf-8', 'ignore')
+    if isinstance(name, unicode):
+        name = name.encode('utf-8', 'ignore')
+    
+    boundary = "-"*20 + ("%f" % time.time()) + "-"*20
+    
+    items = []
+    items.append("--" + boundary)
+    items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
+                 % {'name': name, 'filename': filename})
+    items.append('Content-Type: application/octet-stream')
+    items.append('')
+    items.append(data)
+    items.append('--' + boundary + '--')
+    items.append('')
+    
+    body = "\r\n".join(items)
+    content_type = 'multipart/form-data; boundary=%s' % boundary
+    
+    return content_type, body
