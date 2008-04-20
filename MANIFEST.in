@@ -5,6 +5,7 @@ include README.html
 include README.txt
 include example_conf.txt
 include ez_setup.py
+include mwlib/EasyTimeline.pl
 include mwlib/Makefile
 include mwlib/__init__.py
 include mwlib/_expander.cc
@@ -62,4 +63,5 @@ include tests/test_recorddb.py
 include tests/test_sanitychecker.py
 include tests/test_scanner.py
 include tests/test_table.py
+include tests/test_timeline.py
 include tests/test_zipwiki.py
