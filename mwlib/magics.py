@@ -9,7 +9,6 @@ http://meta.wikimedia.org/wiki/Help:Magic_words
 http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
-import re
 import datetime
 import urllib
 from mwlib.log import Log
@@ -273,7 +272,9 @@ class StringMagic(object):
 
 class ParserFunctions(object):
     wikidb = None
-
+    def _error(self,s):
+        return '<strong class="error">%s</strong>' % (s,)
+    
     def TAG(self, args):
         name = args[0].strip()
         r= u"<%s>%s</%s>" % (name, args[1], name)
@@ -319,7 +320,7 @@ class ParserFunctions(object):
             try:
                 r=str(expr.expr(rl[0]))
             except Exception, err:
-                return str(err)
+                return self._error(err)
 
             if "e" in r:
                 f,i = r.split("e")
@@ -333,7 +334,7 @@ class ParserFunctions(object):
         try:
             r = expr.expr(rl[0])
         except Exception, err:
-            return str(err)
+            return self._error(err)
 
         if r:
             return rl[1]
@@ -366,6 +367,44 @@ class ParserFunctions(object):
             return last
         return u''
     
+    def TITLEPARTS(self, args):
+        def safe_int(n):
+            try:
+                return int(n)
+            except ValueError:
+                return 0
+            
+        title = args[0]
+        try:
+            numseg = int(args[1])
+        except ValueError:
+            numseq = 0
+            
+        try:
+            start = int(args[2])
+        except ValueError:
+            start = 1
+        
+        if start>0:    
+            start -= 1
+            
+        parts = title.split("/")[start:]
+        if numseg:
+            parts = parts[:numseg]
+        return "/".join(parts)
+
+    def IFERROR(self, args):
+        errmark = '<strong class="error">'
+        val = args[0]
+        bad=args[1]
+        good=args[2] or val
+        
+        if errmark in val:
+            return bad
+        else:
+            return good
+        
+        
 for x in dir(ParserFunctions):
     if x.startswith("_"):
         continue    

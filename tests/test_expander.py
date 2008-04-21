@@ -196,3 +196,38 @@ def test_bad_expr_name():
     s=expandstr("{{expr:1+1}}")  # '#' missing
     assert s!='2', "bad result"
 
+def test_parmpart():
+    parmpart = """{{#ifeq:/{{{2|}}}
+|{{#titleparts:/{{{2|}}}|1|{{#expr:1+{{{1|1}}}}}}}
+|
+|{{#titleparts:/{{{2|}}}|1|{{#expr:1+{{{1|1}}}}}}}
+}}"""
+    expandstr("{{ParmPart|0|a/b}}", "", wikidb=DictDB(ParmPart=parmpart))
+    expandstr("{{ParmPart|1|a/b}}", "a", wikidb=DictDB(ParmPart=parmpart))
+    expandstr("{{ParmPart|2|a/b}}", "b", wikidb=DictDB(ParmPart=parmpart))
+    expandstr("{{ParmPart|3|a/b}}", "", wikidb=DictDB(ParmPart=parmpart))
+              
+def test_titleparts():
+    expandstr("{{#titleparts:Help:Link/a/b|0|}}", "Help:Link/a/b")
+    expandstr("{{#titleparts:Help:Link/a/b|1|}}", "Help:Link")
+    expandstr("{{#titleparts:Help:Link/a/b|2|}}", "Help:Link/a") 
+    expandstr("{{#titleparts:Help:Link/a/b|3|}}", "Help:Link/a/b")
+    expandstr("{{#titleparts:Help:Link/a/b|4|}}", "Help:Link/a/b")
+
+def test_titleparts_2params():
+    expandstr("{{#titleparts:Help:Link/a/b|2|2}}", "a/b")
+    expandstr("{{#titleparts:Help:Link/a/b|1|2}}", "a")
+    expandstr("{{#titleparts:Help:Link/a/b|1|3}}", "b")
+
+def test_titleparts_negative():
+    expandstr("{{#titleparts:Help:Link/a/b|-1|}}", "Help:Link/a")
+    expandstr("{{#titleparts:Help:Link/a/b|1|-1|}}", "b")
+
+
+def test_iferror():
+    expandstr("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression")
+    expandstr("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input")
+    expandstr("{{#iferror:{{#expr:1+1}}|bad input}}", "2")
+    expandstr("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input")
+    expandstr("{{#iferror:{{#expr:1+1}}}}", "2")
+    expandstr("{{#iferror:{{#expr:1+Z}}}}", "")
