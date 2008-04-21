@@ -9,7 +9,6 @@ http://meta.wikimedia.org/wiki/Help:Magic_words
 http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
-import re
 import datetime
 import urllib
 from mwlib.log import Log

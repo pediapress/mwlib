@@ -222,3 +222,12 @@ def test_titleparts_2params():
 def test_titleparts_negative():
     expandstr("{{#titleparts:Help:Link/a/b|-1|}}", "Help:Link/a")
     expandstr("{{#titleparts:Help:Link/a/b|1|-1|}}", "b")
+
+
+def test_iferror():
+    expandstr("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression")
+    expandstr("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input")
+    expandstr("{{#iferror:{{#expr:1+1}}|bad input}}", "2")
+    expandstr("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input")
+    expandstr("{{#iferror:{{#expr:1+1}}}}", "2")
+    expandstr("{{#iferror:{{#expr:1+Z}}}}", "")
