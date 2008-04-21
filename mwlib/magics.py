@@ -368,12 +368,6 @@ class ParserFunctions(object):
         return u''
     
     def TITLEPARTS(self, args):
-        def safe_int(n):
-            try:
-                return int(n)
-            except ValueError:
-                return 0
-            
         title = args[0]
         try:
             numseg = int(args[1])
