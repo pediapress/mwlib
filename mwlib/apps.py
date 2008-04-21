@@ -84,13 +84,15 @@ def buildzip():
                       help="max. pixel size (width or height) for images (default: 800)")
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
+    parser.add_option("--logfile", help="log to logfile")
     parser.add_option("-e", "--errorfile", help="write errors to this file")
     options, args = parser.parse_args()
 
     import tempfile
     import os
     import zipfile
-    
+
+    from mwlib import utils
     from mwlib.utils import daemonize
 
     articles = [unicode(x, 'utf-8') for x in args]
@@ -98,8 +100,26 @@ def buildzip():
     conf = options.conf
     if not options.conf:
         parser.error("missing --conf argument\nuse --help for all options")
-    
+
+
+
+    posturl = None
+    def post_status(status):
+        print 'status:', status
+        if not posturl:
+            return
+        try:
+            return urllib2.urlopen(posturl, urllib.urlencode({'status': status})).read()
+        except Exception, e:
+            print 'ERROR posting status %r to %r' % (status, posturl)
+
+
+
+            
     try:
+        if options.logfile:
+            utils.start_logging(options.logfile)
+            
         output = options.output
 
         from mwlib import wiki, recorddb, metabook
@@ -152,14 +172,6 @@ def buildzip():
         import urllib
         import urllib2
         
-        def post_status(status):
-            print 'status:', status
-            if not posturl:
-                return
-            try:
-                return urllib2.urlopen(posturl, urllib.urlencode({'status': status})).read()
-            except Exception, e:
-                print 'ERROR posting status %r to %r' % (status, posturl)
         
         zf = zipfile.ZipFile(zipfilename, 'w')
         z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
