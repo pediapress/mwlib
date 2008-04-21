@@ -366,6 +366,32 @@ class ParserFunctions(object):
             return last
         return u''
     
+    def TITLEPARTS(self, args):
+        def safe_int(n):
+            try:
+                return int(n)
+            except ValueError:
+                return 0
+            
+        title = args[0]
+        try:
+            numseg = int(args[1])
+        except ValueError:
+            numseq = 0
+            
+        try:
+            start = int(args[2])
+        except ValueError:
+            start = 1
+        
+        if start>0:    
+            start -= 1
+            
+        parts = title.split("/")[start:]
+        if numseg:
+            parts = parts[:numseg]
+        return "/".join(parts)
+    
 for x in dir(ParserFunctions):
     if x.startswith("_"):
         continue    
