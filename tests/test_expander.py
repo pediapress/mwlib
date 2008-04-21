@@ -207,3 +207,18 @@ def test_parmpart():
     expandstr("{{ParmPart|2|a/b}}", "b", wikidb=DictDB(ParmPart=parmpart))
     expandstr("{{ParmPart|3|a/b}}", "", wikidb=DictDB(ParmPart=parmpart))
               
+def test_titleparts():
+    expandstr("{{#titleparts:Help:Link/a/b|0|}}", "Help:Link/a/b")
+    expandstr("{{#titleparts:Help:Link/a/b|1|}}", "Help:Link")
+    expandstr("{{#titleparts:Help:Link/a/b|2|}}", "Help:Link/a") 
+    expandstr("{{#titleparts:Help:Link/a/b|3|}}", "Help:Link/a/b")
+    expandstr("{{#titleparts:Help:Link/a/b|4|}}", "Help:Link/a/b")
+
+def test_titleparts_2params():
+    expandstr("{{#titleparts:Help:Link/a/b|2|2}}", "a/b")
+    expandstr("{{#titleparts:Help:Link/a/b|1|2}}", "a")
+    expandstr("{{#titleparts:Help:Link/a/b|1|3}}", "b")
+
+def test_titleparts_negative():
+    expandstr("{{#titleparts:Help:Link/a/b|-1|}}", "Help:Link/a")
+    expandstr("{{#titleparts:Help:Link/a/b|1|-1|}}", "b")
