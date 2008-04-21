@@ -12,8 +12,21 @@ except ImportError:
             if not x:
                 return False
         return True
+
+def start_logging(path):
+    sys.stderr.flush()
+    sys.stdout.flush()
     
-def daemonize(dev_null=True):
+    f = open(path, "a")
+    fd = f.fileno()
+    os.dup2(fd, 1)
+    os.dup2(fd, 2)
+    
+    null=os.open('/dev/null', os.O_RDWR)
+    os.dup2(null, 0)
+    os.close(null)
+        
+def daemonize(dev_null=False):
     # See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
     if os.fork():   # launch child and...
         os._exit(0) # kill off parent
