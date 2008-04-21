@@ -58,6 +58,7 @@ include tests/test_html.py
 include tests/test_imgmap.py
 include tests/test_mwscan.py
 include tests/test_netdb_imagedb.py
+include tests/test_parse_params.py
 include tests/test_parser.py
 include tests/test_recorddb.py
 include tests/test_sanitychecker.py
