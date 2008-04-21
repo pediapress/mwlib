@@ -196,3 +196,14 @@ def test_bad_expr_name():
     s=expandstr("{{expr:1+1}}")  # '#' missing
     assert s!='2', "bad result"
 
+def test_parmpart():
+    parmpart = """{{#ifeq:/{{{2|}}}
+|{{#titleparts:/{{{2|}}}|1|{{#expr:1+{{{1|1}}}}}}}
+|
+|{{#titleparts:/{{{2|}}}|1|{{#expr:1+{{{1|1}}}}}}}
+}}"""
+    expandstr("{{ParmPart|0|a/b}}", "", wikidb=DictDB(ParmPart=parmpart))
+    expandstr("{{ParmPart|1|a/b}}", "a", wikidb=DictDB(ParmPart=parmpart))
+    expandstr("{{ParmPart|2|a/b}}", "b", wikidb=DictDB(ParmPart=parmpart))
+    expandstr("{{ParmPart|3|a/b}}", "", wikidb=DictDB(ParmPart=parmpart))
+              
