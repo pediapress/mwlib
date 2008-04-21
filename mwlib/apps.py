@@ -84,7 +84,7 @@ def buildzip():
                       help="max. pixel size (width or height) for images (default: 800)")
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
-    parser.add_option("--logfile", help="log to logfile")
+    parser.add_option("-l", "--logfile", help="log to logfile")
     parser.add_option("-e", "--errorfile", help="write errors to this file")
     options, args = parser.parse_args()
 
