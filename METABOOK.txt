@@ -60,6 +60,9 @@ revision (string):
 
 timestamp (integer):
     UNIX timestamp (seconds since 1970-1-1) of the revision of this article.
+    
+authors (list of strings):
+    List of (principal) authors of this article.
 
 
 Chapters
@@ -92,6 +95,8 @@ Example:
                     'type': 'article',
                     'title': 'ARTICLE TITLE',   
                     'revision': 'ARTITLE REVISION', # e.g. oldid for MediaWiki articles
+                    'authors': ['John Doe', 'Jane Doe'],
+                    'timestamp': 122331212312
                 },
             ],
             ...

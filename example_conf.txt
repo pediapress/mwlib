@@ -60,3 +60,8 @@ defaultarticlelicense = GFDL
 # * [[Template:refimprove]]
 # * [[Template:pp-semi]]
 templateblacklist = http://en.wikipedia.org/w/index.php?title=TemplateBlacklist&action=raw
+
+# comma-separated list of default (principal) authors of articles in this wiki
+# (if there is no fixed set of authors, set this to some string describing the
+# community of authors, e.g. "Wikipedians" on a Wikipedia):
+defaultauthors = Wikipedians

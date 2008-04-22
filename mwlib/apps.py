@@ -125,6 +125,9 @@ def buildzip():
         from mwlib import wiki, recorddb, metabook
     
         w = wiki.makewiki(conf)
+        
+        w['wiki'].defaultauthors = [a.strip() for a in cp.get('wiki', 'defaultauthors').split(',')]
+        
         if options.noimages:
             w['images'] = None
         else:
