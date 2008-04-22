@@ -126,8 +126,6 @@ def buildzip():
     
         w = wiki.makewiki(conf)
         
-        w['wiki'].defaultauthors = [a.strip() for a in cp.get('wiki', 'defaultauthors').split(',')]
-        
         if options.noimages:
             w['images'] = None
         else:
@@ -146,7 +144,8 @@ def buildzip():
         
         cp = ConfigParser()
         cp.read(conf)
-        
+
+        w['wiki'].defaultauthors = [a.strip() for a in cp.get('wiki', 'defaultauthors').split(',')]
         license = w['wiki'].getRawArticle(cp.get('wiki', 'defaultarticlelicense'))
         
         mb = metabook.MetaBook()
