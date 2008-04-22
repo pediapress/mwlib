@@ -38,6 +38,13 @@ class FakeDB(object):
             return None
         return a['url']
     
+    def getAuthors(self, title, revision=None):
+        try:
+            a = self.articles[title]
+        except KeyError:
+            return None
+        return [u'foo', u'bar']
+    
 
 class TestRecordDB(object):
     def setup_method(self, method):

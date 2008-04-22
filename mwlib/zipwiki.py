@@ -56,6 +56,12 @@ class Wiki(object):
             return article['url']
         return None
     
+    def getAuthors(self, title, revision=None):
+        article = self._getArticle(title, revision=revision)
+        if article:
+            return article.get('authors', [])
+        return None
+    
     def getTemplate(self, name, followRedirects=True):
         try:
             return self.templates[name]['content']

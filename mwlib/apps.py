@@ -145,7 +145,6 @@ def buildzip():
         cp = ConfigParser()
         cp.read(conf)
 
-        w['wiki'].defaultauthors = [a.strip() for a in cp.get('wiki', 'defaultauthors').split(',')]
         license = w['wiki'].getRawArticle(cp.get('wiki', 'defaultarticlelicense'))
         
         mb = metabook.MetaBook()

@@ -21,17 +21,17 @@ class RecordDB(object):
         r = self.db.getRawArticle(name, revision=revision)
         self.articles[name] = {
             'revision': revision,
-            'contenttype': 'text/x-mediawiki',
+            'content-type': 'text/x-wiki',
             'content': r,
             'url': self.db.getURL(name, revision=revision),
-            'authors': getattr(self.db, 'defaultauthors', []),
+            'authors': self.db.getAuthors(name, revision=revision),
         }
         return r
     
     def getTemplate(self, name, followRedirects=False):
         r = self.db.getTemplate(name, followRedirects=followRedirects)
         self.templates[name] = {
-            'contenttype': 'text/x-mediawiki',
+            'content-type': 'text/x-wiki',
             'content': r,
         }
         return r

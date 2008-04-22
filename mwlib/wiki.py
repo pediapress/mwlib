@@ -11,9 +11,10 @@ def wiki_zip(path=None, url=None, name=None):
     return zipwiki.Wiki(path)
 
 def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
-             templateurls=None, templateblacklist=None, defaultarticlelicense=None, **kwargs):
+             templateurls=None, templateblacklist=None, defaultarticlelicense=None,
+             defaultauthors=None, **kwargs):
     from mwlib import netdb
-
+    
     if templateurls:
         templateurls = [x for x in templateurls.split() if x]
     else:
@@ -24,10 +25,14 @@ def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
     else:
         raise RuntimeError("imagedescriptionurls parameter for netdb not set in [wiki] section")
     
+    if defaultauthors:
+        defaultauthors = [a.strip() for a in defaultauthors.split(',')]
+    
     return netdb.NetDB(articleurl,
         imagedescriptionurls=imagedescriptionurls,
         templateurls=templateurls,
         templateblacklist=templateblacklist,
+        defaultauthors=defaultauthors,
     )
 
 def wiki_cdb(path=None, **kwargs):

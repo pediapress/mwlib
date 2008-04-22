@@ -333,6 +333,7 @@ class NetDB(object):
         imagedescriptionurls=None,
         templateurls=None,
         templateblacklist=None,
+        defaultauthors=None,
     ):
         """
         @param pagename: URL to page in wikitext format. @TITLE@ gets replaced
@@ -361,6 +362,9 @@ class NetDB(object):
             
             If more than one URL is specified, URLs are tried in given order.
         @type templateurls: [str]
+        
+        @param defaultauthors: list of default (principal) authors for articles
+        @type defaultauthors: [unicode]
         """
         
         self.pagename = pagename.replace("%", "%%").replace("@TITLE@", "%(NAME)s").replace("@REVISION@", "%(REVISION)s")
@@ -379,6 +383,11 @@ class NetDB(object):
             self.templateblacklist = self._readTemplateBlacklist(templateblacklist)
         else:
             self.templateblacklist = []
+        
+        if defaultauthors:
+            self.defaultauthors = defaultauthors
+        else:
+            self.defaultauthors = []
         
         self.pages = {}
     
@@ -424,6 +433,9 @@ class NetDB(object):
             return self.pagename % dict(NAME=name, REVISION='0')
         else:
             return self.pagename % dict(NAME=name, REVISION=revision)
+    
+    def getAuthors(self, title, revision=None):
+        return list(self.defaultauthors)
     
     def title2db(self, title):
         assert isinstance(title, unicode), 'title must be of type unicode'
