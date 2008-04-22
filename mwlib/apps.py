@@ -125,6 +125,7 @@ def buildzip():
         from mwlib import wiki, recorddb, metabook
     
         w = wiki.makewiki(conf)
+        
         if options.noimages:
             w['images'] = None
         else:
@@ -143,7 +144,8 @@ def buildzip():
         
         cp = ConfigParser()
         cp.read(conf)
-        
+
+        w['wiki'].defaultauthors = [a.strip() for a in cp.get('wiki', 'defaultauthors').split(',')]
         license = w['wiki'].getRawArticle(cp.get('wiki', 'defaultarticlelicense'))
         
         mb = metabook.MetaBook()

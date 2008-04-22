@@ -24,9 +24,10 @@ class RecordDB(object):
             'contenttype': 'text/x-mediawiki',
             'content': r,
             'url': self.db.getURL(name, revision=revision),
+            'authors': getattr(self.db, 'defaultauthors', []),
         }
         return r
-
+    
     def getTemplate(self, name, followRedirects=False):
         r = self.db.getTemplate(name, followRedirects=followRedirects)
         self.templates[name] = {
