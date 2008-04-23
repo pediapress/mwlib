@@ -13,6 +13,18 @@ except ImportError:
                 return False
         return True
 
+def fsescape(s):
+    res = []
+    for x in s:
+        c = ord(x)
+        if c>127: 
+            res.append("~%s~" % c)
+        elif c==126: # ord("~")==126
+            res.append("~~")
+        else:
+            res.append(x)
+    return "".join(res)
+    
 def start_logging(path):
     sys.stderr.flush()
     sys.stdout.flush()

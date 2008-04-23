@@ -22,9 +22,8 @@ import time
 import tempfile
 import re
 
-from mwlib import uparser
+from mwlib import uparser, utils
 from mwlib.log import Log
-from mwlib.utils import shell_exec
 
 log = Log("netdb")
 
@@ -241,7 +240,7 @@ class ImageDB(object):
         d = os.path.join(urlpart, sizepart)
         if makedirs and not os.path.isdir(d):
             os.makedirs(d)
-        return os.path.join(d, name)
+        return os.path.join(d, utils.fsescape(name))
     
     def _fetchImage(self, name):
         """Fetch image with given name in original (i.e. biggest) size per HTTP.
@@ -293,7 +292,6 @@ class ImageDB(object):
         @returns: filename of converted image
         @rtype: basestring
         """
-        
         destfile = self._getCachedImagePath(baseurl, name, size=size, makedirs=True)
         if size is not None:
             thumbnail = '-thumbnail "%dx%d>"' % (size, size)
@@ -310,7 +308,7 @@ class ImageDB(object):
             'dest': destfile,
         }
         log.info('executing %r' % cmd)
-        rc = shell_exec(cmd)
+        rc = utils.shell_exec(cmd)
         if rc != 0:
             log.error('Could not convert %r: convert returned %d' % (name, rc))
             return None
