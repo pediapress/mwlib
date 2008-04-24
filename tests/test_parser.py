@@ -527,3 +527,16 @@ def test_timeline_stray():
 
     links=parse("<timeline />[[foobar]]").find(parser.Link)
     assert links, "expected a link"
+
+def test_ftp_url():
+    """http://code.pediapress.com/wiki/ticket/98"""
+    url = "ftp://bla.com:8888/asdfasdf+adfdsf$fasd{}/~ralf?=blubb/@#&*(),blubb"
+    
+    urls = parse("foo %s bar" % url).find(parser.URL)
+    assert urls, "expected a url"
+    assert urls[0].caption==url, "bad url"
+
+    
+    urls = parse("[%s bar]" % url).find(parser.NamedURL)
+    assert urls, "expected a named url"
+    assert urls[0].caption==url, "bad url"
