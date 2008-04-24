@@ -197,6 +197,8 @@ class _compat_scanner(object):
                         i+=1
                 elif tt.t=="nowiki":
                     i+=1
+                    if isEndToken or tt.selfClosing:
+                        continue
                     while i<numtokens:
                         type, start, tlen = tokens[i]
                         if type==token.t_html_tag:
