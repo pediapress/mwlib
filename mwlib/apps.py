@@ -85,7 +85,7 @@ def buildzip():
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
     parser.add_option("-l", "--logfile", help="log to logfile")
-    parser.add_option("-e", "--errorfile", help="write errors to this file")
+    parser.add_option("-e", "--errorfile", help="deprecated. do not use this option.")
     options, args = parser.parse_args()
 
     import tempfile
@@ -212,16 +212,7 @@ def buildzip():
         post_status('finished')
     except Exception, e:
         post_status('error')
-        if options.errorfile:
-            errorfile = open(options.errorfile, 'w')
-            print 'writing errors to %r' % options.errorfile
-            errorfile.write('Caught: %s %s' % (e, type(e)))
-            import traceback, sys
-            traceback.print_exc(file=errorfile)
-            errorfile.close()
-            sys.exit(1)
-        else:
-            raise
+        raise
     
 
 def parse():
