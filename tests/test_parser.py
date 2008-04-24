@@ -511,3 +511,19 @@ def test_nowiki_closing():
     """http://code.pediapress.com/wiki/ticket/102"""
     links=parse("</nowiki>[[foobar]]").find(parser.Link)
     assert links, "expected a link"
+    
+def test_math_stray():
+    """http://code.pediapress.com/wiki/ticket/102"""
+    links=parse("</math>[[foobar]]").find(parser.Link)
+    assert links, "expected a link"
+
+    links=parse("<math />[[foobar]]").find(parser.Link)
+    assert links, "expected a link"
+
+def test_timeline_stray():
+    """http://code.pediapress.com/wiki/ticket/102"""
+    links=parse("</timeline>[[foobar]]").find(parser.Link)
+    assert links, "expected a link"
+
+    links=parse("<timeline />[[foobar]]").find(parser.Link)
+    assert links, "expected a link"
