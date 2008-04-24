@@ -170,8 +170,13 @@ class _compat_scanner(object):
 
                 tt = self.tagtoken(s)
                 isEndToken = isinstance(tt, EndTagToken)
-
+                closingOrSelfClosing = isEndToken or tt.selfClosing
+                
                 if tt.t=="math":
+                    if closingOrSelfClosing:
+                        i+=1
+                        continue
+                    
                     res.append(("MATH", g()))
                     i+=1
                     while i<numtokens:
@@ -184,6 +189,9 @@ class _compat_scanner(object):
                         res.append(("LATEX", g()))
                         i+=1
                 elif tt.t=="timeline":
+                    if closingOrSelfClosing:
+                        i+=1
+                        continue
                     res.append(("TIMELINE", g()))
                     i+=1
                     while i<numtokens:
