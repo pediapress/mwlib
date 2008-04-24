@@ -501,6 +501,8 @@ def test_timeline():
     assert r.children==[], "expected no children"
     assert r.caption==source, "bad script"
     
-    
-    
+def test_self_closing_nowiki():
+    """http://code.pediapress.com/wiki/ticket/102"""
+    links=parse("<nowiki />[[foobar]]").find(parser.Link)
+    assert links, "expected a link"
     
