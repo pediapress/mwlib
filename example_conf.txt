@@ -16,7 +16,7 @@ type = download
 url = http://upload.wikimedia.org/wikipedia/commons/ http://upload.wikimedia.org/wikipedia/en/
 
 # local cache directory (can become very large):
-localpath = ~/en-images
+localpath = /some/path/en-images
 
 # list of names of known templates used for declaring image licenses on image
 # description pages:
