@@ -513,8 +513,6 @@ class NetDB(object):
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
 
-    def getEditors(self, title):
-        return []
 
 class Overlay(NetDB):
     def __init__(self, wikidb, templates):
