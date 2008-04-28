@@ -8,6 +8,7 @@
 
 [images]
 # type of virtual image database, can be on of
+# * mwapi - to use mwapidb.ImageDB
 # * download - to use netdb.ImageDB
 # * zip - to use zipwiki.ImageDB
 type = download
@@ -26,6 +27,7 @@ knownlicenses = GFDL cc-by-sa
 [wiki]
 # type of the virtual wiki (see http://code.pediapress.com/wiki/wiki/VirtualWiki),
 # value can be one of
+# * mwapi - to use mwapidb.WikiDB
 # * net - to use netdb.NetDB
 # * cdb - to use cdbwiki.WikiDB
 # * zip - to use zipwiki.Wiki
