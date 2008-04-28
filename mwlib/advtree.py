@@ -312,6 +312,8 @@ _styleNodeMap = dict( (k._style,k) for k in [Overline, Underline, Sub, Sup, Smal
 # Missing as Classes derived from parser.TagNode
 # -------------------------------------------------------------------------
 
+class Source(TagNode, AdvancedNode):
+    _tag = "source"
 
 class Code(TagNode, AdvancedNode):
     _tag = "code"
@@ -352,7 +354,7 @@ class Strike(TagNode,AdvancedNode):
 class ImageMap(TagNode, AdvancedNode): # defined as block node, maybe incorrect
     _tag = "imagemap"
     
-_tagNodeMap = dict( (k._tag,k) for k in [Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap] )
+_tagNodeMap = dict( (k._tag,k) for k in [Source, Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap] )
 _styleNodeMap["s"] = Strike # Special Handling for deprecated s style
 
 
@@ -374,7 +376,7 @@ Open Issues: Math, Magic, (unknown) TagNode
 _blockNodesMap = (Book, Chapter, Article, Section, Paragraph, Div,
                   PreFormatted, Cell, Row, Table, Item, BreakingReturn,
                   ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
-                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList)
+                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Source)
 
 for k in _blockNodesMap:  
   k.isblocknode = True
@@ -504,7 +506,7 @@ def removeNewlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
-    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted):
+    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted) and not node.getParentNodesByClass(Source):
         if node.caption.strip() == u"":
             prev = node.previous or node.parent # previous sibling node or parentnode 
             next = node.next or node.parent.next
