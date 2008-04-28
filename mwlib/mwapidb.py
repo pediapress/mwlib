@@ -149,7 +149,7 @@ class ImageDB(APIDBBase):
         if result is None:
             return None
         try:
-            return result['pages'].values()[0]['imageinfo']['comment']
+            return result['pages'].values()[0]['imageinfo'][0]['comment']
         except KeyError:
             return None
     
@@ -181,38 +181,23 @@ def normname(name):
 
 
 class WikiDB(APIDBBase):
-    redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
-    print_template = 'Template:Print%s'
+    print_template = u'Template:Print%s'
+    license_templates = [u'Wikipedia:Text of the %s', u'MediaWiki:Text of the %s']
+    template_blacklist_titles = [u'Wikipedia:Template Blacklist', u'MediaWiki:Template Blacklist']
+    ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
+    bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    def __init__(self, api_url, templateblacklist=None, defaultauthors=None):
-        """
-        @param defaultauthors: list of default (principal) authors for articles
-        @type defaultauthors: [unicode]
-        """
-        
+    def __init__(self, api_url):
         super(WikiDB, self).__init__(api_url)
-        
-        if templateblacklist:
-            self.templateblacklist = self._readTemplateBlacklist(templateblacklist)
+        self.template_blacklist = []
+        for title in self.template_blacklist_titles:
+            raw = self.getRawArticle(title)
+            if raw is not None:
+                self.template_blacklist = [template.lower().strip() 
+                                           for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
+                break
         else:
-            self.templateblacklist = []
-        
-        if defaultauthors:
-            self.defaultauthors = defaultauthors
-        else:
-            self.defaultauthors = []
-        
-        self.pages = {}
-    
-    def _readTemplateBlacklist(self, templateblacklist):
-        if not templateblacklist:
-            return []
-        try:
-            content = self.getRawArticle(templateblacklist)
-            return [template.lower().strip() for template in re.findall('\* *\[\[.*?:(.*?)\]\]', content)]
-        except: # fixme: more sensible error handling...
-            log.error('Error fetching template blacklist from url:', templateblacklist)
-            return []
+            log.error('Could not get template blacklist (tried: %r)' % self.template_blacklist_titles)
     
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))
@@ -221,34 +206,69 @@ class WikiDB(APIDBBase):
         else:
             return '%stitle=%s&oldid=%s' % (self.index_url, name, revision)
     
-    def getAuthors(self, title, revision=None):
-        return list(self.defaultauthors)
+    def getAuthors(self, title, revision=None, max_num_authors=10):
+        """Return at most max_num_authors names of non-bot, non-anon users for
+        non-minor changes of given article (before given revsion).
+        
+        @returns: list of principal authors
+        @rtype: [unicode]
+        """
+        
+        result = self.query(
+            titles=title,
+            redirects=1,
+            prop='revisions',
+            rvprop='user|ids|flags|comment',
+            rvlimit=500,
+        )
+        if result is None:
+            return None
+        
+        try:
+            revs = result['pages'].values()[0]['revisions']
+        except KeyError:
+            return None
+
+        if revision is not None:
+            revision = int(revision)
+            revs = [r for r in revs if r['revid'] < revision]
+        
+        authors = [r['user'] for r in revs
+                   if not r.get('anon')
+                   and not self.ip_rex.match(r['user'])
+                   and not r.get('minor')
+                   and not self.bot_rex.search(r.get('comment', ''))
+                   and not self.bot_rex.search(r['user'])
+                   ]
+        author2count = {}
+        for a in authors:
+            try:
+                author2count[a] += 1
+            except KeyError:
+                author2count[a] = 1
+        author2count = author2count.items()
+        author2count.sort(key=lambda a: -a[1])
+        return [a[0] for a in author2count[:max_num_authors]]
     
-    def getTemplate(self, name, followRedirects=False):
+    def getTemplate(self, name):
         if ":" in name:
             name = name.split(':', 1)[1]
         
-        if name.lower() in self.templateblacklist:
+        if name.lower() in self.template_blacklist:
             log.info("ignoring blacklisted template:" , repr(name))
             return None
         
         for title in (self.print_template % name, 'Template:%s' % name):
             log.info("Trying template %r" % (title,))
             c = self.getRawArticle(title)
-            if c is None:
-                continue
-            mo = self.redirect_rex.search(c)
-            if mo is None:
+            if c is not None:
                 return c
-            redirect = mo.group('redirect')
-            redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
-            return self.getTemplate(redirect)
         
         return None
     
     def getRawArticle(self, title, revision=None):
         if revision is None:
-            result = self.query(titles=title, prop='revisions', rvprop='content')
+            result = self.query(titles=title, redirects=1, prop='revisions', rvprop='content')
         else:
             result = self.query(revids=revision, prop='revisions', rvprop='content')
         if result is None:
@@ -261,13 +281,33 @@ class WikiDB(APIDBBase):
         except KeyError:
             return None
     
+    def getMetaData(self):
+        result = self.query(meta='siteinfo')
+        try:
+            g = result['general']
+            license_name = g['rights']
+            for title in self.license_templates + [license_name]:
+                raw = self.getRawArticle(title)
+                if raw is not None:
+                    break
+            return {
+                'license': {
+                    'name': license_name,
+                    'wikitext': raw,
+                },
+                'url': g['base'],
+                'name': '%s (%s)' % (g['sitename'], g['lang']),
+            }
+        except KeyError:
+            return None
+    
     def getParsedArticle(self, title, revision=None):
         raw = self.getRawArticle(title, revision=revision)
         if raw is None:
             return None
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
-
+    
 
 class Overlay(WikiDB):
     def __init__(self, wikidb, templates):

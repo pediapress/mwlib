@@ -6,6 +6,10 @@
 import os
 from ConfigParser import ConfigParser
 
+def wiki_mwapi(base_url=None):
+    from mwlib import mwapidb
+    return mwapidb.WikiDB(base_url)
+
 def wiki_zip(path=None, url=None, name=None):
     from mwlib import zipwiki
     return zipwiki.Wiki(path)
@@ -41,6 +45,10 @@ def wiki_cdb(path=None, **kwargs):
     db=cdbwiki.WikiDB(path)
     return db
 
+def image_mwapi(base_url=None):
+    from mwlib import mwapidb
+    return mwapidb.ImageDB(base_url)
+
 def image_download(url=None, localpath=None, knownlicenses=None):
     assert url, "must supply url in [images] section"
     from mwlib import netdb
@@ -65,8 +73,8 @@ def image_zip(path=None):
 
 
 dispatch = dict(
-    images = dict(download=image_download, zip=image_zip),
-    wiki = dict(cdb=wiki_cdb, net=wiki_net, zip=wiki_zip)
+    images = dict(mwapi=image_mwapi, download=image_download, zip=image_zip),
+    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_cdb, net=wiki_net, zip=wiki_zip)
 )
 
 def makewiki(conf):
@@ -76,7 +84,7 @@ def makewiki(conf):
     wc = os.path.join(conf, "wikiconf.txt")
     if os.path.exists(wc):
         conf = wc 
-
+    
     if conf.lower().endswith(".zip"):
         from mwlib import zipwiki
         res['wiki'] = zipwiki.Wiki(conf)

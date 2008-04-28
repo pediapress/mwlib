@@ -36,7 +36,12 @@ class TestWikiDB(object):
         raw = self.w.getTemplate('Infobox')
         assert isinstance(raw, unicode)
         assert len(raw) > 10
-        
+    
+    def test_getAuthors(self):
+        authors = self.w.getAuthors(u'Physics')
+        print 'AUTHORS:', authors
+        authors = self.w.getAuthors(u'Physics', revision='206917093')
+        print 'AUTHORS:', authors
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
