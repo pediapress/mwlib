@@ -182,10 +182,13 @@ def normname(name):
 
 class WikiDB(APIDBBase):
     print_template = u'Template:Print%s'
-    license_templates = [u'Wikipedia:Text of the %s', u'MediaWiki:Text of the %s']
     template_blacklist_titles = [u'Wikipedia:PDF Template Blacklist', u'MediaWiki:PDF Template Blacklist']
+    
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
+    
+    # FIXME: see getMetaData() method
+    license_templates = [u'Wikipedia:Text of the %s', u'MediaWiki:Text of the %s']
     
     def __init__(self, api_url):
         super(WikiDB, self).__init__(api_url)
@@ -290,10 +293,15 @@ class WikiDB(APIDBBase):
         try:
             g = result['general']
             license_name = g['rights']
+            
+            # FIXME: we need a authoritative title for an article containing the license text
             for title in [t % license_name for t in self.license_templates] + [license_name]:
                 raw = self.getRawArticle(title)
                 if raw is not None:
                     break
+            else:
+                raise RuntimeError('Could not get license text')
+            
             return {
                 'license': {
                     'name': license_name,
