@@ -250,7 +250,11 @@ class WikiDB(APIDBBase):
         author2count.sort(key=lambda a: -a[1])
         return [a[0] for a in author2count[:max_num_authors]]
     
-    def getTemplate(self, name):
+    def getTemplate(self, name, followRedirects=True):
+        """
+        Note: *Not* following redirects is unsupported!
+        """
+        
         if ":" in name:
             name = name.split(':', 1)[1]
         
@@ -286,7 +290,7 @@ class WikiDB(APIDBBase):
         try:
             g = result['general']
             license_name = g['rights']
-            for title in self.license_templates + [license_name]:
+            for title in [t % license_name for t in self.license_templates] + [license_name]:
                 raw = self.getRawArticle(title)
                 if raw is not None:
                     break

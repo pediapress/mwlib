@@ -73,7 +73,7 @@ def show():
 
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog -c CONF [--help] [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
+    parser = optparse.OptionParser(usage="%prog [OPTIONS] [ARTICLE ...]")
     parser.add_option("-c", "--conf", help="config file (required unless --baseurl is given)")
     parser.add_option("-b", "--baseurl", help="base URL for mwapidb backend")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
