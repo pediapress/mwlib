@@ -23,7 +23,7 @@ def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
         templateurls = [x for x in templateurls.split() if x]
     else:
         raise RuntimeError("templateurls parameter for netdb not set in [wiki] section")
-
+    
     if imagedescriptionurls:
         imagedescriptionurls = [x for x in imagedescriptionurls.split() if x]
     else:

@@ -183,7 +183,7 @@ def normname(name):
 class WikiDB(APIDBBase):
     print_template = u'Template:Print%s'
     license_templates = [u'Wikipedia:Text of the %s', u'MediaWiki:Text of the %s']
-    template_blacklist_titles = [u'Wikipedia:Template Blacklist', u'MediaWiki:Template Blacklist']
+    template_blacklist_titles = [u'Wikipedia:PDF Template Blacklist', u'MediaWiki:PDF Template Blacklist']
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
