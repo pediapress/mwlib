@@ -74,7 +74,8 @@ def show():
 
 def buildzip():
     parser = optparse.OptionParser(usage="%prog -c CONF [--help] [-o OUTPUT] [-m METABOOK] [--collectionpage TITLE] [-p POSTURL] [ARTICLE] ...")
-    parser.add_option("-c", "--conf", help="config file")
+    parser.add_option("-c", "--conf", help="config file (required unless --baseurl is given)")
+    parser.add_option("-b", "--baseurl", help="base URL for mwapidb backend")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option('--collectionpage', help='Title of a collection page')
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
@@ -96,13 +97,12 @@ def buildzip():
     from mwlib.utils import daemonize
 
     articles = [unicode(x, 'utf-8') for x in args]
-
+    
+    baseurl = options.baseurl
     conf = options.conf
-    if not options.conf:
-        parser.error("missing --conf argument\nuse --help for all options")
-
-
-
+    if not baseurl and not options.conf:
+        parser.error("neither --conf nor --baseurl specified\nuse --help for all options")
+    
     posturl = None
     def post_status(status):
         print 'status:', status
@@ -112,10 +112,7 @@ def buildzip():
             return urllib2.urlopen(posturl, urllib.urlencode({'status': status})).read()
         except Exception, e:
             print 'ERROR posting status %r to %r' % (status, posturl)
-
-
-
-            
+    
     try:
         if options.logfile:
             utils.start_logging(options.logfile)
@@ -123,8 +120,34 @@ def buildzip():
         output = options.output
 
         from mwlib import wiki, recorddb, metabook
-    
-        w = wiki.makewiki(conf)
+        
+        mb = metabook.MetaBook()
+        if conf:
+            from ConfigParser import ConfigParser
+
+            w = wiki.makewiki(conf)
+            cp = ConfigParser()
+            cp.read(conf)
+            license = {
+                'name': cp.get('wiki', 'defaultarticlelicense')
+            }
+            license['wikitext'] = w['wiki'].getRawArticle(license['name'])
+            mb.source = {
+                'name': cp.get('wiki', 'name'),
+                'url': cp.get('wiki', 'url'),
+                'defaultarticlelicense': license,
+            }
+        else:
+            w = {
+                'wiki': wiki.wiki_mwapi(baseurl),
+                'images': wiki.image_mwapi(baseurl)
+            }
+            metadata = w['wiki'].getMetaData()
+            mb.source = {
+                'name': metadata['name'],
+                'url': metadata['url'],
+                'defaultarticlelicense': metadata['license'],
+            }
         
         if options.noimages:
             w['images'] = None
@@ -133,34 +156,19 @@ def buildzip():
                 imagesize = int(options.imagesize)
             else:
                 imagesize = 800
-    
+        
         if output:
             zipfilename = output
         else:
             fd, zipfilename = tempfile.mkstemp()
             os.close(fd)
         
-        from ConfigParser import ConfigParser
-        
-        cp = ConfigParser()
-        cp.read(conf)
-
-        license = w['wiki'].getRawArticle(cp.get('wiki', 'defaultarticlelicense'))
-        
-        mb = metabook.MetaBook()
-        mb.source = {
-            'type': 'MediaWiki',
-            'name': cp.get('wiki', 'name'),
-            'url': cp.get('wiki', 'url'),
-            'defaultarticlelicense': license,
-        }
-        
         if options.collectionpage:
             mwcollection = w['wiki'].getRawArticle(options.collectionpage)
             mb.loadCollectionPage(mwcollection)
         elif options.metabook:
             mb.readJsonFile(options.metabook)
-
+        
         # do not daemonize earlier: Collection extension deletes input metabook file!
         if options.daemonize:
             daemonize()
@@ -172,7 +180,6 @@ def buildzip():
         from mwlib.utils import get_multipart
         import urllib
         import urllib2
-        
         
         zf = zipfile.ZipFile(zipfilename, 'w')
         z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])

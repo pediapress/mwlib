@@ -149,7 +149,7 @@ class ImageDB(APIDBBase):
         if result is None:
             return None
         try:
-            return result['pages'].values()[0]['imageinfo']['comment']
+            return result['pages'].values()[0]['imageinfo'][0]['comment']
         except KeyError:
             return None
     
@@ -182,7 +182,8 @@ def normname(name):
 
 class WikiDB(APIDBBase):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
-    print_template = 'Template:Print%s'
+    print_template = u'Template:Print%s'
+    license_template = u'Wikipedia:Text of the %s'
     
     def __init__(self, api_url, templateblacklist=None, defaultauthors=None):
         """
@@ -248,9 +249,9 @@ class WikiDB(APIDBBase):
     
     def getRawArticle(self, title, revision=None):
         if revision is None:
-            result = self.query(titles=title, prop='revisions', rvprop='content')
+            result = self.query(titles=title, redirects=1, prop='revisions', rvprop='content')
         else:
-            result = self.query(revids=revision, prop='revisions', rvprop='content')
+            result = self.query(revids=revision, redirects=1, prop='revisions', rvprop='content')
         if result is None:
             return None
         try:
@@ -261,13 +262,33 @@ class WikiDB(APIDBBase):
         except KeyError:
             return None
     
+    def getMetaData(self):
+        result = self.query(meta='siteinfo')
+        try:
+            g = result['general']
+            license_name = g['rights']
+            for title in (self.license_template % license_name, license_name):
+                raw = self.getRawArticle(title)
+                if raw is not None:
+                    break
+            return {
+                'license': {
+                    'name': license_name,
+                    'wikitext': raw,
+                },
+                'url': g['base'],
+                'name': '%s (%s)' % (g['sitename'], g['lang']),
+            }
+        except KeyError:
+            return None
+    
     def getParsedArticle(self, title, revision=None):
         raw = self.getRawArticle(title, revision=revision)
         if raw is None:
             return None
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
-
+    
 
 class Overlay(WikiDB):
     def __init__(self, wikidb, templates):
