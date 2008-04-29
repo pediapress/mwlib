@@ -45,16 +45,17 @@ class TestWikiDB(object):
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
+    shared_base_url = 'http://commons.wikimedia.org/w/'
     
-    existing_image_name = u'Serra_de_Cals.jpg'
+    existing_image_name = u'Serra de Cals.jpg'
     existing_image_url = 'http://upload.wikimedia.org/wikipedia/commons/6/6b/Serra_de_Cals.jpg'
     nonexisting_image_name = u'Test12123213.jpg'
     
-    def setup_class(cls):
-        cls.tempdir = tempfile.mkdtemp()
+    def setup_method(self, method):
+        self.imagedb = ImageDB(self.base_url, self.shared_base_url)
     
-    def teardown_class(cls):
-        shutil.rmtree(cls.tempdir)
+    def teardown_method(self, method):
+        self.imagedb.clear()
     
     def check(self, size, success):
         if success:
@@ -68,15 +69,12 @@ class TestImageDB(object):
             check_url = None
         
         time.sleep(0.5)
-        imagedb = ImageDB(self.base_url)
-        p = imagedb.getDiskPath(name, size=size)
-        assert imagedb.getURL(name, size=size) == check_url
+        p = self.imagedb.getDiskPath(name, size=size)
+        assert self.imagedb.getURL(name, size=size) == check_url
         if success:
             assert os.path.exists(p)
-            imagedb.clear()
         else:
             assert p is None
-            imagedb.clear()
     
     def test_succeed_gen(self):
         for size in (None, 100):
@@ -87,37 +85,39 @@ class TestImageDB(object):
             yield self.check, size, False
     
     def test_spaces_in_imagename(self):
-        imagedb = ImageDB(self.base_url)
         name = u'DNA As Structure Formula (German).PNG'
         size = 100
-        p = imagedb.getDiskPath(name, size=size)
+        p = self.imagedb.getDiskPath(name, size=size)
         assert p is not None
     
     def test_unicode_imagename(self):
-        imagedb = ImageDB(self.base_url)
         name = u'Balneario_Iporá_lago_02.jpg'
         size = 100
-        p = imagedb.getDiskPath(name, size=size)
+        p = self.imagedb.getDiskPath(name, size=size)
         assert p is not None
     
     def test_resize(self):
         big_size = 2000
         
-        imagedb = ImageDB(self.base_url)
-        p = imagedb.getDiskPath(self.existing_image_name)
+        p = self.imagedb.getDiskPath(self.existing_image_name)
         img = Image.open(p)
         orig_size = img.size
         print 'ORIG', orig_size
         assert orig_size[0] < big_size
         assert orig_size[1] < big_size
         
-        p = imagedb.getDiskPath(self.existing_image_name, size=100)
+        p = self.imagedb.getDiskPath(self.existing_image_name, size=100)
         img = Image.open(p)
         print 'CONVERTED1', img.size
         assert img.size[0] == 100
         assert img.size[1] < 100
         
-        p = imagedb.getDiskPath(self.existing_image_name, size=big_size)
+        p = self.imagedb.getDiskPath(self.existing_image_name, size=big_size)
         img = Image.open(p)
         print 'CONVERTED2', img.size
         assert img.size == orig_size
+    
+    def test_getLicense(self):
+        license = self.imagedb.getLicense(self.existing_image_name)
+        assert license == u'Cc-by-sa-1.0'
+    

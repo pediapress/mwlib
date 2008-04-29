@@ -17,42 +17,48 @@ import simplejson
 from mwlib import uparser, utils
 from mwlib.log import Log
 
-# ==============================================================================
-
 log = Log("mwapidb")
 
+try:
+    from mwlib.licenses import lower2normal
+except ImportError:
+    log.warn('no licenses found')
+    lower2normal = {}
+
 # ==============================================================================
 
 
-class APIDBBase(object):
-    def __init__(self, base_url):
-        """Init ImageDB with a base URL
-        
-        @param base_url: base URL of a MediaWiki, i.e. URL path to php scripts,
-            e.g. 'http://en.wikipedia.org/w/' for English Wikipedia.
-        @type base_url: basestring
-        """
+def fetch_url(url):
+    log.info("fetching %r" % (url,))
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', 'mwlib')]
+    try:
+        data = opener.open(url).read()
+    except urllib2.URLError, err:
+        log.error("%s - while fetching %r" % (err, url))
+        return None
+    log.info("got %r (%d Bytes)" % (url, len(data)))
+    return data
 
+
+# ==============================================================================
+
+
+class APIHelper(object):
+    def __init__(self, base_url):
+        """
+        @param base_url: base URL (or list of URLs) of a MediaWiki,
+            i.e. URL path to php scripts,
+            e.g. 'http://en.wikipedia.org/w/' for English Wikipedia.
+        @type base_url: basestring or [basestring]
+        """
+        
         if isinstance(base_url, unicode):
-            self.base_url = base_url.encode('ascii')
+            self.base_url = base_url.encode('utf-8')
         else:
             self.base_url = base_url
         if self.base_url[-1] != '/':
             self.base_url += '/'
-        self.api_url = '%sapi.php?' % self.base_url
-        self.index_url = '%sindex.php?' % self.base_url
-    
-    def fetch_url(self, url):
-        log.info("fetching %r" % (url,))
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'mwlib')]
-        try:
-            data = opener.open(url).read()
-        except urllib2.URLError, err:
-            log.error("%s - while fetching %r" % (err, url))
-            return None
-        log.info("got %r (%d Bytes)" % (url, len(data)))
-        return data
     
     def query(self, **kwargs):
         args = {
@@ -63,22 +69,35 @@ class APIDBBase(object):
         for k, v in args.items():
             if isinstance(v, unicode):
                 args[k] = v.encode('utf-8')
-        data = self.fetch_url('%s%s' % (self.api_url, urllib.urlencode(args)))
+        data = fetch_url('%sapi.php?%s' % (self.base_url, urllib.urlencode(args)))
         if data is None:
             return None
-        result = simplejson.loads(unicode(data, 'utf-8'))
         try:
-            return result['query']
+            return simplejson.loads(unicode(data, 'utf-8'))['query']
         except KeyError:
             return None
+    
+    def page_query(self, **kwargs):
+        q = self.query(**kwargs)
+        if q is None:
+            return None
+        try:
+            page = q['pages'].values()[0]
+        except (KeyError, IndexError):
+            return None
+        if 'missing' in page:
+            return None
+        return page
     
 
 # ==============================================================================
 
 
-class ImageDB(APIDBBase):
-    def __init__(self, api_url):
-        super(ImageDB, self).__init__(api_url)
+class ImageDB(object):
+    def __init__(self, base_url, shared_base_url=None):
+        self.api_helpers = [APIHelper(base_url)]
+        if shared_base_url is not None:
+            self.api_helpers.append(APIHelper(shared_base_url))
         self.tmpdir = tempfile.mkdtemp()
     
     def clear(self):
@@ -96,17 +115,21 @@ class ImageDB(APIDBBase):
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
-        if size is None:
-            result = self.query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
+        for api_helper in self.api_helpers:
+            if size is None:
+                result = api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
+            else:
+                result = api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url', iiurlwidth=str(size))
+            if result is not None:
+                break
         else:
-            result = self.query(titles='Image:%s' % name, prop='imageinfo', iiprop='url', iiurlwidth=str(size))
-        if result is None:
             return None
+        
         try:
             if size is None:
-                return result['pages'].values()[0]['imageinfo'][0]['url']
+                return result['imageinfo'][0]['url']
             else:
-                return result['pages'].values()[0]['imageinfo'][0]['thumburl']
+                return result['imageinfo'][0]['thumburl']
         except KeyError:
             return None
     
@@ -129,7 +152,7 @@ class ImageDB(APIDBBase):
         if url is None:
             return None
         
-        data = self.fetch_url(url)
+        data = fetch_url(url)
         if url is None:
             return None
         
@@ -144,15 +167,6 @@ class ImageDB(APIDBBase):
         f.close()
         return filename
     
-    def getImageDescription(self, name):
-        result = self.query(titles='Image:%s' % name, prop='imageinfo', iiprop='comment')
-        if result is None:
-            return None
-        try:
-            return result['pages'].values()[0]['imageinfo'][0]['comment']
-        except KeyError:
-            return None
-    
     def getLicense(self, name):
         """Return license of image as stated on image description page
         
@@ -165,11 +179,25 @@ class ImageDB(APIDBBase):
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
-        descr = self.getImageDescription(name)
-        if descr is None:
+        for api_helper in self.api_helpers:
+            result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
+            if result is not None:
+                break
+        else:
             return None
         
-        return u'FIXME!!!'
+        try:
+            templates = [t['title'] for t in result['templates']]
+        except KeyError:
+            return None
+        
+        for t in templates:
+            try:
+                return lower2normal[t.split(':', 1)[-1].lower()]
+            except KeyError:
+                pass
+        
+        return None
     
 
 # ==============================================================================
@@ -180,7 +208,7 @@ def normname(name):
     return name
 
 
-class WikiDB(APIDBBase):
+class WikiDB(object):
     print_template = u'Template:Print%s'
     template_blacklist_titles = [u'Wikipedia:PDF Template Blacklist', u'MediaWiki:PDF Template Blacklist']
     
@@ -190,8 +218,10 @@ class WikiDB(APIDBBase):
     # FIXME: see getMetaData() method
     license_templates = [u'Wikipedia:Text of the %s', u'MediaWiki:Text of the %s']
     
-    def __init__(self, api_url):
-        super(WikiDB, self).__init__(api_url)
+    def __init__(self, base_url):
+        self.base_url = base_url
+        self.api_helper = APIHelper(self.base_url)
+        self.template_cache = {}
         self.template_blacklist = []
         for title in self.template_blacklist_titles:
             raw = self.getRawArticle(title)
@@ -205,9 +235,9 @@ class WikiDB(APIDBBase):
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))
         if revision is None:
-            return '%stitle=%s' % (self.index_url, name)
+            return '%sindex.php?title=%s' % (self.base_url, name)
         else:
-            return '%stitle=%s&oldid=%s' % (self.index_url, name, revision)
+            return '%sindex.php?title=%s&oldid=%s' % (self.base_url, name, revision)
     
     def getAuthors(self, title, revision=None, max_num_authors=10):
         """Return at most max_num_authors names of non-bot, non-anon users for
@@ -217,7 +247,7 @@ class WikiDB(APIDBBase):
         @rtype: [unicode]
         """
         
-        result = self.query(
+        result = self.api_helper.page_query(
             titles=title,
             redirects=1,
             prop='revisions',
@@ -228,7 +258,7 @@ class WikiDB(APIDBBase):
             return None
         
         try:
-            revs = result['pages'].values()[0]['revisions']
+            revs = result['revisions']
         except KeyError:
             return None
 
@@ -258,6 +288,11 @@ class WikiDB(APIDBBase):
         Note: *Not* following redirects is unsupported!
         """
         
+        try:
+            return self.template_cache[name]
+        except KeyError:
+            pass
+        
         if ":" in name:
             name = name.split(':', 1)[1]
         
@@ -269,19 +304,19 @@ class WikiDB(APIDBBase):
             log.info("Trying template %r" % (title,))
             c = self.getRawArticle(title)
             if c is not None:
+                self.template_cache[name] = c
                 return c
         
         return None
     
     def getRawArticle(self, title, revision=None):
         if revision is None:
-            result = self.query(titles=title, redirects=1, prop='revisions', rvprop='content')
+            page = self.api_helper.page_query(titles=title, redirects=1, prop='revisions', rvprop='content')
         else:
-            result = self.query(revids=revision, prop='revisions', rvprop='content')
-        if result is None:
+            page = self.api_helper.page_query(revids=revision, prop='revisions', rvprop='content')
+        if page is None:
             return None
         try:
-            page = result['pages'].values()[0]
             if page['title'] != title:
                 return None
             return page['revisions'][0].values()[0]
@@ -289,7 +324,7 @@ class WikiDB(APIDBBase):
             return None
     
     def getMetaData(self):
-        result = self.query(meta='siteinfo')
+        result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
             license_name = g['rights']
