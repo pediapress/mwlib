@@ -76,6 +76,7 @@ def buildzip():
     parser = optparse.OptionParser(usage="%prog [OPTIONS] [ARTICLE ...]")
     parser.add_option("-c", "--conf", help="config file (required unless --baseurl is given)")
     parser.add_option("-b", "--baseurl", help="base URL for mwapidb backend")
+    parser.add_option("-s", "--shared-baseurl", help="base URL for shared images for mwapidb backend")
     parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
     parser.add_option('--collectionpage', help='Title of a collection page')
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
@@ -86,9 +87,10 @@ def buildzip():
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become daemon after collection articles (before POST request)')
     parser.add_option("-l", "--logfile", help="log to logfile")
-    parser.add_option("-e", "--errorfile", help="deprecated. do not use this option.")
+    parser.add_option("--license", help="Title of article containing full license text")
+    parser.add_option("--template-blacklist", help="Title of article containing blacklisted templates")
     options, args = parser.parse_args()
-
+    
     import tempfile
     import os
     import zipfile
@@ -131,7 +133,8 @@ def buildzip():
             license = {
                 'name': cp.get('wiki', 'defaultarticlelicense')
             }
-            license['wikitext'] = w['wiki'].getRawArticle(license['name'])
+            if license['name'] is not None:
+                license['wikitext'] = w['wiki'].getRawArticle(license['name'])
             mb.source = {
                 'name': cp.get('wiki', 'name'),
                 'url': cp.get('wiki', 'url'),
@@ -139,8 +142,8 @@ def buildzip():
             }
         else:
             w = {
-                'wiki': wiki.wiki_mwapi(baseurl),
-                'images': wiki.image_mwapi(baseurl)
+                'wiki': wiki.wiki_mwapi(baseurl, options.license, options.template_blacklist),
+                'images': wiki.image_mwapi(baseurl, shared_base_url=options.shared_baseurl)
             }
             metadata = w['wiki'].getMetaData()
             mb.source = {
