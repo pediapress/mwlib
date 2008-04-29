@@ -127,10 +127,13 @@ class ImageDB(object):
         
         try:
             if size is None:
-                return result['imageinfo'][0]['url']
+                url = result['imageinfo'][0]['url']
             else:
-                return result['imageinfo'][0]['thumburl']
-        except KeyError:
+                url = result['imageinfo'][0]['thumburl']
+            if url: # url can be False
+                return url
+            return None
+        except (KeyError, IndexError):
             return None
     
     def getDiskPath(self, name, size=None):
@@ -201,36 +204,40 @@ class ImageDB(object):
     
 
 # ==============================================================================
+
     
-def normname(name):
-    name = name.strip().replace("_", " ")
-    name = name[:1].upper()+name[1:]
-    return name
-
-
 class WikiDB(object):
     print_template = u'Template:Print%s'
-    template_blacklist_titles = [u'Wikipedia:PDF Template Blacklist', u'MediaWiki:PDF Template Blacklist']
     
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    # FIXME: see getMetaData() method
-    license_templates = [u'Wikipedia:Text of the %s', u'MediaWiki:Text of the %s']
-    
-    def __init__(self, base_url):
+    def __init__(self, base_url, license, template_blacklist=None):
+        """
+        @param base_url: base URL of a MediaWiki,
+            e.g. 'http://en.wikipedia.org/w/'
+        @type base_url: basestring
+        
+        @param license: title of an article containing full license text
+        @type license: unicode
+        
+        @param template_blacklist: title of an article containing blacklisted
+            templates (optional)
+        @type template_blacklist: unicode
+        """
+        
         self.base_url = base_url
+        self.license = license
         self.api_helper = APIHelper(self.base_url)
         self.template_cache = {}
         self.template_blacklist = []
-        for title in self.template_blacklist_titles:
-            raw = self.getRawArticle(title)
-            if raw is not None:
+        if template_blacklist is not None:
+            raw = self.getRawArticle(template_blacklist)
+            if raw is None:
+                log.error('Could not get template blacklist (tried: %r)' % self.template_blacklist_titles)
+            else:
                 self.template_blacklist = [template.lower().strip() 
                                            for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
-                break
-        else:
-            log.error('Could not get template blacklist (tried: %r)' % self.template_blacklist_titles)
     
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))
@@ -314,11 +321,11 @@ class WikiDB(object):
             page = self.api_helper.page_query(titles=title, redirects=1, prop='revisions', rvprop='content')
         else:
             page = self.api_helper.page_query(revids=revision, prop='revisions', rvprop='content')
+            if page['title'] != title: # given revision could point to another article!
+                return None
         if page is None:
             return None
         try:
-            if page['title'] != title:
-                return None
             return page['revisions'][0].values()[0]
         except KeyError:
             return None
@@ -327,20 +334,10 @@ class WikiDB(object):
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
-            license_name = g['rights']
-            
-            # FIXME: we need a authoritative title for an article containing the license text
-            for title in [t % license_name for t in self.license_templates] + [license_name]:
-                raw = self.getRawArticle(title)
-                if raw is not None:
-                    break
-            else:
-                raise RuntimeError('Could not get license text')
-            
             return {
                 'license': {
-                    'name': license_name,
-                    'wikitext': raw,
+                    'name': g['rights'],
+                    'wikitext': self.getRawArticle(self.license),
                 },
                 'url': g['base'],
                 'name': '%s (%s)' % (g['sitename'], g['lang']),
