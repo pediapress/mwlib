@@ -12,9 +12,10 @@ from mwlib.mwapidb import ImageDB, WikiDB
 
 class TestWikiDB(object):
     base_url = 'http://en.wikipedia.org/w/'
+    license = 'Wikipedia:GFDL'
     
     def setup_method(self, method):
-        self.w = WikiDB(self.base_url)
+        self.w = WikiDB(self.base_url, self.license)
     
     def test_getRawArticle(self):
         raw = self.w.getRawArticle(u'Mathematics')
@@ -120,4 +121,8 @@ class TestImageDB(object):
     def test_getLicense(self):
         license = self.imagedb.getLicense(self.existing_image_name)
         assert license == u'Cc-by-sa-1.0'
+    
+    def test_svg(self):
+        url = self.imagedb.getURL(u'Flag of the United States.svg', size=800)
+        assert not url.endswith('.svg')
     
