@@ -6,9 +6,9 @@
 import os
 from ConfigParser import ConfigParser
 
-def wiki_mwapi(base_url=None):
+def wiki_mwapi(base_url=None, license=None, template_blacklist=None):
     from mwlib import mwapidb
-    return mwapidb.WikiDB(base_url)
+    return mwapidb.WikiDB(base_url, license, template_blacklist)
 
 def wiki_zip(path=None, url=None, name=None):
     from mwlib import zipwiki
@@ -45,9 +45,9 @@ def wiki_cdb(path=None, **kwargs):
     db=cdbwiki.WikiDB(path)
     return db
 
-def image_mwapi(base_url=None):
+def image_mwapi(base_url=None, shared_base_url=None):
     from mwlib import mwapidb
-    return mwapidb.ImageDB(base_url)
+    return mwapidb.ImageDB(base_url, shared_base_url)
 
 def image_download(url=None, localpath=None, knownlicenses=None):
     assert url, "must supply url in [images] section"
