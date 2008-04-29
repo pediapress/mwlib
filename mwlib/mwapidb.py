@@ -234,7 +234,7 @@ class WikiDB(object):
         if template_blacklist is not None:
             raw = self.getRawArticle(template_blacklist)
             if raw is None:
-                log.error('Could not get template blacklist (tried: %r)' % self.template_blacklist_titles)
+                log.error('Could not get template blacklist article %r' % template_blacklist)
             else:
                 self.template_blacklist = [template.lower().strip() 
                                            for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
