@@ -26,6 +26,7 @@ include mwlib/htmlwriter.py
 include mwlib/imgmap.py
 include mwlib/lang.py
 include mwlib/lang.txt
+include mwlib/licenses.py
 include mwlib/log.py
 include mwlib/magics.py
 include mwlib/metabook.py
@@ -68,3 +69,4 @@ include tests/test_scanner.py
 include tests/test_table.py
 include tests/test_timeline.py
 include tests/test_zipwiki.py
+include tools/get_license_templates.py
