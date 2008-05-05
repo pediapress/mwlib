@@ -423,7 +423,7 @@ def fixTagNodes(node):
                 # NEED TO MOVE NODE IF IT REALLY STARTS A SECTION
                 c.__class__ = Section 
                 MixIn(c.__class__, AdvancedSection)
-                c._h_level = int(c.caption[1])
+                c.level = int(c.caption[1])
                 c.caption = ""
             else:
                 log.warn("fixTagNodes, unknowntagnode %r" % c)
