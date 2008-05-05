@@ -82,7 +82,7 @@ a("exp", 9, math.exp, 1)
 a("ln", 9, math.log, 1)
 a("ceil", 9, lambda x: int(math.ceil(x)))
 a("floor", 9, lambda x: int(math.floor(x)))
-a("trunc", 9, math.trunc, 1)
+a("trunc", 9, long, 1)
 
 a("*", 8, lambda x,y: x*y)
 a("/", 8, lambda x,y: x/y)
