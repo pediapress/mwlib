@@ -324,7 +324,12 @@ class ParserFunctions(object):
 
             if "e" in r:
                 f,i = r.split("e")
-                fixed=str(float(f))+"E"+str(int(i))
+                i=int(i)
+                if i<0:
+                    sign = ''
+                else:
+                    sign = '+'
+                fixed=str(float(f))+"E"+sign+str(int(i))
                 return fixed
             return r
         return u"0"
