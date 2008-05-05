@@ -78,4 +78,9 @@ def test_ceil():
     ee("ceil 5.1", "6")
     ee("ceil -5.1", "-5")
     
-# trigonometrical functions sin, cos, tan, asin, acos, atan and exp, ln, abs, floor, trunc, ceil, ^,
+def test_scientific():
+    ee("1e15", "1.0E+15")
+    ee("1E15", "1.0E+15")
+    ee("1e-10", "1E-10")
+    ee("1E-10", "1E-10")
+    
