@@ -26,8 +26,8 @@ def _myround(a,b):
 
 pattern = """
 (?:\s+)
-|((?:\d+)(?:\.\d+)?
- |(?:\.\d+))
+|((?:(?:\d+)(?:\.\d+)?
+ |(?:\.\d+)) (?:e(?:\+|-)?\d+)?)
 |(\+|-|\*|/|>=|<=|<>|!=|[a-zA-Z]+|.)
 """
 
@@ -206,6 +206,9 @@ def main():
             res=expr(input_string)
         except Exception, err:
             print "ERROR:", err
+            import traceback
+            traceback.print_exc()
+            
             continue
         print res
         print time.time()-stime, "s"
@@ -213,3 +216,4 @@ def main():
 if __name__=='__main__':
     main()
     
+        
