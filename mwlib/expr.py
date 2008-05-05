@@ -69,7 +69,7 @@ def addop(op, prec, fun, numargs=None):
 a=addop
 a(uminus, 10, lambda x: -x)
 a(uplus, 10, lambda x: x)
-a("^", 10, pow, 2)
+a("^", 10, math.pow, 2)
 a("not", 9, lambda x:int(not(bool(x))))
 a("abs", 9, abs, 1)
 a("sin", 9, math.sin, 1)
