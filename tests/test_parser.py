@@ -540,3 +540,8 @@ def test_ftp_url():
     urls = parse("[%s bar]" % url).find(parser.NamedURL)
     assert urls, "expected a named url"
     assert urls[0].caption==url, "bad url"
+
+def test_source_vlist():
+    r=parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
+    assert r.vlist == dict(lang='c'), "bad value: %r" % (r.vlist,)
+    
