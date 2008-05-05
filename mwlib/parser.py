@@ -1074,6 +1074,9 @@ class Parser(object):
         else:
             return m()
 
+    def parseEMTag(self):
+        return self._parseStyledTag(Style("''"))
+    
     def parseITag(self):
         return self._parseStyledTag(Style("''"))
         
