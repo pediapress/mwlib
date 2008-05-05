@@ -583,8 +583,9 @@ class Parser(object):
             n=PreFormatted()
         else:
             n=TagNode(token.t)
-            
-        print "PARSEPRE:", self.token, n
+
+        n.vlist = parseParams(self.token[1])
+        
         end = EndTagToken(self.token[0].t)
         self.next()
         
