@@ -115,6 +115,15 @@ def buildzip():
         except Exception, e:
             print 'ERROR posting status %r to %r' % (status, posturl)
     
+    def post_progress(progress):
+        print 'progress', progress
+        if not posturl:
+            return
+        try:
+            return urllib2.urlopen(posturl, urllib.urlencode({'progress': int(progress)})).read()
+        except Exception, e:
+            print 'ERROR posting progress %r to %r' % (progress, posturl)
+    
     try:
         if options.logfile:
             utils.start_logging(options.logfile)
@@ -194,16 +203,28 @@ def buildzip():
         mb.addArticles(articles)
         
         z.addObject('metabook.json', mb.dumpJson())
-        for title, revision in mb.getArticles():
+        articles = list(mb.getArticles())
+        if articles:
+            inc = 70/len(articles)
+        else:
+            inc = 0
+        p = 0
+        for title, revision in articles:
+            post_progress(p)
             z.addArticle(title, revision=revision)        
-
+            p += inc
+        
         post_status('packaging')
 
         if not options.noimages:
             z.writeImages(size=imagesize)
         
+        post_progress(80)
+        
         z.writeContent()
         zf.close()
+        
+        post_progress(90)
         
         if posturl:
             post_status('uploading')
@@ -220,6 +241,7 @@ def buildzip():
             os.unlink(zipfilename)
         
         post_status('finished')
+        post_progress(100)
     except Exception, e:
         post_status('error')
         raise
