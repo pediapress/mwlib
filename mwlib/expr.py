@@ -12,6 +12,7 @@ from __future__ import division
 
 import re
 import inspect
+import math
 
 class ExprError(Exception):
     pass
@@ -32,6 +33,17 @@ pattern = """
 
 rxpattern = re.compile(pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 def tokenize(s):
+    res = []
+    for (v1,v2) in rxpattern.findall(s):
+        if not (v1 or v2):
+            continue
+        v2=v2.lower()
+        if v2 in Expr.constants:
+            res.append((v2,""))
+        else:
+            res.append((v1,v2))
+    return res
+        
     return [(v1,v2.lower()) for (v1,v2) in rxpattern.findall(s) if v1 or v2]
 
 class uminus: pass
@@ -40,17 +52,16 @@ class uplus: pass
 precedence = {"(":-1, ")":-1}
 functions = {}
 
-def addop(op, prec, fun):
+def addop(op, prec, fun, numargs=None):
     precedence[op] = prec
-    numargs = len(inspect.getargspec(fun)[0])
+    if numargs is None:
+        numargs = len(inspect.getargspec(fun)[0])
     
     
     def wrap(stack):
         assert len(stack)>=numargs
-        
         args = tuple(stack[-numargs:])
         del stack[-numargs:]
-
         stack.append(fun(*args))
 
     functions[op] = wrap
@@ -58,8 +69,20 @@ def addop(op, prec, fun):
 a=addop
 a(uminus, 10, lambda x: -x)
 a(uplus, 10, lambda x: x)
-
+a("^", 10, pow, 2)
 a("not", 9, lambda x:int(not(bool(x))))
+a("abs", 9, abs, 1)
+a("sin", 9, math.sin, 1)
+a("cos", 9, math.cos, 1)
+a("asin", 9, math.asin, 1)
+a("acos", 9, math.acos, 1)
+a("tan", 9, math.tan, 1)
+a("atan", 9, math.atan, 1)
+a("exp", 9, math.exp, 1)
+a("ln", 9, math.log, 1)
+a("ceil", 9, lambda x: int(math.ceil(x)))
+a("floor", 9, lambda x: int(math.floor(x)))
+a("trunc", 9, math.trunc, 1)
 
 a("*", 8, lambda x,y: x*y)
 a("/", 8, lambda x,y: x/y)
@@ -85,8 +108,16 @@ a("or", 2, lambda x,y: int(bool(x) or bool(y)))
 del a
 
 class Expr(object):
+    constants = dict(
+        e=math.e,
+        pi=math.pi)
     
     def as_float_or_int(self, s):
+        try:
+            return self.constants[s]
+        except KeyError:
+            pass
+        
         if "." in s or "e" in s.lower():
             return float(s)
         return long(s)
@@ -173,7 +204,7 @@ def main():
         stime = time.time()
         try:
             res=expr(input_string)
-        except ParseException, err:
+        except Exception, err:
             print "ERROR:", err
             continue
         print res
