@@ -68,8 +68,8 @@ class Renderer(object):
         self.lazy = lazy
     
     def _render_file(self, name, format):
-        assert format in ('pdf', 'png'), "rendermath: format %r not supported" % format
-        
+        assert format in ('pdf', 'png', 'eps'), "rendermath: format %r not supported" % format
+
         texfile = os.path.join(self.basedir, name+'.tex')
         srcbase = os.path.join(self.basedir, name)
 
@@ -77,11 +77,13 @@ class Renderer(object):
         os.chdir(self.basedir)
         try:
             mysystem("latex -interaction=batchmode %s" % texfile)
-            mysystem("dvips -E %s.dvi" % srcbase)
+            mysystem("dvips -E %s.dvi -o %s.ps" % (srcbase, srcbase))
             if format=='png':
                 mysystem("convert +adjoin -transparent white -density 300x300 %s.ps %s.png" % (srcbase, srcbase))
             elif format=='pdf':
                 mysystem("epstopdf %s.ps" % srcbase)
+            elif format=='eps':
+                os.rename("%s.ps" % srcbase, "%s.eps" % srcbase)
         finally:
             for x in ['.dvi', '.aux', '.log', '.ps']:
                 p = os.path.join(self.basedir, name+x)
@@ -97,11 +99,11 @@ class Renderer(object):
         return latexsource
     
     def convert(self, latexsource, lazy=True, format='pdf', addMathEnv=True):
-        assert format in ('pdf', 'png'), "rendermath: format %r not supported" % format
+        assert format in ('pdf', 'png', 'eps'), "rendermath: format %r not supported" % format
         latexsource = self._normalizeLatex(latexsource)
         if addMathEnv:
             latexsource = '$' + latexsource + '$'
-        if format=='pdf':
+        if format in ('pdf', 'eps'):
             extra_header = '\usepackage{geometry}\n\geometry{textwidth=3.0in}\n'
             fontsize = 10
         else:
