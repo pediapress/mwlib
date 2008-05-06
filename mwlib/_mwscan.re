@@ -159,6 +159,7 @@ re2c:yyfill:enable = 0 ;
 		goto not_bol;
 	}
 /*!re2c
+  " "* "{|"              {++tablemode; RET(t_begin_table);}
   " "* "|}"              {--tablemode; RET(t_end_table);}
 
   " "* "|" "-"+         
@@ -253,8 +254,6 @@ not_bol:
 		RET(t_special);
 	}
   [:|\[\]]              {RET(t_special);}
-  "{|"              {++tablemode; RET(t_begin_table);}
-  "|}"              {--tablemode; RET(t_end_table);}
   "'''''" | "'''" | "''"  {RET(t_style);}
   "<" "/"? [a-zA-Z]+ [^\000<>]* "/"? ">" 
 		{RET(t_html_tag);}
