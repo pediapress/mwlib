@@ -23,3 +23,20 @@ def test_tokenize_math():
     toks = mwscan.tokenize("<math> bla </math> blubb")
     assert toks==[('MATH', '<math>'), ('LATEX', ' bla '), ('ENDMATH', '</math>'), ('TEXT', ' blubb')], "bad tokenization"
 
+def _check_table_markup(s):
+    toks = [t[0] for t in mwscan.scan(s)]
+    print "TOKENS:",toks
+    assert mwscan.token.t_begin_table not in toks, "should not contain table markup"
+    assert mwscan.token.t_end_table not in toks, "should not contain table markup"
+    
+def test_table_bol_begin_code():
+    _check_table_markup("<code>{|</code>")
+    
+def test_table_bol_begin():
+    _check_table_markup("foo {| bar")
+
+def test_table_bol_end_code():
+    _check_table_markup("<code>|}</code>")
+    
+def test_table_bol_end():
+    _check_table_markup("foo |} bar")
