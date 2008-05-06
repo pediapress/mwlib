@@ -28,15 +28,17 @@ except ImportError:
 # ==============================================================================
 
 
-def fetch_url(url):
+def fetch_url(url, ignore_errors=False):
     log.info("fetching %r" % (url,))
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'mwlib')]
     try:
         data = opener.open(url).read()
     except urllib2.URLError, err:
-        log.error("%s - while fetching %r" % (err, url))
-        return None
+        if ignore_errors:
+            log.error("%s - while fetching %r" % (err, url))
+            return None
+        raise RuntimeError('Could not fetch %r: %s' % (url, err))
     log.info("got %r (%d Bytes)" % (url, len(data)))
     return data
 
@@ -76,6 +78,8 @@ class APIHelper(object):
             return simplejson.loads(unicode(data, 'utf-8'))['query']
         except KeyError:
             return None
+        except:
+            raise RuntimeError('api.php query failed. Are you sure you specified the correct baseurl?')
     
     def page_query(self, **kwargs):
         q = self.query(**kwargs)
@@ -155,7 +159,7 @@ class ImageDB(object):
         if url is None:
             return None
         
-        data = fetch_url(url)
+        data = fetch_url(url, ignore_errors=True)
         if url is None:
             return None
         
