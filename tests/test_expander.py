@@ -231,3 +231,12 @@ def test_iferror():
     expandstr("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input")
     expandstr("{{#iferror:{{#expr:1+1}}}}", "2")
     expandstr("{{#iferror:{{#expr:1+Z}}}}", "")
+
+def test_implicit_newline_begintable():
+    expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="{|"))
+    
+def test_implicit_newline_colon():
+    expandstr("foo {{tt}}", "foo \n:", wikidb=DictDB(tt=":"))
+
+def test_implicit_newline_semicolon():
+    expandstr("foo {{tt}}", "foo \n;", wikidb=DictDB(tt=";"))
