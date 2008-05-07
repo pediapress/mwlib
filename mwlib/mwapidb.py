@@ -11,6 +11,7 @@ import tempfile
 import time
 import urllib
 import urllib2
+import urlparse
 
 import simplejson
 
@@ -159,8 +160,11 @@ class ImageDB(object):
         if url is None:
             return None
         
+        if url.startswith('/'):
+            url = urlparse.urljoin(self.api_helpers[0].base_url, url)
+        
         data = fetch_url(url, ignore_errors=True)
-        if url is None:
+        if not data:
             return None
         
         ext = url.rsplit('.')[-1]

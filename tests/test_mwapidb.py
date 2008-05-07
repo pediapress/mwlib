@@ -126,3 +126,11 @@ class TestImageDB(object):
         url = self.imagedb.getURL(u'Flag of the United States.svg', size=800)
         assert not url.endswith('.svg')
     
+    def test_non_full_url(self):
+        """WikiEducator (any probably many other MediaWikis) return image URLs
+        that do not start with http://hostname.
+        """
+        
+        imgdb = ImageDB('http://wikieducator.org/')
+        imgdb.getDiskPath(u'Mediawiki_logo_m.png')
+    
