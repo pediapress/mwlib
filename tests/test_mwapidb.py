@@ -132,5 +132,7 @@ class TestImageDB(object):
         """
         
         imgdb = ImageDB('http://wikieducator.org/')
-        imgdb.getDiskPath(u'Mediawiki_logo_m.png')
+        t = u'Mediawiki_logo_m.png'
+        assert imgdb.getURL(t).startswith('http://')
+        imgdb.getDiskPath(t)
     

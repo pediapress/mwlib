@@ -136,6 +136,8 @@ class ImageDB(object):
             else:
                 url = result['imageinfo'][0]['thumburl']
             if url: # url can be False
+                if url.startswith('/'):
+                    url = urlparse.urljoin(self.api_helpers[0].base_url, url)
                 return url
             return None
         except (KeyError, IndexError):
@@ -159,9 +161,6 @@ class ImageDB(object):
         url = self.getURL(name, size=size)
         if url is None:
             return None
-        
-        if url.startswith('/'):
-            url = urlparse.urljoin(self.api_helpers[0].base_url, url)
         
         data = fetch_url(url, ignore_errors=True)
         if not data:
