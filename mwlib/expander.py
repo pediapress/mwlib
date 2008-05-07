@@ -404,8 +404,9 @@ class Expander(object):
             log.warn("no template", repr(name))
             res = None
         else:
-            #   add newline to templates starting with a (semi)colon,
-            if raw.startswith(":") or raw.startswith(";"):
+            # add newline to templates starting with a (semi)colon, or tablemarkup
+            # XXX what else? see test_implicit_newline in test_expander
+            if raw.startswith(":") or raw.startswith(";") or raw.startswith("{|"):
                 raw = '\n'+raw
                 
             log.info("parsing template", repr(name))
