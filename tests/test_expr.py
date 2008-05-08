@@ -99,3 +99,7 @@ def test_mod_unary():
     
 def test_mod():
     ee("1.253702 mod 360", 1)
+
+def test_unary_paren():
+    ee("10+(--100)", 110)
+    
