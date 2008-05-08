@@ -161,8 +161,10 @@ class Expr(object):
                         operator = uminus
                     elif operator=='+':
                         operator = uplus
+                        
+                is_unary = operator in (uplus, uminus)
                 prec = precedence[operator]
-                while operator_stack and prec<=precedence[operator_stack[-1]]:
+                while not is_unary and operator_stack and prec<=precedence[operator_stack[-1]]:
                     p = operator_stack.pop()
                     self.output_operator(p)
                 operator_stack.append(operator)
