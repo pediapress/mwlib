@@ -77,7 +77,7 @@ dispatch = dict(
     wiki = dict(mwapi=wiki_mwapi, cdb=wiki_cdb, net=wiki_net, zip=wiki_zip)
 )
 
-def makewiki(conf):
+def _makewiki(conf):
     res = {}
 
     # yes, I really don't want to type this everytime
@@ -120,6 +120,11 @@ def makewiki(conf):
         res[s] = m(**args)
 
     assert "wiki" in res
+    return res
+
+def makewiki(conf):
+    res = _makewiki(conf)
+    
     try:
         overlaydir = os.environ['MWOVERLAY']
         assert os.path.isdir(overlaydir)
