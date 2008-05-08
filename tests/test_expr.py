@@ -7,7 +7,7 @@ from mwlib.expander import expandstr
 def ee(s, expected=None):
     s=expandstr("{{#expr:%s}}" % (s,))
     if isinstance(expected, (float,int,long)):
-        assert math.fabs(float(s)-expected)<1e5
+        assert math.fabs(float(s)-expected)<1e-5
     elif expected is not None:
         assert s==expected, "expected %r, got %r" % (expected, s)
         
