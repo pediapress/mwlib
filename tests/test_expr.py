@@ -34,7 +34,8 @@ def test_ln():
     ee("ln 2.7182818284590451", 1)
     
 def test_exp():
-    ee("exp(0)", 2.7182818284590451)
+    ee("exp(1)", 2.7182818284590451)
+    ee("exp(0)", 1)
     
 def test_abs_int():
     ee("abs(-5)", "5")
