@@ -1,4 +1,3 @@
-include .hgignore
 include MANIFEST.in
 include METABOOK.txt
 include README.html

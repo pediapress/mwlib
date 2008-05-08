@@ -17,7 +17,8 @@ def main():
     remove("make_manifest.py")
     remove(".hgtags")
     remove("Makefile")
-
+    remove(".hgignore")
+    
     files.sort()
 
     f = open("MANIFEST.in", "w")
