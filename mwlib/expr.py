@@ -130,7 +130,9 @@ class Expr(object):
             
     def parse_expr(self, s):
         tokens = tokenize(s)
-
+        if not tokens:
+            return ""
+        
         self.operand_stack = []
         operator_stack = []
 
@@ -159,9 +161,8 @@ class Expr(object):
                         operator = uminus
                     elif operator=='+':
                         operator = uplus
-
                 prec = precedence[operator]
-                while operator_stack and prec<=precedence[operator_stack[-1]]:
+                while operator_stack and self.operand_stack and prec<=precedence[operator_stack[-1]]:
                     p = operator_stack.pop()
                     self.output_operator(p)
                 operator_stack.append(operator)
