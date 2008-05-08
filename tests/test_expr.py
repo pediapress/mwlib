@@ -83,3 +83,18 @@ def test_scientific():
     ee("1E25", "1.0E+25")
     ee("1e-10", "1.0E-10")
     ee("1E-10", "1.0E-10")
+
+def test_unary_double_plus():
+    ee("++5", 5)
+    
+def test_unary_double_minus():
+    ee("--5", 5)
+
+def test_unary_plus():
+    ee("0-+5", -5)
+    
+def test_mod_unary():
+    ee("--1.253702 mod 360", 1)
+    
+def test_mod():
+    ee("1.253702 mod 360", 1)
