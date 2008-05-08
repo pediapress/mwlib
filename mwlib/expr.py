@@ -162,7 +162,7 @@ class Expr(object):
                     elif operator=='+':
                         operator = uplus
                 prec = precedence[operator]
-                while operator_stack and self.operand_stack and prec<=precedence[operator_stack[-1]]:
+                while operator_stack and prec<=precedence[operator_stack[-1]]:
                     p = operator_stack.pop()
                     self.output_operator(p)
                 operator_stack.append(operator)
