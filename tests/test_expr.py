@@ -103,3 +103,9 @@ def test_mod():
 def test_unary_paren():
     ee("10+(--100)", 110)
     
+def test_unary_pow_minus():
+    ee("2^-10", 0.0009765625)
+    
+def test_unary_pow_plus():
+    ee("2^+10", 1024)
+    
