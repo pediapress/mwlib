@@ -9,3 +9,4 @@ mwlib.egg-info
 build
 trunk
 mwlib/*.cc
+README.html
