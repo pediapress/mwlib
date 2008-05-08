@@ -131,10 +131,11 @@ class ImageDB(object):
             return None
         
         try:
-            if size is None:
-                url = result['imageinfo'][0]['url']
+            imageinfo = result['imageinfo'][0]
+            if size is not None and 'thumburl' in imageinfo:
+                url = imageinfo['thumburl']
             else:
-                url = result['imageinfo'][0]['thumburl']
+                url = imageinfo['url']
             if url: # url can be False
                 if url.startswith('/'):
                     url = urlparse.urljoin(self.api_helpers[0].base_url, url)
