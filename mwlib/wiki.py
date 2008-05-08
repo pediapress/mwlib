@@ -84,7 +84,13 @@ def makewiki(conf):
     wc = os.path.join(conf, "wikiconf.txt")
     if os.path.exists(wc):
         conf = wc 
+
+    if conf.startswith("http://") or conf.startswith("https://"):
+        res['wiki'] = wiki_mwapi(conf)
+        res['images'] = image_mwapi(conf)
+        return res
     
+            
     if conf.lower().endswith(".zip"):
         from mwlib import zipwiki
         res['wiki'] = zipwiki.Wiki(conf)
