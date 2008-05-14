@@ -72,7 +72,8 @@ class APIHelper(object):
         for k, v in args.items():
             if isinstance(v, unicode):
                 args[k] = v.encode('utf-8')
-        data = fetch_url('%sapi.php?%s' % (self.base_url, urllib.urlencode(args)))
+        q = urllib.urlencode(args).replace('%3A', ':') # fix for wrong quoting of url for images
+        data = fetch_url('%sapi.php?%s' % (self.base_url, q))
         if data is None:
             return None
         try:
