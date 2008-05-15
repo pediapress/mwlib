@@ -60,11 +60,21 @@ class ZipfileCreator(object):
                 name = x.target
                 self.images[name] = {}
     
-    def writeImages(self, size=None):
+    def writeImages(self, size=None, progress_callback=None):
+        """
+        @param progress_callback: callback which gets called with two args: the
+            number of the currently processed image and the total number of
+            images (optional)
+        @type progress_callback: callable
+        """
         if self.imgdb is None:
             return
         
-        for name in sorted(self.images.keys()):
+        image_names = sorted(self.images.keys())
+        n = len(image_names)
+        for i, name in enumerate(image_names):
+            if progress_callback is not None:
+                progress_callback(i, n)
             dp = self.imgdb.getDiskPath(name, size=size)
             if dp is None:
                 continue

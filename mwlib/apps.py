@@ -116,13 +116,14 @@ def buildzip():
             print 'ERROR posting status %r to %r' % (status, posturl)
     
     def post_progress(progress):
+        progress = int(progress)
         print 'progress', progress
         if not posturl:
             return
         try:
-            return urllib2.urlopen(posturl, urllib.urlencode({'progress': int(progress)})).read()
+            return urllib2.urlopen(posturl, urllib.urlencode({'progress': progress})).read()
         except Exception, e:
-            print 'ERROR posting progress %r to %r' % (progress, posturl)
+            print 'ERROR posting progress %d to %r' % (progress, posturl)
     
     try:
         if options.logfile:
@@ -189,6 +190,8 @@ def buildzip():
         if posturl:
             posturl = posturl.encode('utf-8')
         
+        post_status('init')
+        
         from mwlib.utils import get_multipart
         import urllib
         import urllib2
@@ -198,8 +201,6 @@ def buildzip():
         
         post_status('parsing')
         
-        for x in articles:
-            z.addArticle(x)
         mb.addArticles(articles)
         
         z.addObject('metabook.json', mb.dumpJson())
@@ -214,17 +215,22 @@ def buildzip():
             z.addArticle(title, revision=revision)        
             p += inc
         
-        post_status('packaging')
-
-        if not options.noimages:
-            z.writeImages(size=imagesize)
+        post_progress(70)
         
-        post_progress(80)
+        post_status('packaging')
+        
+        def image_progress(i, n):
+            post_progress(70 + i*(20.0/n))
+        
+        if not options.noimages:
+            z.writeImages(size=imagesize, progress_callback=image_progress)
+        
+        post_progress(90)
         
         z.writeContent()
         zf.close()
         
-        post_progress(90)
+        post_progress(95)
         
         if posturl:
             post_status('uploading')
