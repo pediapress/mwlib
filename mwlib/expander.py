@@ -203,6 +203,7 @@ class Parser(object):
         # find the name
         name = Node()
         t.children.append(name)
+        idx = 0
         for idx, c in enumerate(children):
             if c==u'|':
                 break
@@ -215,7 +216,7 @@ class Parser(object):
         arg = Node()
 
         linkcount = 0
-        for idx, c in enumerate(children[idx+1:]):
+        for c in children[idx+1:]:
             if c==u'[[':
                 linkcount += 1
             elif c==']]':
