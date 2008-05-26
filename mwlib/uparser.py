@@ -71,10 +71,31 @@ def removeBoilerplate(node):
     for x in node.children:
         removeBoilerplate(x)
         
-            
-        
+import re
+_ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches all alpha
+def labelLinks(node):
+    for i, x in enumerate(node):
+        if not isinstance(x, parser.Link):
+            labelLinks(x)
+            continue
 
-postprocessors = [removeBoilerplate, simplify, fixlitags]
+        if not x.children:
+            x.append(parser.Text(x.target))
+
+        try:
+            next = node.children[i+1]
+        except IndexError:
+            continue
+        if not isinstance(next, parser.Text):
+            continue
+
+        m = _ALPHA_RE.match(next.caption)
+        if m:
+            # Include trailing alpha chars in link
+            x.children[-1].caption += m.group(0)
+            next.caption = next.caption[m.end():]
+
+postprocessors = [removeBoilerplate, simplify, fixlitags, labelLinks]
 
 def parseString(title=None, raw=None, wikidb=None, revision=None):
     """parse article with title from raw mediawiki text"""
