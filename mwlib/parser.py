@@ -393,6 +393,8 @@ def append_br_tag(node):
     br.starttext = '<br />'
     br.endtext = ''
     node.append(br)
+
+_ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
             
 class Parser(object):
     def __init__(self, tokens, name=''):
@@ -540,6 +542,17 @@ class Parser(object):
                 self.next()
 
         obj._specialize()
+
+        if not obj.children:
+            # [[a]] -> [[a|a]]
+            obj.append(Text(obj.target))
+
+        if self.left and self.token[0] == 'TEXT':
+            m = _ALPHA_RE.match(self.token[1])
+            if m:
+                # [[a|a]]b -> [[a|ab]]
+                obj.append(Text(m.group(0)), True)
+                self.tokens[self.pos] = ('TEXT', self.token[1][m.end():])
             
         return obj
     
