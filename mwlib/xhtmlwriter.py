@@ -425,7 +425,16 @@ class MWXHTMLWriter(object):
         return ET.Element("pre")
 
     def xwriteParagraph(self, obj):
-        return ET.Element("p")
+        """
+        currently the parser encapsulates almost anything into paragraphs, 
+        but XHTML1.0 allows no block elements in paragraphs.
+        therefore we use the html-div-element. 
+
+        this is a hack to let created documents pass the validation test.
+        """
+        e = ET.Element("div")
+        e.set("class", "mwx.paragraph")
+        return e
 
 
     # others: Index, Gallery, ImageMap  FIXME

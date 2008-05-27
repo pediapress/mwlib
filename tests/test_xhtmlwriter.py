@@ -8,9 +8,9 @@ import mwlib.advtree
 from mwlib.xhtmlwriter import MWXHTMLWriter
 
 import subprocess
-import StringIO
 import tempfile
 import os
+import re
 
 def getXHTML(wikitext):
     db = DummyDB()
@@ -82,3 +82,73 @@ def test_math():
     validate(xhtml)
     
 
+def test_validatetags():
+    """
+    this test checks only basic XHTML validation 
+    """
+    raw=r'''<b class="test">bold</b>
+<big>big</big>
+<blockquote>blockquote</blockquote>
+break after <br/> and before this
+<table class="testi vlist"><caption>caption for the table</caption><thead><th>heading</th></thead><tbody><tr><td>cell</td></tr></tbody></table>
+<center>center</center>
+<cite>cite</cite>
+<code>code</code>
+<source class="test_class" id="test_id">source</source>
+<dl><dt>dt</dt><dd>dd</dd></dl>
+<del>deleted</del>
+<div>division</div>
+<em>em</em>
+<font>font</font>
+<h1>h1</h1>
+<h6>h6</h6>
+<hr/>
+<i>i</i>
+<ins>ins</ins>
+<ol><li>li 1</li><li>li 2</li></ol>
+<ul><li>li 1</li><li>li 2</li></ul>
+<p>paragraph</p>
+<pre>preformatted</pre>
+<ruby><rb>A</rb><rp>(</rp><rt>aaa</rt><rp>)</rp></ruby>
+<s>s</s>
+<small>small</small>
+<span>span</span>
+<strike>strke</strike>
+<strong>strong</strong>
+<sub>sub</sub>
+<sup>sup</sup>
+<tt>teletyped</tt>
+<u>u</u>
+<var>var</var>
+th<!-- this is comment -->is includes a comment'''
+
+    for x in raw.split("\n"):
+        xhtml = getXHTML(raw.decode("utf8"))
+        validate(xhtml)
+
+
+def test_sections():
+    raw='''
+== Section 1 ==
+
+text with newline above
+
+more text with newline, this will result in paragrahps
+
+=== This should be a sub section ===
+currently the parser ends sections at paragraphs. 
+unless this bug is fixed subsections are not working
+
+==== subsub section ====
+this test will validate, but sections will be broken.
+
+'''.decode("utf8")
+    xhtml = getXHTML(raw)
+    validate(xhtml)
+    
+    reg = re.compile(r"<(h\d)", re.MULTILINE)
+    res =  list(reg.findall(xhtml))
+    print res, "should be", ['h1', 'h2', 'h3']
+    if not res == ['h1', 'h2', 'h3']:
+        print xhtml
+        assert res == ['h1', 'h2', 'h3']
