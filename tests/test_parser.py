@@ -544,4 +544,13 @@ def test_ftp_url():
 def test_source_vlist():
     r=parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
     assert r.vlist == dict(lang='c'), "bad value: %r" % (r.vlist,)
+
+def test_pull_in_alpha():
+    link=parse("[[link|ab]]cd").find(parser.Link)[0]
+    assert "cd" in link.asText(), "'cd' not in linkstext"
     
+
+def test_not_pull_in_numeric():
+    link=parse("[[link|ab]]12").find(parser.Link)[0]
+
+    assert "12" not in link.asText(), "'12' in linkstext"
