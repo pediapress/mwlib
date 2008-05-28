@@ -539,7 +539,7 @@ def removeNewlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
-    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted) and not node.getParentNodesByClass(Source):
+    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted) and not node.getParentNodesByClass(Source) and node.caption:
         if node.caption.strip() == u"":
             prev = node.previous or node.parent # previous sibling node or parentnode 
             next = node.next or node.parent.next
