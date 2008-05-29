@@ -20,10 +20,11 @@ import sys
 
 import odf
 from odf.opendocument import OpenDocumentText
-from odf import style, text, dc, meta, table, draw
+from odf import text, dc, meta, table, draw
 from mwlib import parser,  mathml
 from mwlib.log import Log
 import advtree 
+import odfstyles as style
 
 log = Log("odfwriter")
 
