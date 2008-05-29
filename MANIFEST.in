@@ -28,10 +28,12 @@ include mwlib/lang.txt
 include mwlib/licenses.py
 include mwlib/log.py
 include mwlib/magics.py
+include mwlib/mathml.py
 include mwlib/metabook.py
 include mwlib/mwapidb.py
 include mwlib/mwscan.py
 include mwlib/netdb.py
+include mwlib/odfwriter.py
 include mwlib/overlay.py
 include mwlib/parser.py
 include mwlib/recorddb.py
@@ -48,6 +50,7 @@ include mwlib/uparser.py
 include mwlib/utils.py
 include mwlib/web.py
 include mwlib/wiki.py
+include mwlib/xhtmlwriter.py
 include mwlib/zipwiki.py
 include setup.py
 include tests/data/test.zip
@@ -68,5 +71,6 @@ include tests/test_sanitychecker.py
 include tests/test_scanner.py
 include tests/test_table.py
 include tests/test_timeline.py
+include tests/test_xhtmlwriter.py
 include tests/test_zipwiki.py
 include tools/get_license_templates.py
