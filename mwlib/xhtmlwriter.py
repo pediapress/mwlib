@@ -506,11 +506,13 @@ def fixtree(element, parent=None):
 
 
 
-
+def preprocess(root):
+    pass
 
 def main():
     for fn in sys.argv[1:]:
         r = advtree.getAdvTree(fn)
+        preprocess(r)
         parser.show(sys.stdout, r)
         dbw = MWXHTMLWriter()
         dbw.write(r)

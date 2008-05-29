@@ -5,8 +5,7 @@
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 import mwlib.advtree
-from mwlib.xhtmlwriter import MWXHTMLWriter
-
+from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
 import subprocess
 import tempfile
 import os
@@ -16,6 +15,7 @@ def getXHTML(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
     mwlib.advtree.buildAdvancedTree(r)
+    preprocess(r)
     dbw = MWXHTMLWriter()
     dbw.write(r)
     return dbw.asstring()
@@ -120,10 +120,10 @@ break after <br/> and before this
 <tt>teletyped</tt>
 <u>u</u>
 <var>var</var>
-th<!-- this is comment -->is includes a comment'''
+th<!-- this is comment -->is includes a comment'''.decode("utf8")
 
     for x in raw.split("\n"):
-        xhtml = getXHTML(raw.decode("utf8"))
+        xhtml = getXHTML(x)
         validate(xhtml)
 
 

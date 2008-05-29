@@ -22,8 +22,9 @@ import sys
 
 import odf
 from odf.opendocument import OpenDocumentText
-from odf import style, text, dc, meta
+from odf import style, text, dc, meta, table
 from mwlib import parser,  mathml
+import mwlib.odfstyles as style
 from mwlib.log import Log
 import advtree 
 
@@ -38,41 +39,6 @@ def showNode(obj):
     if stuff:
         log(repr(stuff))
 
-# we define some styles here -----------------------------------------------------------------------------
-
-arial =  style.FontFace(name="Arial", fontfamily="Arial", fontfamilygeneric="swiss", fontpitch="variable")
-# Paragraph styles
-standardstyle = style.Style(name="Standard", family="paragraph")
-standardstyle.addElement(style.ParagraphProperties(marginbottom="0cm", margintop="0cm" ))
-h1style = style.Style(name="Heading 1", family="paragraph", defaultoutlinelevel="1")
-h1style.addElement(style.TextProperties(attributes={'fontsize':"20pt", 'fontweight':"bold"}))
-textbodystyle = style.Style(name="Text body", family="paragraph", parentstylename=standardstyle)
-textbodystyle.addElement(style.ParagraphProperties(
-        attributes={'marginbottom':"0.212cm", 'margintop':"0cm",'textalign':"justify", 'justifysingleword':"false"}))
-subtitlestyle = style.Style(name="Subtitle", family="paragraph", nextstylename=textbodystyle)
-subtitlestyle.addElement(style.ParagraphProperties(textalign="center") )
-subtitlestyle.addElement(style.TextProperties(fontsize="14pt", fontstyle="italic", fontname="Arial"))
-titlestyle = style.Style(name="Title", family="paragraph", nextstylename=subtitlestyle)
-titlestyle.addElement(style.ParagraphProperties(textalign="center") )
-titlestyle.addElement(style.TextProperties(fontsize="18pt", fontweight="bold", fontname="Arial"))
-# Text styles
-emphasisstyle = style.Style(name="Emphasis",family="text")
-emphasisstyle.addElement(style.TextProperties(fontstyle="italic"))
-sectstyle  = style.Style(name="Sect1", family="section")
-sectstyle.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
-
-
-def applyStylesToDoc(doc):
-    doc.fontfacedecls.addElement(arial)
-    doc.styles.addElement(standardstyle)
-    doc.styles.addElement(h1style)
-    doc.automaticstyles.addElement(sectstyle)
-    doc.styles.addElement(textbodystyle)
-    doc.styles.addElement(subtitlestyle)
-    doc.styles.addElement(titlestyle)
-    doc.styles.addElement(emphasisstyle)
-    
-
 
 class ODFWriter(object):
     namedLinkCount = 1
@@ -83,7 +49,7 @@ class ODFWriter(object):
         self.imagesrcresolver = imagesrcresolver # e.g. "http://anyhost/redir?img=IMAGENAME" where IMAGENAME is substituted
         self.references = []
         self.doc =  OpenDocumentText()
-        applyStylesToDoc(self.doc)
+        style.applyStylesToDoc(self.doc)
         self.text = self.doc.text
 
         if creator:
@@ -100,12 +66,23 @@ class ODFWriter(object):
     def getDoc(self, debuginfo=""):
         return self.doc
 
+    def asstring(self):
+        import StringIO
+        s = StringIO.StringIO()
+        self.doc.text.toXml(0, s)
+        s.seek(0)
+        return s.read()
+    
     
     def writeText(self, obj, parent):
         try:
             parent.addText(obj.caption)
         except odf.element.IllegalText:
-            print obj, "not allowed in ", parent.type
+            print "writeText:", obj, "not allowed in ", parent.type, "adding Paragraph"
+            # try to wrap it into a paragraph
+            p = text.P(stylename=style.textbody)
+            parent.addElement(p)
+            p.addText(obj.caption)
 
 
 
@@ -136,7 +113,7 @@ class ODFWriter(object):
                     try: 
                         e.addElement(ce)
                     except odf.element.IllegalChild:
-                        print ce.type, "not allowed in ", e.type
+                        print "write:", ce.type, "not allowed in ", e.type
                         #e.parentNode.addElement(ce)
                         
             return e
@@ -150,18 +127,19 @@ class ODFWriter(object):
     def owriteSection(self, obj):
         title = obj.children[0].children[0].caption 
         level = 1 + obj.getLevel()
-        r = text.Section(stylename=sectstyle, name=title) #, display="none")
-        r.addElement(text.H(outlinelevel=level, stylename=h1style, text=title))
+        r = text.Section(stylename=style.sect, name=title) #, display="none")
+        hXstyle = (style.h1,style.h2,style.h3,style.h4)[level]
+        r.addElement(text.H(outlinelevel=level, stylename=hXstyle, text=title))
         obj.children = obj.children[1:]
         return r
 
     def owriteParagraph(self, obj):
-        return text.P(stylename=textbodystyle)
+        return text.P(stylename=style.textbody)
         
     def owriteItem(self, item):
         
         li =text.ListItem()
-        p = text.P(stylename=textbodystyle)
+        p = text.P(stylename=style.textbody)
         li.addElement(p)
         
         def _addText(text):
@@ -176,8 +154,40 @@ class ODFWriter(object):
             tag = "ol"
         else:
             tag = "ul"
-        return text.List(stylename=textbodystyle)
+        return text.List(stylename=style.textbody)
 
+    def owriteBreakingReturn(self, obj):
+        return text.LineBreak()
+
+
+
+    def owriteCell(self, cell):
+        #self.setVList(td, cell)           
+        return table.TableCell()
+            
+    def owriteRow(self, row):
+        return table.TableRow()
+
+    def owriteTable(self, t):           
+        #self.setVList(table, t)           
+        #if t.caption:
+        #    c = ET.SubElement(table, "caption")
+        #    self.writeText(t.caption, c)
+        return table.Table()
+
+    def owriteEmphasized(self, obj):
+        return text.Span(stylename=style.emphasis)
+
+    def owriteStrong(self, obj):
+        return text.Span(stylename=style.strong)
+
+    def owriteBold(self, obj):
+        return text.Span(stylename=style.bold)
+
+    def owriteItalic(self, obj):
+        return text.Span(stylename=style.italic)
+
+    # Strong Small Big, Cite, Sub, Sup, Code, 
 
 
 
@@ -309,6 +319,9 @@ class ODFWriter(object):
         return s
 
 
+
+
+
     # Links ---------------------------------------------------------
 
     def xwriteURL(self, obj):
@@ -433,7 +446,7 @@ class ODFWriter(object):
     xwriteSub = xwriteGenericElement
     xwriteSup = xwriteGenericElement
     xwriteCode = xwriteGenericElement
-    xwriteBreakingReturn = xwriteGenericElement
+
     xwriteHorizontalRule = xwriteGenericElement
     xwriteTeletyped = xwriteGenericElement
     xwriteDiv = xwriteGenericElement
@@ -544,20 +557,27 @@ def fixtree(element, parent=None):
         for c in element:
             fixtree(c, element)
 
-def fixParagraphs(element):
+
+def _fixParagraphs(element):
     if isinstance(element, advtree.Paragraph) and isinstance(element.previous, advtree.Section) \
             and element.previous is not element.parent:
-        element.moveto(element.previous.getLastChild())
+        prev = element.previous
+        parent = element.parent
+        element.moveto(prev.getLastChild())
+        assert element not in parent.children
+        assert element in prev.children
+        assert element.parent is prev
         return True # changed
     else:
-        changes = True
-        while changes:
-            changes = False
-            for c in element.children[:]:
-                changes = fixParagraphs(c)
-                if changes:
-                    break
-        return False
+        for c in element.children[:]:
+            if _fixParagraphs(c):
+                return True
+
+
+def fixParagraphs(root):
+    while _fixParagraphs(root):
+        print "_run fix paragraphs"
+
     
 
 def _fixBlockElements(element):
@@ -566,45 +586,67 @@ def _fixBlockElements(element):
     this is not compatible with xhtml where nesting of 
     block elements is not allowed.
     """
-    blockelements = (advtree.Paragraph, advtree.PreFormatted, advtree.ItemList,
-                        advtree.Blockquote, advtree.DefinitionList, advtree.HorizontalRule)
+    blockelements = (advtree.Paragraph, advtree.PreFormatted, advtree.ItemList,advtree.Section, advtree.Table,
+                     advtree.Blockquote, advtree.DefinitionList, advtree.HorizontalRule)
 
-    if isinstance(element, blockelements) and element.parent and isinstance(element.parent, blockelements) and element.parent.parent:
+    if isinstance(element, blockelements) and element.parent and isinstance(element.parent, blockelements) \
+            and not isinstance(element.parent, advtree.Section) : # Section is no problem if parent
+        if not element.parent.parent:
+            print "missing parent parent", element, element.parent, element.parent.parent
+            assert element.parent.parent
+        
         # s[ p, p[il[], text], p] -> s[p, p, il, p[text], p]
         # split element parents
         pstart = element.parent.copy()
         pend = element.parent.copy()
-        for i,c in enumerate(pstart.children):
+        for i,c in enumerate(element.parent.children):
             if c is element:
                 break
         pstart.children = pstart.children[:i]
         pend.children = pend.children[i+1:]
         print "action",  [pstart, element, pend]
-        element.parent.parent.replaceChild(element.parent, [pstart, element, pend])
+        grandp = element.parent.parent
+        oldparent = element.parent
+        grandp.replaceChild(oldparent, [pstart, element, pend])
+        assert pstart in grandp.children
+        assert element in grandp.children
+        assert pend in grandp.children
+        assert oldparent not in grandp.children
+        assert pstart.parent is grandp
+        assert pend.parent is grandp
+        #assertparents(element.parent.parent)
         return True # changed
     else:
-        for c in element.children[:]:
-            changes = fixBlockElements(c)
-            if changes:
+        for c in element.children:
+            if _fixBlockElements(c):
                 return True
-        return False
         
 def fixBlockElements(root):
     while _fixBlockElements(root):
         print "_run fix block elements"
 
+def assertparents(e, isroot=True):
+    if not isroot:
+        assert e.parent
+    for c in e.children:
+        assertparents(c, isroot=False)
+
+
+def preprocess(root):
+    fixParagraphs(root)
+    fixBlockElements(root)
+    #fixParagraphs(root)
+
 
 def main():
     for fn in sys.argv[1:]:
         r = advtree.getAdvTree(fn)
-        fixParagraphs(r)
-        fixBlockElements(r)
+        parser.show(sys.stdout, r)
+        preprocess(r)
         parser.show(sys.stdout, r)
         odf = ODFWriter()
         odf.write(r)
         doc = odf.getDoc()
-
-        import StringIO
         doc.toXml("%s.odf.xml"%fn)
         doc.save("%s.odf" % fn, True)
  
