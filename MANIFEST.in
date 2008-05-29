@@ -33,6 +33,7 @@ include mwlib/metabook.py
 include mwlib/mwapidb.py
 include mwlib/mwscan.py
 include mwlib/netdb.py
+include mwlib/odfstyles.py
 include mwlib/odfwriter.py
 include mwlib/overlay.py
 include mwlib/parser.py
@@ -64,6 +65,7 @@ include tests/test_imgmap.py
 include tests/test_mwapidb.py
 include tests/test_mwscan.py
 include tests/test_netdb_imagedb.py
+include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
 include tests/test_recorddb.py

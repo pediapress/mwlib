@@ -5,12 +5,29 @@
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 import mwlib.parser
-import mwlib.advtree
 from mwlib.odfwriter import ODFWriter, preprocess
 import subprocess
 import tempfile
 import os, sys
 import re
+
+class ValidationError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+ 
+def validate(odfw):
+    "THIS USES odflint AND WILL FAIL IF NOT INSTALLED"
+    fh, tfn = tempfile.mkstemp()
+    odfw.getDoc().save(tfn, True)
+    cmd = "odflint %s" %tfn
+    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE, close_fds=True)
+    p.wait()
+    r = p.stderr.read()
+    os.remove(tfn)
+    if len(r):
+        raise ValidationError, r
 
 def getXML(wikitext):
     db = DummyDB()
@@ -21,28 +38,9 @@ def getXML(wikitext):
     mwlib.parser.show(sys.stdout, r)
     odfw = ODFWriter()
     odfw.write(r)
+    validate(odfw)
     return odfw.asstring()
 
-class ValidationError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
- 
-def validate(xhtml):
-    "THIS USES xmllint AND WILL FAIL IF NOT INSTALLED"
-    if True: # FIXME
-        return # is there a suitable validator?
-    fh, tfn = tempfile.mkstemp()
-    open(tfn, "w").write(xhtml)
-    cmd = "xmllint --noout --valid %s" %tfn
-    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE, close_fds=True)
-    p.wait()
-    r = p.stderr.read()
-    os.remove(tfn)
-    if len(r):
-        print xhtml
-        raise ValidationError, r
 
 
 def test_pass():
@@ -51,7 +49,6 @@ def test_pass():
 kthxybye
 """.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
 
 def test_fixparagraphs(): 
     raw = """
@@ -60,9 +57,6 @@ def test_fixparagraphs():
 </p>
 """.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
-   
-
 
 def test_gallery():
     raw="""
@@ -77,14 +71,12 @@ Image:Wikipedesketch1.png|Wikipedia has bugs
 Image:Wikipedesketch1.png|The mascot of Wikipedia
 </gallery>""".decode("utf8")
     xml = getXML(raw)
-    validate(xml)
 
 def test_math():
     raw=r'''
 <math> Q = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \frac{\sqrt{3}}{2} & \frac12 \\ 0 & -\frac12 & \frac{\sqrt{3}}{2} \end{bmatrix} </math>
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
     
 
 def test_validatetags():
@@ -129,7 +121,6 @@ th<!-- this is comment -->is includes a comment'''.decode("utf8")
 
     for x in raw.split("\n"):
         xml = getXML(x)
-        validate(xml)
 
 
 def test_sections():
@@ -149,7 +140,6 @@ this test will validate, but sections will be broken.
 
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
     
     reg = re.compile(r'text:outline-level="(\d)"', re.MULTILINE)
     res =  list(reg.findall(xml))
@@ -180,7 +170,7 @@ You can break lines<br />
 without starting a new paragraph.
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
+
     
 
 
@@ -198,7 +188,7 @@ marks the end of the list.
 * start again.
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
+
     
 
 
@@ -217,8 +207,6 @@ marks the end of the list.
 
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
-    
 
 
 def test_mixedlists():
@@ -230,9 +218,6 @@ def test_mixedlists():
 
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
-    
-
 
 def test_definitionlists():
     raw='''== Rest of the page ==
@@ -243,9 +228,6 @@ def test_definitionlists():
 
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
-    
-
 
 def test_preprocess():
     raw='''== Rest of the page ==
@@ -290,9 +272,6 @@ marks the end of the list.
 
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)
-    
-
 
 def test_paragraphsinsections():
     raw='''== section 1 ==
@@ -312,4 +291,3 @@ s2 paragraph 2
 
 '''.decode("utf8")
     xml = getXML(raw)
-    validate(xml)

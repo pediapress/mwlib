@@ -12,8 +12,6 @@ those prefixed with 'x' are unmodofied copies from xhtmlwriter.py
 and deactived.
 
 ToDo:
-
- * fix parse tree (blockelements)
  * implement missing methods
  * add missing styles
 
@@ -22,9 +20,8 @@ import sys
 
 import odf
 from odf.opendocument import OpenDocumentText
-from odf import style, text, dc, meta, table
+from odf import style, text, dc, meta, table, draw
 from mwlib import parser,  mathml
-import mwlib.odfstyles as style
 from mwlib.log import Log
 import advtree 
 
@@ -43,10 +40,10 @@ def showNode(obj):
 class ODFWriter(object):
     namedLinkCount = 1
 
-    def __init__(self, language="en", namespace="en.wikipedia.org", creator="", license="GFDL", imagesrcresolver=None):
+    def __init__(self, language="en", namespace="en.wikipedia.org", creator="", license="GFDL", images=None):
         self.language = language
         self.namespace = namespace
-        self.imagesrcresolver = imagesrcresolver # e.g. "http://anyhost/redir?img=IMAGENAME" where IMAGENAME is substituted
+        self.images = images
         self.references = []
         self.doc =  OpenDocumentText()
         style.applyStylesToDoc(self.doc)
@@ -61,7 +58,20 @@ class ODFWriter(object):
             self.doc.meta.addElement(meta.UserDefined(name="Rights", text=license))
 
 
-        
+    def writeBook(self, book, bookParseTree, output, removedArticlesFile=None, coverimage=None):
+        outfile = output
+        advtree.buildAdvancedTree(bookParseTree)
+        preprocess(bookParseTree)
+        self.book = book
+        self.baseUrl = book.source['url']
+        self.wikiTitle = book.source.get('name')
+        for e in bookParseTree.children:
+            r = self.write(e)
+        licenseArticle = self.book.source.get('defaultarticlelicense','')
+        doc = self.getDoc()
+        #doc.toXml("%s.odf.xml"%fn)
+        doc.save(outfile, True)
+        print "writing to", outfile
         
     def getDoc(self, debuginfo=""):
         return self.doc
@@ -73,7 +83,6 @@ class ODFWriter(object):
         s.seek(0)
         return s.read()
     
-    
     def writeText(self, obj, parent):
         try:
             parent.addText(obj.caption)
@@ -81,8 +90,11 @@ class ODFWriter(object):
             print "writeText:", obj, "not allowed in ", parent.type, "adding Paragraph"
             # try to wrap it into a paragraph
             p = text.P(stylename=style.textbody)
-            parent.addElement(p)
-            p.addText(obj.caption)
+            try:
+                parent.addElement(p)
+                p.addText(obj.caption)
+            except odf.element.IllegalChild:
+                print  "...failed" # FAILS FOR FRAMES # FIXME!
 
 
 
@@ -128,7 +140,7 @@ class ODFWriter(object):
         title = obj.children[0].children[0].caption 
         level = 1 + obj.getLevel()
         r = text.Section(stylename=style.sect, name=title) #, display="none")
-        hXstyle = (style.h1,style.h2,style.h3,style.h4)[level]
+        hXstyle = (style.h1,style.h2,style.h3,style.h4,style.h5,style.h6)[level]
         r.addElement(text.H(outlinelevel=level, stylename=hXstyle, text=title))
         obj.children = obj.children[1:]
         return r
@@ -188,6 +200,128 @@ class ODFWriter(object):
         return text.Span(stylename=style.italic)
 
     # Strong Small Big, Cite, Sub, Sup, Code, 
+
+    def owriteChapter(self, obj):
+        pass
+
+
+    def owriteImageLink(self, obj):
+        # see http://books.evc-cit.info/odbook/ch04.html
+        print "in write imageLink"
+        if not self.images:
+            return
+
+        targetWidth = 400
+        imgPath = self.images.getDiskPath(obj.target, size=targetWidth)
+        print imgPath
+        if not imgPath:
+            print "NO IMAGE PATH", obj, obj.target
+            return
+        imgPath = imgPath.encode('utf-8')
+        print "have img here", imgPath
+        frame = draw.Frame(stylename=style.photo, width="25cm", height="18.75cm", x="1.5cm", y="2.5cm")
+        href = self.doc.addPicture(imgPath)
+        frame.addElement(draw.Image(href=href))
+        return frame
+
+
+
+
+
+
+    def RLwriteImageLink(self,obj): ## EXAMLPE CODE (IMAGE HANDLING IN PDF GEN)
+        if obj.colon == True:
+            items = []
+            for node in obj.children:
+                items.extend(self.write(node))
+            return items
+
+        targetWidth = 400
+        if self.imgDB:
+            imgPath = self.imgDB.getDiskPath(obj.target, size=targetWidth)
+            if imgPath:
+                #self._cleanImage(imgPath)
+                imgPath = imgPath.encode('utf-8')
+                self.tmpImages.add(imgPath)
+        else:
+            imgPath = ''
+        if not imgPath:
+            log.warning('invalid image url')
+            return []
+               
+        def sizeImage(w,h):
+            max_img_width = 7 # max size in cm FIXME: make this configurable
+            max_img_height = 11 # FIXME: make this configurable
+            scale = 1/30 # 100 dpi = 30 dpcm <-- this is the minimum pic resolution FIXME: make this configurable
+            _w = w * scale
+            _h = h * scale
+            if _w > max_img_width or _h > max_img_height:
+                scale = min( max_img_width/w, max_img_height/h)
+                return (w*scale*cm, h*scale*cm)
+            else:
+                return (_w*cm, _h*cm)
+
+        (w,h) = (obj.width or 0, obj.height or 0)
+
+        try:
+            img = PilImage.open(imgPath)
+            if img.info.get('interlace',0) == 1:
+                log.warning("got interlaced PNG which can't be handeled by PIL")
+                return []
+        except IOError:
+            log.warning('img can not be opened by PIL')
+            return []
+        (_w,_h) = img.size
+        if _h == 0 or _w == 0:
+            return []
+        aspectRatio = _w/_h                           
+           
+        if w>0 and not h>0:
+            h = w / aspectRatio
+        elif h>0 and not w>0:
+            w = aspectRatio / h
+        elif w==0 and h==0:
+            w, h = _w, _h
+
+        (width, height) = sizeImage( w, h)
+        align = obj.align
+        #if not align:
+        #    align = 'right' # FIXME: make this configurable
+            
+        txt = []
+        for node in obj.children:
+            res = self.write(node)
+            if isInline(res):
+                txt.extend(res)
+            else:
+                log.warning('imageLink contained block element: %s' % type(res))
+        if obj.isInline(): 
+            #log.info('got inline image:',  imgPath,"w:",width,"h:",height)
+            txt = '<img src="%(src)s" width="%(width)fin" height="%(height)fin" valign="%(align)s"/>' % {
+                'src':unicode(imgPath, 'utf-8'),
+                'width':width/100,
+                'height':height/100,
+                'align':'bottom',
+                }
+            return txt
+        # FIXME: make margins and padding configurable
+        captionTxt = '<i>%s</i>' % ''.join(txt)  #filter
+        return [Figure(imgPath, captionTxt=captionTxt,  captionStyle=figure_caption_style, imgWidth=width, imgHeight=height, margin=(0.2*cm, 0.2*cm, 0.2*cm, 0.2*cm), padding=(0.2*cm, 0.2*cm, 0.2*cm, 0.2*cm), align=align)]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -535,6 +669,20 @@ class ODFWriter(object):
         else:
             tag = "ul"
         return ET.Element(tag)
+
+
+
+
+
+
+
+
+
+
+
+
+# - helper funcs   r ---------------------------------------------------
+
 
 
 def fixtree(element, parent=None):
