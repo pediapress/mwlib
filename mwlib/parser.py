@@ -740,8 +740,11 @@ class Parser(object):
                 s.append(self.parseSection())
             elif token[0] in FirstParagraph:
                 s.append(self.parseParagraph())
-            else:
+            elif token[0]=='BREAK':
                 log.info("in parseSection: skipping", token)
+                self.next()
+            else:
+                log.info("ending section with token", token)
                 break
                 
         return s
