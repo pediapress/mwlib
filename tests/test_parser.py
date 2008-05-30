@@ -559,3 +559,9 @@ def test_section_consume_break():
     r=parse('= about us =\n\nfoobar').find(parser.Section)[0]
     txt = r.asText()
     assert 'foobar' in txt, 'foobar should be inside the section'
+
+def test_text_caption_none_bug():
+    lst=parse("[[]]").find(parser.Text)
+    print lst
+    for x in lst:
+        assert x.caption is not None
