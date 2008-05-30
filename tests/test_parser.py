@@ -554,3 +554,8 @@ def test_not_pull_in_numeric():
     link=parse("[[link|ab]]12").find(parser.Link)[0]
 
     assert "12" not in link.asText(), "'12' in linkstext"
+
+def test_section_consume_break():
+    r=parse('= about us =\n\nfoobar').find(parser.Section)[0]
+    txt = r.asText()
+    assert 'foobar' in txt, 'foobar should be inside the section'
