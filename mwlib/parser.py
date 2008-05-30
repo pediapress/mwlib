@@ -543,7 +543,7 @@ class Parser(object):
 
         obj._specialize()
 
-        if not obj.children:
+        if not obj.children and obj.target:
             # [[a]] -> [[a|a]]
             obj.append(Text(obj.target))
 
