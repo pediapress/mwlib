@@ -38,14 +38,15 @@ localpath = ~/images
 """ % (os.path.abspath(output),))
 
 def show():
-    parser = optparse.OptionParser(usage="%prog [-e|--expand] --conf CONF ARTICLE [...]")
+    parser = optparse.OptionParser()
     parser.add_option("-c", "--conf", help="config file")
     parser.add_option("-e", "--expand", action="store_true", help="expand templates")
     parser.add_option("-t", "--template", action="store_true", help="show template")
+    parser.add_option("-f", help='read input from file. implies -e')
     
     options, args = parser.parse_args()
     
-    if not args:
+    if not args and not options.f:
         parser.error("missing ARTICLE argument")
         
     articles = [unicode(x, 'utf-8') for x in args]
@@ -70,7 +71,11 @@ def show():
                 raw = te.expandTemplates()
 
             print raw.encode("utf-8")
-
+    if options.f:
+        raw = unicode(open(options.f).read(), 'utf-8')
+        te = expander.Expander(raw, pagename='test', wikidb=db)
+        raw = te.expandTemplates()
+        print raw.encode("utf-8")
 
 def buildzip():
     parser = optparse.OptionParser(usage="%prog [OPTIONS] [ARTICLE ...]")
