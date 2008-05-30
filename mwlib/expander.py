@@ -459,7 +459,7 @@ class Expander(object):
             rep = self.resolver(name, var)
 
             if rep is not None:
-                res.append(rep)
+                res.append(add_implicit_newline(rep))
             else:            
                 p = self.getParsedTemplate(name)
                 if p:
