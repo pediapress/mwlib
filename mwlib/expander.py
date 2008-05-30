@@ -374,7 +374,17 @@ class ArgumentList(object):
 
         return val
     
-            
+def add_implicit_newline(raw):
+    """add newline to templates starting with *, #, :, ;, {|
+    see: http://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
+    """
+    sw = raw.startswith
+    for x in ('*', '#', ':', ';', '{|'):
+        if sw(x):
+            return '\n'+raw
+    return raw
+
+
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
@@ -405,11 +415,7 @@ class Expander(object):
             log.warn("no template", repr(name))
             res = None
         else:
-            # add newline to templates starting with a (semi)colon, or tablemarkup
-            # XXX what else? see test_implicit_newline in test_expander
-            if raw.startswith(":") or raw.startswith(";") or raw.startswith("{|"):
-                raw = '\n'+raw
-                
+            raw = add_implicit_newline(raw)
             log.info("parsing template", repr(name))
             res = Parser(raw).parse()
             if DEBUG:
