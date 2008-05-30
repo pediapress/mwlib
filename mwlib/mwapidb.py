@@ -326,6 +326,9 @@ class WikiDB(object):
         return None
     
     def getRawArticle(self, title, revision=None):
+        if not title:
+            return None
+        
         if revision is None:
             page = self.api_helper.page_query(titles=title, redirects=1, prop='revisions', rvprop='content')
         else:
