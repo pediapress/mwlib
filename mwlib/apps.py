@@ -86,7 +86,8 @@ def buildzip():
     parser.add_option('--collectionpage', help='Title of a collection page')
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
     parser.add_option("-o", "--output", help="write output to OUTPUT")
-    parser.add_option("-p", "--posturl", help="http post to POSTURL")
+    parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
+    parser.add_option("-g", "--getposturl", action="store_true", help="get posturl from pp and direct browser to upload url")
     parser.add_option("-i", "--imagesize",
                       help="max. pixel size (width or height) for images (default: 800)")
     parser.add_option("-d", "--daemonize", action="store_true",
@@ -99,9 +100,10 @@ def buildzip():
     import tempfile
     import os
     import zipfile
-
+    import simplejson
     from mwlib import utils
     from mwlib.utils import daemonize
+    import urllib2
 
     articles = [unicode(x, 'utf-8') for x in args]
     
@@ -111,6 +113,23 @@ def buildzip():
         parser.error("neither --conf nor --baseurl specified\nuse --help for all options")
     
     posturl = None
+    posturl = options.posturl
+    if posturl:
+        posturl = posturl.encode('utf-8')
+
+    # automatically acquires a post url 
+    if not posturl and options.getposturl:
+        serviceurl = "http://pediapress.com/api/collections/"
+        browsercmd = "firefox %s &"
+        u = urllib2.urlopen(serviceurl, data="any")
+        h = simplejson.loads(u.read())
+        posturl = h["post_url"]
+        redirect_url = h["redirect_url"]
+        os.system(browsercmd % redirect_url)
+        print "acquired post url", posturl
+        print "redirected browser to", redirect_url
+
+
     def post_status(status):
         print 'status:', status
         if not posturl:
@@ -191,15 +210,12 @@ def buildzip():
         if options.daemonize:
             daemonize()
         
-        posturl = options.posturl
-        if posturl:
-            posturl = posturl.encode('utf-8')
         
         post_status('init')
         
         from mwlib.utils import get_multipart
         import urllib
-        import urllib2
+
         
         zf = zipfile.ZipFile(zipfilename, 'w')
         z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
@@ -242,9 +258,11 @@ def buildzip():
             zf = open(zipfilename, "rb")
             ct, data = get_multipart('collection.zip', zf.read(), 'collection')
             zf.close()
+            print "posting the zip to", posturl, len(data)
             req = urllib2.Request(posturl, data=data, headers={"Content-Type": ct})
             result = urllib2.urlopen(req).read()
-        
+            print "posting result was ", result
+
         if w['images']:
             w['images'].clear()
         
