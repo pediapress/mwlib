@@ -245,3 +245,7 @@ def test_empty_template():
     """test for http://code.pediapress.com/wiki/ticket/126"""
     expandstr("{{}}", "")
     
+def test_implicit_newline_magic():
+    expandstr("foo {{#if: 1 | :xxx }} bar", "foo \n:xxx bar")
+    expandstr("foo {{#ifexpr: 1 | #xxx }} bar", "foo \n#xxx bar")
+    
