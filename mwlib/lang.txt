@@ -49,6 +49,7 @@ da
 de
 diq
 dk
+dk:da
 dv
 dz
 ee
@@ -78,6 +79,7 @@ gn
 got
 gu
 gv
+ha
 hak
 haw
 he
@@ -217,8 +219,10 @@ tk
 tl
 tn
 to
+tp
 tpi
 tr
+ts
 tt
 tw
 ty
@@ -246,7 +250,6 @@ zea
 zh
 zh-classical
 zh-cn
-zh-min-nan
 zh-min-nan
 zh-tw
 zh-yue
