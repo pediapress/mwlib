@@ -25,8 +25,9 @@ splitpattern = """
 |(?:<gallery[^<>]*>.*?</gallery>)
 |(?:<source[^<>]*>.*?</source>)
 |(?:<pre.*?>.*?</pre>)
+|(?:=)
 |(?:[:\[\]\|{}<])                                  # all special characters
-|(?:[^\[\]\|:{}<]*))                               # all others
+|(?:[^=\[\]\|:{}<]*))                               # all others
 """
 
 splitrx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
@@ -302,9 +303,44 @@ class LazyArgument(object):
         self.expander = expander
         self._flatten = None
         self.variables = variables
+        self._splitflatten = None
 
+    def _flattennode(self, n):
+        arg=[]
+        self.expander.flatten(n, arg, self.variables)
+        arg = u"".join(arg)
+
+        if len(arg)>256*1024:
+            raise MemoryLimitError("template argument too long: %s bytes" % (len(arg),))
+        return arg
+
+    def splitflatten(self):
+        if self._splitflatten is None:
+            try:
+                idx = self.node.children.index(u'=')
+            except ValueError:
+                name = None
+                val = self.node
+            else:
+                name = self.node
+                val = Node()
+                val.children[:] = self.node.children[idx+1:]
+                oldchildren = self.node.children[:]
+                del self.node.children[idx:]
+
+                name = self._flattennode(name)
+                self.node.children = oldchildren
+                
+            val = self._flattennode(val)
+
+            self._splitflatten = name, val
+        return self._splitflatten
+    
+            
     def flatten(self):
         if self._flatten is None:            
+            self._flatten = self._flattennode(self.node).strip()
+            
             arg=[]
             self.expander.flatten(self.node, arg, self.variables)
 
@@ -353,9 +389,10 @@ class ArgumentList(object):
         varcount=1
         if n not in self.namedargs:
             for x in self.args:
-                f=x.flatten()
-                if u"=" in f:
-                    name, val = f.split(u"=", 1)
+                name, val = x.splitflatten()
+                
+                
+                if name is not None:
                     name = name.strip()
                     val = val.strip()
                     self.namedargs[name] = val
@@ -364,10 +401,10 @@ class ArgumentList(object):
                 else:
                     name = str(varcount)
                     varcount+=1
-                    self.namedargs[name] = f
+                    self.namedargs[name] = val 
 
                     if n==name:
-                        return f
+                        return val
             self.namedargs[n] = u''
 
         val = self.namedargs[n]
