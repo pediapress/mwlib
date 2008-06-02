@@ -354,7 +354,7 @@ class WikiDB(object):
             else: 
                 wikitext = self.getRawArticle(self.license)
                 assert wikitext is not None, 'Could not get license article %r' % self.license
-                result['license' =
+                result['license'] = {
                     'name': g['rights'],
                     'wikitext': wikitext,
                 }
