@@ -185,8 +185,9 @@ def buildzip():
             mb.source = {
                 'name': metadata['name'],
                 'url': metadata['url'],
-                'defaultarticlelicense': metadata['license'],
             }
+            if 'license' in metadata:
+                mb.source['defaultarticlelicense'] = metadata['license']
         
         if options.noimages:
             w['images'] = None
