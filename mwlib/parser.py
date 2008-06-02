@@ -248,7 +248,7 @@ class Link(Node):
             return
             
         
-        if linktype not in ("bild", "image"):
+        if linktype not in ("bild", "image", "imagen"):
             # assume a LangLink
             log.info("Unknown linktype:", repr(linktype))
             if len(linktype)==2:
