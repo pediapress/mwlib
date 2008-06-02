@@ -11,6 +11,8 @@ arial =  style.FontFace(name="Arial", fontfamily="Arial", fontfamilygeneric="swi
 # Paragraph styles
 standard = style.Style(name="Standard", family="paragraph")
 standard.addElement(style.ParagraphProperties(marginbottom="0cm", margintop="0cm" ))
+ArticleHeader = style.Style(name="Heading 1", family="paragraph", defaultoutlinelevel="1")
+ArticleHeader.addElement(style.TextProperties(attributes={'fontsize':"28pt", 'fontweight':"bold"}))
 h1 = style.Style(name="Heading 1", family="paragraph", defaultoutlinelevel="1")
 h1.addElement(style.TextProperties(attributes={'fontsize':"24pt", 'fontweight':"bold"}))
 h2 = style.Style(name="Heading 2", family="paragraph", defaultoutlinelevel="2")
@@ -43,7 +45,6 @@ emphasis.addElement(style.TextProperties(fontstyle="italic")) # shpould be also 
 italic = emphasis
 strong = style.Style(name="Bold",family="text")
 strong.addElement(style.TextProperties(fontsize="14pt", fontweight="bold"))
-
 bold = strong
 
 sect  = style.Style(name="Sect1", family="section")
@@ -53,6 +54,7 @@ sect  = style.Style(name="Sect1", family="section")
 def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
     doc.styles.addElement(standard)
+    doc.styles.addElement(ArticleHeader)
     doc.styles.addElement(h1)
     doc.styles.addElement(h2)
     doc.styles.addElement(h3)

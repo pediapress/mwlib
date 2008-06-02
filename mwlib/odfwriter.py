@@ -134,6 +134,17 @@ class ODFWriter(object):
                         e.addElement(ce)
                     except odf.element.IllegalChild:
                         print "write:", ce.type, "not allowed in ", e.type
+                        #if isinstance(e, text.ListItem) and isinstance(ce, text.A): # this is how one do it python
+                        if e.qname[1] in ["list-item"] and ce.qname[1] in ["a"]: # this is how we have to do it :((
+                            print "adding Paragraph"
+                            # wrap into paragraph
+                            try:
+                                p = text.Span()
+                                p.addElement(ce)
+                                e.addElement(p)
+                            except odf.element.IllegalChild:
+                                print "failed"
+                            
                         #e.parentNode.addElement(ce)
                         
             return e
@@ -147,7 +158,7 @@ class ODFWriter(object):
         title = a.caption
         r = text.Section(stylename=style.sect, name=title) #, display="none")
         self.doc.text.addElement(r)
-        r.addElement(text.H(outlinelevel=1, stylename=style.h1, text=title))
+        r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
         return r # mhm 
 
     def owriteSection(self, obj):
