@@ -15,6 +15,9 @@ ToDo:
  * implement missing methods
  * add missing styles
 
+More Info:
+* http://books.evc-cit.info/odbook/book.html
+* http://opendocumentfellowship.com/projects/odfpy
 """
 import sys, exceptions
 try:
@@ -69,6 +72,7 @@ class ODFWriter(object):
         advtree.buildAdvancedTree(bookParseTree)
         preprocess(bookParseTree)
         self.book = book
+        self.doc.meta.addElement(dc.Title(text=u"collection title fixme"))
         self.baseUrl = book.source['url']
         self.wikiTitle = book.source.get('name')
         for e in bookParseTree.children:
@@ -134,17 +138,6 @@ class ODFWriter(object):
                         e.addElement(ce)
                     except odf.element.IllegalChild:
                         print "write:", ce.type, "not allowed in ", e.type
-                        #if isinstance(e, text.ListItem) and isinstance(ce, text.A): # this is how one do it python
-                        if e.qname[1] in ["list-item"] and ce.qname[1] in ["a"]: # this is how we have to do it :((
-                            print "adding Paragraph"
-                            # wrap into paragraph
-                            try:
-                                p = text.P(stylename=style.textbody)
-                                p.addElement(ce)
-                                e.addElement(p)
-                            except odf.element.IllegalChild:
-                                print "failed"
-                            
                         #e.parentNode.addElement(ce)
                         
             return e
@@ -152,20 +145,28 @@ class ODFWriter(object):
 
     def owriteArticle(self, a):
         #if a.caption:
-        #    self.doc.meta.addElement(dc.Title(text=a.caption))
+        #    
         # FIXME
         self.references = [] # collect references
         title = a.caption
         r = text.Section(stylename=style.sect, name=title) #, display="none")
         self.doc.text.addElement(r)
         r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
+       
+        #for c in a.children:
+        #    self.write(c, r)
+        #if self.references:
+        #    # FIXME add header
+        #    r.addElement( self.writeReferences(None))
+
         return r # mhm 
 
     def owriteSection(self, obj):
-        title = obj.children[0].children[0].caption 
         level = 1 + obj.getLevel()
+        #title = u"%d %s" %(level,  obj.children[0].children[0].caption ) # FIXME (debug output)
+        title = obj.children[0].children[0].caption
         r = text.Section(stylename=style.sect, name=title) #, display="none")
-        hXstyle = (style.h1,style.h2,style.h3,style.h4,style.h5,style.h6)[level]
+        hXstyle = (style.h1,style.h2,style.h3,style.h4,style.h5,style.h6)[level-1]
         r.addElement(text.H(outlinelevel=level, stylename=hXstyle, text=title))
         obj.children = obj.children[1:]
         return r
@@ -174,7 +175,6 @@ class ODFWriter(object):
         return text.P(stylename=style.textbody)
         
     def owriteItem(self, item):
-        
         li =text.ListItem()
         p = text.P(stylename=style.textbody)
         li.addElement(p)
@@ -182,7 +182,11 @@ class ODFWriter(object):
         def _addText(text):
             p.addText(text)
 
+        def _addElement(e):
+            p.addElement(e)
+
         li.addText = _addText
+        li.addElement = _addElement
         
         return li
 
@@ -310,6 +314,7 @@ class ODFWriter(object):
 
 
     def owriteNamedURL(self, obj):
+        # FIXME handle references
         a = text.A(href=obj.caption)
         if not obj.children:
             name = "[%s]" % self.namedLinkCount
@@ -339,8 +344,24 @@ class ODFWriter(object):
             a.addText(obj.target)
         return a
 
-       
+    def owriteReference(self, t):
+        self.references.append(t)
+        s =  text.Span(stylename=style.superscript)
+        s.addText(unicode( len(self.references)))
+        return s
 
+    def owriteReferenceList(self, t):
+        if not self.references:
+            return
+        ol =  text.List(stylename=style.textbody)
+        for i,r in enumerate(self.references):
+            li = self.owriteItem(None)
+            ol.addElement(li)
+            for x in r:                    
+                self.write(x, li) 
+        self.references = []            
+        return ol
+       
 
 
     def writeImageLink(self,obj):  # INACTIVE COPY FROM RL WRITER TO LEARN HOW TO GET CORRECT SIZE
@@ -509,24 +530,6 @@ class ODFWriter(object):
         return args
 
 
-    def xwriteReference(self, t):
-        self.references.append(t)
-        t =  ET.Element("sup")
-        t.set("class", "mwx.reference")
-        t.text = unicode( len(self.references))
-        return t
-        
-    def xwriteReferenceList(self, t):
-        if not self.references:
-            return
-        ol = ET.Element("ol")
-        ol.set("class", "mwx.references")
-        for i,r in enumerate(self.references):
-            li = ET.SubElement(ol,"li")
-            for x in r:                    
-                self.write(x, li)                          
-        self.references = []            
-        return ol
 
 
     # Special Objects

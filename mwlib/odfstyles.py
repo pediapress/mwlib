@@ -3,6 +3,8 @@
 # Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+# http://books.evc-cit.info/odbook/ch03.html#char-para-styling-section
+
 from odf import style
 
 # we define some styles here -----------------------------------------------------------------------------
@@ -37,6 +39,13 @@ title.addElement(style.TextProperties(fontsize="18pt", fontweight="bold", fontna
 
 photo = style.Style(name="MyMaster-photo", family="presentation")
 
+superscript = style.Style(name="Sup", family="paragraph")
+superscript.addElement(style.TextProperties(attributes={'textposition':"super"})) # WTF why not text-position as in XML?
+fixed = style.Style(name="Fixed", family="paragraph")
+fixed.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
+
+
+
 
 
 # Text styles
@@ -55,6 +64,8 @@ def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
     doc.styles.addElement(standard)
     doc.styles.addElement(ArticleHeader)
+    doc.styles.addElement(fixed)
+    doc.styles.addElement(superscript)
     doc.styles.addElement(h1)
     doc.styles.addElement(h2)
     doc.styles.addElement(h3)
