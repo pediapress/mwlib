@@ -159,7 +159,7 @@ re2c:yyfill:enable = 0 ;
 		goto not_bol;
 	}
 /*!re2c
-  " "* "{|"              {++tablemode; RET(t_begin_table);}
+  " "* ":"* "{|"              {++tablemode; RET(t_begin_table);}
   " "* "|}"              {--tablemode; RET(t_end_table);}
 
   " "* "|" "-"+         

@@ -933,9 +933,17 @@ class Parser(object):
             
     def parseTable(self):
         token = self.token
+                
         self.next()
         t = Table()
-
+        retval = t
+        
+        if '{|' in token[1]:
+            indent = token[1].count(':')
+            if indent:
+                retval = Style(':'*indent)
+                retval.append(t)
+                
         params = ""
         if "{|" in token[1]:   # not a <table> tag
             # everything till the next newline/break is a parameter list
@@ -966,7 +974,7 @@ class Parser(object):
                 self.next()
                 #t.append(self.parseRow())
 
-        return t
+        return retval
 
     def parseMath(self):
         self.next()
