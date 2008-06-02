@@ -565,3 +565,11 @@ def test_text_caption_none_bug():
     print lst
     for x in lst:
         assert x.caption is not None
+
+def test_link_inside_gallery():
+    links = parse("<gallery>Bild:Guanosinmonophosphat protoniert.svg|[[Guanosinmonophosphat]] <br /> (GMP)</gallery>").find(parser.Link)
+    print links
+    assert len(links)==2, "expected 2 links"
+    
+    
+    
