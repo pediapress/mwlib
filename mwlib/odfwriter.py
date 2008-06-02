@@ -16,11 +16,15 @@ ToDo:
  * add missing styles
 
 """
-import sys
+import sys, exceptions
+try:
+    import odf
+except exceptions.ImportError, e:
+    print "you need to install odfpy: http://opendocumentfellowship.com/projects/odfpy"
+    raise exceptions.ImportError, e
 
-import odf
 from odf.opendocument import OpenDocumentText
-from odf import text, dc, meta, table, draw
+from odf import text, dc, meta, table, draw, math
 from mwlib import parser,  mathml
 from mwlib.log import Log
 import advtree 
@@ -77,10 +81,12 @@ class ODFWriter(object):
     def getDoc(self, debuginfo=""):
         return self.doc
 
-    def asstring(self):
+    def asstring(self, element = None):
         import StringIO
         s = StringIO.StringIO()
-        self.doc.text.toXml(0, s)
+        if not element:
+            element = self.doc.text 
+        element.toXml(0, s)
         s.seek(0)
         return s.read()
     
@@ -206,6 +212,52 @@ class ODFWriter(object):
         pass
 
 
+
+
+    def owriteMath(self, obj): 
+        """
+        get a MATHML from Latex
+        translate element tree to odf.Elements
+        
+        <draw:frame draw:style-name="fr1" draw:name="Objekt1" text:anchor-type="as-char" svg:width="2.972cm" svg:height="1.138cm" draw:z-index="0">
+          <draw:object xlink:href="./MathML" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+        </draw:frame>
+
+        """
+
+        r = mathml.latex2mathml(obj.caption)     # returns an element tree parse tree
+        #print mathml.ET.tostring(r)
+
+        
+        def _withETElement(e, parent):
+            # translate to odf.Elements
+            for c in e.getchildren():
+                n = math.Element(qname=(math.MATHNS, c.tag))
+                parent.addElement(n)
+                if c.text:
+                    n.elements.append(odf.element.Text(c.text)) # n.addText(c.text)
+                _withETElement(c, n)
+
+
+
+
+        mathframe = draw.Frame() 
+        #mathframe.addAttribute("z-index","0")
+        mathframe.addAttribute("width","2.972cm") # needed to add thos attributes in order to see something
+        mathframe.addAttribute("height","1.138cm")
+
+
+        mathobject = draw.Object() 
+        mathframe.addElement(mathobject)
+        mroot = math.Math()
+        mathobject.addElement(mroot)
+        _withETElement(r, mroot)
+        
+
+        return mathframe
+        
+
+
     def owriteImageLink(self, obj):
         # see http://books.evc-cit.info/odbook/ch04.html
         print "in write imageLink"
@@ -224,6 +276,9 @@ class ODFWriter(object):
         href = self.doc.addPicture(imgPath)
         frame.addElement(draw.Image(href=href))
         return frame
+
+
+
 
 
 
@@ -796,8 +851,8 @@ def main():
         odf = ODFWriter()
         odf.write(r)
         doc = odf.getDoc()
-        doc.toXml("%s.odf.xml"%fn)
-        doc.save("%s.odf" % fn, True)
+        doc.toXml("%s.xml"%fn)
+        doc.save(fn, True)
  
 if __name__=="__main__":
     main()

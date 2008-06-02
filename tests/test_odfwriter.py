@@ -19,15 +19,17 @@ class ValidationError(Exception):
  
 def validate(odfw):
     "THIS USES odflint AND WILL FAIL IF NOT INSTALLED"
-    fh, tfn = tempfile.mkstemp()
+    fh, tfn = tempfile.mkstemp() 
     odfw.getDoc().save(tfn, True)
+    tfn +=".odt"
+    print "writing to", tfn
     cmd = "odflint %s" %tfn
-    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE, close_fds=True)
+    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE,stdout=subprocess.PIPE, close_fds=True)
     p.wait()
-    r = p.stderr.read()
-    os.remove(tfn)
+    r = p.stderr.read() + p.stdout.read()
     if len(r):
         raise ValidationError, r
+    #os.remove(tfn)
 
 def getXML(wikitext):
     db = DummyDB()
@@ -291,3 +293,10 @@ s2 paragraph 2
 
 '''.decode("utf8")
     xml = getXML(raw)
+
+
+def test_math():
+    raw=r'''<math>\exp(-\gamma x)</math>'''.decode("utf8")
+    xml = getXML(raw)
+    print xml
+    
