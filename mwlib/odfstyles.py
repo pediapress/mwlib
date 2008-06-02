@@ -47,7 +47,7 @@ strong.addElement(style.TextProperties(fontsize="14pt", fontweight="bold"))
 bold = strong
 
 sect  = style.Style(name="Sect1", family="section")
-sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
+#sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
 
 
 def applyStylesToDoc(doc):

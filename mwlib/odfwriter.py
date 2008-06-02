@@ -53,6 +53,7 @@ class ODFWriter(object):
         self.doc =  OpenDocumentText()
         style.applyStylesToDoc(self.doc)
         self.text = self.doc.text
+        self.namedLinkCount = 0
 
         if creator:
             self.doc.meta.addElement(meta.InitialCreator(text=creator))
@@ -71,7 +72,7 @@ class ODFWriter(object):
         self.baseUrl = book.source['url']
         self.wikiTitle = book.source.get('name')
         for e in bookParseTree.children:
-            r = self.write(e)
+            r = self.write(e, self.doc.text)
         licenseArticle = self.book.source.get('defaultarticlelicense','')
         doc = self.getDoc()
         #doc.toXml("%s.odf.xml"%fn)
@@ -118,8 +119,8 @@ class ODFWriter(object):
             if m: # find handler
                 e = m(obj)
             else:
-                #log("SKIPPED")
-                #showNode(obj)
+                log("SKIPPED")
+                showNode(obj)
                 e = None
             
             if e is None:
@@ -139,9 +140,15 @@ class ODFWriter(object):
 
 
     def owriteArticle(self, a):
-        if a.caption:
-            self.doc.meta.addElement(dc.Title(text=a.caption))
-        return self.doc.text # mhm 
+        #if a.caption:
+        #    self.doc.meta.addElement(dc.Title(text=a.caption))
+        # FIXME
+        self.references = [] # collect references
+        title = a.caption
+        r = text.Section(stylename=style.sect, name=title) #, display="none")
+        self.doc.text.addElement(r)
+        r.addElement(text.H(outlinelevel=1, stylename=style.h1, text=title))
+        return r # mhm 
 
     def owriteSection(self, obj):
         title = obj.children[0].children[0].caption 
@@ -212,8 +219,6 @@ class ODFWriter(object):
         pass
 
 
-
-
     def owriteMath(self, obj): 
         """
         get a MATHML from Latex
@@ -272,7 +277,7 @@ class ODFWriter(object):
             return
         imgPath = imgPath.encode('utf-8')
         print "have img here", imgPath
-        frame = draw.Frame(stylename=style.photo, width="25cm", height="18.75cm", x="1.5cm", y="2.5cm")
+        frame = draw.Frame(stylename=style.photo, width="12cm", height="9cm", x="1.5cm", y="2.5cm")
         href = self.doc.addPicture(imgPath)
         frame.addElement(draw.Image(href=href))
         return frame
@@ -280,12 +285,54 @@ class ODFWriter(object):
 
 
 
+    def owriteLink(self, obj): 
+        a = text.A(href=obj.target)
+        if not obj.children:
+            a.addText(obj.target)
+        return a
+
+    def owriteURL(self, obj):
+        a = text.A(href=obj.caption)
+        if not obj.children:
+            a.addText(obj.caption)
+        return a
+
+
+    def owriteNamedURL(self, obj):
+        a = text.A(href=obj.caption)
+        if not obj.children:
+            name = "[%s]" % self.namedLinkCount
+            self.namedLinkCount += 1
+            a.addText(name)
+        return a
+
+
+    def owriteSpecialLink(self, obj): # whats that?
+        a = text.A(href=obj.target)
+        if not obj.children:
+            a.addText(obj.target)
+        return a
+
+    def owriteCategoryLink(self, obj):
+        if not obj.colon and not obj.children:
+            a = text.A(href=obj.target)
+            a.addText(obj.target)
+            return a
+
+
+    def owriteLangLink(self, obj): # FIXME no valid url (but uri)
+        if obj.target is None:
+            return
+        a = text.A(href=obj.target)
+        if not obj.children:
+            a.addText(obj.target)
+        return a
+
+       
 
 
 
-
-
-    def RLwriteImageLink(self,obj): ## EXAMLPE CODE (IMAGE HANDLING IN PDF GEN)
+    def writeImageLink(self,obj):  # INACTIVE COPY FROM RL WRITER TO LEARN HOW TO GET CORRECT SIZE
         if obj.colon == True:
             items = []
             for node in obj.children:
@@ -308,7 +355,7 @@ class ODFWriter(object):
         def sizeImage(w,h):
             max_img_width = 7 # max size in cm FIXME: make this configurable
             max_img_height = 11 # FIXME: make this configurable
-            scale = 1/30 # 100 dpi = 30 dpcm <-- this is the minimum pic resolution FIXME: make this configurable
+            scale = 1/30 #. 100 dpi = 30 dpcm <-- this is the minimum pic resolution FIXME: make this configurable
             _w = w * scale
             _h = h * scale
             if _w > max_img_width or _h > max_img_height:
@@ -320,6 +367,7 @@ class ODFWriter(object):
         (w,h) = (obj.width or 0, obj.height or 0)
 
         try:
+            from PIL import Image as PilImage
             img = PilImage.open(imgPath)
             if img.info.get('interlace',0) == 1:
                 log.warning("got interlaced PNG which can't be handeled by PIL")
@@ -341,8 +389,6 @@ class ODFWriter(object):
 
         (width, height) = sizeImage( w, h)
         align = obj.align
-        #if not align:
-        #    align = 'right' # FIXME: make this configurable
             
         txt = []
         for node in obj.children:
@@ -351,7 +397,7 @@ class ODFWriter(object):
                 txt.extend(res)
             else:
                 log.warning('imageLink contained block element: %s' % type(res))
-        if obj.isInline(): 
+        if obj.isInline() : # or self.nestingLevel: 
             #log.info('got inline image:',  imgPath,"w:",width,"h:",height)
             txt = '<img src="%(src)s" width="%(width)fin" height="%(height)fin" valign="%(align)s"/>' % {
                 'src':unicode(imgPath, 'utf-8'),
@@ -362,7 +408,13 @@ class ODFWriter(object):
             return txt
         # FIXME: make margins and padding configurable
         captionTxt = '<i>%s</i>' % ''.join(txt)  #filter
-        return [Figure(imgPath, captionTxt=captionTxt,  captionStyle=figure_caption_style, imgWidth=width, imgHeight=height, margin=(0.2*cm, 0.2*cm, 0.2*cm, 0.2*cm), padding=(0.2*cm, 0.2*cm, 0.2*cm, 0.2*cm), align=align)]
+        #return [Figure(imgPath, captionTxt=captionTxt,  captionStyle=text_style('figure', in_table=self.nestingLevel), imgWidth=width, imgHeight=height, margin=(0.2*cm, 0.2*cm, 0.2*cm, 0.2*cm), padding=(0.2*cm, 0.2*cm, 0.2*cm, 0.2*cm), align=align)]
+
+
+
+
+
+
 
 
 
