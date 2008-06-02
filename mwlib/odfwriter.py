@@ -139,7 +139,7 @@ class ODFWriter(object):
                             print "adding Paragraph"
                             # wrap into paragraph
                             try:
-                                p = text.Span()
+                                p = text.P(stylename=style.textbody)
                                 p.addElement(ce)
                                 e.addElement(p)
                             except odf.element.IllegalChild:
