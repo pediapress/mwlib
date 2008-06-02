@@ -249,3 +249,9 @@ def test_implicit_newline_magic():
     expandstr("foo {{#if: 1 | :xxx }} bar", "foo \n:xxx bar")
     expandstr("foo {{#ifexpr: 1 | #xxx }} bar", "foo \n#xxx bar")
     
+def test_expand_after_named():
+    db = DictDB(
+        show="{{{1}}}",
+        a="a=bc")
+    expandstr("{{show|{{a}}}}", "a=bc",  wikidb=db)
+    
