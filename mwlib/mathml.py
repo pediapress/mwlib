@@ -7,7 +7,11 @@ http://cvs.berlios.de/cgi-bin/viewcvs.cgi/blahtex/blahtex/includes/Math.php?rev=
 """
 import sys
 import popen2
-import xml.etree.ElementTree as ET
+try:
+    import xml.etree.ElementTree as ET
+except:
+    from elementtree import ElementTree as ET
+
 from xml.parsers.expat import ExpatError
 
 def log(err):
