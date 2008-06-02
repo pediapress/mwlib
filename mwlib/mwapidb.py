@@ -192,7 +192,7 @@ class ImageDB(object):
         
         for api_helper in self.api_helpers:
             result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
-            if result is not None:
+            if result and 'templates' in result:
                 break
         else:
             return None
@@ -345,16 +345,20 @@ class WikiDB(object):
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
-            wikitext = self.getRawArticle(self.license)
-            assert wikitext is not None, 'Could not get license article %r' % self.license
-            return {
-                'license': {
-                    'name': g['rights'],
-                    'wikitext': wikitext,
-                },
+            result = {
                 'url': g['base'],
                 'name': '%s (%s)' % (g['sitename'], g['lang']),
             }
+            if self.license is None:
+                log.warn('No license given')
+            else: 
+                wikitext = self.getRawArticle(self.license)
+                assert wikitext is not None, 'Could not get license article %r' % self.license
+                result['license' =
+                    'name': g['rights'],
+                    'wikitext': wikitext,
+                }
+            return result
         except KeyError:
             return None
     
