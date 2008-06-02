@@ -573,3 +573,9 @@ def test_link_inside_gallery():
     
     
     
+def test_indented_table():
+    r=parse(':::{| class="prettytable" \n|-\n| bla || blub\n|}')
+    style = r.find(parser.Style)[0]
+    assert isinstance(style.children[0], parser.Table), "style should have a Table as child"
+    
+    
