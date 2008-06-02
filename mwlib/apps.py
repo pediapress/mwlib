@@ -164,16 +164,18 @@ def buildzip():
             w = wiki.makewiki(conf)
             cp = ConfigParser()
             cp.read(conf)
-            license = {
-                'name': cp.get('wiki', 'defaultarticlelicense')
-            }
-            if license['name'] is not None:
-                license['wikitext'] = w['wiki'].getRawArticle(license['name'])
             mb.source = {
                 'name': cp.get('wiki', 'name'),
                 'url': cp.get('wiki', 'url'),
-                'defaultarticlelicense': license,
             }
+            license_name = cp.get('wiki', 'defaultarticlelicense')
+            if license_name is not None:
+                wikitext = w['wiki'].getRawArticle(license_name)
+                assert wikitext is not None, 'Could not get license article %r' % license_name
+                mb.source['defaultarticlelicense'] = {
+                    'name': license_name,
+                    'wikitext': wikitext,
+                }
         else:
             w = {
                 'wiki': wiki.wiki_mwapi(baseurl, options.license, options.template_blacklist),

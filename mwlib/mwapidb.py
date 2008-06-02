@@ -8,7 +8,6 @@ import os
 import re
 import shutil
 import tempfile
-import time
 import urllib
 import urllib2
 import urlparse
@@ -346,10 +345,12 @@ class WikiDB(object):
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
+            wikitext = self.getRawArticle(self.license)
+            assert wikitext is not None, 'Could not get license article %r' % self.license
             return {
                 'license': {
                     'name': g['rights'],
-                    'wikitext': self.getRawArticle(self.license),
+                    'wikitext': wikitext,
                 },
                 'url': g['base'],
                 'name': '%s (%s)' % (g['sitename'], g['lang']),
