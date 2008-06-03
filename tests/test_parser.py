@@ -579,3 +579,11 @@ def test_indented_table():
     assert isinstance(style.children[0], parser.Table), "style should have a Table as child"
     
     
+def test_double_exclamation_mark_in_table():
+    r=parse('{|\n|-\n| bang!!\n| cell2\n|}\n')
+    cells = r.find(parser.Cell)
+    print "CELLS:", cells
+    assert len(cells)==2, 'expected two cells'
+    txt=cells[0].asText()
+    print "TXT:", txt
+    assert "!!" in txt, 'expected "!!" in cell'
