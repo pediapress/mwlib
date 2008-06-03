@@ -574,5 +574,13 @@ def getAdvTree(fn):
     buildAdvancedTree(r)
     return r
 
-
+def simpleparse(raw):    # !!! USE FOR DEBUGGING ONLY !!! 
+    import sys
+    from mwlib import dummydb, parser
+    from mwlib.uparser import parseString
+    input = raw.decode('utf8')
+    r = parseString(title="title", raw=input, wikidb=dummydb.DummyDB())
+    buildAdvancedTree(r)
+    parser.show(sys.stdout, r, 0)
+    return r
 

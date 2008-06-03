@@ -40,11 +40,27 @@ title.addElement(style.TextProperties(fontsize="18pt", fontweight="bold", fontna
 photo = style.Style(name="MyMaster-photo", family="presentation")
 
 superscript = style.Style(name="Sup", family="paragraph")
-superscript.addElement(style.TextProperties(attributes={'textposition':"super"})) # WTF why not text-position as in XML?
+superscript.addElement(style.TextProperties(attributes={'textposition':"super"}))
 fixed = style.Style(name="Fixed", family="paragraph")
 fixed.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
 
+# ----- math ----
+"""
+  <style:style style:name="Formula" style:family="graphic">
+   <style:graphic-properties text:anchor-type="as-char" svg:y="0in" fo:margin-left="0.0791in" fo:margin-right="0.0791in" style:vertical-pos="middle" style:vertical-rel="text"/>
+  </style:style>
+and
 
+ <office:automatic-styles>
+  <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Formula">
+   <style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" draw:ole-draw-aspect="1"/>
+  </style:style>
+ </office:automatic-styles>
+
+"""
+
+formula = style.Style(name="Formula", family="graphic")
+formula.addElement(style.GraphicProperties(attributes={"anchortype":"as-char" ,"y":"0in","marginleft":"0.0791in","marginright":"0.0791in","verticalpos":"middle","verticalrel":"text", "oledrawaspect":"1"}))
 
 
 
@@ -66,6 +82,7 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(ArticleHeader)
     doc.styles.addElement(fixed)
     doc.styles.addElement(superscript)
+    doc.styles.addElement(formula)
     doc.styles.addElement(h1)
     doc.styles.addElement(h2)
     doc.styles.addElement(h3)
