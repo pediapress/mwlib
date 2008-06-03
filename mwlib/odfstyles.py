@@ -39,8 +39,6 @@ title.addElement(style.TextProperties(fontsize="18pt", fontweight="bold", fontna
 
 photo = style.Style(name="MyMaster-photo", family="presentation")
 
-superscript = style.Style(name="Sup", family="paragraph")
-superscript.addElement(style.TextProperties(attributes={'textposition':"super"}))
 fixed = style.Style(name="Fixed", family="paragraph")
 fixed.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
 
@@ -61,27 +59,70 @@ and
 
 formula = style.Style(name="Formula", family="graphic")
 formula.addElement(style.GraphicProperties(attributes={"anchortype":"as-char" ,"y":"0in","marginleft":"0.0791in","marginright":"0.0791in","verticalpos":"middle","verticalrel":"text", "oledrawaspect":"1"}))
+sect  = style.Style(name="Sect1", family="section")
+#sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
 
 
 
-# Text styles
+# inline Text styles ---------------------------------------------
+# small big sub sup var deleted inserted  strike underline overline  center 
 emphasis = style.Style(name="Emphasis",family="text")
 emphasis.addElement(style.TextProperties(fontstyle="italic")) # shpould be also bold, but is paresed differntly
 italic = emphasis
 strong = style.Style(name="Bold",family="text")
 strong.addElement(style.TextProperties(fontsize="14pt", fontweight="bold"))
 bold = strong
+sup = style.Style(name="Sup", family="paragraph")
+sup.addElement(style.TextProperties(attributes={'textposition':"super"}))
+sub = style.Style(name="Sub", family="paragraph")
+sub.addElement(style.TextProperties(attributes={'textposition':"-30% 50%"}))
+underline = style.Style(name="Underline", family="paragraph")
+underline.addElement(style.TextProperties(attributes={'textunderlinestyle':"solid"}))
 
-sect  = style.Style(name="Sect1", family="section")
-#sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
+overline = underline # FIXME
+small = standard # FIXME
+big = standard # FIXME
+var = standard # FIXME
+strike = standard # FIXME
+deleted = standard # FIXME
+inserted = standard # FIXME
+
+# paragraph text styles
+
+# indented  cite code source  blockquote  preformatted teletyped
+
+center = style.Style(name="Center", family="paragraph")
+center.addElement(style.ParagraphProperties(attributes={'textalign':"center"}))
+
+indented = style.Style(name="Indented", family="paragraph")
+indented.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in"}))
+
+blockquote = style.Style(name="Blockquote", family="paragraph")
+blockquote.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in",'marginright':"0.12in"}))
+
+cite = style.Style(name="Cite", family="paragraph")
+cite.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in",'marginright':"0.12in"}))
+cite.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
+
+code = source = preformatted = teletyped = cite # FIXME
+
+dumbcolumn = style.Style(name="Dumbcolumn", family="table-column") # REALLY FIXME
+dumbcolumn.addElement(style.TableColumnProperties(attributes={'columnwidth':"1.0in"}))
 
 
 def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
     doc.styles.addElement(standard)
+    doc.styles.addElement(dumbcolumn)
+    doc.styles.addElement(indented)
+    doc.styles.addElement(blockquote)
     doc.styles.addElement(ArticleHeader)
     doc.styles.addElement(fixed)
-    doc.styles.addElement(superscript)
+    doc.styles.addElement(cite)
+    doc.styles.addElement(underline)
+    doc.styles.addElement(sup)
+    doc.styles.addElement(sub)
+    doc.styles.addElement(center)
     doc.styles.addElement(formula)
     doc.styles.addElement(h1)
     doc.styles.addElement(h2)
