@@ -41,7 +41,9 @@ def getXML(wikitext):
     odfw = ODFWriter()
     odfw.write(r)
     validate(odfw)
-    return odfw.asstring()
+    xml = odfw.asstring()
+    print xml
+    return
 
 
 
@@ -298,5 +300,4 @@ s2 paragraph 2
 def test_math():
     raw=r'''<math>\exp(-\gamma x)</math>'''.decode("utf8")
     xml = getXML(raw)
-    print xml
     
