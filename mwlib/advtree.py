@@ -186,6 +186,26 @@ class AdvancedNode:
         if self.children:
             return self.children[0]
 
+    def getFirstLeaf(self, callerIsSelf=True):
+        if self.children:
+            return self.children[0].getFirstLeaf(callerIsSelf=False)
+        else:
+            if callerIsSelf:
+                return None
+            else:
+                return self
+
+    def getLastLeaf(self, callerIsSelf=True):
+        if self.children:
+            return self.children[-1].getFirstLeaf(callerIsSelf=False)
+        else:
+            if callerIsSelf:
+                return None
+            else:
+                return self
+
+
+
     def getAllDisplayText(self, amap = None):
         "return all text that is intended for display"
         text = []
