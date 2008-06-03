@@ -75,8 +75,13 @@ public:
 		return tokens.size()-1;
 	}
 
-	bool bol() const {
-		return (start==source) || (start[-1]=='\n');
+	bool bol() {
+		if ((start==source) || (start[-1]=='\n')) {
+			memset(&lineflags, 0, sizeof(lineflags));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	bool eol() const {
@@ -101,6 +106,9 @@ public:
 
 	int line_startswith_section;
 	int tablemode;
+	struct {
+		int rowchar;
+	} lineflags;
 };
 
 
@@ -175,8 +183,10 @@ re2c:yyfill:enable = 0 ;
 
   " "* ("|" | "!")      
 	{
-		if (tablemode)
+		if (tablemode) {
+		        lineflags.rowchar=cursor[-1];
 			RET(t_column);
+		}
 
 		if (*start==' ') {
 			cursor = start+1;
@@ -241,8 +251,11 @@ not_bol:
   "\n"		    {newline(); RET(t_newline);}
   "||" | "|!" | "!!"              
 	{
-		if (tablemode) 
-			RET(t_column);
+		if (tablemode) {
+		        if (cursor[-2]==lineflags.rowchar) {
+			       RET(t_column);
+			}
+		}
 		cursor = start+1;
 		RET(t_special);
 	}
