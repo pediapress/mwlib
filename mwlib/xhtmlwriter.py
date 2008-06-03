@@ -29,9 +29,8 @@ ToDo:
 
 import sys
 import xml.etree.ElementTree as ET
-from mwlib import parser,  mathml
+from mwlib import parser,  mathml, advtree
 from mwlib.log import Log
-import advtree 
 
 log = Log("xhtmlwriter")
 

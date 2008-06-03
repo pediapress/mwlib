@@ -30,8 +30,8 @@ from odf.opendocument import OpenDocumentText
 from odf import text, dc, meta, table, draw, math
 from mwlib import parser,  mathml
 from mwlib.log import Log
-import advtree 
-import odfstyles as style
+from mwlib import advtree 
+from mwlib import odfstyles as style
 
 log = Log("odfwriter")
 
@@ -162,10 +162,10 @@ class ODFWriter(object):
         return r # mhm 
 
     def owriteSection(self, obj):
-        level = 1 + obj.getLevel()
+        level = 2 + obj.getevel() # H2 is max within a page
         #title = u"%d %s" %(level,  obj.children[0].children[0].caption ) # FIXME (debug output)
         title = obj.children[0].children[0].caption
-        r = text.Section(stylename=style.sect, name=title) #, display="none")
+        r = text.Section(stylename=style.sect, name=title) 
         hXstyle = (style.h1,style.h2,style.h3,style.h4,style.h5,style.h6)[level-1]
         r.addElement(text.H(outlinelevel=level, stylename=hXstyle, text=title))
         obj.children = obj.children[1:]
@@ -259,12 +259,9 @@ class ODFWriter(object):
                 _withETElement(c, n)
 
 
-
-
-        mathframe = draw.Frame() 
-        #mathframe.addAttribute("z-index","0")
-        mathframe.addAttribute("width","2.972cm") # needed to add thos attributes in order to see something
-        mathframe.addAttribute("height","1.138cm")
+        mathframe = draw.Frame(stylename=style.formula, zindex=0, anchortype="as-char") 
+        #mathframe.addAttribute("width","2.972cm") # needed to add thos attributes in order to see something
+        #mathframe.addAttribute("height","1.138cm")
 
 
         mathobject = draw.Object() 
@@ -336,13 +333,8 @@ class ODFWriter(object):
             return a
 
 
-    def owriteLangLink(self, obj): # FIXME no valid url (but uri)
-        if obj.target is None:
-            return
-        a = text.A(href=obj.target)
-        if not obj.children:
-            a.addText(obj.target)
-        return a
+    def owriteLangLink(self, obj):
+        pass # we dont want them in the PDF
 
     def owriteReference(self, t):
         self.references.append(t)
