@@ -6,11 +6,8 @@
 import sys
 import os
 
-try:
-    from setuptools import setup
-except ImportError:
-    import ez_setup
-    ez_setup.use_setuptools(version="0.6c1")
+import ez_setup
+ez_setup.use_setuptools()
 
 from setuptools import setup, Extension
 import distutils.util
