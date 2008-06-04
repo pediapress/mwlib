@@ -362,9 +362,6 @@ class ArgumentList(object):
     def append(self, a):
         self.args.append(a)
 
-    def get(self, n, default):
-        return self.__getitem__(n) or default
-
     def __iter__(self):
         for x in self.args:
             yield x
@@ -377,11 +374,14 @@ class ArgumentList(object):
         return len(self.args)
 
     def __getitem__(self, n):
+        return self.get(n, None) or u''
+        
+    def get(self, n, default):
         if isinstance(n, (int, long)):
             try:
                 a=self.args[n]
             except IndexError:
-                return u""
+                return default
             return a.flatten()
 
         assert isinstance(n, basestring), "expected int or string"
@@ -405,10 +405,11 @@ class ArgumentList(object):
 
                     if n==name:
                         return val
-            self.namedargs[n] = u''
+            self.namedargs[n] = None
 
         val = self.namedargs[n]
-
+        if val is None:
+            return default
         return val
     
 def add_implicit_newline(raw):
