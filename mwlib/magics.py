@@ -149,6 +149,11 @@ class PageMagic(object):
         """
         return urllib.quote(self.pagename.encode('utf8'))
 
+    def FULLPAGENAME(self, args):
+        return self.pagename # FIXME
+
+    def FULLPAGENAMEE(self, args):
+        return self.pagename  # FIXME
     
     def SUBPAGENAME(self, args):
         """[MW1.6+] Returns the name of the current page, excluding parent
