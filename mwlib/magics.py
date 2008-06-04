@@ -270,6 +270,27 @@ class StringMagic(object):
     def FORMATNUM(self, a):
         return a
 
+    def PADLEFT(self, args):
+        s=args[0]
+        try:
+            width=int(args[1])
+        except ValueError:
+            return s
+        
+        fillchar = args[2] or u'0'
+        return s.rjust(width, fillchar[0])
+    
+    def PADRIGHT(self, args):
+        s=args[0]
+        try:
+            width=int(args[1])
+        except ValueError:
+            return s
+        
+        fillchar = args[2] or u'0'
+        return s.ljust(width, fillchar[0])
+        
+    
 class ParserFunctions(object):
     wikidb = None
     def _error(self,s):
