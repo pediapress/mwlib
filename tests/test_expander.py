@@ -255,3 +255,13 @@ def test_expand_after_named():
         a="a=bc")
     expandstr("{{show|{{a}}}}", "a=bc",  wikidb=db)
     
+def test_padleft():
+    yield expandstr, "{{padleft:7|3|0}}", "007"
+    yield expandstr, "{{padleft:0|3|0}}", "000"
+    yield expandstr, "{{padleft:bcd|6|a}}", "aaabcd"
+    # {{padleft:cafe|8|-}} = ----cafe 
+
+def test_padright():   
+    yield expandstr, "{{padright:bcd|6|a}}", "bcdaaa"
+    yield expandstr, "{{padright:0|6|a}}", "0aaaaa"
+    
