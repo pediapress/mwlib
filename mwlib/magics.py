@@ -227,7 +227,7 @@ class PageMagic(object):
     
     @noarg        
     def SERVERNAME(self):
-        return self.SERVER({})[len("http://"):]
+        return self.server[len('http://'):]
 
 
 class NumberMagic(object):
