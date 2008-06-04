@@ -572,7 +572,7 @@ def expandstr(s, expected=None, wikidb=None):
     te = Expander(s, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPAND: %r -> %r" % (s, res)
-    if expected:
+    if expected is not None:
         assert res==expected, "expected %r, got %r" % (expected, res)
     return res
 
