@@ -11,6 +11,7 @@ http://meta.wikimedia.org/wiki/ParserFunctions
 
 import datetime
 import urllib
+import urlparse
 from mwlib.log import Log
 from mwlib import expr
 
@@ -136,6 +137,8 @@ class PageMagic(object):
         self.server = server
         self.revisionid = revisionid
         
+        self.niceurl = urlparse.urljoin(self.server, 'wiki')
+        
     def PAGENAME(self, args):
         """Returns the name of the current page, including all levels (Title/Subtitle/Sub-subtitle)"""
         return self.pagename
@@ -213,10 +216,12 @@ class PageMagic(object):
         return self.server
 
     def FULLURL(self, args):
-        return u''
-        u = "".join(args)
-        self.SERVERNAME({})
-
+        a=args[0].capitalize().replace(' ', '_')
+        print "A:", a
+        a=urllib.quote_plus(a)
+        print "Q:", a, self.niceurl
+        return '%s/%s' % (self.niceurl, a)
+    
     @noarg        
     def SERVERNAME(self):
         return self.SERVER({})[len("http://"):]
