@@ -279,4 +279,25 @@ def test_server():
     
 def test_servername():
     expandstr('{{servername}}', 'en.wikipedia.org')
+
     
+def test_1x_newline_and_spaces():
+    # see http://en.wikipedia.org/wiki/Help:Newlines_and_spaces#Spaces_and.2For_newlines_as_value_of_an_unnamed_parameter
+    wikidb=DictDB()
+    wikidb.d['1x'] = '{{{1}}}'
+    def e(a,b):
+        return expandstr(a,b,wikidb=wikidb)
+
+    yield e, 'a{{#if:1|\n}}b', 'ab'
+    yield e, 'a{{#if:1|b\n}}c', 'abc'
+    yield e, 'a{{#if:1|\nb}}c', 'abc'
+    
+            
+    yield e, 'a{{1x|\n}}b', 'a\nb'
+    yield e, 'a{{1x|b\n}}c', 'ab\nc'
+    yield e, 'a{{1x|\nb}}c', 'a\nbc'
+
+    yield e, 'a{{1x|1=\n}}b', 'ab'
+
+    yield e, 'a{{1x|1=b\n}}c', 'abc'
+    yield e, 'a{{1x|1=\nb}}c', 'abc'
