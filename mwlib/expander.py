@@ -501,12 +501,12 @@ class Expander(object):
                 p = self.getParsedTemplate(name)
                 if p:
                     if DEBUG:
-                        msg = "EXPANDING %r %s  ===> " % (name, var)
+                        msg = "EXPANDING %r %r  ===> " % (name, var)
                         oldidx = len(res)
                     self.flatten(p, res, var)
 
                     if DEBUG:
-                        msg += "".join(res[oldidx:])
+                        msg += repr("".join(res[oldidx:]))
                         print msg
                     
                     
