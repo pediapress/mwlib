@@ -267,4 +267,9 @@ def test_padright():
     
 def test_urlencode():
     expandstr('{{urlencode:x y @}}', 'x+y+%40')
+
+def test_anchorencode():
+    expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')
     
+def test_fullurl():
+    expandstr('{{fullurl:x y @}}', 'http://en.wikipedia.org/wiki/X_y_%40')
