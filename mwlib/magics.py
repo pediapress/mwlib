@@ -222,9 +222,7 @@ class PageMagic(object):
 
     def FULLURL(self, args):
         a=args[0].capitalize().replace(' ', '_')
-        print "A:", a
         a=urllib.quote_plus(a)
-        print "Q:", a, self.niceurl
         return '%s/%s' % (self.niceurl, a)
     
     @noarg        
