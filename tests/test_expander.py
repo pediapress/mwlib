@@ -301,3 +301,10 @@ def test_1x_newline_and_spaces():
 
     yield e, 'a{{1x|1=b\n}}c', 'abc'
     yield e, 'a{{1x|1=\nb}}c', 'abc'
+
+
+
+def test_variable_alternative():
+    wikidb=DictDB(t1='{{{var|undefined}}}')
+    expandstr('{{t1|var=}}', '', wikidb=wikidb)
+    
