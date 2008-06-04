@@ -265,3 +265,6 @@ def test_padright():
     yield expandstr, "{{padright:bcd|6|a}}", "bcdaaa"
     yield expandstr, "{{padright:0|6|a}}", "0aaaaa"
     
+def test_urlencode():
+    expandstr('{{urlencode:x y @}}', 'x+y+%40')
+    
