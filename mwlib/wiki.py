@@ -81,10 +81,33 @@ wpwikis = dict(
     de = 'http://de.wikipedia.org/w/',
     en = 'http://en.wikipedia.org/w/',
     )
-    
-    
+
+
+class Environment(object):
+    def __init__(self):
+        self.images = None
+        self.wiki = None
+        self.configparser = ConfigParser()
+        
+    # __getitem__, __setitem__ for compatability (make it look like a dict)
+    def __getitem__(self, name):
+        if name=='images':
+            return self.images
+        if name=='wiki':
+            return self.wiki
+        raise KeyError("Environment.__getitem__ only works for 'wiki' or 'images', not %r" % (name,))
+    def __setitem__(self, name, val):
+        if name=='images':
+            self.images = val
+        elif name=='wiki':
+            self.wiki = val
+        else:
+            raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
+        
+
 def _makewiki(conf):
-    res = {}
+    res = Environment()
+    
 
     url = None
     if conf.startswith(':'):
@@ -110,8 +133,10 @@ def _makewiki(conf):
         res['images'] = zipwiki.ImageDB(conf)
         return res
 
-    cp=ConfigParser()
-
+    cp=res.configparser
+    res.configparser = cp
+    
+    
     if not cp.read(conf):
         raise RuntimeError("could not read config file %r" % (conf,))
 
@@ -132,7 +157,7 @@ def _makewiki(conf):
         
         res[s] = m(**args)
 
-    assert "wiki" in res
+    assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res
 
 def makewiki(conf):
