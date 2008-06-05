@@ -316,16 +316,16 @@ def test_variable_alternative():
     
 def test_pagename_non_ascii():
     def e(a,b):
-        return expandstr(a,b,pagename=u'L\xe9onie')
-    yield e, '{{PAGENAME}}', u'L\xe9onie'
-    yield e, '{{PAGENAMEE}}', 'L%C3%A9onie'
+        return expandstr(a,b,pagename=u'L\xe9onie s')
+    yield e, '{{PAGENAME}}', u'L\xe9onie s'
+    yield e, '{{PAGENAMEE}}', 'L%C3%A9onie_s'
 
-    yield e, '{{BASEPAGENAME}}', u'L\xe9onie'
-    yield e, '{{BASEPAGENAMEE}}', 'L%C3%A9onie'
+    yield e, '{{BASEPAGENAME}}', u'L\xe9onie s'
+    yield e, '{{BASEPAGENAMEE}}', 'L%C3%A9onie_s'
 
     
-    yield e, '{{FULLPAGENAME}}', u'L\xe9onie'
-    yield e, '{{FULLPAGENAMEE}}', 'L%C3%A9onie'
+    yield e, '{{FULLPAGENAME}}', u'L\xe9onie s'
+    yield e, '{{FULLPAGENAMEE}}', 'L%C3%A9onie_s'
     
-    yield e, '{{SUBPAGENAME}}', u'L\xe9onie'
-    yield e, '{{SUBPAGENAMEE}}', 'L%C3%A9onie'
+    yield e, '{{SUBPAGENAME}}', u'L\xe9onie s'
+    yield e, '{{SUBPAGENAMEE}}', 'L%C3%A9onie_s'

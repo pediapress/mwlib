@@ -139,6 +139,7 @@ class TimeMagic(object):
 class PageMagic(object):
     def __init__(self, pagename='', server="http://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
+        self.qpagename = pagename.replace(' ', '_')
         self.server = server
         self.revisionid = revisionid
         
@@ -152,13 +153,13 @@ class PageMagic(object):
         """same as PAGENAME but More URL-friendly percent encoded
         special characters (To use an articlename in an external link).
         """
-        return urlquote(self.pagename)
+        return urlquote(self.qpagename)
 
     def FULLPAGENAME(self, args):
         return self.pagename # FIXME
 
     def FULLPAGENAMEE(self, args):
-        return urlquote(self.pagename)
+        return urlquote(self.qpagename)
     
     def SUBPAGENAME(self, args):
         """[MW1.6+] Returns the name of the current page, excluding parent
@@ -167,7 +168,7 @@ class PageMagic(object):
         return self.pagename.split('/')[-1]
 
     def SUBPAGENAMEE(self, args):
-        return urlquote(self.SUBPAGENAME([]))
+        return urlquote(self.qpagename.split('/')[-1])
 
     def BASEPAGENAME(self, args):
         """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
@@ -177,7 +178,7 @@ class PageMagic(object):
     def BASEPAGENAMEE(self, args):
         """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
         """
-        return urlquote(self.BASEPAGENAME(args))
+        return urlquote(self.qpagename.rsplit('/', 1)[0])
 
     def NAMESPACE(self, args):
         """Returns the name of the namespace the current page resides in."""
