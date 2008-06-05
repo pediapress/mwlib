@@ -267,6 +267,9 @@ def test_padright():
     
 def test_urlencode():
     expandstr('{{urlencode:x y @}}', 'x+y+%40')
+    
+def test_urlencode_non_ascii():
+    expandstr(u'{{urlencode:L\xe9onie}}', 'L%C3%A9onie')
 
 def test_anchorencode():
     expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')
