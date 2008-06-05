@@ -563,14 +563,14 @@ class DictDB(object):
     def getTemplate(self, title, dummy):
         return self.d.get(title.lower(), u"")
     
-def expandstr(s, expected=None, wikidb=None):
+def expandstr(s, expected=None, wikidb=None, pagename='thispage'):
     """debug function. expand templates in string s"""
     if wikidb:
         db = wikidb
     else:
         db = DictDB(dict(a=s))
 
-    te = Expander(s, pagename="thispage", wikidb=db)
+    te = Expander(s, pagename=pagename, wikidb=db)
     res = te.expandTemplates()
     print "EXPAND: %r -> %r" % (s, res)
     if expected is not None:
