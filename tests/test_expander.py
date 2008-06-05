@@ -274,6 +274,9 @@ def test_anchorencode():
 def test_fullurl():
     expandstr('{{fullurl:x y @}}', 'http://en.wikipedia.org/wiki/X_y_%40')
 
+def test_fullurl_nonascii():
+    expandstr(u'{{fullurl:L\xe9onie}}', 'http://en.wikipedia.org/wiki/L%C3%A9onie')
+              
 def test_server():
     expandstr('{{server}}', 'http://en.wikipedia.org')
     
