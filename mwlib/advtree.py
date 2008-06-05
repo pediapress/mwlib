@@ -426,7 +426,7 @@ Image depends on result of Image.isInline() see above
 Open Issues: Math, Magic, (unknown) TagNode 
 
 """
-_blockNodesMap = (Book, Chapter, Article, Section, Paragraph, Div,
+_blockNodesMap = (Book, Chapter, Article, Section, Paragraph, Div, Center,
                   PreFormatted, Cell, Row, Table, Item, BreakingReturn,
                   ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
                   DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Source)
