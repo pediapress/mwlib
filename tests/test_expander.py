@@ -311,3 +311,18 @@ def test_variable_alternative():
     wikidb=DictDB(t1='{{{var|undefined}}}')
     expandstr('{{t1|var=}}', '', wikidb=wikidb)
     
+def test_pagename_non_ascii():
+    def e(a,b):
+        return expandstr(a,b,pagename=u'L\xe9onie')
+    yield e, '{{PAGENAME}}', u'L\xe9onie'
+    yield e, '{{PAGENAMEE}}', 'L%C3%A9onie'
+
+    yield e, '{{BASEPAGENAME}}', u'L\xe9onie'
+    yield e, '{{BASEPAGENAMEE}}', 'L%C3%A9onie'
+
+    
+    yield e, '{{FULLPAGENAME}}', u'L\xe9onie'
+    yield e, '{{FULLPAGENAMEE}}', 'L%C3%A9onie'
+    
+    yield e, '{{SUBPAGENAME}}', u'L\xe9onie'
+    yield e, '{{SUBPAGENAMEE}}', 'L%C3%A9onie'

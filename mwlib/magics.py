@@ -53,6 +53,11 @@ def maybe_numeric_compare(a,b):
 
     return a==b
 
+def urlquote(u):
+    if isinstance(u, unicode):
+        u = u.encode('utf-8')
+    return urllib.quote(u)
+
 
 class OtherMagic(object):
     def DEFAULTSORT(self, args):
@@ -147,13 +152,13 @@ class PageMagic(object):
         """same as PAGENAME but More URL-friendly percent encoded
         special characters (To use an articlename in an external link).
         """
-        return urllib.quote(self.pagename.encode('utf8'))
+        return urlquote(self.pagename)
 
     def FULLPAGENAME(self, args):
         return self.pagename # FIXME
 
     def FULLPAGENAMEE(self, args):
-        return self.pagename  # FIXME
+        return urlquote(self.pagename)
     
     def SUBPAGENAME(self, args):
         """[MW1.6+] Returns the name of the current page, excluding parent
@@ -162,7 +167,7 @@ class PageMagic(object):
         return self.pagename.split('/')[-1]
 
     def SUBPAGENAMEE(self, args):
-        return urllib.quote(self.SUBPAGENAMEE())
+        return urlquote(self.SUBPAGENAME([]))
 
     def BASEPAGENAME(self, args):
         """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
@@ -172,7 +177,7 @@ class PageMagic(object):
     def BASEPAGENAMEE(self, args):
         """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
         """
-        return urllib.quote(self.BASEPAGENAME(args))
+        return urlquote(self.BASEPAGENAME(args))
 
     def NAMESPACE(self, args):
         """Returns the name of the namespace the current page resides in."""
