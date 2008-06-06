@@ -42,8 +42,8 @@ def getXML(wikitext):
     odfw.write(r)
     validate(odfw)
     xml = odfw.asstring()
-    print xml
-    return
+    print xml # usefull to inspect generateded xml
+    return xml
 
 
 
@@ -76,11 +76,6 @@ Image:Wikipedesketch1.png|The mascot of Wikipedia
 </gallery>""".decode("utf8")
     xml = getXML(raw)
 
-def test_math():
-    raw=r'''
-<math> Q = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \frac{\sqrt{3}}{2} & \frac12 \\ 0 & -\frac12 & \frac{\sqrt{3}}{2} \end{bmatrix} </math>
-'''.decode("utf8")
-    xml = getXML(raw)
     
 
 def test_validatetags():
@@ -298,6 +293,13 @@ s2 paragraph 2
 
 
 def test_math():
-    raw=r'''<math>\exp(-\gamma x)</math>'''.decode("utf8")
+    raw=r'''
+<math> Q = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \frac{\sqrt{3}}{2} & \frac12 \\ 0 & -\frac12 & \frac{\sqrt{3}}{2} \end{bmatrix} </math>
+'''.decode("utf8")
     xml = getXML(raw)
-    
+
+
+def test_math2():
+    raw=r'''<math>\exp(-\gamma x)</math>'''
+    xml = getXML(raw)
+

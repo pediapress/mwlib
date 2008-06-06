@@ -97,8 +97,11 @@ class ODFWriter(object):
         if not element:
             element = self.doc.text 
         element.toXml(0, s)
-        s.seek(0)
-        return s.read()
+        
+        print repr(s.buflist), repr(s.buf)
+        return s.getvalue()
+        #return unicode(s.buf) + ''.join(s.buflist)
+
     
     def writeText(self, obj, parent):
         try:
@@ -338,13 +341,6 @@ class ODFWriter(object):
         return text.P(stylename=style.indented)
 
  
-
-
-
-
-
-
-
     def owriteMath(self, obj): 
         """
         get a MATHML from Latex
@@ -355,10 +351,13 @@ class ODFWriter(object):
         def _withETElement(e, parent):
             # translate to odf.Elements
             for c in e.getchildren():
-                n = math.Element(qname=(math.MATHNS, c.tag))
+                n = math.Element(qname=(math.MATHNS, str(c.tag)))
                 parent.addElement(n)
                 if c.text:
-                    n.elements.append(odf.element.Text(c.text)) # n.addText(c.text)
+                    text = c.text
+                    #print repr(text)
+                    #if not isinstance(text, unicode):  text = text.decode("utf8")
+                    n.elements.append(odf.element.Text(text)) # n.addText(c.text)
                 _withETElement(c, n)
 
 
