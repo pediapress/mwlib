@@ -84,8 +84,6 @@ class ZipfileCreator(object):
                 descriptionurl = self.imgdb.getDescriptionURL(name)
                 if descriptionurl:
                     self.images[name]['descriptionurl'] = descriptionurl
-                else:
-                    print 'NO DESCR URL'
             except AttributeError:
                 pass
             license = self.imgdb.getLicense(name)
