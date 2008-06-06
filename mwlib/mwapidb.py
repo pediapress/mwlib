@@ -110,6 +110,16 @@ class APIHelper(object):
 
 class ImageDB(object):
     def __init__(self, base_url, shared_base_url=None):
+        """
+        @param base_url: base URL of a MediaWiki,
+            e.g. 'http://en.wikipedia.org/w/'
+        @type base_url: basestring
+        
+        @param shared_base_url: base URL of a shared MediaWiki,
+            e.g. 'http://commons.wikimedia.org/w/' for commons MediaWikis
+        @type base_url: basestring
+        """
+        
         self.api_helpers = [APIHelper(base_url)]
         if shared_base_url is not None:
             self.api_helpers.append(APIHelper(shared_base_url))
