@@ -27,8 +27,13 @@ except ImportError:
 
 # ==============================================================================
 
+fetch_cache = {}
+max_cacheable_size = 1024
 
 def fetch_url(url, ignore_errors=False):
+    if url in fetch_cache:
+        return fetch_cache[url]
+    
     log.info("fetching %r" % (url,))
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'mwlib')]
@@ -40,6 +45,10 @@ def fetch_url(url, ignore_errors=False):
             return None
         raise RuntimeError('Could not fetch %r: %s' % (url, err))
     log.info("got %r (%d Bytes)" % (url, len(data)))
+    
+    if len(data) < max_cacheable_size:
+        fetch_cache[url] = data
+    
     return data
 
 
