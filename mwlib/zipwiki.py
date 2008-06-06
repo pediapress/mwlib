@@ -131,6 +131,12 @@ class ImageDB(object):
         except KeyError:
             return None
     
+    def getDescriptionURL(self, name):
+        try:
+            return self.images[name]['descriptionurl']
+        except KeyError:
+            return None
+    
     def clean(self):
         if self._tmpdir:
             shutil.rmtree(self._tmpdir, ignore_errors=True)

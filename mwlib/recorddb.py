@@ -80,6 +80,14 @@ class ZipfileCreator(object):
                 continue
             self.zf.write(dp, (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
             self.images[name]['url'] = self.imgdb.getURL(name, size=size)
+            try:
+                descriptionurl = self.imgdb.getDescriptionURL(name)
+                if descriptionurl:
+                    self.images[name]['descriptionurl'] = descriptionurl
+                else:
+                    print 'NO DESCR URL'
+            except AttributeError:
+                pass
             license = self.imgdb.getLicense(name)
             if license:
                 self.images[name]['license'] = license

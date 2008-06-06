@@ -136,3 +136,10 @@ class TestImageDB(object):
         assert imgdb.getURL(t).startswith('http://')
         imgdb.getDiskPath(t)
     
+    def test_getDescriptionURL(self):
+        imgdb = ImageDB('http://en.wikipedia.org/w/', 'http://commons.wikimedia.org/w/')
+        t = u'Sertraline-A-3D-balls.png'
+        du = imgdb.getDescriptionURL(t)
+        assert du == 'http://commons.wikimedia.org/wiki/Image:Sertraline-A-3D-balls.png'
+    
+

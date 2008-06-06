@@ -61,6 +61,7 @@ class APIHelper(object):
             self.base_url = base_url
         if self.base_url[-1] != '/':
             self.base_url += '/'
+        self.query_cache = {}
     
     def query(self, **kwargs):
         args = {
@@ -107,6 +108,36 @@ class ImageDB(object):
     
     def clear(self):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
+    
+    def getDescriptionURL(self, name):
+        """Return URL of image description page for image with given name
+        
+        @param name: image name (w/out namespace, i.e. w/out 'Image:')
+        @type name: unicode
+        
+        @returns: URL to image description page
+        @rtype: str
+        """
+    
+        assert isinstance(name, unicode), 'name must be of type unicode'
+        
+        for api_helper in self.api_helpers:
+            result = api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
+            if result is not None:
+                break
+        else:
+            return None
+        
+        try:
+            imageinfo = result['imageinfo'][0]
+            url = imageinfo['descriptionurl']
+            if url: # url can be False
+                if url.startswith('/'):
+                    url = urlparse.urljoin(self.api_helpers[0].base_url, url)
+                return url
+            return None
+        except (KeyError, IndexError):
+            return None
     
     def getURL(self, name, size=None):
         """Return image URL for image with given name
