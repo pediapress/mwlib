@@ -215,7 +215,7 @@ class ImageDB(object):
 
     
 class WikiDB(object):
-    print_template = u'Template:Print%s'
+    print_template = u'Template:Print%s' # set this to none to deacticate # FIXME
     
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
@@ -315,7 +315,10 @@ class WikiDB(object):
             log.info("ignoring blacklisted template:" , repr(name))
             return None
         
-        for title in (self.print_template % name, 'Template:%s' % name):
+        titles = ['Template:%s' % name]
+        if self.print_template:
+            titles.append(self.print_template % name)
+        for title in titles:
             log.info("Trying template %r" % (title,))
             c = self.getRawArticle(title)
             if c is not None:

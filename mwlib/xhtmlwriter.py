@@ -28,6 +28,7 @@ ToDo:
 """
 
 import sys
+import StringIO
 import xml.etree.ElementTree as ET
 from mwlib import parser,  mathml, advtree
 from mwlib.log import Log
@@ -38,7 +39,7 @@ def showNode(obj):
     attrs = obj.__dict__.keys()
     log(obj.__class__.__name__ ) 
     stuff =  ["%s => %r" %(k,getattr(obj,k)) for k in attrs if 
-              (not k == "children") and getattr(obj,k)
+              (not k in ("_parentref", "children")) and getattr(obj,k)
               ]
     if stuff:
         log(repr(stuff))
@@ -58,6 +59,74 @@ def indent(elem, level=0):
             elem.tail = i
 
 
+class XMLWriter(object):
+    "basic writer that translate parse tree nodes to XML"
+
+    header='''<?xml version="1.0" encoding="UTF-8"?>
+'''
+    def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None, debug=False):
+        self.root = ET.Element("mwlibparsetreeasxml")
+        self.root.set("xmlns", "http://code.pediapress.com/mwlib/this-is-fake")
+        self.root.set("xml:lang", "en")
+
+
+    def xwriteArticle(self, a):
+        # add head + title
+        h = ET.SubElement(self.root,"head")
+        e = ET.SubElement(h, "title")
+        if a.caption:
+            e.text = a.caption
+
+        # start body
+        return ET.SubElement(self.root,"body")
+        
+        
+    def getTree(self, debuginfo=""):
+        indent(self.root) # breaks XHTML (proper rendering at least) if activated!
+        return self.root
+    
+    def asstring(self):
+        return self.header + ET.tostring(self.getTree())
+    
+    def writeparsetree(self, tree):
+        pass
+    
+    def writeText(self, obj, parent):
+        if parent.getchildren(): # add to tail of last tag
+            t = parent.getchildren()[-1]
+            if not t.tail:
+                t.tail = obj.caption
+            else:
+                t.tail += obj.caption
+        else:
+            if not parent.text:
+                parent.text = obj.caption
+            else:
+                parent.text += obj.caption
+
+    def write(self, obj, parent=None):
+        if not parent:
+            parent = self.root
+        # if its text, append to last node
+        if isinstance(obj, parser.Text):
+            self.writeText(obj, parent)
+        else:
+            e = ET.SubElement(parent, obj.__class__.__name__.lower())
+            attrs = obj.__dict__.keys()
+            for k in attrs:
+                val = getattr(obj,k)
+                if k not in ("_parentref", "children") and val:
+                    print k, val
+                    e.set(k, repr(val))
+            for c in obj.children[:]:
+                ce = self.write(c,e)
+                if ce is not None and ce is not e:                    
+                    e.append(ce)
+            return e
+
+
+
+
 
 class MWXHTMLWriter(object):
     namedLinkCount = 1
@@ -65,11 +134,11 @@ class MWXHTMLWriter(object):
     header='''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 '''
-    def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None):
+    def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None, debug=False):
         self.language = language
         self.namespace = namespace
         self.imagesrcresolver = imagesrcresolver # e.g. "http://anyhost/redir?img=IMAGENAME" where IMAGENAME is substituted
-
+        self.debug = debug
         self.references = []
         self.root = ET.Element("html")
         self.root.set("xmlns", "http://www.w3.org/1999/xhtml")
@@ -107,13 +176,32 @@ class MWXHTMLWriter(object):
             else:
                 parent.text += obj.caption
 
+    def writedebug(self, obj, parent, comment=""):
+        if not self.debug or parent is None:
+            return 
+        attrs = obj.__dict__.keys()
+        stuff =  ["%s : %r" %(k,getattr(obj,k)) for k in attrs if 
+                  (not k in ("_parentref", "children")) and getattr(obj,k)
+                  ]
+        text = obj.__class__.__name__  + repr(stuff) 
+        if comment:
+            text += "\n" + comment
+        parent.append(ET.Comment(text))
+
+
+    def writeparsetree(self, tree):
+        out = StringIO.StringIO()
+        parser.show(out, tree)
+        print "append parsetree to ", self.root
+        self.root.append(ET.Comment(out.getvalue()))
+        
 
     def write(self, obj, parent=None):
-        #showNode(obj)
         # if its text, append to last node
         if isinstance(obj, parser.Text):
             self.writeText(obj, parent)
         else:
+            self.writedebug(obj, parent)
             # check for method
             m = "xwrite" + obj.__class__.__name__
             m=getattr(self, m, None)
@@ -121,6 +209,7 @@ class MWXHTMLWriter(object):
             if m: # find handler
                 e = m(obj)
             else:
+                self.writedebug(obj, parent, "was skipped")
                 log("SKIPPED")
                 showNode(obj)
                 e = None
@@ -193,7 +282,7 @@ class MWXHTMLWriter(object):
         the class attribute is set to some mwx.value.
         """
         if hasattr(node, "vlist") and node.vlist:
-            print "vlist", element, node
+            #print "vlist", element, node
             saveclass = element.get("class")
             for k,v in self.xserializeVList(node.vlist):
                 element.set(k,v)
@@ -307,10 +396,11 @@ class MWXHTMLWriter(object):
 
     def xwriteCategoryLink(self, obj):
         if not obj.colon and not obj.children:
-            a = ET.Element("a", href=obj.target)
-            a.set("class", "mwx.link.category")
-            a.text = obj.target
-            return a
+            pass # FIXME
+        a = ET.Element("a", href=obj.target)
+        a.set("class", "mwx.link.category")
+        a.text = obj.target
+        return a
 
 
     def xwriteLangLink(self, obj): # FIXME no valid url (but uri)
@@ -325,7 +415,7 @@ class MWXHTMLWriter(object):
        
     def xwriteImageLink(self, obj): 
         if obj.caption or obj.align:
-            assert not obj.isInline() and not obj.thumb
+            #assert not obj.isInline() and not obj.thumb
             e = ET.Element("div")
             e.set("class", "mwx.image.float")
             if obj.align:
@@ -358,9 +448,9 @@ class MWXHTMLWriter(object):
 
         return e 
 
-    def writeImageMap(self, obj): # FIXME!
+    def xwriteImageMap(self, obj): # FIXME!
         if obj.imagemap.imagelink:
-            return self.write(t.imagemap.imagelink)
+            return self.write(obj.imagemap.imagelink)
 
 
     def xwriteGallery(self, obj):
@@ -470,18 +560,16 @@ class MWXHTMLWriter(object):
     def _xwriteBlockquote(self, s, klass): 
         e = ET.Element("blockquote")
         e.set("class", klass)
-        for i in range(len(s.caption)-1):
-            e = ET.SubElement(e, "blockquote")
-            e.set("class", klass)
+        level = len(s.caption) # FIXME
         return e
     
     def xwriteBlockquote(self, s):
         "margin to the left & right"
-        self._xwriteBlockquote(s, klass="mwx.blockquote")
+        return self._xwriteBlockquote(s, klass="mwx.blockquote")
 
     def xwriteIndented(self, s):
         "margin to the left"
-        self._xwriteBlockquote(s, klass="mwx.indented")
+        return self._xwriteBlockquote(s, klass="mwx.indented")
 
     def xwriteItem(self, item):
         return ET.Element("li")

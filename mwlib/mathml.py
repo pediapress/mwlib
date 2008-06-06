@@ -4,6 +4,10 @@ converts LaTex to Mathml using blahtexml
 FIXME: Robustness, error handling, ....
 # see integration in MW: 
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/blahtex/blahtex/includes/Math.php?rev=HEAD&content-type=text/vnd.viewcvs-markup
+
+FIXME: replace with texvc which is deistributed with MediaWiki
+
+
 """
 import sys
 import popen2
@@ -11,8 +15,8 @@ try:
     import xml.etree.ElementTree as ET
 except:
     from elementtree import ElementTree as ET
-
 from xml.parsers.expat import ExpatError
+
 
 def log(err):
     sys.stderr.write(err + " ")
@@ -21,7 +25,7 @@ def log(err):
 
 def latex2mathml(latex):
 
-    data = "\\displaystyle\n%s\n" %  latex.strip()
+    data = "\\displaystyle\n%s\n" %  latex.strip()  
     r, w, e = popen2.popen3('blahtexml --mathml')
     w.write(data)
     w.close()
@@ -36,6 +40,9 @@ def latex2mathml(latex):
         #ET._namespace_map["http://www.w3.org/1998/Math/MathML"] = 'mathml'
         # remove xmlns declaration
         #outmsg = outmsg.replace('xmlns="http://www.w3.org/1998/Math/MathML"', '')
+
+        outmsg = '<?xml version="1.0" encoding="UTF-8"?>\n' + outmsg
+        print repr(outmsg)
     
         try:
             p =  ET.fromstring(outmsg)
@@ -50,7 +57,6 @@ def latex2mathml(latex):
 
         tag = "mathml"
         mathml = p.getiterator(tag)
-        
         
         if mathml:
             mathml=mathml[0]
