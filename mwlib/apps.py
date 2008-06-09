@@ -230,7 +230,7 @@ def buildzip():
         z.addObject('metabook.json', mb.dumpJson())
         articles = list(mb.getArticles())
         if articles:
-            inc = 70/len(articles)
+            inc = 70./len(articles)
         else:
             inc = 0
         p = 0
