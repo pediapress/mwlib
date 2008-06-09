@@ -103,6 +103,7 @@ def buildzip():
     import simplejson
     from mwlib import utils
     from mwlib.utils import daemonize
+    import urllib
     import urllib2
 
     articles = [unicode(x, 'utf-8') for x in args]
@@ -217,7 +218,6 @@ def buildzip():
         post_status('init')
         
         from mwlib.utils import get_multipart
-        import urllib
 
         
         zf = zipfile.ZipFile(zipfilename, 'w')
