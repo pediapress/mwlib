@@ -137,7 +137,7 @@ def buildzip():
         try:
             return urllib2.urlopen(posturl, urllib.urlencode({'status': status})).read()
         except Exception, e:
-            print 'ERROR posting status %r to %r' % (status, posturl)
+            print 'ERROR posting status %r to %r: %s' % (status, posturl, e)
     
     def post_progress(progress):
         progress = int(progress)
@@ -147,7 +147,7 @@ def buildzip():
         try:
             return urllib2.urlopen(posturl, urllib.urlencode({'progress': progress})).read()
         except Exception, e:
-            print 'ERROR posting progress %d to %r' % (progress, posturl)
+            print 'ERROR posting progress %d to %r: %s' % (progress, posturl, e)
     
     try:
         if options.logfile:
