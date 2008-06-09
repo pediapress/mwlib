@@ -1,22 +1,129 @@
 #!/usr/bin/env python
 import urllib
+import cgi
+import traceback
+import StringIO
 import BaseHTTPServer
 import SimpleHTTPServer
 from mwlib import mwapidb
 from mwlib import xhtmlwriter
 from mwlib import advtree
 
-default_baseurl = "http://en.wikipedia.org/w/"
-default_shared_baseurl = "http://commons.wikimedia.org/w/"
+default_baseurl = "en.wikipedia.org/w"
+default_shared_baseurl = "commons.wikimedia.org/w/"
+default_debug = 1
+default_imgwidth = 200
 imagesrcresolver = "/imageresolver/IMAGENAME"
+version = "0.1"
 
 class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    """
+    mwlib.xml-server version %s using xhtmlwriter.py version (%s)
+    
+    This server offers two services:
+    /mwxml/         : returns MediaWiki documents as XHTML1.0 transitional
+    /imageresolver/ : resolves imagenames to full urls
 
-    def _servXML(self, title):
-        base_url = default_baseurl # FIXME
+    Note this service relies on MediaWiki API http://en.wikipedia.org/w/api.php
+    Son only Mediawikis with an approriate version are supported.
+
+
+    usage /mwxml/ _____________________________________________________:
+
+    /mwxml/<wiki_base_url>/<article><?option_arg=option_value>
+    e.g.
+    /mwxml/www.mediawiki.org/w/API
+    
+    wiki_base_url defaults to %s
+    so one can also use /mwxml/Article to access Article from the above site
+    
+    options (query args):
+
+    debug
+    whether verbose debug info is included as XML-comments
+    0 or 1, defaults to %d
+    
+    imageresolver
+    img src tags can be set to a redirector service, in order to get them 
+    resolved and displayed in browsers.
+    value can be any  string, in which every occurence of IMAGENAME is 
+    substituted by the image name (e.g. 'Picture1.jpg).
+    This defaults to '%s'
+
+    
+    usage /imageresolver/ ___________________________________________:   
+    
+    /imageresolver/<IMAGENAME><?baseurl=url&sharedbaseurl=url2>
+    
+    baseurl and sharedbasurl are used to retrieve images
+
+    baseurl defaults to %s
+    sharedbaseurl defaults to %s
+    imgwidth defaults to %d
+    
+    """ 
+
+    documentation = __doc__ % (version, xhtmlwriter.version, default_baseurl, 
+                               default_debug, imagesrcresolver, default_baseurl, 
+                               default_shared_baseurl, default_imgwidth)
+       
+
+
+    def do_GET(self):
+        path, query = urllib.splitquery(self.path)
+        path = [urllib.unquote_plus(x) for x in path.split("/")]
+        query = cgi.parse_qs(query or "")
+        print path, query
+        app = path[1]
+        args = path[2:]
+        print args, query
+        if app == "mwxml":
+            self._dosafe(self._servXML, args, query)
+        elif app == "imageresolver":
+            self._dosafe(self._resolveImage, args, query)
+        else:
+            self._doc()
+        
+
+
+    def _dosafe(self, method, query, args):
+        try:
+            method(query, args)
+        except Exception, e:
+            s = StringIO.StringIO()
+            traceback.print_exc(file=s)
+            self._doc(error = s.getvalue())
+
+
+    def _doc(self, error=""):
+        if error:
+            response = "An error occurred:\n\n%s\n\n%s" %( error, self.documentation)
+            self.send_response(500)
+        else:
+            self.send_response(200)
+            response = self.documentation
+        
+        self.send_header("Content-type", "text/plain")
+        self.send_header("Content-length", str(len(response)))
+        self.end_headers()
+        self.wfile.write(response)
+
+
+    def _servXML(self, args, query):
+        if not len(args):
+            self._doc(error="require articlename")
+            return
+        unknown = [k for k in query if k not in ("debug", "imageresolver")]
+        if unknown:
+            return self._doc(error="unknown option %r" % unknown)
+        title = args.pop()
+        base_url = "http://%s/" % ("/".join(args) or default_baseurl)
+        debug = bool(query.setdefault("debug", [default_debug])[0])
+
         language = "en" # FIXME
         namespace="en.wikipedia.org" # FIXME
-        debug = True # FIXME
+
+        print "_servXML", title, base_url, debug
 
         db = mwapidb.WikiDB(base_url, license=None)
         db.print_template = None # deactivate print template lookups
@@ -25,7 +132,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         dbw = xhtmlwriter.MWXHTMLWriter(language=language, namespace=namespace, 
                                         imagesrcresolver=imagesrcresolver,
                                         debug=debug)
-        #dbw = xhtmlwriter.XMLWriter()
+        #dbw = xhtmlwriter.XMLWriter() # another XML-writer implementation
         dbw.write(tree)
         if debug:
             dbw.writeparsetree(tree)
@@ -41,17 +148,23 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         # shut down the connection
         self.wfile.flush()
         
-        #self.send_response(500)
-        #self.end_headers()
 
+    def _resolveImage(self, args, query):
+        if not len(args):
+            self._doc(error="require imagename")
+            return
+        unknown = [k for k in query if k not in ("baseurl", "sharedbaseurl", "imgwidth")]
+        if unknown:
+            return self._doc(error="unknown option %r" % unknown)
+        title = args.pop()
+        base_url = "http://" + query.setdefault("baseurl", [default_baseurl])[0] 
+        shared_base_url = "http://" + query.setdefault("sharedbaseurl", [default_shared_baseurl])[0] 
+        imgwidth = int(query.setdefault("imgwidth", [default_imgwidth])[0] )
 
-    def _resolveImage(self, title):
-        base_url = default_baseurl # FIXME
-        shared_base_url = default_shared_baseurl # FIXME
-        size = 200 # FIXME
+        print "_resolveImage", title, base_url, shared_base_url, imgwidth
 
         db = mwapidb.ImageDB(base_url, shared_base_url)
-        url = db.getURL(title.decode("utf8"), size=size)
+        url = db.getURL(title.decode("utf8"), size=imgwidth)
         if not url:
             self.send_response(404)
             self.end_headers()
@@ -61,25 +174,14 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.end_headers()
 
 
-    def do_GET(self):
-        print self.path
-        parts = [urllib.unquote_plus(x) for x in self.path.split("/")]
-        print parts
-        if parts[1] == "mwxml" and len(parts)>2:
-            self._servXML(title=parts[2])
-        elif parts[1] == "imageresolver" and len(parts)>2:
-            self._resolveImage(title=parts[2])
-        else:
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
-        
 
 
 
 
-def run(server_class = BaseHTTPServer.HTTPServer,
-        handler_class = XMLHandler):
-    server_address = ('', 8000)
-    httpd = server_class(server_address, handler_class)
+def run(port=8000):
+    server_address = ('', port)
+    httpd = BaseHTTPServer.HTTPServer(server_address, XMLHandler)
+    print "listening on port", port
     httpd.serve_forever()
 
 

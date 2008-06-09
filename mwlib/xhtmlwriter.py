@@ -20,8 +20,7 @@ executed and xhtml output is validated by xmllint.
 
 
 ToDo: 
- * write more tests
- * reorder tree to fix for paragraphs / have to fix parser first
+
  * templates / parser has to support marking of boundaries first
  * always add vlist data if available / if supported by the parser
  * strategy to move to xhtml1.1 in order to validate w/ mathml
@@ -32,6 +31,7 @@ import StringIO
 import xml.etree.ElementTree as ET
 from mwlib import parser,  mathml, advtree
 from mwlib.log import Log
+version = "0.1"
 
 log = Log("xhtmlwriter")
 
@@ -186,14 +186,14 @@ class MWXHTMLWriter(object):
         text = obj.__class__.__name__  + repr(stuff) 
         if comment:
             text += "\n" + comment
-        parent.append(ET.Comment(text))
+        parent.append(ET.Comment(text.replace("--", " - - "))) # FIXME (hot fix)
 
 
     def writeparsetree(self, tree):
         out = StringIO.StringIO()
         parser.show(out, tree)
         print "append parsetree to ", self.root
-        self.root.append(ET.Comment(out.getvalue()))
+        self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
         
 
     def write(self, obj, parent=None):
