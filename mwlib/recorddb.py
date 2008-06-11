@@ -19,6 +19,8 @@ class RecordDB(object):
         
     def getRawArticle(self, name, revision=None):
         r = self.db.getRawArticle(name, revision=revision)
+        if r is None:
+            return None
         self.articles[name] = {
             'revision': revision,
             'content-type': 'text/x-wiki',
