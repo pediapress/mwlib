@@ -545,6 +545,10 @@ def test_source_vlist():
     r=parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
     assert r.vlist == dict(lang='c'), "bad value: %r" % (r.vlist,)
 
+def test_not_pull_in_alpha_image():
+    link=parse("[[Image:link.jpg|ab]]cd").find(parser.Link)[0]
+    assert "cd" not in link.asText(), "'cd' not in linkstext"
+    
 def test_pull_in_alpha():
     link=parse("[[link|ab]]cd").find(parser.Link)[0]
     assert "cd" in link.asText(), "'cd' not in linkstext"
