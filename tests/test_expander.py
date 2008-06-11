@@ -232,6 +232,12 @@ def test_iferror():
     expandstr("{{#iferror:{{#expr:1+1}}}}", "2")
     expandstr("{{#iferror:{{#expr:1+Z}}}}", "")
 
+def test_implicit_newline_noinclude():
+    expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<noinclude></noinclude>{|"))
+    
+def test_implicit_newline_includeonly():
+    expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<includeonly>{|</includeonly>"))
+    
 def test_implicit_newline_begintable():
     expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="{|"))
     
