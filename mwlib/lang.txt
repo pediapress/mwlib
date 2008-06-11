@@ -254,3 +254,7 @@ zh-min-nan
 zh-tw
 zh-yue
 zu
+szl
+lbe
+crh
+hif

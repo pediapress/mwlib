@@ -53,6 +53,7 @@ include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/xhtmlwriter.py
 include mwlib/zipwiki.py
+include sandbox/xmlserver/xml-server.py
 include setup.py
 include tests/data/test.zip
 include tests/memeater.py
