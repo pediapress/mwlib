@@ -320,6 +320,10 @@ def test_variable_alternative():
     wikidb=DictDB(t1='{{{var|undefined}}}')
     expandstr('{{t1|var=}}', '', wikidb=wikidb)
     
+def test_implicit_newline_after_expand():
+    wikidb=DictDB(tone='{{{1}}}{{{2}}}')
+    expandstr('foo {{tone||:}} bar', 'foo \n: bar', wikidb=wikidb)
+    
 def test_pagename_non_ascii():
     def e(a,b):
         return expandstr(a,b,pagename=u'L\xe9onie s')
