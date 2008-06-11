@@ -308,6 +308,7 @@ class LazyArgument(object):
     def _flattennode(self, n):
         arg=[]
         self.expander.flatten(n, arg, self.variables)
+        _insert_implicit_newlines(arg)
         arg = u"".join(arg)
 
         if len(arg)>256*1024:
@@ -343,7 +344,7 @@ class LazyArgument(object):
             
             arg=[]
             self.expander.flatten(self.node, arg, self.variables)
-
+            _insert_implicit_newlines(arg)
             arg = u"".join(arg).strip()
             if len(arg)>256*1024:
                 raise MemoryLimitError("template argument too long: %s bytes" % (len(arg),))
@@ -434,6 +435,24 @@ class mark_start(mark): pass
 class mark_end(mark): pass
 class mark_maybe_newline(mark): pass
 
+def _insert_implicit_newlines(res):
+    res.append(mark('dummy'))
+    res.append(mark('dummy'))
+
+    for i in range(len(res)):
+        p = res[i]
+        if isinstance(p, mark_maybe_newline):
+            s1 = res[i+1]
+            s2 = res[i+2]
+            if isinstance(s1, mark):
+                continue
+            if len(s1)>=2:
+                if is_implicit_newline(s1):
+                    res[i] = '\n'
+            else:
+                if is_implicit_newline(''.join([s1, s2])):
+                    res[i] = '\n'
+    del res[-2:]
     
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
@@ -553,32 +572,11 @@ class Expander(object):
                     res.append(x)
                 else:
                     self.flatten(x, res, variables)
-
-    def _insert_implicit_newlines(self, res):
-        res.append(mark('dummy'))
-        res.append(mark('dummy'))
-        
-        for i in range(len(res)):
-            p = res[i]
-            if isinstance(p, mark_maybe_newline):
-                s1 = res[i+1]
-                s2 = res[i+2]
-                if isinstance(s1, mark):
-                    continue
-                if len(s1)>=2:
-                    if is_implicit_newline(s1):
-                        res[i] = '\n'
-                else:
-                    if is_implicit_newline(''.join([s1, s2])):
-                        res[i] = '\n'
-                
-                
-                
                 
     def expandTemplates(self):
         res = []
         self.flatten(self.parsed, res, ArgumentList())
-        self._insert_implicit_newlines(res)
+        _insert_implicit_newlines(res)
         return u"".join(res)
 
 
