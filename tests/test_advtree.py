@@ -109,3 +109,16 @@ def test_identity():
             assert br is not bbr
             
             
+def test_isnavbox():
+    raw = """
+== test ==
+
+<div class="noprint">
+some text
+</div>
+""".decode("utf8")
+
+    db = DummyDB()
+    r = parseString(title="X33", raw=raw, wikidb=db)
+    buildAdvancedTree(r)
+    assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])

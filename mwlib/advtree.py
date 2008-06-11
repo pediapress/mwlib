@@ -221,6 +221,21 @@ class AdvancedNode:
         else:
             return ''
 
+
+    nav_box_classes = set(('noprint', 'navframe', 'collapsible', 'autocollapse'))
+    def isNavBox(self):
+        """
+        navigation boxes at the bottom of articles seem to be automatically detectable by the use of the css styles.
+        we try to filter out these boxes (div, table etc. nodes) 
+        """
+        if hasattr(self, 'vlist'):
+            klasses = self.vlist.get('class')
+            if klasses and self.nav_box_classes.intersection(set(klasses.split())):
+                return True
+        return False
+
+
+
     parent = property(getParent)
     parents = property(getParents)
     next = property(getNext)
