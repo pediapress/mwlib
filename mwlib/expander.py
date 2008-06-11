@@ -537,7 +537,9 @@ class Expander(object):
                     #res.append(u"{{{%s}}}" % (name,))
             else:
                 res.append(v)
-        else:        
+        elif isinstance(n, basestring):
+            res.append(n)
+        else:
             for x in n:
                 if isinstance(x, basestring):
                     res.append(x)
