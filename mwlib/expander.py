@@ -411,16 +411,15 @@ class ArgumentList(object):
         if val is None:
             return default
         return val
-    
-def add_implicit_newline(raw):
-    """add newline to templates starting with *, #, :, ;, {|
+def is_implicit_newline(raw):
+    """should we add a newline to templates starting with *, #, :, ;, {|
     see: http://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
     """
     sw = raw.startswith
     for x in ('*', '#', ':', ';', '{|'):
         if sw(x):
-            return '\n'+raw
-    return raw
+            return True
+    return False 
 
 class mark(unicode):
     def __new__(klass, msg):
@@ -429,7 +428,12 @@ class mark(unicode):
         return r
     
     def __repr__(self):
-        return '<mark %r>' % (self.msg,)
+        return '<%s %r>' % (self.__class__.__name__, self.msg,)
+
+class mark_start(mark): pass
+class mark_end(mark): pass
+class mark_maybe_newline(mark): pass
+
     
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
@@ -461,7 +465,6 @@ class Expander(object):
             log.warn("no template", repr(name))
             res = None
         else:
-            raw = add_implicit_newline(raw)
             log.info("parsing template", repr(name))
             res = Parser(raw).parse()
             if DEBUG:
@@ -505,15 +508,20 @@ class Expander(object):
             rep = self.resolver(name, var)
 
             if rep is not None:
-                res.append(add_implicit_newline(rep))
+                res.append(mark_maybe_newline(repr(name)))
+                res.append(rep)
+                res.append(mark('dummy'))
             else:            
                 p = self.getParsedTemplate(name)
                 if p:
                     if DEBUG:
                         msg = "EXPANDING %r %r  ===> " % (name, var)
                         oldidx = len(res)
+                    res.append(mark_start(repr(name)))
+                    res.append(mark_maybe_newline(repr(name)))
                     self.flatten(p, res, var)
-
+                    res.append(mark_end(repr(name)))
+                               
                     if DEBUG:
                         msg += repr("".join(res[oldidx:]))
                         print msg
@@ -546,9 +554,31 @@ class Expander(object):
                 else:
                     self.flatten(x, res, variables)
 
+    def _insert_implicit_newlines(self, res):
+        res.append(mark('dummy'))
+        res.append(mark('dummy'))
+        
+        for i in range(len(res)):
+            p = res[i]
+            if isinstance(p, mark_maybe_newline):
+                s1 = res[i+1]
+                s2 = res[i+2]
+                if isinstance(s1, mark):
+                    continue
+                if len(s1)>=2:
+                    if is_implicit_newline(s1):
+                        res[i] = '\n'
+                else:
+                    if is_implicit_newline(''.join([s1, s2])):
+                        res[i] = '\n'
+                
+                
+                
+                
     def expandTemplates(self):
         res = []
         self.flatten(self.parsed, res, ArgumentList())
+        self._insert_implicit_newlines(res)
         return u"".join(res)
 
 
