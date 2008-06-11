@@ -422,7 +422,15 @@ def add_implicit_newline(raw):
             return '\n'+raw
     return raw
 
-
+class mark(unicode):
+    def __new__(klass, msg):
+        r=unicode.__new__(klass)
+        r.msg = msg
+        return r
+    
+    def __repr__(self):
+        return '<mark %r>' % (self.msg,)
+    
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
