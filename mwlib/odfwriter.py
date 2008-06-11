@@ -411,8 +411,6 @@ class ODFWriter(object):
     def owriteLangLink(self, obj):
         obj.children=[]
         pass # we dont want them in the PDF
-    
-
 
     def owriteReference(self, t):
         self.references.append(t)
@@ -625,10 +623,13 @@ def assertparents(e, isroot=True):
 
 
 def preprocess(root):
+    # remove nav boxes
+    for c in root.getAllChildren():
+        if c.isNavBox() and c.parent is not None:
+            c.parent.removeChild(c)
     fixParagraphs(root)
     fixBlockElements(root)
-    #fixParagraphs(root)
-
+    
 
 def main():
     for fn in sys.argv[1:]:

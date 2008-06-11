@@ -239,7 +239,6 @@ class MWXHTMLWriter(object):
         e = ET.SubElement(h, "title")
         if a.caption:
             e.text = a.caption
-
         # start body
         return ET.SubElement(self.root,"body")
 
