@@ -193,7 +193,7 @@ class Template(Node):
         rep = expander.resolver(name, var)
 
         if rep is not None:
-            res.append(mark_maybe_newline(repr(name)))
+            res.append(maybe_newline)
             res.append(rep)
             res.append(mark('dummy'))
         else:            
@@ -203,7 +203,7 @@ class Template(Node):
                     msg = "EXPANDING %r %r  ===> " % (name, var)
                     oldidx = len(res)
                 res.append(mark_start(repr(name)))
-                res.append(mark_maybe_newline(repr(name)))
+                res.append(maybe_newline)
                 flatten(p, expander, var, res)
                 res.append(mark_end(repr(name)))
 
@@ -494,6 +494,7 @@ class ArgumentList(object):
         if val is None:
             return default
         return val
+    
 def is_implicit_newline(raw):
     """should we add a newline to templates starting with *, #, :, ;, {|
     see: http://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
@@ -517,13 +518,14 @@ class mark_start(mark): pass
 class mark_end(mark): pass
 class mark_maybe_newline(mark): pass
 
-def _insert_implicit_newlines(res):
-    res.append(mark('dummy'))
-    res.append(mark('dummy'))
+maybe_newline = mark_maybe_newline('maybe_newline')
 
-    for i in range(len(res)):
-        p = res[i]
-        if isinstance(p, mark_maybe_newline):
+def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
+    # do not pass the second argument
+    res.append(mark('dummy'))
+    res.append(mark('dummy'))
+    for i, p in enumerate(res):
+        if p is maybe_newline:
             s1 = res[i+1]
             s2 = res[i+2]
             if isinstance(s1, mark):
