@@ -120,17 +120,17 @@ def buildzip():
 
     # automatically acquires a post url 
     if not posturl and options.getposturl:
+        import webbrowser
+        
         serviceurl = "http://pediapress.com/api/collections/"
-        browsercmd = "firefox %s &"
         u = urllib2.urlopen(serviceurl, data="any")
         h = simplejson.loads(u.read())
         posturl = h["post_url"]
         redirect_url = h["redirect_url"]
-        os.system(browsercmd % redirect_url)
+        webbrowser.open(redirect_url)
         print "acquired post url", posturl
         print "redirected browser to", redirect_url
-
-
+    
     def post_status(status):
         print 'status:', status
         if not posturl:
