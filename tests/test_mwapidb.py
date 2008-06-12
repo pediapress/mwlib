@@ -43,6 +43,10 @@ class TestWikiDB(object):
         print 'AUTHORS:', authors
         authors = self.w.getAuthors(u'Physics', revision='206917093')
         print 'AUTHORS:', authors
+        
+        w = WikiDB('http://en.wikipedia.com/w/', self.license) # note: the .com is on purpose!
+        authors = w.getAuthors(u'Physics')
+        print 'AUTHORS:', authors
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
