@@ -107,7 +107,16 @@ def new_tokenize(txt):
 
 tokenize = old_tokenize
 
-
+def flatten(node, expander, variables, res):
+    t=type(node)
+    if t is unicode or t is str:
+        res.append(node)
+    elif t is list:
+        for x in node:
+            flatten(x, expander, variables, res)
+    else:
+        node.flatten(expander, variables, res)
+    
 
 class Node(object):
     def __init__(self):
@@ -123,11 +132,84 @@ class Node(object):
     def show(self, out=None):
         show(self, out=out)
 
+        
+    def flatten(self, expander, variables, res):
+        for x in self.children:
+            if isinstance(x, basestring):
+                res.append(x)
+            else:
+                flatten(x, expander, variables, res)
+        
 class Variable(Node):
-    pass
+    def flatten(self, expander, variables, res):
+        name = []
+        flatten(self.children[0], expander, variables, name)
+        name = u"".join(name).strip()
+        if len(name)>256*1024:
+            raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
+
+        v = variables.get(name, None)
+
+        if v is None:
+            if len(self.children)>1:
+                flatten(self.children[1:], expander, variables, res)
+            else:
+                pass
+                # FIXME. breaks If
+                #res.append(u"{{{%s}}}" % (name,))
+        else:
+            res.append(v)
 
 class Template(Node):
-    pass
+    def flatten(self, expander, variables, res):
+        name = []
+        flatten(self.children[0], expander, variables, name)
+        name = u"".join(name).strip()
+        if len(name)>256*1024:
+            raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
+
+        remainder = None
+        if ":" in name:
+            try_name, try_remainder = name.split(':', 1)
+            if expander.resolver.has_magic(try_name):
+                name=try_name
+                remainder = try_remainder
+
+        var = ArgumentList()
+
+        varcount = 1   #unnamed vars
+
+        def args():
+            if remainder is not None:
+                tmpnode=Node()
+                tmpnode.children.append(remainder)
+                yield tmpnode
+            for x in self.children[1:]:
+                yield x
+
+        for x in args():
+            var.append(LazyArgument(x, expander, variables))
+
+        rep = expander.resolver(name, var)
+
+        if rep is not None:
+            res.append(maybe_newline)
+            res.append(rep)
+            res.append(mark('dummy'))
+        else:            
+            p = expander.getParsedTemplate(name)
+            if p:
+                if DEBUG:
+                    msg = "EXPANDING %r %r  ===> " % (name, var)
+                    oldidx = len(res)
+                res.append(mark_start(repr(name)))
+                res.append(maybe_newline)
+                flatten(p, expander, var, res)
+                res.append(mark_end(repr(name)))
+
+                if DEBUG:
+                    msg += repr("".join(res[oldidx:]))
+                    print msg
 
 def show(node, indent=0, out=None):
     if out is None:
@@ -307,7 +389,8 @@ class LazyArgument(object):
 
     def _flattennode(self, n):
         arg=[]
-        self.expander.flatten(n, arg, self.variables)
+        flatten(n, self.expander, self.variables, arg)
+        _insert_implicit_newlines(arg)
         arg = u"".join(arg)
 
         if len(arg)>256*1024:
@@ -342,8 +425,8 @@ class LazyArgument(object):
             self._flatten = self._flattennode(self.node).strip()
             
             arg=[]
-            self.expander.flatten(self.node, arg, self.variables)
-
+            flatten(self.node, self.expander, self.variables, arg)
+            _insert_implicit_newlines(arg)
             arg = u"".join(arg).strip()
             if len(arg)>256*1024:
                 raise MemoryLimitError("template argument too long: %s bytes" % (len(arg),))
@@ -412,17 +495,49 @@ class ArgumentList(object):
             return default
         return val
     
-def add_implicit_newline(raw):
-    """add newline to templates starting with *, #, :, ;, {|
+def is_implicit_newline(raw):
+    """should we add a newline to templates starting with *, #, :, ;, {|
     see: http://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
     """
     sw = raw.startswith
     for x in ('*', '#', ':', ';', '{|'):
         if sw(x):
-            return '\n'+raw
-    return raw
+            return True
+    return False 
 
+class mark(unicode):
+    def __new__(klass, msg):
+        r=unicode.__new__(klass)
+        r.msg = msg
+        return r
+    
+    def __repr__(self):
+        return '<%s %r>' % (self.__class__.__name__, self.msg,)
 
+class mark_start(mark): pass
+class mark_end(mark): pass
+class mark_maybe_newline(mark): pass
+
+maybe_newline = mark_maybe_newline('maybe_newline')
+
+def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
+    # do not pass the second argument
+    res.append(mark('dummy'))
+    res.append(mark('dummy'))
+    for i, p in enumerate(res):
+        if p is maybe_newline:
+            s1 = res[i+1]
+            s2 = res[i+2]
+            if isinstance(s1, mark):
+                continue
+            if len(s1)>=2:
+                if is_implicit_newline(s1):
+                    res[i] = '\n'
+            else:
+                if is_implicit_newline(''.join([s1, s2])):
+                    res[i] = '\n'
+    del res[-2:]
+    
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
@@ -453,7 +568,6 @@ class Expander(object):
             log.warn("no template", repr(name))
             res = None
         else:
-            raw = add_implicit_newline(raw)
             log.info("parsing template", repr(name))
             res = Parser(raw).parse()
             if DEBUG:
@@ -464,81 +578,10 @@ class Expander(object):
         return res
             
         
-    def flatten(self, n, res, variables):
-        if isinstance(n, Template):
-            name = []
-            self.flatten(n.children[0], name, variables)
-            name = u"".join(name).strip()
-            if len(name)>256*1024:
-                raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
-            
-            remainder = None
-            if ":" in name:
-                try_name, try_remainder = name.split(':', 1)
-                if self.resolver.has_magic(try_name):
-                    name=try_name
-                    remainder = try_remainder
-
-            var = ArgumentList()
-
-            varcount = 1   #unnamed vars
-
-            def args():
-                if remainder is not None:
-                    tmpnode=Node()
-                    tmpnode.children.append(remainder)
-                    yield tmpnode
-                for x in n.children[1:]:
-                    yield x
-
-            for x in args():
-                var.append(LazyArgument(x, self, variables))
-
-            rep = self.resolver(name, var)
-
-            if rep is not None:
-                res.append(add_implicit_newline(rep))
-            else:            
-                p = self.getParsedTemplate(name)
-                if p:
-                    if DEBUG:
-                        msg = "EXPANDING %r %r  ===> " % (name, var)
-                        oldidx = len(res)
-                    self.flatten(p, res, var)
-
-                    if DEBUG:
-                        msg += repr("".join(res[oldidx:]))
-                        print msg
-                    
-                    
-        elif isinstance(n, Variable):
-            name = []
-            self.flatten(n.children[0], name, variables)
-            name = u"".join(name).strip()
-            if len(name)>256*1024:
-                raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
-            
-            v = variables.get(name, None)
-
-            if v is None:
-                if len(n.children)>1:
-                    self.flatten(n.children[1:], res, variables)
-                else:
-                    pass
-                    # FIXME. breaks If
-                    #res.append(u"{{{%s}}}" % (name,))
-            else:
-                res.append(v)
-        else:        
-            for x in n:
-                if isinstance(x, basestring):
-                    res.append(x)
-                else:
-                    self.flatten(x, res, variables)
-
     def expandTemplates(self):
         res = []
-        self.flatten(self.parsed, res, ArgumentList())
+        flatten(self.parsed, self, ArgumentList(), res)
+        _insert_implicit_newlines(res)
         return u"".join(res)
 
 

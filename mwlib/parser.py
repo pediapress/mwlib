@@ -547,6 +547,9 @@ class Parser(object):
             # [[a]] -> [[a|a]]
             obj.append(Text(obj.target))
 
+        if isinstance(obj, ImageLink):
+            return obj
+        
         if self.left and self.token[0] == 'TEXT':
             m = _ALPHA_RE.match(self.token[1])
             if m:
