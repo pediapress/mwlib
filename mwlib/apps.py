@@ -160,17 +160,15 @@ def buildzip():
         
         mb = metabook.MetaBook()
         if conf:
-            from ConfigParser import ConfigParser
 
             w = wiki.makewiki(conf)
-            cp = ConfigParser()
-            cp.read(conf)
+            cp = w.configparser
             mb.source = {
                 'name': cp.get('wiki', 'name'),
                 'url': cp.get('wiki', 'url'),
             }
             license_name = cp.get('wiki', 'defaultarticlelicense')
-            if license_name is not None:
+            if license_name:
                 wikitext = w['wiki'].getRawArticle(license_name)
                 assert wikitext is not None, 'Could not get license article %r' % license_name
                 mb.source['defaultarticlelicense'] = {

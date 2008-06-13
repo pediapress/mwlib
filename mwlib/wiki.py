@@ -5,6 +5,7 @@
 
 import os
 from ConfigParser import ConfigParser
+import StringIO
 
 def wiki_mwapi(base_url=None, license=None, template_blacklist=None):
     from mwlib import mwapidb
@@ -88,6 +89,13 @@ class Environment(object):
         self.images = None
         self.wiki = None
         self.configparser = ConfigParser()
+        defaults=StringIO.StringIO("""
+[wiki]
+name=
+url=
+defaultarticlelicense=
+""")
+        self.configparser.readfp(defaults)
         
     # __getitem__, __setitem__ for compatability (make it look like a dict)
     def __getitem__(self, name):
