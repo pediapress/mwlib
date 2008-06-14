@@ -18,14 +18,12 @@ if len(sys.argv) > 2:
 
 mwzip_cmd = 'mw-zip' # (Path to) mw-zip executable.
 default_baseurl = "en.wikipedia.org/w"
-default_shared_baseurl = "commons.wikimedia.org/w/"
 serviceurl = "http://pediapress.com/api/collections/"
 thisservice = "http://%s:%d/"% (host, port)
 
 class State(object):
     articles = []
     baseurl = default_baseurl
-    shared_base_url = default_shared_baseurl
     bookmarklet ="javascript:location.href='%s?addarticle='+location.href" % thisservice
 
 
@@ -59,15 +57,12 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         Note, only articles from one wiki allowed, baseurl should be set so, that api.php can be found
         <br/>
         Click order to send your collection to pediapress
-        <br/>
-        shared_baseurl : %s (for images not available at baseurl)
         </body>
         </html>
         """ %(self.state.baseurl, 
               thisservice,
               ("\n".join(self.state.articles)),
               self.state.bookmarklet,
-              self.state.shared_base_url
               )
         return response
     
@@ -138,8 +133,6 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             '--baseurl', "http://" +self.state.baseurl,
             '--posturl', posturl,
         ]
-        if self.state.shared_base_url:
-            args.extend(['--shared-baseurl', "http://" + self.state.shared_base_url])
         
         for a in self.state.articles:
             a = a.split("/")[-1]

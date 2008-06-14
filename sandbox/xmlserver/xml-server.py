@@ -10,7 +10,6 @@ from mwlib import xhtmlwriter
 from mwlib import advtree
 
 default_baseurl = "en.wikipedia.org/w"
-default_shared_baseurl = "commons.wikimedia.org/w/"
 default_debug = 1
 default_imgwidth = 200
 imagesrcresolver = "/imageresolver/IMAGENAME"
@@ -53,19 +52,18 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     
     usage /imageresolver/ ___________________________________________:   
     
-    /imageresolver/<IMAGENAME><?baseurl=url&sharedbaseurl=url2>
+    /imageresolver/<IMAGENAME><?baseurl=url>
     
-    baseurl and sharedbasurl are used to retrieve images
+    baseurl is used to retrieve images
 
     baseurl defaults to %s
-    sharedbaseurl defaults to %s
     imgwidth defaults to %d
     
     """ 
 
     documentation = __doc__ % (version, xhtmlwriter.version, default_baseurl, 
                                default_debug, imagesrcresolver, default_baseurl, 
-                               default_shared_baseurl, default_imgwidth)
+                               default_imgwidth)
        
 
 
@@ -153,17 +151,16 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         if not len(args):
             self._doc(error="require imagename")
             return
-        unknown = [k for k in query if k not in ("baseurl", "sharedbaseurl", "imgwidth")]
+        unknown = [k for k in query if k not in ("baseurl", "imgwidth")]
         if unknown:
             return self._doc(error="unknown option %r" % unknown)
         title = args.pop()
         base_url = "http://" + query.setdefault("baseurl", [default_baseurl])[0] 
-        shared_base_url = "http://" + query.setdefault("sharedbaseurl", [default_shared_baseurl])[0] 
         imgwidth = int(query.setdefault("imgwidth", [default_imgwidth])[0] )
 
-        print "_resolveImage", title, base_url, shared_base_url, imgwidth
+        print "_resolveImage", title, base_url, imgwidth
 
-        db = mwapidb.ImageDB(base_url, shared_base_url)
+        db = mwapidb.ImageDB(base_url)
         url = db.getURL(title.decode("utf8"), size=imgwidth)
         if not url:
             self.send_response(404)
