@@ -53,7 +53,7 @@ def fetch_url(url, ignore_errors=False):
 
 # ==============================================================================
 
-articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+/)(?P<path>.*)$')
+articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+)(?P<path>.*)$')
 api_helper_cache = {}
 
 def get_api_helper(url):
@@ -74,7 +74,7 @@ def get_api_helper(url):
     if scheme_host_port in api_helper_cache:
         return api_helper_cache[scheme_host_port]
     
-    for path in ('w/', 'wiki/', ''):
+    for path in ('/w/', '/wiki/', '/'):
         base_url = scheme_host_port + path
         api_helper = APIHelper(base_url)
         if api_helper.is_usable():
@@ -155,7 +155,8 @@ class ImageDB(object):
         @type base_url: basestring
         """
         
-        self.api_helper = APIHelper(base_url)
+        self.api_helper = get_api_helper(base_url)
+        assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.tmpdir = tempfile.mkdtemp()
     
     def clear(self):
@@ -318,7 +319,8 @@ class WikiDB(object):
         
         self.base_url = base_url
         self.license = license
-        self.api_helper = APIHelper(self.base_url)
+        self.api_helper = get_api_helper(self.base_url)
+        assert self.api_helper is not None, 'invalid base URL %r' % self.base_url
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
