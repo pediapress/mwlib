@@ -50,14 +50,13 @@ class TestWikiDB(object):
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
-    shared_base_url = 'http://commons.wikimedia.org/w/'
     
     existing_image_name = u'Serra de Cals.jpg'
     existing_image_url = 'http://upload.wikimedia.org/wikipedia/commons/6/6b/Serra_de_Cals.jpg'
     nonexisting_image_name = u'Test12123213.jpg'
     
     def setup_method(self, method):
-        self.imagedb = ImageDB(self.base_url, self.shared_base_url)
+        self.imagedb = ImageDB(self.base_url)
     
     def teardown_method(self, method):
         self.imagedb.clear()
@@ -141,7 +140,7 @@ class TestImageDB(object):
         imgdb.getDiskPath(t)
     
     def test_getDescriptionURL(self):
-        imgdb = ImageDB('http://en.wikipedia.org/w/', 'http://commons.wikimedia.org/w/')
+        imgdb = ImageDB('http://en.wikipedia.org/w/')
         t = u'Sertraline-A-3D-balls.png'
         du = imgdb.getDescriptionURL(t)
         assert du == 'http://commons.wikimedia.org/wiki/Image:Sertraline-A-3D-balls.png'

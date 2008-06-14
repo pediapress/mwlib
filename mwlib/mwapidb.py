@@ -51,6 +51,37 @@ def fetch_url(url, ignore_errors=False):
     
     return data
 
+# ==============================================================================
+
+articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+/)(?P<path>.*)$')
+api_helper_cache = {}
+
+def get_api_helper(url):
+    """Return APIHelper instance given (e.g. article) URL.
+    
+    @param url: URL of a MediaWiki article
+    @type url: str
+    
+    @returns: APIHelper instance or None if it couldn't be guessed
+    @rtype: @{APIHelper}
+    """
+    
+    mo = articleurl_rex.match(url)
+    if mo is None:
+        return None
+    
+    scheme_host_port = mo.group('scheme_host_port')
+    if scheme_host_port in api_helper_cache:
+        return api_helper_cache[scheme_host_port]
+    
+    for path in ('w/', 'wiki/', ''):
+        base_url = scheme_host_port + path
+        api_helper = APIHelper(base_url)
+        if api_helper.is_usable():
+            api_helper_cache[scheme_host_port] = api_helper
+            return api_helper
+    
+    return None
 
 # ==============================================================================
 
@@ -72,7 +103,13 @@ class APIHelper(object):
             self.base_url += '/'
         self.query_cache = {}
     
-    def query(self, **kwargs):
+    def is_usable(self):
+        result = self.query(meta='siteinfo', ignore_errors=True)
+        if result and 'general' in result:
+            return True
+        return False
+    
+    def query(self, ignore_errors=False, **kwargs):
         args = {
             'action': 'query',
             'format': 'json',
@@ -84,14 +121,16 @@ class APIHelper(object):
         q = urllib.urlencode(args)
         q = q.replace('%3A', ':') # fix for wrong quoting of url for images
         q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
-        data = fetch_url('%sapi.php?%s' % (self.base_url, q))
-        if data is None:
+        data = fetch_url('%sapi.php?%s' % (self.base_url, q), ignore_errors=ignore_errors)
+        if ignore_errors and data is None:
             return None
         try:
             return simplejson.loads(unicode(data, 'utf-8'))['query']
         except KeyError:
             return None
         except:
+            if ignore_errors:
+                return None
             raise RuntimeError('api.php query failed. Are you sure you specified the correct baseurl?')
     
     def page_query(self, **kwargs):
@@ -102,8 +141,6 @@ class APIHelper(object):
             page = q['pages'].values()[0]
         except (KeyError, IndexError):
             return None
-        if 'missing' in page:
-            return None
         return page
     
 
@@ -111,20 +148,14 @@ class APIHelper(object):
 
 
 class ImageDB(object):
-    def __init__(self, base_url, shared_base_url=None):
+    def __init__(self, base_url):
         """
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
-        
-        @param shared_base_url: base URL of a shared MediaWiki,
-            e.g. 'http://commons.wikimedia.org/w/' for commons MediaWikis
-        @type base_url: basestring
         """
         
-        self.api_helpers = [APIHelper(base_url)]
-        if shared_base_url is not None:
-            self.api_helpers.append(APIHelper(shared_base_url))
+        self.api_helper = APIHelper(base_url)
         self.tmpdir = tempfile.mkdtemp()
     
     def clear(self):
@@ -142,11 +173,8 @@ class ImageDB(object):
     
         assert isinstance(name, unicode), 'name must be of type unicode'
         
-        for api_helper in self.api_helpers:
-            result = api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
-            if result is not None:
-                break
-        else:
+        result = self.api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
+        if result is None:
             return None
         
         try:
@@ -154,7 +182,7 @@ class ImageDB(object):
             url = imageinfo['descriptionurl']
             if url: # url can be False
                 if url.startswith('/'):
-                    url = urlparse.urljoin(self.api_helpers[0].base_url, url)
+                    url = urlparse.urljoin(self.api_helper.base_url, url)
                 return url
             return None
         except (KeyError, IndexError):
@@ -172,14 +200,11 @@ class ImageDB(object):
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
-        for api_helper in self.api_helpers:
-            if size is None:
-                result = api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
-            else:
-                result = api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url', iiurlwidth=str(size))
-            if result is not None:
-                break
+        if size is None:
+            result = self.api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url')
         else:
+            result = self.api_helper.page_query(titles='Image:%s' % name, prop='imageinfo', iiprop='url', iiurlwidth=str(size))
+        if result is None:
             return None
         
         try:
@@ -190,7 +215,7 @@ class ImageDB(object):
                 url = imageinfo['url']
             if url: # url can be False
                 if url.startswith('/'):
-                    url = urlparse.urljoin(self.api_helpers[0].base_url, url)
+                    url = urlparse.urljoin(self.api_helper.base_url, url)
                 return url
             return None
         except (KeyError, IndexError):
@@ -242,11 +267,16 @@ class ImageDB(object):
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
-        for api_helper in self.api_helpers:
-            result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
-            if result and 'templates' in result:
-                break
-        else:
+        desc_url = self.getDescriptionURL(name)
+        if desc_url is None:
+            return None
+        
+        api_helper = get_api_helper(desc_url)
+        if api_helper is None:
+            return None
+        
+        result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
+        if not result or 'templates' not in result:
             return None
         
         try:
