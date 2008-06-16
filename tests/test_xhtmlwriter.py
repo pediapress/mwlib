@@ -20,6 +20,7 @@ def getXHTML(wikitext):
     dbw.write(r)
     return dbw.asstring()
 
+
 class ValidationError(Exception):
     def __init__(self, value):
         self.value = value
@@ -152,3 +153,4 @@ this test will validate, but sections will be broken.
     if not res == ['h1', 'h2', 'h3']:
         print xhtml
         assert res == ['h1', 'h2', 'h3']
+

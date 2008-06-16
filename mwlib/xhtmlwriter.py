@@ -27,6 +27,7 @@ ToDo:
 """
 
 import sys
+import cgi
 import StringIO
 import xml.etree.ElementTree as ET
 from mwlib import parser,  mathml, advtree
@@ -59,27 +60,51 @@ def indent(elem, level=0):
             elem.tail = i
 
 
-class XMLWriter(object):
-    "basic writer that translate parse tree nodes to XML"
+
+
+def setVList(element, node):
+    """
+    sets html attributes as found in the wikitext
+    if this method is used it should be called *after* 
+    the class attribute is set to some mwx.value.
+    """
+    if hasattr(node, "vlist") and node.vlist:
+        #print "vlist", element, node
+        saveclass = element.get("class")
+        for k,v in xserializeVList(node.vlist):
+            element.set(k,v)
+        if saveclass and element.get("class") != saveclass:
+            element.set("class", " ".join((saveclass, element.get("class"))))
+
+def xserializeVList(vlist):
+    args = [] # list of (key, value)
+    styleArgs = []
+    gotClass = 0
+    gotExtraClass = 0
+    for (key,value) in vlist.items():
+        if isinstance(value, (basestring, int)):
+            args.append((key, unicode(value)))
+        if isinstance(value, dict) and key=="style":
+            for (_key,_value) in value.items():
+                styleArgs.append("%s:%s" % (_key, _value))
+            args.append(("style", '%s' % '; '.join(styleArgs)))
+
+    return args
+
+def escapeattr(val):
+    return cgi.escape(unicode(val).encode("utf8"), quote=True)
+
+
+class MWXMLWriter(object):
+    """
+    basic writer that translate parse tree nodes to XML
+    the emitted XML is lossless 1:1 representation of the parse tree
+    """
 
     header='''<?xml version="1.0" encoding="UTF-8"?>
 '''
-    def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None, debug=False):
-        self.root = ET.Element("mwlibparsetreeasxml")
-        self.root.set("xmlns", "http://code.pediapress.com/mwlib/this-is-fake")
-        self.root.set("xml:lang", "en")
-
-
-    def xwriteArticle(self, a):
-        # add head + title
-        h = ET.SubElement(self.root,"head")
-        e = ET.SubElement(h, "title")
-        if a.caption:
-            e.text = a.caption
-
-        # start body
-        return ET.SubElement(self.root,"body")
-        
+    def __init__(self):
+        self.root = ET.Element("mwlibxml")
         
     def getTree(self, debuginfo=""):
         indent(self.root) # breaks XHTML (proper rendering at least) if activated!
@@ -89,8 +114,10 @@ class XMLWriter(object):
         return self.header + ET.tostring(self.getTree())
     
     def writeparsetree(self, tree):
-        pass
-    
+        out = StringIO.StringIO()
+        parser.show(out, tree)
+        self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
+
     def writeText(self, obj, parent):
         if parent.getchildren(): # add to tail of last tag
             t = parent.getchildren()[-1]
@@ -105,7 +132,7 @@ class XMLWriter(object):
                 parent.text += obj.caption
 
     def write(self, obj, parent=None):
-        if not parent:
+        if parent is None:
             parent = self.root
         # if its text, append to last node
         if isinstance(obj, parser.Text):
@@ -116,12 +143,14 @@ class XMLWriter(object):
             for k in attrs:
                 val = getattr(obj,k)
                 if k not in ("_parentref", "children") and val:
-                    print k, val
-                    e.set(k, repr(val))
+                    if isinstance(val, dict):
+                        for kk, vv in val.items():
+                            e.set(kk, escapeattr(vv))
+                    else:
+                        e.set(k, escapeattr(val))
+            setVList(e, obj)
             for c in obj.children[:]:
                 ce = self.write(c,e)
-                if ce is not None and ce is not e:                    
-                    e.append(ce)
             return e
 
 
@@ -192,7 +221,6 @@ class MWXHTMLWriter(object):
     def writeparsetree(self, tree):
         out = StringIO.StringIO()
         parser.show(out, tree)
-        print "append parsetree to ", self.root
         self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
         
 
@@ -259,7 +287,7 @@ class MWXHTMLWriter(object):
 
     def xwriteCell(self, cell):
         td = ET.Element("td")
-        self.setVList(td, cell)           
+        setVList(td, cell)           
         return td
             
     def xwriteRow(self, row):
@@ -267,41 +295,11 @@ class MWXHTMLWriter(object):
 
     def xwriteTable(self, t):           
         table = ET.Element("table")
-        self.setVList(table, t)           
+        setVList(table, t)           
         if t.caption:
             c = ET.SubElement(table, "caption")
             self.writeText(t.caption, c)
         return table
-
-
-    def setVList(self, element, node):
-        """
-        sets html attributes as found in the wikitext
-        if this method is used it should be called *after* 
-        the class attribute is set to some mwx.value.
-        """
-        if hasattr(node, "vlist") and node.vlist:
-            #print "vlist", element, node
-            saveclass = element.get("class")
-            for k,v in self.xserializeVList(node.vlist):
-                element.set(k,v)
-            if saveclass and element.get("class") != saveclass:
-                element.set("class", " ".join((saveclass, element.get("class"))))
-
-    def xserializeVList(self,vlist):
-        args = [] # list of (key, value)
-        styleArgs = []
-        gotClass = 0
-        gotExtraClass = 0
-        for (key,value) in vlist.items():
-            if isinstance(value, (basestring, int)):
-                args.append((key, unicode(value)))
-            if isinstance(value, dict) and key=="style":
-                for (_key,_value) in value.items():
-                    styleArgs.append("%s:%s" % (_key, _value))
-                args.append(("style", '{%s}' % ','.join(styleArgs)))
-
-        return args
 
 
     def xwriteReference(self, t):
@@ -455,7 +453,7 @@ class MWXHTMLWriter(object):
     def xwriteGallery(self, obj):
         s = ET.Element("div")
         s.set("class", "mwx.gallery")
-        self.setVList(s, obj)
+        setVList(s, obj)
         return s
 
     
@@ -465,7 +463,7 @@ class MWXHTMLWriter(object):
         if not hasattr(t, "starttext"):
             if hasattr(t, "_tag"):
                 e = ET.Element(t._tag)
-                self.setVList(e, t)
+                setVList(e, t)
                 return e
             else:
                 log("skipping %r"%t)

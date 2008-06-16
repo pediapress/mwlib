@@ -7,6 +7,7 @@ import BaseHTTPServer
 import SimpleHTTPServer
 import urllib2
 import simplejson
+from mwlib.utils import daemonize
 
 # init host and port fu**ed up style # FIXME
 host, port = "localhost", 8000
@@ -140,6 +141,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 args.append('%s' % str(a))
 
         print "executing", mwzip_cmd, args
+        daemonize()
         rc = subprocess.call(executable=mwzip_cmd, args=args)
         if rc != 0:
             self.send_response(500)
