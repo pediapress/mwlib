@@ -20,13 +20,13 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     """
     mwlib.xml-server version %s using xhtmlwriter.py version (%s)
     
-    This server offers two services:
-    /mwxml/         : returns MediaWiki documents as XHTML1.0 transitional
+    This server offers three services:
+    /mwxml/         : returns a XML represnentaion of the parse tree 
+    /mwxhtml/       : returns MediaWiki documents as XHTML1.0 transitional
     /imageresolver/ : resolves imagenames to full urls
 
     Note this service relies on MediaWiki API http://en.wikipedia.org/w/api.php
-    Son only Mediawikis with an approriate version are supported.
-
+    So only Mediawikis with an approriate version are supported.
 
     usage /mwxml/ _____________________________________________________:
 
@@ -36,6 +36,15 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     
     wiki_base_url defaults to %s
     so one can also use /mwxml/Article to access Article from the above site
+
+    usage /mwxhtml/ _____________________________________________________:
+
+    /mwxhtml/<wiki_base_url>/<article><?option_arg=option_value>
+    e.g.
+    /mwxhtml/www.mediawiki.org/w/API
+    
+    wiki_base_url defaults to %s
+    so one can also use /mwxhtml/Article to access Article from the above site
     
     options (query args):
 
@@ -64,6 +73,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     """ 
 
     documentation = __doc__ % (version, xhtmlwriter.version, default_baseurl, 
+                               default_baseurl, 
                                default_debug, imagesrcresolver, default_baseurl, 
                                default_shared_baseurl, default_imgwidth)
        
@@ -77,18 +87,18 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         app = path[1]
         args = path[2:]
         print args, query
-        if app == "mwxml":
-            self._dosafe(self._servXML, args, query)
+        if app in ("mwxml", "mwxhtml"):
+            self._dosafe(self._servXML, args, query, app)
         elif app == "imageresolver":
-            self._dosafe(self._resolveImage, args, query)
+            self._dosafe(self._resolveImage, args, query, app)
         else:
             self._doc()
         
 
 
-    def _dosafe(self, method, query, args):
+    def _dosafe(self, method, query, args, app):
         try:
-            method(query, args)
+            method(query, args, app)
         except Exception, e:
             s = StringIO.StringIO()
             traceback.print_exc(file=s)
@@ -109,7 +119,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.wfile.write(response)
 
 
-    def _servXML(self, args, query):
+    def _servXML(self, args, query, dialect="mwxml"):
         if not len(args):
             self._doc(error="require articlename")
             return
@@ -129,10 +139,14 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         db.print_template = None # deactivate print template lookups
         tree = db.getParsedArticle(title, revision=None)
         advtree.buildAdvancedTree(tree)
-        dbw = xhtmlwriter.MWXHTMLWriter(language=language, namespace=namespace, 
-                                        imagesrcresolver=imagesrcresolver,
-                                        debug=debug)
-        #dbw = xhtmlwriter.XMLWriter() # another XML-writer implementation
+        if dialect == "mwxhtml":
+            dbw = xhtmlwriter.MWXHTMLWriter(language=language, namespace=namespace, 
+                                            imagesrcresolver=imagesrcresolver,
+                                            debug=debug)
+        else:
+            assert dialect == "mwxml"
+            dbw = xhtmlwriter.MWXMLWriter() # another XML-writer implementation
+
         dbw.write(tree)
         if debug:
             dbw.writeparsetree(tree)
@@ -149,7 +163,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.wfile.flush()
         
 
-    def _resolveImage(self, args, query):
+    def _resolveImage(self, args, query, app=None):
         if not len(args):
             self._doc(error="require imagename")
             return
