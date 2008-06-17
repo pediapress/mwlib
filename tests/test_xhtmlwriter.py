@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
-import os, sys
-import subprocess
-import tempfile
+import sys
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib.parser import show
 from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
+from mwlib.xhtmlwriter import validate as mwvalidate
+
 import re
 
 def getXHTML(wikitext):
@@ -26,18 +26,13 @@ class ValidationError(Exception):
         self.value = value
     def __str__(self):
         return repr(self.value)
- 
-def validate(xhtml):
+
+
+def validate(xml):
     "THIS USES xmllint AND WILL FAIL IF NOT INSTALLED"
-    fh, tfn = tempfile.mkstemp()
-    open(tfn, "w").write(xhtml)
-    cmd = "xmllint --noout --valid %s" %tfn
-    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE, close_fds=True)
-    p.wait()
-    r = p.stderr.read()
-    os.remove(tfn)
+    r = mwvalidate(xml)
     if len(r):
-        print xhtml
+        print xml
         raise ValidationError, r
 
 

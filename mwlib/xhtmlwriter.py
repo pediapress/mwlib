@@ -159,14 +159,22 @@ class MWXMLWriter(object):
 
 
 
-
-
 class MWXHTMLWriter(object):
     namedLinkCount = 1
 
     header='''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 '''
+
+    paratag = "div" # [p,div] switch to 'div' if xhtml validation is required (or fix parser)
+
+    css = ET.Element("style", type='text/css',  media='screen, projection')
+    css.text = """
+			@import "http://en.wikipedia.org/skins-1.5/common/shared.css?156";
+			@import "http://en.wikipedia.org//skins-1.5/monobook/main.css?156";
+"""
+    #css = None # set to None disables css
+
     def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None, debug=False):
         self.language = language
         self.namespace = namespace
@@ -186,10 +194,10 @@ class MWXHTMLWriter(object):
         
     def getTree(self, debuginfo=""):
         indent(self.root) # breaks XHTML (proper rendering at least) if activated!
-        # generate xml for
-        # errors
-        # categorylinks
-        # language links
+        if self.debug:
+            r = validate(self.header + ET.tostring(self.root))
+            if r:
+                self.root.append(ET.Comment(r.replace("--", " - - ")))
         return self.root
     
     def asstring(self):
@@ -255,6 +263,13 @@ class MWXHTMLWriter(object):
                     e.append(ce)
             return e
 
+    def writeChildren(self, obj, parent): # use this to avoid bugs!
+        "writes only the children of a node"
+        for c in obj:                    
+            res = self.write(c, parent)
+            if res is not None and res is not parent:
+                parent.append(res)
+
 
     def xwriteLink(self, obj): # FIXME (known|unknown)
         a = ET.Element("a")
@@ -268,17 +283,25 @@ class MWXHTMLWriter(object):
     def xwriteArticle(self, a):
         # add head + title
         h = ET.SubElement(self.root,"head")
+        if self.css is not None:
+            h.append(self.css)
         e = ET.SubElement(h, "title")
         if a.caption:
             e.text = a.caption
         # start body
-        return ET.SubElement(self.root,"body")
+        b = ET.SubElement(self.root,"body")
+        # add article name as first section heading
+        e = ET.SubElement(b, "div")
+        e.set("class", "mwx.section")
+        h = ET.SubElement(e, "h1")
+        h.text = a.caption
+        return e
 
 
     def xwriteSection(self, obj):
         e = ET.Element("div")
         e.set("class", "mwx.section")
-        level = 1 + obj.getLevel()
+        level = 2 + obj.getLevel() # starting with h2
         h = ET.SubElement(e, "h%d" % level)
         self.write(obj.children[0], h)
         obj.children = obj.children[1:]
@@ -318,10 +341,9 @@ class MWXHTMLWriter(object):
             return
         ol = ET.Element("ol")
         ol.set("class", "mwx.references")
-        for i,r in enumerate(self.references):
-            li = ET.SubElement(ol,"li")
-            for x in r:                    
-                self.write(x, li)                          
+        for i,ref in enumerate(self.references):
+            li = ET.SubElement(ol, "li", id="cite_note-%s" % i)
+            self.writeChildren(ref, parent=li)
         self.references = []            
         return ol
 
@@ -522,7 +544,7 @@ class MWXHTMLWriter(object):
 
         this is a hack to let created documents pass the validation test.
         """
-        e = ET.Element("div")
+        e = ET.Element(self.paratag) # "div" or "p"
         e.set("class", "mwx.paragraph")
         return e
 
@@ -602,6 +624,19 @@ def preprocess(root):
     xmltreecleaner.fixLists(root)
     xmltreecleaner.fixParagraphs(root)
     xmltreecleaner.fixBlockElements(root)
+
+
+def validate(xml):
+    import subprocess, tempfile, os
+    "THIS USES xmllint AND WILL FAIL IF NOT INSTALLED"
+    fh, tfn = tempfile.mkstemp()
+    open(tfn, "w").write(xml)
+    cmd = "xmllint --noout --valid %s" %tfn
+    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE, close_fds=True)
+    p.wait()
+    r = p.stderr.read()
+    os.remove(tfn)
+    return r
 
 
 

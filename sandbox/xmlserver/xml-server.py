@@ -151,7 +151,9 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         elif dialect == "dbxml":
             from mwlib import docbookwriter
             docbookwriter.preprocess(tree)
-            dbw = docbookwriter.DocBookWriter() 
+            dbw = docbookwriter.DocBookWriter(language=language, namespace=namespace, 
+                                            imagesrcresolver=imagesrcresolver,
+                                            debug=debug) 
         else:
             raise Exception, "unkonwn export"
 
