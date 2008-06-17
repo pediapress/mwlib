@@ -98,6 +98,7 @@ def xserializeVList(vlist):
 def escapeattr(val):
     return cgi.escape(unicode(val).encode("utf8"), quote=True)
 
+   
 
 class MWXMLWriter(object):
     """
@@ -157,9 +158,14 @@ class MWXMLWriter(object):
                 ce = self.write(c,e)
             return e
 
-
+class SkipChildren(object):
+    "if returned by the writer no children are processed"
+    def __init__(self, element=None):
+        self.element = element
 
 class MWXHTMLWriter(object):
+
+        
     namedLinkCount = 1
 
     header='''<?xml version="1.0" encoding="UTF-8"?>
@@ -170,8 +176,8 @@ class MWXHTMLWriter(object):
 
     css = ET.Element("style", type='text/css',  media='screen, projection')
     css.text = """
-			@import "http://en.wikipedia.org/skins-1.5/common/shared.css?156";
-			@import "http://en.wikipedia.org//skins-1.5/monobook/main.css?156";
+                        @import "http://en.wikipedia.org/skins-1.5/common/shared.css?156";
+                        @import "http://en.wikipedia.org//skins-1.5/monobook/main.css?156";
 """
     #css = None # set to None disables css
 
@@ -186,7 +192,6 @@ class MWXHTMLWriter(object):
         self.root.set("xml:lang", "en")
         #if self.language: self.root.set("lang", self.language) 
         self.xmlparent = None # this is the parent XML Element
-        
         self.errors = []
         self.languagelinks = []
         self.categorylinks = []
@@ -194,6 +199,8 @@ class MWXHTMLWriter(object):
         
     def getTree(self, debuginfo=""):
         indent(self.root) # breaks XHTML (proper rendering at least) if activated!
+        self.root.append(self.writeCategoryLinks())
+        self.root.append(self.writeLanguageLinks())
         if self.debug:
             r = validate(self.header + ET.tostring(self.root))
             if r:
@@ -254,9 +261,11 @@ class MWXHTMLWriter(object):
                 showNode(obj)
                 e = None
             
-            if e is None:
+            if isinstance(e, SkipChildren): # do not process children of this node
+                return e.element
+            elif e is None:
                 e = parent
-            
+
             for c in obj.children[:]:
                 ce = self.write(c,e)
                 if ce is not None and ce is not e:                    
@@ -329,23 +338,6 @@ class MWXHTMLWriter(object):
         return table
 
 
-    def xwriteReference(self, t):
-        self.references.append(t)
-        t =  ET.Element("sup")
-        t.set("class", "mwx.reference")
-        t.text = unicode( len(self.references))
-        return t
-        
-    def xwriteReferenceList(self, t):
-        if not self.references:
-            return
-        ol = ET.Element("ol")
-        ol.set("class", "mwx.references")
-        for i,ref in enumerate(self.references):
-            li = ET.SubElement(ol, "li", id="cite_note-%s" % i)
-            self.writeChildren(ref, parent=li)
-        self.references = []            
-        return ol
 
 
     # Special Objects
@@ -417,24 +409,6 @@ class MWXHTMLWriter(object):
             a.text = obj.target
         return a
 
-    def xwriteCategoryLink(self, obj):
-        if not obj.colon and not obj.children:
-            pass # FIXME
-        a = ET.Element("a", href=obj.target)
-        a.set("class", "mwx.link.category")
-        a.text = obj.target
-        return a
-
-
-    def xwriteLangLink(self, obj): # FIXME no valid url (but uri)
-        if obj.target is None:
-            return
-        a = ET.Element("a", href=obj.target)
-        a.set("class", "mwx.link.interwiki")
-        if not obj.children:
-            a.text = obj.target
-        return a
-
        
     def xwriteImageLink(self, obj): 
         if obj.caption or obj.align:
@@ -481,6 +455,75 @@ class MWXHTMLWriter(object):
         s.set("class", "mwx.gallery")
         setVList(s, obj)
         return s
+
+# -------------- things that are collected --------------
+
+
+    def xwriteCategoryLink(self, obj):
+        if obj.target:
+            self.categorylinks.append(obj)
+        return SkipChildren()
+
+    def writeCategoryLinks(self):
+        seen = set()
+        if not self.languagelinks:
+            return
+        ol = ET.Element("ol")
+        ol.set("class", "mwx.categorylinks")
+        for i,link in enumerate(self.categorylinks):
+            if link.target in seen:
+                continue
+            seen.add(link.target)
+            li = ET.SubElement(ol, "li")
+            a = ET.SubElement(li, "a", href=link.target)
+            a.set("class", "mwx.link.category")
+            if not link.children:
+                a.text = link.target
+            else:
+                self.writeChildren(link, parent=a)
+        return ol
+
+
+    def xwriteLangLink(self, obj): # FIXME no valid url (but uri)
+        if obj.target:
+            self.languagelinks.append(obj)
+        return SkipChildren()
+
+    def writeLanguageLinks(self):
+        if not self.languagelinks:
+            return
+        ol = ET.Element("ol")
+        ol.set("class", "mwx.languagelinks")
+        for i,link in enumerate(self.languagelinks):
+            li = ET.SubElement(ol, "li")
+            a = ET.SubElement(li, "a", href=link.target)
+            a.set("class", "mwx.link.interwiki")
+            if not link.children:
+                a.text = link.target
+            else:
+                self.writeChildren(link, parent=a)
+        return ol
+
+
+        
+    def xwriteReference(self, t):
+        self.references.append(t)
+        t =  ET.Element("sup")
+        t.set("class", "mwx.reference")
+        t.text = unicode( len(self.references))
+        return SkipChildren(t)
+
+        
+    def xwriteReferenceList(self, t):
+        if not self.references:
+            return
+        ol = ET.Element("ol")
+        ol.set("class", "mwx.references")
+        for i,ref in enumerate(self.references):
+            li = ET.SubElement(ol, "li", id="cite_note-%s" % i)
+            self.writeChildren(ref, parent=li)
+        self.references = []            
+        return ol
 
     
     # ---------- Generic XHTML Elements --------------------------------
