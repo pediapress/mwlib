@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+# Copyright (c) 2008, PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import urllib
 import sys
 import cgi

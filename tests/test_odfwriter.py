@@ -34,8 +34,6 @@ def validate(odfw):
 def getXML(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
-    mwlib.advtree.buildAdvancedTree(r)
-    mwlib.parser.show(sys.stdout, r)
     preprocess(r)
     mwlib.parser.show(sys.stdout, r)
     odfw = ODFWriter()

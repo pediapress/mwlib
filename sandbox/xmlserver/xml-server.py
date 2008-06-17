@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Copyright (c) 2008, PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import urllib
 import cgi
 import traceback
@@ -85,7 +88,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         app = path[1]
         args = path[2:]
         print args, query
-        if app in ("mwxml", "mwxhtml"):
+        if app in ("mwxml", "mwxhtml", "dbxml"):
             self._dosafe(self._servXML, args, query, app)
         elif app == "imageresolver":
             self._dosafe(self._resolveImage, args, query, app)
@@ -136,14 +139,22 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         db = mwapidb.WikiDB(base_url, license=None)
         db.print_template = None # deactivate print template lookups
         tree = db.getParsedArticle(title, revision=None)
-        advtree.buildAdvancedTree(tree)
+
         if dialect == "mwxhtml":
+            xhtmlwriter.preprocess(tree)
             dbw = xhtmlwriter.MWXHTMLWriter(language=language, namespace=namespace, 
                                             imagesrcresolver=imagesrcresolver,
                                             debug=debug)
+        elif dialect == "mwxml":
+            advtree.buildAdvancedTree(tree) # this should be optional
+            dbw = xhtmlwriter.MWXMLWriter() # 1:1 XML from parse tree
+        elif dialect == "dbxml":
+            from mwlib import docbookwriter
+            docbookwriter.preprocess(tree)
+            dbw = docbookwriter.DocBookWriter() 
         else:
-            assert dialect == "mwxml"
-            dbw = xhtmlwriter.MWXMLWriter() # another XML-writer implementation
+            raise Exception, "unkonwn export"
+
 
         dbw.write(tree)
         if debug:

@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
-from mwlib.dummydb import DummyDB
-from mwlib.uparser import parseString
-import mwlib.advtree
-from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
+import os, sys
 import subprocess
 import tempfile
-import os
+from mwlib.dummydb import DummyDB
+from mwlib.uparser import parseString
+from mwlib.parser import show
+from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
 import re
 
 def getXHTML(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
-    mwlib.advtree.buildAdvancedTree(r)
     preprocess(r)
+    show(sys.stdout, r)
     dbw = MWXHTMLWriter()
     dbw.write(r)
     return dbw.asstring()

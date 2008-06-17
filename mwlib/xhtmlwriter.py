@@ -30,8 +30,12 @@ import sys
 import cgi
 import StringIO
 import xml.etree.ElementTree as ET
-from mwlib import parser,  mathml, advtree
+from mwlib import parser
+from mwlib import mathml
+from mwlib import advtree
+from mwlib import xmltreecleaner
 from mwlib.log import Log
+
 version = "0.1"
 
 log = Log("xhtmlwriter")
@@ -590,12 +594,25 @@ def fixtree(element, parent=None):
 
 
 
+
+
 def preprocess(root):
-    pass
+    advtree.buildAdvancedTree(root)
+    xmltreecleaner.removeChildlessNodes(root)
+    xmltreecleaner.fixLists(root)
+    xmltreecleaner.fixParagraphs(root)
+    xmltreecleaner.fixBlockElements(root)
+
+
 
 def main():
     for fn in sys.argv[1:]:
-        r = advtree.getAdvTree(fn)
+        from mwlib.dummydb import DummyDB
+        from mwlib.uparser import parseString
+        db = DummyDB()
+        input = unicode(open(fn).read(), 'utf8')
+        r = parseString(title=fn, raw=input, wikidb=db)
+        parser.show(sys.stdout, r)
         preprocess(r)
         parser.show(sys.stdout, r)
         dbw = MWXHTMLWriter()

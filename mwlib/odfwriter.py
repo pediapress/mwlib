@@ -32,10 +32,12 @@ except exceptions.ImportError, e:
 
 from odf.opendocument import OpenDocumentText
 from odf import text, dc, meta, table, draw, math
-from mwlib import parser,  mathml
+from mwlib import parser
+from mwlib import mathml
 from mwlib.log import Log
 from mwlib import advtree 
 from mwlib import odfstyles as style
+from mwlib import xmltreecleaner
 
 log = Log("odfwriter")
 
@@ -525,115 +527,25 @@ class ODFWriter(object):
     
 # - helper funcs   r ---------------------------------------------------
 
-
-
-def fixtree(element, parent=None):
-    """
-    the parser uses paragraphs to group anything
-    this is not compatible with xhtml where nesting of 
-    block elements is not allowed.
-    """
-    #blockelements = set("p","pre", "ul", "ol","blockquote", "hr", "dl")
-    # TODO POSTPROCESS 
-    
-    # move section children after the section
-    if isinstance(element, advtree.Section):
-        last = element
-        for c in element.children[1:]:
-            c.moveto(last)
-            last = c
-        element.children = element.children[0:1] # contains the caption
-    else:
-        for c in element:
-            fixtree(c, element)
-
-
-def _fixParagraphs(element):
-    if isinstance(element, advtree.Paragraph) and isinstance(element.previous, advtree.Section) \
-            and element.previous is not element.parent:
-        prev = element.previous
-        parent = element.parent
-        element.moveto(prev.getLastChild())
-        assert element not in parent.children
-        assert element in prev.children
-        assert element.parent is prev
-        return True # changed
-    else:
-        for c in element.children[:]:
-            if _fixParagraphs(c):
-                return True
-
-
-def fixParagraphs(root):
-    while _fixParagraphs(root):
-        print "_run fix paragraphs"
-
-    
-
-def _fixBlockElements(element):
-    """
-    the parser uses paragraphs to group anything
-    this is not compatible with xhtml where nesting of 
-    block elements is not allowed.
-    """
-    blockelements = (advtree.Paragraph, advtree.PreFormatted, advtree.ItemList,advtree.Section, advtree.Table,
-                     advtree.Blockquote, advtree.DefinitionList, advtree.HorizontalRule)
-
-    if isinstance(element, blockelements) and element.parent and isinstance(element.parent, blockelements) \
-            and not isinstance(element.parent, advtree.Section) : # Section is no problem if parent
-        if not element.parent.parent:
-            print "missing parent parent", element, element.parent, element.parent.parent
-            assert element.parent.parent
-        
-        # s[ p, p[il[], text], p] -> s[p, p, il, p[text], p]
-        # split element parents
-        pstart = element.parent.copy()
-        pend = element.parent.copy()
-        for i,c in enumerate(element.parent.children):
-            if c is element:
-                break
-        pstart.children = pstart.children[:i]
-        pend.children = pend.children[i+1:]
-        print "action",  [pstart, element, pend]
-        grandp = element.parent.parent
-        oldparent = element.parent
-        grandp.replaceChild(oldparent, [pstart, element, pend])
-        assert pstart in grandp.children
-        assert element in grandp.children
-        assert pend in grandp.children
-        assert oldparent not in grandp.children
-        assert pstart.parent is grandp
-        assert pend.parent is grandp
-        #assertparents(element.parent.parent)
-        return True # changed
-    else:
-        for c in element.children:
-            if _fixBlockElements(c):
-                return True
-        
-def fixBlockElements(root):
-    while _fixBlockElements(root):
-        print "_run fix block elements"
-
-def assertparents(e, isroot=True):
-    if not isroot:
-        assert e.parent
-    for c in e.children:
-        assertparents(c, isroot=False)
-
-
 def preprocess(root):
+    advtree.buildAdvancedTree(root)
     # remove nav boxes
     for c in root.getAllChildren():
         if c.isNavBox() and c.parent is not None:
             c.parent.removeChild(c)
-    fixParagraphs(root)
-    fixBlockElements(root)
-    
+    xmltreecleaner.removeChildlessNodes(root)
+    xmltreecleaner.fixLists(root)
+    xmltreecleaner.fixParagraphs(root)
+    xmltreecleaner.fixBlockElements(root)
+
 
 def main():
     for fn in sys.argv[1:]:
-        r = advtree.getAdvTree(fn)
+        from mwlib.dummydb import DummyDB
+        from mwlib.uparser import parseString
+        db = DummyDB()
+        input = unicode(open(fn).read(), 'utf8')
+        r = parseString(title=fn, raw=input, wikidb=db)
         parser.show(sys.stdout, r)
         preprocess(r)
         parser.show(sys.stdout, r)
