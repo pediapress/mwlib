@@ -7,7 +7,7 @@ import simplejson
 import zipfile
 from mwlib import uparser, parser
 import mwlib.log
-log = mwlib.log.Log("zip")
+log = mwlib.log.Log("recorddb")
 
 
 class RecordDB(object):
@@ -40,11 +40,12 @@ class RecordDB(object):
     
 
 class ZipfileCreator(object):
-    def __init__(self, zf, wikidb=None, imgdb=None):
+    def __init__(self, zf, wikidb=None, imgdb=None, imagesize=None):
         self.zf = zf
         self.db = RecordDB(wikidb)
         self.images = {}
         self.imgdb = imgdb
+        self.imagesize = imagesize
 
     def addObject(self, name, value):
         """
@@ -57,40 +58,31 @@ class ZipfileCreator(object):
     
     def addArticle(self, title, revision=None):
         a = uparser.parseString(title, revision=revision, wikidb=self.db)
-        for x in a.allchildren():
-            if isinstance(x, parser.ImageLink):
-                name = x.target
-                self.images[name] = {}
-    
-    def writeImages(self, size=None, progress_callback=None):
-        """
-        @param progress_callback: callback which gets called with two args: the
-            number of the currently processed image and the total number of
-            images (optional)
-        @type progress_callback: callable
-        """
         if self.imgdb is None:
             return
-        
-        image_names = sorted(self.images.keys())
-        n = len(image_names)
-        for i, name in enumerate(image_names):
-            if progress_callback is not None:
-                progress_callback(i, n)
-            dp = self.imgdb.getDiskPath(name, size=size)
-            if dp is None:
-                continue
-            self.zf.write(dp, (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
-            self.images[name]['url'] = self.imgdb.getURL(name, size=size)
-            try:
-                descriptionurl = self.imgdb.getDescriptionURL(name)
-                if descriptionurl:
-                    self.images[name]['descriptionurl'] = descriptionurl
-            except AttributeError:
-                pass
-            license = self.imgdb.getLicense(name)
-            if license:
-                self.images[name]['license'] = license
+        for x in a.allchildren():
+            if isinstance(x, parser.ImageLink):
+                self.addImage(x.target)
+    
+    def addImage(self, name):
+        if name in self.images:
+            return
+        self.images[name] = {}
+        path = self.imgdb.getDiskPath(name, size=self.imagesize)
+        if path is None:
+            log.warn('Could not get image %r (size=%r)' % (name, self.imagesize))
+            return
+        self.zf.write(path, (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
+        self.images[name]['url'] = self.imgdb.getURL(name, size=self.imagesize)
+        try:
+            descriptionurl = self.imgdb.getDescriptionURL(name)
+            if descriptionurl:
+                self.images[name]['descriptionurl'] = descriptionurl
+        except AttributeError: # FIXME: implement getDescriptionURL() in all WikiDBs and remove this try-except
+            pass
+        license = self.imgdb.getLicense(name)
+        if license:
+            self.images[name]['license'] = license
     
     def writeContent(self):
         self.addObject('content.json', simplejson.dumps(dict(

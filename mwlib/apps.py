@@ -87,81 +87,83 @@ def buildzip():
     parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
-    parser.add_option("-g", "--getposturl", action="store_true", help="get posturl from pp and direct browser to upload url")
+    parser.add_option("-g", "--getposturl",
+                      help='get POSTURL from service with given URL and open upload URL in webbrowser (default: "http://pediapress.com/api/collections/")',
+                      metavar="SERVICEURL")
     parser.add_option("-i", "--imagesize",
-                      help="max. pixel size (width or height) for images (default: 800)")
+                      help="max. pixel size (width or height) for images (default: 800)",
+                      default=800)
     parser.add_option("-d", "--daemonize", action="store_true",
-                      help='become daemon after collection articles (before POST request)')
+                      help='become a daemon process as soon as possible')
     parser.add_option("-l", "--logfile", help="log to logfile")
     parser.add_option("--license", help="Title of article containing full license text")
     parser.add_option("--template-blacklist", help="Title of article containing blacklisted templates")
     options, args = parser.parse_args()
     
-    import tempfile
-    import os
-    import zipfile
-    import simplejson
-    from mwlib import utils
-    from mwlib.utils import daemonize
-    import urllib
-    import urllib2
-
-    articles = [unicode(x, 'utf-8') for x in args]
-    
-    baseurl = options.baseurl
-    conf = options.conf
-    if not baseurl and not options.conf:
-        parser.error("neither --conf nor --baseurl specified\nuse --help for all options")
-    
-    posturl = None
-    posturl = options.posturl
-    if posturl:
-        posturl = posturl.encode('utf-8')
-
-    # automatically acquires a post url 
-    if not posturl and options.getposturl:
-        import webbrowser
-        
-        serviceurl = "http://pediapress.com/api/collections/"
-        u = urllib2.urlopen(serviceurl, data="any")
-        h = simplejson.loads(u.read())
-        posturl = h["post_url"]
-        redirect_url = h["redirect_url"]
-        webbrowser.open(redirect_url)
-        print "acquired post url", posturl
-        print "redirected browser to", redirect_url
-    
-    def post_status(status):
-        print 'status:', status
-        if not posturl:
-            return
-        try:
-            return urllib2.urlopen(posturl, urllib.urlencode({'status': status})).read()
-        except Exception, e:
-            print 'ERROR posting status %r to %r: %s' % (status, posturl, e)
-    
-    def post_progress(progress):
-        progress = int(progress)
-        print 'progress', progress
-        if not posturl:
-            return
-        try:
-            return urllib2.urlopen(posturl, urllib.urlencode({'progress': progress})).read()
-        except Exception, e:
-            print 'ERROR posting progress %d to %r: %s' % (progress, posturl, e)
+    use_help = 'Use --help for usage information.'
+    if not options.baseurl and not options.conf:
+        parser.error("Neither --conf nor --baseurl specified\n" + use_help)        
+    if options.posturl and options.getposturl:
+        parser.error('Please specify either --posturl or --getposturl, not both.\n' + use_help)
+    if not options.posturl and not options.getposturl and not options.output:
+        parser.error('Neither --output, nor --posturl or --getposturl specified. This would result in a no-op...')
     
     try:
-        if options.logfile:
-            utils.start_logging(options.logfile)
-            
-        output = options.output
-
+        options.imagesize = int(options.imagesize)
+        assert options.imagesize > 0
+    except (ValueError, AssertionError):
+        parser.error('Argument for --imagesize must be an integer > 0.')
+    
+    if options.logfile:
+        from mwlib.utils import start_logging
+        start_logging(options.logfile)
+    
+    import os
+    import tempfile
+    import zipfile
+    
+    if options.posturl:
+        from mwlib.podclient import PODClient
+        podclient = PODClient(options.posturl)
+    elif options.getposturl:
+        import webbrowser
+        from mwlib.podclient import podclient_from_serviceurl
+        podclient = podclient_from_serviceurl(options.getposturl)
+        webbrowser.open(podclient.redirecturl)
+    else:
+        podclient = None
+    
+    delete_files = []
+    
+    if options.daemonize:
+        from mwlib.utils import daemonize
+        if options.metabook:
+            import shutil
+            fd, tmp = tempfile.mkstemp()
+            os.close(fd)
+            shutil.copyfile(options.metabook, tmp)
+            options.metabook = tmp
+            delete_files.append(tmp)
+        daemonize()
+    
+    def set_status(status):
+        print 'Status: %s' % status
+        if podclient is not None:
+            podclient.post_status(status)
+        
+    def set_progress(progress):
+        print 'Progress: %d%%' % progress
+        if podclient is not None:
+            podclient.post_progress(progress)
+    
+    try:
+        set_status('init')
+        
         from mwlib import wiki, recorddb, metabook
         
         mb = metabook.MetaBook()
-        if conf:
-
-            w = wiki.makewiki(conf)
+        if options.conf:
+            w = wiki.makewiki(options.conf)
             cp = w.configparser
             mb.source = {
                 'name': cp.get('wiki', 'name'),
@@ -177,8 +179,8 @@ def buildzip():
                 }
         else:
             w = {
-                'wiki': wiki.wiki_mwapi(baseurl, options.license, options.template_blacklist),
-                'images': wiki.image_mwapi(baseurl)
+                'wiki': wiki.wiki_mwapi(options.baseurl, options.license, options.template_blacklist),
+                'images': wiki.image_mwapi(options.baseurl)
             }
             metadata = w['wiki'].getMetaData()
             mb.source = {
@@ -188,94 +190,59 @@ def buildzip():
             if 'license' in metadata:
                 mb.source['defaultarticlelicense'] = metadata['license']
         
-        if options.noimages:
-            w['images'] = None
-        else:
-            if options.imagesize:
-                imagesize = int(options.imagesize)
-            else:
-                imagesize = 800
-        
-        if output:
-            zipfilename = output
-        else:
-            fd, zipfilename = tempfile.mkstemp()
-            os.close(fd)
+        if args:
+            mb.addArticles([unicode(x, 'utf-8') for x in args])
         
         if options.collectionpage:
-            mwcollection = w['wiki'].getRawArticle(options.collectionpage)
-            mb.loadCollectionPage(mwcollection)
+            mb.loadCollectionPage(w['wiki'].getRawArticle(options.collectionpage))
         elif options.metabook:
             mb.readJsonFile(options.metabook)
         
-        # do not daemonize earlier: Collection extension deletes input metabook file!
-        if options.daemonize:
-            daemonize()
+        if options.noimages:
+            w['images'] = None
         
-        
-        post_status('init')
-        
-        from mwlib.utils import get_multipart
-
-        
-        zf = zipfile.ZipFile(zipfilename, 'w')
-        z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'])
-        
-        post_status('parsing')
-        
-        mb.addArticles(articles)
-        
+        if options.output is None:
+            fd, options.output = tempfile.mkstemp()
+            os.close(fd)
+            delete_files.append(options.output)
+        zf = zipfile.ZipFile(options.output, 'w')
+        z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'], imagesize=options.imagesize)
         z.addObject('metabook.json', mb.dumpJson())
+        
+        set_status('parsing')
         articles = list(mb.getArticles())
         if articles:
-            inc = 70./len(articles)
+            inc = 90./len(articles)
         else:
             inc = 0
         p = 0
         for title, revision in articles:
-            post_progress(p)
+            set_progress(p)
             z.addArticle(title, revision=revision)        
             p += inc
-        
-        post_progress(70)
-        
-        post_status('packaging')
-        
-        def image_progress(i, n):
-            post_progress(70 + i*(20.0/n))
-        
-        if not options.noimages:
-            z.writeImages(size=imagesize, progress_callback=image_progress)
-        
-        post_progress(90)
+        set_progress(90)
         
         z.writeContent()
         zf.close()
+        set_progress(95)
         
-        post_progress(95)
+        if podclient:
+            podclient.post_zipfile(options.output)
         
-        if posturl:
-            post_status('uploading')
-            zf = open(zipfilename, "rb")
-            ct, data = get_multipart('collection.zip', zf.read(), 'collection')
-            zf.close()
-            print "posting the zip to", posturl, len(data)
-            req = urllib2.Request(posturl, data=data, headers={"Content-Type": ct})
-            result = urllib2.urlopen(req).read()
-            print "posting result was ", result
-
         if w['images']:
             w['images'].clear()
         
-        if not output:
-            os.unlink(zipfilename)
-        
-        post_status('finished')
-        post_progress(100)
+        set_status('finished')
+        set_progress(100)
     except Exception, e:
-        post_status('error')
+        set_status('error')
         raise
-    
+    finally:
+        for path in delete_files:
+            try:
+                os.unlink(path)
+            except Exception, e:
+                print 'Could not delete file %r: %s' % (path, e)
 
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
