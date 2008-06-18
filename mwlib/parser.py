@@ -218,6 +218,7 @@ class Link(Node):
         pic = self.target
         if pic.startswith(':'):
             self.colon = True
+            self.target = self.target.strip(':')
             return
         
         
