@@ -8,9 +8,14 @@ import traceback
 import StringIO
 import BaseHTTPServer
 import SimpleHTTPServer
-from mwlib import mwapidb
+
 from mwlib import xhtmlwriter
 from mwlib import advtree
+
+from mwlib.utils import Cache # this is local
+from mwlib import mwapidb
+mwapidb.max_cacheable_size = 5 * 1024 * 1024
+mwapidb.fetch_cache = Cache()
 
 default_baseurl = "en.wikipedia.org/w"
 default_debug = 1

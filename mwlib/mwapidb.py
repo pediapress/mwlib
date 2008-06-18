@@ -19,16 +19,22 @@ from mwlib.log import Log
 
 log = Log("mwapidb")
 
+if urllib2.getproxies():
+    log("using proxy %r" % urllib2.getproxies())
+
 try:
     from mwlib.licenses import lower2normal
 except ImportError:
     log.warn('no licenses found')
     lower2normal = {}
 
+
+
 # ==============================================================================
 
 fetch_cache = {}
 max_cacheable_size = 1024
+
 
 def fetch_url(url, ignore_errors=False):
     if url in fetch_cache:

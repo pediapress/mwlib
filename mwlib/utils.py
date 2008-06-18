@@ -110,3 +110,42 @@ def get_multipart(filename, data, name):
     content_type = 'multipart/form-data; boundary=%s' % boundary
     
     return content_type, body
+
+
+
+# --------------------- CACHE for mwapidb ----------------------
+"""
+persists documents in tempdir
+
+usage:
+from mwlib.utils import Cache # this is local
+from mwlib import mwapidb
+mwapidb.max_cacheable_size = 5 * 1024 * 1024
+mwapidb.fetch_cache = Cache()
+"""
+
+import tempfile
+import md5
+import UserDict
+import exceptions
+
+cache_prefix = "%s/mwlibcache." % tempfile.gettempdir()
+
+def fname(key):
+    return cache_prefix + md5.md5(key).hexdigest()
+
+class Cache(UserDict.UserDict):
+    def __getitem__(self, name):
+        fn = fname(name)
+        if os.path.exists(fn):
+            return open(fn).read()
+        raise exceptions.KeyError, name
+
+    def __setitem__(self, name, value):
+        fn = fname(name)
+        if not os.path.exists(fn):
+            return open(fn, "w").write(value)
+
+    def __contains__(self, name):
+        fn = fname(name)
+        return os.path.exists(fn)
