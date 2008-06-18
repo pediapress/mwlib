@@ -252,7 +252,7 @@ not_bol:
   "||" | "|!" | "!!"              
 	{
 		if (tablemode) {
-		        if (cursor[-2]==lineflags.rowchar) {
+		        if (cursor[-2]!='!' || cursor[-2]==lineflags.rowchar) {
 			       RET(t_column);
 			}
 		}
