@@ -591,3 +591,13 @@ def test_double_exclamation_mark_in_table():
     txt=cells[0].asText()
     print "TXT:", txt
     assert "!!" in txt, 'expected "!!" in cell'
+
+
+def test_table_row_exclamation_mark():
+    r=parse("""{|
+|-
+! bgcolor="#ffccaa" | foo || bar
+|}""")
+    cells = r.find(parser.Cell)
+    print "CELLS:", cells
+    assert len(cells)==2, 'expected exactly two cells'
