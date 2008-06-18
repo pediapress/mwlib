@@ -194,8 +194,7 @@ class Caption(_VListNode):
 class Link(Node):
     target = None
     specialPrefixes = set(["wikipedia", "wiktionary", "wikibooks", "wikisource",
-                           "wikiquote", "meta", "talk",
-                           "commons", "wikinews", "template", "wikitravel", "help", "vorlage"])
+                           "wikiquote", "meta", "commons", "wikinews", "wikitravel"])
     from mwlib.lang import languages
     colon = False
 
@@ -219,7 +218,7 @@ class Link(Node):
         pic = self.target
         if pic.startswith(':'):
             self.colon = True
-            
+            return
         
         
         # pic == "Bild:Wappen_von_Budenheim.png"
