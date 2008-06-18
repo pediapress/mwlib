@@ -231,7 +231,7 @@ def buildzip():
             else:
                 wikidb = w['wiki']
                 imagedb = w['images']
-            z.addArticle(item['title'], revision=item['revision'], wikidb=wikidb, imagedb=imagedb)
+            z.addArticle(item['title'], revision=item.get('revision', None), wikidb=wikidb, imagedb=imagedb)
             p += inc
         set_progress(90)
         
