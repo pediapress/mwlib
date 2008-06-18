@@ -214,15 +214,22 @@ class APIHelper(object):
 
 
 class ImageDB(object):
-    def __init__(self, base_url):
+    def __init__(self, base_url=None, api_helper=None):
         """
-        @param base_url: base URL of a MediaWiki,
-            e.g. 'http://en.wikipedia.org/w/'
+        @param base_url: base URL of a MediaWiki, e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
+        
+        @param api_helper: APIHelper instance
+        @type api_helper: L{APIHelper}
         """
         
-        self.api_helper = APIHelper(base_url)
-        assert self.api_helper is not None, 'invalid base URL %r' % base_url
+        if api_helper is not None:
+            assert base_url is None, 'either api_helper or base_url can be given, not both'
+            self.api_helper = api_helper
+        else:
+            self.api_helper = APIHelper(base_url)
+            assert self.api_helper is not None, 'invalid base URL %r' % base_url
+        
         self.tmpdir = tempfile.mkdtemp()
     
     def clear(self):
@@ -369,7 +376,7 @@ class WikiDB(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    def __init__(self, base_url, license, template_blacklist=None, api_helper=None):
+    def __init__(self, base_url=None, license=None, template_blacklist=None, api_helper=None):
         """
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
@@ -381,6 +388,9 @@ class WikiDB(object):
         @param template_blacklist: title of an article containing blacklisted
             templates (optional)
         @type template_blacklist: unicode
+        
+        @param api_helper: APIHelper instance
+        @type api_helper: L{APIHelper}
         """
         
         if api_helper is not None:

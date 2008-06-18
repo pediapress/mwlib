@@ -49,17 +49,19 @@ class FakeDB(object):
 class TestRecordDB(object):
     def setup_method(self, method):
         self.fakedb = FakeDB()
-        self.recorddb = recorddb.RecordDB(self.fakedb)
+        self.articles = {}
+        self.templates = {}
+        self.recorddb = recorddb.RecordDB(self.fakedb, self.articles, self.templates)
     
     def test_getRawArticle(self):
         raw = self.recorddb.getRawArticle(u'article1')
         assert isinstance(raw, unicode)
-        assert len(self.recorddb.articles) == 1
+        assert len(self.articles) == 1
     
     def test_getTemplate(self):
         raw = self.recorddb.getTemplate(u'template1')
         assert isinstance(raw, unicode)
-        assert len(self.recorddb.templates) == 1
+        assert len(self.templates) == 1
     
 
 class TestZipFileCreator(object):
@@ -74,15 +76,11 @@ class TestZipFileCreator(object):
         shutil.rmtree(self.tempdir)
     
     def test_addArticle(self):
-        self.creator.addArticle(u'article1')
-        assert self.creator.images
-        assert u'template1' in self.creator.db.templates
+        self.creator.addArticle(u'article1', wikidb=self.fakedb, imagedb=None)
+        assert u'template1' in self.creator.templates
     
     def test_addObject(self):
         self.creator.addObject(u'fü', 'bär')
-    
-    def test_writeImages(self):
-        self.creator.writeImages() # TODO: this does nothing ATM
     
     def test_writeContent(self):
         self.creator.writeContent()
