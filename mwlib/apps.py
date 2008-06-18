@@ -88,8 +88,8 @@ def buildzip():
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
-                      help='get POSTURL from service with given URL and open upload URL in webbrowser',
-                      metavar="SERVICEURL")
+                      help='get POST URL from PediaPress.com and open upload page in webbrowser',
+                      action='store_true')
     parser.add_option("-i", "--imagesize",
                       help="max. pixel size (width or height) for images (default: 800)",
                       default=800)
@@ -128,7 +128,7 @@ def buildzip():
     elif options.getposturl:
         import webbrowser
         from mwlib.podclient import podclient_from_serviceurl
-        podclient = podclient_from_serviceurl(options.getposturl)
+        podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
         webbrowser.open(podclient.redirecturl)
     else:
         podclient = None
