@@ -63,7 +63,7 @@ articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+)(?P<path>.*)$
 api_helper_cache = {}
 
 def get_api_helper(url):
-    """Return APIHelper instance given (e.g. article) URL.
+    """Return APIHelper instance for given (e.g. article) URL.
     
     @param url: URL of a MediaWiki article
     @type url: str
@@ -161,7 +161,7 @@ class ImageDB(object):
         @type base_url: basestring
         """
         
-        self.api_helper = get_api_helper(base_url)
+        self.api_helper = APIHelper(base_url)
         assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.tmpdir = tempfile.mkdtemp()
     
@@ -323,10 +323,9 @@ class WikiDB(object):
         @type template_blacklist: unicode
         """
         
-        self.base_url = base_url
         self.license = license
-        self.api_helper = get_api_helper(self.base_url)
-        assert self.api_helper is not None, 'invalid base URL %r' % self.base_url
+        self.api_helper = APIHelper(base_url)
+        assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
@@ -340,9 +339,9 @@ class WikiDB(object):
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))
         if revision is None:
-            return '%sindex.php?title=%s' % (self.base_url, name)
+            return '%sindex.php?title=%s' % (self.api_helper.base_url, name)
         else:
-            return '%sindex.php?title=%s&oldid=%s' % (self.base_url, name, revision)
+            return '%sindex.php?title=%s&oldid=%s' % (self.api_helper.base_url, name, revision)
     
     def getAuthors(self, title, revision=None, max_num_authors=10):
         """Return at most max_num_authors names of non-bot, non-anon users for
