@@ -63,7 +63,7 @@ articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+)(?P<path>.*)$
 api_helper_cache = {}
 
 def get_api_helper(url):
-    """Return APIHelper instance given (e.g. article) URL.
+    """Return APIHelper instance for given (e.g. article) URL.
     
     @param url: URL of a MediaWiki article
     @type url: str
@@ -161,7 +161,7 @@ class ImageDB(object):
         @type base_url: basestring
         """
         
-        self.api_helper = get_api_helper(base_url)
+        self.api_helper = APIHelper(base_url)
         assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.tmpdir = tempfile.mkdtemp()
     
@@ -324,7 +324,7 @@ class WikiDB(object):
         """
         
         self.license = license
-        self.api_helper = get_api_helper(base_url)
+        self.api_helper = APIHelper(base_url)
         assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.template_cache = {}
         self.template_blacklist = []
