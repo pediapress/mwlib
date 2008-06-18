@@ -88,7 +88,7 @@ def buildzip():
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
-                      help='get POSTURL from service with given URL and open upload URL in webbrowser (default: "http://pediapress.com/api/collections/")',
+                      help='get POSTURL from service with given URL and open upload URL in webbrowser',
                       metavar="SERVICEURL")
     parser.add_option("-i", "--imagesize",
                       help="max. pixel size (width or height) for images (default: 800)",
