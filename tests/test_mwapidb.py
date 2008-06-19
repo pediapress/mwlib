@@ -86,7 +86,7 @@ class TestWikiDB(object):
         
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
-        assert 'Redirected' not in raw
+        assert 'redirect' not in raw.lower()
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
