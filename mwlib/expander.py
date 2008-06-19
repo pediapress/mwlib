@@ -149,7 +149,21 @@ class Template(Node):
             if expander.resolver.has_magic(try_name):
                 name=try_name
                 remainder = try_remainder
+        if name=='#if':
+            #print "SPECIALCASE", (name, remainder)
+            res.append(maybe_newline)
+            tmp = []
+            if remainder:
+                flatten(self.children[1], expander, variables, tmp)
+            else:
+                if len(self.children)>=3:
+                    flatten(self.children[2], expander, variables, tmp)
+            res.append(u"".join(tmp).strip())
+            res.append(dummy_mark)
+            return
 
+        #print "NAME:", (name, remainder)
+        
         var = ArgumentList()
 
         if remainder is not None:
@@ -165,7 +179,7 @@ class Template(Node):
         if rep is not None:
             res.append(maybe_newline)
             res.append(rep)
-            res.append(mark('dummy'))
+            res.append(dummy_mark)
         else:            
             p = expander.getParsedTemplate(name)
             if p:
@@ -490,11 +504,12 @@ class mark_end(mark): pass
 class mark_maybe_newline(mark): pass
 
 maybe_newline = mark_maybe_newline('maybe_newline')
+dummy_mark = mark('dummy')
 
 def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument
-    res.append(mark('dummy'))
-    res.append(mark('dummy'))
+    res.append(dummy_mark)
+    res.append(dummy_mark)
     for i, p in enumerate(res):
         if p is maybe_newline:
             s1 = res[i+1]
