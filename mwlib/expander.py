@@ -154,7 +154,8 @@ class Template(Node):
             res.append(maybe_newline)
             tmp = []
             if remainder:
-                flatten(self.children[1], expander, variables, tmp)
+                if len(self.children)>=2:
+                    flatten(self.children[1], expander, variables, tmp)
             else:
                 if len(self.children)>=3:
                     flatten(self.children[2], expander, variables, tmp)
