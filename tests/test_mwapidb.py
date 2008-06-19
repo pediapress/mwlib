@@ -48,6 +48,46 @@ class TestWikiDB(object):
         authors = w.getAuthors(u'Physics')
         print 'AUTHORS:', authors
 
+    
+    def test_parse_article_url(self):
+        from mwlib.mwapidb import parse_article_url
+        
+        def p(url):
+            d = parse_article_url(url)
+            return d['api_helper'].base_url, d['title'], d['revision']
+        
+        b, t, r = p('http://de.wikipedia.org/wiki/Hauptseite')
+        assert b == 'http://de.wikipedia.org/w/'
+        assert t == u'Hauptseite'
+        assert r is None
+
+        b, t, r = p('http://de.wikipedia.org/wiki/August_Ferdinand_Möbius')
+        assert b == 'http://de.wikipedia.org/w/'
+        assert t == u'August Ferdinand Möbius'
+        assert r is None
+    
+        b, t, r = p('http://de.wikipedia.org/w/index.php?title=August_Ferdinand_Möbius&oldid=38212551')
+        assert b == 'http://de.wikipedia.org/w/'
+        assert t == u'August Ferdinand Möbius'
+        assert r == 38212551
+    
+        b, t, r = p('http://de.wikipedia.org/w/index.php?title=August_Ferdinand_Möbius&oldid=38212551')
+        assert b == 'http://de.wikipedia.org/w/'
+        assert t == u'August Ferdinand Möbius'
+        assert r == 38212551
+
+        b, t, r = p('http://wikieducator.org/Otago_Polytechnic')
+        assert b == 'http://wikieducator.org/'
+        assert t == u'Otago Polytechnic'
+        assert r is None
+        
+        assert parse_article_url('bla') is None
+        assert parse_article_url('http://pediapress.com/') is None
+        
+    def test_redirect(self):
+        raw = self.w.getRawArticle(u'The European Library')
+        assert 'Redirected' not in raw
+
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
     
@@ -144,38 +184,3 @@ class TestImageDB(object):
         t = u'Sertraline-A-3D-balls.png'
         du = imgdb.getDescriptionURL(t)
         assert du == 'http://commons.wikimedia.org/wiki/Image:Sertraline-A-3D-balls.png'
-    
-    def test_parse_article_url(self):
-        from mwlib.mwapidb import parse_article_url
-        
-        def p(url):
-            d = parse_article_url(url)
-            return d['api_helper'].base_url, d['title'], d['revision']
-        
-        b, t, r = p('http://de.wikipedia.org/wiki/Hauptseite')
-        assert b == 'http://de.wikipedia.org/w/'
-        assert t == u'Hauptseite'
-        assert r is None
-
-        b, t, r = p('http://de.wikipedia.org/wiki/August_Ferdinand_Möbius')
-        assert b == 'http://de.wikipedia.org/w/'
-        assert t == u'August Ferdinand Möbius'
-        assert r is None
-    
-        b, t, r = p('http://de.wikipedia.org/w/index.php?title=August_Ferdinand_Möbius&oldid=38212551')
-        assert b == 'http://de.wikipedia.org/w/'
-        assert t == u'August Ferdinand Möbius'
-        assert r == 38212551
-    
-        b, t, r = p('http://de.wikipedia.org/w/index.php?title=August_Ferdinand_Möbius&oldid=38212551')
-        assert b == 'http://de.wikipedia.org/w/'
-        assert t == u'August Ferdinand Möbius'
-        assert r == 38212551
-
-        b, t, r = p('http://wikieducator.org/Otago_Polytechnic')
-        assert b == 'http://wikieducator.org/'
-        assert t == u'Otago Polytechnic'
-        assert r is None
-        
-        assert parse_article_url('bla') is None
-        assert parse_article_url('http://pediapress.com/') is None
