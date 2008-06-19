@@ -177,7 +177,6 @@ class Template(Node):
 
         var = ArgumentList()
 
-        varcount = 1   #unnamed vars
         if remainder is not None:
             tmpnode=Node()
             tmpnode.children.append(remainder)
@@ -431,8 +430,6 @@ class LazyArgument(object):
         return self._flatten
 
 class ArgumentList(object):
-    class notfound: pass
-
     def __init__(self):
         self.args = []
         self.namedargs = {}
