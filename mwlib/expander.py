@@ -210,6 +210,9 @@ class Parser(object):
 
 
     def __init__(self, txt):
+        if isinstance(txt, str):
+            txt = unicode(txt)
+            
         self.txt = txt
         self.tokens = tokenize(txt)
         self.pos = 0
