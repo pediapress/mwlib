@@ -371,7 +371,7 @@ class LazyArgument(object):
         if self._splitflatten is None:
             try:
                 idx = self.node.children.index(u'=')
-            except ValueError:
+            except (ValueError, AttributeError):
                 name = None
                 val = self.node
             else:
@@ -513,7 +513,7 @@ class Expander(object):
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
 
-        self.parsed = Parser(txt).parse()
+        self.parsed = parse(txt)
         #show(self.parsed)
         self.parsedTemplateCache = {}
         
@@ -537,7 +537,7 @@ class Expander(object):
             res = None
         else:
             log.info("parsing template", repr(name))
-            res = Parser(raw).parse()
+            res = parse(raw)
             if DEBUG:
                 print "TEMPLATE:", name, repr(raw)
                 res.show()
