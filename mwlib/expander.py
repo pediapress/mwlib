@@ -26,8 +26,8 @@ splitpattern = """
 |(?:<source[^<>]*>.*?</source>)
 |(?:<pre.*?>.*?</pre>)
 |(?:=)
-|(?:[:\[\]\|{}<])                                  # all special characters
-|(?:[^=\[\]\|:{}<]*))                               # all others
+|(?:[\[\]\|{}<])                                  # all special characters
+|(?:[^=\[\]\|{}<]*))                               # all others
 """
 
 splitrx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
