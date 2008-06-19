@@ -178,16 +178,12 @@ class Template(Node):
         var = ArgumentList()
 
         varcount = 1   #unnamed vars
-
-        def args():
-            if remainder is not None:
-                tmpnode=Node()
-                tmpnode.children.append(remainder)
-                yield tmpnode
-            for x in self.children[1:]:
-                yield x
-
-        for x in args():
+        if remainder is not None:
+            tmpnode=Node()
+            tmpnode.children.append(remainder)
+            var.append(LazyArgument(tmpnode, expander, variables))
+        
+        for x in self.children[1:]:
             var.append(LazyArgument(x, expander, variables))
 
         rep = expander.resolver(name, var)
