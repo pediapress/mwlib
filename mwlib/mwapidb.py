@@ -376,14 +376,11 @@ class WikiDB(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    def __init__(self, base_url=None, license=None, template_blacklist=None, api_helper=None):
+    def __init__(self, base_url=None, template_blacklist=None, api_helper=None):
         """
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
-        
-        @param license: title of an article containing full license text
-        @type license: unicode
         
         @param template_blacklist: title of an article containing blacklisted
             templates (optional)
@@ -399,7 +396,6 @@ class WikiDB(object):
         else:
             self.api_helper = APIHelper(base_url)
             assert self.api_helper is not None, 'invalid base URL %r' % base_url
-        self.license = license
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
@@ -511,20 +507,10 @@ class WikiDB(object):
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
-            result = {
+            return {
                 'url': g['base'],
                 'name': '%s (%s)' % (g['sitename'], g['lang']),
             }
-            if self.license is None:
-                log.warn('No license given')
-            else: 
-                wikitext = self.getRawArticle(self.license)
-                assert wikitext is not None, 'Could not get license article %r' % self.license
-                result['license'] = {
-                    'name': g['rights'],
-                    'wikitext': wikitext,
-                }
-            return result
         except KeyError:
             return None
     

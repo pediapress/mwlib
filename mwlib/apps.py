@@ -96,7 +96,7 @@ def buildzip():
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
     parser.add_option("-l", "--logfile", help="log to logfile")
-    parser.add_option("--license", help="Title of article containing full license text")
+    parser.add_option("--license", help="DEPRECATED, DO NOT USE!")
     parser.add_option("--template-blacklist", help="Title of article containing blacklisted templates")
     options, args = parser.parse_args()
     
@@ -162,31 +162,16 @@ def buildzip():
         mb = metabook.MetaBook()
         if options.conf:
             w = wiki.makewiki(options.conf)
-            cp = w.configparser
             mb.source = {
-                'name': cp.get('wiki', 'name'),
-                'url': cp.get('wiki', 'url'),
+                'name': w.configparser.get('wiki', 'name'),
+                'url': w.configparser.get('wiki', 'url'),
             }
-            license_name = cp.get('wiki', 'defaultarticlelicense')
-            if license_name:
-                wikitext = w['wiki'].getRawArticle(license_name)
-                assert wikitext is not None, 'Could not get license article %r' % license_name
-                mb.source['defaultarticlelicense'] = {
-                    'name': license_name,
-                    'wikitext': wikitext,
-                }
         elif options.baseurl:
             w = {
-                'wiki': wiki.wiki_mwapi(options.baseurl, options.license, options.template_blacklist),
+                'wiki': wiki.wiki_mwapi(options.baseurl, options.template_blacklist),
                 'images': wiki.image_mwapi(options.baseurl)
             }
-            metadata = w['wiki'].getMetaData()
-            mb.source = {
-                'name': metadata['name'],
-                'url': metadata['url'],
-            }
-            if 'license' in metadata:
-                mb.source['defaultarticlelicense'] = metadata['license']
+            mb.source = w['wiki'].getMetaData()
         else:
             w = {'wiki': None, 'images': None}
             # FIXME!!!!!!:

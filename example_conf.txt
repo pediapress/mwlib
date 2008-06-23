@@ -54,9 +54,6 @@ imagedescriptionurls = http://commons.wikipedia.org/w/index.php?title=Image:@TIT
 # the title (without namespace prefix) of the requested template:
 templateurls = http://en.wikipedia.org/w/index.php?title=Template:@TITLE@_Print&action=raw http://en.wikipedia.org/w/index.php?title=Template:@TITLE@&action=raw
 
-# name of article license, which is the title of article containing the license text at the same time:
-defaultarticlelicense = GFDL
-
 # title of article containing a list of links to templates wich are ignored (and
 # not expanded) by mwlib. Example for such a template blacklist page:
 # * [[Template:refimprove]]

@@ -7,16 +7,16 @@ import os
 from ConfigParser import ConfigParser
 import StringIO
 
-def wiki_mwapi(base_url=None, license=None, template_blacklist=None):
+def wiki_mwapi(base_url=None, template_blacklist=None):
     from mwlib import mwapidb
-    return mwapidb.WikiDB(base_url, license, template_blacklist)
+    return mwapidb.WikiDB(base_url, template_blacklist)
 
 def wiki_zip(path=None, url=None, name=None):
     from mwlib import zipwiki
     return zipwiki.Wiki(path)
 
 def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
-             templateurls=None, templateblacklist=None, defaultarticlelicense=None,
+             templateurls=None, templateblacklist=None,
              defaultauthors=None, **kwargs):
     from mwlib import netdb
     
@@ -93,7 +93,6 @@ class Environment(object):
 [wiki]
 name=
 url=
-defaultarticlelicense=
 """)
         self.configparser.readfp(defaults)
         

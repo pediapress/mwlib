@@ -12,10 +12,9 @@ from mwlib.mwapidb import ImageDB, WikiDB
 
 class TestWikiDB(object):
     base_url = 'http://en.wikipedia.org/w/'
-    license = 'Wikipedia:GFDL'
     
     def setup_method(self, method):
-        self.w = WikiDB(self.base_url, self.license)
+        self.w = WikiDB(self.base_url)
     
     def test_getRawArticle(self):
         raw = self.w.getRawArticle(u'Mathematics')
@@ -44,7 +43,7 @@ class TestWikiDB(object):
         authors = self.w.getAuthors(u'Physics', revision='206917093')
         print 'AUTHORS:', authors
         
-        w = WikiDB('http://en.wikipedia.com/w/', self.license) # note: the .com is on purpose!
+        w = WikiDB('http://en.wikipedia.com/w/') # note: the .com is on purpose!
         authors = w.getAuthors(u'Physics')
         print 'AUTHORS:', authors
 
