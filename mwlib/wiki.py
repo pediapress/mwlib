@@ -153,11 +153,11 @@ url=
             elif license.get('mw_rights_text'):
                 wikitext = ''
                 if license.get('mw_rights_text'):
-                    wikitext += '\n\n' + license['mw_rights_text']
+                    wikitext = license['mw_rights_text']
                 if license.get('mw_rights_page'):
                     wikitext += '\n\n[[%s]]' % license['mw_rights_page']
                 if license.get('mw_rights_url'):
-                    wikitext += '\n\n[%s]' % license['mw_rights_url']
+                    wikitext += '\n\n' + license['mw_rights_url']
             
             if not wikitext:
                 continue
