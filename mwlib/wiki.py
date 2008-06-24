@@ -148,7 +148,7 @@ url=
                 wikitext = utils.fetch_url(
                     license['mw_license_url'],
                     ignore_errors=True,
-                    excpected_content_type='text/x-wiki',
+                    expected_content_type='text/x-wiki',
                 )
                 if wikitext:
                     try:
