@@ -152,3 +152,10 @@ this test will validate, but sections will be broken.
         print xhtml
         assert res == expect
 
+def test_snippets():
+    from mwlib import snippets
+    for s in snippets.get_all():
+        print "testing", repr(s.txt)
+        xhtml = getXHTML(s.txt)
+        validate(xhtml)
+        
