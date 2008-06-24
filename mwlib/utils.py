@@ -180,7 +180,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         data = result.read()
         if expected_content_type:
             content_type = result.info().gettype()
-            if content_tpye != expected_content_type:
+            if content_type != expected_content_type:
                 msg = 'Got content-type %r, expected %r' % (
                     content_type,
                     expected_content_type,
