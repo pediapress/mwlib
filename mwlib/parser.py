@@ -297,9 +297,30 @@ class Link(Node):
             except ValueError:
                 pass
             # We can't handle this as an image, so default:
-            self.__class__ = SpecialLink 
+            self.__class__ = NamespaceLink 
 
 
+# Link forms:
+
+class ArticleLink(Link):
+    pass
+
+class SpecialLink(Link):
+    pass
+
+class NamespaceLink(SpecialLink):
+    pass
+
+class InterwikiLink(SpecialLink):
+    pass
+
+# Non-links with same syntax:
+
+class LangLink(Link):
+    pass
+
+class CategoryLink(Link):
+    pass
 
 class ImageLink(Link):
     target = None
@@ -371,24 +392,6 @@ class ImageLink(Link):
         
         if not self.children:
             self.children = last
-    
-class LangLink(Link):
-    pass
-
-class CategoryLink(Link):
-    pass
-
-class ArticleLink(Link):
-    pass
-
-class SpecialLink(Link):
-    pass
-
-class NamespaceLink(SpecialLink):
-    pass
-
-class InterwikiLink(SpecialLink):
-    pass
 
 Link._setSpecializeMap('default') # initialise the Link class
 
