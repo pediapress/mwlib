@@ -152,8 +152,6 @@ url=
                     wikitext = None
             elif license.get('mw_rights_text'):
                 wikitext = ''
-                if license.get('mw_rights_icon'):
-                    wikitext += '[[%s]]' % license['mw_rights_icon']
                 if license.get('mw_rights_text'):
                     wikitext += '\n\n' + license['mw_rights_text']
                 if license.get('mw_rights_page'):
