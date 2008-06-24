@@ -301,3 +301,8 @@ def test_math2():
     raw=r'''<math>\exp(-\gamma x)</math>'''
     xml = getXML(raw)
 
+def test_snippets():
+    from mwlib import snippets
+    for s in snippets.get_all():
+        print "testing", repr(s.txt)
+        xml = getXML(s.txt)
