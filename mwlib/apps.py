@@ -78,13 +78,9 @@ def show():
         print raw.encode("utf-8")
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog [OPTIONS] [ARTICLETITLE|ARTICLEURL ...]")
-    parser.add_option("-c", "--conf", help="config file (required unless --baseurl is given)")
-    parser.add_option("-b", "--baseurl", help="base URL for mwapidb backend")
-    parser.add_option("-s", "--shared-baseurl", help="DEPRECATED, DO NOT USE!")
-    parser.add_option("-m", "--metabook", help="JSON encoded text file with book structure")
-    parser.add_option('--collectionpage', help='Title of a collection page')
-    parser.add_option("-x", "--noimages", action="store_true", help="exclude images")
+    from mwlib.options import OptionParser
+
+    parser = OptionParser()
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
@@ -95,9 +91,6 @@ def buildzip():
                       default=800)
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
-    parser.add_option("-l", "--logfile", help="log to logfile")
-    parser.add_option("--license", help="DEPRECATED, DO NOT USE!")
-    parser.add_option("--template-blacklist", help="Title of article containing blacklisted templates")
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
@@ -111,10 +104,6 @@ def buildzip():
         assert options.imagesize > 0
     except (ValueError, AssertionError):
         parser.error('Argument for --imagesize must be an integer > 0.')
-    
-    if options.logfile:
-        from mwlib.utils import start_logging
-        start_logging(options.logfile)
     
     import os
     import tempfile
@@ -157,39 +146,9 @@ def buildzip():
     try:
         set_status('init')
         
-        from mwlib import wiki, recorddb, metabook, mwapidb
+        from mwlib import recorddb, metabook, mwapidb
         
-        mb = metabook.MetaBook()
-        if options.conf:
-            w = wiki.makewiki(options.conf)
-            mb.source = {
-                'name': w.configparser.get('wiki', 'name'),
-                'url': w.configparser.get('wiki', 'url'),
-            }
-        elif options.baseurl:
-            w = {
-                'wiki': wiki.wiki_mwapi(options.baseurl, options.template_blacklist),
-                'images': wiki.image_mwapi(options.baseurl)
-            }
-            mb.source = w['wiki'].getMetaData()
-        else:
-            w = {'wiki': None, 'images': None}
-            # FIXME!!!!!!:
-            mb.source = {
-                'name': 'FIXME',
-                'url': 'http://FIXME',
-            }
-        
-        if args:
-            mb.addArticles([unicode(x, 'utf-8') for x in args])
-        
-        if options.collectionpage:
-            mb.loadCollectionPage(w['wiki'].getRawArticle(options.collectionpage))
-        elif options.metabook:
-            mb.readJsonFile(options.metabook)
-        
-        if options.noimages:
-            w['images'] = None
+        env = parser.env
         
         if options.output is None:
             fd, options.output = tempfile.mkstemp()
@@ -199,7 +158,7 @@ def buildzip():
         z = recorddb.ZipfileCreator(zf, imagesize=options.imagesize)
         
         set_status('parsing')
-        articles = list(mb.getArticles())
+        articles = list(parser.metabook.getArticles())
         if articles:
             inc = 90./len(articles)
         else:
@@ -214,13 +173,22 @@ def buildzip():
                 wikidb = mwapidb.WikiDB(api_helper=d['api_helper'])
                 imagedb = mwapidb.ImageDB(api_helper=d['api_helper'])
             else:
-                wikidb = w['wiki']
-                imagedb = w['images']
+                wikidb = env.wiki
+                imagedb = env.images
             z.addArticle(item['title'], revision=item.get('revision', None), wikidb=wikidb, imagedb=imagedb)
+            
             p += inc
         set_progress(90)
         
-        z.addObject('metabook.json', mb.dumpJson())
+        for license in env.get_licenses():
+            z.parseArticle(
+                title=license['title'],
+                raw=license['wikitext'],
+                wikidb=env.wikidb,
+                imagedb=env.imagedb,
+            )
+        
+        z.addObject('metabook.json', parser.metabook.dumpJson())
         
         z.writeContent()
         zf.close()
@@ -229,8 +197,8 @@ def buildzip():
         if podclient:
             podclient.post_zipfile(options.output)
         
-        if w['images']:
-            w['images'].clear()
+        if env.images:
+            env.images.clear()
         
         set_status('finished')
         set_progress(100)

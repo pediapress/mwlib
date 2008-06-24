@@ -70,6 +70,10 @@ class ZipfileCreator(object):
             'url': wikidb.getURL(title, revision=revision),
             'authors': wikidb.getAuthors(title, revision=revision),
         }
+        self.parseArticle(title, revision=revision, raw=raw, wikidb=wikidb, imagedb=imagedb)
+    
+    def parseArticle(self, title, revision=None, raw=None, wikidb=None, imagedb=None):
+        recorddb = RecordDB(wikidb, self.articles, self.templates)
         parse_tree = uparser.parseString(title, revision=revision, raw=raw, wikidb=recorddb)
         if imagedb is None:
             return

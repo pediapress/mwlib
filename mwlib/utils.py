@@ -1,7 +1,25 @@
+import errno
+import exceptions
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 import os
 import sys
-import errno
+import tempfile
 import time
+import urllib2
+import UserDict
+
+from mwlib.log import Log
+
+if urllib2.getproxies():
+    log.info("using proxy %r" % urllib2.getproxies())
+
+
+
+log = Log('mwlib.utils')
+
 
 # provide all for python 2.4
 try:
@@ -117,20 +135,12 @@ def get_multipart(filename, data, name):
 """
 persists documents in tempdir
 
-usage:
-from mwlib.utils import Cache # this is local
-from mwlib import mwapidb
-mwapidb.max_cacheable_size = 5 * 1024 * 1024
-mwapidb.fetch_cache = Cache()
-"""
+usage::
 
-import tempfile
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
-import UserDict
-import exceptions
+>>> from mwlib.utils import Cache, fetch_url
+>>> cache = Cache()
+>>> data = fetch_url(some_url, fetch_cache=cache, max_cacheable_size=5*1024*1024)
+"""
 
 cache_prefix = "%s/mwlibcache." % tempfile.gettempdir()
 
@@ -152,3 +162,42 @@ class Cache(UserDict.UserDict):
     def __contains__(self, name):
         fn = fname(name)
         return os.path.exists(fn)
+
+# ==============================================================================
+
+fetch_cache = {}
+
+def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
+    max_cacheable_size=1024, expected_content_type=None):
+    if url in fetch_cache:
+        return fetch_cache[url]
+    
+    log.info("fetching %r" % (url,))
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', 'mwlib')]
+    try:
+        result = opener.open(url)
+        data = result.read()
+        if expected_content_type:
+            content_type = result.info().gettype()
+            if content_tpye != expected_content_type:
+                msg = 'Got content-type %r, expected %r' % (
+                    content_type,
+                    expected_content_type,
+                )
+                if ignore_errors:
+                    log.warn(msg)
+                else:
+                    raise RuntimeError(msg)
+                return None
+    except urllib2.URLError, err:
+        if ignore_errors:
+            log.error("%s - while fetching %r" % (err, url))
+            return None
+        raise RuntimeError('Could not fetch %r: %s' % (url, err))
+    log.info("got %r (%d Bytes)" % (url, len(data)))
+    
+    if len(data) < max_cacheable_size:
+        fetch_cache[url] = data
+    
+    return data
