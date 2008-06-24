@@ -601,3 +601,11 @@ def test_table_row_exclamation_mark():
     cells = r.find(parser.Cell)
     print "CELLS:", cells
     assert len(cells)==2, 'expected exactly two cells'
+
+def test_unknown_tag():
+    r=parse("<nosuchtag>foobar</nosuchtag>")
+    txt = r.asText()
+    print "TXT:", repr(txt)
+    assert u'<nosuchtag>' in txt, 'opening tag missing in asText()'
+    assert u'</nosuchtag>' in txt, 'closing tag missing in asText()'
+    
