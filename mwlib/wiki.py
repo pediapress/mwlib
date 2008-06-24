@@ -7,16 +7,24 @@ import os
 from ConfigParser import ConfigParser
 import StringIO
 
-def wiki_mwapi(base_url=None, license=None, template_blacklist=None):
-    from mwlib import mwapidb
-    return mwapidb.WikiDB(base_url, license, template_blacklist)
+from mwlib import utils
+from mwlib.log import Log
 
-def wiki_zip(path=None, url=None, name=None):
+log = Log('mwlib.utils')
+
+
+def wiki_mwapi(base_url=None, template_blacklist=None, **kwargs):
+    from mwlib import mwapidb
+    return mwapidb.WikiDB(base_url, template_blacklist)
+
+def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
+    if kwargs:
+        log.warn('Unused parameters: %r' % kwargs)
     return zipwiki.Wiki(path)
 
 def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
-             templateurls=None, templateblacklist=None, defaultarticlelicense=None,
+             templateurls=None, templateblacklist=None,
              defaultauthors=None, **kwargs):
     from mwlib import netdb
     
@@ -46,11 +54,11 @@ def wiki_cdb(path=None, **kwargs):
     db=cdbwiki.WikiDB(path)
     return db
 
-def image_mwapi(base_url=None):
+def image_mwapi(base_url=None, **kwargs):
     from mwlib import mwapidb
     return mwapidb.ImageDB(base_url)
 
-def image_download(url=None, localpath=None, knownlicenses=None):
+def image_download(url=None, localpath=None, knownlicenses=None, **kwargs):
     assert url, "must supply url in [images] section"
     from mwlib import netdb
 
@@ -64,11 +72,13 @@ def image_download(url=None, localpath=None, knownlicenses=None):
     else:
         knownlicenses = None
     
-    imgdb = netdb.ImageDB(urls, cachedir=localpath, knownLicenses=knownlicenses)
+    imgdb = netdb.ImageDB(urls, cachedir=localpath, knownLicenses=knownlicenses)    
     return imgdb
 
-def image_zip(path=None):
+def image_zip(path=None, **kwargs):
     from mwlib import zipwiki
+    if kwargs:
+        log.warn('Unused parameters: %r' % kwargs)
     return zipwiki.ImageDB(path)
 
 
@@ -85,7 +95,8 @@ wpwikis = dict(
 
 
 class Environment(object):
-    def __init__(self):
+    def __init__(self, metabook=None):
+        self.metabook = metabook
         self.images = None
         self.wiki = None
         self.configparser = ConfigParser()
@@ -93,7 +104,6 @@ class Environment(object):
 [wiki]
 name=
 url=
-defaultarticlelicense=
 """)
         self.configparser.readfp(defaults)
         
@@ -111,10 +121,61 @@ defaultarticlelicense=
             self.wiki = val
         else:
             raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
+    
+    def get_source(self):
+        if hasattr(self.metabook, 'source'):
+            return self.metabook.source
+        if hasattr(self.wiki, 'getMetaData'):
+            return self.wiki.getMetaData()
+        return {
+            'name': self.configparser.get('wiki', 'name'),
+            'url': self.configparser.get('wiki', 'url'),
+        }
+    
+    def get_licenses(self, icon_size=400):
+        """Return list of licenses
         
+        @returns: list of dicts with license info and list of (imagename, imagesize) tuples
+        @rtype: ([{str: unicode}], [(unicode, int)])
+        """
+        
+        if not hasattr(self.metabook, 'licenses'):
+            return []
+        
+        licenses = []
+        for license in self.metabook.licenses:
+            if license.get('mw_license_url'):
+                wikitext = utils.fetch_url(
+                    license['mw_license_url'],
+                    ignore_errors=True,
+                    expected_content_type='text/x-wiki',
+                )
+                if wikitext:
+                    try:
+                        wikitext = unicode(wikitext, 'utf-8')
+                    except UnicodeError:
+                        wikitext = None
+            elif license.get('mw_rights_text'):
+                wikitext = ''
+                if license.get('mw_rights_text'):
+                    wikitext = license['mw_rights_text']
+                if license.get('mw_rights_page'):
+                    wikitext += '\n\n[[%s]]' % license['mw_rights_page']
+                if license.get('mw_rights_url'):
+                    wikitext += '\n\n' + license['mw_rights_url']
+            
+            if not wikitext:
+                continue
+            
+            licenses.append({
+                'title': license.get('name', u'License'),
+                'wikitext': wikitext,
+            })
+        return licenses
+    
 
-def _makewiki(conf):
-    res = Environment()
+def _makewiki(conf, metabook=None):
+    res = Environment(metabook)
     
 
     url = None
@@ -125,8 +186,8 @@ def _makewiki(conf):
         url = conf
 
     if url:
-        res['wiki'] = wiki_mwapi(url)
-        res['images'] = image_mwapi(url)
+        res.wiki = wiki_mwapi(url)
+        res.images = image_mwapi(url)
         return res
     
             
@@ -137,13 +198,13 @@ def _makewiki(conf):
         
     if conf.lower().endswith(".zip"):
         from mwlib import zipwiki
-        res['wiki'] = zipwiki.Wiki(conf)
-        res['images'] = zipwiki.ImageDB(conf)
+        res.wiki = zipwiki.Wiki(conf)
+        res.images = zipwiki.ImageDB(conf)
+        if metabook is None:
+            res.metabook = res.wiki.metabook
         return res
 
-    cp=res.configparser
-    res.configparser = cp
-    
+    cp = res.configparser
     
     if not cp.read(conf):
         raise RuntimeError("could not read config file %r" % (conf,))
@@ -164,12 +225,15 @@ def _makewiki(conf):
             raise RuntimeError("cannot handle type %r in section %r" % (t, s))
         
         res[s] = m(**args)
-
+    
     assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res
 
-def makewiki(conf):
-    res = _makewiki(conf)
+def makewiki(conf, metabook=None):
+    res = _makewiki(conf, metabook)
+    res.wiki.env = res
+    if res.images:
+        res.images.env = res
     
     try:
         overlaydir = os.environ['MWOVERLAY']

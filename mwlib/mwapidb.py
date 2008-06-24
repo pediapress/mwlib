@@ -20,43 +20,11 @@ from mwlib.log import Log
 
 log = Log("mwapidb")
 
-if urllib2.getproxies():
-    log("using proxy %r" % urllib2.getproxies())
-
 try:
     from mwlib.licenses import lower2normal
 except ImportError:
     log.warn('no licenses found')
     lower2normal = {}
-
-
-
-# ==============================================================================
-
-fetch_cache = {}
-max_cacheable_size = 1024
-
-
-def fetch_url(url, ignore_errors=False):
-    if url in fetch_cache:
-        return fetch_cache[url]
-    
-    log.info("fetching %r" % (url,))
-    opener = urllib2.build_opener()
-    opener.addheaders = [('User-agent', 'mwlib')]
-    try:
-        data = opener.open(url).read()
-    except urllib2.URLError, err:
-        if ignore_errors:
-            log.error("%s - while fetching %r" % (err, url))
-            return None
-        raise RuntimeError('Could not fetch %r: %s' % (url, err))
-    log.info("got %r (%d Bytes)" % (url, len(data)))
-    
-    if len(data) < max_cacheable_size:
-        fetch_cache[url] = data
-    
-    return data
 
 # ==============================================================================
 
@@ -187,7 +155,7 @@ class APIHelper(object):
         q = urllib.urlencode(args)
         q = q.replace('%3A', ':') # fix for wrong quoting of url for images
         q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
-        data = fetch_url('%sapi.php?%s' % (self.base_url, q), ignore_errors=ignore_errors)
+        data = utils.fetch_url('%sapi.php?%s' % (self.base_url, q), ignore_errors=ignore_errors)
         if ignore_errors and data is None:
             return None
         try:
@@ -314,7 +282,7 @@ class ImageDB(object):
         if url is None:
             return None
         
-        data = fetch_url(url, ignore_errors=True)
+        data = utils.fetch_url(url, ignore_errors=True)
         if not data:
             return None
         
@@ -376,14 +344,11 @@ class WikiDB(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    def __init__(self, base_url=None, license=None, template_blacklist=None, api_helper=None):
+    def __init__(self, base_url=None, template_blacklist=None, api_helper=None):
         """
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
-        
-        @param license: title of an article containing full license text
-        @type license: unicode
         
         @param template_blacklist: title of an article containing blacklisted
             templates (optional)
@@ -399,16 +364,18 @@ class WikiDB(object):
         else:
             self.api_helper = APIHelper(base_url)
             assert self.api_helper is not None, 'invalid base URL %r' % base_url
-        self.license = license
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
-            raw = self.getRawArticle(template_blacklist)
-            if raw is None:
-                log.error('Could not get template blacklist article %r' % template_blacklist)
-            else:
-                self.template_blacklist = [template.lower().strip() 
-                                           for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
+            self.setTemplateBlacklist(template_blacklist)
+    
+    def setTemplateBlacklist(self, template_blacklist):
+        raw = self.getRawArticle(template_blacklist)
+        if raw is None:
+            log.error('Could not get template blacklist article %r' % template_blacklist)
+        else:
+            self.template_blacklist = [template.lower().strip() 
+                                       for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
     
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))
@@ -511,20 +478,10 @@ class WikiDB(object):
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
-            result = {
+            return {
                 'url': g['base'],
                 'name': '%s (%s)' % (g['sitename'], g['lang']),
             }
-            if self.license is None:
-                log.warn('No license given')
-            else: 
-                wikitext = self.getRawArticle(self.license)
-                assert wikitext is not None, 'Could not get license article %r' % self.license
-                result['license'] = {
-                    'name': g['rights'],
-                    'wikitext': wikitext,
-                }
-            return result
         except KeyError:
             return None
     
