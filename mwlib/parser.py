@@ -300,6 +300,23 @@ class Link(Node):
             self.__class__ = NamespaceLink 
     
 
+    capitalizeTarget = False # Wiki-dependent setting, e.g. Wikipedia => True
+
+    _SPACE_RE = re.compile('[_\s]+')
+    def _normalizeTarget(self):
+        """
+        Normalizes the format of the target with regards to whitespace and
+        capitalization (depending on capitalizeTarget setting).
+        """
+
+        # really we should have a urllib.unquote() first, but in practice this
+        # format may be rare enough to ignore
+
+        # [[__init__]] -> [[init]]
+        self.target = self._SPACE_RE.sub(' ', self.target).strip()
+        if self.capitalizeTarget:
+            self.target = self.target[:1].upper() + self.target[1:]
+
 
 # Link forms:
 
@@ -605,6 +622,8 @@ class Parser(object):
                 obj.append(Text(m.group(0)), True)
                 self.tokens[self.pos] = ('TEXT', self.token[1][m.end():])
 
+        obj._normalizeTarget()
+            
         return obj
     
     def parseTag(self):
