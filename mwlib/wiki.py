@@ -146,6 +146,10 @@ url=
         for license in self.metabook.licenses:
             if license.get('mw_license_url'):
                 wikitext = utils.fetch_url(license['mw_license_url'], ignore_errors=True)
+                try:
+                    wikitext = unicode(wikitext, 'utf-8')
+                except UnicodeError:
+                    wikitext = None
             elif license.get('mw_rights_text'):
                 wikitext = ''
                 if license.get('mw_rights_icon'):
