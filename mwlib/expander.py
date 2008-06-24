@@ -26,8 +26,8 @@ splitpattern = """
 |(?:<source[^<>]*>.*?</source>)
 |(?:<pre.*?>.*?</pre>)
 |(?:=)
-|(?:[:\[\]\|{}<])                                  # all special characters
-|(?:[^=\[\]\|:{}<]*))                               # all others
+|(?:[\[\]\|{}<])                                  # all special characters
+|(?:[^=\[\]\|{}<]*))                               # all others
 """
 
 splitrx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
@@ -56,7 +56,7 @@ class symbols:
     noi = 4
     txt = 5
 
-def old_tokenize(txt):
+def tokenize(txt):
     txt = preprocess(txt)
                          
     if "<onlyinclude>" in txt:
@@ -81,31 +81,6 @@ def old_tokenize(txt):
     
     return tokens
 
-
-def new_tokenize(txt):
-    txt = preprocess(txt)
-    
-    import _expander
-    
-    if "<onlyinclude>" in txt:
-        # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
-        txt = "".join(onlyincluderx.findall(txt))
-    
-    txt=txt+u'\0'
-    tokens = _expander.scan(txt)
-    
-    res = []
-    for t in tokens:
-        type,start,len=t
-        if type:
-            res.append((type, txt[start:start+len]))
-        else:
-            res.append((None, ''))
-            
-    
-    return res
-
-tokenize = old_tokenize
 
 def flatten(node, expander, variables, res):
     t=type(node)
@@ -174,20 +149,30 @@ class Template(Node):
             if expander.resolver.has_magic(try_name):
                 name=try_name
                 remainder = try_remainder
+        if name=='#if':
+            #print "SPECIALCASE", (name, remainder)
+            res.append(maybe_newline)
+            tmp = []
+            if remainder:
+                if len(self.children)>=2:
+                    flatten(self.children[1], expander, variables, tmp)
+            else:
+                if len(self.children)>=3:
+                    flatten(self.children[2], expander, variables, tmp)
+            res.append(u"".join(tmp).strip())
+            res.append(dummy_mark)
+            return
 
+        #print "NAME:", (name, remainder)
+        
         var = ArgumentList()
 
-        varcount = 1   #unnamed vars
-
-        def args():
-            if remainder is not None:
-                tmpnode=Node()
-                tmpnode.children.append(remainder)
-                yield tmpnode
-            for x in self.children[1:]:
-                yield x
-
-        for x in args():
+        if remainder is not None:
+            tmpnode=Node()
+            tmpnode.children.append(remainder)
+            var.append(LazyArgument(tmpnode, expander, variables))
+        
+        for x in self.children[1:]:
             var.append(LazyArgument(x, expander, variables))
 
         rep = expander.resolver(name, var)
@@ -195,7 +180,7 @@ class Template(Node):
         if rep is not None:
             res.append(maybe_newline)
             res.append(rep)
-            res.append(mark('dummy'))
+            res.append(dummy_mark)
         else:            
             p = expander.getParsedTemplate(name)
             if p:
@@ -240,6 +225,9 @@ class Parser(object):
 
 
     def __init__(self, txt):
+        if isinstance(txt, str):
+            txt = unicode(txt)
+            
         self.txt = txt
         self.tokens = tokenize(txt)
         self.pos = 0
@@ -401,7 +389,7 @@ class LazyArgument(object):
         if self._splitflatten is None:
             try:
                 idx = self.node.children.index(u'=')
-            except ValueError:
+            except (ValueError, AttributeError):
                 name = None
                 val = self.node
             else:
@@ -435,8 +423,6 @@ class LazyArgument(object):
         return self._flatten
 
 class ArgumentList(object):
-    class notfound: pass
-
     def __init__(self):
         self.args = []
         self.namedargs = {}
@@ -519,11 +505,12 @@ class mark_end(mark): pass
 class mark_maybe_newline(mark): pass
 
 maybe_newline = mark_maybe_newline('maybe_newline')
+dummy_mark = mark('dummy')
 
 def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument
-    res.append(mark('dummy'))
-    res.append(mark('dummy'))
+    res.append(dummy_mark)
+    res.append(dummy_mark)
     for i, p in enumerate(res):
         if p is maybe_newline:
             s1 = res[i+1]
@@ -545,7 +532,7 @@ class Expander(object):
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
 
-        self.parsed = Parser(txt).parse()
+        self.parsed = parse(txt)
         #show(self.parsed)
         self.parsedTemplateCache = {}
         
@@ -569,7 +556,7 @@ class Expander(object):
             res = None
         else:
             log.info("parsing template", repr(name))
-            res = Parser(raw).parse()
+            res = parse(raw)
             if DEBUG:
                 print "TEMPLATE:", name, repr(raw)
                 res.show()

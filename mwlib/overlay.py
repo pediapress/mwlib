@@ -9,7 +9,7 @@ class OverlayDB(object):
         self.db = db
         self.basedir = basedir
 
-    def getRawArticle(self, title):
+    def getRawArticle(self, title, revision=None):
         p = os.path.join(self.basedir, title)
         if os.path.isfile(p):
             return unicode(open(p, 'rb').read(), 'utf-8')

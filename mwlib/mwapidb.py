@@ -4,6 +4,7 @@
 # Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import cgi
 import os
 import re
 import shutil
@@ -89,6 +90,65 @@ def get_api_helper(url):
     
     return None
 
+
+# ==============================================================================
+
+def parse_article_url(url, title_encoding='utf-8'):
+    """Return APIHelper instance, title and revision for given article URL.
+    Return None if the information could not be guessed.
+    
+    @param url: article URL
+    @type url: str
+    
+    @param title_encoding: encoding of URL
+    @type title_encoding: str
+    
+    @returns: None or dict containing 'api_helper', 'title' and 'revision'
+    @rtype: {str: object} or NoneType
+    """
+    
+    scheme, netloc, path, params, query, fragment = urlparse.urlparse(url)
+    if scheme is None or netloc is None or path is None:
+        return None
+    args = cgi.parse_qs(query)
+    
+    if path.endswith('index.php'):
+        if 'title' not in args or not args['title']:
+            return None
+        base_url = url[:url.find('index.php')]
+        title = unicode(args['title'][0], title_encoding, 'ignore').replace('_', ' ')
+        revision = None
+        try:
+            revision = int(args['oldid'][0])
+        except (KeyError, ValueError):
+            pass
+        api_helper = APIHelper(base_url)
+        if not api_helper.is_usable():
+            return None
+        return {
+            'api_helper': api_helper,
+            'title': title,
+            'revision': revision,
+        }
+    
+    api_helper = get_api_helper(url)
+    if api_helper is None:
+        return None
+    
+    if '/wiki/' in path:
+        return {
+            'api_helper': api_helper,
+            'title': unicode(path[path.find('/wiki/') + len('/wiki/'):], title_encoding, 'ignore').replace('_', ' '),
+            'revision': None,
+        }
+    
+    return {
+        'api_helper': api_helper,
+        'title': unicode(path.rsplit('/', 1)[-1], title_encoding, 'ignore').replace('_', ' '),
+        'revision': None,
+    }
+
+
 # ==============================================================================
 
 
@@ -154,15 +214,22 @@ class APIHelper(object):
 
 
 class ImageDB(object):
-    def __init__(self, base_url):
+    def __init__(self, base_url=None, api_helper=None):
         """
-        @param base_url: base URL of a MediaWiki,
-            e.g. 'http://en.wikipedia.org/w/'
+        @param base_url: base URL of a MediaWiki, e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
+        
+        @param api_helper: APIHelper instance
+        @type api_helper: L{APIHelper}
         """
         
-        self.api_helper = APIHelper(base_url)
-        assert self.api_helper is not None, 'invalid base URL %r' % base_url
+        if api_helper is not None:
+            assert base_url is None, 'either api_helper or base_url can be given, not both'
+            self.api_helper = api_helper
+        else:
+            self.api_helper = APIHelper(base_url)
+            assert self.api_helper is not None, 'invalid base URL %r' % base_url
+        
         self.tmpdir = tempfile.mkdtemp()
     
     def clear(self):
@@ -309,7 +376,7 @@ class WikiDB(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    def __init__(self, base_url, license, template_blacklist=None):
+    def __init__(self, base_url=None, license=None, template_blacklist=None, api_helper=None):
         """
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
@@ -321,11 +388,18 @@ class WikiDB(object):
         @param template_blacklist: title of an article containing blacklisted
             templates (optional)
         @type template_blacklist: unicode
+        
+        @param api_helper: APIHelper instance
+        @type api_helper: L{APIHelper}
         """
         
+        if api_helper is not None:
+            assert base_url is None, 'either api_helper or base_url can be given, not both'
+            self.api_helper = api_helper
+        else:
+            self.api_helper = APIHelper(base_url)
+            assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.license = license
-        self.api_helper = APIHelper(base_url)
-        assert self.api_helper is not None, 'invalid base URL %r' % base_url
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
@@ -419,7 +493,7 @@ class WikiDB(object):
     def getRawArticle(self, title, revision=None):
         if not title:
             return None
-        
+
         if revision is None:
             page = self.api_helper.page_query(titles=title, redirects=1, prop='revisions', rvprop='content')
         else:

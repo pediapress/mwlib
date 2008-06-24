@@ -102,7 +102,7 @@ class MetaBook(object):
         
         for item in self.getItems():
             if item['type'] == 'article':
-                yield item['title'], item.get('revision', None)
+                yield item
     
     def getItems(self):
         """Generator that produces a flattened list of chapters and articles

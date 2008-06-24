@@ -78,7 +78,7 @@ def show():
         print raw.encode("utf-8")
 
 def buildzip():
-    parser = optparse.OptionParser(usage="%prog [OPTIONS] [ARTICLE ...]")
+    parser = optparse.OptionParser(usage="%prog [OPTIONS] [ARTICLETITLE|ARTICLEURL ...]")
     parser.add_option("-c", "--conf", help="config file (required unless --baseurl is given)")
     parser.add_option("-b", "--baseurl", help="base URL for mwapidb backend")
     parser.add_option("-s", "--shared-baseurl", help="DEPRECATED, DO NOT USE!")
@@ -88,8 +88,8 @@ def buildzip():
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
-                      help='get POSTURL from service with given URL and open upload URL in webbrowser (default: "http://pediapress.com/api/collections/")',
-                      metavar="SERVICEURL")
+                      help='get POST URL from PediaPress.com and open upload page in webbrowser',
+                      action='store_true')
     parser.add_option("-i", "--imagesize",
                       help="max. pixel size (width or height) for images (default: 800)",
                       default=800)
@@ -101,8 +101,6 @@ def buildzip():
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
-    if not options.baseurl and not options.conf:
-        parser.error("Neither --conf nor --baseurl specified\n" + use_help)        
     if options.posturl and options.getposturl:
         parser.error('Please specify either --posturl or --getposturl, not both.\n' + use_help)
     if not options.posturl and not options.getposturl and not options.output:
@@ -128,7 +126,7 @@ def buildzip():
     elif options.getposturl:
         import webbrowser
         from mwlib.podclient import podclient_from_serviceurl
-        podclient = podclient_from_serviceurl(options.getposturl)
+        podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
         webbrowser.open(podclient.redirecturl)
     else:
         podclient = None
@@ -159,7 +157,7 @@ def buildzip():
     try:
         set_status('init')
         
-        from mwlib import wiki, recorddb, metabook
+        from mwlib import wiki, recorddb, metabook, mwapidb
         
         mb = metabook.MetaBook()
         if options.conf:
@@ -177,7 +175,7 @@ def buildzip():
                     'name': license_name,
                     'wikitext': wikitext,
                 }
-        else:
+        elif options.baseurl:
             w = {
                 'wiki': wiki.wiki_mwapi(options.baseurl, options.license, options.template_blacklist),
                 'images': wiki.image_mwapi(options.baseurl)
@@ -189,6 +187,13 @@ def buildzip():
             }
             if 'license' in metadata:
                 mb.source['defaultarticlelicense'] = metadata['license']
+        else:
+            w = {'wiki': None, 'images': None}
+            # FIXME!!!!!!:
+            mb.source = {
+                'name': 'FIXME',
+                'url': 'http://FIXME',
+            }
         
         if args:
             mb.addArticles([unicode(x, 'utf-8') for x in args])
@@ -206,8 +211,7 @@ def buildzip():
             os.close(fd)
             delete_files.append(options.output)
         zf = zipfile.ZipFile(options.output, 'w')
-        z = recorddb.ZipfileCreator(zf, w['wiki'], w['images'], imagesize=options.imagesize)
-        z.addObject('metabook.json', mb.dumpJson())
+        z = recorddb.ZipfileCreator(zf, imagesize=options.imagesize)
         
         set_status('parsing')
         articles = list(mb.getArticles())
@@ -216,11 +220,22 @@ def buildzip():
         else:
             inc = 0
         p = 0
-        for title, revision in articles:
+        for item in articles:
             set_progress(p)
-            z.addArticle(title, revision=revision)        
+            d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
+            if d is not None:
+                item['title'] = d['title']
+                item['revision'] = d['revision']
+                wikidb = mwapidb.WikiDB(api_helper=d['api_helper'])
+                imagedb = mwapidb.ImageDB(api_helper=d['api_helper'])
+            else:
+                wikidb = w['wiki']
+                imagedb = w['images']
+            z.addArticle(item['title'], revision=item.get('revision', None), wikidb=wikidb, imagedb=imagedb)
             p += inc
         set_progress(90)
+        
+        z.addObject('metabook.json', mb.dumpJson())
         
         z.writeContent()
         zf.close()

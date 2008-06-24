@@ -27,7 +27,7 @@ def test_undefined_variable():
 
 def test_birth_date_and_age():
     db = DictDB({
-            "birth date and age": '[[{{MONTHNAME|{{{2|{{{month|{{{2}}}}}}}}}}} {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
+            "birth date and age": '[[ {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
             
             "age" : '<includeonly>{{#expr:({{{4|{{CURRENTYEAR}}}}})-({{{1}}})-(({{{5|{{CURRENTMONTH}}}}})<({{{2}}})or({{{5|{{CURRENTMONTH}}}}})=({{{2}}})and({{{6|{{CURRENTDAY}}}}})<({{{3}}}))}}</includeonly>',
             })
@@ -44,7 +44,6 @@ def test_birth_date_and_age():
     expected = u"age&nbsp;%s" % age
     assert expected in res
 
-    assert u"February" in res
     
 def test_five():
     txt = "text of the tnext template"
@@ -123,14 +122,6 @@ def test_named_variable_whitespace():
     expandstr("{{doit|notable roles=these are the notable roles}}",
               "these are the notable roles",
               wikidb=DictDB(doit="{{{notable roles}}}"))
-
-def test_monthname():
-    expandstr("{{MONTHNAME|1}}", "January")
-    expandstr("{{MONTHNAME|2}}", "February")
-    expandstr("{{MONTHNAME|12}}", "December")
-    expandstr("{{MONTHNAME|13}}", "January")
-
-    expandstr("{{MONTHNAME|0}}", "December")
 
 def test_pipe_inside_imagemap():
     """pipes inside image maps should not separate template arguments

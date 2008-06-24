@@ -149,7 +149,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             xhtmlwriter.preprocess(tree)
             dbw = xhtmlwriter.MWXHTMLWriter(language=language, namespace=namespace, 
                                             imagesrcresolver=imagesrcresolver,
-                                            debug=debug)
+                                            debug=False)
         elif dialect == "mwxml":
             advtree.buildAdvancedTree(tree) # this should be optional
             dbw = xhtmlwriter.MWXMLWriter() # 1:1 XML from parse tree

@@ -125,14 +125,17 @@ mwapidb.fetch_cache = Cache()
 """
 
 import tempfile
-import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 import UserDict
 import exceptions
 
 cache_prefix = "%s/mwlibcache." % tempfile.gettempdir()
 
 def fname(key):
-    return cache_prefix + md5.md5(key).hexdigest()
+    return cache_prefix + md5(key).hexdigest()
 
 class Cache(UserDict.UserDict):
     def __getitem__(self, name):

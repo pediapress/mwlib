@@ -179,6 +179,9 @@ class MWXHTMLWriter(object):
                         @import "http://en.wikipedia.org/skins-1.5/common/shared.css?156";
                         @import "http://en.wikipedia.org//skins-1.5/monobook/main.css?156";
 """
+    # this shuld be in a CDATA section, bot available prioir to etree version 2.xxx
+    # http://codespeak.net/lxml/dev/api/lxml.etree.CDATA-class.html
+
     #css = None # set to None disables css
 
     def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None, debug=False):
@@ -199,8 +202,9 @@ class MWXHTMLWriter(object):
         
     def getTree(self, debuginfo=""):
         indent(self.root) # breaks XHTML (proper rendering at least) if activated!
-        self.root.append(self.writeCategoryLinks())
-        self.root.append(self.writeLanguageLinks())
+        for x in (self.writeCategoryLinks(), self.writeLanguageLinks()):
+            if x:
+                self.root.append(x)
         if self.debug:
             r = validate(self.header + ET.tostring(self.root))
             if r:
@@ -379,7 +383,8 @@ class MWXHTMLWriter(object):
             #r.set("class", "math.error")
             #r.text = obj.caption
             pass
-        s.append(r)
+        else:
+            s.append(r)
         return s
 
 
