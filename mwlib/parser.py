@@ -298,6 +298,7 @@ class Link(Node):
                 pass
             # We can't handle this as an image, so default:
             self.__class__ = NamespaceLink 
+    
 
 
 # Link forms:
@@ -592,7 +593,7 @@ class Parser(object):
 
         if not obj.children and obj.target:
             # [[a]] -> [[a|a]]
-            obj.append(Text(obj.target))
+            obj.append(Text(obj.full_target))
 
         if isinstance(obj, ImageLink):
             return obj
@@ -603,7 +604,7 @@ class Parser(object):
                 # [[a|a]]b -> [[a|ab]]
                 obj.append(Text(m.group(0)), True)
                 self.tokens[self.pos] = ('TEXT', self.token[1][m.end():])
-            
+
         return obj
     
     def parseTag(self):
