@@ -375,7 +375,7 @@ class MWXHTMLWriter(object):
         """
         s = ET.Element("object")
         s.set("class", "mwx.math")
-        s.set("type", "application/mediawiki-latex")
+        s.set("type", "application/x-latex")
         s.set("src", "data:text/plain;charset=utf-8,%s" % obj.caption)
         r = mathml.latex2mathml(obj.caption)       
         if not r:
