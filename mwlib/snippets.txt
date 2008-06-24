@@ -1,0 +1,33 @@
+#! -*- mode: wikipedia -*-
+
+funky Umlauts and symbols: äöü ÄÖÜ some symbols: @ € ~ # ^ § '
+
+Intra wiki link: [[Articlename]] with different link text: [[Other Article|Some funky text]]
+
+External link to [http://example.com] with optional link text [http://example.com bla blub]
+
+some url: http://example.com. now a url with umlauts: http://dasörtliche.de and now a italic url ''http://example.com/öpath''
+
+* item 1 ä#üß
+* item 2 @€
+* item3
+
+# numbered item 1
+# numbered item 2
+# numbered item3
+
+{| class="prettytable"
+|-
+| row 1, col 1 || row 1, col 2 || row 1, col 3
+|-
+| row 2, col 1 || row 2, col 2 || row 2, col 3
+|-
+| row 3, col 1 || row 3, col 2 || row 3, col 3
+|}
+
+normal paragraph
+
+: some indented text
+
+back to normal
+
