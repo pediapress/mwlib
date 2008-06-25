@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex
+from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex, Indented
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
@@ -122,3 +122,22 @@ some text
     r = parseString(title="X33", raw=raw, wikidb=db)
     buildAdvancedTree(r)
     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
+
+
+def test_indentation():
+    raw = """
+== test ==
+
+:One
+::Two
+:::Three
+::::Four
+
+""".decode("utf8")
+    db = DummyDB()
+    r = parseString(title="t", raw=raw, wikidb=db)
+    buildAdvancedTree(r)
+    for i,c in enumerate(r.getChildNodesByClass(Indented)):
+        assert c.indentlevel == i + 1
+    assert i == 3
+
