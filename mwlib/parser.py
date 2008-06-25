@@ -258,7 +258,8 @@ class Link(Node):
         # Mark [[:Category:Foo]]. See below
         if full_target.startswith(':'):
             self.colon = True
-        self.full_target = full_target = full_target.strip(':')
+            full_target = full_target[1:]
+        self.full_target = full_target
         
         try:
             ns, title = full_target.split(':', 1)
@@ -308,6 +309,9 @@ class Link(Node):
         Normalizes the format of the target with regards to whitespace and
         capitalization (depending on capitalizeTarget setting).
         """
+
+        if not self.target:
+            return
 
         # really we should have a urllib.unquote() first, but in practice this
         # format may be rare enough to ignore
