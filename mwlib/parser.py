@@ -222,7 +222,7 @@ class Link(Node):
             res[name.lower()] = (InterwikiLink, target)
 
         for lang in langs:
-            res[name.lower()] = (LangLink, lang)
+            res[lang.lower()] = (LangLink, lang)
 
         return res
         

@@ -648,6 +648,11 @@ def test_language_link():
     assert r.target=='bla'
     assert r.namespace == 'es'
 
+def test_long_language_link():
+    r=parse("[[csb:bla]]").find(parser.LangLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 'csb'
+
 def test_normalize():
     r=parse("[[MediaWiki:__bla_ _]]").find(parser.LangLink)[0]
     assert r.target=='bla'
