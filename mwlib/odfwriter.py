@@ -81,12 +81,12 @@ class ODFWriter(object):
         outfile = output
         self.book = book
         self.doc.meta.addElement(dc.Title(text=u"collection title fixme"))
-        self.baseUrl = book.source['url']
-        self.wikiTitle = book.source.get('name')
+        #self.baseUrl = book.source['url']
+        #self.wikiTitle = book.source.get('name')
         # add chapters FIXME
         for e in bookParseTree.children:
             r = self.write(e, self.doc.text)
-        licenseArticle = self.book.source.get('defaultarticlelicense','')
+        #licenseArticle = self.book.source.get('defaultarticlelicense','') # FIXME
         doc = self.getDoc()
         #doc.toXml("%s.odf.xml"%fn)
         doc.save(outfile, True)
