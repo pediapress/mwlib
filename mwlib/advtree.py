@@ -314,12 +314,13 @@ class DefinitionDescription(Style, AdvancedNode):
 class Blockquote(Style, AdvancedNode):
     "margins to left &  right"
     _tag = "blockquote"
+    
+class Indented(Style, AdvancedNode):
+    "margin to the left"
+    # this is fixed
     def getIndentLevel(self):
         return self.caption.count(":")
     indentlevel = property(getIndentLevel)
-    
-class Indented(Blockquote):
-    "margin to the left"
 
 class Overline(Style, AdvancedNode):
     _style = "overline"
