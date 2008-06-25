@@ -74,9 +74,11 @@ class ODFWriter(object):
 
 
     def writeBook(self, book, bookParseTree, output, removedArticlesFile=None, coverimage=None):
+        """
+        bookParseTree must be advtree and sent through preprocess()
+        """
+
         outfile = output
-        advtree.buildAdvancedTree(bookParseTree)
-        preprocess(bookParseTree)
         self.book = book
         self.doc.meta.addElement(dc.Title(text=u"collection title fixme"))
         self.baseUrl = book.source['url']
@@ -547,6 +549,7 @@ def main():
         input = unicode(open(fn).read(), 'utf8')
         r = parseString(title=fn, raw=input, wikidb=db)
         parser.show(sys.stdout, r)
+        advtree.buildAdvancedTree(r)
         preprocess(r)
         parser.show(sys.stdout, r)
         odf = ODFWriter()

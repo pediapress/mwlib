@@ -4,6 +4,7 @@
 # See README.txt for additional licensing information.
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
+from mwlib import advtree
 import mwlib.parser
 from mwlib.odfwriter import ODFWriter, preprocess
 import subprocess
@@ -29,11 +30,13 @@ def validate(odfw):
     r = p.stderr.read() + p.stdout.read()
     if len(r):
         raise ValidationError, r
-    #os.remove(tfn)
+    else:
+        os.remove(tfn)
 
 def getXML(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
+    advtree.buildAdvancedTree(r)
     preprocess(r)
     mwlib.parser.show(sys.stdout, r)
     odfw = ODFWriter()
