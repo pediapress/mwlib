@@ -25,12 +25,13 @@ More Info:
 * http://books.evc-cit.info/odbook/book.html
 * http://opendocumentfellowship.com/projects/odfpy
 """
-import sys, exceptions
+
+import sys
 try:
     import odf
-except exceptions.ImportError, e:
+except ImportError, e:
     print "you need to install odfpy: http://opendocumentfellowship.com/projects/odfpy"
-    raise exceptions.ImportError, e
+    raise ImportError(e)
 
 from odf.opendocument import OpenDocumentText
 from odf import text, dc, meta, table, draw, math
