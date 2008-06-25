@@ -25,17 +25,15 @@ class OptionParser(optparse.OptionParser):
             if not self.conf_optional:
                 self.error('Please specify --conf option. See --help for all options.')
             return self.options, self.args
-        self.metabook = self.get_metabook()
+        if self.options.metabook:
+            self.metabook = metabook.MetaBook()
+            self.metabook.readJsonFile(self.options.metabook)
         if self.args:
+            if self.metabook is None:
+                self.metabook = metabook.MetaBook()
             self.metabook.addArticles([unicode(x, 'utf-8') for x in self.args])
         self.env = self.makewiki()
         return self.options, self.args
-    
-    def get_metabook(self):
-        mb = metabook.MetaBook()
-        if self.options.metabook:
-            mb.readJsonFile(self.options.metabook)
-        return mb
     
     def makewiki(self):
         env = wiki.makewiki(self.options.conf, metabook=self.metabook)
