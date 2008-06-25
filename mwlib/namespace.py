@@ -49,7 +49,7 @@ interwiki_map = {
     'w': 'wikipedia',
     'wiktionary': 'wiktionary',
     'wikt': 'wiktionary',
-    'wikinews':	'wikinews',
+    'wikinews': 'wikinews',
     'n': 'wikinews',
     'wikibooks': 'wikibooks',
     'b': 'wikibooks',
