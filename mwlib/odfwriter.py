@@ -12,7 +12,6 @@ those prefixed with 'x' are unmodofied copies from xhtmlwriter.py
 and deactived.
 
 ToDo:
- * call status_callback with status & progress info
  * fix license handling
  * implement missing methods
  * add missing styles
