@@ -190,8 +190,8 @@ def buildzip():
             z.parseArticle(
                 title=license['title'],
                 raw=license['wikitext'],
-                wikidb=env.wikidb,
-                imagedb=env.imagedb,
+                wikidb=env.wiki,
+                imagedb=env.images,
             )
         
         z.addObject('metabook.json', parser.metabook.dumpJson())
