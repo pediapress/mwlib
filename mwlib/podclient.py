@@ -28,6 +28,9 @@ class PODClient(object):
     def post_progress(self, progress):
         self._post(urllib.urlencode({'progress': '%d' % progress}))
     
+    def post_current_article(self, title):
+        self._post(urllib.urlencode({'article': title.encode('utf-8')}))
+
     def post_zipfile(self, filename):
         f = open(filename, "rb")
         content_type, data = get_multipart('collection.zip', f.read(), 'collection')
