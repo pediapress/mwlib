@@ -12,6 +12,8 @@ those prefixed with 'x' are unmodofied copies from xhtmlwriter.py
 and deactived.
 
 ToDo:
+ * call status_callback with status & progress info
+ * fix license handling
  * implement missing methods
  * add missing styles
  * use ODF supported special features for
@@ -38,6 +40,7 @@ from mwlib.log import Log
 from mwlib import advtree 
 from mwlib import odfstyles as style
 from mwlib import xmltreecleaner
+from mwlib import writerbase
 
 log = Log("odfwriter")
 
@@ -54,10 +57,11 @@ def showNode(obj):
 class ODFWriter(object):
     namedLinkCount = 1
 
-    def __init__(self, language="en", namespace="en.wikipedia.org", creator="", license="GFDL", images=None):
+    def __init__(self, env, status_callback=None, language="en", namespace="en.wikipedia.org", creator="", license="GFDL"):
+        self.env = env
+        self.status_callback = status_callback
         self.language = language
         self.namespace = namespace
-        self.images = images
         self.references = []
         self.doc =  OpenDocumentText()
         style.applyStylesToDoc(self.doc)
@@ -73,24 +77,22 @@ class ODFWriter(object):
             self.doc.meta.addElement(meta.UserDefined(name="Rights", text=license))
 
 
-    def writeBook(self, book, bookParseTree, output, removedArticlesFile=None, coverimage=None):
+    def writeBook(self, book, output, removedArticlesFile=None, coverimage=None):
         """
         bookParseTree must be advtree and sent through preprocess()
         """
-
-        outfile = output
-        self.book = book
+        
         self.doc.meta.addElement(dc.Title(text=u"collection title fixme"))
         #self.baseUrl = book.source['url']
         #self.wikiTitle = book.source.get('name')
         # add chapters FIXME
-        for e in bookParseTree.children:
+        for e in book.children:
             r = self.write(e, self.doc.text)
-        #licenseArticle = self.book.source.get('defaultarticlelicense','') # FIXME
+        #licenseArticle = self.env.metabook.source.get('defaultarticlelicense','') # FIXME
         doc = self.getDoc()
         #doc.toXml("%s.odf.xml"%fn)
-        doc.save(outfile, True)
-        print "writing to", outfile
+        doc.save(output, True)
+        print "writing to %r" % (output + '.odt')
         
     def getDoc(self, debuginfo=""):
         return self.doc
@@ -443,11 +445,11 @@ class ODFWriter(object):
         # http://code.pediapress.com/hg/mwlib.rl rlwriter.py
         
 
-        if not self.images:
+        if not self.env.images:
             return
 
         targetWidth = 400
-        imgPath = self.images.getDiskPath(obj.target, size=targetWidth)
+        imgPath = self.env.images.getDiskPath(obj.target, size=targetWidth)
         print imgPath
         if not imgPath:
             print "NO IMAGE PATH", obj, obj.target
@@ -526,6 +528,13 @@ class ODFWriter(object):
     def xwriteGallery(self, obj):
         pass # FIXME
 
+
+def writer(env, output, status_callback, language='en', namespace='en.wikipedia.org'):
+    book = writerbase.build_book(env)
+    for c in book.children:
+        preprocess(c)
+    ODFWriter(env, status_callback=status_callback).writeBook(book, output=output)
+
     
 # - helper funcs   r ---------------------------------------------------
 
@@ -540,6 +549,11 @@ def preprocess(root):
     xmltreecleaner.fixParagraphs(root)
     xmltreecleaner.fixBlockElements(root)
 
+
+
+
+
+# ==============================================================================
 
 def main():
     for fn in sys.argv[1:]:
