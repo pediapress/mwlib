@@ -18,6 +18,8 @@ class OptionParser(optparse.OptionParser):
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
+        if self.options.conf is None:
+            self.error('Pleace specify --conf option. See --help for all options.')
         if self.options.logfile:
             start_logging(self.options.logfile)
         self.metabook = self.get_metabook()
