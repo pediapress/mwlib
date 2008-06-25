@@ -355,10 +355,11 @@ def zip2odf():
     
     from mwlib import parser, zipwiki
     from mwlib import odfwriter
+    from mwlib import advtree
 
     wikidb = zipwiki.Wiki(zipfile)
     imagedb = zipwiki.ImageDB(zipfile)
-
+    
     
     def buildBook(wikidb):
         bookParseTree = parser.Book()
@@ -367,6 +368,9 @@ def zip2odf():
                 bookParseTree.children.append(parser.Chapter(item['title'].strip()))
             elif item['type'] == 'article':
                 a = wikidb.getParsedArticle(title=item['title'], revision=item.get('revision'))
+                # prepare tree
+                advtree.buildAdvancedTree(a)
+                odfwriter.preprocess(a)
                 bookParseTree.children.append(a)
         return bookParseTree
 
