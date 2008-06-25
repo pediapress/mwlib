@@ -1,4 +1,4 @@
-﻿from mwlib.namespace_langs import lang_ns_data as _lang_ns_data
+from mwlib.namespace_langs import lang_ns_data as _lang_ns_data
 
 NS_MEDIA          = -2
 NS_SPECIAL        = -1
