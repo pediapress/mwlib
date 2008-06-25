@@ -224,7 +224,7 @@ def render():
     parser = OptionParser(conf_optional=True)
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-w", "--writer", help='use writer backend WRITER')
-    parser.add_option("-W", "--writer-options", help='additional writer-specific options')
+    parser.add_option("-W", "--writer-options", help='";"-separated list of additional writer-specific options')
     parser.add_option("-e", "--error-file", help='write errors to this file')
     parser.add_option("-s", "--status-file", help='write status/progress info to this file')
     parser.add_option("--list-writers", action='store_true', help='list available writers and exit')
