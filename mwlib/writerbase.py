@@ -26,5 +26,5 @@ def build_book(env, status_callback=None, progress_range=None):
             else:
                 log.warn('No such article: %r' % item['title'])
     if status_callback is not None:
-        status_callback(status='parsing', progress=progress)
+        status_callback(status='parsing', progress=progress, article='')
     return book

@@ -531,9 +531,13 @@ class ODFWriter(object):
 
 
 def writer(env, output, status_callback, language='en', namespace='en.wikipedia.org'):
-    book = writerbase.build_book(env)
+    book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
+    if status_callback is not None:
+        status_callback(status='preprocessing', progress=70)
     for c in book.children:
         preprocess(c)
+    if status_callback is not None:
+        status_callback(status='rendering', progress=80)
     ODFWriter(env, status_callback=status_callback).writeBook(book, output=output)
 
     
