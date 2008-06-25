@@ -143,6 +143,11 @@ def buildzip():
         if podclient is not None:
             podclient.post_progress(progress)
     
+    def set_current_article(title):
+        print 'Current Article: %r' % title
+        if podclient is not None:
+            podclient.post_current_article(title)
+    
     try:
         set_status('init')
         
@@ -175,6 +180,7 @@ def buildzip():
             else:
                 wikidb = env.wiki
                 imagedb = env.images
+            set_current_article(item['title'])
             z.addArticle(item['title'], revision=item.get('revision', None), wikidb=wikidb, imagedb=imagedb)
             
             p += inc
