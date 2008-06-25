@@ -1,0 +1,2 @@
+class WriterError(RuntimeError):
+    pass

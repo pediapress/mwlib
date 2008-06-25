@@ -45,6 +45,7 @@ setup(
     version=str(version),
     entry_points = dict(console_scripts=['mw-buildcdb = mwlib.apps:buildcdb',
                                          'mw-zip = mwlib.apps:buildzip',
+                                         'mw-render = mwlib.apps:render',
                                          'mw-zip2odf = mwlib.apps:zip2odf',
                                          'mw-parse = mwlib.apps:parse',
                                          'mw-show = mwlib.apps:show',

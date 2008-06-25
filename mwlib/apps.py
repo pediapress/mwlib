@@ -218,6 +218,91 @@ def buildzip():
             except Exception, e:
                 print 'Could not delete file %r: %s' % (path, e)
 
+def render():
+    from mwlib.options import OptionParser
+    
+    parser = OptionParser(conf_optional=True)
+    parser.add_option("-o", "--output", help="write output to OUTPUT")
+    parser.add_option("-w", "--writer", help='use writer backend WRITER')
+    parser.add_option("-W", "--writer-options", help='additional writer-specific options')
+    parser.add_option("-e", "--error-file", help='write errors to this file')
+    parser.add_option("-s", "--status-file", help='write status/progress info to this file')
+    parser.add_option("--list-writers", action='store_true', help='list available writers and exit')
+    parser.add_option("-d", "--daemonize", action="store_true",
+                      help='become a daemon process as soon as possible')
+    options, args = parser.parse_args()
+    
+    import simplejson
+    import sys
+    import traceback
+    import pkg_resources
+    from mwlib.writerbase import WriterError
+    
+    use_help = 'Use --help for usage information.'
+    
+    if options.list_writers:
+        for entry_point in pkg_resources.iter_entry_points('mwlib.writers'):
+            print entry_point.name
+        return
+    
+    if options.output is None:
+        parser.error('Please specify an output file with --output.\n' + use_help)
+    
+    if options.writer is None:
+        parser.error('Please specify a writer with --writer.\n' + use_help)    
+    try:
+        entry_point = pkg_resources.iter_entry_points('mwlib.writers', options.writer).next()
+    except StopIteration:
+        sys.exit('No such writer: %r (use --list-writers to list available writers)' % options.writer)
+    try:
+        writer = entry_point.load()
+    except Exception, e:
+        sys.exit('Could not load writer %r: %s' % (options.writer, e))
+    
+    writer_options = {}
+    if options.writer_options:
+        for wopt in options.writer_options.split(';'):
+            if '=' in wopt:
+                key, value = wopt.split('=', 1)
+                writer_options[key] = value
+            else:
+                writer_options[wopt] = True
+    
+    if options.daemonize:
+        from mwlib.utils import daemonize
+        daemonize()
+    
+    last_status = {}
+    def set_status(status=None, progress=None, article=None):
+        if status is not None:
+            last_status['status'] = status
+            print 'STATUS: %s' % status
+        if progress is not None:
+            assert 0 <= progress and progress <= 100, 'status not in range 0..100'
+            last_status['progress'] = progress
+            print 'PROGRESS: %d%%' % progress
+        if article is not None:
+            last_status['article'] = article
+            print 'ARTICLE: %r' % article
+        if options.status_file:
+            open(options.status_file, 'wb').write(simplejson.dumps(last_status).encode('utf-8'))
+    
+    try:
+        set_status(status='init', progress=0)
+        writer(parser.env, output=options.output, status_callback=set_status, **writer_options)
+        set_status(status='finished', progress=100)
+    except WriterError, e:
+        set_status(status='error')
+        if options.error_file:
+            open(options.error_file, 'wb').write(str(e))
+        raise
+    except Exception, e:
+        set_status(status='error')
+        if options.error_file:
+            traceback.print_exc(file=open(options.error_file, 'wb'))
+        raise
+    
+
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
     parser.add_option("-a", "--all", action="store_true", help="parse all articles")

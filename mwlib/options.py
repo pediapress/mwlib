@@ -4,7 +4,8 @@ from mwlib.utils import start_logging
 from mwlib import wiki, metabook
 
 class OptionParser(optparse.OptionParser):
-    def __init__(self, usage=None):
+    def __init__(self, usage=None, conf_optional=False):
+        self.conf_optional = conf_optional
         if usage is None:
             usage = '%prog [OPTIONS] [ARTICLETITLE...]'
         optparse.OptionParser.__init__(self, usage=usage)
@@ -18,10 +19,12 @@ class OptionParser(optparse.OptionParser):
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
-        if self.options.conf is None:
-            self.error('Pleace specify --conf option. See --help for all options.')
         if self.options.logfile:
             start_logging(self.options.logfile)
+        if self.options.conf is None:
+            if not self.conf_optional:
+                self.error('Please specify --conf option. See --help for all options.')
+            return self.options, self.args
         self.metabook = self.get_metabook()
         if self.args:
             self.metabook.addArticles([unicode(x, 'utf-8') for x in self.args])
