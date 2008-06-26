@@ -29,7 +29,11 @@ ToDo:
 import sys
 import cgi
 import StringIO
-import xml.etree.ElementTree as ET
+try:
+    import xml.etree.ElementTree as ET
+except:
+    from elementtree import ElementTree as ET
+
 from mwlib import parser
 from mwlib import mathml
 from mwlib import advtree
