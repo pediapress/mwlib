@@ -58,7 +58,7 @@ setup(
                                       ]},
     install_requires=install_requires,
     ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
-                   Extension("mwlib._expander", ["mwlib/_expander.cc"]),
+                   #Extension("mwlib._expander", ["mwlib/_expander.cc"]),
                    ],
     
     packages=["mwlib", "mwlib.resources"],
