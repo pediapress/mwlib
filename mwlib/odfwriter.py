@@ -30,7 +30,7 @@ try:
     import odf
 except ImportError, e:
     print "you need to install odfpy: http://opendocumentfellowship.com/projects/odfpy"
-    raise ImportError(e)
+    raise
 
 from odf.opendocument import OpenDocumentText
 from odf import text, dc, meta, table, draw, math
