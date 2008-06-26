@@ -250,7 +250,7 @@ def render():
                     description = '<no description>'
             except Exception, e:
                 description = '<NOT LOADABLE: %s>' % e
-            print '%s - %s' % (entry_point.name, description)
+            print '%s\t%s' % (entry_point.name, description)
         return
     
     if options.output is None:
