@@ -147,7 +147,19 @@ def buildzip():
         print 'Current Article: %r' % title
         if podclient is not None:
             podclient.post_current_article(title)
-    
+
+    # try:... except:... finally:... does not work in python 2.4
+    # use atexit instead
+    def cleanup():
+        for path in delete_files:
+            try:
+                os.unlink(path)
+            except Exception, e:
+                print 'Could not delete file %r: %s' % (path, e)
+                
+    import atexit
+    atexit.register(cleanup)
+        
     try:
         set_status('init')
         
@@ -211,12 +223,6 @@ def buildzip():
     except Exception, e:
         set_status('error')
         raise
-    finally:
-        for path in delete_files:
-            try:
-                os.unlink(path)
-            except Exception, e:
-                print 'Could not delete file %r: %s' % (path, e)
 
 def render():
     from mwlib.options import OptionParser

@@ -13,10 +13,11 @@ from setuptools import setup, Extension
 import distutils.util
 
 
-install_requires=["simplejson>=1.3", "pyparsing>=1.4.11"]
+install_requires=["simplejson>=1.3", "pyparsing>=1.4.11", "odfpy>=0.7.0"]
 if sys.version_info[:2] < (2,5):
     install_requires.append("wsgiref>=0.1.2")
-
+    install_requires.append("elementtree>=1.2.6")
+    
 execfile(distutils.util.convert_path('mwlib/_version.py')) 
 # adds 'version' to local namespace
 
@@ -57,7 +58,7 @@ setup(
                                       ]},
     install_requires=install_requires,
     ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
-                   Extension("mwlib._expander", ["mwlib/_expander.cc"]),
+                   #Extension("mwlib._expander", ["mwlib/_expander.cc"]),
                    ],
     
     packages=["mwlib", "mwlib.resources"],
