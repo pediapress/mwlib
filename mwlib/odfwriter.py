@@ -532,7 +532,7 @@ class ODFWriter(object):
 # - func  ---------------------------------------------------
 
 
-def writer(env, output, status_callback, language='en', namespace='en.wikipedia.org'):
+def writer(env, output, status_callback):
     book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
     scb = lambda status, progress :  status_callback is not None and status_callback(status,progress)
     scb(status='preprocessing', progress=70)

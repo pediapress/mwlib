@@ -52,7 +52,6 @@ setup(
                                         'mw-serve = mwlib.apps:serve',
                                         ],
                     'mwlib.writers': ['odf = mwlib.odfwriter:writer',
-                                      'docbook = mwlib.docbookwriter:writer',
                                       'xhtml = mwlib.xhtmlwriter:xhtmlwriter',
                                       'mwxml = mwlib.xhtmlwriter:xmlwriter',
                                       ]},
