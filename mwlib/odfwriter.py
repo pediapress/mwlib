@@ -539,6 +539,7 @@ def writer(env, output, status_callback, language='en', namespace='en.wikipedia.
         status_callback(status='rendering', progress=80)
     ODFWriter(env, status_callback=status_callback).writeBook(book, output=output)
 
+writer.description = 'OpenDocument Text'
     
 # - helper funcs   r ---------------------------------------------------
 

@@ -242,7 +242,15 @@ def render():
     
     if options.list_writers:
         for entry_point in pkg_resources.iter_entry_points('mwlib.writers'):
-            print entry_point.name
+            try:
+                writer = entry_point.load()
+                if hasattr(writer, 'description'):
+                    description = writer.description
+                else:
+                    description = '<no description>'
+            except Exception, e:
+                description = '<NOT LOADABLE: %s>' % e
+            print '%s - %s' % (entry_point.name, description)
         return
     
     if options.output is None:
