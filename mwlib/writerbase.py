@@ -1,4 +1,4 @@
-from mwlib import advtree, parser, log
+from mwlib import parser, log
 
 log = log.Log('mwlib.writerbase')
 
@@ -21,7 +21,6 @@ def build_book(env, status_callback=None, progress_range=None):
                 progress += progress_step
             a = env.wiki.getParsedArticle(title=item['title'], revision=item.get('revision'))
             if a is not None:
-                advtree.buildAdvancedTree(a)
                 book.children.append(a)
             else:
                 log.warn('No such article: %r' % item['title'])
