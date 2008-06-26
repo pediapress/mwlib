@@ -60,7 +60,7 @@ public:
 int MacroScanner::scan()
 {
 
-std:
+def:
 
 	start=cursor;
 	
@@ -104,7 +104,7 @@ re2c:yyfill:enable = 0 ;
 
 noinclude:
 /*!re2c
-	'</noinclude>' {goto std;}
+	'</noinclude>' {goto def;}
 	[^\000] {goto noinclude;}
 	"\000" {cursor=start+11; RET(5);}
  */
