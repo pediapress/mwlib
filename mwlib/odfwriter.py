@@ -445,7 +445,7 @@ class ODFWriter(object):
         # http://code.pediapress.com/hg/mwlib.rl rlwriter.py
         
 
-        if not self.env and self.env.images:
+        if not self.env or not self.env.images:
             return
 
         targetWidth = 400
