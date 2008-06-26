@@ -57,7 +57,7 @@ def showNode(obj):
 class ODFWriter(object):
     namedLinkCount = 1
 
-    def __init__(self, env, status_callback=None, language="en", namespace="en.wikipedia.org", creator="", license="GFDL"):
+    def __init__(self, env=None, status_callback=None, language="en", namespace="en.wikipedia.org", creator="", license="GFDL"):
         self.env = env
         self.status_callback = status_callback
         self.language = language
@@ -91,8 +91,8 @@ class ODFWriter(object):
         #licenseArticle = self.env.metabook.source.get('defaultarticlelicense','') # FIXME
         doc = self.getDoc()
         #doc.toXml("%s.odf.xml"%fn)
-        doc.save(output, True)
-        print "writing to %r" % (output + '.odt')
+        doc.save(output, addsuffix=False)
+        print "writing to %r" % (output)
         
     def getDoc(self, debuginfo=""):
         return self.doc
@@ -445,7 +445,7 @@ class ODFWriter(object):
         # http://code.pediapress.com/hg/mwlib.rl rlwriter.py
         
 
-        if not self.env.images:
+        if not self.env and self.env.images:
             return
 
         targetWidth = 400
@@ -529,17 +529,20 @@ class ODFWriter(object):
         pass # FIXME
 
 
+# - func  ---------------------------------------------------
+
+
 def writer(env, output, status_callback, language='en', namespace='en.wikipedia.org'):
     book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
-    if status_callback is not None:
-        status_callback(status='preprocessing', progress=70)
+    scb = lambda status, progress :  status_callback is not None and status_callback(status,progress)
+    scb(status='preprocessing', progress=70)
     for c in book.children:
         preprocess(c)
-    if status_callback is not None:
-        status_callback(status='rendering', progress=80)
-    ODFWriter(env, status_callback=status_callback).writeBook(book, output=output)
+    scb(status='rendering', progress=80)
+    ODFWriter(env, status_callback=scb).writeBook(book, output=output)
 
 writer.description = 'OpenDocument Text'
+
     
 # - helper funcs   r ---------------------------------------------------
 

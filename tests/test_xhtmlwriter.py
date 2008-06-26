@@ -17,7 +17,7 @@ def getXHTML(wikitext):
     preprocess(r)
     show(sys.stdout, r)
     dbw = MWXHTMLWriter()
-    dbw.write(r)
+    dbw.writeBook(r)
     return dbw.asstring()
 
 

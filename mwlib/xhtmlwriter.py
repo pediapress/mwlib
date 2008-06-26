@@ -35,10 +35,12 @@ from mwlib import mathml
 from mwlib import advtree
 from mwlib import xmltreecleaner
 from mwlib.log import Log
+from mwlib import writerbase
 
-version = "0.1"
 
-log = Log("xhtmlwriter")
+version = "0.2"
+
+log = Log("xmlwriter")
 
 def showNode(obj):
     attrs = obj.__dict__.keys()
@@ -108,7 +110,7 @@ class MWXMLWriter(object):
 
     header='''<?xml version="1.0" encoding="UTF-8"?>
 '''
-    def __init__(self):
+    def __init__(self, env=None, status_callback=None):
         self.root = ET.Element("mwlibxml")
         
     def getTree(self, debuginfo=""):
@@ -122,7 +124,7 @@ class MWXMLWriter(object):
         out = StringIO.StringIO()
         parser.show(out, tree)
         self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
-
+       
     def writeText(self, obj, parent):
         if parent.getchildren(): # add to tail of last tag
             t = parent.getchildren()[-1]
@@ -184,17 +186,25 @@ class MWXHTMLWriter(object):
 
     #css = None # set to None disables css
 
-    def __init__(self, language="en", namespace="en.wikipedia.org", imagesrcresolver=None, debug=False):
-        self.language = language
-        self.namespace = namespace
+    def __init__(self, env=None, status_callback=None,imagesrcresolver=None, debug=False):
+        self.environment = env # not used yet
+        self.status_callback = status_callback # not used yet
         self.imagesrcresolver = imagesrcresolver # e.g. "http://anyhost/redir?img=IMAGENAME" where IMAGENAME is substituted
         self.debug = debug
         self.references = []
         self.root = ET.Element("html")
         self.root.set("xmlns", "http://www.w3.org/1999/xhtml")
         self.root.set("xml:lang", "en")
-        #if self.language: self.root.set("lang", self.language) 
-        self.xmlparent = None # this is the parent XML Element
+        # add head + title
+        h = ET.SubElement(self.root,"head")
+        e = ET.SubElement(h, "title") 
+        if self.environment and self.environment.metabook.title:
+            e.text = self.environment.metabook.title
+        if self.css is not None:
+            h.append(self.css)
+
+        # start body
+        self.xmlbody = ET.SubElement(self.root,"body")        
         self.errors = []
         self.languagelinks = []
         self.categorylinks = []
@@ -202,9 +212,6 @@ class MWXHTMLWriter(object):
         
     def getTree(self, debuginfo=""):
         indent(self.root) # breaks XHTML (proper rendering at least) if activated!
-        for x in (self.writeCategoryLinks(), self.writeLanguageLinks()):
-            if x:
-                self.root.append(x)
         if self.debug:
             r = validate(self.header + ET.tostring(self.root))
             if r:
@@ -256,7 +263,6 @@ class MWXHTMLWriter(object):
             # check for method
             m = "xwrite" + obj.__class__.__name__
             m=getattr(self, m, None)
-            
             if m: # find handler
                 e = m(obj)
             else:
@@ -283,31 +289,38 @@ class MWXHTMLWriter(object):
             if res is not None and res is not parent:
                 parent.append(res)
 
+    def writeBook(self, book, output=None):
+        self.xmlbody.append(self.write(book))
+        #self.write(book, self.xmlbody)
+        if self.debug:
+            self.writeparsetree(book)
+        if output:
+            open(output, "w").write(self.asstring())
 
-    def xwriteLink(self, obj): # FIXME (known|unknown)
-        a = ET.Element("a")
-        if obj.target:
-            a.set("href", obj.target)
-            a.set("class", "mwx.link.article")
-        if not obj.children:
-            a.text = obj.target
-        return a
+    def xwriteBook(self, obj):
+        e = ET.Element("div")
+        e.set("class", "mwx.collection")
+        return e # do not return an empty top level element
 
     def xwriteArticle(self, a):
-        # add head + title
-        h = ET.SubElement(self.root,"head")
-        if self.css is not None:
-            h.append(self.css)
-        e = ET.SubElement(h, "title")
-        if a.caption:
-            e.text = a.caption
-        # start body
-        b = ET.SubElement(self.root,"body")
         # add article name as first section heading
-        e = ET.SubElement(b, "div")
-        e.set("class", "mwx.section")
+        print "in write Article", a
+        e = ET.Element("div")
+        e.set("class", "mwx.article")
         h = ET.SubElement(e, "h1")
         h.text = a.caption
+        self.writeChildren(a, e)
+        for x in (self.writeCategoryLinks(), self.writeLanguageLinks()):
+            if x:
+                e.append(x)
+        return SkipChildren(e)
+
+
+    def xwriteChapter(self, obj):
+        e = ET.Element("div")
+        e.set("class", "mwx.chapter")
+        h = ET.SubElement(e, "h1")
+        self.write(obj.caption)
         return e
 
 
@@ -390,6 +403,16 @@ class MWXHTMLWriter(object):
 
     # Links ---------------------------------------------------------
 
+
+    def xwriteLink(self, obj): # FIXME (known|unknown)
+        a = ET.Element("a")
+        if obj.target:
+            a.set("href", obj.target)
+            a.set("class", "mwx.link.article")
+        if not obj.children:
+            a.text = obj.target
+        return a
+
     def xwriteURL(self, obj):
         a = ET.Element("a", href=obj.caption)
         a.set("class", "mwx.link.external")
@@ -439,6 +462,8 @@ class MWXHTMLWriter(object):
         # e.g. "http://anyhost/redir?img=IMAGENAME"
         if self.imagesrcresolver:
             imgsrc = self.imagesrcresolver.replace("IMAGENAME", obj.target)
+        elif self.environment and self.environment.images:
+            imgsrc = self.environment.images.getURL(obj.target, obj.width or None)
         else:
             imgsrc = obj.target
 
@@ -447,7 +472,6 @@ class MWXHTMLWriter(object):
             img.set("width", unicode(obj.width))
         if obj.height:
             img.set("height", unicode(obj.height))
-
         return e 
 
     def xwriteImageMap(self, obj): # FIXME!
@@ -471,7 +495,7 @@ class MWXHTMLWriter(object):
 
     def writeCategoryLinks(self):
         seen = set()
-        if not self.languagelinks:
+        if not self.categorylinks:
             return
         ol = ET.Element("ol")
         ol.set("class", "mwx.categorylinks")
@@ -486,6 +510,7 @@ class MWXHTMLWriter(object):
                 a.text = link.target
             else:
                 self.writeChildren(link, parent=a)
+        self.categorylinks = []
         return ol
 
 
@@ -507,6 +532,7 @@ class MWXHTMLWriter(object):
                 a.text = link.target
             else:
                 self.writeChildren(link, parent=a)
+        self.languagelinks = []
         return ol
 
 
@@ -663,9 +689,6 @@ def fixtree(element, parent=None):
     # TODO POSTPROCESS 
 
 
-
-
-
 def preprocess(root):
     advtree.buildAdvancedTree(root)
     xmltreecleaner.removeChildlessNodes(root)
@@ -686,6 +709,25 @@ def validate(xml):
     os.remove(tfn)
     return r
 
+
+
+
+# - func  ---------------------------------------------------
+
+
+def xhtmlwriter(env, output, status_callback, writer=MWXHTMLWriter):
+    book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
+    scb = lambda status, progress :  status_callback is not None and status_callback(status,progress)
+    scb(status='preprocessing', progress=70)
+    for c in book.children:
+        preprocess(c)
+    scb(status='rendering', progress=80)
+    writer(env, status_callback=scb).writeBook(book, output=output)
+xhtmlwriter.description = 'XHTML 1.0 Transitional'
+
+def xmlwriter(env, output, status_callback):
+    xhtmlwriter(env, output, status_callback, writer=MWXMLWriter)
+xmlwriter.description = 'XML representation of the parse tree'
 
 
 def main():

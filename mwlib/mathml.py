@@ -42,7 +42,7 @@ def latex2mathml(latex):
         #outmsg = outmsg.replace('xmlns="http://www.w3.org/1998/Math/MathML"', '')
 
         outmsg = '<?xml version="1.0" encoding="UTF-8"?>\n' + outmsg
-        print repr(outmsg)
+        #print repr(outmsg)
     
         try:
             p =  ET.fromstring(outmsg)
