@@ -128,6 +128,13 @@ class MWXMLWriter(object):
         out = StringIO.StringIO()
         parser.show(out, tree)
         self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
+
+    def writeBook(self, book, output=None):
+        self.write(book)
+        self.writeparsetree(book)
+        if output:
+            open(output, "w").write(self.asstring())
+
        
     def writeText(self, obj, parent):
         if parent.getchildren(): # add to tail of last tag
