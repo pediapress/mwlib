@@ -3,8 +3,9 @@
 
 all:: subdirs README.html MANIFEST.in
 
-subdirs:: 
+subdirs::
 	cd mwlib; make all
+	cd docs; make all
 
 MANIFEST.in::
 	./make_manifest.py

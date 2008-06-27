@@ -1,7 +1,9 @@
 include MANIFEST.in
-include METABOOK.txt
 include README.html
 include README.txt
+include docs/metabook.txt
+include docs/writers.html
+include docs/writers.txt
 include example_conf.txt
 include ez_setup.py
 include mwlib/EasyTimeline.pl
@@ -18,6 +20,7 @@ include mwlib/apps.py
 include mwlib/caller.py
 include mwlib/cdb.py
 include mwlib/cdbwiki.py
+include mwlib/docbookwriter.py
 include mwlib/dummydb.py
 include mwlib/expander.py
 include mwlib/expr.py
