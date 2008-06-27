@@ -10,6 +10,10 @@ Currently this is just a proof of concept which is very incomplete
 see also: 
 http://docutils.sourceforge.net/sandbox/oliverr/docbook/docbook.py
 http://www.docbook.org/tdg5/en/html/ch02.html
+
+basic convertion to other formats using jade works:
+docbook2pdf -l /usr/share/sgml/declaration/xml.dcl -e no-valid  t.xml  
+
 """
 
 import sys
