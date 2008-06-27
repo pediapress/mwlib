@@ -12,15 +12,23 @@ try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
+
     
+_basedir = None
+def _get_global_basedir():
+    global _basedir
+    if not _basedir:
+        _basedir = tempfile.mkdtemp(prefix='timeline-')
+        import atexit
+        import shutil
+        atexit.register(shutil.rmtree, _basedir)
+    return _basedir
 
 def drawTimeline(script, basedir=None):
     if isinstance(script, unicode):
         script = script.encode('utf8')
     if basedir is None:
-        basedir = os.path.join(tempfile.gettempdir(), "timeline-%s" % (os.getuid(),))
-    if not os.path.exists(basedir):
-        os.mkdir(basedir)
+        basedir = _get_global_basedir()
         
     m=md5()
     m.update(script)
