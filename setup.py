@@ -55,6 +55,7 @@ setup(
                     'mwlib.writers': ['odf = mwlib.odfwriter:writer',
                                       'xhtml = mwlib.xhtmlwriter:xhtmlwriter',
                                       'mwxml = mwlib.xhtmlwriter:xmlwriter',
+                                      'docbook = mwlib.docbookwriter:writer',
                                       ]},
     install_requires=install_requires,
     ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
