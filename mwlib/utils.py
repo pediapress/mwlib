@@ -52,7 +52,7 @@ def start_logging(path):
     os.dup2(fd, 1)
     os.dup2(fd, 2)
     
-    null=os.open('/dev/null', os.O_RDWR)
+    null=os.open(os.path.devnull, os.O_RDWR)
     os.dup2(null, 0)
     os.close(null)
         
@@ -65,7 +65,7 @@ def daemonize(dev_null=False):
         os._exit(0) # kill off parent again.
     os.umask(077)
     if dev_null:
-        null=os.open('/dev/null', os.O_RDWR)
+        null=os.open(os.path.devnull, os.O_RDWR)
         for i in range(3):
             try:
                 os.dup2(null, i)
