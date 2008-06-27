@@ -238,8 +238,10 @@ def render():
                       help='become a daemon process as soon as possible')
     options, args = parser.parse_args()
     
+    import os
     import simplejson
     import sys
+    import tempfile
     import traceback
     import pkg_resources
     from mwlib.writerbase import WriterError
@@ -303,7 +305,10 @@ def render():
     
     try:
         set_status(status='init', progress=0)
-        writer(parser.env, output=options.output, status_callback=set_status, **writer_options)
+        fd, tmpout = tempfile.mkstemp()
+        os.close(fd)
+        writer(parser.env, output=tmpout, status_callback=set_status, **writer_options)
+        os.rename(tmpout, options.output)
         set_status(status='finished', progress=100)
     except WriterError, e:
         set_status(status='error')
