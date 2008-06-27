@@ -289,7 +289,7 @@ def render():
         daemonize()
     
     last_status = {}
-    def set_status(status=None, progress=None, article=None):
+    def set_status(status=None, progress=None, article=None, content_type=None, file_extension=None):
         if status is not None:
             last_status['status'] = status
             print 'STATUS: %s' % status
@@ -300,6 +300,10 @@ def render():
         if article is not None:
             last_status['article'] = article
             print 'ARTICLE: %r' % article
+        if content_type is not None:
+            last_status['content_type'] = content_type
+        if file_extension is not None:
+            last_status['file_extension'] = file_extension
         if options.status_file:
             open(options.status_file, 'wb').write(simplejson.dumps(last_status).encode('utf-8'))
     
@@ -309,7 +313,12 @@ def render():
         os.close(fd)
         writer(parser.env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
-        set_status(status='finished', progress=100)
+        kwargs = {}
+        if hasattr(writer, 'content_type'):
+            kwargs['content_type'] = writer.content_type
+        if hasattr(writer, 'file_extension'):
+            kwargs['file_extension'] = writer.file_extension
+        set_status(status='finished', progress=100, **kwargs)
     except WriterError, e:
         set_status(status='error')
         if options.error_file:

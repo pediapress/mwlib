@@ -542,6 +542,8 @@ def writer(env, output, status_callback):
     ODFWriter(env, status_callback=scb).writeBook(book, output=output)
 
 writer.description = 'OpenDocument Text'
+writer.content_type = 'application/vnd.oasis.opendocument.text'
+writer.file_extension = 'odt'
 
     
 # - helper funcs   r ---------------------------------------------------
