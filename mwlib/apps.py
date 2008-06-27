@@ -309,8 +309,7 @@ def render():
     
     try:
         set_status(status='init', progress=0)
-        fd, tmpout = tempfile.mkstemp()
-        os.close(fd)
+        tmpout = options.output + '.tmp'
         writer(parser.env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
         kwargs = {}
