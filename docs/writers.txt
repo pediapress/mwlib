@@ -27,7 +27,8 @@ the "``**kwargs``" above) that can be passed to the writer with the
 If the user specified a writer option with ``option=value``, the kwarg
 ``option`` gets passed the string ``"value"``, if she specified a writer
 option just with ``option``, the kwarg ``option`` gets passed the value
-``True``.
+``True``. All writer options should be optional and documented using the
+options attribute on the writer object (see below).
 
 
 Attributes
@@ -39,18 +40,41 @@ attributes::
     writer.description = 'Some short description'
     writer.content_type = 'Content-Type of the output'
     writer.file_extension = 'File extension for documents'
+    writer.options = {
+        'foo: {
+            'help': 'help text for "switch" foo',
+        },
+        'bar': {
+            'param': 'PARAM',
+            'help': 'help text for option bar with parameter PARAM',
+        }
+    }
 
-For example the ODF writer (defined in ``mwlib.odfwriter``) sets the attributes
-to these values::
+For example the writer "odf" (defined in ``mwlib.odfwriter``) sets the
+attributes to these values::
 
     writer.description = 'OpenDocument Text'
     writer.content_type = 'application/vnd.oasis.opendocument.text'
     writer.file_extension = 'odt'
 
+and the writer "rl" from mwlib.rl (defined in ``mwlib.rl.rlwriter``) sets
+the attributes to these values::
+
+    writer.description = 'PDF documents (using ReportLab)'
+    writer.content_type = 'application/pdf'
+    writer.file_extension = 'pdf'
+    writer.options = {
+        'coverimage': {
+            'param': 'FILENAME',
+            'help': 'filename of an image for the cover page',
+        }
+    }
+
 The description is used when the list of writers is displayed with
-``mw-render --list-writers``, the content type and file extension are written
-to a file, if one is specified with the ``--status-file`` argument of
-``mw-render``.
+``mw-render --list-writers``, all information is displayed with
+``mw-render --writer-info SOMEWRITER``. The content type and file extension
+are written to a file, if one is specified with the ``--status-file`` argument
+of ``mw-render``.
 
 Publishing the writer
 ---------------------
