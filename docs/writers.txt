@@ -24,7 +24,7 @@ the configure ``ImageDB`` instance.
 The ``output`` argument is a filename of a file in which the writer should
 write its output.
 
-The ``status_callback``argument is a callable with the following signature::
+The ``status_callback`` argument is a callable with the following signature::
 
     def status_callback(status=None, progress=None, article=None): pass
 
