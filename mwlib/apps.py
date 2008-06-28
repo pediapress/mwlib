@@ -230,10 +230,21 @@ def render():
     parser = OptionParser(conf_optional=True)
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-w", "--writer", help='use writer backend WRITER')
-    parser.add_option("-W", "--writer-options", help='";"-separated list of additional writer-specific options')
+    parser.add_option("-W", "--writer-options",
+        help='";"-separated list of additional writer-specific options',
+    )
     parser.add_option("-e", "--error-file", help='write errors to this file')
-    parser.add_option("-s", "--status-file", help='write status/progress info to this file')
-    parser.add_option("--list-writers", action='store_true', help='list available writers and exit')
+    parser.add_option("-s", "--status-file",
+        help='write status/progress info to this file',
+    )
+    parser.add_option("--list-writers",
+        action='store_true',
+        help='list available writers and exit',
+    )
+    parser.add_option("--writer-info",
+        help='list information about given WRITER and exit',
+        metavar='WRITER',
+    )
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
     options, args = parser.parse_args()
@@ -248,6 +259,16 @@ def render():
     
     use_help = 'Use --help for usage information.'
     
+    def load_writer(name):
+        try:
+            entry_point = pkg_resources.iter_entry_points('mwlib.writers', name).next()
+        except StopIteration:
+            sys.exit('No such writer: %r (use --list-writers to list available writers)' % name)
+        try:
+            return entry_point.load()
+        except Exception, e:
+            sys.exit('Could not load writer %r: %s' % (name, e))
+    
     if options.list_writers:
         for entry_point in pkg_resources.iter_entry_points('mwlib.writers'):
             try:
@@ -261,20 +282,32 @@ def render():
             print '%s\t%s' % (entry_point.name, description)
         return
     
+    if options.writer_info:
+        writer = load_writer(options.writer_info)
+        if hasattr(writer, 'description'):
+            print 'Description:\t%s' % writer.description
+        if hasattr(writer, 'content_type'):
+            print 'Content-Type:\t%s' % writer.content_type
+        if hasattr(writer, 'file_extension'):
+            print 'File extension:\t%s' % writer.file_extension
+        if hasattr(writer, 'options') and writer.options:
+            print 'Options (usable in a ";"-separated list for --writer-options):'
+            for name, info in writer.options.items():
+                param = info.get('param')
+                if param:
+                    print ' %s=%s:\t%s' % (name, param, info['help'])
+                else:
+                    print ' %s:\t%s' % (name, info['help'])
+        return
+    
+    
     if options.output is None:
         parser.error('Please specify an output file with --output.\n' + use_help)
     
     if options.writer is None:
         parser.error('Please specify a writer with --writer.\n' + use_help)    
-    try:
-        entry_point = pkg_resources.iter_entry_points('mwlib.writers', options.writer).next()
-    except StopIteration:
-        sys.exit('No such writer: %r (use --list-writers to list available writers)' % options.writer)
-    try:
-        writer = entry_point.load()
-    except Exception, e:
-        sys.exit('Could not load writer %r: %s' % (options.writer, e))
     
+    writer = load_writer(options.writer)
     writer_options = {}
     if options.writer_options:
         for wopt in options.writer_options.split(';'):
