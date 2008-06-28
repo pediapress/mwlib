@@ -86,6 +86,7 @@ include tests/test_sanitychecker.py
 include tests/test_scanner.py
 include tests/test_table.py
 include tests/test_timeline.py
+include tests/test_utils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipwiki.py
 include tools/get_license_templates.py

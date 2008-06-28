@@ -413,7 +413,36 @@ def parse():
         else:
             print "G", time.time()-stime, repr(x)
 
+
+
 def serve():
+    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
+    parser.add_option("-c", "--conf", help="config file")
+
+    options, args = parser.parse_args()
+    
+
+    conf = options.conf
+    if not options.conf:
+        parser.error("missing --conf argument")
+    
+    from mwlib import wiki, web
+    
+    res = wiki.makewiki(conf)
+    db = res['wiki']
+    images = res['images']
+    from wsgiref.simple_server import make_server, WSGIServer
+
+    from SocketServer import  ForkingMixIn
+    class MyServer(ForkingMixIn, WSGIServer):
+        pass
+
+    iface, port = '0.0.0.0', 8080
+    print "serving on %s:%s" % (iface, port)
+    http = make_server(iface, port, web.Serve(db, res['images']), server_class=MyServer)
+    http.serve_forever()
+
+def testserve():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
 
