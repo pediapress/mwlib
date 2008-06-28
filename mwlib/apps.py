@@ -350,6 +350,8 @@ def render():
             kwargs['content_type'] = writer.content_type
         if hasattr(writer, 'file_extension'):
             kwargs['file_extension'] = writer.file_extension
+        if parser.env.images:
+            parser.env.images.clear()
         set_status(status='finished', progress=100, **kwargs)
     except WriterError, e:
         set_status(status='error')
