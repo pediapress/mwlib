@@ -3,6 +3,7 @@
 """WSGI dispatcher base class"""
 
 import cgi
+import StringIO
 import traceback
 
 from mwlib.log import Log
@@ -20,25 +21,19 @@ class Request(object):
         self.env = env
         self.method = self.env['REQUEST_METHOD'].upper()
         self.path = self.env.get('PATH_INFO')
-        self.query = self.parse_qs_single(self.env.get('QUERY_STRING', ''))
+        self.query = self.multi2single(cgi.parse_qs(self.env.get('QUERY_STRING', '')))
         if self.method == 'POST':
             self.post_data = self.read_post_data()
         else:
             self.post_data = {}
     
-    def parse_qs_single(self, s):
-        d = cgi.parse_qs(s)
+    def multi2single(self, d):
         for key, values in d.items():
             if values:
                 d[key] = values[0]
         return d
     
     def read_post_data(self):
-        """
-        * only data with Content-Type application/x-www-form-urlencoded
-        * no multi-value fields
-        """
-        
         try:
             content_length = int(self.env['CONTENT_LENGTH'])
         except (KeyError, ValueError):
@@ -49,12 +44,20 @@ class Request(object):
             raise RuntimeError('Request data exceeds limit: %d > %d' % (
                 content_length, self.max_post_data_size,
             ))
+        
         content = self.env['wsgi.input'].read(content_length)
         if len(content) < content_length:
             raise RuntimeError('Expected %d bytes of request data, got %d bytes' % (
                 content_length, len(content),
             ))
-        return self.parse_qs_single(content)
+        
+        sio = StringIO.StringIO(content)
+        content_type, pdict = cgi.parse_header(self.env.get('CONTENT_TYPE', ''))
+        if content_type == 'multipart/form-data':
+            post_data = cgi.parse_multipart(sio, pdict)
+        else:
+            post_data = cgi.parse(sio)
+        return self.multi2single(post_data)
     
 
 class Response(object):
