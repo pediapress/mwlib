@@ -30,12 +30,6 @@ class Application(wsgi.Application):
         self.mwzip_logfile = mwzip_logfile
     
     def dispatch(self, request):
-        if request.method != 'POST':
-            return wsgi.Response(
-                status_code=405,
-                status_text='Method Not Allowed',
-            )
-        
         try:
             command = request.post_data['command']
         except KeyError:
