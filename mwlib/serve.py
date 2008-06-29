@@ -70,7 +70,7 @@ class Application(wsgi.Application):
         return os.path.join(self.cache_dir, collection_id)
     
     def get_collection(self, post_data):
-        collection_id = self.post_data.get('collection_id')
+        collection_id = post_data.get('collection_id')
         if not collection_id or not self.collection_id_rex.match(collection_id):
             raise RuntimeError('invalid collection ID %r' % collection_id)
         collection_dir = self.get_collection_dir(collection_id)
