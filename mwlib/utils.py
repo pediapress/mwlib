@@ -58,24 +58,31 @@ def fsescape(s):
     
 # ==============================================================================
 
-def start_logging(path):
-    """Redirect all output to sys.stdout or sys.stderr to be appended to a file
+def start_logging(path, stderr_only=False):
+    """Redirect all output to sys.stdout or sys.stderr to be appended to a file,
+    redirect sys.stdin to /dev/null.
     
     @param path: filename of logfile
     @type path: basestring
+    
+    @param stderr_only: if True, only redirect stderr, not stdout & stdin
+    @type stderr_only: bool
     """
     
+    if not stderr_only:
+        sys.stdout.flush()
     sys.stderr.flush()
-    sys.stdout.flush()
     
     f = open(path, "a")
     fd = f.fileno()
-    os.dup2(fd, 1)
+    if not stderr_only:
+        os.dup2(fd, 1)
     os.dup2(fd, 2)
     
-    null = os.open(os.path.devnull, os.O_RDWR)
-    os.dup2(null, 0)
-    os.close(null)
+    if not stderr_only:
+        null = os.open(os.path.devnull, os.O_RDWR)
+        os.dup2(null, 0)
+        os.close(null)
 
 # ==============================================================================
 

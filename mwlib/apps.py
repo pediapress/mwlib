@@ -163,7 +163,7 @@ def buildzip():
     try:
         set_status('init')
         
-        from mwlib import recorddb, metabook, mwapidb
+        from mwlib import recorddb, mwapidb
         
         env = parser.env
         
@@ -252,7 +252,6 @@ def render():
     import os
     import simplejson
     import sys
-    import tempfile
     import traceback
     import pkg_resources
     from mwlib.writerbase import WriterError
@@ -416,31 +415,117 @@ def parse():
 
 
 def serve():
-    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
-    parser.add_option("-c", "--conf", help="config file")
-
+    from SocketServer import ForkingMixIn
+    import sys
+    from wsgiref.simple_server import make_server, WSGIServer    
+    import pkg_resources
+    
+    try:
+        pkg_resources.require('flup>=1.0')
+    except:
+        sys.exit('Python module flup >= 1.0 required. Please run "easy_install flup".')
+    from flup.server import cgi, fcgi_fork, scgi_fork
+    
+    class ForkingWSGIServer(ForkingMixIn, WSGIServer):
+        pass
+    
+    proto2server = {
+        'http': ForkingWSGIServer,
+        'cgi': cgi.WSGIServer,
+        'fcgi': fcgi_fork.WSGIServer,
+        'scgi': scgi_fork.WSGIServer,
+    }
+    
+    parser = optparse.OptionParser(usage="%prog [OPTIONS]")
+    parser.add_option('-l', '--logfile',
+        help='logfile',
+    )
+    parser.add_option('-d', '--daemonize',
+        action='store_true',
+        help='become daemon as soon as possible',
+    )
+    parser.add_option('-P', '--protocol',
+        help='one of %s (default: fcgi)' % ', '.join(proto2server.keys()),
+        default='fcgi',
+    )
+    parser.add_option('-p', '--port',
+        help='port to listen on, irrelevant for cgi (default: 8899)',
+        default='8899',
+    )
+    parser.add_option('-i', '--interface',
+        help='interface to listen on, irrelevant for cgi (default: 0.0.0.0)',
+        default='0.0.0.0',
+    )
+    parser.add_option('--cache-dir',
+        help='cache directory',
+        default='/var/cache/mw-serve/',
+    )
+    parser.add_option('--mwrender',
+        help='(path to) mw-render executable',
+        default='mw-render',
+    )
+    parser.add_option('--mwrender-logfile',
+        help='logfile for mw-render',
+        default='/var/log/mw-render.log',
+    )
+    parser.add_option('--mwzip',
+        help='(path to) mw-zip executable',
+        default='mw-zip',
+    )
+    parser.add_option('--mwzip-logfile',
+        help='logfile for mw-zip',
+        default='/var/log/mw-zip.log',
+    )
     options, args = parser.parse_args()
     
-
-    conf = options.conf
-    if not options.conf:
-        parser.error("missing --conf argument")
+    if options.protocol not in proto2server:
+        parser.error('unsupported protocol (must be one of %s)' % (
+            ', '.join(proto2server.keys()),
+        ))
     
-    from mwlib import wiki, web
+    try:
+        options.port = int(options.port)
+    except ValueError:
+        parser.error('port value must be an integer')
     
-    res = wiki.makewiki(conf)
-    db = res['wiki']
-    images = res['images']
-    from wsgiref.simple_server import make_server, WSGIServer
-
-    from SocketServer import  ForkingMixIn
-    class MyServer(ForkingMixIn, WSGIServer):
-        pass
-
-    iface, port = '0.0.0.0', 8080
-    print "serving on %s:%s" % (iface, port)
-    http = make_server(iface, port, web.Serve(db, res['images']), server_class=MyServer)
-    http.serve_forever()
+    from mwlib import serve, log, utils
+    
+    log = log.Log('mw-serve')
+    
+    if options.logfile:
+        # Note: if we're running as CGI script, stdin & stdout are needed for
+        # the communication with the webserver. mwlib.log.Log writes to stderr,
+        # so that's ok, but keep in mind NOT TO USE print ANYWHERE from here!
+        utils.start_logging(logfile, stderr_only=options.protocol=='cgi')
+    
+    if options.daemonize:
+        utils.daemonize()
+    
+    log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
+    
+    app = serve.Application(
+        cache_dir=options.cache_dir,
+        mwrender_cmd=options.mwrender,
+        mwrender_logfile=options.mwrender_logfile,
+        mwzip_cmd=options.mwzip,
+        mwzip_logfile=options.mwzip_logfile,
+    )
+    if options.protocol == 'http':
+        server = make_server(options.interface, options.port, app,
+            server_class=proto2server[options.protocol],
+        )
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+    else:
+        serverclass = proto2server[options.protocol]
+        if options.protocol == 'cgi':
+            serverclass(app).run()
+            return
+        serverclass(app, bindAddress=(options.interface, options.port)).run()
+    
+    log.info('exit.')
 
 def testserve():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
