@@ -51,6 +51,7 @@ include mwlib/resources/pedia.css
 include mwlib/sanitychecker.py
 include mwlib/scanfile.py
 include mwlib/scanner.py
+include mwlib/serve.py
 include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/texmap.py
@@ -60,6 +61,7 @@ include mwlib/utils.py
 include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/writerbase.py
+include mwlib/wsgi.py
 include mwlib/xhtmlwriter.py
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py

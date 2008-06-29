@@ -438,7 +438,7 @@ def serve():
     
     parser = optparse.OptionParser(usage="%prog [OPTIONS]")
     parser.add_option('-l', '--logfile',
-        help='logfile',
+        help='log output to LOGFILE',
     )
     parser.add_option('-d', '--daemonize',
         action='store_true',
