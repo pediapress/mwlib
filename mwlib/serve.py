@@ -166,7 +166,7 @@ class Application(wsgi.Application):
         status = self.read_status_file(collection_id)
         response = wsgi.Response(content=content)
         if 'content_type' in status:
-            response.headers['Content-Type'] = status['content_type']
+            response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
         if 'file_extension' in status:
             response.headers['Content-Disposition'] = 'inline;filename="collection.%s"' %  (
                 status['file_extension'].encode('utf-8', 'ignore'),
