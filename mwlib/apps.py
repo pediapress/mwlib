@@ -501,7 +501,8 @@ def serve():
     if options.daemonize:
         utils.daemonize()
     
-    log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
+    if options.protocol != 'cgi':
+        log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
     
     app = serve.Application(
         cache_dir=options.cache_dir,
