@@ -181,12 +181,12 @@ class Application(wsgi.Application):
     
     def do_zip_post(self, post_data):
         try:
-            metabook_data = self.post_data['metabook']
-            base_url = self.post_data['base_url']
-            post_url = self.post_data['post_url']
+            metabook_data = post_data['metabook']
+            base_url = post_data['base_url']
+            post_url = post_data['post_url']
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
-        template_blacklist = self.post_data.get('template_blacklist', '')
+        template_blacklist = post_data.get('template_blacklist', '')
         
         collection_id = self.new_collection()
         
