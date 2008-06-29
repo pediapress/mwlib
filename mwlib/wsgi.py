@@ -19,7 +19,7 @@ class Request(object):
     def __init__(self, env):
         self.env = env
         self.method = self.env['REQUEST_METHOD'].upper()
-        self.path = self.env['PATH_INFO']
+        self.path = self.env.get('PATH_INFO')
         self.query = self.parse_qs_single(self.env.get('QUERY_STRING', ''))
         if self.method == 'POST':
             self.post_data = self.read_post_data()
