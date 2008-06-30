@@ -25,6 +25,10 @@ MWZIP = 'mw-zip'
 # Logfile for mw-zip.
 MWZIP_LOGFILE = '/var/log/mw-zip.log'
 
+# Queue directory for mw-watch or None if no queue should be used
+QUEUE_DIR = None
+#QUEUE_DIR = '/var/cache/mw-watch/q'
+
 # ==============================================================================
 
 from flup.server.cgi import WSGIServer
@@ -40,4 +44,5 @@ WSGIServer(serve.Application(
     mwrender_logfile=MWRENDER_LOGFILE,
     mwzip_cmd=MWZIP,
     mwzip_logfile=MWZIP_LOGFILE,
+    queue_dir=QUEUE_DIR,
 )).run()
