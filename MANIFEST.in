@@ -2,6 +2,8 @@ include MANIFEST.in
 include README.html
 include README.txt
 include docs/Makefile
+include docs/commands.html
+include docs/commands.txt
 include docs/metabook.txt
 include docs/writers.html
 include docs/writers.txt
