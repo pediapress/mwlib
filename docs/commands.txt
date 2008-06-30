@@ -180,7 +180,7 @@ Specific Options
 ``-P, --protocol=PROTOCOL``
 
   Protocol to serve. The value can be one of "http", "fcgi" (FastCGI) or
-  "scgi". Note: If you want to "serve" CGI instead, use `the mw-cgi command`_.
+  "scgi". Note: If you want to "serve" CGI instead, use `the mwlib.cgi script`_.
 
 ``-p, --port=PORT``
 
@@ -214,11 +214,11 @@ Specific Options
   Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
   be writeable.
 
-The ``mw-cgi`` Command
-======================
+The ``mwlib.cgi`` Script
+========================
 
-This command is not installed via ``setup.py``. Instead it can be used as a
-CGI script equivalent for `the mw-serve command`_. Just copy the ``mw-zip``
+This script (located in the ``cgi-bin/`` directory) can be used as a
+CGI script equivalent for `the mw-serve command`_. Just copy the ``mwlib.cgi``
 script to the cgi-bin directory of your web server and adjust the configuration
 variables located at the top of the file.
 
