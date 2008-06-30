@@ -8,7 +8,7 @@ below and install this script as CGI script for your web server.
 
 # Name of logfile or None if log output should go to stderr.
 LOGFILE = None
-#LOGFILE = '/var/log/mw-cgi.log'
+#LOGFILE = '/var/log/mwlib.cgi.log'
 
 # Cache directory. Must be writeable.
 CACHE_DIR = '/var/cache/mwlib/'
