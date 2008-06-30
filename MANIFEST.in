@@ -1,6 +1,7 @@
 include MANIFEST.in
 include README.html
 include README.txt
+include cgi-bin/mwlib.cgi
 include docs/Makefile
 include docs/commands.html
 include docs/commands.txt
