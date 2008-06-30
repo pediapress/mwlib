@@ -545,7 +545,7 @@ def watch():
     except ValueError:
         parser.error('--num-jobs value must be an integer')
     
-    from mwlib import filequeue
+    from mwlib import filequeue, utils
     
     if options.logfile:
         utils.start_logging(options.logfile)
