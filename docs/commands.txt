@@ -1,0 +1,255 @@
+.. -*- mode: rst; coding: utf-8 -*-
+
+~~~~~~~~~~~~~~
+mwlib Commands
+~~~~~~~~~~~~~~
+
+Common Options
+==============
+
+This section contains a description of options that are accepted by more than
+one command.
+
+``-h, --help``
+
+  Show usage information and exit.
+
+``-c, --conf=CONF``
+
+  The value for this option describes the source of MediaWiki articles and
+  images for the command and can be of one of the following types:
+
+  * A "base URL" of a MediaWiki installation. A base URL is the URL up to, but
+    not including the ``index.php``/``api.php`` part.
+  
+    This URL can differ from
+    the prefix seen in "pretty" article URLs. For example the article *Physics*
+    in the English Wikipedia has the URL http://en.wikipedia.org/wiki/Physics,
+    but the base URL is http://en.wikipedia.org/w/.
+  
+    If you've set up your own
+    MediaWiki you probably know what your base URL should be, but if you're
+    using a different MediaWiki, you can see the base URL if add a query string
+    to the URL, e.g. by cicking on the edit link or by looking at an older
+    revision of an article.
+  
+    This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
+    file (see below), i.e. articles and images are fetched with the
+    `MediaWiki API`_. Speciffying the URL directly as value for ``--config``
+    is usually the quicker way to achieve exactly the same result.
+  
+  * A shortcut for a base URL. Currently there are the following shortcuts:
+
+    - ":en" -- http://en.wikipedia.org/w/, i.e. the English Wikipedia
+    - ":de" -- http://en.wikipedia.org/w/, i.e. the German Wikipedia
+
+  * A filename of a ZIP file generated with the `the mw-zip Command`_.
+  
+  * A filename of a configuration file (see `Configuration Files`_).
+
+``-m, --metabook=METABOOK``
+
+  Description of the article colleciton to be rendered in JSON format.
+  This is used by the `Collection extension`_ to transfer this information
+  to ``mw-serve`` which in turn passes the information to ``mw-render`` and
+  ``mw-zip``.
+
+``--collectionpage=COLLECTIONPAGE``
+
+  Title of a saved article collection (using the `Collection extension`_)
+
+``-x, --no-images``
+
+  If given, no images are included in the output document.
+
+``--template-blacklist=TEMPLATE_BLACKLIST``
+
+  A name of an article containing a list of "blacklisted templates", i.e.
+  MediaWiki templates that should be discarded during rendering.
+
+``-o, --output=OUTPUT``
+
+  Write output to given file.
+
+``-l, --logfile=LOGFILE``
+
+  Log output to the given file.
+
+``-d, --daemonize``
+
+  Become a daemon process as soon as possible.
+
+The ``mw-render`` Command
+=========================
+
+Render MediaWiki articles to one of several output formats like PDF of
+OpenDocument Text.
+
+Usage
+-----
+::
+
+  mw-render [OPTIONS] [ARTICLETITLE...]
+
+Specific Options
+----------------
+
+``-w, --writer``
+
+  Name of the writer to produce the output. The list of available writers
+  can be seen with ``mw-render --list-writers``.
+
+``--list-writers``
+
+  List the available writers.
+  
+``-W, --writer-options``
+
+  Writer specific options in a ";" separated list (depending on your shell,
+  quoting with "..." or '...' might be needed). Each item in that list can
+  either be a single option or an option=value pair. To list the available
+  writer options use ``mw-render --writer-info WRITERNAME``.
+
+``--writer-info=WRITER``
+
+  Show avaiable options and some additional information about the given writer.
+
+``-s, --status-file=STATUS_FILE``
+
+  Write status/progress information in JSON format to this file. The file
+  is continuously updated during the execution of ``mw-render``.
+
+``-e, --error-file=ERROR_FILE``
+
+  If an error occurs, write the error message to this file. If no error occurs
+  this file is not written/created.
+
+
+The ``mw-zip`` Command
+======================
+
+Generate a ZIP file containing
+
+ * articles,
+ * images,
+ * templates and
+ * additional meta information (especially if ``--metabook`` is given, see
+   `Common Options`_) like name and URL of the MediaWiki, licensing information
+   and title, subtitle and the hierarchical structure of the article collection.
+
+Usage
+-----
+::
+
+  mw-zip [OPTIONS] [ARTICLETITLE...]
+  
+Specific Options
+----------------
+
+``-i, --imagesize=IMAGESIZE``
+
+  Maximum size (which can be either width or height, whichever is greater) of
+  images. If images exceed this maximum size, they're scaled down.
+  
+``-p, --posturl=POSTURL``
+  Upload the ZIP file with an HTTP POST request to the given URL.
+
+``-g , --getposturl``
+
+  Retrieve the POSTURL from PediaPress and open the upload page in the web
+  browser.
+
+
+The ``mw-serve`` Command
+========================
+
+Provide a server interface to ``mw-render`` and ``mw-zip``. This can be used
+in conjuction with the `Collection extension`_ to provide PDF generation or
+the possibility to order printed books from a MediaWiki.
+
+Usage
+-----
+::
+
+  mw-serve [OPTIONS]
+
+Specific Options
+----------------
+
+``-P, --protocol=PROTOCOL``
+
+  Protocol to serve. The value can be one of "http", "fcgi" (FastCGI),
+  "scgi" or "cgi". If the value is "cgi", ``mw-serve`` is actually no server
+  at all but will be run by the driving web serve once for each request.
+
+``-p, --port=PORT``
+
+  For protocols other than ``cgi``, listen on this TCP port. The default value
+  is 8899.
+
+``-i, --interface=INTERFACE``
+
+  For protocols other than ``cgi``, listen on this interface. The default value
+  is "0.0.0.0".
+
+``--cache-dir=CACHE_DIR``
+
+  Cache directory. This directory must be writeable by the ``mw-serve`` process.
+
+``--mwrender``
+
+  Path to the ``mw-render`` executable. The default is just "mw-render" which
+  is ok, as long as ``mw-render`` is in the ``PATH``.
+
+``--mwrender-logfile``
+
+  Logfile for ``mw-render``. Default is "/var/log/mw-render.log". The file must
+  be writeable.
+
+``--mwzip``
+
+  Path to the ``mw-zip`` executable. The default is just "mw-zip" which
+  is ok, as long as ``mw-zip`` is in the ``PATH``.
+
+``--mwzip-logfile``
+
+  Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
+  be writeable.
+
+
+Configuration Files
+===================
+
+Configuration files are in a `INI-like format`_. They can contain the sections
+
+``[wiki]``
+
+  Description of how to retrieve MediaWiki articles and templates and meta
+  information about the MediaWiki like name or URL.
+
+and
+
+``[images]``
+
+  Description of how to retrieve images.
+
+Both sections must contain a ``type`` setting, on which all other available
+settings in that section depend. ``type`` can be one of the following values:
+
+``type=mwapi``
+
+  Retrieve articles and images via the `MediaWiki API`_, i.e. via ``api.php``.
+  The following settings must be present:
+  
+  ``base_url=BASEURL``
+
+    The base URL of the MediaWiki. See the ``--conf`` option in `Common Options`_.
+    
+  ``template_blacklist=TEMPLATEBLACKLIST``
+
+    A title of a page in the MediaWiki which contains blacklisted templates.
+
+.. _`INI-like format`: http://docs.python.org/lib/module-ConfigParser.html
+.. _`MediaWiki API`: http://www.mediawiki.org/wiki/API
+.. _`Collection extension`: http://www.mediawiki.org/wiki/Extension:Collection
+
