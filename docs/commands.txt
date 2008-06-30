@@ -35,7 +35,7 @@ one command.
   
     This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
     file (see below), i.e. articles and images are fetched with the
-    `MediaWiki API`_. Speciffying the URL directly as value for ``--config``
+    `MediaWiki API`_. Speciffying the URL directly as value for ``--conf``
     is usually the quicker way to achieve exactly the same result.
   
   * A shortcut for a base URL. Currently there are the following shortcuts:
