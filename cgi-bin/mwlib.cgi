@@ -11,7 +11,7 @@ LOGFILE = None
 #LOGFILE = '/var/log/mw-cgi.log'
 
 # Cache directory. Must be writeable.
-CACHE_DIR = '/var/cache/mw-cgi/'
+CACHE_DIR = '/var/cache/mwlib/'
 
 # (Path to) mw-render executable.
 MWRENDER = 'mw-render'
