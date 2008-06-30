@@ -416,22 +416,14 @@ def parse():
 
 def serve():
     from SocketServer import ForkingMixIn
-    import sys
-    from wsgiref.simple_server import make_server, WSGIServer    
-    import pkg_resources
-    
-    try:
-        pkg_resources.require('flup>=1.0')
-    except:
-        sys.exit('Python module flup >= 1.0 required. Please run "easy_install flup".')
-    from flup.server import cgi, fcgi_fork, scgi_fork
+    from wsgiref.simple_server import make_server, WSGIServer
+    from flup.server import fcgi_fork, scgi_fork
     
     class ForkingWSGIServer(ForkingMixIn, WSGIServer):
         pass
     
     proto2server = {
         'http': ForkingWSGIServer,
-        'cgi': cgi.WSGIServer,
         'fcgi': fcgi_fork.WSGIServer,
         'scgi': scgi_fork.WSGIServer,
     }
@@ -449,11 +441,11 @@ def serve():
         default='fcgi',
     )
     parser.add_option('-p', '--port',
-        help='port to listen on, irrelevant for cgi (default: 8899)',
+        help='port to listen on (default: 8899)',
         default='8899',
     )
     parser.add_option('-i', '--interface',
-        help='interface to listen on, irrelevant for cgi (default: 0.0.0.0)',
+        help='interface to listen on (default: 0.0.0.0)',
         default='0.0.0.0',
     )
     parser.add_option('--cache-dir',
@@ -493,16 +485,12 @@ def serve():
     log = log.Log('mw-serve')
     
     if options.logfile:
-        # Note: if we're running as CGI script, stdin & stdout are needed for
-        # the communication with the webserver. mwlib.log.Log writes to stderr,
-        # so that's ok, but keep in mind NOT TO USE print ANYWHERE from here!
-        utils.start_logging(logfile, stderr_only=options.protocol=='cgi')
+        utils.start_logging(logfile)
     
     if options.daemonize:
         utils.daemonize()
     
-    if options.protocol != 'cgi':
-        log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
+    log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
     
     app = serve.Application(
         cache_dir=options.cache_dir,
@@ -521,9 +509,6 @@ def serve():
             pass
     else:
         serverclass = proto2server[options.protocol]
-        if options.protocol == 'cgi':
-            serverclass(app).run()
-            return
         serverclass(app, bindAddress=(options.interface, options.port)).run()
     
     log.info('exit.')

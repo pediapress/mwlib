@@ -10,5 +10,6 @@ build
 trunk
 mwlib/*.cc
 README.html
+docs/commands.html
 docs/writers.html
 

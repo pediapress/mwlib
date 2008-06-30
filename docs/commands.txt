@@ -179,19 +179,16 @@ Specific Options
 
 ``-P, --protocol=PROTOCOL``
 
-  Protocol to serve. The value can be one of "http", "fcgi" (FastCGI),
-  "scgi" or "cgi". If the value is "cgi", ``mw-serve`` is actually no server
-  at all but will be run by the driving web serve once for each request.
+  Protocol to serve. The value can be one of "http", "fcgi" (FastCGI) or
+  "scgi". Note: If you want to "serve" CGI instead, use `the mw-cgi command`_.
 
 ``-p, --port=PORT``
 
-  For protocols other than ``cgi``, listen on this TCP port. The default value
-  is 8899.
+  Listen on this TCP port. The default value is 8899.
 
 ``-i, --interface=INTERFACE``
 
-  For protocols other than ``cgi``, listen on this interface. The default value
-  is "0.0.0.0".
+  Listen on this interface. The default value is "0.0.0.0".
 
 ``--cache-dir=CACHE_DIR``
 
@@ -217,6 +214,13 @@ Specific Options
   Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
   be writeable.
 
+The ``mw-cgi`` Command
+======================
+
+This command is not installed via ``setup.py``. Instead it can be used as a
+CGI script equivalent for `the mw-serve command`_. Just copy the ``mw-zip``
+script to the cgi-bin directory of your web server and adjust the configuration
+variables located at the top of the file.
 
 Configuration Files
 ===================
