@@ -2,6 +2,7 @@ import heapq
 import os
 import subprocess
 import time
+import traceback
 
 from mwlib.log import Log
 from mwlib import utils
@@ -64,16 +65,29 @@ class FileJobPoller(object):
         return None
     
     def start_job(self, filename):
+        src = os.path.join(self.queue_dir, filename)
         path = os.path.join(self.processing_dir, filename)
-        os.rename(os.path.join(self.queue_dir, filename), path)
+        try:
+            os.rename(src, path)
+        except Exception, exc:
+            self.log.warn('Could not rename %r to %r: %s' % (src, path, exc))
+            traceback.print_exc()
         self.log.info('starting job %r' % filename)
         pid = os.fork()
         if pid == 0:
             try:
                 args = open(path, 'rb').read().split('\n')
                 self.log.info('executing: %r' % args)
-                subprocess.call(args)
-                os.unlink(path)
+                try:
+                    subprocess.check_call(args)
+                except Exception, exc:
+                    self.log.warn('Error executing %r: %s' % (args, exc))
+                    traceback.print_exc()
             finally:
+                try:
+                    os.unlink(path)
+                except Exception, exc:
+                    self.log.warn('Could not remove file %r: %s' % (path, exc))
+                    traceback.print_exc()
                 os._exit(0)
     
