@@ -527,15 +527,15 @@ def watch():
         help='become daemon as soon as possible',
     )
     parser.add_option('-q', '--queue-dir',
-        help='queue directory, where new job files are written to',
+        help='queue directory, where new job files are written to (default: /var/cache/mw-watch/q/)',
         default='/var/cache/mw-watch/q/',
     )
     parser.add_option('-p', '--processing-dir',
-        help='processing directory, where active job files are moved to (must be on same filesystem as --queue-dir)',
+        help='processing directory, where active job files are moved to (must be on same filesystem as --queue-dir, default: /var/cache/mw-watch/p/)',
         default='/var/cache/mw-watch/p/',
     )
     parser.add_option('-n', '--num-jobs',
-        help='maximum number of simulataneous jobs',
+        help='maximum number of simulataneous jobs (default: 5)',
         default='5',
     )
     options, args = parser.parse_args()

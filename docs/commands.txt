@@ -194,25 +194,56 @@ Specific Options
 
   Cache directory. This directory must be writeable by the ``mw-serve`` process.
 
-``--mwrender``
+``--mwrender=MWRENDER``
 
   Path to the ``mw-render`` executable. The default is just "mw-render" which
   is ok, as long as ``mw-render`` is in the ``PATH``.
 
-``--mwrender-logfile``
+``--mwrender-logfile=MWRENDER_LOGFILE``
 
   Logfile for ``mw-render``. Default is "/var/log/mw-render.log". The file must
   be writeable.
 
-``--mwzip``
+``--mwzip=MWZIP``
 
   Path to the ``mw-zip`` executable. The default is just "mw-zip" which
   is ok, as long as ``mw-zip`` is in the ``PATH``.
 
-``--mwzip-logfile``
+``--mwzip-logfile=MWZIP_LOGFILE``
 
   Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
   be writeable.
+
+``-q, --queue-dir=QUEUE_DIR``
+
+  If specified, do not call ``mw-render`` and ``mw-zip`` but write small job
+  desciption files in the given QUEUE_DIR directory for later processing by
+  `the mw-watch command`_.
+  
+The ``mw-watch`` Command
+========================
+
+Work on jobs queued by `the mw-serve command`_.
+
+Specific Options
+----------------
+
+``-q, --queue-dir=QUEUE_DIR``
+
+  Poll this directory for new job description files. The value must be the same
+  to be given to the ``--queue-dir`` option of ``mw-serve`` to make any sense.
+  Default is "/var/cache/mw-watch/q/".
+
+``-p, --processing-dir=PROCESSING_DIR``
+
+  Job description files that are currently being processed are moved from
+  the ``--queue-dir`` directory to this directory. After the processing they
+  are deleted. ``--queued-dir`` and this directory must be on the same
+  filesystem. Default is "/var/cache/mw-watch/p/".
+
+``-n, --num-job=NUM_JOBS``
+
+  Maximum number of simultaneous jobs. Default is 5.
 
 The ``mwlib.cgi`` Script
 ========================
