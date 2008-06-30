@@ -77,7 +77,7 @@ one command.
 
 ``-d, --daemonize``
 
-  Become a daemon process as soon as possible.
+  Become a daemon process as soon as possible. This doesn't work on Windows.
 
 The ``mw-render`` Command
 =========================
