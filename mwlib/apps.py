@@ -488,7 +488,7 @@ def serve():
     log = log.Log('mw-serve')
     
     if options.logfile:
-        utils.start_logging(logfile)
+        utils.start_logging(options.logfile)
     
     if options.daemonize:
         utils.daemonize()
@@ -548,7 +548,7 @@ def watch():
     from mwlib import filequeue
     
     if options.logfile:
-        utils.start_logging(logfile)
+        utils.start_logging(options.logfile)
     
     if options.daemonize:
         utils.daemonize()
