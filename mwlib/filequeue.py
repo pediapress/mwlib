@@ -72,6 +72,7 @@ class FileJobPoller(object):
         except Exception, exc:
             self.log.warn('Could not rename %r to %r: %s' % (src, path, exc))
             traceback.print_exc()
+            return
         self.log.info('starting job %r' % filename)
         pid = os.fork()
         if pid == 0:
