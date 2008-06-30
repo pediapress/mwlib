@@ -51,6 +51,7 @@ setup(
                                         'mw-show = mwlib.apps:show',
                                         'mw-html = mwlib.apps:html',
                                         'mw-serve = mwlib.apps:serve',
+                                        'mw-watch = mwlib.apps:watch',
                                         'mw-testserve = mwlib.apps:testserve',
                                         ],
                     'mwlib.writers': ['odf = mwlib.odfwriter:writer',

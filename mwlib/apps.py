@@ -468,6 +468,9 @@ def serve():
         help='logfile for mw-zip',
         default='/var/log/mw-zip.log',
     )
+    parser.add_option('-q', '--queue-dir',
+        help='queue dir of mw-watch (if not specified, no queue is used)',
+    )
     options, args = parser.parse_args()
     
     if options.protocol not in proto2server:
@@ -498,6 +501,7 @@ def serve():
         mwrender_logfile=options.mwrender_logfile,
         mwzip_cmd=options.mwzip,
         mwzip_logfile=options.mwzip_logfile,
+        queue_dir=options.queue_dir,
     )
     if options.protocol == 'http':
         server = make_server(options.interface, options.port, app,
@@ -512,6 +516,48 @@ def serve():
         serverclass(app, bindAddress=(options.interface, options.port)).run()
     
     log.info('exit.')
+
+def watch():
+    parser = optparse.OptionParser(usage="%prog [OPTIONS]")
+    parser.add_option('-l', '--logfile',
+        help='log output to LOGFILE',
+    )
+    parser.add_option('-d', '--daemonize',
+        action='store_true',
+        help='become daemon as soon as possible',
+    )
+    parser.add_option('-q', '--queue-dir',
+        help='queue directory, where new job files are written to',
+        default='/var/cache/mw-watch/q/',
+    )
+    parser.add_option('-p', '--processing-dir',
+        help='processing directory, where active job files are moved to (must be on same filesystem as --queue-dir)',
+        default='/var/cache/mw-watch/p/',
+    )
+    parser.add_option('-n', '--num-jobs',
+        help='maximum number of simulataneous jobs',
+        default='5',
+    )
+    options, args = parser.parse_args()
+    
+    try:
+        options.num_jobs = int(options.num_jobs)
+    except ValueError:
+        parser.error('--num-jobs value must be an integer')
+    
+    from mwlib import filequeue
+    
+    if options.logfile:
+        utils.start_logging(logfile)
+    
+    if options.daemonize:
+        utils.daemonize()
+    
+    poller = filequeue.FileJobPoller(
+        queue_dir=options.queue_dir,
+        processing_dir=options.processing_dir,
+        max_num_jobs=options.num_jobs,
+    ).run_forever()
 
 def testserve():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")

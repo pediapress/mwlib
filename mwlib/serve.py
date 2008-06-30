@@ -7,10 +7,23 @@ import re
 import simplejson
 import subprocess
 
-from mwlib import utils
-from mwlib import wsgi
+from mwlib import filequeue, utils, wsgi
 
 # ==============================================================================
+
+def no_job_queue(job_type, collection_id, args):
+    """Just spawn a new process for the given job"""
+    
+    try:
+        subprocess.Popen(args, close_fds=True)
+    except OSError, exc:
+        raise RuntimeError('Could not execute command %r: %s' % (
+            self.mwrender_cmd, exc,
+        ))
+
+
+# ==============================================================================
+
 
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
@@ -22,12 +35,17 @@ class Application(wsgi.Application):
     
     def __init__(self, cache_dir,
         mwrender_cmd, mwrender_logfile,
-        mwzip_cmd, mwzip_logfile):
+        mwzip_cmd, mwzip_logfile,
+        queue_dir):
         self.cache_dir = utils.ensure_dir(cache_dir)
         self.mwrender_cmd = mwrender_cmd
         self.mwrender_logfile = mwrender_logfile
         self.mwzip_cmd = mwzip_cmd
         self.mwzip_logfile = mwzip_logfile
+        if queue_dir:
+            self.queue_job = filequeue.FileJobQueuer(utils.ensure_dir(queue_dir))
+        else:
+            self.queue_job = no_job_queue
     
     def dispatch(self, request):
         try:
@@ -116,12 +134,7 @@ class Application(wsgi.Application):
         if template_blacklist:
             args.extend(['--template-blacklist', template_blacklist])
         
-        try:
-            subprocess.Popen(executable=self.mwrender_cmd, args=args)
-        except OSError, exc:
-            raise RuntimeError('Could not execute command %r: %s' % (
-                self.mwrender_cmd, exc,
-            ))
+        self.queue_job('render', collection_id, args)
         
         return self.json_response({
             'collection_id': collection_id,
@@ -196,12 +209,8 @@ class Application(wsgi.Application):
         ]
         if template_blacklist:
             args.extend(['--template-blacklist', template_blacklist])
-        try:
-            subprocess.Popen(executable=self.mwzip_cmd, args=args)
-        except OSError, exc:
-            raise RuntimeError('Could not execute command %r: %s' % (
-                self.mwzip_cmd, exc,
-            ))
+        
+        self.queue_job('post', collection_id, args)
         
         return self.json_response({'state': 'ok'})
     
