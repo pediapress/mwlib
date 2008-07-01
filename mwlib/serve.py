@@ -4,10 +4,18 @@
 
 import os
 import re
+import shutil
 import simplejson
 import subprocess
+import time
 
-from mwlib import filequeue, utils, wsgi
+from mwlib import filequeue, log, utils, wsgi
+
+# ==============================================================================
+
+log = log.Log('mwlib.serve')
+
+collection_id_rex = re.compile(r'^[a-z0-9]+$')
 
 # ==============================================================================
 
@@ -24,14 +32,11 @@ def no_job_queue(job_type, collection_id, args):
 
 # ==============================================================================
 
-
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
     error_filename = 'errors.txt'
     status_filename = 'status.txt'
     output_filename = 'output'
-    
-    collection_id_rex = re.compile(r'^[a-z0-9]+$')
     
     def __init__(self, cache_dir,
         mwrender_cmd, mwrender_logfile,
@@ -83,7 +88,7 @@ class Application(wsgi.Application):
     
     def get_collection(self, post_data):
         collection_id = post_data.get('collection_id')
-        if not collection_id or not self.collection_id_rex.match(collection_id):
+        if not collection_id or not collection_id_rex.match(collection_id):
             raise RuntimeError('invalid collection ID %r' % collection_id)
         collection_dir = self.get_collection_dir(collection_id)
         if not os.path.exists(collection_dir):
@@ -214,3 +219,29 @@ class Application(wsgi.Application):
         
         return self.json_response({'state': 'ok'})
     
+
+# ==============================================================================
+
+def clean_cache(max_age, cache_dir):
+    """Clean all subdirectories of cache_dir whose mtime is before now-max_age
+    
+    @param max_age: max age of directories in seconds
+    @type max_age: int
+    
+    @param cache_dir: cache directory
+    @type cache_dir: basestring
+    """
+    
+    now = time.time()
+    for d in os.listdir(cache_dir):
+        path = os.path.join(cache_dir, d)
+        if not os.path.isdir(path) or not collection_id_rex.match(d):
+            log.warn('unknown item in cache dir %r: %r' % (cache_dir, d))
+            continue
+        if now - os.stat(path).st_mtime < max_age:
+            continue
+        try:
+            log.info('removing directory %r' % path)
+            shutil.rmtree(path)
+        except Exception, exc:
+            log.ERROR('could not remove directory %r: %s' % (path, exc))

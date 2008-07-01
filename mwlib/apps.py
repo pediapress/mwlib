@@ -471,7 +471,20 @@ def serve():
     parser.add_option('-q', '--queue-dir',
         help='queue dir of mw-watch (if not specified, no queue is used)',
     )
+    parser.add_option('--clean-cache',
+        help='clean cache files that have not been touched for at least HOURS hours and exit',
+        metavar='HOURS',
+    )
     options, args = parser.parse_args()
+    
+    if options.clean_cache:
+        try:
+            options.clean_cache = int(options.clean_cache)
+        except ValueError:
+            parser.error('--clean-cache value must be an integer')
+        from mwlib.serve import clean_cache
+        clean_cache(options.clean_cache*60*60, cache_dir=options.cache_dir)
+        return
     
     if options.protocol not in proto2server:
         parser.error('unsupported protocol (must be one of %s)' % (

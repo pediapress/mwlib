@@ -219,6 +219,12 @@ Specific Options
   If specified, do not call ``mw-render`` and ``mw-zip`` but write small job
   desciption files in the given QUEUE_DIR directory for later processing by
   `the mw-watch command`_.
+
+``--clean-cache=HOURS``
+
+  Clean all cached files in --cache-dir that haven't been touched for the
+  last HOURS hourse. This is meant to be run as a cron job.
+
   
 The ``mw-watch`` Command
 ========================
