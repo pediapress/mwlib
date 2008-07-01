@@ -548,10 +548,14 @@ def serve():
     
     if options.method == 'threaded':
         options.protocol += '_threaded'
-        kwargs['maxThreads'] = options.max_children
+        flup_kwargs = {
+            'maxThreads': options.max_children,
+        }
     else:
-        kwargs['maxChildren'] = options.max_children
-        kwargs['maxRequests'] = options.max_requests
+        flup_kwargs = {
+            'maxChildren': options.max_children,
+            'maxRequests':  options.max_requests,
+        }
     
     log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
     
@@ -577,7 +581,7 @@ def serve():
             bindAddress=(options.interface, options.port),
             minSpare=options.min_spare,
             maxSpare=options.max_spare,
-            **kwargs
+            **flup_kwargs
         ).run()
     
     log.info('exit.')
