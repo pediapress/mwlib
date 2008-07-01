@@ -265,6 +265,8 @@ class ImageDB(object):
     
     def getPath(self, name, size=None):
         url = self.getURL(name, size=size)
+        if url is None:
+            return
         path = urlparse.urlparse(url).path
         pos = path.find('/thumb/')
         if pos >= 0:
