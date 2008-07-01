@@ -278,7 +278,7 @@ class HTMLWriter(object):
 
             try:
                 def getimg():
-                    return Image.open(os.path.join(os.path.expanduser("~/images"), path))
+                    return Image.open(self.images.getDiskPath(obj.target, size=max(width, height)))
                 img = None
                 
                 if not width:
