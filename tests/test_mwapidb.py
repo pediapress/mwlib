@@ -186,7 +186,7 @@ class TestImageDB(object):
     
     def test_getPath(self):
         p = self.imagedb.getPath(u'Flag of the United States.svg')
-        assert p == '/images/commons/a/a4/Flag_of_the_United_States.svg'
+        assert p == 'commons/a/a4/Flag_of_the_United_States.svg'
         p = self.imagedb.getPath(u'Flag of the United States.svg', size=800)
-        assert p == '/images/thumb/a/a4/Flag_of_the_United_States.svg/800px-Flag_of_the_United_States.svg.png'
+        assert p == 'thumb/a/a4/Flag_of_the_United_States.svg/800px-Flag_of_the_United_States.svg.png'
     

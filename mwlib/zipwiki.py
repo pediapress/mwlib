@@ -99,10 +99,10 @@ class ImageDB(object):
         path = urlparse.urlparse(url).path
         pos = path.find('/thumb/')
         if pos >= 0:
-            return '/images%s' % path[pos:]
+            return path[pos + 1:]
         if path.count('/') >= 4:
             prefix, repo, hash1, hash2, name = url.rsplit('/', 4)
-            return '/images/%s/%s/%s/%s' % (repo, hash1, hash2, name)
+            return '%s/%s/%s/%s' % (repo, hash1, hash2, name)
         return path
     
     def getDiskPath(self, name, size=None):
