@@ -202,6 +202,9 @@ def buildzip():
                 imagedb=env.images,
             )
         
+        if not hasattr(parser.env.metabook, 'source'):
+            parser.env.metabook.source = parser.env.get_source()
+        
         z.addObject('metabook.json', parser.metabook.dumpJson())
         
         z.writeContent()
