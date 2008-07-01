@@ -220,6 +220,27 @@ Specific Options
   desciption files in the given QUEUE_DIR directory for later processing by
   `the mw-watch command`_.
 
+``-m, --method=METHOD``
+
+  Whether to use a preforking or a threaded server (values "prefork" and
+  "threaded", default is "prefork"). When ``--protocol=http``, "prefork"
+  the server isn't actually preforking, but just forking.
+
+``--max-requests=NUM``
+
+  Maximum number of requests a child process can handle before it gets killed.
+  This setting is irrelevant for ``--method=threaded`` or when
+  ``--protocol=http``. A value of 0 means "no limit". The default is 0.
+
+``--min-spare=NUM``, ``--max-spare=NUM``
+
+  Minimum and maximum number of spare processes or threads.
+  Defaults are 2 and 5.
+
+``--max-children=NUM``
+
+  Maximum number of processes/threads. This is a hard limit. Default: 50.
+
 ``--clean-cache=HOURS``
 
   Clean all cached files in --cache-dir that haven't been touched for the

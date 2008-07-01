@@ -415,17 +415,23 @@ def parse():
 
 
 def serve():
-    from SocketServer import ForkingMixIn
+    from SocketServer import ForkingMixIn, ThreadingMixIn
     from wsgiref.simple_server import make_server, WSGIServer
-    from flup.server import fcgi_fork, scgi_fork
+    from flup.server import fcgi, fcgi_fork, scgi, scgi_fork
     
     class ForkingWSGIServer(ForkingMixIn, WSGIServer):
         pass
     
+    class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+        pass
+    
     proto2server = {
         'http': ForkingWSGIServer,
+        'http_threaded': ThreadingWSGIServer,
         'fcgi': fcgi_fork.WSGIServer,
+        'fcgi_threaded': fcgi.WSGIServer,
         'scgi': scgi_fork.WSGIServer,
+        'scgi_threaded': scgi.WSGIServer,
     }
     
     parser = optparse.OptionParser(usage="%prog [OPTIONS]")
@@ -471,6 +477,30 @@ def serve():
     parser.add_option('-q', '--queue-dir',
         help='queue dir of mw-watch (if not specified, no queue is used)',
     )
+    parser.add_option('-m', '--method',
+        help='prefork or threaded (default: prefork)',
+        default='prefork',
+    )
+    parser.add_option('--max-requests',
+        help='maximum number of requests a child process can handle before it is killed, irrelevant for --method=threaded (default: 0 = no limit)',
+        default='0',
+        metavar='NUM',
+    )
+    parser.add_option('--min-spare',
+        help='minimum number of spare processes/threads (default: 2)',
+        default='2',
+        metavar='NUM',
+    )
+    parser.add_option('--max-spare',
+        help='maximum number of spare processes/threads (default: 5)',
+        default='5',
+        metavar='NUM',
+    )
+    parser.add_option('--max-children',
+        help='maximum number of processes/threads (default: 50)',
+        default='50',
+        metavar='NUM',
+    )
     parser.add_option('--clean-cache',
         help='clean cache files that have not been touched for at least HOURS hours and exit',
         metavar='HOURS',
@@ -490,11 +520,21 @@ def serve():
         parser.error('unsupported protocol (must be one of %s)' % (
             ', '.join(proto2server.keys()),
         ))
+
+    def to_int(opt_name):
+        try:
+            setattr(options, opt_name, int(getattr(options, opt_name)))
+        except ValueError:
+            parser.error('--%s value must be an integer' % opt_name.replace('_', '-'))
     
-    try:
-        options.port = int(options.port)
-    except ValueError:
-        parser.error('port value must be an integer')
+    to_int('port')
+    to_int('max_requests')
+    to_int('min_spare')
+    to_int('max_spare')
+    to_int('max_children')
+    
+    if options.method not in ('prefork', 'threaded'):
+        parser.error('the only supported values for --method are "prefork" and "threaded"')
     
     from mwlib import serve, log, utils
     
@@ -506,6 +546,13 @@ def serve():
     if options.daemonize:
         utils.daemonize()
     
+    if options.method == 'threaded':
+        options.protocol += '_threaded'
+        kwargs['maxThreads'] = options.max_children
+    else:
+        kwargs['maxChildren'] = options.max_children
+        kwargs['maxRequests'] = options.max_requests
+    
     log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
     
     app = serve.Application(
@@ -516,7 +563,7 @@ def serve():
         mwzip_logfile=options.mwzip_logfile,
         queue_dir=options.queue_dir,
     )
-    if options.protocol == 'http':
+    if options.protocol.startswith('http'):
         server = make_server(options.interface, options.port, app,
             server_class=proto2server[options.protocol],
         )
@@ -526,7 +573,12 @@ def serve():
             pass
     else:
         serverclass = proto2server[options.protocol]
-        serverclass(app, bindAddress=(options.interface, options.port)).run()
+        serverclass(app,
+            bindAddress=(options.interface, options.port),
+            minSpare=options.min_spare,
+            maxSpare=options.max_spare,
+            **kwargs
+        ).run()
     
     log.info('exit.')
 
