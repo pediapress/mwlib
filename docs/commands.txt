@@ -35,7 +35,7 @@ one command.
   
     This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
     file (see below), i.e. articles and images are fetched with the
-    `MediaWiki API`_. Speciffying the URL directly as value for ``--conf``
+    `MediaWiki API`_. Specifying the URL directly as value for ``--conf``
     is usually the quicker way to achieve exactly the same result.
   
   * A shortcut for a base URL. Currently there are the following shortcuts:
@@ -45,7 +45,7 @@ one command.
 
   * A filename of a ZIP file generated with the `the mw-zip Command`_.
   
-  * A filename of a configuration file (see `Configuration Files`_).
+  * A filename of a configuration file (see ``docs/conffiles.txt``).
 
 ``-m, --metabook=METABOOK``
 
@@ -66,6 +66,10 @@ one command.
 
   A name of an article containing a list of "blacklisted templates", i.e.
   MediaWiki templates that should be discarded during rendering.
+  Example for such a template blacklist page::
+
+    * [[Template:SkipMe]]
+    * [[Template:MeToo]]
 
 ``-o, --output=OUTPUT``
 
@@ -286,39 +290,7 @@ CGI script equivalent for `the mw-serve command`_. Just copy the ``mwlib.cgi``
 script to the cgi-bin directory of your web server and adjust the configuration
 variables located at the top of the file.
 
-Configuration Files
-===================
 
-Configuration files are in a `INI-like format`_. They can contain the sections
-
-``[wiki]``
-
-  Description of how to retrieve MediaWiki articles and templates and meta
-  information about the MediaWiki like name or URL.
-
-and
-
-``[images]``
-
-  Description of how to retrieve images.
-
-Both sections must contain a ``type`` setting, on which all other available
-settings in that section depend. ``type`` can be one of the following values:
-
-``type=mwapi``
-
-  Retrieve articles and images via the `MediaWiki API`_, i.e. via ``api.php``.
-  The following settings must be present:
-  
-  ``base_url=BASEURL``
-
-    The base URL of the MediaWiki. See the ``--conf`` option in `Common Options`_.
-    
-  ``template_blacklist=TEMPLATEBLACKLIST``
-
-    A title of a page in the MediaWiki which contains blacklisted templates.
-
-.. _`INI-like format`: http://docs.python.org/lib/module-ConfigParser.html
 .. _`MediaWiki API`: http://www.mediawiki.org/wiki/API
 .. _`Collection extension`: http://www.mediawiki.org/wiki/Extension:Collection
 
