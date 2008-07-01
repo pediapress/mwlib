@@ -91,6 +91,9 @@ def buildzip():
                       default=800)
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
@@ -124,14 +127,7 @@ def buildzip():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        if options.metabook:
-            import shutil
-            fd, tmp = tempfile.mkstemp()
-            os.close(fd)
-            shutil.copyfile(options.metabook, tmp)
-            options.metabook = tmp
-            delete_files.append(tmp)
-        daemonize()
+        daemonize(pid_file=options.pid_file)
     
     def set_status(status):
         print 'Status: %s' % status
@@ -247,6 +243,9 @@ def render():
     )
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     options, args = parser.parse_args()
     
     import os
@@ -318,7 +317,7 @@ def render():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        daemonize()
+        daemonize(pid_file=pid_file)
     
     last_status = {}
     def set_status(status=None, progress=None, article=None, content_type=None, file_extension=None):
@@ -442,6 +441,9 @@ def serve():
         action='store_true',
         help='become daemon as soon as possible',
     )
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     parser.add_option('-P', '--protocol',
         help='one of %s (default: fcgi)' % ', '.join(proto2server.keys()),
         default='fcgi',
@@ -544,7 +546,7 @@ def serve():
         utils.start_logging(options.logfile)
     
     if options.daemonize:
-        utils.daemonize()
+        utils.daemonize(pid_file=options.pid_file)
     
     if options.method == 'threaded':
         options.protocol += '_threaded'
@@ -595,6 +597,9 @@ def watch():
         action='store_true',
         help='become daemon as soon as possible',
     )
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     parser.add_option('-q', '--queue-dir',
         help='queue directory, where new job files are written to (default: /var/cache/mw-watch/q/)',
         default='/var/cache/mw-watch/q/',
@@ -620,7 +625,7 @@ def watch():
         utils.start_logging(options.logfile)
     
     if options.daemonize:
-        utils.daemonize()
+        utils.daemonize(pid_file=options.pid_file)
     
     poller = filequeue.FileJobPoller(
         queue_dir=options.queue_dir,
