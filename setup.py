@@ -13,7 +13,7 @@ from setuptools import setup, Extension
 import distutils.util
 
 
-install_requires=["simplejson>=1.3", "pyparsing>=1.4.11", "odfpy>=0.7.0"]
+install_requires=["simplejson>=1.3", "pyparsing>=1.4.11", "odfpy>=0.7.0", "flup>=1.0"]
 if sys.version_info[:2] < (2,5):
     install_requires.append("wsgiref>=0.1.2")
     install_requires.append("elementtree>=1.2.6")
@@ -51,6 +51,8 @@ setup(
                                         'mw-show = mwlib.apps:show',
                                         'mw-html = mwlib.apps:html',
                                         'mw-serve = mwlib.apps:serve',
+                                        'mw-watch = mwlib.apps:watch',
+                                        'mw-testserve = mwlib.apps:testserve',
                                         ],
                     'mwlib.writers': ['odf = mwlib.odfwriter:writer',
                                       'xhtml = mwlib.xhtmlwriter:xhtmlwriter',

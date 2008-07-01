@@ -1,6 +1,12 @@
 include MANIFEST.in
 include README.html
 include README.txt
+include cgi-bin/mwlib.cgi
+include docs/Makefile
+include docs/commands.html
+include docs/commands.txt
+include docs/conffiles.html
+include docs/conffiles.txt
 include docs/metabook.txt
 include docs/writers.html
 include docs/writers.txt
@@ -24,6 +30,7 @@ include mwlib/docbookwriter.py
 include mwlib/dummydb.py
 include mwlib/expander.py
 include mwlib/expr.py
+include mwlib/filequeue.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
 include mwlib/lang.py
@@ -50,6 +57,7 @@ include mwlib/resources/pedia.css
 include mwlib/sanitychecker.py
 include mwlib/scanfile.py
 include mwlib/scanner.py
+include mwlib/serve.py
 include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/texmap.py
@@ -59,6 +67,7 @@ include mwlib/utils.py
 include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/writerbase.py
+include mwlib/wsgi.py
 include mwlib/xhtmlwriter.py
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py
@@ -85,6 +94,7 @@ include tests/test_sanitychecker.py
 include tests/test_scanner.py
 include tests/test_table.py
 include tests/test_timeline.py
+include tests/test_utils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipwiki.py
 include tools/get_license_templates.py

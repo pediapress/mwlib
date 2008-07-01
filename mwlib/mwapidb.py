@@ -263,6 +263,19 @@ class ImageDB(object):
         except (KeyError, IndexError):
             return None
     
+    def getPath(self, name, size=None):
+        url = self.getURL(name, size=size)
+        if url is None:
+            return
+        path = urlparse.urlparse(url).path
+        pos = path.find('/thumb/')
+        if pos >= 0:
+            return path[pos + 1:]
+        if path.count('/') >= 4:
+            prefix, repo, hash1, hash2, name = url.rsplit('/', 4)
+            return '%s/%s/%s/%s' % (repo, hash1, hash2, name)
+        return path
+    
     def getDiskPath(self, name, size=None):
         """Return filename for image with given name and size
         

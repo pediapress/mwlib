@@ -183,3 +183,10 @@ class TestImageDB(object):
         t = u'Sertraline-A-3D-balls.png'
         du = imgdb.getDescriptionURL(t)
         assert du == 'http://commons.wikimedia.org/wiki/Image:Sertraline-A-3D-balls.png'
+    
+    def test_getPath(self):
+        p = self.imagedb.getPath(u'Flag of the United States.svg')
+        assert p == 'commons/a/a4/Flag_of_the_United_States.svg'
+        p = self.imagedb.getPath(u'Flag of the United States.svg', size=800)
+        assert p == 'thumb/a/a4/Flag_of_the_United_States.svg/800px-Flag_of_the_United_States.svg.png'
+    

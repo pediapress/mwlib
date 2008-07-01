@@ -144,6 +144,8 @@ url=
         
         licenses = []
         for license in self.metabook.licenses:
+            wikitext = ''
+            
             if license.get('mw_license_url'):
                 wikitext = utils.fetch_url(
                     license['mw_license_url'],

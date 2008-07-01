@@ -1,0 +1,296 @@
+.. -*- mode: rst; coding: utf-8 -*-
+
+~~~~~~~~~~~~~~
+mwlib Commands
+~~~~~~~~~~~~~~
+
+Common Options
+==============
+
+This section contains a description of options that are accepted by more than
+one command.
+
+``-h, --help``
+
+  Show usage information and exit.
+
+``-c, --conf=CONF``
+
+  The value for this option describes the source of MediaWiki articles and
+  images for the command and can be of one of the following types:
+
+  * A "base URL" of a MediaWiki installation. A base URL is the URL up to, but
+    not including the ``index.php``/``api.php`` part.
+  
+    This URL can differ from
+    the prefix seen in "pretty" article URLs. For example the article *Physics*
+    in the English Wikipedia has the URL http://en.wikipedia.org/wiki/Physics,
+    but the base URL is http://en.wikipedia.org/w/.
+  
+    If you've set up your own
+    MediaWiki you probably know what your base URL should be, but if you're
+    using a different MediaWiki, you can see the base URL if add a query string
+    to the URL, e.g. by cicking on the edit link or by looking at an older
+    revision of an article.
+  
+    This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
+    file (see below), i.e. articles and images are fetched with the
+    `MediaWiki API`_. Specifying the URL directly as value for ``--conf``
+    is usually the quicker way to achieve exactly the same result.
+  
+  * A shortcut for a base URL. Currently there are the following shortcuts:
+
+    - ":en" -- http://en.wikipedia.org/w/, i.e. the English Wikipedia
+    - ":de" -- http://en.wikipedia.org/w/, i.e. the German Wikipedia
+
+  * A filename of a ZIP file generated with the `the mw-zip Command`_.
+  
+  * A filename of a configuration file (see ``docs/conffiles.txt``).
+
+``-m, --metabook=METABOOK``
+
+  Description of the article colleciton to be rendered in JSON format.
+  This is used by the `Collection extension`_ to transfer this information
+  to ``mw-serve`` which in turn passes the information to ``mw-render`` and
+  ``mw-zip``.
+
+``--collectionpage=COLLECTIONPAGE``
+
+  Title of a saved article collection (using the `Collection extension`_)
+
+``-x, --no-images``
+
+  If given, no images are included in the output document.
+
+``--template-blacklist=TEMPLATE_BLACKLIST``
+
+  A name of an article containing a list of "blacklisted templates", i.e.
+  MediaWiki templates that should be discarded during rendering.
+  Example for such a template blacklist page::
+
+    * [[Template:SkipMe]]
+    * [[Template:MeToo]]
+
+``-o, --output=OUTPUT``
+
+  Write output to given file.
+
+``-l, --logfile=LOGFILE``
+
+  Log output to the given file.
+
+``-d, --daemonize``
+
+  Become a daemon process as soon as possible. This doesn't work on Windows.
+
+``--pid-file=PID_FILE``
+
+  To be used together with --daemonize: Write PID of daemon process to this
+  file.
+
+
+The ``mw-render`` Command
+=========================
+
+Render MediaWiki articles to one of several output formats like PDF of
+OpenDocument Text.
+
+Usage
+-----
+::
+
+  mw-render [OPTIONS] [ARTICLETITLE...]
+
+Specific Options
+----------------
+
+``-w, --writer``
+
+  Name of the writer to produce the output. The list of available writers
+  can be seen with ``mw-render --list-writers``.
+
+``--list-writers``
+
+  List the available writers.
+  
+``-W, --writer-options``
+
+  Writer specific options in a ";" separated list (depending on your shell,
+  quoting with "..." or '...' might be needed). Each item in that list can
+  either be a single option or an option=value pair. To list the available
+  writer options use ``mw-render --writer-info WRITERNAME``.
+
+``--writer-info=WRITER``
+
+  Show avaiable options and some additional information about the given writer.
+
+``-s, --status-file=STATUS_FILE``
+
+  Write status/progress information in JSON format to this file. The file
+  is continuously updated during the execution of ``mw-render``.
+
+``-e, --error-file=ERROR_FILE``
+
+  If an error occurs, write the error message to this file. If no error occurs
+  this file is not written/created.
+
+
+The ``mw-zip`` Command
+======================
+
+Generate a ZIP file containing
+
+ * articles,
+ * images,
+ * templates and
+ * additional meta information (especially if ``--metabook`` is given, see
+   `Common Options`_) like name and URL of the MediaWiki, licensing information
+   and title, subtitle and the hierarchical structure of the article collection.
+
+Usage
+-----
+::
+
+  mw-zip [OPTIONS] [ARTICLETITLE...]
+  
+Specific Options
+----------------
+
+``-i, --imagesize=IMAGESIZE``
+
+  Maximum size (which can be either width or height, whichever is greater) of
+  images. If images exceed this maximum size, they're scaled down.
+  
+``-p, --posturl=POSTURL``
+
+  Upload the ZIP file with an HTTP POST request to the given URL.
+
+``-g , --getposturl``
+
+  Retrieve the POSTURL from PediaPress and open the upload page in the web
+  browser.
+
+
+The ``mw-serve`` Command
+========================
+
+Provide a server interface to ``mw-render`` and ``mw-zip``. This can be used
+in conjuction with the `Collection extension`_ to provide PDF generation or
+the possibility to order printed books from a MediaWiki.
+
+Usage
+-----
+::
+
+  mw-serve [OPTIONS]
+
+Specific Options
+----------------
+
+``-P, --protocol=PROTOCOL``
+
+  Protocol to serve. The value can be one of "http", "fcgi" (FastCGI) or
+  "scgi". Note: If you want to "serve" CGI instead, use `the mwlib.cgi script`_.
+
+``-p, --port=PORT``
+
+  Listen on this TCP port. The default value is 8899.
+
+``-i, --interface=INTERFACE``
+
+  Listen on this interface. The default value is "0.0.0.0".
+
+``--cache-dir=CACHE_DIR``
+
+  Cache directory. This directory must be writeable by the ``mw-serve`` process.
+
+``--mwrender=MWRENDER``
+
+  Path to the ``mw-render`` executable. The default is just "mw-render" which
+  is ok, as long as ``mw-render`` is in the ``PATH``.
+
+``--mwrender-logfile=MWRENDER_LOGFILE``
+
+  Logfile for ``mw-render``. Default is "/var/log/mw-render.log". The file must
+  be writeable.
+
+``--mwzip=MWZIP``
+
+  Path to the ``mw-zip`` executable. The default is just "mw-zip" which
+  is ok, as long as ``mw-zip`` is in the ``PATH``.
+
+``--mwzip-logfile=MWZIP_LOGFILE``
+
+  Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
+  be writeable.
+
+``-q, --queue-dir=QUEUE_DIR``
+
+  If specified, do not call ``mw-render`` and ``mw-zip`` but write small job
+  desciption files in the given QUEUE_DIR directory for later processing by
+  `the mw-watch command`_.
+
+``-m, --method=METHOD``
+
+  Whether to use a preforking or a threaded server (values "prefork" and
+  "threaded", default is "prefork"). When ``--protocol=http``, "prefork"
+  the server isn't actually preforking, but just forking.
+
+``--max-requests=NUM``
+
+  Maximum number of requests a child process can handle before it gets killed.
+  This setting is irrelevant for ``--method=threaded`` or when
+  ``--protocol=http``. A value of 0 means "no limit". The default is 0.
+
+``--min-spare=NUM``, ``--max-spare=NUM``
+
+  Minimum and maximum number of spare processes or threads.
+  Defaults are 2 and 5.
+
+``--max-children=NUM``
+
+  Maximum number of processes/threads. This is a hard limit. Default: 50.
+
+``--clean-cache=HOURS``
+
+  Clean all cached files in --cache-dir that haven't been touched for the
+  last HOURS hourse. This is meant to be run as a cron job.
+
+  
+The ``mw-watch`` Command
+========================
+
+Work on jobs queued by `the mw-serve command`_.
+
+Specific Options
+----------------
+
+``-q, --queue-dir=QUEUE_DIR``
+
+  Poll this directory for new job description files. The value must be the same
+  to be given to the ``--queue-dir`` option of ``mw-serve`` to make any sense.
+  Default is "/var/cache/mw-watch/q/".
+
+``-p, --processing-dir=PROCESSING_DIR``
+
+  Job description files that are currently being processed are moved from
+  the ``--queue-dir`` directory to this directory. After the processing they
+  are deleted. ``--queued-dir`` and this directory must be on the same
+  filesystem. Default is "/var/cache/mw-watch/p/".
+
+``-n, --num-job=NUM_JOBS``
+
+  Maximum number of simultaneous jobs. Default is 5.
+
+The ``mwlib.cgi`` Script
+========================
+
+This script (located in the ``cgi-bin/`` directory) can be used as a
+CGI script equivalent for `the mw-serve command`_. Just copy the ``mwlib.cgi``
+script to the cgi-bin directory of your web server and adjust the configuration
+variables located at the top of the file.
+
+
+.. _`MediaWiki API`: http://www.mediawiki.org/wiki/API
+.. _`Collection extension`: http://www.mediawiki.org/wiki/Extension:Collection
+

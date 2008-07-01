@@ -91,6 +91,9 @@ def buildzip():
                       default=800)
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
@@ -124,14 +127,7 @@ def buildzip():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        if options.metabook:
-            import shutil
-            fd, tmp = tempfile.mkstemp()
-            os.close(fd)
-            shutil.copyfile(options.metabook, tmp)
-            options.metabook = tmp
-            delete_files.append(tmp)
-        daemonize()
+        daemonize(pid_file=options.pid_file)
     
     def set_status(status):
         print 'Status: %s' % status
@@ -163,7 +159,7 @@ def buildzip():
     try:
         set_status('init')
         
-        from mwlib import recorddb, metabook, mwapidb
+        from mwlib import recorddb, mwapidb
         
         env = parser.env
         
@@ -230,23 +226,46 @@ def render():
     parser = OptionParser(conf_optional=True)
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-w", "--writer", help='use writer backend WRITER')
-    parser.add_option("-W", "--writer-options", help='";"-separated list of additional writer-specific options')
+    parser.add_option("-W", "--writer-options",
+        help='";"-separated list of additional writer-specific options',
+    )
     parser.add_option("-e", "--error-file", help='write errors to this file')
-    parser.add_option("-s", "--status-file", help='write status/progress info to this file')
-    parser.add_option("--list-writers", action='store_true', help='list available writers and exit')
+    parser.add_option("-s", "--status-file",
+        help='write status/progress info to this file',
+    )
+    parser.add_option("--list-writers",
+        action='store_true',
+        help='list available writers and exit',
+    )
+    parser.add_option("--writer-info",
+        help='list information about given WRITER and exit',
+        metavar='WRITER',
+    )
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     options, args = parser.parse_args()
     
     import os
     import simplejson
     import sys
-    import tempfile
     import traceback
     import pkg_resources
     from mwlib.writerbase import WriterError
     
     use_help = 'Use --help for usage information.'
+    
+    def load_writer(name):
+        try:
+            entry_point = pkg_resources.iter_entry_points('mwlib.writers', name).next()
+        except StopIteration:
+            sys.exit('No such writer: %r (use --list-writers to list available writers)' % name)
+        try:
+            return entry_point.load()
+        except Exception, e:
+            sys.exit('Could not load writer %r: %s' % (name, e))
     
     if options.list_writers:
         for entry_point in pkg_resources.iter_entry_points('mwlib.writers'):
@@ -261,20 +280,32 @@ def render():
             print '%s\t%s' % (entry_point.name, description)
         return
     
+    if options.writer_info:
+        writer = load_writer(options.writer_info)
+        if hasattr(writer, 'description'):
+            print 'Description:\t%s' % writer.description
+        if hasattr(writer, 'content_type'):
+            print 'Content-Type:\t%s' % writer.content_type
+        if hasattr(writer, 'file_extension'):
+            print 'File extension:\t%s' % writer.file_extension
+        if hasattr(writer, 'options') and writer.options:
+            print 'Options (usable in a ";"-separated list for --writer-options):'
+            for name, info in writer.options.items():
+                param = info.get('param')
+                if param:
+                    print ' %s=%s:\t%s' % (name, param, info['help'])
+                else:
+                    print ' %s:\t%s' % (name, info['help'])
+        return
+    
+    
     if options.output is None:
         parser.error('Please specify an output file with --output.\n' + use_help)
     
     if options.writer is None:
         parser.error('Please specify a writer with --writer.\n' + use_help)    
-    try:
-        entry_point = pkg_resources.iter_entry_points('mwlib.writers', options.writer).next()
-    except StopIteration:
-        sys.exit('No such writer: %r (use --list-writers to list available writers)' % options.writer)
-    try:
-        writer = entry_point.load()
-    except Exception, e:
-        sys.exit('Could not load writer %r: %s' % (options.writer, e))
     
+    writer = load_writer(options.writer)
     writer_options = {}
     if options.writer_options:
         for wopt in options.writer_options.split(';'):
@@ -286,7 +317,7 @@ def render():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        daemonize()
+        daemonize(pid_file=pid_file)
     
     last_status = {}
     def set_status(status=None, progress=None, article=None, content_type=None, file_extension=None):
@@ -309,8 +340,7 @@ def render():
     
     try:
         set_status(status='init', progress=0)
-        fd, tmpout = tempfile.mkstemp()
-        os.close(fd)
+        tmpout = options.output + '.tmp'
         writer(parser.env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
         kwargs = {}
@@ -318,6 +348,8 @@ def render():
             kwargs['content_type'] = writer.content_type
         if hasattr(writer, 'file_extension'):
             kwargs['file_extension'] = writer.file_extension
+        if parser.env.images:
+            parser.env.images.clear()
         set_status(status='finished', progress=100, **kwargs)
     except WriterError, e:
         set_status(status='error')
@@ -379,7 +411,229 @@ def parse():
         else:
             print "G", time.time()-stime, repr(x)
 
+
+
 def serve():
+    from SocketServer import ForkingMixIn, ThreadingMixIn
+    from wsgiref.simple_server import make_server, WSGIServer
+    from flup.server import fcgi, fcgi_fork, scgi, scgi_fork
+    
+    class ForkingWSGIServer(ForkingMixIn, WSGIServer):
+        pass
+    
+    class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+        pass
+    
+    proto2server = {
+        'http': ForkingWSGIServer,
+        'http_threaded': ThreadingWSGIServer,
+        'fcgi': fcgi_fork.WSGIServer,
+        'fcgi_threaded': fcgi.WSGIServer,
+        'scgi': scgi_fork.WSGIServer,
+        'scgi_threaded': scgi.WSGIServer,
+    }
+    
+    parser = optparse.OptionParser(usage="%prog [OPTIONS]")
+    parser.add_option('-l', '--logfile',
+        help='log output to LOGFILE',
+    )
+    parser.add_option('-d', '--daemonize',
+        action='store_true',
+        help='become daemon as soon as possible',
+    )
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
+    parser.add_option('-P', '--protocol',
+        help='one of %s (default: fcgi)' % ', '.join(proto2server.keys()),
+        default='fcgi',
+    )
+    parser.add_option('-p', '--port',
+        help='port to listen on (default: 8899)',
+        default='8899',
+    )
+    parser.add_option('-i', '--interface',
+        help='interface to listen on (default: 0.0.0.0)',
+        default='0.0.0.0',
+    )
+    parser.add_option('--cache-dir',
+        help='cache directory',
+        default='/var/cache/mw-serve/',
+    )
+    parser.add_option('--mwrender',
+        help='(path to) mw-render executable',
+        default='mw-render',
+    )
+    parser.add_option('--mwrender-logfile',
+        help='logfile for mw-render',
+        default='/var/log/mw-render.log',
+    )
+    parser.add_option('--mwzip',
+        help='(path to) mw-zip executable',
+        default='mw-zip',
+    )
+    parser.add_option('--mwzip-logfile',
+        help='logfile for mw-zip',
+        default='/var/log/mw-zip.log',
+    )
+    parser.add_option('-q', '--queue-dir',
+        help='queue dir of mw-watch (if not specified, no queue is used)',
+    )
+    parser.add_option('-m', '--method',
+        help='prefork or threaded (default: prefork)',
+        default='prefork',
+    )
+    parser.add_option('--max-requests',
+        help='maximum number of requests a child process can handle before it is killed, irrelevant for --method=threaded (default: 0 = no limit)',
+        default='0',
+        metavar='NUM',
+    )
+    parser.add_option('--min-spare',
+        help='minimum number of spare processes/threads (default: 2)',
+        default='2',
+        metavar='NUM',
+    )
+    parser.add_option('--max-spare',
+        help='maximum number of spare processes/threads (default: 5)',
+        default='5',
+        metavar='NUM',
+    )
+    parser.add_option('--max-children',
+        help='maximum number of processes/threads (default: 50)',
+        default='50',
+        metavar='NUM',
+    )
+    parser.add_option('--clean-cache',
+        help='clean cache files that have not been touched for at least HOURS hours and exit',
+        metavar='HOURS',
+    )
+    options, args = parser.parse_args()
+    
+    if options.clean_cache:
+        try:
+            options.clean_cache = int(options.clean_cache)
+        except ValueError:
+            parser.error('--clean-cache value must be an integer')
+        from mwlib.serve import clean_cache
+        clean_cache(options.clean_cache*60*60, cache_dir=options.cache_dir)
+        return
+    
+    if options.protocol not in proto2server:
+        parser.error('unsupported protocol (must be one of %s)' % (
+            ', '.join(proto2server.keys()),
+        ))
+
+    def to_int(opt_name):
+        try:
+            setattr(options, opt_name, int(getattr(options, opt_name)))
+        except ValueError:
+            parser.error('--%s value must be an integer' % opt_name.replace('_', '-'))
+    
+    to_int('port')
+    to_int('max_requests')
+    to_int('min_spare')
+    to_int('max_spare')
+    to_int('max_children')
+    
+    if options.method not in ('prefork', 'threaded'):
+        parser.error('the only supported values for --method are "prefork" and "threaded"')
+    
+    from mwlib import serve, log, utils
+    
+    log = log.Log('mw-serve')
+    
+    if options.logfile:
+        utils.start_logging(options.logfile)
+    
+    if options.daemonize:
+        utils.daemonize(pid_file=options.pid_file)
+    
+    if options.method == 'threaded':
+        options.protocol += '_threaded'
+        flup_kwargs = {
+            'maxThreads': options.max_children,
+        }
+    else:
+        flup_kwargs = {
+            'maxChildren': options.max_children,
+            'maxRequests':  options.max_requests,
+        }
+    
+    log.info("serving %s on %s:%s" % (options.protocol, options.interface, options.port))
+    
+    app = serve.Application(
+        cache_dir=options.cache_dir,
+        mwrender_cmd=options.mwrender,
+        mwrender_logfile=options.mwrender_logfile,
+        mwzip_cmd=options.mwzip,
+        mwzip_logfile=options.mwzip_logfile,
+        queue_dir=options.queue_dir,
+    )
+    if options.protocol.startswith('http'):
+        server = make_server(options.interface, options.port, app,
+            server_class=proto2server[options.protocol],
+        )
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+    else:
+        serverclass = proto2server[options.protocol]
+        serverclass(app,
+            bindAddress=(options.interface, options.port),
+            minSpare=options.min_spare,
+            maxSpare=options.max_spare,
+            **flup_kwargs
+        ).run()
+    
+    log.info('exit.')
+
+def watch():
+    parser = optparse.OptionParser(usage="%prog [OPTIONS]")
+    parser.add_option('-l', '--logfile',
+        help='log output to LOGFILE',
+    )
+    parser.add_option('-d', '--daemonize',
+        action='store_true',
+        help='become daemon as soon as possible',
+    )
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
+    parser.add_option('-q', '--queue-dir',
+        help='queue directory, where new job files are written to (default: /var/cache/mw-watch/q/)',
+        default='/var/cache/mw-watch/q/',
+    )
+    parser.add_option('-p', '--processing-dir',
+        help='processing directory, where active job files are moved to (must be on same filesystem as --queue-dir, default: /var/cache/mw-watch/p/)',
+        default='/var/cache/mw-watch/p/',
+    )
+    parser.add_option('-n', '--num-jobs',
+        help='maximum number of simulataneous jobs (default: 5)',
+        default='5',
+    )
+    options, args = parser.parse_args()
+    
+    try:
+        options.num_jobs = int(options.num_jobs)
+    except ValueError:
+        parser.error('--num-jobs value must be an integer')
+    
+    from mwlib import filequeue, utils
+    
+    if options.logfile:
+        utils.start_logging(options.logfile)
+    
+    if options.daemonize:
+        utils.daemonize(pid_file=options.pid_file)
+    
+    poller = filequeue.FileJobPoller(
+        queue_dir=options.queue_dir,
+        processing_dir=options.processing_dir,
+        max_num_jobs=options.num_jobs,
+    ).run_forever()
+
+def testserve():
     parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
     parser.add_option("-c", "--conf", help="config file")
 

@@ -1,15 +1,15 @@
 .. -*- mode: rst; coding: utf-8 -*-
 
 ======================================================================
-mwlib - mediawiki parser and utility library
+mwlib - MediaWiki parser and utility library
 ======================================================================
 
 
 Overview
 ======================================================================
-mwlib provides a library for parsing mediawiki_ articles.
+mwlib provides a library for parsing MediaWiki_ articles.
 It is currently aimed at developers, who have a need to somehow handle
-mediawiki articles.
+MediaWiki articles.
 
 Installation
 ======================================================================
@@ -27,31 +27,38 @@ unpack it and run::
 
 You will also need:
 
-*latex*
-  latex is used for rendering of mathematical formulas
+*LaTeX*
+  LaTeX is used for rendering of mathematical formulas.
 
 *perl*
-  perl is used to drive the timeline.pl script, which produces
+  perl is used to drive the ``EasyTimeline.pl`` script, which produces
   timeline images.
 
 *PIL*
- PIL is the Python Imaging Library and is used for image handling
- (http://www.pythonware.com/products/pil/).
+ PIL_ is the Python Imaging Library and is used for image handling.
+
+Commands
+======================================================================
+The commands (i.e. command-line tools) provided by mwlib are described
+in ``docs/commands.txt``.
 
 Configuration
 ======================================================================
-See example_conf.py for an example configuration.
+The format of configuration files is described in
+``docs/conffiles.txt``.
+
+See ``example_conf.py`` for an example configuration.
 
 Contact/Further Information
 ======================================================================
-For further information please visit our trac instance running at
-http://code.pediapress.com
+For further information please visit our Trac instance running at
+http://code.pediapress.com/.
 The current development version can also be found there.
 
 Credits
 ======================================================================
-mwlib/cdb.py is based on the cdb implementation from the spambayes_
-project ( (C) 2002-2004 Python Software Foundation ).
+``mwlib/cdb.py`` is based on the cdb implementation from the SpamBayes_
+project ((C) 2002-2004 Python Software Foundation).
 The remaining parts are distributed under the BSD license:
 
 License
@@ -88,5 +95,6 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-.. _mediawiki: http://www.mediawiki.org
-.. _spambayes: http://spambayes.sourceforge.net/
+.. _MediaWiki: http://www.mediawiki.org/
+.. _SpamBayes: http://spambayes.sourceforge.net/
+.. _PIL: http://www.pythonware.com/products/pil/
