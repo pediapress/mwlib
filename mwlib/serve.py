@@ -26,7 +26,7 @@ def no_job_queue(job_type, collection_id, args):
         subprocess.Popen(args, close_fds=True)
     except OSError, exc:
         raise RuntimeError('Could not execute command %r: %s' % (
-            self.mwrender_cmd, exc,
+            args[0], exc,
         ))
 
 
@@ -116,6 +116,7 @@ class Application(wsgi.Application):
             return self.error_response('POST argument required: %s' % exc)
         writer_options = post_data.get('writer_options', '')
         template_blacklist = post_data.get('template_blacklist', '')
+        login_credentials = post_data.get('login_credentials', '')
         
         collection_id = self.new_collection()
         
@@ -138,6 +139,8 @@ class Application(wsgi.Application):
             args.extend(['--writer-options', writer_options])
         if template_blacklist:
             args.extend(['--template-blacklist', template_blacklist])
+        if login_credentials:
+            args.extend(['--login', login_credentials])
         
         self.queue_job('render', collection_id, args)
         
@@ -199,6 +202,7 @@ class Application(wsgi.Application):
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         template_blacklist = post_data.get('template_blacklist', '')
+        login_credentials = post_data.get('login_credentials', '')
         
         collection_id = self.new_collection()
         
@@ -214,6 +218,8 @@ class Application(wsgi.Application):
         ]
         if template_blacklist:
             args.extend(['--template-blacklist', template_blacklist])
+        if login_credentials:
+            args.extend(['--login', login_credentials])
         
         self.queue_job('post', collection_id, args)
         
