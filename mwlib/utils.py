@@ -234,7 +234,7 @@ class PersistedDict(UserDict.UserDict):
 fetch_cache = {}
 
 def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
-    max_cacheable_size=1024, expected_content_type=None):
+    max_cacheable_size=1024, expected_content_type=None, opener=None):
     """Fetch given URL via HTTP
     
     @param ignore_errors: if True, log but otherwise ignore errors, return None
@@ -251,6 +251,9 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         content-type of the reponse does not mathc
     @type expected_content_type: str
     
+    @param opener: if give, use this opener instead of instantiating a new one
+    @type opener: L{urllib2.URLOpenerDirector}
+    
     @returns: fetched reponse or None
     @rtype: str
     """
@@ -259,8 +262,9 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         return fetch_cache[url]
     
     log.info("fetching %r" % (url,))
-    opener = urllib2.build_opener()
-    opener.addheaders = [('User-agent', 'mwlib')]
+    if opener is None:
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', 'mwlib')]
     try:
         result = opener.open(url)
         data = result.read()

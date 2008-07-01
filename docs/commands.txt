@@ -85,8 +85,15 @@ one command.
 
 ``--pid-file=PID_FILE``
 
-  To be used together with --daemonize: Write PID of daemon process to this
-  file.
+  To be used together with --daemonize: Write process ID of daemon process to
+  this file.
+  
+``--login=USERNAME:PASSWORD``
+
+  For MediaWikis that restrict the viewing of pages, login with given USERNAME
+  and PASSWORD (currently this is only supported for mwapidb, i.e. when the
+  --conf argument is a base URL or shortcut, or when ``type=mwapi`` in the
+  configuration file).
 
 
 The ``mw-render`` Command

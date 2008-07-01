@@ -5,6 +5,7 @@
 # See README.txt for additional licensing information.
 
 import cgi
+import cookielib
 import os
 import re
 import shutil
@@ -136,12 +137,29 @@ class APIHelper(object):
         if self.base_url[-1] != '/':
             self.base_url += '/'
         self.query_cache = {}
+        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+        self.opener.addheaders = [('User-agent', 'mwlib')]
     
     def is_usable(self):
         result = self.query(meta='siteinfo', ignore_errors=True)
         if result and 'general' in result:
             return True
         return False
+    
+    def login(self, username, password):
+        """Login via MediaWiki API
+        
+        @type username: unicode
+        
+        @type password: unicode
+        """
+        
+        post_data = urllib.urlencode({
+            'action': 'login',
+            'lgname': username.encode('utf-8'),
+            'lgpassword': password.encode('utf-8'),
+        })
+        self.opener.open('%sapi.php' % self.base_url, post_data)
     
     def query(self, ignore_errors=False, **kwargs):
         args = {
@@ -155,7 +173,10 @@ class APIHelper(object):
         q = urllib.urlencode(args)
         q = q.replace('%3A', ':') # fix for wrong quoting of url for images
         q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
-        data = utils.fetch_url('%sapi.php?%s' % (self.base_url, q), ignore_errors=ignore_errors)
+        data = utils.fetch_url('%sapi.php?%s' % (self.base_url, q),
+            ignore_errors=ignore_errors,
+            opener=self.opener,
+        )
         if ignore_errors and data is None:
             return None
         try:
@@ -182,7 +203,7 @@ class APIHelper(object):
 
 
 class ImageDB(object):
-    def __init__(self, base_url=None, api_helper=None):
+    def __init__(self, base_url=None, username=None, password=None, api_helper=None):
         """
         @param base_url: base URL of a MediaWiki, e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
@@ -198,10 +219,16 @@ class ImageDB(object):
             self.api_helper = APIHelper(base_url)
             assert self.api_helper is not None, 'invalid base URL %r' % base_url
         
+        if username is not None:
+            self.login(username, password)
+        
         self.tmpdir = tempfile.mkdtemp()
     
     def clear(self):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
+    
+    def login(self, username, password):
+        self.api_helper.login(username, password)
     
     def getDescriptionURL(self, name):
         """Return URL of image description page for image with given name
@@ -357,7 +384,13 @@ class WikiDB(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
     
-    def __init__(self, base_url=None, template_blacklist=None, api_helper=None):
+    def __init__(self,
+        base_url=None,
+        username=None,
+        password=None,
+        template_blacklist=None,
+        api_helper=None,
+    ):
         """
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
@@ -377,6 +410,8 @@ class WikiDB(object):
         else:
             self.api_helper = APIHelper(base_url)
             assert self.api_helper is not None, 'invalid base URL %r' % base_url
+        if username is not None:
+            self.login(username, password)
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
@@ -389,6 +424,9 @@ class WikiDB(object):
         else:
             self.template_blacklist = [template.lower().strip() 
                                        for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
+    
+    def login(self, username, password):
+        self.api_helper.login(username, password)
     
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))

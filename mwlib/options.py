@@ -1,7 +1,9 @@
 import optparse
 
 from mwlib.utils import start_logging
-from mwlib import wiki, metabook
+from mwlib import wiki, metabook, log
+
+log = log.Log('mwlib.options')
 
 class OptionParser(optparse.OptionParser):
     def __init__(self, usage=None, conf_optional=False):
@@ -10,12 +12,25 @@ class OptionParser(optparse.OptionParser):
             usage = '%prog [OPTIONS] [ARTICLETITLE...]'
         optparse.OptionParser.__init__(self, usage=usage)
         self.metabook = None
-        self.add_option("-c", "--conf", help="config file, ZIP file or base URL")
-        self.add_option("-m", "--metabook", help="JSON encoded text file with article collection")
+        self.add_option("-c", "--conf",
+            help="config file, ZIP file or base URL",
+        )
+        self.add_option("-m", "--metabook",
+            help="JSON encoded text file with article collection",
+        )
         self.add_option('--collectionpage', help='Title of a collection page')
-        self.add_option("-x", "--noimages", action="store_true", help="exclude images")
+        self.add_option("-x", "--noimages",
+            action="store_true",
+            help="exclude images",
+        )
         self.add_option("-l", "--logfile", help="log to logfile")
-        self.add_option("--template-blacklist", help="Title of article containing blacklisted templates")
+        self.add_option("--template-blacklist",
+            help="Title of article containing blacklisted templates",
+        )
+        self.add_option("--login",
+            help='login with given USERNAME and PASSWORD',
+            metavar='USERNAME:PASSWORD',
+        )
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
@@ -28,6 +43,8 @@ class OptionParser(optparse.OptionParser):
         if self.options.metabook:
             self.metabook = metabook.MetaBook()
             self.metabook.readJsonFile(self.options.metabook)
+        if self.options.login is not None and ':' not in self.options.login:
+            self.error('Please specify username and password as USERNAME:PASSWORD.')
         if self.args:
             if self.metabook is None:
                 self.metabook = metabook.MetaBook()
@@ -39,9 +56,19 @@ class OptionParser(optparse.OptionParser):
         env = wiki.makewiki(self.options.conf, metabook=self.metabook)
         if self.options.noimages:
             env.images = None
-        if self.options.template_blacklist and hasattr(env.wiki, 'setTemplateBlacklist'):
-            # FIXME!
-            env.wiki.setTemplateBlacklist(self.options.template_blacklist)
+        if self.options.template_blacklist:
+            if hasattr(env.wiki, 'setTemplateBlacklist'):
+                env.wiki.setTemplateBlacklist(self.options.template_blacklist)
+            else:
+                log.warn('WikiDB does not support setting a template blacklist')
+        if self.options.login:
+            username, password = self.options.login.split(':', 1)
+            if hasattr(env.wiki, 'login'):
+                env.wiki.login(username, password)
+            else:
+                log.warn('WikiDB does not support logging in')
+            if env.images and hasattr(env.images, 'login'):
+                env.images.login(username, password)
         if self.options.collectionpage:
             self.metabook.loadCollectionPage(env.wiki.getRawArticle(self.options.collectionpage))
         return env

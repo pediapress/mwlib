@@ -13,9 +13,18 @@ from mwlib.log import Log
 log = Log('mwlib.utils')
 
 
-def wiki_mwapi(base_url=None, template_blacklist=None, **kwargs):
+def wiki_mwapi(
+    base_url=None,
+    template_blacklist=None,
+    username=None,
+    password=None,
+    **kwargs):
     from mwlib import mwapidb
-    return mwapidb.WikiDB(base_url, template_blacklist)
+    return mwapidb.WikiDB(base_url,
+        template_blacklist=template_blacklist,
+        username=username,
+        password=password,
+    )
 
 def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
@@ -54,9 +63,9 @@ def wiki_cdb(path=None, **kwargs):
     db=cdbwiki.WikiDB(path)
     return db
 
-def image_mwapi(base_url=None, **kwargs):
+def image_mwapi(base_url=None, username=None, password=None, **kwargs):
     from mwlib import mwapidb
-    return mwapidb.ImageDB(base_url)
+    return mwapidb.ImageDB(base_url, username=username, password=password)
 
 def image_download(url=None, localpath=None, knownlicenses=None, **kwargs):
     assert url, "must supply url in [images] section"

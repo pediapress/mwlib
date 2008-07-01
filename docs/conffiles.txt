@@ -41,6 +41,11 @@ Specific Options
     * [[Template:SkipMe]]
     * [[Template:MeToo]]
 
+``username=USERNAME``, ``password=PASSWORD``
+
+  Login with the given credentials.
+  
+
 ``type=zip``
 ============
 
