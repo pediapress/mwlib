@@ -148,10 +148,13 @@ def test_defintion_list():
     raw = u''';termA
 :descr1
 '''
-    r = parseString(title='t', raw=raw)
-    buildAdvancedTree(r)
-    dls = r.getChildNodesByClass(DefinitionList)
-    assert len(dls) == 1
-    assert dls[0].getChildNodesByClass(DefinitionTerm)
-    assert dls[0].getChildNodesByClass(DefinitionDescription)
+
+    for i in range(2):
+        r = parseString(title='t', raw=raw)
+        buildAdvancedTree(r)
+        dls = r.getChildNodesByClass(DefinitionList)
+        assert len(dls) == 1
+        assert dls[0].getChildNodesByClass(DefinitionTerm)
+        assert dls[0].getChildNodesByClass(DefinitionDescription)
+        raw = raw.replace('\n', '')
 
