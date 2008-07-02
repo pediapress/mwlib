@@ -165,6 +165,11 @@ class Paragraph(Node): pass
 class Section(Node): pass
 class Timeline(Node): pass
 class TagNode(Node): pass
+class UnknownTagNode(Node): 
+    """unknown tag. default mediawiki handling is to treat it as text. 
+    but it in most cases it might be a unknown tag extension
+
+    """
 class PreFormatted(TagNode): pass
 class URL(Node): pass
 class NamedURL(Node): pass
@@ -398,7 +403,8 @@ _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
             
 class Parser(object):
     def __init__(self, tokens, name=''):
-        import mwlib.extensiontags # will extend the supported parser tags 
+        from  mwlib.extensiontags import addExtensionTags # will extend the supported parser tags 
+        addExtensionTags()
         self.tokens = tokens
         self.pos = 0
         self.name = name
@@ -560,10 +566,10 @@ class Parser(object):
             
         return obj
     
-    def parseTag(self):
+    def parseTag(self, nodeclass=TagNode):
         token = self.token[0]
         
-        n = TagNode(token.t)
+        n = nodeclass(token.t)
         if token.values:
             n.values = token.values
         n.vlist = parseParams(self.token[1])
@@ -1096,9 +1102,7 @@ class Parser(object):
         try:
             m=getattr(self, 'parse'+tag.upper()+'Tag')
         except (AttributeError, UnicodeEncodeError):
-            t=Text(self.token[1])
-            self.next()
-            return t
+            return self.parseTag(nodeclass=UnknownTagNode)
         else:
             return m()
 
