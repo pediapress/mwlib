@@ -216,7 +216,7 @@ def buildzip():
         if podclient:
             podclient.post_zipfile(options.output)
         
-        if env.images:
+        if env.images and hasattr(env.images, 'clear'):
             env.images.clear()
         
         set_status('finished')
