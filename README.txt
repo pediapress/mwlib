@@ -45,7 +45,7 @@ in ``docs/commands.txt``.
 Configuration
 ======================================================================
 The format of configuration files is described in
-``docs/conffiles.txt``.
+``docs/configfiles.txt``.
 
 See ``example_conf.py`` for an example configuration.
 

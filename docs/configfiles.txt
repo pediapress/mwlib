@@ -30,7 +30,7 @@ Specific Options
 
 ``base_url=BASEURL``
 
-  The base URL of the MediaWiki. See the ``--conf`` option in
+  The base URL of the MediaWiki. See the ``--config`` option in
   ``docs/commands.txt``.
   
 ``template_blacklist=TEMPLATEBLACKLIST``
