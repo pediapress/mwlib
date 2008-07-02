@@ -14,20 +14,31 @@ def make_metabook(title=None, subtitle=None):
         'version': METABOOK_VERSION,
         'items': [],
     }
-    if title is not None:
+    if title:
         metabook['title'] = title
-    if subtitle is not None:
+    if subtitle:
         metabook['subtitle'] = subtitle
     return metabook
+
+def make_source(name=None, url=None):
+    source = {
+        'type': 'source',
+        'system': 'MediaWiki',
+    }
+    if name:
+        source['name'] = name
+    if url:
+        source['url'] = url
+    return source
 
 def make_article(title=None, displaytitle=None, content_type='text/x-wiki'):
     article = {
         'type': 'article',
         'content-type': content_type,
     }
-    if title is not None:
+    if title:
         article['title'] = title
-    if displaytitle is not None:
+    if displaytitle:
         article['displaytitle'] = displaytitle
     return article
 
@@ -36,7 +47,7 @@ def make_chapter(title=None):
         'type': 'chapter',
         'items': [],
     }
-    if title is not None:
+    if title:
         chapter['title'] = title
     return chapter
 

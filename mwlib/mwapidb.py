@@ -16,7 +16,7 @@ import urlparse
 
 import simplejson
 
-from mwlib import uparser, utils
+from mwlib import uparser, utils, metabook
 from mwlib.log import Log
 
 log = Log("mwapidb")
@@ -529,10 +529,10 @@ class WikiDB(object):
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
-            return {
-                'url': g['base'],
-                'name': '%s (%s)' % (g['sitename'], g['lang']),
-            }
+            return metabook.make_source(
+                url=g['base'],
+                name='%s (%s)' % (g['sitename'], g['lang']),
+            )
         except KeyError:
             return None
     

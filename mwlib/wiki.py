@@ -7,7 +7,7 @@ import os
 from ConfigParser import ConfigParser
 import StringIO
 
-from mwlib import utils
+from mwlib import utils, metabook
 from mwlib.log import Log
 
 log = Log('mwlib.utils')
@@ -136,10 +136,10 @@ url=
             return self.metabook.source
         if hasattr(self.wiki, 'getMetaData'):
             return self.wiki.getMetaData()
-        return {
-            'name': self.configparser.get('wiki', 'name'),
-            'url': self.configparser.get('wiki', 'url'),
-        }
+        return metabook.make_source(
+            name=self.configparser.get('wiki', 'name'),
+            url=self.configparser.get('wiki', 'url'),
+        )
     
     def get_licenses(self, icon_size=400):
         """Return list of licenses
