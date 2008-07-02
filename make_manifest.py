@@ -7,7 +7,9 @@ def main():
     files.append("README.html")
     files.append("docs/commands.html")
     files.append("docs/conffiles.html")
+    files.append("docs/metabook.html")
     files.append("docs/writers.html")
+    files.append("docs/zipfile.html")
     files.append("mwlib/_mwscan.cc")
     files.append("mwlib/_expander.cc")
     

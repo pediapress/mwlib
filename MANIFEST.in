@@ -7,9 +7,11 @@ include docs/commands.html
 include docs/commands.txt
 include docs/conffiles.html
 include docs/conffiles.txt
+include docs/metabook.html
 include docs/metabook.txt
 include docs/writers.html
 include docs/writers.txt
+include docs/zipfile.html
 include example_conf.txt
 include ez_setup.py
 include mwlib/EasyTimeline.pl
@@ -83,6 +85,7 @@ include tests/test_expander.py
 include tests/test_expr.py
 include tests/test_html.py
 include tests/test_imgmap.py
+include tests/test_metabook.py
 include tests/test_mwapidb.py
 include tests/test_mwscan.py
 include tests/test_netdb_imagedb.py
