@@ -42,7 +42,7 @@ class OptionParser(optparse.OptionParser):
                 self.error('Please specify --conf option. See --help for all options.')
             return self.options, self.args
         if self.options.metabook:
-            self.metabook = simplejson.loads(self.options.metabook)
+            self.metabook = simplejson.loads(open(self.options.metabook, 'rb').read())
         if self.options.login is not None and ':' not in self.options.login:
             self.error('Please specify username and password as USERNAME:PASSWORD.')
         if self.args:
