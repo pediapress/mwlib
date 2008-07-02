@@ -306,7 +306,9 @@ def render():
     
     if options.output is None:
         parser.error('Please specify an output file with --output.\n' + use_help)
-    
+    else:
+        options.output = os.path.abspath(options.output)
+        
     if options.writer is None:
         parser.error('Please specify a writer with --writer.\n' + use_help)    
     
@@ -322,7 +324,7 @@ def render():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        daemonize(pid_file=pid_file)
+        daemonize(pid_file=options.pid_file)
     
     last_status = {}
     def set_status(status=None, progress=None, article=None, content_type=None, file_extension=None):
