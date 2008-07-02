@@ -123,6 +123,7 @@ url=
         if name=='wiki':
             return self.wiki
         raise KeyError("Environment.__getitem__ only works for 'wiki' or 'images', not %r" % (name,))
+    
     def __setitem__(self, name, val):
         if name=='images':
             self.images = val
@@ -132,8 +133,8 @@ url=
             raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
     
     def get_source(self):
-        if hasattr(self.metabook, 'source'):
-            return self.metabook.source
+        if 'source' in self.metabook:
+            return self.metabook['source']
         if hasattr(self.wiki, 'getMetaData'):
             return self.wiki.getMetaData()
         return metabook.make_source(
@@ -188,7 +189,6 @@ url=
 def _makewiki(conf, metabook=None):
     res = Environment(metabook)
     
-
     url = None
     if conf.startswith(':'):
         url = wpwikis.get(conf[1:])
