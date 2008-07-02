@@ -109,8 +109,10 @@ def buildzip():
         parser.error('Argument for --imagesize must be an integer > 0.')
     
     import os
+    import simplejson
     import tempfile
     import zipfile
+    from mwlib import metabook
     
     if options.posturl:
         from mwlib.podclient import PODClient
@@ -171,7 +173,7 @@ def buildzip():
         z = recorddb.ZipfileCreator(zf, imagesize=options.imagesize)
         
         set_status('parsing')
-        articles = list(parser.metabook.getArticles())
+        articles = metabook.get_item_list(parser.metabook, filter_type='article')
         if articles:
             inc = 90./len(articles)
         else:
@@ -202,10 +204,10 @@ def buildzip():
                 imagedb=env.images,
             )
         
-        if not hasattr(parser.env.metabook, 'source'):
-            parser.env.metabook.source = parser.env.get_source()
+        if 'source' not in parser.metabook:
+            parser.metabook['source'] = parser.env.get_source()
         
-        z.addObject('metabook.json', parser.metabook.dumpJson())
+        z.addObject('metabook.json', simplejson.dumps(parser.metabook))
         
         z.writeContent()
         zf.close()

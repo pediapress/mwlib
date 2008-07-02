@@ -88,7 +88,7 @@ class ODFWriter(object):
         # add chapters FIXME
         for e in book.children:
             r = self.write(e, self.doc.text)
-        #licenseArticle = self.env.metabook.source.get('defaultarticlelicense','') # FIXME
+        #licenseArticle = self.env.metabook['source'].get('defaultarticlelicense','') # FIXME
         doc = self.getDoc()
         #doc.toXml("%s.odf.xml"%fn)
         doc.save(output, addsuffix=False)

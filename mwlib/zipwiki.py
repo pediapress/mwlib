@@ -10,7 +10,6 @@ import tempfile
 from zipfile import ZipFile
 import urlparse
 
-from mwlib.metabook import MetaBook
 from mwlib import uparser
 
 class Wiki(object):
@@ -23,8 +22,7 @@ class Wiki(object):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
-        self.metabook = MetaBook()
-        self.metabook.loadJson(self.zf.read("metabook.json"))
+        self.metabook = simplejson.loads(self.zf.read("metabook.json"))
         content = simplejson.loads(self.zf.read('content.json'))
         self.articles = content['articles']
         self.templates = content['templates']
@@ -85,6 +83,10 @@ class ImageDB(object):
         self.images = content['images']
         self._tmpdir = tmpdir
         self.diskpaths = {}
+    
+    def clear(self):
+        if self._tmpdir is not None:
+            shutil.rmtree(self._tmpdir)
     
     @property
     def tmpdir(self):

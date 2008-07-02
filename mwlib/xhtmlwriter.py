@@ -209,8 +209,8 @@ class MWXHTMLWriter(object):
         # add head + title
         h = ET.SubElement(self.root,"head")
         e = ET.SubElement(h, "title") 
-        if self.environment and self.environment.metabook.title:
-            e.text = self.environment.metabook.title
+        if self.environment and self.environment.metabook.get('title'):
+            e.text = self.environment.metabook['title']
         if self.css is not None:
             h.append(self.css)
 

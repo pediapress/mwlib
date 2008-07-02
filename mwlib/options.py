@@ -1,4 +1,5 @@
 import optparse
+import simplejson
 
 from mwlib.utils import start_logging
 from mwlib import wiki, metabook, log
@@ -41,14 +42,16 @@ class OptionParser(optparse.OptionParser):
                 self.error('Please specify --conf option. See --help for all options.')
             return self.options, self.args
         if self.options.metabook:
-            self.metabook = metabook.MetaBook()
-            self.metabook.readJsonFile(self.options.metabook)
+            self.metabook = simplejson.loads(self.options.metabook)
         if self.options.login is not None and ':' not in self.options.login:
             self.error('Please specify username and password as USERNAME:PASSWORD.')
         if self.args:
             if self.metabook is None:
-                self.metabook = metabook.MetaBook()
-            self.metabook.addArticles([unicode(x, 'utf-8') for x in self.args])
+                self.metabook = metabook.make_metabook()
+            for title in self.args:
+                self.metabook['items'].append(metabook.make_article(
+                    title=unicode(title, 'utf-8'),
+                ))
         self.env = self.makewiki()
         return self.options, self.args
     
@@ -70,6 +73,11 @@ class OptionParser(optparse.OptionParser):
             if env.images and hasattr(env.images, 'login'):
                 env.images.login(username, password)
         if self.options.collectionpage:
-            self.metabook.loadCollectionPage(env.wiki.getRawArticle(self.options.collectionpage))
+            wikitext = env.wiki.getRawArticle(self.options.collectionpage)
+            if wikitext is None:
+                raise RuntimeError('No such collection page: %r' % (
+                    self.options.collectionpage,
+                ))
+            self.metabook = metabook.parse_collection_page(wikitext)
         return env
     

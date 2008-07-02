@@ -11,4 +11,5 @@ trunk
 mwlib/*.cc
 README.html
 docs/*.html
+dist/*
 

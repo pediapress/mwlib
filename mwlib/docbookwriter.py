@@ -167,10 +167,10 @@ class DocBookWriter(object):
         e = ET.Element("book")
         if self.root is None:
             self.root = e
-        if self.environment and self.environment.metabook.title:
+        if self.environment and self.environment.metabook.get('title'):
             h = ET.SubElement(e,"bookinfo")
             t = ET.SubElement(h, "title")
-            t.text = self.environment.metabook.title
+            t.text = self.environment.metabook['title']
         return e
 
 
