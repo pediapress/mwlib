@@ -109,6 +109,8 @@ class scan_result(object):
 
 
 class _compat_scanner(object):
+    from mwlib.tagext import default_registry as tagextensions
+    
     class ignore: pass
     tok2compat = {
         token.t_text: "TEXT",
@@ -200,6 +202,23 @@ class _compat_scanner(object):
                             tt = self.tagtoken(g())
                             if tt.t=="timeline":
                                 res.append(("TIMELINE", g()))
+                                break
+                        res.append(("TEXT", g()))
+                        i+=1
+                elif tt.t in self.tagextensions:
+                    if closingOrSelfClosing:
+                        i+=1
+                        continue
+                    tagname = tt.t
+                    
+                    res.append((tt, s))
+                    i+=1
+                    while i<numtokens:
+                        type, start, tlen = tokens[i]
+                        if type==token.t_html_tag:
+                            tt = self.tagtoken(g())
+                            if tt.t==tagname:
+                                res.append((tt, g()))
                                 break
                         res.append(("TEXT", g()))
                         i+=1

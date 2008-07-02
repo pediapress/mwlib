@@ -404,6 +404,9 @@ class Parser(object):
         self.lastpos = 0
         self.count = 0
 
+        from mwlib import tagext
+        self.tagextensions = tagext.default_registry
+        
     @property
     def token(self):
         t=self.tokens[self.pos]
@@ -1092,6 +1095,13 @@ class Parser(object):
 
     def parseTagToken(self):
         tag = self.token[0].t
+        if tag in self.tagextensions:
+            n = self.parseTag()
+            txt = "".join(x.caption for x in n.find(Text))
+            
+            return self.tagextensions[tag](txt, {})
+            
+            
         try:
             m=getattr(self, 'parse'+tag.upper()+'Tag')
         except (AttributeError, UnicodeEncodeError):
