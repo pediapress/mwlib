@@ -135,7 +135,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         args = [
             mwzip_cmd,
             '--daemonize',
-            '--baseurl', "http://" +self.state.baseurl,
+            '--conf', "http://" +self.state.baseurl,
             '--posturl', posturl,
         ]
         

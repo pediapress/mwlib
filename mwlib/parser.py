@@ -398,6 +398,7 @@ _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
             
 class Parser(object):
     def __init__(self, tokens, name=''):
+        import mwlib.extensiontags # will extend the supported parser tags 
         self.tokens = tokens
         self.pos = 0
         self.name = name
