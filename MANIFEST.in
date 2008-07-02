@@ -5,8 +5,8 @@ include cgi-bin/mwlib.cgi
 include docs/Makefile
 include docs/commands.html
 include docs/commands.txt
-include docs/conffiles.txt
 include docs/configfiles.html
+include docs/configfiles.txt
 include docs/metabook.html
 include docs/metabook.txt
 include docs/writers.html
