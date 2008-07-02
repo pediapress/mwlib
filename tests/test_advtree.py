@@ -3,7 +3,10 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.advtree import PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex, Indented
+from mwlib.advtree import (
+    PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
+    Indented, DefinitionList, DefinitionTerm, DefinitionDescription
+)
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
@@ -125,7 +128,7 @@ some text
 
 
 def test_indentation():
-    raw = """
+    raw = u"""
 == test ==
 
 :One
@@ -133,11 +136,22 @@ def test_indentation():
 :::Three
 ::::Four
 
-""".decode("utf8")
+"""
     db = DummyDB()
     r = parseString(title="t", raw=raw, wikidb=db)
     buildAdvancedTree(r)
     for i,c in enumerate(r.getChildNodesByClass(Indented)):
         assert c.indentlevel == i + 1
     assert i == 3
+
+def test_defintion_list():
+    raw = u''';termA
+:descr1
+'''
+    r = parseString(title='t', raw=raw)
+    buildAdvancedTree(r)
+    dls = r.getChildNodesByClass(DefinitionList)
+    assert len(dls) == 1
+    assert dls[0].getChildNodesByClass(DefinitionTerm)
+    assert dls[0].getChildNodesByClass(DefinitionDescription)
 
