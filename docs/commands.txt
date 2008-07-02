@@ -14,7 +14,7 @@ one command.
 
   Show usage information and exit.
 
-``-c, --conf=CONF``
+``-c, --config=CONFIG``
 
   The value for this option describes the source of MediaWiki articles and
   images for the command and can be of one of the following types:
@@ -35,7 +35,7 @@ one command.
   
     This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
     file (see below), i.e. articles and images are fetched with the
-    `MediaWiki API`_. Specifying the URL directly as value for ``--conf``
+    `MediaWiki API`_. Specifying the URL directly as value for ``--config``
     is usually the quicker way to achieve exactly the same result.
   
   * A shortcut for a base URL. Currently there are the following shortcuts:
@@ -45,7 +45,7 @@ one command.
 
   * A filename of a ZIP file generated with the `the mw-zip Command`_.
   
-  * A filename of a configuration file (see ``docs/conffiles.txt``).
+  * A filename of a configuration file (see ``docs/configfiles.txt``).
 
 ``-m, --metabook=METABOOK``
 
@@ -92,7 +92,7 @@ one command.
 
   For MediaWikis that restrict the viewing of pages, login with given USERNAME
   and PASSWORD (currently this is only supported for mwapidb, i.e. when the
-  --conf argument is a base URL or shortcut, or when ``type=mwapi`` in the
+  --config argument is a base URL or shortcut, or when ``type=mwapi`` in the
   configuration file).
 
 

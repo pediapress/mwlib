@@ -39,7 +39,7 @@ localpath = ~/images
 
 def show():
     parser = optparse.OptionParser()
-    parser.add_option("-c", "--conf", help="config file")
+    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
     parser.add_option("-e", "--expand", action="store_true", help="expand templates")
     parser.add_option("-t", "--template", action="store_true", help="show template")
     parser.add_option("-f", help='read input from file. implies -e')
@@ -51,9 +51,9 @@ def show():
         
     articles = [unicode(x, 'utf-8') for x in args]
 
-    conf = options.conf
+    conf = options.config
     if not conf:
-        parser.error("missing --conf argument")
+        parser.error("missing --config argument")
 
     from mwlib import wiki, expander
     
@@ -228,7 +228,7 @@ def buildzip():
 def render():
     from mwlib.options import OptionParser
     
-    parser = OptionParser(conf_optional=True)
+    parser = OptionParser(config_optional=True)
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-w", "--writer", help='use writer backend WRITER')
     parser.add_option("-W", "--writer-options",
@@ -371,23 +371,23 @@ def render():
     
 
 def parse():
-    parser = optparse.OptionParser(usage="%prog [-a|--all] --conf CONF [ARTICLE1 ...]")
+    parser = optparse.OptionParser(usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]")
     parser.add_option("-a", "--all", action="store_true", help="parse all articles")
     parser.add_option("--tb", action="store_true", help="show traceback on error")
 
-    parser.add_option("-c", "--conf", help="config file")
+    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
 
     options, args = parser.parse_args()
                                    
     if not args and not options.all:
         parser.error("missing option.")
         
-    if not options.conf:
-        parser.error("missing --conf argument")
+    if not options.config:
+        parser.error("missing --config argument")
 
     articles = [unicode(x, 'utf-8') for x in args]
 
-    conf = options.conf
+    conf = options.config
     
     import traceback
     from mwlib import wiki, uparser
@@ -641,15 +641,15 @@ def watch():
     ).run_forever()
 
 def testserve():
-    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
-    parser.add_option("-c", "--conf", help="config file")
+    parser = optparse.OptionParser(usage="%prog --config CONFIG ARTICLE [...]")
+    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
 
     options, args = parser.parse_args()
     
 
-    conf = options.conf
-    if not options.conf:
-        parser.error("missing --conf argument")
+    conf = options.config
+    if not conf:
+        parser.error("missing --config argument")
     
     from mwlib import wiki, web
     
@@ -670,8 +670,8 @@ def testserve():
 
     
 def html():
-    parser = optparse.OptionParser(usage="%prog --conf CONF ARTICLE [...]")
-    parser.add_option("-c", "--conf", help="config file")
+    parser = optparse.OptionParser(usage="%prog --config CONFIG ARTICLE [...]")
+    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
 
     options, args = parser.parse_args()
     
@@ -680,9 +680,9 @@ def html():
         
     articles = [unicode(x, 'utf-8') for x in args]
 
-    conf = options.conf
-    if not options.conf:
-        parser.error("missing --conf argument")
+    conf = options.config
+    if not conf:
+        parser.error("missing --config argument")
     
     import StringIO
     import tempfile

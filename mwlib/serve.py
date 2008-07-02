@@ -131,7 +131,7 @@ class Application(wsgi.Application):
             '--error-file', self.get_path(collection_id, self.error_filename),
             '--status-file', self.get_path(collection_id, self.status_filename),
             '--metabook', metabook_path,
-            '--conf', base_url,
+            '--config', base_url,
             '--writer', writer,
             '--output', self.get_path(collection_id, self.output_filename),
         ]
@@ -213,7 +213,7 @@ class Application(wsgi.Application):
             self.mwzip_cmd,
             '--logfile', self.mwzip_logfile,
             '--metabook', metabook_path,
-            '--conf', base_url,
+            '--config', base_url,
             '--posturl', post_url,
         ]
         if template_blacklist:

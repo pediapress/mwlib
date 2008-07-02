@@ -7,14 +7,14 @@ from mwlib import wiki, metabook, log
 log = log.Log('mwlib.options')
 
 class OptionParser(optparse.OptionParser):
-    def __init__(self, usage=None, conf_optional=False):
-        self.conf_optional = conf_optional
+    def __init__(self, usage=None, config_optional=False):
+        self.config_optional = config_optional
         if usage is None:
             usage = '%prog [OPTIONS] [ARTICLETITLE...]'
         optparse.OptionParser.__init__(self, usage=usage)
         self.metabook = None
-        self.add_option("-c", "--conf",
-            help="config file, ZIP file or base URL",
+        self.add_option("-c", "--config",
+            help="configuration file, ZIP file or base URL",
         )
         self.add_option("-m", "--metabook",
             help="JSON encoded text file with article collection",
@@ -37,9 +37,9 @@ class OptionParser(optparse.OptionParser):
         self.options, self.args = optparse.OptionParser.parse_args(self)
         if self.options.logfile:
             start_logging(self.options.logfile)
-        if self.options.conf is None:
-            if not self.conf_optional:
-                self.error('Please specify --conf option. See --help for all options.')
+        if self.options.config is None:
+            if not self.config_optional:
+                self.error('Please specify --config option. See --help for all options.')
             return self.options, self.args
         if self.options.metabook:
             self.metabook = simplejson.loads(open(self.options.metabook, 'rb').read())
@@ -56,7 +56,7 @@ class OptionParser(optparse.OptionParser):
         return self.options, self.args
     
     def makewiki(self):
-        env = wiki.makewiki(self.options.conf, metabook=self.metabook)
+        env = wiki.makewiki(self.options.config, metabook=self.metabook)
         if self.options.noimages:
             env.images = None
         if self.options.template_blacklist:

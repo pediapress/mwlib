@@ -134,7 +134,7 @@ writer can then be passed with the ``--writer`` option to produce output
 with that writer. For example this will use the ODF writer (named "odf")
 to produce a document in the OpenOffice Text format::
 
-    $ mw-render --conf :en --writer odf --output test.odt Test
+    $ mw-render --config :en --writer odf --output test.odt Test
 
 Additional options for the writer can be specified with the
 ``--writer-options`` argument, whose value is a ";" separated list of
