@@ -610,3 +610,59 @@ def test_unknown_tag():
     assert u'<nosuchtag>' in txt, 'opening tag missing in asText()'
     assert u'</nosuchtag>' in txt, 'closing tag missing in asText()'
     
+# Test varieties of link
+
+def test_plain_link():
+    r=parse("[[bla]]").find(parser.ArticleLink)[0]
+    assert r.target=='bla'
+    assert r.children[0].caption == 'bla'
+
+def test_piped_link():
+    r=parse("[[bla|blubb]]").find(parser.ArticleLink)[0]
+    assert r.target=='bla'
+    assert r.children[0].caption == 'blubb'
+
+def test_category_link():
+    r=parse("[[category:bla]]").find(parser.CategoryLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 14
+
+def test_category_colon_link():
+    r=parse("[[:category:bla]]").find(parser.SpecialLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 14
+    assert not isinstance(r, parser.CategoryLink)
+
+def test_image_colon_link():
+    r=parse("[[:image:bla.jpg]]").find(parser.SpecialLink)[0]
+    assert r.target=='bla.jpg'
+    assert r.namespace == 6
+    assert not isinstance(r, parser.ImageLink)
+
+def test_interwiki_link():
+    r=parse("[[wict:bla]]").find(parser.SpecialLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 'wiktionary'
+
+def test_language_link():
+    r=parse("[[es:bla]]").find(parser.LangLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 'es'
+
+def test_long_language_link():
+    r=parse("[[csb:bla]]").find(parser.LangLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 'csb'
+
+def test_normalize():
+    r=parse("[[MediaWiki:__bla_ _]]").find(parser.LangLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 8
+
+def test_normalize_with_caps():
+    parser.Link.capitalizeTarget = True
+    r=parse("[[MediaWiki:__bla_ _ ]]").find(parser.LangLink)[0]
+    parser.Link.capitalizeTarget = False
+    assert r.target=='Bla'
+    assert r.namespace == 8
+    assert r.children[0].caption == 'MediaWiki:__bla_ _'

@@ -193,82 +193,168 @@ class Caption(_VListNode):
 
 class Link(Node):
     target = None
-    specialPrefixes = set(["wikipedia", "wiktionary", "wikibooks", "wikisource",
-                           "wikiquote", "meta", "talk",
-                           "commons", "wikinews", "template", "wikitravel", "help", "vorlage"])
-    from mwlib.lang import languages
+    from mwlib.namespace import NS_MAIN, NS_CATEGORY, NS_IMAGE
+
     colon = False
 
     def hasContent(self):
         if self.target:
             return True
         return False
+
+    @classmethod
+    def _buildSpecializeMap(cls, namespaces, interwikis, langs):
+        """
+        Returns a dict mapping namespace prefixes to a tuple of form
+        (link_class, namespace_value).
+        """
+        res = {}
+        for name, num in namespaces.iteritems():
+            name = name.lower()
+            if num == cls.NS_CATEGORY:
+                res[name] = (CategoryLink, num)
+            elif num == cls.NS_IMAGE:
+                res[name] = (ImageLink, num)
+            else:
+                res[name] = (NamespaceLink, num)
+
+        for name, target in interwikis.iteritems():
+            res[name.lower()] = (InterwikiLink, target)
+
+        for lang in langs:
+            res[lang.lower()] = (LangLink, lang)
+
+        return res
         
+    @classmethod
+    def _setSpecializeMap(cls, nsMap='default'):
+        from mwlib.namespace import namespace_maps, interwiki_map
+        from mwlib.lang import languages
+
+        cls._specializeMap = cls._buildSpecializeMap(
+            namespace_maps[nsMap], interwiki_map, languages)
+
     def _specialize(self):
+        """
+        Handles different forms of link, e.g.:
+            - [[Foo]]
+            - [[Foo|Bar]]
+            - [[Category:Foo]]
+            - [[:Category:Foo]]
+        """
+
         if not self.children:
             return
 
         if type(self.children[0]) != Text:
             return
             
-        self.target = target = self.children[0].caption.strip()
+        # Handle [[Foo|Bar]]
+        full_target = self.children[0].caption.strip()
         del self.children[0]
         if self.children and self.children[0] == Control("|"):
             del self.children[0]
-        
-        pic = self.target
-        if pic.startswith(':'):
+
+        # Mark [[:Category:Foo]]. See below
+        if full_target.startswith(':'):
             self.colon = True
-            
-        
-        
-        # pic == "Bild:Wappen_von_Budenheim.png"
-        
-        pic = pic.strip(': ')
-        if ':' not in pic:
-            return
-            
-        linktype, pic = pic.split(':', 1)
-        linktype = linktype.lower().strip(" :")
-        
-        if linktype in ("category", "kategorie"):
-            self.__class__ = CategoryLink
-            self.target = pic.strip()
-            return
-
-        if linktype in self.specialPrefixes:
-            self.__class__ = SpecialLink
-            self.target = pic.strip()
-            self.ns = linktype            
-
-            return
-
-        if linktype in self.languages:
-            self.__class__ = LangLink
-            return
-            
-        
-        if linktype not in ("bild", "image", "imagen"):
-            # assume a LangLink
-            log.info("Unknown linktype:", repr(linktype))
-            if len(linktype)==2:
-                self.__class__ = LangLink
-            return
-        
-        
-        # pic == "Wappen_von_Budenheim.png"
+            full_target = full_target[1:]
+        self.full_target = full_target
         
         try:
-            prefix, suffix = pic.rsplit('.', 1)
+            ns, title = full_target.split(':', 1)
         except ValueError:
+            self.namespace = self.NS_MAIN
+            self.target = full_target
+            self.__class__ = ArticleLink
             return
 
-        if suffix.lower() in ['jpg', 'jpeg', 'gif', 'png', 'svg']:
-            self.__class__ = ImageLink
-            self.target = pic.strip()
+        (self.__class__, self.namespace) = (
+                self._specializeMap.get(ns.lower(), (ArticleLink, self.NS_MAIN)))
+
+        if len(ns) == 2:
+            # Assume this is an unlisted language
+            self.__class__ = LangLink
+            self.namespace = ns.lower()
+
+        if self.colon and self.namespace != self.NS_MAIN:
+            # [[:Category:Foo]] should not be a category link
+            self.__class__ = NamespaceLink
+
+        if self.namespace == self.NS_MAIN:
+            # e.g. [[Blah: Foo]] is an ordinary article with a colon
+            self.target = full_target
+        else:
+            self.target = title
+
+        if self.__class__ == ImageLink:
+            # Handle images. First ensure they are syntactically sound.
+
+            try:
+                prefix, suffix = title.rsplit('.', 1)
+                if suffix.lower() in ['jpg', 'jpeg', 'gif', 'png', 'svg']:
+                    self._readArgs() # calls Image._readArgs()
+                    return
+            except ValueError:
+                pass
+            # We can't handle this as an image, so default:
+            self.__class__ = NamespaceLink 
+    
+
+    capitalizeTarget = False # Wiki-dependent setting, e.g. Wikipedia => True
+
+    _SPACE_RE = re.compile('[_\s]+')
+    def _normalizeTarget(self):
+        """
+        Normalizes the format of the target with regards to whitespace and
+        capitalization (depending on capitalizeTarget setting).
+        """
+
+        if not self.target:
+            return
+
+        # really we should have a urllib.unquote() first, but in practice this
+        # format may be rare enough to ignore
+
+        # [[__init__]] -> [[init]]
+        self.target = self._SPACE_RE.sub(' ', self.target).strip()
+        if self.capitalizeTarget:
+            self.target = self.target[:1].upper() + self.target[1:]
 
 
+# Link forms:
 
+class ArticleLink(Link):
+    pass
+
+class SpecialLink(Link):
+    pass
+
+class NamespaceLink(SpecialLink):
+    pass
+
+class InterwikiLink(SpecialLink):
+    pass
+
+# Non-links with same syntax:
+
+class LangLink(Link):
+    pass
+
+class CategoryLink(Link):
+    pass
+
+class ImageLink(Link):
+    target = None
+    width = None
+    height = None
+    align = ''
+    thumb = False
+    
+    def isInline(self):
+        return not bool(self.align or self.thumb)
+
+    def _readArgs(self):
         idx = 0
         last = []
         
@@ -328,25 +414,8 @@ class Link(Node):
         
         if not self.children:
             self.children = last
-            
-class ImageLink(Link):
-    target = None
-    width = None
-    height = None
-    align = ''
-    thumb = False
-    
-    def isInline(self):
-        return not bool(self.align or self.thumb)
-    
-class LangLink(Link):
-    pass
 
-class CategoryLink(Link):
-    pass
-
-class SpecialLink(Link):
-    pass
+Link._setSpecializeMap('default') # initialise the Link class
 
             
 class Text(Node):
@@ -548,7 +617,7 @@ class Parser(object):
 
         if not obj.children and obj.target:
             # [[a]] -> [[a|a]]
-            obj.append(Text(obj.target))
+            obj.append(Text(obj.full_target))
 
         if isinstance(obj, ImageLink):
             return obj
@@ -559,6 +628,8 @@ class Parser(object):
                 # [[a|a]]b -> [[a|ab]]
                 obj.append(Text(m.group(0)), True)
                 self.tokens[self.pos] = ('TEXT', self.token[1][m.end():])
+
+        obj._normalizeTarget()
             
         return obj
     
