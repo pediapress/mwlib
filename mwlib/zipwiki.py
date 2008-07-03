@@ -36,6 +36,9 @@ class Wiki(object):
             pass
         return None
     
+    def getSource(self):
+        return self.metabook.get('source')
+    
     def getRawArticle(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
         if article:
