@@ -499,7 +499,7 @@ class WikiDB(object):
         
         titles = ['Template:%s' % name]
         if self.print_template:
-            titles.append(self.print_template % name)
+            titles.insert(0,self.print_template % name)
         for title in titles:
             log.info("Trying template %r" % (title,))
             c = self.getRawArticle(title)
