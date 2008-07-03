@@ -135,8 +135,8 @@ url=
     def get_source(self):
         if 'source' in self.metabook:
             return self.metabook['source']
-        if hasattr(self.wiki, 'getMetaData'):
-            return self.wiki.getMetaData()
+        if hasattr(self.wiki, 'getSource'):
+            return self.wiki.getSource()
         return metabook.make_source(
             name=self.configparser.get('wiki', 'name'),
             url=self.configparser.get('wiki', 'url'),
