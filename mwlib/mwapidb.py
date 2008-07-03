@@ -416,6 +416,7 @@ class WikiDB(object):
         self.template_blacklist = []
         if template_blacklist is not None:
             self.setTemplateBlacklist(template_blacklist)
+        self.source = None
     
     def setTemplateBlacklist(self, template_blacklist):
         raw = self.getRawArticle(template_blacklist)
@@ -525,14 +526,18 @@ class WikiDB(object):
         except KeyError:
             return None
     
-    def getMetaData(self):
+    def getSource(self):
+        if self.source is not None:
+            return self.source
         result = self.api_helper.query(meta='siteinfo')
         try:
             g = result['general']
-            return metabook.make_source(
+            self.source = metabook.make_source(
                 url=g['base'],
                 name='%s (%s)' % (g['sitename'], g['lang']),
+                language=g['lang'],
             )
+            return self.source
         except KeyError:
             return None
     

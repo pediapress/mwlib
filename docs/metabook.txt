@@ -74,6 +74,10 @@ name (string):
 
     Unique name of source, e.g. "Wikipedia (en)"
 
+language (string)
+
+    2-character ISO code of language, e.g. "en"
+
 
 License
 -------

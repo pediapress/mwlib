@@ -20,7 +20,7 @@ def make_metabook(title=None, subtitle=None):
         metabook['subtitle'] = subtitle
     return metabook
 
-def make_source(name=None, url=None):
+def make_source(name=None, url=None, language=None):
     source = {
         'type': 'source',
         'system': 'MediaWiki',
@@ -29,6 +29,8 @@ def make_source(name=None, url=None):
         source['name'] = name
     if url:
         source['url'] = url
+    if language:
+        source['language'] = language
     return source
 
 def make_article(title=None, displaytitle=None, content_type='text/x-wiki'):

@@ -48,7 +48,7 @@ class Cdb(object):
     def close(self):
         self.map.close()
 
-    def __iter__(self, fn=None):
+    def __iter__(self):
         len = 2048
         while len < self.eod:
             klen, vlen = struct.unpack("<LL", self.map[len:len+8])
@@ -57,37 +57,25 @@ class Cdb(object):
             len += klen
             val = self.map[len:len+vlen]
             len += vlen
-            if fn:
-                yield fn(key, val)
-            else:
-                yield (key, val)
+            yield (key, val)
 
     def iteritems(self):
         return self.__iter__()
 
     def iterkeys(self):
-        return self.__iter__(lambda k,v: k)
+        return (k for k, v in self)
 
     def itervalues(self):
-        return self.__iter__(lambda k,v: v)
+        return (v for k, v in self)
 
     def items(self):
-        ret = []
-        for i in self.iteritems():
-            ret.append(i)
-        return ret
+        return list(self.iteritems())
 
     def keys(self):
-        ret = []
-        for i in self.iterkeys():
-            ret.append(i)
-        return ret
+        return list(self.iterkeys())
 
     def values(self):
-        ret = []
-        for i in self.itervalues():
-            ret.append(i)
-        return ret
+        return list(self.itervalues())
 
     def findstart(self):
         self.loop = 0

@@ -8,206 +8,129 @@ import os
 import zlib
 import re
 
-from mwlib import cdb
-
-try:
-    from xml.etree import cElementTree
-except ImportError:
-    import cElementTree
-
-ns = '{http://www.mediawiki.org/xml/export-0.3/}'
-
-wikiindex = "wikiidx"
-wikidata = "wikidata.bin"
-
-
+from mwlib import cdb, dumpparser
 
 def normname(name):
     name = name.strip().replace("_", " ")
     name = name[:1].upper()+name[1:]
     return name
 
-class Tags:
-    page = ns + 'page'
+class ZCdbWriter(cdb.CdbMake):
+    def __init__(self, indexpath, datapath=None):
+        if not datapath:
+            datapath = indexpath + 'data.bin'
+            indexpath = indexpath + 'idx.cdb'
 
-    # <title> inside <page>
-    title = ns + 'title'
+        cdb.CdbMake.__init__(self, open(indexpath, 'wb'))
+        self.data = open(datapath, 'wb')
 
-    # <revision> inside <page>
-    revision = ns + 'revision'
+    def add(self, key, val):
+        key = key.encode("utf-8")
+        val = zlib.compress(val.encode('utf-8')) # NOTE: encode wasn't in original
+        pos = self.data.tell()
+        self.data.write(val)
+        cdb.CdbMake.add(self, key, "%s %s" % (pos, len(val)))
 
-    # <id> inside <revision>
-    revid = ns + 'id'
-
-    # <contributor><username> inside <revision>
-    username = ns + 'contributor/' + ns + 'username'
-
-    # <text> inside <revision>
-    text = ns + 'text'
-
-    # <timestamp> inside <revision>
-    timestamp = ns + 'timestamp'
-
-    # <revision><text> inside <page>
-    revision_text = ns + 'revision/' + ns + 'text'
-
-    siteinfo = ns + "siteinfo"
-
-class DumpParser(object):
-    category_ns = set(['category', 'kategorie'])
-    image_ns = set(['image', 'bild'])
-    template_ns = set(['template', 'vorlage'])
-    wikipedia_ns = set(['wikipedia'])
-
-    tags = Tags()
+    def finish(self):
+        cdb.CdbMake.finish(self)
+        self.data.close()
 
 
-    def __init__(self, xmlfilename):
-        self.xmlfilename = xmlfilename
+class ZCdbReader(cdb.Cdb):
+    def __init__(self, indexpath, datapath=None):
+        if not datapath:
+            datapath = indexpath + 'data.bin'
+            indexpath = indexpath + 'idx.cdb'
 
-    def _write(self, msg):
-        sys.stdout.write(msg)
-        sys.stdout.flush()
+        cdb.Cdb.__init__(self, open(indexpath, 'rb'))
+        self.datapath = datapath
 
-    def openInputStream(self):
-        if self.xmlfilename.lower().endswith(".bz2"):
-            f = os.popen("bunzip2 -c %s" % self.xmlfilename, "r")
-        elif self.xmlfilename.lower().endswith(".7z"):
-            f = os.popen("7z -so x %s" % self.xmlfilename, "r")
-        else:
-            f = open(self.xmlfilename, "r")        
+    def __getitem__(self, key):
+        key = key.encode("utf-8")
+        data = cdb.Cdb.__getitem__(self, key) # may raise KeyError 
+        return self._readz(data)
 
-        return f
-
-    def __call__(self):
-        f = self.openInputStream()    
+    def _readz(self, data):
+        pos, len = map(int, data.split())
         
-        count = 0
-        for event, elem in cElementTree.iterparse(f):
-            if elem.tag != self.tags.page:
-                continue
-            self.handlePageElement(elem)
-            elem.clear()
-            count += 1
-            
-            if count % 5000 == 0:
-                self._write(" %s\n" % count)            
-            elif count % 100 == 0:
-                self._write(".")
+        f=open(self.datapath, "rb")
+        f.seek(pos)
+        d=f.read(len)
+        f.close()
+        return zlib.decompress(d).decode('utf-8')
 
-    
-    def handlePageElement(self, page):
-        title = page.find(self.tags.title).text
-        revisions = page.findall(self.tags.revision)
-        if not revisions:
-            return
-        revision = revisions[-1]
-        
-        texttag = revision.find(self.tags.text)
-        timestamptag = revision.find(self.tags.timestamp)
-        revision.clear()
-        
-        if texttag is not None:
-            text = texttag.text
-            texttag.clear()
+    def iterkeys(self):
+        return (k.decode('utf-8') for k in cdb.Cdb.iterkeys(self))
+
+    def iteritems(self):
+        return ((k.decode('utf-8'), self._readz(v))
+            for k,v in cdb.Cdb.iteritems(self))
+
+    def itervalues(self):
+        return (self._readz(v) for v in cdb.Cdb.itervalues(self))
+
+
+class BuildWiki():
+    def __init__(self, dumpfile, outputdir, prefix='wiki'):
+        if type(dumpfile) in (type(''), type(u'')):
+            self.dumpParser = dumpparser.DumpParser(dumpfile)
         else:
-            text = None
-            
-        if timestamptag is not None:
-            timestamp = timestamptag.text
-            timestamptag.clear()
-        else:
-            timestamp = None
-        
-        if not text:
-            return
-
-        if isinstance(title, str):
-            title = unicode(title)
-        if isinstance(text, str):
-            text = unicode(text)
-
-            
-        if ':' in title:
-            ns, rest = title.split(':', 1)
-            ns = ns.lower()
-            if ns not in self.template_ns:
-                return
-            self.handleTemplate(rest, text, timestamp)
-        else:
-            self.handleArticle(title, text, timestamp)
-
-    def handleArticle(self, title, text, timestamp):
-        print "ART:", repr(title), len(text), timestamp
-
-    def handleTemplate(self, title, text, timestamp):
-        print "TEMPL:", repr(title), len(text), timestamp
-
-class BuildWiki(DumpParser):
-    def __init__(self, xmlfilename, outputdir):
-        DumpParser.__init__(self, xmlfilename)
+            self.dumpParser = dumpfile
+        self.output_path = os.path.join(outputdir, prefix)
         self.outputdir = outputdir
         
     def __call__(self):
         if not os.path.exists(self.outputdir):
             os.makedirs(self.outputdir)
         
-        n = os.path.join(self.outputdir, wikiindex)
-        out = open(os.path.join(self.outputdir, wikidata), "wb")
-        self.out = out
-        f = open(n+'.cdb', 'wb')
-        c = cdb.CdbMake(f)
-        self.cdb = c
+        self.writer = ZCdbWriter(self.output_path)
 
-        DumpParser.__call__(self)
-        c.finish()
-        f.close()
+        count = 0
+        for page in self.dumpParser:
+            if page.namespace == dumpparser.NS_MAIN:
+                self.handleArticle(page.title, page.text, page.timestamp)
+            elif page.namespace == dumpparser.NS_TEMPLATE:
+                self.handleTemplate(page.title, page.text, page.timestamp)
+            else:
+                self.handleOther(page.title, page.text, page.timestamp)
 
+            count += 1
+            if count % 5000 == 0:
+                self._write(" %s\n" % count)
+            elif count % 100 == 0:
+                self._write(".")
+            
+        self.writer.finish()
 
-    def _writeobj(self, key, val):
-        key = key.encode("utf-8")
-        val = zlib.compress(val)
-        pos = self.out.tell()
-        self.out.write(val)
-        self.cdb.add(key, "%s %s" % (pos, len(val)))
+    def _write(self, msg):
+        sys.stdout.write(msg)
+        sys.stdout.flush()
 
     def handleArticle(self, title, text, timestamp):
-        self._writeobj(u":"+title, text.encode("utf-8"))
+        self.writer.add(u":"+title, text)
 
     def handleTemplate(self, title, text, timestamp):
-        self._writeobj(u"T:"+title, text.encode("utf-8"))
+        self.writer.add(u"T:"+title, text)
+
+    def handleOther(self, title, text, timestamp):
+        self.writer.add(title, text)
     
 
 
 class WikiDB(object):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
 
-    def __init__(self, dir):
+    def __init__(self, dir, prefix='wiki'):
         self.dir = dir
-        self.obj2pos_path = os.path.join(self.dir, wikidata)
-        self.cdb = cdb.Cdb(open(os.path.join(self.dir, wikiindex+'.cdb'), 'rb'))
-
-    def _readobj(self, key):
-        key = key.encode("utf-8")
-
-        try:
-            data = self.cdb[key]  
-        except KeyError:
-            return None
-
-        pos, len = map(int, data.split())
-        
-        f=open(self.obj2pos_path, "rb")
-        f.seek(pos)
-        d=f.read(len)
-        f.close()
-        return zlib.decompress(d)
+        self.reader = ZCdbReader(os.path.join(self.dir, prefix))
 
     def getRawArticle(self, title, raw=None, revision=None):
         title = normname(title)
-        res = self._readobj(":"+title)
-        if res is None:
-            return  None
+        print repr(title)
+        try:
+            res = self.reader[":"+title]
+        except KeyError:
+            return None
 
         res = unicode(res, 'utf-8')
         mo = self.redirect_rex.search(res)
@@ -224,9 +147,10 @@ class WikiDB(object):
             title = title.split(':', 1)[1]
 
         title = normname(title)
-        res = unicode(self._readobj(u"T:"+title) or "", 'utf-8')
-        if not res:
-            return res
+        try:
+            res = self.reader["T:"+title]
+        except KeyError:
+            return ''
 
         mo = self.redirect_rex.search(res)
         if mo:
@@ -237,7 +161,12 @@ class WikiDB(object):
 
 
     def articles(self):
-        for k, v in self.cdb:
-            if k[0]==':':
-                k = unicode(k[1:], "utf-8")
-                yield k
+        return (k[1:]
+                for k in self.reader.iterkeys()
+                if k[0] == ':')
+
+    def article_texts(self):
+        return ((k[1:], v)
+                for k in self.reader.iteritems()
+                if k[0] == ':')
+        
