@@ -9,6 +9,8 @@ import re
 
 from mwlib.scanner import tokenize, TagToken, EndTagToken
 from mwlib.log import Log
+from mwlib.namespace import namespace_maps, interwiki_map
+from mwlib.lang import languages
 
 log = Log("parser")
 
@@ -228,9 +230,6 @@ class Link(Node):
         
     @classmethod
     def _setSpecializeMap(cls, nsMap='default'):
-        from mwlib.namespace import namespace_maps, interwiki_map
-        from mwlib.lang import languages
-
         cls._specializeMap = cls._buildSpecializeMap(
             namespace_maps[nsMap], interwiki_map, languages)
 
@@ -434,10 +433,10 @@ class Text(Node):
 class Control(Text):
     pass
 
-def _parseAtomFromString(s):
+def _parseAtomFromString(s, lang=None):
     from mwlib import scanner
     tokens = scanner.tokenize(s)
-    p=Parser(tokens)
+    p=Parser(tokens, lang=lang)
     try:
         return p.parseAtom()
     except Exception, err:
@@ -446,10 +445,10 @@ def _parseAtomFromString(s):
 
                   
     
-def parse_fields_in_imagemap(imap):
+def parse_fields_in_imagemap(imap, lang=None):
     
     if imap.image:
-        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]')
+        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]', lang=lang)
         if not isinstance(imap.imagelink, ImageLink):
             imap.imagelink = None
 
@@ -466,13 +465,22 @@ def append_br_tag(node):
 _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
             
 class Parser(object):
-    def __init__(self, tokens, name=''):
+    def __init__(self, tokens, name='', lang=None):
         self.tokens = tokens
+        self.lang = lang
         self.pos = 0
         self.name = name
         self.lastpos = 0
         self.count = 0
-
+        
+        if lang:
+            nsMap = '%s+en_mw' % lang
+            if nsMap not in namespace_maps:
+                nsMap = 'default'
+        else:
+            nsMap = 'default'
+        Link._setSpecializeMap(nsMap)
+        
         from mwlib import tagext
         self.tagextensions = tagext.default_registry
         
@@ -739,7 +747,7 @@ class Parser(object):
                 continue
 
             # either image link or text inside
-            n=_parseAtomFromString(u'[['+x+']]')
+            n=_parseAtomFromString(u'[['+x+']]', lang=self.lang)
 
             if isinstance(n, ImageLink):
                 children.append(n)
@@ -755,7 +763,7 @@ class Parser(object):
         txt = "".join(x.caption for x in node.find(Text))
         from mwlib import imgmap
         node.imagemap = imgmap.ImageMapFromString(txt)
-        parse_fields_in_imagemap(node.imagemap)
+        parse_fields_in_imagemap(node.imagemap, lang=self.lang)
 
         #print node.imagemap
         return node
