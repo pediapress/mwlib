@@ -97,7 +97,7 @@ class IDLExtension(TagExtension):
     # http://wiki.services.openoffice.org/wiki/Special:Version
     name = "idl"
     def __call__(self, source, attributes):
-        return self.parse('<source lang="idl">%s</source>' % source)
+        return self.parse('<source lang="idl">%s</source>' % source)        
 register(IDLExtension)
 
 class RDFExtension(TagExtension):
