@@ -32,6 +32,8 @@ def build_book(env, status_callback=None, progress_range=None):
                 revision=item.get('revision'),
             )
             if a is not None:
+                if "displaytitle" in item:
+                    a.caption = item['displaytitle']
                 book.children.append(a)
             else:
                 log.warn('No such article: %r' % item['title'])
