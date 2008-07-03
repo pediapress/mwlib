@@ -79,5 +79,6 @@ class OptionParser(optparse.OptionParser):
                     self.options.collectionpage,
                 ))
             self.metabook = metabook.parse_collection_page(wikitext)
+            env.metabook = self.metabook
         return env
     
