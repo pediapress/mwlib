@@ -486,6 +486,7 @@ def test_source_tag():
 
     r=parse(s).find(parser.TagNode)[0]
     print r
+    assert r.vlist["lang"] == "c"
     assert r.children==[parser.Text(source)]
 
 def test_self_closing_style():
@@ -602,7 +603,7 @@ def test_table_row_exclamation_mark():
     print "CELLS:", cells
     assert len(cells)==2, 'expected exactly two cells'
 
-def test_unknown_tag():
+def test_unknown_tag(): 
     r=parse("<nosuchtag>foobar</nosuchtag>")
     txt = r.asText()
     print "TXT:", repr(txt)

@@ -66,7 +66,7 @@ def parseParams(s):
     
     r = {}
     for name, value in paramrx.findall(s):
-        if value.startswith('"'):
+        if value.startswith('"') or value.startswith("'"):
             value = value[1:-1]
             
         if name=='style':
@@ -165,11 +165,6 @@ class Paragraph(Node): pass
 class Section(Node): pass
 class Timeline(Node): pass
 class TagNode(Node): pass
-class UnknownTagNode(Node): 
-    """unknown tag. default mediawiki handling is to treat it as text. 
-    but it in most cases it might be a unknown tag extension
-
-    """
 class PreFormatted(TagNode): pass
 class URL(Node): pass
 class NamedURL(Node): pass
@@ -403,8 +398,6 @@ _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
             
 class Parser(object):
     def __init__(self, tokens, name=''):
-        from  mwlib.extensiontags import addExtensionTags # will extend the supported parser tags 
-        addExtensionTags()
         self.tokens = tokens
         self.pos = 0
         self.name = name
@@ -569,10 +562,10 @@ class Parser(object):
             
         return obj
     
-    def parseTag(self, nodeclass=TagNode):
+    def parseTag(self):
         token = self.token[0]
         
-        n = nodeclass(token.t)
+        n =TagNode(token.t)
         if token.values:
             n.values = token.values
         n.vlist = parseParams(self.token[1])
@@ -1105,14 +1098,14 @@ class Parser(object):
         if tag in self.tagextensions:
             n = self.parseTag()
             txt = "".join(x.caption for x in n.find(Text))
-            
-            return self.tagextensions[tag](txt, {})
-            
-            
+            attributes = n.vlist
+            return self.tagextensions[tag](txt, attributes)
         try:
             m=getattr(self, 'parse'+tag.upper()+'Tag')
         except (AttributeError, UnicodeEncodeError):
-            return self.parseTag(nodeclass=UnknownTagNode)
+            t=Text(self.token[1])
+            self.next()
+            return t
         else:
             return m()
 
