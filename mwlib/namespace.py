@@ -39,6 +39,8 @@ add_namespace_map('enwiki', 'en', 'Wikipedia',
         {'Portal': 100, 'Portal_Talk': 101})
 add_namespace_map('dewiki', 'de', 'Wikipedia',
         {'Portal': 100, 'Portal_Diskussion': 101})
+for lang in _lang_ns_data:
+    add_namespace_map('%s+en_mw' % lang, lang, 'MediaWiki', namespace_maps['enwiki'])
 
 namespace_maps['default'] = dict(namespace_maps['enwiki'].items() + namespace_maps['dewiki'].items())
 
