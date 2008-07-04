@@ -1,7 +1,6 @@
 import atexit
 import Queue
 import threading
-import time
 import traceback
 
 from mwlib.log import Log
@@ -25,7 +24,6 @@ class Fetcher(object):
         self.job_queue = Queue.Queue()
         self.results = {}
         self.started = False
-        self.last_fetch = time.time()
     
     def fetch_url(self, url, filename=None, opener=None, callback=None):
         """Fetch given URL
@@ -39,10 +37,6 @@ class Fetcher(object):
         @param opener: if given, use this opener to fetch the URL
         @type opener: L{urlib2.OpenerDirector}
         """
-        
-        print 'FROM LAST FETCH', time.time() - self.last_fetch
-        self.last_fetch = time.time()
-        print 'QUEUE SIZE', self.job_queue.qsize()
         
         if not self.started:
             self.started = True
@@ -122,6 +116,7 @@ class FetcherThread(threading.Thread):
 # ==============================================================================
 
 if __name__ == '__main__':
+    import time
     for n in [1, 5]:
         s = time.time()
         f = Fetcher(num_threads=n)
