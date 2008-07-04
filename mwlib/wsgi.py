@@ -15,7 +15,7 @@ log = Log('mwlib.wsgi')
 # ==============================================================================
 
 class Request(object):
-    max_post_data_size = 10*1024
+    max_post_data_size = 1024*1024
     
     def __init__(self, env):
         self.env = env
