@@ -63,13 +63,6 @@ class ZipfileCreator(object):
         raw = recorddb.getRawArticle(title, revision=revision)
         if raw is None:
             return
-        self.articles[title] = {
-            'revision': revision,
-            'content-type': 'text/x-wiki',
-            'content': raw,
-            'url': wikidb.getURL(title, revision=revision),
-            'authors': wikidb.getAuthors(title, revision=revision),
-        }
         self.parseArticle(title, revision=revision, raw=raw, wikidb=wikidb, imagedb=imagedb)
     
     def parseArticle(self, title, revision=None, raw=None, wikidb=None, imagedb=None):
