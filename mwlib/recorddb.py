@@ -6,7 +6,7 @@
 import simplejson
 import zipfile
 
-from mwlib import uparser, parser, mwapidb, fetcher
+from mwlib import uparser, parser, mwapidb, jobsched, utils
 import mwlib.log
 
 log = mwlib.log.Log("recorddb")
@@ -48,7 +48,7 @@ class ZipfileCreator(object):
         self.articles = {}
         self.templates = {}
         self.images = {}
-        self.fetcher = fetcher.Fetcher()
+        self.fetcher = jobsched.JobScheduler(1, utils.fetch_url)
     
     def addObject(self, name, value):
         """

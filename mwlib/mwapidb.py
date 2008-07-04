@@ -335,7 +335,10 @@ class ImageDB(object):
                 return None
             open(filename, 'wb').write(data)
         else:
-            fetcher.fetch_url(url, filename=filename, opener=self.api_helper.opener)
+            fetcher.add_job(url,
+                output_filename=filename,
+                opener=self.api_helper.opener,
+            )
         return filename
     
     def getLicense(self, name):

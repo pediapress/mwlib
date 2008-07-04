@@ -234,7 +234,8 @@ class PersistedDict(UserDict.UserDict):
 fetch_cache = {}
 
 def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
-    max_cacheable_size=1024, expected_content_type=None, opener=None):
+    max_cacheable_size=1024, expected_content_type=None, opener=None,
+    output_filename=None):
     """Fetch given URL via HTTP
     
     @param ignore_errors: if True, log but otherwise ignore errors, return None
@@ -292,7 +293,12 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     if len(data) <= max_cacheable_size:
         fetch_cache[url] = data
     
-    return data
+    if output_filename:
+        open(output_filename, 'wb').write(data)
+        return True
+    else:
+        return data
+
 
 def uid(max_length=10):
     """Generate a unique identifier of given maximum length
