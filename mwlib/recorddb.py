@@ -6,7 +6,7 @@
 import simplejson
 import zipfile
 
-from mwlib import uparser, parser, mwapidb
+from mwlib import uparser, parser, mwapidb, fetcher
 import mwlib.log
 
 log = mwlib.log.Log("recorddb")
@@ -48,6 +48,7 @@ class ZipfileCreator(object):
         self.articles = {}
         self.templates = {}
         self.images = {}
+        self.fetcher = fetcher.Fetcher()
     
     def addObject(self, name, value):
         """
@@ -77,24 +78,26 @@ class ZipfileCreator(object):
     def addImage(self, name, imagedb=None):
         if name in self.images:
             return
-        self.images[name] = {}
-        path = imagedb.getDiskPath(name, size=self.imagesize)
-        if path is None:
-            log.warn('Could not get image %r (size=%r)' % (name, self.imagesize))
-            return
-        self.zf.write(path, (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
-        self.images[name]['url'] = imagedb.getURL(name, size=self.imagesize)
-        try:
+        self.images[name] = {
+            'url': imagedb.getURL(name, size=self.imagesize),
+            'diskpath': imagedb.getDiskPath(name, size=self.imagesize, fetcher=self.fetcher),
+        }
+        if hasattr(imagedb, 'getDescriptionURL'): # FIXME: implement in all ImageDBs
             descriptionurl = imagedb.getDescriptionURL(name)
             if descriptionurl:
                 self.images[name]['descriptionurl'] = descriptionurl
-        except AttributeError: # FIXME: implement getDescriptionURL() in all ImageDBs and remove this try-except
-            pass
         license = imagedb.getLicense(name)
         if license:
             self.images[name]['license'] = license
     
     def writeContent(self):
+        results = self.fetcher.get_results()
+        for name, attrs in self.images.items():
+            if results[attrs['url']] is None:
+                log.warn('Could not get image %r (size=%r)' % (name, self.imagesize))
+                continue
+            self.zf.write(attrs['diskpath'], (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
+            del attrs['diskpath']
         self.addObject('content.json', simplejson.dumps(dict(
             articles=self.articles,
             templates=self.templates,
