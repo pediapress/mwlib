@@ -3,13 +3,20 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import os
 import simplejson
+import tempfile
 import threading
+import zipfile
 
-from mwlib import uparser, parser, jobsched
+from mwlib import uparser, parser, jobsched, metabook, mwapidb
 import mwlib.log
 
+# ==============================================================================
+
 log = mwlib.log.Log("recorddb")
+
+# ==============================================================================
 
 
 class RecordDB(object):
@@ -58,6 +65,9 @@ class RecordDB(object):
         }
         return r
     
+
+# ==============================================================================
+
 
 class ZipfileCreator(object):
     """Create ZIP files usable as WikiDB
@@ -244,3 +254,85 @@ class ZipfileCreator(object):
             images=self.images,
         )))
     
+
+# ==============================================================================
+
+
+def make_zip_file(options, env,
+    set_progress=None,
+    set_current_article=None,
+):
+    if options.output:
+        output = options.output
+    else:
+        fd, output = tempfile.mkstemp()
+        os.close(fd)
+    
+    zf = zipfile.ZipFile(output, 'w')
+    
+    if options.no_threads:
+        num_article_threads = 0
+        num_image_threads = 0
+    else:
+        num_article_threads = 5
+        num_image_threads = 20
+    
+    z = ZipfileCreator(zf,
+        imagesize=options.imagesize,
+        num_article_threads=num_article_threads,
+        num_image_threads=num_image_threads,
+    )
+    
+    articles = metabook.get_item_list(env.metabook, filter_type='article')
+    if articles:
+        class IncProgress(object):
+            inc = 100./len(articles)
+            p = 0
+            def __call__(self, title):
+                self.p += self.inc
+                set_progress(int(self.p))
+                set_current_article(title)
+        inc_progress = IncProgress()
+    else:
+        inc_progress = None
+    
+    for item in articles:
+        d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
+        if d is not None:
+            item['title'] = d['title']
+            item['revision'] = d['revision']
+            wikidb = mwapidb.WikiDB(api_helper=d['api_helper'])
+            imagedb = mwapidb.ImageDB(api_helper=d['api_helper'])
+        else:
+            wikidb = env.wiki
+            imagedb = env.images
+        z.addArticle(item['title'],
+            revision=item.get('revision', None),
+            wikidb=wikidb,
+            imagedb=imagedb,
+            callback=inc_progress,
+        )
+    
+    for license in env.get_licenses():
+        z.parseArticle(
+            title=license['title'],
+            raw=license['wikitext'],
+            wikidb=env.wiki,
+            imagedb=env.images,
+        )
+    
+    if 'source' not in env.metabook:
+        env.metabook['source'] = env.get_source()
+    
+    z.addObject('metabook.json', simplejson.dumps(env.metabook))
+    
+    z.writeContent()
+    zf.close()
+    
+    if env.images and hasattr(env.images, 'clear'):
+        env.images.clear()
+    
+    set_progress(100)
+    
+    return output
+

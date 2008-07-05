@@ -32,6 +32,10 @@ class OptionParser(optparse.OptionParser):
             help='login with given USERNAME and PASSWORD',
             metavar='USERNAME:PASSWORD',
         )
+        self.add_option('--no-threads',
+            action='store_true',
+            help='do not use threads to fetch articles and images in parallel',
+        )
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)

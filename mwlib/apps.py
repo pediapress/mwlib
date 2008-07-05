@@ -91,10 +91,6 @@ def buildzip():
         help="max. pixel size (width or height) for images (default: 800)",
         default=800,
     )
-    parser.add_option('--no-threads',
-        action='store_true',
-        help='do not use threads to fetch articles and images in parallel',
-    )
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
     parser.add_option('--pid-file',
@@ -113,12 +109,6 @@ def buildzip():
         assert options.imagesize > 0
     except (ValueError, AssertionError):
         parser.error('Argument for --imagesize must be an integer > 0.')
-    
-    import os
-    import simplejson
-    import tempfile
-    import zipfile
-    from mwlib import metabook
     
     if options.posturl:
         from mwlib.podclient import PODClient
@@ -145,106 +135,34 @@ def buildzip():
     def set_progress(progress):
         print 'Progress: %d%%' % progress
         if podclient is not None:
-            podclient.post_progress(progress)
+            podclient.post_progress(int(progress))
     
     def set_current_article(title):
         print 'Current Article: %r' % title
         if podclient is not None:
             podclient.post_current_article(title)
 
-    # try:... except:... finally:... does not work in python 2.4
-    # use atexit instead
-    def cleanup():
-        for path in delete_files:
-            try:
-                os.unlink(path)
-            except Exception, e:
-                print 'Could not delete file %r: %s' % (path, e)
-                
-    import atexit
-    atexit.register(cleanup)
-        
     try:
-        set_status('init')
-        
-        from mwlib import recorddb, mwapidb
-        
-        env = parser.env
-        
-        if options.output is None:
-            fd, options.output = tempfile.mkstemp()
-            os.close(fd)
-            delete_files.append(options.output)
-        zf = zipfile.ZipFile(options.output, 'w')
-        
-        if options.no_threads:
-            num_article_threads = 0
-            num_image_threads = 0
-        else:
-            num_article_threads = 5
-            num_image_threads = 20
-        
-        z = recorddb.ZipfileCreator(zf,
-            imagesize=options.imagesize,
-            num_article_threads=num_article_threads,
-            num_image_threads=num_image_threads,
-        )
+        import os
+        from mwlib import recorddb
         
         set_status('parsing')
         set_progress(0)
         
-        articles = metabook.get_item_list(parser.metabook, filter_type='article')
-        if articles:
-            class IncProgress(object):
-                inc = 90./len(articles)
-                p = 0
-                def __call__(self, title):
-                    self.p += self.inc
-                    set_progress(self.p)
-                    set_current_article(title)
-            inc_progress = IncProgress()
-        else:
-            inc_progress = None
-        
-        for item in articles:
-            d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
-            if d is not None:
-                item['title'] = d['title']
-                item['revision'] = d['revision']
-                wikidb = mwapidb.WikiDB(api_helper=d['api_helper'])
-                imagedb = mwapidb.ImageDB(api_helper=d['api_helper'])
-            else:
-                wikidb = env.wiki
-                imagedb = env.images
-            z.addArticle(item['title'],
-                revision=item.get('revision', None),
-                wikidb=wikidb,
-                imagedb=imagedb,
-                callback=inc_progress,
-            )
-        
-        for license in env.get_licenses():
-            z.parseArticle(
-                title=license['title'],
-                raw=license['wikitext'],
-                wikidb=env.wiki,
-                imagedb=env.images,
-            )
-        
-        if 'source' not in parser.metabook:
-            parser.metabook['source'] = parser.env.get_source()
-        
-        z.addObject('metabook.json', simplejson.dumps(parser.metabook))
-        
-        z.writeContent()
-        zf.close()
-        set_progress(95)
+        filename = recorddb.make_zip_file(options, parser.env,
+            set_progress=lambda p: set_progress(p*0.9),
+            set_current_article=set_current_article,
+        )
         
         if podclient:
-            podclient.post_zipfile(options.output)
+            set_status('uploading')
+            podclient.post_zipfile(filename)
         
-        if env.images and hasattr(env.images, 'clear'):
-            env.images.clear()
+        if options.output is None:
+            try:
+                os.unlink(filename)
+            except Exception, e:
+                print 'Could not delete file %r: %s' % (filename, e)
         
         set_status('finished')
         set_progress(100)
