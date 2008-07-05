@@ -84,11 +84,17 @@ def buildzip():
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
-                      help='get POST URL from PediaPress.com and open upload page in webbrowser',
-                      action='store_true')
+        help='get POST URL from PediaPress.com and open upload page in webbrowser',
+        action='store_true',
+    )
     parser.add_option("-i", "--imagesize",
-                      help="max. pixel size (width or height) for images (default: 800)",
-                      default=800)
+        help="max. pixel size (width or height) for images (default: 800)",
+        default=800,
+    )
+    parser.add_option('--no-threads',
+        action='store_true',
+        help='do not use threads to fetch articles and images in parallel',
+    )
     parser.add_option("-d", "--daemonize", action="store_true",
                       help='become a daemon process as soon as possible')
     parser.add_option('--pid-file',
@@ -98,9 +104,9 @@ def buildzip():
     
     use_help = 'Use --help for usage information.'
     if options.posturl and options.getposturl:
-        parser.error('Please specify either --posturl or --getposturl, not both.\n' + use_help)
+        parser.error('Specify either --posturl or --getposturl.\n' + use_help)
     if not options.posturl and not options.getposturl and not options.output:
-        parser.error('Neither --output, nor --posturl or --getposturl specified. This would result in a no-op...')
+        parser.error('Neither --output, nor --posturl or --getposturl specified.\n' + use_help)
     
     try:
         options.imagesize = int(options.imagesize)
@@ -170,17 +176,36 @@ def buildzip():
             os.close(fd)
             delete_files.append(options.output)
         zf = zipfile.ZipFile(options.output, 'w')
-        z = recorddb.ZipfileCreator(zf, imagesize=options.imagesize)
+        
+        if options.no_threads:
+            num_article_threads = 0
+            num_image_threads = 0
+        else:
+            num_article_threads = 5
+            num_image_threads = 20
+        
+        z = recorddb.ZipfileCreator(zf,
+            imagesize=options.imagesize,
+            num_article_threads=num_article_threads,
+            num_image_threads=num_image_threads,
+        )
         
         set_status('parsing')
+        set_progress(0)
+        
         articles = metabook.get_item_list(parser.metabook, filter_type='article')
         if articles:
-            inc = 90./len(articles)
+            class IncProgress(object):
+                inc = 90./len(articles)
+                p = 0
+                def __call__(self):
+                    self.p += self.inc
+                    set_progress(self.p)
+            inc_progress = IncProgress()
         else:
-            inc = 0
-        p = 0
+            inc_progress = None
+        
         for item in articles:
-            set_progress(p)
             d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
             if d is not None:
                 item['title'] = d['title']
@@ -190,11 +215,13 @@ def buildzip():
             else:
                 wikidb = env.wiki
                 imagedb = env.images
-            set_current_article(item['title'])
-            z.addArticle(item['title'], revision=item.get('revision', None), wikidb=wikidb, imagedb=imagedb)
-            
-            p += inc
-        set_progress(90)
+            #set_current_article(item['title'])
+            z.addArticle(item['title'],
+                revision=item.get('revision', None),
+                wikidb=wikidb,
+                imagedb=imagedb,
+                callback=inc_progress,
+            )
         
         for license in env.get_licenses():
             z.parseArticle(

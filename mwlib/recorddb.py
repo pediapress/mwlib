@@ -4,16 +4,30 @@
 # See README.txt for additional licensing information.
 
 import simplejson
-import zipfile
+import threading
 
-from mwlib import uparser, parser, mwapidb
+from mwlib import uparser, parser, jobsched
 import mwlib.log
 
 log = mwlib.log.Log("recorddb")
 
 
 class RecordDB(object):
+    """Proxy getRawArticle() and getTemplate() to another WikiDB and record all
+    results for later retrieval.
+    """
+    
     def __init__(self, db, articles, templates):
+        """
+        @param db: WikiDB to use
+        
+        @param articles: dictionary to store article data
+        @type articles: dict
+        
+        @param templates: dictionary to store template data
+        @type templates: dict
+        """
+        
         assert db is not None, "db must not be None"
         self.db = db
         self.articles = articles
@@ -33,6 +47,10 @@ class RecordDB(object):
         return r
     
     def getTemplate(self, name, followRedirects=False):
+        try:
+            return self.templates[name]['content']
+        except KeyError:
+            pass
         r = self.db.getTemplate(name, followRedirects=followRedirects)
         self.templates[name] = {
             'content-type': 'text/x-wiki',
@@ -42,32 +60,132 @@ class RecordDB(object):
     
 
 class ZipfileCreator(object):
-    def __init__(self, zf, imagesize=None):
+    """Create ZIP files usable as WikiDB
+    
+    See docs/zipfile.txt
+    """
+    
+    def __init__(self, zf,
+        imagesize=None,
+        num_article_threads=5,
+        num_image_threads=20,
+    ):
+        """
+        @param imagesize: max. size of images
+        @type imagesize: int
+        
+        @param num_article_threads: number of threads for parallel article
+            fetching & parsing (set to 0 to turn threading off)
+        @type num_article_threads: int
+        
+        
+        @param num_image_threads: number of threads for parallel image fetching
+            (set to 0 to turn threading off)
+        @type num_image_threads: int
+        """
+        
         self.zf = zf
         self.imagesize = imagesize
         self.articles = {}
         self.templates = {}
         self.images = {}
+        self.zf_lock = threading.RLock()
+        if num_article_threads > 0:
+            self.article_adders = jobsched.JobScheduler(num_article_threads)
+        else:
+            self.article_adders = None
+        if num_image_threads > 0:
+            self.image_fetchers = jobsched.JobScheduler(num_image_threads)
+        else:
+            self.image_fetchers = None
     
     def addObject(self, name, value):
-        """
+        """Add a file with name and contents value to the ZIP file
+        
+        @param name: name for entry in ZIP file, will be UTF-8 encoded
         @type name: unicode
         
+        @param value: content for ZIP file entry
         @type value: str
         """
         
         self.zf.writestr(name.encode('utf-8'), value)
     
-    def addArticle(self, title, revision=None, wikidb=None, imagedb=None):
-        recorddb = RecordDB(wikidb, self.articles, self.templates)
-        raw = recorddb.getRawArticle(title, revision=revision)
-        if raw is None:
+    def addArticle(self, title,
+        revision=None,
+        wikidb=None,
+        imagedb=None,
+        callback=None,
+    ):
+        """Add article with given title and revision to ZIP file. This will add
+        all referenced templates and images, too.
+        
+        @param title: article title
+        @type title: unicode
+        
+        @param revision: article revision (optional)
+        @type revision: int
+        
+        @param wikidb: WikiDB to use
+        
+        @param imagedb: ImageDB to use (optional)
+        
+        @param callback: callable which is called when article is parsed (optional)
+        @type callback: callable with signature callback() -> None
+        """
+        
+        if title in self.articles:
             return
-        self.parseArticle(title, revision=revision, raw=raw, wikidb=wikidb, imagedb=imagedb)
+        self.articles[title] = {}
+        
+        def add_article_job(title):
+            recorddb = RecordDB(wikidb, self.articles, self.templates)
+            raw = recorddb.getRawArticle(title, revision=revision)
+            if raw is None:
+                return
+            self.parseArticle(title,
+                revision=revision,
+                raw=raw,
+                wikidb=wikidb,
+                imagedb=imagedb,
+            )
+            if callback is not None:
+                callback()
+        
+        if self.article_adders is not None:
+            self.article_adders.add_job(title, add_article_job)
+        else:
+            add_article_job(title)
     
-    def parseArticle(self, title, revision=None, raw=None, wikidb=None, imagedb=None):
+    def parseArticle(self, title,
+        revision=None,
+        raw=None,
+        wikidb=None,
+        imagedb=None,
+    ):
+        """Parse article with given title, revision and raw wikitext, adding all
+        referenced templates and images, but not adding the article itself.
+        
+        @param title: title of article
+        @type title: unicode
+        
+        @param revision: revision of article (optional)
+        @type revision: int
+        
+        @param raw: wikitext of article
+        @type raw: unicode
+        
+        @param wikidb: WikiDB to use
+        
+        @param imagedb: ImageDB to use (optional)
+        """
+        
         recorddb = RecordDB(wikidb, self.articles, self.templates)
-        parse_tree = uparser.parseString(title, revision=revision, raw=raw, wikidb=recorddb)
+        parse_tree = uparser.parseString(title,
+            revision=revision,
+            raw=raw,
+            wikidb=recorddb,
+        )
         if imagedb is None:
             return
         for node in parse_tree.allchildren():
@@ -75,26 +193,51 @@ class ZipfileCreator(object):
                 self.addImage(node.target, imagedb=imagedb)
     
     def addImage(self, name, imagedb=None):
+        """Add image with given name to the ZIP file
+        
+        @param name: image name
+        @type name: uncidoe
+        
+        @param imagedb: ImageDB to use
+        """
+        
         if name in self.images:
             return
         self.images[name] = {}
-        path = imagedb.getDiskPath(name, size=self.imagesize)
-        if path is None:
-            log.warn('Could not get image %r (size=%r)' % (name, self.imagesize))
-            return
-        self.zf.write(path, (u"images/%s" % name.replace("'", '-')).encode("utf-8"))
-        self.images[name]['url'] = imagedb.getURL(name, size=self.imagesize)
-        try:
+        
+        def fetch_image_job(name):
+            path = imagedb.getDiskPath(name, size=self.imagesize)
+            if path is None:
+                log.warn('Could not get image %r' % name)
+                return
+            self.zf_lock.acquire()
+            try:
+                zipname = u"images/%s" % name.replace("'", '-')
+                self.zf.write(path, zipname.encode("utf-8"))
+            finally:
+                self.zf_lock.release()
+            self.images[name]['url'] = imagedb.getURL(name, size=self.imagesize)
             descriptionurl = imagedb.getDescriptionURL(name)
             if descriptionurl:
                 self.images[name]['descriptionurl'] = descriptionurl
-        except AttributeError: # FIXME: implement getDescriptionURL() in all ImageDBs and remove this try-except
-            pass
-        license = imagedb.getLicense(name)
-        if license:
-            self.images[name]['license'] = license
+            license = imagedb.getLicense(name)
+            if license:
+                self.images[name]['license'] = license
+            
+        if self.image_fetchers is not None:
+            self.image_fetchers.add_job(name, fetch_image_job)
+        else:
+            fetch_image_job(name)
     
     def writeContent(self):
+        """Finish ZIP file by writing the actual content"""
+        
+        if self.article_adders is not None:
+            # wait for articles first (they add images)...
+            self.article_adders.get_results()
+        if self.image_fetchers is not None:
+            # ... then for the images
+            self.image_fetchers.get_results()
         self.addObject('content.json', simplejson.dumps(dict(
             articles=self.articles,
             templates=self.templates,
