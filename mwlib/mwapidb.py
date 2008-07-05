@@ -303,7 +303,7 @@ class ImageDB(object):
             return '%s/%s/%s/%s' % (repo, hash1, hash2, name)
         return path
     
-    def getDiskPath(self, name, size=None, fetcher=None):
+    def getDiskPath(self, name, size=None):
         """Return filename for image with given name and size
         
         @param name: image name (without namespace, i.e. without 'Image:')
@@ -329,16 +329,10 @@ class ImageDB(object):
             ext = '.%s' % ext
         filename = os.path.join(self.tmpdir, utils.fsescape(name + ext))
         
-        if fetcher is None:
-            data = utils.fetch_url(url, ignore_errors=True)
-            if not data:
-                return None
-            open(filename, 'wb').write(data)
-        else:
-            fetcher.add_job(url,
-                output_filename=filename,
-                opener=self.api_helper.opener,
-            )
+        data = utils.fetch_url(url, ignore_errors=True)
+        if not data:
+            return None
+        open(filename, 'wb').write(data)
         return filename
     
     def getLicense(self, name):
