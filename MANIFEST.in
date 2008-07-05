@@ -31,6 +31,7 @@ include mwlib/cdb.py
 include mwlib/cdbwiki.py
 include mwlib/docbookwriter.py
 include mwlib/dummydb.py
+include mwlib/dumpparser.py
 include mwlib/expander.py
 include mwlib/expr.py
 include mwlib/filequeue.py
@@ -45,6 +46,8 @@ include mwlib/mathml.py
 include mwlib/metabook.py
 include mwlib/mwapidb.py
 include mwlib/mwscan.py
+include mwlib/namespace.py
+include mwlib/namespace_langs.py
 include mwlib/netdb.py
 include mwlib/odfstyles.py
 include mwlib/odfwriter.py
