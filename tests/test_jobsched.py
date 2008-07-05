@@ -11,11 +11,11 @@ def test_jobsched():
         print 'finish', job_id
         return wait_time
     
-    sched = JobScheduler(5, wait)
+    sched = JobScheduler(5)
     for i in range(2): # test reusability
         n = 20
         for i in range(n):
-            sched.add_job(i, wait_time=0.01*i)
+            sched.add_job(i, wait, wait_time=0.01*i)
         s = time.time()
         results = sched.get_results()
         t = time.time() - s
@@ -24,3 +24,8 @@ def test_jobsched():
         print results
         for i in range(n):
             assert results[i] == 0.01*i
+
+def test_empty():
+    sched = JobScheduler(5)
+    results = sched.get_results()
+    assert not results
