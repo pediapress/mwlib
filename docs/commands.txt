@@ -95,6 +95,11 @@ one command.
   --config argument is a base URL or shortcut, or when ``type=mwapi`` in the
   configuration file).
 
+``--no-threads``
+
+  If given, do not use multiple threads to fetch articles and images in
+  parallel.
+
 
 The ``mw-render`` Command
 =========================
