@@ -144,7 +144,7 @@ class ImageDB(object):
     def getPath(self):
         raise NotImplemented('getPath() does not work with zipwiki.ImageDB!')
     
-    def getURL(self, name):
+    def getURL(self, name, size=None):
         try:
             return self.images[name]['url']
         except KeyError:
