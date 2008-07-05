@@ -45,24 +45,21 @@ class JobScheduler(object):
         """
         
         def worker():
-            try:
-                while True:
-                    job_id, kwargs = self.job_queue.get()
-                    try:
-                        if job_id == 'die':
-                            break
-                        try:                
-                            result = self.do_job(job_id, **kwargs)
-                        except Exception, exc:
-                            log.ERROR('Error executing job: %s' % exc)
-                            traceback.print_exc()
-                        self.results_lock.acquire()
-                        self.results[job_id] = result
-                        self.results_lock.release()
-                    finally:
-                        self.job_queue.task_done()
-            except:
-                traceback.print_exc()
+            while True:
+                job_id, kwargs = self.job_queue.get()
+                try:
+                    if job_id == 'die':
+                        break
+                    try:                
+                        result = self.do_job(job_id, **kwargs)
+                    except Exception, exc:
+                        log.ERROR('Error executing job: %s' % exc)
+                        traceback.print_exc()
+                    self.results_lock.acquire()
+                    self.results[job_id] = result
+                    self.results_lock.release()
+                finally:
+                    self.job_queue.task_done()
         
         if not self.started:
             self.started = True
