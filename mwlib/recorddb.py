@@ -131,7 +131,7 @@ class ZipfileCreator(object):
         @param imagedb: ImageDB to use (optional)
         
         @param callback: callable which is called when article is parsed (optional)
-        @type callback: callable with signature callback() -> None
+        @type callback: callable with signature callback(title) -> None
         """
         
         if title in self.articles:
@@ -150,7 +150,7 @@ class ZipfileCreator(object):
                 imagedb=imagedb,
             )
             if callback is not None:
-                callback()
+                callback(title)
         
         if self.article_adders is not None:
             self.article_adders.add_job(title, add_article_job)

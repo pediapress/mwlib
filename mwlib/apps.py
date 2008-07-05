@@ -198,9 +198,10 @@ def buildzip():
             class IncProgress(object):
                 inc = 90./len(articles)
                 p = 0
-                def __call__(self):
+                def __call__(self, title):
                     self.p += self.inc
                     set_progress(self.p)
+                    set_current_article(title)
             inc_progress = IncProgress()
         else:
             inc_progress = None
@@ -215,7 +216,6 @@ def buildzip():
             else:
                 wikidb = env.wiki
                 imagedb = env.images
-            #set_current_article(item['title'])
             z.addArticle(item['title'],
                 revision=item.get('revision', None),
                 wikidb=wikidb,
