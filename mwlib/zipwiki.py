@@ -185,6 +185,9 @@ class FakeImageDB(ImageDB):
     def getURL(self, name):
         raise NotImplemented('getURL() does not work with zipwiki.FakeImageDB!')
     
+    def getDescriptionURL(self, name):
+        raise NotImplemented('getDescriptionURL() does not work with zipwiki.FakeImageDB!')
+    
     def getLicense(self, name):
         raise NotImplemented('getLicense() does not work with zipwiki.FakeImageDB!')
     

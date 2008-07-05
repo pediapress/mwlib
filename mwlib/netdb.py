@@ -124,6 +124,10 @@ class ImageDB(object):
                 continue
             return self._getImageURLForBaseURL(baseurl, name)
     
+    def getDescriptionURL(self, name):
+        log.warn('getDescriptionURL() not supported by netdb.ImageDB')
+        return None
+    
     def getPath(self, name, size=None):
         """Return path to image with given parameters relative to cachedir"""
         
