@@ -33,7 +33,13 @@ class RecordDB(object):
         return r
     
     def getTemplate(self, name, followRedirects=False):
+        try:
+            return self.templates[name]['content']
+        except KeyError:
+            pass
         r = self.db.getTemplate(name, followRedirects=followRedirects)
+        if r is None:
+            return
         self.templates[name] = {
             'content-type': 'text/x-wiki',
             'content': r,
@@ -48,7 +54,8 @@ class ZipfileCreator(object):
         self.articles = {}
         self.templates = {}
         self.images = {}
-        self.fetcher = jobsched.JobScheduler(1, utils.fetch_url)
+        self.fetcher = jobsched.JobScheduler(5, utils.fetch_url)
+        self.adder = jobsched.JobScheduler(5, self._addArticleJob)
     
     def addObject(self, name, value):
         """
@@ -60,6 +67,10 @@ class ZipfileCreator(object):
         self.zf.writestr(name.encode('utf-8'), value)
     
     def addArticle(self, title, revision=None, wikidb=None, imagedb=None):
+        self.adder.add_job((title, revision), wikidb=wikidb, imagedb=imagedb)
+    
+    def _addArticleJob(self, title_revision, wikidb=None, imagedb=None):
+        title, revision = title_revision
         recorddb = RecordDB(wikidb, self.articles, self.templates)
         raw = recorddb.getRawArticle(title, revision=revision)
         if raw is None:
@@ -78,10 +89,12 @@ class ZipfileCreator(object):
     def addImage(self, name, imagedb=None):
         if name in self.images:
             return
-        self.images[name] = {
-            'url': imagedb.getURL(name, size=self.imagesize),
-            'diskpath': imagedb.getDiskPath(name, size=self.imagesize, fetcher=self.fetcher),
-        }
+        self.images[name] = {} # create dict entry as fast as possible
+        self.images[name]['url'] = imagedb.getURL(name, size=self.imagesize)
+        self.images[name]['diskpath'] = imagedb.getDiskPath(name,
+            size=self.imagesize,
+            fetcher=self.fetcher,
+        )
         if hasattr(imagedb, 'getDescriptionURL'): # FIXME: implement in all ImageDBs
             descriptionurl = imagedb.getDescriptionURL(name)
             if descriptionurl:
@@ -91,6 +104,9 @@ class ZipfileCreator(object):
             self.images[name]['license'] = license
     
     def writeContent(self):
+        # first wait for all articles to be parsed (they add images)...
+        self.adder.get_results()
+        # ... then wait for the images to be fetched
         results = self.fetcher.get_results()
         for name, attrs in self.images.items():
             if results[attrs['url']] is None:
