@@ -84,17 +84,8 @@ def buildzip():
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
-        help='get POST URL from PediaPress.com and open upload page in webbrowser',
+        help='get POST URL from PediaPress.com, open upload page in webbrowser',
         action='store_true',
-    )
-    parser.add_option("-i", "--imagesize",
-        help="max. pixel size (width or height) for images (default: 800)",
-        default=800,
-    )
-    parser.add_option("-d", "--daemonize", action="store_true",
-                      help='become a daemon process as soon as possible')
-    parser.add_option('--pid-file',
-        help='write PID of daemonized process to this file',
     )
     options, args = parser.parse_args()
     
@@ -103,13 +94,6 @@ def buildzip():
         parser.error('Specify either --posturl or --getposturl.\n' + use_help)
     if not options.posturl and not options.getposturl and not options.output:
         parser.error('Neither --output, nor --posturl or --getposturl specified.\n' + use_help)
-    
-    try:
-        options.imagesize = int(options.imagesize)
-        assert options.imagesize > 0
-    except (ValueError, AssertionError):
-        parser.error('Argument for --imagesize must be an integer > 0.')
-    
     if options.posturl:
         from mwlib.podclient import PODClient
         podclient = PODClient(options.posturl)
@@ -120,8 +104,6 @@ def buildzip():
         webbrowser.open(podclient.redirecturl)
     else:
         podclient = None
-    
-    delete_files = []
     
     if options.daemonize:
         from mwlib.utils import daemonize
@@ -149,7 +131,7 @@ def buildzip():
         set_status('parsing')
         set_progress(0)
         
-        filename = recorddb.make_zip_file(options, parser.env,
+        filename = recorddb.make_zip_file(options.output, options, parser.env,
             set_progress=lambda p: set_progress(p*0.9),
             set_current_article=set_current_article,
         )
@@ -164,6 +146,60 @@ def buildzip():
             except Exception, e:
                 print 'Could not delete file %r: %s' % (filename, e)
         
+        set_status('finished')
+        set_progress(100)
+    except Exception, e:
+        set_status('error')
+        raise
+
+def post():
+    parser = optparse.OptionParser(usage="%prog OPTIONS")
+    parser.add_option("-i", "--input", help="ZIP file to POST")
+    parser.add_option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
+    parser.add_option("-g", "--getposturl",
+        help='get POST URL from PediaPress.com, open upload page in webbrowser',
+        action='store_true',
+    )
+    parser.add_option("-d", "--daemonize", action="store_true",
+        help='become a daemon process as soon as possible')
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
+    options, args = parser.parse_args()
+    
+    use_help = 'Use --help for usage information.'
+    if (options.posturl and options.getposturl)\
+        or (not options.posturl and not options.getposturl):
+        parser.error('Specify either --posturl or --getposturl.\n' + use_help)
+    if options.posturl:
+        from mwlib.podclient import PODClient
+        podclient = PODClient(options.posturl)
+    elif options.getposturl:
+        import webbrowser
+        from mwlib.podclient import podclient_from_serviceurl
+        podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
+        webbrowser.open(podclient.redirecturl)
+    
+    if options.daemonize:
+        from mwlib.utils import daemonize
+        daemonize(pid_file=options.pid_file)
+    
+    def set_status(status):
+        print 'Status: %s' % status
+        podclient.post_status(status)
+        
+    def set_progress(progress):
+        print 'Progress: %d%%' % progress
+        podclient.post_progress(int(progress))
+    
+    def set_current_article(title):
+        print 'Current Article: %r' % title
+        podclient.post_current_article(title)
+
+    try:
+        set_progress(0)
+        set_status('uploading')
+        podclient.post_zipfile(options.input)
         set_status('finished')
         set_progress(100)
     except Exception, e:
@@ -191,10 +227,9 @@ def render():
         help='list information about given WRITER and exit',
         metavar='WRITER',
     )
-    parser.add_option("-d", "--daemonize", action="store_true",
-                      help='become a daemon process as soon as possible')
-    parser.add_option('--pid-file',
-        help='write PID of daemonized process to this file',
+    parser.add_option('--keep-zip',
+        help='write ZIP file to FILENAME',
+        metavar='FILENAME',
     )
     options, args = parser.parse_args()
     
@@ -204,6 +239,7 @@ def render():
     import traceback
     import pkg_resources
     from mwlib.writerbase import WriterError
+    from mwlib import recorddb, zipwiki
     
     use_help = 'Use --help for usage information.'
     
@@ -291,7 +327,22 @@ def render():
             open(options.status_file, 'wb').write(simplejson.dumps(last_status).encode('utf-8'))
     
     try:
-        set_status(status='init', progress=0)
+        set_status(status='parsing', progress=0)
+        
+        if not isinstance(parser.env.wiki, zipwiki.Wiki)\
+            or not isinstance(parser.env.images, zipwiki.ImageDB):
+            zip_filename = recorddb.make_zip_file(
+                options.keep_zip,
+                options,
+                parser.env,
+                set_progress=lambda p: set_status(progress=0.7*p),
+                set_current_article=lambda t: set_status(article=t)
+            )
+            parser.env.wiki = zipwiki.Wiki(zip_filename)
+            parser.env.images = zipwiki.ImageDB(zip_filename)
+        else:
+            zip_filename = None
+        
         tmpout = options.output + '.tmp'
         writer(parser.env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
@@ -303,6 +354,11 @@ def render():
         if parser.env.images:
             parser.env.images.clear()
         set_status(status='finished', progress=100, **kwargs)
+        if options.keep_zip is None and zip_filename is not None:
+            try:
+                os.unlink(zip_filename)
+            except Exception, e:
+                print 'Could not remove %r: %s' % (zip_filename, e)
     except WriterError, e:
         set_status(status='error')
         if options.error_file:
@@ -393,9 +449,6 @@ def serve():
         action='store_true',
         help='become daemon as soon as possible',
     )
-    parser.add_option('--pid-file',
-        help='write PID of daemonized process to this file',
-    )
     parser.add_option('-P', '--protocol',
         help='one of %s (default: fcgi)' % ', '.join(proto2server.keys()),
         default='fcgi',
@@ -427,6 +480,14 @@ def serve():
     parser.add_option('--mwzip-logfile',
         help='logfile for mw-zip',
         default='/var/log/mw-zip.log',
+    )
+    parser.add_option('--mwpost',
+        help='(path to) mw-post executable',
+        default='mw-post',
+    )
+    parser.add_option('--mwpost-logfile',
+        help='logfile for mw-post',
+        default='/var/log/mw-post.log',
     )
     parser.add_option('-q', '--queue-dir',
         help='queue dir of mw-watch (if not specified, no queue is used)',
@@ -519,6 +580,8 @@ def serve():
         mwrender_logfile=options.mwrender_logfile,
         mwzip_cmd=options.mwzip,
         mwzip_logfile=options.mwzip_logfile,
+        mwpost_cmd=options.mwpost,
+        mwpost_logfile=options.mwpost_logfile,
         queue_dir=options.queue_dir,
     )
     if options.protocol.startswith('http'):
