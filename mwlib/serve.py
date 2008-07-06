@@ -230,7 +230,7 @@ class Application(wsgi.Application):
             'collection_id': collection_id,
             'writer': writer,
             'state': 'progress',
-            'status': self.read_status_file(collection_id),
+            'status': self.read_status_file(collection_id, writer),
         })
         
     def do_download(self, post_data):
