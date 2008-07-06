@@ -244,10 +244,10 @@ class ZipfileCreator(object):
         
         if self.article_adders is not None:
             # wait for articles first (they add images)...
-            self.article_adders.get_results()
+            self.article_adders.join()
         if self.image_fetchers is not None:
             # ... then for the images
-            self.image_fetchers.get_results()
+            self.image_fetchers.join()
         self.addObject('content.json', simplejson.dumps(dict(
             articles=self.articles,
             templates=self.templates,
@@ -258,17 +258,15 @@ class ZipfileCreator(object):
 # ==============================================================================
 
 
-def make_zip_file(options, env,
+def make_zip_file(output, options, env,
     set_progress=None,
     set_current_article=None,
 ):
-    if options.output:
-        output = options.output
-    else:
-        fd, output = tempfile.mkstemp()
+    if output is None:
+        fd, output = tempfile.mkstemp(suffix='.zip')
         os.close(fd)
     
-    zf = zipfile.ZipFile(output, 'w')
+    zf = zipfile.ZipFile(output + '.tmp', 'w')
     
     if options.no_threads:
         num_article_threads = 0
@@ -328,11 +326,10 @@ def make_zip_file(options, env,
     
     z.writeContent()
     zf.close()
+    os.rename(output + '.tmp', output)
     
     if env.images and hasattr(env.images, 'clear'):
         env.images.clear()
     
     set_progress(100)
-    
     return output
-
