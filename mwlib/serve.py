@@ -70,6 +70,8 @@ class Application(wsgi.Application):
         self.mwrender_logfile = mwrender_logfile
         self.mwzip_cmd = mwzip_cmd
         self.mwzip_logfile = mwzip_logfile
+        self.mwpost_cmd = mwpost_cmd
+        self.mwpost_logfile = mwpost_logfile
         if queue_dir:
             self.queue_job = filequeue.FileJobQueuer(utils.ensure_dir(queue_dir))
         else:
