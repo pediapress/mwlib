@@ -255,7 +255,11 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     @param opener: if give, use this opener instead of instantiating a new one
     @type opener: L{urllib2.URLOpenerDirector}
     
-    @returns: fetched reponse or None
+    @param output_filename: write response to given file
+    @type output_filename: basestring
+    
+    @returns: fetched response or True if filename was given; None when
+        ignore_errors is True, and the request failed
     @rtype: str
     """
     
