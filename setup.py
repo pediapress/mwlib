@@ -46,6 +46,7 @@ setup(
     version=str(version),
     entry_points = {'console_scripts': ['mw-buildcdb = mwlib.apps:buildcdb',
                                         'mw-zip = mwlib.apps:buildzip',
+                                        'mw-post = mwlib.apps:post',
                                         'mw-render = mwlib.apps:render',
                                         'mw-parse = mwlib.apps:parse',
                                         'mw-show = mwlib.apps:show',
