@@ -143,6 +143,7 @@ class Application(wsgi.Application):
         
         response = self.json_response({
             'collection_id': collection_id,
+            'writer': writer,
         })
         
         output_path = self.get_path(collection_id, self.output_filename, writer)
