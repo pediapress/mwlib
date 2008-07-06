@@ -53,8 +53,8 @@ def make_collection_id(data):
 
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
-    error_filename = 'errors.txt'
-    status_filename = 'status.txt'
+    error_filename = 'errors'
+    status_filename = 'status'
     output_filename = 'output'
     zip_filename = 'collection.zip'
     
@@ -125,7 +125,7 @@ class Application(wsgi.Application):
     def get_path(self, collection_id, filename, ext=None):
         p = os.path.join(self.get_collection_dir(collection_id), filename)
         if ext is not None:
-            p += ext[:10]
+            p += '.' + ext[:10]
         return p
     
     def do_render(self, post_data):
@@ -156,8 +156,16 @@ class Application(wsgi.Application):
         args = [
             self.mwrender_cmd,
             '--logfile', self.mwrender_logfile,
-            '--error-file', self.get_path(collection_id, self.error_filename),
-            '--status-file', self.get_path(collection_id, self.status_filename),
+            '--error-file', self.get_path(
+                collection_id,
+                self.error_filename,
+                writer,
+            ),
+            '--status-file', self.get_path(
+                collection_id,
+                self.status_filename,
+                writer,
+            ),
             '--writer', writer,
             '--output', output_path,
         ]
