@@ -94,11 +94,11 @@ class Application(object):
         else:
             try:
                 response = self.dispatch(request)
+                if not isinstance(response, Response):
+                    log.ERROR('invalid result from dispatch(): %r' % response)
+                    response = self.http500()
             except Exception, exc:
-                return self.http500(exc)
-            if not isinstance(response, Response):
-                log.ERROR('invalid result from dispatch(): %r' % response)
-                return self.http500()
+                response = self.http500(exc)
         
         response.finish()
         start_response(
