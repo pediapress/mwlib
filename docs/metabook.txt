@@ -110,14 +110,6 @@ mw_rights_text (string, optional)
 
     Name and possibly a short description of the license
 
-title (string)
-
-    Title of license article
-
-wikitext (string)
-
-    License in wikitext
-
 
 Article
 -------

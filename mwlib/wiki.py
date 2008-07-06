@@ -142,8 +142,8 @@ url=
             url=self.configparser.get('wiki', 'url'),
         )
     
-    def get_licenses(self, icon_size=400):
-        """Return list of licenses, modify metabook to contain usable licenses
+    def get_licenses(self):
+        """Return list of licenses
         
         @returns: list of dicts with license info
         @rtype: [dict]
@@ -184,8 +184,7 @@ url=
                 'wikitext': wikitext,
             })
         
-        self.metabook.licenses = licenses
-        return self.metabook['licenses']
+        return licenses
     
 
 def _makewiki(conf, metabook=None):
