@@ -6,16 +6,19 @@ import os
 import re
 import shutil
 import simplejson
+import StringIO
 import subprocess
 import time
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 
-from mwlib import filequeue, log, utils, wsgi
+from mwlib import filequeue, log, utils, wsgi, _version
 
 # ==============================================================================
 
 log = log.Log('mwlib.serve')
-
-collection_id_rex = re.compile(r'^[a-z0-9]+$')
 
 # ==============================================================================
 
@@ -32,15 +35,33 @@ def no_job_queue(job_type, collection_id, args):
 
 # ==============================================================================
 
+collection_id_rex = re.compile(r'^[a-z0-9]+$')
+
+def make_collection_id(data):
+    sio = StringIO.StringIO()
+    for key in (
+        _version.version,
+        'metabook',
+        'base_url',
+        'template_blacklist',
+        'login_credentials',
+    ):
+        sio.write(repr(data.get(key)))
+    return md5(sio.getvalue()).hexdigest()[:16]
+
+# ==============================================================================
+
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
     error_filename = 'errors.txt'
     status_filename = 'status.txt'
     output_filename = 'output'
+    zip_filename = 'collection.zip'
     
     def __init__(self, cache_dir,
         mwrender_cmd, mwrender_logfile,
         mwzip_cmd, mwzip_logfile,
+        mwpost_cmd, mwpost_logfile,
         queue_dir):
         self.cache_dir = utils.ensure_dir(cache_dir)
         self.mwrender_cmd = mwrender_cmd
@@ -70,7 +91,7 @@ class Application(wsgi.Application):
         
     def json_response(self, data):
         return wsgi.Response(
-            content=simplejson.dumps(data).encode('utf-8'),
+            content=simplejson.dumps(data),
             headers={'Content-Type': 'application/json'},
         )
     
@@ -86,26 +107,26 @@ class Application(wsgi.Application):
     def get_collection_dir(self, collection_id):
         return os.path.join(self.cache_dir, collection_id)
     
-    def get_collection(self, post_data):
-        collection_id = post_data.get('collection_id')
+    def check_collection_id(self, collection_id):
         if not collection_id or not collection_id_rex.match(collection_id):
             raise RuntimeError('invalid collection ID %r' % collection_id)
         collection_dir = self.get_collection_dir(collection_id)
         if not os.path.exists(collection_dir):
             raise RuntimeError('no such collection: %r' % collection_id)
+    
+    def new_collection(self, post_data):
+        collection_id = make_collection_id(post_data)
+        collection_dir = self.get_collection_dir(collection_id)
+        if not os.path.isdir(collection_dir):
+            log.info('Creating new collection dir %r' % collection_dir)
+            os.makedirs(collection_dir)
         return collection_id
     
-    def new_collection(self):
-        while True:
-            collection_id = utils.uid()
-            collection_dir = self.get_collection_dir(collection_id)
-            if os.path.isdir(collection_dir):
-                continue
-            os.makedirs(collection_dir)
-            return collection_id
-    
-    def get_path(self, collection_id, filename):
-        return os.path.join(self.get_collection_dir(collection_id), filename)
+    def get_path(self, collection_id, filename, ext=None):
+        p = os.path.join(self.get_collection_dir(collection_id), filename)
+        if ext is not None:
+            p += ext[:10]
+        return p
     
     def do_render(self, post_data):
         try:
@@ -118,74 +139,111 @@ class Application(wsgi.Application):
         template_blacklist = post_data.get('template_blacklist', '')
         login_credentials = post_data.get('login_credentials', '')
         
-        collection_id = self.new_collection()
+        collection_id = self.new_collection(post_data)
         
-        metabook_path = self.get_path(collection_id, self.metabook_filename)
-        f = open(metabook_path, 'wb')
-        f.write(metabook_data)
-        f.close()
+        response = self.json_response({
+            'collection_id': collection_id,
+        })
         
-        args=[
+        output_path = self.get_path(collection_id, self.output_filename, writer)
+        if os.path.exists(output_path):
+            log.info('re-using rendered file %r' % output_path)
+            return response
+        
+        args = [
             self.mwrender_cmd,
             '--logfile', self.mwrender_logfile,
             '--error-file', self.get_path(collection_id, self.error_filename),
             '--status-file', self.get_path(collection_id, self.status_filename),
-            '--metabook', metabook_path,
-            '--config', base_url,
             '--writer', writer,
-            '--output', self.get_path(collection_id, self.output_filename),
+            '--output', output_path,
         ]
-        if writer_options:
-            args.extend(['--writer-options', writer_options])
-        if template_blacklist:
-            args.extend(['--template-blacklist', template_blacklist])
-        if login_credentials:
-            args.extend(['--login', login_credentials])
+        
+        zip_path = self.get_path(collection_id, self.zip_filename)
+        if os.path.exists(zip_path):
+            log.info('using existing ZIP file to render %r' % output_path)
+            args.extend(['--config', zip_path])
+            if writer_options:
+                args.extend(['--writer-options', writer_options])
+            if template_blacklist:
+                args.extend(['--template-blacklist', template_blacklist])
+        else:
+            log.info('rendering %r' % output_path)
+            metabook_path = self.get_path(collection_id, self.metabook_filename)
+            f = open(metabook_path, 'wb')
+            f.write(metabook_data)
+            f.close()
+            args.extend([
+                '--metabook', metabook_path,
+                '--config', base_url,
+                '--keep-zip', zip_path,
+            ])
+            if writer_options:
+                args.extend(['--writer-options', writer_options])
+            if template_blacklist:
+                args.extend(['--template-blacklist', template_blacklist])
+            if login_credentials:
+                args.extend(['--login', login_credentials])
         
         self.queue_job('render', collection_id, args)
         
-        return self.json_response({
-            'collection_id': collection_id,
-        })
+        return response
     
-    def read_status_file(self, collection_id):
+    def read_status_file(self, collection_id, writer):
+        status_path = self.get_path(collection_id, self.status_filename, writer)
         try:
-            f = open(self.get_path(collection_id, self.status_filename), 'rb')
+            f = open(status_path, 'rb')
             return simplejson.loads(f.read())
             f.close()
         except (IOError, ValueError):
             return {'progress': 0}
     
     def do_render_status(self, post_data):
-        collection_id = self.get_collection(post_data)
+        try:
+            collection_id = post_data['collection_id']
+            writer = post_data['writer']
+        except KeyError, exc:
+            return self.error_response('POST argument required: %s' % exc)
+            
+        self.check_collection_id(collection_id)
         
-        if os.path.exists(self.get_path(collection_id, self.output_filename)):
+        output_path = self.get_path(collection_id, self.output_filename, writer)
+        if os.path.exists(output_path):
             return self.json_response({
                 'collection_id': collection_id,
+                'writer': writer,
                 'state': 'finished',
             })
         
-        error_path = self.get_path(collection_id, self.error_filename)
+        error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
             text = unicode(open(error_path, 'rb').read(), 'utf-8', 'ignore')
             return self.json_response({
                 'collection_id': collection_id,
+                'writer': writer,
                 'state': 'failed',
                 'error': text,
             })
         
         return self.json_response({
             'collection_id': collection_id,
+            'writer': writer,
             'state': 'progress',
             'status': self.read_status_file(collection_id),
         })
         
     def do_download(self, post_data):
-        collection_id = self.get_collection(post_data)
-        filename = self.get_path(collection_id, self.output_filename)
-        content = open(filename, 'rb').read()
-        status = self.read_status_file(collection_id)
-        response = wsgi.Response(content=content)
+        try:
+            collection_id = post_data['collection_id']
+            writer = post_data['writer']
+        except KeyError, exc:
+            return self.error_response('POST argument required: %s' % exc)
+        
+        self.check_collection_id(collection_id)
+        
+        output_path = self.get_path(collection_id, self.output_filename, writer)
+        status = self.read_status_file(collection_id, writer)
+        response = wsgi.Response(content=open(output_path, 'rb'))
         if 'content_type' in status:
             response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
         if 'file_extension' in status:
@@ -204,22 +262,34 @@ class Application(wsgi.Application):
         template_blacklist = post_data.get('template_blacklist', '')
         login_credentials = post_data.get('login_credentials', '')
         
-        collection_id = self.new_collection()
-        
-        metabook_path = self.get_path(collection_id, self.metabook_filename)
-        open(metabook_path, 'wb').write(metabook_data)
-        
-        args = [
-            self.mwzip_cmd,
-            '--logfile', self.mwzip_logfile,
-            '--metabook', metabook_path,
-            '--config', base_url,
-            '--posturl', post_url,
-        ]
-        if template_blacklist:
-            args.extend(['--template-blacklist', template_blacklist])
-        if login_credentials:
-            args.extend(['--login', login_credentials])
+        collection_id = self.new_collection(post_data)
+        zip_path = self.get_path(collection_id, self.zip_filename)
+        if os.path.exists(zip_path):
+            log.info('POSTing ZIP file %r' % zip_path)
+            args = [
+                self.mwpost_cmd,
+                '--logfile', self.mwpost_logfile,
+                '--posturl', post_url,
+                '--input', zip_path,
+            ]
+        else:
+            log.info('Creating and POSting ZIP file %r' % zip_path)
+            metabook_path = self.get_path(collection_id, self.metabook_filename)
+            f = open(metabook_path, 'wb')
+            f.write(metabook_data)
+            f.close()
+            args = [
+                self.mwzip_cmd,
+                '--logfile', self.mwzip_logfile,
+                '--metabook', metabook_path,
+                '--config', base_url,
+                '--posturl', post_url,
+                '--output', zip_path,
+            ]
+            if template_blacklist:
+                args.extend(['--template-blacklist', template_blacklist])
+            if login_credentials:
+                args.extend(['--login', login_credentials])
         
         self.queue_job('post', collection_id, args)
         

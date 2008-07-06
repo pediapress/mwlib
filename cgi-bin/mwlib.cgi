@@ -25,6 +25,12 @@ MWZIP = 'mw-zip'
 # Logfile for mw-zip.
 MWZIP_LOGFILE = '/var/log/mw-zip.log'
 
+# (Path to) mw-post executable.
+MWPOST = 'mw-post'
+
+# Logfile for mw-post.
+MWPOST_LOGFILE = '/var/log/mw-post.log'
+
 # Queue directory for mw-watch or None if no queue should be used
 QUEUE_DIR = None
 #QUEUE_DIR = '/var/cache/mw-watch/q'
@@ -44,5 +50,7 @@ WSGIServer(serve.Application(
     mwrender_logfile=MWRENDER_LOGFILE,
     mwzip_cmd=MWZIP,
     mwzip_logfile=MWZIP_LOGFILE,
+    mwpost_cmd=MWPOST,
+    mwpost_logfile=MWPOST_LOGFILE,
     queue_dir=QUEUE_DIR,
 )).run()
