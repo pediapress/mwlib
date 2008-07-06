@@ -155,6 +155,9 @@ def buildzip():
 def post():
     parser = optparse.OptionParser(usage="%prog OPTIONS")
     parser.add_option("-i", "--input", help="ZIP file to POST")
+    parser.add_option('-l', '--logfile',
+        help='log output to LOGFILE',
+    )
     parser.add_option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
     parser.add_option("-g", "--getposturl",
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
@@ -180,9 +183,13 @@ def post():
         podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
         webbrowser.open(podclient.redirecturl)
     
+    from mwlib import utils
+    
+    if options.logfile:
+        utils.start_logging(options.logfile)
+    
     if options.daemonize:
-        from mwlib.utils import daemonize
-        daemonize(pid_file=options.pid_file)
+        utils.daemonize(pid_file=options.pid_file)
     
     def set_status(status):
         print 'Status: %s' % status
