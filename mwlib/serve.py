@@ -141,6 +141,8 @@ class Application(wsgi.Application):
         
         collection_id = self.new_collection(post_data)
         
+        log.info('render %s %s' % (collection_id, writer))
+        
         response = self.json_response({
             'collection_id': collection_id,
             'writer': writer,
@@ -208,6 +210,8 @@ class Application(wsgi.Application):
             
         self.check_collection_id(collection_id)
         
+        log.info('render_status %s %s' % (collection_id, writer))
+        
         output_path = self.get_path(collection_id, self.output_filename, writer)
         if os.path.exists(output_path):
             return self.json_response({
@@ -242,6 +246,8 @@ class Application(wsgi.Application):
         
         self.check_collection_id(collection_id)
         
+        log.info('download %s %s' % (collection_id, writer))
+        
         output_path = self.get_path(collection_id, self.output_filename, writer)
         status = self.read_status_file(collection_id, writer)
         response = wsgi.Response(content=open(output_path, 'rb'))
@@ -264,6 +270,9 @@ class Application(wsgi.Application):
         login_credentials = post_data.get('login_credentials', '')
         
         collection_id = self.new_collection(post_data)
+
+        log.info('zip_post %s %s' % (collection_id, post_url))
+        
         zip_path = self.get_path(collection_id, self.zip_filename)
         if os.path.exists(zip_path):
             log.info('POSTing ZIP file %r' % zip_path)
