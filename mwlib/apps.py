@@ -173,6 +173,8 @@ def post():
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
+    if not options.input:
+        parser.error('Specify --input.\n' + use_help)
     if (options.posturl and options.getposturl)\
         or (not options.posturl and not options.getposturl):
         parser.error('Specify either --posturl or --getposturl.\n' + use_help)
