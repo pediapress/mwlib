@@ -62,7 +62,9 @@ class Application(wsgi.Application):
         mwrender_cmd, mwrender_logfile,
         mwzip_cmd, mwzip_logfile,
         mwpost_cmd, mwpost_logfile,
-        queue_dir):
+        queue_dir,
+        default_writer='rl',
+    ):
         self.cache_dir = utils.ensure_dir(cache_dir)
         self.mwrender_cmd = mwrender_cmd
         self.mwrender_logfile = mwrender_logfile
@@ -72,6 +74,7 @@ class Application(wsgi.Application):
             self.queue_job = filequeue.FileJobQueuer(utils.ensure_dir(queue_dir))
         else:
             self.queue_job = no_job_queue
+        self.default_writer = default_writer
     
     def dispatch(self, request):
         try:
@@ -132,7 +135,7 @@ class Application(wsgi.Application):
         try:
             metabook_data = post_data['metabook']
             base_url = post_data['base_url']
-            writer = post_data['writer']
+            writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         writer_options = post_data.get('writer_options', '')
@@ -212,7 +215,7 @@ class Application(wsgi.Application):
     def do_render_status(self, post_data):
         try:
             collection_id = post_data['collection_id']
-            writer = post_data['writer']
+            writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
             
@@ -248,7 +251,7 @@ class Application(wsgi.Application):
     def do_download(self, post_data):
         try:
             collection_id = post_data['collection_id']
-            writer = post_data['writer']
+            writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         
