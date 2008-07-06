@@ -327,13 +327,11 @@ class ImageDB(object):
             ext = '%dpx.%s' % (size, ext)
         else:
             ext = '.%s' % ext
-        filename = os.path.join(self.tmpdir, utils.fsescape(name + ext))
-        
-        data = utils.fetch_url(url, ignore_errors=True)
-        if not data:
+        filename = os.path.join(self.tmpdir, utils.fsescape(name + ext))    
+        if utils.fetch_url(url, ignore_errors=True, output_filename=filename):
+            return filename
+        else:
             return None
-        open(filename, 'wb').write(data)
-        return filename
     
     def getLicense(self, name):
         """Return license of image as stated on image description page
