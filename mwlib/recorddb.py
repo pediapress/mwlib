@@ -258,17 +258,22 @@ class ZipfileCreator(object):
 # ==============================================================================
 
 
-def make_zip_file(output, options, env,
+def make_zip_file(output, env,
     set_progress=None,
     set_current_article=None,
+    no_threads=False,
+    imagesize=800,
 ):
+    set_progress = set_progress or (lambda p: None)
+    set_current_article = set_current_article or (lambda t: None)
+    
     if output is None:
         fd, output = tempfile.mkstemp(suffix='.zip')
         os.close(fd)
     
     zf = zipfile.ZipFile(output + '.tmp', 'w')
     
-    if options.no_threads:
+    if no_threads:
         num_article_threads = 0
         num_image_threads = 0
     else:
@@ -276,7 +281,7 @@ def make_zip_file(output, options, env,
         num_image_threads = 20
     
     z = ZipfileCreator(zf,
-        imagesize=options.imagesize,
+        imagesize=imagesize,
         num_article_threads=num_article_threads,
         num_image_threads=num_image_threads,
     )

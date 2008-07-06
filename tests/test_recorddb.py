@@ -6,7 +6,7 @@ import shutil
 import tempfile
 from zipfile import ZipFile
 
-from mwlib import recorddb
+from mwlib import recorddb, wiki, metabook
 
 class FakeDB(object):
     articles = {
@@ -20,10 +20,9 @@ class FakeDB(object):
     }
     def getRawArticle(self, title, revision=None):
         try:
-            a = self.articles[title]
+            return self.articles[title]['text']
         except KeyError:
             return None
-        return a['text']
     
     def getTemplate(self, title, followRedirects=False):
         try:
@@ -77,6 +76,7 @@ class TestZipFileCreator(object):
     
     def test_addArticle(self):
         self.creator.addArticle(u'article1', wikidb=self.fakedb, imagedb=None)
+        self.creator.article_adders.join()
         assert u'template1' in self.creator.templates
     
     def test_addObject(self):
@@ -85,4 +85,25 @@ class TestZipFileCreator(object):
     def test_writeContent(self):
         self.creator.writeContent()
     
-
+class TestMakeZIPFile(object):
+    class Options(object):
+        no_threads = False
+        imagesize = 800
+        
+        def __init__(self, **kwargs):
+            self.__dict__.update(kwargs)
+    
+    def setup_method(self, method):
+        fd, self.filename = tempfile.mkstemp()
+        os.close(fd)
+    
+    def teardown_mehod(self, method):
+        os.unlink(self.filename)
+    
+    def test_with_metabok(self):
+        mb = metabook.make_metabook()
+        mb['items'].append(metabook.make_article('Test'))
+        env = wiki.makewiki(':en', mb)
+        f = recorddb.make_zip_file(self.filename, env)
+        assert f == self.filename
+    

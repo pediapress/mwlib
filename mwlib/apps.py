@@ -131,9 +131,11 @@ def buildzip():
         set_status('parsing')
         set_progress(0)
         
-        filename = recorddb.make_zip_file(options.output, options, parser.env,
+        filename = recorddb.make_zip_file(options.output, parser.env,
             set_progress=lambda p: set_progress(p*0.9),
             set_current_article=set_current_article,
+            no_threads=options.no_threads,
+            imagesize=options.imagesize,
         )
         
         if podclient:
@@ -338,12 +340,11 @@ def render():
         
         if not isinstance(parser.env.wiki, zipwiki.Wiki)\
             or not isinstance(parser.env.images, zipwiki.ImageDB):
-            zip_filename = recorddb.make_zip_file(
-                options.keep_zip,
-                options,
-                parser.env,
+            zip_filename = recorddb.make_zip_file(options.keep_zip, parser.env,
                 set_progress=lambda p: set_status(progress=0.7*p),
-                set_current_article=lambda t: set_status(article=t)
+                set_current_article=lambda t: set_status(article=t),
+                no_threads=options.no_threads,
+                imagesize=options.imagesize,
             )
             parser.env.wiki = zipwiki.Wiki(zip_filename)
             parser.env.images = zipwiki.ImageDB(zip_filename)
