@@ -5,6 +5,7 @@
 import cgi
 import os
 import StringIO
+import time
 import traceback
 
 from mwlib.log import Log
@@ -85,6 +86,7 @@ class Application(object):
     """
     
     def __call__(self, env, start_response):
+        start_time = time.time()
         try:
             request = Request(env)
         except Exception, exc:
@@ -113,6 +115,7 @@ class Application(object):
                 if not d:
                     break
                 yield d
+        log.info('request took %f s' % (time.time() - start_time))
     
     def http404(self, path):
         log.not_found(path)
