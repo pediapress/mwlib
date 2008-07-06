@@ -449,6 +449,9 @@ def serve():
         action='store_true',
         help='become daemon as soon as possible',
     )
+    parser.add_option('--pid-file',
+        help='write PID of daemonized process to this file',
+    )
     parser.add_option('-P', '--protocol',
         help='one of %s (default: fcgi)' % ', '.join(proto2server.keys()),
         default='fcgi',
