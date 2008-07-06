@@ -143,17 +143,17 @@ url=
         )
     
     def get_licenses(self, icon_size=400):
-        """Return list of licenses
+        """Return list of licenses, modify metabook to contain usable licenses
         
-        @returns: list of dicts with license info and list of (imagename, imagesize) tuples
-        @rtype: ([{str: unicode}], [(unicode, int)])
+        @returns: list of dicts with license info
+        @rtype: [dict]
         """
         
-        if not hasattr(self.metabook, 'licenses'):
+        if 'licenses' not in self.metabook:
             return []
         
         licenses = []
-        for license in self.metabook.licenses:
+        for license in self.metabook['licenses']:
             wikitext = ''
             
             if license.get('mw_license_url'):
@@ -183,7 +183,9 @@ url=
                 'title': license.get('name', u'License'),
                 'wikitext': wikitext,
             })
-        return licenses
+        
+        self.metabook.licenses = licenses
+        return self.metabook['licenses']
     
 
 def _makewiki(conf, metabook=None):
