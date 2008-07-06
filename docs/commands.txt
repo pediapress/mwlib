@@ -62,6 +62,11 @@ one command.
 
   If given, no images are included in the output document.
 
+``-i, --imagesize=IMAGESIZE``
+
+  Maximum size (which can be either width or height, whichever is greater) of
+  images. If images exceed this maximum size, they're scaled down.  
+
 ``--template-blacklist=TEMPLATE_BLACKLIST``
 
   A name of an article containing a list of "blacklisted templates", i.e.
@@ -146,6 +151,10 @@ Specific Options
   If an error occurs, write the error message to this file. If no error occurs
   this file is not written/created.
 
+``--keep-zip=FILENAME``
+
+  Do not remove the (otherwise temporary) ZIP file, but save it under FILENAME.
+
 
 The ``mw-zip`` Command
 ======================
@@ -168,11 +177,35 @@ Usage
 Specific Options
 ----------------
 
-``-i, --imagesize=IMAGESIZE``
+``-p, --posturl=POSTURL``
 
-  Maximum size (which can be either width or height, whichever is greater) of
-  images. If images exceed this maximum size, they're scaled down.
+  Upload the ZIP file with an HTTP POST request to the given URL.
+
+``-g , --getposturl``
+
+  Retrieve the POSTURL from PediaPress and open the upload page in the web
+  browser.
+
+
+The ``mw-post`` Command
+=======================
+
+Send a ZIP file generated with `the mw-zip command`_ to a given or an
+automatically retrieved URL via HTTP POST request.
+
+Usage
+-----
+::
+
+  mw-post [OPTIONS]
   
+Specific Options
+----------------
+
+``-i, --input=INPUT``
+  
+  Filename of ZIP file.
+
 ``-p, --posturl=POSTURL``
 
   Upload the ZIP file with an HTTP POST request to the given URL.
@@ -234,6 +267,16 @@ Specific Options
 ``--mwzip-logfile=MWZIP_LOGFILE``
 
   Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
+  be writeable.
+
+``--mwpost=MWPOST``
+
+  Path to the ``mw-post`` executable. The default is just "mw-post" which
+  is ok, as long as ``mw-post`` is in the ``PATH``.
+
+``--mwpost-logfile=MWPOST_LOGFILE``
+
+  Logfile for ``mw-post``. Default is "/var/log/mw-post.log". The file must
   be writeable.
 
 ``-q, --queue-dir=QUEUE_DIR``
