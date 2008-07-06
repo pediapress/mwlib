@@ -16,6 +16,10 @@ class OptionParser(optparse.OptionParser):
         self.add_option("-c", "--config",
             help="configuration file, ZIP file or base URL",
         )
+        self.add_option("-i", "--imagesize",
+            help="max. pixel size (width or height) for images (default: 800)",
+            default=800,
+        )
         self.add_option("-m", "--metabook",
             help="JSON encoded text file with article collection",
         )
@@ -36,6 +40,12 @@ class OptionParser(optparse.OptionParser):
             action='store_true',
             help='do not use threads to fetch articles and images in parallel',
         )
+        self.add_option("-d", "--daemonize", action="store_true",
+            help='become a daemon process as soon as possible',
+        )
+        self.add_option('--pid-file',
+            help='write PID of daemonized process to this file',
+        )
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
@@ -49,6 +59,11 @@ class OptionParser(optparse.OptionParser):
             self.metabook = simplejson.loads(open(self.options.metabook, 'rb').read())
         if self.options.login is not None and ':' not in self.options.login:
             self.error('Please specify username and password as USERNAME:PASSWORD.')
+        try:
+            self.options.imagesize = int(self.options.imagesize)
+            assert self.options.imagesize > 0
+        except (ValueError, AssertionError):
+            self.error('Argument for --imagesize must be an integer > 0.')
         if self.args:
             if self.metabook is None:
                 self.metabook = metabook.make_metabook()
