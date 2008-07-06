@@ -295,6 +295,8 @@ def render():
                     print ' %s:\t%s' % (name, info['help'])
         return
     
+    if options.config is None:
+        parser.error('Please specify --config.\n' + use_help)
     
     if options.output is None:
         parser.error('Please specify an output file with --output.\n' + use_help)
