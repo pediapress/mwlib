@@ -3,6 +3,7 @@
 """WSGI dispatcher base class"""
 
 import cgi
+import os
 import StringIO
 import traceback
 
@@ -68,7 +69,14 @@ class Response(object):
         self.status_text = status_text
     
     def finish(self):
-        self.headers['Content-Length'] = '%d' % len(self.content)
+        if isinstance(self.content, unicode):
+            self.content = self.content.encode('utf-8')
+        if isinstance(self.content, str):
+            content_length = len(self.content)
+        else:
+            content_length = os.fstat(self.content.fileno()).st_size
+        self.headers['Content-Length'] = '%d' % content_length
+            
 
 
 class Application(object):
@@ -97,7 +105,14 @@ class Application(object):
             '%d %s' % (response.status_code, response.status_text),
             response.headers.items()
         )
-        return response.content
+        if isinstance(response.content, str):
+            yield response.content
+        else:
+            while True:
+                d = response.content.read(0x20000)
+                if not d:
+                    break
+                yield d
     
     def http404(self, path):
         log.not_found(path)
