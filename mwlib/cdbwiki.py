@@ -156,7 +156,10 @@ class WikiDB(object):
         if mo:
             redirect = mo.group('redirect')
             redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
-            return self.getTemplate(redirect)
+            if followRedirects:
+                return self.getTemplate(redirect, followRedirects=False)
+            else:
+                sys.stderr.write('Chained redirect not followed: %r -> %r' % (title, redirect))
         return res
 
 
