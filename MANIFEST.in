@@ -37,6 +37,7 @@ include mwlib/expr.py
 include mwlib/filequeue.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
+include mwlib/jobsched.py
 include mwlib/lang.py
 include mwlib/lang.txt
 include mwlib/licenses.py
@@ -90,6 +91,7 @@ include tests/test_expander.py
 include tests/test_expr.py
 include tests/test_html.py
 include tests/test_imgmap.py
+include tests/test_jobsched.py
 include tests/test_metabook.py
 include tests/test_mwapidb.py
 include tests/test_mwscan.py

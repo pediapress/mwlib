@@ -134,7 +134,8 @@ def buildzip():
         filename = recorddb.make_zip_file(options.output, parser.env,
             set_progress=lambda p: set_progress(p*0.9),
             set_current_article=set_current_article,
-            no_threads=options.no_threads,
+            num_article_threads=options.num_article_threads,
+            num_image_threads=options.num_image_threads,
             imagesize=options.imagesize,
         )
         
@@ -347,7 +348,8 @@ def render():
             zip_filename = recorddb.make_zip_file(options.keep_zip, parser.env,
                 set_progress=lambda p: set_status(progress=0.7*p),
                 set_current_article=lambda t: set_status(article=t),
-                no_threads=options.no_threads,
+                num_article_threads=options.num_article_threads,
+                num_image_threads=options.num_image_threads,
                 imagesize=options.imagesize,
             )
             parser.env.wiki = zipwiki.Wiki(zip_filename)

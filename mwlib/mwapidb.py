@@ -161,7 +161,7 @@ class APIHelper(object):
         })
         self.opener.open('%sapi.php' % self.base_url, post_data)
     
-    def query(self, ignore_errors=False, **kwargs):
+    def query(self, ignore_errors=True, **kwargs):
         args = {
             'action': 'query',
             'format': 'json',

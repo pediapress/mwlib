@@ -99,11 +99,22 @@ one command.
   and PASSWORD (currently this is only supported for mwapidb, i.e. when the
   --config argument is a base URL or shortcut, or when ``type=mwapi`` in the
   configuration file).
+  
+``--num-article-threads=NUM``
+
+  Number of threads to fetch and parse articles in parallel. Set to 0 or use
+  ``--no-threads`` to not use threading. Default is 3.
+
+``--num-image-threads=NUM``
+
+  Number of threads to fetch images in parallel. Set to 0 or use
+  ``--no-threads`` to not use threading. Default is 3.
 
 ``--no-threads``
 
   If given, do not use multiple threads to fetch articles and images in
-  parallel.
+  parallel. This overrides ``--num-article-threads`` and/or
+  ``--num-image-threads``.
 
 
 The ``mw-render`` Command

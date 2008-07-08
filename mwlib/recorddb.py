@@ -77,8 +77,8 @@ class ZipfileCreator(object):
     
     def __init__(self, zf,
         imagesize=None,
-        num_article_threads=5,
-        num_image_threads=20,
+        num_article_threads=3,
+        num_image_threads=5,
     ):
         """
         @param imagesize: max. size of images
@@ -261,7 +261,8 @@ class ZipfileCreator(object):
 def make_zip_file(output, env,
     set_progress=None,
     set_current_article=None,
-    no_threads=False,
+    num_article_threads=3,
+    num_image_threads=5,
     imagesize=800,
 ):
     set_progress = set_progress or (lambda p: None)
@@ -272,13 +273,6 @@ def make_zip_file(output, env,
         os.close(fd)
     
     zf = zipfile.ZipFile(output + '.tmp', 'w')
-    
-    if no_threads:
-        num_article_threads = 0
-        num_image_threads = 0
-    else:
-        num_article_threads = 5
-        num_image_threads = 20
     
     z = ZipfileCreator(zf,
         imagesize=imagesize,
