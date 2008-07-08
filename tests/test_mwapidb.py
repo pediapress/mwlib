@@ -6,9 +6,17 @@ import shutil
 import tempfile
 import time
 
+import py
+
 from PIL import Image
 
-from mwlib.mwapidb import ImageDB, WikiDB
+from mwlib.mwapidb import APIHelper, ImageDB, WikiDB
+
+class TestAPIHelper(object):
+    def test_num_tries(self):
+        api_helper = APIHelper('http://localhost:12345/')
+        api_helper.page_query() # ignore_errors=True per default
+        py.test.raises(RuntimeError, 'api_helper.page_query(ignore_errors=False)')
 
 class TestWikiDB(object):
     base_url = 'http://en.wikipedia.org/w/'

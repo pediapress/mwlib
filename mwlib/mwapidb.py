@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import tempfile
+import time
 import urllib
 import urllib2
 import urlparse
@@ -188,15 +189,20 @@ class APIHelper(object):
                 return None
             raise RuntimeError('api.php query failed. Are you sure you specified the correct baseurl?')
     
-    def page_query(self, **kwargs):
-        q = self.query(**kwargs)
-        if q is None:
-            return None
-        try:
-            page = q['pages'].values()[0]
-        except (KeyError, IndexError):
-            return None
-        return page
+    def page_query(self, num_tries=2, **kwargs):
+        for i in range(num_tries):
+            try:
+                q = self.query(**kwargs)
+                if q is not None:
+                    try:
+                        return q['pages'].values()[0]
+                    except (KeyError, IndexError):
+                        return None
+            except:
+                if i == num_tries - 1:
+                    raise
+            time.sleep(0.5)
+        return None
     
 
 # ==============================================================================
@@ -217,7 +223,7 @@ class ImageDB(object):
             self.api_helper = api_helper
         else:
             self.api_helper = APIHelper(base_url)
-            assert self.api_helper is not None, 'invalid base URL %r' % base_url
+            assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
         
         if username is not None:
             self.login(username, password)
