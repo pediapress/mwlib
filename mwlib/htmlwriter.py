@@ -216,6 +216,8 @@ class HTMLWriter(object):
             
         self.out.write("</a>")
 
+    writeArticleLink = writeLink
+
     def writeSpecialLink(self, obj):
         if obj.children:
             for x in obj.children:

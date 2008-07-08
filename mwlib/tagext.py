@@ -128,12 +128,11 @@ class ListingExtension(TagExtension):
              ("long", u", Longitude: %s"),
              ("tags", u", Tags: %s")]
     def __call__(self, source, attributes):
-        for k,v in self.attrs:
-            print k, v, attributes.get(k,None)
         t = u"".join(v%attributes[k] for k,v in self.attrs if attributes.get(k,None))
         if source:
             t += u", %s" % source
         return self.parse(t)
+
 register(ListingExtension)
 
 class SeeExtension(ListingExtension):
