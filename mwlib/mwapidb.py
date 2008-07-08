@@ -445,15 +445,19 @@ class WikiDB(object):
         @returns: list of principal authors
         @rtype: [unicode]
         """
-        
-        result = self.api_helper.page_query(
-            titles=title,
-            redirects=1,
-            prop='revisions',
-            rvprop='user|ids|flags|comment',
-            rvlimit=500,
-        )
-        if result is None:
+
+        result = None
+        for rvlimit in (500, 50):
+            result = self.api_helper.page_query(
+                titles=title,
+                redirects=1,
+                prop='revisions',
+                rvprop='user|ids|flags|comment',
+                rvlimit=rvlimit,
+            )
+            if result is not None:
+                break
+        else:
             return None
         
         try:
