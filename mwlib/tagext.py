@@ -152,9 +152,9 @@ class EatExtension(ListingExtension):
     name = "eat"
 register(EatExtension)
 
-class TrinkExtension(ListingExtension):
-    name = "trink"
-register(TrinkExtension)
+class DrinkExtension(ListingExtension):
+    name = "drink"
+register(DrinkExtension)
 
 class SleepExtension(ListingExtension):
     name = "sleep"
