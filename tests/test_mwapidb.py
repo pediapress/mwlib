@@ -50,15 +50,18 @@ class TestWikiDB(object):
         print 'AUTHORS:', authors
         authors = self.w.getAuthors(u'Physics', revision='206917093')
         print 'AUTHORS:', authors
+        assert authors
         
         w = WikiDB('http://en.wikipedia.com/w/') # note: the .com is on purpose!
         authors = w.getAuthors(u'Physics')
         print 'AUTHORS:', authors
+        assert authors
 
         # wikitravel.org only allows rvlimit=50 when fetching the authors:
-        w = WikiDB('http://wikitravel.org/wiki/en/') # note: the .com is on purpose!
+        w = WikiDB('http://wikitravel.org/wiki/en/')
         authors = w.getAuthors(u'Egypt')
         print 'AUTHORS:', authors
+        assert authors
     
     def test_parse_article_url(self):
         from mwlib.mwapidb import parse_article_url

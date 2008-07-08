@@ -446,7 +446,6 @@ class WikiDB(object):
         @rtype: [unicode]
         """
 
-        result = None
         for rvlimit in (500, 50):
             result = self.api_helper.page_query(
                 titles=title,
