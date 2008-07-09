@@ -214,7 +214,9 @@ def test_titleparts_negative():
     expandstr("{{#titleparts:Help:Link/a/b|-1|}}", "Help:Link/a")
     expandstr("{{#titleparts:Help:Link/a/b|1|-1|}}", "b")
 
-
+def test_titleparts_nonint():
+    expandstr("{{#titleparts:Help:Link/a/b|bla}}", "Help:Link/a/b")
+    
 def test_iferror():
     expandstr("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression")
     expandstr("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input")
