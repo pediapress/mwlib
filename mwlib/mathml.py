@@ -62,9 +62,9 @@ def latex2mathml(latex):
             mathml=mathml[0]
             mathml.set("xmlns","http://www.w3.org/1998/Math/MathML")
             # add annotation with original TeX
-            a = ET.Element("annotation", encoding="TeX")
-            a.text=latex
-            mathml.append(a)
+            #a = ET.Element("annotation", encoding="TeX")
+            #a.text=latex
+            #mathml.append(a)
             return mathml
         else:
             log ("an error occured, \n%s\n" % outmsg)

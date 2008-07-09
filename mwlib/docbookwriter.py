@@ -541,7 +541,8 @@ def writer(env, output, status_callback):
     DocBookWriter(env, status_callback=scb, documenttype="book").writeBook(book, output=output)
 
 writer.description = 'DocBook XML'
-
+writer.content_type = 'text/xml'
+writer.file_extension = 'xml'
 
 
 def main():

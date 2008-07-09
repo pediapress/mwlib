@@ -393,7 +393,12 @@ class MWXHTMLWriter(object):
         em.text = u"Hiero"
         return s
 
-    def xwriteMath(self, obj): 
+
+    def xwriteMath(self, obj):
+        return mathml.latex2mathml(obj.caption) or self.xwriteMath_WITH_OBJECT(obj)
+        
+
+    def xwriteMath_WITH_OBJECT(self, obj): 
         """
         this won't validate as long as we are using xhtml 1.0 transitional
 
@@ -740,11 +745,14 @@ def xhtmlwriter(env, output, status_callback, writer=MWXHTMLWriter):
     scb(status='rendering', progress=80)
     writer(env, status_callback=scb).writeBook(book, output=output)
 xhtmlwriter.description = 'XHTML 1.0 Transitional'
+xhtmlwriter.content_type = 'text/xml'
+xhtmlwriter.file_extension = 'html'
 
 def xmlwriter(env, output, status_callback):
     xhtmlwriter(env, output, status_callback, writer=MWXMLWriter)
 xmlwriter.description = 'XML representation of the parse tree'
-
+xmlwriter.content_type = 'text/xml'
+xmlwriter.file_extension = 'xml'
 
 def main():
     for fn in sys.argv[1:]:
@@ -757,7 +765,7 @@ def main():
         preprocess(r)
         parser.show(sys.stdout, r)
         dbw = MWXHTMLWriter()
-        dbw.write(r)
+        dbw.writeBook(r)
         nf = open("%s.html" % fn, "w")
         nf.write(dbw.asstring())
         

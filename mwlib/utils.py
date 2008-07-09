@@ -211,7 +211,8 @@ class PersistedDict(UserDict.UserDict):
         @type max_cacheable_size: int
         """
         
-        super(PersistedDict, self).__init__(*args, **kwargs)
+        #super(PersistedDict, self).__init__(*args, **kwargs)
+        UserDict.UserDict.__init__(self, *args, **kwargs)
         self.max_cacheable_size = max_cacheable_size
         ensure_dir(self.cache_dir)
     

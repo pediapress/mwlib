@@ -15,7 +15,7 @@ from mwlib import advtree
 from mwlib import utils
 from mwlib import mwapidb
 
-utils.fetch_cache = PersistedDict(max_cacheable_size=5*1024*1024)
+utils.fetch_cache = utils.PersistedDict(max_cacheable_size=5*1024*1024)
 
 default_baseurl = "en.wikipedia.org/w"
 default_debug = 1
@@ -66,6 +66,9 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     substituted by the image name (e.g. 'Picture1.jpg).
     This defaults to '%s'
 
+
+    usage /dbxml/ _____________________________________________________:
+    as above but emitting docbook
     
     usage /imageresolver/ ___________________________________________:   
     
@@ -141,14 +144,13 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         print "_servXML", title, base_url, debug
 
-        db = mwapidb.WikiDB(base_url, license=None)
+        db = mwapidb.WikiDB(base_url)
         db.print_template = None # deactivate print template lookups
         tree = db.getParsedArticle(title, revision=None)
 
         if dialect == "mwxhtml":
             xhtmlwriter.preprocess(tree)
-            dbw = xhtmlwriter.MWXHTMLWriter(language=language, namespace=namespace, 
-                                            imagesrcresolver=imagesrcresolver,
+            dbw = xhtmlwriter.MWXHTMLWriter(imagesrcresolver=imagesrcresolver,
                                             debug=False)
         elif dialect == "mwxml":
             advtree.buildAdvancedTree(tree) # this should be optional
@@ -156,14 +158,13 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         elif dialect == "dbxml":
             from mwlib import docbookwriter
             docbookwriter.preprocess(tree)
-            dbw = docbookwriter.DocBookWriter(language=language, namespace=namespace, 
-                                            imagesrcresolver=imagesrcresolver,
+            dbw = docbookwriter.DocBookWriter(imagesrcresolver=imagesrcresolver,
                                             debug=debug) 
         else:
             raise Exception, "unkonwn export"
 
 
-        dbw.write(tree)
+        dbw.writeBook(tree)
         if debug:
             dbw.writeparsetree(tree)
 
@@ -207,7 +208,7 @@ class XMLHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
 
 
-def run(port=8000):
+def run(port=8002):
     server_address = ('', port)
     httpd = BaseHTTPServer.HTTPServer(server_address, XMLHandler)
     print "listening on port", port
