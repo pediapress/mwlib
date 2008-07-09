@@ -625,7 +625,7 @@ class MWXHTMLWriter(object):
     def xwritePreFormatted(self, n):
         return ET.Element("pre")
 
-    def xxwriteParagraph(self, obj):
+    def xwriteParagraph(self, obj):
         """
         currently the parser encapsulates almost anything into paragraphs, 
         but XHTML1.0 allows no block elements in paragraphs.
