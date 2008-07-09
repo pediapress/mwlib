@@ -31,3 +31,25 @@ normal paragraph
 
 back to normal
 
+[[w:en:Help:Piped link|en:Help:Piped link]]
+
+[[wikipedia:]]
+
+[[wikipedia:somePage]]
+
+[[wikibooks:SomePage]]
+
+[[:fr:]]
+
+[[:fr:andAnotherPage]]
+
+[[s:de:Hauptseite]]
+
+[[:de:q:Hauptseite]]
+
+[[w:Interwiki]]
+
+[[Category:SomeCategory]]
+
+[[:Category:SomeCategoryWhichIsDisplayed]]
+
