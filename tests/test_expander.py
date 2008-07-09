@@ -2,7 +2,9 @@
 
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
+from mwlib.xfail import xfail
 
+        
 def parse_and_show(s):
     res=expander.parse(s)
     print "PARSE:", repr(s)    
@@ -15,7 +17,7 @@ def test_noexpansion_inside_pre():
 
     res = expandstr("<pre>A{{Pipe}}B</pre>", "<pre>A{{Pipe}}B</pre>", wikidb=DictDB(Pipe="C"))
 
-
+@xfail
 def test_undefined_variable():
     db = DictDB(Art="{{Pipe}}",
                 Pipe="{{{undefined_variable}}}")
@@ -270,6 +272,7 @@ def test_urlencode():
 def test_urlencode_non_ascii():
     expandstr(u'{{urlencode:L\xe9onie}}', 'L%C3%A9onie')
 
+@xfail
 def test_anchorencode():
     expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')
     
