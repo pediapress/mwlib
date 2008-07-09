@@ -124,13 +124,15 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
             break
     if res["state"] == "finished":
         d = download(res["collection_id"], serviceurl).read()
+        log.info("received PDF with %d bytes" % len(d))
         checkPDF(d)
-        print "received PDF with %d bytes" % len(d)
+        return True
     else:
         reportError('render', metabook, res,
             from_email=from_email,
             mail_recipients=mail_recipients,
         )
+    return False
 
     
 
