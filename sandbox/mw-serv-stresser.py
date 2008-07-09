@@ -2,25 +2,33 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-"""main programs - installed via setuptools' entry_points"""
 from optparse import OptionParser
+import os
 import urllib
 import urllib2
+import tempfile
 import time
 import random
 import simplejson
-import mwlib.mwapidb
-import mwlib.utils 
+import subprocess
+
+from mwlib import mwapidb, utils, log
 import mwlib.metabook
 
+system = 'mw-serv-stresser'
+
+log = log.Log('mw-serv-stresser')
 
 # disable fetch cache
-mwlib.utils.fetch_url_orig = mwlib.utils.fetch_url 
+utils.fetch_url_orig = utils.fetch_url 
 def fetch_url(*args, **kargs):
     kargs["fetch_cache"] = {} 
-    return mwlib.utils.fetch_url_orig(*args, **kargs) 
-mwlib.utils.fetch_url = fetch_url
+    return utils.fetch_url_orig(*args, **kargs) 
+utils.fetch_url = fetch_url
 
+writer_options = {
+    'rl': '', # TODO
+}
 
 def getRandomArticles(api, min=1, max=100):
     #"http://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=10"
@@ -42,67 +50,135 @@ def getMetabook(articles):
         metabook['items'].append(article)
     return metabook
 
-def postCollection(metabook, baseurl, serviceurl, writer="rl"):
-    data = {"metabook":simplejson.dumps(metabook), "writer":writer, "base_url":baseurl.encode('utf-8'), "command":"render"}
+def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
+    log.info('POSTing render command')
+    data = {
+        "metabook": simplejson.dumps(metabook),
+        "writer": writer,
+        "writer_options": writer_options.get(writer, ''),
+        "base_url": baseurl.encode('utf-8'),
+        "command":"render",
+    }
     data = urllib.urlencode(data)
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
-def getStatus(colid,serviceurl):
+def getRenderStatus(colid, serviceurl):
+    log.info('get render status')
     data = urllib.urlencode({"command":"render_status", "collection_id":colid})
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
 def download(colid,serviceurl):
+    log.info('download')
     data = urllib.urlencode({"command":"download", "collection_id":colid})
     return urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)) # fh
 
-def reportError(metabook, res):
-    print "had error with collection", repr(metabook)
-    print "error:"
-    print res["error"]
-    # FIXME REPORT ERROR and ARTICLES
+def reportError(command, metabook, res,
+    from_email=None,
+    mail_recipients=None,
+):
+    utils.report(
+        system=system,
+        subject='Error with command %r' % command,
+        error=res.get('error'),
+        res=res,
+        metabook=metabook,
+        from_email=from_email,
+        mail_recipients=mail_recipients,
+    )
 
-def checkservice(api, serviceurl, baseurl, maxarticles):
+def checkPDF(data):
+    log.info('checkPDF')
+    fd, filename = tempfile.mkstemp(suffix='.pdf')
+    os.write(fd, data)
+    os.close(fd)
+    try:
+        popen = subprocess.Popen(args=['pdfinfo', filename], stdout=subprocess.PIPE)
+        rc = popen.wait()
+        assert rc == 0, 'pdfinfo rc = %d' % rc
+        for line in popen.stdout:
+            line = line.strip()
+            if not line.startswith('Pages:'):
+                continue
+            num_pages = int(line.split()[-1])
+            assert num_pages > 0, 'PDF is empty'
+            break
+        else:
+            raise RuntimeError('invalid PDF')
+    finally:
+        os.unlink(filename)
+
+def checkservice(api, serviceurl, baseurl, maxarticles,
+    from_email=None,
+    mail_recipients=None,
+):
     arts = getRandomArticles(api, min=1, max=maxarticles)
+    log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
-    res = postCollection(metabook, baseurl, serviceurl)
+    res = postRenderCommand(metabook, baseurl, serviceurl)
     while True:
         time.sleep(1)
-        res = getStatus(res["collection_id"], serviceurl)
+        res = getRenderStatus(res["collection_id"], serviceurl)
         if res["state"] != "progress":
             break
     if res["state"] == "finished":
         d = download(res["collection_id"], serviceurl).read()
-        # FIXME DO SOME CHECKS
+        checkPDF(d)
         print "received PDF with %d bytes" % len(d)
-    else: # error?
-        assert res["state"] == "failed"
-        reportError(metabook, res)
+    else:
+        assert res['state'] == 'error', 'unknown state'
+        reportError('render', metabook, res,
+            from_email=from_email,
+            mail_recipients=mail_recipients,
+        )
 
     
 
 def main():
     parser = OptionParser(usage="%prog [OPTIONS]")
     parser.add_option("-b", "--baseurl", help="baseurl of wiki")
-    parser.add_option('-l', '--logfile',help='log output to LOGFILE')
+    parser.add_option('-l', '--logfile', help='log output to LOGFILE')
+    parser.add_option('-f', '--from-email',
+        help='From: email address for error mails',
+    )
+    parser.add_option('-r', '--mail-recipients',
+        help='To: email addresses ("," separated) for error mails',
+    )
     parser.add_option('-m', '--max-narticles',
-                      help='maximum number of articles for random collections (min is 1)',
-                      default=10,
+        help='maximum number of articles for random collections (min is 1)',
+        default=10,
     )
     parser.add_option('-s', '--serviceurl',
-                      help="location of the mw-serv server to test",
-                      default='http://tools.pediapress.com/mw-serve/',
-                      #default='http://localhost:8899/mw-serve/',
+        help="location of the mw-serv server to test",
+        default='http://tools.pediapress.com/mw-serve/',
+        #default='http://localhost:8899/mw-serve/',
     )
     use_help = 'Use --help for usage information.'
     options, args = parser.parse_args()   
-    api =  mwlib.mwapidb.APIHelper(options.baseurl)
+    api =  mwapidb.APIHelper(options.baseurl)
     maxarts = int(getattr(options, "max-narticles", 10))
+    mail_recipients = None
+    if options.mail_recipients:
+        mail_recipients = options.mail_recipients.split(',')
     while True:
-        checkservice(api, options.serviceurl, options.baseurl, maxarts)
-        # FIXME ALSO ENCAPSULATE THIS AND REPORT ERRORS
-                            
+        try:
+            checkservice(api,
+                options.serviceurl,
+                options.baseurl,
+                maxarts,
+                from_email=options.from_email,
+                mail_recipients=options.mail_recipients,
+            )
+        except KeyboardInterrupt:
+            break
+        except:
+            utils.report(
+                system=system,
+                subject='checkservice() failed',
+                from_email=options.from_email,
+                mail_recipients=options.mail_recipients,
+            )
 
 
 if __name__ == '__main__':
