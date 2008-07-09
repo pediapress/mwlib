@@ -222,7 +222,7 @@ class Link(Node):
 
         for name, target in interwikis.iteritems():
             res[name.lower()] = (InterwikiLink, target)
-
+        
         for lang in langs:
             res[lang.lower()] = (LangLink, lang)
 
@@ -270,8 +270,8 @@ class Link(Node):
 
         (self.__class__, self.namespace) = (
                 self._specializeMap.get(ns.lower(), (ArticleLink, self.NS_MAIN)))
-
-        if len(ns) == 2:
+        
+        if len(ns) == 2 and not isinstance(self, InterwikiLink):
             # Assume this is an unlisted language
             self.__class__ = LangLink
             self.namespace = ns.lower()
