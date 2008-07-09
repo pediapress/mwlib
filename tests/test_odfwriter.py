@@ -12,6 +12,8 @@ import tempfile
 import os, sys
 import re
 
+ODFWriter.ignoreUnknownNodes = False
+
 class ValidationError(Exception):
     def __init__(self, value):
         self.value = value

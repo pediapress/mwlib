@@ -47,6 +47,7 @@ class SkipChildren(object):
 
 
 class DocBookWriter(object):
+    ignoreUnknownNodes = True
     namedLinkCount = 1
     # stylesheet which uses the mozilla Extensible Binding Language
     # http://www.informatik.fh-wiesbaden.de/~werntges/home_t/proj/dbkcss102/wysiwygdocbook.xml
@@ -132,11 +133,14 @@ class DocBookWriter(object):
             
             if m: # find handler
                 e = m(obj)
-            else:
+            elif self.ignoreUnknownNodes:
                 self.writedebug(obj, parent, "was skipped")
                 log("SKIPPED")
                 showNode(obj)
                 e = None
+            else:
+                raise Exception("unknown node:%r" % obj)
+            
 
             if isinstance(e, SkipChildren): # do not process children of this node
                 return e.element

@@ -9,7 +9,7 @@ from mwlib.uparser import parseString
 from mwlib.parser import show
 from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
 from mwlib.xhtmlwriter import validate as mwvalidate
-
+MWXHTMLWriter.ignoreUnknownNodes = False
 import re
 
 xmllintAvailable = bool(0 == os.system("xmllint --version"))

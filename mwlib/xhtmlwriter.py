@@ -178,7 +178,7 @@ class SkipChildren(object):
 
 class MWXHTMLWriter(object):
 
-        
+    ignoreUnknownNodes = True
     namedLinkCount = 1
 
     header='''<?xml version="1.0" encoding="UTF-8"?>
@@ -276,11 +276,13 @@ class MWXHTMLWriter(object):
             m=getattr(self, m, None)
             if m: # find handler
                 e = m(obj)
-            else:
+            elif self.ignoreUnknownNodes:
                 self.writedebug(obj, parent, "was skipped")
                 log("SKIPPED")
                 showNode(obj)
                 e = None
+            else:
+                raise Exception("unknown node:%r" % obj)
             
             if isinstance(e, SkipChildren): # do not process children of this node
                 return e.element
@@ -623,7 +625,7 @@ class MWXHTMLWriter(object):
     def xwritePreFormatted(self, n):
         return ET.Element("pre")
 
-    def xwriteParagraph(self, obj):
+    def xxwriteParagraph(self, obj):
         """
         currently the parser encapsulates almost anything into paragraphs, 
         but XHTML1.0 allows no block elements in paragraphs.
