@@ -640,7 +640,7 @@ def test_image_colon_link():
     assert not isinstance(r, parser.ImageLink)
 
 def test_interwiki_link():
-    r=parse("[[wict:bla]]").find(parser.SpecialLink)[0]
+    r=parse("[[wikt:bla]]").find(parser.InterwikiLink)[0]
     assert r.target=='bla'
     assert r.namespace == 'wiktionary'
 
