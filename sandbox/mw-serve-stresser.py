@@ -15,9 +15,9 @@ import subprocess
 from mwlib import mwapidb, utils, log
 import mwlib.metabook
 
-system = 'mw-serv-stresser'
+system = 'mw-serve-stresser'
 
-log = log.Log('mw-serv-stresser')
+log = log.Log('mw-serve-stresser')
 
 # disable fetch cache
 utils.fetch_url_orig = utils.fetch_url 
@@ -150,7 +150,7 @@ def main():
         default=10,
     )
     parser.add_option('-s', '--serviceurl',
-        help="location of the mw-serv server to test",
+        help="location of the mw-serve server to test",
         default='http://tools.pediapress.com/mw-serve/',
         #default='http://localhost:8899/mw-serve/',
     )
