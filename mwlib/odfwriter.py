@@ -384,6 +384,8 @@ class ODFWriter(object):
             a.addText(obj.target)
         return a
 
+    owriteArticleLink = owriteLink
+
     def owriteURL(self, obj):
         a = text.A(href=obj.caption)
         if not obj.children:
