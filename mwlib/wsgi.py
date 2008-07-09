@@ -53,12 +53,12 @@ class Request(object):
                 content_length, len(content),
             ))
         
-        sio = StringIO.StringIO(content)
+        
         content_type, pdict = cgi.parse_header(self.env.get('CONTENT_TYPE', ''))
         if content_type == 'multipart/form-data':
-            post_data = cgi.parse_multipart(sio, pdict)
+            post_data = cgi.parse_multipart(StringIO.StringIO(content), pdict)
         else:
-            post_data = cgi.parse(sio)
+            post_data = cgi.parse_qs(content)
         return self.multi2single(post_data)
     
 

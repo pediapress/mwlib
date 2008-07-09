@@ -424,6 +424,8 @@ class MWXHTMLWriter(object):
             a.text = obj.target
         return a
 
+    xwriteArticleLink = xwriteLink
+
     def xwriteURL(self, obj):
         a = ET.Element("a", href=obj.caption)
         a.set("class", "mwx.link.external")
