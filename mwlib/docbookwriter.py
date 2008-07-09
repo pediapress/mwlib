@@ -181,6 +181,15 @@ class DocBookWriter(object):
             t.text = self.environment.metabook['title']
         return e
 
+    def dbwriteNode(self, obj):
+        pass
+
+    def dbwriteBreakingReturn(self, obj):
+        e = ET.Element("literallayout")
+        e.text = "\n"
+        return e
+        
+
 
     def dbwriteChapter(self, obj):
         e = ET.Element("chapter")
@@ -268,7 +277,7 @@ class DocBookWriter(object):
         p.writeto = ET.SubElement(p, "term")
         return p
 
-    def dbwriteDefinitionDefinition(self, obj):
+    def dbwriteDefinitionDescription(self, obj):
         p = ET.Element("listitem") # FIXME
         p.writeto = ET.SubElement(p, "para")
         return p
