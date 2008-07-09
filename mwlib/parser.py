@@ -41,10 +41,13 @@ FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'STYLE', 
                            TagToken])
 
     
-def show(out, node, indent=0):
-    print >>out, "    "*indent, node
+def show(out, node, indent=0, verbose=False):
+    if verbose:
+        print >>out, "    "*indent, node, repr(getattr(node, 'vlist', ''))
+    else:
+        print >>out, "    "*indent, node
     for x in node:
-        show(out, x, indent+1)
+        show(out, x, indent+1, verbose=verbose)
 
 
 paramrx = re.compile("(?P<name>\w+) *= *(?P<value>(?:(?:\".*?\")|(?:(?:\w|[%:])+)))")
