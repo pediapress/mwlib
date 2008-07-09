@@ -33,13 +33,16 @@ def getRandomArticles(api, min=1, max=100):
     return list(articles)[:max]
 
 
-def postCollection(articles, baseurl, serviceurl, writer="rl"):
+def getMetabook(articles):
     metabook = mwlib.metabook.make_metabook()
     metabook['title'] = u"title test"
     metabook['subtitle'] = u"sub title test"
     for a in articles:
         article = mwlib.metabook.make_article(title=a)
         metabook['items'].append(article)
+    return metabook
+
+def postCollection(metabook, baseurl, serviceurl, writer="rl"):
     data = {"metabook":simplejson.dumps(metabook), "writer":writer, "base_url":baseurl.encode('utf-8'), "command":"render"}
     data = urllib.urlencode(data)
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
@@ -50,7 +53,34 @@ def getStatus(colid,serviceurl):
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
+def download(colid,serviceurl):
+    data = urllib.urlencode({"command":"download", "collection_id":colid})
+    return urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)) # fh
 
+def reportError(metabook, res):
+    print "had error with collection", repr(metabook)
+    print "error:"
+    print res["error"]
+    # FIXME REPORT ERROR and ARTICLES
+
+def checkservice(api, serviceurl, baseurl, maxarticles):
+    arts = getRandomArticles(api, min=1, max=maxarticles)
+    metabook = getMetabook(arts)
+    res = postCollection(metabook, baseurl, serviceurl)
+    while True:
+        time.sleep(1)
+        res = getStatus(res["collection_id"], serviceurl)
+        if res["state"] != "progress":
+            break
+    if res["state"] == "finished":
+        d = download(res["collection_id"], serviceurl).read()
+        # FIXME DO SOME CHECKS
+        print "received PDF with %d bytes" % len(d)
+    else: # error?
+        assert res["state"] == "failed"
+        reportError(metabook, res)
+
+    
 
 def main():
     parser = OptionParser(usage="%prog [OPTIONS]")
@@ -58,26 +88,20 @@ def main():
     parser.add_option('-l', '--logfile',help='log output to LOGFILE')
     parser.add_option('-m', '--max-narticles',
                       help='maximum number of articles for random collections (min is 1)',
-                      default=100,
+                      default=10,
     )
     parser.add_option('-s', '--serviceurl',
                       help="location of the mw-serv server to test",
-                      #default='http://tools.pediapress.com/mw-serve/',
-                      default='http://localhost:8899/mw-serve/',
+                      default='http://tools.pediapress.com/mw-serve/',
+                      #default='http://localhost:8899/mw-serve/',
     )
     use_help = 'Use --help for usage information.'
-    options, args = parser.parse_args()
-
-    
+    options, args = parser.parse_args()   
     api =  mwlib.mwapidb.APIHelper(options.baseurl)
-    arts = getRandomArticles(api, min=1, max=int(getattr(options, "max-articles", 2)))
-    print arts
-    res = postCollection(arts, options.baseurl, options.serviceurl)
-    print res
+    maxarts = int(getattr(options, "max-narticles", 10))
     while True:
-        res = getStatus(res["collection_id"], options.serviceurl)
-        print res
-        time.sleep(1)
+        checkservice(api, options.serviceurl, options.baseurl, maxarts)
+        # FIXME ALSO ENCAPSULATE THIS AND REPORT ERRORS
                             
 
 
