@@ -6,6 +6,7 @@
 
 from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
+from mwlib.xfail import xfail
 
 parse = uparser.simpleparse
     
@@ -26,6 +27,7 @@ def test_style():
     assert isinstance(s, parser.Style)
     assert s.caption == "'''"
 
+@xfail
 def test_single_quote_after_style():
     """http://code.pediapress.com/wiki/ticket/20"""
     
@@ -141,6 +143,7 @@ blubb
     assert "blubb" in res
     assert "{|" in res
 
+@xfail
 def test_cell_parse_bug():
     """http://code.pediapress.com/wiki/ticket/17"""
     r=parse("""{|
@@ -603,7 +606,9 @@ def test_table_row_exclamation_mark():
     print "CELLS:", cells
     assert len(cells)==2, 'expected exactly two cells'
 
-def test_unknown_tag(): 
+@xfail
+def test_unknown_tag():
+    """http://code.pediapress.com/wiki/ticket/212"""
     r=parse("<nosuchtag>foobar</nosuchtag>")
     txt = r.asText()
     print "TXT:", repr(txt)
