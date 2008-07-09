@@ -256,17 +256,6 @@ def test_nested_list_listitem():
     assert isinstance(outer.children[0], parser.Item), "expected an Item inside ItemList"
     
     
-def test_image_link_colon():
-    """http://code.pediapress.com/wiki/ticket/28"""
-    img = uparser.simpleparse("[[:Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
-    print img, img.colon
-    assert img.colon, "expected colon attribute to be True"
-
-    img = uparser.simpleparse("[[Image:DNA orbit animated.gif|Large version]]").find(parser.ImageLink)[0]
-    print img, img.colon
-    assert not img.colon, "expected colon attribute to be False"
-
-
 def checktag(tagname):
     source = "<%s>foobar</%s>" % (tagname, tagname)
     r=parse(source)
