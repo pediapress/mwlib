@@ -20,7 +20,7 @@ def xfail(fun): # FIXME: what about generators?
     import os
     doc = fun.__doc__ or ""
     if 'http://code.pediapress.com/wiki/ticket/' not in doc:
-        stats.warnings.append("expected failure %r does not reference a ticket in it's docstring" % (fun,))
+        stats.warnings.append("expected failure %s.%s does not reference a ticket in it's docstring" % (fun.__module__, fun.__name__,))
         
     if 'XFAIL' in os.environ:
 
