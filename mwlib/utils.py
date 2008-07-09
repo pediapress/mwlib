@@ -1,9 +1,16 @@
+import cgi
+from email.mime.text import MIMEText
+from email.utils import make_msgid, formatdate
 import errno
 import os
+import pprint
+import smtplib
+import socket
 import StringIO
 import sys
 import tempfile
 import time
+import traceback
 import urllib2
 import UserDict
 
@@ -335,4 +342,106 @@ def ensure_dir(d):
         log.info('mkdir -r %r' % d)
         os.makedirs(d)
     return d
+
+
+# ==============================================================================
+
+def send_mail(from_email, to_emails, subject, body, host='mail', port=25):
+    """Send an email via SMTP
+    
+    @param from_email: email address for From: header
+    @type from_email: str
+    
+    @param to_emails: sequence of email addresses for To: header
+    @type to_email: [str]
+    
+    @param subject: text for Subject: header
+    @type subject: unicode
+    
+    @param body: text for message body
+    @type body: unicode
+    
+    @param host: mail server host
+    @type host: str
+    
+    @param port: mail server port
+    @type port: int
+    """
+    
+    connection = smtplib.SMTP(host, port)
+    msg = MIMEText(body.encode('utf-8'), 'plain', 'utf-8')
+    msg['Subject'] = subject.encode('utf-8')
+    msg['From'] = from_email
+    msg['To'] = ', '.join(to_emails)
+    msg['Date'] = formatdate()
+    msg['Message-ID'] = make_msgid()
+    connection.sendmail(from_email, to_emails, msg.as_string())
+    connection.close()
+
+
+# ==============================================================================
+
+
+def report(system='', subject='', from_email=None, mail_recipients=None, **kw):
+    path = os.path.expanduser("~/errors/%s" % system)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    fp = os.path.join(path, "%.2f.txt" % time.time())
+    precision = 3
+    while os.path.exists(fp):
+        fp = os.path.join(path, ("%%.%df.txt" % precision) % time.time())
+        precision += 1
+    
+    outfile = open(fp, 'w', 0) # unbuffered
+    outfile.write(subject)
+    outfile.write("\n<pre>")
+    
+    class Wrap(object):
+        def write(self, x):
+            try:
+                outfile.write(cgi.escape(x))
+            except UnicodeError:
+                outfile.write(cgi.escape(repr(x)))
+    f = Wrap()
+    
+    print >>f, "SYSTEM:", repr(system)
+    
+    traceback.print_exc(file=f)
+    
+    try:
+        fqdn = socket.getfqdn()
+    except:
+        fqdn = 'not available'
+
+    print >>f, "FQDN:", repr(fqdn)
+    
+    print >>f, "CWD:", repr(os.getcwd())
+    print >>f
+    
+    print >>f, "ENV:"
+    pprint.pprint(os.environ, stream=f)
+    
+    print >>f, "KEYWORDS:"    
+    pprint.pprint(kw, stream=f)
+    
+    print >>f, "BREAK"
+    
+    outfile.write('\n</pre>')
+    outfile.close()
+    
+    log.report('system=%r subject=%r. Wrote to file %r' % (system, subject, fp))
+    
+    if from_email and mail_recipients:
+        try:
+            text = open(fp, 'rb').read()
+            send_mail(
+                from_email,
+                mail_recipients,
+                'REPORT [%s]: %s' % (fqdn, subject),
+                text,
+            )
+        except Exception, e:
+            log.ERROR('Could not send mail: %s' % e)
+    
+    return fp
 
