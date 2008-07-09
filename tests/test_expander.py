@@ -274,6 +274,7 @@ def test_urlencode_non_ascii():
 
 @xfail
 def test_anchorencode():
+    """http://code.pediapress.com/wiki/ticket/213"""
     expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')
     
 def test_fullurl():
