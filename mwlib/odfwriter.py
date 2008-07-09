@@ -174,7 +174,7 @@ class ODFWriter(object):
 
 
     def owriteSection(self, obj):
-        level = 2 + obj.getSectionLevel() # H2 is max within a page
+        level = 1 + obj.getSectionLevel() # H1 is for an article, starting with h2
         #title = u"%d %s" %(level,  obj.children[0].children[0].caption ) # FIXME (debug output)
         title = obj.children[0].children[0].caption
         r = text.Section(stylename=style.sect, name=title) 

@@ -3,7 +3,6 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 import sys
-import os
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib.parser import show
@@ -11,8 +10,6 @@ from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
 from mwlib.xhtmlwriter import validate as mwvalidate
 MWXHTMLWriter.ignoreUnknownNodes = False
 import re
-
-xmllintAvailable = bool(0 == os.system("xmllint --version"))
 
 
 def getXHTML(wikitext):
@@ -33,8 +30,6 @@ class ValidationError(Exception):
 
 
 def validate(xml):
-    if not xmllintAvailable:
-        return
     r = mwvalidate(xml)
     if len(r):
         print xml

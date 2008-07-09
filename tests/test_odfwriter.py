@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import os, sys
 import re
+from mwlib import xfail
 
 ODFWriter.ignoreUnknownNodes = False
 
@@ -64,6 +65,7 @@ def test_fixparagraphs():
 </p>
 """.decode("utf8")
     xml = getXML(raw)
+
 
 def test_gallery():
     raw="""
@@ -145,7 +147,7 @@ this test will validate, but sections will be broken.
     
     reg = re.compile(r'text:outline-level="(\d)"', re.MULTILINE)
     res =  list(reg.findall(xml))
-    goal =  [u'1', u'2', u'3']
+    goal =  [u'1', u'2', u'3', u'4']
     print res, "should be",goal
     if not res == goal:
         print xml
@@ -311,3 +313,13 @@ def test_snippets():
     for s in snippets.get_all():
         print "testing", repr(s.txt)
         xml = getXML(s.txt)
+
+def test_minimal_unicodebug():
+    from odf import text
+    import StringIO
+    auml = "ä".decode("utf8")
+    e = text.P()
+    e.addText(auml)
+    s = StringIO.StringIO()
+    e.toXml(0, s)
+    s.getvalue()
