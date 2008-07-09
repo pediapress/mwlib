@@ -643,6 +643,9 @@ def test_interwiki_link():
     r=parse("[[wikt:bla]]").find(parser.InterwikiLink)[0]
     assert r.target=='bla'
     assert r.namespace == 'wiktionary'
+    r=parse("[[mw:bla]]").find(parser.InterwikiLink)[0]
+    assert r.target=='bla'
+    assert r.namespace == 'mediawiki'
 
 def test_language_link():
     r=parse("[[es:bla]]").find(parser.LangLink)[0]
