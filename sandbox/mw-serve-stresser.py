@@ -27,7 +27,7 @@ def fetch_url(*args, **kargs):
 utils.fetch_url = fetch_url
 
 writer_options = {
-    'rl': '', # TODO
+    'rl': 'strict',
 }
 
 def getRandomArticles(api, min=1, max=100):
@@ -126,8 +126,6 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
         d = download(res["collection_id"], serviceurl).read()
         checkPDF(d)
         print "received PDF with %d bytes" % len(d)
-    else:
-        assert res['state'] == 'error', 'unknown state'
         reportError('render', metabook, res,
             from_email=from_email,
             mail_recipients=mail_recipients,
@@ -165,24 +163,35 @@ def main():
     mail_recipients = None
     if options.mail_recipients:
         mail_recipients = options.mail_recipients.split(',')
+    ok_count = 0
+    fail_count = 0
     while True:
         try:
-            checkservice(api,
+            ok = checkservice(api,
                 options.serviceurl,
                 options.baseurl,
                 maxarts,
                 from_email=options.from_email,
-                mail_recipients=options.mail_recipients,
+                mail_recipients=mail_recipients,
             )
+            if ok:
+                ok_count += 1
+                log.check('OK')
+            else:
+                fail_count += 1
+                log.check('FAIL!')
         except KeyboardInterrupt:
             break
         except:
+            fail_count += 1
+            log.check('EPIC FAIL!!!')
             utils.report(
                 system=system,
                 subject='checkservice() failed',
                 from_email=options.from_email,
-                mail_recipients=options.mail_recipients,
+                mail_recipients=mail_recipients,
             )
+        log.info('ok: %d, failed: %d' % (ok_count, fail_count))
 
 
 if __name__ == '__main__':
