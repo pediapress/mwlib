@@ -156,6 +156,10 @@ def main():
     )
     use_help = 'Use --help for usage information.'
     options, args = parser.parse_args()   
+    
+    if options.logfile:
+        utils.start_logging(options.logfile)
+    
     api =  mwapidb.APIHelper(options.baseurl)
     maxarts = int(getattr(options, "max-narticles", 10))
     mail_recipients = None
