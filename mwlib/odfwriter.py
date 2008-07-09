@@ -55,6 +55,7 @@ def showNode(obj):
 
 
 class ODFWriter(object):
+    ignoreUnknownNodes = True
     namedLinkCount = 1
 
     def __init__(self, env=None, status_callback=None, language="en", namespace="en.wikipedia.org", creator="", license="GFDL"):
@@ -136,10 +137,12 @@ class ODFWriter(object):
             
             if m: # find handler
                 e = m(obj)
-            else:
+            elif self.ignoreUnknownNodes:
                 log("SKIPPED")
                 showNode(obj)
                 e = None
+            else:
+                raise Exception("unknown node:%r" % obj)
             
             if e is None:
                 e = parent
