@@ -22,6 +22,7 @@ http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 import weakref
 from mwlib.parser import Magic, Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
+from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
 from mwlib.parser import Item, ItemList,  Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, Timeline
 from mwlib.parser import  ImageLink, Article, Book, Chapter
@@ -587,9 +588,7 @@ def removeNewlines(node):
         node.caption = node.caption.replace("\n", " ")
       
     for c in node.children[:]:
-        removeNewlines(c)
-
-        
+        removeNewlines(c)            
 
 
 def buildAdvancedTree(root): # USE WITH CARE
