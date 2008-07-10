@@ -194,7 +194,7 @@ def main():
                 from_email=options.from_email,
                 mail_recipients=mail_recipients,
             )
-        log.info('ok: %d, failed: %d' % (ok_count, fail_count))
+        log.info('%s\tok: %d, failed: %d' % (options.baseurl, ok_count, fail_count))
 
 
 if __name__ == '__main__':
