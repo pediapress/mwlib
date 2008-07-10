@@ -342,7 +342,23 @@ class ODFWriter(object):
 
 
     def owritePreFormatted(self, n):
-        return text.P(stylename=style.preformatted) # FIXME
+        # need to replace \n \t
+        p = text.P(stylename=style.preformatted) 
+        col = []
+        for c in n.getAllDisplayText():
+            if c == "\n":
+                p.addText(u"".join(col))
+                col = []
+                p.addElement(text.LineBreak())
+            elif c == "\t":
+                p.addText(u"".join(col))
+                col = []
+                p.addElement(text.Tab())
+            else:
+                col.append(c)
+        p.addText(u"".join(col))
+        n.children = []  # remove the children
+        return p
 
     def owriteCode(self, obj): 
         return text.P(stylename=style.code)

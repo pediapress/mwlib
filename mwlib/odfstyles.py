@@ -29,7 +29,7 @@ h6 = style.Style(name="Heading 6", family="paragraph", defaultoutlinelevel="6")
 h6.addElement(style.TextProperties(attributes={'fontsize':"14pt", 'fontweight':"bold"}))
 textbody = style.Style(name="Text body", family="paragraph", parentstylename=standard)
 textbody.addElement(style.ParagraphProperties(
-        attributes={'marginbottom':"0.212cm", 'margintop':"0cm",'textalign':"justify", 'justifysingleword':"false"}))
+        attributes={'marginbottom':"0cm", 'margintop':"0cm",'textalign':"left"}))
 subtitle = style.Style(name="Subtitle", family="paragraph", nextstylename=textbody)
 subtitle.addElement(style.ParagraphProperties(textalign="center") )
 subtitle.addElement(style.TextProperties(fontsize="14pt", fontstyle="italic", fontname="Arial"))
@@ -59,9 +59,17 @@ and
 
 formula = style.Style(name="Formula", family="graphic")
 formula.addElement(style.GraphicProperties(attributes={"anchortype":"as-char" ,"y":"0in","marginleft":"0.0791in","marginright":"0.0791in","verticalpos":"middle","verticalrel":"text", "oledrawaspect":"1"}))
+
+
 sect  = style.Style(name="Sect1", family="section")
 #sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
 
+preformatted = style.Style(name="Preformatted",family="paragraph")
+preformatted.addElement(style.ParagraphProperties(margintop="0in",marginbottom="0in"))
+preformatted.addElement(style.TextProperties(attributes={"fontname":"DejaVu Sans Mono", "fontsize":"10pt"}))
+
+hr = style.Style(name="HorizontalLine", family="paragraph")
+hr.addElement(style.ParagraphProperties(margintop="0in",marginbottom="0.1965in",borderlinewidthbottom="0.0008in 0.0138in 0.0008in",padding="0in",borderleft="none",borderright="none",bordertop="none",borderbottom="0.0154in double #808080"))
 
 
 # inline Text styles ---------------------------------------------
@@ -70,13 +78,14 @@ emphasis = style.Style(name="Emphasis",family="text")
 emphasis.addElement(style.TextProperties(fontstyle="italic")) # shpould be also bold, but is paresed differntly
 italic = emphasis
 strong = style.Style(name="Bold",family="text")
-strong.addElement(style.TextProperties(fontweight="bold", fontweightasian="bold",fontweightcomplex="bold"))
+#strong.addElement(style.TextProperties(fontstyle="bold"))
+strong.addElement(style.TextProperties(fontweight="bold"))
 bold = strong
-sup = style.Style(name="Sup", family="paragraph")
+sup = style.Style(name="Sup", family="text")
 sup.addElement(style.TextProperties(attributes={'textposition':"super"}))
-sub = style.Style(name="Sub", family="paragraph")
+sub = style.Style(name="Sub", family="text")
 sub.addElement(style.TextProperties(attributes={'textposition':"-30% 50%"}))
-underline = style.Style(name="Underline", family="paragraph")
+underline = style.Style(name="Underline", family="text")
 underline.addElement(style.TextProperties(attributes={'textunderlinestyle':"solid"}))
 
 overline = underline # FIXME
@@ -104,13 +113,15 @@ cite = style.Style(name="Cite", family="paragraph")
 cite.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in",'marginright':"0.12in"}))
 cite.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
 
-code = source = preformatted = teletyped = cite # FIXME
+code = source = preformatted 
+
+teletyped = cite # FIXME
 
 dumbcolumn = style.Style(name="Dumbcolumn", family="table-column") # REALLY FIXME
 dumbcolumn.addElement(style.TableColumnProperties(attributes={'columnwidth':"1.0in"}))
 
 
-hr = style.Style(name="Horizontal_20_Line")
+
 
 def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
@@ -137,33 +148,99 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(subtitle)
     doc.styles.addElement(title)
     doc.styles.addElement(photo)
+    doc.styles.addElement(strong)
+    doc.styles.addElement(emphasis)
+    doc.styles.addElement(preformatted)
     doc.styles.addElement(hr)
 
 
 
-# try automatic
-def applyStylesToDoc_test(doc):
-    doc.fontfacedecls.addElement(arial)
-    doc.automaticstyles.addElement(standard)
-    doc.automaticstyles.addElement(dumbcolumn)
-    doc.automaticstyles.addElement(indented)
-    doc.automaticstyles.addElement(blockquote)
-    doc.automaticstyles.addElement(ArticleHeader)
-    doc.automaticstyles.addElement(fixed)
-    doc.automaticstyles.addElement(cite)
-    doc.automaticstyles.addElement(underline)
-    doc.automaticstyles.addElement(sup)
-    doc.automaticstyles.addElement(sub)
-    doc.automaticstyles.addElement(center)
-    doc.automaticstyles.addElement(formula)
-    doc.automaticstyles.addElement(h1)
-    doc.automaticstyles.addElement(h2)
-    doc.automaticstyles.addElement(h3)
-    doc.automaticstyles.addElement(h4)
-    doc.automaticstyles.addElement(h5)
-    doc.automaticstyles.addElement(h6)
-    doc.automaticstyles.addElement(sect)
-    doc.automaticstyles.addElement(textbody)
-    doc.automaticstyles.addElement(subtitle)
-    doc.automaticstyles.addElement(title)
-    doc.automaticstyles.addElement(photo)
+
+def test(fn):
+
+    from odf.opendocument import OpenDocumentText
+    #from odf.style import Header
+    #from odf.text import P, Section, Span, Chapter, H
+    from odf import text
+
+    textdoc = OpenDocumentText()
+    applyStylesToDoc(textdoc)
+    tdoc = textdoc.text
+    
+    
+    # headings
+    for i,s in enumerate((h1,h2,h3,h4,h5)):
+        i+=1
+        t = text.H(outlinelevel=i, stylename=s, text="Heading %d" % i)
+        tdoc.addElement(t)
+
+    # preformatted
+    p = text.P(stylename=preformatted)
+    p.addText(u"This")
+    p.addElement(text.LineBreak())
+    p.addText(u"Is")
+    p.addElement(text.Tab())
+    p.addText(u"PreFormatted    d    d                      d")
+    p.addElement(text.LineBreak())
+    p.addText(u"very long lineeeee"*30) # DOES NOT WORK
+    tdoc.addElement(p)
+
+    # fixed
+    p = text.P(stylename=fixed)
+    p.addText("This is fixed 1234 width, continued with HR")
+    tdoc.addElement(p)
+
+    # hr
+    p = text.P(stylename=hr)
+    tdoc.addElement(p)
+
+    p = text.P(stylename=textbody)
+    tdoc.addElement(p)
+    
+    # strong
+    t = text.Span(stylename=strong)    
+    t.addText("this is strong")
+    p.addElement(t)
+    p.addText(" ")
+
+    # italic
+    t = text.Span(stylename=italic)    
+    t.addText("this is italic")
+    p.addElement(t)
+
+    # strong italic FIXME
+    p.addText(" ")
+    t = text.Span(stylename=strong)    
+    p.addElement(t)
+    t2 = text.Span(stylename=italic)    
+    t2.addText("is this bold italic?")
+    t.addElement(t2)
+    p.addText(" ")
+
+    # underline FIXME
+    t = text.Span(stylename=underline)    
+    t.addText("this is underline")
+    p.addElement(t)
+    p.addText(" ")
+
+    # sub FIXME
+    t = text.Span(stylename=sub)    
+    t.addText("this is sub")
+    p.addElement(t)
+    p.addText(" ")
+
+    # sup FIXME
+    t = text.Span(stylename=sup)    
+    t.addText("this is sup")
+    p.addElement(t)
+
+
+    textdoc.save(fn)
+
+
+if __name__ == "__main__":
+    import sys
+    fn = sys.argv[1]
+    test(fn)
+    
+
