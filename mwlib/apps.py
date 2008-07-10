@@ -352,6 +352,7 @@ def render():
                 num_image_threads=options.num_image_threads,
                 imagesize=options.imagesize,
             )
+            parser.env.images.clear()
             parser.env.wiki = zipwiki.Wiki(zip_filename)
             parser.env.images = zipwiki.ImageDB(zip_filename)
         else:
