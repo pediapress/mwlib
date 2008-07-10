@@ -15,26 +15,33 @@ from mwlib import xfail
 
 ODFWriter.ignoreUnknownNodes = False
 
+# hook for reuse of generated files
+def removefile(fn):
+    os.remove(fn)
+odtfile_cb = removefile
+
+
 class ValidationError(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
+
+
  
 def validate(odfw):
     "THIS USES odflint AND WILL FAIL IF NOT INSTALLED"
     fh, tfn = tempfile.mkstemp() 
     odfw.getDoc().save(tfn, True)
     tfn +=".odt"
-    print "writing to", tfn
     cmd = "odflint %s" %tfn
     p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE,stdout=subprocess.PIPE, close_fds=True)
     p.wait()
     r = p.stderr.read() + p.stdout.read()
     if len(r):
         raise ValidationError, r
-    else:
-        os.remove(tfn)
+    odtfile_cb(tfn)
+
 
 def getXML(wikitext):
     db = DummyDB()
@@ -46,7 +53,7 @@ def getXML(wikitext):
     odfw.write(r)
     validate(odfw)
     xml = odfw.asstring()
-    print xml # usefull to inspect generateded xml
+    #print xml # usefull to inspect generateded xml
     return xml
 
 
@@ -175,6 +182,15 @@ without starting a new paragraph.
 '''.decode("utf8")
     xml = getXML(raw)
 
+
+def test_bold():
+    raw="""
+is this '''bold''' 
+
+another '''bold''
+
+""".decode("utf8")
+    xml = getXML(raw)
     
 
 
@@ -314,12 +330,6 @@ def test_snippets():
         print "testing", repr(s.txt)
         xml = getXML(s.txt)
 
-def test_minimal_unicodebug():
-    from odf import text
-    import StringIO
-    auml = "ä".decode("utf8")
-    e = text.P()
-    e.addText(auml)
-    s = StringIO.StringIO()
-    e.toXml(0, s)
-    s.getvalue()
+def test_horizontalrule():
+    raw=r'''before_hr<hr/>after_hr'''
+    xml = getXML(raw)

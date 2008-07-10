@@ -23,6 +23,7 @@ ToDo:
 More Info:
 * http://books.evc-cit.info/odbook/book.html
 * http://opendocumentfellowship.com/projects/odfpy
+* http://testsuite.opendocumentfellowship.com/ sample documents
 """
 
 import sys
@@ -99,13 +100,25 @@ class ODFWriter(object):
         return self.doc
 
     def asstring(self, element = None):
-        import StringIO
-        s = StringIO.StringIO()
+
+        class Writer(object):
+            def __init__(self):
+                self.res = []
+            def write(self, txt):
+                if isinstance(txt, unicode):
+                    self.res.append(str(txt))
+                else:
+                    self.res.append(txt)
+            def getvalue(self):
+                return "".join(self.res) 
+
+        #import StringIO
+        #s = StringIO.StringIO()
+        s = Writer()
         if not element:
             element = self.doc.text 
         element.toXml(0, s)
-        
-        print repr(s.buflist), repr(s.buf)
+       
         return s.getvalue()
         #return unicode(s.buf) + ''.join(s.buflist)
 
@@ -472,9 +485,16 @@ class ODFWriter(object):
         frame.addElement(draw.Image(href=href))
         return frame
 
-    def writeNode(self, n):
+    def owriteNode(self, n):
         pass # simply write children
 
+    def owriteGallery(self, obj):
+        pass # simply write children FIXME
+
+    def owriteHorizontalRule(self, obj):
+        p = text.P(stylename=style.hr)
+        p.text = u"hr?"
+        return p
 
 # - unimplemented methods copy from xhtml writer ---------------------------------------------------
 
@@ -514,6 +534,7 @@ class ODFWriter(object):
 
 
 
+
 #  Special Objects -----------------------------------------------
 
     def xwriteTimeline(self, obj): 
@@ -530,8 +551,6 @@ class ODFWriter(object):
             return self.write(obj.imagemap.imagelink)
         
 
-    def xwriteGallery(self, obj):
-        pass # FIXME
 
 
 # - func  ---------------------------------------------------

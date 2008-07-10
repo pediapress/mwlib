@@ -70,7 +70,7 @@ emphasis = style.Style(name="Emphasis",family="text")
 emphasis.addElement(style.TextProperties(fontstyle="italic")) # shpould be also bold, but is paresed differntly
 italic = emphasis
 strong = style.Style(name="Bold",family="text")
-strong.addElement(style.TextProperties(fontsize="14pt", fontweight="bold"))
+strong.addElement(style.TextProperties(fontweight="bold", fontweightasian="bold",fontweightcomplex="bold"))
 bold = strong
 sup = style.Style(name="Sup", family="paragraph")
 sup.addElement(style.TextProperties(attributes={'textposition':"super"}))
@@ -110,6 +110,8 @@ dumbcolumn = style.Style(name="Dumbcolumn", family="table-column") # REALLY FIXM
 dumbcolumn.addElement(style.TableColumnProperties(attributes={'columnwidth':"1.0in"}))
 
 
+hr = style.Style(name="Horizontal_20_Line")
+
 def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
     doc.styles.addElement(standard)
@@ -135,3 +137,33 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(subtitle)
     doc.styles.addElement(title)
     doc.styles.addElement(photo)
+    doc.styles.addElement(hr)
+
+
+
+# try automatic
+def applyStylesToDoc_test(doc):
+    doc.fontfacedecls.addElement(arial)
+    doc.automaticstyles.addElement(standard)
+    doc.automaticstyles.addElement(dumbcolumn)
+    doc.automaticstyles.addElement(indented)
+    doc.automaticstyles.addElement(blockquote)
+    doc.automaticstyles.addElement(ArticleHeader)
+    doc.automaticstyles.addElement(fixed)
+    doc.automaticstyles.addElement(cite)
+    doc.automaticstyles.addElement(underline)
+    doc.automaticstyles.addElement(sup)
+    doc.automaticstyles.addElement(sub)
+    doc.automaticstyles.addElement(center)
+    doc.automaticstyles.addElement(formula)
+    doc.automaticstyles.addElement(h1)
+    doc.automaticstyles.addElement(h2)
+    doc.automaticstyles.addElement(h3)
+    doc.automaticstyles.addElement(h4)
+    doc.automaticstyles.addElement(h5)
+    doc.automaticstyles.addElement(h6)
+    doc.automaticstyles.addElement(sect)
+    doc.automaticstyles.addElement(textbody)
+    doc.automaticstyles.addElement(subtitle)
+    doc.automaticstyles.addElement(title)
+    doc.automaticstyles.addElement(photo)
