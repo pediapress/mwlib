@@ -64,7 +64,7 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
     return simplejson.loads(res)
 
 def getRenderStatus(colid, serviceurl):
-    log.info('get render status')
+    #log.info('get render status')
     data = urllib.urlencode({"command":"render_status", "collection_id":colid})
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
