@@ -152,6 +152,7 @@ class ZipfileCreator(object):
             recorddb = RecordDB(wikidb, self.articles, self.templates)
             raw = recorddb.getRawArticle(title, revision=revision)
             if raw is None:
+                log.warn('Could not get article %r' % title)
                 return
             self.parseArticle(title,
                 revision=revision,
