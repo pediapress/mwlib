@@ -652,13 +652,13 @@ def test_long_language_link():
     assert r.namespace == 'csb'
 
 def test_normalize():
-    r=parse("[[MediaWiki:__bla_ _]]").find(parser.LangLink)[0]
+    r=parse("[[MediaWiki:__bla_ _]]").find(parser.NamespaceLink)[0]
     assert r.target=='bla'
     assert r.namespace == 8
 
 def test_normalize_with_caps():
     parser.Link.capitalizeTarget = True
-    r=parse("[[MediaWiki:__bla_ _ ]]").find(parser.LangLink)[0]
+    r=parse("[[MediaWiki:__bla_ _ ]]").find(parser.NamespaceLink)[0]
     parser.Link.capitalizeTarget = False
     assert r.target=='Bla'
     assert r.namespace == 8

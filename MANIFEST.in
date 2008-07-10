@@ -2,6 +2,7 @@ include MANIFEST.in
 include README.html
 include README.txt
 include cgi-bin/mwlib.cgi
+include conftest.py
 include docs/Makefile
 include docs/commands.html
 include docs/commands.txt
@@ -76,11 +77,13 @@ include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/writerbase.py
 include mwlib/wsgi.py
+include mwlib/xfail.py
 include mwlib/xhtmlwriter.py
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py
 include sandbox/anywikisampler.py
 include sandbox/citeweb.py
+include sandbox/mw-serve-stresser.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
 include tests/data/test.zip
