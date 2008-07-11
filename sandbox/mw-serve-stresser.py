@@ -170,7 +170,7 @@ def main():
         utils.start_logging(options.logfile)
     
     api =  mwapidb.APIHelper(options.baseurl)
-    maxarts = int(getattr(options, "max-narticles", 10))
+    maxarts = int(options.max_narticles)
     mail_recipients = None
     if options.mail_recipients:
         mail_recipients = options.mail_recipients.split(',')
