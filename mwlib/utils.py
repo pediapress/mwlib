@@ -1,6 +1,11 @@
 import cgi
-from email.mime.text import MIMEText
-from email.utils import make_msgid, formatdate
+try:
+    from email.mime.text import MIMEText
+    from email.utils import make_msgid, formatdate
+except ImportError:
+    from email.MIMEText import MIMEText
+    from email.Utils import make_msgid, formatdate
+    
 import errno
 import os
 import pprint
