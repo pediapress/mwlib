@@ -126,7 +126,8 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
         if res["state"] != "progress":
             break
         if render_timeout and (time.time()-st) > render_timeout:
-            res = {"state":"failed", "reason":"render_timeout (%ds)" % render_timeout}
+            res["state"] = "failed"
+            res["reason"] = "render_timeout (%ds)" % render_timeout
             break
     if res["state"] == "finished":
         d = download(res["collection_id"], serviceurl).read()
