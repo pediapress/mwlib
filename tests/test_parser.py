@@ -661,3 +661,14 @@ def test_normalize_with_caps():
     parser.Link.capitalizeTarget = False
     assert r.target=='Bla'
     assert r.namespace == 8
+
+def test_quotes_in_tags():
+    """http://code.pediapress.com/wiki/ticket/199"""
+    vlist = parse("""<source attr="value"/>""").find(parser.TagNode)[0].vlist
+    print "VLIST:", vlist
+    assert vlist==dict(attr="value"), "bad vlist"
+    
+    vlist = parse("""<source attr='value'/>""").find(parser.TagNode)[0].vlist
+    print "VLIST:", vlist
+    assert vlist==dict(attr="value"), "bad vlist"
+    
