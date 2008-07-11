@@ -64,7 +64,7 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
-def postRenderKillCommand(collection_id, writer="rl"):
+def postRenderKillCommand(collection_id, serviceurl, writer="rl"):
     log.info('POSTing render_kill command %r' % collection_id)
     data = {
         "collection_id": collection_id,
@@ -139,7 +139,7 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
             break
         if render_timeout and (time.time()-st) > render_timeout:
             log.timeout('Killing render proc for collection ID %r' % collection_id)
-            r = postRenderKillCommand(collection_id)
+            r = postRenderKillCommand(collection_id, serviceurl)
             if r['killed']:
                 log.info('Killed.')
             else:
