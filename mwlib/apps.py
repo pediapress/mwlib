@@ -5,6 +5,7 @@
 """main programs - installed via setuptools' entry_points"""
 
 import optparse
+import os
 
 def buildcdb():
     parser = optparse.OptionParser(usage="%prog --input XMLDUMP --output OUTPUT")
@@ -22,7 +23,6 @@ def buildcdb():
     if not (input and output):
         parser.error("missing argument.")
         
-    import os
     from mwlib import cdbwiki
 
     cdbwiki.BuildWiki(input, output)()
@@ -107,7 +107,9 @@ def buildzip():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        daemonize(pid_file=options.pid_file)
+        daemonize()
+    if options.pid_file:
+        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
     def set_status(status):
         print 'Status: %s' % status
@@ -125,7 +127,6 @@ def buildzip():
             podclient.post_current_article(title)
 
     try:
-        import os
         from mwlib import recorddb
         
         set_status('parsing')
@@ -194,7 +195,9 @@ def post():
         utils.start_logging(options.logfile)
     
     if options.daemonize:
-        utils.daemonize(pid_file=options.pid_file)
+        utils.daemonize()
+    if options.pid_file:
+        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
     def set_status(status):
         print 'Status: %s' % status
@@ -207,7 +210,7 @@ def post():
     def set_current_article(title):
         print 'Current Article: %r' % title
         podclient.post_current_article(title)
-
+    
     try:
         set_progress(0)
         set_status('uploading')
@@ -245,7 +248,6 @@ def render():
     )
     options, args = parser.parse_args()
     
-    import os
     import simplejson
     import sys
     import traceback
@@ -319,7 +321,9 @@ def render():
     
     if options.daemonize:
         from mwlib.utils import daemonize
-        daemonize(pid_file=options.pid_file)
+        daemonize()
+    if options.pid_file:
+        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
     last_status = {}
     def set_status(status=None, progress=None, article=None, content_type=None, file_extension=None):
@@ -577,7 +581,9 @@ def serve():
         utils.start_logging(options.logfile)
     
     if options.daemonize:
-        utils.daemonize(pid_file=options.pid_file)
+        utils.daemonize()
+    if options.pid_file:
+        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
     if options.method == 'threaded':
         options.protocol += '_threaded'
@@ -658,7 +664,9 @@ def watch():
         utils.start_logging(options.logfile)
     
     if options.daemonize:
-        utils.daemonize(pid_file=options.pid_file)
+        utils.daemonize()
+    if options.pid_file:
+        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
     poller = filequeue.FileJobPoller(
         queue_dir=options.queue_dir,
@@ -712,7 +720,6 @@ def html():
     
     import StringIO
     import tempfile
-    import os
     import webbrowser
     from mwlib import wiki, uparser, htmlwriter
     
