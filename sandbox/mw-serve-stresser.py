@@ -64,6 +64,17 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
     res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
+def postRenderKillCommand(collection_id, writer="rl"):
+    log.info('POSTing render_kill command %r' % collection_id)
+    data = {
+        "collection_id": collection_id,
+        "writer": writer,
+        "command":"render_kill",
+    }
+    data = urllib.urlencode(data)
+    res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    return simplejson.loads(res)
+
 def getRenderStatus(colid, serviceurl):
     #log.info('get render status')
     data = urllib.urlencode({"command":"render_status", "collection_id":colid})
@@ -119,6 +130,7 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
     log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
     res = postRenderCommand(metabook, baseurl, serviceurl)
+    collection_id = res['collection_id']
     st = time.time()
     while True:
         time.sleep(1)
@@ -126,6 +138,12 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
         if res["state"] != "progress":
             break
         if render_timeout and (time.time()-st) > render_timeout:
+            log.timeout('Killing render proc for collection ID %r' % collection_id)
+            r = postRenderKillCommand(collection_id)
+            if r['killed']:
+                log.info('Killed.')
+            else:
+                log.warn('Nothing to kill!?')
             res["state"] = "failed"
             res["reason"] = "render_timeout (%ds)" % render_timeout
             break
