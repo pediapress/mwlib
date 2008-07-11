@@ -300,7 +300,7 @@ class ImageDB(object):
         url = self.getURL(name, size=size)
         if url is None:
             return
-        path = urlparse.urlparse(url).path
+        path = urlparse.urlparse(url)[2]
         pos = path.find('/thumb/')
         if pos >= 0:
             return path[pos + 1:]
