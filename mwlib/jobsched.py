@@ -22,7 +22,7 @@ class JobScheduler(object):
         
         self.num_threads = num_threads
         self.job_queue = Queue.Queue()
-        self.started = False
+        self.semaphore = None
     
     def add_job(self, job_id, do_job, **kwargs):
         """Schedule a job to be executed in a separate thread. The job_id and
@@ -40,9 +40,9 @@ class JobScheduler(object):
         """
         
         def worker():
-            while True:
-                job_id, do_job, kwargs = self.job_queue.get()
-                try:
+            try:
+                while True:
+                    job_id, do_job, kwargs = self.job_queue.get()
                     if job_id == 'die':
                         break
                     try:                
@@ -50,12 +50,13 @@ class JobScheduler(object):
                     except Exception, exc:
                         log.ERROR('Error executing job: %s' % exc)
                         traceback.print_exc()
-                finally:
-                    self.job_queue.task_done()
+            finally:
+                self.semaphore.release()
         
-        if not self.started:
-            self.started = True
+        if self.semaphore is None:
+            self.semaphore = threading.BoundedSemaphore(self.num_threads)
             for i in range(self.num_threads):
+                self.semaphore.acquire()
                 thread = threading.Thread(target=worker)
                 thread.setDaemon(True)
                 thread.start()
@@ -68,10 +69,11 @@ class JobScheduler(object):
         After this method returns, all threads of this scheduler are killed.
         """
         
-        if not self.started:
+        if self.semaphore is None:
             return
         for i in range(self.num_threads):
             self.job_queue.put(('die', None, None))
-        self.job_queue.join()
-        self.started = False
+        for i in range(self.num_threads):
+            self.semaphore.acquire()
+        self.semaphore = None
     

@@ -22,7 +22,7 @@ def test_jobsched():
         sched.join()
         t = time.time() - s
         print 'join() took %f secs' % t
-        assert t > 0.01
+        assert t >= 0.01
         print results
         for i in range(n):
             assert results[i] == 0.01*i
