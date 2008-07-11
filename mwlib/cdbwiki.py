@@ -70,7 +70,7 @@ class ZCdbReader(cdb.Cdb):
         return (self._readz(v) for v in cdb.Cdb.itervalues(self))
 
 
-class BuildWiki():
+class BuildWiki(object):
     def __init__(self, dumpfile, outputdir, prefix='wiki'):
         if type(dumpfile) in (type(''), type(u'')):
             self.dumpParser = dumpparser.DumpParser(dumpfile)

@@ -88,36 +88,34 @@ class Application(object):
     def __call__(self, env, start_response):
         start_time = time.time()
         try:
+            request = Request(env)
+        except Exception, exc:
+            log.ERROR('invalid request: %s' % exc)
+            traceback.print_exc()
+            response = self.http500()
+        else:
             try:
-                request = Request(env)
+                response = self.dispatch(request)
+                if not isinstance(response, Response):
+                    log.ERROR('invalid result from dispatch(): %r' % response)
+                    response = self.http500()
             except Exception, exc:
-                log.ERROR('invalid request: %s' % exc)
-                traceback.print_exc()
-                response = self.http500()
-            else:
-                try:
-                    response = self.dispatch(request)
-                    if not isinstance(response, Response):
-                        log.ERROR('invalid result from dispatch(): %r' % response)
-                        response = self.http500()
-                except Exception, exc:
-                    response = self.http500(exc)
-        
-            response.finish()
-            start_response(
-                '%d %s' % (response.status_code, response.status_text),
-                response.headers.items()
-            )
-            if isinstance(response.content, str):
-                yield response.content
-            else:
-                while True:
-                    d = response.content.read(0x20000)
-                    if not d:
-                        break
-                    yield d
-        finally:
-            log.info('request took %f s' % (time.time() - start_time))
+                response = self.http500(exc)
+    
+        response.finish()
+        start_response(
+            '%d %s' % (response.status_code, response.status_text),
+            response.headers.items()
+        )
+        if isinstance(response.content, str):
+            yield response.content
+        else:
+            while True:
+                d = response.content.read(0x20000)
+                if not d:
+                    break
+                yield d
+        log.info('request took %f s' % (time.time() - start_time))
     
     def http404(self, path):
         log.not_found(path)
