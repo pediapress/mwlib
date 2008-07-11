@@ -36,7 +36,12 @@ def getRandomArticles(api, min=1, max=100):
     num = random.randint(min, max)
     articles = set()
     while len(articles) < num:
-        res = api.query(list="random", rnnamespace=0, rnlimit=10)["random"]
+        res = api.query(list="random", rnnamespace=0, rnlimit=10)
+        if res is None or 'random' not in res:
+            log.warn('Could not get random articles')
+            time.sleep(0.5)
+            continue
+        res = res["random"]
         for x in res:
             articles.add(x["title"])
     return list(articles)[:max]
