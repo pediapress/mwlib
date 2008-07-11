@@ -15,8 +15,9 @@ import subprocess
 from mwlib import mwapidb, utils, log
 import mwlib.metabook
 
-system = 'mw-serve-stresser'
 
+RENDER_TIMEOUT_DEFAULT = 5*60 # 5 minutes
+system = 'mw-serve-stresser'
 log = log.Log('mw-serve-stresser')
 
 # disable fetch cache
@@ -110,17 +111,22 @@ def checkPDF(data):
         os.unlink(filename)
 
 def checkservice(api, serviceurl, baseurl, maxarticles,
-    from_email=None,
-    mail_recipients=None,
-):
+                 from_email=None,
+                 mail_recipients=None,
+                 render_timeout = RENDER_TIMEOUT_DEFAULT # seconds or None
+                 ):
     arts = getRandomArticles(api, min=1, max=maxarticles)
     log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
     res = postRenderCommand(metabook, baseurl, serviceurl)
+    st = time.time()
     while True:
         time.sleep(1)
         res = getRenderStatus(res["collection_id"], serviceurl)
         if res["state"] != "progress":
+            break
+        if render_timeout and (time.time()-st) > render_timeout:
+            res = {"state":"failed", "reason":"render_timeout (%ds)" % render_timeout}
             break
     if res["state"] == "finished":
         d = download(res["collection_id"], serviceurl).read()
@@ -158,6 +164,8 @@ def main():
     use_help = 'Use --help for usage information.'
     options, args = parser.parse_args()   
     
+    assert options.from_email
+
     if options.logfile:
         utils.start_logging(options.logfile)
     
