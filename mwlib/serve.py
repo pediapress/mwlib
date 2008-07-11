@@ -5,6 +5,7 @@
 import os
 import re
 import shutil
+import signal
 import simplejson
 import StringIO
 import subprocess

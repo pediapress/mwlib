@@ -61,7 +61,7 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
         "command":"render",
     }
     data = urllib.urlencode(data)
-    res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
 def postRenderKillCommand(collection_id, serviceurl, writer="rl"):
@@ -72,13 +72,13 @@ def postRenderKillCommand(collection_id, serviceurl, writer="rl"):
         "command":"render_kill",
     }
     data = urllib.urlencode(data)
-    res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
 def getRenderStatus(colid, serviceurl):
     #log.info('get render status')
     data = urllib.urlencode({"command":"render_status", "collection_id":colid})
-    res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
 def download(colid,serviceurl):
