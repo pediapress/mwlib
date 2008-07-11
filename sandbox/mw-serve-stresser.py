@@ -11,6 +11,7 @@ import time
 import random
 import simplejson
 import subprocess
+import sys
 
 from mwlib import mwapidb, utils, log
 import mwlib.metabook
@@ -104,6 +105,7 @@ def reportError(command, metabook, res,
         from_email=from_email,
         mail_recipients=mail_recipients,
     )
+    sys.exc_clear()
 
 def checkPDF(data):
     log.info('checkPDF')
@@ -226,6 +228,7 @@ def main():
                 from_email=options.from_email,
                 mail_recipients=mail_recipients,
             )
+            sys.exc_clear()
         log.info('%s\tok: %d, failed: %d' % (options.baseurl, ok_count, fail_count))
 
 
