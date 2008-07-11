@@ -56,6 +56,7 @@ class Application(wsgi.Application):
     error_filename = 'errors'
     status_filename = 'status'
     output_filename = 'output'
+    pid_filename = 'pid'
     zip_filename = 'collection.zip'
     
     def __init__(self, cache_dir,
@@ -157,6 +158,7 @@ class Application(wsgi.Application):
         if os.path.exists(output_path):
             log.info('re-using rendered file %r' % output_path)
             return response
+        pid_path = self.get_path(collection_id, self.pid_filename, writer)
         
         args = [
             self.mwrender_cmd,
@@ -173,6 +175,7 @@ class Application(wsgi.Application):
             ),
             '--writer', writer,
             '--output', output_path,
+            '--pid-file', pid_path,
         ]
         
         zip_path = self.get_path(collection_id, self.zip_filename)
@@ -249,7 +252,32 @@ class Application(wsgi.Application):
             'state': 'progress',
             'status': self.read_status_file(collection_id, writer),
         })
+    
+    def do_render_kill(self, post_data):
+        try:
+            collection_id = post_data['collection_id']
+            writer = post_data.get('writer', self.default_writer)
+        except KeyError, exc:
+            return self.error_response('POST argument required: %s' % exc)
         
+        self.check_collection_id(collection_id)
+        
+        log.info('render_kill %s %s' % (collection_id, writer))
+        
+        pid_path = self.get_path(collection_id, self.pid_filename, writer)
+        killed = False
+        try:
+            pid = int(open(pid_path, 'rb').read())
+            os.kill(pid, signal.SIGINT)
+            killed = True
+        except (OSError, ValueError, IOError):
+            pass
+        return self.json_response({
+            'collection_id': collection_id,
+            'writer': writer,
+            'killed': killed,
+        })
+    
     def do_download(self, post_data):
         try:
             collection_id = post_data['collection_id']
@@ -287,6 +315,7 @@ class Application(wsgi.Application):
         log.info('zip_post %s %s' % (collection_id, post_url))
         
         zip_path = self.get_path(collection_id, self.zip_filename)
+        pid_path = self.get_path(collection_id, self.pid_filename, 'zip')
         if os.path.exists(zip_path):
             log.info('POSTing ZIP file %r' % zip_path)
             args = [
@@ -294,6 +323,7 @@ class Application(wsgi.Application):
                 '--logfile', self.mwpost_logfile,
                 '--posturl', post_url,
                 '--input', zip_path,
+                '--pid-file', pid_path,
             ]
         else:
             log.info('Creating and POSting ZIP file %r' % zip_path)
@@ -308,6 +338,7 @@ class Application(wsgi.Application):
                 '--config', base_url,
                 '--posturl', post_url,
                 '--output', zip_path,
+                '--pid-file', pid_path,
             ]
             if template_blacklist:
                 args.extend(['--template-blacklist', template_blacklist])
