@@ -98,16 +98,13 @@ def start_logging(path, stderr_only=False):
 
 # ==============================================================================
 
-def daemonize(pid_file=None, dev_null=False):
+def daemonize(dev_null=False):
     """Deamonize current process
     
     Note: This only works on systems that have os.fork(), i.e. it doesn't work
     on Windows.
     
     See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
-    
-    @param pid_file: write PID of daemon process to this file
-    @type pid_file: basestring
     
     @param dev_null: if True, redirect stdin, stdout and stderr to /dev/null
     @type dev_null: bool
@@ -118,11 +115,7 @@ def daemonize(pid_file=None, dev_null=False):
     os.setsid()
     pid = os.fork() # launch child and...
     if pid:
-        try:
-            if pid_file is not None:
-                open(pid_file, 'w').write('%d\n' % pid)
-        finally:
-            os._exit(0) # ... kill off parent again.
+        os._exit(0) # ... kill off parent again.
     os.umask(077)
     if dev_null:
         null = os.open(os.path.devnull, os.O_RDWR)
