@@ -128,7 +128,6 @@ class DocBookWriter(object):
         self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
 
     def write(self, obj, parent=None):
-        print "write", obj
         """
         translates a parse tree object to element tree XML Element
         returns an element, which the caller has to add (or not)
@@ -369,10 +368,12 @@ class DocBookWriter(object):
         if imgsrc is None:
             imgsrc = obj.target
 
-        img = ET.SubElement(t, "imagedata", fileref=imgsrc)
+        img = ET.SubElement(t, "imagedata", fileref=imgsrc, scalefit="1")
         if obj.width:
+            img.set("contentwidth", "%dpx" % obj.width)
             img.set("width", "%dpx" % obj.width)
         if obj.height:
+            img.set("contentdepth", "%dpx" % obj.height)
             img.set("depth", "%dpx" % obj.height)
 
         return e 
@@ -455,11 +456,11 @@ class DocBookWriter(object):
     def dbwriteReference(self, t): # FIXME USE DOCBOOK FEATURES (needs parser support)
         self.references.append(t)
         t =  ET.Element("superscript")
-        t.text = unicode( len(self.references))
+        t.text = u"[%d]" %  len(self.references)
 #        self.references.append(t)
 #       t =  ET.Element("citation")
 #        ET.SubElement("xref", linked="ref-%d" % len(self.references), endterm="%d" % len(self.references))
-        return SkipChildren()
+        return SkipChildren(t)
 
     def dbwriteReferenceList(self, t): # FIXME USE DOCBOOK FEATURES
         if not self.references:

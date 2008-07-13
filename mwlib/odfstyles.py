@@ -5,7 +5,7 @@
 
 # http://books.evc-cit.info/odbook/ch03.html#char-para-styling-section
 
-from odf import style
+from odf import style, text
 
 # we define some styles here -----------------------------------------------------------------------------
 
@@ -37,7 +37,15 @@ title = style.Style(name="Title", family="paragraph", nextstylename=subtitle)
 title.addElement(style.ParagraphProperties(textalign="center") )
 title.addElement(style.TextProperties(fontsize="18pt", fontweight="bold", fontname="Arial"))
 
-photo = style.Style(name="MyMaster-photo", family="presentation")
+#graphic = style.Style(name="Graphic", family="presentation")
+graphic = style.Style(name="Graphic", family="graphic")
+graphic.addElement(style.GraphicProperties(wrap="dynamic", verticalrel="paragraph", horizontalrel="paragraph"))
+
+#graphic = style.Style(name="Graphic", family="graphic")
+#graphic.addElement(style.GraphicProperties(runthrough="foreground", wrap="dynamic", numberwrappedparagraphs="no-limit",
+#                                           verticalpos="top", verticalrel="page",horizontalpos="center", horizontalrel="page"))
+
+
 
 fixed = style.Style(name="Fixed", family="paragraph")
 fixed.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
@@ -55,11 +63,15 @@ and
   </style:style>
  </office:automatic-styles>
 
+                (DRAWNS,u'auto-grow-height'),
+                (DRAWNS,u'auto-grow-width'),
+
+
 """
 
 formula = style.Style(name="Formula", family="graphic")
-formula.addElement(style.GraphicProperties(attributes={"anchortype":"as-char" ,"y":"0in","marginleft":"0.0791in","marginright":"0.0791in","verticalpos":"middle","verticalrel":"text", "oledrawaspect":"1"}))
-
+#formula.addElement(style.GraphicProperties(attributes={"anchortype":"as-char" ,"y":"0in","marginleft":"0.0791in","marginright":"0.0791in","verticalpos":"middle","verticalrel":"text", "oledrawaspect":"1"}))
+#formula.addElement(style.GraphicProperties(verticalpos="middle",verticalrel="baseline",  minwidth="0.7902in", autogrowheight="1", autogrowwidth="1"))
 
 sect  = style.Style(name="Sect1", family="section")
 #sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
@@ -120,8 +132,44 @@ teletyped = cite # FIXME
 dumbcolumn = style.Style(name="Dumbcolumn", family="table-column") # REALLY FIXME
 dumbcolumn.addElement(style.TableColumnProperties(attributes={'columnwidth':"1.0in"}))
 
+"""
+ <text:list-style style:name="L1">
+        <text:list-level-style-number text:level="1"
+            text:style-name="Numbering_20_Symbols"
+            style:num-prefix=" " style:num-suffix="."
+            style:num-format="1">
+            <style:list-level-properties
+                text:space-before="0.25in"
+                text:min-label-width="0.25in"/>
+        </text:list-level-style-number>
+        <text:list-level-style-number text:level="2"
+            text:style-name="Numbering_20_Symbols"
+            style:num-prefix=" " style:num-suffix=")"
+            style:num-format="a">
+            <style:list-level-properties
+                text:space-before="0.5in"
+                text:min-label-width="0.25in"/>
+        </text:list-level-style-number>
+        <text:list-level-style-bullet text:level="3"
+            text:style-name="Bullet_20_Symbols"
+            style:num-prefix=" " style:num-suffix=" "
+            text:bullet-char="*">
+            <style:list-level-properties
+                text:space-before="0.75in"
+                text:min-label-width="0.25in"/>
+            <style:text-properties style:font-name="StarSymbol"/>
+        </text:list-level-style-bullet>
+        <!-- the bullet is repeated for levels 4 through 10 -->
+    </text:list-style>
+"""
 
+numberedlist = text.ListStyle(name="numberedlist")
+numberedlist.addElement(text.ListLevelStyleNumber(level="1", numprefix="  ", numsuffix=".  ", numformat="1"))
+numberedlist.addElement(text.ListLevelStyleNumber(level="2", numprefix="  ", numsuffix=")  ", numformat="a"))
+numberedlist.addElement(text.ListLevelStyleBullet(level="3", numprefix="  ", numsuffix="   ", bulletchar='-'))
 
+unorderedlist = text.ListStyle(name="unorderedlist")
+unorderedlist.addElement(text.ListLevelStyleBullet(level="1", bulletchar='-', numsuffix="   "))
 
 def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
@@ -147,11 +195,14 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(textbody)
     doc.styles.addElement(subtitle)
     doc.styles.addElement(title)
-    doc.styles.addElement(photo)
+    #doc.styles.addElement(photo)
+    doc.styles.addElement(graphic)
     doc.styles.addElement(strong)
     doc.styles.addElement(emphasis)
     doc.styles.addElement(preformatted)
     doc.styles.addElement(hr)
+    doc.styles.addElement(numberedlist)
+    doc.styles.addElement(unorderedlist)
 
 
 

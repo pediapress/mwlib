@@ -333,3 +333,20 @@ def test_snippets():
 def test_horizontalrule():
     raw=r'''before_hr<hr/>after_hr'''
     xml = getXML(raw)
+
+
+
+
+def test_tables():
+    raw = r'''
+{| border="1" cellspacing="0" cellpadding="5" align="center"
+! This
+! is
+|- 
+| a
+| cheese
+|-
+|}
+'''
+    xml = getXML(raw)
+    assert "cheese" in xml
