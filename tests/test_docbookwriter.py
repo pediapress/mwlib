@@ -13,6 +13,7 @@ DocBookWriter.ignoreUnknownNodes = False
 def getXML(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
+    show(sys.stdout, r)
     preprocess(r)
     show(sys.stdout, r)
     dbw = DocBookWriter()
@@ -249,3 +250,13 @@ def test_snippets():
     for s in snippets.get_all():
         print "testing", repr(s.txt)
         xml = getXML(s.txt)
+
+
+def test_heiko():
+    raw = '''
+[[User:Heiko/Editing]]
+
+[[User:Heiko/Size in Volumes]] vanished
+'''
+    xml = getXML(raw)
+    assert "Heiko/Editing" in xml

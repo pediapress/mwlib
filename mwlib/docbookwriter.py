@@ -41,17 +41,14 @@ version = "0.1"
 log = Log("docbookwriter")
 
 
-def dumpTree(r, i=0):
-    print "\t"*i, repr(r), repr(r.text), repr(r.attrib)
-    assert r is not None
-    assert r.tag is not None
-    for k,v in r.attrib.items():
-        assert k is not None
-        assert v is not None
-        
-
-    for c in r.getchildren():
-        dumpTree(c,i+1)
+# fix iselement in ET
+def _iselement(element):
+    # FIXME: not sure about this; might be a better idea to look
+    # for tag/attrib/text attributes
+    if None in element.attrib.values():
+        raise TypeError("None not allowed in %r %r" %(element, element.attrib)) # enforce valid values for attributes
+    return isinstance(element, ET._ElementInterface) or hasattr(element, "tag")
+ET.iselement = _iselement
 
 
 
@@ -70,7 +67,7 @@ class DocBookWriter(object):
     header='''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE %s PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">\n%s
  ''' # need to expand with at least documenttype
-    def __init__(self, env=None, status_callback=None, documenttype="article", language="en", imagesrcresolver=None, debug=False):
+    def __init__(self, env=None, status_callback=None, documenttype="article", language="en", imagesrcresolver=None, debug=True):
         assert documenttype in ("article", "book")
         self.documenttype = documenttype
         self.environment = env
@@ -96,7 +93,6 @@ class DocBookWriter(object):
         return self.root
     
     def asstring(self):
-        dumpTree(self.root)
         return self.getHeader() + ET.tostring(self.getTree())
 
     
@@ -130,9 +126,9 @@ class DocBookWriter(object):
         out = StringIO.StringIO()
         parser.show(out, tree)
         self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
-        
 
     def write(self, obj, parent=None):
+        print "write", obj
         """
         translates a parse tree object to element tree XML Element
         returns an element, which the caller has to add (or not)
@@ -350,6 +346,9 @@ class DocBookWriter(object):
 
 
     def dbwriteImageLink(self, obj): 
+        if not obj.target:
+            return 
+
         if obj.isInline():
             e = ET.Element("inlinemediaobject")
         else:
@@ -359,13 +358,16 @@ class DocBookWriter(object):
         t = ET.SubElement(e, "imageobject")
         e.writeto = ET.SubElement(ET.SubElement(e, "caption"), "para")
 
-        imgsrc = obj.target 
+        imgsrc = None
         if self.imagesrcresolver:
             # use a resolver which redirects to the real image
             # e.g. "http://anyhost/redir?img=IMAGENAME"
             imgsrc = self.imagesrcresolver.replace("IMAGENAME", obj.target)
         elif self.environment and self.environment.images:
             imgsrc = self.environment.images.getURL(obj.target, obj.width or None)
+
+        if imgsrc is None:
+            imgsrc = obj.target
 
         img = ET.SubElement(t, "imagedata", fileref=imgsrc)
         if obj.width:
@@ -380,6 +382,7 @@ class DocBookWriter(object):
     # Links ---------------------------------------------------------
 
     def dbwriteLink(self, obj): 
+        print "dbwritelink", obj
         a = ET.Element("ulink")
         if obj.target:
             a.set("url", obj.target)
@@ -387,7 +390,11 @@ class DocBookWriter(object):
             a.text = obj.target
         return a
 
-    dbwriteArticleLink = dbwriteLink
+    dbwriteArticleLink = dbwriteLink 
+    dbwriteLangLink = dbwriteLink # FIXME
+    dbwriteNamespaceLink = dbwriteLink# FIXME
+    dbwriteInterwikiLink = dbwriteLink# FIXME
+    dbwriteSpecialLink = dbwriteLink# FIXME
 
     def dbwriteURL(self, obj):
         a = ET.Element("ulink", url=obj.caption)

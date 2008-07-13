@@ -8,6 +8,7 @@ from mwlib import advtree
 from mwlib.advtree import Paragraph, PreFormatted, ItemList, Div, Reference, Cite, Item, Article, Section
 from mwlib.advtree import Text, Cell, Link, Math, URL, BreakingReturn, HorizontalRule, CategoryLink
 from mwlib.advtree import SpecialLink, ImageLink, ReferenceList, Chapter, NamedURL, LangLink, Table
+from mwlib.advtree import ArticleLink, InterwikiLink, NamespaceLink
                
 def fixLists(node): 
     """
@@ -22,7 +23,7 @@ def fixLists(node):
 
 
 childlessOK = [Text, Cell, Link, Math, URL, BreakingReturn, HorizontalRule, CategoryLink, LangLink,
-               SpecialLink, ImageLink, ReferenceList, Chapter, NamedURL]
+               SpecialLink, ImageLink, ReferenceList, Chapter, NamedURL, ArticleLink, NamespaceLink, InterwikiLink]
 
 def removeChildlessNodes(node):
     """
