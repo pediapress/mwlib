@@ -80,7 +80,8 @@ class FileJobPoller(object):
                 args = open(path, 'rb').read().split('\n')
                 self.log.info('executing: %r' % args)
                 try:
-                    subprocess.check_call(args)
+                    rc = subprocess.call(args)
+                    assert rc == 0, 'non-zero return code'
                 except Exception, exc:
                     self.log.warn('Error executing %r: %s' % (args, exc))
                     traceback.print_exc()

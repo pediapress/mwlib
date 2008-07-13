@@ -150,7 +150,6 @@ class Template(Node):
                 name=try_name
                 remainder = try_remainder
         if name=='#if':
-            #print "SPECIALCASE", (name, remainder)
             res.append(maybe_newline)
             tmp = []
             if remainder:
@@ -162,7 +161,27 @@ class Template(Node):
             res.append(u"".join(tmp).strip())
             res.append(dummy_mark)
             return
-
+        elif name=='#ifeq':
+            res.append(maybe_newline)
+            tmp=[]
+            if len(self.children)>=2:
+                flatten(self.children[1], expander, variables, tmp)
+            other = u"".join(tmp)
+            tmp = []
+            from mwlib.magics import maybe_numeric_compare
+            if maybe_numeric_compare(remainder, other):
+                if len(self.children)>=3:
+                    flatten(self.children[2], expander, variables, tmp)
+                    res.append(u"".join(tmp).strip())
+            else:
+                if len(self.children)>=4:
+                    flatten(self.children[3], expander, variables, tmp)
+                    res.append(u"".join(tmp).strip())
+            res.append(dummy_mark)
+            return
+                
+            
+            
         #print "NAME:", (name, remainder)
         
         var = ArgumentList()
@@ -539,7 +558,6 @@ class Expander(object):
     def getParsedTemplate(self, name):
         if name.startswith("[["):
             return None
-
         try:
             return self.parsedTemplateCache[name]
         except KeyError:

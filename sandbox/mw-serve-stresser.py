@@ -11,6 +11,7 @@ import time
 import random
 import simplejson
 import subprocess
+import sys
 
 from mwlib import mwapidb, utils, log
 import mwlib.metabook
@@ -36,7 +37,12 @@ def getRandomArticles(api, min=1, max=100):
     num = random.randint(min, max)
     articles = set()
     while len(articles) < num:
-        res = api.query(list="random", rnnamespace=0, rnlimit=10)["random"]
+        res = api.query(list="random", rnnamespace=0, rnlimit=10)
+        if res is None or 'random' not in res:
+            log.warn('Could not get random articles')
+            time.sleep(0.5)
+            continue
+        res = res["random"]
         for x in res:
             articles.add(x["title"])
     return list(articles)[:max]
@@ -61,13 +67,24 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
         "command":"render",
     }
     data = urllib.urlencode(data)
-    res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    return simplejson.loads(res)
+
+def postRenderKillCommand(collection_id, serviceurl, writer="rl"):
+    log.info('POSTing render_kill command %r' % collection_id)
+    data = {
+        "collection_id": collection_id,
+        "writer": writer,
+        "command":"render_kill",
+    }
+    data = urllib.urlencode(data)
+    res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
 def getRenderStatus(colid, serviceurl):
     #log.info('get render status')
     data = urllib.urlencode({"command":"render_status", "collection_id":colid})
-    res =  urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
+    res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
 def download(colid,serviceurl):
@@ -88,6 +105,7 @@ def reportError(command, metabook, res,
         from_email=from_email,
         mail_recipients=mail_recipients,
     )
+    sys.exc_clear()
 
 def checkPDF(data):
     log.info('checkPDF')
@@ -119,6 +137,7 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
     log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
     res = postRenderCommand(metabook, baseurl, serviceurl)
+    collection_id = res['collection_id']
     st = time.time()
     while True:
         time.sleep(1)
@@ -126,6 +145,12 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
         if res["state"] != "progress":
             break
         if render_timeout and (time.time()-st) > render_timeout:
+            log.timeout('Killing render proc for collection ID %r' % collection_id)
+            r = postRenderKillCommand(collection_id, serviceurl)
+            if r['killed']:
+                log.info('Killed.')
+            else:
+                log.warn('Nothing to kill!?')
             res["state"] = "failed"
             res["reason"] = "render_timeout (%ds)" % render_timeout
             break
@@ -203,6 +228,7 @@ def main():
                 from_email=options.from_email,
                 mail_recipients=mail_recipients,
             )
+            sys.exc_clear()
         log.info('%s\tok: %d, failed: %d' % (options.baseurl, ok_count, fail_count))
 
 
