@@ -40,6 +40,21 @@ version = "0.1"
 
 log = Log("docbookwriter")
 
+
+def dumpTree(r, i=0):
+    print "\t"*i, repr(r), repr(r.text), repr(r.attrib)
+    assert r is not None
+    assert r.tag is not None
+    for k,v in r.attrib.items():
+        assert k is not None
+        assert v is not None
+        
+
+    for c in r.getchildren():
+        dumpTree(c,i+1)
+
+
+
 class SkipChildren(object):
     "if returned by the writer no children are processed"
     def __init__(self, element=None):
@@ -73,7 +88,7 @@ class DocBookWriter(object):
         return self.header % (self.documenttype, self.css)
         
     def getTree(self, debuginfo=""):
-        indent(self.root) # breaks XHTML (proper rendering at least) if activated!
+        indent(self.root) 
         if self.debug:
             r = validate(self.header + ET.tostring(self.root))
             if r:
@@ -81,6 +96,7 @@ class DocBookWriter(object):
         return self.root
     
     def asstring(self):
+        dumpTree(self.root)
         return self.getHeader() + ET.tostring(self.getTree())
 
     
@@ -343,14 +359,13 @@ class DocBookWriter(object):
         t = ET.SubElement(e, "imageobject")
         e.writeto = ET.SubElement(ET.SubElement(e, "caption"), "para")
 
-        # use a resolver which redirects to the real image
-        # e.g. "http://anyhost/redir?img=IMAGENAME"
+        imgsrc = obj.target 
         if self.imagesrcresolver:
+            # use a resolver which redirects to the real image
+            # e.g. "http://anyhost/redir?img=IMAGENAME"
             imgsrc = self.imagesrcresolver.replace("IMAGENAME", obj.target)
         elif self.environment and self.environment.images:
             imgsrc = self.environment.images.getURL(obj.target, obj.width or None)
-        else:
-            imgsrc = obj.target
 
         img = ET.SubElement(t, "imagedata", fileref=imgsrc)
         if obj.width:
