@@ -34,6 +34,7 @@ except ImportError, e:
     print "you need to install odfpy: http://opendocumentfellowship.com/projects/odfpy"
     raise
 
+import urllib
 from odf.opendocument import OpenDocumentText
 from odf import text, dc, meta, table, draw, math
 from mwlib import parser
@@ -66,32 +67,37 @@ class SkipChildren(object):
 class ParagraphProxy(text.Element):
     """
     special handling since most problems occure arround paragraphs
+    this is broken!
     """
 
     qname = (text.TEXTNS, 'p')
     def addElement(self, e):
-        assert self.parentNode is not None
+        assert e is not self
         if isinstance(e, ParagraphProxy):
+            #print "relinking paragraph"
+            "this is broken for different styles"
             self.addElement(text.LineBreak())
-            e.addElement = self.addElement
-            e.addText = self.addText
-            e.parentNode = self.parentNode
+            self.elements.extend(e.elements) # everything is written
         elif e.qname not in self.allowed_children:
+            assert self.parentNode is not None
             "this is currently broken, since it does not add stuff in the correct order" # FIXME
             #log("addElement", e.type, "not allowed in ", self.type)
             # find a parent that accepts this type
             p = self
             while p.parentNode is not None and e.qname not in p.allowed_children:
                 p = p.parentNode
+                assert p.parentNode is not p
             if e.qname not in p.allowed_children:
                 assert p.parentNode is None
                 log("addElement:", e.type, "not allowed in any parents, failed, was added to", self.type)
                 return
-
+            assert p is not self
+            log("addElement: moving", e.type, "to ", p.type)
             # add this type to the parent
             p.addElement(e)
             # add a new paragraph to this parent and link my addElement and addText to this
             np = ParagraphProxy()
+            np.attributes = self.attributes
             p.addElement(np) # THIS MAY FAIL
             self.addElement = np.addElement
             self.addText = np.addText
@@ -209,10 +215,10 @@ class ODFWriter(object):
                 return e.element
             elif e is None:
                 e = parent
-
-            # FIXME, this for addElement in ParagraphProxy
-            e.parentNode = parent # since parent must not be None, but this is broken
-
+            else:
+                # FIXME, this for addElement in ParagraphProxy
+                e.parentNode = parent # since parent must not be None, but this is broken
+                
             p = e
             if hasattr(e, "writeto"):
                 p = e.writeto # SPECIAL HANDLING 
@@ -279,7 +285,7 @@ class ODFWriter(object):
         else:
             return text.List(stylename=style.unorderedlist)
 
-    def owriteDefinitionList(self, lst):
+    def owriteDefinitionList(self, obj):
         return text.List(stylename=style.textbody)
 
     def owriteDefinitionTerm(self, obj):
@@ -406,11 +412,7 @@ class ODFWriter(object):
 
     def owritePreFormatted(self, n):
         # need to replace \n \t
-        frame = draw.Frame(stylename=style.graphic,anchortype="paragraph")
-        tb = draw.TextBox()
-        frame.addElement(tb)
         p = ParagraphProxy(stylename=style.preformatted) 
-        tb.addElement(p)
         col = []
         for c in n.getAllDisplayText():
             if c == "\n":
@@ -429,7 +431,7 @@ class ODFWriter(object):
                 col.append(c)
         p.addText(u"".join(col))
         n.children = []  # remove the children
-        return frame
+        return p
 
     # FIXME
     owriteCode = owritePreFormatted
@@ -452,7 +454,7 @@ class ODFWriter(object):
         "margin to the left"
         indentlevel = len(s.caption)-1
         return ParagraphProxy(stylename=style.indented)
-
+        
  
     def owriteMath(self, obj): 
         """
@@ -484,13 +486,27 @@ class ODFWriter(object):
         _withETElement(r, mroot)
         return mathframe
 
+    def _quoteURL(self,url, baseUrl=None):
+        safeChars = ':/#'
+        if url.startswith('mailto:'):
+            safeChars = ':/@'
+        url = urllib.quote(url.encode('utf-8'),safe=safeChars)
+        if baseUrl:
+            url = u'%s%s' % (baseUrl, url)
+        return url
+
 
     def owriteLink(self, obj): 
-        if self.env:
-            url = self.env.get_source()["url"].rsplit("/",1)[0] + "/" + obj.target # FIXME
-        else:
-            url=obj.target
-        a = text.A(href=url)
+        href = getattr(obj, 'full_target', None) or obj.target
+        if not href:
+            log.warning('no link target specified')
+            href = ''
+            
+        source = self.env.get_source()
+        self.baseUrl = source.get('url', '')
+        href = self._quoteURL(href, self.baseUrl)
+
+        a = text.A(href=href)
         if not obj.children:
             a.addText(obj.target)
         return a
@@ -745,7 +761,9 @@ def writer(env, output, status_callback):
     for c in book.children:
         preprocess(c)
     scb(status='rendering', progress=80)
-    ODFWriter(env, status_callback=scb).writeBook(book, output=output)
+    w = ODFWriter(env, status_callback=scb)
+    w.writeBook(book, output=output)
+#    print w.asstring()
 
 writer.description = 'OpenDocument Text'
 writer.content_type = 'application/vnd.oasis.opendocument.text'
@@ -764,7 +782,7 @@ def preprocess(root):
     xmltreecleaner.fixLists(root)
     xmltreecleaner.fixParagraphs(root)
     xmltreecleaner.fixBlockElements(root)
-
+#    parser.show(sys.stdout, root)
 
 
 
