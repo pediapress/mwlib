@@ -8,6 +8,8 @@ from mwlib.uparser import parseString
 from mwlib.parser import show
 from mwlib.docbookwriter import DocBookWriter, preprocess
 from mwlib.xhtmlwriter import validate as mwvalidate
+from mwlib.xfail import xfail
+
 DocBookWriter.ignoreUnknownNodes = False
 
 def getXML(wikitext):
@@ -54,7 +56,11 @@ def test_fixparagraphs():
     
 
 
+
+
+@xfail
 def test_gallery():
+    """http://code.pediapress.com/wiki/ticket/219"""
     raw="""
 <gallery>
 Image:Wikipedesketch1.png|The Wikipede
