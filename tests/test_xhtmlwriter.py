@@ -8,9 +8,10 @@ from mwlib.uparser import parseString
 from mwlib.parser import show
 from mwlib.xhtmlwriter import MWXHTMLWriter, preprocess
 from mwlib.xhtmlwriter import validate as mwvalidate
-MWXHTMLWriter.ignoreUnknownNodes = False
+from mwlib.xfail import xfail
 import re
 
+MWXHTMLWriter.ignoreUnknownNodes = False
 
 def getXHTML(wikitext):
     db = DummyDB()
@@ -152,7 +153,9 @@ this test will validate, but sections will be broken.
         print xhtml
         assert res == expect
 
+@xfail
 def test_snippets():
+    """http://code.pediapress.com/wiki/ticket/220"""
     from mwlib import snippets
     for s in snippets.get_all():
         print "testing", repr(s.txt)
