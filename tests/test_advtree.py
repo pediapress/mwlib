@@ -5,11 +5,13 @@
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
-    Indented, DefinitionList, DefinitionTerm, DefinitionDescription
+    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
+from mwlib.xfail import xfail
+
 import sys
 
 def _treesanity(r):
@@ -144,7 +146,10 @@ def test_indentation():
         assert c.indentlevel == i + 1
     assert i == 3
 
+
+@xfail
 def test_defintion_list():
+    """http://code.pediapress.com/wiki/ticket/221"""
     raw = u''';termA
 :descr1
 '''
@@ -157,4 +162,18 @@ def test_defintion_list():
         assert dls[0].getChildNodesByClass(DefinitionTerm)
         assert dls[0].getChildNodesByClass(DefinitionDescription)
         raw = raw.replace('\n', '')
+
+
+@xfail
+def test_ulist():
+    """http://code.pediapress.com/wiki/ticket/222"""
+    raw = u"""
+* A item
+*: B Previous item continues.
+"""
+    r = parseString(title='t', raw=raw)
+    buildAdvancedTree(r)
+#    parser.show(sys.stdout, r)
+    assert len(r.getChildNodesByClass(Item)) == 1
+
 
