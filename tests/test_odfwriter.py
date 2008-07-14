@@ -50,7 +50,7 @@ def getXML(wikitext):
     preprocess(r)
     mwlib.parser.show(sys.stdout, r)
     odfw = ODFWriter()
-    odfw.write(r)
+    odfw.writeTest(r)
     validate(odfw)
     xml = odfw.asstring()
     #print xml # usefull to inspect generateded xml

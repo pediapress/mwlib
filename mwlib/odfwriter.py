@@ -140,6 +140,9 @@ class ODFWriter(object):
             self.doc.meta.addElement(meta.UserDefined(name="Rights", text=license))
 
 
+    def writeTest(self, root):
+        self.write(root, self.doc.text)
+
     def writeBook(self, book, output, removedArticlesFile=None, coverimage=None):
         """
         bookParseTree must be advtree and sent through preprocess()
