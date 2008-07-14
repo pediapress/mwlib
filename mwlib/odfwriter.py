@@ -233,7 +233,8 @@ class ODFWriter(object):
                 raise Exception("unknown node:%r" % obj)
             
             if isinstance(e, SkipChildren): # do not process children of this node
-                saveAddChild(parent, e.element)
+                if e.element is not None:
+                    saveAddChild(parent, e.element)
                 return # skip
             elif e is None:
                 pass # do nothing
@@ -551,7 +552,7 @@ class ODFWriter(object):
 
     def owriteCategoryLink(self, obj):
         if True: # FIXME, collect and add to the end of the page
-            return
+            return SkipChildren()
         if not obj.colon and not obj.children:
             a = text.A(href=obj.target)
             a.addText(obj.target)
@@ -559,8 +560,8 @@ class ODFWriter(object):
 
 
     def owriteLangLink(self, obj):
-        obj.children=[]
-        pass # we dont want them in the PDF
+        return SkipChildren() # we dont want them
+    
 
 
     def owriteReference(self, t): 
