@@ -626,6 +626,9 @@ class Parser(object):
 
         obj._specialize()
 
+        if not obj.children and obj.target and not isinstance(obj, ImageLink):
+            obj.append(Text(obj.full_target))
+
         if isinstance(obj, ImageLink):
             return obj
         
