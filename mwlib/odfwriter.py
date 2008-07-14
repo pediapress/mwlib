@@ -72,16 +72,21 @@ class ParagraphProxy(text.Element):
 
     qname = (text.TEXTNS, 'p')
     def addElement(self, e):
+        assert not hasattr(self, "writeto")
+        assert e.parentNode is None
         assert e is not self
         if isinstance(e, ParagraphProxy):
-            #print "relinking paragraph"
-            "this is broken for different styles"
-            self.addElement(text.LineBreak())
-            self.elements.extend(e.elements) # everything is written
+            assert self.parentNode is not None
+#            log("relinking paragraph")
+            self.parentNode.addElement(e) # add at the same level
+            np = ParagraphProxy() # add copy at the same level
+            np.attributes = self.attributes.copy()
+            self.parentNode.addElement(np) 
+            self.writeto = np
+
         elif e.qname not in self.allowed_children:
             assert self.parentNode is not None
-            "this is currently broken, since it does not add stuff in the correct order" # FIXME
-            #log("addElement", e.type, "not allowed in ", self.type)
+ #           log("addElement", e.type, "not allowed in ", self.type)
             # find a parent that accepts this type
             p = self
             while p.parentNode is not None and e.qname not in p.allowed_children:
@@ -92,15 +97,14 @@ class ParagraphProxy(text.Element):
                 log("addElement:", e.type, "not allowed in any parents, failed, was added to", self.type)
                 return
             assert p is not self
-            log("addElement: moving", e.type, "to ", p.type)
+ #           log("addElement: moving", e.type, "to ", p.type)
             # add this type to the parent
             p.addElement(e)
             # add a new paragraph to this parent and link my addElement and addText to this
             np = ParagraphProxy()
             np.attributes = self.attributes
-            p.addElement(np) # THIS MAY FAIL
-            self.addElement = np.addElement
-            self.addText = np.addText
+            p.addElement(np) 
+            self.writeto = np
         else:
             text.Element.addElement(self, e)
 
@@ -142,11 +146,10 @@ class ODFWriter(object):
         """
         
         self.doc.meta.addElement(dc.Title(text=u"collection title fixme"))
-        #self.baseUrl = book.source['url']
         #self.wikiTitle = book.source.get('name')
         # add chapters FIXME
         for e in book.children:
-            r = self.write(e, self.doc.text)
+            self.write(e, self.doc.text)
         #licenseArticle = self.env.metabook['source'].get('defaultarticlelicense','') # FIXME
         doc = self.getDoc()
         #doc.toXml("%s.odf.xml"%fn)
@@ -194,6 +197,21 @@ class ODFWriter(object):
 
 
     def write(self, obj, parent=None):
+        assert parent is not None
+  
+        def saveAddChild(p,c):
+            try:
+                p.addElement(c)
+                assert c.parentNode is not None
+                return True
+            except odf.element.IllegalChild:
+                log("write:", c.type, "not allowed in ", p.type, ", dumping")
+                return False
+
+        
+        while hasattr(parent, "writeto"):
+            parent = parent.writeto # SPECIAL HANDLING 
+
         # if its text, append to last node
         if isinstance(obj, parser.Text):
             self.writeText(obj, parent)
@@ -212,45 +230,31 @@ class ODFWriter(object):
                 raise Exception("unknown node:%r" % obj)
             
             if isinstance(e, SkipChildren): # do not process children of this node
-                return e.element
+                saveAddChild(parent, e.element)
+                return # skip
             elif e is None:
+                pass # do nothing
                 e = parent
             else:
-                # FIXME, this for addElement in ParagraphProxy
-                e.parentNode = parent # since parent must not be None, but this is broken
-                
-            p = e
-            if hasattr(e, "writeto"):
-                p = e.writeto # SPECIAL HANDLING 
+                if not saveAddChild(parent, e):
+                    return # 
 
             for c in obj.children[:]:
-                ce = self.write(c,p)
-                if ce is not None and ce is not p:                    
-                    try: 
-                        p.addElement(ce)
-                    except odf.element.IllegalChild:
-                        log( "write:", ce.type, "not allowed in ", p.type)
+                ce = self.write(c,e)
 
-            return e
+            
 
     def writeChildren(self, obj, parent): # use this to avoid bugs!
         "writes only the children of a node"
-        if hasattr(parent, "writeto"):
-            parent = parent.writeto
-        for c in obj:                    
-            res = self.write(c, parent)
-            if res is not None and res is not parent:
-                try: 
-                    parent.addElement(res)
-                except odf.element.IllegalChild:
-                    log( "writeChildren:", res.type, "not allowed in ", parent.type)
-
+        for c in obj:
+            self.write(c, parent)
+            
 
     def owriteArticle(self, a):
         self.references = [] # collect references
         title = a.caption
         r = text.Section(stylename=style.sect, name=title) #, display="none")
-        self.doc.text.addElement(r)
+        #self.doc.text.addElement(r)
         r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
         # write reference list writeReferences FIXME       
         return r # mhm 
@@ -286,14 +290,17 @@ class ODFWriter(object):
             return text.List(stylename=style.unorderedlist)
 
     def owriteDefinitionList(self, obj):
-        return text.List(stylename=style.textbody)
+        return text.List(stylename=style.definitionlist)
 
     def owriteDefinitionTerm(self, obj):
-        return self.owriteItem(obj)
-
+        li =text.ListItem()
+        p = ParagraphProxy(stylename=style.definitionterm)
+        li.addElement(p)
+        li.writeto = p
+        return li
 
     def owriteDefinitionDescription(self, obj):
-        li = text.ListItem(stylename=style.unorderedlist) # fixme
+        li = text.ListItem() 
         p = ParagraphProxy(stylename=style.indented)
         li.addElement(p)
         li.writeto = p
@@ -314,10 +321,9 @@ class ODFWriter(object):
         tr = table.TableRow()
         for c in row.children:
             cs =  c.vlist.get("colspan", 0)
-            cell = self.write(c,tr)
+            self.write(c,tr)
             if cs:
-                cell.addAttribute("numbercolumnsspanned",str(cs))
-            tr.addElement(cell)
+                tr.elements[-1].addAttribute("numbercolumnsspanned",str(cs))
             for i in range(cs):
                 tr.addElement(table.CoveredTableCell())
         return SkipChildren(tr)
@@ -400,14 +406,14 @@ class ODFWriter(object):
         return ParagraphProxy(stylename=style.center)
 
     def owriteCite(self, obj): 
-        return ParagraphProxy(stylename=style.cite)
+        return text.Span(stylename=style.cite)
 
     def owriteDiv(self, obj): 
         return ParagraphProxy()
         
     def owriteTeletyped(self, obj):
         # (monospaced) or code, newlines ignored, spaces collapsed
-        return ParagraphProxy(stylename=style.teletyped)
+        return text.Span(stylename=style.teletyped)
 
 
     def owritePreFormatted(self, n):
@@ -497,14 +503,12 @@ class ODFWriter(object):
 
 
     def owriteLink(self, obj): 
-        href = getattr(obj, 'full_target', None) or obj.target
-        if not href:
-            log.warning('no link target specified')
-            href = ''
-            
-        source = self.env.get_source()
-        self.baseUrl = source.get('url', '')
-        href = self._quoteURL(href, self.baseUrl)
+        href = getattr(obj, 'full_target', "") or obj.target or ""
+        if self.env and self.env.wiki:
+            art = obj.getParentNodesByClass(advtree.Article)[0]
+            baseurl =  self.env.wiki.getURL(art.caption)
+            if baseurl is not None:
+                href = baseurl.rsplit("/",1)[0] + "/index.php?title=" + self._quoteURL(href) 
 
         a = text.A(href=href)
         if not obj.children:
@@ -808,3 +812,5 @@ def main():
  
 if __name__=="__main__":
     main()
+
+

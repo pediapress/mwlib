@@ -74,11 +74,14 @@ formula = style.Style(name="Formula", family="graphic")
 #formula.addElement(style.GraphicProperties(verticalpos="middle",verticalrel="baseline",  minwidth="0.7902in", autogrowheight="1", autogrowwidth="1"))
 
 sect  = style.Style(name="Sect1", family="section")
-#sect.addElement(style.SectionProperties(backgroundcolor="#e6e6e6"))
+
 
 preformatted = style.Style(name="Preformatted",family="paragraph")
-preformatted.addElement(style.ParagraphProperties(margintop="0in",marginbottom="0in"))
-preformatted.addElement(style.TextProperties(attributes={"fontname":"DejaVu Sans Mono", "fontsize":"10pt"}))
+preformatted.addElement(
+    style.ParagraphProperties(marginleft=".25in",marginright=".25in", margintop=".25in",marginbottom=".25in", backgroundcolor="#e6e6e6"))
+preformatted.addElement(style.TextProperties(attributes={"fontname":"DejaVu Sans Mono", "fontsize":"8pt"}))
+
+
 
 hr = style.Style(name="HorizontalLine", family="paragraph")
 hr.addElement(style.ParagraphProperties(margintop="0in",marginbottom="0.1965in",borderlinewidthbottom="0.0008in 0.0138in 0.0008in",padding="0in",borderleft="none",borderright="none",bordertop="none",borderbottom="0.0154in double #808080"))
@@ -121,55 +124,32 @@ indented.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in"}
 blockquote = style.Style(name="Blockquote", family="paragraph")
 blockquote.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in",'marginright':"0.12in"}))
 
-cite = style.Style(name="Cite", family="paragraph")
-cite.addElement(style.ParagraphProperties(attributes={'marginleft':"0.12in",'marginright':"0.12in"}))
-cite.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
+cite = style.Style(name="Cite", family="text")
+cite.addElement(style.TextProperties(attributes={'fontpitch':"fixed", "fontname":"DejaVu Sans Mono"}))
+teletyped = cite # FIXME
 
 code = source = preformatted 
 
-teletyped = cite # FIXME
+
 
 dumbcolumn = style.Style(name="Dumbcolumn", family="table-column") # REALLY FIXME
 dumbcolumn.addElement(style.TableColumnProperties(attributes={'columnwidth':"1.0in"}))
 
-"""
- <text:list-style style:name="L1">
-        <text:list-level-style-number text:level="1"
-            text:style-name="Numbering_20_Symbols"
-            style:num-prefix=" " style:num-suffix="."
-            style:num-format="1">
-            <style:list-level-properties
-                text:space-before="0.25in"
-                text:min-label-width="0.25in"/>
-        </text:list-level-style-number>
-        <text:list-level-style-number text:level="2"
-            text:style-name="Numbering_20_Symbols"
-            style:num-prefix=" " style:num-suffix=")"
-            style:num-format="a">
-            <style:list-level-properties
-                text:space-before="0.5in"
-                text:min-label-width="0.25in"/>
-        </text:list-level-style-number>
-        <text:list-level-style-bullet text:level="3"
-            text:style-name="Bullet_20_Symbols"
-            style:num-prefix=" " style:num-suffix=" "
-            text:bullet-char="*">
-            <style:list-level-properties
-                text:space-before="0.75in"
-                text:min-label-width="0.25in"/>
-            <style:text-properties style:font-name="StarSymbol"/>
-        </text:list-level-style-bullet>
-        <!-- the bullet is repeated for levels 4 through 10 -->
-    </text:list-style>
-"""
-
 numberedlist = text.ListStyle(name="numberedlist")
 numberedlist.addElement(text.ListLevelStyleNumber(level="1", numprefix="  ", numsuffix=".  ", numformat="1"))
 numberedlist.addElement(text.ListLevelStyleNumber(level="2", numprefix="  ", numsuffix=")  ", numformat="a"))
-numberedlist.addElement(text.ListLevelStyleBullet(level="3", numprefix="  ", numsuffix="   ", bulletchar='-'))
+numberedlist.addElement(text.ListLevelStyleBullet(level="3", numprefix="  ", numsuffix="   ", bulletchar=''))
 
 unorderedlist = text.ListStyle(name="unorderedlist")
-unorderedlist.addElement(text.ListLevelStyleBullet(level="1", bulletchar='-', numsuffix="   "))
+unorderedlist.addElement(text.ListLevelStyleBullet(level="1", bulletchar='', numsuffix="   "))
+
+definitionlist = text.ListStyle(name="definitionlist")
+definitionlist.addElement(text.ListLevelStyleBullet(level="1", bulletchar=' ', numsuffix=""))
+
+definitionterm = style.Style(name="definitionterm", family="paragraph")
+definitionterm.addElement(style.TextProperties(fontweight="bold"))
+
+
 
 def applyStylesToDoc(doc):
     doc.fontfacedecls.addElement(arial)
@@ -203,6 +183,8 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(hr)
     doc.styles.addElement(numberedlist)
     doc.styles.addElement(unorderedlist)
+    doc.styles.addElement(definitionlist)
+    doc.styles.addElement(definitionterm)
 
 
 
