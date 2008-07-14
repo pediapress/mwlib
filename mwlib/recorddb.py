@@ -51,6 +51,10 @@ class RecordDB(object):
             'url': self.db.getURL(name, revision=revision),
             'authors': self.db.getAuthors(name, revision=revision),
         }
+        if hasattr(self.db, 'getSource'):
+            src  = self.db.getSource()
+            if src:
+                self.articles[name]['source'] = src
         return r
     
     def getTemplate(self, name, followRedirects=False):

@@ -49,8 +49,10 @@ class Wiki(object):
         raw = self.getRawArticle(title, revision=revision)
         if raw is None:
             return None
-        a = uparser.parseString(title=title, raw=raw, wikidb=self)
-        return a
+        article = self._getArticle(title, revision=revision)
+        if 'source' in article:
+            lang = article['source'].get('language')
+        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
     
     def getURL(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
