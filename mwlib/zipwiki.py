@@ -50,6 +50,7 @@ class Wiki(object):
         if raw is None:
             return None
         article = self._getArticle(title, revision=revision)
+        lang = None
         if 'source' in article:
             lang = article['source'].get('language')
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
