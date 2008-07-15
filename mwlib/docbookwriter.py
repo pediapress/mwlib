@@ -67,7 +67,7 @@ class DocBookWriter(object):
     header='''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE %s PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">\n%s
  ''' # need to expand with at least documenttype
-    def __init__(self, env=None, status_callback=None, documenttype="article", language="en", imagesrcresolver=None, debug=True):
+    def __init__(self, env=None, status_callback=None, documenttype="article", language="en", imagesrcresolver=None, debug=False):
         assert documenttype in ("article", "book")
         self.documenttype = documenttype
         self.environment = env
