@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+# -*- coding: utf-8 -*-
 # Copyright (c) 2008, PediaPress GmbH
 # See README.txt for additional licensing information.
 
@@ -40,6 +40,9 @@ title.addElement(style.TextProperties(fontsize="18pt", fontweight="bold", fontna
 #graphic = style.Style(name="Graphic", family="presentation")
 graphic = style.Style(name="Graphic", family="graphic")
 graphic.addElement(style.GraphicProperties(wrap="dynamic", verticalrel="paragraph", horizontalrel="paragraph"))
+graphic.addElement(
+    style.GraphicProperties(padding="0.15in",borderleft="none",borderright="0.0154in double #FFFFFF",
+                            bordertop="0.0154in double #FFFFFF",borderbottom="0.0154in double #FFFFFF"))
 
 #graphic = style.Style(name="Graphic", family="graphic")
 #graphic.addElement(style.GraphicProperties(runthrough="foreground", wrap="dynamic", numberwrappedparagraphs="no-limit",
@@ -138,10 +141,10 @@ dumbcolumn.addElement(style.TableColumnProperties(attributes={'columnwidth':"1.0
 numberedlist = text.ListStyle(name="numberedlist")
 numberedlist.addElement(text.ListLevelStyleNumber(level="1", numprefix="  ", numsuffix=".  ", numformat="1"))
 numberedlist.addElement(text.ListLevelStyleNumber(level="2", numprefix="  ", numsuffix=")  ", numformat="a"))
-numberedlist.addElement(text.ListLevelStyleBullet(level="3", numprefix="  ", numsuffix="   ", bulletchar=''))
+numberedlist.addElement(text.ListLevelStyleBullet(level="3", numprefix="  ", numsuffix="   ", bulletchar=u'•'))
 
 unorderedlist = text.ListStyle(name="unorderedlist")
-unorderedlist.addElement(text.ListLevelStyleBullet(level="1", bulletchar='', numsuffix="   "))
+unorderedlist.addElement(text.ListLevelStyleBullet(level="1",numprefix="   ", bulletchar=u'•', numsuffix="   "))
 
 definitionlist = text.ListStyle(name="definitionlist")
 definitionlist.addElement(text.ListLevelStyleBullet(level="1", bulletchar=' ', numsuffix=""))
