@@ -284,22 +284,31 @@ class Application(wsgi.Application):
             collection_id = post_data['collection_id']
             writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
-            return self.error_response('POST argument required: %s' % exc)
+            log.ERROR('POST argument required: %s' % exc)
+            return self.http500()
         
-        self.check_collection_id(collection_id)
+        try:
+            self.check_collection_id(collection_id)
         
-        log.info('download %s %s' % (collection_id, writer))
+            log.info('download %s %s' % (collection_id, writer))
         
-        output_path = self.get_path(collection_id, self.output_filename, writer)
-        status = self.read_status_file(collection_id, writer)
-        response = wsgi.Response(content=open(output_path, 'rb'))
-        if 'content_type' in status:
-            response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
-        if 'file_extension' in status:
-            response.headers['Content-Disposition'] = 'inline;filename="collection.%s"' %  (
-                status['file_extension'].encode('utf-8', 'ignore'),
-            )
-        return response
+            output_path = self.get_path(collection_id, self.output_filename, writer)
+            status = self.read_status_file(collection_id, writer)
+            response = wsgi.Response(content=open(output_path, 'rb'))
+            if 'content_type' in status:
+                response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
+            else:
+                log.warn('no content type in status file')
+            if 'file_extension' in status:
+                response.headers['Content-Disposition'] = 'inline;filename="collection.%s"' %  (
+                    status['file_extension'].encode('utf-8', 'ignore'),
+                )
+            else:
+                log.warn('no file extension in status file')
+            return response
+        except Exception, exc:
+            log.ERROR('exception in do_download(): %r' % exc)
+            return self.http500()
     
     def do_zip_post(self, post_data):
         try:
