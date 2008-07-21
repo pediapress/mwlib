@@ -724,7 +724,11 @@ def validate(xml):
     fh, tfn = tempfile.mkstemp()
     open(tfn, "w").write(xml)
     cmd = "xmllint --noout --valid %s" %tfn
-    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE, close_fds=True)
+    if os.name == 'nt':
+        kwargs = {}
+    else:
+        kwargs = {'close_fds': True}
+    p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, **kwargs)
     p.wait()
     r = p.stderr.read()
     os.remove(tfn)

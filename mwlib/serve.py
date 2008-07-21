@@ -26,8 +26,12 @@ log = log.Log('mwlib.serve')
 def no_job_queue(job_type, collection_id, args):
     """Just spawn a new process for the given job"""
     
+    if os.name == 'nt':
+        kwargs = {}
+    else:
+        kwargs = {'close_fds': True}
     try:
-        subprocess.Popen(args, close_fds=True)
+        subprocess.Popen(args, **kwargs)
     except OSError, exc:
         raise RuntimeError('Could not execute command %r: %s' % (
             args[0], exc,
