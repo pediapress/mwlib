@@ -330,6 +330,8 @@ def make_zip_file(output, env,
     
     z.writeContent()
     zf.close()
+    if os.path.exists(output):
+        os.unlink(output)
     os.rename(output + '.tmp', output)
     
     if env.images and hasattr(env.images, 'clear'):
