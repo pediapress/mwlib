@@ -86,6 +86,12 @@ class Application(object):
     """
     
     def __call__(self, env, start_response):
+        if os.name == 'nt':
+            import msvcrt
+            for fd in (env['wsgi.input'], env['wsgi.output']):
+                if hasattr(fd, 'fileno') and fd.fileno() >= 0:
+                    msvcrt.setmode(fd.fileno(), os.O_BINARY)
+        
         start_time = time.time()
         try:
             request = Request(env)
