@@ -360,7 +360,8 @@ def render():
                 num_image_threads=options.num_image_threads,
                 imagesize=options.imagesize,
             )
-            env.images.clear()
+            if env.images:
+                env.images.clear()
             env.wiki = zipwiki.Wiki(zip_filename)
             env.images = zipwiki.ImageDB(zip_filename)
         else:
