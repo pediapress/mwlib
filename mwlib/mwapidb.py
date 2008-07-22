@@ -231,10 +231,11 @@ class ImageDB(object):
             self.api_helper = api_helper
         else:
             self.api_helper = APIHelper(base_url)
-            assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
+        assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
         
         if username is not None:
-            self.login(username, password)
+            assert self.login(username, password), 'Login failed'
+                
         
         self.tmpdir = tempfile.mkdtemp()
     
@@ -543,6 +544,8 @@ class WikiDB(object):
         if self.source is not None:
             return self.source
         result = self.api_helper.query(meta='siteinfo')
+        if result is None:
+            return None
         try:
             g = result['general']
             self.source = metabook.make_source(
