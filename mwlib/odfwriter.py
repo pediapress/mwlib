@@ -268,6 +268,10 @@ class ODFWriter(object):
 
 
     def owriteSection(self, obj):
+        # skip empty sections (as for eg References)
+        if not u"".join(x.getAllDisplayText().strip() for x in obj.children[1:]):
+            return SkipChildren()
+
         level = 1 + obj.getSectionLevel() # H1 is for an article, starting with h2
         #title = u"%d %s" %(level,  obj.children[0].children[0].caption ) # FIXME (debug output)
         title = obj.children[0].children[0].caption
@@ -561,30 +565,41 @@ class ODFWriter(object):
 
     def owriteLangLink(self, obj):
         return SkipChildren() # we dont want them
-    
 
 
     def owriteReference(self, t): 
         self.references.append(t)
-        s =  text.Span(stylename=style.sup)
-        s.addText(u"[%d]" %  len(self.references))
-        return SkipChildren(s)
-
-
-    def writeReferenceList(self, t):
-        pass
+        n =  text.Note(noteclass="footnote")
+        nc = text.NoteCitation()
+        n.addElement(nc )
+        nc.addText(str(len(self.references)))
+        nb = text.NoteBody()
+        n.addElement( nb )
+        p = ParagraphProxy(stylename="Footnote")
+        nb.addElement(p)
+        n.writeto = p
+        return n
 
     def owriteReferenceList(self, t):
-        if not self.references:
-            return
-        ol =  text.List(stylename=style.numberedlist)
-        for i,ref in enumerate(self.references):
-            li = self.owriteItem(None)
-            ol.addElement(li)
-            self.writeChildren(ref, parent=li)
-        self.references = []
-        return SkipChildren(ol) # shall not have any children??
-       
+        pass
+
+#     def owriteReferenceOLD(self, t): 
+#         self.references.append(t)
+#         s =  text.Span(stylename=style.sup)
+#         s.addText(u"[%d]" %  len(self.references))
+#         return SkipChildren(s)
+
+
+#     def owriteReferenceListOLD(self, t):
+#         if not self.references:
+#             return
+#         ol =  text.List(stylename=style.numberedlist)
+#         for i,ref in enumerate(self.references):
+#             li = self.owriteItem(None)
+#             ol.addElement(li)
+#             self.writeChildren(ref, parent=li)
+#         self.references = []
+#         return SkipChildren(ol) # shall not have any children??
 
     def owriteImageMap(self, obj):
         pass # write children # fixme
