@@ -153,14 +153,22 @@ class APIHelper(object):
         @type username: unicode
         
         @type password: unicode
+        
+        @returns: True if login succeeded, False otherwise
+        @rtype: bool
         """
         
         post_data = urllib.urlencode({
             'action': 'login',
             'lgname': username.encode('utf-8'),
             'lgpassword': password.encode('utf-8'),
+            'format': 'json',
         })
-        self.opener.open('%sapi.php' % self.base_url, post_data)
+        result = self.opener.open('%sapi.php' % self.base_url, post_data)
+        result = simplejson.loads(result.read())
+        if 'login' in result and result['login'].get('result') == 'Success':
+            return True
+        return False
     
     def query(self, ignore_errors=True, **kwargs):
         args = {
