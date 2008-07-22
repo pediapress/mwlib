@@ -235,11 +235,11 @@ class ImageDB(object):
             self.api_helper = api_helper
         else:
             self.api_helper = APIHelper(base_url)
-        assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
         
         if username is not None:
             assert self.login(username, password), 'Login failed'
                 
+        assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
         
         self.tmpdir = tempfile.mkdtemp()
     
@@ -247,7 +247,7 @@ class ImageDB(object):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
     
     def login(self, username, password):
-        self.api_helper.login(username, password)
+        return self.api_helper.login(username, password)
     
     def getDescriptionURL(self, name):
         """Return URL of image description page for image with given name
@@ -424,9 +424,12 @@ class WikiDB(object):
             self.api_helper = api_helper
         else:
             self.api_helper = APIHelper(base_url)
-            assert self.api_helper is not None, 'invalid base URL %r' % base_url
+        
         if username is not None:
-            self.login(username, password)
+            assert self.login(username, password), 'login failed'
+        
+        assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
+
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:
@@ -442,7 +445,7 @@ class WikiDB(object):
                                        for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
     
     def login(self, username, password):
-        self.api_helper.login(username, password)
+        return self.api_helper.login(username, password)
     
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))

@@ -107,7 +107,13 @@ class OptionParser(optparse.OptionParser):
         return self.options, self.args
     
     def makewiki(self):
-        env = wiki.makewiki(self.options.config, metabook=self.metabook)
+        if self.options.login:
+            username, password = self.options.login.split(':', 1)
+        env = wiki.makewiki(self.options.config,
+            metabook=self.metabook,
+            username=username,
+            password=password,
+        )
         if self.options.noimages:
             env.images = None
         if self.options.template_blacklist:
@@ -115,14 +121,6 @@ class OptionParser(optparse.OptionParser):
                 env.wiki.setTemplateBlacklist(self.options.template_blacklist)
             else:
                 log.warn('WikiDB does not support setting a template blacklist')
-        if self.options.login:
-            username, password = self.options.login.split(':', 1)
-            if hasattr(env.wiki, 'login'):
-                env.wiki.login(username, password)
-            else:
-                log.warn('WikiDB does not support logging in')
-            if env.images and hasattr(env.images, 'login'):
-                env.images.login(username, password)
         if self.options.collectionpage:
             wikitext = env.wiki.getRawArticle(self.options.collectionpage)
             if wikitext is None:

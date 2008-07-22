@@ -187,22 +187,22 @@ url=
         return licenses
     
 
-def _makewiki(conf, metabook=None):
+def _makewiki(conf, metabook=None, username=None, password=None):
     res = Environment(metabook)
     
     url = None
     if conf.startswith(':'):
         url = wpwikis.get(conf[1:])
-
+    
     if conf.startswith("http://") or conf.startswith("https://"):
         url = conf
 
     if url:
-        res.wiki = wiki_mwapi(url)
-        res.images = image_mwapi(url)
+        res.wiki = wiki_mwapi(url, username=username, password=password)
+        res.images = image_mwapi(url, username=username, password=password)
         return res
     
-            
+    
     # yes, I really don't want to type this everytime
     wc = os.path.join(conf, "wikiconf.txt")
     if os.path.exists(wc):
@@ -241,8 +241,8 @@ def _makewiki(conf, metabook=None):
     assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res
 
-def makewiki(conf, metabook=None):
-    res = _makewiki(conf, metabook)
+def makewiki(conf, metabook=None, username=None, password=None):
+    res = _makewiki(conf, metabook, username=username, password=password)
     res.wiki.env = res
     if res.images:
         res.images.env = res
