@@ -186,13 +186,17 @@ class APIHelper(object):
             ignore_errors=ignore_errors,
             opener=self.opener,
         )
+        
         if ignore_errors and data is None:
+            log.error('Got no data from api.php')
             return None
         try:
             return simplejson.loads(unicode(data, 'utf-8'))['query']
         except KeyError:
+            log.error('Response from api.php did not contain a query result')
             return None
-        except:
+        except Exception, e:
+            log.error('Got exception: %r' % e)
             if ignore_errors:
                 return None
             raise RuntimeError('api.php query failed. Are you sure you specified the correct baseurl?')
