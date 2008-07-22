@@ -5,18 +5,35 @@
 
 import sys
 import os
-
+import atexit
+import time
 import ez_setup
 ez_setup.use_setuptools()
 
 from setuptools import setup, Extension
 import distutils.util
-
-
+    
 install_requires=["simplejson>=1.3", "pyparsing>=1.4.11", "odfpy>=0.7.0", "flup>=1.0"]
 if sys.version_info[:2] < (2,5):
     install_requires.append("wsgiref>=0.1.2")
     install_requires.append("elementtree>=1.2.6")
+
+try:
+    from PIL import Image
+except ImportError:
+    def showpil():
+        print """
+
+*****************************************************
+* please install the python imaging library (PIL)
+* from http://www.pythonware.com/products/pil/
+*****************************************************
+
+"""
+        # give them some time to read it, we really need it and can't install with setuptools
+        time.sleep(5) 
+        
+    atexit.register(showpil)
     
 execfile(distutils.util.convert_path('mwlib/_version.py')) 
 # adds 'version' to local namespace
@@ -33,7 +50,6 @@ def mtime(fn):
 
 if mtime("mwlib/_mwscan.cc") < mtime("mwlib/_mwscan.re"):
     print "Warning: _mwscan.cc is older than _mwscan.re. please run make.\n"
-    import time
     time.sleep(2)
     
     
@@ -64,7 +80,6 @@ setup(
     ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
                    #Extension("mwlib._expander", ["mwlib/_expander.cc"]),
                    ],
-    
     packages=["mwlib", "mwlib.resources"],
     namespace_packages=['mwlib'],
     include_package_data = True,
