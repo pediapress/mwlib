@@ -37,9 +37,17 @@ QUEUE_DIR = None
 
 # ==============================================================================
 
+import os
+import sys
+
 from flup.server.cgi import WSGIServer
 
 from mwlib import serve, utils
+
+if os.name == 'nt':
+    import msvcrt
+    if hasattr(sys.stdout, 'fileno') and sys.stdout.fileno() >= 0:
+        msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 if LOGFILE is not None:
     utils.start_logging(LOGFILE, stderr_only=True)
