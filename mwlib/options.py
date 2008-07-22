@@ -109,6 +109,8 @@ class OptionParser(optparse.OptionParser):
     def makewiki(self):
         if self.options.login:
             username, password = self.options.login.split(':', 1)
+        else:
+            username, password = None, None
         env = wiki.makewiki(self.options.config,
             metabook=self.metabook,
             username=username,
