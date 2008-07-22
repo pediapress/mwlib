@@ -125,14 +125,16 @@ def buildzip():
         print 'Current Article: %r' % title
         if podclient is not None:
             podclient.post_current_article(title)
-
+    
     try:
+        env = parser.makewiki()
+        
         from mwlib import recorddb
         
         set_status('parsing')
         set_progress(0)
         
-        filename = recorddb.make_zip_file(options.output, parser.env,
+        filename = recorddb.make_zip_file(options.output, env,
             set_progress=lambda p: set_progress(p*0.9),
             set_current_article=set_current_article,
             num_article_threads=options.num_article_threads,
@@ -345,33 +347,35 @@ def render():
             open(options.status_file, 'wb').write(simplejson.dumps(last_status).encode('utf-8'))
     
     try:
+        env = parser.makewiki()
+        
         set_status(status='parsing', progress=0)
         
-        if not isinstance(parser.env.wiki, zipwiki.Wiki)\
-            or not isinstance(parser.env.images, zipwiki.ImageDB):
-            zip_filename = recorddb.make_zip_file(options.keep_zip, parser.env,
+        if not isinstance(env.wiki, zipwiki.Wiki)\
+            or not isinstance(env.images, zipwiki.ImageDB):
+            zip_filename = recorddb.make_zip_file(options.keep_zip, env,
                 set_progress=lambda p: set_status(progress=0.7*p),
                 set_current_article=lambda t: set_status(article=t),
                 num_article_threads=options.num_article_threads,
                 num_image_threads=options.num_image_threads,
                 imagesize=options.imagesize,
             )
-            parser.env.images.clear()
-            parser.env.wiki = zipwiki.Wiki(zip_filename)
-            parser.env.images = zipwiki.ImageDB(zip_filename)
+            env.images.clear()
+            env.wiki = zipwiki.Wiki(zip_filename)
+            env.images = zipwiki.ImageDB(zip_filename)
         else:
             zip_filename = None
         
         tmpout = options.output + '.tmp'
-        writer(parser.env, output=tmpout, status_callback=set_status, **writer_options)
+        writer(env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
         kwargs = {}
         if hasattr(writer, 'content_type'):
             kwargs['content_type'] = writer.content_type
         if hasattr(writer, 'file_extension'):
             kwargs['file_extension'] = writer.file_extension
-        if parser.env.images:
-            parser.env.images.clear()
+        if env.images:
+            env.images.clear()
         set_status(status='finished', progress=100, **kwargs)
         if options.keep_zip is None and zip_filename is not None:
             try:

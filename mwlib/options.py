@@ -59,34 +59,43 @@ class OptionParser(optparse.OptionParser):
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
+        
         if self.options.logfile:
             start_logging(self.options.logfile)
+        
         if self.options.config is None:
             if not self.config_optional:
                 self.error('Please specify --config option. See --help for all options.')
             return self.options, self.args
+        
         if self.options.metabook:
             self.metabook = simplejson.loads(open(self.options.metabook, 'rb').read())
+        
         if self.options.login is not None and ':' not in self.options.login:
             self.error('Please specify username and password as USERNAME:PASSWORD.')
+        
         try:
             self.options.imagesize = int(self.options.imagesize)
             assert self.options.imagesize > 0
         except (ValueError, AssertionError):
             self.error('Argument for --imagesize must be an integer > 0.')
+        
         try:
             self.options.num_article_threads = int(self.options.num_article_threads)
             assert self.options.num_article_threads >= 0
         except (ValueError, AssertionError):
             self.error('Argument for --num-article-threads must be an integer >= 0.')
+        
         try:
             self.options.num_image_threads = int(self.options.num_image_threads)
             assert self.options.num_image_threads >= 0
         except (ValueError, AssertionError):
             self.error('Argument for --num-image-threads must be an integer >= 0.')
+        
         if self.options.no_threads:
             self.options.num_article_threads = 0
             self.options.num_image_threads = 0
+        
         if self.args:
             if self.metabook is None:
                 self.metabook = metabook.make_metabook()
@@ -94,7 +103,7 @@ class OptionParser(optparse.OptionParser):
                 self.metabook['items'].append(metabook.make_article(
                     title=unicode(title, 'utf-8'),
                 ))
-        self.env = self.makewiki()
+        
         return self.options, self.args
     
     def makewiki(self):
