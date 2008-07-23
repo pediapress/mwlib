@@ -45,9 +45,12 @@ class Log(object):
     def __call__(self, msg, *args):
         if not self.logfile:
             return
-
+        
+        if not isinstance(msg, str):
+            msg = repr(msg)
+        
         if args:
             msg = " ".join(([msg] + [repr(x) for x in args]))
-
+        
         s = "%s >> %s\n" % (".".join(str(x) for x in self._prefix if x), msg)
         self.logfile.write(s)
