@@ -45,6 +45,7 @@ from mwlib import odfstyles as style
 from mwlib import xmltreecleaner
 from mwlib import writerbase
 
+
 log = Log("odfwriter")
 
 def showNode(obj):
@@ -475,7 +476,9 @@ class ODFWriter(object):
         get a MATHML from Latex
         translate element tree to odf.Elements
         """
-        r = mathml.latex2mathml(obj.caption)     # returns an element tree parse tree
+        r = writerbase.renderMath(obj.caption, output_mode='mathml', render_engine='blahtexml')        
+        if not r:
+            return
         #print mathml.ET.tostring(r)
         def _withETElement(e, parent):
             # translate to odf.Elements

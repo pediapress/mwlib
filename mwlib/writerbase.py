@@ -1,4 +1,13 @@
+#! /usr/bin/env python
+
+# Copyright (c) 2007-2008 PediaPress GmbH
+# See README.txt for additional licensing information.
+
+
 from mwlib import parser, log, metabook
+
+# import functions needed by most writers that should be accessible through writerbase
+from math_utils import renderMath
 
 log = log.Log('mwlib.writerbase')
 
@@ -40,3 +49,5 @@ def build_book(env, status_callback=None, progress_range=None):
     if status_callback is not None:
         status_callback(status='parsing', progress=progress, article='')
     return book
+
+
