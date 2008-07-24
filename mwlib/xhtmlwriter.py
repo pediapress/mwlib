@@ -35,7 +35,6 @@ except:
     from elementtree import ElementTree as ET
 
 from mwlib import parser
-from mwlib import mathml
 from mwlib import advtree
 from mwlib import xmltreecleaner
 from mwlib.log import Log
@@ -395,8 +394,7 @@ class MWXHTMLWriter(object):
 
 
     def xwriteMath(self, obj):
-        return mathml.latex2mathml(obj.caption) or self.xwriteMath_WITH_OBJECT(obj)
-        
+        return writerbase.renderMath(obj.caption, output_mode='mathml', render_engine='blahtexml')
 
     def xwriteMath_WITH_OBJECT(self, obj): 
         """
@@ -408,7 +406,7 @@ class MWXHTMLWriter(object):
         s.set("class", "mwx.math")
         s.set("type", "application/x-latex")
         s.set("src", "data:text/plain;charset=utf-8,%s" % obj.caption)
-        r = mathml.latex2mathml(obj.caption)       
+        r = writerbase.renderMath(obj.caption, output_mode='mathml', render_engine='blahtexml')
         if not r:
             #r = ET.Element("em")
             #r.set("class", "math.error")
