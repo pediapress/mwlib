@@ -30,13 +30,13 @@ The ``status_callback`` argument is a callable with the following signature::
 
 which should be called from time to time to update the status/progress
 information. ``status`` should be set to a short, English description of
-what's happending (e.g. "parsing", "rendering"), ``progress`` should be an
+what's happening (e.g. "parsing", "rendering"), ``progress`` should be an
 integer value between 0 and 100 indicating the percentage of progress
 (actually you don't have to worry about setting it to 0 at the start and to
-100 at the end, this is done by ``mw-render``) and ``aritcle`` should
+100 at the end, this is done by ``mw-render``) and ``article`` should
 be the unicode string of the currently processed article. All parameters
 are optional, so you can pass only one or two of the parameters to
-``status_callback()`` and the other paramters will keep their previous
+``status_callback()`` and the other parameters will keep their previous
 value.
 
 The return value of the writer function is not used: If the function returns,
