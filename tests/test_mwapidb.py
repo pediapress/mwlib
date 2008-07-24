@@ -98,6 +98,14 @@ class TestWikiDB(object):
         assert parse_article_url('bla') is None
         assert parse_article_url('http://pediapress.com/') is None
         
+        b, t, r = p('http://simple.pediapress.com/w/index.php/User:Jojo/Collections/test')
+        assert b == 'http://simple.pediapress.com/w/'
+        assert t == 'User:Jojo/Collections/test'
+        assert r is None
+        
+        b, t, r = p('http://memory-alpha.org/en/wiki/Damar')
+        print b, t, r
+        
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
         assert 'redirect' not in raw.lower()

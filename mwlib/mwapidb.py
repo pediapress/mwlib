@@ -43,19 +43,31 @@ def get_api_helper(url):
     @rtype: @{APIHelper}
     """
     
-    mo = articleurl_rex.match(url)
-    if mo is None:
+    try:
+        scheme, netloc, path, params, query, fragment = urlparse.urlparse(url)
+    except ValueError:
+        return None
+    if not (scheme and netloc):
         return None
     
-    scheme_host_port = mo.group('scheme_host_port')
-    if scheme_host_port in api_helper_cache:
-        return api_helper_cache[scheme_host_port]
+    if '/wiki/' in path:
+        path_prefix = path[:path.find('/wiki/')]
+    elif '/w/' in path:
+        path_prefix = path[:path.find('/w/')]
+    else:
+        path_prefix = ''
     
+    prefix = '%s://%s%s' % (scheme, netloc, path_prefix)
+    try:
+        return api_helper_cache[prefix]
+    except KeyError:
+        pass
+
     for path in ('/w/', '/wiki/', '/'):
-        base_url = scheme_host_port + path
+        base_url = '%s%s' % (prefix, path)
         api_helper = APIHelper(base_url)
         if api_helper.is_usable():
-            api_helper_cache[scheme_host_port] = api_helper
+            api_helper_cache[prefix] = api_helper
             return api_helper
     
     return None
@@ -82,6 +94,7 @@ def parse_article_url(url, title_encoding='utf-8'):
         return None
     args = cgi.parse_qs(query)
     
+    # example: http://some.host/bla/index.php?title=Article_title&oldid=1234
     if path.endswith('index.php'):
         if 'title' not in args or not args['title']:
             return None
@@ -101,16 +114,38 @@ def parse_article_url(url, title_encoding='utf-8'):
             'revision': revision,
         }
     
+    # example: http://some.host/bla/index.php/Article_title
+    # pos = path.find('index.php/')
+    # if pos >= 0:
+    #     try:
+    #         title = unicode(path[pos + len('index.php/')], title_encoding, 'ignore').replace('_', ' ')
+    #     except IndexError:
+    #         return None
+    #     base_url = url[:url.find('index.php/')]
+    #     api_helper = APIHelper(base_url)
+    #     if not api_helper.is_usable():
+    #         return None
+    #     return {
+    #         'api_helper': api_helper,
+    #         'title', title,
+    #         'revision': None,
+    #     }
+    
     api_helper = get_api_helper(url)
     if api_helper is None:
         return None
-    
-    if '/wiki/' in path:
-        return {
-            'api_helper': api_helper,
-            'title': unicode(path[path.find('/wiki/') + len('/wiki/'):], title_encoding, 'ignore').replace('_', ' '),
-            'revision': None,
-        }
+
+    for part in ('/wiki/', 'index.php/'):
+        if part in path:
+            return {
+                'api_helper': api_helper,
+                'title': unicode(
+                    path[path.find(part) + len(part):],
+                    title_encoding,
+                    'ignore'
+                ).replace('_', ' '),
+                'revision': None,
+            }
     
     return {
         'api_helper': api_helper,
