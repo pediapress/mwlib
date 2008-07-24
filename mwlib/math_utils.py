@@ -75,7 +75,7 @@ def _renderMathTexvc(latex, output_path, output_mode='png'):
 def renderMath(latex, output_path=None, output_mode='png', render_engine='blahtexml'):
     """
     output_mode = png|mathml  - mathml only works with blahtexml as render_engine
-    render_mode = blahtexml|texvc
+    render_engine = blahtexml|texvc
 
     returns either path to generated png or mathml string
     """
