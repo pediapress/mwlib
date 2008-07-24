@@ -274,7 +274,7 @@ class Link(Node):
         (self.__class__, self.namespace) = (
                 self._specializeMap.get(ns.lower(), (ArticleLink, self.NS_MAIN)))
         
-        if len(ns) == 2 and not isinstance(self, InterwikiLink):
+        if len(ns) == 2 and isinstance(self, ArticleLink):
             # Assume this is an unlisted language
             self.__class__ = LangLink
             self.namespace = ns.lower()

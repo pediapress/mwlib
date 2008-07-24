@@ -626,6 +626,12 @@ def test_category_colon_link():
     assert r.namespace == 14
     assert not isinstance(r, parser.CategoryLink)
 
+def test_image_link():
+    t = uparser.parseString('', u'[[画像:Tajima mihonoura03s3200.jpg]]', lang='ja')
+    r = t.find(parser.ImageLink)[0]
+    assert r.target == u'Tajima mihonoura03s3200.jpg'
+    assert r.namespace == 6
+
 def test_image_colon_link():
     r=parse("[[:image:bla.jpg]]").find(parser.SpecialLink)[0]
     assert r.target=='bla.jpg'
