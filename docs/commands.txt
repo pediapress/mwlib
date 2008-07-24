@@ -30,7 +30,7 @@ one command.
     If you've set up your own
     MediaWiki you probably know what your base URL should be, but if you're
     using a different MediaWiki, you can see the base URL if add a query string
-    to the URL, e.g. by cicking on the edit link or by looking at an older
+    to the URL, e.g. by clicking on the edit link or by looking at an older
     revision of an article.
   
     This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
@@ -49,7 +49,7 @@ one command.
 
 ``-m, --metabook=METABOOK``
 
-  Description of the article colleciton to be rendered in JSON format.
+  Description of the article collection to be rendered in JSON format.
   This is used by the `Collection extension`_ to transfer this information
   to ``mw-serve`` which in turn passes the information to ``mw-render`` and
   ``mw-zip``.
@@ -120,7 +120,7 @@ one command.
 The ``mw-render`` Command
 =========================
 
-Render MediaWiki articles to one of several output formats like PDF of
+Render MediaWiki articles to one of several output formats like PDF or
 OpenDocument Text.
 
 Usage
@@ -150,7 +150,7 @@ Specific Options
 
 ``--writer-info=WRITER``
 
-  Show avaiable options and some additional information about the given writer.
+  Show available options and some additional information about the given writer.
 
 ``-s, --status-file=STATUS_FILE``
 
@@ -231,7 +231,7 @@ The ``mw-serve`` Command
 ========================
 
 Provide a server interface to ``mw-render`` and ``mw-zip``. This can be used
-in conjuction with the `Collection extension`_ to provide PDF generation or
+in conjunction with the `Collection extension`_ to provide PDF generation or
 the possibility to order printed books from a MediaWiki.
 
 Usage
@@ -293,7 +293,7 @@ Specific Options
 ``-q, --queue-dir=QUEUE_DIR``
 
   If specified, do not call ``mw-render`` and ``mw-zip`` but write small job
-  desciption files in the given QUEUE_DIR directory for later processing by
+  description files in the given QUEUE_DIR directory for later processing by
   `the mw-watch command`_.
 
 ``-m, --method=METHOD``
@@ -320,7 +320,7 @@ Specific Options
 ``--clean-cache=HOURS``
 
   Clean all cached files in --cache-dir that haven't been touched for the
-  last HOURS hourse. This is meant to be run as a cron job.
+  last HOURS hours. This is meant to be run as a cron job.
 
   
 The ``mw-watch`` Command
