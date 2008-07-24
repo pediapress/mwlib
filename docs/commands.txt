@@ -93,12 +93,13 @@ one command.
   To be used together with --daemonize: Write process ID of daemon process to
   this file.
   
-``--login=USERNAME:PASSWORD``
+``--login=USERNAME:PASSWORD[:DOMAIN]``
 
-  For MediaWikis that restrict the viewing of pages, login with given USERNAME
-  and PASSWORD (currently this is only supported for mwapidb, i.e. when the
-  --config argument is a base URL or shortcut, or when ``type=mwapi`` in the
-  configuration file).
+  For MediaWikis that restrict the viewing of pages, login with given USERNAME,
+  PASSWORD and optionally DOMAIN.
+  
+  Currently this is only supported for mwapidb, i.e. when the --config argument
+  is a base URL or shortcut, or when ``type=mwapi`` in the configuration file.
   
 ``--num-article-threads=NUM``
 

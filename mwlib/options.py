@@ -33,8 +33,8 @@ class OptionParser(optparse.OptionParser):
             help="Title of article containing blacklisted templates",
         )
         self.add_option("--login",
-            help='login with given USERNAME and PASSWORD',
-            metavar='USERNAME:PASSWORD',
+            help='login with given USERNAME, PASSWORD and (optionally) DOMAIN',
+            metavar='USERNAME:PASSWORD[:DOMAIN]',
         )
         self.add_option('--no-threads',
             action='store_true',
@@ -107,14 +107,17 @@ class OptionParser(optparse.OptionParser):
         return self.options, self.args
     
     def makewiki(self):
+        username, password, domain = None, None, None
         if self.options.login:
-            username, password = self.options.login.split(':', 1)
-        else:
-            username, password = None, None
+            if self.options.login.count(':') == 1:
+                username, password = self.options.login.split(':', 1)
+            else:
+                username, password, domain = self.options.login.split(':', 2)
         env = wiki.makewiki(self.options.config,
             metabook=self.metabook,
             username=username,
             password=password,
+            domain=domain,
         )
         if self.options.noimages:
             env.images = None

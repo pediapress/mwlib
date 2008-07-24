@@ -182,25 +182,36 @@ class APIHelper(object):
             return True
         return False
     
-    def login(self, username, password):
+    def login(self, username, password, domain=None):
         """Login via MediaWiki API
         
+        @param username: username
         @type username: unicode
         
+        @param password: password
         @type password: unicode
+        
+        @param domain: optional domain
+        @type domain: unicode
         
         @returns: True if login succeeded, False otherwise
         @rtype: bool
         """
         
-        post_data = urllib.urlencode({
+        args = {
             'action': 'login',
             'lgname': username.encode('utf-8'),
             'lgpassword': password.encode('utf-8'),
             'format': 'json',
-        })
-        result = self.opener.open('%sapi.php' % self.base_url, post_data)
-        result = simplejson.loads(result.read())
+        }
+        if domain is not None:
+            args['lgdomain'] = domain.encode('utf-8')
+        result = utils.fetch_url('%sapi.php' % self.base_url,
+            post_data=args,
+            ignore_errors=False,
+            opener=self.opener,
+        )
+        result = simplejson.loads(result)
         if 'login' in result and result['login'].get('result') == 'Success':
             return True
         return False
@@ -256,10 +267,25 @@ class APIHelper(object):
 
 
 class ImageDB(object):
-    def __init__(self, base_url=None, username=None, password=None, api_helper=None):
+    def __init__(self,
+        base_url=None,
+        username=None,
+        password=None,
+        domain=None,
+        api_helper=None,
+    ):
         """
         @param base_url: base URL of a MediaWiki, e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
+        
+        @param username: username to login with (optional)
+        @type username: unicode
+        
+        @param password: password to login with (optional)
+        @type password: unicode
+        
+        @param domain: domain to login with (optional)
+        @type domain: unicode
         
         @param api_helper: APIHelper instance
         @type api_helper: L{APIHelper}
@@ -272,7 +298,7 @@ class ImageDB(object):
             self.api_helper = APIHelper(base_url)
         
         if username is not None:
-            assert self.login(username, password), 'Login failed'
+            assert self.login(username, password, domain=domain), 'Login failed'
                 
         assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
         
@@ -281,8 +307,8 @@ class ImageDB(object):
     def clear(self):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
     
-    def login(self, username, password):
-        return self.api_helper.login(username, password)
+    def login(self, username, password, domain=None):
+        return self.api_helper.login(username, password, domain=domain)
     
     def getDescriptionURL(self, name):
         """Return URL of image description page for image with given name
@@ -438,6 +464,7 @@ class WikiDB(object):
         base_url=None,
         username=None,
         password=None,
+        domain=None,
         template_blacklist=None,
         api_helper=None,
     ):
@@ -445,6 +472,15 @@ class WikiDB(object):
         @param base_url: base URL of a MediaWiki,
             e.g. 'http://en.wikipedia.org/w/'
         @type base_url: basestring
+        
+        @param username: username to login with (optional)
+        @type username: unicode
+        
+        @param password: password to login with (optional)
+        @type password: unicode
+        
+        @param domain: domain to login with (optional)
+        @type domain: unicode
         
         @param template_blacklist: title of an article containing blacklisted
             templates (optional)
@@ -461,7 +497,7 @@ class WikiDB(object):
             self.api_helper = APIHelper(base_url)
         
         if username is not None:
-            assert self.login(username, password), 'login failed'
+            assert self.login(username, password, domain=domain), 'login failed'
         
         assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
 
@@ -479,8 +515,8 @@ class WikiDB(object):
             self.template_blacklist = [template.lower().strip() 
                                        for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
     
-    def login(self, username, password):
-        return self.api_helper.login(username, password)
+    def login(self, username, password, domain=None):
+        return self.api_helper.login(username, password, domain=domain)
     
     def getURL(self, title, revision=None):
         name = urllib.quote(title.replace(" ", "_").encode('utf-8'))

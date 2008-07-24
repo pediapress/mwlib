@@ -16,6 +16,7 @@ import sys
 import tempfile
 import time
 import traceback
+import urllib
 import urllib2
 import UserDict
 
@@ -241,7 +242,7 @@ fetch_cache = {}
 
 def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     max_cacheable_size=1024, expected_content_type=None, opener=None,
-    output_filename=None):
+    output_filename=None, post_data=None):
     """Fetch given URL via HTTP
     
     @param ignore_errors: if True, log but otherwise ignore errors, return None
@@ -264,6 +265,9 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     @param output_filename: write response to given file
     @type output_filename: basestring
     
+    @param post_data: if given use POST request
+    @type post_data: dict
+    
     @returns: fetched response or True if filename was given; None when
         ignore_errors is True, and the request failed
     @rtype: str
@@ -277,7 +281,9 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'mwlib')]
     try:
-        result = opener.open(url)
+        if post_data:
+            post_data = urllib.urlencode(post_data)
+        result = opener.open(url, post_data)
         data = result.read()
         if expected_content_type:
             content_type = result.info().gettype()

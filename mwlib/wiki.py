@@ -18,12 +18,14 @@ def wiki_mwapi(
     template_blacklist=None,
     username=None,
     password=None,
+    domain=None,
     **kwargs):
     from mwlib import mwapidb
     return mwapidb.WikiDB(base_url,
         template_blacklist=template_blacklist,
         username=username,
         password=password,
+        domain=domain,
     )
 
 def wiki_zip(path=None, url=None, name=None, **kwargs):
@@ -63,9 +65,19 @@ def wiki_cdb(path=None, **kwargs):
     db=cdbwiki.WikiDB(path)
     return db
 
-def image_mwapi(base_url=None, username=None, password=None, **kwargs):
+def image_mwapi(
+    base_url=None,
+    username=None,
+    password=None,
+    domain=None,
+    **kwargs
+):
     from mwlib import mwapidb
-    return mwapidb.ImageDB(base_url, username=username, password=password)
+    return mwapidb.ImageDB(base_url,
+        username=username,
+        password=password,
+        domain=domain,
+    )
 
 def image_download(url=None, localpath=None, knownlicenses=None, **kwargs):
     assert url, "must supply url in [images] section"
@@ -187,7 +199,7 @@ url=
         return licenses
     
 
-def _makewiki(conf, metabook=None, username=None, password=None):
+def _makewiki(conf, metabook=None, username=None, password=None, domain=None):
     res = Environment(metabook)
     
     url = None
@@ -198,8 +210,16 @@ def _makewiki(conf, metabook=None, username=None, password=None):
         url = conf
 
     if url:
-        res.wiki = wiki_mwapi(url, username=username, password=password)
-        res.images = image_mwapi(url, username=username, password=password)
+        res.wiki = wiki_mwapi(url,
+            username=username,
+            password=password,
+            domain=domain,
+        )
+        res.images = image_mwapi(url,
+            username=username,
+            password=password,
+            domain=domain,
+        )
         return res
     
     
@@ -241,8 +261,12 @@ def _makewiki(conf, metabook=None, username=None, password=None):
     assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res
 
-def makewiki(conf, metabook=None, username=None, password=None):
-    res = _makewiki(conf, metabook, username=username, password=password)
+def makewiki(conf, metabook=None, username=None, password=None, domain=None):
+    res = _makewiki(conf, metabook,
+        username=username,
+        password=password,
+        domain=domain,
+    )
     res.wiki.env = res
     if res.images:
         res.images.env = res
