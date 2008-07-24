@@ -58,7 +58,6 @@ def get_api_helper(url):
         path_prefix = ''
     
     prefix = '%s://%s%s' % (scheme, netloc, path_prefix)
-    print 'PREFIX:', prefix
     try:
         return api_helper_cache[prefix]
     except KeyError:
