@@ -25,9 +25,9 @@ def xfail(fun): # FIXME: what about generators?
     if 'XFAIL' in os.environ:
 
 
-        def doit():
+        def doit(*args, **kwargs):
             try:
-                fun()
+                fun(*args, **kwargs)
             except:
                 stats.xfail += 1
                 return
