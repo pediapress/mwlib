@@ -97,7 +97,6 @@ def xserializeVList(vlist):
             for (_key,_value) in value.items():
                 styleArgs.append("%s:%s" % (_key, _value))
             args.append(("style", '%s' % '; '.join(styleArgs)))
-
     return args
 
 def escapeattr(val):

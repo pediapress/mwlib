@@ -235,8 +235,45 @@ class AdvancedNode:
                 return True
         return False
 
+    
+    def getStyle(self):
+        if not self.attributes:
+            return {}
+        style =  self.attributes.get('style', {})
+        return style
 
+    def _fixAttributes(self, attributes):
+        def _safeint(value, default=1):
+            try:
+                value = int(value)
+            except ValueError:
+                value = default
+            return value
+        colspan = attributes.get('colspan')
+        if colspan:
+            attributes['colspan'] = _safeint(colspan)
+        rowspan = attributes.get('rowspan')
+        if rowspan:
+            attributes['rowspan'] = _safeint(rowspan)
+        return attributes
 
+    def getAttributes(self):
+        attrs = getattr(self, 'vlist', {})
+        attrs = self._fixAttributes(attrs)
+        return attrs
+
+    def isVisible(self):
+        if self.style.get('display', '').lower() == 'none':
+            return False
+        if self.style.get('visibility','').lower() == 'hidden':
+            return False
+        return True
+
+    
+    style = property(getStyle)
+    attributes = property(getAttributes)
+    visible = property(isVisible)
+    
     parent = property(getParent)
     parents = property(getParents)
     next = property(getNext)
@@ -504,7 +541,7 @@ def fixTagNodes(node):
         fixTagNodes(c)
 
 
-def fixStyle(node):
+def fixStyle(node): #FIXME: rename to fixStyleNode or something like that
     """
     parser.Style Nodes are mapped to logical markup
     detection of DefinitionList depends on removeNodes
@@ -556,7 +593,7 @@ def fixStyle(node):
         pass
     return node
 
-def fixStyles(node):
+def fixStyles(node): #FIXME: rename to fixStyleNodes or something like that
     if node.__class__ == Style:
         fixStyle(node)
     for c in node.children[:]:
