@@ -330,12 +330,12 @@ class ODFWriter(object):
     def owriteRow(self, row): # COLSPAN FIXME
         tr = table.TableRow()
         for c in row.children:
-            cs =  c.vlist.get("colspan", 0)
+            cs =  c.vlist.get("colspan",0)
             self.write(c,tr)
             if cs:
                 tr.elements[-1].addAttribute("numbercolumnsspanned",str(cs))
-            for i in range(cs):
-                tr.addElement(table.CoveredTableCell())
+                for i in range(cs):
+                    tr.addElement(table.CoveredTableCell())
         return SkipChildren(tr)
 
     def owriteTable(self, obj): # FIXME ADD FORMATTING
