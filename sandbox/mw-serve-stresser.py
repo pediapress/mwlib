@@ -58,7 +58,7 @@ def getMetabook(articles):
     return metabook
 
 def postRenderCommand(metabook, baseurl, serviceurl, writer):
-    log.info('POSTing render command')
+    log.info('POSTing render command %s %s' % (baseurl, writer))
     data = {
         "metabook": simplejson.dumps(metabook),
         "writer": writer,
@@ -66,7 +66,6 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer):
         "base_url": baseurl.encode('utf-8'),
         "command":"render",
     }
-    print data
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
