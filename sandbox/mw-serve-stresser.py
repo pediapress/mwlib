@@ -57,7 +57,7 @@ def getMetabook(articles):
         metabook['items'].append(article)
     return metabook
 
-def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
+def postRenderCommand(metabook, baseurl, serviceurl, writer):
     log.info('POSTing render command')
     data = {
         "metabook": simplejson.dumps(metabook),
@@ -66,11 +66,12 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer="rl"):
         "base_url": baseurl.encode('utf-8'),
         "command":"render",
     }
+    print data
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
-def postRenderKillCommand(collection_id, serviceurl, writer="rl"):
+def postRenderKillCommand(collection_id, serviceurl, writer):
     log.info('POSTing render_kill command %r' % collection_id)
     data = {
         "collection_id": collection_id,
@@ -235,7 +236,7 @@ def main():
                 mail_recipients=mail_recipients,
             )
             sys.exc_clear()
-        log.info('%s\tok: %d, failed: %d' % (options.baseurl, ok_count, fail_count))
+        log.info('%s, %s\tok: %d, failed: %d' % (options.baseurl, writer, ok_count, fail_count))
 
 
 if __name__ == '__main__':
