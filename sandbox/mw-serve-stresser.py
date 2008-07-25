@@ -87,9 +87,9 @@ def getRenderStatus(colid, serviceurl, writer):
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
-def download(colid, serviceurl):
+def download(colid, serviceurl, writer):
     log.info('download')
-    data = urllib.urlencode({"command": "download", "collection_id": colid})
+    data = urllib.urlencode({"command": "download", "collection_id": colid, 'writer': writer})
     return urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)) # fh
 
 def reportError(command, metabook, res, baseurl, writer,
@@ -159,7 +159,7 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
             res["reason"] = "render_timeout (%ds)" % render_timeout
             break
     if res["state"] == "finished":
-        d = download(res["collection_id"], serviceurl).read()
+        d = download(res["collection_id"], serviceurl, writer).read()
         log.info("received %s document with %d bytes" % (writer, len(d)))        
         checkDoc(d, writer)
         return True
