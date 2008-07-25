@@ -83,16 +83,16 @@ def postRenderKillCommand(collection_id, serviceurl, writer="rl"):
 
 def getRenderStatus(colid, serviceurl):
     #log.info('get render status')
-    data = urllib.urlencode({"command":"render_status", "collection_id":colid})
+    data = urllib.urlencode({"command": "render_status", "collection_id": colid})
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
-def download(colid,serviceurl):
+def download(colid, serviceurl):
     log.info('download')
-    data = urllib.urlencode({"command":"download", "collection_id":colid})
+    data = urllib.urlencode({"command": "download", "collection_id": colid})
     return urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)) # fh
 
-def reportError(command, metabook, res,
+def reportError(command, metabook, res, baseurl, writer,
     from_email=None,
     mail_recipients=None,
 ):
@@ -102,33 +102,37 @@ def reportError(command, metabook, res,
         error=res.get('error'),
         res=res,
         metabook=metabook,
+        baseurl=baseurl,
+        writer=writer,
         from_email=from_email,
         mail_recipients=mail_recipients,
     )
     sys.exc_clear()
 
-def checkPDF(data):
-    log.info('checkPDF')
-    fd, filename = tempfile.mkstemp(suffix='.pdf')
-    os.write(fd, data)
-    os.close(fd)
-    try:
-        popen = subprocess.Popen(args=['pdfinfo', filename], stdout=subprocess.PIPE)
-        rc = popen.wait()
-        assert rc == 0, 'pdfinfo rc = %d' % rc
-        for line in popen.stdout:
-            line = line.strip()
-            if not line.startswith('Pages:'):
-                continue
-            num_pages = int(line.split()[-1])
-            assert num_pages > 0, 'PDF is empty'
-            break
-        else:
-            raise RuntimeError('invalid PDF')
-    finally:
-        os.unlink(filename)
+def checkDoc(data, writer):
+    log.info('checkDoc %s' % writer)
+    assert len(data) > 0
+    if writer == 'rl':
+        fd, filename = tempfile.mkstemp(suffix='.pdf')
+        os.write(fd, data)
+        os.close(fd)
+        try:
+            popen = subprocess.Popen(args=['pdfinfo', filename], stdout=subprocess.PIPE)
+            rc = popen.wait()
+            assert rc == 0, 'pdfinfo rc = %d' % rc
+            for line in popen.stdout:
+                line = line.strip()
+                if not line.startswith('Pages:'):
+                    continue
+                num_pages = int(line.split()[-1])
+                assert num_pages > 0, 'PDF is empty'
+                break
+            else:
+                raise RuntimeError('invalid PDF')
+        finally:
+            os.unlink(filename)
 
-def checkservice(api, serviceurl, baseurl, maxarticles,
+def checkservice(api, serviceurl, baseurl, writer, maxarticles,
                  from_email=None,
                  mail_recipients=None,
                  render_timeout = RENDER_TIMEOUT_DEFAULT # seconds or None
@@ -136,7 +140,7 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
     arts = getRandomArticles(api, min=1, max=maxarticles)
     log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
-    res = postRenderCommand(metabook, baseurl, serviceurl)
+    res = postRenderCommand(metabook, baseurl, serviceurl, writer)
     collection_id = res['collection_id']
     st = time.time()
     while True:
@@ -146,7 +150,7 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
             break
         if render_timeout and (time.time()-st) > render_timeout:
             log.timeout('Killing render proc for collection ID %r' % collection_id)
-            r = postRenderKillCommand(collection_id, serviceurl)
+            r = postRenderKillCommand(collection_id, serviceurl, writer)
             if r['killed']:
                 log.info('Killed.')
             else:
@@ -156,11 +160,11 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
             break
     if res["state"] == "finished":
         d = download(res["collection_id"], serviceurl).read()
-        log.info("received PDF with %d bytes" % len(d))
-        checkPDF(d)
+        log.info("received %s document with %d bytes" % (writer, len(d)))        
+        checkDoc(d, writer)
         return True
     else:
-        reportError('render', metabook, res,
+        reportError('render', metabook, res, baseurl, writer,
             from_email=from_email,
             mail_recipients=mail_recipients,
         )
@@ -171,6 +175,7 @@ def checkservice(api, serviceurl, baseurl, maxarticles,
 def main():
     parser = OptionParser(usage="%prog [OPTIONS]")
     parser.add_option("-b", "--baseurl", help="baseurl of wiki")
+    parser.add_option("-w", "--writer", help="writer to use")
     parser.add_option('-l', '--logfile', help='log output to LOGFILE')
     parser.add_option('-f', '--from-email',
         help='From: email address for error mails',
@@ -207,6 +212,7 @@ def main():
             ok = checkservice(api,
                 options.serviceurl,
                 options.baseurl,
+                options.writer,
                 maxarts,
                 from_email=options.from_email,
                 mail_recipients=mail_recipients,
