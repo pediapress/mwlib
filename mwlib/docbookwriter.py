@@ -383,10 +383,9 @@ class DocBookWriter(object):
     # Links ---------------------------------------------------------
 
     def dbwriteLink(self, obj): 
-        print "dbwritelink", obj
         a = ET.Element("ulink")
         if obj.target:
-            a.set("url", obj.target)
+            a.set("url", obj.url or "#")
         if not obj.children:
             a.text = obj.target
         return a

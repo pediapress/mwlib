@@ -515,14 +515,7 @@ class ODFWriter(object):
 
 
     def owriteLink(self, obj): 
-        href = getattr(obj, 'full_target', "") or obj.target or ""
-        if self.env and self.env.wiki:
-            art = obj.getParentNodesByClass(advtree.Article)[0]
-            baseurl =  self.env.wiki.getURL(art.caption)
-            if baseurl is not None:
-                href = baseurl.rsplit("/",1)[0] + "/index.php?title=" + self._quoteURL(href) 
-
-        a = text.A(href=href)
+        a = text.A(href= obj.url or "#")
         if not obj.children:
             a.addText(obj.target)
         return a
