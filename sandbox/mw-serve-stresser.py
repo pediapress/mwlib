@@ -235,7 +235,9 @@ def main():
                 mail_recipients=mail_recipients,
             )
             sys.exc_clear()
-        log.info('%s, %s\tok: %d, failed: %d' % (options.baseurl, writer, ok_count, fail_count))
+        log.info('%s, %s\tok: %d, failed: %d' % (
+            options.baseurl, options.writer, ok_count, fail_count,
+        ))
 
 
 if __name__ == '__main__':
