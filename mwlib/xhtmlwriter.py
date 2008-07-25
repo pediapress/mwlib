@@ -420,10 +420,8 @@ class MWXHTMLWriter(object):
 
 
     def xwriteLink(self, obj): # FIXME (known|unknown)
-        a = ET.Element("a")
-        if obj.target:
-            a.set("href", obj.target)
-            a.set("class", "mwx.link.article")
+        a = ET.Element("a", href=obj.url or "#")
+        a.set("class", "mwx.link.article")
         if not obj.children:
             a.text = obj.target
         return a
@@ -449,7 +447,7 @@ class MWXHTMLWriter(object):
 
 
     def xwriteSpecialLink(self, obj): # whats that?
-        a = ET.Element("a", href=obj.target)
+        a = ET.Element("a", href=obj.url or "#")
         a.set("class", "mwx.link.special")
         if not obj.children:
             a.text = obj.target
