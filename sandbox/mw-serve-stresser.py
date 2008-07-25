@@ -81,9 +81,9 @@ def postRenderKillCommand(collection_id, serviceurl, writer):
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
-def getRenderStatus(colid, serviceurl):
+def getRenderStatus(colid, serviceurl, writer):
     #log.info('get render status')
-    data = urllib.urlencode({"command": "render_status", "collection_id": colid})
+    data = urllib.urlencode({"command": "render_status", "collection_id": colid, 'writer': writer})
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return simplejson.loads(res)
 
@@ -145,7 +145,7 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
     st = time.time()
     while True:
         time.sleep(1)
-        res = getRenderStatus(res["collection_id"], serviceurl)
+        res = getRenderStatus(res["collection_id"], serviceurl, writer)
         if res["state"] != "progress":
             break
         if render_timeout and (time.time()-st) > render_timeout:
