@@ -6,8 +6,11 @@
 """usable/user parser"""
 
 from mwlib import parser, scanner, expander
+from mwlib.log import Log
 
-def simplify(node):
+log = Log('uparser')
+
+def simplify(node, **kwargs):
     "concatenates textnodes in order to reduce the number of objects"
     Text = parser.Text
     
@@ -27,7 +30,7 @@ def simplify(node):
     for i,ii in enumerate(toremove):
         del node.children[ii-i]
 
-def fixlitags(node):
+def fixlitags(node, **kwargs):
     Text = parser.Text
 
     if not isinstance(node, parser.ItemList):
@@ -52,7 +55,7 @@ def fixlitags(node):
     for x in node.children:
         fixlitags(x)
 
-def removeBoilerplate(node):
+def removeBoilerplate(node, **kwargs):
     i = 0
     while i < len(node.children):
         x = node.children[i]
@@ -70,11 +73,20 @@ def removeBoilerplate(node):
 
     for x in node.children:
         removeBoilerplate(x)
-        
-            
-        
 
-postprocessors = [removeBoilerplate, simplify, fixlitags]
+
+def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
+    """Add 'url' attribute to Link nodes with full HTTP URL to the target"""
+    
+    if not hasattr(wikidb, 'getLinkURL'):
+        log.warn('WikiDB has not getLinkURL() method')
+        return
+    if isinstance(node, parser.Link) and not isinstance(node, parser.ImageLink):
+        node.url = wikidb.getLinkURL(node, title, revision=revision)
+    for x in node.children:
+        addurls(x, title=title, revision=revision, wikidb=wikidb)
+
+postprocessors = [removeBoilerplate, simplify, fixlitags, addurls]
 
 def parseString(title=None, raw=None, wikidb=None, revision=None, lang=None):
     """parse article with title from raw mediawiki text"""
@@ -98,7 +110,8 @@ def parseString(title=None, raw=None, wikidb=None, revision=None, lang=None):
     a = parser.Parser(tokens, title, lang=lang).parse()
     a.caption = title
     for x in postprocessors:
-        x(a)
+        x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)
+    
     return a
 
 
