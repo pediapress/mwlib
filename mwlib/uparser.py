@@ -78,6 +78,8 @@ def removeBoilerplate(node, **kwargs):
 def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
     """Add 'url' attribute to Link nodes with full HTTP URL to the target"""
     
+    if wikidb is None or title is None:
+        return
     if not hasattr(wikidb, 'getLinkURL'):
         log.warn('WikiDB has not getLinkURL() method')
         return
