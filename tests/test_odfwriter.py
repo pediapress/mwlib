@@ -162,6 +162,29 @@ this test will validate, but sections will be broken.
 
 
 
+def test_invalid_level_sections():
+    raw='''
+
+= 1 =
+== 2 ==
+=== 3 ===
+==== 4 ====
+===== 5 =====
+====== 6 ======
+======= 7 =======
+======== 8 ========
+text
+'''.decode("utf8")
+    xml = getXML(raw)
+    
+    reg = re.compile(r'text:outline-level="(\d)"', re.MULTILINE)
+    res =  list(reg.findall(xml))
+    goal =  ['1', '2', '3', '4', '5', '6', '6', '6', '6'] # article title is on the first level, therefore we have "6"*4
+    print res, "should be",goal
+    if not res == goal:
+        print xml
+        assert res == goal
+
 
 def test_newlines():
     raw='''== Rest of the page ==

@@ -269,16 +269,17 @@ class ODFWriter(object):
 
 
     def owriteSection(self, obj):
+        hXstyles = (style.h1,style.h2,style.h3,style.h4,style.h5,style.h6)
         # skip empty sections (as for eg References)
         if not u"".join(x.getAllDisplayText().strip() for x in obj.children[1:]):
             return SkipChildren()
 
         level = 1 + obj.getSectionLevel() # H1 is for an article, starting with h2
-        #title = u"%d %s" %(level,  obj.children[0].children[0].caption ) # FIXME (debug output)
+        level = min(level, len(hXstyles))
         title = obj.children[0].children[0].caption
         r = text.Section(stylename=style.sect, name=title) 
-        hXstyle = (style.h1,style.h2,style.h3,style.h4,style.h5,style.h6)[level-1]
-        r.addElement(text.H(outlinelevel=level, stylename=hXstyle, text=title))
+        hX = hXstyles[level-1] 
+        r.addElement(text.H(outlinelevel=level, stylename=hX, text=title))
         obj.children = obj.children[1:]
         return r
 

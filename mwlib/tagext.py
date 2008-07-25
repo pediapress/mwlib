@@ -110,10 +110,11 @@ class RDFExtension(TagExtension):
 
 register(RDFExtension)
 
+
 # --- wiki travel extensions ----
 
 class ListingExtension(TagExtension):
-    # http://wikitravel.org/en/Wikitravel:Listings 
+    " http://wikitravel.org/en/Wikitravel:Listings "
     name = "listing"
     attrs = [(u"name",u"'''%s'''"),
              ("alt",u"(''%s'')"),
