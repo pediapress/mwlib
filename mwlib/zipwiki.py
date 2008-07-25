@@ -10,9 +10,9 @@ import tempfile
 from zipfile import ZipFile
 import urlparse
 
-from mwlib import uparser
+from mwlib import uparser, wikidbbase
 
-class Wiki(object):
+class Wiki(wikidbbase.WikiDBBase):
     def __init__(self, zipfile):
         """
         @type zipfile: basestring or ZipFile
@@ -26,6 +26,7 @@ class Wiki(object):
         content = simplejson.loads(self.zf.read('content.json'))
         self.articles = content['articles']
         self.templates = content['templates']
+        self.sources = content['sources']
     
     def _getArticle(self, title, revision=None):
         try:
@@ -51,8 +52,8 @@ class Wiki(object):
             return None
         article = self._getArticle(title, revision=revision)
         lang = None
-        if 'source' in article:
-            lang = article['source'].get('language')
+        if 'source-url' in article and article['source-url'] in self.sources:
+            lang = self.sources[article['source-url']].get('language')
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
     
     def getURL(self, title, revision=None):

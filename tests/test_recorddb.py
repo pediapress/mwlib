@@ -50,7 +50,8 @@ class TestRecordDB(object):
         self.fakedb = FakeDB()
         self.articles = {}
         self.templates = {}
-        self.recorddb = recorddb.RecordDB(self.fakedb, self.articles, self.templates)
+        self.sources = {}
+        self.recorddb = recorddb.RecordDB(self.fakedb, self.articles, self.templates, self.sources)
     
     def test_getRawArticle(self):
         raw = self.recorddb.getRawArticle(u'article1')

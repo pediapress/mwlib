@@ -33,6 +33,18 @@ def make_source(name=None, url=None, language=None):
         source['language'] = language
     return source
 
+def make_interwiki(api_entry=None):
+    interwiki = {
+        'type': 'interwiki',
+    }
+    if api_entry is not None:
+        interwiki.update(api_entry)
+        if 'local' in interwiki:
+            interwiki['local'] = True
+        else:
+            interwiki['local'] = False
+    return interwiki
+
 def make_article(title=None, displaytitle=None, content_type='text/x-wiki'):
     article = {
         'type': 'article',

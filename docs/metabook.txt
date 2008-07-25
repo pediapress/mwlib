@@ -46,37 +46,9 @@ items (list of `article`_ and/or `chapter`_ objects, can be empty):
 
     Chapters and top-level articles contained in the collection
     
-source (`source`_):
-
-    The `source`_ of the collection
-
 licenses (list of `license`_ objects):
 
     List of licenses for articles in this collection
-
-
-Source
-------
-
-type (string):
-
-    Fixed value "source"
-
-system (string):
-
-    Fixed value "MediaWiki" for now
-
-url (string, optional):
-
-    "home" URL of source, e.g. "http://en.wikipedia.org/wiki/Main_Page"
-      
-name (string):
-
-    Unique name of source, e.g. "Wikipedia (en)"
-
-language (string)
-
-    2-character ISO code of language, e.g. "en"
 
 
 License
@@ -139,6 +111,11 @@ timestamp (integer, optional):
 
     UNIX timestamp (seconds since 1970-1-1) of the revision of this article
 
+source-url (string)
+
+    URL of source wiki. This URL is the key to an item in the sources dictionary
+    in the content.json object of the ZIP file (see zipfile.txt).
+
 
 Chapter
 -------
@@ -154,6 +131,64 @@ title (string):
 items (list of `article`_ objects, can be empty):
 
     List of articles contained in this chapter
+
+
+Source
+------
+        
+type (string)
+
+    Fixed value "source"
+
+system (string):
+
+    Fixed value "MediaWiki" for now
+
+url (string, optional):
+
+    "home" URL of source, e.g. "http://en.wikipedia.org/wiki/Main_Page"
+    (same as key for this entry)
+
+name (string):
+
+    Unique name of source, e.g. "Wikipedia (en)"
+
+language (string)
+
+    2-character ISO code of language, e.g. "en"
+
+interwikimap (dictionary mapping prefixes to `interwiki`_ objects, optional)
+
+    Describes interwikimap for this wiki,
+    cf. http://en.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=interwikimap
+
+
+Interwiki
+---------
+
+Interwiki entries can describe language links and interwiki links
+
+type (string)
+
+    Fixed value "interwiki"
+
+prefix (string)
+
+    Prefix is MediaWiki links, i.e. the part before the ":".
+    This is the key in the interwikimap attribute of a `source`_ object.
+
+url (string)
+
+    URL template, the string "$1" gets replaced with the link target (w/out prefx)
+
+local (bool, optional)
+
+    True if the interwiki link is a "local" one
+
+language (string, optional)
+
+    Name of the language, if this interwiki describes language links
+
 
 
 Example
@@ -183,21 +218,17 @@ Given in `JSON`_ notation::
                         "revision": "1234",
                         "timestamp": 122331212312,
                         "content-type": "text/x-wiki"
+                        "source-url": "http://en.wikipedia.org/wiki/Main_Page",
                     },
                     {
                         "type": "article",
                         "title": "Second Article in Chapter",
                         "content-type": "text/x-wiki"
+                        "source-url": "http://en.wikipedia.org/wiki/Main_Page",
                     }
                 ]
             },
         ],
-        "source": {
-            "type": "source",
-            "system": "MediaWiki",
-            "name": "Wikipedia (en)",
-            "url": "http://en.wikipedia.org/wiki/Main_Page"
-        },
         "licenses": [
             {
                 "type": "license",

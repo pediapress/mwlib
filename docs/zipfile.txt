@@ -56,6 +56,11 @@ content.json
             
                 Wikitext of tempalte
     
+    sources (dictionary):
+    
+        A dictionary with URLs of MediaWikis as keys and meta infomation about
+        the wiki as values. See source objects in metabook.txt.
+    
     images (dictionary):
     
        A dictionary with image titles without the prefix (i.e. without
