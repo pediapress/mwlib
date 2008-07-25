@@ -37,24 +37,40 @@ class Wiki(wikidbbase.WikiDBBase):
             pass
         return None
     
-    def getSource(self):
-        return self.metabook.get('source')
+    def getSource(self, title, revision=None):
+        """Return source for article with given title and revision
+        
+        @param title: article title
+        @type title: unicode
+        
+        @param revision: article revision (optional)
+        @type revision: unicode
+        """
+        
+        article = self._getArticle(title, revision=revision)
+        assert article, 'no such article: %r' % title
+        try:
+            return self.sources[article['source-url']]
+        except KeyError:
+            return None
+    
+    def getInterwikiMap(self, title, revision=None):
+        """Return interwikimap for given article and revision
+        
+        @returns: interwikimap, i.e. dict mapping prefixes to interwiki data
+        @rtype: dict
+        """
+        
+        source = self.getSource(title, revision=revision)
+        if source is None:
+            return None
+        return source.get('interwikimap', None)
     
     def getRawArticle(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
         if article:
             return article['content']
         return None
-    
-    def getParsedArticle(self, title, revision=None):
-        raw = self.getRawArticle(title, revision=revision)
-        if raw is None:
-            return None
-        article = self._getArticle(title, revision=revision)
-        lang = None
-        if 'source-url' in article and article['source-url'] in self.sources:
-            lang = self.sources[article['source-url']].get('language')
-        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
     
     def getURL(self, title, revision=None):
         article = self._getArticle(title, revision=revision)

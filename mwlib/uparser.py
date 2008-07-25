@@ -87,7 +87,7 @@ def parseString(title=None, raw=None, wikidb=None, revision=None, lang=None):
         te = expander.Expander(raw, pagename=title, wikidb=wikidb)
         input = te.expandTemplates()
         if lang is None and hasattr(wikidb, 'getSource'):
-            src = wikidb.getSource()
+            src = wikidb.getSource(title, revision=revision)
             if src:
                 lang = src.get('language')
     else:

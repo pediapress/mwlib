@@ -10,36 +10,65 @@ class WikiDBBase(object):
     
     interwikimap = None
     
-    def getLinkURL(self, link):
+    def getLinkURL(self, link, title, revision=None):
         """Get a full HTTP URL for the given link object, parsed from an article
         in this WikiDB.
         
         @param link: link node from parser
         @type link: L{mwlib.parser.Link}
         
-        @returns: full HTTP URL
-        @rtype: str
+        @param title: title of containing article
+        @type title: unicode
+        
+        @param revision: revision of containing article (optional)
+        @type revision: unicode
+        
+        @returns: full HTTP URL or None if it could not be constructed
+        @rtype: str or NoneType
         """
         
-        if isinstance(link, parser.ArticleLink):
-            return self.getURL(link.target)
-        
-        if isinstance(link, parser.CategoryLink)\
+        if isinstance(link, parser.ArticleLink)\
+            or isinstance(link, parser.CategoryLink)\
             or isinstance(link, parser.NamespaceLink):
-            return self.getURL(link.full_target)
+            target = link.full_target or link.target
+            url = self.getURL(target)
+            
+            # the following code is kinda hack
+            if url:
+                return url
+            my_url = self.getURL(title, revision=revision)
+            my_title = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
+            link_title = urllib.quote(link.target.replace(" ", "_").encode('utf-8'), safe=':/@')
+            pos = my_url.find(my_title)
+            if pos == -1:
+                return None
+            return my_url[:pos] + link_title
         
         if isinstance(link, parser.LangLink)\
             or isinstance(link, parser.InterwikiLink):
-            if self.interwikimap is None and hasattr(self, 'getInterwikiMap'):
-                self.getInterwikiMap()
-            prefix, title = link.full_target.split(':', 1)
-            if self.interwikimap and prefix in self.interwikimap:
-                return self.interwikimap[prefix]['url'].replace(
+            if not hasattr(self, 'getInterwikiMap'):
+                return None
+            prefix, target = link.full_target.split(':', 1)
+            interwikimap = self.getInterwikiMap(title, revision=revision)
+            if interwikimap and prefix in interwikimap:
+                return interwikimap[prefix]['url'].replace(
                     '$1',
-                    urllib.quote(title.encode('utf-8'), safe='/:@'),
+                    urllib.quote(target.encode('utf-8'), safe='/:@'),
                 )
         
         log.warn('unhandled link in getLinkURL(): %s with (full)target %r' % (
             link.__class__.__name__, link.full_target or link.target,
         ))
         return None
+
+    def getParsedArticle(self, title, revision=None):
+        raw = self.getRawArticle(title, revision=revision)
+        if raw is None:
+            return None
+        article = self._getArticle(title, revision=revision)
+        lang = None
+        source = self.getSource(title, revision=revision)
+        if source is not None:
+            lang = source.get('language')
+        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
+    

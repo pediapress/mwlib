@@ -144,16 +144,6 @@ url=
         else:
             raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
     
-    def get_source(self):
-        if 'source' in self.metabook:
-            return self.metabook['source']
-        if hasattr(self.wiki, 'getSource'):
-            return self.wiki.getSource()
-        return metabook.make_source(
-            name=self.configparser.get('wiki', 'name'),
-            url=self.configparser.get('wiki', 'url'),
-        )
-    
     def get_licenses(self):
         """Return list of licenses
         

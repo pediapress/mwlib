@@ -616,7 +616,14 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             return None
     
-    def getSource(self):
+    def getSource(self, title, revision=None):
+        """Return source for given article title and revision. For this WikiDB,
+        the paramaters are not used.
+        
+        @returns: source dict
+        @rtype: dict
+        """
+        
         if self.source is not None:
             return self.source
         result = self.api_helper.query(meta='siteinfo')
@@ -630,14 +637,24 @@ class WikiDB(wikidbbase.WikiDBBase):
                 language=g['lang'],
             )
             if self.interwikimap is None:
-                self.getInterwikiMap()
+                self.getInterwikiMap(title, revision=revision)
             if self.interwikimap:
                 self.source['interwikimap'] = self.interwikimap
             return self.source
         except KeyError:
             return None
     
-    def getInterwikiMap(self):
+    def getInterwikiMap(self, title, revision=None):
+        """Return interwiki map for article with given title and revision
+        (the parameters are not used with this WikiDB).
+        Fetch it via MediaWiki API if needed.
+        
+        @returns: interwikimap, i.e. dict mapping prefixes to interwiki data
+        @rtype: dict
+        """
+        
+        if self.interwikimap is not None:
+            return self.interwikimap
         result = self.api_helper.query(
             meta='siteinfo',
             siprop='interwikimap',
@@ -648,6 +665,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         for entry in result:
             interwiki = metabook.make_interwiki(api_entry=entry)
             self.interwikimap[interwiki['prefix']] = interwiki
+        return self.interwikimap
     
     def getParsedArticle(self, title, revision=None):
         raw = self.getRawArticle(title, revision=revision)

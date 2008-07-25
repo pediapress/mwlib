@@ -56,7 +56,7 @@ class RecordDB(object):
             'authors': self.db.getAuthors(name, revision=revision),
         }
         if hasattr(self.db, 'getSource'):
-            src  = self.db.getSource()
+            src  = self.db.getSource(name, revision=revision)
             if src and 'url' in src:
                 self.articles[name]['source-url'] = src['url']
                 if src['url'] not in self.sources:
@@ -330,9 +330,6 @@ def make_zip_file(output, env,
             wikidb=env.wiki,
             imagedb=env.images,
         )
-    
-    if 'source' not in env.metabook:
-        env.metabook['source'] = env.get_source()
     
     z.addObject('metabook.json', simplejson.dumps(env.metabook))
     
