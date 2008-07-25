@@ -114,23 +114,6 @@ def parse_article_url(url, title_encoding='utf-8'):
             'revision': revision,
         }
     
-    # example: http://some.host/bla/index.php/Article_title
-    # pos = path.find('index.php/')
-    # if pos >= 0:
-    #     try:
-    #         title = unicode(path[pos + len('index.php/')], title_encoding, 'ignore').replace('_', ' ')
-    #     except IndexError:
-    #         return None
-    #     base_url = url[:url.find('index.php/')]
-    #     api_helper = APIHelper(base_url)
-    #     if not api_helper.is_usable():
-    #         return None
-    #     return {
-    #         'api_helper': api_helper,
-    #         'title', title,
-    #         'revision': None,
-    #     }
-    
     api_helper = get_api_helper(url)
     if api_helper is None:
         return None
