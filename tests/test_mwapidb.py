@@ -11,6 +11,7 @@ import py
 from PIL import Image
 
 from mwlib.mwapidb import APIHelper, ImageDB, WikiDB
+from mwlib import parser
 
 class TestAPIHelper(object):
     def test_num_tries(self):
@@ -109,6 +110,36 @@ class TestWikiDB(object):
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
         assert 'redirect' not in raw.lower()
+    
+    def test_getLinkURL(self):
+        def make_link_node(cls, target, full_target=None):
+            link = cls()
+            link.target = target
+            link.full_target = full_target or target
+            if link.full_target[0] == ':':
+                link.full_target = link.full_target[1:]
+                link.colon = True
+            else:
+                link.colon = False
+            return link
+        
+        u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'Philosophy'))
+        assert u == 'http://en.wikipedia.org/w/index.php?title=Philosophy'
+
+        u = self.w.getLinkURL(make_link_node(parser.CategoryLink, u'Physics', u':Category:Physics'))
+        assert u == 'http://en.wikipedia.org/w/index.php?title=Category:Physics'
+        
+        u = self.w.getLinkURL(make_link_node(parser.NamespaceLink, u'He!ko', u'User:He!ko'))
+        assert u == 'http://en.wikipedia.org/w/index.php?title=User:He%21ko'
+        
+        u = self.w.getLinkURL(make_link_node(parser.LangLink, u'Physik', u'de:Physik'))
+        assert u == 'http://de.wikipedia.org/wiki/Physik'
+        
+        u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'wiktionary:Physics'))
+        assert u == 'http://en.wiktionary.org/wiki/Physics'
+    
+        u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'gibtsnicht:Physics'))
+        assert u is None
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'

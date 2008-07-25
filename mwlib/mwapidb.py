@@ -17,7 +17,7 @@ import urlparse
 
 import simplejson
 
-from mwlib import uparser, utils, metabook
+from mwlib import utils, metabook, wikidbbase
 from mwlib.log import Log
 
 log = Log("mwapidb")
@@ -113,23 +113,6 @@ def parse_article_url(url, title_encoding='utf-8'):
             'title': title,
             'revision': revision,
         }
-    
-    # example: http://some.host/bla/index.php/Article_title
-    # pos = path.find('index.php/')
-    # if pos >= 0:
-    #     try:
-    #         title = unicode(path[pos + len('index.php/')], title_encoding, 'ignore').replace('_', ' ')
-    #     except IndexError:
-    #         return None
-    #     base_url = url[:url.find('index.php/')]
-    #     api_helper = APIHelper(base_url)
-    #     if not api_helper.is_usable():
-    #         return None
-    #     return {
-    #         'api_helper': api_helper,
-    #         'title', title,
-    #         'revision': None,
-    #     }
     
     api_helper = get_api_helper(url)
     if api_helper is None:
@@ -454,7 +437,7 @@ class ImageDB(object):
 # ==============================================================================
 
     
-class WikiDB(object):
+class WikiDB(wikidbbase.WikiDBBase):
     print_template = u'Template:Print%s' # set this to none to deacticate # FIXME
     
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
@@ -510,20 +493,26 @@ class WikiDB(object):
     def setTemplateBlacklist(self, template_blacklist):
         raw = self.getRawArticle(template_blacklist)
         if raw is None:
-            log.error('Could not get template blacklist article %r' % template_blacklist)
+            log.error('Could not get template blacklist article %r' % (
+                template_blacklist,
+            ))
         else:
-            self.template_blacklist = [template.lower().strip() 
-                                       for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)]
+            self.template_blacklist = [
+                template.lower().strip() 
+                for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)
+            ]
     
     def login(self, username, password, domain=None):
         return self.api_helper.login(username, password, domain=domain)
     
     def getURL(self, title, revision=None):
-        name = urllib.quote(title.replace(" ", "_").encode('utf-8'))
+        name = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
         if revision is None:
             return '%sindex.php?title=%s' % (self.api_helper.base_url, name)
         else:
-            return '%sindex.php?title=%s&oldid=%s' % (self.api_helper.base_url, name, revision)
+            return '%sindex.php?title=%s&oldid=%s' % (
+                self.api_helper.base_url, name, revision,
+            )
     
     def getAuthors(self, title, revision=None, max_num_authors=10):
         """Return at most max_num_authors names of non-bot, non-anon users for
@@ -606,9 +595,18 @@ class WikiDB(object):
             return None
 
         if revision is None:
-            page = self.api_helper.page_query(titles=title, redirects=1, prop='revisions', rvprop='content')
+            page = self.api_helper.page_query(
+                titles=title,
+                redirects=1,
+                prop='revisions',
+                rvprop='content',
+            )
         else:
-            page = self.api_helper.page_query(revids=revision, prop='revisions', rvprop='content')
+            page = self.api_helper.page_query(
+                revids=revision,
+                prop='revisions',
+                rvprop='content',
+            )
             if page['title'] != title: # given revision could point to another article!
                 return None
         if page is None:
@@ -631,9 +629,25 @@ class WikiDB(object):
                 name='%s (%s)' % (g['sitename'], g['lang']),
                 language=g['lang'],
             )
+            if self.interwikimap is None:
+                self.getInterwikiMap()
+            if self.interwikimap:
+                self.source['interwikimap'] = self.interwikimap
             return self.source
         except KeyError:
             return None
+    
+    def getInterwikiMap(self):
+        result = self.api_helper.query(
+            meta='siteinfo',
+            siprop='interwikimap',
+        ).get('interwikimap', [])
+        if not result:
+            return
+        self.interwikimap = {}
+        for entry in result:
+            interwiki = metabook.make_interwiki(api_entry=entry)
+            self.interwikimap[interwiki['prefix']] = interwiki
     
     def getParsedArticle(self, title, revision=None):
         raw = self.getRawArticle(title, revision=revision)
