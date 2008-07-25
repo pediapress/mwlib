@@ -57,7 +57,7 @@ class WikiDBBase(object):
                 )
         
         log.warn('unhandled link in getLinkURL(): %s with (full)target %r' % (
-            link.__class__.__name__, link.full_target or link.target,
+            link.__class__.__name__, getattr(link, 'full_target', None) or link.target,
         ))
         return None
 
