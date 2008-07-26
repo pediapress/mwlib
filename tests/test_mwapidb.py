@@ -141,6 +141,10 @@ class TestWikiDB(object):
     
         u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'gibtsnicht:Physics'), u'Bla')
         assert u is None
+        
+        u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'/Bar'), u'Foo')
+        assert u == 'http://en.wikipedia.org/w/index.php?title=Foo/Bar'
+    
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
