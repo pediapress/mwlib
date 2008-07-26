@@ -36,7 +36,7 @@ class WikiDBBase(object):
             if not target:
                 return None
             
-            if target[0] == '/':
+            if isinstance(link, parser.ArticleLink) and target[0] == '/':
                 target = title + target
             
             url = self.getURL(target)
