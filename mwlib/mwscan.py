@@ -22,7 +22,7 @@ class token(object):
     t_begin_table = 10
     t_end_table = 11
     t_html_tag = 12
-    t_style = 13
+    t_singlequote = 13
     t_pre = 14
     t_section = 15
     t_section_end = 16
@@ -119,7 +119,7 @@ class _compat_scanner(object):
         token.t_2box_close: "]]",
         token.t_http_url: "URL",
         token.t_break: "BREAK",
-        token.t_style: "STYLE", 
+        token.t_singlequote: "SINGLEQUOTE", 
         token.t_pre: "PRE",
         token.t_section: "SECTION",
         token.t_section_end: "ENDSECTION",

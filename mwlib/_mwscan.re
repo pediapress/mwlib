@@ -25,7 +25,7 @@ typedef enum {
 	t_begin_table,
 	t_end_table,
 	t_html_tag,
-	t_style,
+	t_singlequote,
 	t_pre,
 	t_section,
 	t_section_end,
@@ -267,7 +267,7 @@ not_bol:
 		RET(t_special);
 	}
   [:|\[\]]              {RET(t_special);}
-  "'''''" | "'''" | "''"  {RET(t_style);}
+  "'" {RET(t_singlequote);}
   "<" "/"? [a-zA-Z]+ [^\000<>]* "/"? ">" 
 		{RET(t_html_tag);}
 

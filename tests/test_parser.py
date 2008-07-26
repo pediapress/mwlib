@@ -22,24 +22,47 @@ def test_headings():
 
 
 def test_style():
-    r=parse(u"'''mainz'''")
-    s=r.children[0].children[0]
-    assert isinstance(s, parser.Style)
-    assert s.caption == "'''"
+    def check(s, outer, inner=None):
+        art = parse(s)
+        style = art.children[0].children[0]
+        assert isinstance(style, parser.Style)
+        assert style.caption == outer
+        if inner is not None:
+            assert isinstance(style.children[0], parser.Style)
+            assert style.children[0].caption == inner
+        else:
+            assert not isinstance(style.children[0], parser.Style)
+    
+    check(u"''mainz''", "''") 
+    check(u"'''mainz'''", "'''")
+    check(u"'''''mainz'''''", "'''", "''")
+    check(u"'''''mainz'' bla'''", "'''", "''")
+    check(u"'''''mainz''' bla''", "''", "'''")
+    check(u"'''''''''''''''''''pp'''''", "'''", "''")
 
-@xfail
 def test_single_quote_after_style():
     """http://code.pediapress.com/wiki/ticket/20"""
     
-    r=parse(u"''pp'''s")
-    styles = r.find(parser.Style)
-    assert len(styles)==1, "should be pp's"
+    def check(s, outer, inner=None):
+        art = parse(s)
+        styles = art.find(parser.Style)
+        style = art.children[0].children[0]
+        assert isinstance(style, parser.Style)
+        assert style.caption == outer
+        if inner is None:
+            assert len(styles) == 1
+            assert not isinstance(style.children[0], parser.Style)
+        else:
+            assert len(styles) == 2
+            assert isinstance(style.children[0], parser.Style)
+            assert style.children[0].caption == inner
     
-    
-    s=r.children[0].children[0]
-    assert isinstance(s, parser.Style)
-    assert s.caption == "'''"
-    
+    check(u"''pp'''s", "''")
+    check(u"'''pp''''s", "'''")
+    check(u"''pp'''", "''")
+    check(u"'''pp''''", "'''")
+    check(u"'''''pp''''''", "'''", "''")
+    check(u"'''''''''''''''''''pp''''''", "'''", "''")
 
 def test_links_in_style():
     r=parse(u"'''[[mainz]]'''")

@@ -33,10 +33,10 @@ class TokenSet(object):
         return x in self.values or type(x) in self.types
         
 FirstAtom = TokenSet(['TEXT', 'URL', 'SPECIAL', '[[', 'MATH', '\n',
-                      'BEGINTABLE', 'STYLE', 'TIMELINE', 'ITEM', 'URLLINK',
+                      'BEGINTABLE', 'SINGLEQUOTE', 'TIMELINE', 'ITEM', 'URLLINK',
                       TagToken])
 
-FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'STYLE', 'BEGINTABLE', 'ITEM',
+FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'SINGLEQUOTE', 'BEGINTABLE', 'ITEM',
                            'PRE', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
                            TagToken])
 
@@ -535,8 +535,8 @@ class Parser(object):
             return Text(token[1])
         elif token[0]=='BEGINTABLE':
             return self.parseTable()
-        elif token[0]=='STYLE':
-            return self.parseStyle()
+        elif token[0]=='SINGLEQUOTE':
+            return self.parseSingleQuote()
         elif token[0]=='TIMELINE':
             return self.parseTimeline()
         elif token[0]=='ITEM':
@@ -789,8 +789,8 @@ class Parser(object):
                 break
             elif token[0] == '[[':
                 title.append(self.parseLink())
-            elif token[0] == "STYLE":
-                title.append(self.parseStyle())
+            elif token[0] == "SINGLEQUOTE":
+                title.append(self.parseSingleQuote())
             elif token[0] == 'TEXT':
                 self.next()
                 title.append(Text(token[1]))
@@ -836,52 +836,93 @@ class Parser(object):
                 
         return s
 
-    def parseStyle(self):
-        end = self.token[1]
-        b = Style(self.token[1])
-        self.next()
-
-        break_at = TokenSet(['BREAK', '\n', 'ENDEOLSTYLE', 'SECTION', 'ENDSECTION',
-                             'BEGINTABLE', ']]', 'ROW', 'COLUMN', 'ENDTABLE', EndTagToken])
+    def parseSingleQuote(self):
+        def count_consecutives():
+            count = 0
+            while self.left:
+                token = self.token
+                if token[0] != 'SINGLEQUOTE':
+                    break
+                count += 1
+                self.next()
+            return count
+        
+        inner_style, outer_style = None, None
+        count = count_consecutives()
+        
+        if count == 1:
+            return Text("'")
+        
+        end_count = 0
+        if count >= 3:
+            outer_style = inner_style = Style("'''")
+            end_count += 3
+            count -= 3
+        if count >= 2:
+            if inner_style is None:
+                outer_style = inner_style = Style("''")
+            else:
+                outer_style = inner_style
+                inner_style = Style("''")
+                outer_style.append(inner_style)
+            end_count += 2
+            count -= 2
+        
+        if count > 0:
+            inner_style.append(Text("'"*count))
+        
+        break_at = TokenSet([
+            'BREAK', '\n', 'ENDEOLSTYLE', 'SECTION', 'ENDSECTION',
+            'BEGINTABLE', ']]', 'ROW', 'COLUMN', 'ENDTABLE', EndTagToken,
+        ])
         
         while self.left:
             token = self.token
-            if token[0]=="STYLE":
-                if token[1]==end:
-                    self.next()
+            if token[0] == 'SINGLEQUOTE':
+                count = count_consecutives()
+                if count >= end_count:
+                    self.pos -= count - end_count
                     break
-                else:
-                    new = token[1]
-                    if end=="'''''":
-                        if token[1]=="''":
-                            new = "'''"
-                        else:
-                            new = "''"
-                    elif end=="''":
-                        if token[1]=="'''":
-                            new = "'''''"
-                        elif token[1]=="'''''":
-                            new = "'''"
-                    elif end=="'''":
-                        if token[1]=="''":
-                            new = "'''''"
-                        elif token[1]=="'''''":
-                            new = "''"
-                        
-                    self.tokens[self.pos] = ("STYLE", new)
-                    break
+                
+                if count == 1:
+                    inner_style.append(Text("'"))
+                    continue
+                
+                if count >= 3:
+                    count -= 3
+                    assert inner_style is not outer_style, 'sanity check'
+                    # swap styles
+                    outer_style.caption = "''"
+                    inner_style.caption = "'''"
+                    inner_style = outer_style
+                    end_count = 2
+                
+                if count >= 2:
+                    count -= 2
+                    if inner_style is not outer_style:
+                        inner_style = outer_style
+                        end_count = 3
+                    else:
+                        # must be the case inner_style = outer_style = Style("'''")
+                        outer_style.caption = "''"
+                        self.pos -= 1
+                        break
+                
+                if count > 0:
+                    assert count == 1, 'sanity check'
+                    inner_style.append(Text("'"))
+            
             elif token[0] in break_at:
                 break
             elif token[0] in FirstAtom:
-                b.append(self.parseAtom())
+                inner_style.append(self.parseAtom())
             else:
                 log.info("assuming text in parseStyle", token)
-                b.append(Text(token[1]))
+                inner_style.append(Text(token[1]))
                 self.next()
-
-        return b
+        
+        return outer_style
     
-
     def parseColumn(self):
         token = self.token
         c = Cell()
@@ -1008,8 +1049,8 @@ class Parser(object):
                 if token[1]!='|':
                     n.append(Text(token[1]))
                 self.next()
-            elif token[0] == 'STYLE':
-                n.append(self.parseStyle())
+            elif token[0] == 'SINGLEQUOTE':
+                n.append(self.parseSingleQuote())
             elif isinstance(token[0], TagToken):
                 n.append(self.parseTagToken())
             elif token[0] == '[[':
