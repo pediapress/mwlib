@@ -29,7 +29,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     os.chdir(output_path)
     latex = latex.strip()
     r, w, e = popen2.popen3(cmd)
-    w.write(latex)
+    w.latex.encode('utf-8'))
     w.close()
     error = e.read()
     result = r.read()
@@ -58,8 +58,8 @@ def _renderMathBlahtex(latex, output_path, output_mode):
 
 def _renderMathTexvc(latex, output_path, output_mode='png'):
     """only render mode is png"""
-
-    cmd = "texvc %s %s '%s' utf-8" % (output_path, output_path, latex)
+    
+    cmd = "texvc %s %s '%s' utf-8" % (output_path, output_path, latex.encode('utf-8'))
     r= os.popen(cmd)
     result = r.read()
     r.close()
@@ -74,11 +74,22 @@ def _renderMathTexvc(latex, output_path, output_mode='png'):
     
 def renderMath(latex, output_path=None, output_mode='png', render_engine='blahtexml'):
     """
-    output_mode = png|mathml  - mathml only works with blahtexml as render_engine
-    render_engine = blahtexml|texvc
+    @param latex: LaTeX code
+    @type latex: unicode
+    
+    @param output_mode: one of the values 'png' or 'mathml'. mathml only works
+        with blahtexml as render_engine
+    @type output_mode: str
+    
+    @param render_engine: one of the value 'blahtexml' or 'texvc'
+    @type render_engine: str
 
-    returns either path to generated png or mathml string
+    @returns: either path to generated png or mathml string
+    @rtype: basestring
     """
+    
+    assert isinstance(latex, unicode), 'latex must be of type unicode'
+    
     if output_mode == 'png' and not output_path:
         log.error('math rendering with output_mode png requires an output_path')
         raise
