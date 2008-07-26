@@ -29,7 +29,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     os.chdir(output_path)
     latex = latex.strip()
     r, w, e = popen2.popen3(cmd)
-    w.latex.encode('utf-8'))
+    w.write(latex.encode('utf-8'))
     w.close()
     error = e.read()
     result = r.read()
