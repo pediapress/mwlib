@@ -20,7 +20,7 @@ class TestMathUtils(object):
                      r"E = m c^2",
                      r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
                      r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
-                     'björn',
+                     r'\text{björn}',
                      ]
         for latex in latexlist:
             latex = unicode(latex, 'utf-8')
