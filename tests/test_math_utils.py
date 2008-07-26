@@ -47,6 +47,8 @@ class TestMathUtils(object):
     
     @xfail
     def test_single_quote_bug(self):
+        """http://code.pediapress.com/wiki/ticket/241"""
+        
         res = renderMath(u"f'(x) = x", self.tmpdir, output_mode='png', render_engine='texvc')
         assert res
 
