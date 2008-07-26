@@ -30,12 +30,20 @@ class WikiDBBase(object):
         if isinstance(link, parser.ArticleLink)\
             or isinstance(link, parser.CategoryLink)\
             or isinstance(link, parser.NamespaceLink):
-            target = link.full_target or link.target
-            url = self.getURL(target)
             
-            # the following code is kinda hack
+            target = link.full_target or link.target
+            
+            if not target:
+                return None
+            
+            if target[0] == '/':
+                target = title + target
+            
+            url = self.getURL(target)
             if url:
                 return url
+            
+            # the following code is kinda hack
             my_url = self.getURL(title, revision=revision)
             my_title = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
             link_title = urllib.quote(link.target.replace(" ", "_").encode('utf-8'), safe=':/@')
