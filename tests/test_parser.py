@@ -679,6 +679,10 @@ def test_long_language_link():
     assert r.target=='bla'
     assert r.namespace == 'csb'
 
+def test_subpage_link():
+    r = parse('[[/SomeSubPage]]').find(parser.ArticleLink)[0]
+    assert r.target == '/SomeSubPage'
+
 def test_normalize():
     r=parse("[[MediaWiki:__bla_ _]]").find(parser.NamespaceLink)[0]
     assert r.target=='bla'
