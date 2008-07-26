@@ -124,22 +124,22 @@ class TestWikiDB(object):
                 link.colon = False
             return link
         
-        u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'Philosophy'))
+        u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'Philosophy'), u'Bla')
         assert u == 'http://en.wikipedia.org/w/index.php?title=Philosophy'
 
-        u = self.w.getLinkURL(make_link_node(parser.CategoryLink, u'Physics', u':Category:Physics'))
+        u = self.w.getLinkURL(make_link_node(parser.CategoryLink, u'Physics', u':Category:Physics'), u'Bla')
         assert u == 'http://en.wikipedia.org/w/index.php?title=Category:Physics'
         
-        u = self.w.getLinkURL(make_link_node(parser.NamespaceLink, u'He!ko', u'User:He!ko'))
+        u = self.w.getLinkURL(make_link_node(parser.NamespaceLink, u'He!ko', u'User:He!ko'), u'Bla')
         assert u == 'http://en.wikipedia.org/w/index.php?title=User:He%21ko'
         
-        u = self.w.getLinkURL(make_link_node(parser.LangLink, u'Physik', u'de:Physik'))
+        u = self.w.getLinkURL(make_link_node(parser.LangLink, u'Physik', u'de:Physik'), u'Bla')
         assert u == 'http://de.wikipedia.org/wiki/Physik'
         
-        u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'wiktionary:Physics'))
+        u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'wiktionary:Physics'), u'Bla')
         assert u == 'http://en.wiktionary.org/wiki/Physics'
     
-        u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'gibtsnicht:Physics'))
+        u = self.w.getLinkURL(make_link_node(parser.InterwikiLink, u'Physics', u'gibtsnicht:Physics'), u'Bla')
         assert u is None
 
 class TestImageDB(object):
