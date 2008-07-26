@@ -1,4 +1,5 @@
 #! /usr/bin/env py.test
+# -*- coding: utf-8 -*-
 
 import shutil
 import tempfile
@@ -19,8 +20,10 @@ class TestMathUtils(object):
                      r"E = m c^2",
                      r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
                      r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
+                     'björn',
                      ]
         for latex in latexlist:
+            latex = unicode(latex, 'utf-8')
             res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='blahtexml')
             assert res
             res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
