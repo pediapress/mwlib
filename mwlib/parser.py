@@ -9,8 +9,7 @@ import re
 
 from mwlib.scanner import tokenize, TagToken, EndTagToken
 from mwlib.log import Log
-from mwlib.namespace import namespace_maps, interwiki_map
-from mwlib.lang import languages
+from mwlib import namespace
 
 log = Log("parser")
 
@@ -198,8 +197,6 @@ class Caption(_VListNode):
 
 class Link(Node):
     target = None
-    from mwlib.namespace import NS_MAIN, NS_CATEGORY, NS_IMAGE
-
     colon = False
 
     def hasContent(self):
@@ -208,34 +205,43 @@ class Link(Node):
         return False
 
     @classmethod
-    def _buildSpecializeMap(cls, namespaces, interwikis, langs):
-        """
-        Returns a dict mapping namespace prefixes to a tuple of form
+    def _buildSpecializeMap(cls, namespaces, interwikimap):
+        """Return a dict mapping namespace prefixes to a tuple of form
         (link_class, namespace_value).
         """
+        
         res = {}
         for name, num in namespaces.iteritems():
             name = name.lower()
-            if num == cls.NS_CATEGORY:
+            if num == namespace.NS_CATEGORY:
                 res[name] = (CategoryLink, num)
-            elif num == cls.NS_IMAGE:
+            elif num == namespace.NS_IMAGE:
                 res[name] = (ImageLink, num)
             else:
                 res[name] = (NamespaceLink, num)
-
-        for name, target in interwikis.iteritems():
-            res[name.lower()] = (InterwikiLink, target)
         
-        for lang in langs:
-            res[lang.lower()] = (LangLink, lang)
-
+        for prefix, d in interwikimap.items():
+            if 'language' in interwikimap[prefix]:
+                res[prefix] = (LangLink, prefix)
+            else:
+                res[prefix] = (InterwikiLink, d.get('renamed', prefix))
+        
         return res
-        
+    
     @classmethod
-    def _setSpecializeMap(cls, nsMap='default'):
+    def _setSpecializeMap(cls, nsMap='default', interwikimap=None):
+        if interwikimap is None:
+            from mwlib.lang import languages
+            interwikimap = {}
+            for prefix, renamed in namespace.dummy_interwikimap.items():
+                interwikimap[prefix] = {'renamed': renamed}
+            for lang in languages:
+                interwikimap[lang] = {'language': True}
+        
         cls._specializeMap = cls._buildSpecializeMap(
-            namespace_maps[nsMap], interwiki_map, languages)
-
+            namespace.namespace_maps[nsMap], interwikimap,
+        )
+    
     def _specialize(self):
         """
         Handles different forms of link, e.g.:
@@ -266,24 +272,21 @@ class Link(Node):
         try:
             ns, title = full_target.split(':', 1)
         except ValueError:
-            self.namespace = self.NS_MAIN
+            self.namespace = namespace.NS_MAIN
             self.target = full_target
             self.__class__ = ArticleLink
             return
 
-        (self.__class__, self.namespace) = (
-                self._specializeMap.get(ns.lower(), (ArticleLink, self.NS_MAIN)))
+        self.__class__, self.namespace = self._specializeMap.get(
+            ns.lower(),
+            (ArticleLink, namespace.NS_MAIN),
+        )
         
-        if len(ns) == 2 and isinstance(self, ArticleLink):
-            # Assume this is an unlisted language
-            self.__class__ = LangLink
-            self.namespace = ns.lower()
-
-        if self.colon and self.namespace != self.NS_MAIN:
+        if self.colon and self.namespace != namespace.NS_MAIN:
             # [[:Category:Foo]] should not be a category link
             self.__class__ = NamespaceLink
 
-        if self.namespace == self.NS_MAIN:
+        if self.namespace == namespace.NS_MAIN:
             # e.g. [[Blah: Foo]] is an ordinary article with a colon
             self.target = full_target
         else:
@@ -436,22 +439,25 @@ class Text(Node):
 class Control(Text):
     pass
 
-def _parseAtomFromString(s, lang=None):
+def _parseAtomFromString(s, lang=None, interwikimap=None):
     from mwlib import scanner
     tokens = scanner.tokenize(s)
-    p=Parser(tokens, lang=lang)
+    p=Parser(tokens, lang=lang, interwikimap=interwikimap)
     try:
         return p.parseAtom()
     except Exception, err:
         log.error("exception while parsing %r: %r" % (s, err))
         return None
 
-                  
+
     
-def parse_fields_in_imagemap(imap, lang=None):
+def parse_fields_in_imagemap(imap, lang=None, interwikimap=None):
     
     if imap.image:
-        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]', lang=lang)
+        imap.imagelink = _parseAtomFromString(u'[['+imap.image+']]',
+            lang=lang,
+            interwikimap=interwikimap,
+        )
         if not isinstance(imap.imagelink, ImageLink):
             imap.imagelink = None
 
@@ -468,9 +474,10 @@ def append_br_tag(node):
 _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
             
 class Parser(object):
-    def __init__(self, tokens, name='', lang=None):
+    def __init__(self, tokens, name='', lang=None, interwikimap=None):
         self.tokens = tokens
         self.lang = lang
+        self.interwikimap = interwikimap
         self.pos = 0
         self.name = name
         self.lastpos = 0
@@ -478,11 +485,11 @@ class Parser(object):
         
         if lang:
             nsMap = '%s+en_mw' % lang
-            if nsMap not in namespace_maps:
+            if nsMap not in namespace.namespace_maps:
                 nsMap = 'default'
         else:
             nsMap = 'default'
-        Link._setSpecializeMap(nsMap)
+        Link._setSpecializeMap(nsMap, interwikimap)
         
         from mwlib import tagext
         self.tagextensions = tagext.default_registry
@@ -749,7 +756,10 @@ class Parser(object):
                 continue
 
             # either image link or text inside
-            n=_parseAtomFromString(u'[['+x+']]', lang=self.lang)
+            n=_parseAtomFromString(u'[['+x+']]',
+                lang=self.lang,
+                interwikimap=self.interwikimap,
+            )
 
             if isinstance(n, ImageLink):
                 children.append(n)
@@ -765,7 +775,10 @@ class Parser(object):
         txt = "".join(x.caption for x in node.find(Text))
         from mwlib import imgmap
         node.imagemap = imgmap.ImageMapFromString(txt)
-        parse_fields_in_imagemap(node.imagemap, lang=self.lang)
+        parse_fields_in_imagemap(node.imagemap,
+            lang=self.lang,
+            interwikimap=self.interwikimap,
+        )
 
         #print node.imagemap
         return node

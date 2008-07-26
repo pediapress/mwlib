@@ -3,6 +3,7 @@
 
 import os
 import shutil
+import sys
 import tempfile
 import time
 
@@ -11,7 +12,7 @@ import py
 from PIL import Image
 
 from mwlib.mwapidb import APIHelper, ImageDB, WikiDB
-from mwlib import parser
+from mwlib import parser, uparser
 from mwlib.xfail import xfail
 
 class TestAPIHelper(object):
@@ -144,6 +145,18 @@ class TestWikiDB(object):
         
         u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'/Bar'), u'Foo')
         assert u == 'http://en.wikipedia.org/w/index.php?title=Foo/Bar'
+    
+        r = uparser.parseString(u'', u'[[google:test]]', wikidb=self.w)
+        parser.show(sys.stdout, r)
+        link = r.find(parser.InterwikiLink)[0]
+        assert link.target == 'test'
+        assert self.w.getLinkURL(link, u'bla') == 'http://www.google.com/search?q=test'
+        
+        r = uparser.parseString(u'', u'[[fr:test]]', wikidb=self.w)
+        parser.show(sys.stdout, r)
+        link = r.find(parser.LangLink)[0]
+        assert link.target == 'test'
+        assert self.w.getLinkURL(link, u'bla') == 'http://fr.wikipedia.org/wiki/test'
     
 
 class TestImageDB(object):

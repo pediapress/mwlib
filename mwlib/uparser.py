@@ -90,10 +90,18 @@ def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
 
 postprocessors = [removeBoilerplate, simplify, fixlitags, addurls]
 
-def parseString(title=None, raw=None, wikidb=None, revision=None, lang=None):
+def parseString(
+    title=None,
+    raw=None,
+    wikidb=None,
+    revision=None,
+    lang=None,
+    interwikimap=None,
+):
     """parse article with title from raw mediawiki text"""
-    assert title is not None 
-
+    
+    assert title is not None, 'no title given'
+    
     if raw is None:
         raw = wikidb.getRawArticle(title, revision=revision)
         assert raw is not None, "cannot get article %r" % (title,)
@@ -104,12 +112,14 @@ def parseString(title=None, raw=None, wikidb=None, revision=None, lang=None):
             src = wikidb.getSource(title, revision=revision)
             if src:
                 lang = src.get('language')
+        if interwikimap is None and hasattr(wikidb, 'getInterwikiMap'):
+            interwikimap = wikidb.getInterwikiMap(title, revision=revision)
     else:
         input = raw
     
     tokens = scanner.tokenize(input, title)
 
-    a = parser.Parser(tokens, title, lang=lang).parse()
+    a = parser.Parser(tokens, title, lang=lang, interwikimap=interwikimap).parse()
     a.caption = title
     for x in postprocessors:
         x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)

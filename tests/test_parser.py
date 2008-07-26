@@ -39,6 +39,7 @@ def test_style():
     check(u"'''''mainz'' bla'''", "'''", "''")
     check(u"'''''mainz''' bla''", "''", "'''")
     check(u"'''''''''''''''''''pp'''''", "'''", "''")
+    check(u"'''test''bla", "''")
 
 def test_single_quote_after_style():
     """http://code.pediapress.com/wiki/ticket/20"""
