@@ -44,3 +44,10 @@ class TestMathUtils(object):
 
         res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
         assert res
+    
+    @xfail
+    def test_single_quote_bug(self):
+        res = renderMath(u"f'(x) = x", self.tmpdir, output_mode='png', render_engine='texvc')
+        assert res
+
+
