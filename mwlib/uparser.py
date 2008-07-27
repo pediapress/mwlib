@@ -81,7 +81,6 @@ def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
     if wikidb is None or title is None:
         return
     if not hasattr(wikidb, 'getLinkURL'):
-        log.warn('WikiDB has not getLinkURL() method')
         return
     if isinstance(node, parser.Link) and not isinstance(node, parser.ImageLink):
         node.url = wikidb.getLinkURL(node, title, revision=revision)
