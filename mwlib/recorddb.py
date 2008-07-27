@@ -75,6 +75,9 @@ class RecordDB(object):
         }
         return r
     
+    def getLinkURL(self, link, title, revision=None):
+        return self.db.getLinkURL(link, title, revision=revision)
+    
 
 # ==============================================================================
 
