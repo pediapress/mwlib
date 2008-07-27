@@ -158,6 +158,12 @@ class TestWikiDB(object):
         assert link.target == 'test'
         assert self.w.getLinkURL(link, u'bla') == 'http://fr.wikipedia.org/wiki/test'
     
+        r = uparser.parseString(u'', u'[[Wikipedia:test]]', wikidb=self.w)
+        parser.show(sys.stdout, r)
+        link = r.find(parser.NamespaceLink)[0]
+        assert link.target == 'test'
+        assert self.w.getLinkURL(link, u'bla') == 'http://en.wikipedia.org/w/index.php?title=Wikipedia:test'
+    
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'
