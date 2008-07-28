@@ -287,7 +287,7 @@ def make_zip_file(output, env,
     
     fd, tmpzip = tempfile.mkstemp(suffix='.zip')
     os.close(fd)
-    zf = zipfile.ZipFile(tempzip, 'w')
+    zf = zipfile.ZipFile(tmpzip, 'w')
     
     z = ZipfileCreator(zf,
         imagesize=imagesize,
