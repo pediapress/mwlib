@@ -132,7 +132,6 @@ class WikiDB(object):
         except KeyError:
             return None
 
-        res = unicode(res, 'utf-8')
         mo = self.redirect_rex.search(res)
         if mo:
             redirect = mo.group('redirect')
