@@ -58,6 +58,8 @@ def make_collection_id(data):
 
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
+    rendering_filename = 'rendering'
+    zipposting_filename = 'zipposting'
     error_filename = 'errors'
     status_filename = 'status'
     output_filename = 'output'
@@ -159,11 +161,21 @@ class Application(wsgi.Application):
             'writer': writer,
         })
         
+        rendering_filename = self.get_path(collection_id, self.rendering_filename, writer)
+        if os.path.exists(rendering_filename):
+            return response
+        f = open(rendering_filename, 'wb')
+        f.write('1\n')
+        f.close()
+        
+        pid_path = self.get_path(collection_id, self.pid_filename, writer)
+        if os.path.exists(pid_path):
+            return response
+        
         output_path = self.get_path(collection_id, self.output_filename, writer)
         if os.path.exists(output_path):
             log.info('re-using rendered file %r' % output_path)
             return response
-        pid_path = self.get_path(collection_id, self.pid_filename, writer)
         
         status_path = self.get_path(collection_id, self.status_filename, writer)
         if os.path.exists(status_path):
@@ -330,8 +342,20 @@ class Application(wsgi.Application):
 
         log.info('zip_post %s %s' % (collection_id, post_url))
         
-        zip_path = self.get_path(collection_id, self.zip_filename)
+        response = self.json_response({'state': 'ok'})
+        
+        zipposting_filename = self.get_path(collection_id, self.zipposting_filename, writer)
+        if os.path.exists(zipposting_filename):
+            return response
+        f = open(zipposting_filename, 'wb')
+        f.write('1\n')
+        f.close()
+        
         pid_path = self.get_path(collection_id, self.pid_filename, 'zip')
+        if os.path.exists(pid_path):
+            return response
+        
+        zip_path = self.get_path(collection_id, self.zip_filename)
         if os.path.exists(zip_path):
             log.info('POSTing ZIP file %r' % zip_path)
             args = [
@@ -363,7 +387,7 @@ class Application(wsgi.Application):
         
         self.queue_job('post', collection_id, args)
         
-        return self.json_response({'state': 'ok'})
+        return response
     
 
 # ==============================================================================
