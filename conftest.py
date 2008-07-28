@@ -2,6 +2,7 @@ import py
 import os
 xmllint_not_found = os.system('xmllint --version 2>/dev/null 1>/dev/null')
 ploticus_not_found = not os.path.isfile('/usr/bin/ploticus')
+blahtex_not_found = os.system('blahtexml --help 2>/dev/null 1>/dev/null')
 
 class Exclude(py.test.collect.Directory):
     def filefilter(self, path):
@@ -11,7 +12,10 @@ class Exclude(py.test.collect.Directory):
         if path.basename == 'test_timeline.py' and ploticus_not_found:
             print "Skipping", path, "no ploticus found"
             return False
-        
+        if blahtex_not_found and \
+                (path.basename == 'test_math_utils.py' or path.basename == "test_odfwriter.py"):
+            print "Skipping", path, "no blahtexml found"
+            return False        
         return super(Exclude, self).filefilter(path)
 
 Directory = Exclude
