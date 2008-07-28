@@ -262,10 +262,6 @@ class TestImageDB(object):
         du = imgdb.getDescriptionURL(t)
         assert du == 'http://commons.wikimedia.org/wiki/Image:Sertraline-A-3D-balls.png'
     
-    @xfail
-    def test_getDescriptionURL2(self):
-        """http://code.pediapress.com/wiki/ticket/238"""
-        
         imgdb = ImageDB('http://memory-alpha.org/en/')
         t = u'Damar2375.jpg'
         du = imgdb.getDescriptionURL(t)
