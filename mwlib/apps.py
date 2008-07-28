@@ -368,7 +368,7 @@ def render():
         else:
             zip_filename = None
         
-        fd, tmpout = tempfile.mkstemp()
+        fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
         os.close(fd)
         writer(env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
