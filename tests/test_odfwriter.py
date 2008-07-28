@@ -186,6 +186,21 @@ text
         assert res == goal
 
 
+def test_empty_sections():
+    raw='''=  =
+= correct =
+== with title no children =='''.decode("utf8")
+    xml = getXML(raw)
+    reg = re.compile(r'text:name="(.*?)"', re.MULTILINE)
+    res =  list(reg.findall(xml))
+    goal =  [u'test', 'correct '] # article title is on the first level, 
+    print res, "should be",goal
+    if not res == goal:
+        print xml
+        assert res == goal
+
+
+
 def test_newlines():
     raw='''== Rest of the page ==
 
