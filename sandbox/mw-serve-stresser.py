@@ -98,7 +98,7 @@ def reportError(command, metabook, res, baseurl, writer,
 ):
     utils.report(
         system=system,
-        subject='Error with command %r' % command,
+        subject='Error %r with command %r' % (res.get('reason', '?'), command),
         error=res.get('error'),
         res=res,
         metabook=metabook,
