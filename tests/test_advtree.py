@@ -5,7 +5,7 @@
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
-    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item
+    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
@@ -177,3 +177,16 @@ def test_ulist():
     assert len(r.getChildNodesByClass(Item)) == 1
 
 
+def test_colspan():
+    t1 = '''<table><tr><td colspan="one">no colspan </td></tr></table>'''
+    r = parseString(title='t', raw=t1)
+    buildAdvancedTree(r)
+    parser.show(sys.stdout, r)
+    assert r.getChildNodesByClass(Cell)[0].colspan is None
+
+    t1 = '''<table><tr><td colspan="2">colspan1</td></tr></table>'''
+    r = parseString(title='t', raw=t1)
+    buildAdvancedTree(r)
+    parser.show(sys.stdout, r)
+    assert r.getChildNodesByClass(Cell)[0].colspan is 2
+    

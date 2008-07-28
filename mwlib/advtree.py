@@ -307,7 +307,17 @@ class AdvancedRow(AdvancedNode):
     @property 
     def cells(self):
         return [c for c in self if c.__class__ == Cell]
-    
+    def rowspan(self):
+        c = self.vlist.get("rowspan",0)
+        if isinstance(c,int) and c>0:
+            return int(c)
+
+class AdvancedCell(AdvancedNode):
+    @property    
+    def colspan(self):
+        c = self.vlist.get("colspan",0)
+        if isinstance(c,int) and c>0:
+            return int(c)
 
 class AdvancedSection(AdvancedNode):
     h_level = 0 # this is set if it originates from an H1, H2, ... TagNode
@@ -511,7 +521,7 @@ def extendClasses(node):
 
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
-                     Math:AdvancedMath, Row:AdvancedRow, Table:AdvancedTable}
+                     Math:AdvancedMath, Cell:AdvancedCell, Row:AdvancedRow, Table:AdvancedTable}
 MixIn(Node, AdvancedNode)
 for k, v in _advancedNodesMap.items():
     MixIn(k,v)

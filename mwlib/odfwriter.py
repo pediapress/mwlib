@@ -330,7 +330,7 @@ class ODFWriter(object):
     def owriteRow(self, row): # COLSPAN FIXME
         tr = table.TableRow()
         for c in row.children:
-            cs =  c.vlist.get("colspan",0)
+            cs =  c.colspan
             self.write(c,tr)
             if cs:
                 tr.elements[-1].addAttribute("numbercolumnsspanned",str(cs))
