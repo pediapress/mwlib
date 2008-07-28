@@ -240,7 +240,6 @@ class AdvancedNode:
             if klasses and self.nav_box_classes.intersection(set(klasses.split())):
                 return True
         return False
-
     
     def getStyle(self):
         if not self.attributes:
