@@ -243,17 +243,19 @@ class AdvancedNode:
         return style
 
     def _fixAttributes(self, attributes):
-        def _safeint(value, default=1):
+        def _safeint(value, default=1, minval=1):
             try:
                 value = int(value)
             except ValueError:
                 value = default
-            return value
+            return max(minval, value)
+
         colspan = attributes.get('colspan')
-        if colspan:
+        if not colspan is None:
             attributes['colspan'] = _safeint(colspan)
+
         rowspan = attributes.get('rowspan')
-        if rowspan:
+        if not rowspan is None:
             attributes['rowspan'] = _safeint(rowspan)
         return attributes
 
