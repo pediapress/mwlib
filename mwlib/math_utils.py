@@ -4,9 +4,9 @@
 # See README.txt for additional licensing information.
 
 import os
-import popen2
 import tempfile
 import shutil
+from subprocess import Popen, PIPE
 
 try:
     import xml.etree.ElementTree as ET
@@ -18,23 +18,26 @@ from mwlib import log
 log = log.Log('mwlib.math_utils')
 
 def _renderMathBlahtex(latex, output_path, output_mode):
-    
+
+    cmd = ['blahtexml', '--texvc-compatible-commands']
     if output_mode == 'mathml':
-        cmd = 'blahtexml --texvc-compatible-commands --mathml'
+        cmd.append('--mathml')
     elif output_mode == 'png':
-        cmd = 'blahtexml --texvc-compatible-commands --png'
+        cmd.append('--png')
     else:
         return None
     curdir = os.path.abspath(os.curdir)
-    os.chdir(output_path)
+    os.chdir(output_path)    
     latex = latex.strip()
-    r, w, e = popen2.popen3(cmd)
-    w.write(latex.encode('utf-8'))
-    w.close()
-    error = e.read()
-    result = r.read()
-    r.close()
-    e.close()
+    if not latex:
+        return None
+    sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    sub.stdin.write(latex.encode('utf-8'))    
+    sub.stdin.close()
+    error = sub.stderr.read()
+    result = sub.stdout.read()
+    sub.stderr.close()
+    sub.stdout.close()    
     os.chdir(curdir)
 
     if result:
@@ -59,10 +62,13 @@ def _renderMathBlahtex(latex, output_path, output_mode):
 def _renderMathTexvc(latex, output_path, output_mode='png'):
     """only render mode is png"""
     
-    cmd = "texvc %s %s '%s' utf-8" % (output_path, output_path, latex.encode('utf-8'))
-    r= os.popen(cmd)
-    result = r.read()
-    r.close()
+    cmd = ['texvc', output_path, output_path, latex.encode('utf-8')]
+
+    sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    sub.stdin.close()
+    result = sub.stdout.read()
+    sub.stdout.close()
+
     if output_mode == 'png':
         if len(result) >= 32:
             png_fn = os.path.join(output_path, result[1:33] + '.png')

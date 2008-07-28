@@ -45,7 +45,6 @@ class TestMathUtils(object):
         res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
         assert res
     
-    @xfail
     def test_single_quote_bug(self):
         """http://code.pediapress.com/wiki/ticket/241"""
         
