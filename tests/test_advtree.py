@@ -189,4 +189,3 @@ def test_colspan():
     buildAdvancedTree(r)
     parser.show(sys.stdout, r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 2
-    

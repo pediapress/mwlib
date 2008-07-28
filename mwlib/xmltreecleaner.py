@@ -66,11 +66,19 @@ def removeLangLinks(node):
 
 
 def _fixParagraphs(element):
+    """
+    moves paragraphs so they are child of the last section  (if existent)
+    """
+    if isinstance(element, advtree.Article):
+        print element.caption
     if isinstance(element, advtree.Paragraph) and isinstance(element.previous, advtree.Section) \
             and element.previous is not element.parent:
         prev = element.previous
         parent = element.parent
-        element.moveto(prev.getLastChild())
+        target = prev.getLastChild()
+        assert target in prev
+        assert target.parent is prev
+        element.moveto(target)
         return True # changed
     else:
         for c in element.children[:]:
