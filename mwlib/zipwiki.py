@@ -48,7 +48,8 @@ class Wiki(wikidbbase.WikiDBBase):
         """
         
         article = self._getArticle(title, revision=revision)
-        assert article, 'no such article: %r' % title
+        if article is None:
+            return None
         try:
             return self.sources[article['source-url']]
         except KeyError:
