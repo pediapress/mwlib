@@ -137,6 +137,18 @@ class Variable(Node):
 
 class Template(Node):
     def flatten(self, expander, variables, res):
+        try:
+            return self._flatten(expander, variables, res)
+        except RuntimeError, err:
+            # we expect a "RuntimeError: maximum recursion depth exceeded" here.
+            # logging this error is rather hard...
+            try:
+                log.warn("error %s ignored" % (err,))
+            except:
+                pass
+            
+        
+    def _flatten(self, expander, variables, res):
         name = []
         flatten(self.children[0], expander, variables, name)
         name = u"".join(name).strip()
