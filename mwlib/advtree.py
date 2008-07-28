@@ -250,13 +250,12 @@ class AdvancedNode:
                 value = default
             return max(minval, value)
 
-        colspan = attributes.get('colspan')
-        if not colspan is None:
-            attributes['colspan'] = _safeint(colspan)
-
-        rowspan = attributes.get('rowspan')
-        if not rowspan is None:
-            attributes['rowspan'] = _safeint(rowspan)
+        # list of attributes that are checked for type and transformed to positive (excluding zero) integers
+        pos_int_attrs = ['colspan', 'rowspan']
+        for attr in pos_int_attrs:
+            val = attributes.get(attr)
+            if not val is None:
+                attributes[attr] = _safeint(val)
         return attributes
 
     def getAttributes(self):
