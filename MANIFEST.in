@@ -44,6 +44,7 @@ include mwlib/lang.txt
 include mwlib/licenses.py
 include mwlib/log.py
 include mwlib/magics.py
+include mwlib/math_utils.py
 include mwlib/mathml.py
 include mwlib/metabook.py
 include mwlib/mwapidb.py
@@ -75,6 +76,7 @@ include mwlib/uparser.py
 include mwlib/utils.py
 include mwlib/web.py
 include mwlib/wiki.py
+include mwlib/wikidbbase.py
 include mwlib/writerbase.py
 include mwlib/wsgi.py
 include mwlib/xfail.py
@@ -96,6 +98,7 @@ include tests/test_expr.py
 include tests/test_html.py
 include tests/test_imgmap.py
 include tests/test_jobsched.py
+include tests/test_math_utils.py
 include tests/test_metabook.py
 include tests/test_mwapidb.py
 include tests/test_mwscan.py
