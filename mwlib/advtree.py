@@ -248,32 +248,16 @@ class AdvancedNode:
         style =  self.attributes.get('style', {})
         return style
 
-    def _fixAttributes(self, attributes):
-        def _safeint(value, default=1, minval=1):
-            try:
-                value = int(value)
-            except ValueError:
-                value = default
-            return max(minval, value)
-
-        colspan = attributes.get('colspan')
-        if not colspan is None:
-            attributes['colspan'] = _safeint(colspan)
-
-        rowspan = attributes.get('rowspan')
-        if not rowspan is None:
-            attributes['rowspan'] = _safeint(rowspan)
-        return attributes
-
     def getAttributes(self):
         attrs = getattr(self, 'vlist', {})
-        for n in ("colspan", "rowspan"):
+        for n in ("colspan", "rowspan"): # col, row span attributes 
             v = attrs.get(n)
-            if v is not None and not isinstance(v, int):
+            if v is not None:
                 if isinstance(v, (str, unicode)) and v.isdigit():
                     attrs[n] = int(v)
-                else:
+                elif not isinstance(v, int):
                     attrs[n] = 1 # some default
+                attrs[n] = max(attrs[n], 1)
         return attrs
 
     def isVisible(self):
@@ -321,17 +305,21 @@ class AdvancedRow(AdvancedNode):
     @property 
     def cells(self):
         return [c for c in self if c.__class__ == Cell]
-    def rowspan(self):
-        c = self.vlist.get("rowspan",0)
-        if isinstance(c,int) and c>0:
-            return int(c)
+
 
 class AdvancedCell(AdvancedNode):
     @property    
-    def colspan(self):
-        c = self.vlist.get("colspan",0)
-        if isinstance(c,int) and c>0:
-            return int(c)
+    def colspan(self, attr="colspan"):
+        # returns None if there is no valid colspan e.g. colspan="one"
+        c = self.vlist.get(attr, None)
+        if c is not None and (isinstance(c,int) or (isinstance(c, (str, unicode)) and c.isdigit())):
+            return max(1,int(c))
+
+    @property
+    def rowspan(self):
+        return self.colspan(attr="rowspan")
+
+
 
 class AdvancedSection(AdvancedNode):
     h_level = 0 # this is set if it originates from an H1, H2, ... TagNode
@@ -669,7 +657,7 @@ def buildAdvancedTree(root): # USE WITH CARE
     removeNodes(root)
     removeNewlines(root)
     fixStyles(root) 
-#    _validateParents(root)       
+    _validateParents(root)       
 
 
 def _validateParserTree(node, parent=None):
