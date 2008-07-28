@@ -126,7 +126,6 @@ class WikiDB(object):
 
     def getRawArticle(self, title, raw=None, revision=None):
         title = normname(title)
-        print repr(title)
         try:
             res = self.reader[":"+title]
         except KeyError:
