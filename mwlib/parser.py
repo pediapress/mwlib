@@ -198,7 +198,7 @@ class Caption(_VListNode):
 class Link(Node):
     target = None
     colon = False
-
+    url = None
     def hasContent(self):
         if self.target:
             return True
