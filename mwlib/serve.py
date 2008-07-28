@@ -58,6 +58,8 @@ def make_collection_id(data):
 
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
+    rendering_filename = 'rendering'
+    zipposting_filename = 'zipposting'
     error_filename = 'errors'
     status_filename = 'status'
     output_filename = 'output'
@@ -158,7 +160,14 @@ class Application(wsgi.Application):
             'collection_id': collection_id,
             'writer': writer,
         })
-
+        
+        rendering_filename = self.get_path(collection_id, self.rendering_filename, writer)
+        if os.path.exists(rendering_filename):
+            return response
+        f = open(rendering_filename, 'wb')
+        f.write('1\n')
+        f.close()
+        
         pid_path = self.get_path(collection_id, self.pid_filename, writer)
         if os.path.exists(pid_path):
             return response
@@ -335,11 +344,18 @@ class Application(wsgi.Application):
         
         response = self.json_response({'state': 'ok'})
         
-        zip_path = self.get_path(collection_id, self.zip_filename)
+        zipposting_filename = self.get_path(collection_id, self.zipposting_filename, writer)
+        if os.path.exists(zipposting_filename):
+            return response
+        f = open(zipposting_filename, 'wb')
+        f.write('1\n')
+        f.close()
+        
         pid_path = self.get_path(collection_id, self.pid_filename, 'zip')
         if os.path.exists(pid_path):
             return response
         
+        zip_path = self.get_path(collection_id, self.zip_filename)
         if os.path.exists(zip_path):
             log.info('POSTing ZIP file %r' % zip_path)
             args = [
