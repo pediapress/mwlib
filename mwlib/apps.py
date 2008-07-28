@@ -385,17 +385,18 @@ def render():
                 os.unlink(zip_filename)
             except Exception, e:
                 print 'Could not remove %r: %s' % (zip_filename, e)
-    except WriterError, e:
-        set_status(status='error')
-        if options.error_file:
-            open(options.error_file, 'wb').write(str(e))
-        raise
     except Exception, e:
         set_status(status='error')
         if options.error_file:
-            traceback.print_exc(file=open(options.error_file, 'wb'))
+            fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
+            f = os.fdopen(fd, 'wb')
+            if isinstance(e, WriterError):
+                f.write(str(e))
+            else:
+                traceback.print_exc(file=f) 
+            f.close()
+            os.rename(tmpfile, options.error_file)
         raise
-    
 
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]")
