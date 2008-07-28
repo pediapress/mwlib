@@ -252,6 +252,7 @@ def render():
     
     import simplejson
     import sys
+    import tempfile
     import traceback
     import pkg_resources
     from mwlib.writerbase import WriterError
@@ -367,7 +368,8 @@ def render():
         else:
             zip_filename = None
         
-        tmpout = options.output + '.tmp'
+        fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
+        os.close(fd)
         writer(env, output=tmpout, status_callback=set_status, **writer_options)
         os.rename(tmpout, options.output)
         kwargs = {}

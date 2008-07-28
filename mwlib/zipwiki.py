@@ -24,9 +24,9 @@ class Wiki(wikidbbase.WikiDBBase):
             self.zf = ZipFile(zipfile)
         self.metabook = simplejson.loads(self.zf.read("metabook.json"))
         content = simplejson.loads(self.zf.read('content.json'))
-        self.articles = content['articles']
-        self.templates = content['templates']
-        self.sources = content['sources']
+        self.articles = content.get('articles', {})
+        self.templates = content.get('templates', {})
+        self.sources = content.get('sources', {})
     
     def _getArticle(self, title, revision=None):
         try:
@@ -48,7 +48,8 @@ class Wiki(wikidbbase.WikiDBBase):
         """
         
         article = self._getArticle(title, revision=revision)
-        assert article, 'no such article: %r' % title
+        if article is None:
+            return None
         try:
             return self.sources[article['source-url']]
         except KeyError:

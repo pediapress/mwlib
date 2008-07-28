@@ -286,6 +286,7 @@ class ImageDB(object):
         assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
         
         self.tmpdir = tempfile.mkdtemp()
+        self.wikidb = None
     
     def clear(self):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
@@ -311,14 +312,21 @@ class ImageDB(object):
         
         try:
             imageinfo = result['imageinfo'][0]
-            url = imageinfo['descriptionurl']
-            if url: # url can be False
+            url = imageinfo.get('descriptionurl')
+            if url: # url can be False (!) or non-existant
                 if url.startswith('/'):
                     url = urlparse.urljoin(self.api_helper.base_url, url)
                 return url
-            return None
+            else:
+                if self.wikidb is None:
+                    self.wikidb = WikiDB(api_helper=self.api_helper)
+                title = 'Image:%s' % name
+                art = self.wikidb.getRawArticle(title)
+                if art is not None:
+                    return self.wikidb.getURL(title)
         except (KeyError, IndexError):
-            return None
+            pass
+        return None
     
     def getURL(self, name, size=None):
         """Return image URL for image with given name

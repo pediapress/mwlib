@@ -285,7 +285,9 @@ def make_zip_file(output, env,
         fd, output = tempfile.mkstemp(suffix='.zip')
         os.close(fd)
     
-    zf = zipfile.ZipFile(output + '.tmp', 'w')
+    fd, tmpzip = tempfile.mkstemp(suffix='.zip', dir=os.path.dirname(output))
+    os.close(fd)
+    zf = zipfile.ZipFile(tmpzip, 'w')
     
     z = ZipfileCreator(zf,
         imagesize=imagesize,
@@ -337,7 +339,7 @@ def make_zip_file(output, env,
     zf.close()
     if os.path.exists(output):
         os.unlink(output)
-    os.rename(output + '.tmp', output)
+    os.rename(tmpzip, output)
     
     if env.images and hasattr(env.images, 'clear'):
         env.images.clear()
