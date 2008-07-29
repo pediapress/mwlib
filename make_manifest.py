@@ -11,7 +11,6 @@ def main():
     files.append("docs/writers.html")
     files.append("docs/zipfile.html")
     files.append("mwlib/_mwscan.cc")
-    files.append("mwlib/_expander.cc")
     
     def remove(n):
         try:
@@ -30,7 +29,6 @@ def main():
     for x in files:
         f.write("include %s\n" % x)
     f.close()
-
 
 if __name__=='__main__':
     main()
