@@ -230,11 +230,12 @@ def main():
             log.check('EPIC FAIL!!!')
             utils.report(
                 system=system,
-                subject='checkservice() failed',
+                subject='checkservice() failed, waiting 60seconds',
                 from_email=options.from_email,
                 mail_recipients=mail_recipients,
             )
             sys.exc_clear()
+            time.sleep(60)
         log.info('%s, %s\tok: %d, failed: %d' % (
             options.baseurl, options.writer, ok_count, fail_count,
         ))
