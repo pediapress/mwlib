@@ -45,6 +45,8 @@ class WikiDBBase(object):
             
             # the following code is kinda hack
             my_url = self.getURL(title, revision=revision)
+            if my_url is None:
+                return None
             my_title = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
             link_title = urllib.quote(link.target.replace(" ", "_").encode('utf-8'), safe=':/@')
             pos = my_url.find(my_title)
