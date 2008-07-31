@@ -334,7 +334,7 @@ class TagToken(_BaseTagToken):
         self.text = text
 
     def __repr__(self):
-        return "<Tag:%s %r>" % (self.t, self.text)
+        return "<Tag:%r %r>" % (self.t, self.text)
 
 class EndTagToken(_BaseTagToken):
     def __init__(self, t, text=''):
@@ -342,7 +342,7 @@ class EndTagToken(_BaseTagToken):
         self.text = text
         
     def __repr__(self):
-        return "<EndTag:%s>" % self.t
+        return "<EndTag:%r>" % (self.t,)
 
 def tokenize(input, name="unknown"):
     assert input is not None, "must specify input argument in tokenize"
