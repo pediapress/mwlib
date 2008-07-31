@@ -73,7 +73,7 @@ def parseParams(s):
         if value.startswith('"') or value.startswith("'"):
             value = value[1:-1]
             
-        if name=='style':
+        if name.lower() == 'style':
             value = style2dict(value)
             r['style'] = value
         else:
