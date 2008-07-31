@@ -344,7 +344,7 @@ class Application(wsgi.Application):
         
         response = self.json_response({'state': 'ok'})
         
-        zipposting_filename = self.get_path(collection_id, self.zipposting_filename, writer)
+        zipposting_filename = self.get_path(collection_id, self.zipposting_filename)
         if os.path.exists(zipposting_filename):
             return response
         f = open(zipposting_filename, 'wb')
