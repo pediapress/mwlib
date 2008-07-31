@@ -43,6 +43,18 @@ def _idIndex(lst, el):
         return match
     raise ValueError
 
+def debug(method): # use as decorator
+    def f(self, *args, **kargs):
+        log("\n%s called with %r %r" % (method.__name__, args, kargs))
+        log("on %r attrs:%r style:%r" % (self, self.attributes, self.style) )
+        p = self
+        while p.parent:
+            p = p.parent
+            log("%r" % p)
+        return method(self, *args, **kargs)
+    return f
+
+
 class AdvancedNode:
     """
     MixIn Class that extends Nodes so they become easier accessible
@@ -244,7 +256,7 @@ class AdvancedNode:
     def getStyle(self):
         if not self.attributes:
             return {}
-        style =  self.attributes.get('style', {})
+        style =  self.attributes.get('style', {}) # THIS IS BROKEN
         return style
 
     def getAttributes(self):
@@ -259,6 +271,7 @@ class AdvancedNode:
                 attrs[n] = max(attrs[n], 1)
         return attrs
 
+#    @debug
     def isVisible(self):
         if self.style.get('display', '').lower() == 'none':
             return False
