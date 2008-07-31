@@ -56,7 +56,7 @@ def parseParams(s):
         for x in s.split(';'):
             if ':' in x:
                 var, value = x.split(':', 1)
-                var=var.strip()
+                var = var.strip().lower()
                 value = value.strip()
                 res[var] = value
 
@@ -73,7 +73,7 @@ def parseParams(s):
         if value.startswith('"') or value.startswith("'"):
             value = value[1:-1]
             
-        if name=='style':
+        if name.lower() == 'style':
             value = style2dict(value)
             r['style'] = value
         else:
