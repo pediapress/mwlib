@@ -5,7 +5,7 @@
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
-    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell
+    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell, Span, Row
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
@@ -189,3 +189,21 @@ def test_colspan():
     buildAdvancedTree(r)
     parser.show(sys.stdout, r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 2
+
+
+
+def test_attributes():
+    t1 = '''
+{|
+|- STYLE="BACKGROUND:#FFDEAD;"
+|stuff
+|}
+'''
+    #t1 = '''<table><tr colspan="one" STYLE="BACKGROUND:#FFDEAD;"  bgcolor="#000000"><td>no colspan </td></tr></table>'''
+    r = parseString(title='t', raw=t1)
+    buildAdvancedTree(r)
+    n = r.getChildNodesByClass(Row)[0]
+    print n.attributes, n.style
+    assert isinstance(n.style, dict)
+    assert isinstance(n.attributes, dict)
+    assert n.style["background"]=="#FFDEAD"
