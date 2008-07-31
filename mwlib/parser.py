@@ -56,7 +56,7 @@ def parseParams(s):
         for x in s.split(';'):
             if ':' in x:
                 var, value = x.split(':', 1)
-                var=var.strip()
+                var = var.strip().lower()
                 value = value.strip()
                 res[var] = value
 
