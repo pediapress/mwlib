@@ -40,3 +40,13 @@ def test_table_bol_end_code():
     
 def test_table_bol_end():
     _check_table_markup("foo |} bar")
+
+def test_tagtoken_repr():
+    t=mwscan.TagToken(unichr(180))
+    repr(t)
+    
+def test_endtagtoken_repr():
+    t=mwscan.EndTagToken(unichr(180))
+    repr(t)
+    
+    
