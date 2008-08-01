@@ -19,19 +19,25 @@ log = log.Log('mwlib.math_utils')
 
 def _renderMathBlahtex(latex, output_path, output_mode):
 
-    cmd = ['blahtexml', '--texvc-compatible-commands']
+    cmd = ['Xblahtexml', '--texvc-compatible-commands']
     if output_mode == 'mathml':
         cmd.append('--mathml')
     elif output_mode == 'png':
         cmd.append('--png')
     else:
         return None
-    curdir = os.path.abspath(os.curdir)
+    curdir = os.getcwd()
     os.chdir(output_path)    
     latex = latex.strip()
     if not latex:
         return None
-    sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+
+    try:
+        sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    except OSError:
+        log.error('error: executable "blahtexml" not available (needed for formulas)')
+        os.chdir(curdir)
+        return None
     sub.stdin.write(latex.encode('utf-8'))    
     sub.stdin.close()
     error = sub.stderr.read()
@@ -62,9 +68,12 @@ def _renderMathBlahtex(latex, output_path, output_mode):
 def _renderMathTexvc(latex, output_path, output_mode='png'):
     """only render mode is png"""
     
-    cmd = ['texvc', output_path, output_path, latex.encode('utf-8')]
-
-    sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    cmd = ['Xtexvc', output_path, output_path, latex.encode('utf-8')]
+    try:
+        sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    except OSError:
+        log.error('error: executable "texvc" not available (needed for formulas)')
+        return None
     sub.stdin.close()
     result = sub.stdout.read()
     sub.stdout.close()
@@ -93,18 +102,22 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
     @returns: either path to generated png or mathml string
     @rtype: basestring
     """
-    
+    assert output_mode in ("png", "mathml")
+    assert render_engine in ("texvc", "blahtexml")
     assert isinstance(latex, unicode), 'latex must be of type unicode'
     
     if output_mode == 'png' and not output_path:
         log.error('math rendering with output_mode png requires an output_path')
-        raise
+        raise Exception("output path required")
+
     removeTmpDir = False
     if output_mode == 'mathml' and not output_path:
         output_path = tempfile.mkdtemp()
         removeTmpDir = True
+    print "op", output_path
     output_path = os.path.abspath(output_path)
     result = None
+
     if render_engine == 'blahtexml':
         result = _renderMathBlahtex(latex, output_path=output_path, output_mode=output_mode)
     if not result and output_mode == 'png':
@@ -118,7 +131,7 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
 
 if __name__ == "__main__":
 
-    latex = "\\sqrt{4}=2"
+    latex = u"\\sqrt{4}=2"
 
 ##     latexlist = ["\\sqrt{4}=2",
 ##                  r"a^2 + b^2 = c^2\,",
@@ -135,6 +148,6 @@ if __name__ == "__main__":
 ##                  """,
 ##         ]
     
-    #print renderMath(latex, '/tmp/math', output_mode='mathml')
-    #print renderMath(latex, '/tmp/math', output_mode='png')
-    print renderMath(latex, '/tmp/math', output_mode='png', render_engine='texvc')
+    print renderMath(latex,  output_mode='mathml')
+    print renderMath(latex,  output_path="/tmp/", output_mode='png')
+    print renderMath(latex,  output_path="/tmp/", output_mode='png', render_engine='texvc')
