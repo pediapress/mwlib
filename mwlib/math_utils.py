@@ -19,7 +19,7 @@ log = log.Log('mwlib.math_utils')
 
 def _renderMathBlahtex(latex, output_path, output_mode):
 
-    cmd = ['Xblahtexml', '--texvc-compatible-commands']
+    cmd = ['blahtexml', '--texvc-compatible-commands']
     if output_mode == 'mathml':
         cmd.append('--mathml')
     elif output_mode == 'png':
@@ -68,7 +68,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
 def _renderMathTexvc(latex, output_path, output_mode='png'):
     """only render mode is png"""
     
-    cmd = ['Xtexvc', output_path, output_path, latex.encode('utf-8')]
+    cmd = ['texvc', output_path, output_path, latex.encode('utf-8')]
     try:
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
