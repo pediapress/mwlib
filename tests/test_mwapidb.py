@@ -107,7 +107,9 @@ class TestWikiDB(object):
         assert r is None
         
         b, t, r = p('http://memory-alpha.org/en/wiki/Damar')
-        print b, t, r
+        assert b == 'http://memory-alpha.org/en/'
+        assert t == u'Damar'
+        assert r is None
         
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
