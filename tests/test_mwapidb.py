@@ -111,6 +111,12 @@ class TestWikiDB(object):
         assert t == u'Damar'
         assert r is None
         
+        b, t, r = p('http://wikimediafoundation.org/wiki/Home')
+        print b, t, r
+        assert b == 'http://wikimediafoundation.org/w/'
+        assert t == u'Home'
+        assert r is None
+    
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
         assert 'redirect' not in raw.lower()
