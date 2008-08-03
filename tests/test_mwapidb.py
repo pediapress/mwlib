@@ -117,6 +117,17 @@ class TestWikiDB(object):
         assert t == u'Home'
         assert r is None
     
+    def test_MW10(self):
+        from mwlib.mwapidb import parse_article_url
+        
+        d = parse_article_url('http://wiki.python-ogre.org/index.php/Basic_Tutorial_1')
+        w = WikiDB(api_helper=d['api_helper'])
+        u = w.getURL(d['title'], revision=d['revision'])
+        assert u == 'http://wiki.python-ogre.org/index.php?title=Basic_Tutorial_1'
+        raw = w.getRawArticle(d['title'])
+        assert len(raw) > 1000
+        print 'AUTHORS:', w.getAuthors(d['title'])
+    
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
         assert 'redirect' not in raw.lower()

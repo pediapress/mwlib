@@ -619,10 +619,17 @@ class WikiDB(wikidbbase.WikiDBBase):
                 return None
         if page is None:
             return None
-        try:
-            return page['revisions'][0].values()[0]
-        except KeyError:
-            return None
+        if isinstance(page['revisions'], list):
+            try:
+                return page['revisions'][0]['*']
+            except (IndexError, KeyError):
+                return None
+        else:
+            # MediaWiki 1.10
+            try:
+                return page['revisions'].values()[0]['*']
+            except (AttributeError, IndexError, KeyError):
+                return None
     
     def getSource(self, title, revision=None):
         """Return source for given article title and revision. For this WikiDB,
