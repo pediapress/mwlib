@@ -25,6 +25,8 @@ settings in that section depend.
 
 Retrieve articles and images via the `MediaWiki API`_, i.e. via ``api.php``.
 
+This requires MediaWiki 1.11 or later.
+
 Specific Options
 ----------------
 

@@ -34,9 +34,11 @@ one command.
     revision of an article.
   
     This value for ``--config`` corresponds to ``type=mwapi`` in a configuration
-    file (see below), i.e. articles and images are fetched with the
+    file (see ``docs/configfiles.txt``), i.e. articles and images are fetched with the
     `MediaWiki API`_. Specifying the URL directly as value for ``--config``
     is usually the quicker way to achieve exactly the same result.
+    
+    This requires MediaWiki 1.11 or later.
   
   * A shortcut for a base URL. Currently there are the following shortcuts:
 
