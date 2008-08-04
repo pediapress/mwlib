@@ -619,15 +619,18 @@ class WikiDB(wikidbbase.WikiDBBase):
                 return None
         if page is None:
             return None
-        if isinstance(page['revisions'], list):
+        revisions = page.get('revisions')
+        if revisions is None:
+            return None
+        if isinstance(revisions, list):
             try:
-                return page['revisions'][0]['*']
+                return revisions[0]['*']
             except (IndexError, KeyError):
                 return None
         else:
             # MediaWiki 1.10
             try:
-                return page['revisions'].values()[0]['*']
+                return revisions.values()[0]['*']
             except (AttributeError, IndexError, KeyError):
                 return None
     
