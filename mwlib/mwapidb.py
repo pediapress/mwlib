@@ -199,7 +199,7 @@ class APIHelper(object):
             return True
         return False
     
-    def query(self, ignore_errors=True, **kwargs):
+    def query(self, ignore_errors=True, num_tries=2, **kwargs):
         args = {
             'action': 'query',
             'format': 'json',
@@ -211,10 +211,17 @@ class APIHelper(object):
         q = urllib.urlencode(args)
         q = q.replace('%3A', ':') # fix for wrong quoting of url for images
         q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
-        data = utils.fetch_url('%sapi.php?%s' % (self.base_url, q),
-            ignore_errors=ignore_errors,
-            opener=self.opener,
-        )
+
+        for i in range(num_tries):
+            try:
+                data = utils.fetch_url('%sapi.php?%s' % (self.base_url, q),
+                    ignore_errors=ignore_errors,
+                    opener=self.opener,
+                )
+            except:
+                if i == num_tries - 1:
+                    raise
+            time.sleep(0.5)
         
         if ignore_errors and data is None:
             log.error('Got no data from api.php')
@@ -230,19 +237,13 @@ class APIHelper(object):
                 return None
             raise RuntimeError('api.php query failed. Are you sure you specified the correct baseurl?')
     
-    def page_query(self, num_tries=2, **kwargs):
-        for i in range(num_tries):
+    def page_query(self, **kwargs):
+        q = self.query(**kwargs)
+        if q is not None:
             try:
-                q = self.query(**kwargs)
-                if q is not None:
-                    try:
-                        return q['pages'].values()[0]
-                    except (KeyError, IndexError):
-                        return None
-            except:
-                if i == num_tries - 1:
-                    raise
-            time.sleep(0.5)
+                return q['pages'].values()[0]
+            except (KeyError, IndexError):
+                return None
         return None
     
 
