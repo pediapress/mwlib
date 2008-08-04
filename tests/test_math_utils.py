@@ -41,7 +41,7 @@ class TestMathUtils(object):
     20\,\lg\frac{F_1}{F_2}\,\mathrm{dB}&=&
     10\,\lg\frac{W_1}{W_2}\,\mathrm{dB}
     \end{array}"""
-
+        latex = unicode(latex)
         res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
         assert res
     

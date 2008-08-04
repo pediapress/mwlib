@@ -26,8 +26,13 @@ def _renderMathBlahtex(latex, output_path, output_mode):
         cmd.append('--png')
     else:
         return None
-    curdir = os.getcwd()
-    os.chdir(output_path)    
+
+    if output_path:
+        try:
+            curdir = os.getcwd()
+        except:
+            curdir = None
+        os.chdir(output_path)    
     latex = latex.strip()
     if not latex:
         return None
@@ -36,16 +41,18 @@ def _renderMathBlahtex(latex, output_path, output_mode):
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
         log.error('error: executable "blahtexml" not available (needed for formulas)')
-        os.chdir(curdir)
+        if output_path:
+            os.chdir(curdir)
         return None
+
     sub.stdin.write(latex.encode('utf-8'))    
     sub.stdin.close()
     error = sub.stderr.read()
     result = sub.stdout.read()
     sub.stderr.close()
     sub.stdout.close()    
-    os.chdir(curdir)
-
+    if curdir is not None:
+        os.chdir(curdir)
     if result:
         p = ET.fromstring(result)
         if output_mode == 'png':
@@ -57,7 +64,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
                     if os.path.exists(png_fn):
                         return png_fn
         elif output_mode == 'mathml':
-            mathml = p.getiterator('mathml')
+            mathml = p.getiterator('mathml')            
             if mathml:
                 mathml = mathml[0]
                 mathml.set("xmlns","http://www.w3.org/1998/Math/MathML")
