@@ -121,7 +121,6 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
     if output_mode == 'mathml' and not output_path:
         output_path = tempfile.mkdtemp()
         removeTmpDir = True
-    print "op", output_path
     output_path = os.path.abspath(output_path)
     result = None
 
