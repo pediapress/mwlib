@@ -141,6 +141,13 @@ def parse_article_url(url, title_encoding='utf-8'):
 
 
 class APIHelper(object):
+    """
+    @ivar long_request: log a warning if an HTTP requests lasts longer than this
+       time (in seconds)
+    @type lon_request: float or int
+    """
+    long_request = 2
+    
     def __init__(self, base_url):
         """
         @param base_url: base URL (or list of URLs) of a MediaWiki,
@@ -214,10 +221,14 @@ class APIHelper(object):
 
         for i in range(num_tries):
             try:
+                s = time.time()
                 data = utils.fetch_url('%sapi.php?%s' % (self.base_url, q),
                     ignore_errors=ignore_errors,
                     opener=self.opener,
                 )
+                elapsed = time.time() - s
+                if elapsed > self.long_request:
+                    log.warn('Long request: HTTP request took %f s' % elapsed)
             except:
                 if i == num_tries - 1:
                     raise

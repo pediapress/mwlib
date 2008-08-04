@@ -27,6 +27,9 @@ try:
 except ImportError:
     from md5 import md5
 
+# set default socket timeout to 10 seconds
+socket.setdefaulttimeout(10)
+
 # provide all() for python 2.4
 try:
     from __builtin__ import all
