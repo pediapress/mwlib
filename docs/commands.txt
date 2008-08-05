@@ -118,7 +118,18 @@ one command.
   If given, do not use multiple threads to fetch articles and images in
   parallel. This overrides ``--num-article-threads`` and/or
   ``--num-image-threads``.
+ 
+``--title``
 
+  Specify a title for the article collection. This is e.g. used by some writers
+  to produce a title page. This title overrides titles contained in ZIP files
+  or metabook files.
+
+``--subtitle``
+
+  Specify a subtitle for the article collection. This is e.g. used by some writers
+  to produce a title page. This subtitle overrides subtitles contained in ZIP files
+  or metabook files.
 
 The ``mw-render`` Command
 =========================
