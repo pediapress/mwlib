@@ -56,6 +56,12 @@ class OptionParser(optparse.OptionParser):
         self.add_option('--pid-file',
             help='write PID of daemonized process to this file',
         )
+        self.add_option('--title',
+            help='title for article collection',
+        )
+        self.add_option('--subtitle',
+            help='subtitle for article collection',
+        )
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
@@ -134,5 +140,11 @@ class OptionParser(optparse.OptionParser):
                 ))
             self.metabook = metabook.parse_collection_page(wikitext)
             env.metabook = self.metabook
+        
+        if self.options.title:
+            env.metabook['title'] = self.options.title
+        if self.options.subtitle:
+            env.metabook['subtitle'] = self.options.subtitle
+        
         return env
     
