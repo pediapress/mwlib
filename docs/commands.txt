@@ -128,8 +128,8 @@ one command.
 ``--subtitle``
 
   Specify a subtitle for the article collection. This is e.g. used by some writers
-  to produce a title page. This subtitle overrides subtitles contained in ZIP files
-  or metabook files.
+  to produce a title page (note that subtitle might require a tilte).
+  This subtitle overrides subtitles contained in ZIP files or metabook files.
 
 The ``mw-render`` Command
 =========================
