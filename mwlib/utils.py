@@ -276,7 +276,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     @rtype: str
     """
     
-    if url in fetch_cache:
+    if not post_data and url in fetch_cache:
         return fetch_cache[url]
     
     log.info("fetching %r" % (url,))
