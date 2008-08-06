@@ -40,3 +40,9 @@ def test_report():
     files = os.listdir(p)
     if not files:
         os.rmdir(p)
+
+    existed = os.path.exists(p)
+    filename = utils.report(system='system123', subject='subject123', foo='foo123', write_file=False)
+    assert filename is None
+    if not existed:
+        assert not os.path.exists(p)

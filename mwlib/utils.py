@@ -390,17 +390,25 @@ def send_mail(from_email, to_emails, subject, body, host='mail', port=25):
 # ==============================================================================
 
 
-def report(system='', subject='', from_email=None, mail_recipients=None, **kw):
-    path = os.path.expanduser("~/errors/%s" % system)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    fp = os.path.join(path, "%.2f.txt" % time.time())
-    precision = 3
-    while os.path.exists(fp):
-        fp = os.path.join(path, ("%%.%df.txt" % precision) % time.time())
-        precision += 1
+def report(system='', subject='',
+    from_email=None, mail_recipients=None,
+    write_file=True,
+    **kw):
     
-    outfile = open(fp, 'w', 0) # unbuffered
+    if write_file:
+        path = os.path.expanduser("~/errors/%s" % system)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        fp = os.path.join(path, "%.2f.txt" % time.time())
+        precision = 3
+        while os.path.exists(fp):
+            fp = os.path.join(path, ("%%.%df.txt" % precision) % time.time())
+            precision += 1
+        outfile = open(fp, 'w', 0) # unbuffered
+    else:
+        fd, fp = tempfile.mkstemp()
+        outfile = os.fdopen(fd, 'w', 0)
+    
     outfile.write(subject)
     outfile.write("\n<pre>")
     
@@ -451,5 +459,10 @@ def report(system='', subject='', from_email=None, mail_recipients=None, **kw):
         except Exception, e:
             log.ERROR('Could not send mail: %s' % e)
     
-    return fp
-
+    if write_file:
+        return fp
+    
+    try:
+        os.unlink(fp)
+    except:
+        pass
