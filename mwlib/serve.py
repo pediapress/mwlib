@@ -72,6 +72,8 @@ class Application(wsgi.Application):
         mwpost_cmd, mwpost_logfile,
         queue_dir,
         default_writer='rl',
+        report_from_mail=None,
+        report_recipients=None,
     ):
         self.cache_dir = utils.ensure_dir(cache_dir)
         self.mwrender_cmd = mwrender_cmd
@@ -85,6 +87,8 @@ class Application(wsgi.Application):
         else:
             self.queue_job = no_job_queue
         self.default_writer = default_writer
+        self.report_from_mail = report_from_mail
+        self.report_recipients = report_recipients
     
     def dispatch(self, request):
         try:
@@ -113,9 +117,22 @@ class Application(wsgi.Application):
             error = unicode(error, 'utf-8', 'ignore')
         elif not isinstance(error, unicode):
             error = unicode(repr(error), 'ascii')
+        self.send_report_mail('error response', error=error)
         return self.json_response({
             'error': error,
         })
+    
+    def send_report_mail(self, subject, **kwargs):
+        if not (self.report_from_mail and self.report_recipients):
+            return
+        utils.report(
+            system='mwlib.serve',
+            subject=subject,
+            from_email=self.report_from_mail,
+            mail_recipients=self.report_recipients,
+            write_file=False,
+            **kwargs
+        )
     
     def get_collection_dir(self, collection_id):
         return os.path.join(self.cache_dir, collection_id)
@@ -258,6 +275,11 @@ class Application(wsgi.Application):
         error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
             text = unicode(open(error_path, 'rb').read(), 'utf-8', 'ignore')
+            self.send_report_mail('rendering failed',
+                collection_id=collection_id,
+                writer=writer,
+                error=text,
+            )
             return self.json_response({
                 'collection_id': collection_id,
                 'writer': writer,
