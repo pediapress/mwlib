@@ -43,9 +43,9 @@ Specific Options
     * [[Template:SkipMe]]
     * [[Template:MeToo]]
 
-``username=USERNAME``, ``password=PASSWORD``
+``username=USERNAME``, ``password=PASSWORD``, ``domain=DOMAIN``
 
-  Login with the given credentials.
+  Login with the given credentials (domain is optional).
   
 
 ``type=zip``
