@@ -102,6 +102,10 @@ def test_ifeq_numeric_comparison2():
 def test_ifeq_case_sensitive():
     expandstr("{{ #ifeq: A | a | 1 | 0 }}", "0")
 
+def test_ifeq_strip():
+    """http://code.pediapress.com/wiki/ticket/260"""
+    expandstr("{{#ifeq: bla |    bla  |yes|no}}", "yes")
+    
 def test_ifexpr():
     expandstr("{{ #ifexpr: 10 > 9 | yes | no }}", "yes")
  
