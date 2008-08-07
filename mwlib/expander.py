@@ -161,36 +161,39 @@ class Template(Node):
             if expander.resolver.has_magic(try_name):
                 name=try_name
                 remainder = try_remainder
-        if name=='#if':
-            res.append(maybe_newline)
-            tmp = []
-            if remainder:
+                
+            if name=='#if':
+                remainder=remainder.strip()
+                res.append(maybe_newline)
+                tmp = []
+                if remainder:
+                    if len(self.children)>=2:
+                        flatten(self.children[1], expander, variables, tmp)
+                else:
+                    if len(self.children)>=3:
+                        flatten(self.children[2], expander, variables, tmp)
+                res.append(u"".join(tmp).strip())
+                res.append(dummy_mark)
+                return
+            elif name=='#ifeq':
+                res.append(maybe_newline)
+                tmp=[]
                 if len(self.children)>=2:
                     flatten(self.children[1], expander, variables, tmp)
-            else:
-                if len(self.children)>=3:
-                    flatten(self.children[2], expander, variables, tmp)
-            res.append(u"".join(tmp).strip())
-            res.append(dummy_mark)
-            return
-        elif name=='#ifeq':
-            res.append(maybe_newline)
-            tmp=[]
-            if len(self.children)>=2:
-                flatten(self.children[1], expander, variables, tmp)
-            other = u"".join(tmp)
-            tmp = []
-            from mwlib.magics import maybe_numeric_compare
-            if maybe_numeric_compare(remainder, other):
-                if len(self.children)>=3:
-                    flatten(self.children[2], expander, variables, tmp)
-                    res.append(u"".join(tmp).strip())
-            else:
-                if len(self.children)>=4:
-                    flatten(self.children[3], expander, variables, tmp)
-                    res.append(u"".join(tmp).strip())
-            res.append(dummy_mark)
-            return
+                other = u"".join(tmp).strip()
+                remainder = remainder.strip()
+                tmp = []
+                from mwlib.magics import maybe_numeric_compare
+                if maybe_numeric_compare(remainder, other):
+                    if len(self.children)>=3:
+                        flatten(self.children[2], expander, variables, tmp)
+                        res.append(u"".join(tmp).strip())
+                else:
+                    if len(self.children)>=4:
+                        flatten(self.children[3], expander, variables, tmp)
+                        res.append(u"".join(tmp).strip())
+                res.append(dummy_mark)
+                return
                 
             
             
