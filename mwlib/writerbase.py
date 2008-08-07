@@ -43,9 +43,12 @@ def build_book(env, status_callback=None, progress_range=None):
             if a is not None:
                 if "displaytitle" in item:
                     a.caption = item['displaytitle']
+                a.url = env.wiki.getURL(item['title'], item.get('revision'))
+                a.authors = env.wiki.getAuthors(item['title'], revision=item.get('revision'))
                 book.children.append(a)
             else:
                 log.warn('No such article: %r' % item['title'])
+
     if status_callback is not None:
         status_callback(status='parsing', progress=progress, article='')
     return book
