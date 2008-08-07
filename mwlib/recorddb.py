@@ -75,6 +75,9 @@ class RecordDB(object):
         }
         return r
     
+    def getSource(self, title, revision=None):
+        return self.db.getSource(title, revision=revision)
+    
 
 # ==============================================================================
 
