@@ -37,6 +37,18 @@ You will also need:
 *PIL*
  PIL_ is the Python Imaging Library and is used for image handling.
 
+*blahtexml*
+ Blahtex is a program written in C++, which converts an equation given
+ in a syntax close to TeX into MathML. It is designed by David Harvey
+ and is aimed at supporting equations in MediaWiki. 
+ (http://gva.noekeon.org/blahtexml/)
+
+*texvc*
+  texvc (TeX validator and converter) is a program which validates
+  (AMS) LaTeX mathematical expressions and converts them to HTML,
+  MathML, or PNG graphics. (see http://en.wikipedia.org/wiki/Texvc).
+
+
 Commands
 ======================================================================
 The commands (i.e. command-line tools) provided by mwlib are described
