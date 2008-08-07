@@ -2,16 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
 import sys
-import tempfile
 import time
 
 import py
 
 from PIL import Image
 
-from mwlib.mwapidb import APIHelper, ImageDB, WikiDB
+from mwlib.mwapidb import APIHelper, ImageDB, WikiDB, MWAPIError, parse_article_url
 from mwlib import parser, uparser
 from mwlib.xfail import xfail
 
@@ -67,8 +65,6 @@ class TestWikiDB(object):
         assert authors
     
     def test_parse_article_url(self):
-        from mwlib.mwapidb import parse_article_url
-        
         def p(url):
             d = parse_article_url(url)
             return d['api_helper'].base_url, d['title'], d['revision']
@@ -118,8 +114,6 @@ class TestWikiDB(object):
         assert r is None
     
     def test_MW10(self):
-        from mwlib.mwapidb import parse_article_url
-        
         d = parse_article_url('http://wiki.python-ogre.org/index.php/Basic_Tutorial_1')
         w = WikiDB(api_helper=d['api_helper'])
         u = w.getURL(d['title'], revision=d['revision'])
@@ -182,6 +176,9 @@ class TestWikiDB(object):
         link = r.find(parser.NamespaceLink)[0]
         assert link.target == 'test'
         assert self.w.getLinkURL(link, u'bla') == 'http://en.wikipedia.org/w/index.php?title=Wikipedia:test'
+    
+    def test_invalid_base_url(self):
+        print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
     
 
 class TestImageDB(object):

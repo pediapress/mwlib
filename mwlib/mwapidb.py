@@ -30,6 +30,11 @@ except ImportError:
 
 # ==============================================================================
 
+class MWAPIError(RuntimeError):
+    """MediaWiki API error"""
+
+# ==============================================================================
+
 articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+)(?P<path>.*)$')
 api_helper_cache = {}
 
@@ -246,7 +251,7 @@ class APIHelper(object):
             log.error('Got exception: %r' % e)
             if ignore_errors:
                 return None
-            raise RuntimeError('api.php query failed. Are you sure you specified the correct baseurl?')
+            raise RuntimeError('api.php query failed. Are you sure you specified the correct base URL?')
     
     def page_query(self, **kwargs):
         q = self.query(**kwargs)
@@ -293,9 +298,11 @@ class ImageDB(object):
             self.api_helper = APIHelper(base_url)
         
         if username is not None:
-            assert self.login(username, password, domain=domain), 'Login failed'
-                
-        assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
+            if not self.login(username, password, domain=domain):
+                raise MWAPIError('Login failed')
+        
+        if not self.api_helper.is_usable():
+            raise MWAPIError('Invalid base URL: %r' % base_url)
         
         self.tmpdir = tempfile.mkdtemp()
         self.wikidb = None
@@ -500,10 +507,12 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.api_helper = APIHelper(base_url)
         
         if username is not None:
-            assert self.login(username, password, domain=domain), 'login failed'
+            if not self.login(username, password, domain=domain):
+                raise MWAPIError('Login failed')
         
-        assert self.api_helper.is_usable(), 'invalid base URL %r' % base_url
-
+        if not self.api_helper.is_usable():
+            raise MWAPIError('Invalid base URL: %r' % base_url)
+        
         self.template_cache = {}
         self.template_blacklist = []
         if template_blacklist is not None:

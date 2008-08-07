@@ -255,6 +255,7 @@ def render():
     import tempfile
     import traceback
     import pkg_resources
+    from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
     from mwlib import recorddb, zipwiki
     
@@ -390,7 +391,7 @@ def render():
         if options.error_file:
             fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
             f = os.fdopen(fd, 'wb')
-            if isinstance(e, WriterError):
+            if isinstance(e, WriterError) or isinstance(e, MWAPIError):
                 f.write(str(e))
             else:
                 traceback.print_exc(file=f) 
