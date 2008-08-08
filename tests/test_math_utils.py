@@ -4,7 +4,7 @@
 import shutil
 import tempfile
 
-from mwlib.math_utils import renderMath
+from mwlib.mathutils import renderMath
 from mwlib.xfail import xfail 
 
 class TestMathUtils(object):

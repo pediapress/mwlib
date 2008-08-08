@@ -15,7 +15,7 @@ except:
 
 from mwlib import log
 
-log = log.Log('mwlib.math_utils')
+log = log.Log('mwlib.mathutils')
 
 def _renderMathBlahtex(latex, output_path, output_mode):
 

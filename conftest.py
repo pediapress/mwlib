@@ -12,7 +12,7 @@ class Exclude(py.test.collect.Directory):
         if path.basename == 'test_timeline.py' and ploticus_not_found:
             print "Skipping", path, "no ploticus found"
             return False
-        if path.basename == 'test_math_utils.py' and mathrenderer_not_found:
+        if path.basename == 'test_mathutils.py' and mathrenderer_not_found:
             print "Skipping", path, 'blahtexml or texvc for math rendering not found'
             return False
         return super(Exclude, self).filefilter(path)
