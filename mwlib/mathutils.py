@@ -17,8 +17,12 @@ from mwlib import log
 
 log = log.Log('mwlib.mathutils')
 
-def _renderMathBlahtex(latex, output_path, output_mode):
+texvc_available = not os.system('texvc')
+blahtexml_available = not os.system('blahtexml')
 
+def _renderMathBlahtex(latex, output_path, output_mode):
+    if not blahtexml_available:
+        return None
     cmd = ['blahtexml', '--texvc-compatible-commands']
     if output_mode == 'mathml':
         cmd.append('--mathml')
@@ -40,17 +44,14 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     try:
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
-        log.error('error: executable "blahtexml" not available (needed for formulas)')
+        log.error('error with blahtexml. cmd:', repr(' '.join(cmd)))
         if output_path:
             os.chdir(curdir)
         return None
 
-    sub.stdin.write(latex.encode('utf-8'))    
-    sub.stdin.close()
-    error = sub.stderr.read()
-    result = sub.stdout.read()
-    sub.stderr.close()
-    sub.stdout.close()    
+    (result, error) = sub.communicate(latex.encode('utf-8'))
+    del sub
+
     if curdir is not None:
         os.chdir(curdir)
     if result:
@@ -74,16 +75,16 @@ def _renderMathBlahtex(latex, output_path, output_mode):
 
 def _renderMathTexvc(latex, output_path, output_mode='png'):
     """only render mode is png"""
-    
+    if not texvc_available:
+        return None
     cmd = ['texvc', output_path, output_path, latex.encode('utf-8')]
     try:
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
-        log.error('error: executable "texvc" not available (needed for formulas)')
+        log.error('error with texvc. cmd:', repr(' '.join(cmd)))
         return None
-    sub.stdin.close()
-    result = sub.stdout.read()
-    sub.stdout.close()
+    (result, error) = sub.communicate()
+    del sub
 
     if output_mode == 'png':
         if len(result) >= 32:
@@ -131,7 +132,6 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
 
     if removeTmpDir:
         shutil.rmtree(output_path)
-
     return result
 
 
