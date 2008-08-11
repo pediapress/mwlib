@@ -49,6 +49,7 @@ def make_collection_id(data):
         'metabook',
         'base_url',
         'template_blacklist',
+        'template_exclusion_category',
         'login_credentials',
     ):
         sio.write(repr(data.get(key)))
@@ -167,6 +168,7 @@ class Application(wsgi.Application):
             return self.error_response('POST argument required: %s' % exc)
         writer_options = post_data.get('writer_options', '')
         template_blacklist = post_data.get('template_blacklist', '')
+        template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
         
         collection_id = self.new_collection(post_data)
@@ -222,6 +224,8 @@ class Application(wsgi.Application):
                 args.extend(['--writer-options', writer_options])
             if template_blacklist:
                 args.extend(['--template-blacklist', template_blacklist])
+            if template_exclusion_category:
+                args.extend(['--template-exclusion-category', template_exclusion_category])
         else:
             log.info('rendering %r' % output_path)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
@@ -237,6 +241,8 @@ class Application(wsgi.Application):
                 args.extend(['--writer-options', writer_options])
             if template_blacklist:
                 args.extend(['--template-blacklist', template_blacklist])
+            if template_exclusion_category:
+                args.extend(['--template-exclusion-category', template_exclusion_category])
             if login_credentials:
                 args.extend(['--login', login_credentials])
         
@@ -358,6 +364,7 @@ class Application(wsgi.Application):
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         template_blacklist = post_data.get('template_blacklist', '')
+        template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
         
         collection_id = self.new_collection(post_data)
@@ -404,6 +411,8 @@ class Application(wsgi.Application):
             ]
             if template_blacklist:
                 args.extend(['--template-blacklist', template_blacklist])
+            if template_exclusion_category:
+                args.extend(['--tempalte-exclusion-category', template_exclusion_category])
             if login_credentials:
                 args.extend(['--login', login_credentials])
         

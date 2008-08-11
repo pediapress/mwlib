@@ -35,13 +35,18 @@ Specific Options
   The base URL of the MediaWiki. See the ``--config`` option in
   ``docs/commands.txt``.
   
-``template_blacklist=TEMPLATEBLACKLIST``
+``template_blacklist=ARTICLE``
 
   A title of a page in the MediaWiki which contains blacklisted templates.
   Example for such a template blacklist page::
 
     * [[Template:SkipMe]]
     * [[Template:MeToo]]
+
+``template_exclusion_category=CATEGORY``
+
+  A name of a category: Templates in this category are excluded during
+  rendering.
 
 ``username=USERNAME``, ``password=PASSWORD``, ``domain=DOMAIN``
 
