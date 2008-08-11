@@ -628,14 +628,22 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.template_cache[name] = raw
             
             if self.template_exclusion_category:
-                parsed = uparser.parseString(title, raw, wikidb=self)
-                if not parsed:
-                    log.warn('Could not parse template %r' % title)
+                page = self.api_helper.page_query(
+                    titles=title,
+                    redirects=1,
+                    prop='categories',
+                )
+                if page is None:
+                    log.warn('Could not get categories for template %r' % title)
                     continue
-                categories = [cl.target for cl in parsed.find(parser.CategoryLink)]
-                if self.template_exclusion_category in categories:
-                    continue
-            
+                if 'categories' in page:
+                    categories = [
+                        c.get('title', '').split(':', 1)[-1]
+                        for c in page['categories']
+                    ]
+                    if self.template_exclusion_category in categories:
+                        log.info('Skipping excluded template %r' % title)
+                        continue
             return raw
         
         return None
