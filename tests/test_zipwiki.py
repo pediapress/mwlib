@@ -52,7 +52,6 @@ class TestZipWiki(object):
             return link
         
         url = self.wikidb.getLinkURL(make_link_node(parser.NamespaceLink, u'Test', u':Category:Test'), u'The Living Sea')
-        print url
         assert url == 'http://en.wikipedia.org/w/index.php?title=Category:Test'
     
     def test_getTemplate(self):

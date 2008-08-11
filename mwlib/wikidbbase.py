@@ -48,7 +48,7 @@ class WikiDBBase(object):
             if my_url is None:
                 return None
             my_title = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
-            link_title = urllib.quote(link.target.replace(" ", "_").encode('utf-8'), safe=':/@')
+            link_title = urllib.quote(link.full_target.replace(" ", "_").encode('utf-8'), safe=':/@')
             pos = my_url.find(my_title)
             if pos == -1:
                 return None
