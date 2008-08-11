@@ -625,8 +625,6 @@ class WikiDB(wikidbbase.WikiDBBase):
             if raw is None:
                 continue
             
-            self.template_cache[name] = raw
-            
             if self.template_exclusion_category:
                 page = self.api_helper.page_query(
                     titles=title,
@@ -644,6 +642,8 @@ class WikiDB(wikidbbase.WikiDBBase):
                     if self.template_exclusion_category in categories:
                         log.info('Skipping excluded template %r' % title)
                         continue
+            
+            self.template_cache[name] = raw
             return raw
         
         return None
