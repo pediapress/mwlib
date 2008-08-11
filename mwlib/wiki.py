@@ -16,6 +16,7 @@ log = Log('mwlib.utils')
 def wiki_mwapi(
     base_url=None,
     template_blacklist=None,
+    template_exclusion_category=None,
     username=None,
     password=None,
     domain=None,
@@ -23,6 +24,7 @@ def wiki_mwapi(
     from mwlib import mwapidb
     return mwapidb.WikiDB(base_url,
         template_blacklist=template_blacklist,
+        template_exclusion_category=template_exclusion_category,
         username=username,
         password=password,
         domain=domain,

@@ -17,7 +17,7 @@ import urlparse
 
 import simplejson
 
-from mwlib import utils, metabook, wikidbbase
+from mwlib import utils, metabook, wikidbbase, uparser, parser
 from mwlib.log import Log
 
 log = Log("mwapidb")
@@ -476,6 +476,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         password=None,
         domain=None,
         template_blacklist=None,
+        template_exclusion_category=None,
         api_helper=None,
     ):
         """
@@ -496,6 +497,10 @@ class WikiDB(wikidbbase.WikiDBBase):
             templates (optional)
         @type template_blacklist: unicode
         
+        @param template_exclusion_category: title of a category for templates to
+            be excluded (optional)
+        @type template_exclusion_category: unicode
+        
         @param api_helper: APIHelper instance
         @type api_helper: L{APIHelper}
         """
@@ -514,23 +519,27 @@ class WikiDB(wikidbbase.WikiDBBase):
             raise MWAPIError('Invalid base URL: %r' % base_url)
         
         self.template_cache = {}
-        self.template_blacklist = []
-        if template_blacklist is not None:
-            self.setTemplateBlacklist(template_blacklist)
+        self.setTemplateExclusion(
+            blacklist=template_blacklist,
+            category=template_exclusion_category,
+        )
         self.source = None
     
-    def setTemplateBlacklist(self, template_blacklist):
-        raw = self.getRawArticle(template_blacklist)
-        if raw is None:
-            log.error('Could not get template blacklist article %r' % (
-                template_blacklist,
-            ))
-        else:
-            self.template_blacklist = [
-                template.lower().strip() 
-                for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)
-            ]
-    
+    def setTemplateExclusion(self, blacklist=None, category=None):
+        self.template_exclusion_category = category
+        self.template_blacklist = []
+        if blacklist:
+            raw = self.getRawArticle(blacklist)
+            if raw is None:
+                log.error('Could not get template blacklist article %r' % (
+                    blacklist,
+                ))
+            else:
+                self.template_blacklist = [
+                    template.lower().strip() 
+                    for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)
+                ]
+            
     def login(self, username, password, domain=None):
         return self.api_helper.login(username, password, domain=domain)
     
@@ -612,10 +621,30 @@ class WikiDB(wikidbbase.WikiDBBase):
             titles.insert(0, self.print_template % name)
         for title in titles:
             log.info("Trying template %r" % (title,))
-            c = self.getRawArticle(title)
-            if c is not None:
-                self.template_cache[name] = c
-                return c
+            raw = self.getRawArticle(title)
+            if raw is None:
+                continue
+            
+            if self.template_exclusion_category:
+                page = self.api_helper.page_query(
+                    titles=title,
+                    redirects=1,
+                    prop='categories',
+                )
+                if page is None:
+                    log.warn('Could not get categories for template %r' % title)
+                    continue
+                if 'categories' in page:
+                    categories = [
+                        c.get('title', '').split(':', 1)[-1]
+                        for c in page['categories']
+                    ]
+                    if self.template_exclusion_category in categories:
+                        log.info('Skipping excluded template %r' % title)
+                        continue
+            
+            self.template_cache[name] = raw
+            return raw
         
         return None
     

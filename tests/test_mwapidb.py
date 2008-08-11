@@ -180,6 +180,21 @@ class TestWikiDB(object):
     def test_invalid_base_url(self):
         print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
     
+    def test_template_exclusion_category(self):
+        w = WikiDB(
+            base_url='http://simple.pediapress.com/w/',
+            template_exclusion_category=u'Exclude in print',
+        )
+        assert w.getTemplate('Excluded') is None
+        assert w.getTemplate('colours') is not None
+
+        w = WikiDB(
+            base_url='http://simple.pediapress.com/w/',
+        )
+        w.setTemplateExclusion(category=u'Exclude in print')
+        assert w.getTemplate('Excluded') is None
+        assert w.getTemplate('colours') is not None
+    
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'

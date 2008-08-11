@@ -29,8 +29,13 @@ class OptionParser(optparse.OptionParser):
             help="exclude images",
         )
         self.add_option("-l", "--logfile", help="log to logfile")
+        self.add_option("--template-exclusion-category",
+            help="Name of category for templates to be excluded",
+            metavar='CATEGORY',
+        )
         self.add_option("--template-blacklist",
             help="Title of article containing blacklisted templates",
+            metavar='ARTICLE',
         )
         self.add_option("--login",
             help='login with given USERNAME, PASSWORD and (optionally) DOMAIN',
@@ -127,9 +132,12 @@ class OptionParser(optparse.OptionParser):
         )
         if self.options.noimages:
             env.images = None
-        if self.options.template_blacklist:
-            if hasattr(env.wiki, 'setTemplateBlacklist'):
-                env.wiki.setTemplateBlacklist(self.options.template_blacklist)
+        if self.options.template_blacklist or self.options.template_exclusion_category:
+            if hasattr(env.wiki, 'setTemplateExclusion'):
+                env.wiki.setTemplateExclusion(
+                    blacklist=self.options.template_blacklist,
+                    category=self.options.template_exclusion_category,
+                )
             else:
                 log.warn('WikiDB does not support setting a template blacklist')
         if self.options.collectionpage:

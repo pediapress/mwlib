@@ -69,7 +69,7 @@ one command.
   Maximum size (which can be either width or height, whichever is greater) of
   images. If images exceed this maximum size, they're scaled down.  
 
-``--template-blacklist=TEMPLATE_BLACKLIST``
+``--template-blacklist=ARTICLE``
 
   A name of an article containing a list of "blacklisted templates", i.e.
   MediaWiki templates that should be discarded during rendering.
@@ -77,6 +77,10 @@ one command.
 
     * [[Template:SkipMe]]
     * [[Template:MeToo]]
+
+``--template-exclusion-category=CATEGORY``
+
+  A name of a category: Templates in this cateogry are excluded during rendering.
 
 ``-o, --output=OUTPUT``
 
