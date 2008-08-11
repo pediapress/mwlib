@@ -141,7 +141,7 @@ class TestWikiDB(object):
         u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'Philosophy'), u'Bla')
         assert u == 'http://en.wikipedia.org/w/index.php?title=Philosophy'
 
-        u = self.w.getLinkURL(make_link_node(parser.CategoryLink, u'Physics', u':Category:Physics'), u'Bla')
+        u = self.w.getLinkURL(make_link_node(parser.NamespaceLink, u'Physics', u':Category:Physics'), u'Bla')
         assert u == 'http://en.wikipedia.org/w/index.php?title=Category:Physics'
         
         u = self.w.getLinkURL(make_link_node(parser.NamespaceLink, u'He!ko', u'User:He!ko'), u'Bla')
