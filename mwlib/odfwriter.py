@@ -822,7 +822,7 @@ def main():
         preprocess(r)
         parser.show(sys.stdout, r)
         odf = ODFWriter()
-        odf.write(r)
+        odf.writeTest(r)
         doc = odf.getDoc()
         doc.toXml("%s.xml"%fn)
         doc.save(fn, True)
