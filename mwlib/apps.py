@@ -481,8 +481,8 @@ def serve():
         help='write PID of daemonized process to this file',
     )
     parser.add_option('-P', '--protocol',
-        help='one of %s (default: fcgi)' % ', '.join(proto2server.keys()),
-        default='fcgi',
+        help='one of %s (default: http)' % ', '.join(proto2server.keys()),
+        default='http',
     )
     parser.add_option('-p', '--port',
         help='port to listen on (default: 8899)',
