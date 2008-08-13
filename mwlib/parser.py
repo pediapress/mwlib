@@ -209,6 +209,8 @@ class Link(Node):
         """Return a dict mapping namespace prefixes to a tuple of form
         (link_class, namespace_value).
         """
+
+        from mwlib.lang import languages
         
         res = {}
         for name, num in namespaces.iteritems():
@@ -221,7 +223,7 @@ class Link(Node):
                 res[name] = (NamespaceLink, num)
         
         for prefix, d in interwikimap.items():
-            if 'language' in interwikimap[prefix]:
+            if 'language' in interwikimap[prefix] or prefix in languages:
                 res[prefix] = (LangLink, prefix)
             else:
                 res[prefix] = (InterwikiLink, d.get('renamed', prefix))

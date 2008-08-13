@@ -183,6 +183,13 @@ class TestWikiDB(object):
         assert link.full_target == u'3dgame:Test123'
         assert link.url == 'http://3dgame.wikia.com/wiki/Test123'
     
+        # Wikia doesn't set the language attribute in interwikimap entries for lang links
+        w = WikiDB(base_url='http://memory-alpha.org/en/')
+        r = uparser.parseString(u'', u'[[es:español]]', wikidb=w)
+        link = r.find(parser.LangLink)[0]
+        assert link.full_target == u'es:español'
+        assert link.url == 'http://memory-alpha.org/es/wiki/espa%C3%B1ol'
+    
     def test_invalid_base_url(self):
         print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
     
