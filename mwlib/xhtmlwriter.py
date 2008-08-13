@@ -312,7 +312,6 @@ class MWXHTMLWriter(object):
                 parent.append(res)
 
     def writeBook(self, book, output=None):
-        assert isinstance(book, advtree.Book)
         self.xmlbody.append(self.write(book))
         #self.write(book, self.xmlbody)
         if self.debug:
