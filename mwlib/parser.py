@@ -169,7 +169,7 @@ class Style(Node):
     
     The attribute caption can have the following values:
      * "''" for italic text
-     * "'''" for bold text
+     * ''' for bold text
      * ":", "::", ... for indented text (number of ":"'s == indentation level)
      * ";" for a definition description term
     """
@@ -242,7 +242,7 @@ class URL(Node):
        ftp://example.com/
     """
     
-class NamedURL(Node): pass
+class NamedURL(Node): 
     """A (potentially) named URL
     
     The caption attribute contains the URL. The children attribute contains the

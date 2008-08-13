@@ -33,15 +33,12 @@ log = Log("advtree")
 
 
 def _idIndex(lst, el):
-    # return first appeareance of element in list
-    match = None
+    """Return index of first appeareance of element el in list lst"""
+    
     for i, e in enumerate(lst):
         if e is el:
-            assert match is None
-            match = i
-    if match is not None:
-        return match
-    raise ValueError
+            return i
+    raise ValueError('element %r not found' % el)
 
 def debug(method): # use as decorator
     def f(self, *args, **kargs):
@@ -56,12 +53,12 @@ def debug(method): # use as decorator
 
 
 class AdvancedNode:
-    """
-    MixIn Class that extends Nodes so they become easier accessible
+    """Mixin Class that extends Nodes so they become easier accessible.
 
-    allows to traverse the tree in any direction and 
+    Allows to traverse the tree in any direction and 
     build derived convinience functions
    """
+
     _parentref = None # weak referece to parent element
     isblocknode = False
 
@@ -76,10 +73,11 @@ class AdvancedNode:
 
 
     def moveto(self, targetnode, prefix=False):
+        """Move this node behind the target node.
+
+        If prefix is true, move before the target node.
         """
-        moves this node after target node
-        if prefix is true, move in front of target node
-        """
+        
         if self.parent:
             self.parent.removeChild(self)
         tp = targetnode.parent
@@ -90,6 +88,7 @@ class AdvancedNode:
         self._parentref = weakref.ref(tp)
 
     def hasChild(self, c):
+        """Check if node c is child of self"""
         try:
             _idIndex(self.children, c)
             assert c.parent is self
@@ -106,6 +105,7 @@ class AdvancedNode:
         assert c.parent is None
 
     def replaceChild(self, c, newchildren = []):
+        """Remove child node c and replace with newchildren if given."""
         assert self.hasChild(c)
         idx = _idIndex(self.children, c)
         self.children = self.children[:idx] + self.children[idx+1:]
@@ -117,6 +117,10 @@ class AdvancedNode:
                 nc._parentref = weakref.ref(self)
 
     def getParents(self):
+        """Return list of parent nodes up to the root node.
+
+        The returned list starts with the root node.
+        """
         if self.parent:
             return self.parent.getParents() + [self.parent]
         else:
@@ -223,8 +227,6 @@ class AdvancedNode:
             else:
                 return self
 
-
-
     def getAllDisplayText(self, amap = None):
         "return all text that is intended for display"
         text = []
@@ -271,7 +273,7 @@ class AdvancedNode:
                 attrs[n] = max(attrs[n], 1)
         return attrs
 
-#    @debug
+
     def isVisible(self):
         if self.style.get('display', '').lower() == 'none':
             return False
@@ -521,7 +523,7 @@ for k in _blockNodesMap:
 # funcs for extending the nodes
 # -------------------------------------------------------------------------
 
-def MixIn(pyClass, mixInClass, makeFirst=False):
+def mixIn(pyClass, mixInClass, makeFirst=False):
   if mixInClass not in pyClass.__bases__:
     if makeFirst:
       pyClass.__bases__ = (mixInClass,) + pyClass.__bases__
@@ -536,9 +538,9 @@ def extendClasses(node):
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
                      Math:AdvancedMath, Cell:AdvancedCell, Row:AdvancedRow, Table:AdvancedTable}
-MixIn(Node, AdvancedNode)
+mixIn(Node, AdvancedNode)
 for k, v in _advancedNodesMap.items():
-    MixIn(k,v)
+    mixIn(k,v)
     
 # --------------------------------------------------------------------------
 # funcs for repairing the tree
@@ -556,7 +558,7 @@ def fixTagNodes(node):
             elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"): # FIXME
                 # NEED TO MOVE NODE IF IT REALLY STARTS A SECTION
                 c.__class__ = Section 
-                MixIn(c.__class__, AdvancedSection)
+                mixIn(c.__class__, AdvancedSection)
                 c.level = int(c.caption[1])
                 c.caption = ""
             else:
