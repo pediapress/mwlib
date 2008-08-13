@@ -177,6 +177,14 @@ class TestWikiDB(object):
         assert link.target == 'test'
         assert self.w.getLinkURL(link, u'bla') == 'http://en.wikipedia.org/w/index.php?title=Wikipedia:test'
     
+        w = WikiDB(base_url='http://memory-alpha.org/en/')
+        r = uparser.parseString(u'', u'[[3dgame:Test123]]', wikidb=w)
+        link = r.find(parser.InterwikiLink)[0]
+        print link.__class__
+        print link.target
+        print link.full_target
+        print link.url
+    
     def test_invalid_base_url(self):
         print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
     
