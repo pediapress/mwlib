@@ -372,7 +372,6 @@ class Blockquote(Style, AdvancedNode):
     
 class Indented(Style, AdvancedNode):
     "margin to the left"
-    # this is fixed
     def getIndentLevel(self):
         return self.caption.count(":")
     indentlevel = property(getIndentLevel)
@@ -500,12 +499,12 @@ Image depends on result of Image.isInline() see above
 Open Issues: Math, Magic, (unknown) TagNode 
 
 """
-_blockNodesMap = (Book, Chapter, Article, Section, Paragraph, Div, Center,
-                  PreFormatted, Cell, Row, Table, Item, BreakingReturn,
-                  ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
-                  DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Source)
+_blockNodes = (Book, Chapter, Article, Section, Paragraph, Div, Center,
+               PreFormatted, Cell, Row, Table, Item, BreakingReturn,
+               ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
+               DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Source)
 
-for k in _blockNodesMap:  
+for k in _blockNodes:  
   k.isblocknode = True
 
 
@@ -534,14 +533,11 @@ for k, v in _advancedNodesMap.items():
     mixIn(k,v)
     
 # --------------------------------------------------------------------------
-# funcs for repairing the tree
+# Functions for fixing the parse tree
 # -------------------------------------------------------------------------
 
-
 def fixTagNodes(node):
-    """
-    detect known TagNode(s) and associate appropriate Nodes
-    """
+    """Detect known TagNodes and and transfrom to appropriate Nodes"""
     for c in node.children:
         if c.__class__ == TagNode:
             if c.caption in _tagNodeMap:
@@ -554,11 +550,10 @@ def fixTagNodes(node):
                 c.caption = ""
             else:
                 log.warn("fixTagNodes, unknowntagnode %r" % c)
-                #raise Exception, "unknown tag %s" % c.caption # FIXME
         fixTagNodes(c)
 
 
-def fixStyle(node): #FIXME: rename to fixStyleNode or something like that
+def fixStyleNode(node): #FIXME: rename to fixStyleNode or something like that
     """
     parser.Style Nodes are mapped to logical markup
     detection of DefinitionList depends on removeNodes
@@ -566,7 +561,6 @@ def fixStyle(node): #FIXME: rename to fixStyleNode or something like that
     """
     if not node.__class__ == Style:
         return
-    # replace this node by a more apporiate
     if node.caption == "''": 
         node.__class__ = Emphasized
         node.caption = ""
@@ -606,15 +600,15 @@ def fixStyle(node): #FIXME: rename to fixStyleNode or something like that
         node.caption = ""
     else:
         log.warn("fixStyle, unknownstyle %r" % node)
-        #raise Exception, "unknown style %s" % node.caption # FIXME
-        pass
+        return node
+    
     return node
 
-def fixStyles(node): #FIXME: rename to fixStyleNodes or something like that
+def fixStyleNodes(node): #FIXME: rename to fixStyleNodes or something like that
     if node.__class__ == Style:
-        fixStyle(node)
+        fixStyleNode(node)
     for c in node.children[:]:
-        fixStyles(c)
+        fixStyleNodes(c)
 
 
 def removeNodes(node):
@@ -661,7 +655,7 @@ def buildAdvancedTree(root): # USE WITH CARE
     fixTagNodes(root)
     removeNodes(root)
     removeNewlines(root)
-    fixStyles(root) 
+    fixStyleNodes(root) 
     _validateParents(root)       
 
 
