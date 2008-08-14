@@ -127,6 +127,7 @@ class AdvancedNode:
             return []
 
     def getParent(self):
+        """Return the parent node or raise weakref.ReferenceError"""
         if not self._parentref:
             return None
         x = self._parentref()
@@ -135,7 +136,7 @@ class AdvancedNode:
         return x
 
     def getLevel(self):
-        "returns the number of nodes of same class in parents"
+        """Returns the number of nodes of same class in parents"""
         return [p.__class__ for p in self.getParents()].count(self.__class__)
 
    
@@ -155,16 +156,17 @@ class AdvancedNode:
                 yield x        
         
     def getSiblings(self):
+        "Return all siblings WITHOUT self"
         return [c for c in self.getAllSiblings() if c is not self]
 
     def getAllSiblings(self):
-        "all siblings plus me my self and i"
+        "Return all siblings plus self"
         if self.parent:
             return self.parent.children
         return []
 
     def getPrevious(self):
-        "return previous sibling"
+        "Return previous sibling"
         s = self.getAllSiblings()
         try:
             idx = _idIndex(s,self)
@@ -176,7 +178,7 @@ class AdvancedNode:
             return s[idx-1]
 
     def getNext(self):
-        "return next sibling"
+        "Return next sibling"
         s = self.getAllSiblings()
         try:
             idx = _idIndex(s,self)
@@ -187,25 +189,25 @@ class AdvancedNode:
         else:
             return s[idx+1]
 
-    def getLast(self):
-        "return last sibling"
+    def getLast(self): #FIXME might return self. is this intended?
+        "Return last sibling"
         s = self.getAllSiblings()
         if s:
             return s[-1]
 
-    def getFirst(self):
-        "return first sibling"
+    def getFirst(self): #FIXME might return self. is this intended?
+        "Return first sibling"
         s = self.getAllSiblings()
         if s:
             return s[0]
 
     def getLastChild(self):
-        "return last child of this node"
+        "Return last child of this node"
         if self.children:
             return self.children[-1]
 
     def getFirstChild(self):
-        "return first child of this node"
+        "Return first child of this node"
         if self.children:
             return self.children[0]
 
@@ -228,7 +230,7 @@ class AdvancedNode:
                 return self
 
     def getAllDisplayText(self, amap = None):
-        "return all text that is intended for display"
+        "Return all text that is intended for display"
         text = []
         if not amap:
             amap = {Text:"caption", Link:"target", URL:"caption", Math:"caption", ImageLink:"caption" }
@@ -241,19 +243,6 @@ class AdvancedNode:
             return u''.join(alltext)
         else:
             return ''
-
-
-    nav_box_classes = set(('noprint', 'navframe', 'collapsible', 'autocollapse'))
-    def isNavBox(self):
-        """
-        navigation boxes at the bottom of articles seem to be automatically detectable by the use of the css styles.
-        we try to filter out these boxes (div, table etc. nodes) 
-        """
-        if hasattr(self, 'vlist'):
-            klasses = self.vlist.get('class')
-            if klasses and self.nav_box_classes.intersection(set(klasses.split())):
-                return True
-        return False
     
     def getStyle(self):
         if not self.attributes:
@@ -262,6 +251,7 @@ class AdvancedNode:
         return style
 
     def getAttributes(self):
+        """ Return dict with node attributes (e.g. class, style, colspan etc.)"""
         attrs = getattr(self, 'vlist', {})
         for n in ("colspan", "rowspan"): # col, row span attributes 
             v = attrs.get(n)
@@ -275,6 +265,7 @@ class AdvancedNode:
 
 
     def isVisible(self):
+        """Return True if node is visble. Used to detect hidden elements."""
         if self.style.get('display', '').lower() == 'none':
             return False
         if self.style.get('visibility','').lower() == 'hidden':
@@ -309,12 +300,16 @@ class AdvancedTable(AdvancedNode):
 
     @property 
     def numcols(self):
-        cols = [[n.__class__ for n in row].count(Cell) for row in self.rows]
-        if cols:
-            return max(cols)
-        else:
-            return 0
+        max_cols = 0
+        for row in self.children:
+            cells = 0
+            for cell in row.children:
+                colspan = int(cell.attributes.get('colspan', 1)) # FIXME: broken so far
+                cells += colspan
+            max_cols = max(max_cols, cells)
+        return max_cols
 
+        
 class AdvancedRow(AdvancedNode):    
     @property 
     def cells(self):

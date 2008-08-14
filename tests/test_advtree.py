@@ -113,20 +113,22 @@ def test_identity():
             assert br == bbr
             assert br is not bbr
             
-            
-def test_isnavbox():
-    raw = """
-== test ==
 
-<div class="noprint">
-some text
-</div>
-""".decode("utf8")
 
-    db = DummyDB()
-    r = parseString(title="X33", raw=raw, wikidb=db)
-    buildAdvancedTree(r)
-    assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
+# FIXME isNavBox removed from advtree. could be implemented in general treecleaner - move test there            
+## def test_isnavbox():
+##     raw = """
+## == test ==
+
+## <div class="noprint">
+## some text
+## </div>
+## """.decode("utf8")
+
+##     db = DummyDB()
+##     r = parseString(title="X33", raw=raw, wikidb=db)
+##     buildAdvancedTree(r)
+##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
 
 
 def test_indentation():

@@ -795,10 +795,6 @@ writer.file_extension = 'odt'
 
 def preprocess(root):
     advtree.buildAdvancedTree(root)
-    # remove nav boxes
-#    for c in root.getAllChildren():
-#        if c.isNavBox() and c.parent is not None:
-#            c.parent.removeChild(c)
     xmltreecleaner.removeChildlessNodes(root)
     xmltreecleaner.fixLists(root)
     xmltreecleaner.fixParagraphs(root)
