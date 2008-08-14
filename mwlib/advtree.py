@@ -302,11 +302,8 @@ class AdvancedTable(AdvancedNode):
     def numcols(self):
         max_cols = 0
         for row in self.children:
-            cells = 0
-            for cell in row.children:
-                colspan = int(cell.attributes.get('colspan', 1)) # FIXME: broken so far
-                cells += colspan
-            max_cols = max(max_cols, cells)
+            cols = sum([cell.attributes.get('colspan', 1) for cell in row.children])
+            max_cols = max(max_cols, cols)
         return max_cols
 
         
