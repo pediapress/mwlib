@@ -223,6 +223,21 @@ def test_blockquote_with_newline():
     print "STYLE:", node
     assert "blockquoted" in node.asText(), "expected 'blockquoted'"
 
+@xfail
+def test_blockquote_with_two_paras():
+    """http://code.pediapress.com/wiki/ticket/41"""
+    
+    node = parse("<blockquote>\nblockquoted\n\nmust be inside</blockquote>")
+    print 'BLOCKQUOTE:', node.children
+    assert len(node.children) == 1
+    
+def test_newline_closes_bold_tag():
+    node = parse('<b>test\n\nfoo</b>')
+    print node
+    assert len(node.children) == 2
+    assert isinstance(node.children[0].children[0], parser.Style)
+    assert node.children[1].children[0].caption == u'foo'
+
 def test_percent_table_style(): 
     """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
     
