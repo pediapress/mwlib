@@ -7,8 +7,8 @@
 import copy
 
 from advtree import AdvancedNode
-from advtree import (Article, ArticleLink, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                     Cite, Code, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
+from advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
+                     Cite, Code, DefinitionList, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
                      Reference, ReferenceList, Row, Section, Source, SpecialLink, Table, Text, Underline,
                      URL)
@@ -88,35 +88,37 @@ class TreeCleaner(object):
     def cleanAll(self):
         """Clean parse tree using all available cleaner methods."""
 
-        cleanerMethods = ['_moveBrokenChildren',
-                          '_removeChildlessNodes',
-                          '_removeLangLinks',
-                          '_fixLists',
-                          '_removeSingleCellTables',
-                          '_removeCriticalTables',
-                          '_removeBrokenChildren',
-                          '_fixTableColspans',
-                          '_moveReferenceListSection',
-                          '_removeBreakingReturns', # NEW
-                          '_removeBreakingReturns2', # NEW
-                          '_removeEmptyReferenceLists',
-                          '_swapNodes',
-                          '_splitBigTableCells',
-                          '_removeNoPrintNodes',
-                          '_removeBlockNodeChildren',
+        cleanerMethods = ['moveBrokenChildren',
+                          'removeChildlessNodes',
+                          'removeLangLinks',
+                          'fixLists',
+                          'fixParagraphs', # was in xmltreecleaner
+                          'fixBlockNodes', # was in xmltreecleaner
+                          'removeSingleCellTables',
+                          'removeCriticalTables',
+                          'removeBrokenChildren',
+                          'fixTableColspans',
+                          'moveReferenceListSection',
+                          'removeBreakingReturns', # NEW
+                          'removeBreakingReturns2', # NEW
+                          'removeEmptyReferenceLists',# NEW
+                          'swapNodes',# NEW
+                          'splitBigTableCells',# NEW
+                          'removeNoPrintNodes',# NEW
+                          'removeBlockNodeChildren',# NEW
                           ]
         self.clean(cleanerMethods)
 
 
-    def _fixLists(self, node): 
+    def fixLists(self, node): 
         """Removes paragraph nodes which only have a list as the only child - keeps the list."""
         if node.__class__ == ItemList and node.parent and node.parent.__class__ == Paragraph:
             if not node.siblings and node.parent.parent:
                 node.parent.parent.replaceChild(node.parent,[node])        
         for c in node.children[:]:
-            self._fixLists(c)
+            self.fixLists(c)
 
-    def _removeChildlessNodes(self, node):
+    def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
 
         if not node.children and node.__class__ not in self.childlessOK:
@@ -127,9 +129,9 @@ class TreeCleaner(object):
                 removeNode.parent.removeChild(removeNode)
 
         for c in node.children[:]:
-            self._removeChildlessNodes(c)
+            self.removeChildlessNodes(c)
 
-    def _removeLangLinks(self, node):
+    def removeLangLinks(self, node):
         """Removes the language links that are listed below an article.
 
         Language links inside the article should not be touched
@@ -148,7 +150,7 @@ class TreeCleaner(object):
             node.parent.removeChild(node)
 
         for c in node.children[:]:
-            self._removeLangLinks(c)
+            self.removeLangLinks(c)
 
 
     def _tableIsCrititcal(self, table):
@@ -158,7 +160,7 @@ class TreeCleaner(object):
 
         return False
 
-    def _removeCriticalTables(self, node):
+    def removeCriticalTables(self, node):
         """Remove problematic table nodes - keep content.
                
         The content is preserved if possible and only the outmost 'container' table is removed.
@@ -175,9 +177,9 @@ class TreeCleaner(object):
             return
 
         for c in node.children:
-            self._removeCriticalTables(c)
+            self.removeCriticalTables(c)
 
-    def _fixTableColspans(self, node):
+    def fixTableColspans(self, node):
         """ Fix erronous colspanning information in table nodes.
 
         1. SINGLE CELL COLSPAN: if a row contains a single cell, the
@@ -206,7 +208,7 @@ class TreeCleaner(object):
                         cell.vlist['colspan'] = maxwidth
         # /SINGLE CELL COLSPAN
         for c in node.children:
-            self._fixTableColspans(c)
+            self.fixTableColspans(c)
 
     def _any(self, list):
         for x in list:
@@ -214,7 +216,7 @@ class TreeCleaner(object):
                 return True
         return False
 
-    def _removeBrokenChildren(self, node):
+    def removeBrokenChildren(self, node):
         """Remove Nodes (while keeping their children) which can't be nested with their parents."""
         if node.__class__ in self.removeNodes.keys():
             if self._any([parent.__class__ in self.removeNodes[node.__class__] for parent in node.parents]):
@@ -226,10 +228,10 @@ class TreeCleaner(object):
                 return
 
         for c in node.children:
-            self._removeBrokenChildren(c)
+            self.removeBrokenChildren(c)
 
 
-    def _moveBrokenChildren(self, node):
+    def moveBrokenChildren(self, node):
         """Move child nodes to their parents level, if they can't be nested with their parents."""
 
         # FIXME: refactor this. get all parents and directly go to bad parent if present
@@ -248,10 +250,10 @@ class TreeCleaner(object):
                 container = container.parent
 
         for c in node.children[:]:
-            self._moveBrokenChildren(c)
+            self.moveBrokenChildren(c)
 
 
-    def _removeSingleCellTables(self, node):
+    def removeSingleCellTables(self, node):
         """Remove table nodes which contain only a single row with a single cell"""
 
         if node.__class__ == Table:
@@ -261,10 +263,10 @@ class TreeCleaner(object):
                     node.parent.replaceChild(node, cell_content)
 
         for c in node.children:
-            self._removeSingleCellTables(c)
+            self.removeSingleCellTables(c)
 
 
-    def _moveReferenceListSection(self, node):
+    def moveReferenceListSection(self, node):
         """Move the section containing the reference list to the end of the article."""
 
         if node.__class__ == Article:
@@ -277,10 +279,11 @@ class TreeCleaner(object):
             return
 
         for c in node.children:
-            self._moveReferenceListSection(c)
+            self.moveReferenceListSection(c)
 
-    # FIXME: replace this by implementing and using getParentStyleInfo(style='blub') where parent styles are needed
-    def _inheritStyles(self, node, inheritStyle={}):
+    # FIXME: replace this by implementing and using
+    # getParentStyleInfo(style='blub') where parent styles are needed
+    def inheritStyles(self, node, inheritStyle={}):
         """style information is handed down to child nodes."""
 
         def flattenStyle(styleHash):
@@ -319,7 +322,7 @@ class TreeCleaner(object):
 
         for c in node.children:
             _is = cleanInheritStyles(nodeStyle)
-            self._inheritStyles(c, inheritStyle=_is)
+            self.inheritStyles(c, inheritStyle=_is)
 
 
     def _getNext(self, node): #FIXME: name collides with advtree.getNext
@@ -340,7 +343,7 @@ class TreeCleaner(object):
                 return self._getPrev(prev)
         return prev
 
-    def _removeBreakingReturns(self, node):
+    def removeBreakingReturns(self, node):
         """
         remove breakingReturns if we are next to a blockNode
         skip whitespace
@@ -361,9 +364,9 @@ class TreeCleaner(object):
 
 
         for c in node.children[:]:
-            self._removeBreakingReturns(c)
+            self.removeBreakingReturns(c)
 
-    def _removeBreakingReturns2(self, node): #FIXME: if we also check if the next and prev nodes are breakingreturns we should be able to throw away the above method
+    def removeBreakingReturns2(self, node): #FIXME: if we also check if the next and prev nodes are breakingreturns we should be able to throw away the above method
         if node.isblocknode:
             firstLeaf = node.getFirstLeaf()
             if firstLeaf.__class__ == BreakingReturn:
@@ -380,13 +383,13 @@ class TreeCleaner(object):
                 tryRemoveNode(prevAdjacent)
 
         for c in node.children:
-            self._removeBreakingReturns2(c)
+            self.removeBreakingReturns2(c)
 
 
     #FIXME: this method is used currently.
     # improve customization of treecleaner, b/c this method only needs to be used
     # by some writers: e.g. the ones that write footnotes should not need to print the ref-section
-    def _removeEmptyReferenceLists(self, node):
+    def removeEmptyReferenceLists(self, node):
         """
         empty ReferenceLists are removed. they typically stick in a section which only contains the ReferenceList. That section is also removed
         """
@@ -398,12 +401,84 @@ class TreeCleaner(object):
                 removeNode.parent.removeChild(removeNode)
 
         for c in node.children[:]:
-            self._removeEmptyReferenceLists(c)
+            self.removeEmptyReferenceLists(c)
+
+
+    def _fixParagraphs(self, node):
+        """Move paragraphs to the child list of the last section (if existent)"""
+
+        if isinstance(node, Paragraph) and isinstance(node.previous, Section) \
+                and node.previous is not node.parent:
+            prev = node.previous
+            parent = node.parent
+            target = prev.getLastChild()
+            node.moveto(target)
+            return True # changed
+        else:
+            for c in node.children[:]:
+                if self._fixParagraphs(c):
+                    return True
+
+    def fixParagraphs(self, node):
+        while self._fixParagraphs(node):
+            pass
+
+
+    def _fixBlockNodes(self, node):
+        """
+        the parser uses paragraphs to group anything
+        this is not compatible with xhtml where nesting of 
+        block nodes is not allowed.
+
+        this code splits the parent blocknode and puts the blocknode-child on the same level
+
+        bn_1
+         nbn_2
+         bn_3
+         nbn_4
+
+        becomes:
+        bn_1.1
+         nbn_2
+        bn_3
+        bn_1.2
+         nbn_4
+
+
+        """
+        # FIXME: why is node.isblocknode not used?
+        blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
+                      Blockquote, DefinitionList, HorizontalRule, Source)
+
+        if isinstance(node, blocknodes) and node.parent and isinstance(node.parent, blocknodes) \
+                and not isinstance(node.parent, Section) : # Section is no problem if parent
+            if not node.parent.parent:
+                assert node.parent.parent
+
+            pstart = node.parent.copy()
+            pend = node.parent.copy()
+            for i,c in enumerate(node.parent.children):
+                if c is node:
+                    break
+            pstart.children = pstart.children[:i]
+            pend.children = pend.children[i+1:]
+            grandp = node.parent.parent
+            oldparent = node.parent
+            grandp.replaceChild(oldparent, [pstart, node, pend])
+            return True # changed
+        else:
+            for c in node.children:
+                if self._fixBlockNodes(c):
+                    return True
+
+    def fixBlockNodes(self, node):
+        while self._fixBlockNodes(node):
+            pass
     
 
     # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
     # e.g. but only if the center is a direct and only child
-    def _swapNodes(self, node):
+    def swapNodes(self, node):
         """Swaps two nodes if nesting is problematic.
 
         Some writers have problems with some node combinations
@@ -425,9 +500,9 @@ class TreeCleaner(object):
                 swap(node.parent, node)
 
         for c in node.children[:]:
-            self._swapNodes(c)
+            self.swapNodes(c)
 
-    def _splitBigTableCells(self, node):
+    def splitBigTableCells(self, node):
         """Splits table cells if their height exceeds the output page height.
 
         This method is only needed for writers that output on a paginated medium.
@@ -446,10 +521,10 @@ class TreeCleaner(object):
             return
 
         for c in node.children[:]:
-            self._splitBigTableCells(c)
+            self.splitBigTableCells(c)
 
 
-    def _removeNoPrintNodes(self, node):
+    def removeNoPrintNodes(self, node):
 
         klasses = set(node.attributes.get('class', '').split())
         if set(self.noDisplayClasses).intersection(klasses) and node.parent:
@@ -457,10 +532,10 @@ class TreeCleaner(object):
             return
 
         for c in node.children[:]:
-            self._removeNoPrintNodes(c)
+            self.removeNoPrintNodes(c)
 
 
-    def _removeBlockNodeChildren(self, node):
+    def removeBlockNodeChildren(self, node):
         """Remove all block nodes from child list, keep the content."""
     
         if node.__class__ in self.block_node_forbidden:
@@ -471,5 +546,5 @@ class TreeCleaner(object):
                     c.parent.removeChild(c)
 
         for c in node.children[:]:
-            self._removeBlockNodeChildren(c)
+            self.removeBlockNodeChildren(c)
             
