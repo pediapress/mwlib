@@ -72,7 +72,7 @@ class AdvancedNode:
         return n
 
 
-    def moveto(self, targetnode, prefix=False):
+    def moveto(self, targetnode, prefix=False): #FIXME: bad name. rename to moveBehind, and create method moveBefore
         """Move this node behind the target node.
 
         If prefix is true, move before the target node.
@@ -140,11 +140,11 @@ class AdvancedNode:
         return [p.__class__ for p in self.getParents()].count(self.__class__)
 
    
-    def getParentNodesByClass(self, klass):
+    def getParentNodesByClass(self, klass): #FIXME: rename to getParentsByClass
         "returns parents w/ klass"
         return [p for p in self.parents if p.__class__ == klass]
 
-    def getChildNodesByClass(self, klass):
+    def getChildNodesByClass(self, klass): #FIXME: rename to getChildrenByClass
         "returns all children  w/ klass"
         return [p for p in self.getAllChildren() if p.__class__ == klass]
 
