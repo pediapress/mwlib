@@ -1428,7 +1428,8 @@ class Parser(object):
         return self._parseStyledTag(Style("'''"))
     
     def parseBLOCKQUOTETag(self):
-        return self._parseStyledTag(Style(":"))
+        #return self._parseStyledTag(Style(":"))
+        return self._parseStyledTag(Style("-"))
 
     def _parseStyledTag(self, style=None):
             

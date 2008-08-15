@@ -595,6 +595,9 @@ def fixStyleNode(node): #FIXME: rename to fixStyleNode or something like that
             node.caption = ""
         else:
             node.__class__ = Indented
+    elif node.caption == '-':
+        node.__class__ = Blockquote
+        node.caption = ''
     elif node.caption in _styleNodeMap:
         node.__class__ = _styleNodeMap[node.caption]
         node.caption = ""

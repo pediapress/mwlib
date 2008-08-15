@@ -6,8 +6,8 @@
 
 import copy
 
-from advtree import AdvancedNode
-from advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
+from mwlib.advtree import AdvancedNode
+from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
                      Reference, ReferenceList, Row, Section, Source, SpecialLink, Table, Text, Underline,
