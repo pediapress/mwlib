@@ -231,12 +231,13 @@ def test_blockquote_with_two_paras():
     print 'BLOCKQUOTE:', node.children
     assert len(node.children) == 1
     
-def test_newline_closes_bold_tag():
+@xfail
+def test_newlines_in_bold_tag():
+    """http://code.pediapress.com/wiki/ticket/41"""
+    
     node = parse('<b>test\n\nfoo</b>')
     print node
-    assert len(node.children) == 2
-    assert isinstance(node.children[0].children[0], parser.Style)
-    assert node.children[1].children[0].caption == u'foo'
+    assert len(node.children) == 1
 
 def test_percent_table_style(): 
     """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
