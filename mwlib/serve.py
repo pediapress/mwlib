@@ -412,7 +412,7 @@ class Application(wsgi.Application):
             if template_blacklist:
                 args.extend(['--template-blacklist', template_blacklist])
             if template_exclusion_category:
-                args.extend(['--tempalte-exclusion-category', template_exclusion_category])
+                args.extend(['--template-exclusion-category', template_exclusion_category])
             if login_credentials:
                 args.extend(['--login', login_credentials])
         
