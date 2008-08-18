@@ -21,6 +21,13 @@ def tryRemoveNode(node):
         node.parent.removeChild(node)
         return True
 
+
+def _all(list):
+    for item in list:
+        if item == False:
+            return False
+    return True
+
 class TreeCleaner(object):
 
     """The TreeCleaner object cleans the parse tree to optimize writer ouput.
@@ -94,13 +101,13 @@ class TreeCleaner(object):
             for cleaner in cleanerList:
                 cleaner(child)
 
-    def cleanAll(self):
+    def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
 
         cleanerMethods = ['moveBrokenChildren',
                           'removeChildlessNodes',
                           'removeLangLinks',
-                          'fixLists',
+                          'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
                           'fixBlockNodes', # was in xmltreecleaner
                           'removeSingleCellTables',
@@ -116,7 +123,7 @@ class TreeCleaner(object):
                           'removeNoPrintNodes',# NEW
                           'removeBlockNodeChildren',# NEW
                           ]
-        self.clean(cleanerMethods)
+        self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
 
     def report(self, *args):        
@@ -131,14 +138,18 @@ class TreeCleaner(object):
     def getReports(self):
         return self.reports
 
-    def fixLists(self, node): 
-        """Removes paragraph nodes which only have a list as the only child - keeps the list."""
-        if node.__class__ == ItemList and node.parent and node.parent.__class__ == Paragraph:
-            if not node.siblings and node.parent.parent:
-                self.report('replaced parent:', node.parent, node)
-                node.parent.parent.replaceChild(node.parent,[node])
+
+    def removeListOnlyParagraphs(self, node):
+        """Removes paragraph nodes which only have lists as the only childen - keep the lists."""
+        if node.__class__ == Paragraph:
+            list_only_children = _all([c.__class__ == ItemList for c in node.children])
+            if list_only_children and node.parent:
+                self.report('replaced children:', node.parent, node)
+                node.parent.replaceChild(node, node.children)
+                
         for c in node.children[:]:
-            self.fixLists(c)
+            self.removeListOnlyParagraphs(c)
+
 
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""   

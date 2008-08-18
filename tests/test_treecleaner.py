@@ -7,7 +7,7 @@ import sys
 
 from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
-from mwlib.treecleaner import TreeCleaner
+from mwlib.treecleaner import TreeCleaner, _all
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
@@ -35,7 +35,7 @@ def cleanMarkup(raw):
     tree  = getTreeFromMarkup(raw)
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
-    tc.cleanAll()
+    tc.cleanAll(skipMethods=['fixBlockNodes'])
     reports = tc.getReports()
     return (tree, reports)
 
@@ -51,12 +51,6 @@ def cleanMarkupSingle(raw, cleanerMethod):
 def showTree(tree):
     parser.show(sys.stderr, tree, 0)
     
-
-def _all(list):
-    for item in list:
-        if item == False:
-            return False
-    return True
 
 def test_fixLists():
     raw = r"""
@@ -79,19 +73,33 @@ para
     for li in lists:
         assert _all([p.__class__ != Paragraph for p in li.getParents()])
     _treesanity(tree)   
+    showTree(tree)
 
 def test_fixLists2():
     raw = r"""
 * list item 1
 * list item 2
 some text in the same paragraph
-    """
-    
+    """    
+    # cleaner should do nothing
     tree, reports = cleanMarkup(raw)
-    #tree, reports = cleanMarkupSingle(raw, 'fixLists')
-    showTree(tree)
-    print reports
-    assert False
+    lists = tree.getChildNodesByClass(ItemList)
+    li = lists[0]
+    assert li.parent.__class__ == Paragraph
+    assert Text in [sib.__class__ for sib in li.siblings]
+
+
+def test_fixLists3():
+    raw = r"""
+* ul1
+* ul2
+# ol1
+# ol2
+"""
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.children) == 2 # 2 itemlists as only children of article
+    assert _all( [ c.__class__ == ItemList for c in tree.children])
+    
     
 def test_removebrakingreturn():
     raw = r"""
