@@ -7,7 +7,7 @@ import sys
 
 from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
-from mwlib.treecleaner import TreeCleaner, _all
+from mwlib.treecleaner import TreeCleaner, _all, _any
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
@@ -73,7 +73,6 @@ para
     for li in lists:
         assert _all([p.__class__ != Paragraph for p in li.getParents()])
     _treesanity(tree)   
-    showTree(tree)
 
 def test_fixLists2():
     raw = r"""
@@ -100,6 +99,108 @@ def test_fixLists3():
     assert len(tree.children) == 2 # 2 itemlists as only children of article
     assert _all( [ c.__class__ == ItemList for c in tree.children])
     
+
+def test_childlessNodes():
+    raw = r"""
+blub
+    
+<source></source>
+
+*
+
+<div></div>
+
+<u></u>
+    """
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.children) == 1 #assert only the 'blub' paragraph is left and the rest removed
+    assert tree.children[0].__class__ == Paragraph  
+
+
+def test_removeLangLinks():
+    raw = r"""
+bla blub [[it:blub]] bla
+
+[[de:Blub]]
+[[en:Blub]]
+[[es:Blub]]
+"""
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.children) == 1
+    assert tree.children[0].__class__ == Paragraph
+    assert tree.children[0].children[1].__class__ == LangLink
+
+
+def test_removeCriticalTables():
+    raw = r'''
+{| class="navbox"
+|-
+| bla
+| blub
+|}
+
+blub
+'''    
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(Table)) == 0
+
+
+def test_fixTableColspans():
+    raw = r'''
+{|
+|-
+| colspan="5" | bla
+|-
+| bla
+| blub
+|}
+    '''
+    tree, reports = cleanMarkup(raw)
+    t = tree.getChildNodesByClass(Table)[0]
+    cell = t.children[0].children[0]
+    assert cell.colspan == 2
+
+def test_removeBrokenChildren():
+    raw = r'''
+<ref>
+ preformatted text
+</ref>
+    '''
+    
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(PreFormatted)) == 0
+
+
+def test_fixNesting():
+    raw = r'''
+ preformatted text <source>some source text</source> some text after the source node    
+    '''
+    
+    tree, reports = cleanMarkup(raw)
+    source_node = tree.getChildNodesByClass(Source)[0]
+    assert not _any([p.__class__ == PreFormatted for p in source_node.getParents()])
+
+
+def test_fixNesting2():
+    raw = r'''
+<div><div>
+* bla
+* blub
+</div></div>
+    '''
+    tree, reports = cleanMarkup(raw)
+    list_node = tree.getChildNodesByClass(ItemList)[0]
+    assert not _any([p.__class__ == Div for p in list_node.getParents()])
+
+
+def test_swapNodes():
+    raw = r'''
+<u><center>Text</center></u>
+    '''
+    tree, reports = cleanMarkup(raw)
+    center_node= tree.getChildNodesByClass(Center)[0]
+    assert not _any([p.__class__ == Underline for p in center_node.getParents()])
+
     
 def test_removebrakingreturn():
     raw = r"""
@@ -123,7 +224,7 @@ def test_removebrakingreturn():
 |}
 """.decode("utf8")
 
-    tree, reports = cleanMarkup(raw)
+    tree, reports = cleanMarkup(raw)    
     assert len(tree.getChildNodesByClass(BreakingReturn)) == 4
     _treesanity(tree)
 
@@ -160,7 +261,6 @@ def test_removebrakingreturn4():
 """.decode("utf8")
 
     tree, repotrs = cleanMarkup(raw)
-    showTree(tree)
     assert len(tree.getChildNodesByClass(BreakingReturn)) == 1
     _treesanity(tree)
 
