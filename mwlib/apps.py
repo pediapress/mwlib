@@ -90,6 +90,8 @@ def buildzip():
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
+    if parser.metabook is None:
+        parser.error('Neither --metabook nor arguments specified.\n' + use_help)
     if options.posturl and options.getposturl:
         parser.error('Specify either --posturl or --getposturl.\n' + use_help)
     if not options.posturl and not options.getposturl and not options.output:
@@ -126,37 +128,40 @@ def buildzip():
         if podclient is not None:
             podclient.post_current_article(title)
     
+    filename = None
     try:
-        env = parser.makewiki()
+        try:
+            env = parser.makewiki()
         
-        from mwlib import recorddb
+            from mwlib import recorddb
         
-        set_status('parsing')
-        set_progress(0)
+            set_status('parsing')
+            set_progress(0)
         
-        filename = recorddb.make_zip_file(options.output, env,
-            set_progress=lambda p: set_progress(p*0.9),
-            set_current_article=set_current_article,
-            num_article_threads=options.num_article_threads,
-            num_image_threads=options.num_image_threads,
-            imagesize=options.imagesize,
-        )
+            filename = recorddb.make_zip_file(options.output, env,
+                set_progress=lambda p: set_progress(p*0.9),
+                set_current_article=set_current_article,
+                num_article_threads=options.num_article_threads,
+                num_image_threads=options.num_image_threads,
+                imagesize=options.imagesize,
+            )
         
-        if podclient:
-            set_status('uploading')
-            podclient.post_zipfile(filename)
+            if podclient:
+                set_status('uploading')
+                podclient.post_zipfile(filename)
         
-        if options.output is None:
+            set_status('finished')
+            set_progress(100)
+        except Exception, e:
+            set_status('error')
+            raise
+    finally:
+        if options.output is None and filename is not None:
             try:
+                print 'removing %r' % filename
                 os.unlink(filename)
             except Exception, e:
-                print 'Could not delete file %r: %s' % (filename, e)
-        
-        set_status('finished')
-        set_progress(100)
-    except Exception, e:
-        set_status('error')
-        raise
+                print 'ERROR: Could not delete file %r: %s' % (filename, e)
 
 def post():
     parser = optparse.OptionParser(usage="%prog OPTIONS")
@@ -348,56 +353,62 @@ def render():
         if options.status_file:
             open(options.status_file, 'wb').write(simplejson.dumps(last_status).encode('utf-8'))
     
+    env = None
     try:
-        env = parser.makewiki()
+        try:
+            env = parser.makewiki()
         
-        set_status(status='parsing', progress=0)
+            set_status(status='parsing', progress=0)
         
-        if not isinstance(env.wiki, zipwiki.Wiki)\
-            or not isinstance(env.images, zipwiki.ImageDB):
-            zip_filename = recorddb.make_zip_file(options.keep_zip, env,
-                set_progress=lambda p: set_status(progress=0.7*p),
-                set_current_article=lambda t: set_status(article=t),
-                num_article_threads=options.num_article_threads,
-                num_image_threads=options.num_image_threads,
-                imagesize=options.imagesize,
-            )
-            if env.images:
-                env.images.clear()
-            env.wiki = zipwiki.Wiki(zip_filename)
-            env.images = zipwiki.ImageDB(zip_filename)
-        else:
-            zip_filename = None
-        
-        fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
-        os.close(fd)
-        writer(env, output=tmpout, status_callback=set_status, **writer_options)
-        os.rename(tmpout, options.output)
-        kwargs = {}
-        if hasattr(writer, 'content_type'):
-            kwargs['content_type'] = writer.content_type
-        if hasattr(writer, 'file_extension'):
-            kwargs['file_extension'] = writer.file_extension
-        if env.images:
-            env.images.clear()
-        set_status(status='finished', progress=100, **kwargs)
-        if options.keep_zip is None and zip_filename is not None:
-            try:
-                os.unlink(zip_filename)
-            except Exception, e:
-                print 'Could not remove %r: %s' % (zip_filename, e)
-    except Exception, e:
-        set_status(status='error')
-        if options.error_file:
-            fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
-            f = os.fdopen(fd, 'wb')
-            if isinstance(e, WriterError) or isinstance(e, MWAPIError):
-                f.write(str(e))
+            if not isinstance(env.wiki, zipwiki.Wiki)\
+                or not isinstance(env.images, zipwiki.ImageDB):
+                zip_filename = recorddb.make_zip_file(options.keep_zip, env,
+                    set_progress=lambda p: set_status(progress=0.7*p),
+                    set_current_article=lambda t: set_status(article=t),
+                    num_article_threads=options.num_article_threads,
+                    num_image_threads=options.num_image_threads,
+                    imagesize=options.imagesize,
+                )
+                if env.images:
+                    env.images.clear()
+                env.wiki = zipwiki.Wiki(zip_filename)
+                env.images = zipwiki.ImageDB(zip_filename)
             else:
-                traceback.print_exc(file=f) 
-            f.close()
-            os.rename(tmpfile, options.error_file)
-        raise
+                zip_filename = None
+        
+            fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
+            os.close(fd)
+            writer(env, output=tmpout, status_callback=set_status, **writer_options)
+            os.rename(tmpout, options.output)
+            kwargs = {}
+            if hasattr(writer, 'content_type'):
+                kwargs['content_type'] = writer.content_type
+            if hasattr(writer, 'file_extension'):
+                kwargs['file_extension'] = writer.file_extension
+            set_status(status='finished', progress=100, **kwargs)
+            if options.keep_zip is None and zip_filename is not None:
+                try:
+                    os.unlink(zip_filename)
+                except Exception, e:
+                    print 'Could not remove %r: %s' % (zip_filename, e)
+        except Exception, e:
+            set_status(status='error')
+            if options.error_file:
+                fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
+                f = os.fdopen(fd, 'wb')
+                if isinstance(e, WriterError) or isinstance(e, MWAPIError):
+                    f.write(str(e))
+                else:
+                    traceback.print_exc(file=f) 
+                f.close()
+                os.rename(tmpfile, options.error_file)
+            raise
+    finally:
+        if env is not None and env.images is not None:
+            try:
+                env.images.clear()
+            except Exception, e:
+                print 'ERROR: Could not remove temporary images: %s' % e
 
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]")

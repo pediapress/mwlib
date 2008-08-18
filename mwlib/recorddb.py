@@ -292,60 +292,69 @@ def make_zip_file(output, env,
     os.close(fd)
     zf = zipfile.ZipFile(tmpzip, 'w')
     
-    z = ZipfileCreator(zf,
-        imagesize=imagesize,
-        num_article_threads=num_article_threads,
-        num_image_threads=num_image_threads,
-    )
+    try:
+        z = ZipfileCreator(zf,
+            imagesize=imagesize,
+            num_article_threads=num_article_threads,
+            num_image_threads=num_image_threads,
+        )
     
-    articles = metabook.get_item_list(env.metabook, filter_type='article')
-    if articles:
-        class IncProgress(object):
-            inc = 100./len(articles)
-            p = 0
-            def __call__(self, title):
-                self.p += self.inc
-                set_progress(int(self.p))
-                set_current_article(title)
-        inc_progress = IncProgress()
-    else:
-        inc_progress = None
-    
-    for item in articles:
-        d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
-        if d is not None:
-            item['title'] = d['title']
-            item['revision'] = d['revision']
-            wikidb = mwapidb.WikiDB(api_helper=d['api_helper'])
-            imagedb = mwapidb.ImageDB(api_helper=d['api_helper'])
+        articles = metabook.get_item_list(env.metabook, filter_type='article')
+        if articles:
+            class IncProgress(object):
+                inc = 100./len(articles)
+                p = 0
+                def __call__(self, title):
+                    self.p += self.inc
+                    set_progress(int(self.p))
+                    set_current_article(title)
+            inc_progress = IncProgress()
         else:
-            wikidb = env.wiki
-            imagedb = env.images
-        z.addArticle(item['title'],
-            revision=item.get('revision', None),
-            wikidb=wikidb,
-            imagedb=imagedb,
-            callback=inc_progress,
-        )
+            inc_progress = None
     
-    for license in env.get_licenses():
-        z.parseArticle(
-            title=license['title'],
-            raw=license['wikitext'],
-            wikidb=env.wiki,
-            imagedb=env.images,
-        )
+        for item in articles:
+            d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
+            if d is not None:
+                item['title'] = d['title']
+                item['revision'] = d['revision']
+                wikidb = mwapidb.WikiDB(api_helper=d['api_helper'])
+                imagedb = mwapidb.ImageDB(api_helper=d['api_helper'])
+            else:
+                wikidb = env.wiki
+                imagedb = env.images
+            z.addArticle(item['title'],
+                revision=item.get('revision', None),
+                wikidb=wikidb,
+                imagedb=imagedb,
+                callback=inc_progress,
+            )
     
-    z.addObject('metabook.json', simplejson.dumps(env.metabook))
+        for license in env.get_licenses():
+            z.parseArticle(
+                title=license['title'],
+                raw=license['wikitext'],
+                wikidb=env.wiki,
+                imagedb=env.images,
+            )
     
-    z.writeContent()
-    zf.close()
-    if os.path.exists(output):
-        os.unlink(output)
-    os.rename(tmpzip, output)
+        z.addObject('metabook.json', simplejson.dumps(env.metabook))
     
-    if env.images and hasattr(env.images, 'clear'):
-        env.images.clear()
+        z.writeContent()
+        zf.close()
+        if os.path.exists(output): # Windows...
+            os.unlink(output)
+        os.rename(tmpzip, output)
     
-    set_progress(100)
-    return output
+        if env.images and hasattr(env.images, 'clear'):
+            env.images.clear()
+    
+        set_progress(100)
+        return output
+    finally:
+        if os.path.exists(tmpzip):
+            try:
+                os.unlink(tmpzip)
+            except Exception, e:
+                print 'ERROR: Could not remove %r' % tmpzip
+
+
