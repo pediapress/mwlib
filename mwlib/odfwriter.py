@@ -44,6 +44,7 @@ from mwlib import advtree
 from mwlib import odfstyles as style
 from mwlib import xmltreecleaner
 from mwlib import writerbase
+from mwlib.treecleaner import TreeCleaner
 
 
 log = Log("odfwriter")
@@ -815,7 +816,11 @@ def main():
         r = parseString(title=fn, raw=input, wikidb=db)
         parser.show(sys.stdout, r)
         advtree.buildAdvancedTree(r)
-        preprocess(r)
+        tc = TreeCleaner(parseTree)
+        tc.cleanAll()
+
+        
+        #preprocess(r)
         parser.show(sys.stdout, r)
         odf = ODFWriter()
         odf.write(r)

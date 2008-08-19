@@ -180,6 +180,7 @@ def test_fixNesting():
     tree, reports = cleanMarkup(raw)
     source_node = tree.getChildNodesByClass(Source)[0]
     assert not _any([p.__class__ == PreFormatted for p in source_node.getParents()])
+   
 
 
 def test_fixNesting2():
@@ -193,6 +194,18 @@ def test_fixNesting2():
     list_node = tree.getChildNodesByClass(ItemList)[0]
     assert not _any([p.__class__ == Div for p in list_node.getParents()])
 
+def test_fixNesting3():
+    raw = r'''
+<strike>
+para 1
+
+para 2
+</strike>
+    '''
+    
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    assert False
 
 def test_swapNodes():
     raw = r'''
@@ -312,3 +325,16 @@ ordinary paragraph. inside <br/> tags should not be removed
     # the br tags inside the source tag are not converted to br nodes - they remain inside the text
     # the only br tags that should remain after cleaning are the ones inside the preformatted node
     assert numBR(tree) == 3
+
+
+def test_fixTextStyleNesting():
+    raw = """
+<strike>
+para 1
+
+para 2
+</strike>
+    """
+    tree, reports = cleanMarkup(raw) 
+    showTree(tree)
+    #assert False

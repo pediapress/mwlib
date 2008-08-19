@@ -72,7 +72,7 @@ class TreeCleaner(object):
         # USED IN fixNesting if nesting_strictness == 'loose'
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
-        self.forbidden_parents = {ImageLink:[PreFormatted, Reference], ItemList:[Div],  Source:[PreFormatted]} 
+        self.forbidden_parents = {ImageLink:[PreFormatted, Reference], ItemList:[Div],  Source:[PreFormatted], Paragraph:[Paragraph]} 
 
         
         # ex: delete preformatted nodes which are inside reference nodes,
@@ -133,6 +133,7 @@ class TreeCleaner(object):
                           'splitBigTableCells',# NEW
                           'removeNoPrintNodes',# NEW
                           'removeBlockNodesFromSectionCaptions',
+                          'fixTextStyleNesting',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
@@ -470,6 +471,10 @@ class TreeCleaner(object):
 
 
     def _nestingBroken(self, node, parent):
+        # FIXME: the list below was used and not node.isblocknode. is there a reason for that?
+        blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
+                      Blockquote, DefinitionList, HorizontalRule, Source)
+
         if self.nesting_strictness == 'loose':
             if parent.__class__ in self.forbidden_parents.get(node.__class__, []):
                 return True
@@ -504,9 +509,7 @@ class TreeCleaner(object):
 
 
         """
-        # FIXME: why is node.isblocknode not used?
-        blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
-                      Blockquote, DefinitionList, HorizontalRule, Source)
+        # FIXME: fix docstring
 
         #if isinstance(node, blocknodes) and node.parent and isinstance(node.parent, blocknodes) \
         #        and not isinstance(node.parent, Section) : # Section is no problem if parent
@@ -615,3 +618,9 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.removeBlockNodesFromSectionCaptions(c)
             
+
+    def fixTextStyleNesting(self, node):
+
+        for c in node.children:
+            self.fixTextStyleNesting(c)
+
