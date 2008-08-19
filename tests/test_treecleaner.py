@@ -202,10 +202,10 @@ para 1
 para 2
 </strike>
     '''
-    
     tree, reports = cleanMarkup(raw)
-    showTree(tree)
-    assert False
+    paras = tree.getChildNodesByClass(Paragraph)
+    for para in paras:
+        assert not para.getChildNodesByClass(Paragraph)
 
 def test_swapNodes():
     raw = r'''

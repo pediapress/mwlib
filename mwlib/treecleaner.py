@@ -292,30 +292,6 @@ class TreeCleaner(object):
             self.removeBrokenChildren(c)
 
 
-    def moveBrokenChildren(self, node):
-        """Move child nodes to their parents level, if they can't be nested with their parents."""
-
-        # FIXME: refactor this. get all parents and directly go to bad parent if present
-        # no need for while loop.
-        if node.__class__ in self.moveNodes.keys():
-            firstContainer = node.parent
-            container = node.parent
-            while container:
-                if container.__class__ in self.moveNodes[node.__class__]:
-                    if container.parent:
-                        self.report('moved node', node, container)
-                        node.moveto(container)
-                        if not firstContainer.children: # remove empty nodes
-                            self.report('removed empty container:', firstContainer)
-                            firstContainer.parent.removeChild(firstContainer)
-                    else: #FIXME: add some fallback
-                        pass
-                container = container.parent
-
-        for c in node.children[:]:
-            self.moveBrokenChildren(c)
-
-
     def removeSingleCellTables(self, node):
         """Remove table nodes which contain only a single row with a single cell"""
 
@@ -468,24 +444,20 @@ class TreeCleaner(object):
         while self._fixParagraphs(node):
             pass
 
-
-
-    def _nestingBroken(self, node, parent):
+    def _nestingBroken(self, node):
         # FIXME: the list below was used and not node.isblocknode. is there a reason for that?
         blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
                       Blockquote, DefinitionList, HorizontalRule, Source)
-
+        parents = node.getParents()
         if self.nesting_strictness == 'loose':
-            if parent.__class__ in self.forbidden_parents.get(node.__class__, []):
-                return True
-            else:
-                return False            
+            for parent in parents:
+                if parent.__class__ in self.forbidden_parents.get(node.__class__, []):
+                    return True
         elif self.nesting_strictness == 'xml':
-            if node.__class__ != Section and node.isblocknode and parent.isblocknode:
-                return True
-            else:
-                return False
-
+            for parent in parents:
+                if node.__class__ != Section and node.__class__ in blocknodes and parent.__class__ in blocknodes:
+                    return True
+        return False
             
     def _fixNesting(self, node):
         """
@@ -510,12 +482,8 @@ class TreeCleaner(object):
 
         """
         # FIXME: fix docstring
-
-        #if isinstance(node, blocknodes) and node.parent and isinstance(node.parent, blocknodes) \
-        #        and not isinstance(node.parent, Section) : # Section is no problem if parent
-
-       
-        if node.parent and self._nestingBroken(node, node.parent):
+        # FIXME: i think this code might leave empty nodes. 
+        if node.parent and self._nestingBroken(node):
             if not node.parent.parent:
                 assert node.parent.parent
 
@@ -539,8 +507,8 @@ class TreeCleaner(object):
     def fixNesting(self, node):
         while self._fixNesting(node):
             pass
-       
 
+   
     # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
     # e.g. but only if the center is a direct and only child
     def swapNodes(self, node):
