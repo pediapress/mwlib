@@ -84,8 +84,6 @@ class TreeCleaner(object):
         # e.g. but only if the center is a direct and only child
         self.swapNodesMap = { Center:[Underline, Emphasized]} # { ChildClass: [ParentClass, ParentClass2]}
 
-        # list of nodes which can not contain any block nodes. 
-        self.block_node_forbidden = [Section]
 
         # list of css classes which trigger the removal of the node from the tree
         # the following list is wikipedia specific
@@ -123,23 +121,19 @@ class TreeCleaner(object):
                           'removeLangLinks',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
-                          #'fixBlockNodes', # was in xmltreecleaner
-                          'fixNesting', # was in xmltreecleaner
+                          'fixNesting', 
                           'removeSingleCellTables',
                           'removeCriticalTables',
-                          #moveBrokenChildren', # replace by more general fixNesting method
                           'removeBrokenChildren',
                           'fixTableColspans',
                           'moveReferenceListSection',
                           'removeBreakingReturns', # NEW
-                          'removeBreakingReturns2', # NEW
                           'removeEmptyReferenceLists',# NEW
                           'swapNodes',# NEW
                           'splitBigTableCells',# NEW
                           'removeNoPrintNodes',# NEW
-                          'removeBlockNodeChildren',# NEW
-                          #FIXME: removeChildlessNodes nees to be called again
-                          'removeChildlessNodes',
+                          'removeBlockNodesFromSectionCaptions',
+                          'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
@@ -413,53 +407,25 @@ class TreeCleaner(object):
                 return self._getPrev(prev)
         return prev
 
-    def removeBreakingReturns(self, node):
-        """
-        remove breakingReturns if we are next to a blockNode
-        skip whitespace
-        """
-        if node.__class__ in [PreFormatted, Source]:
-            # do not remove BRs from preformatted or source text
-            return
-
-        if node.__class__ == BreakingReturn:
-            next = self._getNext(node)
-            while next.__class__ == BreakingReturn:
-                self.report('trying to remov node', next)
-                if not tryRemoveNode(next):
-                    break
-                next = self._getNext(node)
-            prev = self._getPrev(node)       
-            if not next or next.isblocknode or not prev or prev.isblocknode: 
-                self.report('trying to remov node', next)
-                tryRemoveNode(node)
-
-
-        for c in node.children[:]:
-            self.removeBreakingReturns(c)
-
-    def removeBreakingReturns2(self, node): #FIXME: if we also check if the next and prev nodes are breakingreturns we should be able to throw away the above method
+    def removeBreakingReturns(self, node): 
+        """Remove BreakingReturns that occur around blocknodes or as the first/last element inside a blocknode."""
         if node.isblocknode:
-            firstLeaf = node.getFirstLeaf()
-            if firstLeaf.__class__ == BreakingReturn:
-                self.report('trying to remov node', next)
-                tryRemoveNode(firstLeaf)
-            lastLeaf = node.getLastLeaf()
-            if lastLeaf.__class__ == BreakingReturn:
-                self.report('trying to remov node', next)
-                tryRemoveNode(lastLeaf)
-
-            nextAdjacent = self._getNext(node)
-            if nextAdjacent.__class__ == BreakingReturn:
-                self.report('trying to remov node', next)
-                tryRemoveNode(nextAdjacent)
-            prevAdjacent = self._getPrev(node)
-            if prevAdjacent.__class__ == BreakingReturn:
-                self.report('trying to remov node', next)
-                tryRemoveNode(prevAdjacent)
+            changed = True
+            while changed:
+                check_node = [node.getFirstLeaf(),
+                             node.getLastLeaf(),
+                             self._getNext(node),
+                             self._getPrev(node)
+                             ]
+                changed = False
+                for n in check_node:
+                    if n.__class__ == BreakingReturn:
+                        self.report('removing node', n)
+                        tryRemoveNode(n)
+                        changed = True
 
         for c in node.children:
-            self.removeBreakingReturns2(c)
+            self.removeBreakingReturns(c)
 
 
     #FIXME: this method is used currently.
@@ -634,17 +600,18 @@ class TreeCleaner(object):
             self.removeNoPrintNodes(c)
 
 
-    def removeBlockNodeChildren(self, node):
-        """Remove all block nodes from child list, keep the content."""
+    def removeBlockNodesFromSectionCaptions(self, node):
+        """Remove all block nodes from Section nodes, keep the content."""
     
-        if node.__class__ in self.block_node_forbidden:
+        if node.__class__ == Section:
             caption_node = node.children[0]
             children = caption_node.getAllChildren()
             for c in children:
                 if c.isblocknode:
                     self.report('removed block node', c)
-                    c.parent.removeChild(c)
+                    #c.parent.removeChild(c)
+                    c.parent.replaceChild(c, c.children)
 
         for c in node.children[:]:
-            self.removeBlockNodeChildren(c)
+            self.removeBlockNodesFromSectionCaptions(c)
             

@@ -14,6 +14,7 @@ from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, Cat
                      Reference, ReferenceList, Row, Section, Source, SpecialLink, Table, Text, Underline,
                      URL)
 
+from mwlib.xfail import xfail
 
 def _treesanity(r):
     "check that parents match their children"
@@ -35,7 +36,7 @@ def cleanMarkup(raw):
     tree  = getTreeFromMarkup(raw)
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
-    tc.cleanAll(skipMethods=['fixBlockNodes'])
+    tc.cleanAll(skipMethods=[])
     reports = tc.getReports()
     return (tree, reports)
 
@@ -201,66 +202,113 @@ def test_swapNodes():
     center_node= tree.getChildNodesByClass(Center)[0]
     assert not _any([p.__class__ == Underline for p in center_node.getParents()])
 
+@xfail
+def test_splitBigTableCells():
+    '''
+    Splitting big table cells can not properly be tested here.
+    Testing needs to be done in the writers, since this test is writer
+    specific and the output has to be verfied
+    '''
+    assert False
     
-def test_removebrakingreturn():
-    raw = r"""
-{| class="prettytable"  width="100%"
-|width="30%"|'''Preis'''
-|width="34%"|'''Preisträger / Film / Serie'''
-|width="36%"|'''Nominierungen'''
-|-
-| '''Bester Fernsehfilm/Mehrteiler'''
-|"Rose" (ARD/BR/SWR/ARTE)
-|<small> [[2030 – Aufstand der Alten]] (ZDF)</small> </br>
-<small> Der Butler und die Prinzessin (Sat.1)</small> </br>
-<small> [[Die Flucht (2007)|Die Flucht]] (ARD/ARTE)</small> </br>
-<small> [[Vom Ende der Eiszeit]] (ARD/ARTE)</small>
-|-
-| '''Bester Schnitt'''
-|[[Florian Drechsler]] für Sperling und die kalte Angst (ZDF)
-|<small> </small> </br>
-<small> [[Clara Fabry]] für Helen, Fred und Ted (ARD)</small> </br>
-<small> [[Dagmar Lichius]] für [[Post Mortem]] (RTL)</small>
-|}
-""".decode("utf8")
 
-    tree, reports = cleanMarkup(raw)    
-    assert len(tree.getChildNodesByClass(BreakingReturn)) == 4
-    _treesanity(tree)
+@xfail
+def test_fixParagraphs():
+    raw = r'''  ''' #FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
+    tree, reports = cleanMarkup(raw)
+    assert False
 
 
-def test_removebrakingreturn2():
-    raw = """
-blub
-
-<br style="clear:both" />
-
-<br />
-
-===Mannschaft===
-""".decode("utf8")
+def test_removeBlockNodesFromSectionCaptions():
+    raw = r'''
+==<center>centered heading</center>==    
+    '''
 
     tree, reports = cleanMarkup(raw)
-    assert len(tree.getChildNodesByClass(BreakingReturn)) == 0
-    _treesanity(tree)
+    section_node = tree.getChildNodesByClass(Section)[0]
+    assert _all([p.__class__ != Center for p in section_node.children[0].getAllChildren()])
+
+    
+def numBR(tree):
+    return len(tree.getChildNodesByClass(BreakingReturn))
+
+def test_removebreakingreturnsInside():
+    # remove BRs at the inside 'borders' of block nodes
+    raw = '''
+{|
+|-
+|<br/>blub<br/>
+|text
+|-
+|<source></source><br/>text
+| text
+|-
+|<br/><source></source><br/><br/>text
+| text
+|}
+'''
+    tree, reports = cleanMarkup(raw) # 1 & 2
+    assert numBR(tree) == 0
 
 
-def test_removebrakingreturn3():
+def test_removebreakingreturnsOutside():
+    # remove BRs at the outside 'borders' of block nodes
+    raw = '''
+<br/>
+
+== section heading ==
+
+<br/>
+
+text
+
+<br/>
+
+<br/>
+
+== section heading 2 ==
+
+<br/><br/>
+
+== section heading 3 ==
+<br/>bla</br/>
+'''
+
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    assert numBR(tree) == 0
+
+
+def test_removebreakingreturnsMultiple():
+    # remove BRs at the outside 'borders' of block nodes
+    raw = '''
+paragraph
+
+<br/>
+
+<br/>
+
+paragraph
+'''
+
+    tree, reports = cleanMarkup(raw) 
+    assert numBR(tree) == 0
+
+
+def test_removebreakingreturnsNoremove():
     raw = """
-blub
-<br />""".decode("utf8")
+<br/>
+<source>
+<br/>dummy code line 1 <br/> next line of code <br/>  
+</source>
 
-    tree, reports = cleanMarkup(raw)    
-    assert len(tree.getChildNodesByClass(BreakingReturn)) == 0
-    _treesanity(tree)
+<br/>
+ <br/> bla <br/> blub
 
+ordinary paragraph. inside <br/> tags should not be removed 
+"""
 
-def test_removebrakingreturn4():
-    raw = """
-[[Yokosuka Kaigun Kosho]]<br />(Marinewerft [[Yokosuka]])
-""".decode("utf8")
-
-    tree, repotrs = cleanMarkup(raw)
-    assert len(tree.getChildNodesByClass(BreakingReturn)) == 1
-    _treesanity(tree)
-
+    tree, reports = cleanMarkup(raw) 
+    # the br tags inside the source tag are not converted to br nodes - they remain inside the text
+    # the only br tags that should remain after cleaning are the ones inside the preformatted node
+    assert numBR(tree) == 3

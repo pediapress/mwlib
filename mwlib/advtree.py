@@ -141,32 +141,32 @@ class AdvancedNode:
 
    
     def getParentNodesByClass(self, klass): #FIXME: rename to getParentsByClass
-        "returns parents w/ klass"
+        """returns parents w/ klass"""
         return [p for p in self.parents if p.__class__ == klass]
 
     def getChildNodesByClass(self, klass): #FIXME: rename to getChildrenByClass
-        "returns all children  w/ klass"
+        """returns all children  w/ klass"""
         return [p for p in self.getAllChildren() if p.__class__ == klass]
 
     def getAllChildren(self):
-        "don't confuse w/ Node.allchildren() which returns allchildren + self"
+        """don't confuse w/ Node.allchildren() which returns allchildren + self"""
         for c in self.children:
             yield c
             for x in c.getAllChildren():
                 yield x        
         
     def getSiblings(self):
-        "Return all siblings WITHOUT self"
+        """Return all siblings WITHOUT self"""
         return [c for c in self.getAllSiblings() if c is not self]
 
     def getAllSiblings(self):
-        "Return all siblings plus self"
+        """Return all siblings plus self"""
         if self.parent:
             return self.parent.children
         return []
 
     def getPrevious(self):
-        "Return previous sibling"
+        """Return previous sibling"""
         s = self.getAllSiblings()
         try:
             idx = _idIndex(s,self)
@@ -178,7 +178,7 @@ class AdvancedNode:
             return s[idx-1]
 
     def getNext(self):
-        "Return next sibling"
+        """Return next sibling"""
         s = self.getAllSiblings()
         try:
             idx = _idIndex(s,self)
@@ -190,19 +190,19 @@ class AdvancedNode:
             return s[idx+1]
 
     def getLast(self): #FIXME might return self. is this intended?
-        "Return last sibling"
+        """Return last sibling"""
         s = self.getAllSiblings()
         if s:
             return s[-1]
 
     def getFirst(self): #FIXME might return self. is this intended?
-        "Return first sibling"
+        """Return first sibling"""
         s = self.getAllSiblings()
         if s:
             return s[0]
 
     def getLastChild(self):
-        "Return last child of this node"
+        """Return last child of this node"""
         if self.children:
             return self.children[-1]
 
@@ -212,8 +212,15 @@ class AdvancedNode:
             return self.children[0]
 
     def getFirstLeaf(self, callerIsSelf=True):
+        """Return 'first' child that has no children itself"""
         if self.children:
-            return self.children[0].getFirstLeaf(callerIsSelf=False)
+            if self.__class__ == Section: # first kid of a section is its caption
+                if len(self.children) == 1:
+                    return None
+                else:
+                    return self.children[1].getFirstLeaf(callerIsSelf=False)
+            else:
+                return self.children[0].getFirstLeaf(callerIsSelf=False)
         else:
             if callerIsSelf:
                 return None
@@ -221,6 +228,7 @@ class AdvancedNode:
                 return self
 
     def getLastLeaf(self, callerIsSelf=True):
+        """Return 'last' child that has no children itself"""
         if self.children:
             return self.children[-1].getFirstLeaf(callerIsSelf=False)
         else:
