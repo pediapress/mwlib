@@ -337,9 +337,8 @@ def make_zip_file(output, env,
                 imagedb=env.images,
             )
     
-        z.addObject('metabook.json', simplejson.dumps(env.metabook))
-    
         z.writeContent()
+        z.addObject('metabook.json', simplejson.dumps(env.metabook))
         zf.close()
         if os.path.exists(output): # Windows...
             os.unlink(output)
