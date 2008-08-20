@@ -27,9 +27,6 @@ try:
 except ImportError:
     from md5 import md5
 
-# set default socket timeout to 10 seconds
-socket.setdefaulttimeout(10)
-
 # provide all() for python 2.4
 try:
     from __builtin__ import all
@@ -245,7 +242,7 @@ fetch_cache = {}
 
 def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     max_cacheable_size=1024, expected_content_type=None, opener=None,
-    output_filename=None, post_data=None):
+    output_filename=None, post_data=None, timeout=10.0):
     """Fetch given URL via HTTP
     
     @param ignore_errors: if True, log but otherwise ignore errors, return None
@@ -271,6 +268,9 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     @param post_data: if given use POST request
     @type post_data: dict
     
+    @param timeout: timeout in seconds
+    @type timeout: float
+    
     @returns: fetched response or True if filename was given; None when
         ignore_errors is True, and the request failed
     @rtype: str
@@ -280,6 +280,8 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         return fetch_cache[url]
     
     log.info("fetching %r" % (url,))
+    start_time = time.time()
+    socket.setdefaulttimeout(timeout)
     if opener is None:
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'mwlib')]
@@ -305,7 +307,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
             log.error("%s - while fetching %r" % (err, url))
             return None
         raise RuntimeError('Could not fetch %r: %s' % (url, err))
-    log.info("got %r (%d Bytes)" % (url, len(data)))
+    log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
     
     if hasattr(fetch_cache, 'max_cacheable_size'):
         max_cacheable_size = max(fetch_cache.max_cacheable_size, max_cacheable_size)
