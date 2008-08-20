@@ -283,30 +283,33 @@ Specific Options
   Path to the ``mw-render`` executable. The default is just "mw-render" which
   is ok, as long as ``mw-render`` is in the ``PATH``.
 
-``--mwrender-logfile=MWRENDER_LOGFILE``
+``--mwrender-logfile=LOGFILE``
 
-  Logfile for ``mw-render``. Default is "/var/log/mw-render.log". The file must
-  be writeable.
+  Global logfile for ``mw-render``. The file must be writeable.
+  If this option is not specified, a log file inside the collection directory
+  under --cache-dir is written.
 
 ``--mwzip=MWZIP``
 
   Path to the ``mw-zip`` executable. The default is just "mw-zip" which
   is ok, as long as ``mw-zip`` is in the ``PATH``.
 
-``--mwzip-logfile=MWZIP_LOGFILE``
+``--mwzip-logfile=LOGFILE``
 
-  Logfile for ``mw-zip``. Default is "/var/log/mw-zip.log". The file must
-  be writeable.
+  Global logfile for ``mw-zip``. The file must be writeable.
+  If this option is not specified, a log file inside the collection directory
+  under --cache-dir is written.
 
 ``--mwpost=MWPOST``
 
   Path to the ``mw-post`` executable. The default is just "mw-post" which
   is ok, as long as ``mw-post`` is in the ``PATH``.
 
-``--mwpost-logfile=MWPOST_LOGFILE``
+``--mwpost-logfile=LOGFILE``
 
-  Logfile for ``mw-post``. Default is "/var/log/mw-post.log". The file must
-  be writeable.
+  Global logfile for ``mw-post``. The file must be writeable.
+  If this option is not specified, a log file inside the collection directory
+  under --cache-dir is written.
 
 ``-q, --queue-dir=QUEUE_DIR``
 

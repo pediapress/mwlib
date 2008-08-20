@@ -66,6 +66,9 @@ class Application(wsgi.Application):
     output_filename = 'output'
     pid_filename = 'pid'
     zip_filename = 'collection.zip'
+    mwpostlog_filename = 'mw-post.log'
+    mwziplog_filename = 'mw-zip.log'
+    mwrenderlog_filename = 'mw-render.log'
     
     def __init__(self, cache_dir,
         mwrender_cmd, mwrender_logfile,
@@ -206,9 +209,14 @@ class Application(wsgi.Application):
             log.info('error file exists %r' % error_path)
             return response
         
+        if self.mwrender_logfile:
+            logfile = self.mwrender_logfile
+        else:
+            logfile = self.get_path(collection_id, self.mwrenderlog_filename, writer)
+        
         args = [
             self.mwrender_cmd,
-            '--logfile', self.mwrender_logfile,
+            '--logfile', logfile,
             '--error-file', error_path,
             '--status-file', status_path,
             '--writer', writer,
@@ -387,22 +395,30 @@ class Application(wsgi.Application):
         zip_path = self.get_path(collection_id, self.zip_filename)
         if os.path.exists(zip_path):
             log.info('POSTing ZIP file %r' % zip_path)
+            if self.mwpost_logfile:
+                logfile = self.mwpost_logfile
+            else:
+                logfile = self.get_path(collection_id, self.mwpostlog_filename)
             args = [
                 self.mwpost_cmd,
-                '--logfile', self.mwpost_logfile,
+                '--logfile', logfile,
                 '--posturl', post_url,
                 '--input', zip_path,
                 '--pid-file', pid_path,
             ]
         else:
             log.info('Creating and POSting ZIP file %r' % zip_path)
+            if self.mwzip_logfile:
+                logfile = self.mwzip_logfile
+            else:
+                logfile = self.get_path(collection_id, self.mwziplog_filename)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
             f = open(metabook_path, 'wb')
             f.write(metabook_data)
             f.close()
             args = [
                 self.mwzip_cmd,
-                '--logfile', self.mwzip_logfile,
+                '--logfile', logfile,
                 '--metabook', metabook_path,
                 '--config', base_url,
                 '--posturl', post_url,

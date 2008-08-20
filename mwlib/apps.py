@@ -512,24 +512,24 @@ def serve():
         default='mw-render',
     )
     parser.add_option('--mwrender-logfile',
-        help='logfile for mw-render',
-        default='/var/log/mw-render.log',
+        help='global logfile for mw-render',
+        metavar='LOGFILE',
     )
     parser.add_option('--mwzip',
         help='(path to) mw-zip executable',
         default='mw-zip',
     )
     parser.add_option('--mwzip-logfile',
-        help='logfile for mw-zip',
-        default='/var/log/mw-zip.log',
+        help='global logfile for mw-zip',
+        metavar='LOGFILE',
     )
     parser.add_option('--mwpost',
         help='(path to) mw-post executable',
         default='mw-post',
     )
     parser.add_option('--mwpost-logfile',
-        help='logfile for mw-post',
-        default='/var/log/mw-post.log',
+        help='global logfile for mw-post',
+        metavar='LOGFILE',
     )
     parser.add_option('-q', '--queue-dir',
         help='queue dir of mw-watch (if not specified, no queue is used)',
