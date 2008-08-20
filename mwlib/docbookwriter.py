@@ -26,8 +26,10 @@ except:
 from mwlib import parser
 from mwlib import mathml
 from mwlib import advtree
-from mwlib import xmltreecleaner
+#from mwlib import xmltreecleaner
 from mwlib import writerbase
+from mwlib.treecleaner import TreeCleaner
+
 from mwlib.xhtmlwriter import showNode
 from mwlib.xhtmlwriter import indent
 from mwlib.xhtmlwriter import validate
@@ -539,15 +541,8 @@ class DocBookWriter(object):
 
 def preprocess(root):
     advtree.buildAdvancedTree(root)
-    # remove nav boxes
-#    for c in root.getAllChildren():
-#        if c.isNavBox() and c.parent is not None:
-#            c.parent.removeChild(c)
-    xmltreecleaner.removeChildlessNodes(root)
-    xmltreecleaner.fixLists(root)
-    xmltreecleaner.fixParagraphs(root)
-    xmltreecleaner.fixBlockElements(root)
-
+    tc = TreeCleaner(root)
+    tc.cleanAll()
 
 
 # - func  ---------------------------------------------------
