@@ -74,7 +74,11 @@ class TreeCleaner(object):
         # USED IN fixNesting if nesting_strictness == 'loose'
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
-        self.forbidden_parents = {ImageLink:[PreFormatted, Reference], ItemList:[Div],  Source:[PreFormatted], Paragraph:[Paragraph]} 
+        self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
+                                  ItemList:[Div],
+                                  Source:self.inlineStyleNodes,
+                                  Paragraph:[Paragraph]}
+        self.forbidden_parents[Source].append(PreFormatted)
         self.nesting_strictness = nesting_strictness # loose | strict
 
         

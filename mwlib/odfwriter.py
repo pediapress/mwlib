@@ -780,8 +780,14 @@ def writer(env, output, status_callback):
     book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
     scb = lambda status, progress :  status_callback is not None and status_callback(status,progress)
     scb(status='preprocessing', progress=70)
-    for c in book.children:
-        preprocess(c)
+    #for c in book.children:
+    #    preprocess(c)
+
+    advtree.buildAdvancedTree(book)
+    tc = TreeCleaner(book)
+    tc.cleanAll()
+
+        
     scb(status='rendering', progress=80)
     w = ODFWriter(env, status_callback=scb)
     w.writeBook(book, output=output)
@@ -816,7 +822,7 @@ def main():
         r = parseString(title=fn, raw=input, wikidb=db)
         parser.show(sys.stdout, r)
         advtree.buildAdvancedTree(r)
-        tc = TreeCleaner(parseTree)
+        tc = TreeCleaner(r)
         tc.cleanAll()
 
         
