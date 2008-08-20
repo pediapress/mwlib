@@ -604,11 +604,6 @@ class WikiDB(wikidbbase.WikiDBBase):
         Note: *Not* following redirects is unsupported!
         """
         
-        try:
-            return self.template_cache[name]
-        except KeyError:
-            pass
-        
         if ":" in name:
             name = name.split(':', 1)[1]
         
@@ -616,11 +611,15 @@ class WikiDB(wikidbbase.WikiDBBase):
             log.info("ignoring blacklisted template:" , repr(name))
             return None
         
+        try:
+            return self.template_cache[name]
+        except KeyError:
+            pass
+        
         titles = ['Template:%s' % name]
         if self.print_template:
             titles.insert(0, self.print_template % name)
         for title in titles:
-            log.info("Trying template %r" % (title,))
             raw = self.getRawArticle(title)
             if raw is None:
                 continue
@@ -646,6 +645,8 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.template_cache[name] = raw
             return raw
         
+        log.warn('Could not fetch template %r' % name)
+        self.template_cache[name] = None
         return None
     
     def getRawArticle(self, title, revision=None):
