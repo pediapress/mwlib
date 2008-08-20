@@ -4,6 +4,7 @@
 # See README.txt for additional licensing information.
 
 import sys
+import time
 
 class Stdout(object):
     """late-bound sys.stdout"""
@@ -23,8 +24,10 @@ class Stderr(object):
 
 class Log(object):
     logfile = Stderr()
+    timestamp_fmt = '%Y-%m-%dT%H:%M:%S'
     
-    def __init__(self, prefix=None):
+    def __init__(self, prefix=None, timestamps=True):
+        self.timestamps = timestamps
         if prefix is None:
             self._prefix = []
         else:
@@ -34,7 +37,7 @@ class Log(object):
                 self._prefix = prefix
 
     def __getattr__(self, name):
-        return Log([self, name])
+        return Log([self, name], timestamps=self.timestamps)
 
     def __nonzero__(self):
         return bool(self._prefix)
@@ -52,5 +55,8 @@ class Log(object):
         if args:
             msg = " ".join(([msg] + [repr(x) for x in args]))
         
-        s = "%s >> %s\n" % (".".join(str(x) for x in self._prefix if x), msg)
+        s = ''
+        if self.timestamps:
+            s = '%s ' % time.strftime(self.timestamp_fmt)
+        s += "%s >> %s\n" % (".".join(str(x) for x in self._prefix if x), msg)
         self.logfile.write(s)
