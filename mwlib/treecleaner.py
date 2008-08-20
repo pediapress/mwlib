@@ -9,11 +9,11 @@ import inspect
 import re
 
 from mwlib.advtree import AdvancedNode
-from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                     Cite, Code, DefinitionList, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
-                     ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
-                     Reference, ReferenceList, Row, Section, Source, SpecialLink, Table, Text, Underline,
-                     URL)
+from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
+                           Cite, Code, DefinitionList, Deleted, Div, Emphasized, HorizontalRule, ImageLink, Inserted,
+                           InterwikiLink, Italic, Item, ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Overline, 
+                           Paragraph, PreFormatted, Reference, ReferenceList, Row, Section, Small, Source, SpecialLink,
+                           Strike, Strong, Sub, Sup, Table, Teletyped, Text, Underline, URL, Var)
 
 from mwlib.treecleanerhelper import *
 
@@ -65,14 +65,17 @@ class TreeCleaner(object):
                             HorizontalRule, ImageLink, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, SpecialLink, Text, URL]
 
-
-
-        self.nesting_strictness = nesting_strictness # loose | xml
+        # FIXME: not used currently. remove if this is not used soon. could be used as reference
+        # list nodes that apply styles to their children
+        # FIXME: Center node might be problematic. Center is a block node and not inline
+        self.inlineStyleNodes = [Big, Center, Cite, Code, Deleted, Emphasized, Inserted, Italic,
+                                 Overline, Small, Strike, Strong, Sub, Sup, Teletyped, Underline, Var]
 
         # USED IN fixNesting if nesting_strictness == 'loose'
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference], ItemList:[Div],  Source:[PreFormatted], Paragraph:[Paragraph]} 
+        self.nesting_strictness = nesting_strictness # loose | strict
 
         
         # ex: delete preformatted nodes which are inside reference nodes,
@@ -109,9 +112,24 @@ class TreeCleaner(object):
             else:
                 raise 'TreeCleaner has no method: %r' % method            
 
-        for child in self.tree.children:
+        # FIXME: performance could be improved, if individual articles would be cleaned
+        # the algorithm below splits on the first level, if a book is found
+        # --> if chapters are used, whole chapters are cleaned which slows things down
+        
+        if self.tree.__class__ == Book:
+            children = self.tree.children
+        else:
+            children = [self.tree]
+
+        for child in children:
             for cleaner in cleanerList:
                 cleaner(child)
+            
+        #for child in self.tree.children:
+        #    for cleaner in cleanerList:
+        #        cleaner(child)
+
+
 
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
@@ -133,7 +151,6 @@ class TreeCleaner(object):
                           'splitBigTableCells',# NEW
                           'removeNoPrintNodes',# NEW
                           'removeBlockNodesFromSectionCaptions',
-                          'fixTextStyleNesting',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
@@ -147,6 +164,7 @@ class TreeCleaner(object):
         if args:
             msg = ' '.join([repr(arg) for arg in args])        
         self.reports.append((caller, msg))
+
 
     def getReports(self):
         return self.reports
@@ -180,7 +198,6 @@ class TreeCleaner(object):
 
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
-
         if not node.children and node.__class__ not in self.childlessOK:
             removeNode = node
             while removeNode.parent and not removeNode.siblings:
@@ -188,9 +205,9 @@ class TreeCleaner(object):
             if removeNode.parent:
                 self.report('removed:', removeNode)
                 removeNode.parent.removeChild(removeNode)
-
         for c in node.children[:]:
             self.removeChildlessNodes(c)
+            
 
     def removeLangLinks(self, node):
         """Removes the language links that are listed below an article.
@@ -452,21 +469,40 @@ class TreeCleaner(object):
         if self.nesting_strictness == 'loose':
             for parent in parents:
                 if parent.__class__ in self.forbidden_parents.get(node.__class__, []):
-                    return True
-        elif self.nesting_strictness == 'xml':
+                    return parent
+        elif self.nesting_strictness == 'strict':
             for parent in parents:
                 if node.__class__ != Section and node.__class__ in blocknodes and parent.__class__ in blocknodes:
-                    return True
-        return False
+                    return parent
+        return None
+
+
+    def _buildSubTree(self, badparent, path, problem_node, side):
+        if side == 'left':
+            remove_children = False
+        elif side == 'right':
+            remove_children = True
             
+        for c in badparent.children:
+            if side == 'right' and (c in path or c == problem_node):
+                remove_children = not remove_children
+            if remove_children or c == problem_node:
+                badparent.removeChild(c)
+            if side == 'left' and (c in path or c == problem_node):
+                remove_children = not remove_children
+
+        for c in badparent.children:
+            self._buildSubTree(c, path, problem_node, side)
+        
+
     def _fixNesting(self, node):
-        """
-        the parser uses paragraphs to group anything
-        this is not compatible with xhtml where nesting of 
-        block nodes is not allowed.
+        """Nesting of nodes is corrected.
 
-        this code splits the parent blocknode and puts the blocknode-child on the same level
+        The strictness depends on nesting_strictness which can either be 'loose' or 'strict'.
+        Depending on the strictness the _nestingBroken method uses different approaches to
+        detect forbidden nesting.
 
+        Example for 'strict' setting: (bn --> blocknode, nbn --> nonblocknode)
         bn_1
          nbn_2
          bn_3
@@ -478,31 +514,52 @@ class TreeCleaner(object):
         bn_3
         bn_1.2
          nbn_4
-
-
         """
         # FIXME: fix docstring
-        # FIXME: i think this code might leave empty nodes. 
-        if node.parent and self._nestingBroken(node):
-            if not node.parent.parent:
-                assert node.parent.parent
+        # FIXME: i think this code might leave empty nodes.
 
-            pstart = node.parent.copy()
-            pend = node.parent.copy()
-            for i,c in enumerate(node.parent.children):
-                if c is node:
-                    break
-            pstart.children = pstart.children[:i]
-            pend.children = pend.children[i+1:]
-            grandp = node.parent.parent
-            oldparent = node.parent
-            self.report('replacing child', oldparent, 'with', pstart, node, pend)
-            grandp.replaceChild(oldparent, [pstart, node, pend])
-            return True # changed
+        # EXPLANATION OF ALGORITHM:
+        # 1. detect node (problem_child) with a parent that is forbidden (bad_parent)
+        # split the tree starting from the forbidden parent into three parts.
+        # middle path is the one leading from the first child of the bad_parent to the problem_child
+        # left tree is copied from original, all nodes further right than the
+        # path to the root node from the problem_child are remove
+        # same for right tree
+        
+        bad_parent = self._nestingBroken(node)
+        if bad_parent:
+            path2root = node.getParents()
+            problem_node = node
+            root = bad_parent.parent
+            path2root = path2root[path2root.index(root):]
+
+            ltree = bad_parent.copy()
+            self._buildSubTree(ltree, path2root, problem_node, 'left')
+
+            if bad_parent != node.parent:
+                assert len(path2root) > 2
+                middle = path2root[2] # root->badparent->firstgood
+            else:
+                middle = node
+
+            rtree = bad_parent.copy()
+            self._buildSubTree(rtree, path2root, problem_node, 'right')
+
+            new_children = []
+            if ltree:
+                new_children.append(ltree)
+            new_children.append(middle)
+            if rtree:
+                new_children.append(rtree)
+            self.report('replacing child', bad_parent, 'by', new_children)
+            root.replaceChild(bad_parent, new_children)
+            return True
         else:
             for c in node.children:
                 if self._fixNesting(c):
                     return True
+
+        return False
 
     def fixNesting(self, node):
         while self._fixNesting(node):
@@ -587,8 +644,7 @@ class TreeCleaner(object):
             self.removeBlockNodesFromSectionCaptions(c)
             
 
-    def fixTextStyleNesting(self, node):
 
-        for c in node.children:
-            self.fixTextStyleNesting(c)
 
+
+            

@@ -172,12 +172,18 @@ def test_removeBrokenChildren():
     assert len(tree.getChildNodesByClass(PreFormatted)) == 0
 
 
-def test_fixNesting():
+def test_fixNesting1():
     raw = r'''
  preformatted text <source>some source text</source> some text after the source node    
     '''
+
+    tree = getTreeFromMarkup(raw)
+    showTree(tree)
+    print "*"*40
     
     tree, reports = cleanMarkup(raw)
+
+    showTree(tree)
     source_node = tree.getChildNodesByClass(Source)[0]
     assert not _any([p.__class__ == PreFormatted for p in source_node.getParents()])
    
@@ -206,6 +212,55 @@ para 2
     paras = tree.getChildNodesByClass(Paragraph)
     for para in paras:
         assert not para.getChildNodesByClass(Paragraph)
+
+def test_fixNesting4():
+    raw = """
+<strike>
+
+<div>
+ indented para 1
+
+regular para
+
+ indented para 2
+
+</div>
+
+</strike>
+"""
+    
+    tree, reports = cleanMarkup(raw)
+    paras = tree.getChildNodesByClass(Paragraph)
+    for para in paras:
+        assert not para.getChildNodesByClass(Paragraph)
+      
+def test_fixNesting5():
+    raw = """
+<strike>
+<div>
+
+<div>
+
+<div>
+para 1
+</div>
+
+para 2
+</div>
+
+<div>
+para 2
+</div>
+
+</div>
+</strike>
+    """
+
+    tree, reports = cleanMarkup(raw)
+    paras = tree.getChildNodesByClass(Paragraph)
+    for para in paras:
+        assert not para.getChildNodesByClass(Paragraph) 
+
 
 def test_swapNodes():
     raw = r'''
@@ -327,14 +382,4 @@ ordinary paragraph. inside <br/> tags should not be removed
     assert numBR(tree) == 3
 
 
-def test_fixTextStyleNesting():
-    raw = """
-<strike>
-para 1
 
-para 2
-</strike>
-    """
-    tree, reports = cleanMarkup(raw) 
-    showTree(tree)
-    #assert False
