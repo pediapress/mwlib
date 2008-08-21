@@ -90,8 +90,8 @@ def buildzip():
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
-    if parser.metabook is None:
-        parser.error('Neither --metabook nor arguments specified.\n' + use_help)
+    if parser.metabook is None and options.collectionpage is None:
+        parser.error('Neither --metabook nor, --collectionpage or arguments specified.\n' + use_help)
     if options.posturl and options.getposturl:
         parser.error('Specify either --posturl or --getposturl.\n' + use_help)
     if not options.posturl and not options.getposturl and not options.output:
