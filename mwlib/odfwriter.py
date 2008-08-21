@@ -783,10 +783,7 @@ def writer(env, output, status_callback):
     #for c in book.children:
     #    preprocess(c)
 
-    advtree.buildAdvancedTree(book)
-    tc = TreeCleaner(book)
-    tc.cleanAll()
-
+    preprocess(book)
         
     scb(status='rendering', progress=80)
     w = ODFWriter(env, status_callback=scb)
@@ -801,12 +798,16 @@ writer.file_extension = 'odt'
 # - helper funcs   r ---------------------------------------------------
 
 def preprocess(root):
+    #advtree.buildAdvancedTree(root)
+    #xmltreecleaner.removeChildlessNodes(root)
+    #xmltreecleaner.fixLists(root)
+    #xmltreecleaner.fixParagraphs(root)
+    #xmltreecleaner.fixBlockElements(root)
+    #    parser.show(sys.stdout, root)
+
     advtree.buildAdvancedTree(root)
-    xmltreecleaner.removeChildlessNodes(root)
-    xmltreecleaner.fixLists(root)
-    xmltreecleaner.fixParagraphs(root)
-    xmltreecleaner.fixBlockElements(root)
-#    parser.show(sys.stdout, root)
+    tc = TreeCleaner(root)
+    tc.cleanAll()
 
 
 
