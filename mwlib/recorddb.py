@@ -4,6 +4,7 @@
 # See README.txt for additional licensing information.
 
 import os
+import re
 import simplejson
 import tempfile
 import threading
@@ -88,6 +89,8 @@ class ZipfileCreator(object):
     See docs/zipfile.txt
     """
     
+    redirect_rex = re.compile(r'^#redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+    
     def __init__(self, zf,
         imagesize=None,
         num_article_threads=3,
@@ -168,6 +171,14 @@ class ZipfileCreator(object):
             if raw is None:
                 log.warn('Could not get article %r' % title)
                 return
+            mo = self.redirect_rex.search(raw)
+            if mo:
+                raw = recorddb.getRawArticle(mo.group('redirect'))
+                if raw is None:
+                    log.warn('Could not get redirected article %r (from %r)' % (
+                        mo.group('redirect'), title
+                    ))
+                    return
             self.parseArticle(title,
                 revision=revision,
                 raw=raw,
@@ -328,7 +339,7 @@ def make_zip_file(output, env,
                 imagedb=imagedb,
                 callback=inc_progress,
             )
-    
+        
         for license in env.get_licenses():
             z.parseArticle(
                 title=license['title'],
