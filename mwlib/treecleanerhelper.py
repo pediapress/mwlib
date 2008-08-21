@@ -52,7 +52,7 @@ def splitRow(row, params):
         cellHeight = 0
         items = []
         for item in cell.children:            
-            cellHeight += getNodeHeight(item)
+            cellHeight += getNodeHeight(item, params)
             if not items or cellHeight < maxCellHeight:
                 items.append(item)
             else:
