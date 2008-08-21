@@ -79,3 +79,11 @@ def test_preformatted_pipe():
     tokens=scanner.tokenize("   |foo")
     assert tokens==[('PRE', ' '), ('TEXT', '  '), ('SPECIAL', '|'), ('TEXT', 'foo')]
     
+def test_url_with_at_signs():
+    """http://code.pediapress.com/wiki/ticket/285"""
+    
+    tokens = scanner.tokenize('http://example.com/foo@bar@baz')
+    assert len(tokens) == 1
+    assert tokens[0] == ('URL', 'http://example.com/foo@bar@baz')
+
+
