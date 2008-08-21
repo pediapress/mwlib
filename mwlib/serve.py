@@ -349,6 +349,7 @@ class Application(wsgi.Application):
             output_path = self.get_path(collection_id, self.output_filename, writer)
             status = self.read_status_file(collection_id, writer)
             response = wsgi.Response(content=open(output_path, 'rb'))
+            os.utime(output_path)
             if 'content_type' in status:
                 response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
             else:
