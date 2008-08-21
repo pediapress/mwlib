@@ -439,6 +439,8 @@ class MWXHTMLWriter(object):
         return a
 
     xwriteArticleLink = xwriteLink
+    xwriteInterwikiLink = xwriteLink
+    xwriteNamespaceLink = xwriteLink
 
 
     def xwriteURL(self, obj):
