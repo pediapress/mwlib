@@ -8,7 +8,7 @@ import copy
 import inspect
 import re
 
-from mwlib.advtree import AdvancedNode
+from mwlib.advtree import AdvancedNode, removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                            Cite, Code, DefinitionList, Deleted, Div, Emphasized, HorizontalRule, ImageLink, Inserted,
                            InterwikiLink, Italic, Item, ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Overline, 
@@ -16,6 +16,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            Strike, Strong, Sub, Sup, Table, Teletyped, Text, Underline, URL, Var)
 
 from mwlib.treecleanerhelper import *
+
 
 def tryRemoveNode(node):
     if node.parent is not None:
@@ -156,6 +157,7 @@ class TreeCleaner(object):
                           'splitBigTableCells',# NEW
                           'removeNoPrintNodes',# NEW
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
+                          'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
@@ -169,10 +171,11 @@ class TreeCleaner(object):
             msg = ' '.join([repr(arg) for arg in args])        
         self.reports.append((caller, msg))
 
-
     def getReports(self):
         return self.reports
 
+    def removeNewlines(self, node):
+        removeNewlines(node)
 
     def removeEmptyTextNodes(self, node):
         """Removes Text nodes which contain no text at all.
@@ -466,7 +469,7 @@ class TreeCleaner(object):
             pass
 
     def _nestingBroken(self, node):
-        # FIXME: the list below was used and not node.isblocknode. is there a reason for that?
+        # FIXME: the list below is used and not node.isblocknode. is there a reason for that?
         blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
                       Blockquote, DefinitionList, HorizontalRule, Source)
         parents = node.getParents()
@@ -480,25 +483,31 @@ class TreeCleaner(object):
                     return parent
         return None
 
-
-    def _buildSubTree(self, badparent, path, problem_node, side):
-        if side == 'left':
+    def _buildSubTree(self, root, path, problem_node, side):
+        if side == 'bottom':
             remove_children = False
-        elif side == 'right':
+            for c in root.children[:]:
+                if remove_children or c == problem_node:
+                    root.removeChild(c)
+                if c in path:
+                    remove_children= True
+        elif side == 'top':
             remove_children = True
-            
-        for c in badparent.children:
-            if side == 'right' and (c in path or c == problem_node):
-                remove_children = not remove_children
-            if remove_children or c == problem_node:
-                badparent.removeChild(c)
-            if side == 'left' and (c in path or c == problem_node):
-                remove_children = not remove_children
-
-        for c in badparent.children:
+            for c in root.children[:]:
+                if c in path:
+                    remove_children= False
+                if remove_children or c == problem_node:
+                    root.removeChild(c)
+        for c in root.children:
             self._buildSubTree(c, path, problem_node, side)
-        
 
+    def _buildMiddleTree(self, treestart, path2top, problem_node):        
+        for c in treestart:
+            if not c in path2top and c != problem_node and not problem_node in c.getParents():
+                treestart.removeChild(c)
+        for c in treestart:
+            self._buildMiddleTree(c, path2top, problem_node)
+            
     def _fixNesting(self, node):
         """Nesting of nodes is corrected.
 
@@ -519,8 +528,6 @@ class TreeCleaner(object):
         bn_1.2
          nbn_4
         """
-        # FIXME: fix docstring
-        # FIXME: i think this code might leave empty nodes.
 
         # EXPLANATION OF ALGORITHM:
         # 1. detect node (problem_child) with a parent that is forbidden (bad_parent)
@@ -529,7 +536,7 @@ class TreeCleaner(object):
         # left tree is copied from original, all nodes further right than the
         # path to the root node from the problem_child are remove
         # same for right tree
-        
+
         bad_parent = self._nestingBroken(node)
         if bad_parent:
             path2root = node.getParents()
@@ -537,24 +544,33 @@ class TreeCleaner(object):
             root = bad_parent.parent
             path2root = path2root[path2root.index(root):]
 
-            ltree = bad_parent.copy()
-            self._buildSubTree(ltree, path2root, problem_node, 'left')
-
-            if bad_parent != node.parent:
-                assert len(path2root) > 2
-                middle = path2root[2] # root->badparent->firstgood
+            if bad_parent == node.parent: # direct nesting of problematic node and forbidden parent
+                mtree = node                
+                i = node.parent.children.index(node)
+                if i > 0:
+                    ttree = node.parent.copy()
+                    ttree.children = ttree.children[:i]
+                else:
+                    ttree = None
+                if i < len(node.parent.children):                    
+                    btree = node.parent.copy()
+                    btree.children = btree.children[i+1:]
+                else:
+                    btree = None
             else:
-                middle = node
-
-            rtree = bad_parent.copy()
-            self._buildSubTree(rtree, path2root, problem_node, 'right')
+                ttree = bad_parent.copy()
+                self._buildSubTree(ttree, path2root, problem_node, 'top')
+                mtree = path2root[2].copy()
+                self._buildMiddleTree(mtree, path2root, problem_node)
+                btree = bad_parent.copy()
+                self._buildSubTree(btree, path2root, problem_node, 'bottom')
 
             new_children = []
-            if ltree:
-                new_children.append(ltree)
-            new_children.append(middle)
-            if rtree:
-                new_children.append(rtree)
+            if ttree:
+                new_children.append(ttree)
+            new_children.append(mtree)
+            if btree:
+                new_children.append(btree)                
             self.report('replacing child', bad_parent, 'by', new_children)
             root.replaceChild(bad_parent, new_children)
             return True
