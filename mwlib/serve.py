@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
-"""WSGI server interface to mw-render and mw-zip"""
+"""WSGI server interface to mw-render and mw-zip/mw-post"""
 
+import functools
 import os
 import re
 import shutil
@@ -32,6 +33,7 @@ def no_job_queue(job_type, collection_id, args):
     else:
         kwargs = {'close_fds': True}
     try:
+        log.info('queueing %r' % args)
         subprocess.Popen(args, **kwargs)
     except OSError, exc:
         raise RuntimeError('Could not execute command %r: %s' % (
@@ -58,10 +60,24 @@ def make_collection_id(data):
 
 # ==============================================================================
 
+def json_response(fn):
+    """Decorator wrapping result of decorated function in JSON response"""
+    
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        result = fn(*args, **kwargs)
+        if isinstance(result, wsgi.Response):
+            return result
+        return wsgi.Response(
+            content=simplejson.dumps(result),
+            headers={'Content-Type': 'application/json'},
+        )
+    return wrapper
+
+# ==============================================================================
+
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
-    rendering_filename = 'rendering'
-    zipposting_filename = 'zipposting'
     error_filename = 'errors'
     status_filename = 'status'
     output_filename = 'output'
@@ -110,22 +126,15 @@ class Application(wsgi.Application):
             return self.error_response('error executing command %r: %s' % (
                 command, exc,
             ))
-        
-    def json_response(self, data):
-        return wsgi.Response(
-            content=simplejson.dumps(data),
-            headers={'Content-Type': 'application/json'},
-        )
     
+    @json_response
     def error_response(self, error):
         if isinstance(error, str):
             error = unicode(error, 'utf-8', 'ignore')
         elif not isinstance(error, unicode):
             error = unicode(repr(error), 'ascii')
         self.send_report_mail('error response', error=error)
-        return self.json_response({
-            'error': error,
-        })
+        return {'error': error}
     
     def send_report_mail(self, subject, **kwargs):
         if not (self.report_from_mail and self.report_recipients):
@@ -163,9 +172,15 @@ class Application(wsgi.Application):
             p += '.' + ext[:10]
         return p
     
+    @json_response
     def do_render(self, post_data):
+        metabook_data = post_data.get('metabook')
+        collection_id = post_data.get('collection_id')
+        if not (metabook_data or collection_id):
+            return self.error_response('POST argument metabook or collection_id required')
+        if metabook_data and collection_id:
+            return self.error_response('Specify either metabook or collection_id, not both')
         try:
-            metabook_data = post_data['metabook']
             base_url = post_data['base_url']
             writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
@@ -174,41 +189,51 @@ class Application(wsgi.Application):
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
+        force_render = bool(post_data.get('force_render'))
+        print 'FORCE_RENDER:', force_render
         
-        collection_id = self.new_collection(post_data)
+        if not collection_id:
+            collection_id = self.new_collection(post_data)
         
         log.info('render %s %s' % (collection_id, writer))
         
-        response = self.json_response({
+        response = {
             'collection_id': collection_id,
             'writer': writer,
-        })
-        
-        rendering_filename = self.get_path(collection_id, self.rendering_filename, writer)
-        if os.path.exists(rendering_filename):
-            return response
-        f = open(rendering_filename, 'wb')
-        f.write('1\n')
-        f.close()
+        }
         
         pid_path = self.get_path(collection_id, self.pid_filename, writer)
         if os.path.exists(pid_path):
+            log.info('mw-render already running for collection %r' % collection_id)
             return response
         
         output_path = self.get_path(collection_id, self.output_filename, writer)
         if os.path.exists(output_path):
-            log.info('re-using rendered file %r' % output_path)
-            return response
+            if force_render:
+                log.info('removing rendered file %r (forced rendering)' % output_path)
+                utils.safe_unlink(output_path)
+            else:
+                log.info('re-using rendered file %r' % output_path)
+                response['is_cached'] = True
+                return response
         
         status_path = self.get_path(collection_id, self.status_filename, writer)
         if os.path.exists(status_path):
-            log.info('status file exists %r' % status_path)
-            return response
+            if force_render:
+                log.info('removing status file %r (forced rendering)' % status_path)
+                utils.safe_unlink(status_path)
+            else:
+                log.info('status file exists %r' % status_path)
+                return response
         
         error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
-            log.info('error file exists %r' % error_path)
-            return response
+            if force_render:
+                log.info('removing error file %r (forced rendering)' % error_path)
+                utils.safe_unlink(error_path)
+            else:
+                log.info('error file exists %r' % error_path)
+                return response
         
         if self.mwrender_logfile:
             logfile = self.mwrender_logfile
@@ -236,6 +261,8 @@ class Application(wsgi.Application):
             if template_exclusion_category:
                 args.extend(['--template-exclusion-category', template_exclusion_category])
         else:
+            if force_render:
+                return self.error_response('Forced to render document which has not been previously rendered.')
             log.info('rendering %r' % output_path)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
             f = open(metabook_path, 'wb')
@@ -268,6 +295,7 @@ class Application(wsgi.Application):
         except (IOError, ValueError):
             return {'progress': 0}
     
+    @json_response
     def do_render_status(self, post_data):
         try:
             collection_id = post_data['collection_id']
@@ -281,11 +309,11 @@ class Application(wsgi.Application):
         
         output_path = self.get_path(collection_id, self.output_filename, writer)
         if os.path.exists(output_path):
-            return self.json_response({
+            return {
                 'collection_id': collection_id,
                 'writer': writer,
                 'state': 'finished',
-            })
+            }
         
         error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
@@ -295,20 +323,21 @@ class Application(wsgi.Application):
                 writer=writer,
                 error=text,
             )
-            return self.json_response({
+            return {
                 'collection_id': collection_id,
                 'writer': writer,
                 'state': 'failed',
                 'error': text,
-            })
+            }
         
-        return self.json_response({
+        return {
             'collection_id': collection_id,
             'writer': writer,
             'state': 'progress',
             'status': self.read_status_file(collection_id, writer),
-        })
+        }
     
+    @json_response
     def do_render_kill(self, post_data):
         try:
             collection_id = post_data['collection_id']
@@ -328,11 +357,11 @@ class Application(wsgi.Application):
             killed = True
         except (OSError, ValueError, IOError):
             pass
-        return self.json_response({
+        return {
             'collection_id': collection_id,
             'writer': writer,
             'killed': killed,
-        })
+        }
     
     def do_download(self, post_data):
         try:
@@ -366,6 +395,7 @@ class Application(wsgi.Application):
             log.ERROR('exception in do_download(): %r' % exc)
             return self.http500()
     
+    @json_response
     def do_zip_post(self, post_data):
         try:
             metabook_data = post_data['metabook']
@@ -380,30 +410,24 @@ class Application(wsgi.Application):
         if pod_api_url:
             result = simplejson.loads(urllib2.urlopen(pod_api_url, data="any").read())
             post_url = result['post_url']
-            response = self.json_response({
+            response = {
                 'state': 'ok',
                 'redirect_url': result['redirect_url'],
-            })
+            }
         else:
             try:
                 post_url = post_data['post_url']
             except KeyError:
                 return self.error_response('POST argument required: post_url')
-            response = self.json_response({'state': 'ok'})
+            response = {'state': 'ok'}
         
         collection_id = self.new_collection(post_data)
         
         log.info('zip_post %s %s' % (collection_id, pod_api_url))
         
-        zipposting_filename = self.get_path(collection_id, self.zipposting_filename)
-        if os.path.exists(zipposting_filename):
-            return response
-        f = open(zipposting_filename, 'wb')
-        f.write('1\n')
-        f.close()
-        
         pid_path = self.get_path(collection_id, self.pid_filename, 'zip')
         if os.path.exists(pid_path):
+            log.info('mw-zip/mw-post already running for collection %r' % collection_id)
             return response
         
         zip_path = self.get_path(collection_id, self.zip_filename)
