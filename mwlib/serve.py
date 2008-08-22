@@ -190,7 +190,6 @@ class Application(wsgi.Application):
         template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
         force_render = bool(post_data.get('force_render'))
-        print 'FORCE_RENDER:', force_render
         
         if not collection_id:
             collection_id = self.new_collection(post_data)
