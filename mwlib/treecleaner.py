@@ -139,6 +139,7 @@ class TreeCleaner(object):
         """Clean parse tree using all available cleaner methods."""
 
         cleanerMethods = ['removeEmptyTextNodes',
+                          'cleanSectionCaptions',
                           'removeChildlessNodes',
                           'removeLangLinks',
                           'removeListOnlyParagraphs',
@@ -154,7 +155,6 @@ class TreeCleaner(object):
                           'swapNodes',# NEW
                           'splitBigTableCells',# NEW
                           'removeNoPrintNodes',# NEW
-                          'removeBlockNodesFromSectionCaptions',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
@@ -632,8 +632,18 @@ class TreeCleaner(object):
             self.removeNoPrintNodes(c)
 
 
-    def removeBlockNodesFromSectionCaptions(self, node):
-        """Remove all block nodes from Section nodes, keep the content."""
+    def cleanSectionCaptions(self, node):
+        """Remove all block nodes from Section nodes, keep the content. If section title is empty replace section by br node"""
+        
+        if node.__class__ == Section:
+            assert node.children
+            assert node.parent
+            if not node.children[0].children:
+                children = [BreakingReturn()]
+                if len(node.children) > 1: # at least one "content" node
+                    children.extend(node.children)
+                self.report('replaced section with empty title with br node')
+                node.parent.replaceChild(node, children)
     
         if node.__class__ == Section:
             caption_node = node.children[0]
@@ -641,11 +651,10 @@ class TreeCleaner(object):
             for c in children:
                 if c.isblocknode:
                     self.report('removed block node', c)
-                    #c.parent.removeChild(c)
                     c.parent.replaceChild(c, c.children)
 
         for c in node.children[:]:
-            self.removeBlockNodesFromSectionCaptions(c)
+            self.cleanSectionCaptions(c)
             
 
 
