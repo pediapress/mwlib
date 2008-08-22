@@ -176,18 +176,13 @@ def test_fixNesting1():
     raw = r'''
  preformatted text <source>some source text</source> some text after the source node    
     '''
-
-    tree = getTreeFromMarkup(raw)
-    showTree(tree)
-    print "*"*40
-    
     tree, reports = cleanMarkup(raw)
-
-    showTree(tree)
     source_node = tree.getChildNodesByClass(Source)[0]
-    assert not _any([p.__class__ == PreFormatted for p in source_node.getParents()])
-   
-
+    assert not _any([p.__class__ == PreFormatted for p in source_node.getParents()]) 
+    p = tree.getChildNodesByClass(Paragraph)[0]
+    assert p.children[0].__class__ == PreFormatted and p.children[0].children[0].caption.find('preformatted text') > -1
+    assert p.children[1].__class__ == Source and len(p.children[1].children) > 0
+    assert p.children[2].__class__ == PreFormatted and p.children[2].children[0].caption.find('some text') > -1
 
 def test_fixNesting2():
     raw = r'''
@@ -208,6 +203,7 @@ para 1
 para 2
 </strike>
     '''
+
     tree, reports = cleanMarkup(raw)
     paras = tree.getChildNodesByClass(Paragraph)
     for para in paras:
@@ -228,8 +224,12 @@ regular para
 
 </strike>
 """
+
+    tree = getTreeFromMarkup(raw)
+    showTree(tree)
     
     tree, reports = cleanMarkup(raw)
+    showTree(tree)
     paras = tree.getChildNodesByClass(Paragraph)
     for para in paras:
         assert not para.getChildNodesByClass(Paragraph)
@@ -287,7 +287,7 @@ def test_fixParagraphs():
     assert False
 
 
-def test_removeBlockNodesFromSectionCaptions():
+def test_cleanSectionCaptions():
     raw = r'''
 ==<center>centered heading</center>==    
     '''
@@ -295,6 +295,14 @@ def test_removeBlockNodesFromSectionCaptions():
     tree, reports = cleanMarkup(raw)
     section_node = tree.getChildNodesByClass(Section)[0]
     assert _all([p.__class__ != Center for p in section_node.children[0].getAllChildren()])
+
+def test_cleanSectionCaptions2():
+    raw = """=== ===
+    bla
+    """
+
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(Section)) == 0
 
     
 def numBR(tree):
