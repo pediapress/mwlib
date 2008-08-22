@@ -107,9 +107,10 @@ def buildzip():
     else:
         podclient = None
     
+    from mwlib import utils
+    
     if options.daemonize:
-        from mwlib.utils import daemonize
-        daemonize()
+        utils.daemonize()
     if options.pid_file:
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
@@ -157,11 +158,10 @@ def buildzip():
             raise
     finally:
         if options.output is None and filename is not None:
-            try:
-                print 'removing %r' % filename
-                os.unlink(filename)
-            except Exception, e:
-                print 'ERROR: Could not delete file %r: %s' % (filename, e)
+            print 'removing %r' % filename
+            utils.safe_unlink(filename)
+        if options.pid_file:
+            utils.safe_unlink(options.pid_file)
 
 def post():
     parser = optparse.OptionParser(usage="%prog OPTIONS")
@@ -219,14 +219,18 @@ def post():
         podclient.post_current_article(title)
     
     try:
-        set_progress(0)
-        set_status('uploading')
-        podclient.post_zipfile(options.input)
-        set_status('finished')
-        set_progress(100)
-    except Exception, e:
-        set_status('error')
-        raise
+        try:
+            set_progress(0)
+            set_status('uploading')
+            podclient.post_zipfile(options.input)
+            set_status('finished')
+            set_progress(100)
+        except Exception, e:
+            set_status('error')
+            raise
+    finally:
+        if options.pid_file:
+            utils.safe_unlink(options.pid_file)
 
 def render():
     from mwlib.options import OptionParser
@@ -262,7 +266,7 @@ def render():
     import pkg_resources
     from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
-    from mwlib import recorddb, zipwiki
+    from mwlib import recorddb, utils, zipwiki
     
     use_help = 'Use --help for usage information.'
     
@@ -329,8 +333,7 @@ def render():
                 writer_options[wopt] = True
     
     if options.daemonize:
-        from mwlib.utils import daemonize
-        daemonize()
+        utils.daemonize()
     if options.pid_file:
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
@@ -387,10 +390,7 @@ def render():
                 kwargs['file_extension'] = writer.file_extension
             set_status(status='finished', progress=100, **kwargs)
             if options.keep_zip is None and zip_filename is not None:
-                try:
-                    os.unlink(zip_filename)
-                except Exception, e:
-                    print 'Could not remove %r: %s' % (zip_filename, e)
+                utils.safe_unlink(zip_filename)
         except Exception, e:
             set_status(status='error')
             if options.error_file:
@@ -409,6 +409,8 @@ def render():
                 env.images.clear()
             except Exception, e:
                 print 'ERROR: Could not remove temporary images: %s' % e
+        if options.pid_file:
+            utils.safe_unlink(options.pid_file)
 
 def parse():
     parser = optparse.OptionParser(usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]")
@@ -662,6 +664,9 @@ def serve():
             **flup_kwargs
         ).run()
     
+    if options.pid_file:
+        utils.safe_unlink(options.pid_file)
+    
     log.info('exit.')
 
 def watch():
@@ -710,6 +715,9 @@ def watch():
         processing_dir=options.processing_dir,
         max_num_jobs=options.num_jobs,
     ).run_forever()
+    
+    if options.pid_file:
+        utils.safe_unlink(options.pid_file)
 
 def testserve():
     parser = optparse.OptionParser(usage="%prog --config CONFIG ARTICLE [...]")

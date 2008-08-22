@@ -238,6 +238,16 @@ class PersistedDict(UserDict.UserDict):
 
 # ==============================================================================
 
+def safe_unlink(filename):
+    """Never failing os.unlink()"""
+    
+    try:
+        os.unlink(filename)
+    except Exception, exc:
+        log.warn('Could not remove file %r: %s' % (filename, exc))
+
+# ==============================================================================
+
 fetch_cache = {}
 
 def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
