@@ -542,7 +542,7 @@ class ImageLink(Link):
                 idx += 1
                 continue
 
-            x = x.caption.lower()
+            x = x.caption.lower().strip()
             
             if x == 'thumb' or x=='thumbnail':
                 self.thumb = True
