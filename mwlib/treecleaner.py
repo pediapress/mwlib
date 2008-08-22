@@ -163,6 +163,7 @@ class TreeCleaner(object):
                           'removeNoPrintNodes',# NEW
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
+                          'removeBreakingReturns', # NEW
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
