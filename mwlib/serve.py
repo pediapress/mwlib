@@ -10,12 +10,13 @@ import simplejson
 import StringIO
 import subprocess
 import time
+import urllib2
 try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
 
-from mwlib import filequeue, log, utils, wsgi, _version
+from mwlib import filequeue, log, podclient, utils, wsgi, _version
 
 # ==============================================================================
 
@@ -349,7 +350,7 @@ class Application(wsgi.Application):
             output_path = self.get_path(collection_id, self.output_filename, writer)
             status = self.read_status_file(collection_id, writer)
             response = wsgi.Response(content=open(output_path, 'rb'))
-            os.utime(output_path)
+            os.utime(output_path, None)
             if 'content_type' in status:
                 response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
             else:
@@ -369,18 +370,30 @@ class Application(wsgi.Application):
         try:
             metabook_data = post_data['metabook']
             base_url = post_data['base_url']
-            post_url = post_data['post_url']
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
         
-        collection_id = self.new_collection(post_data)
-
-        log.info('zip_post %s %s' % (collection_id, post_url))
+        pod_api_url = post_data.get('pod_api_url', '')
+        if pod_api_url:
+            result = simplejson.loads(urllib2.urlopen(pod_api_url, data="any").read())
+            post_url = result['post_url']
+            response = self.json_response({
+                'state': 'ok',
+                'redirect_url': result['redirect_url'],
+            })
+        else:
+            try:
+                post_url = post_data['post_url']
+            except KeyError:
+                return self.error_response('POST argument required: post_url')
+            response = self.json_response({'state': 'ok'})
         
-        response = self.json_response({'state': 'ok'})
+        collection_id = self.new_collection(post_data)
+        
+        log.info('zip_post %s %s' % (collection_id, pod_api_url))
         
         zipposting_filename = self.get_path(collection_id, self.zipposting_filename)
         if os.path.exists(zipposting_filename):
