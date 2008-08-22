@@ -10,7 +10,7 @@ import tempfile
 import threading
 import zipfile
 
-from mwlib import uparser, parser, jobsched, metabook, mwapidb
+from mwlib import uparser, parser, jobsched, metabook, mwapidb, utils
 import mwlib.log
 
 # ==============================================================================
@@ -362,9 +362,7 @@ def make_zip_file(output, env,
         return output
     finally:
         if os.path.exists(tmpzip):
-            try:
-                os.unlink(tmpzip)
-            except Exception, e:
-                print 'ERROR: Could not remove %r' % tmpzip
+            utils.safe_.unlink(tmpzip)
+
 
 
