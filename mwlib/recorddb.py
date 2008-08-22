@@ -286,14 +286,13 @@ class ZipfileCreator(object):
 
 
 def make_zip_file(output, env,
-    set_progress=None,
-    set_current_article=None,
+    status=None,
     num_article_threads=3,
     num_image_threads=5,
     imagesize=800,
 ):
-    set_progress = set_progress or (lambda p: None)
-    set_current_article = set_current_article or (lambda t: None)
+    if status is None:
+        status = lambda **kwargs: None
     
     if output is None:
         fd, output = tempfile.mkstemp(suffix='.zip')
@@ -317,8 +316,7 @@ def make_zip_file(output, env,
                 p = 0
                 def __call__(self, title):
                     self.p += self.inc
-                    set_progress(int(self.p))
-                    set_current_article(title)
+                    status(progress=int(self.p), article=title)
             inc_progress = IncProgress()
         else:
             inc_progress = None
@@ -358,7 +356,7 @@ def make_zip_file(output, env,
         if env.images and hasattr(env.images, 'clear'):
             env.images.clear()
     
-        set_progress(100)
+        status(progress=100)
         return output
     finally:
         if os.path.exists(tmpzip):

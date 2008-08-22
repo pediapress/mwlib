@@ -113,48 +113,33 @@ def buildzip():
         utils.daemonize()
     if options.pid_file:
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
-    
-    def set_status(status):
-        print 'Status: %s' % status
-        if podclient is not None:
-            podclient.post_status(status)
-        
-    def set_progress(progress):
-        print 'Progress: %d%%' % progress
-        if podclient is not None:
-            podclient.post_progress(int(progress))
-    
-    def set_current_article(title):
-        print 'Current Article: %r' % title
-        if podclient is not None:
-            podclient.post_current_article(title)
-    
+
     filename = None
     try:
         try:
             env = parser.makewiki()
         
+            from mwlib.status import Status
             from mwlib import recorddb
         
-            set_status('parsing')
-            set_progress(0)
-        
+            status = Status(podclient=podclient, progress_range=(1, 90))
+            status(status='parsing', progress=0)
+            
             filename = recorddb.make_zip_file(options.output, env,
-                set_progress=lambda p: set_progress(p*0.9),
-                set_current_article=set_current_article,
+                status=status,
                 num_article_threads=options.num_article_threads,
                 num_image_threads=options.num_image_threads,
                 imagesize=options.imagesize,
             )
         
+            status = Status(podclient=podclient, progress_range=(91, 100))
             if podclient:
-                set_status('uploading')
+                status(status='uploading', progress=0)
                 podclient.post_zipfile(filename)
-        
-            set_status('finished')
-            set_progress(100)
+            
+            status(status='finished', progress=100)
         except Exception, e:
-            set_status('error')
+            status(status='error')
             raise
     finally:
         if options.output is None and filename is not None:
@@ -197,6 +182,7 @@ def post():
         webbrowser.open(podclient.redirecturl)
     
     from mwlib import utils
+    from mwlib.status import Status
     
     if options.logfile:
         utils.start_logging(options.logfile)
@@ -206,27 +192,16 @@ def post():
     if options.pid_file:
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
-    def set_status(status):
-        print 'Status: %s' % status
-        podclient.post_status(status)
-        
-    def set_progress(progress):
-        print 'Progress: %d%%' % progress
-        podclient.post_progress(int(progress))
     
-    def set_current_article(title):
-        print 'Current Article: %r' % title
-        podclient.post_current_article(title)
+    status = Status(podclient=podclient)
     
     try:
         try:
-            set_progress(0)
-            set_status('uploading')
+            status(status='uploading', progress=0)
             podclient.post_zipfile(options.input)
-            set_status('finished')
-            set_progress(100)
+            status(status='finished', progress=100)
         except Exception, e:
-            set_status('error')
+            status(status='error')
             raise
     finally:
         if options.pid_file:
@@ -267,6 +242,7 @@ def render():
     from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
     from mwlib import recorddb, utils, zipwiki
+    from mwlib.status import Status
     
     use_help = 'Use --help for usage information.'
     
@@ -337,37 +313,18 @@ def render():
     if options.pid_file:
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
-    last_status = {}
-    def set_status(status=None, progress=None, article=None, content_type=None, file_extension=None):
-        if status is not None:
-            last_status['status'] = status
-            print 'STATUS: %s' % status
-        if progress is not None:
-            assert 0 <= progress and progress <= 100, 'status not in range 0..100'
-            last_status['progress'] = progress
-            print 'PROGRESS: %d%%' % progress
-        if article is not None:
-            last_status['article'] = article
-            print 'ARTICLE: %r' % article
-        if content_type is not None:
-            last_status['content_type'] = content_type
-        if file_extension is not None:
-            last_status['file_extension'] = file_extension
-        if options.status_file:
-            open(options.status_file, 'wb').write(simplejson.dumps(last_status).encode('utf-8'))
+    status = Status(options.status_file, progress_range=(1, 70))
+    status(status='parsing', progress=0)
     
     env = None
     try:
         try:
             env = parser.makewiki()
         
-            set_status(status='parsing', progress=0)
-        
             if not isinstance(env.wiki, zipwiki.Wiki)\
                 or not isinstance(env.images, zipwiki.ImageDB):
                 zip_filename = recorddb.make_zip_file(options.keep_zip, env,
-                    set_progress=lambda p: set_status(progress=0.7*p),
-                    set_current_article=lambda t: set_status(article=t),
+                    status=status,
                     num_article_threads=options.num_article_threads,
                     num_image_threads=options.num_image_threads,
                     imagesize=options.imagesize,
@@ -378,21 +335,25 @@ def render():
                 env.images = zipwiki.ImageDB(zip_filename)
             else:
                 zip_filename = None
-        
+            
+            print 'START WITH PROGRESS'
+            status = Status(options.status_file, progress_range=(71, 100))
+            status(status='rendering', progress=0)
+            
             fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
             os.close(fd)
-            writer(env, output=tmpout, status_callback=set_status, **writer_options)
+            writer(env, output=tmpout, status_callback=status, **writer_options)
             os.rename(tmpout, options.output)
             kwargs = {}
             if hasattr(writer, 'content_type'):
                 kwargs['content_type'] = writer.content_type
             if hasattr(writer, 'file_extension'):
                 kwargs['file_extension'] = writer.file_extension
-            set_status(status='finished', progress=100, **kwargs)
+            status(status='finished', progress=100, **kwargs)
             if options.keep_zip is None and zip_filename is not None:
                 utils.safe_unlink(zip_filename)
         except Exception, e:
-            set_status(status='error')
+            status(status='error')
             if options.error_file:
                 fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
                 f = os.fdopen(fd, 'wb')
