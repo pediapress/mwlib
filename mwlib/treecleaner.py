@@ -489,9 +489,6 @@ class TreeCleaner(object):
         clean_parents.reverse()
         parents = clean_parents
 
-        if node.__class__ == Paragraph:
-            print parents, node
-
         if self.nesting_strictness == 'loose':
             for parent in parents:
                 if parent.__class__ in self.forbidden_parents.get(node.__class__, []):
