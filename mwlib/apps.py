@@ -115,20 +115,20 @@ def buildzip():
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
 
     filename = None
+    status = None
     try:
         try:
             env = parser.makewiki()
         
             from mwlib.status import Status
-            from mwlib import recorddb
+            from mwlib import zipcreator
         
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(status='parsing', progress=0)
             
-            filename = recorddb.make_zip_file(options.output, env,
+            filename = zipcreator.make_zip_file(options.output, env,
                 status=status,
-                num_article_threads=options.num_article_threads,
-                num_image_threads=options.num_image_threads,
+                num_threads=options.num_threads,
                 imagesize=options.imagesize,
             )
         
@@ -139,7 +139,8 @@ def buildzip():
             
             status(status='finished', progress=100)
         except Exception, e:
-            status(status='error')
+            if status:
+                status(status='error')
             raise
     finally:
         if options.output is None and filename is not None:
@@ -241,7 +242,7 @@ def render():
     import pkg_resources
     from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
-    from mwlib import recorddb, utils, zipwiki
+    from mwlib import utils, zipwiki, zipcreator
     from mwlib.status import Status
     
     use_help = 'Use --help for usage information.'
@@ -323,7 +324,7 @@ def render():
         
             if not isinstance(env.wiki, zipwiki.Wiki)\
                 or not isinstance(env.images, zipwiki.ImageDB):
-                zip_filename = recorddb.make_zip_file(options.keep_zip, env,
+                zip_filename = zipcreator.make_zip_file(options.keep_zip, env,
                     status=status,
                     num_article_threads=options.num_article_threads,
                     num_image_threads=options.num_image_threads,
