@@ -207,7 +207,7 @@ class _compat_scanner(object):
                                 break
                         res.append(("TEXT", g()))
                         i+=1
-                elif tt.t in self.tagextensions:
+                elif tt.t in self.tagextensions or tt.t=='imagemap':
                     if closingOrSelfClosing:
                         i+=1
                         continue
