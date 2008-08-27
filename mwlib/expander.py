@@ -253,11 +253,6 @@ def optimize(node):
 
     
 class Parser(object):
-    template_ns = set([ ((5, u'Template'), (5, u':')),
-                        ((5, u'Vorlage'), (5, u':')),
-                        ])
-
-
     def __init__(self, txt):
         if isinstance(txt, str):
             txt = unicode(txt)
