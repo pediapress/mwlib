@@ -8,8 +8,6 @@ log = Log('wikidbbase')
 class WikiDBBase(object):
     """Base class for WikiDBs"""
     
-    interwikimap = None
-    
     def getLinkURL(self, link, title, revision=None):
         """Get a full HTTP URL for the given link object, parsed from an article
         in this WikiDB.
