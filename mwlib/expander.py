@@ -114,7 +114,24 @@ class Node(object):
                 res.append(x)
             else:
                 flatten(x, expander, variables, res)
+    
+    @property
+    def descendants(self):
+        """Iterator yielding all descendants of this Node which are Nodes"""
         
+        for c in self.children:
+            yield c
+            if not isinstance(c, Node):
+                continue
+            for x in c.descendants:
+                yield x        
+    
+    def find(self, tp):
+        """Return instances of type tp in self.descendants"""
+        
+        return [x for x in self.descendants if isinstance(x, tp)]
+    
+
 class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []
