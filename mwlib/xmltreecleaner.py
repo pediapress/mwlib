@@ -90,6 +90,10 @@ def fixParagraphs(root):
     
 
 
+    
+blockelements = (advtree.Paragraph, advtree.PreFormatted, advtree.ItemList,advtree.Section, advtree.Table,
+                 advtree.Blockquote, advtree.DefinitionList, advtree.HorizontalRule, advtree.Source)
+
 def _fixBlockElements(element):
     """
     the parser uses paragraphs to group anything
@@ -109,11 +113,8 @@ def _fixBlockElements(element):
     bn_3
     bn_1.2
      nbn_4
-    
 
     """
-    blockelements = (advtree.Paragraph, advtree.PreFormatted, advtree.ItemList,advtree.Section, advtree.Table,
-                     advtree.Blockquote, advtree.DefinitionList, advtree.HorizontalRule, advtree.Source)
 
     if isinstance(element, blockelements) and element.parent and isinstance(element.parent, blockelements) \
             and not isinstance(element.parent, advtree.Section) : # Section is no problem if parent
@@ -144,5 +145,16 @@ def fixBlockElements(root):
     while _fixBlockElements(root):
         #print "_run fix block elements"
         pass
+
+    def _check(c, p=None):
+        if p and p.__class__ in blockelements:
+            if c.__class__ in blockelements and not isinstance(p, advtree.Section):
+                print "p:", p, "c:", c
+                assert (not c.__class__ in blockelements) or (not p.__class__ in blockelements)
+
+        for cc in c.children:
+            _check(cc, c)
+    
+    #_check(root)
         
                 
