@@ -2,7 +2,6 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-import functools
 import os
 import re
 import shutil
@@ -63,7 +62,6 @@ def make_collection_id(data):
 def json_response(fn):
     """Decorator wrapping result of decorated function in JSON response"""
     
-    @functools.wraps(fn)
     def wrapper(*args, **kwargs):
         result = fn(*args, **kwargs)
         if isinstance(result, wsgi.Response):
