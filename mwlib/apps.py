@@ -326,8 +326,7 @@ def render():
                 or not isinstance(env.images, zipwiki.ImageDB):
                 zip_filename = zipcreator.make_zip_file(options.keep_zip, env,
                     status=status,
-                    num_article_threads=options.num_article_threads,
-                    num_image_threads=options.num_image_threads,
+                    num_threads=options.num_threads,
                     imagesize=options.imagesize,
                 )
                 if env.images:
