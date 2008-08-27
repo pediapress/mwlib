@@ -77,3 +77,24 @@ class JobScheduler(object):
             self.semaphore.acquire()
         self.semaphore = None
     
+# ==============================================================================
+
+class DummyJobScheduler(object):
+    """Dummy (not-threaded) job 'scheduler'"""
+    
+    def add_job(self, job_id, do_job, **kwargs):
+        """Execute the given job
+        
+        @param job_id: unique ID for this job
+        @type job_id: hashable object
+
+        @param do_job: callable which gets called with job_id and kwargs
+        @type do_job: callable with signature do_job(job_id, **kwargs) -> None
+        """
+        
+        do_job(job_id, **kwargs)
+    
+    def join(self):
+        pass
+    
+

@@ -45,14 +45,9 @@ class OptionParser(optparse.OptionParser):
             action='store_true',
             help='do not use threads to fetch articles and images in parallel',
         )
-        self.add_option('--num-article-threads',
-            help='number of threads to fetch articles in parallel (default: 5)',
-            default='3',
-            metavar='NUM',
-        )
-        self.add_option('--num-image-threads',
-            help='number of threads to fetch images in parallel (default: 5)',
-            default='5',
+        self.add_option('--num-threads',
+            help='number of threads to fetch resources in parallel (default: 10)',
+            default='10',
             metavar='NUM',
         )
         self.add_option("-d", "--daemonize", action="store_true",
@@ -92,20 +87,13 @@ class OptionParser(optparse.OptionParser):
             self.error('Argument for --imagesize must be an integer > 0.')
         
         try:
-            self.options.num_article_threads = int(self.options.num_article_threads)
-            assert self.options.num_article_threads >= 0
+            self.options.num_threads = int(self.options.num_threads)
+            assert self.options.num_threads >= 0
         except (ValueError, AssertionError):
-            self.error('Argument for --num-article-threads must be an integer >= 0.')
-        
-        try:
-            self.options.num_image_threads = int(self.options.num_image_threads)
-            assert self.options.num_image_threads >= 0
-        except (ValueError, AssertionError):
-            self.error('Argument for --num-image-threads must be an integer >= 0.')
+            self.error('Argument for --num-threads must be an integer >= 0.')
         
         if self.options.no_threads:
-            self.options.num_article_threads = 0
-            self.options.num_image_threads = 0
+            self.options.num_threads = 0
         
         if self.args:
             if self.metabook is None:

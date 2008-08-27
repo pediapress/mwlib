@@ -223,7 +223,7 @@ class APIHelper(object):
         q = urllib.urlencode(args)
         q = q.replace('%3A', ':') # fix for wrong quoting of url for images
         q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
-
+        
         for i in range(num_tries):
             try:
                 s = time.time()
@@ -234,9 +234,12 @@ class APIHelper(object):
                 elapsed = time.time() - s
                 if elapsed > self.long_request:
                     log.warn('Long request: HTTP request took %f s' % elapsed)
+                if data is not None:
+                    break
             except:
                 if i == num_tries - 1:
                     raise
+            log.warn('Fetching failed. Trying again.')
             time.sleep(0.5)
         
         if ignore_errors and data is None:
@@ -705,8 +708,7 @@ class WikiDB(wikidbbase.WikiDBBase):
                 name='%s (%s)' % (g['sitename'], g['lang']),
                 language=g['lang'],
             )
-            if self.interwikimap is None:
-                self.getInterwikiMap(title, revision=revision)
+            self.getInterwikiMap(title, revision=revision)
             if self.interwikimap:
                 self.source['interwikimap'] = self.interwikimap
             return self.source
@@ -722,7 +724,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         @rtype: dict
         """
         
-        if self.interwikimap is not None:
+        if hasattr(self, 'interwikimap'):
             return self.interwikimap
         result = self.api_helper.query(
             meta='siteinfo',
