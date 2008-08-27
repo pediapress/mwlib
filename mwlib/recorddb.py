@@ -360,7 +360,7 @@ def make_zip_file(output, env,
         return output
     finally:
         if os.path.exists(tmpzip):
-            utils.safe_.unlink(tmpzip)
+            utils.safe_unlink(tmpzip)
 
 
 
