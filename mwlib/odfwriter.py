@@ -221,22 +221,15 @@ class ODFWriter(object):
             else:
                 raise Exception("unknown node:%r" % obj)
             
-            if not isinstance(e,list):
-                element_list = [e]
-            else: 
-                element_list = e
-            
-            for e in element_list:
-            
-                if isinstance(e, SkipChildren): # do not process children of this node
-                    if e.element is not None:
-                        saveAddChild(parent, e.element)
-                    return # skip
-                elif e is None:
-                    e = parent
-                else:
-                    if not saveAddChild(parent, e):
-                        return # 
+            if isinstance(e, SkipChildren): # do not process children of this node
+                if e.element is not None:
+                    saveAddChild(parent, e.element)
+                return # skip
+            elif e is None:
+                e = parent
+            else:
+                if not saveAddChild(parent, e):
+                    return # 
 
             for c in obj.children[:]:
                 self.write(c,e)
@@ -351,30 +344,29 @@ class ODFWriter(object):
         return SkipChildren(tr)
 
     def owriteCaption(self, obj):
-        #texts = obj.getChildNodesByClass(advtree.Text)
-        #p = ParagraphProxy(stylename=style.tableCaption)
-        #p.addText(texts[0].caption)
-        #texts[0].writeto = p
-        #texts[0].parent = None
-        #return texts[0]
-        # FIXME
-        pass
+        # are there caption not in tables ???? FIXME
+        if isinstance(obj.parent, advtree.Table):
+            return SkipChildren()
+        pass # FIXME 
+
+    def _writeTableCaption(self, obj):
+        p =  ParagraphProxy(stylename = style.center)
+        self.writeChildren(obj, p)
+        return p
 
     def owriteTable(self, obj): # FIXME ADD FORMATTING
         # http://books.evc-cit.info/odbook/ch04.html#text-table-section
-        captions = obj.getChildNodesByClass(advtree.Caption)
-        if captions: #handle captions first
-            pC = self.owriteCaption(captions[0])
-            for cap in captions: 
-                obj.removeChild(cap)
-
+       
+        # add a caption if avaiable
+        for caption in obj.getChildNodesByClass(advtree.Caption):
+            caption_element = self._writeTableCaption(caption)
+            break # only one caption expected and allowed
+        
         t = table.Table()
         tc = table.TableColumn(stylename=style.dumbcolumn, numbercolumnsrepeated=str(obj.numcols)) # FIXME FIXME
         t.addElement(tc)
-        if captions:
-            return [pC,t]
+        
         return t
-
 
 # ---- inline formattings -------------------
 # use span
