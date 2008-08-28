@@ -350,23 +350,31 @@ class ODFWriter(object):
         pass # FIXME 
 
     def _writeTableCaption(self, obj):
-        p =  ParagraphProxy(stylename = style.center)
+        p =  ParagraphProxy(stylename=style.tableCaption)
         self.writeChildren(obj, p)
         return p
 
+
     def owriteTable(self, obj): # FIXME ADD FORMATTING
         # http://books.evc-cit.info/odbook/ch04.html#text-table-section
-       
-        # add a caption if avaiable
-        for caption in obj.getChildNodesByClass(advtree.Caption):
-            caption_element = self._writeTableCaption(caption)
-            break # only one caption expected and allowed
-        
+             
         t = table.Table()
         tc = table.TableColumn(stylename=style.dumbcolumn, numbercolumnsrepeated=str(obj.numcols)) # FIXME FIXME
         t.addElement(tc)
         
-        return t
+        captions = [c for c in obj.children if isinstance(c, advtree.Caption)]
+        if not captions : # handle table w/o caption:
+            return t
+        else: # a section groups table-caption & table:
+            if not len(captions) == 1:
+                log("owriteTable: more than one Table Caption not handeled. Using only first Caption!")
+            sec = text.Section(stylename=style.sectTable, name="table section")
+            caption_element = self._writeTableCaption(captions[0])  # only one caption expected and allowed
+            sec.addElement(caption_element)
+            sec.addElement(t)
+            sec.writeto=t
+            return sec
+
 
 # ---- inline formattings -------------------
 # use span
