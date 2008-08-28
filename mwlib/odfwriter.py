@@ -43,11 +43,14 @@ if hasattr(e, "elements"): # odfpy-0.7
         self.elements.append(e)
     element.Element.appendChild = _f
     element.Element.lastChild = property(lambda s:s.elements[-1])
+    element.Element.setAttribute = element.Element.addAttribute
 else:
+    # assume this api is stable
     log("assumming odfpy-0.8x")
     assert hasattr(e, "appendChild")
-    element.Element.lastChild = property(lambda s:s.childNodes[-1])
-    element.Element.addAttribute = element.Element.setAttribute
+    assert hasattr(e, "lastChild")
+    assert hasattr(e, "setAttribute")
+
 # ------------ done patching --------------------------------------------
 
 
@@ -348,7 +351,7 @@ class ODFWriter(object):
         # 
         #rs = cell.rowspan
         #if rs:
-        #    t.addAttribute(":numberrowsspanned",str(rs))
+        #    t.setAttribute(":numberrowsspanned",str(rs))
         return t    
 
     def owriteRow(self, row): # COLSPAN FIXME
@@ -357,7 +360,7 @@ class ODFWriter(object):
             cs =  c.colspan
             self.write(c,tr)
             if cs:
-                tr.lastChild.addAttribute("numbercolumnsspanned",str(cs))
+                tr.lastChild.setAttribute("numbercolumnsspanned",str(cs))
                 for i in range(cs):
                     tr.addElement(table.CoveredTableCell())
         return SkipChildren(tr)
