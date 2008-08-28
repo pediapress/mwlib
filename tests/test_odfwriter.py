@@ -388,3 +388,13 @@ def test_tables():
 '''
     xml = getXML(raw)
     assert "cheese" in xml
+
+
+def test_colspan():
+    raw = r'''
+<table>
+<tr><td>a</td><td>b</td></tr>
+<tr><td colspan="2">ab</td></tr>
+</table>
+'''
+    xml = getXML(raw)

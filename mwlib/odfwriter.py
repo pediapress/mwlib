@@ -22,7 +22,7 @@ except ImportError, e:
     raise
 
 from odf.opendocument import OpenDocumentText
-from odf import text, dc, meta, table, draw, math
+from odf import text, dc, meta, table, draw, math, element
 from mwlib import parser
 from mwlib.log import Log
 from mwlib import advtree 
@@ -31,7 +31,26 @@ from mwlib import writerbase
 from mwlib.treecleaner import TreeCleaner
 from mwlib import odfconf
 
+
 log = Log("odfwriter")
+
+# using alpha software is challenging as APIs change -------------------
+# check for ODF version and monkey patch stuff
+e = element.Element(qname = ("a","n"))
+if hasattr(e, "elements"): # odfpy-0.7
+    def _f(self, c):
+        log("assumming odfpy-0.7x")
+        self.elements.append(e)
+    element.Element.appendChild = _f
+    element.Element.lastChild = property(lambda s:s.elements[-1])
+else:
+    log("assumming odfpy-0.8x")
+    assert hasattr(e, "appendChild")
+    element.Element.lastChild = property(lambda s:s.childNodes[-1])
+    element.Element.addAttribute = element.Element.setAttribute
+# ------------ done patching --------------------------------------------
+
+
 
 def showNode(obj):
     attrs = obj.__dict__.keys()
@@ -338,7 +357,7 @@ class ODFWriter(object):
             cs =  c.colspan
             self.write(c,tr)
             if cs:
-                tr.elements[-1].addAttribute("numbercolumnsspanned",str(cs))
+                tr.lastChild.addAttribute("numbercolumnsspanned",str(cs))
                 for i in range(cs):
                     tr.addElement(table.CoveredTableCell())
         return SkipChildren(tr)
@@ -518,7 +537,7 @@ class ODFWriter(object):
                 if c.text:
                     text = c.text
                     #if not isinstance(text, unicode):  text = text.decode("utf8")
-                    n.elements.append(odf.element.Text(text)) # n.addText(c.text)
+                    n.appendChild(odf.element.Text(text)) # n.addText(c.text)
                     # rffixme: odfpy0.8 errors:"AttributeError: Element instance has no attribute 'elements'" -> this is a lie!
                 _withETElement(c, n)
 
