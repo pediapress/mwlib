@@ -59,7 +59,7 @@ dejaVuSansMono = style.FontFace(
 # Section styles 
 #
 sect  = style.Style(name="Sect1", family="section")
-
+sectTable = style.Style(name="SectTable", family="section")
 
 #
 # Paragraph styles
@@ -624,4 +624,5 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(frmInner)
     doc.styles.addElement(imgCaption)
     doc.styles.addElement(tableCaption)
+    doc.styles.addElement(sectTable)
 
