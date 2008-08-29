@@ -726,13 +726,13 @@ class WikiDB(wikidbbase.WikiDBBase):
         
         if hasattr(self, 'interwikimap'):
             return self.interwikimap
+        self.interwikimap = {}
         result = self.api_helper.query(
             meta='siteinfo',
             siprop='interwikimap',
         ).get('interwikimap', [])
         if not result:
             return
-        self.interwikimap = {}
         for entry in result:
             interwiki = metabook.make_interwiki(api_entry=entry)
             self.interwikimap[interwiki['prefix']] = interwiki
