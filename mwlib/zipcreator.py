@@ -367,7 +367,7 @@ class ThreadedZipCreator(ZipCreator):
         
         parse_tree = uparser.parseString(title,
             revision=revision,
-            raw=self.articles[title]['content'],
+            raw=raw or self.articles[title]['content'],
             wikidb=recorddb,
         )
         
