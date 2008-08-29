@@ -141,12 +141,18 @@ class ZipCreator(object):
             raw=raw,
             wikidb=recorddb,
         )
-        
         if imagedb is None:
             return
         for node in parse_tree.allchildren():
             if isinstance(node, parser.ImageLink):
                 self.addImage(node.target, imagedb=imagedb)
+            elif isinstance(node, parser.TagNode) and node.caption == 'imagemap':
+                imagemap = getattr(node, 'imagemap', None)
+                if imagemap is not None:
+                    imagelink = getattr(imagemap, 'imagelink', None)
+                    if imagelink is not None:
+                        self.addImage(imagelink.target, imagedb=imagedb)
+
     
     def addImage(self, name, imagedb=None):
         """Add image with given name to the ZIP file
@@ -303,6 +309,7 @@ class ThreadedZipCreator(ZipCreator):
             self.parseArticle(
                 title=info['title'],
                 revision=info['revision'],
+                raw=self.articles[info['title']]['content'],
                 wikidb=info['wikidb'],
                 imagedb=info['imagedb'],
             )
@@ -339,43 +346,6 @@ class ThreadedZipCreator(ZipCreator):
             recorddb.getTemplate(name)
         
         self.jobsched.add_job(name, get_template_job)
-    
-    def parseArticle(self, title,
-        revision=None,
-        raw=None,
-        wikidb=None,
-        imagedb=None,
-    ):
-        """Parse article with given title, revision and raw wikitext, adding all
-        referenced templates and images, but not adding the article itself.
-        
-        @param title: title of article
-        @type title: unicode
-        
-        @param revision: revision of article (optional)
-        @type revision: int
-        
-        @param raw: wikitext of article
-        @type raw: unicode
-        
-        @param wikidb: WikiDB to use
-        
-        @param imagedb: ImageDB to use (optional)
-        """
-        
-        recorddb = RecordDB(wikidb, self.articles, self.templates, self.sources)
-        
-        parse_tree = uparser.parseString(title,
-            revision=revision,
-            raw=raw or self.articles[title]['content'],
-            wikidb=recorddb,
-        )
-        
-        if imagedb is None:
-            return
-        for node in parse_tree.allchildren():
-            if isinstance(node, parser.ImageLink):
-                self.addImage(node.target, imagedb=imagedb)
     
     def addImage(self, name, imagedb=None):
         """Add image with given name to the ZIP file

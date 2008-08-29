@@ -722,3 +722,17 @@ def test_quotes_in_tags():
     print "VLIST:", vlist
     assert vlist==dict(attr="value"), "bad vlist"
     
+def test_imagemap():
+    r=parse('''<imagemap>Image:Ppwiki.png| exmaple map|100px|thumb|left
+    # this is a comment
+    # rectangle half picture (left)
+    rect 0 0 50 100 [[na| link description]]
+
+    #circle top right
+    circle 75 25 24 [http://external.link | just a other link desc]
+
+    #poly bottom right
+    poly 51 51 100 51 75 100 [[bleh| blubb]]
+    </imagemap>
+''')
+    
