@@ -161,7 +161,10 @@ class Application(wsgi.Application):
         collection_dir = self.get_collection_dir(collection_id)
         if not os.path.isdir(collection_dir):
             log.info('Creating new collection dir %r' % collection_dir)
-            os.makedirs(collection_dir)
+            try:
+                os.makedirs(collection_dir)
+            except Exception, exc:
+                log.warn('Could not create directory %r: %s' % (collection_dir, exc))
         return collection_id
     
     def get_path(self, collection_id, filename, ext=None):
