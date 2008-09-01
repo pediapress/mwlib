@@ -215,10 +215,11 @@ class ODFWriter(object):
             except odf.element.IllegalChild:
                 # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed in ' u'text:span' ', dumping'
                 try: # maybe c has no attribute type
+                    art = obj.getParentNodesByClass(advtree.Article)[0]
+                    log("in article ", art.caption)
                     log("write:", c.type, "not allowed in ", p.type, ", dumping")
                 except AttributeError:
                     log("missing .type attribute %r %r " %(c, p))
-                    pass
                 return False
 
         
@@ -371,17 +372,12 @@ class ODFWriter(object):
             return SkipChildren()
         pass # FIXME 
 
-    def _writeTableCaption(self, obj):
-        p =  ParagraphProxy(stylename=style.tableCaption)
-        self.writeChildren(obj, p)
-        return p
-
-
     def owriteTable(self, obj): # FIXME ADD FORMATTING
         # http://books.evc-cit.info/odbook/ch04.html#text-table-section
              
         t = table.Table()
-        tc = table.TableColumn(stylename=style.dumbcolumn, numbercolumnsrepeated=str(obj.numcols)) # FIXME FIXME
+        tc = table.TableColumn(stylename=style.dumbcolumn, 
+                               numbercolumnsrepeated=str(obj.numcols)) # FIXME FIXME
         t.addElement(tc)
         
         captions = [c for c in obj.children if isinstance(c, advtree.Caption)]
@@ -390,9 +386,11 @@ class ODFWriter(object):
         else: # a section groups table-caption & table:
             if not len(captions) == 1:
                 log("owriteTable: more than one Table Caption not handeled. Using only first Caption!")
+            # group using a section
             sec = text.Section(stylename=style.sectTable, name="table section")
-            caption_element = self._writeTableCaption(captions[0])  # only one caption expected and allowed
-            sec.addElement(caption_element)
+            p =  ParagraphProxy(stylename=style.tableCaption)
+            sec.addElement(p)
+            self.writeChildren(captions[0], p)# only one caption expected and allowed
             sec.addElement(t)
             sec.writeto=t
             return sec
