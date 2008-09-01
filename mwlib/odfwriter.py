@@ -19,6 +19,7 @@ try:
     import odf
 except ImportError, e:
     print "you need to install odfpy: http://opendocumentfellowship.com/projects/odfpy"
+    print "currently only version 0.7 is supported"
     raise
 
 from odf.opendocument import OpenDocumentText
@@ -45,8 +46,10 @@ if hasattr(e, "elements"): # odfpy-0.7
     element.Element.lastChild = property(lambda s:s.elements[-1])
     element.Element.setAttribute = element.Element.addAttribute
 else:
-    # assume this api is stable
-    log("assumming odfpy-0.8x")
+    # assume the odfpy-08 api is stable
+    # but we don't support this now, as they changed their API
+    # easy_install odfpy==0.7.0  might help
+    raise Exception, "only version 0.7 of odfpy is supported"
     assert hasattr(e, "appendChild")
     assert hasattr(e, "lastChild")
     assert hasattr(e, "setAttribute")
