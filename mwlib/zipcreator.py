@@ -291,7 +291,11 @@ class ThreadedZipCreator(ZipCreator):
         self.status(status=u'fetching templates')
         templates = set()
         for info in self.article_jobs:
-            parser = expander.Parser(self.articles[info['title']]['content'])
+            try:
+                raw = self.articles[info['title']]['content']
+            except KeyError:
+                continue
+            parser = expander.Parser(raw)
             for template in parser.parse().find(expander.Template):
                 # FIXME: filter out magics
                 try:
@@ -306,10 +310,14 @@ class ThreadedZipCreator(ZipCreator):
         
         self.status(status=u'fetching images')
         for info in self.article_jobs:
+            try:
+                raw = self.articles[info['title']]['content']
+            except KeyError:
+                continue
             self.parseArticle(
                 title=info['title'],
                 revision=info['revision'],
-                raw=self.articles[info['title']]['content'],
+                raw=raw,
                 wikidb=info['wikidb'],
                 imagedb=info['imagedb'],
             )
