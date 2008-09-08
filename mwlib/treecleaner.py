@@ -74,6 +74,7 @@ class TreeCleaner(object):
         # USED IN fixNesting if nesting_strictness == 'loose'
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
+        # fixme rename to ancestors
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
                                   ItemList:[Div],
                                   Source:self.inlineStyleNodes,
@@ -501,14 +502,14 @@ class TreeCleaner(object):
         return None
 
     def _buildSubTree(self, root, path, problem_node, side):
-        if side == 'bottom':
+        if side == 'top':
             remove_children = False
             for c in root.children[:]:
                 if remove_children or c == problem_node:
                     root.removeChild(c)
                 if c in path:
                     remove_children= True
-        elif side == 'top':
+        elif side == 'bottom':
             remove_children = True
             for c in root.children[:]:
                 if c in path:
@@ -669,8 +670,8 @@ class TreeCleaner(object):
         """Remove all block nodes from Section nodes, keep the content. If section title is empty replace section by br node"""
         
         if node.__class__ == Section:
-            assert node.children
-            assert node.parent
+            assert node.children, 'Error, section has no children'
+            assert node.parent, 'Error, section has no parents'
             if not node.children[0].children:
                 children = [BreakingReturn()]
                 if len(node.children) > 1: # at least one "content" node

@@ -106,7 +106,8 @@ class AdvancedNode:
 
     def replaceChild(self, c, newchildren = []):
         """Remove child node c and replace with newchildren if given."""
-        assert self.hasChild(c)
+
+        assert self.hasChild(c), 'Error, unknown child'
         idx = _idIndex(self.children, c)
         self.children = self.children[:idx] + self.children[idx+1:]
         c._parentref = None
