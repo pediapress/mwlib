@@ -10,10 +10,11 @@ import re
 
 from mwlib.advtree import AdvancedNode, removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                           Cite, Code, DefinitionList, Deleted, Div, Emphasized, HorizontalRule, ImageLink, Inserted,
-                           InterwikiLink, Italic, Item, ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Overline, 
-                           Paragraph, PreFormatted, Reference, ReferenceList, Row, Section, Small, Source, SpecialLink,
-                           Strike, Strong, Sub, Sup, Table, Teletyped, Text, Underline, URL, Var)
+                           Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized,
+                           HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
+                           Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
+                           Row, Section, Small, Source, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text,
+                           Underline, URL, Var)
 
 from mwlib.treecleanerhelper import *
 
@@ -78,7 +79,8 @@ class TreeCleaner(object):
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
                                   ItemList:[Div],
                                   Source:self.inlineStyleNodes,
-                                  Paragraph:[Paragraph]
+                                  Paragraph:[Paragraph],
+                                  DefinitionList:[Paragraph],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
@@ -165,6 +167,9 @@ class TreeCleaner(object):
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           'removeBreakingReturns', # NEW
+                          'findDefinitionLists',
+                          'fixNesting', # pull DefinitionLists out of Paragraphs
+                          'removeChildlessNodes', 
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
@@ -691,7 +696,16 @@ class TreeCleaner(object):
             self.cleanSectionCaptions(c)
             
 
+    def findDefinitionLists(self, node):
+        if node.__class__ in [DefinitionTerm, DefinitionDescription]:
+            prev = node.getPrevious()
+            parent = node.getParent()
+            if prev.__class__ == DefinitionList: 
+                node.moveto(prev.getLastChild())
+            else: 
+                dl = DefinitionList()
+                parent.replaceChild(node, [dl])
+                dl.appendChild(node)
 
-
-
-            
+        for c in node.children[:]:
+            self.findDefinitionLists(c)

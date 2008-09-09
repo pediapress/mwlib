@@ -18,8 +18,9 @@ http://en.wikipedia.org/wiki/Wikipedia:Don%27t_use_line_breaks
 http://meta.wikimedia.org/wiki/Help:Advanced_editing
 http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 """
-
+import re
 import weakref
+
 from mwlib.parser import Magic, Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
 from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
@@ -379,7 +380,7 @@ class Blockquote(Style, AdvancedNode):
     "margins to left &  right"
     _tag = "blockquote"
     
-class Indented(Style, AdvancedNode):
+class Indented(Style, AdvancedNode): # fixme: node is deprecated, now style node ':' always becomes a DefinitionDescription
     "margin to the left"
     def getIndentLevel(self):
         return self.caption.count(":")
@@ -562,7 +563,7 @@ def fixTagNodes(node):
         fixTagNodes(c)
 
 
-def fixStyleNode(node): #FIXME: rename to fixStyleNode or something like that
+def fixStyleNode(node): 
     """
     parser.Style Nodes are mapped to logical markup
     detection of DefinitionList depends on removeNodes
@@ -585,25 +586,12 @@ def fixStyleNode(node): #FIXME: rename to fixStyleNode or something like that
         node.__class__ = Strong
         node.caption = ""
     elif node.caption == ";": 
-        # this starts a definition list ? DL [DT->DD, ...]
-        # check if previous node is DefinitionList, if not create one
-        if node.previous.__class__ == DefinitionList:
-            node.__class__ = DefinitionTerm
-            node.moveto(node.previous.lastchild)
-        else:
-            node.__class__ = DefinitionList
-            dt = DefinitionTerm()
-            for c in node.children:
-                dt.appendChild(c)
-            node.children = []
-            node.appendChild(dt)
+        node.__class__ = DefinitionTerm
+        node.caption = ""
     elif node.caption.startswith(":"): 
-        if node.previous.__class__ == DefinitionList:
-            node.__class__ = DefinitionDescription
-            node.moveto(node.previous.lastchild)
-            node.caption = ""
-        else:
-            node.__class__ = Indented
+        node.__class__ = DefinitionDescription        
+        node.indentlevel = len(re.findall('^:+', node.caption)[0])
+        node.caption = ""
     elif node.caption == '-':
         node.__class__ = Blockquote
         node.caption = ''
@@ -616,7 +604,7 @@ def fixStyleNode(node): #FIXME: rename to fixStyleNode or something like that
     
     return node
 
-def fixStyleNodes(node): #FIXME: rename to fixStyleNodes or something like that
+def fixStyleNodes(node): 
     if node.__class__ == Style:
         fixStyleNode(node)
     for c in node.children[:]:
