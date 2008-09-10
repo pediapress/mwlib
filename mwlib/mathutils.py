@@ -32,7 +32,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
         return None
 
     if output_path:
-        try:
+        try: # for some reason os.getcwd failed at some point. this should be investigated...
             curdir = os.getcwd()
         except:
             curdir = None
@@ -45,7 +45,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
         log.error('error with blahtexml. cmd:', repr(' '.join(cmd)))
-        if output_path:
+        if curdir:
             os.chdir(curdir)
         return None
 
