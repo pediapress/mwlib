@@ -7,6 +7,8 @@
 from __future__ import division
 import  re
 
+from mwlib.advtree import Center
+
 def _colorFromStr(colorStr):
 
     def hex2rgb(r, g, b):
@@ -66,10 +68,8 @@ def rgbBgColorFromNode(node, greyScale=False, darknessLimit=1):
 def rgbColorFromNode(node, greyScale=False, darknessLimit=1):
     """Extract text color from node attributes/style. Result is a rgb triple w/ individual values between [0...1]"""
 
-    colorStr = node.attributes.get('color', None) or \
-               node.style.get('background') or \
-               node.style.get('background-color')
-            
+    colorStr = node.style.get('color', None) or \
+               node.attributes.get('color', None)
     color = None
     if colorStr:
         color = _colorFromStr(colorStr.lower())
@@ -77,4 +77,12 @@ def rgbColorFromNode(node, greyScale=False, darknessLimit=1):
             return _rgb2GreyScale(color, darknessLimit)
     return color
 
+def alignmentFromNode(node):
+    align = node.style.get('text-align', '').lower()
+    if align in ['right', 'left', 'center', 'justify']:
+        return align
+    else: # special handling for nodes inside a center tag
+        if node.getParentNodesByClass(Center):
+            return 'center'
+    return None
 
