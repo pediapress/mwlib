@@ -145,16 +145,16 @@ class ZipCreator(object):
             return
         for node in parse_tree.allchildren():
             if isinstance(node, parser.ImageLink):
-                self.addImage(node.target, imagedb=imagedb)
+                self.addImage(node.target, imagedb=imagedb, wikidb=wikidb)
             elif isinstance(node, parser.TagNode) and node.caption == 'imagemap':
                 imagemap = getattr(node, 'imagemap', None)
                 if imagemap is not None:
                     imagelink = getattr(imagemap, 'imagelink', None)
                     if imagelink is not None:
-                        self.addImage(imagelink.target, imagedb=imagedb)
+                        self.addImage(imagelink.target, imagedb=imagedb, wikidb=wikidb)
 
     
-    def addImage(self, name, imagedb=None):
+    def addImage(self, name, imagedb=None, wikidb=None):
         """Add image with given name to the ZIP file
         
         @param name: image name
@@ -177,7 +177,7 @@ class ZipCreator(object):
         descriptionurl = imagedb.getDescriptionURL(name)
         if descriptionurl:
             self.images[name]['descriptionurl'] = descriptionurl
-        license = imagedb.getLicense(name)
+        license = imagedb.getLicense(name, wikidb=wikidb)
         if license:
             self.images[name]['license'] = license
     
@@ -355,7 +355,7 @@ class ThreadedZipCreator(ZipCreator):
         
         self.jobsched.add_job(name, get_template_job)
     
-    def addImage(self, name, imagedb=None):
+    def addImage(self, name, imagedb=None, wikidb=None):
         """Add image with given name to the ZIP file
         
         @param name: image name
@@ -383,7 +383,7 @@ class ThreadedZipCreator(ZipCreator):
             descriptionurl = imagedb.getDescriptionURL(name)
             if descriptionurl:
                 self.images[name]['descriptionurl'] = descriptionurl
-            license = imagedb.getLicense(name)
+            license = imagedb.getLicense(name, wikidb=wikidb)
             if license:
                 self.images[name]['license'] = license
         

@@ -426,7 +426,7 @@ class ImageDB(object):
         else:
             return None
     
-    def getLicense(self, name):
+    def getLicense(self, name, wikidb=None):
         """Return license of image as stated on image description page
         
         @param name: image name without namespace (e.g. without "Image:")
@@ -442,9 +442,12 @@ class ImageDB(object):
         if desc_url is None:
             return None
         
-        api_helper = get_api_helper(desc_url)
-        if api_helper is None:
-            return None
+        if wikidb is None:
+            api_helper = get_api_helper(desc_url)
+            if api_helper is None:
+                return None
+        else:
+            api_helper = wikidb.api_helper
         
         result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
         if not result or 'templates' not in result:
