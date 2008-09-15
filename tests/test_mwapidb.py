@@ -310,7 +310,7 @@ class TestImageDB(object):
         t = u'Damar2375.jpg'
         du = imgdb.getDescriptionURL(t)
         print du
-        assert du == 'http://memory-alpha.org/en/index.php?title=Image:Damar2375.jpg'
+        assert du == 'http://memory-alpha.org/en/wiki/Image:Damar2375.jpg'
     
     def test_getPath(self):
         p = self.imagedb.getPath(u'Flag of the United States.svg')
