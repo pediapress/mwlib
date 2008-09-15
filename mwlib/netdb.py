@@ -190,7 +190,7 @@ class ImageDB(object):
         
         return mo.group('license')
     
-    def getLicense(self, name):
+    def getLicense(self, name, wikidb=None):
         """Return license of image as stated on image description page
         
         @param name: image name without namespace (e.g. without "Image:")

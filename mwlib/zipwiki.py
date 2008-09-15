@@ -156,7 +156,7 @@ class ImageDB(object):
         f.close()
         return res
     
-    def getLicense(self, name):
+    def getLicense(self, name, wikidb=None):
         try:
             return self.images[name]['license']
         except KeyError:
@@ -209,7 +209,7 @@ class FakeImageDB(ImageDB):
     def getDescriptionURL(self, name):
         raise NotImplemented('getDescriptionURL() does not work with zipwiki.FakeImageDB!')
     
-    def getLicense(self, name):
+    def getLicense(self, name, wikidb=None):
         raise NotImplemented('getLicense() does not work with zipwiki.FakeImageDB!')
     
 
