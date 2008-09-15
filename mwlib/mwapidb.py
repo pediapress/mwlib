@@ -248,6 +248,8 @@ class APIHelper(object):
         try:
             data = unicode(data, 'utf-8')
             if data and data[0] == u'\ufeff': # strip off BOM
+                # Note that a BOM is actually *not allowed* at the beginning of a JSON string
+                # see http://www.ietf.org/rfc/rfc4627.txt, section "3. Encoding"
                 data = data[1:]
             return simplejson.loads(data)['query']
         except KeyError:
