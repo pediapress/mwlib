@@ -208,6 +208,10 @@ class TestWikiDB(object):
         assert w.getTemplate('Excluded') is None
         assert w.getTemplate('colours') is not None
     
+    def test_byte_order_mark(self):
+        ah = APIHelper('http://www.wereldpagina.nl')
+        assert ah.is_usable()
+    
 
 class TestImageDB(object):
     base_url = 'http://en.wikipedia.org/w/'

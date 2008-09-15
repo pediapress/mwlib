@@ -246,7 +246,10 @@ class APIHelper(object):
             log.error('Got no data from api.php')
             return None
         try:
-            return simplejson.loads(unicode(data, 'utf-8'))['query']
+            data = unicode(data, 'utf-8')
+            if data and data[0] == u'\ufeff': # strip off BOM
+                data = data[1:]
+            return simplejson.loads(data)['query']
         except KeyError:
             log.error('Response from api.php did not contain a query result')
             return None
