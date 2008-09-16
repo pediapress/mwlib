@@ -85,36 +85,49 @@ class BuildWiki(object):
         
         self.writer = ZCdbWriter(self.output_path)
 
-        count = 0
-        for page in self.dumpParser:
-            if page.namespace == dumpparser.NS_MAIN:
-                self.handleArticle(page.title, page.text, page.timestamp)
-            elif page.namespace == dumpparser.NS_TEMPLATE:
-                self.handleTemplate(page.title, page.text, page.timestamp)
-            else:
-                self.handleOther(page.title, page.text, page.timestamp)
+        try:
+            count = 0
+            for page in self.dumpParser:
+                m = {dumpparser.NS_MAIN:self.handleArticle,
+                     dumpparser.NS_TEMPLATE:self.handleTemplate,
+                     dumpparser.NS_CATEGORY:self.handleCategory,
+                     dumpparser.NS_PORTAL:self.handlePortal}
+                meth = m.get(page.namespace, self.handleOther)
+                meth(page)
+                count += 1
+                if count % 5000 == 0:
+                    self._write(" %s\n" % count)
+                elif count % 100 == 0:
+                    self._write(".")
+        finally:
+            self.writer.finish()
 
-            count += 1
-            if count % 5000 == 0:
-                self._write(" %s\n" % count)
-            elif count % 100 == 0:
-                self._write(".")
-            
-        self.writer.finish()
 
     def _write(self, msg):
         sys.stdout.write(msg)
         sys.stdout.flush()
 
-    def handleArticle(self, title, text, timestamp):
+    def handleArticle(self, page):
+        title, text, timestamp = page.title, page.text, page.timestamp
         self.writer.add(u":"+title, text)
 
-    def handleTemplate(self, title, text, timestamp):
-        self.writer.add(u"T:"+title, text)
+    def handleTemplate(self, page):
+        title, text, timestamp = page.title, page.text, page.timestamp
+        self.writer.add(u"Template:"+title, text)
 
-    def handleOther(self, title, text, timestamp):
+    def handleCategory(self, page):
+        title, text, timestamp = page.title, page.text, page.timestamp
+        self.writer.add(u"Category:"+title, text)
+
+    def handlePortal(self, page):
+        title, text, timestamp = page.title, page.text, page.timestamp
+        self.writer.add(u"Portal:"+title, text)
+
+    def handleOther(self, page):
+        title, text, timestamp = page.title, page.text, page.timestamp
+        title = u"NS%d:%s" % (page.namespace, title)
         self.writer.add(title, text)
-    
+        
 
 
 class WikiDB(object):
@@ -124,21 +137,34 @@ class WikiDB(object):
         self.dir = dir
         self.reader = ZCdbReader(os.path.join(self.dir, prefix))
 
-    def getRawArticle(self, title, raw=None, revision=None):
+    def getRawArticle(self, title, raw=None, revision=None, resolveRedirect=True):
         title = normname(title)
         try:
             res = self.reader[":"+title]
         except KeyError:
             return None
 
-        mo = self.redirect_rex.search(res)
-        if mo:
-            redirect = mo.group('redirect')
-            redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
-
-            return self.getRawArticle(redirect)
-
+        if resolveRedirect:
+            mo = self.redirect_rex.search(res)
+            if mo:
+                redirect = mo.group('redirect')
+                redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
+                try:
+                    return self.getRawArticle(redirect)
+                except RuntimeError: # recursion
+                    return 
         return res
+
+
+    def getRawPage(self, title, isArticle=False):
+        title = normname(title)
+        if isArticle:
+            title = u":" + title
+        try:
+            return self.reader[title]
+        except KeyError:
+            return None
+
 
     def getTemplate(self, title, followRedirects=False):
         if ":" in title:
@@ -168,6 +194,6 @@ class WikiDB(object):
 
     def article_texts(self):
         return ((k[1:], v)
-                for k in self.reader.iteritems()
+                for k,v in self.reader.iteritems()
                 if k[0] == ':')
         

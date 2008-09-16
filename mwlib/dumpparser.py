@@ -55,6 +55,7 @@ NS_HELP           = 12
 NS_HELP_TALK      = 13
 NS_CATEGORY       = 14
 NS_CATEGORY_TALK  = 15
+NS_PORTAL         = 100
 
 class Page(object):
     __slots__ = [
@@ -95,9 +96,10 @@ class DumpParser(object):
         'image': NS_IMAGE,
         'bild': NS_IMAGE,
         'wikipedia': NS_PROJECT,
+        'portal':NS_PORTAL
     }
 
-    default_namespaces = [NS_MAIN, NS_TEMPLATE]
+    default_namespaces = [NS_MAIN, NS_TEMPLATE, NS_CATEGORY, NS_PORTAL]
 
     tags = Tags()
 
