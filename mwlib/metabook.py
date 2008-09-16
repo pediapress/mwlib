@@ -45,7 +45,7 @@ def make_interwiki(api_entry=None):
             interwiki['local'] = False
     return interwiki
 
-def make_article(title=None, displaytitle=None, content_type='text/x-wiki'):
+def make_article(title=None, displaytitle=None, revision=None, content_type='text/x-wiki'):
     article = {
         'type': 'article',
         'content-type': content_type,
@@ -54,6 +54,8 @@ def make_article(title=None, displaytitle=None, content_type='text/x-wiki'):
         article['title'] = title
     if displaytitle:
         article['displaytitle'] = displaytitle
+    if revision:
+        article['revision'] = revision
     return article
 
 def make_chapter(title=None):
