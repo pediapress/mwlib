@@ -488,8 +488,8 @@ frmOuter.internSpacing = 0.2
 frmOuterRight = style.Style(name="mwlibfrmOuterRight", family="graphic", parentstylename=frmOuter) # does not inherit GrapficPorpertys!
 frmStyGraPropRight = style.GraphicProperties(
         marginleft="0.1in", marginright="0.1in", margintop="0.1in", marginbottom="0.1in",
-        wrap="right", numberwrappedparagraphs="no-limit", 
-        verticalpos="from-top", horizontalpos="from-left", 
+        numberwrappedparagraphs="no-limit", 
+        verticalpos="from-top", 
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
         padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none",
@@ -500,8 +500,8 @@ frmOuterRight.addElement(frmStyGraPropRight)
 frmOuterLeft = style.Style(name="mwlibfrmOuterLeft", family="graphic", parentstylename=frmOuter) 
 frmStyGraProbLeft = style.GraphicProperties(
         marginleft="0.1in", marginright="0.1in", margintop="0.1in", marginbottom="0.1in",
-        wrap="right", numberwrappedparagraphs="no-limit", 
-        verticalpos="from-top", horizontalpos="from-left", 
+        numberwrappedparagraphs="no-limit", 
+        verticalpos="from-top", 
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
         padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none",
@@ -512,8 +512,8 @@ frmOuterLeft.addElement(frmStyGraProbLeft)
 frmOuterCenter = style.Style(name="mwlibfrmOuterCenter", family="graphic", parentstylename=frmOuter) 
 frmStyGraPropCenter = style.GraphicProperties(
         marginleft="0.1in", marginright="0.1in", margintop="0.1in", marginbottom="0.1in",
-        wrap="right", numberwrappedparagraphs="no-limit", 
-        verticalpos="from-top", horizontalpos="from-left", 
+        numberwrappedparagraphs="no-limit", 
+        verticalpos="from-top", 
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
         padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none",
