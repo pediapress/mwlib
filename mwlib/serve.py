@@ -50,6 +50,7 @@ def make_collection_id(data):
         _version.version,
         'metabook',
         'base_url',
+        'script_extension',
         'template_blacklist',
         'template_exclusion_category',
         'login_credentials',
@@ -191,6 +192,7 @@ class Application(wsgi.Application):
         template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
         force_render = bool(post_data.get('force_render'))
+        script_extension = post_data.get('script_extension', '')
         
         if not collection_id:
             collection_id = self.new_collection(post_data)
@@ -281,6 +283,8 @@ class Application(wsgi.Application):
                 args.extend(['--template-exclusion-category', template_exclusion_category])
             if login_credentials:
                 args.extend(['--login', login_credentials])
+            if script_extension:
+                args.extend(['--script-extension', script_extension])
         
         self.queue_job('render', collection_id, args)
         
@@ -405,6 +409,7 @@ class Application(wsgi.Application):
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
         login_credentials = post_data.get('login_credentials', '')
+        script_extension = post_data.get('script_extension', '')
         
         pod_api_url = post_data.get('pod_api_url', '')
         if pod_api_url:
@@ -469,6 +474,8 @@ class Application(wsgi.Application):
                 args.extend(['--template-exclusion-category', template_exclusion_category])
             if login_credentials:
                 args.extend(['--login', login_credentials])
+            if script_extension:
+                args.extend(['--script-extension', script_extension])
         
         self.queue_job('post', collection_id, args)
         

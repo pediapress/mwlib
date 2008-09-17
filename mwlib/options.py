@@ -62,6 +62,10 @@ class OptionParser(optparse.OptionParser):
         self.add_option('--subtitle',
             help='subtitle for article collection',
         )
+        self.add_option('--script-extension',
+            help='script extension for PHP scripts (default: .php)',
+            default='.php',
+        )
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
@@ -117,6 +121,7 @@ class OptionParser(optparse.OptionParser):
             username=username,
             password=password,
             domain=domain,
+            script_extension=self.options.script_extension,
         )
         if self.options.noimages:
             env.images = None
