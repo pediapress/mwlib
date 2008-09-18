@@ -177,9 +177,9 @@ class ZipCreator(object):
         descriptionurl = imagedb.getDescriptionURL(name)
         if descriptionurl:
             self.images[name]['descriptionurl'] = descriptionurl
-        license = imagedb.getLicense(name, wikidb=wikidb)
-        if license:
-            self.images[name]['license'] = license
+        templates = imagedb.getImageTemplates(name, wikidb=wikidb)
+        if templates:
+            self.images[name]['templates'] = templates
     
     def join(self):
         """Finish ZIP file by writing the actual content"""
@@ -383,9 +383,9 @@ class ThreadedZipCreator(ZipCreator):
             descriptionurl = imagedb.getDescriptionURL(name)
             if descriptionurl:
                 self.images[name]['descriptionurl'] = descriptionurl
-            license = imagedb.getLicense(name, wikidb=wikidb)
-            if license:
-                self.images[name]['license'] = license
+            templates = imagedb.getImageTemplates(name, wikidb=wikidb)
+            if templates:
+                self.images[name]['templates'] = templates
         
         self.jobsched.add_job(name, fetch_image_job)
     

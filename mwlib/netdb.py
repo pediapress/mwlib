@@ -90,7 +90,7 @@ class ImageDB(object):
                                  for license in (knownLicenses or [])])
         self.licenseRegexp = re.compile(r'{{(?P<license>%s)}}' % oredLicenses)
         
-        self.name2license = {}
+        self.name2templates = {}
     
     def clear(self):
         """Delete temporary cache directory (i.e. only if no cachedir has been
@@ -163,7 +163,7 @@ class ImageDB(object):
         if tmpfile is None:
             return None
         
-        self.name2license[name] = self._fetchLicense(baseurl, name)
+        self.name2templates[name] = self._fetchTemplates(baseurl, name)
         
         path = self._convertToCache(tmpfile, baseurl, name, size=size)
         
@@ -174,7 +174,7 @@ class ImageDB(object):
         
         return path
     
-    def _fetchLicense(self, baseurl, name):
+    def _fetchTemplates(self, baseurl, name):
         if self.wikidb is None:
             return None
         
@@ -184,24 +184,24 @@ class ImageDB(object):
         if raw is None:
             return None
         
-        mo = re.search(self.licenseRegexp, raw)
+        mo = re.search(self.licenseRegexp, raw) # FIXME: search all
         if mo is None:
-            return None
+            return []
         
-        return mo.group('license')
+        return [mo.group('license')]
     
-    def getLicense(self, name, wikidb=None):
-        """Return license of image as stated on image description page
+    def getImageTemplates(self, name, wikidb=None):
+        """Return list of template names as stated on image description page
         
         @param name: image name without namespace (e.g. without "Image:")
         @type name: unicode
         
-        @returns: license of image of None, if no valid license could be found
-        @rtype: str
+        @returns: list of templates
+        @rtype: [unicode]
         """
         
         assert isinstance(name, unicode), 'name must be of type unicode'
-        return self.name2license.get(name)
+        return self.name2templates.get(name, [])
     
     def _getImageFromCache(self, name, size=None):
         """Look in cachedir for an image with the given parameters"""

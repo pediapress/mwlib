@@ -74,9 +74,9 @@ content.json
         
                URL to the image page
            
-           license (string, optional):
+           templates (string, optional):
            
-               License name for this image
+               List of template names references on the image description page
 
 
 images/

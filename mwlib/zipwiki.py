@@ -156,11 +156,11 @@ class ImageDB(object):
         f.close()
         return res
     
-    def getLicense(self, name, wikidb=None):
+    def getImageTemplates(self, name, wikidb=None):
         try:
-            return self.images[name]['license']
+            return self.images[name]['templates']
         except KeyError:
-            return None
+            return []
     
     def getPath(self):
         raise NotImplemented('getPath() does not work with zipwiki.ImageDB!')
@@ -209,8 +209,8 @@ class FakeImageDB(ImageDB):
     def getDescriptionURL(self, name):
         raise NotImplemented('getDescriptionURL() does not work with zipwiki.FakeImageDB!')
     
-    def getLicense(self, name, wikidb=None):
-        raise NotImplemented('getLicense() does not work with zipwiki.FakeImageDB!')
+    def getImageTemplates(self, name, wikidb=None):
+        raise NotImplemented('getImageTemplates() does not work with zipwiki.FakeImageDB!')
     
 
 

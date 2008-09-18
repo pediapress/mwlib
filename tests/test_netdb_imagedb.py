@@ -130,8 +130,8 @@ class TestImageDB(object):
             knownLicenses=self.knownLicenses,
         )
         p = imagedb.getDiskPath(self.existing_image_name, size=100)
-        license = imagedb.getLicense(self.existing_image_name)
-        print 'LICENSE:', license
+        templates = imagedb.getImageTemplates(self.existing_image_name)
+        print 'TEMPLATES:', templates
     
 
     

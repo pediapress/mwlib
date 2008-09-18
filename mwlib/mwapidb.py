@@ -22,12 +22,6 @@ from mwlib.log import Log
 
 log = Log("mwapidb")
 
-try:
-    from mwlib.licenses import lower2normal
-except ImportError:
-    log.warn('no licenses found')
-    lower2normal = {}
-
 # ==============================================================================
 
 class MWAPIError(RuntimeError):
@@ -445,44 +439,38 @@ class ImageDB(object):
         else:
             return None
     
-    def getLicense(self, name, wikidb=None):
-        """Return license of image as stated on image description page
+    def getImageTemplates(self, name, wikidb=None):
+        """Return template names used on the image description page
         
         @param name: image name without namespace (e.g. without "Image:")
         @type name: unicode
         
-        @returns: license of image of None, if no valid license could be found
-        @rtype: unicode
+        @returns: list of template names
+        @rtype: [unicode]
         """
         
         assert isinstance(name, unicode), 'name must be of type unicode'
         
         desc_url = self.getDescriptionURL(name)
         if desc_url is None:
-            return None
+            return []
         
+        print desc_url
         api_helper = get_api_helper(desc_url)
-        if api_helper is None and wikidb is not None:
-            api_helper = wikidb.api_helper
-        else:
-            return None
+        if api_helper is None:
+            if wikidb is not None:
+                api_helper = wikidb.api_helper
+            else:
+                return []
         
         result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
         if not result or 'templates' not in result:
-            return None
+            return []
         
         try:
-            templates = [t['title'] for t in result['templates']]
+            return [t['title'] for t in result['templates']]
         except KeyError:
-            return None
-        
-        for t in templates:
-            try:
-                return lower2normal[t.split(':', 1)[-1].lower()]
-            except KeyError:
-                pass
-        
-        return None
+            return []
     
 
 # ==============================================================================

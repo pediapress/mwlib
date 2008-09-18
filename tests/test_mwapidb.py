@@ -286,9 +286,9 @@ class TestImageDB(object):
         print 'CONVERTED2', img.size
         assert img.size == orig_size
     
-    def test_getLicense(self):
-        license = self.imagedb.getLicense(self.existing_image_name)
-        assert license == u'Cc-by-sa-1.0'
+    def test_getImageTemplates(self):
+        templates = self.imagedb.getImageTemplates(self.existing_image_name)
+        assert templates
     
     def test_svg(self):
         url = self.imagedb.getURL(u'Flag of the United States.svg', size=800)
