@@ -468,7 +468,7 @@ class ImageDB(object):
             return []
         
         try:
-            return [t['title'] for t in result['templates']]
+            return [t['title'].split(':', 1)[-1] for t in result['templates']]
         except KeyError:
             return []
     
