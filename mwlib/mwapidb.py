@@ -461,12 +461,11 @@ class ImageDB(object):
         if desc_url is None:
             return None
         
-        if wikidb is None:
-            api_helper = get_api_helper(desc_url)
-            if api_helper is None:
-                return None
-        else:
+        api_helper = get_api_helper(desc_url)
+        if api_helper is None and wikidb is not None:
             api_helper = wikidb.api_helper
+        else:
+            return None
         
         result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
         if not result or 'templates' not in result:
