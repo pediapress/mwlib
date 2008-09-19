@@ -117,7 +117,7 @@ def parse_article_url(url, title_encoding='utf-8'):
     if api_helper is None:
         return None
 
-    for part in ('/wiki/', 'index.php/'):
+    for part in ('index.php/', '/wiki/'):
         if part in path:
             return {
                 'api_helper': api_helper,
