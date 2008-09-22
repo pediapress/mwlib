@@ -9,6 +9,7 @@ except ImportError:
 import errno
 import os
 import pprint
+import re
 import smtplib
 import socket
 import StringIO
@@ -18,6 +19,7 @@ import time
 import traceback
 import urllib
 import urllib2
+import urlparse
 import UserDict
 
 from mwlib.log import Log
@@ -478,3 +480,35 @@ def report(system='', subject='',
         os.unlink(fp)
     except:
         pass
+
+# ==============================================================================
+
+def get_safe_url(url):
+    nonwhitespace_rex = re.compile(r'^\S+$')
+    try:
+        result = urlparse.urlsplit(url)
+        scheme, netloc, path, query, fragment = result
+    except Exception, exc:
+        log.warn('urlparse(%r) failed: %s' % (url, exc))
+        return None
+    
+    if not (scheme and netloc):
+        log.warn('Empty scheme or netloc: %r %r' % (scheme, netloc))
+        return None
+    
+    if not (nonwhitespace_rex.match(scheme) and nonwhitespace_rex.match(netloc)):
+        log.warn('Found whitespace in scheme or netloc: %r %r' % (scheme, netloc))
+        return None
+    
+    try:
+        # catches things like path='bla " target="_blank'
+        path = urllib.quote(urllib.unquote(path))
+        print 'PATH', path
+    except Exception, exc:
+        log.warn('quote(unquote(%r)) failed: %s' % (path, exc))
+        return None
+    try:
+        return urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+    except Exception, exc:
+        log.warn('urlunparse() failed: %s' % exc)
+    
