@@ -233,6 +233,12 @@ def render():
         help='write ZIP file to FILENAME',
         metavar='FILENAME',
     )
+    parser.add_option('--keep-tmpfiles',                  
+                      action='store_true',
+                      default=False,
+                      help="don't remove  temporary files like images",
+                      )
+    
     options, args = parser.parse_args()
     
     import simplejson
@@ -367,7 +373,10 @@ def render():
     finally:
         if env is not None and env.images is not None:
             try:
-                env.images.clear()
+                if not options.keep_tmpfiles:
+                    env.images.clear()
+                else:
+                    pass
             except Exception, e:
                 print 'ERROR: Could not remove temporary images: %s' % e
         if options.pid_file:

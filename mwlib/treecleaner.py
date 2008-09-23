@@ -169,6 +169,7 @@ class TreeCleaner(object):
                           'removeBreakingReturns', # NEW
                           'findDefinitionLists',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
+                          'removeEmptyTextNodes',
                           'removeChildlessNodes', 
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
@@ -196,7 +197,7 @@ class TreeCleaner(object):
         """
         
         if node.__class__ == Text:
-            if not len(node.caption) and node.parent:
+            if not len(node.caption.strip()) and node.parent:
                 self.report('removed empty text node')
                 node.parent.removeChild(node)
                 return
