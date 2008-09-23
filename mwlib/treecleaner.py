@@ -77,10 +77,11 @@ class TreeCleaner(object):
         # ex: pull image links out of preformatted nodes
         # fixme rename to ancestors
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
-                                  ItemList:[Div],
+                                  ItemList:[Div, PreFormatted],
                                   Source:self.inlineStyleNodes,
                                   Paragraph:[Paragraph],
                                   DefinitionList:[Paragraph],
+                                  Blockquote:[PreFormatted],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
@@ -137,12 +138,7 @@ class TreeCleaner(object):
         for child in children:
             for cleaner in cleanerList:
                 cleaner(child)
-            
-        #for child in self.tree.children:
-        #    for cleaner in cleanerList:
-        #        cleaner(child)
-
-
+           
 
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
