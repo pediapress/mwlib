@@ -1,6 +1,6 @@
 import urllib
 
-from mwlib import parser, uparser
+from mwlib import parser, uparser, utils
 from mwlib.log import Log
 
 log = Log('wikidbbase')
@@ -59,10 +59,11 @@ class WikiDBBase(object):
             prefix, target = link.full_target.split(':', 1)
             interwikimap = self.getInterwikiMap(title, revision=revision)
             if interwikimap and prefix in interwikimap:
-                return interwikimap[prefix]['url'].replace(
+                url = utils.get_safe_url(interwikimap[prefix]['url'].replace(
                     '$1',
                     urllib.quote(target.encode('utf-8'), safe='/:@'),
-                )
+                ))
+                return url
         
         log.warn('unhandled link in getLinkURL(): %s with (full)target %r' % (
             link.__class__.__name__, getattr(link, 'full_target', None) or link.target,

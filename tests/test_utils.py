@@ -46,3 +46,9 @@ def test_report():
     assert filename is None
     if not existed:
         assert not os.path.exists(p)
+
+def test_get_safe_url():
+    g = utils.get_safe_url
+    assert g('http://bla" target="_blank') is None
+    assert g('http') is None
+    assert g('http://bla/foo/bar" target="_blank') == 'http://bla/foo/bar%22%20target%3D%22_blank'
