@@ -744,3 +744,11 @@ def test_imagemap():
     </imagemap>
 ''')
     
+def test_link_with_quotes():
+    """http://code.pediapress.com/wiki/ticket/303"""
+    r=parse("[[David O'Leary]]")
+    link = r.find(parser.ArticleLink)[0]
+    assert link
+    assert link.children[0].caption == "David O'Leary"
+
+
