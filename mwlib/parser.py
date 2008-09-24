@@ -1505,13 +1505,17 @@ class Parser(object):
         # find first '\n' not followed by a 'PRE' token
         last = None
         for idx in range(self.pos, len(self.tokens)-1):
-            if self.tokens[idx][0] in ['ROW', 'COLUMN', 'BEGINTABLE', 'ENDTABLE', 'TIMELINE', 'MATH']:
+            nexttoken = self.tokens[idx][0]
+            if nexttoken in ['ROW', 'COLUMN', 'BEGINTABLE', 'ENDTABLE', 'TIMELINE']:
+                return None
+
+            if isinstance(nexttoken, TagToken) and nexttoken.t in [u'blockquote']:
                 return None
             
-            if self.tokens[idx][0]=='BREAK':
+            if nexttoken=='BREAK':
                 break
             
-            if self.tokens[idx][0]=='\n' and self.tokens[idx+1][0]!='PRE':
+            if nexttoken=='\n' and self.tokens[idx+1][0]!='PRE':
                 last = idx, self.tokens[idx]
                 self.tokens[idx]=('ENDPRE', '\n')
                 break

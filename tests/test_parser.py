@@ -455,7 +455,6 @@ def test_pre_tag_newlines():
     """http://code.pediapress.com/wiki/ticket/79"""
     _check_text_in_pretag("\ntext1\ntext2\n\ntext3")
 
-
 def test_pre_tag_list():
     """http://code.pediapress.com/wiki/ticket/82"""
     _check_text_in_pretag("\n* item1\n* item2")
@@ -469,6 +468,15 @@ def test_parse_preformatted_pipe():
     r=parse(" |foobar")
     assert r.find(parser.PreFormatted), "expected a preformatted node"
 
+def test_parse_preformatted_math():
+    r=parse(' <math>1+2=3</math>')
+    assert r.find(parser.PreFormatted), 'expected a preformatted node'
+
+def test_parse_preformatted_blockquote():
+    r=parse(' <blockquote>blub</blockquote>')
+    stylenode = r.find(parser.Style)
+    assert not r.find(parser.PreFormatted) and stylenode and stylenode[0].caption=='-', 'expected blockquote w/o preformatted node'
+        
 def _parse_url(u):
     url = parse("url: %s " % u).find(parser.URL)[0]
     assert url.caption == u
@@ -627,10 +635,10 @@ def test_double_exclamation_mark_in_table():
 
 
 def test_table_row_exclamation_mark():
-    r=parse("""{|
+    r=parse('''{|
 |-
 ! bgcolor="#ffccaa" | foo || bar
-|}""")
+|}''')
     cells = r.find(parser.Cell)
     print "CELLS:", cells
     assert len(cells)==2, 'expected exactly two cells'
