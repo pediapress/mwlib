@@ -45,7 +45,7 @@ def remove_comments(txt):
     return commentrx.sub(repl, txt)
 
 def preprocess(txt):
-    txt=txt.replace("\t", " ")
+    #txt=txt.replace("\t", " ")
     txt=remove_comments(txt)
     return txt
 
