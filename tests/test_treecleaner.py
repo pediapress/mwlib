@@ -389,5 +389,8 @@ ordinary paragraph. inside <br/> tags should not be removed
     # the only br tags that should remain after cleaning are the ones inside the preformatted node
     assert numBR(tree) == 3
 
-
-
+def test_preserveEmptyTextNodes():
+    raw="""[[blub]] ''bla'' """
+    tree, reports = cleanMarkup(raw) 
+    p = tree.find(Paragraph)[0]
+    assert isinstance(p.children[1], Text) and p.children[1].caption==' '

@@ -8,7 +8,7 @@ import copy
 import inspect
 import re
 
-from mwlib.advtree import AdvancedNode, removeNewlines
+from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized,
                            HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
@@ -192,8 +192,8 @@ class TreeCleaner(object):
         Text nodes which only contain whitespace are kept.
         """
         
-        if node.__class__ == Text:
-            if not len(node.caption.strip()) and node.parent:
+        if node.__class__ == Text and node.parent:
+            if (node.previous and node.previous.isblocknode and node.next and node.next.isblocknode and not node.caption.strip()) or not node.caption:
                 self.report('removed empty text node')
                 node.parent.removeChild(node)
                 return
