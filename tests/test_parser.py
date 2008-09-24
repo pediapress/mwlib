@@ -7,6 +7,7 @@
 from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
 from mwlib.xfail import xfail
+from mwlib.dummydb import DummyDB
 
 parse = uparser.simpleparse
     
@@ -749,6 +750,9 @@ def test_link_with_quotes():
     r=parse("[[David O'Leary]]")
     link = r.find(parser.ArticleLink)[0]
     assert link
-    assert link.children[0].caption == "David O'Leary"
+    assert link.children[0].caption == "David O'Leary", 'Link caption no fully detected'
 
-
+def test_no_tab_removal():
+    d = DummyDB()
+    r=uparser.parseString(title='', raw='\ttext', wikidb=d)
+    assert not r.find(parser.PreFormatted), 'unexpected PreFormatted node'
