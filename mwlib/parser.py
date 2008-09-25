@@ -731,14 +731,13 @@ class Parser(object):
         n.append(URL(u))
         
         self.next()
-            
+
         while self.left:
             if self.tokens[self.pos:self.pos+2] == [(']]', ']]'), ('SPECIAL', u']')]:                
                 self.tokens[self.pos:self.pos+2] = [('SPECIAL', ']'), (']]', ']]')]
                 
             token = self.token
 
-                
             if token[0] == 'SPECIAL' and token[1]==']':
                 self.next()
                 n.__class__ = NamedURL

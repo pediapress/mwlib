@@ -21,6 +21,10 @@ def test_url():
     s.dump()
     assert len(s)==1, "expected one url"
 
+def test_url2():
+    s=mwscan.scan('[http://www.computer.org/portal/site/computer/menuitem.5d61c1d591162e4b0ef1bd108bcd45f3/index.jsp?&pName=computer_level1_article&TheCat=1055&path=computer/homepage/Feb07&file=howthings.xml&xsl=article.xsl&;jsessionid=G10s8pkpkP1K0Lk07bXx5dR0mXLSj8hXdnLDN5Kjj5GZTJtTTLZ0!1592783441 How GPUs work]')
+    print s.toks
+    assert s.rawtext(s.toks[1]) == u' How GPUs work'
 
 def test_tokenize_math():
     toks = mwscan.tokenize("<math> bla </math> blubb")
