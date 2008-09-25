@@ -10,7 +10,7 @@ import re
 
 from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                           Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized,
+                           Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
                            HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
                            Row, Section, Small, Source, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text,
@@ -107,6 +107,12 @@ class TreeCleaner(object):
         self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject']
 
 
+        # keys are nodes which can only have child nodes of types inside the valuelist.
+        # children of different classes are deleted
+        self.allowedChildren = {Gallery: [ImageLink],
+                                }
+
+
         self.cell_splitter_params = {
             'maxCellHeight': (7*72) * 3/4 ,
             'lineHeight':  26,
@@ -164,6 +170,7 @@ class TreeCleaner(object):
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           'removeBreakingReturns', # NEW
                           'findDefinitionLists',
+                          'restrictChildren',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
                           'removeEmptyTextNodes',
                           'removeChildlessNodes', 
@@ -706,3 +713,15 @@ class TreeCleaner(object):
 
         for c in node.children[:]:
             self.findDefinitionLists(c)
+
+
+    def restrictChildren(self, node):
+
+        if node.__class__ in self.allowedChildren.keys():
+            for c in node.children[:]:
+                if c.__class__ not in self.allowedChildren[node.__class__]:
+                    node.removeChild(c)
+            return 
+
+        for c in node.children:
+            self.restrictChildren(c)
