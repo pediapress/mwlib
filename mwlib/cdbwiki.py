@@ -172,7 +172,7 @@ class WikiDB(object):
 
         title = normname(title)
         try:
-            res = self.reader["T:"+title]
+            res = self.reader["Template:"+title]
         except KeyError:
             return ''
 
