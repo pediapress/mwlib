@@ -175,7 +175,7 @@ url=
                         wikitext = unicode(wikitext, 'utf-8')
                     except UnicodeError:
                         wikitext = None
-            elif license.get('mw_rights_text'):
+            else:
                 wikitext = ''
                 if license.get('mw_rights_text'):
                     wikitext = license['mw_rights_text']

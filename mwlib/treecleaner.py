@@ -8,9 +8,9 @@ import copy
 import inspect
 import re
 
-from mwlib.advtree import AdvancedNode, removeNewlines
+from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                           Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized,
+                           Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
                            HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
                            Row, Section, Small, Source, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text,
@@ -77,10 +77,11 @@ class TreeCleaner(object):
         # ex: pull image links out of preformatted nodes
         # fixme rename to ancestors
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
-                                  ItemList:[Div],
+                                  ItemList:[Div, PreFormatted],
                                   Source:self.inlineStyleNodes,
                                   Paragraph:[Paragraph],
                                   DefinitionList:[Paragraph],
+                                  Blockquote:[PreFormatted],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
@@ -104,6 +105,12 @@ class TreeCleaner(object):
         # list of css classes which trigger the removal of the node from the tree
         # the following list is wikipedia specific
         self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject']
+
+
+        # keys are nodes which can only have child nodes of types inside the valuelist.
+        # children of different classes are deleted
+        self.allowedChildren = {Gallery: [ImageLink],
+                                }
 
 
         self.cell_splitter_params = {
@@ -137,12 +144,7 @@ class TreeCleaner(object):
         for child in children:
             for cleaner in cleanerList:
                 cleaner(child)
-            
-        #for child in self.tree.children:
-        #    for cleaner in cleanerList:
-        #        cleaner(child)
-
-
+           
 
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
@@ -168,7 +170,9 @@ class TreeCleaner(object):
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           'removeBreakingReturns', # NEW
                           'findDefinitionLists',
+                          'restrictChildren',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
+                          'removeEmptyTextNodes',
                           'removeChildlessNodes', 
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
@@ -195,8 +199,8 @@ class TreeCleaner(object):
         Text nodes which only contain whitespace are kept.
         """
         
-        if node.__class__ == Text:
-            if not len(node.caption) and node.parent:
+        if node.__class__ == Text and node.parent:
+            if (node.previous and node.previous.isblocknode and node.next and node.next.isblocknode and not node.caption.strip()) or not node.caption:
                 self.report('removed empty text node')
                 node.parent.removeChild(node)
                 return
@@ -709,3 +713,15 @@ class TreeCleaner(object):
 
         for c in node.children[:]:
             self.findDefinitionLists(c)
+
+
+    def restrictChildren(self, node):
+
+        if node.__class__ in self.allowedChildren.keys():
+            for c in node.children[:]:
+                if c.__class__ not in self.allowedChildren[node.__class__]:
+                    node.removeChild(c)
+            return 
+
+        for c in node.children:
+            self.restrictChildren(c)

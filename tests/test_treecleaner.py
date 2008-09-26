@@ -9,7 +9,7 @@ from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
 from mwlib.treecleaner import TreeCleaner, _all, _any
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                     Cite, Code, DefinitionList, Div, Emphasized, HorizontalRule, ImageLink, InterwikiLink, Item,
+                     Cite, Code, DefinitionList, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
                      Reference, ReferenceList, Row, Section, Source, SpecialLink, Table, Text, Underline,
                      URL)
@@ -389,5 +389,26 @@ ordinary paragraph. inside <br/> tags should not be removed
     # the only br tags that should remain after cleaning are the ones inside the preformatted node
     assert numBR(tree) == 3
 
+def test_preserveEmptyTextNodes():
+    raw="""[[blub]] ''bla'' """
+    tree, reports = cleanMarkup(raw) 
+    p = tree.find(Paragraph)[0]
+    assert isinstance(p.children[1], Text) and p.children[1].caption==' '
 
+def test_gallery():
+    raw ="""<gallery>
+Image:There_Screenshot02.jpg|Activities include hoverboarding, with the ability to perform stunts such as dropping down from space
+Image:Scenery.jpg|A wide pan over a seaside thatched-roof village
+|Members can join and create interest groups
+Image:Landmark02.jpg|There contains many landmarks, including a replica of New Orleans
+Image:Emotes01.jpg|Avatars can display over 100 emotes
+<!-- Deleted image removed: Image:Popoutemotes01.jpg|Avatars can display a wide variety of pop-out emotes -->
+Image:Zona.jpg|Zona Island, a place where new members first log in.
+Image:Hoverboat01.jpg|A member made vehicle. As an avatar users can paint and build a variety of items.
+Image:|Zona Island, a place where new members first log in
+<!-- Deleted image removed: Image:OldWaterinHole.jpg|The Old Waterin' Hole: a place where users can sit and chat while in a social club/bar-like environment. -->
+</gallery>"""
 
+    tree, reports = cleanMarkup(raw) 
+    gallery = tree.find(Gallery)[0]
+    assert len(gallery.children) == 6
