@@ -79,7 +79,7 @@ textbody.addElement(
 )
 textbody.addElement(
     style.TextProperties(
-        color="#000000", fontsize="12pt", language="en", country="US",
+        fontsize="12pt", language="en", country="US",
         fontname="DejaVuSerif"
     )
 )
@@ -443,12 +443,9 @@ imgCaption.addElement(
 )
 imgCaption.addElement(
     style.TextProperties(
-        color="#000000", fontsize="10pt", fontname="DejaVuSerif",
-        language="en", country="US"))
-
-
-
-
+        fontsize="10pt", fontname="DejaVuSerif",
+    )
+)
 
 #
 # Graphic styles:
