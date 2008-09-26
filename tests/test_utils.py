@@ -52,3 +52,4 @@ def test_get_safe_url():
     assert g('http://bla" target="_blank') is None
     assert g('http') is None
     assert g('http://bla/foo/bar" target="_blank') == 'http://bla/foo/bar%22%20target%3D%22_blank'
+    assert g(u'http://xyz/wiki/%D0%91%D0%94%D0%A1%D0%9C') == 'http://xyz/wiki/%D0%91%D0%94%D0%A1%D0%9C'

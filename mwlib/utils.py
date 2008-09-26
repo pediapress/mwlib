@@ -484,6 +484,9 @@ def report(system='', subject='',
 # ==============================================================================
 
 def get_safe_url(url):
+    if not isinstance(url, str):
+        url = url.encode('utf-8')
+    
     nonwhitespace_rex = re.compile(r'^\S+$')
     try:
         result = urlparse.urlsplit(url)
@@ -503,7 +506,6 @@ def get_safe_url(url):
     try:
         # catches things like path='bla " target="_blank'
         path = urllib.quote(urllib.unquote(path))
-        print 'PATH', path
     except Exception, exc:
         log.warn('quote(unquote(%r)) failed: %s' % (path, exc))
         return None
