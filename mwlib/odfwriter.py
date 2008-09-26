@@ -485,7 +485,7 @@ class ODFWriter(object):
             "\n":text.LineBreak,
             " ":text.S}
         col = []
-        for c in obj.getAllDisplayText().strip():
+        for c in obj.getAllDisplayText().replace("\t", " "*8).strip():
             if c in rmap:
                 p.addText(u"".join(col))
                 col = []
