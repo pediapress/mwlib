@@ -38,7 +38,7 @@ class Status(object):
             self.status['article'] = article
 
         if self.podclient is not None:
-            self.podclient.post_status(**status)
+            self.podclient.post_status(**self.status)
         
         sys.stdout.flush()
         
