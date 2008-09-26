@@ -805,7 +805,7 @@ def preprocess(root):
     advtree.buildAdvancedTree(root)
     tc = TreeCleaner(root)
     tc.cleanAll()
-    parser.show(sys.stdout, root)
+    #parser.show(sys.stdout, root)
 
 # ==============================================================================
 
