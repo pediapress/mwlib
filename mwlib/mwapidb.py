@@ -463,7 +463,7 @@ class ImageDB(object):
             else:
                 return []
         
-        result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
+        result = api_helper.page_query(titles='Image:%s' % name, prop='templates', tllimit='500')
         if not result or 'templates' not in result:
             return []
         
