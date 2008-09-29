@@ -22,8 +22,6 @@ class Status(object):
         if status is not None and status != self.status.get('status'):
             print 'STATUS: %s' % status
             self.status['status'] = status
-            if self.podclient is not None:
-                self.podclient.post_status(status)
         
         if progress is not None:
             assert 0 <= progress and progress <= 100, 'progress not in range 0..100'
@@ -34,14 +32,13 @@ class Status(object):
             if progress != self.status.get('progress'):
                 print 'PROGRESS: %d%%' % progress
                 self.status['progress'] = progress
-                if self.podclient is not None:
-                    self.podclient.post_progress(progress)
         
         if article is not None and article != self.status.get('article'):
             print 'ARTICLE: %r' % article
             self.status['article'] = article
-            if self.podclient is not None:
-                self.podclient.post_current_article(article)
+
+        if self.podclient is not None:
+            self.podclient.post_status(**self.status)
         
         sys.stdout.flush()
         

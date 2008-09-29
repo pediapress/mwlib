@@ -131,7 +131,7 @@ def buildzip():
                 num_threads=options.num_threads,
                 imagesize=options.imagesize,
             )
-        
+            
             status = Status(podclient=podclient, progress_range=(91, 100))
             if podclient:
                 status(status='uploading', progress=0)
