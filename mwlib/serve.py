@@ -42,7 +42,7 @@ def no_job_queue(job_type, collection_id, args):
 
 # ==============================================================================
 
-collection_id_rex = re.compile(r'^[a-z0-9]+$')
+collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
 
 def make_collection_id(data):
     sio = StringIO.StringIO()
@@ -162,10 +162,7 @@ class Application(wsgi.Application):
         collection_dir = self.get_collection_dir(collection_id)
         if not os.path.isdir(collection_dir):
             log.info('Creating new collection dir %r' % collection_dir)
-            try:
-                os.makedirs(collection_dir)
-            except Exception, exc:
-                log.warn('Could not create directory %r: %s' % (collection_dir, exc))
+            os.makedirs(collection_dir)
         return collection_id
     
     def get_path(self, collection_id, filename, ext=None):
