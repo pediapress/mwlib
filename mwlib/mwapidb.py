@@ -480,7 +480,7 @@ class WikiDB(wikidbbase.WikiDBBase):
     print_template = u'Template:Print%s' # set this to none to deacticate # FIXME
     
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
-    bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
+    bot_rex = re.compile(r'bot\b', re.IGNORECASE)
     
     def __init__(self,
         base_url=None,
