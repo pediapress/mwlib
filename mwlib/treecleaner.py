@@ -79,7 +79,7 @@ class TreeCleaner(object):
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
                                   ItemList:[Div, PreFormatted],
                                   Source:self.inlineStyleNodes,
-                                  Paragraph:[Paragraph],
+                                  #Paragraph:[Paragraph],
                                   DefinitionList:[Paragraph],
                                   Blockquote:[PreFormatted],
                                   }
@@ -155,8 +155,9 @@ class TreeCleaner(object):
                           'removeLangLinks',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
-                          'fixNesting', 
                           'removeSingleCellTables',
+                          'simplifyBlockNodes',
+                          'fixNesting', #
                           'removeCriticalTables',
                           'removeBrokenChildren',
                           'fixTableColspans',
@@ -340,7 +341,13 @@ class TreeCleaner(object):
                 if node.parent:
                     cell_content = node.children[0].children[0].children
                     self.report('replaced Child', node, cell_content)
-                    node.parent.replaceChild(node, cell_content)
+
+                    d = Div()
+                    node.parent.replaceChild(node, [d])
+                    for child in cell_content:
+                        d.appendChild(child)
+                    d.vlist = node.vlist
+                    #node.parent.replaceChild(node, cell_content)
 
         for c in node.children:
             self.removeSingleCellTables(c)
@@ -725,3 +732,14 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.restrictChildren(c)
+
+
+    def simplifyBlockNodes(self, node):
+
+        if node.__class__ == Paragraph:
+            if len(node.children) == 1 and node.children[0].isblocknode:
+                if node.parent:
+                    node.parent.replaceChild(node, [node.children[0]])
+
+        for c in node.children:
+            self.simplifyBlockNodes(c)
