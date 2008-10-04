@@ -1,5 +1,8 @@
-import simplejson
 import sys
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib.log import Log
 
@@ -52,7 +55,7 @@ class Status(object):
             return
         try:    
             open(self.filename, 'wb').write(
-                simplejson.dumps(self.status).encode('utf-8')
+                json.dumps(self.status).encode('utf-8')
             )
         except Exception, exc:
             log.ERROR('Could not write status file %r: %s' % (

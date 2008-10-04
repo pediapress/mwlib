@@ -9,9 +9,12 @@ import urllib2
 import tempfile
 import time
 import random
-import simplejson
 import subprocess
 import sys
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib import mwapidb, utils, log
 import mwlib.metabook
@@ -60,7 +63,7 @@ def getMetabook(articles):
 def postRenderCommand(metabook, baseurl, serviceurl, writer):
     log.info('POSTing render command %s %s' % (baseurl, writer))
     data = {
-        "metabook": simplejson.dumps(metabook),
+        "metabook": json.dumps(metabook),
         "writer": writer,
         "writer_options": writer_options.get(writer, ''),
         "base_url": baseurl.encode('utf-8'),
@@ -68,7 +71,7 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer):
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return simplejson.loads(res)
+    return json.loads(res)
 
 def postRenderKillCommand(collection_id, serviceurl, writer):
     log.info('POSTing render_kill command %r' % collection_id)
@@ -79,13 +82,13 @@ def postRenderKillCommand(collection_id, serviceurl, writer):
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return simplejson.loads(res)
+    return json.loads(res)
 
 def getRenderStatus(colid, serviceurl, writer):
     #log.info('get render status')
     data = urllib.urlencode({"command": "render_status", "collection_id": colid, 'writer': writer})
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return simplejson.loads(res)
+    return json.loads(res)
 
 def download(colid, serviceurl, writer):
     log.info('download')

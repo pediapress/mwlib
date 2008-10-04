@@ -5,10 +5,13 @@
 
 import os
 import re
-import simplejson
 import tempfile
 import threading
 import zipfile
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib import expander, jobsched, metabook, mwapidb, parser, uparser, utils
 from mwlib.recorddb import RecordDB
@@ -184,7 +187,7 @@ class ZipCreator(object):
     def join(self):
         """Finish ZIP file by writing the actual content"""
         
-        self.addObject('content.json', simplejson.dumps(dict(
+        self.addObject('content.json', json.dumps(dict(
             articles=self.articles,
             templates=self.templates,
             sources=self.sources,
@@ -323,7 +326,7 @@ class ThreadedZipCreator(ZipCreator):
             )
         self.jobsched.join()
         
-        self.addObject('content.json', simplejson.dumps(dict(
+        self.addObject('content.json', json.dumps(dict(
             articles=self.articles,
             templates=self.templates,
             sources=self.sources,
@@ -461,7 +464,7 @@ def make_zip_file(output, env,
             )
         
         z.join()
-        z.addObject('metabook.json', simplejson.dumps(env.metabook))
+        z.addObject('metabook.json', json.dumps(env.metabook))
         zf.close()
         if os.path.exists(output): # Windows...
             os.unlink(output)

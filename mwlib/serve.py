@@ -6,7 +6,6 @@ import os
 import re
 import shutil
 import signal
-import simplejson
 import StringIO
 import subprocess
 import time
@@ -15,6 +14,10 @@ try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib import filequeue, log, podclient, utils, wsgi, _version
 
@@ -68,7 +71,7 @@ def json_response(fn):
         if isinstance(result, wsgi.Response):
             return result
         return wsgi.Response(
-            content=simplejson.dumps(result),
+            content=json.dumps(result),
             headers={'Content-Type': 'application/json'},
         )
     return wrapper
@@ -291,7 +294,7 @@ class Application(wsgi.Application):
         status_path = self.get_path(collection_id, self.status_filename, writer)
         try:
             f = open(status_path, 'rb')
-            return simplejson.loads(f.read())
+            return json.loads(f.read())
             f.close()
         except (IOError, ValueError):
             return {'progress': 0}
@@ -410,7 +413,7 @@ class Application(wsgi.Application):
         
         pod_api_url = post_data.get('pod_api_url', '')
         if pod_api_url:
-            result = simplejson.loads(urllib2.urlopen(pod_api_url, data="any").read())
+            result = json.loads(urllib2.urlopen(pod_api_url, data="any").read())
             post_url = result['post_url']
             response = {
                 'state': 'ok',

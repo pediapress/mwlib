@@ -241,7 +241,6 @@ def render():
     
     options, args = parser.parse_args()
     
-    import simplejson
     import sys
     import tempfile
     import traceback

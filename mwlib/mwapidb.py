@@ -15,7 +15,10 @@ import urllib
 import urllib2
 import urlparse
 
-import simplejson
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib import utils, metabook, wikidbbase, uparser, parser
 from mwlib.log import Log
@@ -210,7 +213,7 @@ class APIHelper(object):
             ignore_errors=False,
             opener=self.opener,
         )
-        result = simplejson.loads(result)
+        result = json.loads(result)
         if 'login' in result and result['login'].get('result') == 'Success':
             return True
         return False
@@ -255,7 +258,7 @@ class APIHelper(object):
                 # Note that a BOM is actually *not allowed* at the beginning of a JSON string
                 # see http://www.ietf.org/rfc/rfc4627.txt, section "3. Encoding"
                 data = data[1:]
-            return simplejson.loads(data)['query']
+            return json.loads(data)['query']
         except KeyError:
             log.error('Response from api%s did not contain a query result' % self.script_extension)
             return None

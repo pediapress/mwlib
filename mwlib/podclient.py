@@ -3,7 +3,10 @@
 import urllib
 import urllib2
 
-import simplejson
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib.log import Log
 from mwlib.utils import get_multipart
@@ -44,5 +47,5 @@ class PODClient(object):
         self._post(data, content_type=content_type)
 
 def podclient_from_serviceurl(serviceurl):
-    result = simplejson.loads(urllib2.urlopen(serviceurl, data="any").read())
+    result = json.loads(urllib2.urlopen(serviceurl, data="any").read())
     return PODClient(result["post_url"], redirecturl=result["redirect_url"])
