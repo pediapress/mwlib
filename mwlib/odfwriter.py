@@ -478,8 +478,7 @@ class ODFWriter(object):
         return text.Span(stylename=style.teletyped)
 
     def _replaceWhitespaces(self,obj, p):
-        # replaces \n and " " given from parser to ODF
-        # Note: \t isnt given from parser, no need to replace
+        # replaces \n, \t and " " given from parser to ODF-valid tags
         # works on (styled) ParagraphProxy p
         rmap = {
             "\n":text.LineBreak,
@@ -497,8 +496,6 @@ class ODFWriter(object):
         return p
         
     def owritePreFormatted(self, obj):
-        # there seems to be no preformatted option in ODF
-        # need to replace \n \t " "
         p = ParagraphProxy(stylename=style.preformatted) 
         return self._replaceWhitespaces(obj, p)
 
