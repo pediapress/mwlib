@@ -74,7 +74,8 @@ textbody.addElement(
     style.ParagraphProperties(
         marginbottom="0.05in", margintop="0.04in", textalign="left",
         punctuationwrap="hanging", linebreak="strict",
-        orphans="3",
+        orphans="3", keeptogether="always",
+
     )
 )
 textbody.addElement(
@@ -92,7 +93,7 @@ preformatted.addElement(
     style.ParagraphProperties(
         marginleft=".25in", marginright=".25in", margintop=".25in", marginbottom=".25in", 
         backgroundcolor="#e6e6e6",
-        orphans="3"
+        orphans="3", keeptogether="always",
     )
 )
 preformatted.addElement(
@@ -154,7 +155,7 @@ blockquote = style.Style(name="Blockquote", family="paragraph")
 blockquote.addElement(
     style.ParagraphProperties(
         marginleft="0.12in",marginright="0.12in", margintop="0in",marginbottom="0.15in",
-        orphans="3"
+        orphans="3", keeptogether="always"
     )
 )
 blockquote.addElement(
@@ -168,7 +169,7 @@ indentedSingle = style.Style(name="IndentedSingle", family="paragraph")
 indentedSingle.addElement(
     style.ParagraphProperties(
         marginleft="0.12in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
-        orphans="3"
+        orphans="3", keeptogether="always"
     )
 )
 indentedSingle.addElement(
@@ -181,7 +182,7 @@ indentedDouble = style.Style(name="IndentedDouble", family="paragraph")
 indentedDouble.addElement(
     style.ParagraphProperties(
         marginleft="0.24in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
-        orphans="3"
+        orphans="3", keeptogether="always"
     )
 )
 indentedDouble.addElement(
@@ -194,7 +195,7 @@ indentedTriple = style.Style(name="IndentedTriple", family="paragraph")
 indentedTriple.addElement(
     style.ParagraphProperties(
         marginleft="0.36in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
-        orphans="3"
+        orphans="3", keeptogether="always"
     )
 )
 indentedTriple.addElement(
@@ -362,7 +363,7 @@ footnotelist.addElement(footnoteLLSN)
 ArticleHeader = style.Style(name="HeadingArticle", family="paragraph", defaultoutlinelevel="1")
 ArticleHeader.addElement(
     style.ParagraphProperties(
-            margintop="0in",marginbottom="0.15in"
+            margintop="0in",marginbottom="0.15in", keepwithnext="always"
     )
 )
 ArticleHeader.addElement(
@@ -377,7 +378,7 @@ h0 = ArticleHeader #alternative name
 h1 = style.Style(name="Heading1", family="paragraph", defaultoutlinelevel="2")
 h1.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.15in"
+        margintop="0.3in",marginbottom="0.15in", keepwithnext="always"
     )
 )
 h1.addElement(
@@ -390,12 +391,12 @@ h1.addElement(
 h2 = style.Style(name="Heading2", family="paragraph", defaultoutlinelevel="3")
 h2.addElement(
     style.TextProperties(
-        fontsize="18pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="18pt", fontname="DejaVuSans"
     )
 )
 h2.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.08in"
+        margintop="0.3in",marginbottom="0.08in", keepwithnext="always"
     )
 )
 
@@ -403,12 +404,12 @@ h2.addElement(
 h3 = style.Style(name="Heading3", family="paragraph", defaultoutlinelevel="4")
 h3.addElement(
     style.TextProperties(
-        fontsize="16pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="16pt", fontname="DejaVuSans"
     )
 )
 h3.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.05in"
+        margintop="0.3in",marginbottom="0.05in", keepwithnext="always"
     )
 )
 
@@ -416,12 +417,12 @@ h3.addElement(
 h4 = style.Style(name="Heading4", family="paragraph", defaultoutlinelevel="5")
 h4.addElement(
     style.TextProperties(
-        fontsize="14pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="14pt", fontname="DejaVuSans"
     )
 )
 h4.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.05in"
+        margintop="0.3in",marginbottom="0.05in", keepwithnext="always"
     )
 )
 
@@ -429,12 +430,12 @@ h4.addElement(
 h5 = style.Style(name="Heading5", family="paragraph", defaultoutlinelevel="6")
 h5.addElement(
     style.TextProperties(
-        fontsize="10pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="10pt", fontname="DejaVuSans"
     )
 )
 h5.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.05in"
+        margintop="0.3in",marginbottom="0.05in", keepwithnext="always"
     )
 )
 
