@@ -74,7 +74,7 @@ textbody.addElement(
     style.ParagraphProperties(
         marginbottom="0.05in", margintop="0.04in", textalign="left",
         punctuationwrap="hanging", linebreak="strict",
-        #widows="2",orphans="2" #fixme: test and add to other para's
+        orphans="3",
     )
 )
 textbody.addElement(
@@ -91,7 +91,8 @@ preformatted = style.Style(name="Preformatted",family="paragraph")
 preformatted.addElement(
     style.ParagraphProperties(
         marginleft=".25in", marginright=".25in", margintop=".25in", marginbottom=".25in", 
-        backgroundcolor="#e6e6e6"
+        backgroundcolor="#e6e6e6",
+        orphans="3"
     )
 )
 preformatted.addElement(
@@ -152,7 +153,8 @@ center.addElement(
 blockquote = style.Style(name="Blockquote", family="paragraph")
 blockquote.addElement(
     style.ParagraphProperties(
-        marginleft="0.12in",marginright="0.12in", margintop="0in",marginbottom="0.15in"
+        marginleft="0.12in",marginright="0.12in", margintop="0in",marginbottom="0.15in",
+        orphans="3"
     )
 )
 blockquote.addElement(
@@ -165,7 +167,8 @@ blockquote.addElement(
 indentedSingle = style.Style(name="IndentedSingle", family="paragraph")
 indentedSingle.addElement(
     style.ParagraphProperties(
-        marginleft="0.12in", marginright="0in", margintop="0.05in", marginbottom="0.04in"
+        marginleft="0.12in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
+        orphans="3"
     )
 )
 indentedSingle.addElement(
@@ -177,7 +180,8 @@ indentedSingle.addElement(
 indentedDouble = style.Style(name="IndentedDouble", family="paragraph")
 indentedDouble.addElement(
     style.ParagraphProperties(
-        marginleft="0.24in", marginright="0in", margintop="0.05in", marginbottom="0.04in"
+        marginleft="0.24in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
+        orphans="3"
     )
 )
 indentedDouble.addElement(
@@ -189,7 +193,8 @@ indentedDouble.addElement(
 indentedTriple = style.Style(name="IndentedTriple", family="paragraph")
 indentedTriple.addElement(
     style.ParagraphProperties(
-        marginleft="0.36in", marginright="0in", margintop="0.05in", marginbottom="0.04in"
+        marginleft="0.36in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
+        orphans="3"
     )
 )
 indentedTriple.addElement(
