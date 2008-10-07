@@ -224,7 +224,7 @@ class TreeCleaner(object):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
         if not node.children and node.__class__ not in self.childlessOK:
             removeNode = node
-            while removeNode.parent and not removeNode.siblings:
+            while removeNode.parent and not removeNode.siblings and removeNode.parent.__class__ not in self.childlessOK:
                 removeNode = removeNode.parent
             if removeNode.parent:
                 self.report('removed:', removeNode)
