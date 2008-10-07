@@ -748,7 +748,8 @@ class Parser(object):
                 n.append(self.parseAtom())
             else:
                 break
-                
+        if n.children[0].__class__ == Text:
+            n.children[0].caption = n.children[0].caption.strip()
         return n
             
         
