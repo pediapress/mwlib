@@ -271,6 +271,7 @@ Specific Options
 ``--cache-dir=CACHE_DIR``
 
   Cache directory. This directory must be writeable by the ``mw-serve`` process.
+  The default ist "/var/cache/mw-serve/".
 
 ``--mwrender=MWRENDER``
 
