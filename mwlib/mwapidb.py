@@ -753,7 +753,10 @@ class WikiDB(wikidbbase.WikiDBBase):
         result = self.api_helper.query(
             meta='siteinfo',
             siprop='interwikimap',
-        ).get('interwikimap', [])
+        )
+        if not result:
+            return
+        result = result.get('interwikimap', [])
         if not result:
             return
         for entry in result:
