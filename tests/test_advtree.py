@@ -131,7 +131,7 @@ def test_identity():
 ##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
 
 
-def test_indentation():
+def test_definitiondescription():
     raw = u"""
 == test ==
 
@@ -144,7 +144,7 @@ def test_indentation():
     db = DummyDB()
     r = parseString(title="t", raw=raw, wikidb=db)
     buildAdvancedTree(r)
-    for i,c in enumerate(r.getChildNodesByClass(Indented)):
+    for i,c in enumerate(r.getChildNodesByClass(DefinitionDescription)):
         assert c.indentlevel == i + 1
     assert i == 3
 
@@ -180,16 +180,19 @@ def test_ulist():
 
 
 def test_colspan():
-    t1 = '''<table><tr><td colspan="one">no colspan </td></tr></table>'''
-    r = parseString(title='t', raw=t1)
+    raw  = '''<table><tr><td colspan="bogus">no colspan </td></tr></table>'''
+    r = parseString(title='t', raw=raw)
     buildAdvancedTree(r)
-    parser.show(sys.stdout, r)
-    assert r.getChildNodesByClass(Cell)[0].colspan is None
+    assert r.getChildNodesByClass(Cell)[0].colspan is 1
 
-    t1 = '''<table><tr><td colspan="2">colspan1</td></tr></table>'''
-    r = parseString(title='t', raw=t1)
+    raw = '''<table><tr><td colspan="-1">no colspan </td></tr></table>'''
+    r = parseString(title='t', raw=raw)
     buildAdvancedTree(r)
-    parser.show(sys.stdout, r)
+    assert r.getChildNodesByClass(Cell)[0].colspan is 1
+
+    raw = '''<table><tr><td colspan="2">colspan1</td></tr></table>'''
+    r = parseString(title='t', raw=raw)
+    buildAdvancedTree(r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 2
 
 
@@ -201,7 +204,6 @@ def test_attributes():
 |stuff
 |}
 '''
-    #t1 = '''<table><tr colspan="one" STYLE="BACKGROUND:#FFDEAD;"  bgcolor="#000000"><td>no colspan </td></tr></table>'''
     r = parseString(title='t', raw=t1)
     buildAdvancedTree(r)
     n = r.getChildNodesByClass(Row)[0]
