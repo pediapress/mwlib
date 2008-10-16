@@ -257,8 +257,8 @@ class AdvancedNode:
     def getStyle(self):
         if not self.attributes:
             return {}
-        style =  self.attributes.get('style', {}) # THIS IS BROKEN
-        return style
+        else:
+            return self.attributes.get('style', {})
 
 
     def _cleanAttrs(self, attrs):
@@ -278,7 +278,7 @@ class AdvancedNode:
                 try:
                     return unicode(val)
                 except:
-                    return ''
+                    return u''
 
         def ensureDict(val):
             if isinstance(val, dict):
@@ -353,16 +353,13 @@ class AdvancedRow(AdvancedNode):
 class AdvancedCell(AdvancedNode):
     @property    
     def colspan(self, attr="colspan"):
-        # returns None if there is no valid colspan e.g. colspan="one"
-        c = self.vlist.get(attr, None)
-        if c is not None and (isinstance(c,int) or (isinstance(c, (str, unicode)) and c.isdigit())):
-            return max(1,int(c))
+        ''' colspan of cell. result is always non-zero, positive int'''
+        return self.attributes.get('colspan') or 1
 
     @property
     def rowspan(self):
-        return self.colspan(attr="rowspan")
-
-
+        ''' rowspan of cell. result is always non-zero, positive int'''
+        return self.attributes.get('rowspan') or 1
 
 class AdvancedSection(AdvancedNode):
     def getSectionLevel(self):
