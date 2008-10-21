@@ -37,6 +37,9 @@ You will also need:
 *PIL*
  PIL_ is the Python Imaging Library and is used for image handling.
 
+*lxml*
+ lxml_ is needed for the docbookwriter.
+
 *blahtexml*
  Blahtex is a program written in C++, which converts an equation given
  in a syntax close to TeX into MathML. It is designed by David Harvey
@@ -110,3 +113,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _MediaWiki: http://www.mediawiki.org/
 .. _SpamBayes: http://spambayes.sourceforge.net/
 .. _PIL: http://www.pythonware.com/products/pil/
+.. _lxml: http://codespeak.net/lxml/
