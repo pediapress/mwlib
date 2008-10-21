@@ -202,6 +202,7 @@ class Application(wsgi.Application):
         response = {
             'collection_id': collection_id,
             'writer': writer,
+            'is_cached': False,
         }
         
         pid_path = self.get_path(collection_id, self.pid_filename, writer)
