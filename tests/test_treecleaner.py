@@ -179,10 +179,10 @@ def test_fixNesting1():
     tree, reports = cleanMarkup(raw)
     source_node = tree.getChildNodesByClass(Source)[0]
     assert not _any([p.__class__ == PreFormatted for p in source_node.getParents()]) 
-    p = tree.getChildNodesByClass(Paragraph)[0]
-    assert p.children[0].__class__ == PreFormatted and p.children[0].children[0].caption.find('preformatted text') > -1
-    assert p.children[1].__class__ == Source and len(p.children[1].children) > 0
-    assert p.children[2].__class__ == PreFormatted and p.children[2].children[0].caption.find('some text') > -1
+    a = tree
+    assert p.children[0].__class__ == PreFormatted and a.children[0].children[0].caption.find('preformatted text') > -1
+    assert p.children[1].__class__ == Source and len(a.children[1].children) > 0
+    assert p.children[2].__class__ == PreFormatted and a.children[2].children[0].caption.find('some text') > -1
 
 def test_fixNesting2():
     raw = r'''
@@ -195,44 +195,45 @@ def test_fixNesting2():
     list_node = tree.getChildNodesByClass(ItemList)[0]
     assert not _any([p.__class__ == Div for p in list_node.getParents()])
 
-def test_fixNesting3():
-    raw = r'''
-<strike>
-para 1
+# the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
+# but maybe they are interesting in the future - therefore I did not delete them
 
-para 2
-</strike>
-    '''
+## def test_fixNesting3():
+##     raw = r'''
+## <strike>
+## para 1
 
-    tree, reports = cleanMarkup(raw)
-    paras = tree.getChildNodesByClass(Paragraph)
-    for para in paras:
-        assert not para.getChildNodesByClass(Paragraph)
+## para 2
+## </strike>
+##     '''
 
-def test_fixNesting4():
-    raw = """
-<strike>
+##     tree, reports = cleanMarkup(raw)
+##     paras = tree.getChildNodesByClass(Paragraph)
+##     for para in paras:
+##         assert not para.getChildNodesByClass(Paragraph)
 
-<div>
- indented para 1
+## def test_fixNesting4():
+##     raw = """
+## <strike>
 
-regular para
+## <div>
+##  indented para 1
 
- indented para 2
+## regular para
 
-</div>
+##  indented para 2
 
-</strike>
-"""
+## </div>
 
-    tree = getTreeFromMarkup(raw)
-    showTree(tree)
-    
-    tree, reports = cleanMarkup(raw)
-    showTree(tree)
-    paras = tree.getChildNodesByClass(Paragraph)
-    for para in paras:
-        assert not para.getChildNodesByClass(Paragraph)
+## </strike>
+## """
+
+##     tree = getTreeFromMarkup(raw)    
+##     tree, reports = cleanMarkup(raw)
+##     paras = tree.getChildNodesByClass(Paragraph)
+##     for para in paras:
+##         assert not para.getChildNodesByClass(Paragraph)
+        
       
 def test_fixNesting5():
     raw = """
