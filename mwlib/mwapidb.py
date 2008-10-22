@@ -587,13 +587,17 @@ class WikiDB(wikidbbase.WikiDBBase):
         """
 
         for rvlimit in (500, 50):
-            result = self.api_helper.page_query(
-                titles=title,
-                redirects=1,
-                prop='revisions',
-                rvprop='user|ids|flags|comment',
-                rvlimit=rvlimit,
-            )
+            kwargs = {
+                'titles': title,
+                'redirets': 1,
+                'prop': 'revisions',
+                'rvprop': 'user|ids|flags|comment',
+                'rvlimit': rvlimit,
+                'rvdir': 'older',
+            }
+            if revision is not None:
+                kwargs['rvstartid'] = revision
+            result = self.api_helper.page_query(**kwargs)
             if result is not None:
                 break
         else:
@@ -604,10 +608,6 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             return None
 
-        if revision is not None:
-            revision = int(revision)
-            revs = [r for r in revs if r['revid'] < revision]
-        
         authors = [r['user'] for r in revs
                    if not r.get('anon')
                    and not self.ip_rex.match(r['user'])
