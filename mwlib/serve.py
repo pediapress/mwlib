@@ -25,9 +25,6 @@ from mwlib import filequeue, log, podclient, utils, wsgi, _version
 
 log = log.Log('mwlib.serve')
 
-class CollectionNotFoundError(RuntimeError):
-    """Collection not found on server"""
-
 # ==============================================================================
 
 def no_job_queue(job_type, collection_id, args):
