@@ -36,9 +36,11 @@ include mwlib/dumpparser.py
 include mwlib/expander.py
 include mwlib/expr.py
 include mwlib/filequeue.py
+include mwlib/htmlcolornames.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
 include mwlib/jobsched.py
+include mwlib/l10n.py
 include mwlib/lang.py
 include mwlib/lang.txt
 include mwlib/log.py

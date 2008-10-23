@@ -25,6 +25,13 @@ unpack it and run::
 
 (this will also install setuptools)
 
+You can also install the latest `mwlib tip`_ with::
+
+  $ easy_install mwlib==dev
+
+(However, you need to have re2c installed for that to work).
+
+
 You will also need:
 
 *LaTeX*
@@ -114,3 +121,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _SpamBayes: http://spambayes.sourceforge.net/
 .. _PIL: http://www.pythonware.com/products/pil/
 .. _lxml: http://codespeak.net/lxml/
+.. _mwlib tip: http://code.pediapress.com/hg/mwlib/archive/tip.tar.gz#egg=mwlib-dev

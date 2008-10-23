@@ -684,9 +684,11 @@ class TreeCleaner(object):
 
     def cleanSectionCaptions(self, node):
         """Remove all block nodes from Section nodes, keep the content. If section title is empty replace section by br node"""
-        
+
         if node.__class__ == Section:
-            assert node.children, 'Error, section has no children'
+            if not node.children:
+                self.report('section contained no children')
+                return
             assert node.parent, 'Error, section has no parents'
             if not node.children[0].children:
                 children = [BreakingReturn()]
