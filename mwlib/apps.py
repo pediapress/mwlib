@@ -365,6 +365,7 @@ def render():
                 if isinstance(e, WriterError) or isinstance(e, MWAPIError):
                     f.write(str(e))
                 else:
+                    f.write('traceback\n')
                     traceback.print_exc(file=f) 
                 f.close()
                 os.rename(tmpfile, options.error_file)

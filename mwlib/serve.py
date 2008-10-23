@@ -329,11 +329,18 @@ class Application(wsgi.Application):
         error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
             text = unicode(open(error_path, 'rb').read(), 'utf-8', 'ignore')
-            self.send_report_mail('rendering failed',
-                collection_id=collection_id,
-                writer=writer,
-                error=text,
-            )
+            if text.startswith('traceback\n'):
+                metabook_path = self.get_path(collection_id, self.metabook_filename)
+                if os.path.exists(metabook_path):
+                    metabook = unicode(open(metabook_path, 'rb').read(), 'utf-8', 'ignore')
+                else:
+                    metabook = None
+                self.send_report_mail('rendering failed',
+                    collection_id=collection_id,
+                    writer=writer,
+                    error=text,
+                    metabook=metabook,
+                )
             return {
                 'collection_id': collection_id,
                 'writer': writer,
