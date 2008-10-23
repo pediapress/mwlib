@@ -198,6 +198,7 @@ class Application(wsgi.Application):
         login_credentials = post_data.get('login_credentials', '')
         force_render = bool(post_data.get('force_render'))
         script_extension = post_data.get('script_extension', '')
+        language = post_data.get('language', '')
         
         if not collection_id:
             collection_id = self.new_collection(post_data)
@@ -268,6 +269,8 @@ class Application(wsgi.Application):
                 args.extend(['--template-blacklist', template_blacklist])
             if template_exclusion_category:
                 args.extend(['--template-exclusion-category', template_exclusion_category])
+            if language:
+                args.extend(['--language', language])
         else:
             if force_render:
                 return self.error_response('Forced to render document which has not been previously rendered.')
@@ -291,6 +294,8 @@ class Application(wsgi.Application):
                 args.extend(['--login', login_credentials])
             if script_extension:
                 args.extend(['--script-extension', script_extension])
+            if language:
+                args.extend(['--language', language])
         
         self.queue_job('render', collection_id, args)
         
