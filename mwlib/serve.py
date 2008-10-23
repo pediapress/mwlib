@@ -25,6 +25,9 @@ from mwlib import filequeue, log, podclient, utils, wsgi, _version
 
 log = log.Log('mwlib.serve')
 
+class CollectionNotFoundError(RuntimeError):
+    """Collection not found on server"""
+
 # ==============================================================================
 
 def no_job_queue(job_type, collection_id, args):
@@ -114,14 +117,16 @@ class Application(wsgi.Application):
         self.report_recipients = report_recipients
     
     def dispatch(self, request):
+        if request.method != 'POST':
+            return self.http405(permitted_methods='POST')
         try:
             command = request.post_data['command']
         except KeyError:
-            return self.error_response('no command given')
+            return self.http500()
         try:
             method = getattr(self, 'do_%s' % command)
         except AttributeError:
-            return self.error_response('invalid command %r' % command)
+            return self.http500()
         try:
             return method(request.post_data)
         except Exception, exc:
@@ -130,12 +135,12 @@ class Application(wsgi.Application):
             ))
     
     @json_response
-    def error_response(self, error):
+    def error_response(self, error, **kwargs):
         if isinstance(error, str):
             error = unicode(error, 'utf-8', 'ignore')
         elif not isinstance(error, unicode):
             error = unicode(repr(error), 'ascii')
-        self.send_report_mail('error response', error=error)
+        self.send_report_mail('error response', error=error, **kwargs)
         return {'error': error}
     
     def send_report_mail(self, subject, **kwargs):
@@ -154,11 +159,14 @@ class Application(wsgi.Application):
         return os.path.join(self.cache_dir, collection_id)
     
     def check_collection_id(self, collection_id):
+        """Return True iff collection with given ID exists"""
+        
         if not collection_id or not collection_id_rex.match(collection_id):
-            raise RuntimeError('invalid collection ID %r' % collection_id)
+            return False
         collection_dir = self.get_collection_dir(collection_id)
         if not os.path.exists(collection_dir):
-            raise RuntimeError('no such collection: %r' % collection_id)
+            return False
+        return True
     
     def new_collection(self, post_data):
         collection_id = make_collection_id(post_data)
@@ -308,7 +316,8 @@ class Application(wsgi.Application):
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
             
-        self.check_collection_id(collection_id)
+        if not self.check_collection_id(collection_id):
+            return self.http404()
         
         log.info('render_status %s %s' % (collection_id, writer))
         
@@ -350,7 +359,8 @@ class Application(wsgi.Application):
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         
-        self.check_collection_id(collection_id)
+        if not self.check_collection_id(collection_id):
+            return self.http404()
         
         log.info('render_kill %s %s' % (collection_id, writer))
         
@@ -377,7 +387,8 @@ class Application(wsgi.Application):
             return self.http500()
         
         try:
-            self.check_collection_id(collection_id)
+            if not self.check_collection_id(collection_id):
+                return self.http404()
         
             log.info('download %s %s' % (collection_id, writer))
         
