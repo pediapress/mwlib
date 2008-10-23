@@ -591,7 +591,7 @@ class WikiDB(wikidbbase.WikiDBBase):
                 'titles': title,
                 'redirets': 1,
                 'prop': 'revisions',
-                'rvprop': 'user|ids|flags|comment',
+                'rvprop': 'user|flags|comment',
                 'rvlimit': rvlimit,
                 'rvdir': 'older',
             }
