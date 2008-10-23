@@ -470,6 +470,7 @@ def report(system='', subject='',
                 'REPORT [%s]: %s' % (fqdn, subject),
                 text,
             )
+            log.info('sent mail to %r' % mail_recipients)
         except Exception, e:
             log.ERROR('Could not send mail: %s' % e)
     
