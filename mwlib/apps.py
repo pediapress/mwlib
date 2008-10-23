@@ -234,10 +234,13 @@ def render():
         metavar='FILENAME',
     )
     parser.add_option('--keep-tmpfiles',                  
-                      action='store_true',
-                      default=False,
-                      help="don't remove  temporary files like images",
-                      )
+        action='store_true',
+        default=False,
+        help="don't remove  temporary files like images",
+    )
+    parser.add_option('-L', '--language',
+        help='use translated strings in LANGUAGE',
+    )
     
     options, args = parser.parse_args()
     
@@ -310,9 +313,15 @@ def render():
         for wopt in options.writer_options.split(';'):
             if '=' in wopt:
                 key, value = wopt.split('=', 1)
-                writer_options[key] = value
             else:
-                writer_options[wopt] = True
+                key, value = wopt, True
+            writer_options[key] = value
+    if options.language:
+        writer_options['lang'] = options.language
+    for option in writer_options:
+        if option not in getattr(writer, 'options', {}):
+            print 'Warning: unkown writer option %r' % option
+            del writer_options[option]
     
     if options.daemonize:
         utils.daemonize()
