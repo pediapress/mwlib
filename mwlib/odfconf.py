@@ -12,8 +12,8 @@ class OdfConf(object):
                         'PAGE_BORDER_BOTTOM' : 0.8,   #[inch] spaces between paper-border and printable area
                         'PAGE_BORDER_LEFT' : 0.8,     #[inch] spaces between paper-border and printable area
                         'PAGE_BORDER_RIGHT' : 0.8,    #[inch] spaces between paper-border and printable area
-                        'IMG_DPI_STANDARD' : 75,      #[dpi] means a image with 120px, needs 120[px]/75[dpi] =  1,6[in] inces on DIN A4
-                        'IMG_DPI_INLINE' : 100,       #[dpi] see above
+                        'IMG_DPI_STANDARD' : 96,      #[dpi] means a image with 120px, needs 120[px]/96[dpi] =  1,25[in] inces on DIN A4
+                        'IMG_DPI_INLINE' : 96,       #[dpi] see above
                         }
         paper['IMG_MAX_WIDTH'] = paper['MAX_IMG_COVER_FACTOR'] * \
             (paper['PAPER_WIDTH'] - paper['PAGE_BORDER_LEFT'] - paper['PAGE_BORDER_RIGHT'])

@@ -750,7 +750,7 @@ class Parser(object):
                 n.append(self.parseAtom())
             else:
                 break
-                
+
         return n
             
         
