@@ -8,6 +8,7 @@ from __future__ import division
 import  re
 
 from mwlib.advtree import Center
+from mwlib.htmlcolornames import colorname2rgb_map
 
 def _colorFromStr(colorStr):
 
@@ -26,7 +27,13 @@ def _colorFromStr(colorStr):
             return (int(r) / 255, int(g) / 255, int(b) / 255)
         except ValueError:
             return None
-
+    def colorname2rgb(colorStr):
+        rgb = colorname2rgb_map.get(colorStr.lower(), None)
+        if rgb:
+            return tuple(channel/255 for channel in rgb)
+        else:
+            return None
+                   
     try:
         colorStr = str(colorStr)
     except:
@@ -40,6 +47,8 @@ def _colorFromStr(colorStr):
         return hex2rgb(hexval.group(1), hexval.group(2), hexval.group(3))
     elif hexvalshort:
         return hexshort2rgb(hexvalshort.group(1), hexvalshort.group(2), hexvalshort.group(3))
+    else:
+        return colorname2rgb(colorStr)
     return None
 
 

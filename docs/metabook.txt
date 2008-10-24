@@ -110,6 +110,14 @@ revision (string, optional):
 timestamp (integer, optional):
 
     UNIX timestamp (seconds since 1970-1-1) of the revision of this article
+    
+url (string):
+
+    URL to article in source wiki
+
+authors (list of strings):
+
+    list of principal authors
 
 source-url (string)
 

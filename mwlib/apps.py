@@ -131,7 +131,7 @@ def buildzip():
                 num_threads=options.num_threads,
                 imagesize=options.imagesize,
             )
-        
+            
             status = Status(podclient=podclient, progress_range=(91, 100))
             if podclient:
                 status(status='uploading', progress=0)
@@ -234,14 +234,16 @@ def render():
         metavar='FILENAME',
     )
     parser.add_option('--keep-tmpfiles',                  
-                      action='store_true',
-                      default=False,
-                      help="don't remove  temporary files like images",
-                      )
+        action='store_true',
+        default=False,
+        help="don't remove  temporary files like images",
+    )
+    parser.add_option('-L', '--language',
+        help='use translated strings in LANGUAGE',
+    )
     
     options, args = parser.parse_args()
     
-    import simplejson
     import sys
     import tempfile
     import traceback
@@ -311,9 +313,15 @@ def render():
         for wopt in options.writer_options.split(';'):
             if '=' in wopt:
                 key, value = wopt.split('=', 1)
-                writer_options[key] = value
             else:
-                writer_options[wopt] = True
+                key, value = wopt, True
+            writer_options[key] = value
+    if options.language:
+        writer_options['lang'] = options.language
+    for option in writer_options:
+        if option not in getattr(writer, 'options', {}):
+            print 'Warning: unkown writer option %r' % option
+            del writer_options[option]
     
     if options.daemonize:
         utils.daemonize()
@@ -366,6 +374,7 @@ def render():
                 if isinstance(e, WriterError) or isinstance(e, MWAPIError):
                     f.write(str(e))
                 else:
+                    f.write('traceback\n')
                     traceback.print_exc(file=f) 
                 f.close()
                 os.rename(tmpfile, options.error_file)
@@ -476,7 +485,7 @@ def serve():
         default='0.0.0.0',
     )
     parser.add_option('--cache-dir',
-        help='cache directory',
+        help='cache directory (default: /var/cache/mw-serve/)',
         default='/var/cache/mw-serve/',
     )
     parser.add_option('--mwrender',

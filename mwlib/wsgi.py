@@ -123,9 +123,20 @@ class Application(object):
                 yield d
         log.info('request took %f s' % (time.time() - start_time))
     
-    def http404(self, path):
-        log.not_found(path)
+    def http404(self, path=None):
+        if path:
+            log.not_found(path)
         return Response(status_code=404, status_text='Not Found')
+    
+    def http405(self, permitted_methods='GET'):
+        """HTTP 405 Method Not Allowed"""
+        
+        return Response(
+            status_code=405,
+            status_text='Method Not Allowed',
+            headers={
+            'Allow': permitted_methods,
+        })
     
     def http500(self, exc=None):
         if exc is not None:

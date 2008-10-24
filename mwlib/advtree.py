@@ -257,20 +257,47 @@ class AdvancedNode:
     def getStyle(self):
         if not self.attributes:
             return {}
-        style =  self.attributes.get('style', {}) # THIS IS BROKEN
-        return style
+        else:
+            return self.attributes.get('style', {})
+
+
+    def _cleanAttrs(self, attrs):
+
+        def ensureInt(val, min_val=1):
+            try:
+                return max(min_val, int(val))
+            except ValueError:
+                return min_val
+
+        def ensureUnicode(val):
+            if isinstance(val, unicode):
+                return val
+            elif isinstance(val, str):
+                return unicode(val, 'utf-8')
+            else:
+                try:
+                    return unicode(val)
+                except:
+                    return u''
+
+        def ensureDict(val):
+            if isinstance(val, dict):
+                return val
+            else:
+                return {}
+
+        for (key, value) in attrs.items():
+            if key in ['colspan', 'rowspan']:
+                attrs[key] = ensureInt(value, min_val=1)
+            elif key == 'style':
+                attrs[key] = self._cleanAttrs(ensureDict(value))
+            else:
+                attrs[key] = ensureUnicode(value)
+        return attrs
 
     def getAttributes(self):
         """ Return dict with node attributes (e.g. class, style, colspan etc.)"""
-        attrs = getattr(self, 'vlist', {})
-        for n in ("colspan", "rowspan"): # col, row span attributes 
-            v = attrs.get(n)
-            if v is not None:
-                if isinstance(v, (str, unicode)) and v.isdigit():
-                    attrs[n] = int(v)
-                elif not isinstance(v, int):
-                    attrs[n] = 1 # some default
-                attrs[n] = max(attrs[n], 1)
+        attrs = self._cleanAttrs(getattr(self, 'vlist', {}))        
         return attrs
 
 
@@ -326,16 +353,13 @@ class AdvancedRow(AdvancedNode):
 class AdvancedCell(AdvancedNode):
     @property    
     def colspan(self, attr="colspan"):
-        # returns None if there is no valid colspan e.g. colspan="one"
-        c = self.vlist.get(attr, None)
-        if c is not None and (isinstance(c,int) or (isinstance(c, (str, unicode)) and c.isdigit())):
-            return max(1,int(c))
+        ''' colspan of cell. result is always non-zero, positive int'''
+        return self.attributes.get('colspan') or 1
 
     @property
     def rowspan(self):
-        return self.colspan(attr="rowspan")
-
-
+        ''' rowspan of cell. result is always non-zero, positive int'''
+        return self.attributes.get('rowspan') or 1
 
 class AdvancedSection(AdvancedNode):
     def getSectionLevel(self):

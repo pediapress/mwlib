@@ -257,8 +257,10 @@ Specific Options
 
 ``-P, --protocol=PROTOCOL``
 
-  Protocol to serve. The value can be one of "http", "fcgi" (FastCGI) or
-  "scgi". Note: If you want to "serve" CGI instead, use `the mwlib.cgi script`_.
+  Protocol to serve. The value can be one of "http", "fcgi" (FastCGI) and
+  "scgi" for multi-process dispatching or one of "http_threaded",
+  "fcgi_threaded" and "scgi_threaded" for multi-thread dispatching.
+  Note: If you want to "serve" CGI instead, use `the mwlib.cgi script`_.
 
 ``-p, --port=PORT``
 
@@ -271,6 +273,7 @@ Specific Options
 ``--cache-dir=CACHE_DIR``
 
   Cache directory. This directory must be writeable by the ``mw-serve`` process.
+  The default ist "/var/cache/mw-serve/".
 
 ``--mwrender=MWRENDER``
 

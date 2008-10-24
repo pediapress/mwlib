@@ -79,7 +79,7 @@ class TreeCleaner(object):
         self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
                                   ItemList:[Div, PreFormatted],
                                   Source:self.inlineStyleNodes,
-                                  Paragraph:[Paragraph],
+                                  #Paragraph:[Paragraph],
                                   DefinitionList:[Paragraph],
                                   Blockquote:[PreFormatted],
                                   }
@@ -155,8 +155,9 @@ class TreeCleaner(object):
                           'removeLangLinks',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
-                          'fixNesting', 
                           'removeSingleCellTables',
+                          'simplifyBlockNodes',
+                          'fixNesting', #
                           'removeCriticalTables',
                           'removeBrokenChildren',
                           'fixTableColspans',
@@ -223,7 +224,7 @@ class TreeCleaner(object):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
         if not node.children and node.__class__ not in self.childlessOK:
             removeNode = node
-            while removeNode.parent and not removeNode.siblings:
+            while removeNode.parent and not removeNode.siblings and removeNode.parent.__class__ not in self.childlessOK:
                 removeNode = removeNode.parent
             if removeNode.parent:
                 self.report('removed:', removeNode)
@@ -340,7 +341,13 @@ class TreeCleaner(object):
                 if node.parent:
                     cell_content = node.children[0].children[0].children
                     self.report('replaced Child', node, cell_content)
-                    node.parent.replaceChild(node, cell_content)
+
+                    d = Div()
+                    node.parent.replaceChild(node, [d])
+                    for child in cell_content:
+                        d.appendChild(child)
+                    d.vlist = node.vlist
+                    #node.parent.replaceChild(node, cell_content)
 
         for c in node.children:
             self.removeSingleCellTables(c)
@@ -677,9 +684,11 @@ class TreeCleaner(object):
 
     def cleanSectionCaptions(self, node):
         """Remove all block nodes from Section nodes, keep the content. If section title is empty replace section by br node"""
-        
+
         if node.__class__ == Section:
-            assert node.children, 'Error, section has no children'
+            if not node.children:
+                self.report('section contained no children')
+                return
             assert node.parent, 'Error, section has no parents'
             if not node.children[0].children:
                 children = [BreakingReturn()]
@@ -725,3 +734,14 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.restrictChildren(c)
+
+
+    def simplifyBlockNodes(self, node):
+
+        if node.__class__ == Paragraph:
+            if len(node.children) == 1 and node.children[0].isblocknode:
+                if node.parent:
+                    node.parent.replaceChild(node, [node.children[0]])
+
+        for c in node.children:
+            self.simplifyBlockNodes(c)

@@ -25,6 +25,13 @@ unpack it and run::
 
 (this will also install setuptools)
 
+You can also install the latest `mwlib tip`_ with::
+
+  $ easy_install mwlib==dev
+
+(However, you need to have re2c installed for that to work).
+
+
 You will also need:
 
 *LaTeX*
@@ -36,6 +43,9 @@ You will also need:
 
 *PIL*
  PIL_ is the Python Imaging Library and is used for image handling.
+
+*lxml*
+ lxml_ is needed for the docbookwriter.
 
 *blahtexml*
  Blahtex is a program written in C++, which converts an equation given
@@ -110,3 +120,5 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _MediaWiki: http://www.mediawiki.org/
 .. _SpamBayes: http://spambayes.sourceforge.net/
 .. _PIL: http://www.pythonware.com/products/pil/
+.. _lxml: http://codespeak.net/lxml/
+.. _mwlib tip: http://code.pediapress.com/hg/mwlib/archive/tip.tar.gz#egg=mwlib-dev

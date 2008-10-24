@@ -10,8 +10,11 @@ import subprocess
 import BaseHTTPServer
 import SimpleHTTPServer
 import urllib2
-import simplejson
 from mwlib.utils import daemonize
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 # init host and port fu**ed up style # FIXME
 host, port = "localhost", 8000
@@ -125,7 +128,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         # automatically acquires a post url 
         u = urllib2.urlopen(serviceurl, data="any")
-        h = simplejson.loads(u.read())
+        h = json.loads(u.read())
         posturl = h["post_url"]
         redirect_url = h["redirect_url"]
         print "acquired post url", posturl

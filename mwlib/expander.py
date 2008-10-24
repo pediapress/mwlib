@@ -152,6 +152,26 @@ class Variable(Node):
         else:
             res.append(v)
 
+def _switch_split_node(node):
+    if isinstance(node, basestring):
+        if '=' in node:
+            return node.split("=", 1) #FIXME
+        
+        return None, node
+
+    try:
+        idx = node.children.index(u"=")
+    except ValueError:
+        #FIXME
+        return None, node
+
+    k = node.children[:idx]
+    v = node.children[idx+1:]
+    
+    return k, v
+    
+        
+        
 class Template(Node):
     def flatten(self, expander, variables, res):
         try:
@@ -211,7 +231,41 @@ class Template(Node):
                         res.append(u"".join(tmp).strip())
                 res.append(dummy_mark)
                 return
+            elif name=='#switch':
+                res.append(maybe_newline)
                 
+                remainder = remainder.strip()
+                default = None
+                for i in xrange(1, len(self.children)):
+                    c = self.children[i]
+                    k, v = _switch_split_node(c)
+                    if k is not None:
+                        tmp = []
+                        flatten(k, expander, variables, tmp)
+                        k=u"".join(tmp).strip()
+
+                    if k=='#default':
+                        default = v
+                        
+                        
+                    if (k is None and i==len(self.children)-1) or (k is not None and magics.maybe_numeric_compare(k, remainder)):
+                        tmp = []
+                        flatten(v, expander, variables, tmp)
+                        v = u"".join(tmp).strip()
+                        
+                        res.append(v)
+                        res.append(dummy_mark)
+                        return
+
+                if default is not None:
+                    tmp=[]
+                    flatten(default, expander, variables, tmp)
+                    tmp = u"".join(tmp).strip()
+                    res.append(tmp)
+                    
+                        
+                res.append(dummy_mark)
+                return
             
             
         #print "NAME:", (name, remainder)

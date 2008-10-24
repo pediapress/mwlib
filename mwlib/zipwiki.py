@@ -5,10 +5,13 @@
 
 import os
 import shutil
-import simplejson
 import tempfile
 from zipfile import ZipFile
 import urlparse
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib import uparser, wikidbbase
 
@@ -22,8 +25,8 @@ class Wiki(wikidbbase.WikiDBBase):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
-        self.metabook = simplejson.loads(self.zf.read("metabook.json"))
-        content = simplejson.loads(self.zf.read('content.json'))
+        self.metabook = json.loads(self.zf.read("metabook.json"))
+        content = json.loads(self.zf.read('content.json'))
         self.articles = content.get('articles', {})
         self.templates = content.get('templates', {})
         self.sources = content.get('sources', {})
@@ -103,7 +106,7 @@ class ImageDB(object):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
-        content = simplejson.loads(self.zf.read('content.json'))
+        content = json.loads(self.zf.read('content.json'))
         self.images = content['images']
         self._tmpdir = tmpdir
         self.diskpaths = {}

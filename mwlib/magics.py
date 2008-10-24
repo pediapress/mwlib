@@ -46,8 +46,14 @@ def maybe_numeric_compare(a,b):
     if a==b:
         return True
     try:
-        a=as_numeric(a)
-        b=as_numeric(b)
+        try:
+            a=int(a)
+        except ValueError:
+            a=float(a)
+        try:
+            b=int(b)
+        except ValueError:
+            b=float(b)
     except ValueError:
         return False
 

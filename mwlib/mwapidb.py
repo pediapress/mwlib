@@ -15,7 +15,10 @@ import urllib
 import urllib2
 import urlparse
 
-import simplejson
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib import utils, metabook, wikidbbase, uparser, parser
 from mwlib.log import Log
@@ -210,7 +213,7 @@ class APIHelper(object):
             ignore_errors=False,
             opener=self.opener,
         )
-        result = simplejson.loads(result)
+        result = json.loads(result)
         if 'login' in result and result['login'].get('result') == 'Success':
             return True
         return False
@@ -255,7 +258,7 @@ class APIHelper(object):
                 # Note that a BOM is actually *not allowed* at the beginning of a JSON string
                 # see http://www.ietf.org/rfc/rfc4627.txt, section "3. Encoding"
                 data = data[1:]
-            return simplejson.loads(data)['query']
+            return json.loads(data)['query']
         except KeyError:
             log.error('Response from api%s did not contain a query result' % self.script_extension)
             return None
@@ -463,7 +466,7 @@ class ImageDB(object):
             else:
                 return []
         
-        result = api_helper.page_query(titles='Image:%s' % name, prop='templates')
+        result = api_helper.page_query(titles='Image:%s' % name, prop='templates', tllimit='500')
         if not result or 'templates' not in result:
             return []
         
@@ -480,7 +483,7 @@ class WikiDB(wikidbbase.WikiDBBase):
     print_template = u'Template:Print%s' # set this to none to deacticate # FIXME
     
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
-    bot_rex = re.compile(r'\bbot\b', re.IGNORECASE)
+    bot_rex = re.compile(r'bot\b', re.IGNORECASE)
     
     def __init__(self,
         base_url=None,
@@ -584,13 +587,17 @@ class WikiDB(wikidbbase.WikiDBBase):
         """
 
         for rvlimit in (500, 50):
-            result = self.api_helper.page_query(
-                titles=title,
-                redirects=1,
-                prop='revisions',
-                rvprop='user|ids|flags|comment',
-                rvlimit=rvlimit,
-            )
+            kwargs = {
+                'titles': title,
+                'redirets': 1,
+                'prop': 'revisions',
+                'rvprop': 'user|flags|comment',
+                'rvlimit': rvlimit,
+                'rvdir': 'older',
+            }
+            if revision is not None:
+                kwargs['rvstartid'] = revision
+            result = self.api_helper.page_query(**kwargs)
             if result is not None:
                 break
         else:
@@ -601,10 +608,6 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             return None
 
-        if revision is not None:
-            revision = int(revision)
-            revs = [r for r in revs if r['revid'] < revision]
-        
         authors = [r['user'] for r in revs
                    if not r.get('anon')
                    and not self.ip_rex.match(r['user'])
@@ -750,7 +753,10 @@ class WikiDB(wikidbbase.WikiDBBase):
         result = self.api_helper.query(
             meta='siteinfo',
             siprop='interwikimap',
-        ).get('interwikimap', [])
+        )
+        if not result:
+            return
+        result = result.get('interwikimap', [])
         if not result:
             return
         for entry in result:

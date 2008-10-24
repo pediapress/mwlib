@@ -3,7 +3,10 @@
 import urllib
 import urllib2
 
-import simplejson
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from mwlib.log import Log
 from mwlib.utils import get_multipart
@@ -22,15 +25,20 @@ class PODClient(object):
             headers = {}
         return urllib2.urlopen(urllib2.Request(self.posturl, data, headers=headers)).read()
     
-    def post_status(self, status):
-        self._post(urllib.urlencode({'status': str(status)}))
+    def post_status(self, status=None, progress=None, article=None):
+        post_data = {}
+        if status is not None:
+            if not isinstance(status, str):
+                status = status.encode('utf-8')
+            post_data['status'] = status
+        if progress is not None:
+            post_data['progress'] = '%d' % progress
+        if article is not None:
+            if not isinstance(article, str):
+                article = article.encode('utf-8')
+            post_data['article'] = article
+        self._post(urllib.urlencode(post_data))
     
-    def post_progress(self, progress):
-        self._post(urllib.urlencode({'progress': '%d' % progress}))
-    
-    def post_current_article(self, title):
-        self._post(urllib.urlencode({'article': title.encode('utf-8')}))
-
     def post_zipfile(self, filename):
         f = open(filename, "rb")
         content_type, data = get_multipart('collection.zip', f.read(), 'collection')
@@ -39,5 +47,5 @@ class PODClient(object):
         self._post(data, content_type=content_type)
 
 def podclient_from_serviceurl(serviceurl):
-    result = simplejson.loads(urllib2.urlopen(serviceurl, data="any").read())
+    result = json.loads(urllib2.urlopen(serviceurl, data="any").read())
     return PODClient(result["post_url"], redirecturl=result["redirect_url"])
