@@ -23,7 +23,7 @@ from odf import text
 #
 # Paragraph styles: standard, textbody, definitionterm, hr, center, blockquote
 #                   indentedSingle, indentedDouble, indentedTriple, imgCaption, tableCaption
-#            FIXME: standard vs textbody, 
+#            FIXME: footnote (liststyle does not work)
 #
 # Text styles: emphasis, italic, strong, bold, sub, sup, underline, 
 #              strike, big, small, var, deleted, inserted, cite (?),
@@ -33,14 +33,15 @@ from odf import text
 #        FIXME: dumbcolumn
 #
 # List styles: numberedlist, unorderedlist, definitionlist
+#       FIXME: <not reviewed yet>
 #
 # Header styles: ArticleHeader, h0-h5
 #         FIXME: Rename h0-h5
 #
 # Graphic styles: frmOuter, frmInner, frmOuterRight, frmOuterLeft, frmOuterCenter,
-#          FIXME: formula
-
-
+#          FIXME: formula, imageMap
+#
+# General FIXME: add "style:display-name" for each element
 
 #
 # Font Styles
@@ -59,35 +60,27 @@ dejaVuSansMono = style.FontFace(
 # Section styles 
 #
 sect  = style.Style(name="Sect1", family="section")
+
 sectTable = style.Style(name="SectTable", family="section")
 
 #
 # Paragraph styles
 #
-standard = style.Style(name="Standard", family="paragraph")
-standard.addElement(
-    style.ParagraphProperties(
-            margintop="0in", marginbottom="0in",
-            punctuationwrap="hanging", linebreak="strict"
-    )
-)
-standard.addElement(
-    style.TextProperties(
-        color="#000000", fontsize="12pt", fontname="DejaVuSerif",
-        language="en", country="US"
-    )
-)
+
 
 # textbody is the default for text
 textbody = style.Style(name="TextBody", family="paragraph")
 textbody.addElement(
     style.ParagraphProperties(
-        marginbottom="0.05in", margintop="0.04in", textalign="left"
+        marginbottom="0.05in", margintop="0.04in", textalign="left",
+        punctuationwrap="hanging", linebreak="strict",
+        orphans="3", keeptogether="always",
+
     )
 )
 textbody.addElement(
     style.TextProperties(
-        color="#000000", fontsize="12pt", language="en", country="US",
+        fontsize="12pt", language="en", country="US",
         fontname="DejaVuSerif"
     )
 )
@@ -99,7 +92,8 @@ preformatted = style.Style(name="Preformatted",family="paragraph")
 preformatted.addElement(
     style.ParagraphProperties(
         marginleft=".25in", marginright=".25in", margintop=".25in", marginbottom=".25in", 
-        backgroundcolor="#e6e6e6"
+        backgroundcolor="#e6e6e6",
+        orphans="3", keeptogether="always",
     )
 )
 preformatted.addElement(
@@ -160,7 +154,8 @@ center.addElement(
 blockquote = style.Style(name="Blockquote", family="paragraph")
 blockquote.addElement(
     style.ParagraphProperties(
-        marginleft="0.12in",marginright="0.12in", margintop="0in",marginbottom="0.15in"
+        marginleft="0.12in",marginright="0.12in", margintop="0in",marginbottom="0.15in",
+        orphans="3", keeptogether="always"
     )
 )
 blockquote.addElement(
@@ -173,7 +168,8 @@ blockquote.addElement(
 indentedSingle = style.Style(name="IndentedSingle", family="paragraph")
 indentedSingle.addElement(
     style.ParagraphProperties(
-        marginleft="0.12in"
+        marginleft="0.12in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
+        orphans="3", keeptogether="always"
     )
 )
 indentedSingle.addElement(
@@ -185,7 +181,8 @@ indentedSingle.addElement(
 indentedDouble = style.Style(name="IndentedDouble", family="paragraph")
 indentedDouble.addElement(
     style.ParagraphProperties(
-        marginleft="0.24in"
+        marginleft="0.24in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
+        orphans="3", keeptogether="always"
     )
 )
 indentedDouble.addElement(
@@ -197,7 +194,8 @@ indentedDouble.addElement(
 indentedTriple = style.Style(name="IndentedTriple", family="paragraph")
 indentedTriple.addElement(
     style.ParagraphProperties(
-        marginleft="0.36in"
+        marginleft="0.36in", marginright="0in", margintop="0.05in", marginbottom="0.04in",
+        orphans="3", keeptogether="always"
     )
 )
 indentedTriple.addElement(
@@ -205,6 +203,15 @@ indentedTriple.addElement(
         fontname="DejaVuSerif"
     )
 )
+
+
+footnote = style.Style(name="Footnote", family="paragraph", liststylename="FootnoteList") #fixme: liststyle does not work
+footnote.addElement(
+    style.TextProperties(
+        fontsize="10pt", fontname="DejaVuSerif"
+    )
+)
+
 
 #
 # Text styles (inline)
@@ -272,8 +279,8 @@ small.addElement(
 teletyped = style.Style(name="Teletyped", family="text")
 teletyped.addElement(
     style.TextProperties(
-                fontname="DejaVumono", fontsize="80%"
-        )
+        fontsize="80%", fontname="DejaVumono"
+    )
 )
 
 
@@ -336,7 +343,18 @@ definitionlist.addElement(
         level="1", bulletchar=' ', numsuffix=""
     )
 )
+#footnote list ##fixme: does not work
+footnoteLLSN = text.ListLevelStyleNumber(
+        level="1", numformat="1"
+)
 
+footnoteLLSN.addElement(
+    style.ListLevelProperties(
+        spacebefore="0.02in", minlabelwidth="0.2in"
+    )
+)
+footnotelist = text.ListStyle(name="FootnoteList")
+footnotelist.addElement(footnoteLLSN)
 
 #
 # Header Syles
@@ -345,7 +363,7 @@ definitionlist.addElement(
 ArticleHeader = style.Style(name="HeadingArticle", family="paragraph", defaultoutlinelevel="1")
 ArticleHeader.addElement(
     style.ParagraphProperties(
-            margintop="0in",marginbottom="0.15in"
+            margintop="0in",marginbottom="0.15in", keepwithnext="always"
     )
 )
 ArticleHeader.addElement(
@@ -354,25 +372,13 @@ ArticleHeader.addElement(
     )
 )
 
-h0 = ArticleHeader
-"""
-h0 = style.Style(name="Heading0", family="paragraph", defaultoutlinelevel="1")
-h0.addElement(
-    style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.15in"
-    )
-)
-h0.addElement(
-    style.TextProperties(
-        fontsize="24pt", fontname="DejaVuSans"
-    )
-)
-"""
+h0 = ArticleHeader #alternative name
+
 
 h1 = style.Style(name="Heading1", family="paragraph", defaultoutlinelevel="2")
 h1.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.15in"
+        margintop="0.3in",marginbottom="0.15in", keepwithnext="always"
     )
 )
 h1.addElement(
@@ -385,12 +391,12 @@ h1.addElement(
 h2 = style.Style(name="Heading2", family="paragraph", defaultoutlinelevel="3")
 h2.addElement(
     style.TextProperties(
-        fontsize="18pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="18pt", fontname="DejaVuSans"
     )
 )
 h2.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.08in"
+        margintop="0.3in",marginbottom="0.08in", keepwithnext="always"
     )
 )
 
@@ -398,12 +404,12 @@ h2.addElement(
 h3 = style.Style(name="Heading3", family="paragraph", defaultoutlinelevel="4")
 h3.addElement(
     style.TextProperties(
-        fontsize="16pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="16pt", fontname="DejaVuSans"
     )
 )
 h3.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.05in"
+        margintop="0.3in",marginbottom="0.05in", keepwithnext="always"
     )
 )
 
@@ -411,12 +417,12 @@ h3.addElement(
 h4 = style.Style(name="Heading4", family="paragraph", defaultoutlinelevel="5")
 h4.addElement(
     style.TextProperties(
-        fontsize="14pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="14pt", fontname="DejaVuSans"
     )
 )
 h4.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.05in"
+        margintop="0.3in",marginbottom="0.05in", keepwithnext="always"
     )
 )
 
@@ -424,12 +430,12 @@ h4.addElement(
 h5 = style.Style(name="Heading5", family="paragraph", defaultoutlinelevel="6")
 h5.addElement(
     style.TextProperties(
-        fontsize="10pt", fontweight="bold", fontname="DejaVuSans"
+        fontsize="10pt", fontname="DejaVuSans"
     )
 )
 h5.addElement(
     style.ParagraphProperties(
-        margintop="0.3in",marginbottom="0.05in"
+        margintop="0.3in",marginbottom="0.05in", keepwithnext="always"
     )
 )
 
@@ -443,12 +449,9 @@ imgCaption.addElement(
 )
 imgCaption.addElement(
     style.TextProperties(
-        color="#000000", fontsize="10pt", fontname="DejaVuSerif",
-        language="en", country="US"))
-
-
-
-
+        fontsize="10pt", fontname="DejaVuSerif",
+    )
+)
 
 #
 # Graphic styles:
@@ -470,7 +473,7 @@ imgCaption.addElement(
 
 
 # define a outer frame:
-# frmOuter and frmInner mainy used to format and align the images
+# frmOuter and frmInner are mainy used to format and align the images
 
 frmOuter = style.Style(name="mwlibfrmOuter", family="graphic")
 frmStyGraPropDef = style.GraphicProperties(
@@ -479,7 +482,9 @@ frmStyGraPropDef = style.GraphicProperties(
         verticalpos="from-top", horizontalpos="from-left", 
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
-        padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none")
+        padding="0.0402in", border="0.0138in solid #c0c0c0", 
+        shadow="none"
+)
 frmOuter.addElement(frmStyGraPropDef)
 frmOuter.internSpacing = 0.2 
 # if frmOuter has marginleft/marginright set this float-value to the sum: internSpacing = marginleft + marginright
@@ -488,36 +493,36 @@ frmOuter.internSpacing = 0.2
 frmOuterRight = style.Style(name="mwlibfrmOuterRight", family="graphic", parentstylename=frmOuter) # does not inherit GrapficPorpertys!
 frmStyGraPropRight = style.GraphicProperties(
         marginleft="0.1in", marginright="0.1in", margintop="0.1in", marginbottom="0.1in",
-        numberwrappedparagraphs="no-limit", 
-        verticalpos="from-top", 
+        wrap="left", numberwrappedparagraphs="no-limit", 
+        verticalpos="from-top", horizontalpos="right",
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
-        padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none",
-        horizontalpos="right", wrap="left"
+        padding="0.0402in", border="0.0138in solid #c0c0c0", 
+        shadow="none"
 )
 frmOuterRight.addElement(frmStyGraPropRight)
 
 frmOuterLeft = style.Style(name="mwlibfrmOuterLeft", family="graphic", parentstylename=frmOuter) 
 frmStyGraProbLeft = style.GraphicProperties(
         marginleft="0.1in", marginright="0.1in", margintop="0.1in", marginbottom="0.1in",
-        numberwrappedparagraphs="no-limit", 
-        verticalpos="from-top", 
+        wrap="right", numberwrappedparagraphs="no-limit", 
+        verticalpos="from-top", horizontalpos="left",
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
-        padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none",
-        horizontalpos="left", wrap="right"
+        padding="0.0402in", border="0.0138in solid #c0c0c0",
+        shadow="none"
 )
 frmOuterLeft.addElement(frmStyGraProbLeft)
 
 frmOuterCenter = style.Style(name="mwlibfrmOuterCenter", family="graphic", parentstylename=frmOuter) 
 frmStyGraPropCenter = style.GraphicProperties(
         marginleft="0.1in", marginright="0.1in", margintop="0.1in", marginbottom="0.1in",
-        numberwrappedparagraphs="no-limit", 
-        verticalpos="from-top", 
+        wrap="paralell", numberwrappedparagraphs="no-limit", 
+        verticalpos="from-top", horizontalpos="center", 
         verticalrel="paragraph", horizontalrel="paragraph", 
         backgroundcolor="transparent", 
-        padding="0.0402in", border="0.0138in solid #c0c0c0", shadow="none",
-        horizontalpos="center", wrap="paralell"
+        padding="0.0402in", border="0.0138in solid #c0c0c0",
+        shadow="none"
 )
 frmOuterCenter.addElement(frmStyGraPropCenter)
 
@@ -534,9 +539,20 @@ frmInner.addElement(
     )
 )
 
-##fixme: fixed not used
-#fixed = style.Style(name="Fixed", family="paragraph")
-#fixed.addElement(style.TextProperties(attributes={'fontpitch':"fixed"}))
+
+
+##2do: imagemap is still in progress
+imageMap = style.Style(name="frmImageMap", family="graphic")
+"""imageMap.addElement(
+    style.GraphicProperties(
+        zindex="0"
+    )
+)
+imageMap.addElement(
+    style.TextProperties(
+        anchortype="paragraph"
+    )
+)"""
 
 
 
@@ -577,7 +593,6 @@ def applyStylesToDoc(doc):
     
     #doc.styles.addElement(defStyleParagraph)
     
-    doc.styles.addElement(standard)
     doc.styles.addElement(dumbcolumn)
     doc.styles.addElement(indentedSingle)
     doc.styles.addElement(indentedDouble)
@@ -602,6 +617,7 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(h4)
     doc.styles.addElement(h5)
     doc.automaticstyles.addElement(sect)
+    doc.styles.addElement(sectTable)
     doc.styles.addElement(textbody)
     #doc.styles.addElement(subtitle)
     #doc.styles.addElement(title)
@@ -612,6 +628,8 @@ def applyStylesToDoc(doc):
     doc.styles.addElement(preformatted)
     doc.styles.addElement(code)
     doc.styles.addElement(source)
+    doc.styles.addElement(footnotelist)
+    doc.styles.addElement(footnote)
     doc.styles.addElement(hr)
     doc.styles.addElement(numberedlist)
     doc.styles.addElement(unorderedlist)
