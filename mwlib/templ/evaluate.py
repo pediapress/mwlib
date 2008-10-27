@@ -1,3 +1,7 @@
+
+# Copyright (c) 2007-2008 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
