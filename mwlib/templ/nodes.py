@@ -132,8 +132,7 @@ class Template(Node):
                 other = u"".join(tmp).strip()
                 remainder = remainder.strip()
                 tmp = []
-                from mwlib.magics import maybe_numeric_compare
-                if maybe_numeric_compare(remainder, other):
+                if magics.maybe_numeric_compare(remainder, other):
                     if len(self.children)>=3:
                         flatten(self.children[2], expander, variables, tmp)
                         res.append(u"".join(tmp).strip())
