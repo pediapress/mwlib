@@ -5,7 +5,7 @@
 
 import sys
 
-from mwlib.templ import log
+from mwlib import log
 
 from mwlib.templ.nodes import Node, Variable, Template, show
 from mwlib.templ.scanner import tokenize
