@@ -6,6 +6,7 @@ from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
 def flatten(node, expander, variables, res):
+    before = variables.count
     t=type(node)
     if t is unicode or t is str:
         res.append(node)
@@ -14,7 +15,9 @@ def flatten(node, expander, variables, res):
             flatten(x, expander, variables, res)
     else:
         node.flatten(expander, variables, res)
-    
+    after = variables.count
+    return before==after
+
 
 class MemoryLimitError(Exception):
     pass
@@ -79,23 +82,31 @@ class ArgumentList(object):
     def __init__(self):
         self.args = []
         self.namedargs = {}
+        self.count = 0
+        
     def __repr__(self):
         return "<ARGLIST args=%r>" % ([x.flatten() for x in self.args],)
+    
     def append(self, a):
+        self.count += 1
         self.args.append(a)
 
     def __iter__(self):
+        self.count += 1
         for x in self.args:
             yield x
 
     def __getslice__(self, i, j):
+        self.count += 1
         for x in self.args[i:j]:
             yield x.flatten()
         
     def __len__(self):
+        self.count += 1
         return len(self.args)
 
     def __getitem__(self, n):
+        self.count += 1
         return self.get(n, None) or u''
         
     def get(self, n, default):
