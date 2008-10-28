@@ -8,7 +8,9 @@ from mwlib.templ.scanner import symbols, tokenize
 def optimize(node):
     if isinstance(node, basestring):
         return node
-
+    if type(node) is list:
+        return node
+    
     if type(node) is Node and len(node.children)==1:
         return optimize(node.children[0])
 
@@ -35,16 +37,16 @@ class Parser(object):
 
     def variableFromChildren(self, children):
         v=Variable()
-        name = Node()
-        v.children.append(name)
+        
 
         try:
             idx = children.index(u"|")
         except ValueError:
-            name.children = children
+            v.append(children)
         else:
-            name.children = children[:idx]            
+            v.append(children[:idx])
             v.children.extend(children[idx+1:])
+
         return v
         
     def _eatBrace(self, num):

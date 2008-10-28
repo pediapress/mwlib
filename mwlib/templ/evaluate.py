@@ -56,7 +56,7 @@ class LazyArgument(object):
                 del self.node.children[idx:]
 
                 name = self._flattennode(name)
-                self.node.children = oldchildren
+                self.node[:] = oldchildren
                 
             val = self._flattennode(val)
 

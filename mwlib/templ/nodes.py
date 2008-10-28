@@ -5,23 +5,20 @@
 from mwlib.templ import magics
 
 
-class Node(object):
-    def __init__(self):
-        self.children = []
-
+class Node(list):
+    @property
+    def children(self):
+        return self
+    
     def __repr__(self):
         return "<%s %s children>" % (self.__class__.__name__, len(self.children))
-
-    def __iter__(self):
-        for x in self.children:
-            yield x
 
     def show(self, out=None):
         show(self, out=out)
 
         
     def flatten(self, expander, variables, res):
-        for x in self.children:
+        for x in self:
             if isinstance(x, basestring):
                 res.append(x)
             else:
@@ -31,7 +28,7 @@ class Node(object):
     def descendants(self):
         """Iterator yielding all descendants of this Node which are Nodes"""
         
-        for c in self.children:
+        for c in self:
             yield c
             if not isinstance(c, Node):
                 continue
