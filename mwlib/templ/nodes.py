@@ -11,7 +11,7 @@ class Node(list):
         return self
     
     def __repr__(self):
-        return "<%s %s children>" % (self.__class__.__name__, len(self.children))
+        return "<%s %s children>" % (self.__class__.__name__, len(self))
 
     def show(self, out=None):
         show(self, out=out)
@@ -44,7 +44,7 @@ class Node(list):
 class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []
-        flatten(self.children[0], expander, variables, name)
+        flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
         if len(name)>256*1024:
             raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
@@ -52,8 +52,8 @@ class Variable(Node):
         v = variables.get(name, None)
 
         if v is None:
-            if len(self.children)>1:
-                flatten(self.children[1:], expander, variables, res)
+            if len(self)>1:
+                flatten(self[1:], expander, variables, res)
             else:
                 pass
                 # FIXME. breaks If
@@ -69,13 +69,13 @@ def _switch_split_node(node):
         return None, node
 
     try:
-        idx = node.children.index(u"=")
+        idx = node.index(u"=")
     except ValueError:
         #FIXME
         return None, node
 
-    k = node.children[:idx]
-    v = node.children[idx+1:]
+    k = node[:idx]
+    v = node[idx+1:]
     
     return k, v
     
@@ -96,7 +96,7 @@ class Template(Node):
         
     def _flatten(self, expander, variables, res):
         name = []
-        flatten(self.children[0], expander, variables, name)
+        flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
         if len(name)>256*1024:
             raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
@@ -113,29 +113,29 @@ class Template(Node):
                 res.append(maybe_newline)
                 tmp = []
                 if remainder:
-                    if len(self.children)>=2:
-                        flatten(self.children[1], expander, variables, tmp)
+                    if len(self)>=2:
+                        flatten(self[1], expander, variables, tmp)
                 else:
-                    if len(self.children)>=3:
-                        flatten(self.children[2], expander, variables, tmp)
+                    if len(self)>=3:
+                        flatten(self[2], expander, variables, tmp)
                 res.append(u"".join(tmp).strip())
                 res.append(dummy_mark)
                 return
             elif name=='#ifeq':
                 res.append(maybe_newline)
                 tmp=[]
-                if len(self.children)>=2:
-                    flatten(self.children[1], expander, variables, tmp)
+                if len(self)>=2:
+                    flatten(self[1], expander, variables, tmp)
                 other = u"".join(tmp).strip()
                 remainder = remainder.strip()
                 tmp = []
                 if magics.maybe_numeric_compare(remainder, other):
-                    if len(self.children)>=3:
-                        flatten(self.children[2], expander, variables, tmp)
+                    if len(self)>=3:
+                        flatten(self[2], expander, variables, tmp)
                         res.append(u"".join(tmp).strip())
                 else:
-                    if len(self.children)>=4:
-                        flatten(self.children[3], expander, variables, tmp)
+                    if len(self)>=4:
+                        flatten(self[3], expander, variables, tmp)
                         res.append(u"".join(tmp).strip())
                 res.append(dummy_mark)
                 return
@@ -144,8 +144,8 @@ class Template(Node):
                 
                 remainder = remainder.strip()
                 default = None
-                for i in xrange(1, len(self.children)):
-                    c = self.children[i]
+                for i in xrange(1, len(self)):
+                    c = self[i]
                     k, v = _switch_split_node(c)
                     if k is not None:
                         tmp = []
@@ -156,7 +156,7 @@ class Template(Node):
                         default = v
                         
                         
-                    if (k is None and i==len(self.children)-1) or (k is not None and magics.maybe_numeric_compare(k, remainder)):
+                    if (k is None and i==len(self)-1) or (k is not None and magics.maybe_numeric_compare(k, remainder)):
                         tmp = []
                         flatten(v, expander, variables, tmp)
                         v = u"".join(tmp).strip()
@@ -182,10 +182,10 @@ class Template(Node):
 
         if remainder is not None:
             tmpnode=Node()
-            tmpnode.children.append(remainder)
+            tmpnode.append(remainder)
             var.append(LazyArgument(tmpnode, expander, variables))
         
-        for x in self.children[1:]:
+        for x in self[1:]:
             var.append(LazyArgument(x, expander, variables))
 
         rep = expander.resolver(name, var)
@@ -218,7 +218,7 @@ def show(node, indent=0, out=None):
     out.write("%s%r\n" % ("  "*indent, node))
     if isinstance(node, basestring):
         return
-    for x in node.children:
+    for x in node:
         show(x, indent+1, out)
 
 

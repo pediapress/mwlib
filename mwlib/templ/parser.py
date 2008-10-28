@@ -11,11 +11,11 @@ def optimize(node):
     if type(node) is list:
         return node
     
-    if type(node) is Node and len(node.children)==1:
-        return optimize(node.children[0])
+    if type(node) is Node and len(node)==1:
+        return optimize(node[0])
 
-    for i, x in enumerate(node.children):
-        node.children[i] = optimize(x)
+    for i, x in enumerate(node):
+        node[i] = optimize(x)
     return node
 
     
@@ -45,7 +45,7 @@ class Parser(object):
             v.append(children)
         else:
             v.append(children[:idx])
-            v.children.extend(children[idx+1:])
+            v.extend(children[idx+1:])
 
         return v
         
@@ -69,12 +69,12 @@ class Parser(object):
         t=Template()
         # find the name
         name = Node()
-        t.children.append(name)
+        t.append(name)
         idx = 0
         for idx, c in enumerate(children):
             if c==u'|':
                 break
-            name.children.append(c)
+            name.append(c)
 
 
         # find the arguments
@@ -89,14 +89,14 @@ class Parser(object):
             elif c==']]':
                 linkcount -= 1
             elif c==u'|' and linkcount==0:
-                t.children.append(arg)
+                t.append(arg)
                 arg = Node()
                 continue
-            arg.children.append(c)
+            arg.append(c)
 
 
-        if arg.children:
-            t.children.append(arg)
+        if arg:
+            t.append(arg)
 
 
         return t
@@ -111,33 +111,33 @@ class Parser(object):
         while 1:
             ty, txt = self.getToken()
             if ty==symbols.bra_open:
-                n.children.append(self.parseOpenBrace())
+                n.append(self.parseOpenBrace())
             elif ty is None:
                 break
             elif ty==symbols.bra_close:
                 closelen = len(txt)
                 if closelen==2 or numbraces==2:
-                    t=self.templateFromChildren(n.children)
+                    t=self.templateFromChildren(n)
                     n=Node()
-                    n.children.append(t)
+                    n.append(t)
                     self._eatBrace(2)
                     numbraces-=2
                 else:
-                    v=self.variableFromChildren(n.children)
+                    v=self.variableFromChildren(n)
                     n=Node()
-                    n.children.append(v)
+                    n.append(v)
                     self._eatBrace(3)
                     numbraces -= 3
 
                 if numbraces==0:
                     break
                 elif numbraces==1:
-                    n.children.insert(0, "{")
+                    n.insert(0, "{")
                     break
             elif ty==symbols.noi:
                 self.pos += 1 # ignore <noinclude>
             else: # link, txt
-                n.children.append(txt)
+                n.append(txt)
                 self.pos += 1                
 
         return n
@@ -147,13 +147,13 @@ class Parser(object):
         while 1:
             ty, txt = self.getToken()
             if ty==symbols.bra_open:
-                n.children.append(self.parseOpenBrace())
+                n.append(self.parseOpenBrace())
             elif ty is None:
                 break
             elif ty==symbols.noi:
                 self.pos += 1   # ignore <noinclude>
             else: # bra_close, link, txt                
-                n.children.append(txt)
+                n.append(txt)
                 self.pos += 1
         return n
 

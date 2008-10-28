@@ -43,7 +43,7 @@ class LazyArgument(object):
     def splitflatten(self):
         if self._splitflatten is None:
             try:
-                idx = self.node.children.index(u'=')
+                idx = self.node.index(u'=')
             except (ValueError, AttributeError):
                 name = None
                 val = self.node
@@ -51,9 +51,9 @@ class LazyArgument(object):
                 name = self.node
                 from mwlib.templ import nodes
                 val = nodes.Node()
-                val.children[:] = self.node.children[idx+1:]
-                oldchildren = self.node.children[:]
-                del self.node.children[idx:]
+                val[:] = self.node[idx+1:]
+                oldchildren = self.node[:]
+                del self.node[idx:]
 
                 name = self._flattennode(name)
                 self.node[:] = oldchildren
