@@ -110,6 +110,7 @@ class ArgumentList(object):
         return self.get(n, None) or u''
         
     def get(self, n, default):
+        self.count += 1
         if isinstance(n, (int, long)):
             try:
                 a=self.args[n]
