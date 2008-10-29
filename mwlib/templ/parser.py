@@ -11,15 +11,34 @@ def optimize(node):
     
     if isinstance(node, basestring):
         return node
-    
-    if type(node) is list and len(node)==1:
-        return node[0]
-    
-    if type(node) is Node and len(node)==1:
+
+    if len(node)==1 and type(node) in (list, Node):
         return optimize(node[0])
 
-    for i, x in enumerate(node):
-        node[i] = optimize(x)
+    if isinstance(node, (Variable, Template)):
+        for i, x in enumerate(node):
+            node[i] = optimize(x)
+    else:
+        # combine strings
+        res = []
+        tmp = []
+        for x in (optimize(x) for x in node):
+            if isinstance(x, basestring) and x!='=':
+                tmp.append(x)
+            else:
+                if tmp:
+                    res.append(u''.join(tmp))
+                    tmp = []
+                res.append(x)
+        if tmp:
+            res.append(u''.join(tmp))
+
+        node[:] = res
+    
+    
+    if len(node)==1 and type(node) in (list, Node):
+        return optimize(node[0])
+    
     return node
 
     

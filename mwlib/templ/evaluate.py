@@ -42,6 +42,14 @@ class LazyArgument(object):
 
     def splitflatten(self):
         if self._splitflatten is None:
+            if isinstance(self.node, basestring):
+                if '=' in self.node:
+                    name, val = self.node.split('=', 1)
+                else:
+                    name, val = None, self.node
+                self._splitflatten = name, val
+                return self._splitflatten
+            
             try:
                 idx = self.node.index(u'=')
             except (ValueError, AttributeError):
