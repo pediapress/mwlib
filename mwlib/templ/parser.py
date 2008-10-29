@@ -11,8 +11,9 @@ def optimize(node):
     
     if isinstance(node, basestring):
         return node
-    if type(node) is list:
-        return node
+    
+    if type(node) is list and len(node)==1:
+        return node[0]
     
     if type(node) is Node and len(node)==1:
         return optimize(node[0])
@@ -48,7 +49,7 @@ class Parser(object):
             v.append(children)
         else:
             v.append(children[:idx])
-            v.extend(children[idx+1:])
+            v.append(children[idx+1:])
 
         return v
         

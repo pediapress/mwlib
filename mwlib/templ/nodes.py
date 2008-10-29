@@ -53,7 +53,7 @@ class Variable(Node):
 
         if v is None:
             if len(self)>1:
-                flatten(self[1:], expander, variables, res)
+                flatten(self[1], expander, variables, res)
             else:
                 pass
                 # FIXME. breaks If
