@@ -101,6 +101,8 @@ class Template(Node):
         if len(name)>256*1024:
             raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
 
+        args = self[1]
+        
         remainder = None
         if ":" in name:
             try_name, try_remainder = name.split(':', 1)
@@ -113,29 +115,29 @@ class Template(Node):
                 res.append(maybe_newline)
                 tmp = []
                 if remainder:
-                    if len(self)>=2:
-                        flatten(self[1], expander, variables, tmp)
+                    if len(args)>=1:
+                        flatten(args[0], expander, variables, tmp)
                 else:
-                    if len(self)>=3:
-                        flatten(self[2], expander, variables, tmp)
+                    if len(args)>=2:
+                        flatten(args[1], expander, variables, tmp)
                 res.append(u"".join(tmp).strip())
                 res.append(dummy_mark)
                 return
             elif name=='#ifeq':
                 res.append(maybe_newline)
                 tmp=[]
-                if len(self)>=2:
-                    flatten(self[1], expander, variables, tmp)
+                if len(args)>=1:
+                    flatten(args[0], expander, variables, tmp)
                 other = u"".join(tmp).strip()
                 remainder = remainder.strip()
                 tmp = []
                 if magics.maybe_numeric_compare(remainder, other):
-                    if len(self)>=3:
-                        flatten(self[2], expander, variables, tmp)
+                    if len(args)>=2:
+                        flatten(args[1], expander, variables, tmp)
                         res.append(u"".join(tmp).strip())
                 else:
-                    if len(self)>=4:
-                        flatten(self[3], expander, variables, tmp)
+                    if len(args)>=3:
+                        flatten(args[2], expander, variables, tmp)
                         res.append(u"".join(tmp).strip())
                 res.append(dummy_mark)
                 return
@@ -144,8 +146,7 @@ class Template(Node):
                 
                 remainder = remainder.strip()
                 default = None
-                for i in xrange(1, len(self)):
-                    c = self[i]
+                for i, c in enumerate(args):
                     k, v = _switch_split_node(c)
                     if k is not None:
                         tmp = []
@@ -156,7 +157,7 @@ class Template(Node):
                         default = v
                         
                         
-                    if (k is None and i==len(self)-1) or (k is not None and magics.maybe_numeric_compare(k, remainder)):
+                    if (k is None and i==len(args)-1) or (k is not None and magics.maybe_numeric_compare(k, remainder)):
                         tmp = []
                         flatten(v, expander, variables, tmp)
                         v = u"".join(tmp).strip()
@@ -185,7 +186,8 @@ class Template(Node):
             tmpnode.append(remainder)
             var.append(LazyArgument(tmpnode, expander, variables))
         
-        for x in self[1:]:
+        for x in args:
+            print "ARG:", x
             var.append(LazyArgument(x, expander, variables))
 
         rep = expander.resolver(name, var)

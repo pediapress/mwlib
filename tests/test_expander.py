@@ -173,7 +173,7 @@ def test_template_name_colon():
     """
     p=parse_and_show("{{Template:foobar}}")
     assert isinstance(p, expander.Template), 'expected a template'
-    assert len(p.children)==1, 'expected exactly one child'
+    assert p[0] == u'Template:foobar'
     
 
 

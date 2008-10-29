@@ -70,6 +70,7 @@ class Parser(object):
         # find the name
         name = Node()
         t.append(name)
+        
         idx = 0
         for idx, c in enumerate(children):
             if c==u'|':
@@ -78,6 +79,8 @@ class Parser(object):
 
 
         # find the arguments
+        args = []
+        t.append(args)
         
 
         arg = Node()
@@ -89,14 +92,14 @@ class Parser(object):
             elif c==']]':
                 linkcount -= 1
             elif c==u'|' and linkcount==0:
-                t.append(arg)
+                args.append(arg)
                 arg = Node()
                 continue
             arg.append(c)
 
 
         if arg:
-            t.append(arg)
+            args.append(arg)
 
 
         return t
