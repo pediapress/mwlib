@@ -88,13 +88,15 @@ class ArgumentList(object):
                 a=self.args[n]
             except IndexError:
                 return default
+            if isinstance(a, unicode):
+                return a
             tmp = []
             flatten(a, self.expander, self.variables, tmp)
             _insert_implicit_newlines(tmp)
             tmp = u"".join(tmp).strip()
             if len(tmp)>256*1024:
                 raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))
-            # FIXME: cache value
+            # FIXME: cache value ???
             return tmp
 
         assert isinstance(n, basestring), "expected int or string"
