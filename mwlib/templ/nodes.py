@@ -95,6 +95,7 @@ class Template(Node):
             
         
     def _flatten(self, expander, variables, res):
+        
         name = []
         flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
@@ -215,7 +216,7 @@ def show(node, indent=0, out=None):
         out=sys.stdout
 
     out.write("%s%r\n" % ("  "*indent, node))
-    if isinstance(node, basestring):
+    if isinstance(node, (basestring, tuple)):
         return
     for x in node:
         show(x, indent+1, out)
