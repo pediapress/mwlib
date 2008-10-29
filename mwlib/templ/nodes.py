@@ -180,13 +180,13 @@ class Template(Node):
             
         #print "NAME:", (name, remainder)
         
-        var = ArgumentList()
+        var = ArgumentList(expander=expander, variables=variables)
 
         if remainder is not None:
-            var.append(LazyArgument(remainder, expander, variables))
+            var.append(remainder)
         
         for x in args:
-            var.append(LazyArgument(x, expander, variables))
+            var.append(x)
 
         rep = expander.resolver(name, var)
 
@@ -222,5 +222,5 @@ def show(node, indent=0, out=None):
         show(x, indent+1, out)
 
 
-from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, LazyArgument
+from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList
 from mwlib.templ import log, DEBUG

@@ -22,76 +22,39 @@ def flatten(node, expander, variables, res):
 class MemoryLimitError(Exception):
     pass
 
-class LazyArgument(object):
-    def __init__(self, node, expander, variables):
-        self.node = node
-        self.expander = expander
-        self._flatten = None
-        self.variables = variables
-        self._splitflatten = None
 
-    def _flattennode(self, n):
-        arg=[]
-        flatten(n, self.expander, self.variables, arg)
-        _insert_implicit_newlines(arg)
-        arg = u"".join(arg)
+def equalsplit(node):
+    if isinstance(node, basestring):
+        if '=' in node:
+            return node.split('=', 1)
+        else:
+            return None, node
 
-        if len(arg)>256*1024:
-            raise MemoryLimitError("template argument too long: %s bytes" % (len(arg),))
-        return arg
+    try:
+        idx = node.index(u'=')
+    except (ValueError, AttributeError):
+        return None, node
 
-    def splitflatten(self):
-        if self._splitflatten is None:
-            if isinstance(self.node, basestring):
-                if '=' in self.node:
-                    name, val = self.node.split('=', 1)
-                else:
-                    name, val = None, self.node
-                self._splitflatten = name, val
-                return self._splitflatten
-            
-            try:
-                idx = self.node.index(u'=')
-            except (ValueError, AttributeError):
-                name = None
-                val = self.node
-            else:
-                name = self.node
-                from mwlib.templ import nodes
-                val = nodes.Node()
-                val[:] = self.node[idx+1:]
-                oldchildren = self.node[:]
-                del self.node[idx:]
-
-                name = self._flattennode(name)
-                self.node[:] = oldchildren
-                
-            val = self._flattennode(val)
-
-            self._splitflatten = name, val
-        return self._splitflatten
-    
-            
-    def flatten(self):
-        if self._flatten is None:            
-            self._flatten = self._flattennode(self.node).strip()
-            
-            arg=[]
-            flatten(self.node, self.expander, self.variables, arg)
-            _insert_implicit_newlines(arg)
-            arg = u"".join(arg).strip()
-            if len(arg)>256*1024:
-                raise MemoryLimitError("template argument too long: %s bytes" % (len(arg),))
-            
-            self._flatten = arg
-        return self._flatten
+    return node[:idx], node[idx+1:]
 
 class ArgumentList(object):
-    def __init__(self):
-        self.args = []
+    def __init__(self, args=None, expander=None, variables=None):
+        if args is None:
+            self.args = []
+        else:
+            self.args = args
+
+        assert expander is not None
+        #assert variables is not None
+        
+        self.expander = expander
+        self.variables = variables
+        self.varcount = 1
+        self.varnum = 0
+        
         self.namedargs = {}
         self.count = 0
-        
+
     def __repr__(self):
         return "<ARGLIST args=%r>" % ([x.flatten() for x in self.args],)
     
@@ -106,8 +69,9 @@ class ArgumentList(object):
 
     def __getslice__(self, i, j):
         self.count += 1
-        for x in self.args[i:j]:
-            yield x.flatten()
+        for x in range(len(self.args))[i:j]:
+            yield self.get(x, None)
+            
         
     def __len__(self):
         self.count += 1
@@ -124,35 +88,50 @@ class ArgumentList(object):
                 a=self.args[n]
             except IndexError:
                 return default
-            return a.flatten()
+            tmp = []
+            flatten(a, self.expander, self.variables, tmp)
+            _insert_implicit_newlines(tmp)
+            tmp = u"".join(tmp).strip()
+            if len(tmp)>256*1024:
+                raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))
+            # FIXME: cache value
+            return tmp
 
         assert isinstance(n, basestring), "expected int or string"
 
-        varcount=1
         if n not in self.namedargs:
-            for x in self.args:
-                name, val = x.splitflatten()
-                
-                
+            while self.varnum < len(self.args):
+                arg = self.args[self.varnum]
+                self.varnum += 1
+
+                name, val = equalsplit(arg)
                 if name is not None:
-                    name = name.strip()
-                    val = val.strip()
-                    self.namedargs[name] = val
-                    if n==name:
-                        return val
+                    tmp = []
+                    flatten(name, self.expander, self.variables, tmp)
+                    _insert_implicit_newlines(tmp)
+                    name = u"".join(tmp).strip()
                 else:
-                    name = str(varcount)
-                    varcount+=1
-                    self.namedargs[name] = val 
+                    name = str(self.varcount)
+                    self.varcount+=1
+                
+                self.namedargs[name] = val
+                
+                if n==name:
+                    break
 
-                    if n==name:
-                        return val
-            self.namedargs[n] = None
-
-        val = self.namedargs[n]
-        if val is None:
+        try:
+            val = self.namedargs[n]
+            if isinstance(val, unicode):
+                return val
+        except KeyError:
             return default
-        return val
+
+        tmp = []
+        flatten(val, self.expander, self.variables, tmp)
+        _insert_implicit_newlines(tmp)
+        tmp=u"".join(tmp).strip()
+        self.namedargs[n] = tmp
+        return tmp
     
 def is_implicit_newline(raw):
     """should we add a newline to templates starting with *, #, :, ;, {|
@@ -239,6 +218,6 @@ class Expander(object):
         
     def expandTemplates(self):
         res = []
-        flatten(self.parsed, self, ArgumentList(), res)
+        flatten(self.parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
         return u"".join(res)
