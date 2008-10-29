@@ -89,7 +89,7 @@ class ArgumentList(object):
             except IndexError:
                 return default
             if isinstance(a, unicode):
-                return a
+                return a.strip()
             tmp = []
             flatten(a, self.expander, self.variables, tmp)
             _insert_implicit_newlines(tmp)
