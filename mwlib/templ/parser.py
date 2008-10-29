@@ -2,7 +2,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.templ.nodes import Node, Variable, Template
+from mwlib.templ.nodes import Node, Variable, Template, IfNode
 from mwlib.templ.scanner import symbols, tokenize
 
 def optimize(node):
@@ -15,7 +15,7 @@ def optimize(node):
     if len(node)==1 and type(node) in (list, Node):
         return optimize(node[0])
 
-    if isinstance(node, (Variable, Template)):
+    if isinstance(node, (Variable, Template, IfNode)):
         for i, x in enumerate(node):
             node[i] = optimize(x)
     else:
@@ -87,8 +87,43 @@ class Parser(object):
         txt = txt[:newlen]
         self.setToken((ty, txt))
         
+    def ifnodeFromChildren(self, children):
+        children[0] = children[0].split(":", 1)[1]
+        args = self._parse_args(children)
+        n = IfNode(args)
+        return n
 
+    def _parse_args(self, children):
+        args = []
+        arg = []
+
+        linkcount = 0
+        for c in children:
+            if c==u'[[':
+                linkcount += 1
+            elif c==']]':
+                linkcount -= 1
+            elif c==u'|' and linkcount==0:
+                args.append(arg)
+                arg = []
+                continue
+            arg.append(c)
+
+
+        if arg:
+            args.append(arg)
+
+        return [optimize(x) for x in args]
+                    
     def templateFromChildren(self, children):
+        if children and isinstance(children[0], unicode):
+            s = children[0].strip().lower()
+            if s.startswith("#if:"):
+                return self.ifnodeFromChildren(children)
+            
+                
+            
+            
         t=Template()
         # find the name
         name = Node()
@@ -100,34 +135,10 @@ class Parser(object):
                 break
             name.append(c)
 
+        name = optimize(name)
 
-        # find the arguments
-        args = []
-        
-
-        arg = Node()
-
-        linkcount = 0
-        for c in children[idx+1:]:
-            if c==u'[[':
-                linkcount += 1
-            elif c==']]':
-                linkcount -= 1
-            elif c==u'|' and linkcount==0:
-                args.append(arg)
-                arg = Node()
-                continue
-            arg.append(c)
-
-
-        if arg:
-            args.append(arg)
-
-        args = [optimize(x) for x in args]
-        
+        args = self._parse_args(children[idx+1:])
         t.append(tuple(args))
-        #t.append(args)
-
         return t
         
     def parseOpenBrace(self):

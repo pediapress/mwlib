@@ -40,7 +40,23 @@ class Node(list):
         
         return [x for x in self.descendants if isinstance(x, tp)]
     
+class IfNode(Node):
+    def flatten(self, expander, variables, res):
+        cond = []
+        flatten(self[0], expander, variables, cond)
+        cond = u"".join(cond).strip()
 
+        res.append(maybe_newline)
+        tmp = []
+        if cond:
+            if len(self)>1:
+                flatten(self[1], expander, variables, tmp)
+        else:
+            if len(self)>2:
+                flatten(self[2], expander, variables, tmp)
+        res.append(u"".join(tmp).strip())
+        res.append(dummy_mark)
+    
 class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []
