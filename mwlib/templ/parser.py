@@ -6,6 +6,9 @@ from mwlib.templ.nodes import Node, Variable, Template
 from mwlib.templ.scanner import symbols, tokenize
 
 def optimize(node):
+    if isinstance(node, tuple):
+        return node
+    
     if isinstance(node, basestring):
         return node
     if type(node) is list:
@@ -80,7 +83,6 @@ class Parser(object):
 
         # find the arguments
         args = []
-        t.append(args)
         
 
         arg = Node()
@@ -101,6 +103,10 @@ class Parser(object):
         if arg:
             args.append(arg)
 
+        args = [optimize(x) for x in args]
+        
+        t.append(tuple(args))
+        #t.append(args)
 
         return t
         
