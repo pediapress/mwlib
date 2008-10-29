@@ -60,27 +60,7 @@ class Variable(Node):
                 #res.append(u"{{{%s}}}" % (name,))
         else:
             res.append(v)
-
-def _switch_split_node(node):
-    if isinstance(node, basestring):
-        if '=' in node:
-            return node.split("=", 1) #FIXME
-        
-        return None, node
-
-    try:
-        idx = node.index(u"=")
-    except ValueError:
-        #FIXME
-        return None, node
-
-    k = node[:idx]
-    v = node[idx+1:]
-    
-    return k, v
-    
-        
-        
+       
 class Template(Node):
     def flatten(self, expander, variables, res):
         try:
@@ -148,7 +128,7 @@ class Template(Node):
                 remainder = remainder.strip()
                 default = None
                 for i, c in enumerate(args):
-                    k, v = _switch_split_node(c)
+                    k, v = equalsplit(c)
                     if k is not None:
                         tmp = []
                         flatten(k, expander, variables, tmp)
@@ -222,5 +202,5 @@ def show(node, indent=0, out=None):
         show(x, indent+1, out)
 
 
-from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList
+from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, equalsplit
 from mwlib.templ import log, DEBUG
