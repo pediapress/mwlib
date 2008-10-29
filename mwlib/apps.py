@@ -318,7 +318,7 @@ def render():
             writer_options[key] = value
     if options.language:
         writer_options['lang'] = options.language
-    for option in writer_options:
+    for option in writer_options.keys():
         if option not in getattr(writer, 'options', {}):
             print 'Warning: unkown writer option %r' % option
             del writer_options[option]

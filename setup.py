@@ -93,7 +93,7 @@ def main():
         install_requires=install_requires,
         ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
                        ],
-        packages=["mwlib", "mwlib.resources"],
+        packages=["mwlib", "mwlib.templ", "mwlib.resources"],
         namespace_packages=['mwlib'],
         include_package_data = True,
         zip_safe = False,
