@@ -9,7 +9,7 @@ _cache = {}
 
 def flatten(node, expander, variables, res):
     t=type(node)
-    
+    hash(node)
     if t is unicode or t is str:
         res.append(node)
         return True
@@ -37,9 +37,10 @@ def equalsplit(node):
         else:
             return None, node
 
+    # FIXME: python 2.4 tuples don't have .index
     try:
         idx = node.index(u'=')
-    except (ValueError, AttributeError):
+    except ValueError:
         return None, node
 
     return node[:idx], node[idx+1:]

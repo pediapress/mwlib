@@ -7,7 +7,7 @@ from mwlib.templ.scanner import symbols, tokenize
 
 def optimize(node):
     if type(node) is tuple:
-        return node
+        return tuple(optimize(x) for x in node)
     
     if isinstance(node, basestring):
         return node
@@ -37,7 +37,10 @@ def optimize(node):
     
     if len(node)==1 and type(node) in (list, Node):
         return optimize(node[0])
-    
+
+    if type(node) is list:
+        return tuple(node)
+        
     return node
 
     
@@ -89,7 +92,9 @@ class Parser(object):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
         cond = optimize(args[0])
+        
         if not isinstance(cond, unicode):
+            cond = list(cond)
             if cond and isinstance(cond[0], unicode):
                 if not cond[0].strip():
                     del cond[0]
@@ -97,8 +102,9 @@ class Parser(object):
             if cond and isinstance(cond[-1], unicode):
                 if not cond[-1].strip():
                     del cond[-1]
+            cond = tuple(cond)
         args[0] = cond
-        n = IfNode(args)
+        n = IfNode(tuple(args))
         return n
 
     def _parse_args(self, children):
