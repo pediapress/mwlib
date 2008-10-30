@@ -6,6 +6,10 @@ from mwlib.templ import magics
 
 
 class Node(tuple):
+    def __eq__(self, other):
+        return type(self)==type(other) and tuple.__eq__(self, other)    
+    def __ne__(self, other):
+        return type(self)!=type(other) or tuple.__ne__(self, other)
     
     def __repr__(self):
         return "%s%s" % (self.__class__.__name__, tuple.__repr__(self))
