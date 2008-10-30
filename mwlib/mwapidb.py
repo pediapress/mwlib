@@ -458,7 +458,6 @@ class ImageDB(object):
         if desc_url is None:
             return []
         
-        print desc_url
         api_helper = get_api_helper(desc_url)
         if api_helper is None:
             if wikidb is not None:
