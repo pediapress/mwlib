@@ -340,3 +340,15 @@ def test_pagename_non_ascii():
     
     yield e, '{{SUBPAGENAME}}', u'L\xe9onie s'
     yield e, '{{SUBPAGENAMEE}}', 'L%C3%A9onie_s'
+
+def test_get_templates():
+    def doit(source, expected):
+        r = expander.get_templates(source)
+        assert r==expected, "expected %r, got %r" % (expected, r)
+
+    yield doit, "{{foo| {{ bar }} }}", set("foo bar".split())
+    yield doit, "{{foo{{{1}}} }}", set()
+    yield doit, "{{{ {{foo}} }}}", set(['foo'])
+    yield doit, "{{ #if: {{{1}}} |yes|no}}", set()
+    
+    

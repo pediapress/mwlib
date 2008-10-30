@@ -5,14 +5,14 @@
 from mwlib.templ import magics
 
 
-class Node(list):
+class Node(tuple):
     @property
     def children(self):
         return self
     
     def __repr__(self):
-        return "<%s %s children>" % (self.__class__.__name__, len(self))
-
+        return "%s%s" % (self.__class__.__name__, tuple.__repr__(self))
+    
     def show(self, out=None):
         show(self, out=out)
 

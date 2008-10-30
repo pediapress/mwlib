@@ -6,7 +6,7 @@ from mwlib.templ.nodes import Node, Variable, Template, IfNode
 from mwlib.templ.scanner import symbols, tokenize
 
 def optimize(node):
-    if isinstance(node, tuple):
+    if type(node) is tuple:
         return node
     
     if isinstance(node, basestring):
@@ -16,8 +16,7 @@ def optimize(node):
         return optimize(node[0])
 
     if isinstance(node, (Variable, Template, IfNode)):
-        for i, x in enumerate(node):
-            node[i] = optimize(x)
+        return node.__class__(tuple(optimize(x) for x in node))
     else:
         # combine strings
         res = []
@@ -59,8 +58,7 @@ class Parser(object):
 
 
     def variableFromChildren(self, children):
-        v=Variable()
-        
+        v=[]
 
         try:
             idx = children.index(u"|")
@@ -70,7 +68,7 @@ class Parser(object):
             v.append(children[:idx])
             v.append(children[idx+1:])
 
-        return v
+        return Variable(v)
         
     def _eatBrace(self, num):
         ty, txt = self.getToken()
@@ -90,6 +88,16 @@ class Parser(object):
     def ifnodeFromChildren(self, children):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
+        cond = optimize(args[0])
+        if not isinstance(cond, unicode):
+            if cond and isinstance(cond[0], unicode):
+                if not cond[0].strip():
+                    del cond[0]
+
+            if cond and isinstance(cond[-1], unicode):
+                if not cond[-1].strip():
+                    del cond[-1]
+        args[0] = cond
         n = IfNode(args)
         return n
 
@@ -121,13 +129,8 @@ class Parser(object):
             if s.startswith("#if:"):
                 return self.ifnodeFromChildren(children)
             
-                
-            
-            
-        t=Template()
         # find the name
-        name = Node()
-        t.append(name)
+        name = []
         
         idx = 0
         for idx, c in enumerate(children):
@@ -136,14 +139,16 @@ class Parser(object):
             name.append(c)
 
         name = optimize(name)
-
+        if isinstance(name, unicode):
+            name = name.strip()
+                    
         args = self._parse_args(children[idx+1:])
-        t.append(tuple(args))
-        return t
+        
+        return Template([name, tuple(args)])
         
     def parseOpenBrace(self):
         ty, txt = self.getToken()
-        n = Node()
+        n = []
 
         numbraces = len(txt)
         self.pos += 1
@@ -158,13 +163,13 @@ class Parser(object):
                 closelen = len(txt)
                 if closelen==2 or numbraces==2:
                     t=self.templateFromChildren(n)
-                    n=Node()
+                    n=[]
                     n.append(t)
                     self._eatBrace(2)
                     numbraces-=2
                 else:
                     v=self.variableFromChildren(n)
-                    n=Node()
+                    n=[]
                     n.append(v)
                     self._eatBrace(3)
                     numbraces -= 3
@@ -183,7 +188,8 @@ class Parser(object):
         return n
         
     def parse(self):
-        n = Node()
+        n = []
+        
         while 1:
             ty, txt = self.getToken()
             if ty==symbols.bra_open:

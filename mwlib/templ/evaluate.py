@@ -5,18 +5,25 @@
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
+_cache = {}
+
 def flatten(node, expander, variables, res):
-    before = variables.count
     t=type(node)
+    
     if t is unicode or t is str:
         res.append(node)
-    elif t is list:
+        return True
+    
+    before = variables.count
+    if t is list or t is tuple:
         for x in node:
             flatten(x, expander, variables, res)
     else:
         node.flatten(expander, variables, res)
     after = variables.count
     return before==after
+
+#from mwlib.templ.flatten import flatten
 
 
 class MemoryLimitError(Exception):
