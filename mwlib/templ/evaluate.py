@@ -9,7 +9,6 @@ _cache = {}
 
 def flatten(node, expander, variables, res):
     t=type(node)
-    hash(node)
     if t is unicode or t is str:
         res.append(node)
         return True
