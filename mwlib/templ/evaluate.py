@@ -36,13 +36,28 @@ def equalsplit(node):
         else:
             return None, node
 
-    # FIXME: python 2.4 tuples don't have .index
     try:
         idx = node.index(u'=')
     except ValueError:
         return None, node
 
     return node[:idx], node[idx+1:]
+
+if not hasattr(tuple, 'index'):
+    def equalsplit(node):
+        if isinstance(node, basestring):
+            if '=' in node:
+                return node.split('=', 1)
+            else:
+                return None, node
+
+        try:
+            idx = list(node).index(u'=')
+        except ValueError:
+            return None, node
+
+        return node[:idx], node[idx+1:]
+    
 
 class ArgumentList(object):
     def __init__(self, args=tuple(), expander=None, variables=None):
