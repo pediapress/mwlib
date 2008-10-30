@@ -17,7 +17,6 @@ def test_noexpansion_inside_pre():
 
     res = expandstr("<pre>A{{Pipe}}B</pre>", "<pre>A{{Pipe}}B</pre>", wikidb=DictDB(Pipe="C"))
 
-@xfail
 def test_undefined_variable():
     db = DictDB(Art="{{Pipe}}",
                 Pipe="{{{undefined_variable}}}")

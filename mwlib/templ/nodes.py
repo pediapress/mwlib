@@ -51,9 +51,8 @@ class Variable(Node):
             if len(self)>1:
                 flatten(self[1], expander, variables, res)
             else:
-                pass
-                # FIXME. breaks If
-                #res.append(u"{{{%s}}}" % (name,))
+                # FIXME. breaks If ???
+                res.append(u"{{{%s}}}" % (name,))
         else:
             res.append(v)
        
