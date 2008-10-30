@@ -45,11 +45,9 @@ def equalsplit(node):
     return node[:idx], node[idx+1:]
 
 class ArgumentList(object):
-    def __init__(self, args=None, expander=None, variables=None):
-        if args is None:
-            self.args = []
-        else:
-            self.args = args
+    def __init__(self, args=tuple(), expander=None, variables=None):
+        self.args = tuple(args)
+        
 
         assert expander is not None
         #assert variables is not None
@@ -61,13 +59,6 @@ class ArgumentList(object):
         
         self.namedargs = {}
         self.count = 0
-
-    def __repr__(self):
-        return "<ARGLIST args=%r>" % ([x.flatten() for x in self.args],)
-    
-    def append(self, a):
-        self.count += 1
-        self.args.append(a)
 
     def __iter__(self):
         self.count += 1

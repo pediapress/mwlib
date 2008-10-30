@@ -155,18 +155,16 @@ class Template(Node):
                         
                 res.append(dummy_mark)
                 return
-            
-            
-        #print "NAME:", (name, remainder)
         
-        var = ArgumentList(expander=expander, variables=variables)
-
+        var = []
         if remainder is not None:
             var.append(remainder)
         
         for x in args:
             var.append(x)
 
+        var = ArgumentList(args=var, expander=expander, variables=variables)
+        
         rep = expander.resolver(name, var)
 
         if rep is not None:
