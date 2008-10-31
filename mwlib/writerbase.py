@@ -8,24 +8,22 @@ import urllib
 from mwlib import parser, log, metabook
 
 # import functions needed by most writers that should be accessible through writerbase
-from mathutils import renderMath
+from mwlib.mathutils import renderMath
 
 log = log.Log('mwlib.writerbase')
 
 class WriterError(RuntimeError):
     pass
 
-def build_book(env, status_callback=None, progress_range=None):
+def build_book(env, status_callback=None):
     book = parser.Book()
+    progress = 0
     if status_callback is not None:
-        progress = progress_range[0]
         num_articles = float(len(metabook.get_item_list(env.metabook,
             filter_type='article',
         )))
         if num_articles > 0:
-            progress_step = int(
-                (progress_range[1] - progress_range[0])/num_articles
-            )
+            progress_step = 100/num_articles
     for item in metabook.get_item_list(env.metabook):
         if item['type'] == 'chapter':
             book.children.append(parser.Chapter(item['title'].strip()))

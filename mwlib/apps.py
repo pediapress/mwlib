@@ -334,8 +334,7 @@ def render():
     env = None
     try:
         try:
-            env = parser.makewiki()
-        
+            env = parser.makewiki()            
             if not isinstance(env.wiki, zipwiki.Wiki)\
                 or not isinstance(env.images, zipwiki.ImageDB):
                 zip_filename = zipcreator.make_zip_file(options.keep_zip, env,
@@ -347,13 +346,12 @@ def render():
                     env.images.clear()
                 env.wiki = zipwiki.Wiki(zip_filename)
                 env.images = zipwiki.ImageDB(zip_filename)
+                status = Status(options.status_file, progress_range=(71, 100))
             else:
                 zip_filename = None
-            
-            print 'START WITH PROGRESS'
-            status = Status(options.status_file, progress_range=(71, 100))
-            status(status='rendering', progress=0)
-            
+                status = Status(options.status_file, progress_range=(0, 100))
+                
+            status(status='rendering', progress=0)           
             fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
             os.close(fd)
             writer(env, output=tmpout, status_callback=status, **writer_options)

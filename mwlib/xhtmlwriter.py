@@ -754,12 +754,16 @@ def validate(xml):
 
 
 def xhtmlwriter(env, output, status_callback, writer=MWXHTMLWriter):
-    book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
-    scb = lambda status, progress :  status_callback is not None and status_callback(status,progress)
-    scb(status='preprocessing', progress=70)
+    if status_callback:
+        buildbook_status = status_callback.getSubRange(0, 50)
+    else:
+        buildbook_status = None
+    book = writerbase.build_book(env, status_callback=buildbook_status)
+    scb = lambda status, progress :  status_callback is not None and status_callback(status=status, progress=progress)
+    scb(status='preprocessing', progress=50)
     for c in book.children:
         preprocess(c)
-    scb(status='rendering', progress=80)
+    scb(status='rendering', progress=60)
     writer(env, status_callback=scb).writeBook(book, output=output)
 xhtmlwriter.description = 'XHTML 1.0 Transitional'
 xhtmlwriter.content_type = 'text/xml'

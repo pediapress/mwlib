@@ -6,7 +6,7 @@ except ImportError:
 
 from mwlib.log import Log
 
-log = Log('mwlib.statusfile')
+log = Log('mwlib.status')
 
 class Status(object):
     def __init__(self,
@@ -14,30 +14,39 @@ class Status(object):
         podclient=None,
         progress_range=(0, 100),
         auto_dump=True,
+        status=None,         
     ):
         self.filename = filename
         self.podclient = podclient
-        self.status = {}
+        self.status = status or {}
         self.progress_range = progress_range
+
+    def getSubRange(self, start, end):
+        progress_range = (self.scaleProgress(start), self.scaleProgress(end))
+        return Status(filename=self.filename, podclient=self.podclient, status=self.status, progress_range=progress_range)
     
+    def scaleProgress(self, progress):
+        return int(
+            self.progress_range[0]
+            + progress*(self.progress_range[1] - self.progress_range[0])/100
+            )
+
+
     def __call__(self, status=None, progress=None, article=None, auto_dump=True,
         **kwargs):
         if status is not None and status != self.status.get('status'):
-            print 'STATUS: %s' % status
+            log('STATUS: %s' % status)
             self.status['status'] = status
         
         if progress is not None:
-            assert 0 <= progress and progress <= 100, 'progress not in range 0..100'
-            progress = int(
-                self.progress_range[0]
-                + progress*(self.progress_range[1] - self.progress_range[0])/100
-            )
-            if progress != self.status.get('progress'):
-                print 'PROGRESS: %d%%' % progress
+            progress = min(max(0, progress), 100)
+            progress = self.scaleProgress(progress)
+            if progress > self.status.get('progress'):
+                log('PROGRESS: %d%%' % progress)
                 self.status['progress'] = progress
         
         if article is not None and article != self.status.get('article'):
-            print 'ARTICLE: %r' % article
+            log('ARTICLE: %r' % article)
             self.status['article'] = article
 
         if self.podclient is not None:

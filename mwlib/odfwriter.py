@@ -756,18 +756,17 @@ class ODFWriter(object):
 
 
 def writer(env, output, status_callback):
-    book = writerbase.build_book(env, status_callback=status_callback, progress_range=(10, 60))
-    scb = lambda status, progress :  status_callback is not None and status_callback(status,progress)
-    scb(status='preprocessing', progress=70)
-    #for c in book.children:
-    #    preprocess(c)
-    
-    preprocess(book)
-        
-    scb(status='rendering', progress=80)
+    if status_callback:
+        buildbook_status = status_callback.getSubRange(0, 50)
+    else:
+        buildbook_status = None
+    book = writerbase.build_book(env, status_callback=buildbook_status)
+    scb = lambda status, progress :  status_callback is not None and status_callback(status=status, progress=progress)
+    scb(status='preprocessing', progress=50)   
+    preprocess(book)        
+    scb(status='rendering', progress=60)
     w = ODFWriter(env, status_callback=scb)
     w.writeBook(book, output=output)
-#    print w.asstring()
 
 writer.description = 'OpenDocument Text'
 writer.content_type = 'application/vnd.oasis.opendocument.text'
