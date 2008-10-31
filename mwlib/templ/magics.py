@@ -299,6 +299,11 @@ class ParserFunctions(object):
     wikidb = None
     def _error(self,s):
         return '<strong class="error">%s</strong>' % (s,)
+
+    def LANGUAGE(self, args):
+        """implement http://meta.wikimedia.org/wiki/Help:Parser_function#.23language:"""
+        
+        return args[0] # FIXME this is just a dummy implementation.
     
     def TAG(self, args):
         name = args[0].strip()
