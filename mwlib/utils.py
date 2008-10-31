@@ -319,7 +319,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
             log.error("%s - while fetching %r" % (err, url))
             return None
         raise RuntimeError('Could not fetch %r: %s' % (url, err))
-    log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
+    #log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
     
     if hasattr(fetch_cache, 'max_cacheable_size'):
         max_cacheable_size = max(fetch_cache.max_cacheable_size, max_cacheable_size)
