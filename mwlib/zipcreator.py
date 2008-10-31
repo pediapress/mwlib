@@ -195,7 +195,7 @@ class ZipCreator(object):
             except KeyError:
                 continue
             if self.parse_status:
-                self.parse_status(article=title)
+                self.parse_status(article=info['title'])
             self.parseArticle(
                 title=info['title'],
                 revision=info['revision'],
