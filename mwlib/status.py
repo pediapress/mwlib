@@ -1,3 +1,4 @@
+import os
 import sys
 try:
     import json
@@ -63,9 +64,10 @@ class Status(object):
         if not self.filename:
             return
         try:    
-            open(self.filename, 'wb').write(
+            open(self.filename + '.tmp', 'wb').write(
                 json.dumps(self.status).encode('utf-8')
             )
+            os.rename(self.filename + '.tmp', self.filename)
         except Exception, exc:
             log.ERROR('Could not write status file %r: %s' % (
                 self.filename, exc
