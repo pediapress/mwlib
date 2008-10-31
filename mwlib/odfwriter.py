@@ -477,19 +477,14 @@ class ODFWriter(object):
         # (monospaced) or code, newlines ignored, spaces collapsed
         return text.Span(stylename=style.teletyped)
 
-
-    def owritePreFormatted(self, n):
-        # there seems to be no preformatted option in ODF
-        # need to replace \n \t " "
-
-        # FIXME TABS NOT RETURNED BY PARSER
-        
-        p = ParagraphProxy(stylename=style.preformatted) 
+    def _replaceWhitespaces(self,obj, p):
+        # replaces \n, \t and " " given from parser to ODF-valid tags
+        # works on (styled) ParagraphProxy p
         rmap = {
             "\n":text.LineBreak,
             " ":text.S}
         col = []
-        for c in n.getAllDisplayText().replace("\t", " "*4):
+        for c in obj.getAllDisplayText().replace("\t", " "*8).strip():
             if c in rmap:
                 p.addText(u"".join(col))
                 col = []
@@ -497,15 +492,20 @@ class ODFWriter(object):
             else:
                 col.append(c)
         p.addText(u"".join(col)) # add remaining
-        n.children = []  # remove the children
+        obj.children = []  # remove the children
         return p
+        
+    def owritePreFormatted(self, obj):
+        p = ParagraphProxy(stylename=style.preformatted) 
+        return self._replaceWhitespaces(obj, p)
+
+    def owriteSource(self, obj): 
+        p = ParagraphProxy(stylename=style.source)
+        return self._replaceWhitespaces(obj, p)
 
 
     def owriteCode(self, obj): 
         return text.Span(stylename=style.code)
-
-    def owriteSource(self, obj): 
-        return ParagraphProxy(stylename=style.source)
 
     
     def owriteBlockquote(self, s):
@@ -609,7 +609,7 @@ class ODFWriter(object):
         nc.addText(str(len(self.references)))
         nb = text.NoteBody()
         n.addElement( nb )
-        p = ParagraphProxy(stylename="Footnote")
+        p = ParagraphProxy(stylename=style.footnote)
         nb.addElement(p)
         n.writeto = p
         return n
@@ -617,11 +617,11 @@ class ODFWriter(object):
     def owriteReferenceList(self, t):
         # already in odf footnotes
         pass
-
+        
     def owriteImageMap(self, obj):
         pass # write children # fixme
-    
-    def owriteImageLink(self,obj):
+        
+    def owriteImageLink(self,obj,isImageMap=False):
         # see http://books.evc-cit.info/odbook/ch04.html
         # see rl.writer for more advanced image integration, including inline, floating, etc.
         # http://code.pediapress.com/hg/mwlib.rl rlwriter.py
@@ -650,15 +650,17 @@ class ODFWriter(object):
                 # image still to large, re-resize to max possible:
                 scale = min(self.conf.paper['IMG_MAX_WIDTH']/w, self.conf.paper['IMG_MAX_HEIGHT']/h)
 
-                return (w*scale, h*scale)
+                return (w*scale, h*scale, scale)
             else:
-                return (wTarget, hTarget)
+                return (wTarget, hTarget, scale)
 
         if obj.colon == True:
             return # writes children
+            #fixme: handle isImageMap
 
         if not self.env or not self.env.images:
             return
+            #fixme: handle isImageMap
 
         imgPath = self.env.images.getDiskPath(obj.target)#, size=targetWidth) ????
         if not imgPath:
@@ -667,7 +669,7 @@ class ODFWriter(object):
         imgPath = imgPath.encode('utf-8')
                
         (wObj,hObj) = (obj.width or 0, obj.height or 0)
-        # sometimes our parser delivers only one value, w or h, so set the other = 0
+        # sometimes the parser delivers only one value, w or h, so set the other = 0
 
         try:
             img = PilImage.open(imgPath)
@@ -683,6 +685,7 @@ class ODFWriter(object):
         if wImg == 0 or wImg == 0:
             return
         
+        # sometimes the parser delivers only one value, w or h, so set the other "by hand"       
         aspectRatio = wImg/hImg                           
 
         if wObj>0 and not hObj>0:
@@ -691,24 +694,33 @@ class ODFWriter(object):
             wObj = aspectRatio / hObj
         elif wObj==0 and hObj==0: 
             wObj, hObj = wImg, hImg
-
-        # sometimes the parser delivers only one value, w or h, so set the other "by hand"       
-        (width, height) = sizeImage( wObj, hObj)
+        #hint: wObj/hObj are the values of the Thumbnail
+        #      wImg/hImg are the real values of the image
         
-        widthIn = "%.2fin" % (width)# * scale)
-        heightIn= "%.2fin" % (height)# * scale)
-                
+        (width, height, scale) = sizeImage( wObj, hObj)
+        
+        
+        widthIn = "%.2fin" % (width)
+        heightIn= "%.2fin" % (height)
+          
         innerframe = draw.Frame(stylename=style.frmInner, width=widthIn, height=heightIn)
+        
+        if isImageMap:
+            innerframe.wImg = wImg
+            innerframe.hImg = hImg
+            innerframe.rescaleFactor = scale # needed cuz image map coordinates needs the same rescaled
+            log ("wObj ,wImg: %s,%s" %(wObj,wImg))
+        
         href = self.doc.addPicture(imgPath)
         innerframe.addElement(draw.Image(href=href))
 
         if obj.isInline():
-            return SkipChildren(innerframe) # FIXME something else formatting?
+                return SkipChildren(innerframe) # FIXME something else formatting?
         else:
             innerframe.addAttribute( "anchortype", "paragraph")
 
 
-        widthIn = "%.2fin" % (width + style.frmOuter.internSpacing)# * scale)
+        widthIn = "%.2fin" % (width + style.frmOuter.internSpacing)
         heightIn= "%.2fin" % (height)
         
         # set image alignment
@@ -726,6 +738,8 @@ class ODFWriter(object):
         tb.addElement(p)
         p.addElement(innerframe)
         frame.writeto = p
+        if isImageMap:
+            frame.writeImageMapTo = innerframe
         return frame
 
 
@@ -799,7 +813,7 @@ def main():
         db = DummyDB()
         input = unicode(open(fn).read(), 'utf8')
         r = parseString(title=fn, raw=input, wikidb=db)
-        parser.show(sys.stdout, r)
+        #parser.show(sys.stdout, r)
         #advtree.buildAdvancedTree(r)
         #tc = TreeCleaner(r)
         #tc.cleanAll()

@@ -95,7 +95,7 @@ snippet = """
 """
 
 db=expander.DictDB(citeweb=citeweb)
-e=expander.Expander(snippet*100, pagename='test', wikidb=db)
+e=expander.Expander(snippet*1000, pagename='test', wikidb=db)
 stime=time.time()
 e.expandTemplates()
 print time.time()-stime

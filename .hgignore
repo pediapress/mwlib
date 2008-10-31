@@ -12,4 +12,6 @@ mwlib/*.cc
 README.html
 docs/*.html
 dist/*
+bla*
+t.py
 

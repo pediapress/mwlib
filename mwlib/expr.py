@@ -184,9 +184,19 @@ class Expr(object):
             raise ExprError("bad stack: %s" % (self.operand_stack,))
 
         return self.operand_stack[-1]
-    
+
+_cache = {}
 def expr(s):
-    return Expr().parse_expr(s)
+    try:
+        return _cache[s]
+    except KeyError:
+        pass
+    
+    
+    r = Expr().parse_expr(s)
+    _cache[s] = r
+    return r
+
 
 def main():
     ParseException = ExprError

@@ -20,7 +20,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import utils, metabook, wikidbbase, uparser, parser
+from mwlib import utils, metabook, wikidbbase, uparser, parser, namespace
 from mwlib.log import Log
 
 log = Log("mwapidb")
@@ -458,7 +458,6 @@ class ImageDB(object):
         if desc_url is None:
             return []
         
-        print desc_url
         api_helper = get_api_helper(desc_url)
         if api_helper is None:
             if wikidb is not None:
@@ -474,6 +473,38 @@ class ImageDB(object):
             return [t['title'].split(':', 1)[-1] for t in result['templates']]
         except KeyError:
             return []
+    
+    def getContributors(self, name, wikidb=None):
+        """Return list of image contributors
+        
+        @param name: image name without namespace (e.g. without "Image:")
+        @type name: unicode
+        
+        @param wikidb: WikiDB instance (optional)
+        @type wikidb: object
+        
+        @returns: list of contributors
+        @rtype: [unicode] or None
+        """
+        
+        desc_url = self.getDescriptionURL(name)
+        if desc_url is None:
+            return None
+        
+        if wikidb is None:
+            api_helper = get_api_helper(desc_url)
+            if api_helper is None:
+                return None
+            wikidb = WikiDB(api_helper=api_helper)
+        
+        article = wikidb.getParsedArticle('Image:%s' % name)
+        if not article:
+            return None
+        
+        def isUserLink(node):
+            return isinstance(node, parser.NamespaceLink) and node.namespace == namespace.NS_USER
+        
+        return [u.target for u in article.filter(isUserLink)]
     
 
 # ==============================================================================

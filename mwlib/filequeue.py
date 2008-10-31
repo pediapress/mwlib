@@ -13,12 +13,15 @@ class FileJobQueuer(object):
     
     def __init__(self, queue_dir):
         self.queue_dir = utils.ensure_dir(queue_dir)
+        self.log = Log('FileJobQueuer')
     
     def __call__(self, job_type, job_id, args):
-        job_file = os.path.join(self.queue_dir, job_id)
+        job_file = '%s.job' % os.path.join(self.queue_dir, job_id)
         if os.path.exists(job_file):
-            raise RuntimeError('Job file %r already exists' % job_file)
-        open(job_file, 'wb').write('\n'.join(args))
+            self.log.warn('Job file %r already exists' % job_file)
+            return
+        open(job_file + '.tmp', 'wb').write('\n'.join(args))
+        os.rename(job_file + '.tmp', job_file)
 
 
 class FileJobPoller(object):

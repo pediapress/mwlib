@@ -197,3 +197,13 @@ class WikiDB(object):
                 for k,v in self.reader.iteritems()
                 if k[0] == ':')
         
+    def getURL(self, *args, **kwargs):
+        return "http://code.pediapress.com"
+
+    def getAuthors(self, *args, **kwargs):
+        return []
+    
+    
+    def getSource(self, *args, **kwargs):
+        return None
+    

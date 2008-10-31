@@ -17,7 +17,6 @@ def test_noexpansion_inside_pre():
 
     res = expandstr("<pre>A{{Pipe}}B</pre>", "<pre>A{{Pipe}}B</pre>", wikidb=DictDB(Pipe="C"))
 
-@xfail
 def test_undefined_variable():
     db = DictDB(Art="{{Pipe}}",
                 Pipe="{{{undefined_variable}}}")
@@ -173,7 +172,7 @@ def test_template_name_colon():
     """
     p=parse_and_show("{{Template:foobar}}")
     assert isinstance(p, expander.Template), 'expected a template'
-    assert len(p.children)==1, 'expected exactly one child'
+    assert p[0] == u'Template:foobar'
     
 
 
@@ -340,3 +339,15 @@ def test_pagename_non_ascii():
     
     yield e, '{{SUBPAGENAME}}', u'L\xe9onie s'
     yield e, '{{SUBPAGENAMEE}}', 'L%C3%A9onie_s'
+
+def test_get_templates():
+    def doit(source, expected):
+        r = expander.get_templates(source)
+        assert r==expected, "expected %r, got %r" % (expected, r)
+
+    yield doit, "{{foo| {{ bar }} }}", set("foo bar".split())
+    yield doit, "{{foo{{{1}}} }}", set()
+    yield doit, "{{{ {{foo}} }}}", set(['foo'])
+    yield doit, "{{ #if: {{{1}}} |yes|no}}", set()
+    
+    

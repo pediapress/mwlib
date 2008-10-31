@@ -298,14 +298,10 @@ class ThreadedZipCreator(ZipCreator):
                 raw = self.articles[info['title']]['content']
             except KeyError:
                 continue
-            parser = expander.Parser(raw)
-            for template in parser.parse().find(expander.Template):
-                # FIXME: filter out magics
-                try:
-                    name = template.children[0].children[0]
-                except IndexError:
-                    continue
+            
+            for name in expander.get_templates(raw):
                 templates.add((name, info['wikidb']))
+                              
         for title, wikidb in templates:
             self.fetchTemplate(title, wikidb)
         self.jobsched.join()
