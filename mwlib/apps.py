@@ -124,7 +124,7 @@ def buildzip():
             from mwlib import zipcreator
         
             status = Status(podclient=podclient, progress_range=(1, 90))
-            status(status='parsing', progress=0)
+            status(progress=0)
             
             filename = zipcreator.make_zip_file(options.output, env,
                 status=status,
@@ -329,7 +329,7 @@ def render():
         open(options.pid_file, 'wb').write('%d\n' % os.getpid())
     
     status = Status(options.status_file, progress_range=(1, 70))
-    status(status='parsing', progress=0)
+    status(progress=0)
     
     env = None
     try:
@@ -351,7 +351,6 @@ def render():
                 zip_filename = None
                 status = Status(options.status_file, progress_range=(0, 100))
                 
-            status(status='rendering', progress=0)           
             fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
             os.close(fd)
             writer(env, output=tmpout, status_callback=status, **writer_options)

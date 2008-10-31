@@ -20,7 +20,7 @@ class Status(object):
         self.podclient = podclient
         self.status = status or {}
         self.progress_range = progress_range
-
+    
     def getSubRange(self, start, end):
         progress_range = (self.scaleProgress(start), self.scaleProgress(end))
         return Status(filename=self.filename, podclient=self.podclient, status=self.status, progress_range=progress_range)
@@ -41,7 +41,7 @@ class Status(object):
         if progress is not None:
             progress = min(max(0, progress), 100)
             progress = self.scaleProgress(progress)
-            if progress > self.status.get('progress'):
+            if progress > self.status.get('progress', -1):
                 log('PROGRESS: %d%%' % progress)
                 self.status['progress'] = progress
         

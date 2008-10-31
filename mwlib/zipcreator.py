@@ -169,7 +169,7 @@ class ZipCreator(object):
             )
         self.jobsched.join()
         if self.status:
-            self.status(status=u'fetching templates')
+            self.status(status=u'fetching templates', article='')
         templates = set()
         for info in self.article_jobs:
             try:
@@ -194,6 +194,8 @@ class ZipCreator(object):
                 raw = self.articles[info['title']]['content']
             except KeyError:
                 continue
+            if self.parse_status:
+                self.parse_status(article=title)
             self.parseArticle(
                 title=info['title'],
                 revision=info['revision'],
@@ -203,9 +205,8 @@ class ZipCreator(object):
             )
             if self.parse_status:
                 self.parse_status(progress=i*100/n)
-        
         if self.status:
-            self.status(status=u'fetching images')
+            self.status(status=u'fetching images', article='')
         self.num_images = len(self.image_infos)
         self.image_count = 0
         for i in self.image_infos:
@@ -221,6 +222,8 @@ class ZipCreator(object):
     
     def fetchArticle(self, title, revision, wikidb):
         def fetch_article_job(job_id):
+            if self.fetcharticle_status:
+                self.fetcharticle_status(article=title)
             recorddb = RecordDB(wikidb, self.articles, self.templates, self.sources)
             raw = recorddb.getRawArticle(title, revision=revision)
             if raw is None:
