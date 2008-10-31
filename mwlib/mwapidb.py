@@ -497,14 +497,20 @@ class ImageDB(object):
                 return None
             wikidb = WikiDB(api_helper=api_helper)
         
-        article = wikidb.getParsedArticle('Image:%s' % name)
+        title = 'Image:%s' % name
+        
+        article = wikidb.getParsedArticle(title)
         if not article:
             return None
         
         def isUserLink(node):
             return isinstance(node, parser.NamespaceLink) and node.namespace == namespace.NS_USER
         
-        return [u.target for u in article.filter(isUserLink)]
+        users = [u.target for u in article.filter(isUserLink)]
+        if users:
+            return users
+        
+        return wikidb.getAuthors(title)
     
 
 # ==============================================================================
