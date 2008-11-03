@@ -322,3 +322,20 @@ class TestImageDB(object):
         p = self.imagedb.getPath(u'Flag of the United States.svg', size=800)
         assert p == 'thumb/a/a4/Flag_of_the_United_States.svg/800px-Flag_of_the_United_States.svg.png'
     
+    def test_getContributors(self):
+        # image contains User: link in Information tempalte:
+        c = self.imagedb.getContributors(u'Hong Kong Skyline Restitch - Dec 2007.jpg')
+        print c
+        assert c
+        # image contains plain username in Information template:
+        c = self.imagedb.getContributors(u'Barakhambaroad.jpg')
+        print c
+        assert c
+        c = self.imagedb.getContributors(u'Uroplatus_Sikorae_Analamazaotra_Forest_Madagascar.jpg')
+        print c
+        assert c
+        c = self.imagedb.getContributors(u'OlympeDeGouge.jpg')
+        print c
+        #assert c
+    
+

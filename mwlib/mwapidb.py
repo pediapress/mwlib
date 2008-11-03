@@ -21,6 +21,7 @@ except ImportError:
     import simplejson as json
 
 from mwlib import utils, metabook, wikidbbase, uparser, parser, namespace
+from mwlib.expander import find_template, get_template_args
 from mwlib.log import Log
 
 log = Log("mwapidb")
@@ -499,17 +500,39 @@ class ImageDB(object):
         
         title = 'Image:%s' % name
         
-        article = wikidb.getParsedArticle(title)
-        if not article:
+        raw = wikidb.getRawArticle(title)
+        if not raw:
             return None
         
         def isUserLink(node):
             return isinstance(node, parser.NamespaceLink) and node.namespace == namespace.NS_USER
         
-        users = [u.target for u in article.filter(isUserLink)]
+        # best method: find Information template, parse Author argument:
+        template = find_template(raw, 'Information')
+        if template is not None:
+            author = get_template_args(template).get('Author', '').strip()
+            if author:
+                userlinks = list(uparser.parseString('',
+                    raw=author,
+                    wikidb=wikidb,
+                ).filter(isUserLink))
+                if userlinks:
+                    return [userlinks[0].target]
+                else:
+                    return [author]
+        
+        # second-to-best method: parse article, look for any User: link:
+        users = [
+            u.target
+            for u in uparser.parseString(title,
+                raw=raw,
+                wikidb=wikidb,
+            ).filter(isUserLink)
+        ]
         if users:
             return users
         
+        # worst method: return authors via history:
         return wikidb.getAuthors(title)
     
 
