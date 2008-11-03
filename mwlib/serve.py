@@ -2,6 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
+import errno
 import os
 import re
 import shutil
@@ -78,6 +79,21 @@ def json_response(fn):
 
 # ==============================================================================
 
+def lock(filename):
+    if not hasattr(os, 'O_EXLOCK'):
+        # this OS does not support file-locks via os.open(),
+        # pretend we've got the lock
+        return None
+    fd = os.open(filename, os.O_CREAT|os.O_EXLOCK)
+    return fd
+
+def unlock(fd):
+    if fd is None:
+        return
+    os.close(fd)
+
+# ==============================================================================
+
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
     error_filename = 'errors'
@@ -112,6 +128,7 @@ class Application(wsgi.Application):
         self.default_writer = default_writer
         self.report_from_mail = report_from_mail
         self.report_recipients = report_recipients
+        self.new_collection_lockfile = os.path.join(self.cache_dir, 'new_collection.lock')
     
     def dispatch(self, request):
         if request.method != 'POST':
@@ -124,12 +141,22 @@ class Application(wsgi.Application):
             method = getattr(self, 'do_%s' % command)
         except AttributeError:
             return self.http500()
+        
+        collection_id = request.post_data.get('collection_id')
+        if collection_id is None:
+            lockfile = lock(self.new_collection_lockfile)
+        else:
+            if not self.check_collection_id(collection_id):
+                return self.http404()
+            lockfile = lock(self.get_path(collection_id, 'lock'))
         try:
             return method(request.post_data)
         except Exception, exc:
             return self.error_response('error executing command %r: %s' % (
                 command, exc,
             ))
+        finally:
+            unlock(lockfile)
     
     @json_response
     def error_response(self, error, **kwargs):
@@ -152,8 +179,12 @@ class Application(wsgi.Application):
             **kwargs
         )
     
+    def get_collection_dirs(self, collection_id):
+        assert len(collection_id) > 3, 'invalid collection ID'
+        return (self.cache_dir, collection_id[0], collection_id[:2], collection_id)
+    
     def get_collection_dir(self, collection_id):
-        return os.path.join(self.cache_dir, collection_id)
+        return os.path.join(*self.get_collection_dirs(collection_id))
     
     def check_collection_id(self, collection_id):
         """Return True iff collection with given ID exists"""
@@ -167,10 +198,17 @@ class Application(wsgi.Application):
     
     def new_collection(self, post_data):
         collection_id = make_collection_id(post_data)
-        collection_dir = self.get_collection_dir(collection_id)
-        if not os.path.isdir(collection_dir):
-            log.info('Creating new collection dir %r' % collection_dir)
-            os.makedirs(collection_dir)
+        collection_dirs = self.get_collection_dirs(collection_id)
+        for i in range(len(collection_dirs)):
+            p = os.path.join(*collection_dirs[:i + 1])
+            if os.path.isdir(p):
+                continue
+            try:
+                log.info('Creating directory %r' % p)
+                os.mkdir(p)
+            except OSError, exc:
+                if getattr(exc, 'errno') not in (errno.EEXIST, errno.EISDIR):
+                    raise
         return collection_id
     
     def get_path(self, collection_id, filename, ext=None):
@@ -318,9 +356,6 @@ class Application(wsgi.Application):
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
             
-        if not self.check_collection_id(collection_id):
-            return self.http404()
-        
         log.info('render_status %s %s' % (collection_id, writer))
         
         output_path = self.get_path(collection_id, self.output_filename, writer)
@@ -368,9 +403,6 @@ class Application(wsgi.Application):
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         
-        if not self.check_collection_id(collection_id):
-            return self.http404()
-        
         log.info('render_kill %s %s' % (collection_id, writer))
         
         pid_path = self.get_path(collection_id, self.pid_filename, writer)
@@ -396,9 +428,6 @@ class Application(wsgi.Application):
             return self.http500()
         
         try:
-            if not self.check_collection_id(collection_id):
-                return self.http404()
-        
             log.info('download %s %s' % (collection_id, writer))
         
             output_path = self.get_path(collection_id, self.output_filename, writer)
@@ -516,15 +545,16 @@ def clean_cache(max_age, cache_dir):
     """
     
     now = time.time()
-    for d in os.listdir(cache_dir):
-        path = os.path.join(cache_dir, d)
-        if not os.path.isdir(path) or not collection_id_rex.match(d):
-            log.warn('unknown item in cache dir %r: %r' % (cache_dir, d))
-            continue
-        if now - os.stat(path).st_mtime < max_age:
-            continue
-        try:
-            log.info('removing directory %r' % path)
-            shutil.rmtree(path)
-        except Exception, exc:
-            log.ERROR('could not remove directory %r: %s' % (path, exc))
+    for dirpath, dirnames, filenames in os.walk(cache_dir):
+        for d in dirnames:
+            if not collection_id_rex.match(d):
+                continue
+            path = os.path.join(dirpath, d)
+            if now - os.stat(path).st_mtime < max_age:
+                continue
+            try:
+                log.info('removing directory %r' % path)
+                shutil.rmtree(path)
+            except Exception, exc:
+                log.ERROR('could not remove directory %r: %s' % (path, exc))
+    
