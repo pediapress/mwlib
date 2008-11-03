@@ -70,3 +70,11 @@ class TestZipWiki(object):
         url = self.imagedb.getURL(u'Thelivingseaimax.jpg')
         assert url == 'http://upload.wikimedia.org/wikipedia/en/1/13/Thelivingseaimax.jpg'
     
+        templates = self.imagedb.getImageTemplates(u"Thelivingseaimax.jpg")
+        print templates
+
+        contribs = self.imagedb.getContributors(u"Thelivingseaimax.jpg")
+        print contribs
+    
+
+        

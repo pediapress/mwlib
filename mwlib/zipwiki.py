@@ -165,6 +165,12 @@ class ImageDB(object):
         except KeyError:
             return []
     
+    def getContributors(self, name, wikidb=None):
+        try:
+            return self.images[name]['contributors']
+        except KeyError:
+            return []
+    
     def getPath(self):
         raise NotImplemented('getPath() does not work with zipwiki.ImageDB!')
     

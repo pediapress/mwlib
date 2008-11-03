@@ -285,6 +285,10 @@ class ZipCreator(object):
             templates = imagedb.getImageTemplates(name, wikidb=wikidb)
             if templates:
                 self.images[name]['templates'] = templates
+            if hasattr(imagedb, 'getContributors'):
+                contribs = imagedb.getContributors(name, wikidb=wikidb)
+                if contribs:
+                    self.images[name]['contributors'] = contributors
             if self.fetchimages_status:
                 self.image_count += 1
                 self.fetchimages_status(progress=self.image_count*100/self.num_images)
