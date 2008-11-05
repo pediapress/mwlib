@@ -311,7 +311,9 @@ class Application(wsgi.Application):
                 args.extend(['--language', language])
         else:
             if force_render:
-                return self.error_response('Forced to render document which has not been previously rendered.')
+                log.warn('Forced to render document which has not been previously rendered.')
+                return self.http404()
+            
             log.info('rendering %r' % output_path)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
             f = open(metabook_path, 'wb')
