@@ -35,6 +35,8 @@ class Wiki(wikidbbase.WikiDBBase):
         try:
             article = self.articles[title]
             if revision is None or article['revision'] == revision:
+                if isinstance(article, str): # fix bug in some simplejson version w/ Python 2.4
+                    article = unicode(article, 'utf-8')
                 return article
         except KeyError:
             pass
