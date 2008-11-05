@@ -150,11 +150,12 @@ class Application(wsgi.Application):
                 return self.http404()
             lockfile = lock(self.get_path(collection_id, 'lock'))
         try:
-            return method(request.post_data)
-        except Exception, exc:
-            return self.error_response('error executing command %r: %s' % (
-                command, exc,
-            ))
+            try:
+                return method(request.post_data)
+            except Exception, exc:
+                return self.error_response('error executing command %r: %s' % (
+                    command, exc,
+                ))
         finally:
             unlock(lockfile)
     
