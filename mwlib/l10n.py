@@ -57,8 +57,6 @@ def make_messages(locale, domain, version, inputdir,
                 continue
             msgs = execute(
                 'xgettext',
-                '--package-name', domain,
-                '--package-version', version,
                 '--default-domain', domain,
                 '--language', ext2lang[file_ext],
                 '--from-code', 'UTF-8',
