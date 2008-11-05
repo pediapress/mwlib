@@ -606,7 +606,7 @@ class WikiDB(wikidbbase.WikiDBBase):
     
     def setTemplateExclusion(self, blacklist=None, category=None):
         self.template_exclusion_category = category
-        self.template_blacklist = set()
+        self.template_blacklist = []
         if blacklist:
             raw = self.getRawArticle(blacklist)
             if raw is None:
@@ -614,10 +614,10 @@ class WikiDB(wikidbbase.WikiDBBase):
                     blacklist,
                 ))
             else:
-                self.template_blacklist = set(
+                self.template_blacklist = [
                     template.lower().strip() 
                     for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)
-                )
+                ]
             
     def login(self, username, password, domain=None):
         return self.api_helper.login(username, password, domain=domain)
