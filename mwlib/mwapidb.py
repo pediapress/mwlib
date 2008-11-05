@@ -752,7 +752,7 @@ class WikiDB(wikidbbase.WikiDBBase):
                 prop='revisions',
                 rvprop='content',
             )
-            if page['title'] != title: # given revision could point to another article!
+            if page is not None and page['title'] != title: # given revision could point to another article!
                 return None
         if page is None:
             return None

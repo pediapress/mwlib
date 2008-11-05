@@ -288,7 +288,7 @@ class ZipCreator(object):
             if hasattr(imagedb, 'getContributors'):
                 contribs = imagedb.getContributors(name, wikidb=wikidb)
                 if contribs:
-                    self.images[name]['contributors'] = contributors
+                    self.images[name]['contributors'] = contribs
             if self.fetchimages_status:
                 self.image_count += 1
                 self.fetchimages_status(progress=self.image_count*100/self.num_images)
