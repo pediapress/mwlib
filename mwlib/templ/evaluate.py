@@ -214,9 +214,6 @@ class Expander(object):
         if name.startswith(":"):
             log.info("including article")
             raw = self.db.getRawArticle(name[1:])
-        elif ':' in name:
-            log.info("including article")
-            raw = self.db.getRawArticle(name)
         else:
             raw = self.db.getTemplate(name, True)
         
