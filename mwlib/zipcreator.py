@@ -303,9 +303,6 @@ def make_zip_file(output, env,
     num_threads=10,
     imagesize=800,
 ):
-    if status is None:
-        status = lambda **kwargs: None
-    
     if output is None:
         fd, output = tempfile.mkstemp(suffix='.zip')
         os.close(fd)
@@ -358,7 +355,8 @@ def make_zip_file(output, env,
         if env.images and hasattr(env.images, 'clear'):
             env.images.clear()
     
-        status(progress=100)
+        if status is not None:
+            status(progress=100)
         return output
     finally:
         if os.path.exists(tmpzip):
