@@ -5,8 +5,6 @@
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
-_cache = {}
-
 def flatten(node, expander, variables, res):
     t=type(node)
     if t is unicode or t is str:
@@ -21,9 +19,6 @@ def flatten(node, expander, variables, res):
         node.flatten(expander, variables, res)
     after = variables.count
     return before==after
-
-#from mwlib.templ.flatten import flatten
-
 
 class MemoryLimitError(Exception):
     pass
