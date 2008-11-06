@@ -1,6 +1,7 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
+import os
 import shutil
 import tempfile
 
@@ -13,6 +14,23 @@ class TestMathUtils(object):
     
     def teardown_method(self, method):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+
+    def blahtexml_present(self):
+        ret = os.system('blahtexml')
+        print "BLAHTEX:", ret
+        if ret != 0:
+            return False
+        else:
+            return True
+
+    def texvc_present(self):
+        ret = os.system('texvc')
+        if ret != 0:
+            return False
+        else:
+            return True
+
     
     def test_math(self):
         latexlist = [r"\sqrt{4}=2",
@@ -24,12 +42,14 @@ class TestMathUtils(object):
                      ]
         for latex in latexlist:
             latex = unicode(latex, 'utf-8')
-            res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='blahtexml')
-            assert res
-            res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
-            assert res
-            res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='texvc')
-            assert res
+            if self.blahtexml_present():
+                res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='blahtexml')
+                assert res
+                res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
+                assert res
+            if self.texvc_present():
+                res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='texvc')
+                assert res
 
     @xfail 
     def test_math_complex(self):
@@ -42,13 +62,15 @@ class TestMathUtils(object):
     10\,\lg\frac{W_1}{W_2}\,\mathrm{dB}
     \end{array}"""
         latex = unicode(latex)
-        res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
-        assert res
+        if self.blahtexml_present():
+            res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
+            assert res
     
     def test_single_quote_bug(self):
         """http://code.pediapress.com/wiki/ticket/241"""
         
-        res = renderMath(u"f'(x) = x", self.tmpdir, output_mode='png', render_engine='texvc')
-        assert res
+        if self.texvc_present():
+            res = renderMath(u"f'(x) = x", self.tmpdir, output_mode='png', render_engine='texvc')
+            assert res
 
 
