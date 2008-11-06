@@ -5,6 +5,12 @@
 from mwlib.templ.nodes import Node, Variable, Template, IfNode
 from mwlib.templ.scanner import symbols, tokenize
 
+try:
+    from hashlib import sha1 as digest
+except ImportError:
+    from md5 import md5 as digest
+    
+
 def optimize(node):
     if type(node) is tuple:
         return tuple(optimize(x) for x in node)
@@ -45,13 +51,13 @@ def optimize(node):
 
     
 class Parser(object):
+    _cache = {}
     def __init__(self, txt):
         if isinstance(txt, str):
             txt = unicode(txt)
             
         self.txt = txt
-        self.tokens = tokenize(txt)
-        self.pos = 0
+        
 
     def getToken(self):
         return self.tokens[self.pos]
@@ -194,6 +200,16 @@ class Parser(object):
         return n
         
     def parse(self):
+        fp = digest(self.txt.encode('utf-8')).digest()
+        
+        try:
+            return self._cache[fp]
+        except KeyError:
+            pass
+        
+        
+        self.tokens = tokenize(self.txt)
+        self.pos = 0
         n = []
         
         while 1:
@@ -207,6 +223,9 @@ class Parser(object):
             else: # bra_close, link, txt                
                 n.append(txt)
                 self.pos += 1
+
+        self._cache[fp] = n
+        
         return n
 
 def parse(txt):
