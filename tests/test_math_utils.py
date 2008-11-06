@@ -65,6 +65,8 @@ class TestMathUtils(object):
         if self.blahtexml_present():
             res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
             assert res
+        else:
+            assert False
     
     def test_single_quote_bug(self):
         """http://code.pediapress.com/wiki/ticket/241"""
