@@ -40,7 +40,10 @@ class IfNode(Node):
                 flatten(self[2], expander, variables, tmp)
         res.append(u"".join(tmp).strip())
         res.append(dummy_mark)
-    
+
+class SwitchNode(Node):
+    pass
+
 class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []

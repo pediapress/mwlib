@@ -2,7 +2,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.templ.nodes import Node, Variable, Template, IfNode
+from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import symbols, tokenize
 
 try:
@@ -93,22 +93,35 @@ class Parser(object):
 
         txt = txt[:newlen]
         self.setToken((ty, txt))
+
+    def _strip_ws(self, cond):
+        if isinstance(cond, unicode):
+            return cond.strip()
+
+        cond = list(cond)
+        if cond and isinstance(cond[0], unicode):
+            if not cond[0].strip():
+                del cond[0]
+
+        if cond and isinstance(cond[-1], unicode):
+            if not cond[-1].strip():
+                del cond[-1]
+        cond = tuple(cond)
+        return cond
+    
+    def switchnodeFromChildren(self, children):
+        children[0] = children[0].split(":", 1)[1]
+        args = self._parse_args(children)
+        value = optimize(args[0])
+        value = self._strip_ws(value)
+        return SwitchNode((value, args[1:]))
         
     def ifnodeFromChildren(self, children):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
         cond = optimize(args[0])
+        cond = self._strip_ws(cond)
         
-        if not isinstance(cond, unicode):
-            cond = list(cond)
-            if cond and isinstance(cond[0], unicode):
-                if not cond[0].strip():
-                    del cond[0]
-
-            if cond and isinstance(cond[-1], unicode):
-                if not cond[-1].strip():
-                    del cond[-1]
-            cond = tuple(cond)
         args[0] = cond
         n = IfNode(tuple(args))
         return n
