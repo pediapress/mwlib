@@ -21,7 +21,7 @@ def optimize(node):
     if len(node)==1 and type(node) in (list, Node):
         return optimize(node[0])
 
-    if isinstance(node, (Variable, Template, IfNode)):
+    if isinstance(node, Node): #(Variable, Template, IfNode)):
         return node.__class__(tuple(optimize(x) for x in node))
     else:
         # combine strings
@@ -153,6 +153,8 @@ class Parser(object):
             s = children[0].strip().lower()
             if s.startswith("#if:"):
                 return self.ifnodeFromChildren(children)
+            if s.startswith("#switch:"):
+                return self.switchnodeFromChildren(children)
             
         # find the name
         name = []

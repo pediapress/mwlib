@@ -41,9 +41,90 @@ class IfNode(Node):
         res.append(u"".join(tmp).strip())
         res.append(dummy_mark)
 
-class SwitchNode(Node):
-    pass
+def maybe_numeric(a):
+    try:
+        return int(a)
+    except ValueError:
+        pass
+    
+    try:
+        return float(a)
+    except ValueError:
+        pass
+    return None
 
+        
+class SwitchNode(Node):
+    fast = None
+    unresolved = None
+    
+    def _init(self):
+        args = [equalsplit(x) for x in self[1]]
+        
+        unresolved = []
+        fast = {}
+        
+        for key, value in args:
+            if key is not None:
+                key = optimize(list(key))
+            value = optimize(list(value))
+            if key is None:
+                key = u'#default'
+                
+            if isinstance(key, basestring):
+                key = key.strip()
+                if key in fast:
+                    continue
+                
+                fast[key] = (len(unresolved), value)
+                num_key = maybe_numeric(key)
+                if num_key is not None and num_key not in fast:
+                    fast[num_key] = (len(unresolved), value)
+            else:
+                unresolved.append((key,value))
+
+                
+        self.unresolved = tuple(unresolved)
+        self.fast = fast
+        self.sentinel = (len(self.unresolved)+1, None)
+        
+    def flatten(self, expander, variables, res):
+        if self.unresolved is None:
+            self._init()
+
+        val = []
+        flatten(self[0], expander, variables, val)
+        val = u"".join(val).strip()
+
+        num_val = maybe_numeric(val)
+        
+        t1 = self.fast.get(val, self.sentinel)
+        t2 = self.fast.get(num_val, self.sentinel)
+
+        pos, retval = min(t1, t2)
+        
+        if pos is None:
+            pos = len(self.unresolved)+1
+        
+        for k, v in self.unresolved[:pos]:
+            tmp = []
+            flatten(k, expander, variables, tmp)
+            tmp = u"".join(k).strip()
+            if tmp==k:
+                retval = v
+                break
+            if num_val is not None and maybe_numeric(tmp)==num_val:
+                retval = v
+                break
+            
+        if retval is None:
+            retval = self.fast.get("#default", (None, u''))[1]
+            
+        tmp = []
+        flatten(retval, expander, variables, tmp)
+        tmp = u"".join(tmp).strip()
+        res.append(tmp)
+            
 class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []
@@ -204,3 +285,4 @@ def show(node, indent=0, out=None):
 
 from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, equalsplit
 from mwlib.templ import log, DEBUG
+from mwlib.templ.parser import optimize
