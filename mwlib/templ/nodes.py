@@ -109,7 +109,7 @@ class SwitchNode(Node):
         for k, v in self.unresolved[:pos]:
             tmp = []
             flatten(k, expander, variables, tmp)
-            tmp = u"".join(k).strip()
+            tmp = u"".join(tmp).strip()
             if tmp==k:
                 retval = v
                 break
