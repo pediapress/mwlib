@@ -38,21 +38,23 @@ def equalsplit(node):
 
     return node[:idx], node[idx+1:]
 
-if not hasattr(tuple, 'index'):
-    def equalsplit(node):
-        if isinstance(node, basestring):
-            if '=' in node:
-                return node.split('=', 1)
-            else:
-                return None, node
-
-        try:
-            idx = list(node).index(u'=')
-        except ValueError:
+    
+def equalsplit_25(node):
+    if isinstance(node, basestring):
+        if '=' in node:
+            return node.split('=', 1)
+        else:
             return None, node
 
-        return node[:idx], node[idx+1:]
+    try:
+        idx = list(node).index(u'=')
+    except ValueError:
+        return None, node
+
+    return node[:idx], node[idx+1:]
     
+if not hasattr(tuple, 'index'):
+    equalsplit = equalsplit_25
 
 class ArgumentList(object):
     def __init__(self, args=tuple(), expander=None, variables=None):
@@ -69,18 +71,7 @@ class ArgumentList(object):
         
         self.namedargs = {}
         self.count = 0
-
-    def __iter__(self):
-        self.count += 1
-        for x in self.args:
-            yield x
-
-    def __getslice__(self, i, j):
-        self.count += 1
-        for x in range(len(self.args))[i:j]:
-            yield self.get(x, None)
             
-        
     def __len__(self):
         self.count += 1
         return len(self.args)
