@@ -237,9 +237,12 @@ class Parser(object):
                 n.append(txt)
                 self.pos += 1
 
+        n=optimize(n)
+        
+        
         self._cache[fp] = n
         
         return n
 
 def parse(txt):
-    return optimize(Parser(txt).parse())
+    return Parser(txt).parse()
