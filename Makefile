@@ -7,6 +7,9 @@ default:: subdirs
 
 all:: subdirs documentation MANIFEST.in
 
+cython::
+	cython mwlib/templ/nodes.py mwlib/templ/evaluate.py
+
 documentation:: README.html
 	cd docs; make all
 
@@ -31,3 +34,4 @@ egg:: all
 clean::
 	rm -rf mwlib/*.pyc mwlib/*.so build dist mwlib.egg-info *.pyc docs/*.html README.html
 	rm -f mwlib/_mwscan.cc
+	rm -f mwlib/templ/*.so mwlib/templ/*.c

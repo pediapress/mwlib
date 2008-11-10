@@ -71,6 +71,15 @@ def main():
     if sys.version_info[:2] < (2,6):
         install_requires.append("simplejson>=1.3")
 
+    ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"])]
+
+    import glob
+    for x in glob.glob("mwlib/templ/*.c"):
+        modname = x[:-2].replace("/", ".")
+        ext_modules.append(Extension(modname, [x]))
+        print "USING:", modname, x
+        
+        
     setup(
         name="mwlib",
         version=str(version),
@@ -91,8 +100,7 @@ def main():
                                           'docbook = mwlib.docbookwriter:writer',
                                           ]},
         install_requires=install_requires,
-        ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]),
-                       ],
+        ext_modules=ext_modules,
         packages=["mwlib", "mwlib.templ", "mwlib.resources"],
         namespace_packages=['mwlib'],
         include_package_data = True,
