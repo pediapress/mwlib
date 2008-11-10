@@ -196,11 +196,8 @@ class PageMagic(object):
 
     def LOCALURL(self, args):
         """Returns the local URL of a given page. The page might not exist."""
-        try:
-            url = "/wiki"+ "".join(args)
-        except:
-            url = '' # FIXME
-        return "/wiki"+url
+        url = "/wiki/"+ "".join(args.get(0, u""))
+        return url 
 
     def LOCALURLE(self, args):
         """Returns the local URL of a given page. The page might not exist."""        

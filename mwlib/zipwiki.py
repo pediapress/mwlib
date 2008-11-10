@@ -73,7 +73,10 @@ class Wiki(wikidbbase.WikiDBBase):
     def getRawArticle(self, title, revision=None):
         article = self._getArticle(title, revision=revision)
         if article:
-            return article['content']
+            result = article['content']
+            if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
+                return unicode(result, 'utf-8')
+            return result
         return None
     
     def getURL(self, title, revision=None):
@@ -90,7 +93,10 @@ class Wiki(wikidbbase.WikiDBBase):
     
     def getTemplate(self, name, followRedirects=True):
         try:
-            return self.templates[name]['content']
+            result = self.templates[name]['content']
+            if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
+                return unicode(result, 'utf-8')
+            return result
         except KeyError:
             pass
         return None

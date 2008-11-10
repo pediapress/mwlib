@@ -2,8 +2,14 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.templ.nodes import Node, Variable, Template, IfNode
+from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import symbols, tokenize
+
+try:
+    from hashlib import sha1 as digest
+except ImportError:
+    from md5 import md5 as digest
+    
 
 def optimize(node):
     if type(node) is tuple:
@@ -15,7 +21,7 @@ def optimize(node):
     if len(node)==1 and type(node) in (list, Node):
         return optimize(node[0])
 
-    if isinstance(node, (Variable, Template, IfNode)):
+    if isinstance(node, Node): #(Variable, Template, IfNode)):
         return node.__class__(tuple(optimize(x) for x in node))
     else:
         # combine strings
@@ -45,13 +51,13 @@ def optimize(node):
 
     
 class Parser(object):
+    _cache = {}
     def __init__(self, txt):
         if isinstance(txt, str):
             txt = unicode(txt)
             
         self.txt = txt
-        self.tokens = tokenize(txt)
-        self.pos = 0
+        
 
     def getToken(self):
         return self.tokens[self.pos]
@@ -87,22 +93,35 @@ class Parser(object):
 
         txt = txt[:newlen]
         self.setToken((ty, txt))
+
+    def _strip_ws(self, cond):
+        if isinstance(cond, unicode):
+            return cond.strip()
+
+        cond = list(cond)
+        if cond and isinstance(cond[0], unicode):
+            if not cond[0].strip():
+                del cond[0]
+
+        if cond and isinstance(cond[-1], unicode):
+            if not cond[-1].strip():
+                del cond[-1]
+        cond = tuple(cond)
+        return cond
+    
+    def switchnodeFromChildren(self, children):
+        children[0] = children[0].split(":", 1)[1]
+        args = self._parse_args(children)
+        value = optimize(args[0])
+        value = self._strip_ws(value)
+        return SwitchNode((value, args[1:]))
         
     def ifnodeFromChildren(self, children):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
         cond = optimize(args[0])
+        cond = self._strip_ws(cond)
         
-        if not isinstance(cond, unicode):
-            cond = list(cond)
-            if cond and isinstance(cond[0], unicode):
-                if not cond[0].strip():
-                    del cond[0]
-
-            if cond and isinstance(cond[-1], unicode):
-                if not cond[-1].strip():
-                    del cond[-1]
-            cond = tuple(cond)
         args[0] = cond
         n = IfNode(tuple(args))
         return n
@@ -134,6 +153,8 @@ class Parser(object):
             s = children[0].strip().lower()
             if s.startswith("#if:"):
                 return self.ifnodeFromChildren(children)
+            if s.startswith("#switch:"):
+                return self.switchnodeFromChildren(children)
             
         # find the name
         name = []
@@ -194,6 +215,16 @@ class Parser(object):
         return n
         
     def parse(self):
+        fp = digest(self.txt.encode('utf-8')).digest()
+        
+        try:
+            return self._cache[fp]
+        except KeyError:
+            pass
+        
+        
+        self.tokens = tokenize(self.txt)
+        self.pos = 0
         n = []
         
         while 1:
@@ -207,7 +238,13 @@ class Parser(object):
             else: # bra_close, link, txt                
                 n.append(txt)
                 self.pos += 1
+
+        n=optimize(n)
+        
+        
+        self._cache[fp] = n
+        
         return n
 
 def parse(txt):
-    return optimize(Parser(txt).parse())
+    return Parser(txt).parse()

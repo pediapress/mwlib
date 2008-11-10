@@ -5,8 +5,6 @@
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
-_cache = {}
-
 def flatten(node, expander, variables, res):
     t=type(node)
     if t is unicode or t is str:
@@ -21,9 +19,6 @@ def flatten(node, expander, variables, res):
         node.flatten(expander, variables, res)
     after = variables.count
     return before==after
-
-#from mwlib.templ.flatten import flatten
-
 
 class MemoryLimitError(Exception):
     pass
@@ -43,21 +38,23 @@ def equalsplit(node):
 
     return node[:idx], node[idx+1:]
 
-if not hasattr(tuple, 'index'):
-    def equalsplit(node):
-        if isinstance(node, basestring):
-            if '=' in node:
-                return node.split('=', 1)
-            else:
-                return None, node
-
-        try:
-            idx = list(node).index(u'=')
-        except ValueError:
+    
+def equalsplit_25(node):
+    if isinstance(node, basestring):
+        if '=' in node:
+            return node.split('=', 1)
+        else:
             return None, node
 
-        return node[:idx], node[idx+1:]
+    try:
+        idx = list(node).index(u'=')
+    except ValueError:
+        return None, node
+
+    return node[:idx], node[idx+1:]
     
+if not hasattr(tuple, 'index'):
+    equalsplit = equalsplit_25
 
 class ArgumentList(object):
     def __init__(self, args=tuple(), expander=None, variables=None):
@@ -74,18 +71,7 @@ class ArgumentList(object):
         
         self.namedargs = {}
         self.count = 0
-
-    def __iter__(self):
-        self.count += 1
-        for x in self.args:
-            yield x
-
-    def __getslice__(self, i, j):
-        self.count += 1
-        for x in range(len(self.args))[i:j]:
-            yield self.get(x, None)
             
-        
     def __len__(self):
         self.count += 1
         return len(self.args)
@@ -158,21 +144,7 @@ def is_implicit_newline(raw):
             return True
     return False 
 
-class mark(unicode):
-    def __new__(klass, msg):
-        r=unicode.__new__(klass)
-        r.msg = msg
-        return r
-    
-    def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.msg,)
-
-class mark_start(mark): pass
-class mark_end(mark): pass
-class mark_maybe_newline(mark): pass
-
-maybe_newline = mark_maybe_newline('maybe_newline')
-dummy_mark = mark('dummy')
+from mwlib.templ.marks import mark, mark_start, mark_end, mark_maybe_newline, maybe_newline, dummy_mark
 
 def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument

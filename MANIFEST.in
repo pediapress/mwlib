@@ -44,7 +44,6 @@ include mwlib/l10n.py
 include mwlib/lang.py
 include mwlib/lang.txt
 include mwlib/log.py
-include mwlib/magics.py
 include mwlib/mathml.py
 include mwlib/mathutils.py
 include mwlib/metabook.py
@@ -74,6 +73,15 @@ include mwlib/snippets.txt
 include mwlib/status.py
 include mwlib/styleutils.py
 include mwlib/tagext.py
+include mwlib/templ/__init__.py
+include mwlib/templ/evaluate.py
+include mwlib/templ/magics.py
+include mwlib/templ/marks.py
+include mwlib/templ/misc.py
+include mwlib/templ/nodes.py
+include mwlib/templ/parser.py
+include mwlib/templ/pp.py
+include mwlib/templ/scanner.py
 include mwlib/texmap.py
 include mwlib/timeline.py
 include mwlib/treecleaner.py
@@ -93,7 +101,9 @@ include mwlib/zipwiki.py
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
+include sandbox/expr.txt
 include sandbox/mw-serve-stresser.py
+include sandbox/time-expr.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
 include tests/data/test.zip
