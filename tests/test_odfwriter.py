@@ -186,7 +186,8 @@ text
         assert res == goal
 
 
-def test_empty_sections():
+def disabled_test_empty_sections():
+    # decision to show empty sections
     raw='''=  =
 = correct =
 == with title no children =='''.decode("utf8")
