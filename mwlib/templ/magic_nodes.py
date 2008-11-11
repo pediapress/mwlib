@@ -3,7 +3,7 @@ import datetime
 import re
 
 from mwlib.templ import nodes, evaluate
-
+from dateutil.parser import parse as parsedate
 
     
 class Time(nodes.Node):
@@ -21,7 +21,7 @@ class Time(nodes.Node):
         z = '%j',
         D = '%a',
         I = '%A',
-        
+        c = '%c',        
         )
     
     def flatten(self, expander, variables, res):
@@ -29,8 +29,17 @@ class Time(nodes.Node):
         evaluate.flatten(self[0], expander, variables, format)
         format = u"".join(format).strip()
         #print "TIME-FORMAT:", format
-        
-        date = datetime.datetime.now()
+
+        if len(self)>1:
+            d = []
+            evaluate.flatten(self[1], expander, variables, d)
+            d = u"".join(d).strip()
+            try:
+                date = parsedate(d)
+            except ValueError:
+                return
+        else:
+            date = datetime.datetime.now()
         
         split = self.rx.findall(format)
 
