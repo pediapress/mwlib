@@ -114,7 +114,7 @@ class Parser(object):
         args = self._parse_args(children)
         value = optimize(args[0])
         value = self._strip_ws(value)
-        return SwitchNode((value, args[1:]))
+        return SwitchNode((value, tuple(args[1:])))
         
     def ifnodeFromChildren(self, children):
         children[0] = children[0].split(":", 1)[1]
@@ -126,6 +126,11 @@ class Parser(object):
         n = IfNode(tuple(args))
         return n
 
+    def magicNodeFromChildren(self, children, klass):
+        children[0] = children[0].split(":", 1)[1]
+        args = self._parse_args(children)
+        return klass(args)
+    
     def _parse_args(self, children):
         args = []
         arg = []
@@ -151,6 +156,13 @@ class Parser(object):
     def templateFromChildren(self, children):
         if children and isinstance(children[0], unicode):
             s = children[0].strip().lower()
+            if u':' in s:
+                from mwlib.templ import magic_nodes
+                name, first = s.split(':', 1)
+                if name in magic_nodes.registry:
+                    return self.magicNodeFromChildren(children, magic_nodes.registry[name])
+                
+                
             if s.startswith("#if:"):
                 return self.ifnodeFromChildren(children)
             if s.startswith("#switch:"):

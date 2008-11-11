@@ -89,6 +89,9 @@ def test_switch_case_sensitive2():
 def test_switch_case_sensitive3():
     expandstr("{{ #switch: a | a=lower | UPPER }}", "lower")
 
+def test_switch_fall_through():
+    expandstr("{{#switch: a| a | b |c=first|default}}", "first")
+    
 def test_names_insensitive():
     expandstr("{{ #SWItch: A | a=lower | UPPER }}", "UPPER")
 
