@@ -57,33 +57,46 @@ def maybe_numeric(a):
 class SwitchNode(Node):
     fast = None
     unresolved = None
-    
+
+    def _store_key(self, key, value, fast, unresolved):
+        if isinstance(key, basestring):
+            key = key.strip()
+            if key in fast:
+                return
+
+            fast[key] = (len(unresolved), value)
+            num_key = maybe_numeric(key)
+            if num_key is not None and num_key not in fast:
+                fast[num_key] = (len(unresolved), value)
+        else:
+            unresolved.append((key,value))
+            
     def _init(self):
         args = [equalsplit(x) for x in self[1]]
         
         unresolved = []
         fast = {}
+
+        nokey_seen = []
         
         for key, value in args:
             if key is not None:
                 key = optimize(list(key))
             value = optimize(list(value))
-            if key is None:
-                key = u'#default'
-                
-            if isinstance(key, basestring):
-                key = key.strip()
-                if key in fast:
-                    continue
-                
-                fast[key] = (len(unresolved), value)
-                num_key = maybe_numeric(key)
-                if num_key is not None and num_key not in fast:
-                    fast[num_key] = (len(unresolved), value)
-            else:
-                unresolved.append((key,value))
 
-                
+
+            if key is None:
+                nokey_seen.append(value)
+                continue
+
+            for k in nokey_seen:
+                self._store_key(k, value, fast, unresolved)
+            del nokey_seen[:]
+            self._store_key(key, value, fast, unresolved)
+
+        if nokey_seen:
+            self._store_key(u'#default', nokey_seen[-1], fast, unresolved)
+            
         self.unresolved = tuple(unresolved)
         self.fast = fast
         self.sentinel = (len(self.unresolved)+1, None)
