@@ -114,7 +114,7 @@ class Parser(object):
         args = self._parse_args(children)
         value = optimize(args[0])
         value = self._strip_ws(value)
-        return SwitchNode((value, args[1:]))
+        return SwitchNode((value, tuple(args[1:])))
         
     def ifnodeFromChildren(self, children):
         children[0] = children[0].split(":", 1)[1]
