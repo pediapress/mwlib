@@ -21,6 +21,8 @@ import mwlib.metabook
 
 
 RENDER_TIMEOUT_DEFAULT = 5*60 # 5 minutes
+LICENSE_URL = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
+
 system = 'mw-serve-stresser'
 log = log.Log('mw-serve-stresser')
 
@@ -58,7 +60,21 @@ def getMetabook(articles):
     for a in articles:
         article = mwlib.metabook.make_article(title=a)
         metabook['items'].append(article)
+    addLicense(metabook)
     return metabook
+
+
+def addLicense(mbook):
+    license_text = utils.fetch_url(
+        LICENSE_URL,
+        ignore_errors=False,
+        expected_content_type='text/x-wiki',
+        )
+    license_text = unicode(license_text, 'utf-8')
+    license = { 'mw_rights_text': license_text,
+                'name': 'GNU Free Documentation License',
+                }
+    mbook['licenses'] = [license]
 
 def postRenderCommand(metabook, baseurl, serviceurl, writer):
     log.info('POSTing render command %s %s' % (baseurl, writer))
