@@ -11,7 +11,7 @@ from mwlib.treecleaner import TreeCleaner, _all, _any
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
-                     Reference, ReferenceList, Row, Section, Source, SpecialLink, Table, Text, Underline,
+                     Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
                      URL)
 
 from mwlib.xfail import xfail
@@ -413,3 +413,19 @@ Image:|Zona Island, a place where new members first log in
     tree, reports = cleanMarkup(raw) 
     gallery = tree.find(Gallery)[0]
     assert len(gallery.children) == 6
+
+def test_removeTextlessStyles():
+
+    raw ="'''bold text'''"
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    assert tree.find(Strong)
+
+    raw ="text <em><br/></em> text"
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    assert tree.find(BreakingReturn) and not tree.find(Emphasized)
+    
+    
+
+    

@@ -112,7 +112,6 @@ class TreeCleaner(object):
         self.allowedChildren = {Gallery: [ImageLink],
                                 }
 
-
         self.cell_splitter_params = {
             'maxCellHeight': (7*72) * 3/4 ,
             'lineHeight':  26,
@@ -120,6 +119,10 @@ class TreeCleaner(object):
             'paragraphMargin': 2, # add 10 pt margin-safety after each node
             'imgHeight': 6, # approximate image height in units of lineHeights
             }
+
+
+        self.style_nodes = [Italic, Emphasized, Strong, Overline, Underline, Sub, Sup, Small, Big, Var]
+
 
 
     def clean(self, cleanerMethods):
@@ -159,6 +162,7 @@ class TreeCleaner(object):
                           'simplifyBlockNodes',
                           'fixNesting', #
                           'removeCriticalTables',
+                          'removeTextlessStyles', 
                           'removeBrokenChildren',
                           'fixTableColspans',
                           'moveReferenceListSection',
@@ -745,3 +749,17 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.simplifyBlockNodes(c)
+
+    def removeTextlessStyles(self, node):
+
+        if node.__class__ in self.style_nodes:
+            if not node.getAllDisplayText() and node.parent:
+                if node.children:
+                    node.parent.replaceChild(node, newchildren=node.children)
+                else:
+                    node.parent.removeChild(node)
+                return
+
+        for c in node.children:
+            self.removeTextlessStyles(c)
+        
