@@ -81,6 +81,8 @@ def test_backslash_quote():
     yield expandstr, '{{#time: \\Y|4 March 2007}}', 'Y'
     yield expandstr, '{{#time: \\\\Y|4 March 2007}}', '\\2007'
 
+@xfail
 def test_time_vs_year():
+    """http://code.pediapress.com/wiki/ticket/350"""
     expandstr('{{#time:G:i|2008}}', '20:08')
 
