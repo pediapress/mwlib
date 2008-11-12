@@ -158,7 +158,8 @@ class TreeCleaner(object):
                           'removeLangLinks',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
-                          'removeSingleCellTables',
+                          #'removeSingleCellTables',
+                          'transformSingleColTables',
                           'simplifyBlockNodes',
                           'fixNesting', #
                           'removeCriticalTables',
@@ -355,6 +356,25 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeSingleCellTables(c)
+
+    def transformSingleColTables(self, node):
+
+        if node.__class__ == Table and node.numcols == 1:
+            if not node.parents:
+                return
+            divs = []
+            for row in node:
+                for cell in row:
+                    d = Div()
+                    d.border = 1
+                    for item in cell:
+                        d.appendChild(item)
+                    divs.append(d)
+            node.parent.replaceChild(node, divs)
+            return
+
+        for c in node:
+            self.transformSingleColTables(c)
 
 
     def moveReferenceListSection(self, node):
