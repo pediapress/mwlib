@@ -1,12 +1,7 @@
 #! /usr/bin/env py.test
 
-from mwlib import expander
-from mwlib.expander import expandstr, DictDB
+from mwlib.expander import expandstr
 from mwlib.xfail import xfail
-
-def et(s, expected):
-    expandstr(u'{{#time:%s' % (s,), expected)
-    
     
 def test_codes():
     def e(s, expected, date="09 Feb 2008 10:55:17"):
@@ -77,3 +72,7 @@ def test_codes():
 
     yield e, "r", "Sat, 09 Feb 2008 10:55:17 +0000"
     
+
+
+def test_examples():
+    yield expandstr, '{{ #time: l [[F j|"Fourth of" F]] [[Y]] | 4 March 2007 }}', 'Sunday [[March 4|Fourth of March]] [[2007]]'
