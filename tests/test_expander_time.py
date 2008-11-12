@@ -43,4 +43,37 @@ def test_codes():
     yield e, "A", "AM"
     yield e, "A", "PM", "09 Feb 2008 12:00:00"
     
+    yield e, "g", "10"
+    yield e, "g", "12", "09 Feb 2008 12:00:00"
+    yield e, "g", "1", "09 Feb 2008 13:00:00"
+    yield e, "g", "12", "09 Feb 2008 00:00:00"
+    
+    
+    yield e, "h", "10"
+    yield e, "h", "12", "09 Feb 2008 12:00:00"
+    yield e, "h", "01", "09 Feb 2008 13:00:00"
+    yield e, "g", "12", "09 Feb 2008 00:00:00"
+
+    yield e, "G", "1", "09 Feb 2008 01:00:00"
+    yield e, "G", "23", "09 Feb 2008 23:00:00"
+    
+    yield e, "H", "01", "09 Feb 2008 01:00:00"
+    yield e, "H", "23", "09 Feb 2008 23:00:00"
+
+    yield e, "i", "55"
+    yield e, "s", "17"
+    
+    yield e, "U", "1202554517"
+    
+
+    yield e, "L", "1"
+    yield e, "L", "1", "09 Feb 2000"
+    yield e, "L", "0", "09 Feb 2009"
+    
+
+    yield e, "t", "29"
+    
+    yield e, "c", "2008-02-09T10:55:17+00:00"
+
+    yield e, "r", "Sat, 09 Feb 2008 10:55:17 +0000"
     

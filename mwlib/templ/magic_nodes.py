@@ -4,14 +4,14 @@ import re
 
 from mwlib.templ import nodes, evaluate
 from dateutil.parser import parse as parsedate
+import calendar
 
 def ampm(date):
     if date.hour < 12:
         return "am"
     else:
         return "pm"
-    
-    
+
 class Time(nodes.Node):
     rx = re.compile('"[^"]*"|.')
     codemap = dict(
@@ -27,11 +27,21 @@ class Time(nodes.Node):
         z = lambda d: str(d.timetuple().tm_yday-1),
         D = '%a',
         l = '%A',
-        c = '%c',
         N = lambda d: str(d.isoweekday()),
         w = lambda d: str(d.isoweekday() % 7),
         a = ampm,
-        A = lambda(d): ampm(d).upper(),
+        A = lambda d: ampm(d).upper(),
+        g = lambda d: str(((d.hour-1) % 12) + 1),
+        h = "%I",
+        G = lambda d: str(d.hour),
+        H = lambda d: "%02d" % (d.hour,),
+        i = '%M',
+        s = '%S',
+        U = lambda d: str(calendar.timegm(d.timetuple())),
+        L = lambda d: str(int(calendar.isleap(d.year))),
+        c = "%Y-%m-%dT%H:%M:%S+00:00",
+        r = "%a, %d %b %Y %H:%M:%S +0000",
+        t = lambda d: str(calendar.monthrange(d.year, d.month)[1]),
         )
     
     def flatten(self, expander, variables, res):
