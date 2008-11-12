@@ -79,4 +79,4 @@ def test_examples():
 
 def test_backslash_quote():
     yield expandstr, '{{#time: \\Y|4 March 2007}}', 'Y'
-    yield expandstr, '{{#time: \\\\Y|4 March 2007}}', '\\Y'
+    yield expandstr, '{{#time: \\\\Y|4 March 2007}}', '\\2007'
