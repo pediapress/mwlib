@@ -67,7 +67,10 @@ class Time(nodes.Node):
         for x in split:
             f = self.codemap.get(x, None)
             if f is None:
-                tmp.append(x)
+                if len(x)>=2:
+                    tmp.append(x[1:-1])
+                else:
+                    tmp.append(x)
             else:
                 if isinstance(f, basestring):
                     tmp.append(date.strftime(f))
