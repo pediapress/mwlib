@@ -13,7 +13,7 @@ def ampm(date):
         return "pm"
 
 class Time(nodes.Node):
-    rx = re.compile('"[^"]*"|.')
+    rx = re.compile('"[^"]*"|\\\\.|.')
     codemap = dict(
         y = '%y',
         Y = '%Y',
@@ -67,7 +67,9 @@ class Time(nodes.Node):
         for x in split:
             f = self.codemap.get(x, None)
             if f is None:
-                if len(x)>=2:
+                if len(x)==2 and x.startswith("\\"):
+                    tmp.append(x[1])
+                elif len(x)>=2 and x.startswith('"'):
                     tmp.append(x[1:-1])
                 else:
                     tmp.append(x)
