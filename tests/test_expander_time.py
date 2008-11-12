@@ -76,3 +76,7 @@ def test_codes():
 
 def test_examples():
     yield expandstr, '{{ #time: l [[F j|"Fourth of" F]] [[Y]] | 4 March 2007 }}', 'Sunday [[March 4|Fourth of March]] [[2007]]'
+
+def test_backslash_quote():
+    yield expandstr, '{{#time: \\Y|4 March 2007}}', 'Y'
+    yield expandstr, '{{#time: \\\\Y|4 March 2007}}', '\\Y'
