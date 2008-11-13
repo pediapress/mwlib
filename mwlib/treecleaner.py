@@ -153,6 +153,7 @@ class TreeCleaner(object):
         """Clean parse tree using all available cleaner methods."""
 
         cleanerMethods = ['removeEmptyTextNodes',
+                          'removeCategoryLinks', 
                           'cleanSectionCaptions',
                           'removeChildlessNodes',
                           'removeLangLinks',
@@ -771,9 +772,9 @@ class TreeCleaner(object):
             self.simplifyBlockNodes(c)
 
     def removeTextlessStyles(self, node):
-
+        """Remove style nodes that have no children with text"""
         if node.__class__ in self.style_nodes:
-            if not node.getAllDisplayText() and node.parent:
+            if not node.getAllDisplayText().strip() and node.parent:
                 if node.children:
                     node.parent.replaceChild(node, newchildren=node.children)
                 else:
@@ -783,3 +784,12 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeTextlessStyles(c)
         
+    def removeCategoryLinks(self, node):
+        """Remove category links that are not displayed in the text, but only used to stick the article in a category"""
+        if node.__class__ == CategoryLink and not node.colon and node.parent:
+            node.parent.removeChild(node)
+            return
+
+        for c in node.children:
+            self.removeCategoryLinks(c)
+            
