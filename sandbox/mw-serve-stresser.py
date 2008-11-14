@@ -226,11 +226,13 @@ def main():
         mail_recipients = options.mail_recipients.split(',')
     ok_count = 0
     fail_count = 0
+    baseurls = options.baseurl.split()
     while True:
+        baseurl = random.choice(baseurls)
         try:
             ok = checkservice(api,
                 options.serviceurl,
-                options.baseurl,
+                baseurl,
                 options.writer,
                 maxarts,
                 from_email=options.from_email,
@@ -256,7 +258,7 @@ def main():
             sys.exc_clear()
             time.sleep(60)
         log.info('%s, %s\tok: %d, failed: %d' % (
-            options.baseurl, options.writer, ok_count, fail_count,
+            baseurl, options.writer, ok_count, fail_count,
         ))
 
 
