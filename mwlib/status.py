@@ -14,7 +14,6 @@ class Status(object):
         filename=None,
         podclient=None,
         progress_range=(0, 100),
-        auto_dump=True,
         status=None,         
     ):
         self.filename = filename
