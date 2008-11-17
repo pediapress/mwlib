@@ -118,6 +118,7 @@ dispatch = dict(
 wpwikis = dict(
     de = 'http://de.wikipedia.org/w/',
     en = 'http://en.wikipedia.org/w/',
+    enwb = 'http://en.wikibooks.org/w',
     commons = 'http://commons.wikimedia.org/w/',
     )
 
