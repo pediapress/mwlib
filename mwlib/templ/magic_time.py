@@ -3,6 +3,7 @@ import datetime
 import re
 import calendar
 from dateutil.parser import parse as parsedate
+from mwlib.strftime import strftime
 
 def ampm(date):
     if date.hour < 12:
@@ -57,7 +58,7 @@ def formatdate(format, date):
                 tmp.append(x)
         else:
             if isinstance(f, basestring):
-                tmp.append(date.strftime(f))
+                tmp.append(strftime(date, f))
             else:
                 tmp.append(f(date))
 
