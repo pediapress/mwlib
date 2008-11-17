@@ -5,21 +5,43 @@
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
+recursion_count = 0
+
+class TemplateRecursion(Exception): pass
+
 def flatten(node, expander, variables, res):
     t=type(node)
     if t is unicode or t is str:
         res.append(node)
         return True
-    
-    before = variables.count
-    if t is list or t is tuple:
-        for x in node:
-            flatten(x, expander, variables, res)
-    else:
-        node.flatten(expander, variables, res)
-    after = variables.count
-    return before==after
 
+    global recursion_count
+
+    if recursion_count>50:
+        raise TemplateRecursion()
+    
+    
+    recursion_count += 1
+    try:
+        before = variables.count
+        oldlen = len(res)
+        try:
+            if t is list or t is tuple:
+                for x in node:
+                    flatten(x, expander, variables, res)
+            else:
+                node.flatten(expander, variables, res)
+        except TemplateRecursion:
+            if recursion_count > 2:
+                raise
+            del res[oldlen:]
+            log.warn("template recursion error ignored")
+        after = variables.count
+        return before==after
+    finally:
+        recursion_count -= 1
+        
+        
 class MemoryLimitError(Exception):
     pass
 
