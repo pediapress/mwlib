@@ -492,10 +492,14 @@ class ImageDB(object):
         if desc_url is None:
             return None
         
-        if wikidb is None:
-            api_helper = get_api_helper(desc_url)
-            if api_helper is None:
+        # Note: We're always guessing the API helper b/c we'll get problems when
+        # fetching from en.wp if we should've used commons.wikimedia.org instead.
+        # A passed wikidb is only used as a fallback here.
+        api_helper = get_api_helper(desc_url)
+        if api_helper is None:
+            if wikidb is None:
                 return None
+        else:
             wikidb = WikiDB(api_helper=api_helper)
         
         title = 'Image:%s' % name
