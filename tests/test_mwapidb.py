@@ -69,6 +69,16 @@ class TestWikiDB(object):
             d = parse_article_url(url)
             return d['api_helper'].base_url, d['title'], d['revision']
         
+        b, t, r = p('http://hu.wikipedia.org/w/index.php?title=Kanada_alkotm%C3%A1nya')
+        print b, repr(t), r
+        assert b == 'http://hu.wikipedia.org/w/'
+        assert t == u'Kanada alkotmánya'
+        
+        b, t, r = p('http://hu.wikipedia.org/wiki/Kanada_alkotm%C3%A1nya')
+        print b, repr(t), r
+        assert b == 'http://hu.wikipedia.org/w/'
+        assert t == u'Kanada alkotmánya'
+        
         b, t, r = p('http://de.wikipedia.org/wiki/Hauptseite')
         assert b == 'http://de.wikipedia.org/w/'
         assert t == u'Hauptseite'
@@ -111,7 +121,7 @@ class TestWikiDB(object):
         print b, t, r
         assert b == 'http://wikimediafoundation.org/w/'
         assert t == u'Home'
-        assert r is None
+        assert r is None    
     
     def test_MW10(self):
         d = parse_article_url('http://wiki.python-ogre.org/index.php/Basic_Tutorial_1')

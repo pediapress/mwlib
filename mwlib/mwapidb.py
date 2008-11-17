@@ -126,7 +126,7 @@ def parse_article_url(url, title_encoding='utf-8'):
             return {
                 'api_helper': api_helper,
                 'title': unicode(
-                    path[path.find(part) + len(part):],
+                    urllib.unquote(path[path.find(part) + len(part):]),
                     title_encoding,
                     'ignore'
                 ).replace('_', ' '),
