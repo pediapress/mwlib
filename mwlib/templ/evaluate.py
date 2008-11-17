@@ -219,7 +219,7 @@ class Expander(object):
             res = parser.parse(raw)
             if DEBUG:
                 print "TEMPLATE:", name, repr(raw)
-                res.show()
+                #res.show()
                 
         self.parsedTemplateCache[name] = res
         return res
