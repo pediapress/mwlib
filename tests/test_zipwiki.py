@@ -10,7 +10,9 @@ class TestZipWiki(object):
     def setup_class(cls):
         fd, cls.zip_filename = tempfile.mkstemp()
         os.close(fd)
+        print 'generating ZIP file'
         rc = os.system('mw-zip -c :en -o %s "The Living Sea"' % cls.zip_filename)
+        print 'ZIP file generation finished'
         assert rc == 0, 'Could not create ZIP file. Is mw-zip in PATH?'
     
     def teardown_class(cls):
@@ -69,12 +71,14 @@ class TestZipWiki(object):
         
         url = self.imagedb.getURL(u'Thelivingseaimax.jpg')
         assert url == 'http://upload.wikimedia.org/wikipedia/en/1/13/Thelivingseaimax.jpg'
-    
+        
         templates = self.imagedb.getImageTemplates(u"Thelivingseaimax.jpg")
         print templates
+        assert templates
 
         contribs = self.imagedb.getContributors(u"Thelivingseaimax.jpg")
         print contribs
+        assert contribs
     
 
         
