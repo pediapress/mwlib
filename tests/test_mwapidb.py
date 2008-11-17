@@ -337,15 +337,34 @@ class TestImageDB(object):
         c = self.imagedb.getContributors(u'Hong Kong Skyline Restitch - Dec 2007.jpg')
         print c
         assert c
+        
         # image contains plain username in Information template:
         c = self.imagedb.getContributors(u'Barakhambaroad.jpg')
         print c
         assert c
+        
         c = self.imagedb.getContributors(u'Uroplatus_Sikorae_Analamazaotra_Forest_Madagascar.jpg')
         print c
         assert c
+        
         c = self.imagedb.getContributors(u'OlympeDeGouge.jpg')
         print c
-        #assert c
+        assert c
+
+        # Author field in Information template contains lots of text and a NamedURL
+        c = self.imagedb.getContributors(u'Flag of Spain.svg')
+        print c
+        assert c
+
+        # Author field in Information template contains [:de:User:...] link and other text
+        c = self.imagedb.getContributors(u'Augustinerkirche Mainz innen.jpg')
+        print c
+        assert c
+
+        c = self.imagedb.getContributors(u'Flag of Israel.svg')
+        print c
+        assert c
+        
+        
     
 
