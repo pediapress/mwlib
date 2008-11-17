@@ -1,5 +1,13 @@
 from mwlib.templ import nodes, evaluate
 
+class Subst(nodes.Node):
+    def flatten(self, expander, variables, res):
+        name = []
+        evaluate.flatten(self[0], expander, variables, name)
+        name = u"".join(name).strip()
+        
+        res.append("{{subst:%s}}" % (name,))
+
 class Time(nodes.Node):
     def flatten(self, expander, variables, res):
         format = []
@@ -18,5 +26,5 @@ class Time(nodes.Node):
         from mwlib.templ import magic_time
         res.append(magic_time.time(format, d))
         
-registry = {'#time': Time}
+registry = {'#time': Time, 'subst': Subst}
 
