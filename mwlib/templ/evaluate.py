@@ -176,7 +176,7 @@ class Expander(object):
         self.parsedTemplateCache = {}
         
     def getParsedTemplate(self, name):
-        if name.startswith("[["):
+        if name.startswith("[[") or "|" in name:
             return None
         try:
             return self.parsedTemplateCache[name]
