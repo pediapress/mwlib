@@ -412,7 +412,7 @@ class Application(wsgi.Application):
         killed = False
         try:
             pid = int(open(pid_path, 'rb').read())
-            os.kill(pid, signal.SIGINT)
+            os.kill(pid, signal.SIGKILL)
             killed = True
         except (OSError, ValueError, IOError):
             pass
