@@ -354,3 +354,6 @@ def test_get_templates():
     yield doit, "{{ #if: {{{1}}} |yes|no}}", set()
     
     
+def test_noinclude_end():
+    expandstr("{{foo}}", "foo", wikidb=DictDB(foo="foo<noinclude>bar should not be in expansion"))
+    
