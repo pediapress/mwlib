@@ -289,7 +289,7 @@ def show(node, indent=0, out=None):
     if out is None:
         out=sys.stdout
 
-    print >>out, node
+    out.write("%s\n" % (node,))
     
 
 from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, equalsplit
