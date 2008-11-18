@@ -357,3 +357,10 @@ def test_get_templates():
 def test_noinclude_end():
     expandstr("{{foo}}", "foo", wikidb=DictDB(foo="foo<noinclude>bar should not be in expansion"))
     
+def test_monthnumber():
+    wikidb = DictDB(MONTHNUMBER="{{#if:{{{1|}}}|{{#switch:{{lc:{{{1}}}}}|january|jan=1|february|feb=2|march|mar=3|apr|april=4|may=5|june|jun=6|july|jul=7|august|aug=8|september|sep=9|october|oct=10|november|nov=11|december|dec=12|{{#ifexpr:{{{1}}}<0|{{#ifexpr:(({{{1}}})round 0)!=({{{1}}})|{{#expr:12-(((0.5-({{{1}}}))round 0)mod 12)}}|{{#expr:12-(((11.5-({{{1}}}))round 0)mod 12)}}}}|{{#expr:(((10.5+{{{1}}})round 0)mod 12)+1}}}}}}|Missing required parameter 1=''month''!}}")
+
+    expandstr("{{MONTHNUMBER|12}}", "12", wikidb=wikidb)
+
+def test_switch_default_template():
+    expandstr("{{#switch:1|{{#if:1|5|12}}}}", "5")
