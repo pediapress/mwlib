@@ -30,7 +30,7 @@ class HTMLWriter(object):
             self.math_renderer = math_renderer
     
     def _write(self, s):
-        self.out.write(cgi.escape(s))
+        self.out.write(cgi.escape(s.encode("utf8")))
 
     def getCategoryList(self, obj):
         categories = list(set(c.target for c in obj.find(parser.CategoryLink)))
@@ -39,7 +39,10 @@ class HTMLWriter(object):
                     
     def write(self, obj):
         m = "write" + obj.__class__.__name__
-        m=getattr(self, m)
+        m=getattr(self, m, None)
+        if not m:
+            log.warn("No method to write object:", obj.__class__.__name__)
+            return
         m(obj)
 
     def ignore(self, obj):
