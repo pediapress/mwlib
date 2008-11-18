@@ -57,6 +57,7 @@ def make_collection_id(data):
         'script_extension',
         'template_blacklist',
         'template_exclusion_category',
+        'print_template_prefix',
         'login_credentials',
     ):
         sio.write(repr(data.get(key)))
@@ -234,6 +235,7 @@ class Application(wsgi.Application):
         writer_options = post_data.get('writer_options', '')
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
+        print_template_prefix = post_data.get('print_template_prefix', '')
         login_credentials = post_data.get('login_credentials', '')
         force_render = bool(post_data.get('force_render'))
         script_extension = post_data.get('script_extension', '')
@@ -308,6 +310,8 @@ class Application(wsgi.Application):
                 args.extend(['--template-blacklist', template_blacklist])
             if template_exclusion_category:
                 args.extend(['--template-exclusion-category', template_exclusion_category])
+            if print_template_prefix:
+                args.extend(['--print-template-prefix', print_template_prefix])
             if language:
                 args.extend(['--language', language])
         else:
@@ -331,6 +335,8 @@ class Application(wsgi.Application):
                 args.extend(['--template-blacklist', template_blacklist])
             if template_exclusion_category:
                 args.extend(['--template-exclusion-category', template_exclusion_category])
+            if print_template_prefix:
+                args.extend(['--print-template-prefix', print_template_prefix])
             if login_credentials:
                 args.extend(['--login', login_credentials])
             if script_extension:
@@ -461,6 +467,7 @@ class Application(wsgi.Application):
             return self.error_response('POST argument required: %s' % exc)
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
+        print_template_prefix = post_data.get('print_template_prefix', '')
         login_credentials = post_data.get('login_credentials', '')
         script_extension = post_data.get('script_extension', '')
         
@@ -525,6 +532,8 @@ class Application(wsgi.Application):
                 args.extend(['--template-blacklist', template_blacklist])
             if template_exclusion_category:
                 args.extend(['--template-exclusion-category', template_exclusion_category])
+            if print_template_prefix:
+                args.extend(['--print-template-prefix', print_template_prefix])
             if login_credentials:
                 args.extend(['--login', login_credentials])
             if script_extension:

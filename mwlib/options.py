@@ -36,6 +36,11 @@ class OptionParser(optparse.OptionParser):
             help="Name of category for templates to be excluded",
             metavar='CATEGORY',
         )
+        self.add_option("--print-template-prefix",
+            help="Prefix for print templates",
+            metavar='PREFIX',
+            default='Print',
+        )
         self.add_option("--template-blacklist",
             help="Title of article containing blacklisted templates",
             metavar='ARTICLE',
@@ -128,11 +133,14 @@ class OptionParser(optparse.OptionParser):
         )
         if self.options.noimages:
             env.images = None
-        if self.options.template_blacklist or self.options.template_exclusion_category:
+        if self.options.template_blacklist\
+            or self.options.template_exclusion_category\
+            or self.options.print_template_prefix:
             if hasattr(env.wiki, 'setTemplateExclusion'):
                 env.wiki.setTemplateExclusion(
                     blacklist=self.options.template_blacklist,
                     category=self.options.template_exclusion_category,
+                    prefix=self.options.print_template_prefix,
                 )
             else:
                 log.warn('WikiDB does not support setting a template blacklist')

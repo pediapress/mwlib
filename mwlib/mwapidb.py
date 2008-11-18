@@ -543,8 +543,6 @@ class ImageDB(object):
 
     
 class WikiDB(wikidbbase.WikiDBBase):
-    print_template = u'Template:Print%s' # set this to none to deacticate # FIXME
-    
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'bot\b', re.IGNORECASE)
     
@@ -555,6 +553,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         domain=None,
         template_blacklist=None,
         template_exclusion_category=None,
+        print_template_prefix=None,
         api_helper=None,
         script_extension=None,
     ):
@@ -580,6 +579,9 @@ class WikiDB(wikidbbase.WikiDBBase):
             be excluded (optional)
         @type template_exclusion_category: unicode
         
+        @param print_template_prefix: prefix for print templates (optional)
+        @type print_template_prefix: unicode
+        
         @param api_helper: APIHelper instance
         @type api_helper: L{APIHelper}
         
@@ -604,11 +606,13 @@ class WikiDB(wikidbbase.WikiDBBase):
         self.setTemplateExclusion(
             blacklist=template_blacklist,
             category=template_exclusion_category,
+            prefix=print_template_prefix,
         )
         self.source = None
     
-    def setTemplateExclusion(self, blacklist=None, category=None):
+    def setTemplateExclusion(self, blacklist=None, category=None, prefix=None):
         self.template_exclusion_category = category
+        self.print_template_prefix = prefix
         self.template_blacklist = []
         if blacklist:
             raw = self.getRawArticle(blacklist)
@@ -697,8 +701,8 @@ class WikiDB(wikidbbase.WikiDBBase):
             pass
         
         titles = ['Template:%s' % name]
-        if self.print_template:
-            titles.insert(0, self.print_template % name)
+        if self.print_template_prefix:
+            titles.insert(0, 'Template:%s%s' % (self.print_template_prefix, name))
         for title in titles:
             raw = self.getRawArticle(title)
             if raw is None:

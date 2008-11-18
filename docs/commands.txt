@@ -81,6 +81,13 @@ one command.
 ``--template-exclusion-category=CATEGORY``
 
   A name of a category: Templates in this cateogry are excluded during rendering.
+  
+``--print-template-prefix=PREFIX``
+
+  Prefix for "print templates", i.e. templates that are tried to fetch before
+  regular templates. The default value is 'Print' resultint in print template
+  names of the form 'Template:PrintNAME' (with NAME being the name of the original
+  template).
 
 ``-o, --output=OUTPUT``
 
