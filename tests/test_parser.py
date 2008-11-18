@@ -756,3 +756,14 @@ def test_no_tab_removal():
     d = DummyDB()
     r=uparser.parseString(title='', raw='\ttext', wikidb=d)
     assert not r.find(parser.PreFormatted), 'unexpected PreFormatted node'
+
+@xfail
+def test_nowiki_inside_tags():
+    """http://code.pediapress.com/wiki/ticket/366"""
+    
+    s = """<span style="color:<nowiki>#</nowiki>DF6108;">foo</span>"""
+    r=parse(s)
+    tags = r.find(parser.TagNode)
+    assert tags, "no tag node found"
+    
+    
