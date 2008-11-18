@@ -880,7 +880,6 @@ class Parser(object):
         n.append(Text("".join(txt)))
         return n
 
-    
     parseCODETag = parsePRETag
     parseSOURCETag = parsePRETag
     def parseA7831D532A30DF0CD772BBC895944EC1Tag(self):
@@ -888,18 +887,6 @@ class Parser(object):
         p.__class__ = Magic
         return p    
 
-    parseRUBYTag = parseTag
-    parseRBTag = parseTag
-    parseRPTag = parseTag
-    parseRTTag = parseTag
-    parseDLTag = parseTag
-    parseDTTag = parseTag
-    parseDDTag = parseTag
-    parseTBODYTag = parseTag
-    parseCAPTIONTag = parseTag
-    
-    parsePTag = parseTag
-    parseFONTTag = parseTag
     parseREFTag = parseTag
     parseREFERENCESTag = parseTag
     
@@ -1429,7 +1416,6 @@ class Parser(object):
         else:
             return m()
 
-        
     def parseEMTag(self):
         return self._parseStyledTag(Style("''"))
     
