@@ -363,4 +363,4 @@ def test_monthnumber():
     expandstr("{{MONTHNUMBER|12}}", "12", wikidb=wikidb)
 
 def test_switch_default_template():
-    expandstr("{{#switch:1|{{#if:0|5|12}}}}", "12")
+    expandstr("{{#switch:1|{{#if:1|5|12}}}}", "5")
