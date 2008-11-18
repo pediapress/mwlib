@@ -1650,7 +1650,7 @@ class Parser(object):
             parent.children[-1].append(node)
 
         for item in items:
-            prefix = item.prefix.strip(":")
+            prefix = item.prefix.replace(":", "*")
             common = commonprefix(current_prefix, item.prefix)
 
             stack = stack[:len(common)+1]
