@@ -82,7 +82,8 @@ class SwitchNode(Node):
         for key, value in args:
             if key is not None:
                 key = optimize(list(key))
-            value = optimize(list(value))
+            if type(value) is tuple:
+                value = optimize(list(value))
 
 
             if key is None:
