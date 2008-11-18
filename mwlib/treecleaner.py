@@ -317,6 +317,7 @@ class TreeCleaner(object):
                     if colspan and colspan > maxwidth:
                         self.report('fixed colspan from', cell.vlist.get('colspan', 'undefined'), 'to', maxwidth)
                         cell.vlist['colspan'] = maxwidth
+
                         
         # /SINGLE CELL COLSPAN
         for c in node.children:
@@ -353,7 +354,7 @@ class TreeCleaner(object):
                     for child in cell_content:
                         d.appendChild(child)
                     d.vlist = node.vlist
-                    #node.parent.replaceChild(node, cell_content)
+                    #node.parent.replaceChild(node, cell_content)                    
 
         for c in node.children:
             self.removeSingleCellTables(c)
@@ -371,7 +372,9 @@ class TreeCleaner(object):
                     for item in cell:
                         d.appendChild(item)
                     divs.append(d)
-            node.parent.replaceChild(node, divs)
+            parent = node.parent
+            parent.replaceChild(node, divs)
+            self.report('replaced single col table with div. div children:',  parent.children)
             return
 
         for c in node:
@@ -392,7 +395,8 @@ class TreeCleaner(object):
             return
 
         for c in node.children:
-            self.moveReferenceListSection(c)
+            self.moveReferenceListSection(c)        
+        
 
     # FIXME: replace this by implementing and using
     # getParentStyleInfo(style='blub') where parent styles are needed

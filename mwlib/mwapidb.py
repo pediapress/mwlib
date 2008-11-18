@@ -641,12 +641,12 @@ class WikiDB(wikidbbase.WikiDBBase):
                 revision,
             )
     
-    def getAuthors(self, title, revision=None, max_num_authors=10):
-        """Return at most max_num_authors names of non-bot, non-anon users for
+    def getAuthors(self, title, revision=None):
+        """Return names of non-bot, non-anon users for
         non-minor changes of given article (before given revsion).
         
-        @returns: list of principal authors
-        @rtype: [unicode]
+        @returns: set of principal authors
+        @rtype: set([unicode])
         """
 
         for rvlimit in (500, 50):
@@ -671,22 +671,13 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             return None
 
-        authors = [r['user'] for r in revs
+        return list(set([r['user'] for r in revs
                    if not r.get('anon')
                    and not self.ip_rex.match(r['user'])
                    and not r.get('minor')
                    and not self.bot_rex.search(r.get('comment', ''))
                    and not self.bot_rex.search(r['user'])
-                   ]
-        author2count = {}
-        for a in authors:
-            try:
-                author2count[a] += 1
-            except KeyError:
-                author2count[a] = 1
-        author2count = author2count.items()
-        author2count.sort(key=lambda a: -a[1])
-        return [a[0] for a in author2count[:max_num_authors]]
+                   ]))
     
     def getTemplate(self, name, followRedirects=True):
         """
