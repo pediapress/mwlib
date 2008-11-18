@@ -179,6 +179,7 @@ class TreeCleaner(object):
                           'findDefinitionLists',
                           'restrictChildren',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
+                          'fixChapterNesting', 
                           'removeEmptyTextNodes',
                           'removeChildlessNodes', 
                           ]
@@ -796,4 +797,24 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeCategoryLinks(c)
+            
+
+
+    def fixChapterNesting(self, node):
+        """move all following siblings of a chapter up to the next chapter below the chapter"""
+        if node.__class__ == Chapter and node.parent:
+            siblings = node.getAllSiblings()
+            siblings = siblings[siblings.index(node)+1:]
+            for idx, sib in enumerate(siblings):
+                if sib.__class__ == Chapter:
+                    siblings = siblings[:idx]
+                    break
+            for sib in siblings:
+                sib.parent.removeChild(sib)
+                node.appendChild(sib)
+            return
+
+        for c in node.children:
+            self.fixChapterNesting(c)
+        
             
