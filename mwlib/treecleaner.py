@@ -82,6 +82,7 @@ class TreeCleaner(object):
                                   #Paragraph:[Paragraph],
                                   DefinitionList:[Paragraph],
                                   Blockquote:[PreFormatted],
+                                  Center:[PreFormatted],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
