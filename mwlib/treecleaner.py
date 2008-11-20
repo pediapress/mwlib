@@ -160,14 +160,13 @@ class TreeCleaner(object):
                           'removeLangLinks',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
-                          #'removeSingleCellTables',
-                          'transformSingleColTables',
                           'simplifyBlockNodes',
                           'fixNesting', #
                           'removeCriticalTables',
                           'removeTextlessStyles', 
                           'removeBrokenChildren',
                           'fixTableColspans',
+                          'transformSingleColTables',                         
                           'moveReferenceListSection',
                           'removeBreakingReturns', # NEW
                           'removeEmptyReferenceLists',# NEW
@@ -377,9 +376,8 @@ class TreeCleaner(object):
             parent = node.parent
             parent.replaceChild(node, divs)
             self.report('replaced single col table with div. div children:',  parent.children)
-            return
 
-        for c in node:
+        for c in node.children:
             self.transformSingleColTables(c)
 
 
