@@ -22,25 +22,32 @@ def test_headings():
     assert sections == [u"1", u"3"]
 
 
+
+def check_style(s, outer, inner=None):
+    art = parse(s)
+    style = art.children[0].children[0]
+    assert isinstance(style, parser.Style)
+    assert style.caption == outer
+    if inner is not None:
+        assert isinstance(style.children[0], parser.Style)
+        assert style.children[0].caption == inner
+    else:
+        assert not isinstance(style.children[0], parser.Style)
+
 def test_style():
-    def check(s, outer, inner=None):
-        art = parse(s)
-        style = art.children[0].children[0]
-        assert isinstance(style, parser.Style)
-        assert style.caption == outer
-        if inner is not None:
-            assert isinstance(style.children[0], parser.Style)
-            assert style.children[0].caption == inner
-        else:
-            assert not isinstance(style.children[0], parser.Style)
+    check_style(u"''mainz''", "''") 
+    check_style(u"'''mainz'''", "'''")
+    check_style(u"'''''mainz'''''", "'''", "''")
+    check_style(u"'''''mainz'' bla'''", "'''", "''")
+    check_style(u"'''''mainz''' bla''", "''", "'''")
+    check_style(u"'''''''''''''''''''pp'''''", "'''", "''")
+    check_style(u"'''test''bla", "''")
+
+@xfail
+def test_style_fails():
+    """http://code.pediapress.com/wiki/ticket/375"""
     
-    check(u"''mainz''", "''") 
-    check(u"'''mainz'''", "'''")
-    check(u"'''''mainz'''''", "'''", "''")
-    check(u"'''''mainz'' bla'''", "'''", "''")
-    check(u"'''''mainz''' bla''", "''", "'''")
-    check(u"'''''''''''''''''''pp'''''", "'''", "''")
-    check(u"'''test''bla", "''")
+    check_style(u"'''strong only ''also emphasized'' strong only'''", "'''", "''")
 
 def test_single_quote_after_style():
     """http://code.pediapress.com/wiki/ticket/20"""
