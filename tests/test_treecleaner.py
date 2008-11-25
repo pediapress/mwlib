@@ -120,17 +120,17 @@ blub
 
 def test_removeLangLinks():
     raw = r"""
-bla blub [[it:blub]] bla
-
+bla
 [[de:Blub]]
 [[en:Blub]]
 [[es:Blub]]
+blub
 """
     tree, reports = cleanMarkup(raw)
+    showTree(tree)
     assert len(tree.children) == 1
     assert tree.children[0].__class__ == Paragraph
-    assert tree.children[0].children[1].__class__ == LangLink
-
+    assert not tree.children[0].getChildNodesByClass(LangLink)
 
 def test_removeCriticalTables():
     raw = r'''

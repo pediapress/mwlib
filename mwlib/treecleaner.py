@@ -154,10 +154,9 @@ class TreeCleaner(object):
         """Clean parse tree using all available cleaner methods."""
 
         cleanerMethods = ['removeEmptyTextNodes',
-                          'removeCategoryLinks', 
+                          'removeInvisibleLinks', 
                           'cleanSectionCaptions',
                           'removeChildlessNodes',
-                          'removeLangLinks',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
                           'simplifyBlockNodes',
@@ -230,6 +229,8 @@ class TreeCleaner(object):
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
         if not node.children and node.__class__ not in self.childlessOK:
+            if node.parent.__class__ == Section and not node.previous: 
+                return # make sure that the first child of a section is not removed - this is the section caption
             removeNode = node
             while removeNode.parent and not removeNode.siblings and removeNode.parent.__class__ not in self.childlessOK:
                 removeNode = removeNode.parent
@@ -239,29 +240,6 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.removeChildlessNodes(c)
             
-
-    def removeLangLinks(self, node):
-        """Removes the language links that are listed below an article.
-
-        Language links inside the article should not be touched
-        """
-
-        txt = []
-        langlinkCount = 0
-
-        for c in node.children:
-            if c.__class__ == LangLink:
-                langlinkCount +=1
-            else:
-                txt.append(c.getAllDisplayText())
-        txt = ''.join(txt).strip()
-        if langlinkCount and not txt and node.parent:
-            self.report('removed child:', node)
-            node.parent.removeChild(node)
-
-        for c in node.children[:]:
-            self.removeLangLinks(c)
-
 
     def _tableIsCrititcal(self, table):
         classAttr = table.attributes.get('class', '')
@@ -340,25 +318,6 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeBrokenChildren(c)
 
-
-    def removeSingleCellTables(self, node):
-        """Remove table nodes which contain only a single row with a single cell"""
-
-        if node.__class__ == Table:
-            if len(node.children) == 1 and len(node.children[0].children) == 1:
-                if node.parent:
-                    cell_content = node.children[0].children[0].children
-                    self.report('replaced Child', node, cell_content)
-
-                    d = Div()
-                    node.parent.replaceChild(node, [d])
-                    for child in cell_content:
-                        d.appendChild(child)
-                    d.vlist = node.vlist
-                    #node.parent.replaceChild(node, cell_content)                    
-
-        for c in node.children:
-            self.removeSingleCellTables(c)
 
     def transformSingleColTables(self, node):
 
@@ -744,10 +703,12 @@ class TreeCleaner(object):
             parent = node.getParent()
             if prev.__class__ == DefinitionList: 
                 node.moveto(prev.getLastChild())
+                self.report('moved node to prev. definition list')
             else: 
                 dl = DefinitionList()
                 parent.replaceChild(node, [dl])
                 dl.appendChild(node)
+                self.report('created new definition list')
 
         for c in node.children[:]:
             self.findDefinitionLists(c)
@@ -759,6 +720,7 @@ class TreeCleaner(object):
             for c in node.children[:]:
                 if c.__class__ not in self.allowedChildren[node.__class__]:
                     node.removeChild(c)
+                    self.report('removed restricted child %s from parent %s' % (c, node))
             return 
 
         for c in node.children:
@@ -766,11 +728,12 @@ class TreeCleaner(object):
 
 
     def simplifyBlockNodes(self, node):
-
+        """Remove paragraphs which have a single block node child - keep the child"""
         if node.__class__ == Paragraph:
             if len(node.children) == 1 and node.children[0].isblocknode:
                 if node.parent:
                     node.parent.replaceChild(node, [node.children[0]])
+                    self.report('remove superfluous wrapping paragraph from node:', node.children[0])
 
         for c in node.children:
             self.simplifyBlockNodes(c)
@@ -781,22 +744,26 @@ class TreeCleaner(object):
             if not node.getAllDisplayText().strip() and node.parent:
                 if node.children:
                     node.parent.replaceChild(node, newchildren=node.children)
+                    self.report('remove style', node, 'with text-less children', node.children )
                 else:
                     node.parent.removeChild(node)
+                    self.report('removed style without children', node)
                 return
 
         for c in node.children:
             self.removeTextlessStyles(c)
         
-    def removeCategoryLinks(self, node):
+
+    def removeInvisibleLinks(self, node):
         """Remove category links that are not displayed in the text, but only used to stick the article in a category"""
-        if node.__class__ == CategoryLink and not node.colon and node.parent:
+        if (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon and node.parent:
             node.parent.removeChild(node)
+            self.report('remove invisible link', node)
             return
 
         for c in node.children:
-            self.removeCategoryLinks(c)
-            
+            self.removeInvisibleLinks(c)
+          
 
 
     def fixChapterNesting(self, node):
@@ -811,6 +778,7 @@ class TreeCleaner(object):
             for sib in siblings:
                 sib.parent.removeChild(sib)
                 node.appendChild(sib)
+                self.report('move node', sib, 'below chapter', node)
             return
 
         for c in node.children:
