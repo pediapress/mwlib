@@ -178,7 +178,8 @@ class TreeCleaner(object):
                           'findDefinitionLists',
                           'restrictChildren',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
-                          'fixChapterNesting', 
+                          'fixChapterNesting',
+                          'fixPreFormatted',
                           'removeEmptyTextNodes',
                           'removeChildlessNodes', 
                           ]
@@ -650,7 +651,7 @@ class TreeCleaner(object):
                 if h > self.cell_splitter_params['maxCellHeight'] and len(cell.children) > 1:
                     rows = splitRow(node, self.cell_splitter_params)
                     self.report('replacing child', node, rows)
-                    node.parent.replaceChild(node, rows)
+                    node.parent.replaceChild(node, rows)                   
                     return
             return
 
@@ -785,3 +786,22 @@ class TreeCleaner(object):
             self.fixChapterNesting(c)
         
             
+
+    def fixPreFormatted(self, node):
+        """Rearrange PreFormatted nodes. Text is broken down into individual lines which are separated by BreakingReturns """
+        if node.__class__ == PreFormatted:
+            children = node.getAllChildren()
+            for c in children:
+                lines = c.caption.split('\n')
+                if len(lines) > 1:
+                    text_nodes = []
+                    for line in lines:
+                        t = Text(line)
+                        text_nodes.append(t)
+                        text_nodes.append(BreakingReturn())
+                    text_nodes.pop()  # remove last BR
+                    c.parent.replaceChild(c, text_nodes)
+            return
+
+        for c in node.children:
+            self.fixPreFormatted(c)
