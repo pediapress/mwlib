@@ -278,12 +278,8 @@ class Application(wsgi.Application):
         
         error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
-            if force_render:
-                log.info('removing error file %r (forced rendering)' % error_path)
-                utils.safe_unlink(error_path)
-            else:
-                log.info('error file exists %r' % error_path)
-                return response
+            log.info('removing error file %r' % error_path)
+            utils.safe_unlink(error_path)
         
         if self.mwrender_logfile:
             logfile = self.mwrender_logfile
