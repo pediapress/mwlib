@@ -1179,27 +1179,3 @@ class Parser(object):
         except Exception, err:
             log.error("error while parsing article", repr(self.name), repr(err))
             raise
-
-def main():
-    #import htmlwriter
-    from mwlib.dummydb import DummyDB
-    db = DummyDB()
-    
-    for x in sys.argv[1:]:
-        input = unicode(open(x).read(), 'utf8')
-        from mwlib import expander
-        te = expander.Expander(input, pagename=x, wikidb=db)
-        input = te.expandTemplates()
-
-        
-        tokens = tokenize(input, x)
-        
-        p=Parser(tokens, os.path.basename(x))
-        r = p.parse()
-
-        show(sys.stdout, r, 0)
-        
-        #hw = htmlwriter.HTMLWriter(htmlout)
-    
-if __name__=="__main__":
-    main()
