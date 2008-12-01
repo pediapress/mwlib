@@ -790,6 +790,9 @@ class TreeCleaner(object):
     def fixPreFormatted(self, node):
         """Rearrange PreFormatted nodes. Text is broken down into individual lines which are separated by BreakingReturns """
         if node.__class__ == PreFormatted:
+            if not node.getAllDisplayText().strip() and node.parent:
+                node.parent.removeChild(node)
+                self.report('removed empty preformatted', node)
             children = node.getAllChildren()
             for c in children:
                 lines = c.caption.split('\n')
