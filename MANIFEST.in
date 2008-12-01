@@ -57,7 +57,8 @@ include mwlib/odfstyles.py
 include mwlib/odfwriter.py
 include mwlib/options.py
 include mwlib/overlay.py
-include mwlib/parser.py
+include mwlib/parser/__init__.py
+include mwlib/parser/nodes.py
 include mwlib/podclient.py
 include mwlib/recorddb.py
 include mwlib/rendermath.py
@@ -71,10 +72,13 @@ include mwlib/serve.py
 include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/status.py
+include mwlib/strftime.py
 include mwlib/styleutils.py
 include mwlib/tagext.py
 include mwlib/templ/__init__.py
 include mwlib/templ/evaluate.py
+include mwlib/templ/magic_nodes.py
+include mwlib/templ/magic_time.py
 include mwlib/templ/magics.py
 include mwlib/templ/marks.py
 include mwlib/templ/misc.py
@@ -112,6 +116,7 @@ include tests/test_advtree.py
 include tests/test_convert_templates.py
 include tests/test_docbookwriter.py
 include tests/test_expander.py
+include tests/test_expander_time.py
 include tests/test_expr.py
 include tests/test_html.py
 include tests/test_imgmap.py

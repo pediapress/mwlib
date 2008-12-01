@@ -732,8 +732,15 @@ def preprocess(root):
 
 
 def validate(xml):
-    import subprocess, tempfile, os
     "THIS USES xmllint AND WILL FAIL IF NOT INSTALLED"
+    
+    import subprocess
+    import tempfile
+    import os
+    from mwlib import xmlcat
+    xmlcat = os.path.join(os.path.dirname(xmlcat.__file__), "cache.xml")
+    os.environ['XML_CATALOG_FILES'] = xmlcat
+    
     fh, tfn = tempfile.mkstemp()
     open(tfn, "w").write(xml)
     cmd = "xmllint --noout --valid %s" %tfn
