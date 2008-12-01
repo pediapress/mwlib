@@ -27,7 +27,7 @@ class Exclude(py.test.collect.Directory):
             print "Skipping", bn, '-- blahtexml or texvc for math rendering not found'
             return False
         if not lxml and bn=='test_docbookwriter.py':
-            print "Skipping", bn, "-- lxml not found"
+            #print "Skipping", bn, "-- lxml not found"
             return False
         if xnet and bn in ('test_mwapidb.py', 'test_netdb_imagedb.py', 'test_zipwiki.py'):
             print "Skipping", bn, "-- needs network"
