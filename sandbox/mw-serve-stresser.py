@@ -218,19 +218,22 @@ def main():
 
     if options.logfile:
         utils.start_logging(options.logfile)
+
+    baseurl2api = {}
+    baseurls = options.baseurl.split()
+    for baseurl in baseurls:
+        baseurl2api[baseurl] = mwapidb.APIHelper(baseurl)
     
-    api =  mwapidb.APIHelper(options.baseurl)
     maxarts = int(options.max_narticles)
     mail_recipients = None
     if options.mail_recipients:
         mail_recipients = options.mail_recipients.split(',')
     ok_count = 0
     fail_count = 0
-    baseurls = options.baseurl.split()
     while True:
         baseurl = random.choice(baseurls)
         try:
-            ok = checkservice(api,
+            ok = checkservice(baseurl2api[baseurl],
                 options.serviceurl,
                 baseurl,
                 options.writer,
