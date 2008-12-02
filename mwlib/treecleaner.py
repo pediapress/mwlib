@@ -95,7 +95,7 @@ class TreeCleaner(object):
         
         # ex: delete preformatted nodes which are inside reference nodes,
         # all children off the preformatted node are kept
-        self.removeNodes = {PreFormatted:[Reference], Cite:[Item, Reference]}
+        self.removeNodes = {PreFormatted:[Reference, PreFormatted], Cite:[Item, Reference], Code:[PreFormatted]}
 
         
         # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
@@ -160,21 +160,22 @@ class TreeCleaner(object):
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
                           'simplifyBlockNodes',
-                          'fixNesting', #
+                          'fixNesting', 
                           'removeCriticalTables',
                           'removeTextlessStyles', 
                           'removeBrokenChildren',
                           'fixTableColspans',
                           'transformSingleColTables',                         
                           'moveReferenceListSection',
-                          'removeBreakingReturns', # NEW
-                          'removeEmptyReferenceLists',# NEW
-                          'swapNodes',# NEW
-                          'splitBigTableCells',# NEW
-                          'removeNoPrintNodes',# NEW
+                          'removeBreakingReturns', 
+                          'removeEmptyReferenceLists',
+                          'swapNodes',
+                          'removeBigSectionsFromCells',
+                          'splitBigTableCells',
+                          'removeNoPrintNodes',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
-                          'removeBreakingReturns', # NEW
+                          'removeBreakingReturns',
                           'findDefinitionLists',
                           'restrictChildren',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
@@ -314,7 +315,7 @@ class TreeCleaner(object):
                 else:
                     self.report('removed child', node)
                     node.parent.removeChild(node)
-                return
+                #return
 
         for c in node.children:
             self.removeBrokenChildren(c)
@@ -636,6 +637,22 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.swapNodes(c)
 
+    def removeBigSectionsFromCells(self, node):
+        """Remove very big sections from tables. It can be assumed that they were not intentionally put inside the table"""
+        if node.__class__ == Cell:   
+            sections = [n for n in node.children if n.__class__ == Section]
+            if len(node.getAllDisplayText()) > 2000 and sections:
+                for section in sections:
+                    if len(section.getAllDisplayText()) > 2000:
+                        parentTable = node.getParentNodesByClass(Table)[-1]
+                        self.report('move big section out of table')
+                        section.moveto(parentTable)
+                        
+
+        for c in node.children:
+            self.removeBigSectionsFromCells(c)
+                    
+
     def splitBigTableCells(self, node):
         """Splits table cells if their height exceeds the output page height.
 
@@ -784,8 +801,7 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.fixChapterNesting(c)
-        
-            
+
 
     def fixPreFormatted(self, node):
         """Rearrange PreFormatted nodes. Text is broken down into individual lines which are separated by BreakingReturns """
