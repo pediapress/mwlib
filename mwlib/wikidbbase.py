@@ -57,6 +57,7 @@ class WikiDBBase(object):
             if not hasattr(self, 'getInterwikiMap'):
                 return None
             prefix, target = link.full_target.split(':', 1)
+            prefix = prefix.lower()
             interwikimap = self.getInterwikiMap(title, revision=revision)
             if interwikimap and prefix in interwikimap:
                 url = utils.get_safe_url(interwikimap[prefix]['url'].replace(

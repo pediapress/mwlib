@@ -819,7 +819,7 @@ class WikiDB(wikidbbase.WikiDBBase):
             return
         for entry in result:
             interwiki = metabook.make_interwiki(api_entry=entry)
-            self.interwikimap[interwiki['prefix']] = interwiki
+            self.interwikimap[interwiki['prefix'].lower()] = interwiki
         return self.interwikimap
     
     def getParsedArticle(self, title, revision=None):

@@ -200,6 +200,12 @@ class TestWikiDB(object):
         assert link.full_target == u'es:español'
         assert link.url == 'http://memory-alpha.org/es/wiki/espa%C3%B1ol'
     
+        w = WikiDB(base_url='http://wikitravel.org/wiki/en/')
+        r = uparser.parseString(u'', u'[[Dmoz:Test123]]', wikidb=w)
+        link = r.find(parser.InterwikiLink)[0]
+        assert link.full_target == u'Dmoz:Test123'
+        assert link.url == 'http://dmoz.org/Regional/Test123'
+    
     def test_invalid_base_url(self):
         print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
     
