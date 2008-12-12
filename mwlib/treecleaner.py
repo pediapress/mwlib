@@ -331,6 +331,7 @@ class TreeCleaner(object):
                 for cell in row:
                     d = Div()
                     d.border = 1
+                    d.vlist = node.vlist
                     for item in cell:
                         d.appendChild(item)
                     divs.append(d)
