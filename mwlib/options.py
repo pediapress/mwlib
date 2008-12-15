@@ -70,6 +70,9 @@ class OptionParser(optparse.OptionParser):
         self.add_option('--subtitle',
             help='subtitle for article collection',
         )
+        self.add_option('--editor',
+            help='editor for article collection',
+        )
         self.add_option('--script-extension',
             help='script extension for PHP scripts (default: .php)',
             default='.php',
@@ -157,6 +160,8 @@ class OptionParser(optparse.OptionParser):
             env.metabook['title'] = self.options.title
         if self.options.subtitle:
             env.metabook['subtitle'] = self.options.subtitle
+        if self.options.editor:
+            env.metabook['editor'] = self.options.editor
         
         return env
     

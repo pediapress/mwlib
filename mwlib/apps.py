@@ -320,7 +320,7 @@ def render():
         writer_options['lang'] = options.language
     for option in writer_options.keys():
         if option not in getattr(writer, 'options', {}):
-            print 'Warning: unkown writer option %r' % option
+            print 'Warning: unknown writer option %r' % option
             del writer_options[option]
     
     if options.daemonize:
