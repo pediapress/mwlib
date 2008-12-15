@@ -157,11 +157,11 @@ class OptionParser(optparse.OptionParser):
             env.metabook = self.metabook
         
         if self.options.title:
-            env.metabook['title'] = self.options.title
+            env.metabook['title'] = unicode(self.options.title, 'utf-8')
         if self.options.subtitle:
-            env.metabook['subtitle'] = self.options.subtitle
+            env.metabook['subtitle'] = unicode(self.options.subtitle, 'utf-8')
         if self.options.editor:
-            env.metabook['editor'] = self.options.editor
+            env.metabook['editor'] = unicode(self.options.editor, 'utf-8')
         
         return env
     
