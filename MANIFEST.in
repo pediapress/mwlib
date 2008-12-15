@@ -36,6 +36,7 @@ include mwlib/dumpparser.py
 include mwlib/expander.py
 include mwlib/expr.py
 include mwlib/filequeue.py
+include mwlib/fontswitcher.py
 include mwlib/htmlcolornames.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
@@ -68,6 +69,7 @@ include mwlib/resources/pedia.css
 include mwlib/sanitychecker.py
 include mwlib/scanfile.py
 include mwlib/scanner.py
+include mwlib/scripts.txt
 include mwlib/serve.py
 include mwlib/snippets.py
 include mwlib/snippets.txt
