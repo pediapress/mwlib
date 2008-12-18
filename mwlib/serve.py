@@ -487,10 +487,6 @@ class Application(wsgi.Application):
         log.info('zip_post %s %s' % (collection_id, pod_api_url))
         
         pid_path = self.get_path(collection_id, self.pid_filename, 'zip')
-        if os.path.exists(pid_path):
-            log.info('mw-zip/mw-post already running for collection %r' % collection_id)
-            return response
-        
         zip_path = self.get_path(collection_id, self.zip_filename)
         if os.path.exists(zip_path):
             log.info('POSTing ZIP file %r' % zip_path)
