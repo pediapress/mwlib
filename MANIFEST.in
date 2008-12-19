@@ -118,7 +118,6 @@ include sandbox/mw-serve-stresser.py
 include sandbox/time-expr.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
-include tests/data/test.zip
 include tests/memeater.py
 include tests/test_advtree.py
 include tests/test_convert_templates.py
@@ -148,4 +147,5 @@ include tests/test_utils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipcreator.py
 include tests/test_zipwiki.py
+include tools/build_namespace_langs.py
 include tools/build_rng_grammar.py
