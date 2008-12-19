@@ -42,11 +42,8 @@ def find_template(raw, name):
                 return n
         todo.extend(n)
 
-def get_template_args(template, expander=None):
+def get_template_args(template, expander):
     """Return ArgumentList for given template"""
-    
-    if expander is None:
-        expander = 1 # FIXME?
     
     return ArgumentList(template[1],
         expander=expander,

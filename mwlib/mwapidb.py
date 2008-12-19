@@ -21,7 +21,7 @@ except ImportError:
     import simplejson as json
 
 from mwlib import utils, metabook, wikidbbase, uparser, parser, namespace, advtree
-from mwlib.expander import find_template, get_template_args
+from mwlib.expander import find_template, get_template_args, Expander
 from mwlib.log import Log
 
 log = Log("mwapidb")
@@ -507,6 +507,9 @@ class ImageDB(object):
         raw = wikidb.getRawArticle(title)
         if not raw:
             return None
+
+        expander = Expander(u'', title, wikidb)
+        
         
         def getUserLinks(raw):
             def isUserLink(node):
@@ -522,7 +525,7 @@ class ImageDB(object):
         
         template = find_template(raw, 'Information')
         if template is not None:
-            author = get_template_args(template).get('Author', '').strip()
+            author = get_template_args(template, expander).get('Author', '').strip()
             if author:
                 users = getUserLinks(author)
                 if users:
