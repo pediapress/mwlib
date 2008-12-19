@@ -30,7 +30,7 @@ def get_templates(raw):
     return used
 
 def find_template(raw, name):
-    """Return Tempalte node with given name or None if there is no such tempalte"""
+    """Return Template node with given name or None if there is no such template"""
     
     todo = [parse(raw)]
     while todo:
