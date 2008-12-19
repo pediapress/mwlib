@@ -83,8 +83,9 @@ def get_ns_list(names, aliases):
         else:
             names[nsnum] = v + (name,)
     
+    proj_talk_name = names.get(namespace.NS_PROJECT_TALK, u'%s_talk')
     try:
-        return [names[nsnum] for nsnum in namespace._lang_ns_data_keys] + [names[namespace.NS_PROJECT_TALK]]
+        return [names[nsnum] for nsnum in namespace._lang_ns_data_keys] + [proj_talk_name]
     except KeyError, e:
         return None
 
@@ -100,13 +101,19 @@ def main(argv):
         mo = filename_rex.match(fn)
         if mo is None:
             continue
+        lang = mo.group('lang').lower()
+        if lang == 'en':
+            # English is special: aliases are handled by other means etc.
+            continue
         p = os.path.join(msgsdir, fn)
         names = parse_namespace_names(p)
         if not names:
             continue
         lst = get_ns_list(names, parse_namespace_aliases(p))
         if lst:
-            lang_ns_data[mo.group('lang').lower()] = lst
+            lang_ns_data[lang] = lst
+    
+    lang_ns_data['en'] = [u'Talk', u'User', u'User_talk', (u'File', u'Image'), (u'File_talk', u'Image talk'), u'MediaWiki', u'MediaWiki_talk', u'Template', u'Template_talk', u'Help', u'Help_talk', u'Category', u'Category_talk', u'Special', u'Media', u'%s_talk']
     
     s = ['lang_ns_data = {']
     for lang in sorted(lang_ns_data.keys()):
