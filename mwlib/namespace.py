@@ -8,7 +8,9 @@ NS_USER           =  2
 NS_USER_TALK      =  3
 NS_PROJECT        =  4
 NS_PROJECT_TALK   =  5
+NS_FILE           =  6
 NS_IMAGE          =  6
+NS_FILE_TALK      =  7
 NS_IMAGE_TALK     =  7
 NS_MEDIAWIKI      =  8
 NS_MEDIAWIKI_TALK =  9
@@ -30,7 +32,7 @@ def add_namespace_map(key, lang, project_name, extras={}):
     namespace_maps[key] = res
 
 _lang_ns_data_keys = [
-    NS_TALK, NS_USER, NS_USER_TALK, NS_IMAGE, NS_IMAGE_TALK,
+    NS_TALK, NS_USER, NS_USER_TALK, NS_FILE, NS_FILE_TALK,
     NS_MEDIAWIKI, NS_MEDIAWIKI_TALK, NS_TEMPLATE, NS_TEMPLATE_TALK,
     NS_HELP, NS_HELP_TALK, NS_CATEGORY, NS_CATEGORY_TALK, NS_SPECIAL, NS_MEDIA
 ]

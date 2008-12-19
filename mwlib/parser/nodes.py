@@ -245,14 +245,22 @@ class Link(Node):
         from mwlib.lang import languages
         
         res = {}
-        for name, num in namespaces.iteritems():
+        
+        def reg(name, num):
             name = name.lower()
             if num == namespace.NS_CATEGORY:
                 res[name] = (CategoryLink, num)
-            elif num == namespace.NS_IMAGE:
+            elif num == namespace.NS_FILE:
                 res[name] = (ImageLink, num)
             else:
                 res[name] = (NamespaceLink, num)
+        
+        for name, num in namespaces.iteritems():
+            if isinstance(name, basestring):
+                reg(name, num)
+            else:
+                for n in name:
+                    reg(n, num)
         
         for prefix, d in interwikimap.items():
             if 'language' in interwikimap[prefix] or prefix in languages:
