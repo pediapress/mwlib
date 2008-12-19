@@ -27,7 +27,10 @@ def add_namespace_map(key, lang, project_name, extras={}):
     ns_data = _lang_ns_data[lang]
     res = dict(zip(ns_data, _lang_ns_data_keys))
     res[project_name] = NS_PROJECT
-    res[ns_data[-1] % project_name] = NS_PROJECT_TALK
+    if '%s' in ns_data[-1]:
+        res[ns_data[-1] % project_name] = NS_PROJECT_TALK
+    else:
+        res[ns_data[-1]] = NS_PROJECT_TALK
     res.update(extras)
     namespace_maps[key] = res
 
