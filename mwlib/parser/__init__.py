@@ -137,7 +137,7 @@ class Parser(object):
                 nsMap = 'default'
         else:
             nsMap = 'default'
-        Link._setSpecializeMap(nsMap, interwikimap)
+        self._specializeMap = Link._setSpecializeMap(nsMap, interwikimap)
         
         from mwlib import tagext
         self.tagextensions = tagext.default_registry
@@ -278,7 +278,7 @@ class Parser(object):
                 obj.append(Text(token[1]), merge=True)
                 self.next()
 
-        obj._specialize()
+        obj._specialize(self._specializeMap)
 
         if not obj.children and obj.target and not isinstance(obj, ImageLink):
             obj.append(Text(obj.full_target))

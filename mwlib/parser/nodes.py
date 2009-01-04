@@ -280,11 +280,11 @@ class Link(Node):
             for lang in languages:
                 interwikimap[lang] = {'language': True}
         
-        cls._specializeMap = cls._buildSpecializeMap(
+        return cls._buildSpecializeMap(
             namespace.namespace_maps[nsMap], interwikimap,
-        )
+            )
     
-    def _specialize(self):
+    def _specialize(self, specializeMap):
         """
         Handles different forms of link, e.g.:
             - [[Foo]]
@@ -319,7 +319,7 @@ class Link(Node):
             self.__class__ = ArticleLink
             return
 
-        self.__class__, self.namespace = self._specializeMap.get(
+        self.__class__, self.namespace = specializeMap.get(
             ns.lower(),
             (ArticleLink, namespace.NS_MAIN),
         )
@@ -513,7 +513,8 @@ class ImageLink(Link):
         if not self.children:
             self.children = last
 
-Link._setSpecializeMap('default') # initialise the Link class
+defaultSpecializeMap = Link._setSpecializeMap('default') 
+# initialise the Link class (not sure -- anyone will use that?)
 
             
 class Text(Node):
