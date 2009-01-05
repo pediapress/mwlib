@@ -180,7 +180,7 @@ class TreeCleaner(object):
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           'removeBreakingReturns',
-                          'findDefinitionLists',
+                          'buildDefinitionLists',
                           'restrictChildren',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
                           'fixChapterNesting',
@@ -720,7 +720,7 @@ class TreeCleaner(object):
             self.cleanSectionCaptions(c)
             
 
-    def findDefinitionLists(self, node):
+    def buildDefinitionLists(self, node):
         if node.__class__ in [DefinitionTerm, DefinitionDescription]:
             prev = node.getPrevious()
             parent = node.getParent()
@@ -734,7 +734,7 @@ class TreeCleaner(object):
                 self.report('created new definition list')
 
         for c in node.children[:]:
-            self.findDefinitionLists(c)
+            self.buildDefinitionLists(c)
 
 
     def restrictChildren(self, node):
