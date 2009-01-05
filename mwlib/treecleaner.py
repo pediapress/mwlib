@@ -67,7 +67,7 @@ class TreeCleaner(object):
         # list of nodes which do not require child nodes
         self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Chapter, Code,
                             HorizontalRule, ImageLink, InterwikiLink, LangLink, Link, Math,
-                            NamedURL, NamespaceLink, ReferenceList, SpecialLink, Text, URL]
+                            NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, URL]
 
         # FIXME: not used currently. remove if this is not used soon. could be used as reference
         # list nodes that apply styles to their children
