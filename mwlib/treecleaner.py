@@ -185,6 +185,7 @@ class TreeCleaner(object):
                           'fixNesting', # pull DefinitionLists out of Paragraphs
                           'fixChapterNesting',
                           'fixPreFormatted',
+                          'fixListNesting',
                           'removeEmptyTextNodes',
                           'removeChildlessNodes', 
                           ]
@@ -231,7 +232,6 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.removeListOnlyParagraphs(c)
 
-
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
         if not node.children and node.__class__ not in self.childlessOK:
@@ -246,7 +246,6 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.removeChildlessNodes(c)
             
-
     def _tableIsCrititcal(self, table):
         classAttr = table.attributes.get('class', '')
         if re.findall(r'\bnavbox\b', classAttr):    
@@ -446,25 +445,22 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeBreakingReturns(c)
 
-
-    #FIXME: this method is used currently.
-    # improve customization of treecleaner, b/c this method only needs to be used
-    # by some writers: e.g. the ones that write footnotes should not need to print the ref-section
     def removeEmptyReferenceLists(self, node):
         """
         empty ReferenceLists are removed. they typically stick in a section which only contains the ReferenceList. That section is also removed
         """
         if node.__class__ == ReferenceList:
-            removeNode = node
-            while removeNode and (not removeNode.siblings or (removeNode.parent and removeNode.parent.__class__ == Section and len(removeNode.siblings) <= 1)):
-                removeNode = removeNode.parent           
-            if removeNode and removeNode.parent:
-                self.report('removing node', removeNode)
-                removeNode.parent.removeChild(removeNode)
+            sections = node.getParentNodesByClass(Section)
+            if sections:
+                section = sections[0]
+                display_text = []
+                for c in section.children[1:]:
+                    display_text.append(c.getAllDisplayText().strip())
+                if not ''.join(display_text) and section.parent:
+                    section.parent.removeChild(section)
 
-        for c in node.children[:]:
+        for c in node.children:
             self.removeEmptyReferenceLists(c)
-
 
     def _fixParagraphs(self, node):
         """Move paragraphs to the child list of the last section (if existent)"""
@@ -829,3 +825,16 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.fixPreFormatted(c)
+            
+    def fixListNesting(self, node):
+        """workaround for #81"""
+        if node.__class__ == ItemList and len(node.children) == 1:
+            item = node.children[0]
+            if len(item.children) == 1 and item.children[0].__class__ == ItemList:
+                dd = DefinitionDescription()
+                dd.appendChild(item.children[0])
+                node.parent.replaceChild(node, [dd])
+                self.report('transformed indented list item', node)
+
+        for c in node.children:
+            self.fixListNesting(c)
