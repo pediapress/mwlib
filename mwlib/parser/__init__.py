@@ -1133,7 +1133,7 @@ class Parser(object):
         p.prefix = self.token[1]
 
         self.token[1]
-        break_at = TokenSet(["ENDTABLE", "COLUMN", "ROW"])
+        break_at = TokenSet(["ITEM", "ENDTABLE", "COLUMN", "ROW"])
         
         self.next()
         while self.left:
