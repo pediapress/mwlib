@@ -995,8 +995,21 @@ class Parser(object):
                 last = idx, self.tokens[idx]
                 self.tokens[idx]=('ENDPRE', '\n')
                 break
+
         
-        
+        ws = u""
+        while self.left:
+            token = self.token
+            if token[0]=="TEXT" and not token[1].strip():
+                ws += token[1]
+            else:
+                break
+            self.next()
+            
+        if ws:
+            p.append(Text(ws))
+
+        first_node = True
         while self.left:
             token = self.token
             if token[0] == 'ENDPRE' or token[0]=='BREAK':
@@ -1021,6 +1034,12 @@ class Parser(object):
                 p.append(Text(token[1]))
                 self.next()
 
+            if first_node and isinstance(p.children[-1], ImageLink):
+                return p.children[-1]
+            
+                
+            first_node = False
+            
         if last:
             self.tokens[last[0]] = last[1]
 
