@@ -110,8 +110,10 @@ class scan_result(object):
         return self.toks[idx]
 
 
+
 class _compat_scanner(object):
     from mwlib.tagext import default_registry as tagextensions
+    allowed_tags = None
     
     class ignore: pass
     tok2compat = {
@@ -140,8 +142,15 @@ class _compat_scanner(object):
         token.t_urllink: "URLLINK",
         }
 
-                   
+
+    def _init_allowed_tags(self):
+        from mwlib.parser import _get_tags
+        self.allowed_tags = _get_tags()
+        
     def __call__(self, text):
+        if self.allowed_tags is None:
+            self._init_allowed_tags()
+        
         tokens = scan(text)
         scanres = scan_result(text, tokens)
 
@@ -269,7 +278,10 @@ class _compat_scanner(object):
                     else:
                         res.append(("ROW", g()))
                 else:
-                    res.append((tt, s))
+                    if tt.t in self.allowed_tags:
+                        res.append((tt, s))
+                    else:
+                        res.append(("TEXT", s))
             else:
                 a(type)
             i+=1
@@ -310,8 +322,6 @@ class _compat_scanner(object):
         
         
 compat_scan = _compat_scanner()
-
-# from plexscanner import _BaseTagToken, TagToken, EndTagToken
 
 class _BaseTagToken(object):
     def __eq__(self, other):

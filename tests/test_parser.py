@@ -651,7 +651,6 @@ def test_table_row_exclamation_mark():
     print "CELLS:", cells
     assert len(cells)==2, 'expected exactly two cells'
 
-@xfail
 def test_unknown_tag():
     """http://code.pediapress.com/wiki/ticket/212"""
     r=parse("<nosuchtag>foobar</nosuchtag>")
