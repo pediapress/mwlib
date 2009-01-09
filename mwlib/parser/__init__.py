@@ -79,7 +79,7 @@ def parseParams(s):
             r[name] = maybeInt(value)
     return r
 
-from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style, Magic,
+from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style, 
                                 Book, Chapter, Article, Paragraph, Section,
                                 Timeline, TagNode, PreFormatted, URL, NamedURL,
                                 _VListNode, Table, Row, Cell, Caption, Link, ArticleLink, SpecialLink,
@@ -356,10 +356,6 @@ class Parser(object):
 
     parseCODETag = parsePRETag
     parseSOURCETag = parsePRETag
-    def parseA7831D532A30DF0CD772BBC895944EC1Tag(self):
-        p = self.parseTag()
-        p.__class__ = Magic
-        return p    
 
     parseREFTag = parseTag
     parseREFERENCESTag = parseTag

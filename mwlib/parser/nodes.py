@@ -92,9 +92,6 @@ class Style(Node):
      * ";" for a definition description term
     """
 
-class Magic(Node):
-    pass
-    
 class Book(Node):
     pass
 

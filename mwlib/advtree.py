@@ -21,7 +21,7 @@ http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 import re
 import weakref
 
-from mwlib.parser import Magic, Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
+from mwlib.parser import Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
 from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
 from mwlib.parser import Item, ItemList,  Node, Table, Row, Cell, Paragraph, PreFormatted
