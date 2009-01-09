@@ -267,7 +267,7 @@ not_bol:
 		RET(t_special);
 	}
   [:|\[\]]              {RET(t_special);}
-  "'" {RET(t_singlequote);}
+  "'" "'"+ {RET(t_singlequote);}
   "<" "/"? [a-zA-Z]+ [^\000<>]* "/"? ">" 
 		{RET(t_html_tag);}
 

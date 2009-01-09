@@ -492,21 +492,12 @@ class Parser(object):
         return s
 
     def parseSingleQuote(self):
-        def count_consecutives():
-            count = 0
-            while self.left:
-                token = self.token
-                if token[0] != 'SINGLEQUOTE':
-                    break
-                count += 1
-                self.next()
-            return count
         
         inner_style, outer_style = None, None
-        count = count_consecutives()
+        count = len(self.token[1])
+        self.next()
         
-        if count == 1:
-            return Text("'")
+        assert count>1, "internal error"
         
         end_count = 0
         if count >= 3:
@@ -534,15 +525,17 @@ class Parser(object):
         while self.left:
             token = self.token
             if token[0] == 'SINGLEQUOTE':
-                count = count_consecutives()
+                count = len(self.token[1])
+                assert count>1, "internal error"
                 if count >= end_count:
-                    self.pos -= count - end_count
+                    if count == end_count+1:
+                        self.tokens[self.pos] = ('TEXT', "'")
+                    elif count > end_count+1:
+                        self.tokens[self.pos] = ('SINGLEQUOTE', "'" * (count-end_count))
+                    else:
+                        self.next()
                     break
-                
-                if count == 1:
-                    inner_style.append(Text("'"))
-                    continue
-                
+                self.next()                
                 if count >= 3:
                     count -= 3
                     assert inner_style is not outer_style, 'sanity check'
@@ -566,7 +559,6 @@ class Parser(object):
                 if count > 0:
                     assert count == 1, 'sanity check'
                     inner_style.append(Text("'"))
-            
             elif token[0] in break_at:
                 break
             elif token[0] in FirstAtom:
