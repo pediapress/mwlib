@@ -119,7 +119,20 @@ def append_br_tag(node):
     node.append(br)
 
 _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
-            
+
+def _get_tags():
+    allowed = set()
+    for x in dir(Parser):
+        if x.startswith("parse") and x.endswith("Tag"):
+            allowed.add(x[5:-3].lower())
+
+    from mwlib import tagext
+    allowed.update(x.lower() for x in tagext.default_registry.name2ext.keys())
+    allowed.remove("")
+    
+    
+    return allowed
+
 class Parser(object):
     def __init__(self, tokens, name='', lang=None, interwikimap=None):
         self.tokens = tokens
