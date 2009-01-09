@@ -282,7 +282,6 @@ def test_urlencode():
 def test_urlencode_non_ascii():
     expandstr(u'{{urlencode:L\xe9onie}}', 'L%C3%A9onie')
 
-@xfail
 def test_anchorencode():
     """http://code.pediapress.com/wiki/ticket/213"""
     expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')
