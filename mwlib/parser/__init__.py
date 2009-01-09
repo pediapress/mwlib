@@ -279,7 +279,7 @@ class Parser(object):
                 self.next()
             elif token[0] in break_at:
                 break
-            elif token[0] in FirstAtom and token[0] != 'SINGLEQUOTE':
+            elif token[0] in FirstAtom:
                 obj.append(self.parseAtom())
             elif token[1].startswith("|"):
                 obj.append(Control("|"))
