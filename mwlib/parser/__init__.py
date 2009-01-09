@@ -3,11 +3,10 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import sys
 import os
 import re
 
-from mwlib.scanner import tokenize, TagToken, EndTagToken
+from mwlib.scanner import TagToken, EndTagToken
 from mwlib.log import Log
 from mwlib import namespace
 
