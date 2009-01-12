@@ -903,11 +903,13 @@ class Parser(object):
     def parseSTRONGTag(self):
         return self._parseStyledTag(Style("'''"))
     
-    def parseBLOCKQUOTETag(self):
-        #return self._parseStyledTag(Style(":"))
-        return self._parseStyledTag(Style("-"))
+    def parseBLOCKQUOTETag(self,
+                           break_at=set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "SECTION", "BEGINTABLE"])):
+        
+        return self._parseStyledTag(Style("-"), break_at=break_at)
 
-    def _parseStyledTag(self, style=None):
+    
+    def _parseStyledTag(self, style=None, break_at=None):
             
         token = self.token[0]
         if style is None:
@@ -920,9 +922,10 @@ class Parser(object):
 
         
         if token.selfClosing:
-            return style 
+            return style
         
-        break_at = set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "BREAK", "SECTION", "BEGINTABLE"])
+        if break_at is None:
+            break_at = set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "BREAK", "SECTION", "BEGINTABLE"])
         
         while self.left:
             token = self.token

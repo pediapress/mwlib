@@ -231,7 +231,6 @@ def test_blockquote_with_newline():
     print "STYLE:", node
     assert "blockquoted" in node.asText(), "expected 'blockquoted'"
 
-@xfail
 def test_blockquote_with_two_paras():
     """http://code.pediapress.com/wiki/ticket/41"""
     
