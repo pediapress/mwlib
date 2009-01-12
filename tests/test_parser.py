@@ -236,7 +236,7 @@ def test_blockquote_with_two_paras():
     
     node = parse("<blockquote>\nblockquoted\n\nmust be inside</blockquote>")
     print 'BLOCKQUOTE:', node.children
-    assert len(node.children) == 1
+    assert len(node.children)==1, "expected exactly one child node"
     
 @xfail
 def test_newlines_in_bold_tag():
@@ -244,7 +244,7 @@ def test_newlines_in_bold_tag():
     
     node = parse('<b>test\n\nfoo</b>')
     print node
-    assert len(node.children) == 1
+    assert len(node.children)==1, "expected exactly one child node"
 
 def test_percent_table_style(): 
     """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
@@ -275,11 +275,11 @@ def test_ol_ul():
 
     r=parse("#num\n*bul\n")
     lists = r.find(parser.ItemList)    
-    assert len(lists)==2
+    assert len(lists)==2, "expected two ItemList children"
 
     r=parse("*num\n#bul\n")
     lists = r.find(parser.ItemList)    
-    assert len(lists)==2
+    assert len(lists)==2, "expected two ItemList children"
 
 def test_nested_lists():
     """http://code.pediapress.com/wiki/ticket/33"""
@@ -361,7 +361,7 @@ def test_headings_unbalanced_2():
 def test_headings_tab_end():
     r=parse("=heading=\t")
     print "R:", r
-    assert isinstance(r.children[0], parser.Section)
+    assert isinstance(r.children[0], parser.Section), "expected first child to be a Section"
     
 def test_table_extra_cells_and_rows():
     """http://code.pediapress.com/wiki/ticket/19"""
@@ -454,9 +454,9 @@ def test_mailto():
 def _check_text_in_pretag(txt):
     r=parse("<pre>%s</pre>" % txt)
     p=r.find(parser.PreFormatted)[0]
-    assert len(p.children)==1
+    assert len(p.children)==1, "expected exactly one child node inside PreFormatted"
     t=p.children[0]
-    assert t==parser.Text(txt)
+    assert t==parser.Text(txt), "child node contains wrong text"
     
 def test_pre_tag_newlines():
     """http://code.pediapress.com/wiki/ticket/79"""
@@ -486,7 +486,7 @@ def test_parse_preformatted_blockquote():
         
 def _parse_url(u):
     url = parse("url: %s " % u).find(parser.URL)[0]
-    assert url.caption == u
+    assert url.caption == u, "url has wrong caption"
 
 def test_url_parsing_plus():
     _parse_url("http://mw/foo+bar")
@@ -509,23 +509,23 @@ def test_url_parsing_umlauts():
 def test_table_markup_in_link_pipe_plus():
     """http://code.pediapress.com/wiki/ticket/54"""
     r=parse("[[bla|+blubb]]").find(parser.Link)[0]
-    assert r.target=='bla'
+    assert r.target=='bla', "wrong target"
     
 def test_table_markup_in_link_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/54"""
     r=parse("[[bla||blubb]]").find(parser.Link)[0]
-    assert r.target=='bla'
+    assert r.target=='bla', "wrong target"
     
 
 def test_table_markup_in_link_table_pipe_plus():
     """http://code.pediapress.com/wiki/ticket/11"""
     r=parse("{|\n|+\n|[[bla|+blubb]]\n|}").find(parser.Link)[0]
-    assert r.target=='bla'
+    assert r.target=='bla', "wrong target"
     
 def test_table_markup_in_link_table_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/11"""
     r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
-    assert r.target=='bla'
+    assert r.target=='bla', "wrong target"
 
 def test_source_tag():
     source = "\nwhile(1){ {{#expr:1+1}}\n  i++;\n}\n\nreturn 0;\n"
@@ -533,8 +533,8 @@ def test_source_tag():
 
     r=parse(s).find(parser.TagNode)[0]
     print r
-    assert r.vlist["lang"] == "c"
-    assert r.children==[parser.Text(source)]
+    assert r.vlist["lang"] == "c", "wrong lang attribute"
+    assert r.children==[parser.Text(source)], "bad children"
 
 def test_self_closing_style():
     "http://code.pediapress.com/wiki/ticket/93"
@@ -671,48 +671,48 @@ def test_piped_link():
 
 def test_category_link():
     r=parse("[[category:bla]]").find(parser.CategoryLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 14
+    assert r.target=='bla', "wrong target"
+    assert r.namespace == 14, "wrong namespace"
 
 def test_category_colon_link():
     r=parse("[[:category:bla]]").find(parser.SpecialLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 14
+    assert r.target=='bla', "wrong target"
+    assert r.namespace == 14, "wrong namespace"
     assert not isinstance(r, parser.CategoryLink)
 
 def test_image_link():
     t = uparser.parseString('', u'[[画像:Tajima mihonoura03s3200.jpg]]', lang='ja')
     r = t.find(parser.ImageLink)[0]
     assert r.target == u'Tajima mihonoura03s3200.jpg'
-    assert r.namespace == 6
+    assert r.namespace == 6, "wrong namespace"
 
 def test_image_colon_link():
     r=parse("[[:image:bla.jpg]]").find(parser.SpecialLink)[0]
     assert r.target=='bla.jpg'
-    assert r.namespace == 6
-    assert not isinstance(r, parser.ImageLink)
+    assert r.namespace == 6, "wrong namespace"
+    assert not isinstance(r, parser.ImageLink), "should not be an image link"
 
 def test_interwiki_link():
     r=parse("[[wikt:bla]]").find(parser.InterwikiLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 'wiktionary'
+    assert r.target=='bla', "wrong target"
+    assert r.namespace == 'wiktionary', "wrong namespace"
     r=parse("[[mw:bla]]").find(parser.InterwikiLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 'mw'
+    assert r.target=='bla', "wrong target"
+    assert r.namespace == 'mw', "wrong namespace"
 
 def test_language_link():
     r=parse("[[es:bla]]").find(parser.LangLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 'es'
+    assert r.target=='bla', "wrong target"
+    assert r.namespace == 'es', "wrong namespace"
 
 def test_long_language_link():
     r=parse("[[csb:bla]]").find(parser.LangLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 'csb'
+    assert r.target=='bla', "wrong target"
+    assert r.namespace == 'csb', "wrong namespace"
 
 def test_subpage_link():
     r = parse('[[/SomeSubPage]]').find(parser.ArticleLink)[0]
-    assert r.target == '/SomeSubPage'
+    assert r.target == '/SomeSubPage', "wrong target"
 
 def test_normalize():
     r=parse("[[MediaWiki:__bla_ _]]").find(parser.NamespaceLink)[0]
@@ -770,5 +770,3 @@ def test_nowiki_inside_tags():
     r=parse(s)
     tags = r.find(parser.TagNode)
     assert tags, "no tag node found"
-    
-    
