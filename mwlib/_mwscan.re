@@ -161,6 +161,9 @@ re2c:yyfill:enable = 0 ;
 	      | "__NOTC__"
 	      | "__END__" 
 	      | "__START__"
+	      | "__NUMBEREDHEADINGS__"
+	      | "__NOTOCNUM__"
+	      | "__NONUMBEREDHEADINGS__"
 	      );
 */
 	if (!bol()) {
