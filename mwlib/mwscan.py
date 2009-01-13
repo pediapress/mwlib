@@ -185,38 +185,7 @@ class _compat_scanner(object):
                 isEndToken = isinstance(tt, EndTagToken)
                 closingOrSelfClosing = isEndToken or tt.selfClosing
                 
-                if tt.t=="math":
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
-                    
-                    res.append(("MATH", g()))
-                    i+=1
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t=="math":
-                                res.append(("ENDMATH", g()))
-                                break
-                        res.append(("LATEX", g()))
-                        i+=1
-                elif tt.t=="timeline":
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
-                    res.append(("TIMELINE", g()))
-                    i+=1
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t=="timeline":
-                                res.append(("TIMELINE", g()))
-                                break
-                        res.append(("TEXT", g()))
-                        i+=1
-                elif tt.t in self.tagextensions or tt.t=='imagemap':
+                if tt.t in self.tagextensions or tt.t in ('imagemap', 'gallery'):
                     if closingOrSelfClosing:
                         i+=1
                         continue
@@ -224,30 +193,32 @@ class _compat_scanner(object):
                     
                     res.append((tt, s))
                     i+=1
+                    text_start = None
+                    text_end = None
+                    end_token = None
+                    
                     while i<numtokens:
                         type, start, tlen = tokens[i]
+                        if text_start is None:
+                            text_start = start
+                            
                         if type==token.t_html_tag:
                             tt = self.tagtoken(g())
                             if tt.t==tagname:
-                                res.append((tt, g()))
+                                end_token = (tt, g())
                                 break
-                        res.append(("TEXT", g()))
+                        text_end = start+tlen
+                        
                         i+=1
-                elif tt.t=="gallery":
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
-                    res.append((tt, s))
-                    i+=1
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t=="gallery":
-                                res.append((tt, g()))
-                                break
-                        res.append(("TEXT", g()))
-                        i+=1
+
+                    if text_end:
+                        res.append(("TEXT", text[text_start:text_end]))
+                        
+                    if end_token:
+                        res.append(end_token)
+                    
+
+                        
                 elif tt.t=="nowiki":
                     i+=1
                     if isEndToken or tt.selfClosing:

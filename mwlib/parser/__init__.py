@@ -31,10 +31,10 @@ class TokenSet(object):
         return x in self.values or type(x) in self.types
         
 FirstAtom = TokenSet(['TEXT', 'URL', 'SPECIAL', '[[', 'MATH', '\n',
-                      'BEGINTABLE', 'SINGLEQUOTE', 'TIMELINE', 'ITEM', 'URLLINK',
+                      'BEGINTABLE', 'SINGLEQUOTE', 'ITEM', 'URLLINK',
                       TagToken])
 
-FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'SINGLEQUOTE', 'BEGINTABLE', 'ITEM',
+FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', '[[', 'SINGLEQUOTE', 'BEGINTABLE', 'ITEM',
                            'PRE', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
                            TagToken])
 
@@ -195,8 +195,6 @@ class Parser(object):
             return Text(token[1])
         elif token[0]=='[[':
             return self.parseLink()
-        elif token[0]=='MATH':
-            return self.parseMath()
         elif token[0]=='\n':
             self.next()            
             return Text(token[1])
@@ -204,8 +202,6 @@ class Parser(object):
             return self.parseTable()
         elif token[0]=='SINGLEQUOTE':
             return self.parseSingleQuote()
-        elif token[0]=='TIMELINE':
-            return self.parseTimeline()
         elif token[0]=='ITEM':
             return self.parseItemList()
         elif isinstance(token[0], TagToken):
@@ -435,7 +431,6 @@ class Parser(object):
             interwikimap=self.interwikimap,
         )
 
-        #print node.imagemap
         return node
 
     def parseSection(self):
@@ -764,30 +759,6 @@ class Parser(object):
 
         return retval
 
-    def parseMath(self):
-        self.next()
-        caption = u''
-        while self.left:
-            token = self.token
-            self.next()            
-            if token[0]=='ENDMATH':
-                break
-            caption += token[1]
-        return Math(caption)                
-                
-    def parseTimeline(self):
-        t=Timeline()
-        self.next()
-        snippets = []
-        while self.left:
-            token = self.token
-            self.next()
-            if token[0]=='TIMELINE':
-                break
-            snippets.append(token[1])
-        t.caption = "".join(snippets)
-        return t
-        
     def parseEOLStyle(self):
         token = self.token
         maybe_definition = False
@@ -985,10 +956,10 @@ class Parser(object):
         last = None
         for idx in range(self.pos, len(self.tokens)-1):
             nexttoken = self.tokens[idx][0]
-            if nexttoken in ['ROW', 'COLUMN', 'BEGINTABLE', 'ENDTABLE', 'TIMELINE']:
+            if nexttoken in ['ROW', 'COLUMN', 'BEGINTABLE', 'ENDTABLE']:
                 return None
 
-            if isinstance(nexttoken, TagToken) and nexttoken.t in [u'blockquote']:
+            if isinstance(nexttoken, TagToken) and nexttoken.t in [u'blockquote', 'timeline']:
                 return None
             
             if nexttoken=='BREAK':
