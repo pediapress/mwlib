@@ -285,6 +285,9 @@ def test_urlencode_non_ascii():
 def test_anchorencode():
     """http://code.pediapress.com/wiki/ticket/213"""
     expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')
+
+def test_anchorencode_non_ascii():
+    expandstr(u"{{anchorencode:\u0107}}", ".C4.87")
     
 def test_fullurl():
     expandstr('{{fullurl:x y @}}', 'http://en.wikipedia.org/wiki/X_y_%40')
