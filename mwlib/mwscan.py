@@ -150,7 +150,10 @@ class _compat_scanner(object):
     def __call__(self, text):
         if self.allowed_tags is None:
             self._init_allowed_tags()
-        
+
+        if isinstance(text, str):
+            text = unicode(text)
+            
         tokens = scan(text)
         scanres = scan_result(text, tokens)
 
