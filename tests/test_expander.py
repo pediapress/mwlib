@@ -255,6 +255,10 @@ def test_empty_template():
 def test_implicit_newline_magic():
     expandstr("foo {{#if: 1 | :xxx }} bar", "foo \n:xxx bar")
     expandstr("foo {{#ifexpr: 1 | #xxx }} bar", "foo \n#xxx bar")
+
+def test_implicit_newline_switch():
+    """http://code.pediapress.com/wiki/ticket/386"""
+    expandstr("* foo{{#switch:bar|bar=* bar}}", "* foo\n* bar")
     
 def test_expand_after_named():
     db = DictDB(
@@ -278,7 +282,6 @@ def test_urlencode():
 def test_urlencode_non_ascii():
     expandstr(u'{{urlencode:L\xe9onie}}', 'L%C3%A9onie')
 
-@xfail
 def test_anchorencode():
     """http://code.pediapress.com/wiki/ticket/213"""
     expandstr('{{anchorencode:x #y @}}', 'x_.23y_.40')

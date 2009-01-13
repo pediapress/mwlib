@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2007-2008 PediaPress GmbH
+# Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
 
@@ -92,6 +92,20 @@ class Rot13Extension(TagExtension):
 register(Rot13Extension)
 
 
+class TimelineExtension(TagExtension):
+    name = "timeline"
+    def __call__(self, source, attributes):
+        from mwlib.parser import Timeline
+        return Timeline(source)
+register(TimelineExtension)
+
+
+class MathExtension(TagExtension):
+    name = "math"
+    def __call__(self, source, attributes):
+        from mwlib.parser import Math
+        return Math(source)
+register(MathExtension)
 
 class IDLExtension(TagExtension):
     # http://wiki.services.openoffice.org/wiki/Special:Version

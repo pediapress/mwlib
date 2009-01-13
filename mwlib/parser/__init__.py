@@ -1,13 +1,12 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2007-2008 PediaPress GmbH
+# Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import sys
 import os
 import re
 
-from mwlib.scanner import tokenize, TagToken, EndTagToken
+from mwlib.scanner import TagToken, EndTagToken
 from mwlib.log import Log
 from mwlib import namespace
 
@@ -32,10 +31,10 @@ class TokenSet(object):
         return x in self.values or type(x) in self.types
         
 FirstAtom = TokenSet(['TEXT', 'URL', 'SPECIAL', '[[', 'MATH', '\n',
-                      'BEGINTABLE', 'SINGLEQUOTE', 'TIMELINE', 'ITEM', 'URLLINK',
+                      'BEGINTABLE', 'SINGLEQUOTE', 'ITEM', 'URLLINK',
                       TagToken])
 
-FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', 'TIMELINE', '[[', 'SINGLEQUOTE', 'BEGINTABLE', 'ITEM',
+FirstParagraph = TokenSet(['SPECIAL', 'URL', 'TEXT', '[[', 'SINGLEQUOTE', 'BEGINTABLE', 'ITEM',
                            'PRE', 'MATH', '\n', 'PRE', 'EOLSTYLE', 'URLLINK',
                            TagToken])
 
@@ -80,7 +79,7 @@ def parseParams(s):
             r[name] = maybeInt(value)
     return r
 
-from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style, Magic,
+from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style, 
                                 Book, Chapter, Article, Paragraph, Section,
                                 Timeline, TagNode, PreFormatted, URL, NamedURL,
                                 _VListNode, Table, Row, Cell, Caption, Link, ArticleLink, SpecialLink,
@@ -120,7 +119,20 @@ def append_br_tag(node):
     node.append(br)
 
 _ALPHA_RE = re.compile(r'[^\W\d_]+', re.UNICODE) # Matches alpha strings
-            
+
+def _get_tags():
+    allowed = set()
+    for x in dir(Parser):
+        if x.startswith("parse") and x.endswith("Tag"):
+            allowed.add(x[5:-3].lower())
+
+    from mwlib import tagext
+    allowed.update(x.lower() for x in tagext.default_registry.name2ext.keys())
+    allowed.remove("")
+    
+    
+    return allowed
+
 class Parser(object):
     def __init__(self, tokens, name='', lang=None, interwikimap=None):
         self.tokens = tokens
@@ -183,8 +195,6 @@ class Parser(object):
             return Text(token[1])
         elif token[0]=='[[':
             return self.parseLink()
-        elif token[0]=='MATH':
-            return self.parseMath()
         elif token[0]=='\n':
             self.next()            
             return Text(token[1])
@@ -192,8 +202,6 @@ class Parser(object):
             return self.parseTable()
         elif token[0]=='SINGLEQUOTE':
             return self.parseSingleQuote()
-        elif token[0]=='TIMELINE':
-            return self.parseTimeline()
         elif token[0]=='ITEM':
             return self.parseItemList()
         elif isinstance(token[0], TagToken):
@@ -267,7 +275,7 @@ class Parser(object):
                 self.next()
             elif token[0] in break_at:
                 break
-            elif token[0] in FirstAtom and token[0] != 'SINGLEQUOTE':
+            elif token[0] in FirstAtom:
                 obj.append(self.parseAtom())
             elif token[1].startswith("|"):
                 obj.append(Control("|"))
@@ -357,10 +365,6 @@ class Parser(object):
 
     parseCODETag = parsePRETag
     parseSOURCETag = parsePRETag
-    def parseA7831D532A30DF0CD772BBC895944EC1Tag(self):
-        p = self.parseTag()
-        p.__class__ = Magic
-        return p    
 
     parseREFTag = parseTag
     parseREFERENCESTag = parseTag
@@ -427,7 +431,6 @@ class Parser(object):
             interwikimap=self.interwikimap,
         )
 
-        #print node.imagemap
         return node
 
     def parseSection(self):
@@ -497,21 +500,12 @@ class Parser(object):
         return s
 
     def parseSingleQuote(self):
-        def count_consecutives():
-            count = 0
-            while self.left:
-                token = self.token
-                if token[0] != 'SINGLEQUOTE':
-                    break
-                count += 1
-                self.next()
-            return count
         
         inner_style, outer_style = None, None
-        count = count_consecutives()
+        count = len(self.token[1])
+        self.next()
         
-        if count == 1:
-            return Text("'")
+        assert count>1, "internal error"
         
         end_count = 0
         if count >= 3:
@@ -539,15 +533,17 @@ class Parser(object):
         while self.left:
             token = self.token
             if token[0] == 'SINGLEQUOTE':
-                count = count_consecutives()
+                count = len(self.token[1])
+                assert count>1, "internal error"
                 if count >= end_count:
-                    self.pos -= count - end_count
+                    if count == end_count+1:
+                        self.tokens[self.pos] = ('TEXT', "'")
+                    elif count > end_count+1:
+                        self.tokens[self.pos] = ('SINGLEQUOTE', "'" * (count-end_count))
+                    else:
+                        self.next()
                     break
-                
-                if count == 1:
-                    inner_style.append(Text("'"))
-                    continue
-                
+                self.next()                
                 if count >= 3:
                     count -= 3
                     assert inner_style is not outer_style, 'sanity check'
@@ -571,7 +567,6 @@ class Parser(object):
                 if count > 0:
                     assert count == 1, 'sanity check'
                     inner_style.append(Text("'"))
-            
             elif token[0] in break_at:
                 break
             elif token[0] in FirstAtom:
@@ -764,30 +759,6 @@ class Parser(object):
 
         return retval
 
-    def parseMath(self):
-        self.next()
-        caption = u''
-        while self.left:
-            token = self.token
-            self.next()            
-            if token[0]=='ENDMATH':
-                break
-            caption += token[1]
-        return Math(caption)                
-                
-    def parseTimeline(self):
-        t=Timeline()
-        self.next()
-        snippets = []
-        while self.left:
-            token = self.token
-            self.next()
-            if token[0]=='TIMELINE':
-                break
-            snippets.append(token[1])
-        t.caption = "".join(snippets)
-        return t
-        
     def parseEOLStyle(self):
         token = self.token
         maybe_definition = False
@@ -903,11 +874,13 @@ class Parser(object):
     def parseSTRONGTag(self):
         return self._parseStyledTag(Style("'''"))
     
-    def parseBLOCKQUOTETag(self):
-        #return self._parseStyledTag(Style(":"))
-        return self._parseStyledTag(Style("-"))
+    def parseBLOCKQUOTETag(self,
+                           break_at=set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "SECTION", "BEGINTABLE"])):
+        
+        return self._parseStyledTag(Style("-"), break_at=break_at)
 
-    def _parseStyledTag(self, style=None):
+    
+    def _parseStyledTag(self, style=None, break_at=None):
             
         token = self.token[0]
         if style is None:
@@ -920,9 +893,10 @@ class Parser(object):
 
         
         if token.selfClosing:
-            return style 
+            return style
         
-        break_at = set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "BREAK", "SECTION", "BEGINTABLE"])
+        if break_at is None:
+            break_at = set(["ENDTABLE", "ROW", "COLUMN", "ITEM", "BREAK", "SECTION", "BEGINTABLE"])
         
         while self.left:
             token = self.token
@@ -982,10 +956,10 @@ class Parser(object):
         last = None
         for idx in range(self.pos, len(self.tokens)-1):
             nexttoken = self.tokens[idx][0]
-            if nexttoken in ['ROW', 'COLUMN', 'BEGINTABLE', 'ENDTABLE', 'TIMELINE']:
+            if nexttoken in ['ROW', 'COLUMN', 'BEGINTABLE', 'ENDTABLE']:
                 return None
 
-            if isinstance(nexttoken, TagToken) and nexttoken.t in [u'blockquote']:
+            if isinstance(nexttoken, TagToken) and nexttoken.t in [u'blockquote', 'timeline']:
                 return None
             
             if nexttoken=='BREAK':
@@ -995,8 +969,21 @@ class Parser(object):
                 last = idx, self.tokens[idx]
                 self.tokens[idx]=('ENDPRE', '\n')
                 break
+
         
-        
+        ws = u""
+        while self.left:
+            token = self.token
+            if token[0]=="TEXT" and not token[1].strip():
+                ws += token[1]
+            else:
+                break
+            self.next()
+            
+        if ws:
+            p.append(Text(ws))
+
+        first_node = True
         while self.left:
             token = self.token
             if token[0] == 'ENDPRE' or token[0]=='BREAK':
@@ -1021,6 +1008,12 @@ class Parser(object):
                 p.append(Text(token[1]))
                 self.next()
 
+            if first_node and isinstance(p.children[-1], ImageLink):
+                return p.children[-1]
+            
+                
+            first_node = False
+            
         if last:
             self.tokens[last[0]] = last[1]
 
@@ -1146,7 +1139,7 @@ class Parser(object):
         p.prefix = self.token[1]
 
         self.token[1]
-        break_at = TokenSet(["ENDTABLE", "COLUMN", "ROW"])
+        break_at = TokenSet(["ITEM", "ENDTABLE", "COLUMN", "ROW"])
         
         self.next()
         while self.left:

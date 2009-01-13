@@ -26,10 +26,6 @@ def test_url2():
     print s.toks
     assert s.rawtext(s.toks[1]) == u' How GPUs work'
 
-def test_tokenize_math():
-    toks = mwscan.tokenize("<math> bla </math> blubb")
-    assert toks==[('MATH', '<math>'), ('LATEX', ' bla '), ('ENDMATH', '</math>'), ('TEXT', ' blubb')], "bad tokenization"
-
 def _check_table_markup(s):
     toks = [t[0] for t in mwscan.scan(s)]
     print "TOKENS:",toks

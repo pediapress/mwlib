@@ -1,5 +1,5 @@
 // -*- mode: c++ -*-
-// Copyright (c) 2007-2008 PediaPress GmbH
+// Copyright (c) 2007-2009 PediaPress GmbH
 // See README.txt for additional licensing information.
 
 #include <Python.h>
@@ -161,6 +161,9 @@ re2c:yyfill:enable = 0 ;
 	      | "__NOTC__"
 	      | "__END__" 
 	      | "__START__"
+	      | "__NUMBEREDHEADINGS__"
+	      | "__NOTOCNUM__"
+	      | "__NONUMBEREDHEADINGS__"
 	      );
 */
 	if (!bol()) {
@@ -267,7 +270,7 @@ not_bol:
 		RET(t_special);
 	}
   [:|\[\]]              {RET(t_special);}
-  "'" {RET(t_singlequote);}
+  "'" "'"+ {RET(t_singlequote);}
   "<" "/"? [a-zA-Z]+ [^\000<>]* "/"? ">" 
 		{RET(t_html_tag);}
 

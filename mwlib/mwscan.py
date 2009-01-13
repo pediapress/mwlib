@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2007-2008 PediaPress GmbH
+# Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
 import sys
@@ -110,8 +110,10 @@ class scan_result(object):
         return self.toks[idx]
 
 
+
 class _compat_scanner(object):
     from mwlib.tagext import default_registry as tagextensions
+    allowed_tags = None
     
     class ignore: pass
     tok2compat = {
@@ -140,8 +142,15 @@ class _compat_scanner(object):
         token.t_urllink: "URLLINK",
         }
 
-                   
+
+    def _init_allowed_tags(self):
+        from mwlib.parser import _get_tags
+        self.allowed_tags = _get_tags()
+        
     def __call__(self, text):
+        if self.allowed_tags is None:
+            self._init_allowed_tags()
+        
         tokens = scan(text)
         scanres = scan_result(text, tokens)
 
@@ -176,38 +185,7 @@ class _compat_scanner(object):
                 isEndToken = isinstance(tt, EndTagToken)
                 closingOrSelfClosing = isEndToken or tt.selfClosing
                 
-                if tt.t=="math":
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
-                    
-                    res.append(("MATH", g()))
-                    i+=1
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t=="math":
-                                res.append(("ENDMATH", g()))
-                                break
-                        res.append(("LATEX", g()))
-                        i+=1
-                elif tt.t=="timeline":
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
-                    res.append(("TIMELINE", g()))
-                    i+=1
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t=="timeline":
-                                res.append(("TIMELINE", g()))
-                                break
-                        res.append(("TEXT", g()))
-                        i+=1
-                elif tt.t in self.tagextensions or tt.t=='imagemap':
+                if tt.t in self.tagextensions or tt.t in ('imagemap', 'gallery'):
                     if closingOrSelfClosing:
                         i+=1
                         continue
@@ -215,30 +193,32 @@ class _compat_scanner(object):
                     
                     res.append((tt, s))
                     i+=1
+                    text_start = None
+                    text_end = None
+                    end_token = None
+                    
                     while i<numtokens:
                         type, start, tlen = tokens[i]
+                        if text_start is None:
+                            text_start = start
+                            
                         if type==token.t_html_tag:
                             tt = self.tagtoken(g())
                             if tt.t==tagname:
-                                res.append((tt, g()))
+                                end_token = (tt, g())
                                 break
-                        res.append(("TEXT", g()))
+                        text_end = start+tlen
+                        
                         i+=1
-                elif tt.t=="gallery":
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
-                    res.append((tt, s))
-                    i+=1
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t=="gallery":
-                                res.append((tt, g()))
-                                break
-                        res.append(("TEXT", g()))
-                        i+=1
+
+                    if text_end:
+                        res.append(("TEXT", text[text_start:text_end]))
+                        
+                    if end_token:
+                        res.append(end_token)
+                    
+
+                        
                 elif tt.t=="nowiki":
                     i+=1
                     if isEndToken or tt.selfClosing:
@@ -269,7 +249,10 @@ class _compat_scanner(object):
                     else:
                         res.append(("ROW", g()))
                 else:
-                    res.append((tt, s))
+                    if tt.t in self.allowed_tags:
+                        res.append((tt, s))
+                    else:
+                        res.append(("TEXT", s))
             else:
                 a(type)
             i+=1
@@ -310,8 +293,6 @@ class _compat_scanner(object):
         
         
 compat_scan = _compat_scanner()
-
-# from plexscanner import _BaseTagToken, TagToken, EndTagToken
 
 class _BaseTagToken(object):
     def __eq__(self, other):

@@ -25,6 +25,24 @@ class Time(nodes.Node):
 
         from mwlib.templ import magic_time
         res.append(magic_time.time(format, d))
+
+class Anchorencode(nodes.Node):
+    def flatten(self, expander, variables, res):
+        arg = []
+        evaluate.flatten(self[0], expander, variables, arg)
+        arg = u"".join(arg)
+
+        # Note: mediawiki has a bug. It tries not to touch colons by replacing '.3A' with
+        # with the colon. However, if the original string contains the substring '.3A',
+        # it will also replace it with a colon. We do *not* reproduce that bug here...
+        import urllib
+        e = urllib.quote_plus(arg, ':').replace('%', '.').replace('+', '_')
+        res.append(e)
         
-registry = {'#time': Time, 'subst': Subst}
+        
+registry = {'#time': Time,
+            'subst': Subst,
+            'anchorencode': Anchorencode,
+            }
+
 

@@ -1,5 +1,5 @@
 
-# Copyright (c) 2007-2008 PediaPress GmbH
+# Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
 from mwlib.templ import magics
@@ -106,6 +106,7 @@ class SwitchNode(Node):
         if self.unresolved is None:
             self._init()
 
+        res.append(maybe_newline)
         val = []
         flatten(self[0], expander, variables, val)
         val = u"".join(val).strip()
@@ -138,7 +139,8 @@ class SwitchNode(Node):
         flatten(retval, expander, variables, tmp)
         tmp = u"".join(tmp).strip()
         res.append(tmp)
-            
+        res.append(dummy_mark)
+
 class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []
