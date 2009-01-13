@@ -36,7 +36,7 @@ class Anchorencode(nodes.Node):
         # with the colon. However, if the original string contains the substring '.3A',
         # it will also replace it with a colon. We do *not* reproduce that bug here...
         import urllib
-        e = urllib.quote_plus(arg, ':').replace('%', '.').replace('+', '_')
+        e = urllib.quote_plus(arg.encode('utf-8'), ':').replace('%', '.').replace('+', '_')
         res.append(e)
         
         
