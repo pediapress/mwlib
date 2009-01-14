@@ -124,15 +124,15 @@ class OptionParser(optparse.OptionParser):
         username, password, domain = None, None, None
         if self.options.login:
             if self.options.login.count(':') == 1:
-                username, password = self.options.login.split(':', 1)
+                username, password = unicode(self.options.login, 'utf-8').split(':', 1)
             else:
-                username, password, domain = self.options.login.split(':', 2)
+                username, password, domain = unicode(self.options.login, 'utf-8').split(':', 2)
         env = wiki.makewiki(self.options.config,
             metabook=self.metabook,
             username=username,
             password=password,
             domain=domain,
-            script_extension=self.options.script_extension,
+            script_extension=unicode(self.options.script_extension, 'utf-8'),
         )
         if self.options.noimages:
             env.images = None
@@ -141,14 +141,14 @@ class OptionParser(optparse.OptionParser):
             or self.options.print_template_prefix:
             if hasattr(env.wiki, 'setTemplateExclusion'):
                 env.wiki.setTemplateExclusion(
-                    blacklist=self.options.template_blacklist,
-                    category=self.options.template_exclusion_category,
-                    prefix=self.options.print_template_prefix,
+                    blacklist=unicode(self.options.template_blacklist, 'utf-8'),
+                    category=unicode(self.options.template_exclusion_category, 'utf-8'),
+                    prefix=unicode(self.options.print_template_prefix, 'utf-8'),
                 )
             else:
                 log.warn('WikiDB does not support setting a template blacklist')
         if self.options.collectionpage:
-            wikitext = env.wiki.getRawArticle(self.options.collectionpage)
+            wikitext = env.wiki.getRawArticle(unicode(self.options.collectionpage, 'utf-8'))
             if wikitext is None:
                 raise RuntimeError('No such collection page: %r' % (
                     self.options.collectionpage,
