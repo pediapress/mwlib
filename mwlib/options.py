@@ -127,23 +127,40 @@ class OptionParser(optparse.OptionParser):
                 username, password = unicode(self.options.login, 'utf-8').split(':', 1)
             else:
                 username, password, domain = unicode(self.options.login, 'utf-8').split(':', 2)
+        if self.options.script_extension:
+            script_extension = unicode(self.options.script_extension, 'utf-8')
+        else:
+            script_extension = None
+
         env = wiki.makewiki(self.options.config,
             metabook=self.metabook,
             username=username,
             password=password,
             domain=domain,
-            script_extension=unicode(self.options.script_extension, 'utf-8'),
+            script_extension=script_extension,
         )
         if self.options.noimages:
             env.images = None
-        if self.options.template_blacklist\
-            or self.options.template_exclusion_category\
-            or self.options.print_template_prefix:
+        if self.options.template_blacklist:
+            template_blacklist = unicode(self.options.template_blacklist, 'utf-8')
+        else:
+            template_blacklist = None
+        if self.options.template_exclusion_category:
+            template_exclusion_category = unicode(self.options.template_exclusion_category, 'utf-8')
+        else:
+            template_exclusion_category = None
+        if self.options.print_template_prefix:
+            print_template_prefix = unicode(self.options.print_template_prefix, 'utf-8')
+        else:
+            print_template_prefix = None
+        if template_blacklist\
+            or template_exclusion_category\
+            or print_template_prefix:
             if hasattr(env.wiki, 'setTemplateExclusion'):
                 env.wiki.setTemplateExclusion(
-                    blacklist=unicode(self.options.template_blacklist, 'utf-8'),
-                    category=unicode(self.options.template_exclusion_category, 'utf-8'),
-                    prefix=unicode(self.options.print_template_prefix, 'utf-8'),
+                    blacklist=template_blacklist,
+                    category=template_exclusion_category,
+                    prefix=print_template_prefix,
                 )
             else:
                 log.warn('WikiDB does not support setting a template blacklist')
