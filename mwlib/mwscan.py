@@ -52,7 +52,6 @@ def dump_tokens(text, tokens):
         print type, repr(text[start:start+len])
            
 def scan(text):
-    stime=time.time()
     text += u"\0"*32    
     tokens = _mwscan.scan(text)
     return scan_result(text, tokens)
