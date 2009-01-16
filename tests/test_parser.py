@@ -446,6 +446,10 @@ def test_nonascii_in_tags():
 def test_mailto_named():
     r = parse("[mailto:ralf@brainbot.com me]")
     assert r.find(parser.NamedURL), "expected a NamedLink"
+
+def test_namedurl_inside_link():
+    r = parse("[http://foo.com baz]]]")
+    assert r.find(parser.NamedURL), "expected a NamedURL"
     
 def test_mailto():
     r=parse("mailto:ralf@brainbot.com")
