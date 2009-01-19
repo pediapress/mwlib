@@ -39,9 +39,12 @@ log = Log("odfwriter")
 # check for ODF version and monkey patch stuff
 e = element.Element(qname = ("a","n"))
 if hasattr(e, "elements"): # odfpy-0.7
+    log("assuming odfpy-0.7x")
     def _f(self, c):
-        log("assumming odfpy-0.7x")
         self.elements.append(e)
+    def _r(self):
+        return "<odf.element.Element tag=%s instance at %s>" % (self.qname[1], id(self))
+    element.Element.__repr__ = _r
     element.Element.appendChild = _f
     element.Element.lastChild = property(lambda s:s.elements[-1])
     element.Element.setAttribute = element.Element.addAttribute
@@ -101,12 +104,14 @@ class ParagraphProxy(text.Element):
             #log("addElement", e.type, "not allowed in ", self.type)
             # find a parent that accepts this type
             p = self
+            #print self, "looking for parent to accept", e
             while p.parentNode is not None and e.qname not in p.allowed_children:
-                p = p.parentNode
+                #print "p:", p
                 assert p.parentNode is not p
+                p = p.parentNode
             if e.qname not in p.allowed_children:
                 assert p.parentNode is None
-                log("ParagraphProxy:addElement() ", e.type, "not allowed in any parents, failed, was added to", self.type)
+                log("ParagraphProxy:addElement() ", e.type, "not allowed in any parents, failed, should have been added to", self.type)
                 return
             assert p is not self
             #log("addElement: moving", e.type, "to ", p.type)
@@ -213,7 +218,8 @@ class ODFWriter(object):
         def saveAddChild(p,c):
             try:
                 p.addElement(c) 
-                assert c.parentNode is not None
+                #print "save add child %r to %r" % (c, p)
+                assert c.parentNode is not None # this check fails if the child could not be added
                 return True
             except odf.element.IllegalChild:
                 # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed in ' u'text:span' ', dumping'
@@ -340,6 +346,13 @@ class ODFWriter(object):
         p = ParagraphProxy(stylename=style.indentedSingle)
         li.addElement(p)
         li.writeto = p
+        # FIXME, this should be handled in advtree!
+        if not isinstance(obj.parent, advtree.DefinitionList):
+            dl = text.List(stylename=style.definitionlist)
+            dl.addElement(li)
+            dl.writeto = p
+            return dl
+        
         return li
 
 

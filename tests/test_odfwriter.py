@@ -399,3 +399,13 @@ def test_colspan():
 </table>
 '''
     xml = getXML(raw)
+
+
+
+def test_definitiondescription():
+    # works with a hack
+    raw = r'''
+: a
+:* b
+'''
+    xml = getXML(raw)
