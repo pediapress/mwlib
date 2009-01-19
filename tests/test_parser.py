@@ -774,3 +774,8 @@ def test_nowiki_inside_tags():
     r=parse(s)
     tags = r.find(parser.TagNode)
     assert tags, "no tag node found"
+
+def test_misformed_tag():
+    s='<div"barbaz">bold</div>'
+    r=parse(s).find(parser.TagNode)
+    assert len(r)==1, "expected a TagNode"
