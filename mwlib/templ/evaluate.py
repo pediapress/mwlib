@@ -17,7 +17,7 @@ def flatten(node, expander, variables, res):
 
     global recursion_count
 
-    if recursion_count>50:
+    if recursion_count>100:
         raise TemplateRecursion()
     
     
