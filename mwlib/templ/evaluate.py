@@ -5,7 +5,6 @@
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
-recursion_count = 0
 
 class TemplateRecursion(Exception): pass
 
@@ -15,13 +14,11 @@ def flatten(node, expander, variables, res):
         res.append(node)
         return True
 
-    global recursion_count
-
-    if recursion_count>50:
+    if expander.recursion_count > expander.recursion_limit:
         raise TemplateRecursion()
     
     
-    recursion_count += 1
+    expander.recursion_count += 1
     try:
         before = variables.count
         oldlen = len(res)
@@ -32,14 +29,14 @@ def flatten(node, expander, variables, res):
             else:
                 node.flatten(expander, variables, res)
         except TemplateRecursion:
-            if recursion_count > 2:
+            if expander.recursion_count > 2:
                 raise
             del res[oldlen:]
             log.warn("template recursion error ignored")
         after = variables.count
         return before==after
     finally:
-        recursion_count -= 1
+        expander.recursion_count -= 1
         
         
 class MemoryLimitError(Exception):
@@ -187,11 +184,14 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     del res[-2:]
     
 class Expander(object):
-    def __init__(self, txt, pagename="", wikidb=None):
+    def __init__(self, txt, pagename="", wikidb=None, recursion_limit=50):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
         self.db = wikidb
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
+
+        self.recursion_limit = recursion_limit
+        self.recursion_count = 0
 
         self.parsed = parser.parse(txt)
         #show(self.parsed)
