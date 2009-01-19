@@ -444,6 +444,10 @@ class ImageLink(Link):
     align = ''
     thumb = False
     printargs = None
+    alt = None
+    link = None
+    frame = None
+    border = None
     
     def isInline(self):
         return not bool(self.align or self.thumb)
@@ -477,12 +481,24 @@ class ImageLink(Link):
                 del self.children[idx]
                 continue
 
-            if x == 'frame' or x=='framed' or x=='enframed':
+            if x == 'frame' or x=='framed' or x=='enframed' or x=='frameless':
+                self.frame = x
+                del self.children[idx]
+                continue
+
+            if x == 'border':
+                self.border = True
                 del self.children[idx]
                 continue
 
             if x.startswith('print='):
                 self.printargs = x[len('print='):]
+
+            if x.startswith('alt='):
+                self.alt = x[len('alt='):]
+
+            if x.startswith('link='):
+                self.link = x[len('link='):]
 
             if x.endswith('px'):
                 # x200px
