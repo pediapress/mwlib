@@ -4,7 +4,7 @@
 # See README.txt for additional licensing information.
 
 import sys
-import time
+import re
 import _mwscan
 import htmlentitydefs
 
@@ -44,8 +44,12 @@ for d in dir(token):
         token2name[getattr(token, d)] = d
 del d
 
-        
-        
+def _split_tag(txt):
+    m=re.match(" *(\w+)(.*)", txt)
+    assert m is not None, "could not match tag name"
+    name = m.group(1)
+    values = m.group(2)
+    return name, values
     
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
@@ -278,7 +282,7 @@ class _compat_scanner(object):
             klass = TagToken
             isEndToken = False
 
-        name, values = (name.split(None, 1)+[u''])[:2]
+        name, values = _split_tag(name)
         from mwlib.parser import paramrx
         values = dict(paramrx.findall(values))
         name = name.lower()
