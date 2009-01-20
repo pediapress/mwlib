@@ -110,9 +110,12 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
     @returns: either path to generated png or mathml string
     @rtype: basestring
     """
+    if not latex:
+        return
     assert output_mode in ("png", "mathml")
     assert render_engine in ("texvc", "blahtexml")
     assert isinstance(latex, unicode), 'latex must be of type unicode'
+
     
     if output_mode == 'png' and not output_path:
         log.error('math rendering with output_mode png requires an output_path')
