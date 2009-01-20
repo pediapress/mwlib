@@ -108,7 +108,7 @@ class TreeCleaner(object):
 
         # list of css classes which trigger the removal of the node from the tree
         # the following list is wikipedia specific
-        self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame']
+        self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct']
 
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
