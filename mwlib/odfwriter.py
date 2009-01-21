@@ -276,6 +276,7 @@ class ODFWriter(object):
     def owriteArticle(self, a):
         self.references = [] # collect references
         title = a.caption
+        log(u"processing article %s" % title)
         r = text.Section(stylename=style.sect, name=title) #, display="none")
         r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
         return r 
