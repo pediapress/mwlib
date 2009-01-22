@@ -72,63 +72,121 @@ class OtherMagic(object):
 
 
 class TimeMagic(object):
-    now = datetime.datetime.now()
+    utcnow = datetime.datetime.utcnow()
 
     @noarg
     def CURRENTDAY(self):
         """Displays the current day in numeric form."""
-        return "%s" % self.now.day
+        return "%s" % self.utcnow.day
 
     @noarg
     def CURRENTDAY2(self):
         """[MW1.5+] Ditto with leading zero 01 .. 31)."""
-        return "%02d" % self.now.day
+        return "%02d" % self.utcnow.day
 
     @noarg
     def CURRENTDAYNAME(self):
         """Displays the current day in named form."""
-        return self.now.strftime("%A")
+        return self.utcnow.strftime("%A")
 
     @noarg
     def CURRENTDOW(self):
         """current day as number (0=Sunday, 1=Monday...)."""
-        return str((self.now.weekday()+1) % 7)
+        return str((self.utcnow.weekday()+1) % 7)
 
     @noarg
     def CURRENTMONTH(self):
         """The number 01 .. 12 of the current month."""
-        return "%02d" % self.now.month
+        return "%02d" % self.utcnow.month
 
     @noarg
     def CURRENTMONTHABBREV(self):
         """[MW1.5+] current month abbreviated Jan .. Dec."""
-        return self.now.strftime("%b")
+        return self.utcnow.strftime("%b")
 
     @noarg        
     def CURRENTMONTHNAME(self):
         """current month in named form January .. December.   """
-        return self.now.strftime("%B")
+        return self.utcnow.strftime("%B")
 
     @noarg
     def CURRENTTIME(self):
         """The current time of day (00:00 .. 23:59)."""
-        return self.now.strftime("%H:%M")
+        return self.utcnow.strftime("%H:%M")
 
     @noarg
     def CURRENTWEEK(self):
         """Number of the current week (1-53) according to ISO 8601 with no leading zero."""
-        return str(self.now.isocalendar()[1])
+        return str(self.utcnow.isocalendar()[1])
 
     @noarg
     def CURRENTYEAR(self):
         """Returns the current year."""
-        return str(self.now.year)
+        return str(self.utcnow.year)
 
     @noarg
     def CURRENTTIMESTAMP(self):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
-        return self.now.strftime("%Y%m%d%H%M%S")
+        return self.utcnow.strftime("%Y%m%d%H%M%S")
+    
+class LocaltimeMagic(object):
+    now = datetime.datetime.now()
 
+    @noarg
+    def LOCALDAY(self):
+        """Displays the current day in numeric form."""
+        return "%s" % self.now.day
+
+    @noarg
+    def LOCALDAY2(self):
+        """[MW1.5+] Ditto with leading zero 01 .. 31)."""
+        return "%02d" % self.now.day
+
+    @noarg
+    def LOCALDAYNAME(self):
+        """Displays the current day in named form."""
+        return self.now.strftime("%A")
+
+    @noarg
+    def LOCALDOW(self):
+        """current day as number (0=Sunday, 1=Monday...)."""
+        return str((self.now.weekday()+1) % 7)
+
+    @noarg
+    def LOCALMONTH(self):
+        """The number 01 .. 12 of the current month."""
+        return "%02d" % self.now.month
+
+    @noarg
+    def LOCALMONTHABBREV(self):
+        """[MW1.5+] current month abbreviated Jan .. Dec."""
+        return self.now.strftime("%b")
+
+    @noarg        
+    def LOCALMONTHNAME(self):
+        """current month in named form January .. December.   """
+        return self.now.strftime("%B")
+
+    @noarg
+    def LOCALTIME(self):
+        """The current time of day (00:00 .. 23:59)."""
+        return self.now.strftime("%H:%M")
+
+    @noarg
+    def LOCALWEEK(self):
+        """Number of the current week (1-53) according to ISO 8601 with no leading zero."""
+        return str(self.now.isocalendar()[1])
+
+    @noarg
+    def LOCALYEAR(self):
+        """Returns the current year."""
+        return str(self.now.year)
+
+    @noarg
+    def LOCALTIMESTAMP(self):
+        """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
+        return self.now.strftime("%Y%m%d%H%M%S")
+    
 class PageMagic(object):
     def __init__(self, pagename='', server="http://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
@@ -440,7 +498,7 @@ for x in dir(ParserFunctions):
 class DummyResolver(object):
     pass
 
-class MagicResolver(TimeMagic, PageMagic, NumberMagic, StringMagic, ParserFunctions, OtherMagic, DummyResolver):
+class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMagic, ParserFunctions, OtherMagic, DummyResolver):
     def __call__(self, name, args):
         try:
             name = str(name)
