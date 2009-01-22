@@ -60,6 +60,7 @@ include mwlib/options.py
 include mwlib/overlay.py
 include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
+include mwlib/parser/styleanalyzer.py
 include mwlib/podclient.py
 include mwlib/recorddb.py
 include mwlib/rendermath.py
