@@ -78,7 +78,7 @@ class state(object):
         return res
 
 def sort_states(states):
-    tmp = [((x.apocount, x.is_bold+x.is_italic), x) for x in states]
+    tmp = [((x.apocount+x.is_bold+x.is_italic), x) for x in states]
     tmp.sort()
     return [x[1] for x in tmp]
     
