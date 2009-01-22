@@ -189,6 +189,7 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
 class Expander(object):
     def __init__(self, txt, pagename="", wikidb=None):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
+        self.pagename = pagename
         self.db = wikidb
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
@@ -200,6 +201,10 @@ class Expander(object):
     def getParsedTemplate(self, name):
         if name.startswith("[[") or "|" in name:
             return None
+
+        if name.startswith("/"):
+            name = self.pagename+name
+            
         try:
             return self.parsedTemplateCache[name]
         except KeyError:
