@@ -23,25 +23,23 @@ def test_headings():
 
 
 
-def check_style(s, outer, inner=None):
+def check_style(s, counts):
+    print "PARSING:", repr(s)
     art = parse(s)
-    style = art.children[0].children[0]
-    assert isinstance(style, parser.Style)
-    assert style.caption == outer
-    if inner is not None:
-        assert isinstance(style.children[0], parser.Style)
-        assert style.children[0].caption == inner
-    else:
-        assert not isinstance(style.children[0], parser.Style)
+    styles = art.find(parser.Style)
+    assert len(styles)==len(counts), "wrong number of styles"
+    for i, x in enumerate(styles):
+        assert len(x.caption)==counts[i]
+        
 
 def test_style():
-    check_style(u"''mainz''", "''") 
-    check_style(u"'''mainz'''", "'''")
-    check_style(u"'''''mainz'''''", "'''", "''")
-    check_style(u"'''''mainz'' bla'''", "'''", "''")
-    check_style(u"'''''mainz''' bla''", "''", "'''")
-    check_style(u"'''''''''''''''''''pp'''''", "'''", "''")
-    check_style(u"'''test''bla", "''")
+    yield check_style, u"''frankfurt''", (2,)
+    yield check_style, u"'''mainz'''", (3,)
+    yield check_style,u"'''''hamburg'''''", (3,2)
+    yield check_style, u"'''''foo'' bla'''", (3,2,3)
+    yield check_style, u"'''''mainz''' bla''", (3,2,2)
+    yield check_style, u"'''''''''''''''''''pp'''''", (3,2)
+    yield check_style, u"'''test''bla", (2,)
 
 @xfail
 def test_style_fails():
@@ -55,16 +53,13 @@ def test_single_quote_after_style():
     def check(s, outer, inner=None):
         art = parse(s)
         styles = art.find(parser.Style)
-        style = art.children[0].children[0]
-        assert isinstance(style, parser.Style)
+        style = styles[0]
         assert style.caption == outer
         if inner is None:
             assert len(styles) == 1
-            assert not isinstance(style.children[0], parser.Style)
         else:
             assert len(styles) == 2
-            assert isinstance(style.children[0], parser.Style)
-            assert style.children[0].caption == inner
+            assert styles[1].caption == inner
     
     check(u"''pp'''s", "''")
     check(u"'''pp''''s", "'''")
@@ -74,9 +69,7 @@ def test_single_quote_after_style():
     check(u"'''''''''''''''''''pp''''''", "'''", "''")
 
 def test_links_in_style():
-    r=parse(u"'''[[mainz]]'''")
-    s=r.children[0].children[0]
-    assert isinstance(s, parser.Style)
+    s=parse(u"'''[[mainz]]'''").find(parser.Style)[0]
     assert isinstance(s.children[0], parser.Link)
     
 
