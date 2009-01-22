@@ -531,20 +531,20 @@ class Parser(object):
 
         last_apocount = 0
         for i, s in enumerate(states):
-            t = ""
-            if s.is_bold:
-                t += "'''"
-
-            if s.is_italic:
-                t += "''"
-
             apos = "'"*(s.apocount-last_apocount)
             if apos:
                 retval.children[i].children.insert(0, Text(apos))
             last_apocount = s.apocount
             
-            if t:
-                retval.children[i].caption = t
+            if s.is_bold and s.is_italic:
+                outer = Style("'''")
+                outer.append(retval.children[i])
+                retval.children[i].caption = "''"
+                retval.children[i]=outer
+            elif s.is_bold:
+                retval.children[i].caption = "'''"
+            elif s.is_italic:
+                retval.children[i].caption = "''"
             else:
                 retval.children[i].__class__=Node
                 retval.children[i].caption = u''
