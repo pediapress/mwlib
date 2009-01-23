@@ -124,6 +124,7 @@ include tests/test_advtree.py
 include tests/test_convert_templates.py
 include tests/test_docbookwriter.py
 include tests/test_expander.py
+include tests/test_expander_parser.py
 include tests/test_expander_time.py
 include tests/test_expr.py
 include tests/test_html.py
