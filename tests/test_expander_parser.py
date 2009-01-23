@@ -9,6 +9,4 @@ def test_no_arguments():
     
 def test_one_empty_arguments():
     t = parse(u"{{bla|}}")
-    assert t[1]==(u""), "expected exactly one empty argument"
-    
-    
+    assert len(t[1])==1, "expected exactly one argument"
