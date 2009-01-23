@@ -9,7 +9,7 @@ import inspect
 import re
 
 from mwlib.advtree import removeNewlines
-from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, CategoryLink, Cell, Center, Chapter,
+from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
                            HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
@@ -163,6 +163,7 @@ class TreeCleaner(object):
                           'removeInvisibleLinks', 
                           'cleanSectionCaptions',
                           'removeChildlessNodes',
+                          'removeNoPrintNodes',
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
                           'simplifyBlockNodes',
@@ -177,8 +178,8 @@ class TreeCleaner(object):
                           'removeEmptyReferenceLists',
                           'swapNodes',
                           'removeBigSectionsFromCells',
+                          'transformNestedTables',
                           'splitBigTableCells',
-                          'removeNoPrintNodes',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           'removeBreakingReturns',
@@ -458,7 +459,7 @@ class TreeCleaner(object):
                 display_text = []
                 for c in section.children[1:]:
                     display_text.append(c.getAllDisplayText().strip())
-                if not ''.join(display_text) and section.parent:
+                if not ''.join(display_text).strip() and section.parent:
                     section.parent.removeChild(section)
 
         for c in node.children:
@@ -654,8 +655,46 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeBigSectionsFromCells(c)
-                    
 
+    def transformNestedTables(self, node):
+        """ Remove Container tables that only contain large nested tables"""
+        
+        if node.__class__ == Table and node.parent and not node.getParentNodesByClass(Table):
+            parent = node.parent
+            rows = [ r for r in node.children if r.__class__ == Row]
+            captions = [ c for c in node.children if c.__class__ == Caption]
+            tables = []
+            non_tables = []
+            for row in rows:
+                for cell in row.children:
+                    for item in cell.children:
+                        if item.__class__ != Table:
+                            non_tables.append(item)
+                        else:
+                            tables.append(item)
+
+            if non_tables:
+                non_tables_text = ''.join([ n.getAllDisplayText() for n in non_tables]).strip()
+            else:
+                non_tables_text = None
+            if tables:
+                tables_text = ''.join([ n.getAllDisplayText() for n in tables]).strip()
+            else:
+                tables_text = None
+
+            if tables and (len(tables_text) > 500 ) and not non_tables_text:
+                if captions:
+                    for c in captions[::-1]:
+                        tables.insert(0, c)
+                parent.replaceChild(node, tables)
+                self.report('removed container table around large tables', node, tables)
+                return
+
+        for c in node.children:
+            self.transformNestedTables(c)
+    
+            
+            
     def splitBigTableCells(self, node):
         """Splits table cells if their height exceeds the output page height.
 
