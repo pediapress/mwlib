@@ -500,83 +500,56 @@ class Parser(object):
         return s
 
     def parseSingleQuote(self):
-        
-        inner_style, outer_style = None, None
-        count = len(self.token[1])
+        retval = Node()
+        node = Style(self.token[1])
+        retval.append(node)
         self.next()
-        
-        assert count>1, "internal error"
-        
-        end_count = 0
-        if count >= 3:
-            outer_style = inner_style = Style("'''")
-            end_count += 3
-            count -= 3
-        if count >= 2:
-            if inner_style is None:
-                outer_style = inner_style = Style("''")
-            else:
-                outer_style = inner_style
-                inner_style = Style("''")
-                outer_style.append(inner_style)
-            end_count += 2
-            count -= 2
-        
-        if count > 0:
-            inner_style.append(Text("'"*count))
         
         break_at = TokenSet([
             'BREAK', '\n', 'ENDEOLSTYLE', 'SECTION', 'ENDSECTION',
             'BEGINTABLE', ']]', 'ROW', 'COLUMN', 'ENDTABLE', EndTagToken,
         ])
-        
+
         while self.left:
             token = self.token
             if token[0] == 'SINGLEQUOTE':
-                count = len(self.token[1])
-                assert count>1, "internal error"
-                if count >= end_count:
-                    if count == end_count+1:
-                        self.tokens[self.pos] = ('TEXT', "'")
-                    elif count > end_count+1:
-                        self.tokens[self.pos] = ('SINGLEQUOTE', "'" * (count-end_count))
-                    else:
-                        self.next()
-                    break
-                self.next()                
-                if count >= 3:
-                    count -= 3
-                    assert inner_style is not outer_style, 'sanity check'
-                    # swap styles
-                    outer_style.caption = "''"
-                    inner_style.caption = "'''"
-                    inner_style = outer_style
-                    end_count = 2
-                
-                if count >= 2:
-                    count -= 2
-                    if inner_style is not outer_style:
-                        inner_style = outer_style
-                        end_count = 3
-                    else:
-                        # must be the case inner_style = outer_style = Style("'''")
-                        outer_style.caption = "''"
-                        self.pos -= 1
-                        break
-                
-                if count > 0:
-                    assert count == 1, 'sanity check'
-                    inner_style.append(Text("'"))
+                node = Style(self.token[1])
+                retval.append(node)
+                self.next()
             elif token[0] in break_at:
                 break
             elif token[0] in FirstAtom:
-                inner_style.append(self.parseAtom())
+                node.append(self.parseAtom())
             else:
                 log.info("assuming text in parseStyle", token)
-                inner_style.append(Text(token[1]))
+                node.append(Text(token[1]))
                 self.next()
-        
-        return outer_style
+
+        counts = [len(x.caption) for x in retval.children]
+        from mwlib.parser import styleanalyzer
+        states = styleanalyzer.compute_path(counts)
+
+        last_apocount = 0
+        for i, s in enumerate(states):
+            apos = "'"*(s.apocount-last_apocount)
+            if apos:
+                retval.children[i].children.insert(0, Text(apos))
+            last_apocount = s.apocount
+            
+            if s.is_bold and s.is_italic:
+                outer = Style("'''")
+                outer.append(retval.children[i])
+                retval.children[i].caption = "''"
+                retval.children[i]=outer
+            elif s.is_bold:
+                retval.children[i].caption = "'''"
+            elif s.is_italic:
+                retval.children[i].caption = "''"
+            else:
+                retval.children[i].__class__=Node
+                retval.children[i].caption = u''
+                
+        return retval
     
     def parseColumn(self):
         token = self.token

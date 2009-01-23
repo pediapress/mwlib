@@ -77,6 +77,9 @@ def test_alfred():
     print "EXPANDED:", repr(res)
     assert "1960" in res
 
+def test_switch_empty_fallback():
+    expandstr("{{#switch:||foo=good}}", "good")
+    
 def test_switch_numeric_comparison():
     expandstr("{{ #switch: +07 | 7 = Yes | 007 = Bond | No }}", "Yes")
 
@@ -91,6 +94,9 @@ def test_switch_case_sensitive3():
 
 def test_switch_fall_through():
     expandstr("{{#switch: a| a | b |c=first|default}}", "first")
+
+def test_switch_fall_through_computed():
+    expandstr("{{#switch:aaa|{{#if:1|aaa}}|b=fine}}", "fine")
     
 def test_names_insensitive():
     expandstr("{{ #SWItch: A | a=lower | UPPER }}", "UPPER")
@@ -226,13 +232,15 @@ def test_titleparts_nonint():
     expandstr("{{#titleparts:Help:Link/a/b|bla}}", "Help:Link/a/b")
     
 def test_iferror():
-    expandstr("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression")
-    expandstr("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input")
-    expandstr("{{#iferror:{{#expr:1+1}}|bad input}}", "2")
-    expandstr("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input")
-    expandstr("{{#iferror:{{#expr:1+1}}}}", "2")
-    expandstr("{{#iferror:{{#expr:1+Z}}}}", "")
-
+    yield expandstr, "{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression"
+    yield expandstr, "{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input"
+    yield expandstr, "{{#iferror:{{#expr:1+1}}|bad input}}", "2"
+    yield expandstr, "{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input"
+    yield expandstr, "{{#iferror:{{#expr:1+1}}}}", "2"
+    yield expandstr, "{{#iferror:{{#expr:1+Z}}}}", ""
+    yield expandstr, "{{#iferror:good|bad input|}}", ""
+    
+    
 def test_implicit_newline_noinclude():
     expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<noinclude></noinclude>{|"))
     

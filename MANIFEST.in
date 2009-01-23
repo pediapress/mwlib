@@ -60,6 +60,7 @@ include mwlib/options.py
 include mwlib/overlay.py
 include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
+include mwlib/parser/styleanalyzer.py
 include mwlib/podclient.py
 include mwlib/recorddb.py
 include mwlib/rendermath.py
@@ -123,6 +124,7 @@ include tests/test_advtree.py
 include tests/test_convert_templates.py
 include tests/test_docbookwriter.py
 include tests/test_expander.py
+include tests/test_expander_parser.py
 include tests/test_expander_time.py
 include tests/test_expr.py
 include tests/test_html.py

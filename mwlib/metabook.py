@@ -81,13 +81,14 @@ def parse_collection_page(wikitext):
     """
     
     metabook = make_metabook()
-    
+
     title_rex = '^==\s+(?P<title>.*?)\s+==$'
     subtitle_rex = '^===\s+(?P<subtitle>.*?)\s+===$'
     chapter_rex = '^;(?P<chapter>.*?)$'
     article_rex = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
-    alltogether_rex = re.compile("(%s)|(%s)|(%s)|(%s)" % (
-        title_rex, subtitle_rex, chapter_rex, article_rex,
+    oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.*?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
+    alltogether_rex = re.compile("(%s)|(%s)|(%s)|(%s)|(%s)" % (
+        title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex
     ))
     
     for line in wikitext.splitlines():
@@ -103,15 +104,23 @@ def parse_collection_page(wikitext):
                 title=res.group('chapter').strip(),
             ))
         elif res.group('article'):
-            article = make_article(title=res.group('article').strip())
-            if res.group('displaytitle'):
-                article['displaytitle'] = res.group('displaytitle').strip()
-            if metabook['items'] and metabook['items'][-1]['type'] == 'chapter':
-                metabook['items'][-1]['items'].append(article)
-            else:
-                metabook['items'].append(article)
-    
+            append_article(res.group('article'), res.group('displaytitle'), metabook)
+        elif res.group('oldarticle'):
+            append_article(res.group('oldarticle'), res.group('olddisplaytitle'), metabook, res.group('oldid'))
+            
     return metabook
+
+def append_article(article, displaytitle, metabook, revision=None):
+    if revision:
+        article = make_article(title=article.strip(), revision=revision)
+    else:
+        article = make_article(title=article.strip())
+    if displaytitle:
+        article['displaytitle'] = displaytitle.strip()
+    if metabook['items'] and metabook['items'][-1]['type'] == 'chapter':
+        metabook['items'][-1]['items'].append(article)
+    else:
+        metabook['items'].append(article)
 
 def get_item_list(metabook, filter_type=None):
     """Return a flat list of items in given metabook
