@@ -96,7 +96,9 @@ def compute_path(counts):
         if best.apocount==0 and not best.is_italic and not best.is_bold:
             #print "CHOOSING PERFECT STATE"
             states = [best]
-        
+        else:
+            states = states[:32]
+            
     tmp = states[0]
 
     res = []
