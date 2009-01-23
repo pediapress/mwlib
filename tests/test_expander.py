@@ -77,6 +77,9 @@ def test_alfred():
     print "EXPANDED:", repr(res)
     assert "1960" in res
 
+def test_switch_empty_fallback():
+    expandstr("{{#switch:||foo=good}}", "good")
+    
 def test_switch_numeric_comparison():
     expandstr("{{ #switch: +07 | 7 = Yes | 007 = Bond | No }}", "Yes")
 
