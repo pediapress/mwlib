@@ -481,8 +481,10 @@ class ParserFunctions(object):
         errmark = '<strong class="error">'
         val = args[0]
         bad=args[1]
-        good=args[2] or val
-        
+        good = args.get(2, None)
+        if good is None:
+            good = val
+            
         if errmark in val:
             return bad
         else:
