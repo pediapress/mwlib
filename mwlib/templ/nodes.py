@@ -125,7 +125,7 @@ class SwitchNode(Node):
             tmp = []
             flatten(k, expander, variables, tmp)
             tmp = u"".join(tmp).strip()
-            if tmp==k:
+            if tmp==val:
                 retval = v
                 break
             if num_val is not None and maybe_numeric(tmp)==num_val:
