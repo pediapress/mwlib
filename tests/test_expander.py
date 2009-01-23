@@ -226,12 +226,12 @@ def test_titleparts_nonint():
     expandstr("{{#titleparts:Help:Link/a/b|bla}}", "Help:Link/a/b")
     
 def test_iferror():
-    expandstr("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression")
-    expandstr("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input")
-    expandstr("{{#iferror:{{#expr:1+1}}|bad input}}", "2")
-    expandstr("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input")
-    expandstr("{{#iferror:{{#expr:1+1}}}}", "2")
-    expandstr("{{#iferror:{{#expr:1+Z}}}}", "")
+    yield expandstr, "{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression"
+    yield expandstr, "{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input"
+    yield expandstr, "{{#iferror:{{#expr:1+1}}|bad input}}", "2"
+    yield expandstr, "{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input"
+    yield expandstr, "{{#iferror:{{#expr:1+1}}}}", "2"
+    yield expandstr, "{{#iferror:{{#expr:1+Z}}}}", ""
 
 def test_implicit_newline_noinclude():
     expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<noinclude></noinclude>{|"))
