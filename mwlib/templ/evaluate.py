@@ -235,7 +235,8 @@ class Expander(object):
             
         
     def expandTemplates(self):
-        res = []
+        res = ["\n"] # guard, against implicit newlines at the beginning
         flatten(self.parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
+        res[0] = u''
         return u"".join(res)
