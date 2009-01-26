@@ -267,6 +267,11 @@ def test_implicit_newline_magic():
 def test_implicit_newline_switch():
     """http://code.pediapress.com/wiki/ticket/386"""
     expandstr("* foo{{#switch:bar|bar=* bar}}", "* foo\n* bar")
+
+
+def test_implicit_newline_inner():
+    yield expandstr, "ab {{#if: 1| cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef"
+    yield expandstr, "ab {{#switch: 1| 1=cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef"
     
 def test_expand_after_named():
     db = DictDB(
