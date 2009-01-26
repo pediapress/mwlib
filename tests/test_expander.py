@@ -240,6 +240,9 @@ def test_iferror():
     yield expandstr, "{{#iferror:{{#expr:1+Z}}}}", ""
     yield expandstr, "{{#iferror:good|bad input|}}", ""
     
+
+def test_no_implicit_newline():
+    expandstr("foo\n{{#if: 1|#bar}}", "foo\n#bar")
     
 def test_implicit_newline_noinclude():
     expandstr("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<noinclude></noinclude>{|"))
