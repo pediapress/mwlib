@@ -109,3 +109,8 @@ def test_unary_pow_minus():
 def test_unary_pow_plus():
     ee("2^+10", 1024)
     
+
+def test_expr_repr():
+    yield expandstr, "{{#expr:99999999999999}}", "99999999999999"
+    yield expandstr, "{{#expr:99999999999999+1}}", "1.0E+14"
+    yield expandstr, "{{#expr:0.1+0.9}}", "1"
