@@ -33,6 +33,9 @@ develop:: all
 sdist:: all
 	python setup.py build sdist
 
+sdist-upload:: all
+	python setup.py build sdist upload
+
 egg:: all
 	python setup.py bdist_egg
 
