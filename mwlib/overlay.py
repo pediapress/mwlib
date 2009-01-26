@@ -20,3 +20,7 @@ class OverlayDB(object):
         if os.path.isfile(p):
             return unicode(open(p, 'rb').read(), 'utf-8')
         return self.db.getTemplate(title, followRedirects=followRedirects)
+
+    def __getattr__(self, name):
+        return getattr(self.db, name)
+    
