@@ -56,9 +56,21 @@ class Tag(nodes.Node):
             
         res.append("</%s>" % (name,))
         
-        
+
+class NoOutput(nodes.Node):
+    def flatten(self, expander, variables, res):
+        pass
+
+class Defaultsort(NoOutput):
+    pass
+
+class Displaytitle(NoOutput):
+    pass
+
 registry = {'#time': Time,
             'subst': Subst,
             'anchorencode': Anchorencode,
             '#tag': Tag,
+            'displaytitle': Displaytitle,
+            'defaultsort': Defaultsort,
             }
