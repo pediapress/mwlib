@@ -586,6 +586,17 @@ def test_ftp_url():
     assert urls, "expected a named url"
     assert urls[0].caption==url, "bad url"
 
+def test_http_url():
+    def checkurl(url):
+        caption = parse("foo [%s]" % (url,)).find(parser.NamedURL)[0].caption
+        assert caption==url, "bad named url"
+
+        caption = parse(url).find(parser.URL)[0].caption
+        assert caption==url, "bad url"
+        
+    yield checkurl, "http://web.de/'bla"
+    
+    
 def test_source_vlist():
     r=parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
     assert r.vlist == dict(lang='c'), "bad value: %r" % (r.vlist,)
