@@ -50,6 +50,7 @@ class Tag(nodes.Node):
         if len(self)>1:
             tmp = []
             evaluate.flatten(self[1], expander, variables, tmp)
+            evaluate._insert_implicit_newlines(tmp)
             tmp = u"".join(tmp)
             res.append(tmp)
             
