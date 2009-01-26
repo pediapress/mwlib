@@ -172,10 +172,14 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument
     res.append(dummy_mark)
     res.append(dummy_mark)
+
     for i, p in enumerate(res):
         if p is maybe_newline:
             s1 = res[i+1]
             s2 = res[i+2]
+            if i and res[i-1].endswith("\n"):
+                continue
+            
             if isinstance(s1, mark):
                 continue
             if len(s1)>=2:
