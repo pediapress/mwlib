@@ -383,3 +383,7 @@ def test_monthnumber():
 
 def test_switch_default_template():
     expandstr("{{#switch:1|{{#if:1|5|12}}}}", "5")
+
+def test_preserve_space_in_tag():
+    expandstr("{{#tag:imagemap|cd }}", "<imagemap>cd </imagemap>")
+
