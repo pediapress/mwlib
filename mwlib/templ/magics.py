@@ -401,9 +401,13 @@ class ParserFunctions(object):
             return rl[3]
 
     def EXPR(self, rl):
+        import math
         if rl:
             try:
-                r=str(expr.expr(rl[0]))
+                val = expr.expr(rl[0])
+                if int(val)==val and math.fabs(val)<1e14:
+                    return str(int(val))
+                r=str(float(val))
             except Exception, err:
                 return self._error(err)
 
