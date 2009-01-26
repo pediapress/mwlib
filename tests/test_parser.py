@@ -575,7 +575,7 @@ def test_timeline_stray():
 
 def test_ftp_url():
     """http://code.pediapress.com/wiki/ticket/98"""
-    url = "ftp://bla.com:8888/asdfasdf+adfdsf$fasd{}/~ralf?=blubb/@#&*(),blubb"
+    url = "ftp://bla.com:8888/asdfasdf+ad'fdsf$fasd{}/~ralf?=blubb/@#&*(),blubb"
     
     urls = parse("foo %s bar" % url).find(parser.URL)
     assert urls, "expected a url"
