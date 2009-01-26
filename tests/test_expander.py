@@ -272,6 +272,7 @@ def test_implicit_newline_switch():
 def test_implicit_newline_inner():
     yield expandstr, "ab {{#if: 1| cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef"
     yield expandstr, "ab {{#switch: 1| 1=cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef"
+    yield expandstr, "ab{{#tag:imagemap|{{#if:1|#abc}} }}ef", "ab<imagemap>\n#abc </imagemap>ef"
     
 def test_expand_after_named():
     db = DictDB(
