@@ -575,17 +575,20 @@ def test_timeline_stray():
 
 def test_ftp_url():
     """http://code.pediapress.com/wiki/ticket/98"""
-    url = "ftp://bla.com:8888/asdfasdf+ad'fdsf$fasd{}/~ralf?=blubb/@#&*(),blubb"
-    
-    urls = parse("foo %s bar" % url).find(parser.URL)
-    assert urls, "expected a url"
-    assert urls[0].caption==url, "bad url"
 
-    
-    urls = parse("[%s bar]" % url).find(parser.NamedURL)
-    assert urls, "expected a named url"
-    assert urls[0].caption==url, "bad url"
+    def checkurl(url):
+        urls = parse("foo %s bar" % url).find(parser.URL)
+        assert urls, "expected a url"
+        assert urls[0].caption==url, "bad url"
 
+
+        urls = parse("[%s bar]" % url).find(parser.NamedURL)
+        assert urls, "expected a named url"
+        assert urls[0].caption==url, "bad url"
+    
+    yield checkurl, "ftp://bla.com:8888/asdfasdf+ad'fdsf$fasd{}/~ralf?=blubb/@#&*(),blubb"
+    yield checkurl, "ftp://bla.com:8888/$blubb/"
+    
 def test_http_url():
     def checkurl(url):
         caption = parse("foo [%s]" % (url,)).find(parser.NamedURL)[0].caption
@@ -594,8 +597,8 @@ def test_http_url():
         caption = parse(url).find(parser.URL)[0].caption
         assert caption==url, "bad url"
         
-    yield checkurl, "http://web.de/'bla"
-    
+    yield checkurl, "http://pediapress.com/'bla"
+    yield checkurl, "http://pediapress.com/bla/$/blubb"
     
 def test_source_vlist():
     r=parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
