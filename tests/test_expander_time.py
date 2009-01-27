@@ -90,3 +90,9 @@ def test_time_vs_year_illegal_time():
     
 def test_before_1900():
     expandstr("{{#time:c|1883-1-1}}", "1883-01-01T00:00:00+00:00")
+
+
+def test_dateutil_raises_typeerror():
+    yield expandstr, "{{#time:c|2007-09-27PM EDT}}"
+    yield expandstr, "{{#iferror:{{#time:c|2007-09-27PM EDT}}|yes|no}}", "yes"
+
