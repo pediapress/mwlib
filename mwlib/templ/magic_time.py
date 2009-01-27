@@ -84,6 +84,9 @@ def time(format, datestring=None):
                 sys.stderr.write("ERROR in dateutil: %r while parsing %r" % (err, datestring))
                 pass
 
+        if date is None:
+            return  u'<strong class="error">Error: invalid time</strong>'
+        
     if date is None:
         date = datetime.datetime.now()
 
