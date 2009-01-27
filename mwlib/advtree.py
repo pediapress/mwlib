@@ -123,6 +123,7 @@ class AdvancedNode:
 
         The returned list starts with the root node.
         """
+        
         if self.parent:
             return self.parent.getParents() + [self.parent]
         else:
