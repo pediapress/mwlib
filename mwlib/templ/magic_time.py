@@ -1,4 +1,4 @@
-
+import sys
 import datetime
 import re
 import calendar
@@ -79,6 +79,9 @@ def time(format, datestring=None):
             try:
                 date = parsedate(datestring)
             except ValueError:
+                pass
+            except Exception, err:
+                sys.stderr.write("ERROR in dateutil: %r while parsing %r" % (err, datestring))
                 pass
 
     if date is None:
