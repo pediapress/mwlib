@@ -305,6 +305,11 @@ class Parser(object):
             
         return obj
     
+    def parsePTag(self):
+        p = self.parseTag()
+        p.__class__ = Paragraph
+        return p
+
     def parseTag(self):
         token = self.token[0]
         
