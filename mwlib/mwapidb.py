@@ -52,13 +52,12 @@ def get_api_helper(url):
         return None
     if not (scheme and netloc):
         return None
-    
+
+    path_prefix = ''
     if '/wiki/' in path:
         path_prefix = path[:path.find('/wiki/')]
     elif '/w/' in path:
         path_prefix = path[:path.find('/w/')]
-    else:
-        path_prefix = ''
     
     prefix = '%s://%s%s' % (scheme, netloc, path_prefix)
     try:
@@ -117,6 +116,24 @@ def parse_article_url(url, title_encoding='utf-8'):
             'revision': revision,
         }
     
+    # Wikitravel special case:
+    if netloc == 'wikitravel.org':
+        mo = re.match(r'^/(?P<lang>.+?)/(?P<title>.*)$', path)
+        if mo:
+            api_helper = APIHelper('%s://%s/wiki/%s/' % (
+                scheme, netloc, mo.group('lang'),
+            ))
+            if api_helper.is_usable():
+                return {
+                    'api_helper': api_helper,
+                    'title': unicode(
+                        urllib.unquote(mo.group('title')),
+                        title_encoding,
+                        'ignore'
+                    ).replace('_', ' '),
+                    'revision': None,
+                }
+
     api_helper = get_api_helper(url)
     if api_helper is None:
         return None
@@ -132,7 +149,7 @@ def parse_article_url(url, title_encoding='utf-8'):
                 ).replace('_', ' '),
                 'revision': None,
             }
-    
+
     return {
         'api_helper': api_helper,
         'title': unicode(path.rsplit('/', 1)[-1], title_encoding, 'ignore').replace('_', ' '),
