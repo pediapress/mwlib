@@ -5,7 +5,7 @@
 
 import urllib
 
-from mwlib import parser, log, metabook
+from mwlib import parser, log, metabook, zipwiki, wiki
 
 # import functions needed by most writers that should be accessible through writerbase
 from mwlib.mathutils import renderMath
@@ -54,3 +54,8 @@ def build_book(env, status_callback=None):
     return book
 
 
+def build_book_from_zip(zip_filename):
+    env = wiki.makewiki(zip_filename)
+    env.wiki = zipwiki.Wiki(zip_filename)
+    env.images = zipwiki.ImageDB(zip_filename)
+    return build_book(env)

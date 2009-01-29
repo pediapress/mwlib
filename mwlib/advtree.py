@@ -681,7 +681,7 @@ def buildAdvancedTree(root): # USE WITH CARE
     removeNodes(root)
     removeNewlines(root)
     fixStyleNodes(root) 
-    _validateParents(root)       
+#    _validateParents(root)       
 
 
 def _validateParserTree(node, parent=None):
