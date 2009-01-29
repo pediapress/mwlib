@@ -1,4 +1,4 @@
-
+import sys
 import datetime
 import re
 import calendar
@@ -69,11 +69,24 @@ def formatdate(format, date):
 def time(format, datestring=None):
     date = None
     if datestring:
-        try:
-            date = parsedate(datestring)
-        except ValueError:
-            pass
+        if re.match("\d\d\d\d$", datestring):
+            try:
+                date = datetime.datetime.now().replace(hour=int(datestring[:2]), minute=int(datestring[2:]), second=0)
+            except ValueError:
+                pass
+        
+        if date is None:
+            try:
+                date = parsedate(datestring)
+            except ValueError:
+                pass
+            except Exception, err:
+                sys.stderr.write("ERROR in dateutil: %r while parsing %r" % (err, datestring))
+                pass
 
+        if date is None:
+            return  u'<strong class="error">Error: invalid time</strong>'
+        
     if date is None:
         date = datetime.datetime.now()
 

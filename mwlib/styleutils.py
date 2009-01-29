@@ -5,7 +5,8 @@
 # See README.txt for additional licensing information.
 
 from __future__ import division
-import  re
+import re
+import weakref
 
 from mwlib.advtree import Center
 from mwlib.htmlcolornames import colorname2rgb_map
@@ -91,7 +92,10 @@ def alignmentFromNode(node):
     if align in ['right', 'left', 'center', 'justify']:
         return align
     else: # special handling for nodes inside a center tag
-        if node.getParentNodesByClass(Center):
-            return 'center'
+        try:
+            if node.getParentNodesByClass(Center):
+                return 'center'
+        except weakref.ReferenceError: # FIXME: this is only a workaround for a bug related to mwlib.rl table reformatting
+            return None
     return None
 

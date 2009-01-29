@@ -122,6 +122,12 @@ class TestWikiDB(object):
         assert b == 'http://wikimediafoundation.org/w/'
         assert t == u'Home'
         assert r is None    
+
+        b, t, r = p('http://wikitravel.org/en/Melbourne')
+        print b, t, r
+        assert b == 'http://wikitravel.org/wiki/en/'
+        assert t == u'Melbourne'
+        assert r is None
     
     def test_MW10(self):
         d = parse_article_url('http://wiki.python-ogre.org/index.php/Basic_Tutorial_1')
@@ -223,6 +229,13 @@ class TestWikiDB(object):
         w.setTemplateExclusion(category=u'Exclude in print')
         assert w.getTemplate('Excluded') is None
         assert w.getTemplate('colours') is not None
+
+    def test_unicodeInPrintTemplate(self):
+        w = WikiDB(
+            base_url='http://simple.pediapress.com/w/',
+        )
+        w.setTemplateExclusion(prefix=u'Vom Druck ausschließen')
+        assert w.getTemplate(u'blaß') is None
     
     def test_byte_order_mark(self):
         ah = APIHelper('http://www.wereldpagina.nl')

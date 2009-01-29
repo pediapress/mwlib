@@ -81,10 +81,18 @@ def test_backslash_quote():
     yield expandstr, '{{#time: \\Y|4 March 2007}}', 'Y'
     yield expandstr, '{{#time: \\\\Y|4 March 2007}}', '\\2007'
 
-@xfail
 def test_time_vs_year():
     """http://code.pediapress.com/wiki/ticket/350"""
     expandstr('{{#time:G:i|2008}}', '20:08')
 
+def test_time_vs_year_illegal_time():
+    expandstr('{{#time:Y|1970}}', "1970")
+    
 def test_before_1900():
     expandstr("{{#time:c|1883-1-1}}", "1883-01-01T00:00:00+00:00")
+
+
+def test_dateutil_raises_typeerror():
+    yield expandstr, "{{#time:c|2007-09-27PM EDT}}"
+    yield expandstr, "{{#iferror:{{#time:c|2007-09-27PM EDT}}|yes|no}}", "yes"
+

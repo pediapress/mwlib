@@ -38,6 +38,7 @@ class IfNode(Node):
         else:
             if len(self)>2:
                 flatten(self[2], expander, variables, tmp)
+        _insert_implicit_newlines(tmp)
         res.append(u"".join(tmp).strip())
         res.append(dummy_mark)
 
@@ -125,7 +126,7 @@ class SwitchNode(Node):
             tmp = []
             flatten(k, expander, variables, tmp)
             tmp = u"".join(tmp).strip()
-            if tmp==k:
+            if tmp==val:
                 retval = v
                 break
             if num_val is not None and maybe_numeric(tmp)==num_val:
@@ -137,6 +138,7 @@ class SwitchNode(Node):
             
         tmp = []
         flatten(retval, expander, variables, tmp)
+        _insert_implicit_newlines(tmp)
         tmp = u"".join(tmp).strip()
         res.append(tmp)
         res.append(dummy_mark)
@@ -295,6 +297,6 @@ def show(node, indent=0, out=None):
     out.write("%s\n" % (node,))
     
 
-from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, equalsplit
+from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, equalsplit, _insert_implicit_newlines
 from mwlib.templ import log, DEBUG
 from mwlib.templ.parser import optimize

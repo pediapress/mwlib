@@ -15,6 +15,7 @@ include docs/writers.txt
 include docs/zipfile.html
 include docs/zipfile.txt
 include example_conf.txt
+include extract-content.py
 include ez_setup.py
 include mwlib/EasyTimeline.pl
 include mwlib/Makefile
@@ -60,6 +61,7 @@ include mwlib/options.py
 include mwlib/overlay.py
 include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
+include mwlib/parser/styleanalyzer.py
 include mwlib/podclient.py
 include mwlib/recorddb.py
 include mwlib/rendermath.py
@@ -123,6 +125,7 @@ include tests/test_advtree.py
 include tests/test_convert_templates.py
 include tests/test_docbookwriter.py
 include tests/test_expander.py
+include tests/test_expander_parser.py
 include tests/test_expander_time.py
 include tests/test_expr.py
 include tests/test_html.py
@@ -139,6 +142,7 @@ include tests/test_parser.py
 include tests/test_recorddb.py
 include tests/test_sanitychecker.py
 include tests/test_scanner.py
+include tests/test_styleanalyzer.py
 include tests/test_table.py
 include tests/test_tagext.py
 include tests/test_timeline.py

@@ -38,11 +38,39 @@ class Anchorencode(nodes.Node):
         import urllib
         e = urllib.quote_plus(arg.encode('utf-8'), ':').replace('%', '.').replace('+', '_')
         res.append(e)
+
+class Tag(nodes.Node):
+    def flatten(self, expander, variables, res):
+        name = []
+        evaluate.flatten(self[0], expander, variables, name)
+        name = u"".join(name).strip()
+
+        res.append("<%s>" % (name,))
         
+        if len(self)>1:
+            tmp = []
+            evaluate.flatten(self[1], expander, variables, tmp)
+            evaluate._insert_implicit_newlines(tmp)
+            tmp = u"".join(tmp)
+            res.append(tmp)
+            
+        res.append("</%s>" % (name,))
         
+
+class NoOutput(nodes.Node):
+    def flatten(self, expander, variables, res):
+        pass
+
+class Defaultsort(NoOutput):
+    pass
+
+class Displaytitle(NoOutput):
+    pass
+
 registry = {'#time': Time,
             'subst': Subst,
             'anchorencode': Anchorencode,
+            '#tag': Tag,
+            'displaytitle': Displaytitle,
+            'defaultsort': Defaultsort,
             }
-
-

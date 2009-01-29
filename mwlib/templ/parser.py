@@ -131,7 +131,7 @@ class Parser(object):
         args = self._parse_args(children)
         return klass(args)
     
-    def _parse_args(self, children):
+    def _parse_args(self, children, append_arg=False):
         args = []
         arg = []
 
@@ -144,11 +144,12 @@ class Parser(object):
             elif c==u'|' and linkcount==0:
                 args.append(arg)
                 arg = []
+                append_arg = True
                 continue
             arg.append(c)
 
 
-        if arg:
+        if append_arg or arg:
             args.append(arg)
 
         return [optimize(x) for x in args]
@@ -170,10 +171,11 @@ class Parser(object):
             
         # find the name
         name = []
-        
+        append_arg = False
         idx = 0
         for idx, c in enumerate(children):
             if c==u'|':
+                append_arg = True
                 break
             name.append(c)
 
@@ -181,7 +183,7 @@ class Parser(object):
         if isinstance(name, unicode):
             name = name.strip()
                     
-        args = self._parse_args(children[idx+1:])
+        args = self._parse_args(children[idx+1:], append_arg=append_arg)
         
         return Template([name, tuple(args)])
         

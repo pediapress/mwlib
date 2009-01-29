@@ -87,4 +87,7 @@ def compile_messages(localedir='locale'):
                 path = os.path.join(dirpath, f)
                 print 'processing file %r' % (path,)
                 mo_filename = os.path.splitext(path)[0] + '.mo'
-                execute('msgfmt', '--check-format', '--output-file', mo_filename, path)
+                try:
+                    execute('msgfmt', '--check-format', '--output-file', mo_filename, path)
+                except RuntimeError, exc:
+                    print 'Could not compile %r: %s' % (path, exc)

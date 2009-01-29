@@ -16,3 +16,5 @@ bla*
 t.py
 mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
+.\#*
+\#*\#

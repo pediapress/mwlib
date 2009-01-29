@@ -6,6 +6,7 @@
 
 import re
 import os
+import string
 
 class Scripts(object):
 
@@ -83,9 +84,9 @@ class FontSwitcher(object):
     def registerDefaultFont(self, font_name=None):
         self.default_font = font_name
 
-    def getFont(self, char):
+    def getFont(self, ord_char):
         for block_start, block_end, font_name in self.code_points2font:            
-            if block_start <= ord(char) <= block_end:
+            if block_start <= ord_char <= block_end:
                 return font_name
         return self.default_font
 
@@ -94,7 +95,16 @@ class FontSwitcher(object):
         last_font = None
         last_txt = []
         for c in txt:
-            font = self.getFont(c)
+            ord_c = ord(c)
+            if ord_c <= 32 or ord_c == 127:
+                if ord_c != 9:
+                    c =' '
+                if last_font:
+                    font = last_font
+                else:
+                    font = self.default_font
+            else:
+                font = self.getFont(ord_c)
             if font != last_font and last_txt:
                 txt_list.append((''.join(last_txt), last_font))
                 last_txt = []

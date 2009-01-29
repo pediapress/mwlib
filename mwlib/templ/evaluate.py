@@ -5,7 +5,6 @@
 from mwlib.templ import magics, log, DEBUG
 from mwlib.templ import parser
 
-recursion_count = 0
 
 class TemplateRecursion(Exception): pass
 
@@ -15,13 +14,11 @@ def flatten(node, expander, variables, res):
         res.append(node)
         return True
 
-    global recursion_count
-
-    if recursion_count>100:
+    if expander.recursion_count > expander.recursion_limit:
         raise TemplateRecursion()
     
     
-    recursion_count += 1
+    expander.recursion_count += 1
     try:
         before = variables.count
         oldlen = len(res)
@@ -32,14 +29,14 @@ def flatten(node, expander, variables, res):
             else:
                 node.flatten(expander, variables, res)
         except TemplateRecursion:
-            if recursion_count > 2:
+            if expander.recursion_count > 2:
                 raise
             del res[oldlen:]
             log.warn("template recursion error ignored")
         after = variables.count
         return before==after
     finally:
-        recursion_count -= 1
+        expander.recursion_count -= 1
         
         
 class MemoryLimitError(Exception):
@@ -172,10 +169,14 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument
     res.append(dummy_mark)
     res.append(dummy_mark)
+
     for i, p in enumerate(res):
         if p is maybe_newline:
             s1 = res[i+1]
             s2 = res[i+2]
+            if i and res[i-1].endswith("\n"):
+                continue
+            
             if isinstance(s1, mark):
                 continue
             if len(s1)>=2:
@@ -187,11 +188,15 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     del res[-2:]
     
 class Expander(object):
-    def __init__(self, txt, pagename="", wikidb=None):
+    def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
+        self.pagename = pagename
         self.db = wikidb
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
+
+        self.recursion_limit = recursion_limit
+        self.recursion_count = 0
 
         self.parsed = parser.parse(txt)
         #show(self.parsed)
@@ -200,6 +205,10 @@ class Expander(object):
     def getParsedTemplate(self, name):
         if name.startswith("[[") or "|" in name:
             return None
+
+        if name.startswith("/"):
+            name = self.pagename+name
+            
         try:
             return self.parsedTemplateCache[name]
         except KeyError:
@@ -226,7 +235,8 @@ class Expander(object):
             
         
     def expandTemplates(self):
-        res = []
+        res = ["\n"] # guard, against implicit newlines at the beginning
         flatten(self.parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
+        res[0] = u''
         return u"".join(res)

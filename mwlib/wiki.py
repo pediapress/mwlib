@@ -282,9 +282,13 @@ def makewiki(conf,
     
     try:
         overlaydir = os.environ['MWOVERLAY']
-        assert os.path.isdir(overlaydir)
-        import mwlib.overlay
+    except KeyError:
+        return res
+    
+    import mwlib.overlay
+    if os.path.isdir(overlaydir):            
         res['wiki'] = mwlib.overlay.OverlayDB(res['wiki'], overlaydir)
-    except:
-        pass
+    if os.path.isfile(overlaydir):
+        res['wiki'] = mwlib.overlay.FlatDB(res['wiki'], overlaydir)
+
     return res
