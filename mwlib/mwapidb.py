@@ -695,13 +695,15 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             return None
 
-        return list(set([r['user'] for r in revs
+        result = list(set([r['user'] for r in revs
                    if not r.get('anon')
                    and not self.ip_rex.match(r['user'])
                    and not r.get('minor')
                    and not self.bot_rex.search(r.get('comment', ''))
                    and not self.bot_rex.search(r['user'])
                    ]))
+        result.sort()
+        return result
     
     def getTemplate(self, name, followRedirects=True):
         """
