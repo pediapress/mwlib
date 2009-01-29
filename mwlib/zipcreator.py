@@ -64,7 +64,7 @@ class ZipCreator(object):
         if num_threads > 0:
             self.jobsched = jobsched.JobScheduler(num_threads)
         else:
-            self.jobsched = jobsched.DummyScheduler()
+            self.jobsched = jobsched.DummyJobScheduler()
         self.article_jobs = []
     
     def addObject(self, name, value):
