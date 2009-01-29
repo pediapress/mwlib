@@ -108,9 +108,10 @@ class TreeCleaner(object):
         self.swapNodesMap = { Center:[Underline, Emphasized]} # { ChildClass: [ParentClass, ParentClass2]}
 
 
-        # list of css classes which trigger the removal of the node from the tree
+        # list of css classes OR id's which trigger the removal of the node from the tree
         # the following list is wikipedia specific
-        self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct']
+        self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct',
+                                 'coordinates_3_ObenRechts', 'microformat'] # FIXME: should really be "geo microformat...
 
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
@@ -720,7 +721,10 @@ class TreeCleaner(object):
 
     def removeNoPrintNodes(self, node):
 
-        klasses = set(node.attributes.get('class', '').split())
+        klasses = node.attributes.get('class', '').split()
+        klasses.extend(node.attributes.get('id', '').split())
+        klasses = set(klasses)
+        
         if set(self.noDisplayClasses).intersection(klasses) and node.parent:
             self.report('removing child', node)
             node.parent.removeChild(node)
