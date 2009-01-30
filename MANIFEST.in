@@ -58,6 +58,7 @@ include mwlib/netdb.py
 include mwlib/odfconf.py
 include mwlib/odfstyles.py
 include mwlib/odfwriter.py
+include mwlib/old_uparser.py
 include mwlib/options.py
 include mwlib/overlay.py
 include mwlib/parser/__init__.py
@@ -67,6 +68,7 @@ include mwlib/podclient.py
 include mwlib/recorddb.py
 include mwlib/refine/__init__.py
 include mwlib/refine/core.py
+include mwlib/refine/uparser.py
 include mwlib/refine/util.py
 include mwlib/rendermath.py
 include mwlib/resources/__init__.py
