@@ -36,7 +36,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
             if stack and break_at(t):
                 start = stack.pop()
                 sub = tokens[start+1:i]
-                tokens[start:i] = [T(type=T.t_complex_tag, start=0, len=0, children=sub)]
+                tokens[start:i] = [T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname=tagname)]
                 refined.append(tokens[start])
                 i=start+1
             elif t.type==T.t_html_tag and t.tagname==tagname:
@@ -46,7 +46,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
                 if stack:
                     start = stack.pop()
                     sub = tokens[start+1:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub)]
+                    tokens[start:i+1] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub, tagname=tagname)]
                     refined.append(tokens[start])
                     i = start+1
                 else:
@@ -57,11 +57,12 @@ def get_recursive_tag_parser(tagname, break_at=None):
         while stack:
             start = stack.pop()
             sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub)]
+            tokens[start:] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub, tagname=tagname)]
             refined.append(tokens[start])
 
         refined.append(tokens)
-        
+    recursive_parse_tag.__name__ += "_"+tagname
+    
     return recursive_parse_tag
 
 parse_div = get_recursive_tag_parser("div")
@@ -75,6 +76,7 @@ parse_li = get_recursive_tag_parser("li", _li_break_at)
 parse_ol = get_recursive_tag_parser("ol")
 parse_ul = get_recursive_tag_parser("ul")
 parse_span = get_recursive_tag_parser("span")
+parse_p = get_recursive_tag_parser("p")
 
 class bunch(object):
     def __init__(self, **kw):
@@ -134,6 +136,8 @@ class parse_sections(object):
 
         if current.endtitle is not None:
             create()
+        self.refined.append(tokens)
+        
                     
 class parse_links(object):
     def __init__(self, tokens, refined):
@@ -270,7 +274,7 @@ class parse_table_rows(object):
         for i,x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
                 mod = T.join_as_text(children[:i])
-                print "MODIFIER:", repr(mod)
+                #print "MODIFIER:", repr(mod)
                 row.vlist = util.parseParams(mod)
                 del children[:i]
                 return
@@ -341,7 +345,7 @@ class parse_tables(object):
         for i,x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
                 mod = T.join_as_text(children[:i])
-                print "MODIFIER:", repr(mod)
+                #print "MODIFIER:", repr(mod)
                 table.vlist = util.parseParams(mod)
                 del children[:i]
                 return
@@ -413,7 +417,7 @@ def parse_txt(txt):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_span, parse_li, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine

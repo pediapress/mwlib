@@ -12,6 +12,7 @@ tok2class = {
     T.t_complex_link: N.Link,
     T.t_complex_section: N.Section,
     T.t_complex_article: N.Article,
+    T.t_complex_tag: N.TagNode,
     }
 
 
@@ -22,7 +23,9 @@ def _change_classes(node):
             node.caption=node.text
         if node.children is None:
             node.children = []
-            
+        if node.type==T.t_complex_tag:
+            node.caption = node.tagname
+        
         node = node.children
         
     if node:
