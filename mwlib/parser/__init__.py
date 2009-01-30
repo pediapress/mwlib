@@ -880,6 +880,8 @@ class Parser(object):
             token = self.token
             if token[0] in break_at:
                 break
+            elif token[0]=="EOLSTYLE":
+                b.append(self.parseEOLStyle())
             elif token[0]=='\n':
                 b.append(Text(token[1]))
                 self.next()
