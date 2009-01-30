@@ -23,6 +23,8 @@ def _change_classes(node):
             node.caption=node.text
         if node.children is None:
             node.children = []
+        if node.vlist is None:
+            node.vlist = {}
         if node.type==T.t_complex_tag:
             node.caption = node.tagname
             if node.tagname=='p':
