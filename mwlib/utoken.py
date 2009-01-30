@@ -9,13 +9,12 @@ import sys
 import re
 import _mwscan
 import htmlentitydefs
-from blist import blist
 
 def show(node, out=None, indent=0, verbose=False):
     if out is None:
         out = sys.stdout
 
-    if isinstance(node, (list, blist)):
+    if not isinstance(node, token):
         for x in node:
             show(x, out=out, indent=indent, verbose=verbose)
         return

@@ -1,9 +1,15 @@
 #! /usr/bin/env python
 
 import sys
-from blist import blist
 from mwlib.utoken import tokenize, show, token as T
 from mwlib.refine import util
+
+try:
+    from blist import blist
+except ImportError:
+    import warnings
+    warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
+    blist = list
 
 T.t_complex_table = "complex_table"
 T.t_complex_caption = "complex_caption"
