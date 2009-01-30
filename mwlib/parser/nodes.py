@@ -1,7 +1,13 @@
+import os
 import re    
 from mwlib import namespace
 
-class Node(object):
+if "MWREFINE" in os.environ:
+    from mwlib.utoken import token as base
+else:
+    base = object
+    
+class Node(base):
     """Base class for all nodes"""
     
     caption = ''
