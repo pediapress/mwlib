@@ -1,3 +1,4 @@
+include ChangeLog
 include MANIFEST.in
 include README.html
 include README.txt
@@ -64,6 +65,9 @@ include mwlib/parser/nodes.py
 include mwlib/parser/styleanalyzer.py
 include mwlib/podclient.py
 include mwlib/recorddb.py
+include mwlib/refine/__init__.py
+include mwlib/refine/core.py
+include mwlib/refine/util.py
 include mwlib/rendermath.py
 include mwlib/resources/__init__.py
 include mwlib/resources/outgoing_link.gif
@@ -96,6 +100,7 @@ include mwlib/treecleaner.py
 include mwlib/treecleanerhelper.py
 include mwlib/uparser.py
 include mwlib/utils.py
+include mwlib/utoken.py
 include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/wikidbbase.py
@@ -140,6 +145,7 @@ include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
 include tests/test_recorddb.py
+include tests/test_refine.py
 include tests/test_sanitychecker.py
 include tests/test_scanner.py
 include tests/test_styleanalyzer.py
