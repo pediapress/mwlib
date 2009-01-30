@@ -669,16 +669,27 @@ class WikiDB(wikidbbase.WikiDBBase):
         """Return names of non-bot, non-anon users for
         non-minor changes of given article (before given revsion).
         
-        @returns: set of principal authors
-        @rtype: set([unicode])
+        The data that can be used to to compute a list of authors is limited:
+        http://de.wikipedia.org/w/api.php?action=query&prop=revisions&rvlimit=500&
+        rvprop=ids|timestamp|flags|comment|user|size&titles=Claude_Bourgelat
+        
+        Authors are sorted by the approximate size of their contribution.
+        
+        Edits are considered to be reverts if two edits end up in the sames size within 
+        N edits and have the reverting edit has the revid of the reverted edit in its commet.
+        
+        @returns: sorted list of principal authors
+        @rtype: list([unicode])
         """
-
-        for rvlimit in (500, 50):
+        REVERT_LOOKBACK = 5 # number of revisions to check for same size (assuming a revert)
+        
+        # fetch data
+        for rvlimit in (500, 50): # some MWs only return the 50 last edits 
             kwargs = {
                 'titles': title,
-                'redirets': 1,
+                'redirects': 1,
                 'prop': 'revisions',
-                'rvprop': 'user|flags|comment',
+                'rvprop': 'ids|user|flags|comment|size',
                 'rvlimit': rvlimit,
                 'rvdir': 'older',
             }
@@ -695,15 +706,46 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             return None
 
-        result = list(set([r['user'] for r in revs
-                   if not r.get('anon')
-                   and not self.ip_rex.match(r['user'])
-                   and not r.get('minor')
-                   and not self.bot_rex.search(r.get('comment', ''))
-                   and not self.bot_rex.search(r['user'])
-                   ]))
-        result.sort()
-        return result
+        
+        revs.reverse() # start with oldest edit
+        
+        def filter_reverts(revs):
+            for i, r in enumerate(revs):
+                if "reverted" in r or i==0:
+                    continue
+                last_size = revs[i-1]['size']
+                for j in range(i+1,min(len(revs)-1, i+REVERT_LOOKBACK+1)):
+                    if revs[j]['size'] == last_size and str(r['revid']) in revs[j].get('comment',''): 
+                        for jj in range(i,j+1): # skip the reverted, all in between, and the reverting edit 
+                            revs[jj]['reverted'] = True 
+                        break
+                
+#            print "reverted", [r for r in revs if "reverted" in r]
+            return [r for r in revs if not "reverted" in r]
+
+        
+        # calc an approximate size for each edit (true if author only *added* to the article)
+        revs = list(filter_reverts(revs))
+        for i, r in enumerate(revs):
+            if i == 0:
+                r['diff_size'] = r['size']
+            else:
+                r['diff_size'] = abs(r['size']-revs[i-1]['size'])
+                
+
+        authors = dict() # author:bytes
+        for r in revs:
+            if not r.get('anon') \
+                    and not self.ip_rex.match(r['user']) \
+                    and not r.get('minor') \
+                    and not self.bot_rex.search(r.get('comment', '')) \
+                    and not self.bot_rex.search(r['user']):
+                authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
+        authors = authors.items()
+        authors.sort(lambda a,b:cmp(b[1], a[1]))
+#        print authors
+        return [a for a,c in authors]
+
     
     def getTemplate(self, name, followRedirects=True):
         """
