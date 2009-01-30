@@ -1,7 +1,7 @@
 
 from mwlib import expander
 from mwlib.log import Log
-from mwlib.refine import core
+from mwlib.refine import core, compat
 
 log = Log('refine.uparser')
 
@@ -33,6 +33,7 @@ def parseString(
         input = raw
 
     a = core.parse_txt(input)
+    a = compat.parse_txt(input)
     
 #     tokens = utoken.tokenize(input, title)
 
@@ -48,7 +49,7 @@ def simpleparse(raw):    # !!! USE FOR DEBUGGING ONLY !!! does not use post proc
     from mwlib import dummydb
     db = dummydb.DummyDB()
 
-    a=core.parse_txt(raw)
+    a=compat.parse_txt(raw)
     core.show(a)    
     return a
     

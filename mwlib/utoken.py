@@ -11,6 +11,9 @@ import _mwscan
 import htmlentitydefs
 
 def show(node, out=None, indent=0, verbose=False):
+    if node is None:
+        return
+    
     if out is None:
         out = sys.stdout
 
@@ -110,7 +113,7 @@ class token(object):
             r.append(repr(self.level))
         return u"".join(r)
 
-    def show(self, out):
+    def show(self, out=None):
         show(self, out=out)
     
 token2name = token.token2name

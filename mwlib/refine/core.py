@@ -18,7 +18,7 @@ T.t_complex_table_cell = "complex_table_cell"
 T.t_complex_tag = "complex_tag"
 T.t_complex_link = "link"
 T.t_complex_section = "section"
-
+T.t_complex_article = "article"
 T.t_vlist = "vlist"
 
 T.children = None
