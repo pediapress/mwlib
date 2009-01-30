@@ -185,6 +185,13 @@ class _compat_scanner(object):
     def _init_allowed_tags(self):
         from mwlib.parser import _get_tags
         self.allowed_tags = _get_tags()
+
+        self.allowed_tags.update("table td tr".split())
+        
+#         tmp = list(self.allowed_tags)
+#         tmp.sort()
+#         print "ALLOWED:", " ".join(tmp)
+        
         
     def __call__(self, text):
         if self.allowed_tags is None:
