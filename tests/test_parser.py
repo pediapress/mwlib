@@ -480,7 +480,13 @@ def test_parse_preformatted_blockquote():
     r=parse(' <blockquote>blub</blockquote>')
     stylenode = r.find(parser.Style)
     assert not r.find(parser.PreFormatted) and stylenode and stylenode[0].caption=='-', 'expected blockquote w/o preformatted node'
-        
+
+def test_parse_eolstyle_inside_blockquote():
+    r=parse("<blockquote>\n:foo</blockquote>")
+    stylenode = r.find(parser.Style)[-1]
+    assert stylenode.caption==':', "bad stylenode"
+    
+    
 def _parse_url(u):
     url = parse("url: %s " % u).find(parser.URL)[0]
     assert url.caption == u, "url has wrong caption"
@@ -786,3 +792,11 @@ def test_misformed_tag():
     s='<div"barbaz">bold</div>'
     r=parse(s).find(parser.TagNode)
     assert len(r)==1, "expected a TagNode"
+
+
+def test_p_tag():
+    s=u"<p>para1</p><p>para2</p>"
+    r=parse(s).find(parser.Paragraph)
+    print "PARAGRAPHS:", r
+    assert len(r)==2, "expected 2 paragraphs"
+    
