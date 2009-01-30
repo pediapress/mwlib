@@ -35,6 +35,7 @@ class token(object):
     target = None
     level = None
     children = None
+    tagname = None
     
     t_end = 0
     t_text = 1
@@ -111,6 +112,10 @@ class token(object):
         if self.level:
             r.append(" level=")
             r.append(repr(self.level))
+        if self.tagname:
+            r.append(" tagname=")
+            r.append(repr(self.tagname))
+        
         return u"".join(r)
 
     def show(self, out=None):
