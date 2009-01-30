@@ -247,6 +247,7 @@ def render():
     import sys
     import tempfile
     import traceback
+    import errno
     import pkg_resources
     from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
@@ -343,7 +344,11 @@ def render():
                     imagesize=options.imagesize,
                 )
                 if env.images:
-                    env.images.clear()
+                    try:
+                        env.images.clear()
+                    except OSError, err:
+                        if err.errno!=errno.ENOENT:
+                            raise
                 env.wiki = zipwiki.Wiki(zip_filename)
                 env.images = zipwiki.ImageDB(zip_filename)
                 status = Status(options.status_file, progress_range=(71, 100))
@@ -381,10 +386,9 @@ def render():
             try:
                 if not options.keep_tmpfiles:
                     env.images.clear()
-                else:
-                    pass
-            except Exception, e:
-                print 'ERROR: Could not remove temporary images: %s' % e
+            except OSError, e:
+                if e.errno!=errno.ENOENT:
+                    print 'ERROR: Could not remove temporary images: %s' % e, e.errno
         if options.pid_file:
             utils.safe_unlink(options.pid_file)
 
