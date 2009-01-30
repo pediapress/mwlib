@@ -25,7 +25,9 @@ def _change_classes(node):
             node.children = []
         if node.type==T.t_complex_tag:
             node.caption = node.tagname
-        
+            if node.tagname=='p':
+                node.__class__=N.Paragraph
+            
         node = node.children
         
     if node:
