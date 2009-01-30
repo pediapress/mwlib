@@ -709,6 +709,9 @@ class WikiDB(wikidbbase.WikiDBBase):
         
         revs.reverse() # start with oldest edit
         
+        # remove revs w/o size (happens with move)
+        revs = [r for r in revs if "size" in r]
+        
         def filter_reverts(revs):
             for i, r in enumerate(revs):
                 if "reverted" in r or i==0:
