@@ -297,7 +297,7 @@ class Application(wsgi.Application):
         ]
         
         zip_path = self.get_path(collection_id, self.zip_filename)
-        if os.path.exists(zip_path):
+        if not force_render and os.path.exists(zip_path):
             log.info('using existing ZIP file to render %r' % output_path)
             args.extend(['--config', zip_path])
             if writer_options:
@@ -311,10 +311,6 @@ class Application(wsgi.Application):
             if language:
                 args.extend(['--language', language])
         else:
-            if force_render:
-                log.warn('Forced to render document which has not been previously rendered.')
-                return self.http404()
-            
             log.info('rendering %r' % output_path)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
             f = open(metabook_path, 'wb')
