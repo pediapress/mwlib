@@ -57,6 +57,7 @@ class ZipCreator(object):
         self.templates = {}
         self.sources = {}
         self.images = {}
+        self.node_stats = {} 
         self.num_articles = num_articles
         self.article_count = 0
         self.image_infos = set()    
@@ -140,6 +141,8 @@ class ZipCreator(object):
         )
         if imagedb is None:
             return
+
+        stats = self.node_stats
         for node in parse_tree.allchildren():
             if isinstance(node, parser.ImageLink):
                 self.image_infos.add((node.target, imagedb, wikidb))
@@ -149,6 +152,14 @@ class ZipCreator(object):
                     imagelink = getattr(imagemap, 'imagelink', None)
                     if imagelink is not None:
                         self.image_infos.add((imagelink.target, imagedb, wikidb))
+            # stats
+            k = node.__class__.__name__
+            if k in ('Text',):
+                stats[k] = stats.get(k, 0) + len(node.caption)
+            else:
+                stats[k] = stats.get(k, 0) + 1
+
+
     
     def join(self):
         """Finish ZIP file by writing the actual content"""
@@ -346,6 +357,7 @@ def make_zip_file(output, env,
             )
         
         z.join()
+        env.metabook['node_stats'] = z.node_stats # add stats for later analysis
         z.addObject('metabook.json', json.dumps(env.metabook))
         zf.close()
         if os.path.exists(output): # Windows...
