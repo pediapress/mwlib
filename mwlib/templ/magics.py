@@ -9,11 +9,14 @@ http://meta.wikimedia.org/wiki/Help:Magic_words
 http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
+import re
 import datetime
 import urllib
 import urlparse
 from mwlib.log import Log
 from mwlib import expr
+
+iferror_rx = re.compile(r'<(div|span|p|strong)\s([^<>]*\s)*?class="error"[^<>]*>', re.I)
 
 log = Log("expander")
 
@@ -483,13 +486,14 @@ class ParserFunctions(object):
 
     def IFERROR(self, args):
         errmark = '<strong class="error">'
+        
         val = args[0]
         bad=args[1]
         good = args.get(2, None)
         if good is None:
             good = val
             
-        if errmark in val:
+        if iferror_rx.search(val):
             return bad
         else:
             return good
