@@ -14,7 +14,7 @@ from mwlib.templ.evaluate import flatten, Expander, ArgumentList
 from mwlib.templ.misc import DictDB, expandstr
 
 
-def get_templates(raw, title):
+def get_templates(raw, title=u""):
     used = set()
     todo = [parse(raw)]
     while todo:
