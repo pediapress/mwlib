@@ -93,6 +93,7 @@ include mwlib/templ/magic_time.py
 include mwlib/templ/magics.py
 include mwlib/templ/marks.py
 include mwlib/templ/misc.py
+include mwlib/templ/mwlocals.py
 include mwlib/templ/nodes.py
 include mwlib/templ/parser.py
 include mwlib/templ/pp.py
