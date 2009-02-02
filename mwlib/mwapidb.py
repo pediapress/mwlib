@@ -759,10 +759,14 @@ class WikiDB(wikidbbase.WikiDBBase):
         """
         Note: *Not* following redirects is unsupported!
         """
-        
+
+        ns = "Template"
         if ":" in name:
-            name = name.split(':', 1)[1]
+            ns, name = name.split(':', 1)
+            if ns not in ("Template", "Vorlage", "Wikipedia"):
+                ns = "Template"
         
+            
         if name.lower() in self.template_blacklist:
             log.info("ignoring blacklisted template:" , repr(name))
             return None
@@ -772,9 +776,9 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             pass
         
-        titles = ['Template:%s' % name]
+        titles = ['%s:%s' % (ns, name)]
         if self.print_template_prefix:
-            titles.insert(0, 'Template:%s%s' % (self.print_template_prefix, name))
+            titles.insert(0, '%s:%s%s' % (ns, self.print_template_prefix, name))
         for title in titles:
             raw = self.getRawArticle(title)
             if raw is None:

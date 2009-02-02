@@ -188,7 +188,8 @@ class ZipCreator(object):
             except KeyError:
                 continue
             
-            for name in expander.get_templates(raw):
+            for name in expander.get_templates(raw, info['title']):
+                
                 templates.add((name, info['wikidb']))
                             
         self.num_templates = len(templates)

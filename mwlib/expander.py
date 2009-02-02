@@ -14,7 +14,7 @@ from mwlib.templ.evaluate import flatten, Expander, ArgumentList
 from mwlib.templ.misc import DictDB, expandstr
 
 
-def get_templates(raw):
+def get_templates(raw, title):
     used = set()
     todo = [parse(raw)]
     while todo:
@@ -23,7 +23,10 @@ def get_templates(raw):
             continue
         
         if isinstance(n, Template) and isinstance(n[0], basestring):
-            used.add(n[0])
+            name = n[0]
+            if name.startswith("/"):
+                name = title+name
+            used.add(name)
             
         todo.extend(n)
         
