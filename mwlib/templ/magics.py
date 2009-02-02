@@ -509,14 +509,22 @@ class DummyResolver(object):
     pass
 
 class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMagic, ParserFunctions, OtherMagic, DummyResolver):
+    local_values = None
     def __call__(self, name, args):
         try:
             name = str(name)
         except UnicodeEncodeError:
             return None
+
+        upper = name.upper()
         
+        if self.local_values:
+            try:
+                return self.local_values[upper]
+            except KeyError:
+                pass
         
-        m = getattr(self, name.upper(), None)
+        m = getattr(self, upper, None)
         if m is None:
             return None
         

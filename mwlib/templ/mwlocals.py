@@ -7,5 +7,15 @@ NUMBEROFARTICLES NUMBEROFPAGES NUMBEROFFILES NUMBEROFUSERS CURRENTVERSION
 
     return "\n---\n".join(["%s={{%s}}" % (x, x) for x in names])
 
-
-    
+def parse_locals(localstr):
+    if isinstance(localstr, str):
+        localstr = unicode(localstr)
+    res = {}
+    for x in localstr.split("\n---\n"):
+        try:
+            name, val = x.split('=', 1)
+        except ValueError:
+            continue
+        if name:
+            res[name] = val
+    return res
