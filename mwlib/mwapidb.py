@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2008, PediaPress GmbH
+# Copyright (c) PediaPress GmbH
 # See README.txt for additional licensing information.
 
 import cgi
@@ -23,6 +23,7 @@ except ImportError:
 from mwlib import utils, metabook, wikidbbase, uparser, parser, namespace, advtree
 from mwlib.expander import find_template, get_template_args, Expander
 from mwlib.log import Log
+from mwlib.templ import mwlocals
 
 log = Log("mwapidb")
 
@@ -236,11 +237,8 @@ class APIHelper(object):
             return True
         return False
     
-    def query(self, ignore_errors=True, num_tries=2, **kwargs):
-        args = {
-            'action': 'query',
-            'format': 'json',
-        }
+    def do_request(self, ignore_errors=True, num_tries=2, **kwargs):
+        args = {'format': 'json'}
         args.update(**kwargs)
         for k, v in args.items():
             if isinstance(v, unicode):
@@ -276,15 +274,22 @@ class APIHelper(object):
                 # Note that a BOM is actually *not allowed* at the beginning of a JSON string
                 # see http://www.ietf.org/rfc/rfc4627.txt, section "3. Encoding"
                 data = data[1:]
-            return json.loads(data)['query']
-        except KeyError:
-            log.error('Response from api%s did not contain a query result' % self.script_extension)
-            return None
+            return json.loads(data)
         except Exception, e:
             log.error('Got exception: %r' % e)
             if ignore_errors:
                 return None
-            raise RuntimeError('api%s query failed. Are you sure you specified the correct base URL?' % self.script_extension)
+            raise RuntimeError('api%s request failed. Are you sure you specified the correct base URL?' % self.script_extension)
+    
+    def query(self, ignore_errors=True, num_tries=2, **kwargs):
+        data = self.do_request(ignore_errors=ignore_errors, num_tries=num_tries, action='query', **kwargs)
+        if data is None:
+            return None
+        try:
+            return data['query']
+        except KeyError:
+            log.error('Response from api%s did not contain a query result' % self.script_extension)
+            return None
     
     def page_query(self, **kwargs):
         q = self.query(**kwargs)
@@ -895,6 +900,16 @@ class WikiDB(wikidbbase.WikiDBBase):
             return None
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
+
+    def getLocals(self):
+        result = self.api_helper.do_request(
+            action='expandtemplates',
+            text=mwlocals.get_locals_txt(),
+        )
+        try:
+            return result['expandtemplates']['*']
+        except KeyError:
+            return None
     
 
 class Overlay(WikiDB):

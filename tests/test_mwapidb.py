@@ -240,6 +240,12 @@ class TestWikiDB(object):
     def test_byte_order_mark(self):
         ah = APIHelper('http://www.wereldpagina.nl')
         assert ah.is_usable()
+
+    def test_getLocals(self):
+        x = self.w.getLocals()
+        print x
+        assert x
+        assert isinstance(x, unicode)
     
 
 class TestImageDB(object):
