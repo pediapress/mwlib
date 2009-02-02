@@ -151,6 +151,7 @@ class TreeCleaner(object):
         else:
             children = [self.tree]
 
+        total_children = len(children)
         for (i, child) in enumerate(children):
             for cleaner in cleanerList:
                 cleaner(child)
@@ -173,7 +174,8 @@ class TreeCleaner(object):
                           'removeTextlessStyles', 
                           'removeBrokenChildren',
                           'fixTableColspans',
-                          'transformSingleColTables',                         
+                          'transformSingleColTables',
+                          'linearizeWideNestedTables',
                           'moveReferenceListSection',
                           'removeBreakingReturns', 
                           'removeEmptyReferenceLists',
@@ -884,3 +886,20 @@ class TreeCleaner(object):
         for c in node.children:
             self.fixListNesting(c)
 
+
+    def linearizeWideNestedTables(self, node):
+        """Remove wide (curr. hardcoded 15+ cols ;)) tables which are nesting inside another table """
+        parent_tables = node.getParentNodesByClass(Table)
+        if node.__class__ == Table and parent_tables and node.numcols > 15 :
+            while parent_tables:
+                parent_table = parent_tables.pop(0)
+                cell_items = []
+                for row in parent_table.children:
+                    for cell in row.children:
+                        for item in cell.children:
+                            cell_items.append(item)
+                self.report('wide nested table linearized. wrapper:', node, ' replaced by items:', cell_items)
+                parent_table.parent.replaceChild(parent_table, cell_items)
+
+        for c in node.children:
+            self.linearizeWideNestedTables(c)
