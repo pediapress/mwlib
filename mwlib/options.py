@@ -39,7 +39,6 @@ class OptionParser(optparse.OptionParser):
         self.add_option("--print-template-prefix",
             help="Prefix for print templates",
             metavar='PREFIX',
-            default='Print',
         )
         self.add_option("--template-blacklist",
             help="Title of article containing blacklisted templates",
