@@ -864,6 +864,9 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.getInterwikiMap(title, revision=revision)
             if self.interwikimap:
                 self.source['interwikimap'] = self.interwikimap
+            self.getLocals()
+            if self.locals:
+                self.source['locals'] = self.locals
             return self.source
         except KeyError:
             return None
@@ -901,15 +904,18 @@ class WikiDB(wikidbbase.WikiDBBase):
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
 
-    def getLocals(self):
+    def getLocals(self, source_url=None):
+        if hasattr(self, 'locals'):
+            return self.locals
         result = self.api_helper.do_request(
             action='expandtemplates',
             text=mwlocals.get_locals_txt(),
         )
         try:
-            return result['expandtemplates']['*']
+            self.locals = result['expandtemplates']['*']
         except KeyError:
-            return None
+            self.locals = None
+        return self.locals
     
 
 class Overlay(WikiDB):

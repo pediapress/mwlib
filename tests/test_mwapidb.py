@@ -241,11 +241,15 @@ class TestWikiDB(object):
         ah = APIHelper('http://www.wereldpagina.nl')
         assert ah.is_usable()
 
-    def test_getLocals(self):
-        x = self.w.getLocals()
-        print x
-        assert x
-        assert isinstance(x, unicode)
+    def test_getSource(self):
+        src = self.w.getSource(u'Main Page')
+        assert src
+        interwikimap = src['interwikimap']
+        assert interwikimap
+        assert isinstance(interwikimap, dict)
+        loc = src['locals']
+        assert loc
+        assert isinstance(loc, unicode)
     
 
 class TestImageDB(object):
