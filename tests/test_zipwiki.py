@@ -90,7 +90,7 @@ class TestZipWiki(object):
 
         loc = src['locals']
         assert loc
-        assert isinstance(loc, unicode)
+        assert isinstance(loc, basestring)
 
 
         

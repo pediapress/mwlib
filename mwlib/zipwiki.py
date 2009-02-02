@@ -54,12 +54,9 @@ class Wiki(wikidbbase.WikiDBBase):
         if article is None:
             return None
         try:
-            d = self.sources[article['source-url']]
+            return self.sources[article['source-url']]
         except KeyError:
             return None
-        if isinstance(d, str): # fix bug in some simplejson version w/ Python 2.4
-            return unicode(d, 'utf-8')
-        return d
     
     def getInterwikiMap(self, title, revision=None):
         """Return interwikimap for given article and revision
