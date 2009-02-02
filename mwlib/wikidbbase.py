@@ -25,9 +25,7 @@ class WikiDBBase(object):
         @rtype: str or NoneType
         """
         
-        if isinstance(link, parser.ArticleLink)\
-            or isinstance(link, parser.CategoryLink)\
-            or isinstance(link, parser.NamespaceLink):
+        if isinstance(link, (parser.ArticleLink, parser.CategoryLink, parser.NamespaceLink)):
             
             target = link.full_target or link.target
             
@@ -52,8 +50,7 @@ class WikiDBBase(object):
                 return None
             return my_url[:pos] + link_title
         
-        if isinstance(link, parser.LangLink)\
-            or isinstance(link, parser.InterwikiLink):
+        if isinstance(link, (parser.LangLink, parser.InterwikiLink)):
             if not hasattr(self, 'getInterwikiMap'):
                 return None
             prefix, target = link.full_target.split(':', 1)
