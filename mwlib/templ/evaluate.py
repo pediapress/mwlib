@@ -2,8 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.templ import magics, log, DEBUG
-from mwlib.templ import parser
+from mwlib.templ import magics, log, DEBUG, parser, mwlocals
 
 
 class TemplateRecursion(Exception): pass
@@ -192,9 +191,20 @@ class Expander(object):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
         self.pagename = pagename
         self.db = wikidb
+        
+        if self.db and hasattr(self.db, "getSource"):
+            source = self.db.getSource(pagename) or {}
+            local_values = source.get("locals", u"")
+            local_values = mwlocals.parse_locals(local_values)
+        else:
+            local_values = None
+            
+            
+            
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
-
+        self.resolver.local_values = local_values
+        
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
 
