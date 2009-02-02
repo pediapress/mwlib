@@ -259,11 +259,7 @@ class Link(Node):
                 res[name] = (NamespaceLink, num)
         
         for name, num in namespaces.iteritems():
-            if isinstance(name, basestring):
-                reg(name, num)
-            else:
-                for n in name:
-                    reg(n, num)
+            reg(name, num)
         
         for prefix, d in interwikimap.items():
             if 'language' in interwikimap[prefix] or prefix in languages:
