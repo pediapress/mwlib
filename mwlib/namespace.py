@@ -25,7 +25,14 @@ namespace_maps = {}
 
 def add_namespace_map(key, lang, project_name, extras={}):
     ns_data = _lang_ns_data[lang]
-    res = dict(zip(ns_data, _lang_ns_data_keys))
+    res = {}
+    for k, v in zip(ns_data, _lang_ns_data_keys):
+        if isinstance(k, basestring):
+            res[k] = v
+        else:
+            for x in k:
+                res[x] = v
+        
     res[project_name] = NS_PROJECT
     if '%s' in ns_data[-1]:
         res[ns_data[-1] % project_name] = NS_PROJECT_TALK
@@ -40,12 +47,12 @@ _lang_ns_data_keys = [
     NS_HELP, NS_HELP_TALK, NS_CATEGORY, NS_CATEGORY_TALK, NS_SPECIAL, NS_MEDIA
 ]
 
-add_namespace_map('enwiki', 'en', 'Wikipedia',
-        {'Portal': 100, 'Portal_Talk': 101})
-add_namespace_map('dewiki', 'de', 'Wikipedia',
-        {'Portal': 100, 'Portal_Diskussion': 101})
+add_namespace_map('enwiki', 'en', u'Wikipedia',
+        {u'Portal': 100, u'Portal_Talk': 101})
+add_namespace_map('dewiki', 'de', u'Wikipedia',
+        {u'Portal': 100, u'Portal_Diskussion': 101})
 for lang in _lang_ns_data:
-    add_namespace_map('%s+en_mw' % lang, lang, 'MediaWiki', namespace_maps['enwiki'])
+    add_namespace_map('%s+en_mw' % lang, lang, u'MediaWiki', namespace_maps['enwiki'])
 
 namespace_maps['default'] = dict(namespace_maps['enwiki'].items() + namespace_maps['dewiki'].items())
 
