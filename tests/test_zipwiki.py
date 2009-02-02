@@ -79,6 +79,18 @@ class TestZipWiki(object):
         contribs = self.imagedb.getContributors(u"Thelivingseaimax.jpg")
         print contribs
         assert contribs
-    
+
+    def test_getSource(self):
+        src = self.wikidb.getSource(u'The Living Sea')
+        print src
+
+        interwikimap = src['interwikimap']
+        assert interwikimap
+        assert isinstance(interwikimap, dict)
+
+        loc = src['locals']
+        assert loc
+        assert isinstance(loc, unicode)
+
 
         
