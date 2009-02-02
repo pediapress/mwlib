@@ -369,7 +369,7 @@ def test_pagename_non_ascii():
 
 def test_get_templates():
     def doit(source, expected):
-        r = expander.get_templates(source)
+        r = expander.get_templates(source, u'')
         assert r==expected, "expected %r, got %r" % (expected, r)
 
     yield doit, "{{foo| {{ bar }} }}", set("foo bar".split())
