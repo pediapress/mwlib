@@ -197,7 +197,6 @@ class TreeCleaner(object):
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
-
     def report(self, *args):        
         if not self.save_reports:
             return
@@ -431,6 +430,13 @@ class TreeCleaner(object):
                 return self._getPrev(prev)
         return prev
 
+    def _nextAdjacentNode(self, node):
+        if node.next:
+            res = node.next.getFirstLeaf() or node.next
+            return res
+        return self._nextAdjacentNode(node.parent)        
+
+
     def removeBreakingReturns(self, node): 
         """Remove BreakingReturns that occur around blocknodes or as the first/last element inside a blocknode."""
         if node.isblocknode:
@@ -447,6 +453,12 @@ class TreeCleaner(object):
                         self.report('removing node', n)
                         tryRemoveNode(n)
                         changed = True
+
+        if node.__class__ == BreakingReturn:
+            next_node = self._nextAdjacentNode(node)
+            if next_node.__class__ == BreakingReturn:
+                node.parent.removeChild(node)
+
 
         for c in node.children:
             self.removeBreakingReturns(c)
