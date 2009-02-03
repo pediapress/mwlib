@@ -4,10 +4,19 @@
 
 import re
 
-onlyincluderx = re.compile("<onlyinclude>(.*?)</onlyinclude>", re.DOTALL | re.IGNORECASE)
-commentrx = re.compile(r"(\n *)?<!--.*?-->( *\n)?", re.DOTALL)
-noincluderx1 = re.compile("<noinclude>.*?</noinclude>", re.DOTALL | re.IGNORECASE)
-noincluderx2 = re.compile("<noinclude>.*", re.DOTALL | re.IGNORECASE)
+rxc = lambda s: re.compile(s, re.DOTALL | re.IGNORECASE)
+
+onlyincluderx   = rxc("<onlyinclude>(.*?)</onlyinclude>")
+commentrx       = rxc(r"(\n *)?<!--.*?-->( *\n)?")
+noincluderx     = rxc("<noinclude>.*?(</noinclude>|$)")
+includeonlyrx   = rxc("<includeonly>.*?(?:</includeonly>|$)")
+
+def get_remove_tags(tags):
+    r=rxc("</?(%s)>" % ("|".join(tags)))
+    return lambda s: r.sub(u'', s)
+
+remove_not_included = get_remove_tags(["onlyinclude", "noinclude"])
+
 
 def remove_comments(txt):
     def repl(m):
@@ -17,15 +26,17 @@ def remove_comments(txt):
         return (m.group(1) or "")+(m.group(2) or "")
     return commentrx.sub(repl, txt)
 
-def preprocess(txt):
-    #txt=txt.replace("\t", " ")
+def preprocess(txt, included=True):
     txt=remove_comments(txt)
 
-    txt = noincluderx1.sub(u'', txt)
-    txt = noincluderx2.sub(u'', txt)
+    if included:
+        txt = noincluderx.sub(u'', txt)
+
+        if "<onlyinclude>" in txt:
+            # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
+            txt = "".join(onlyincluderx.findall(txt))
+    else:
+        txt = includeonlyrx.sub(u'', txt)
+        txt = remove_not_included(txt)
     
-    if "<onlyinclude>" in txt:
-        # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
-        txt = "".join(onlyincluderx.findall(txt))
-        
     return txt

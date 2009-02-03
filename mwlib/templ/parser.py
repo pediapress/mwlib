@@ -52,12 +52,12 @@ def optimize(node):
     
 class Parser(object):
     _cache = {}
-    def __init__(self, txt):
+    def __init__(self, txt, included=True):
         if isinstance(txt, str):
             txt = unicode(txt)
             
         self.txt = txt
-        
+        self.included = included
 
     def getToken(self):
         return self.tokens[self.pos]
@@ -237,7 +237,7 @@ class Parser(object):
             pass
         
         
-        self.tokens = tokenize(self.txt)
+        self.tokens = tokenize(self.txt, included=self.included)
         self.pos = 0
         n = []
         
@@ -260,5 +260,5 @@ class Parser(object):
         
         return n
 
-def parse(txt):
-    return Parser(txt).parse()
+def parse(txt, included=True):
+    return Parser(txt, included=included).parse()

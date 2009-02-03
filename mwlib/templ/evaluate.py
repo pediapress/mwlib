@@ -208,7 +208,7 @@ class Expander(object):
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
 
-        self.parsed = parser.parse(txt)
+        self.parsed = parser.parse(txt, included=False)
         #show(self.parsed)
         self.parsedTemplateCache = {}
         

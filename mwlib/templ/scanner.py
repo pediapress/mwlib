@@ -31,8 +31,8 @@ class symbols:
     noi = 4
     txt = 5
 
-def tokenize(txt):
-    txt = pp.preprocess(txt)
+def tokenize(txt, included=True):
+    txt = pp.preprocess(txt, included=included)
                          
             
     tokens = []
