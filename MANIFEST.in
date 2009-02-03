@@ -155,6 +155,7 @@ include tests/test_scanner.py
 include tests/test_styleanalyzer.py
 include tests/test_table.py
 include tests/test_tagext.py
+include tests/test_templ_pp.py
 include tests/test_timeline.py
 include tests/test_treecleaner.py
 include tests/test_utils.py
