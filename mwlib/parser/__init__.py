@@ -1050,22 +1050,25 @@ class Parser(object):
         lst.numbered = numbered
         
         end = EndTagToken(self.token[0].t)
-
+        break_at = TokenSet([EndTagToken, 'ENDTABLE', 'TABLE', 'SECTION', "BREAK"])
+        
         self.next()
         while self.left:
             token = self.token            
             if token[0]==end:
                 self.next()
                 break
-            elif isinstance(token[0], TagToken):
+            elif token[0]==TagToken("li"):
+                lst.append(self.parseTagToken())
+            elif token[0] in break_at:
+                break
+            elif token[0]==TagToken("li"):
                 lst.append(self.parseTagToken())
             elif token[0]=='ITEM':                
                 lst.append(self.parseItemList())
-            elif token[0] in FirstAtom:
-                lst.append(self.parseAtom())
             else:
-                log.info("assuming text in _parseHTMLList", token)
-                lst.append(Text(token[1]))
+                if token[1].strip():
+                    log.info("skipping in _parseHTMLList", token)
                 self.next()
 
         return lst
