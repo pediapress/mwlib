@@ -5,13 +5,13 @@ NUMBEROFARTICLES NUMBEROFPAGES NUMBEROFFILES NUMBEROFUSERS CURRENTVERSION
 """
     names = [x for x in names.split() if x]
 
-    return "\n---\n".join(["%s={{%s}}" % (x, x) for x in names])
+    return "\n----\n".join(["%s={{%s}}" % (x, x) for x in names]+["{{LOCALVARS}}\n"])
 
 def parse_locals(localstr):
     if isinstance(localstr, str):
         localstr = unicode(localstr)
     res = {}
-    for x in localstr.split("\n---\n"):
+    for x in localstr.split("\n----\n"):
         try:
             name, val = x.split('=', 1)
         except ValueError:
