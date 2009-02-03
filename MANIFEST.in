@@ -47,6 +47,7 @@ include mwlib/l10n.py
 include mwlib/lang.py
 include mwlib/lang.txt
 include mwlib/log.py
+include mwlib/lrucache.py
 include mwlib/mathml.py
 include mwlib/mathutils.py
 include mwlib/metabook.py
