@@ -49,9 +49,11 @@ def optimize(node):
         
     return node
 
-    
+from mwlib import lrucache
+
 class Parser(object):
-    _cache = {}
+    _cache = lrucache.mt_lrucache(2000)
+    
     def __init__(self, txt, included=True):
         if isinstance(txt, str):
             txt = unicode(txt)
