@@ -431,10 +431,12 @@ class TreeCleaner(object):
         return prev
 
     def _nextAdjacentNode(self, node):
-        if node.next:
+        if node and node.next:
             res = node.next.getFirstLeaf() or node.next
             return res
-        return self._nextAdjacentNode(node.parent)        
+        if node.parent:
+            return self._nextAdjacentNode(node.parent)
+        return None
 
 
     def removeBreakingReturns(self, node): 
