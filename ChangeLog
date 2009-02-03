@@ -1,6 +1,0 @@
- * mwapidb: return authors alphabetically sorted (fixes: #420)
- * zipcreator: fixed classname from DummyScheduler to DummyJobScheduler; this bug
-   broke the --no-threads option
- * serve: if rendering is forced, don't re-use ZIP file (fixes: #432)
- * options: remove default value "Print" from --print-template-prefix
- * mapidb: expand local variables, add them to source dictionary

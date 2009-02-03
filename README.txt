@@ -83,6 +83,26 @@ Credits
 project ((C) 2002-2004 Python Software Foundation).
 The remaining parts are distributed under the BSD license:
 
+ChangeLog
+======================================================================
+2009-2-3  release 0.9.6
+--------------------------------
+- mwapidb: return authors alphabetically sorted (fixes: #420)
+- zipcreator: fixed classname from DummyScheduler to DummyJobScheduler; this bug
+  broke the --no-threads option
+- serve: if rendering is forced, don't re-use ZIP file (fixes: #432)
+- options: remove default value "Print" from --print-template-prefix
+- mapidb: expand local* functions, add them to source dictionary
+- expander: fix memory leak in template parser (#439)
+- expander: better noinclude, includeonly handling (#426)
+- expander: #iferror now uses a regular expression (#435)
+- expander: workaround dateutils bug
+  (resulting in a TypeError: unsupported operand type(s) for +=: 'NoneType' and 'int')
+
+2009-1-26 release 0.9.5
+--------------------------------
+
+
 License
 ======================================================================
 Copyright (c) 2007-2009 PediaPress GmbH
