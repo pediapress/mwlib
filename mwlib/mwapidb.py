@@ -739,22 +739,32 @@ class WikiDB(wikidbbase.WikiDBBase):
                 r['diff_size'] = r['size']
             else:
                 r['diff_size'] = abs(r['size']-revs[i-1]['size'])
-                
 
+        ANON = "ANONIPEDITS"
         authors = dict() # author:bytes
         for r in revs:
-            if not r.get('anon') \
-                    and not self.ip_rex.match(r['user']) \
-                    and not r.get('minor') \
-                    and not self.bot_rex.search(r.get('comment', '')) \
-                    and not self.bot_rex.search(r['user']):
-                authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
-        authors = authors.items()
-        authors.sort(lambda a,b:cmp(b[1], a[1]))
+            print r
+            if 'minor' in r:  
+                pass # include minor edits
+            if 'anon' in r or self.ip_rex.match(r['user']): # anon
+                authors[ANON] = authors.get(ANON, 0) + 1
+            elif self.bot_rex.search(r['user']) or self.bot_rex.search(r.get('comment', '')):
+                continue # filter bots
+            else:
+                 authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
+        
+        authors["%s:%d" % (ANON, authors.get(ANON, 0))] = 0 # last if sorted
+        del authors[ANON]
+
+        if False: # by summarized edit diff sizes
+            authors = authors.items()
+            authors.sort(lambda a,b:cmp(b[1], a[1]))
+        else: # sorted by A-Z
+            authors = authors.items()
+            authors.sort()
 #        print authors
         return [a for a,c in authors]
 
-    
     def getTemplate(self, name, followRedirects=True):
         """
         Note: *Not* following redirects is unsupported!
