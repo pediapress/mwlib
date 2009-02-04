@@ -769,7 +769,7 @@ def html():
 
 """)
 
-        a=uparser.parseString(x, raw=raw, wikidb=db)
+        a=uparser.parseString(a, raw=raw, wikidb=db)
         w=htmlwriter.HTMLWriter(out, images)
         w.write(a)
 
