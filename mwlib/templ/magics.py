@@ -380,15 +380,7 @@ class ParserFunctions(object):
         if not self.wikidb:
             return args.get(args[2], "")
         
-        # wrong place. FIXME.
-        if ':' in name:
-            ns, name = name.split(':', 1)
-            if ns.lower() in ['vorlage', 'template']:
-                r=self.wikidb.getTemplate(name)
-            else:
-                r=None
-        else:
-            r=self.wikidb.getRawArticle(name)
+        r=self.wikidb.getRawArticle(name)
 
         if r:
             return args[1]

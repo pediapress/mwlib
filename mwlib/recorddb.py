@@ -3,6 +3,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+from mwlib import namespace
+
 class RecordDB(object):
     """Proxy getRawArticle() and getTemplate() to another WikiDB and record all
     results for later retrieval.
@@ -32,6 +34,17 @@ class RecordDB(object):
         r = self.db.getRawArticle(name, revision=revision)
         if r is None:
             return None
+        
+        ns, partial, full = namespace.splitname(name)
+        if ns==namespace.NS_TEMPLATE:
+            self.templates[partial] = {
+                'content-type': 'text/x-wiki',
+                'content': r,
+                }
+            
+            return r
+    
+                
         self.articles[name] = {
             'revision': revision,
             'content-type': 'text/x-wiki',
@@ -48,6 +61,10 @@ class RecordDB(object):
         return r
     
     def getTemplate(self, name, followRedirects=False):
+        ns, name, full = namespace.splitname(name, namespace.NS_TEMPLATE)
+        if ns!=namespace.NS_TEMPLATE:
+            return self.getRawArticle(full)
+            
         try:
             return self.templates[name]['content']
         except KeyError:
