@@ -51,12 +51,15 @@ class uplus: pass
 
 precedence = {"(":-1, ")":-1}
 functions = {}
+unary_ops = set()
 
 def addop(op, prec, fun, numargs=None):
     precedence[op] = prec
     if numargs is None:
         numargs = len(inspect.getargspec(fun)[0])
-    
+
+    if numargs==1:
+        unary_ops.add(op)
     
     def wrap(stack):
         assert len(stack)>=numargs
@@ -162,7 +165,7 @@ class Expr(object):
                     elif operator=='+':
                         operator = uplus
                         
-                is_unary = operator in (uplus, uminus)
+                is_unary = operator in unary_ops
                 prec = precedence[operator]
                 while not is_unary and operator_stack and prec<=precedence[operator_stack[-1]]:
                     p = operator_stack.pop()
