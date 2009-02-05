@@ -754,7 +754,11 @@ class WikiDB(wikidbbase.WikiDBBase):
                  authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
         
         authors["%s:%d" % (ANON, authors.get(ANON, 0))] = 0 # last if sorted
-        del authors[ANON]
+        try:
+            del authors[ANON]
+        except KeyError:
+            pass
+        
 
         if False: # by summarized edit diff sizes
             authors = authors.items()
