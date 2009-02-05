@@ -23,11 +23,42 @@ NS_CATEGORY_TALK  = 15
 
 namespace_maps = {}
 
+class nsmapper(dict):
+    pass
+
+def splitname(name, defaultns=0, nsmap=None):
+    if nsmap is None:
+        nsmap = namespace_maps['default']
+
+    if name.startswith(':'):
+        name = name[1:]
+
+    name = name.replace(" ", "_")
+
+    
+    res = None
+    
+    if ":" in name:
+        ns, partial_name = name.split(":", 1)
+        ns = nsmap.get(ns.lower(), None)
+        
+        if ns is not None:
+            res = (ns, partial_name, "%s:%s" % (nsmap.ns2name[ns], partial_name))
+
+    if res is None:
+        res = (defaultns, name, "%s:%s" % (nsmap.ns2name[defaultns], name))
+    return res
+              
 def add_namespace_map(key, lang, project_name, extras={}):
     ns_data = _lang_ns_data[lang]
-    res = {}
+    
+    res = nsmapper()    
+    res.ns2name = ns2name = {}
+    
     def insertstring(k, v):
-        res[k.replace(" ", "_")] = v
+        res[k.replace(" ", "_").lower()] = v
+        ns2name[v] = k.replace(" ", "_")
+        
     def insert(k, v):
         if isinstance(k, basestring):
             insertstring(k,v)
@@ -44,7 +75,12 @@ def add_namespace_map(key, lang, project_name, extras={}):
         insert(ns_data[-1] % project_name, NS_PROJECT_TALK)
     else:
         insert(ns_data[-1], NS_PROJECT_TALK)
-    res.update(extras)
+    for k, v in extras.items():
+        insert(k,v)
+
+    insert("", 0)
+    
+        
     namespace_maps[key] = res
 
 _lang_ns_data_keys = [
@@ -61,7 +97,9 @@ for lang in _lang_ns_data:
     add_namespace_map('%s+en_mw' % lang, lang, u'MediaWiki', namespace_maps['enwiki'])
 del lang
 
-namespace_maps['default'] = dict(namespace_maps['enwiki'].items() + namespace_maps['dewiki'].items())
+namespace_maps['default'] = nsmapper(namespace_maps['enwiki'].items() + namespace_maps['dewiki'].items())
+namespace_maps['default'].ns2name = namespace_maps['enwiki'].ns2name
+
 
 # external wikis:
 
