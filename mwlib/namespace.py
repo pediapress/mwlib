@@ -26,18 +26,24 @@ namespace_maps = {}
 def add_namespace_map(key, lang, project_name, extras={}):
     ns_data = _lang_ns_data[lang]
     res = {}
-    for k, v in zip(ns_data, _lang_ns_data_keys):
+    def insertstring(k, v):
+        res[k.replace(" ", "_")] = v
+    def insert(k, v):
         if isinstance(k, basestring):
-            res[k] = v
+            insertstring(k,v)
         else:
             for x in k:
-                res[x] = v
+                insertstring(x, v)
         
-    res[project_name] = NS_PROJECT
+    for k, v in zip(ns_data, _lang_ns_data_keys):
+        insert(k,v)
+
+    insert(project_name, NS_PROJECT_TALK)
+    
     if '%s' in ns_data[-1]:
-        res[ns_data[-1] % project_name] = NS_PROJECT_TALK
+        insert(ns_data[-1] % project_name, NS_PROJECT_TALK)
     else:
-        res[ns_data[-1]] = NS_PROJECT_TALK
+        insert(ns_data[-1], NS_PROJECT_TALK)
     res.update(extras)
     namespace_maps[key] = res
 
