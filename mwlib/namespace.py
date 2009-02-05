@@ -43,10 +43,17 @@ def splitname(name, defaultns=0, nsmap=None):
         ns = nsmap.get(ns.lower(), None)
         
         if ns is not None:
-            res = (ns, partial_name, "%s:%s" % (nsmap.ns2name[ns], partial_name))
+            name = partial_name
+        else:
+            ns = defaultns
+    else:
+        ns = defaultns
 
-    if res is None:
-        res = (defaultns, name, "%s:%s" % (nsmap.ns2name[defaultns], name))
+    if ns==0:
+        res = (ns, name, name)
+    else:
+        res = (ns, name, "%s:%s" % (nsmap.ns2name[ns], name))
+        
     return res
               
 def add_namespace_map(key, lang, project_name, extras={}):
