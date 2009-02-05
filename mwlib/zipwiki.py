@@ -13,7 +13,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import uparser, wikidbbase
+from mwlib import wikidbbase, namespace
 
 class Wiki(wikidbbase.WikiDBBase):
     def __init__(self, zipfile):
@@ -71,6 +71,9 @@ class Wiki(wikidbbase.WikiDBBase):
         return source.get('interwikimap', None)
     
     def getRawArticle(self, title, revision=None):
+        ns, partial, full = namespace.splitname(title)
+        if ns==namespace.NS_TEMPLATE:
+            return self.getTemplate(partial)
         article = self._getArticle(title, revision=revision)
         if article:
             result = article['content']
@@ -92,6 +95,11 @@ class Wiki(wikidbbase.WikiDBBase):
         return None
     
     def getTemplate(self, name, followRedirects=True):
+        ns, name, full = namespace.splitname(name, namespace.NS_TEMPLATE)
+        if ns!=namespace.NS_TEMPLATE:
+            return self.getRawArticle(full)
+        
+        
         try:
             result = self.templates[name]['content']
             if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
