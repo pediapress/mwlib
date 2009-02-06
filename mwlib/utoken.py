@@ -74,7 +74,7 @@ class token(object):
 
     @staticmethod
     def join_as_text(tokens):
-        return u"".join([x.text for x in tokens])
+        return u"".join([x.text or u"" for x in tokens])
     
     def _get_text(self):
         if self._text is None and self.source is not None:

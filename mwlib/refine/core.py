@@ -207,10 +207,15 @@ class parse_links(object):
         tokens = self.tokens
         i = 0
         marks = []
+
+        stack = []
+        
         
         while i<len(self.tokens):
             t = tokens[i]
             if t.type==T.t_2box_open:
+                if len(marks)>1:
+                    stack.append(marks)
                 marks = [i]
                 i+=1
             elif t.type==T.t_special and t.text=="|":
@@ -223,6 +228,10 @@ class parse_links(object):
                 target = T.join_as_text(tokens[start+1:marks[1]]).strip()
                 if not target:
                     i+=1
+                    if stack:
+                        marks=stack.pop()
+                    else:
+                        marks=[]                        
                     continue
                 else:
                     # FIXME: parse image modifiers: thumb, frame, ...
@@ -248,7 +257,10 @@ class parse_links(object):
                     tokens[start:i+1] = [node]
                     node.target = target
                     self.refined.append(sub)
-                    marks = []
+                    if stack:
+                        marks = stack.pop()
+                    else:
+                        marks = []
                     i = start+1
             else:
                 i+=1
