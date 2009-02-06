@@ -40,7 +40,9 @@ def _change_classes(node):
             node.caption = node.tagname
             if node.tagname=='p':
                 node.__class__=N.Paragraph
-        
+            elif node.tagname=='ref':
+                node.__class__=N.Ref
+                
         if node.__class__==N.Link:
             if node.ns==namespace.NS_IMAGE:
                 node.__class__ = N.ImageLink
