@@ -23,8 +23,11 @@ def _change_classes(node):
             node.children = [x for x in node.children if x.type in (T.t_complex_table_row, T.t_complex_caption)]
         elif node.type==T.t_complex_table_row and node.children:
             node.children = [x for x in node.children if x.type==T.t_complex_table_cell]
-            
+
         node.__class__ = tok2class.get(node.type, N.Text)
+        if node.tagname=='br':
+            node.__class__=N.TagNode
+            
         if node.__class__==N.Text:
             node.caption=node.text
         if node.children is None:
