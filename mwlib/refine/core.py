@@ -195,7 +195,7 @@ class parse_links(object):
         return False
     
     def extract_image_modifiers(self, marks, node):
-        cap = blist()
+        cap = None
         for i in range(1,len(marks)-1):
             tmp = self.tokens[marks[i]+1:marks[i+1]]
             if not self.handle_image_modifier(T.join_as_text(tmp), node):
@@ -234,11 +234,16 @@ class parse_links(object):
                         pass
                     
                     node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns)
-                    
+
+                    sub = None
                     if ns==namespace.NS_IMAGE:
-                        sub = self.extract_image_modifiers(marks, node)
-                    else:
+                        sub = self.extract_image_modifiers(marks, node)                        
+                    elif len(marks)>2:
                         sub = tokens[marks[1]+1:marks[-1]]
+
+                    if sub is None:
+                        sub = [T(type=T.t_text, start=0, len=0, text=target)]
+                        
                     node.children = sub
                     tokens[start:i+1] = [node]
                     node.target = target
