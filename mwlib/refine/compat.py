@@ -36,6 +36,10 @@ def _change_classes(node):
         if node.__class__==N.Link:
             if node.ns==namespace.NS_IMAGE:
                 node.__class__ = N.ImageLink
+            elif node.ns==namespace.NS_MAIN:
+                node.__class__ = N.ArticleLink
+            elif node.ns is not None:
+                node.__class__ = N.NamespaceLink
                 
             
         node = node.children
