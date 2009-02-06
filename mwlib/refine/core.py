@@ -304,7 +304,7 @@ class parse_table_cells(object):
             if self.is_table_cell_start(tokens[i]):
                 if start is not None:
 
-                    search_modifier = tokens[start].text in ("|", "!")
+                    search_modifier = tokens[start].text in ("|", "!", "||")
                     sub = tokens[start+1:i]
                     tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub)]
                     if search_modifier:
@@ -319,7 +319,7 @@ class parse_table_cells(object):
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
                     sub = tokens[start+1:i]
-                    search_modifier = tokens[start].text in ("|", "!")
+                    search_modifier = tokens[start].text in ("|", "!", "||")
                     tokens[start:i+1] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub)]
                     
                     if search_modifier:
@@ -335,7 +335,7 @@ class parse_table_cells(object):
 
         if start is not None:
             
-            search_modifier = tokens[start].text in ("|", "!")
+            search_modifier = tokens[start].text in ("|", "!", "||")
             sub = tokens[start+1:]
             tokens[start:] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub)]
             
