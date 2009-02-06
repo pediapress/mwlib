@@ -743,7 +743,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         ANON = "ANONIPEDITS"
         authors = dict() # author:bytes
         for r in revs:
-            print r
+#            print r
             if 'minor' in r:  
                 pass # include minor edits
             if 'anon' in r or self.ip_rex.match(r['user']): # anon
