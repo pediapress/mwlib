@@ -46,6 +46,8 @@ def _change_classes(node):
                 node.__class__ = N.ImageLink
             elif node.ns==namespace.NS_MAIN:
                 node.__class__ = N.ArticleLink
+            elif node.ns==namespace.NS_CATEGORY:
+                node.__class__ = N.CategoryLink
             elif node.ns is not None:
                 node.__class__ = N.NamespaceLink
                 

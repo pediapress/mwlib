@@ -226,6 +226,12 @@ class parse_links(object):
                 start = marks[0]
                 
                 target = T.join_as_text(tokens[start+1:marks[1]]).strip()
+                if target.startswith(":"):
+                    target = target[1:]
+                    colon = True
+                else:
+                    colon = False
+                    
                 if not target:
                     i+=1
                     if stack:
@@ -242,7 +248,7 @@ class parse_links(object):
                         # FIXME: could be an interwiki/language link. -> set ns=None
                         pass
                     
-                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns)
+                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon)
 
                     sub = None
                     if ns==namespace.NS_IMAGE:
