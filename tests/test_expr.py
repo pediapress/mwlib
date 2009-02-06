@@ -3,6 +3,7 @@
 
 import math
 from mwlib.expander import expandstr
+from mwlib import expr
 
 def ee(s, expected=None):
     s=expandstr("{{#expr:%s}}" % (s,))
@@ -114,3 +115,14 @@ def test_expr_repr():
     yield expandstr, "{{#expr:99999999999999}}", "99999999999999"
     yield expandstr, "{{#expr:99999999999999+1}}", "1.0E+14"
     yield expandstr, "{{#expr:0.1+0.9}}", "1"
+
+def test_unary_minus_sin():
+    """http://code.pediapress.com/wiki/ticket/450"""
+    val = expr.expr("-sin(1.5707963267948966)")
+    print val
+    assert math.fabs(-1-val)<0.0001
+    
+    val = expr.expr("-sin ((90--82)*3.14159265358979/180)*(90+-80.0833333)*1.55*1.30522+49.3")
+    print val
+    assert math.fabs(46.507864831337-val)<0.0001
+    

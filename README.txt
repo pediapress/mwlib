@@ -85,6 +85,11 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-X-X release ???
+--------------------------------
+- fix bug in #expr parsing
+- fix bug in localised namespace handling/#ifexist
+
 2009-2-3  release 0.9.6
 --------------------------------
 - mwapidb: return authors alphabetically sorted (fixes: #420)
@@ -101,7 +106,6 @@ ChangeLog
 
 2009-1-26 release 0.9.5
 --------------------------------
-
 
 License
 ======================================================================

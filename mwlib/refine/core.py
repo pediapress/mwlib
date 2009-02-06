@@ -3,6 +3,7 @@
 import sys
 from mwlib.utoken import tokenize, show, token as T
 from mwlib.refine import util
+from mwlib import namespace
 
 try:
     from blist import blist
@@ -145,6 +146,63 @@ class parse_links(object):
         self.refined = refined
         self.run()
 
+    def handle_image_modifier(self, mod, node):
+        mod = mod.strip().lower()
+        if mod=='thumb' or mod=='thumbnail':
+            node.thumb = True
+            return True
+        
+        if mod in ('left', 'right', 'center', 'none'):
+            node.align = mod
+            return True
+        
+        if mod in ('frame', 'framed', 'enframed', 'frameless'):
+            node.frame = mod
+            return True
+        
+        if mod=='border':
+            node.border = True
+            return True
+
+        if mod.startswith('print='):
+            node.printargs = mod[len('print='):]
+
+        if mod.startswith('alt='):
+            node.alt = mod[len('alt='):]
+
+        if mod.startswith('link='):
+            node.link = mod[len('link='):]
+
+        if mod.endswith('px'):
+                # x200px
+                # 100x200px
+                # 200px
+                mod = mod[:-2]
+                width, height = (mod.split('x')+['0'])[:2]
+                try:
+                    width = int(width)
+                except ValueError:
+                    width = 0
+
+                try:
+                    height = int(height)
+                except ValueError:
+                    height = 0
+
+                node.width = width
+                node.height = height
+                return True
+        return False
+    
+    def extract_image_modifiers(self, marks, node):
+        cap = blist()
+        for i in range(1,len(marks)-1):
+            tmp = self.tokens[marks[i]+1:marks[i+1]]
+            if not self.handle_image_modifier(T.join_as_text(tmp), node):
+                cap = tmp
+        return cap
+        
+        
     def run(self):
         tokens = self.tokens
         i = 0
@@ -168,10 +226,22 @@ class parse_links(object):
                     continue
                 else:
                     # FIXME: parse image modifiers: thumb, frame, ...
+                    ns, partial, full = namespace.splitname(target)
 
-                    sub = tokens[marks[1]+1:marks[-1]]
-                    tokens[start:i+1] = [T(type=T.t_complex_link, start=0, len=0, children=sub)]
-                    tokens[start].target = target
+                    
+                    if ns==namespace.NS_MAIN:
+                        # FIXME: could be an interwiki/language link. -> set ns=None
+                        pass
+                    
+                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns)
+                    
+                    if ns==namespace.NS_IMAGE:
+                        sub = self.extract_image_modifiers(marks, node)
+                    else:
+                        sub = tokens[marks[1]+1:marks[-1]]
+                    node.children = sub
+                    tokens[start:i+1] = [node]
+                    node.target = target
                     self.refined.append(sub)
                     marks = []
                     i = start+1
@@ -436,56 +506,3 @@ def parse_txt(txt):
         refine = next
         
     return tokens
-
-
-def main():
-    show(parse_txt("<table>bla"))
-    print
-    show(parse_txt("""
-<table>
-  <tr>
-  row 1
-  </tr>
-  <tr>
-  row 2
-  </tr>
-</table>"""))
-    print
-
-
-    show(parse_txt("""
-<table>
-<tr><td>cell1</td>
-<tr><td>bla cell2<td>cell3
-</table>
-"""))
-
-    sys.exit(0)
-
-
-    print
-
-    show(parse_txt("""<table><tr>
-<td>
-
-<table>
-<tr>
-<td>inner table</td>
-</tr>
-</table>
-
-</td>
-</tr></table>"""))
-
-
-    parse_txt("</table>")
-
-    print
-
-    tokens = blist(tokenize("<p>bla <p>bla</p>blubb</p>"))
-    get_recursive_tag_parser("p", lambda x: False)(tokens)
-    show(tokens)
-
-if __name__=='__main__':
-    main()
-    

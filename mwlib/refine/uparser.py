@@ -32,7 +32,6 @@ def parseString(
     else:
         input = raw
 
-    a = core.parse_txt(input)
     a = compat.parse_txt(input)
     
 #     tokens = utoken.tokenize(input, title)

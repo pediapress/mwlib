@@ -2,6 +2,7 @@
 from mwlib.refine import core
 from mwlib.parser import nodes as N
 from mwlib.utoken import token as T
+from mwlib import namespace
 
 
 tok2class = {
@@ -23,12 +24,23 @@ def _change_classes(node):
             node.caption=node.text
         if node.children is None:
             node.children = []
+        else:
+            node.children = list(node.children) # advtree can't handle the blist
         if node.vlist is None:
             node.vlist = {}
         if node.type==T.t_complex_tag:
             node.caption = node.tagname
             if node.tagname=='p':
                 node.__class__=N.Paragraph
+        
+        if node.__class__==N.Link:
+            if node.ns==namespace.NS_IMAGE:
+                node.__class__ = N.ImageLink
+            elif node.ns==namespace.NS_MAIN:
+                node.__class__ = N.ArticleLink
+            elif node.ns is not None:
+                node.__class__ = N.NamespaceLink
+                
             
         node = node.children
         
