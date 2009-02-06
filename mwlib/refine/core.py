@@ -146,32 +146,32 @@ class parse_links(object):
         self.refined = refined
         self.run()
 
-    def handle_image_modifier(self, mod):
+    def handle_image_modifier(self, mod, node):
         mod = mod.strip().lower()
         if mod=='thumb' or mod=='thumbnail':
-            self.thumb = True
+            node.thumb = True
             return True
         
         if mod in ('left', 'right', 'center', 'none'):
-            self.align = mod
+            node.align = mod
             return True
         
         if mod in ('frame', 'framed', 'enframed', 'frameless'):
-            self.frame = mod
+            node.frame = mod
             return True
         
         if mod=='border':
-            self.border = True
+            node.border = True
             return True
 
         if mod.startswith('print='):
-            self.printargs = mod[len('print='):]
+            node.printargs = mod[len('print='):]
 
         if mod.startswith('alt='):
-            self.alt = mod[len('alt='):]
+            node.alt = mod[len('alt='):]
 
         if mod.startswith('link='):
-            self.link = mod[len('link='):]
+            node.link = mod[len('link='):]
 
         if mod.endswith('px'):
                 # x200px
@@ -189,16 +189,16 @@ class parse_links(object):
                 except ValueError:
                     height = 0
 
-                self.width = width
-                self.height = height
+                node.width = width
+                node.height = height
                 return True
         return False
     
-    def extract_image_modifiers(self, marks):
+    def extract_image_modifiers(self, marks, node):
         cap = blist()
         for i in range(1,len(marks)-1):
             tmp = self.tokens[marks[i]+1:marks[i+1]]
-            if not self.handle_image_modifier(T.join_as_text(tmp)):
+            if not self.handle_image_modifier(T.join_as_text(tmp), node):
                 cap = tmp
         return cap
         
@@ -227,18 +227,21 @@ class parse_links(object):
                 else:
                     # FIXME: parse image modifiers: thumb, frame, ...
                     ns, partial, full = namespace.splitname(target)
+
+                    
                     if ns==namespace.NS_MAIN:
                         # FIXME: could be an interwiki/language link. -> set ns=None
                         pass
                     
-                    self.ns = ns
+                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns)
+                    
                     if ns==namespace.NS_IMAGE:
-                        sub = self.extract_image_modifiers(marks)
+                        sub = self.extract_image_modifiers(marks, node)
                     else:
                         sub = tokens[marks[1]+1:marks[-1]]
-                    
-                    tokens[start:i+1] = [T(type=T.t_complex_link, start=0, len=0, children=sub)]
-                    tokens[start].target = target
+                    node.children = sub
+                    tokens[start:i+1] = [node]
+                    node.target = target
                     self.refined.append(sub)
                     marks = []
                     i = start+1
