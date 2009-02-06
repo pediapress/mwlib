@@ -2,6 +2,7 @@
 from mwlib.refine import core
 from mwlib.parser import nodes as N
 from mwlib.utoken import token as T
+from mwlib import namespace
 
 
 tok2class = {
@@ -31,6 +32,11 @@ def _change_classes(node):
             node.caption = node.tagname
             if node.tagname=='p':
                 node.__class__=N.Paragraph
+        
+        if node.__class__==N.Link:
+            if node.ns==namespace.NS_IMAGE:
+                node.__class__ = N.ImageLink
+                
             
         node = node.children
         
