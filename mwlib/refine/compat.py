@@ -19,6 +19,11 @@ tok2class = {
 
 def _change_classes(node):
     if isinstance(node, T):
+        if node.type==T.t_complex_table and node.children:
+            node.children = [x for x in node.children if x.type in (T.t_complex_table_row, T.t_complex_caption)]
+        elif node.type==T.t_complex_table_row and node.children:
+            node.children = [x for x in node.children if x.type==T.t_complex_table_cell]
+            
         node.__class__ = tok2class.get(node.type, N.Text)
         if node.__class__==N.Text:
             node.caption=node.text
@@ -48,6 +53,8 @@ def _change_classes(node):
         for x in node:
             _change_classes(x)
 
+    
+    
 def parse_txt(raw):
     sub = core.parse_txt(raw)
     article = T(type=T.t_complex_article, start=0, len=0, children=sub)
