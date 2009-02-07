@@ -43,7 +43,7 @@ class ImageUtils(object):
                 max_w = max_h*ar
 
         # check if thumb, then assign default width
-        if getattr(img_node, 'thumb', None) or getattr(img_node, 'framed', None) or getattr(img_node, 'frameless', None):
+        if getattr(img_node, 'thumb', None) or getattr(img_node, 'framed', None) or getattr(img_node, 'frameless', None) or getattr(img_node, 'align', None) in ['right', 'left']:
             max_w = max_w or self.default_thumb_width
             img_node.floating = True
         if not max_w:
@@ -66,13 +66,12 @@ class ImageUtils(object):
         if getattr(img_node, 'floating', False):
             img_print_width = min(img_print_width, self.print_width*self.img_max_thumb_width, self.print_height*self.img_max_thumb_height*ar)
 
-        if not max_print_width:
-            max_print_width = self.print_width
         if img_node.isInline():
             if img_print_width < self.print_width/2: # scale "small" inline images
                 img_print_width *= self.img_inline_scale_factor
             else: # FIXME: full width images are 12pt too wide - we need to check why
                 img_print_width -= 12
-        img_print_height = img_print_width/ar
 
+        img_print_width = min(img_print_width, self.print_width, self.print_height*ar*0.9)
+        img_print_height = img_print_width/ar
         return (img_print_width, img_print_height)
