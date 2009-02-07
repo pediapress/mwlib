@@ -88,6 +88,7 @@ class TreeCleaner(object):
                                   Center:[PreFormatted],
                                   Paragraph:[PreFormatted],
                                   Section:[PreFormatted],
+                                  Gallery:[PreFormatted],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
