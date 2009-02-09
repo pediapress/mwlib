@@ -603,6 +603,7 @@ def fixStyleNode(node):
         node.__class__ = Strong
         node.caption = ""
         em = Emphasized("''")
+        em.vlist = {}
         for c in node.children:
             em.appendChild(c)
         node.children = []
