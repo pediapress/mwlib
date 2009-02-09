@@ -88,10 +88,6 @@ class token(object):
     text = property(_get_text, _set_text)
     
     def __init__(self, type=None, start=None, len=None, source=None, text=None, **kw):
-        assert type is not None
-        assert start is not None
-        assert len is not None
-        
         self.type = type
         self.start = start
         self.len = len
