@@ -31,11 +31,15 @@ def _change_classes(node):
             node.children=[]
             
         node.__class__ = tok2class.get(node.type, N.Text)
+            
         if node.tagname=='br':
             node.__class__=N.TagNode
+
+        if node.type==T.t_complex_style:
+            node.__class__=N.Style
             
         if node.__class__==N.Text:
-            node.caption=node.text
+            node.caption=node.text or u""
         if node.children is None:
             node.children = []
         else:
