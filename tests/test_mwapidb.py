@@ -141,6 +141,10 @@ class TestWikiDB(object):
     def test_redirect(self):
         raw = self.w.getRawArticle(u'The European Library')
         assert 'redirect' not in raw.lower()
+
+        # with specific revision, it's a bit trickier for mwapidb:
+        raw = self.w.getRawArticle(u'The European Library', revision=42994716)
+        assert 'redirect' not in raw.lower()
     
     def test_getLinkURL(self):
         def make_link_node(cls, target, full_target=None):

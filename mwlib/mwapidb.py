@@ -570,6 +570,7 @@ class ImageDB(object):
 class WikiDB(wikidbbase.WikiDBBase):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'bot\b', re.IGNORECASE)
+    redirect_rex = re.compile(r'^#redirect:?\s*?\[\[.*?\]\]', re.IGNORECASE)
     
     def __init__(self,
         base_url=None,
@@ -847,7 +848,10 @@ class WikiDB(wikidbbase.WikiDBBase):
             return None
         if isinstance(revisions, list):
             try:
-                return revisions[0]['*']
+                raw = revisions[0]['*']
+                if revision and self.redirect_rex.search(raw):
+                    return self.getRawArticle(title) # let getRawArticle() w/out revision do the redirect handling
+                return raw
             except (IndexError, KeyError):
                 return None
         else:
