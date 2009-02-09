@@ -37,6 +37,7 @@ class token(object):
     children = None
     tagname = None
     ns = None
+    lineprefix = None
     
     t_end = 0
     t_text = 1
@@ -119,6 +120,9 @@ class token(object):
         if self.ns is not None:
             r.append(" ns=")
             r.append(repr(self.ns))
+        if self.lineprefix is not None:
+            r.append(" lineprefix=")
+            r.append(self.lineprefix)
             
         return u"".join(r)
 
