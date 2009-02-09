@@ -154,8 +154,6 @@ class parse_urls(object):
         self.run()
         
     def run(self):
-        show(self.tokens)
-        
         tokens = self.tokens
         i=0
         start = None
