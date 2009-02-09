@@ -80,7 +80,8 @@ def _li_break_at(token):
     if token.type==T.t_html_tag and token.tagname=="li":
         return True
     return False
-                      
+parse_source = get_recursive_tag_parser("source")
+
 parse_li = get_recursive_tag_parser("li", _li_break_at)
 parse_ol = get_recursive_tag_parser("ol")
 parse_ul = get_recursive_tag_parser("ul")
@@ -751,7 +752,7 @@ def parse_txt(txt):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_source, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
