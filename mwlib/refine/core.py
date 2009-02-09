@@ -23,6 +23,8 @@ T.t_complex_article = "article"
 T.t_complex_indent = "indent"
 T.t_complex_line = "line"
 T.t_complex_named_url = "named_url"
+T.t_complex_style = "style"
+T.t_complex_node = "node"
 T.t_vlist = "vlist"
 
 T.children = None
@@ -173,6 +175,83 @@ class parse_urls(object):
                 i+=1
                 
         self.refined.append(tokens)
+
+class parse_singlequote(object):
+    def __init__(self, tokens, refined):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+
+    def run(self):
+        show(self.tokens)
+        
+        def finish():
+            print "FINISH", counts
+            assert len(counts)==len(styles)
+            
+            from mwlib.parser import styleanalyzer
+            states = styleanalyzer.compute_path(counts)
+
+            
+            last_apocount = 0
+            for i, s in enumerate(states):
+                apos = "'"*(s.apocount-last_apocount)
+                if apos:
+                    styles[i].children.insert(0, T(type=T.t_text, text=apos))
+                last_apocount = s.apocount
+
+                if s.is_bold and s.is_italic:
+                    styles[i].caption = "'''''"
+                elif s.is_bold:
+                    styles[i].caption = "'''"
+                elif s.is_italic:
+                    styles[i].caption = "''"
+                else:
+                    styles[i].type = T.t_complex_node
+            
+        
+        tokens = self.tokens
+        pos = 0
+        start = None
+        counts = []
+        styles = []
+        
+        while pos<len(tokens):
+            t = tokens[pos]
+            if t.type==T.t_singlequote:
+                if start is None:
+                    counts.append(len(t.text))
+                    start = pos
+                    pos+=1
+                else:
+                    tokens[start:pos] = [T(type=T.t_complex_style, children=tokens[start+1:pos])]
+                    styles.append(tokens[start])
+                    pos = start+1
+                    start = None
+            elif t.type==T.t_newline:
+                if start is not None:
+                    tokens[start:pos] = [T(type=T.t_complex_style, children=tokens[start+1:pos])]
+                    styles.append(tokens[start])
+                    pos = start
+                    start = None
+                pos += 1
+                
+                if counts:
+                    finish()
+                    counts = []
+                    styles = []
+            else:
+                pos += 1
+
+        
+        if start is not None:
+            tokens[start:pos] = [T(type=T.t_complex_style, children=tokens[start+1:pos])]
+            styles.append(tokens[start])
+            
+        if counts:
+            finish()
+                
+                    
         
 class parse_lines(object):
     def __init__(self, tokens, refined):
@@ -669,7 +748,7 @@ def parse_txt(txt):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
