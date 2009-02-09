@@ -85,7 +85,7 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
-2009-X-X release ???
+2009-2-9 release 0.9.7
 --------------------------------
 - fix bug in #expr parsing
 - fix bug in localised namespace handling/#ifexist
