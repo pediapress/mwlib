@@ -42,7 +42,13 @@ def _change_classes(node):
                 node.__class__=N.Paragraph
             elif node.tagname=='ref':
                 node.__class__=N.Ref
-                
+            elif node.tagname=='ul':
+                node.__class__=N.ItemList
+            elif node.tagname=='ol':
+                node.__class__=N.ItemList
+                node.numbered=True
+            elif node.tagname=='li':
+                node.__class__=N.Item
         if node.__class__==N.Link:
             if node.ns==namespace.NS_IMAGE:
                 node.__class__ = N.ImageLink
