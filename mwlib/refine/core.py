@@ -20,7 +20,7 @@ T.t_complex_tag = "complex_tag"
 T.t_complex_link = "link"
 T.t_complex_section = "section"
 T.t_complex_article = "article"
-
+T.t_complex_indent = "indent"
 T.t_complex_line = "line"
 T.t_vlist = "vlist"
 
@@ -152,20 +152,76 @@ class parse_lines(object):
         self.refined = refined
         self.run()
 
+        
     def analyze(self, lines):
-        print "ANALYZE", lines 
+
+        def getchar(node):
+            if node.lineprefix:
+                return node.lineprefix[0]
+            return None
         
         
+        lines.append(T(type=T.t_complex_line, lineprefix='<guard>')) # guard
+
+        
+        startpos = 0
+        while startpos<len(lines)-1:
+            prefix = getchar(lines[startpos])
+            if prefix is None:
+                startpos += 1
+                continue
+            
+            i = startpos+1
+            while getchar(lines[i])==prefix:
+                i+=1
+
+            
+            sub = lines[startpos:i]
+            for x in sub:
+                if x.lineprefix:
+                    x.lineprefix = x.lineprefix[1:]
+            self.analyze(sub)
+
+
+            def makelist():
+                for idx, x in enumerate(sub):
+                    if x.type==T.t_complex_line:
+                        x.type=T.t_complex_tag
+                        x.tagname = "li"
+                    else:
+                        sub[idx] = T(type=T.t_complex_tag, tagname="li", children=sub[idx:idx+1])                        
+            
+            if prefix==':':
+                node = T(type=T.t_complex_indent, start=0, len=0, children=sub)
+            elif prefix=='*':
+                makelist()
+                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ul")
+            elif prefix=="#":
+                makelist()
+                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ol")
+            elif prefix==';':
+                node = T(type=T.t_complex_bold, start=0, len=0, children=sub)
+            else:
+                assert 0
+                
+            lines[startpos:i] = [node]
+            startpos += 1
+
+
+        del lines[-1] # remove guard
         
     def run(self):
         tokens = self.tokens
         i = 0
         lines = []
         startline = None
-        
+        firsttoken = None
+                                   
         while i<len(self.tokens):
             t = tokens[i]
             if t.type in (T.t_item, T.t_colon):
+                if firsttoken is None:
+                    firsttoken = i
                 startline = i
                 i+=1
             elif t.type==T.t_newline and startline is not None:
@@ -178,22 +234,37 @@ class parse_lines(object):
                     sub = self.tokens[startline+1:i]
                     lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
                     startline=None
-                self.analyze(lines)
+                if lines:
+                    self.analyze(lines)
+                    self.tokens[firsttoken:i] = lines
+                    i = firsttoken
+                    firsttoken=None
+                    lines=[]
+                    continue
+                    
+                firsttoken = None
+                
                 lines = []
                 i+=1
             else:
                 if startline is None and lines:
                     self.analyze(lines)
+                    self.tokens[firsttoken:i] = lines
+                    i = firsttoken
+                    starttoken=None
                     lines=[]
-                i+=1
+                    firsttoken=None
+                else:
+                    i+=1
 
-        if startline:
+        if startline is not None:
             sub = self.tokens[startline+1:]
             lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
-            startline=None
-        self.analyze(lines)
 
-        
+        if lines:
+            self.analyze(lines)
+            self.tokens[firsttoken:] = lines                
+
 class parse_links(object):
     def __init__(self, tokens, refined):
         self.tokens = tokens
