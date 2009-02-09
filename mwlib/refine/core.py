@@ -22,6 +22,7 @@ T.t_complex_section = "section"
 T.t_complex_article = "article"
 T.t_complex_indent = "indent"
 T.t_complex_line = "line"
+T.t_complex_named_url = "named_url"
 T.t_vlist = "vlist"
 
 T.children = None
@@ -144,6 +145,35 @@ class parse_sections(object):
 
         if current.endtitle is not None:
             create()
+        self.refined.append(tokens)
+
+class parse_urls(object):
+    def __init__(self, tokens, refined):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+        
+    def run(self):
+        show(self.tokens)
+        
+        tokens = self.tokens
+        i=0
+        start = None
+        while i<len(tokens):
+            t = tokens[i]
+            
+            if t.type==T.t_urllink and start is None:
+                start = i
+                i+=1
+            elif t.type==T.t_special and t.text=="]" and start is not None:
+                sub = self.tokens[start+1:i]
+                self.tokens[start:i+1] = [T(type=T.t_complex_named_url, children=sub, caption=self.tokens[start].text[1:])]
+                self.refined.append(sub)
+                i = start
+                start = None
+            else:
+                i+=1
+                
         self.refined.append(tokens)
         
 class parse_lines(object):
@@ -269,6 +299,8 @@ class parse_lines(object):
             self.analyze(lines)
             self.tokens[firsttoken:] = lines                
 
+        self.refined.append(tokens)
+        
 class parse_links(object):
     def __init__(self, tokens, refined):
         self.tokens = tokens
@@ -639,7 +671,7 @@ def parse_txt(txt):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine

@@ -14,6 +14,8 @@ tok2class = {
     T.t_complex_section: N.Section,
     T.t_complex_article: N.Article,
     T.t_complex_tag: N.TagNode,
+    T.t_complex_named_url: N.NamedURL,
+    T.t_http_url: N.URL,
     }
 
 
@@ -24,6 +26,10 @@ def _change_classes(node):
         elif node.type==T.t_complex_table_row and node.children:
             node.children = [x for x in node.children if x.type==T.t_complex_table_cell]
 
+        if node.type==T.t_http_url:
+            node.caption = node.text
+            node.children=[]
+            
         node.__class__ = tok2class.get(node.type, N.Text)
         if node.tagname=='br':
             node.__class__=N.TagNode
