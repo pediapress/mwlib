@@ -20,6 +20,8 @@ T.t_complex_tag = "complex_tag"
 T.t_complex_link = "link"
 T.t_complex_section = "section"
 T.t_complex_article = "article"
+
+T.t_complex_line = "line"
 T.t_vlist = "vlist"
 
 T.children = None
@@ -144,7 +146,54 @@ class parse_sections(object):
             create()
         self.refined.append(tokens)
         
-                    
+class parse_lines(object):
+    def __init__(self, tokens, refined):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+
+    def analyze(self, lines):
+        print "ANALYZE", lines 
+        
+        
+        
+    def run(self):
+        tokens = self.tokens
+        i = 0
+        lines = []
+        startline = None
+        
+        while i<len(self.tokens):
+            t = tokens[i]
+            if t.type in (T.t_item, T.t_colon):
+                startline = i
+                i+=1
+            elif t.type==T.t_newline and startline is not None:
+                sub = self.tokens[startline+1:i+1]
+                lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+                startline = None
+                i+=1
+            elif t.type==T.t_break:
+                if startline is not None:
+                    sub = self.tokens[startline+1:i]
+                    lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+                    startline=None
+                self.analyze(lines)
+                lines = []
+                i+=1
+            else:
+                if startline is None and lines:
+                    self.analyze(lines)
+                    lines=[]
+                i+=1
+
+        if startline:
+            sub = self.tokens[startline+1:]
+            lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+            startline=None
+        self.analyze(lines)
+
+        
 class parse_links(object):
     def __init__(self, tokens, refined):
         self.tokens = tokens
@@ -515,7 +564,7 @@ def parse_txt(txt):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_small, parse_sup, parse_b, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
