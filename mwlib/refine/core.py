@@ -55,7 +55,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
                 if stack:
                     start = stack.pop()
                     sub = tokens[start+1:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub, tagname=tagname)]
+                    tokens[start:i+1] = [T(type=T.t_complex_tag, vlist=tokens[start].vlist, start=tokens[start].start, len=4, children=sub, tagname=tagname)]
                     refined.append(tokens[start])
                     i = start+1
                 else:
