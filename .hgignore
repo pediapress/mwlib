@@ -4,6 +4,7 @@ syntax: glob
 *.o
 *.pyc
 *~
+*.swp
 ID
 mwlib.egg-info
 build

@@ -37,6 +37,7 @@ class token(object):
     children = None
     tagname = None
     ns = None
+    lineprefix = None
     
     t_end = 0
     t_text = 1
@@ -74,7 +75,7 @@ class token(object):
 
     @staticmethod
     def join_as_text(tokens):
-        return u"".join([x.text for x in tokens])
+        return u"".join([x.text or u"" for x in tokens])
     
     def _get_text(self):
         if self._text is None and self.source is not None:
@@ -87,10 +88,6 @@ class token(object):
     text = property(_get_text, _set_text)
     
     def __init__(self, type=None, start=None, len=None, source=None, text=None, **kw):
-        assert type is not None
-        assert start is not None
-        assert len is not None
-        
         self.type = type
         self.start = start
         self.len = len
@@ -119,6 +116,9 @@ class token(object):
         if self.ns is not None:
             r.append(" ns=")
             r.append(repr(self.ns))
+        if self.lineprefix is not None:
+            r.append(" lineprefix=")
+            r.append(self.lineprefix)
             
         return u"".join(r)
 

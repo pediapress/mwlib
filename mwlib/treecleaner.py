@@ -88,6 +88,7 @@ class TreeCleaner(object):
                                   Center:[PreFormatted],
                                   Paragraph:[PreFormatted],
                                   Section:[PreFormatted],
+                                  Gallery:[PreFormatted],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
@@ -175,6 +176,7 @@ class TreeCleaner(object):
                           'removeBrokenChildren',
                           'fixTableColspans',
                           'transformSingleColTables',
+                          'splitTableToColumns', 
                           'linearizeWideNestedTables',
                           'moveReferenceListSection',
                           'removeBreakingReturns', 
@@ -335,18 +337,31 @@ class TreeCleaner(object):
             if not node.parents:
                 return
             divs = []
+            items = []
+            content_len = len(node.getAllDisplayText())
+            if content_len > 5000:
+                div_wrapper = False
+            else:
+                div_wrapper = True
             for row in node:
                 for cell in row:
-                    d = Div()
-                    d.border = 1
-                    d.vlist = node.vlist
-                    for item in cell:
-                        d.appendChild(item)
-                    divs.append(d)
+                    if div_wrapper:
+                        d = Div()
+                        d.border = 1
+                        d.vlist = node.vlist
+                        for item in cell:
+                            d.appendChild(item)
+                        divs.append(d)
+                    else:
+                        for item in cell:
+                            items.append(item)                            
             parent = node.parent
-            parent.replaceChild(node, divs)
-            self.report('replaced single col table with div. div children:',  parent.children)
-
+            if div_wrapper:
+                parent.replaceChild(node, divs)
+                self.report('replaced single col table with div. div children:',  parent.children)
+            else:
+                parent.replaceChild(node, items)
+                self.report('replaced single col table with items:',  parent.children)
         for c in node.children:
             self.transformSingleColTables(c)
 
@@ -917,3 +932,47 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.linearizeWideNestedTables(c)
+
+
+    def _isBigCell(self, cell):
+        is_big = False
+        content_len = len(cell.getAllDisplayText())
+        if content_len > 5000:
+            return True
+
+        tables = cell.getChildNodesByClass(Table)
+        if tables:
+            for table in tables:
+                if table.numcols > 30:
+                    return True
+                if len(table.children) > 40:
+                    return True
+        return is_big
+
+            
+    def splitTableToColumns(self, node):
+        """Removes a table if contained cells are very large. Column content is linearized."""
+        if node.__class__ == Table:
+            split_table = False
+            for row in node.children:
+                for cell in row.children:
+                    if self._isBigCell(cell):
+                        split_table = True
+                    
+            if split_table:
+                cols = [[] for i in range(node.numcols)]
+
+                for row in node.children:
+                    for col_idx, cell in enumerate(row.children):
+                        for item in cell.children:
+                            cols[col_idx].append(item)
+
+                lin_cols = []
+                for col in cols:
+                    for item in col:
+                        lin_cols.append(item)
+                self.report('removed table. outputting linearize columns')
+                node.parent.replaceChild(node, lin_cols)
+
+        for c in node.children:
+            self.splitTableToColumns(c)

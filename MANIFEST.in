@@ -108,6 +108,8 @@ include mwlib/utoken.py
 include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/wikidbbase.py
+include mwlib/writer/__init__.py
+include mwlib/writer/imageutils.py
 include mwlib/writerbase.py
 include mwlib/wsgi.py
 include mwlib/xfail.py
@@ -127,6 +129,7 @@ include sandbox/citeweb.py
 include sandbox/expr.txt
 include sandbox/mw-serve-stresser.py
 include sandbox/time-expr.py
+include sandbox/upload.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
 include tests/memeater.py

@@ -14,6 +14,8 @@ tok2class = {
     T.t_complex_section: N.Section,
     T.t_complex_article: N.Article,
     T.t_complex_tag: N.TagNode,
+    T.t_complex_named_url: N.NamedURL,
+    T.t_http_url: N.URL,
     }
 
 
@@ -24,6 +26,10 @@ def _change_classes(node):
         elif node.type==T.t_complex_table_row and node.children:
             node.children = [x for x in node.children if x.type==T.t_complex_table_cell]
 
+        if node.type==T.t_http_url:
+            node.caption = node.text
+            node.children=[]
+            
         node.__class__ = tok2class.get(node.type, N.Text)
         if node.tagname=='br':
             node.__class__=N.TagNode
@@ -40,12 +46,22 @@ def _change_classes(node):
             node.caption = node.tagname
             if node.tagname=='p':
                 node.__class__=N.Paragraph
-        
+            elif node.tagname=='ref':
+                node.__class__=N.Ref
+            elif node.tagname=='ul':
+                node.__class__=N.ItemList
+            elif node.tagname=='ol':
+                node.__class__=N.ItemList
+                node.numbered=True
+            elif node.tagname=='li':
+                node.__class__=N.Item
         if node.__class__==N.Link:
             if node.ns==namespace.NS_IMAGE:
                 node.__class__ = N.ImageLink
             elif node.ns==namespace.NS_MAIN:
                 node.__class__ = N.ArticleLink
+            elif node.ns==namespace.NS_CATEGORY:
+                node.__class__ = N.CategoryLink
             elif node.ns is not None:
                 node.__class__ = N.NamespaceLink
                 

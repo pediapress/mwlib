@@ -89,6 +89,7 @@ ChangeLog
 --------------------------------
 - fix bug in #expr parsing
 - fix bug in localised namespace handling/#ifexist
+- fix bug in redirect handling together with specific revision in mwapidb
 
 2009-2-3  release 0.9.6
 --------------------------------

@@ -20,6 +20,9 @@ T.t_complex_tag = "complex_tag"
 T.t_complex_link = "link"
 T.t_complex_section = "section"
 T.t_complex_article = "article"
+T.t_complex_indent = "indent"
+T.t_complex_line = "line"
+T.t_complex_named_url = "named_url"
 T.t_vlist = "vlist"
 
 T.children = None
@@ -78,6 +81,11 @@ parse_ol = get_recursive_tag_parser("ol")
 parse_ul = get_recursive_tag_parser("ul")
 parse_span = get_recursive_tag_parser("span")
 parse_p = get_recursive_tag_parser("p")
+parse_ref = get_recursive_tag_parser("ref")
+parse_math = get_recursive_tag_parser("math")
+parse_small = get_recursive_tag_parser("small")
+parse_b = get_recursive_tag_parser("b")
+parse_sup = get_recursive_tag_parser("sup")
 
 class bunch(object):
     def __init__(self, **kw):
@@ -138,8 +146,159 @@ class parse_sections(object):
         if current.endtitle is not None:
             create()
         self.refined.append(tokens)
+
+class parse_urls(object):
+    def __init__(self, tokens, refined):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
         
+    def run(self):
+        tokens = self.tokens
+        i=0
+        start = None
+        while i<len(tokens):
+            t = tokens[i]
+            
+            if t.type==T.t_urllink and start is None:
+                start = i
+                i+=1
+            elif t.type==T.t_special and t.text=="]" and start is not None:
+                sub = self.tokens[start+1:i]
+                self.tokens[start:i+1] = [T(type=T.t_complex_named_url, children=sub, caption=self.tokens[start].text[1:])]
+                self.refined.append(sub)
+                i = start
+                start = None
+            else:
+                i+=1
+                
+        self.refined.append(tokens)
+        
+class parse_lines(object):
+    def __init__(self, tokens, refined):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+
+        
+    def analyze(self, lines):
+
+        def getchar(node):
+            if node.lineprefix:
+                return node.lineprefix[0]
+            return None
+        
+        
+        lines.append(T(type=T.t_complex_line, lineprefix='<guard>')) # guard
+
+        
+        startpos = 0
+        while startpos<len(lines)-1:
+            prefix = getchar(lines[startpos])
+            if prefix is None:
+                startpos += 1
+                continue
+            
+            i = startpos+1
+            while getchar(lines[i])==prefix:
+                i+=1
+
+            
+            sub = lines[startpos:i]
+            for x in sub:
+                if x.lineprefix:
+                    x.lineprefix = x.lineprefix[1:]
+            self.analyze(sub)
+
+
+            def makelist():
+                for idx, x in enumerate(sub):
+                    if x.type==T.t_complex_line:
+                        x.type=T.t_complex_tag
+                        x.tagname = "li"
+                        self.refined.append(x.children)
+                    else:
+                        sub[idx] = T(type=T.t_complex_tag, tagname="li", children=sub[idx:idx+1])                        
+                        self.refined.append(sub[idx].children)
+                        
+            if prefix==':':
+                node = T(type=T.t_complex_indent, start=0, len=0, children=sub)
+                self.refined.append(sub)
+            elif prefix=='*':
+                makelist()
+                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ul")
+            elif prefix=="#":
+                makelist()
+                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ol")
+            elif prefix==';':
+                self.refined.append(sub)
+                node = T(type=T.t_complex_bold, start=0, len=0, children=sub)
+            else:
+                assert 0
+                
+            lines[startpos:i] = [node]
+            startpos += 1
+
+
+        del lines[-1] # remove guard
+        
+    def run(self):
+        tokens = self.tokens
+        i = 0
+        lines = []
+        startline = None
+        firsttoken = None
+                                   
+        while i<len(self.tokens):
+            t = tokens[i]
+            if t.type in (T.t_item, T.t_colon):
+                if firsttoken is None:
+                    firsttoken = i
+                startline = i
+                i+=1
+            elif t.type==T.t_newline and startline is not None:
+                sub = self.tokens[startline+1:i+1]
+                lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+                startline = None
+                i+=1
+            elif t.type==T.t_break:
+                if startline is not None:
+                    sub = self.tokens[startline+1:i]
+                    lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+                    startline=None
+                if lines:
+                    self.analyze(lines)
+                    self.tokens[firsttoken:i] = lines
+                    i = firsttoken
+                    firsttoken=None
+                    lines=[]
+                    continue
                     
+                firsttoken = None
+                
+                lines = []
+                i+=1
+            else:
+                if startline is None and lines:
+                    self.analyze(lines)
+                    self.tokens[firsttoken:i] = lines
+                    i = firsttoken
+                    starttoken=None
+                    lines=[]
+                    firsttoken=None
+                else:
+                    i+=1
+
+        if startline is not None:
+            sub = self.tokens[startline+1:]
+            lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+
+        if lines:
+            self.analyze(lines)
+            self.tokens[firsttoken:] = lines                
+
+        self.refined.append(tokens)
+        
 class parse_links(object):
     def __init__(self, tokens, refined):
         self.tokens = tokens
@@ -207,10 +366,15 @@ class parse_links(object):
         tokens = self.tokens
         i = 0
         marks = []
+
+        stack = []
+        
         
         while i<len(self.tokens):
             t = tokens[i]
             if t.type==T.t_2box_open:
+                if len(marks)>1:
+                    stack.append(marks)
                 marks = [i]
                 i+=1
             elif t.type==T.t_special and t.text=="|":
@@ -221,8 +385,18 @@ class parse_links(object):
                 start = marks[0]
                 
                 target = T.join_as_text(tokens[start+1:marks[1]]).strip()
+                if target.startswith(":"):
+                    target = target[1:]
+                    colon = True
+                else:
+                    colon = False
+                    
                 if not target:
                     i+=1
+                    if stack:
+                        marks=stack.pop()
+                    else:
+                        marks=[]                        
                     continue
                 else:
                     # FIXME: parse image modifiers: thumb, frame, ...
@@ -233,7 +407,7 @@ class parse_links(object):
                         # FIXME: could be an interwiki/language link. -> set ns=None
                         pass
                     
-                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns)
+                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon)
 
                     sub = None
                     if ns==namespace.NS_IMAGE:
@@ -248,7 +422,10 @@ class parse_links(object):
                     tokens[start:i+1] = [node]
                     node.target = target
                     self.refined.append(sub)
-                    marks = []
+                    if stack:
+                        marks = stack.pop()
+                    else:
+                        marks = []
                     i = start+1
             else:
                 i+=1
@@ -292,7 +469,7 @@ class parse_table_cells(object):
             if self.is_table_cell_start(tokens[i]):
                 if start is not None:
 
-                    search_modifier = tokens[start].text in ("|", "!")
+                    search_modifier = tokens[start].text in ("|", "!", "||")
                     sub = tokens[start+1:i]
                     tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub)]
                     if search_modifier:
@@ -307,7 +484,7 @@ class parse_table_cells(object):
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
                     sub = tokens[start+1:i]
-                    search_modifier = tokens[start].text in ("|", "!")
+                    search_modifier = tokens[start].text in ("|", "!", "||")
                     tokens[start:i+1] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub)]
                     
                     if search_modifier:
@@ -323,7 +500,7 @@ class parse_table_cells(object):
 
         if start is not None:
             
-            search_modifier = tokens[start].text in ("|", "!")
+            search_modifier = tokens[start].text in ("|", "!", "||")
             sub = tokens[start+1:]
             tokens[start:] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub)]
             
@@ -492,7 +669,7 @@ def parse_txt(txt):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
