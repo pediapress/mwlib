@@ -188,11 +188,14 @@ class parse_lines(object):
                     if x.type==T.t_complex_line:
                         x.type=T.t_complex_tag
                         x.tagname = "li"
+                        self.refined.append(x.children)
                     else:
                         sub[idx] = T(type=T.t_complex_tag, tagname="li", children=sub[idx:idx+1])                        
-            
+                        self.refined.append(sub[idx].children)
+                        
             if prefix==':':
                 node = T(type=T.t_complex_indent, start=0, len=0, children=sub)
+                self.refined.append(sub)
             elif prefix=='*':
                 makelist()
                 node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ul")
@@ -200,6 +203,7 @@ class parse_lines(object):
                 makelist()
                 node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ol")
             elif prefix==';':
+                self.refined.append(sub)
                 node = T(type=T.t_complex_bold, start=0, len=0, children=sub)
             else:
                 assert 0
