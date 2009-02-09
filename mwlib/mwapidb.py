@@ -688,6 +688,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         @rtype: list([unicode])
         """
         REVERT_LOOKBACK = 5 # number of revisions to check for same size (assuming a revert)
+        USE_DIFF_SIZE = False # whether to sort by diffsize or by alphabet
         
         # fetch data
         for rvlimit in (500, 50): # some MWs only return the 50 last edits 
@@ -732,14 +733,14 @@ class WikiDB(wikidbbase.WikiDBBase):
 #            print "reverted", [r for r in revs if "reverted" in r]
             return [r for r in revs if not "reverted" in r]
 
-        
-        # calc an approximate size for each edit (true if author only *added* to the article)
         revs = list(filter_reverts(revs))
-        for i, r in enumerate(revs):
-            if i == 0:
-                r['diff_size'] = r['size']
-            else:
-                r['diff_size'] = abs(r['size']-revs[i-1]['size'])
+        # calc an approximate size for each edit (true if author only *added* to the article)
+        if USE_DIFF_SIZE:
+            for i, r in enumerate(revs):
+                if i == 0:
+                    r['diff_size'] = r['size']
+                else:
+                    r['diff_size'] = abs(r['size']-revs[i-1]['size'])
 
         ANON = "ANONIPEDITS"
         authors = dict() # author:bytes
@@ -752,21 +753,26 @@ class WikiDB(wikidbbase.WikiDBBase):
             elif self.bot_rex.search(r['user']) or self.bot_rex.search(r.get('comment', '')):
                 continue # filter bots
             else:
-                 authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
+                if USE_DIFF_SIZE:
+                    authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
+                else:
+                    authors[r['user']] = authors.get(r['user'], 0) + 1
         
-        authors["%s:%d" % (ANON, authors.get(ANON, 0))] = 0 # last if sorted
+        num_anon = authors.get(ANON, 0)
         try:
             del authors[ANON]
         except KeyError:
             pass
-        
-
-        if False: # by summarized edit diff sizes
+       
+        if USE_DIFF_SIZE: # by summarized edit diff sizes
             authors = authors.items()
             authors.sort(lambda a,b:cmp(b[1], a[1]))
         else: # sorted by A-Z
             authors = authors.items()
             authors.sort()
+
+        # append anon
+        authors.append((("%s:%d"  % (ANON,num_anon),num_anon)))  #  append at the end
 #        print authors
         return [a for a,c in authors]
 
