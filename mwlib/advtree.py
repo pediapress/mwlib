@@ -298,7 +298,11 @@ class AdvancedNode:
 
     def getAttributes(self):
         """ Return dict with node attributes (e.g. class, style, colspan etc.)"""
-        attrs = self._cleanAttrs(getattr(self, 'vlist', {}))        
+        vlist = getattr(self, 'vlist', None)
+        if vlist is None:
+            self.vlist = vlist = {}
+            
+        attrs = self._cleanAttrs(vlist)
         return attrs
 
 
@@ -603,7 +607,6 @@ def fixStyleNode(node):
         node.__class__ = Strong
         node.caption = ""
         em = Emphasized("''")
-        em.vlist = {}
         for c in node.children:
             em.appendChild(c)
         node.children = []
