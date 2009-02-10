@@ -120,6 +120,7 @@ parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 parse_pre = get_pre_parser("pre")
 parse_source = get_pre_parser("source")
+parse_code_tag = get_recursive_tag_parser("code")
 
 def parse_timeline(tokens, refined, **kwargs):
     
@@ -673,7 +674,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_center, parse_lines,
-               parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_source, parse_math,
+               parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
     while parsers:
         p = parsers.pop()
