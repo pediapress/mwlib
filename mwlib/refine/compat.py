@@ -76,20 +76,34 @@ def _change_classes(node):
             elif node.tagname=='li':
                 node.__class__=N.Item
         if node.__class__==N.Link:
-            if node.ns==namespace.NS_IMAGE:
+            ns = node.ns
+            
+            if node.colon:
+                ns = namespace.NS_SPECIAL
+                
+            if ns==namespace.NS_IMAGE:
                 node.__class__ = N.ImageLink
-            elif node.ns==namespace.NS_MAIN:
+            elif ns==namespace.NS_MAIN:
                 node.__class__ = N.ArticleLink
-            elif node.ns==namespace.NS_CATEGORY:
+            elif ns==namespace.NS_CATEGORY:
                 node.__class__ = N.CategoryLink
-            elif node.ns is not None:
+            elif ns is not None:
                 node.__class__ = N.NamespaceLink
+            elif node.interwiki:
+                node.__class__ = N.InterwikiLink
+                node.target = node.target.split(":")[1]
+                node.namespace = node.interwiki
+            elif node.langlink:
+                node.__class__ = N.LangLink
+                node.namespace, node.target = node.target.split(":", 1)
+                
             ns, partial, full = namespace.splitname(node.target, nsmap=node.nsmap)
             node.target = partial.replace("_", " ").strip()
             node.full_target = full.replace("_", " ")
             if N.Link.capitalizeTarget:
                 node.target = node.target[:1].upper()+node.target[1:]
-            node.namespace = node.ns
+            if node.namespace is None:
+                node.namespace = node.ns
             
                 
             

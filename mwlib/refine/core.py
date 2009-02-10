@@ -382,10 +382,11 @@ class parse_lines(object):
         self.refined.append(tokens)
         
 class parse_links(object):
-    def __init__(self, tokens, refined, lang=None, **kwargs):
+    def __init__(self, tokens, refined, lang=None, interwikimap=None, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.lang = lang
+        self.interwikimap = interwikimap
         
         nsmap = namespace.namespace_maps.get(lang)
         if nsmap is None and lang:
@@ -452,7 +453,8 @@ class parse_links(object):
             if not self.handle_image_modifier(T.join_as_text(tmp), node):
                 cap = tmp
         return cap
-        
+
+    
         
     def run(self):
         tokens = self.tokens
@@ -491,16 +493,30 @@ class parse_links(object):
                         marks=[]                        
                     continue
                 else:
-                    # FIXME: parse image modifiers: thumb, frame, ...
                     ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
 
+                    langlink = None
+                    interwiki = None
                     
                     if ns==namespace.NS_MAIN:
-                        # FIXME: could be an interwiki/language link. -> set ns=None
-                        pass
-                    
+                        # could be an interwiki/language link. -> set ns=None
+                        
+                        if self.interwikimap and ':' in target:
+                            prefix = target.split(":")[0]
+                            r = self.interwikimap.get(prefix.strip().lower(), None)
+                            if r is not None:
+                                ns = None
+                                if 'language' in r:
+                                    langlink = r['language']
+                                else:
+                                    interwiki = r['renamed']
+                                    print "INTERWIKI:", interwiki
                     node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nsmap=self.nsmap)
-
+                    if langlink:
+                        node.langlink = langlink
+                    if interwiki:
+                        node.interwiki = interwiki
+                        
                     sub = None
                     if ns==namespace.NS_IMAGE:
                         sub = self.extract_image_modifiers(marks, node)                        
@@ -526,7 +542,16 @@ class parse_links(object):
         
 
             
-def parse_txt(txt, **kwargs):
+def parse_txt(txt, interwikimap=None, **kwargs):
+    if interwikimap is None:
+        from mwlib.lang import languages
+        interwikimap = {}
+        for prefix, renamed in namespace.dummy_interwikimap.items():
+            interwikimap[prefix] = {'renamed': renamed}
+        for lang in languages:
+            interwikimap[lang] = {'language': True}
+
+    
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
@@ -542,7 +567,7 @@ def parse_txt(txt, **kwargs):
                 toks = x
             else:
                 toks = x.children
-            p(toks, next, **kwargs)
+            p(toks, next, interwikimap=interwikimap, **kwargs)
 
         refine = next
         
