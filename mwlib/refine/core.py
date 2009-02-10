@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 
 import sys
-from mwlib.utoken import tokenize, show, token as T
+from mwlib.utoken import tokenize, show, token as T, walknode
 from mwlib.refine import util
 from mwlib import namespace
 
-from mwlib.refine.parse_table import parse_tables
+from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 
 try:
     from blist import blist
