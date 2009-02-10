@@ -116,11 +116,16 @@ parse_ref = get_recursive_tag_parser("ref")
 parse_math = get_recursive_tag_parser("math")
 parse_small = get_recursive_tag_parser("small")
 parse_b = get_recursive_tag_parser("b")
+parse_tt = get_recursive_tag_parser("tt")
+parse_strike = get_recursive_tag_parser("strike")
+parse_ins = get_recursive_tag_parser("ins")
+parse_del = get_recursive_tag_parser("del")
 parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 parse_pre = get_pre_parser("pre")
 parse_source = get_pre_parser("source")
 parse_code_tag = get_recursive_tag_parser("code")
+
 
 def parse_timeline(tokens, refined, **kwargs):
     
@@ -673,7 +678,9 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_center, parse_lines,
+    parsers = [parse_singlequote, parse_urls,
+               parse_tt, parse_strike, parse_ins, parse_del,
+               parse_small, parse_sup, parse_b, parse_center, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
     while parsers:
