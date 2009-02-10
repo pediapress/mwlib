@@ -83,7 +83,7 @@ def _li_break_at(token):
         return True
     return False
 parse_source = get_recursive_tag_parser("source")
-
+parse_center = get_recursive_tag_parser("center")
 parse_li = get_recursive_tag_parser("li", _li_break_at)
 parse_ol = get_recursive_tag_parser("ol")
 parse_ul = get_recursive_tag_parser("ul")
@@ -642,7 +642,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines,
+    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_center, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
