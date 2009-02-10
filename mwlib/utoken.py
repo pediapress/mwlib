@@ -10,6 +10,21 @@ import re
 import _mwscan
 import htmlentitydefs
 
+def walknode(node, filt=lambda x: True):
+    if not isinstance(node, token):
+        for x in node:
+            for k in walknode(x):
+                if filt(k):
+                    yield k
+        return
+    
+    yield node
+    if node.children:
+        for x in node.children:
+            for k in walknode(x):
+                if filt(k):
+                    yield k
+            
 def show(node, out=None, indent=0, verbose=False):
     if node is None:
         return

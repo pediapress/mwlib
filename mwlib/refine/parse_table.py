@@ -114,12 +114,14 @@ class parse_table_rows(object):
         while i < len(tokens):
             if start is None and self.is_table_cell_start(tokens[i]):
                 start = i
-                remove_start = 0                
+                remove_start = 0
+                i+=1
             elif self.is_table_row_start(tokens[i]):
                 if start is not None:
                     children = tokens[start+remove_start:i]
                     tokens[start:i] = [T(type=T.t_complex_table_row, start=tokens[start].start, len=4, children=children)]
-                    self.find_modifier(tokens[start])
+                    if remove_start:
+                        self.find_modifier(tokens[start])
                     parse_table_cells(children, self.refined)
                     start += 1  # we didn't remove the start symbol above
                     remove_start = 1
@@ -132,7 +134,8 @@ class parse_table_rows(object):
                 if start is not None:
                     sub = tokens[start+remove_start:i]
                     tokens[start:i+1] = [T(type=T.t_complex_table_row, start=tokens[start].start, len=4, children=sub)]
-                    self.find_modifier(tokens[start])
+                    if remove_start:
+                        self.find_modifier(tokens[start])
                     parse_table_cells(sub, self.refined)
                     i = start+1
                     start = None
@@ -144,7 +147,8 @@ class parse_table_rows(object):
         if start is not None:
             sub = tokens[start+remove_start:]
             tokens[start:] = [T(type=T.t_complex_table_row, start=tokens[start].start, len=4, children=sub)]
-            self.find_modifier(tokens[start])
+            if remove_start:
+                self.find_modifier(tokens[start])
             parse_table_cells(sub, self.refined)
         
 class parse_tables(object):

@@ -473,7 +473,7 @@ class ImageLink(Link):
 
             x = x.caption.lower().strip()
             
-            if x == 'thumb' or x=='thumbnail':
+            if x == 'thumb' or x=='thumbnail' or x == 'miniatur':
                 self.thumb = True
                 del self.children[idx]
                 continue
