@@ -247,6 +247,16 @@ class _compat_scanner(object):
         while i < numtokens:
             type, start, tlen = tokens[i]
 
+            if type==token.t_begintable:
+                txt = g()
+                count = txt.count(":")
+                if count:
+                    res.append(token(type=token.t_colon, start=start, len=count, source=text))
+                tlen -= count
+                start += count
+                    
+                
+                
             t = token(type=type, start=start, len=tlen, source=text)
 
             if type==token.t_entity:
