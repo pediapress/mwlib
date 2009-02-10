@@ -115,3 +115,13 @@ def test_parse_link():
     assert len(tokens)==2
     assert tokens[0].type == T.t_complex_link
     assert tokens[1].type == T.t_complex_link
+
+def test_no_row_modifier():    
+    s="{|\n|foo||bar\n|}"
+    r=refine.parse_txt(s)
+    refine.show(r)
+    cells = list(refine.walknode(r, lambda x: x.type==refine.T.t_complex_table_cell))
+    print "CELLS:", cells
+    assert len(cells)==2, "expected 2 cells"
+    
+    

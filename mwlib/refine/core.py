@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import sys
-from mwlib.utoken import tokenize, show, token as T
+from mwlib.utoken import tokenize, show, token as T, walknode
 from mwlib.refine import util
 from mwlib import namespace
 
