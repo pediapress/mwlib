@@ -68,6 +68,12 @@ def _change_classes(node):
                 node.__class__ = N.CategoryLink
             elif node.ns is not None:
                 node.__class__ = N.NamespaceLink
+            ns, partial, full = namespace.splitname(node.target)
+            node.target = partial.strip(" \n\t_")
+            if N.Link.capitalizeTarget:
+                node.target = node.target[:1].upper()+node.target[1:]
+            node.namespace = node.ns
+            
                 
             
         node = node.children
