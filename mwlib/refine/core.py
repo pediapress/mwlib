@@ -187,10 +187,7 @@ class parse_singlequote(object):
         self.run()
 
     def run(self):
-        show(self.tokens)
-        
         def finish():
-            print "FINISH", counts
             assert len(counts)==len(styles)
             
             from mwlib.parser import styleanalyzer
