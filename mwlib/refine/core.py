@@ -94,6 +94,7 @@ parse_math = get_recursive_tag_parser("math")
 parse_small = get_recursive_tag_parser("small")
 parse_b = get_recursive_tag_parser("b")
 parse_sup = get_recursive_tag_parser("sup")
+parse_blockquote = get_recursive_tag_parser("blockquote")
 
 class bunch(object):
     def __init__(self, **kw):
@@ -554,7 +555,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_source, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_blockquote, parse_source, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
