@@ -87,6 +87,8 @@ def _change_classes(node):
             elif node.tagname=='b':
                 node.__class__=N.Style
                 node.caption = "'''"
+            elif node.tagname=='pre':
+                node.__class__=N.PreFormatted
                 
         if node.__class__==N.Link:
             ns = node.ns

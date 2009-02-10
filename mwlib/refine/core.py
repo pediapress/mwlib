@@ -76,13 +76,36 @@ def get_recursive_tag_parser(tagname, break_at=None):
     
     return recursive_parse_tag
 
+def get_pre_parser(tagname):
+    def parse(tokens, refined, **kwargs):
+        i = 0
+        start = None
+        while i<len(tokens):
+            t = tokens[i]
+            if start is None and t.type==T.t_html_tag and t.tagname==tagname:
+                if t.tag_selfClosing:
+                    tokens[i] = T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[i].vlist)
+                else:
+                    start = i
+                i+=1
+            elif start is not None and t.type==T.t_html_tag_end and t.tagname==tagname:
+                txt = T.join_as_text(tokens[start+1:i])
+                tokens[start:i+1] = [T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[start].vlist, children=[T(type=T.t_text, text=txt)])]
+                i = start+1
+            else:
+                i+=1
+        refined.append(tokens)
+    parse.__name__ += "_"+tagname+"_tag"
+    return parse
+
+    
+    
 parse_div = get_recursive_tag_parser("div")
 
 def _li_break_at(token):
     if token.type==T.t_html_tag and token.tagname=="li":
         return True
     return False
-parse_source = get_recursive_tag_parser("source")
 parse_center = get_recursive_tag_parser("center")
 parse_li = get_recursive_tag_parser("li", _li_break_at)
 parse_ol = get_recursive_tag_parser("ol")
@@ -95,6 +118,8 @@ parse_small = get_recursive_tag_parser("small")
 parse_b = get_recursive_tag_parser("b")
 parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
+parse_pre = get_pre_parser("pre")
+parse_source = get_pre_parser("source")
 
 def parse_timeline(tokens, refined, **kwargs):
     
@@ -649,7 +674,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_center, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_source, parse_math,
-               parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+               parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
