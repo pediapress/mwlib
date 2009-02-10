@@ -15,9 +15,13 @@ tok2class = {
     T.t_complex_article: N.Article,
     T.t_complex_tag: N.TagNode,
     T.t_complex_named_url: N.NamedURL,
+    T.t_complex_style: N.Style,
+    T.t_complex_node: N.Node,
     T.t_http_url: N.URL,
     }
 
+
+        
 
 def _change_classes(node):
     if isinstance(node, T):
@@ -29,9 +33,18 @@ def _change_classes(node):
         if node.type==T.t_http_url:
             node.caption = node.text
             node.children=[]
+
+
             
-        node.__class__ = tok2class.get(node.type, N.Text)
+        klass = tok2class.get(node.type, N.Text)
+        
             
+        if klass==N.Text:
+            node.caption=node.text or u""
+            assert not node.children, "%r has children" % (node,)
+            
+        node.__class__=klass
+        
         if node.tagname=='br':
             node.__class__=N.TagNode
 
@@ -40,6 +53,9 @@ def _change_classes(node):
             
         if node.__class__==N.Text:
             node.caption=node.text or u""
+            assert not node.children, "%r has children" % (node,)
+            
+            
         if node.children is None:
             node.children = []
         else:
