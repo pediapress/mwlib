@@ -96,7 +96,30 @@ parse_b = get_recursive_tag_parser("b")
 parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 
-
+def parse_timeline(tokens, refined, **kwargs):
+    
+    get_recursive_tag_parser("timeline")(tokens, [], **kwargs)
+    
+    for t in tokens:
+        if t.tagname=='timeline':
+            t.timeline = T.join_as_text(t.children)
+            del t.children[:]
+            
+            
+    refined.append(tokens)
+    
+def parse_math(tokens, refined, **kwargs):
+    
+    get_recursive_tag_parser("math")(tokens, [], **kwargs)
+    
+    for t in tokens:
+        if t.tagname=='math':
+            t.math = T.join_as_text(t.children)
+            del t.children[:]
+            
+            
+    refined.append(tokens)
+    
 def parse_gallery(tokens, refined, **kwargs):
     i = 0
     start = None
@@ -123,7 +146,7 @@ def parse_gallery(tokens, refined, **kwargs):
                     continue
             sub.append(T(type=T.t_text, text=x))
             
-        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub)]
+        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery")]
         
             
             
@@ -620,7 +643,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines,
-               parse_gallery, parse_blockquote, parse_source, parse_math,
+               parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()

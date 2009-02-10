@@ -51,6 +51,7 @@ def _change_classes(node):
 
         if node.type==T.t_complex_style:
             node.__class__=N.Style
+            node.caption = node.style
             
         if node.__class__==N.Text:
             node.caption=node.text or u""
@@ -76,6 +77,13 @@ def _change_classes(node):
                 node.numbered=True
             elif node.tagname=='li':
                 node.__class__=N.Item
+            elif node.tagname=="timeline":
+                node.__class__=N.Timeline
+                node.caption = node.timeline
+            elif node.tagname=="math":
+                node.__class__=N.Math
+                node.caption = node.math
+                
         if node.__class__==N.Link:
             ns = node.ns
             
