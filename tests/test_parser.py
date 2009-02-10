@@ -104,17 +104,7 @@ def test_self_closing_nowiki():
     parse(u"<nowiki       />")
     parse(u"<NOWIKI>[. . .]</NOWIKI>")
 
-
-
-def test_break_in_li():
-    r=parse("<LI> foo\n\n\nbla")
-    tagnode = r.find(parser.TagNode)[0]
-    assert hasattr(tagnode, "starttext")
-    assert hasattr(tagnode, "endtext")
-
-
 def test_switch_default():
-
     db=DictDB(
         Bonn="""{{Infobox
 |Bundesland         = Nordrhein-Westfalen
