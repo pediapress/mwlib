@@ -96,6 +96,70 @@ parse_b = get_recursive_tag_parser("b")
 parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 
+
+def parse_gallery(tokens, refined, **kwargs):
+    i = 0
+    start = None
+
+    def handle():
+        sub = tokens[start+1:i]
+        txt = T.join_as_text(sub)
+        print "GALLERY:", repr(txt)
+        
+        lines = [x.strip() for x in txt.split("\n")]
+        sub = []
+        for x in lines:
+            if not x:
+                continue
+
+            linode = parse_txt(u'[['+x+']]', **kwargs)
+            print "LINE:", repr(x)
+            print ":", linode
+
+            if linode:
+                n = linode[0]
+                if n.ns==namespace.NS_IMAGE:
+                    sub.append(n)
+                    continue
+            sub.append(T(type=T.t_text, text=x))
+            
+        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub)]
+        
+            
+            
+#             # either image link or text inside
+#             n=_parseAtomFromString(u'[['+x+']]',
+#                 lang=self.lang,
+#                 interwikimap=self.interwikimap,
+#             )
+
+#             if isinstance(n, ImageLink):
+#                 children.append(n)
+#             else:
+#                 children.append(Text(x))
+
+
+                
+        
+    while i<len(tokens):
+        t = tokens[i]
+        if t.type==T.t_html_tag and t.tagname=='gallery':
+            if start is None:
+                start=i
+                i+=1
+            else:
+                handle()
+                i = start+1
+                start = None
+        elif t.type==T.t_html_tag_end and t.tagname=='gallery':
+            handle()
+            i = start+1
+            start = None
+        else:
+            i+=1
+                
+    refined.append(tokens)
+                
 class bunch(object):
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -555,7 +619,9 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
-    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines, parse_blockquote, parse_source, parse_math, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
+    parsers = [parse_singlequote, parse_urls, parse_small, parse_sup, parse_b, parse_lines,
+               parse_gallery, parse_blockquote, parse_source, parse_math,
+               parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_tables]
     while parsers:
         p = parsers.pop()
         #print "doing", p, "on:", refine
