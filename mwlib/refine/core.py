@@ -386,6 +386,15 @@ class parse_links(object):
         self.tokens = tokens
         self.refined = refined
         self.lang = lang
+        
+        nsmap = namespace.namespace_maps.get(lang)
+        if nsmap is None and lang:
+            nsmap = namespace.namespace_maps.get(lang+"+en_mw")
+
+        self.nsmap = nsmap
+            
+        
+        
         self.run()
 
     def handle_image_modifier(self, mod, node):
@@ -483,14 +492,14 @@ class parse_links(object):
                     continue
                 else:
                     # FIXME: parse image modifiers: thumb, frame, ...
-                    ns, partial, full = namespace.splitname(target)
+                    ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
 
                     
                     if ns==namespace.NS_MAIN:
                         # FIXME: could be an interwiki/language link. -> set ns=None
                         pass
                     
-                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon)
+                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nsmap=self.nsmap)
 
                     sub = None
                     if ns==namespace.NS_IMAGE:

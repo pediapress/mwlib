@@ -84,7 +84,7 @@ def _change_classes(node):
                 node.__class__ = N.CategoryLink
             elif node.ns is not None:
                 node.__class__ = N.NamespaceLink
-            ns, partial, full = namespace.splitname(node.target)
+            ns, partial, full = namespace.splitname(node.target, nsmap=node.nsmap)
             node.target = partial.replace("_", " ").strip()
             node.full_target = full.replace("_", " ")
             if N.Link.capitalizeTarget:
