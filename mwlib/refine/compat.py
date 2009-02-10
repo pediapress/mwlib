@@ -84,6 +84,9 @@ def _change_classes(node):
             elif node.tagname=="math":
                 node.__class__=N.Math
                 node.caption = node.math
+            elif node.tagname=='b':
+                node.__class__=N.Style
+                node.caption = "'''"
                 
         if node.__class__==N.Link:
             ns = node.ns
