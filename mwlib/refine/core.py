@@ -146,7 +146,7 @@ def parse_gallery(tokens, refined, **kwargs):
                     continue
             sub.append(T(type=T.t_text, text=x))
             
-        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery")]
+        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist)]
         
             
             
