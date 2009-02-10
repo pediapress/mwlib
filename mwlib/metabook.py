@@ -12,7 +12,9 @@ def make_metabook(title=None, subtitle=None):
     metabook = {
         'type': 'collection',
         'version': METABOOK_VERSION,
+        'summary': '',
         'items': [],
+        
     }
     if title:
         metabook['title'] = title
@@ -87,14 +89,39 @@ def parse_collection_page(wikitext):
     chapter_rex = '^;(?P<chapter>.*?)$'
     article_rex = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
     oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.*?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
-    alltogether_rex = re.compile("(%s)|(%s)|(%s)|(%s)|(%s)" % (
-        title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex
+    template_rex = '^\{\{(?P<template>.*?)\}\}$'
+    template_start_rex = '^(?P<template_start>\{\{)$'
+    template_end_rex = '.*?(?P<template_end>\}\})$'
+    summary_rex = '(?P<summary>.*)'
+    alltogether_rex = re.compile("(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)" % (
+        title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex,
+        template_rex, template_start_rex, template_end_rex, summary_rex,
     ))
     
+    summary = False
+    noTemplate = True
+    firstSummaryLine = True
     for line in wikitext.splitlines():
+        if line == "": 
+            continue #drop empty lines
         res = alltogether_rex.search(line.strip())
         if not res:
             continue
+        
+        #look for initial templates and summaries
+        #multilinetemplates need different handling to those that fit into one line
+        if res.group('template_end') or res.group('template'):
+            summary = True
+            noTemplate = False
+        elif res.group('template_start'):
+            noTemplate = False
+        elif res.group('summary'):
+            if firstSummaryLine:
+                firstSummaryLine = False
+        else:
+            summary = False
+            noTemplate = False
+
         if res.group('title'):
             metabook['title'] = res.group('title')
         elif res.group('subtitle'):
@@ -107,6 +134,8 @@ def parse_collection_page(wikitext):
             append_article(res.group('article'), res.group('displaytitle'), metabook)
         elif res.group('oldarticle'):
             append_article(res.group('oldarticle'), res.group('olddisplaytitle'), metabook, res.group('oldid'))
+        elif res.group('summary') and (noTemplate or summary):
+            metabook['summary'] += res.group('summary') + " "
             
     return metabook
 
