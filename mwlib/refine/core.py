@@ -304,7 +304,7 @@ class parse_lines(object):
                         self.refined.append(sub[idx].children)
                         
             if prefix==':':
-                node = T(type=T.t_complex_indent, start=0, len=0, children=sub)
+                node = T(type=T.t_complex_style, start=0, len=0, children=sub, style=':')
                 self.refined.append(sub)
             elif prefix=='*':
                 makelist()
