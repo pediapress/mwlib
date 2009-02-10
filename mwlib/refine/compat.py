@@ -85,8 +85,8 @@ def _change_classes(node):
             elif node.ns is not None:
                 node.__class__ = N.NamespaceLink
             ns, partial, full = namespace.splitname(node.target)
-            node.target = partial.strip(" \n\t_")
-            node.full_target = full
+            node.target = partial.replace("_", " ").strip()
+            node.full_target = full.replace("_", " ")
             if N.Link.capitalizeTarget:
                 node.target = node.target[:1].upper()+node.target[1:]
             node.namespace = node.ns
