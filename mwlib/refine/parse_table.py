@@ -3,7 +3,7 @@ from mwlib.utoken import tokenize, show, token as T
 from mwlib.refine import util
 
 class parse_table_cells(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()
@@ -80,7 +80,7 @@ class parse_table_cells(object):
             
                 
 class parse_table_rows(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()
@@ -152,7 +152,7 @@ class parse_table_rows(object):
             parse_table_cells(sub, self.refined)
         
 class parse_tables(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()

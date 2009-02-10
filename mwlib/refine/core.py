@@ -36,7 +36,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
     if break_at is None:
         break_at = lambda _: False
         
-    def recursive_parse_tag(tokens, refined):            
+    def recursive_parse_tag(tokens, refined, **kwargs):            
         i = 0
         stack = []
         while i<len(tokens):
@@ -100,7 +100,7 @@ class bunch(object):
         self.__dict__.update(kw)
         
 class parse_sections(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()
@@ -156,7 +156,7 @@ class parse_sections(object):
         self.refined.append(tokens)
 
 class parse_urls(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()
@@ -183,7 +183,7 @@ class parse_urls(object):
         self.refined.append(tokens)
 
 class parse_singlequote(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()
@@ -257,7 +257,7 @@ class parse_singlequote(object):
                     
         
 class parse_lines(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.run()
@@ -382,9 +382,10 @@ class parse_lines(object):
         self.refined.append(tokens)
         
 class parse_links(object):
-    def __init__(self, tokens, refined):
+    def __init__(self, tokens, refined, lang=None, **kwargs):
         self.tokens = tokens
         self.refined = refined
+        self.lang = lang
         self.run()
 
     def handle_image_modifier(self, mod, node):
@@ -516,7 +517,7 @@ class parse_links(object):
         
 
             
-def parse_txt(txt):
+def parse_txt(txt, **kwargs):
     tokens = blist(tokenize(txt))
 
     refine = [tokens]
@@ -532,9 +533,7 @@ def parse_txt(txt):
                 toks = x
             else:
                 toks = x.children
-            #print "BEFORE:", p, toks
-            p(toks, next)
-            #print "AFTER:", toks
+            p(toks, next, **kwargs)
 
         refine = next
         
