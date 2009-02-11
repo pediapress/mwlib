@@ -23,6 +23,8 @@ include mwlib/__init__.py
 include mwlib/_expander.re
 include mwlib/_mwscan.cc
 include mwlib/_mwscan.re
+include mwlib/_uscan.cc
+include mwlib/_uscan.re
 include mwlib/_version.py
 include mwlib/advtree.py
 include mwlib/allnodes.py
