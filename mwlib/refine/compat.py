@@ -51,8 +51,6 @@ def _change_classes(node):
 
         if node.type==T.t_complex_style:
             node.__class__=N.Style
-            if node.style:
-                node.caption = node.style
             
         if node.__class__==N.Text:
             node.caption=node.text or u""
