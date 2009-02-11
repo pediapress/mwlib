@@ -143,6 +143,8 @@ def test_definitiondescription():
 """
     db = DummyDB()
     r = parseString(title="t", raw=raw, wikidb=db)
+    parser.show(sys.stdout, r)
+    
     buildAdvancedTree(r)
     for i,c in enumerate(r.getChildNodesByClass(DefinitionDescription)):
         assert c.indentlevel == i + 1
@@ -166,7 +168,6 @@ def test_defintion_list():
         raw = raw.replace('\n', '')
 
 
-@xfail
 def test_ulist():
     """http://code.pediapress.com/wiki/ticket/222"""
     raw = u"""
