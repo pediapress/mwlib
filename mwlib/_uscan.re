@@ -214,9 +214,7 @@ re2c:yyfill:enable = 0 ;
 			line_startswith_section = found(t_section);
 			return t_section;
 		}
-  ":"* [#*]+    {RET(t_item);}
-  ":"+          {RET(t_colon);}
-  ";"+          {RET(t_semicolon);}
+  [:;#*]+    {RET(t_item);}
   "-"{4,}       {RET(t_hrule);}
 
   [^]           {goto not_bol;}
