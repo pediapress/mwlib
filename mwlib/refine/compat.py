@@ -134,7 +134,5 @@ def _change_classes(node):
 def parse_txt(raw, **kwargs):
     sub = core.parse_txt(raw, **kwargs)
     article = T(type=T.t_complex_article, start=0, len=0, children=sub)
-    core.show(article)
     _change_classes(article)
-    article.show()
     return article
