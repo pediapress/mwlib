@@ -34,16 +34,18 @@ class parse_table_cells(object):
         i = 0
         start = None
 
+        def makecell():
+            search_modifier = tokens[start].text in ("|", "!", "||")
+            sub = tokens[start+1:i]
+            tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
+            if search_modifier:
+                self.find_modifier(tokens[start])
+            self.refined.append(tokens[start])
+        
         while i < len(tokens):
             if self.is_table_cell_start(tokens[i]):
                 if start is not None:
-                    search_modifier = tokens[start].text in ("|", "!", "||")
-                    sub = tokens[start+1:i]
-                    tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
-                    if search_modifier:
-                        self.find_modifier(tokens[start])
-                    self.refined.append(tokens[start])
-                        
+                    makecell()                        
                     start += 1
                     i = start+1
                 else:
@@ -51,31 +53,17 @@ class parse_table_cells(object):
                     i+=1
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
-                    sub = tokens[start+1:i]
-                    search_modifier = tokens[start].text in ("|", "!", "||")
-                    tokens[start:i+1] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
-                    
-                    if search_modifier:
-                        self.find_modifier(tokens[start])
-                    self.refined.append(tokens[start])
-                    
+                    i+=1
+                    makecell()                    
                     i = start+1
                     start = None
                 else:
                     i+= 1
             else:
-                
                 i += 1
 
         if start is not None:
-            
-            search_modifier = tokens[start].text in ("|", "!", "||")
-            sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
-            
-            if search_modifier:
-                self.find_modifier(tokens[start])
-            self.refined.append(tokens[start])
+            makecell()
             
                 
 class parse_table_rows(object):
