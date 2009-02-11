@@ -1,7 +1,6 @@
 #! /usr/bin/env py.test
 
 from mwlib import metabook
-print metabook.__dict__
 
 test_wikitext1 = '''== Title ==
 === Subtitle ===
