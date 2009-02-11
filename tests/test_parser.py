@@ -41,11 +41,10 @@ def test_style():
     yield check_style, u"'''''''''''''''''''pp'''''", (3,2)
     yield check_style, u"'''test''bla", (2,)
 
-@xfail
 def test_style_fails():
     """http://code.pediapress.com/wiki/ticket/375"""
     
-    check_style(u"'''strong only ''also emphasized'' strong only'''", "'''", "''")
+    check_style(u"'''strong only ''also emphasized'' strong only'''", (3,3,2,3))
 
 def test_single_quote_after_style():
     """http://code.pediapress.com/wiki/ticket/20"""
