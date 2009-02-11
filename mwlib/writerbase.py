@@ -45,6 +45,8 @@ def build_book(env, status_callback=None):
                 url = env.wiki.getURL(item['title'], item.get('revision'))
                 if url:
                     a.url = unicode(urllib.unquote(url.encode('utf-8')), 'utf-8')
+                else:
+                    a.url = None
                 a.authors = env.wiki.getAuthors(item['title'], revision=item.get('revision'))
                 book.children.append(a)
             else:
