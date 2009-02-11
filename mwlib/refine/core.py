@@ -330,7 +330,9 @@ class parse_singlequote(object):
                 last_apocount = s.apocount
 
                 if s.is_bold and s.is_italic:
-                    styles[i].caption = "'''''"
+                    styles[i].caption = "'''"
+                    inner = T(type=T.t_complex_style, caption="''", children=styles[i].children)
+                    styles[i].children = blist([inner])
                 elif s.is_bold:
                     styles[i].caption = "'''"
                 elif s.is_italic:
