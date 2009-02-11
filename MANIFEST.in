@@ -69,6 +69,7 @@ include mwlib/recorddb.py
 include mwlib/refine/__init__.py
 include mwlib/refine/compat.py
 include mwlib/refine/core.py
+include mwlib/refine/parse_table.py
 include mwlib/refine/uparser.py
 include mwlib/refine/util.py
 include mwlib/rendermath.py
