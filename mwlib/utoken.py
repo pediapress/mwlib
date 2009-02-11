@@ -53,6 +53,9 @@ class token(object):
     tagname = None
     ns = None
     lineprefix = None
+    interwiki = None
+    langlink = None
+    namespace = None
     
     t_end = 0
     t_text = 1
@@ -134,6 +137,12 @@ class token(object):
         if self.lineprefix is not None:
             r.append(" lineprefix=")
             r.append(self.lineprefix)
+        if self.interwiki:
+            r.append(" interwiki=")
+            r.append(repr(self.interwiki))
+        if self.langlink:
+            r.append(" langlink=")
+            r.append(repr(self.langlink))
             
         return u"".join(r)
 
@@ -238,6 +247,16 @@ class _compat_scanner(object):
         while i < numtokens:
             type, start, tlen = tokens[i]
 
+            if type==token.t_begintable:
+                txt = g()
+                count = txt.count(":")
+                if count:
+                    res.append(token(type=token.t_colon, start=start, len=count, source=text))
+                tlen -= count
+                start += count
+                    
+                
+                
             t = token(type=type, start=start, len=tlen, source=text)
 
             if type==token.t_entity:

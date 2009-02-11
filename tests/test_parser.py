@@ -104,17 +104,7 @@ def test_self_closing_nowiki():
     parse(u"<nowiki       />")
     parse(u"<NOWIKI>[. . .]</NOWIKI>")
 
-
-
-def test_break_in_li():
-    r=parse("<LI> foo\n\n\nbla")
-    tagnode = r.find(parser.TagNode)[0]
-    assert hasattr(tagnode, "starttext")
-    assert hasattr(tagnode, "endtext")
-
-
 def test_switch_default():
-
     db=DictDB(
         Bonn="""{{Infobox
 |Bundesland         = Nordrhein-Westfalen
@@ -644,8 +634,9 @@ def test_link_inside_gallery():
     
 def test_indented_table():
     r=parse(':::{| class="prettytable" \n|-\n| bla || blub\n|}')
-    style = r.find(parser.Style)[0]
-    assert isinstance(style.children[0], parser.Table), "style should have a Table as child"
+    style = r.find(parser.Style)[-1]
+    tables = style.find(parser.Table)
+    assert len(tables)==1, "expected a table as child"
     
     
 def test_double_exclamation_mark_in_table():

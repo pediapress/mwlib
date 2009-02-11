@@ -20,7 +20,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import filequeue, log, podclient, utils, wsgi, _version
+from mwlib import filequeue, log, utils, wsgi, _version
 
 # ==============================================================================
 
@@ -313,9 +313,10 @@ class Application(wsgi.Application):
         else:
             log.info('rendering %r' % output_path)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
-            f = open(metabook_path, 'wb')
-            f.write(metabook_data)
-            f.close()
+            if metabook_data:
+                f = open(metabook_path, 'wb')
+                f.write(metabook_data)
+                f.close()
             args.extend([
                 '--metabook', metabook_path,
                 '--config', base_url,

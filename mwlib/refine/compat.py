@@ -15,9 +15,14 @@ tok2class = {
     T.t_complex_article: N.Article,
     T.t_complex_tag: N.TagNode,
     T.t_complex_named_url: N.NamedURL,
+    T.t_complex_style: N.Style,
+    T.t_complex_node: N.Node,
+    T.t_complex_line: N.Node,
     T.t_http_url: N.URL,
     }
 
+
+        
 
 def _change_classes(node):
     if isinstance(node, T):
@@ -29,9 +34,18 @@ def _change_classes(node):
         if node.type==T.t_http_url:
             node.caption = node.text
             node.children=[]
+
+
             
-        node.__class__ = tok2class.get(node.type, N.Text)
+        klass = tok2class.get(node.type, N.Text)
+        
             
+        if klass==N.Text:
+            node.caption=node.text or u""
+            assert not node.children, "%r has children" % (node,)
+            
+        node.__class__=klass
+        
         if node.tagname=='br':
             node.__class__=N.TagNode
 
@@ -40,6 +54,9 @@ def _change_classes(node):
             
         if node.__class__==N.Text:
             node.caption=node.text or u""
+            assert not node.children, "%r has children" % (node,)
+            
+            
         if node.children is None:
             node.children = []
         else:
@@ -59,20 +76,47 @@ def _change_classes(node):
                 node.numbered=True
             elif node.tagname=='li':
                 node.__class__=N.Item
+            elif node.tagname=="timeline":
+                node.__class__=N.Timeline
+                node.caption = node.timeline
+            elif node.tagname=="math":
+                node.__class__=N.Math
+                node.caption = node.math
+            elif node.tagname=='b':
+                node.__class__=N.Style
+                node.caption = "'''"
+            elif node.tagname=='pre':
+                node.__class__=N.PreFormatted
+                
         if node.__class__==N.Link:
-            if node.ns==namespace.NS_IMAGE:
+            ns = node.ns
+            
+            if node.colon:
+                ns = namespace.NS_SPECIAL
+                
+            if ns==namespace.NS_IMAGE:
                 node.__class__ = N.ImageLink
-            elif node.ns==namespace.NS_MAIN:
+            elif ns==namespace.NS_MAIN:
                 node.__class__ = N.ArticleLink
-            elif node.ns==namespace.NS_CATEGORY:
+            elif ns==namespace.NS_CATEGORY:
                 node.__class__ = N.CategoryLink
-            elif node.ns is not None:
+            elif ns is not None:
                 node.__class__ = N.NamespaceLink
-            ns, partial, full = namespace.splitname(node.target)
-            node.target = partial.strip(" \n\t_")
+            elif node.interwiki:
+                node.__class__ = N.InterwikiLink
+                node.target = node.target.split(":")[1]
+                node.namespace = node.interwiki
+            elif node.langlink:
+                node.__class__ = N.LangLink
+                node.namespace, node.target = node.target.split(":", 1)
+                
+            ns, partial, full = namespace.splitname(node.target, nsmap=node.nsmap)
+            node.target = partial.replace("_", " ").strip()
+            node.full_target = full.replace("_", " ")
             if N.Link.capitalizeTarget:
                 node.target = node.target[:1].upper()+node.target[1:]
-            node.namespace = node.ns
+            if node.namespace is None:
+                node.namespace = node.ns
             
                 
             
@@ -84,8 +128,8 @@ def _change_classes(node):
 
     
     
-def parse_txt(raw):
-    sub = core.parse_txt(raw)
+def parse_txt(raw, **kwargs):
+    sub = core.parse_txt(raw, **kwargs)
     article = T(type=T.t_complex_article, start=0, len=0, children=sub)
     core.show(article)
     _change_classes(article)
