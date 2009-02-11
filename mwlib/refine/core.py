@@ -27,6 +27,8 @@ T.t_complex_line = "line"
 T.t_complex_named_url = "named_url"
 T.t_complex_style = "style"
 T.t_complex_node = "node"
+T.t_complex_preformatted = "preformatted"
+
 T.t_vlist = "vlist"
 
 T.children = None
@@ -379,7 +381,40 @@ class parse_singlequote(object):
             finish()
                 
                     
+class parse_preformatted(object):
+    def __init__(self, tokens, refined, **kwargs):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+
+    def run(self):
+        #spec = object()
         
+        tokens = self.tokens
+        i = 0
+        start = None
+        while i<len(tokens):
+            t = tokens[i]
+            if t.type==T.t_pre:
+                assert start is None
+                start = i
+                i+=1
+            elif t.type==T.t_newline and start is not None:
+                tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+                i = start+1
+                start = None
+            elif t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline"):
+                start = None
+                i+=1
+            else:
+                i+=1
+
+        if start is not None:
+            tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+           
+       
+                
+            
 class parse_lines(object):
     def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
@@ -676,7 +711,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
                parse_tt, parse_strike, parse_ins, parse_del,
-               parse_small, parse_sup, parse_b, parse_center, parse_lines,
+               parse_small, parse_sup, parse_b, parse_center, parse_preformatted, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
     while parsers:

@@ -19,6 +19,7 @@ tok2class = {
     T.t_complex_node: N.Node,
     T.t_complex_line: N.Node,
     T.t_http_url: N.URL,
+    T.t_complex_preformatted: N.PreFormatted,
     }
 
 
