@@ -87,7 +87,8 @@ ChangeLog
 ======================================================================
 2009-?-? release 0.9.?
 --------------------------------
-- fix bug in mwlib.serve with forced rendering
+- fix bug in serve with forced rendering
+- fix bug in writerbase when no URL is returned
 
 2009-2-9 release 0.9.7
 --------------------------------
