@@ -469,7 +469,7 @@ def test_parse_preformatted_math():
 def test_parse_preformatted_blockquote():
     r=parse(' <blockquote>blub</blockquote>')
     stylenode = r.find(parser.Style)
-    assert not r.find(parser.PreFormatted) and stylenode and stylenode[0].caption=='-', 'expected blockquote w/o preformatted node'
+    assert not stylenode, "should not create a stylenode"
 
 def test_parse_eolstyle_inside_blockquote():
     r=parse("<blockquote>\n:foo</blockquote>")
