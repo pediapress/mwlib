@@ -167,6 +167,7 @@ class TreeCleaner(object):
                           'cleanSectionCaptions',
                           'removeChildlessNodes',
                           'removeNoPrintNodes',
+                          'removeInvisibleNodes', 
                           'removeListOnlyParagraphs',
                           'fixParagraphs', # was in xmltreecleaner
                           'simplifyBlockNodes',
@@ -976,3 +977,14 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.splitTableToColumns(c)
+
+
+    def removeInvisibleNodes(self, node):
+
+        if not node.visible and node.parent:
+            node.parent.removeChild(node)
+            self.report("removed invisible node", node)
+
+        for c in node.children:
+            self.removeInvisibleNodes(c)
+            
