@@ -146,9 +146,12 @@ def test_definitiondescription():
     parser.show(sys.stdout, r)
     
     buildAdvancedTree(r)
-    for i,c in enumerate(r.getChildNodesByClass(DefinitionDescription)):
-        assert c.indentlevel == i + 1
-    assert i == 3
+    dd = r.getChildNodesByClass(DefinitionDescription)
+    print "DD:",dd
+    for c in dd:
+        assert c.indentlevel==1
+    assert len(dd)==4
+    
 
 
 @xfail
