@@ -28,7 +28,18 @@ class parse_table_cells(object):
                 
                 del children[:i+1]
                 return
-    
+
+    def replace_tablecaption(self, children):
+        i = 0
+        while i<len(children):
+            if children[i].type == T.t_tablecaption:
+                children[i].type = T.t_special
+                children[i].text = u"|"
+                children.insert(i+1, T(type=T.t_text, text="+"))
+            i+=1
+            
+                
+                
     def run(self):
         tokens = self.tokens
         i = 0
@@ -37,6 +48,7 @@ class parse_table_cells(object):
         def makecell():
             search_modifier = tokens[start].text in ("|", "!", "||")
             sub = tokens[start+1:i]
+            self.replace_tablecaption(sub)
             tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
             if search_modifier:
                 self.find_modifier(tokens[start])
