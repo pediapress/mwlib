@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-?-? release 0.9.?
+--------------------------------
+- fix bug in mwlib.serve with forced rendering
+
 2009-2-9 release 0.9.7
 --------------------------------
 - fix bug in #expr parsing
@@ -93,10 +97,10 @@ ChangeLog
 
 2009-2-3  release 0.9.6
 --------------------------------
-- mwapidb: return authors alphabetically sorted (fixes: #420)
+- mwapidb: return authors alphabetically sorted (#420)
 - zipcreator: fixed classname from DummyScheduler to DummyJobScheduler; this bug
   broke the --no-threads option
-- serve: if rendering is forced, don't re-use ZIP file (fixes: #432)
+- serve: if rendering is forced, don't re-use ZIP file (#432)
 - options: remove default value "Print" from --print-template-prefix
 - mapidb: expand local* functions, add them to source dictionary
 - expander: fix memory leak in template parser (#439)
