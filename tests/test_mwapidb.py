@@ -366,6 +366,12 @@ class TestImageDB(object):
         assert p == 'thumb/a/a4/Flag_of_the_United_States.svg/800px-Flag_of_the_United_States.svg.png'
     
     def test_getContributors(self):
+        # test uniqueness
+        c = self.imagedb.getContributors(u'Flag of France.svg')
+        print c
+        assert c
+        assert len(set(c)) == len(c)
+
         # image contains User: link in Information tempalte:
         c = self.imagedb.getContributors(u'Hong Kong Skyline Restitch - Dec 2007.jpg')
         print c
@@ -397,6 +403,7 @@ class TestImageDB(object):
         c = self.imagedb.getContributors(u'Flag of Israel.svg')
         print c
         assert c
+
         
         
     

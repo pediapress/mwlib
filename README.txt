@@ -89,6 +89,7 @@ ChangeLog
 --------------------------------
 - fix bug in serve with forced rendering
 - fix bug in writerbase when no URL is returned
+- return only unqiue image contributors, sorted (#408)
 
 2009-2-9 release 0.9.7
 --------------------------------

@@ -537,13 +537,16 @@ class ImageDB(object):
             def isUserLink(node):
                 return isinstance(node, parser.NamespaceLink) and node.namespace == namespace.NS_USER
             
-            return [
+            result = list(set([
                 u.target
                 for u in uparser.parseString(title,
                     raw=raw,
                     wikidb=wikidb,
                 ).filter(isUserLink)
-            ]
+            ]))
+            result.sort()
+            return result
+            
         
         template = find_template(raw, 'Information')
         if template is not None:
@@ -551,6 +554,8 @@ class ImageDB(object):
             if author:
                 users = getUserLinks(author)
                 if users:
+                    users = list(set(users))
+                    users.sort()
                     return users
                 
                 node = uparser.parseString('', raw=author, wikidb=wikidb)
