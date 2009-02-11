@@ -388,8 +388,8 @@ class parse_lines(object):
 
         
     def analyze(self, lines):
-
         def getchar(node):
+            assert node.type==T.t_complex_line
             if node.lineprefix:
                 return node.lineprefix[0]
             return None
@@ -402,49 +402,45 @@ class parse_lines(object):
         while startpos<len(lines)-1:
             prefix = getchar(lines[startpos])
             if prefix is None:
-                startpos += 1
+                lines[startpos].type = T.t_complex_node
+                startpos+=1
                 continue
-            
-            i = startpos+1
-            while getchar(lines[i])==prefix:
-                i+=1
-
-            
-            sub = lines[startpos:i]
-            for x in sub:
-                if x.lineprefix:
-                    x.lineprefix = x.lineprefix[1:]
-            self.analyze(sub)
-
-
-            def makelist():
-                for idx, x in enumerate(sub):
-                    if x.type==T.t_complex_line:
-                        x.type=T.t_complex_tag
-                        x.tagname = "li"
-                        self.refined.append(x.children)
-                    else:
-                        sub[idx] = T(type=T.t_complex_tag, tagname="li", children=sub[idx:idx+1])                        
-                        self.refined.append(sub[idx].children)
-                        
+                
             if prefix==':':
-                node = T(type=T.t_complex_style, start=0, len=0, children=sub, caption=':')
-                self.refined.append(sub)
+                node = T(type=T.t_complex_style, caption=':')
+                newitem = lambda: T(type=T.t_complex_node)
             elif prefix=='*':
-                makelist()
-                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ul")
+                node = T(type=T.t_complex_tag, tagname="ul")
+                newitem = lambda: T(type=T.t_complex_tag, tagname="li")
             elif prefix=="#":
-                makelist()
-                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ol")
+                node = T(type=T.t_complex_tag, tagname="ol")
+                newitem = lambda: T(type=T.t_complex_tag, tagname="li")
             elif prefix==';':
-                self.refined.append(sub)
-                node = T(type=T.t_complex_bold, start=0, len=0, children=sub)
+                node = T(type=T.t_complex_bold)
+                newitem = lambda: T(type=T.t_complex_node)
             else:
                 assert 0
+            
+            node.children = blist()
+            
+            while startpos<len(lines)-1 and getchar(lines[startpos])==prefix:
+                # collect items
+                item = newitem()
+                item.children=blist()
+                item.children.append(lines[startpos])
+                del lines[startpos]
                 
-            lines[startpos:i] = [node]
-            startpos += 1
+                while startpos<len(lines)-1 and prefix==getchar(lines[startpos]) and len(lines[startpos].lineprefix)>1:
+                    item.children.append(lines[startpos])
+                    del lines[startpos]
 
+                for x in item.children:
+                    x.lineprefix=x.lineprefix[1:]
+                self.analyze(item.children)
+                node.children.append(item)
+
+            lines.insert(startpos, node)
+            startpos += 1
 
         del lines[-1] # remove guard
         
