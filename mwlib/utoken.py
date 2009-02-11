@@ -7,7 +7,7 @@
 
 import sys
 import re
-import _mwscan
+import _uscan as _mwscan
 import htmlentitydefs
 
 def walknode(node, filt=lambda x: True):
