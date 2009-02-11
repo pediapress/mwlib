@@ -334,10 +334,10 @@ static PyMethodDef module_functions[] = {
 
 
 extern "C" {
-	DL_EXPORT(void) init_mwscan();
+	DL_EXPORT(void) init_uscan();
 }
 
-DL_EXPORT(void) init_mwscan()
+DL_EXPORT(void) init_uscan()
 {
-	/*PyObject *m =*/ Py_InitModule("_mwscan", module_functions);
+	/*PyObject *m =*/ Py_InitModule("_uscan", module_functions);
 }
