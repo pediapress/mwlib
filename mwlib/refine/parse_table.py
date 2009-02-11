@@ -64,6 +64,7 @@ class parse_table_cells(object):
                 else:
                     i+= 1
             else:
+                
                 i += 1
 
         if start is not None:
@@ -228,34 +229,30 @@ class parse_tables(object):
         i = 0
         stack = []
 
+        def maketable():
+            start = stack.pop()
+            starttoken = tokens[start]
+            sub = tokens[start+1:i]
+            tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
+            if starttoken.text == "{|":
+                self.find_modifier(tokens[start])
+            self.handle_rows(sub)
+            self.find_caption(tokens[start])
+            return start
+
+            
         while i < len(tokens):
             if self.is_table_start(tokens[i]):
                 stack.append(i)
                 i+=1
             elif self.is_table_end(tokens[i]):
                 if stack:
-                    start = stack.pop()
-                    starttoken = tokens[start]
-                    
-                    sub = tokens[start+1:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
-                    if starttoken.text == "{|":
-                        self.find_modifier(tokens[start])
-                    self.handle_rows(sub)
-                    self.find_caption(tokens[start])
-                    
-                    i = start+1
+                    i = maketable()+1
                 else:
                     i += 1
             else:
                 i += 1
 
         while stack:
-            start = stack.pop()
-            starttoken = tokens[start]
-            sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
-            if starttoken.text == "{|":
-                self.find_modifier(tokens[start])
-            self.handle_rows(sub)
-            self.find_caption(tokens[start])
+            maketable()
+        
