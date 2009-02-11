@@ -185,14 +185,19 @@ class parse_tables(object):
 
     def find_modifier(self, table):
         children = table.children
+        def compute_mod():
+            mod = T.join_as_text(children[:i])
+            #print "MODIFIER:", repr(mod)
+            table.vlist = util.parseParams(mod)
+            del children[:i]
+
+            
         for i,x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
-                mod = T.join_as_text(children[:i])
-                #print "MODIFIER:", repr(mod)
-                table.vlist = util.parseParams(mod)
-                del children[:i]
-                return
+                break
 
+        compute_mod()
+        
     def find_caption(self, table):
         children = table.children
         start = None
@@ -249,7 +254,7 @@ class parse_tables(object):
             start = stack.pop()
             starttoken = tokens[start]
             sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub)]
+            tokens[start:] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
             if starttoken.text == "{|":
                 self.find_modifier(tokens[start])
             self.handle_rows(sub)
