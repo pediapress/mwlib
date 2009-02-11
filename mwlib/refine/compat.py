@@ -88,7 +88,9 @@ def _change_classes(node):
                 node.caption = "'''"
             elif node.tagname=='pre':
                 node.__class__=N.PreFormatted
-                
+            elif node.tagname=='blockquote':
+                node.__class__=N.Style
+                node.caption = "-"                
         if node.__class__==N.Link:
             ns = node.ns
             

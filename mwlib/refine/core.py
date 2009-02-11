@@ -401,6 +401,7 @@ class parse_preformatted(object):
                 i+=1
             elif t.type==T.t_newline and start is not None:
                 tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+                self.refined.append(tokens[start].children)
                 i = start+1
                 start = None
             elif t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline"):
@@ -411,7 +412,8 @@ class parse_preformatted(object):
 
         if start is not None:
             tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
-           
+            self.refined.append(tokens[start].children)
+        self.refined.append(tokens)
        
                 
             
