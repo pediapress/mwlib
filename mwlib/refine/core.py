@@ -416,11 +416,11 @@ class parse_lines(object):
                 node = T(type=T.t_complex_tag, tagname="ol")
                 newitem = lambda: T(type=T.t_complex_tag, tagname="li")
             elif prefix==';':
-                node = T(type=T.t_complex_bold)
+                node = T(type=T.t_complex_style, caption=';')
                 newitem = lambda: T(type=T.t_complex_node)
             else:
                 assert 0
-            
+                
             node.children = blist()
             
             while startpos<len(lines)-1 and getchar(lines[startpos])==prefix:
