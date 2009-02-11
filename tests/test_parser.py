@@ -517,8 +517,12 @@ def test_table_markup_in_link_table_pipe_plus():
     
 def test_table_markup_in_link_table_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/11"""
-    r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
-    assert r.target=='bla', "wrong target"
+    
+    r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)
+    assert not r, "table should not contain a link"
+    
+#     r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
+#     assert r.target=='bla', "wrong target"
 
 def test_source_tag():
     source = "\nwhile(1){ {{#expr:1+1}}\n  i++;\n}\n\nreturn 0;\n"
