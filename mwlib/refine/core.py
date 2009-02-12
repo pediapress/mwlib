@@ -442,6 +442,7 @@ class parse_lines(object):
             prefix = getchar(lines[startpos])
             if prefix is None:
                 lines[startpos].type = T.t_complex_node
+                self.refined.append(lines[startpos].children)
                 startpos+=1
                 continue
                 
