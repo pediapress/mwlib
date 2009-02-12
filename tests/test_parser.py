@@ -908,3 +908,14 @@ def test_table_whitespace_before_row():
     print "VLIST:", rows[0].vlist
     assert rows[0].vlist==dict(bgcolor="#aacccc")
             
+
+def test_table_whitespace_before_begintable():
+    r=parse("""
+ {| bgcolor="#aacccc" 
+|- 
+| cell1
+| cell2
+|}
+""")
+    table = r.find(parser.Table)[0]
+    assert table.vlist==dict(bgcolor="#aacccc")
