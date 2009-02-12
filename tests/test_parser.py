@@ -869,3 +869,7 @@ baz
     
     
     
+def test_namedurl_inside_list():
+    r=parse(u"* [http://pediapress.com pediapress]")
+    urls = r.find(parser.NamedURL)
+    assert len(urls)==1, "expected exactly one NamedURL"
