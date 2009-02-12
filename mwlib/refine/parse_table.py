@@ -234,7 +234,7 @@ class parse_tables(object):
             starttoken = tokens[start]
             sub = tokens[start+1:i]
             tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
-            if starttoken.text == "{|":
+            if starttoken.text.strip() == "{|":
                 self.find_modifier(tokens[start])
             self.handle_rows(sub)
             self.find_caption(tokens[start])
