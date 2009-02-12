@@ -432,7 +432,15 @@ def test_mailto_named():
 def test_namedurl_inside_link():
     r = parse("[http://foo.com baz]]]")
     assert r.find(parser.NamedURL), "expected a NamedURL"
-    
+
+def test_namedurl_with_style():
+    """http://code.pediapress.com/wiki/ticket/461"""
+    r=parse(u"[http://thetangent.org Internetpräsenz von ''The Tangent'']")
+    named = r.find(parser.NamedURL)
+    assert len(named)==1, "expected a NamedURL instance"
+    styles = named[0].find(parser.Style)
+    assert len(styles)==1, "expected a style"
+
 def test_mailto():
     r=parse("mailto:ralf@brainbot.com")
     assert r.find(parser.URL), "expected a URL node"
