@@ -218,10 +218,8 @@ def test_blockquote_with_two_paras():
     print 'BLOCKQUOTE:', node.children
     assert len(node.children)==1, "expected exactly one child node"
     
-@xfail
 def test_newlines_in_bold_tag():
     """http://code.pediapress.com/wiki/ticket/41"""
-    
     node = parse('<b>test\n\nfoo</b>')
     styles = node.find(parser.Style)
     assert len(styles)==1, "expected exactly one style"
