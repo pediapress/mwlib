@@ -802,3 +802,12 @@ def test_p_tag():
     print "PARAGRAPHS:", r
     assert len(r)==2, "expected 2 paragraphs"
     
+
+def test_table_style_parsing_1():
+    """http://code.pediapress.com/wiki/ticket/172"""
+    s = '{| class="prettytable"\n|-\n|blub\n|align="center"|+bla\n|}\n'
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    print "VLIST:", cells[1].vlist
+    assert cells[1].vlist == dict(align="center"), "bad vlist"
+    
