@@ -842,7 +842,7 @@ def test_force_close_1():
     print "CELLS:", cells
     assert len(cells)==4, "expected 4 cells"
     
-    
+@xfail
 def test_force_close_code():
     s="before <code>inside<code> after"
     r=parse(s)
