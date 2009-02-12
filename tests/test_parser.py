@@ -894,4 +894,17 @@ def test_table_whitespace_before_cell():
     assert cells[0].vlist==dict(bgcolor="#aacccc")
     
     
+def test_table_whitespace_before_row():
+    r=parse("""
+{|
+  |- bgcolor="#aacccc" 
+| | cell1
+| cell2
+|}
+""")
+    rows = r.find(parser.Row)
+    print "ROWS:", rows
+    assert len(rows)==1, "expected exactly one row"
+    print "VLIST:", rows[0].vlist
+    assert rows[0].vlist==dict(bgcolor="#aacccc")
             
