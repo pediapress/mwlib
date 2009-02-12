@@ -910,12 +910,26 @@ def test_table_whitespace_before_row():
             
 
 def test_table_whitespace_before_begintable():
-    r=parse("""
+    def check(s):
+        r=parse(s)
+        tables = r.find(parser.Table)
+        assert len(tables)==1, "expected exactly one table"
+        assert tables[0].vlist==dict(bgcolor="#aacccc")
+
+        
+    yield check, """
  {| bgcolor="#aacccc" 
 |- 
 | cell1
 | cell2
 |}
-""")
-    table = r.find(parser.Table)[0]
-    assert table.vlist==dict(bgcolor="#aacccc")
+"""
+
+    
+    yield check, """
+:::{| bgcolor="#aacccc" 
+|- 
+| cell1
+| cell2
+|}
+"""
