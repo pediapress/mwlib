@@ -825,3 +825,22 @@ def test_table_style_parsing_jtalbot():
     r=parse(s)
     cells = r.find(parser.Cell)
     assert len(cells)==1, "expected exactly one cell"
+
+
+def test_force_close_1():
+    s="""{|
+|-
+| <ul><li>bla</li>
+| bla 2
+|-
+| bla 3
+| bla 4
+|}
+"""
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    print "CELLS:", cells
+    assert len(cells)==4, "expected 4 cells"
+    
+    
+    
