@@ -614,8 +614,10 @@ def test_source_vlist():
 def test_not_pull_in_alpha_image():
     link=parse("[[Image:link.jpg|ab]]cd").find(parser.Link)[0]
     assert "cd" not in link.asText(), "'cd' not in linkstext"
-    
+
+@xfail
 def test_pull_in_alpha():
+    """http://code.pediapress.com/wiki/ticket/130"""
     link=parse("[[link|ab]]cd").find(parser.Link)[0]
     assert "cd" in link.asText(), "'cd' not in linkstext"
     
