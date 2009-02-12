@@ -160,6 +160,8 @@ blubb
 @xfail
 def test_cell_parse_bug():
     """http://code.pediapress.com/wiki/ticket/17"""
+    # mediawiki actually pulls out that ImageLink from the table...
+
     r=parse("""{|
 |-
 [[Image:bla.png|bla]]
