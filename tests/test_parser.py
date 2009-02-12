@@ -878,4 +878,20 @@ def test_link_in_sectiontitle():
     r=parse("== [[mainz]] ==")
     links = r.find(parser.Link)
     assert len(links)==1, "expected exactly one link"
+
+def test_table_whitespace_before_cell():
+    r=parse("""
+{|
+|-
+ | bgcolor="#aacccc" | cell1
+| cell2
+|}
+""")
+    cells = r.find(parser.Cell)
+    print "CELLS:", cells
+    assert len(cells)==2, "expected exactly 3 cells"
+    print "VLIST:", cells[0].vlist
+    assert cells[0].vlist==dict(bgcolor="#aacccc")
     
+    
+            
