@@ -223,9 +223,13 @@ def test_newlines_in_bold_tag():
     """http://code.pediapress.com/wiki/ticket/41"""
     
     node = parse('<b>test\n\nfoo</b>')
-    print node
-    assert len(node.children)==1, "expected exactly one child node"
-
+    styles = node.find(parser.Style)
+    assert len(styles)==1, "expected exactly one style"
+    txt = styles[0].asText()
+    print "TXT:", txt
+    
+    assert "foo" in txt, "foo should be bold"
+    
 def test_percent_table_style(): 
     """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
     
