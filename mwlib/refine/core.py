@@ -243,7 +243,8 @@ class parse_sections(object):
                 caption.children.append(T(type=T.t_text, text=u"="*(l2-l1)))
             elif l1>l2:
                 caption.children.insert(0, T(type=T.t_text, text=u"="*(l1-l2)))
-                
+
+            self.refined.append(caption.children)
                 
             sub = blist([caption])
             sub.extend(tokens[current.endtitle+1:i])
