@@ -873,3 +873,9 @@ def test_namedurl_inside_list():
     r=parse(u"* [http://pediapress.com pediapress]")
     urls = r.find(parser.NamedURL)
     assert len(urls)==1, "expected exactly one NamedURL"
+
+def test_link_in_sectiontitle():
+    r=parse("== [[mainz]] ==")
+    links = r.find(parser.Link)
+    assert len(links)==1, "expected exactly one link"
+    
