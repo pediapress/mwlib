@@ -810,4 +810,13 @@ def test_table_style_parsing_1():
     cells = r.find(parser.Cell)
     print "VLIST:", cells[1].vlist
     assert cells[1].vlist == dict(align="center"), "bad vlist"
-    
+
+def test_table_style_parsing_jtalbot():
+    """mentioned in http://code.pediapress.com/wiki/ticket/172,
+    but real issue is:
+    http://code.pediapress.com/wiki/ticket/366
+    """
+    s = '{| \n|-\n| cell 1 <ref>this|| not cell2</ref>\n|}\n'
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
