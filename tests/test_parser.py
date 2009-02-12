@@ -195,13 +195,9 @@ def test_parse_comment():
     ex = """foo
 <!-- comment --->
 bar"""
-
-    def check(node):
-        paras = node.find(parser.Paragraph)
-        assert len(paras)==1, 'expected exactly one paragraph node'
-    
-    check(parse(ex))
-    check(parse(expander.expandstr(ex)))
+    expanded = expander.expandstr(ex)
+    print "EXPANDED:", expanded
+    assert "\n\n" not in expanded
 
 def test_nowiki_entities():
     """http://code.pediapress.com/wiki/ticket/40"""
