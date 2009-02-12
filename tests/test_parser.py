@@ -843,4 +843,15 @@ def test_force_close_1():
     assert len(cells)==4, "expected 4 cells"
     
     
+def test_force_close_code():
+    s="before <code>inside<code> after"
+    r=parse(s)
+
+    tagnodes = r.find(parser.TagNode)
+    assert len(tagnodes)==1, "expected exactly one tagnode"
+    txt = tagnodes.asText()
+    print "TXT:", txt
+    assert "after" not in txt
+    
+    
     
