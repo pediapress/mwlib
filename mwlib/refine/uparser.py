@@ -1,4 +1,7 @@
 
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 from mwlib import expander
 from mwlib.log import Log
 from mwlib.refine import core, compat

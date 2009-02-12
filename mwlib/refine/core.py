@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import sys
 from mwlib.utoken import tokenize, show, token as T, walknode
 from mwlib.refine import util

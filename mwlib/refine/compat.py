@@ -1,4 +1,7 @@
 
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 from mwlib.refine import core
 from mwlib.parser import nodes as N
 from mwlib.utoken import token as T

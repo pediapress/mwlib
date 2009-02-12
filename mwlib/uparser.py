@@ -1,4 +1,7 @@
-import os
+
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 if "MWREFINE" in os.environ:
     import sys
     sys.stderr.write("USING NEW REFINE PARSER\n")
