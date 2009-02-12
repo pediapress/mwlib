@@ -1,5 +1,5 @@
 
-from mwlib.utoken import tokenize, show, token as T
+from mwlib.utoken import show, token as T
 from mwlib.refine import util
 
 class parse_table_cells(object):
