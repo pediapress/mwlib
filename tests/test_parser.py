@@ -931,3 +931,36 @@ def test_table_whitespace_before_begintable():
 | cell2
 |}
 """
+
+
+def test_i_tag():
+    r=parse("<i>i</i>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="''"
+    
+def test_em_tag():
+    r=parse("<em>i</em>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="''"
+    
+def test_big_tag():
+    r=parse("<i>i</i>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="big"
+
+
+def test_cite_tag():
+    r=parse("<cite>i</cite>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="cite"
+    
+def test_strong_tag():
+    r=parse("<strong>i</strong>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="'''"
+
+def test_hr_tag():
+    r=parse("<hr>")
+    s=r.find(parser.TagNode)[0]
+    assert s.caption=="hr"
+    
