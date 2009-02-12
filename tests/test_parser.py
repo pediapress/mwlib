@@ -852,6 +852,20 @@ def test_force_close_code():
     txt = tagnodes.asText()
     print "TXT:", txt
     assert "after" not in txt
+
+def test_force_close_section_in_li():
+    """example from http://code.pediapress.com/wiki/ticket/63"""
+    s="""<ul><li>item
+== section 1 ==
+baz
+"""
+    r=parse(s)
+    items = r.find(parser.Item)
+    assert len(items)==1, "epxected one item"
+    sections = items[0].find(parser.Section)
+    assert len(sections)==1, "expected exactly one section inside li"
+    
+    
     
     
     
