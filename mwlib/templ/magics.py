@@ -425,6 +425,7 @@ class ParserFunctions(object):
         try:
             r = expr.expr(rl[0])
         except Exception, err:
+            print >>sys.stderr, "ERROR: error while evaluating #ifexpr:%r\n" % (rl[0],)
             return self._error(err)
 
         if r:
