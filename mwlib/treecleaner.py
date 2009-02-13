@@ -1019,7 +1019,7 @@ class TreeCleaner(object):
 
     def fixInfoBoxes(self, node):
         """Optimize rendering of infoboxes"""
-        if node.__class__ == Table and node.attributes.get('class').lower().find('infobox') > -1:
+        if node.__class__ == Table and node.attributes.get('class', '').lower().find('infobox') > -1:
 
             # remove duplicate image caption
             images = node.getChildNodesByClass(ImageLink)
