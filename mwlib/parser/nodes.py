@@ -450,6 +450,7 @@ class ImageLink(Link):
     link = None
     frame = None
     border = None
+    upright = None
     
     def isInline(self):
         return not bool(self.align or self.thumb)
@@ -492,6 +493,18 @@ class ImageLink(Link):
                 self.border = True
                 del self.children[idx]
                 continue
+
+            if x.startswith('upright'):
+                res = re.search('(^upright=([0-9.]+)$)|(^upright$)', x)
+                if res:
+                    try:
+                        scale = float(res.group(2))
+                    except:
+                        scale = 0.75
+                    self.upright = scale
+                    del self.children[idx]
+                    continue
+
 
             if x.startswith('print='):
                 self.printargs = x[len('print='):]

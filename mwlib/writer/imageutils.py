@@ -45,7 +45,11 @@ class ImageUtils(object):
         # check if thumb, then assign default width
         if getattr(img_node, 'thumb', None) or getattr(img_node, 'framed', None) or getattr(img_node, 'frameless', None) or getattr(img_node, 'align', None) in ['right', 'left']:
             max_w = max_w or self.default_thumb_width
-            img_node.floating = True
+            if getattr(img_node, 'align', None) != 'center':
+                img_node.floating = True
+            if getattr(img_node, 'upright'):
+                max_w *= getattr(img_node, 'upright')
+            
         if not max_w:
             max_w = min(self.print_width_px, px_w)
         max_w = min(self.print_width_px, max_w)
