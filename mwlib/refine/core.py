@@ -703,7 +703,28 @@ class parse_links(object):
 
         self.refined.append(tokens)
         
+class combined_parser(object):
+    def __init__(self, parsers):
+        self.parsers = parsers
 
+    def __call__(self, tokens, refined, **kwargs):
+        parsers = list(self.parsers)
+        refine = [tokens]
+        
+        while parsers:
+            p = parsers.pop()
+            #print "doing", p, "on:", refine
+
+            next = []
+
+            for x in refine:
+                if isinstance(x, (list, blist, tuple)):
+                    toks = x
+                else:
+                    toks = x.children
+                p(toks, next, **kwargs)
+
+            refine = next
             
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
@@ -723,19 +744,9 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_small, parse_sup, parse_b, parse_center, parse_preformatted, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
-    while parsers:
-        p = parsers.pop()
-        #print "doing", p, "on:", refine
-        
-        next = []
-        
-        for x in refine:
-            if isinstance(x, (list, blist, tuple)):
-                toks = x
-            else:
-                toks = x.children
-            p(toks, next, interwikimap=interwikimap, **kwargs)
 
-        refine = next
+
+    refined = []
+    combined_parser(parsers)(tokens, refined, interwikimap=interwikimap, **kwargs)
         
     return tokens
