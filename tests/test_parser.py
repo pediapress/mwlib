@@ -932,7 +932,16 @@ def test_table_whitespace_before_begintable():
 |}
 """
 
-
+def test_closing_td_in_cell():
+    r = parse("""
+{|
+<td>foo</td>
+|}""")
+    cell = r.find(parser.Cell)[0]
+    assert "td" not in cell.asText()
+    
+             
+    
 def test_i_tag():
     r=parse("<i>i</i>")
     s=r.find(parser.Style)[0]
