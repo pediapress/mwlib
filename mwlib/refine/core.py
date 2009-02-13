@@ -725,7 +725,11 @@ class combined_parser(object):
                 p(toks, next, **kwargs)
 
             refine = next
-            
+
+parse_style_tags = combined_parser([parse_tt, parse_strike, parse_ins, parse_del, parse_small, parse_sup, parse_b, parse_center])
+
+                
+
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -740,8 +744,8 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
-               parse_tt, parse_strike, parse_ins, parse_del,
-               parse_small, parse_sup, parse_b, parse_center, parse_preformatted, parse_lines,
+               parse_style_tags,               
+               parse_preformatted, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
