@@ -957,6 +957,10 @@ def test_big_tag():
     s=r.find(parser.Style)[0]
     assert s.caption=="big"
 
+def test_small_tag():
+    r=parse("<small>i</small>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="small"
 
 def test_cite_tag():
     r=parse("<cite>i</cite>")
