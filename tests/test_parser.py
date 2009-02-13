@@ -977,6 +977,11 @@ def test_cite_tag():
     s=r.find(parser.Style)[0]
     assert s.caption=="cite"
     
+def test_u_tag():
+    r=parse("<u>i</u>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="u"
+    
 def test_strong_tag():
     r=parse("<strong>i</strong>")
     s=r.find(parser.Style)[0]
