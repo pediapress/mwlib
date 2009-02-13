@@ -93,7 +93,8 @@ ChangeLog
 - #expr with whitespace only argument now returns the empty string
   instead of marking the result as an error.
 - added mw-serve-ctl command line tool (#447)
-- omit title in URLs with oldid
+- mwapidb: omit title in URLs with oldid
+- mwapidb: added getTemplatesForArticle() 
 
 2009-2-9 release 0.9.7
 --------------------------------

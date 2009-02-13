@@ -780,6 +780,36 @@ class WikiDB(wikidbbase.WikiDBBase):
 #        print authors
         return [a for a,c in authors]
 
+    def getTemplatesForArticle(self, title, revision=None):
+        """Return a dictionary with all templates used in article with given
+        title and revision.
+        """
+
+        kwargs = {
+            'generator': 'templates',
+            'gtllimit': 500,
+            'prop': 'revisions',
+            'rvprop': 'content',
+        }
+        if revision is None:
+            kwargs['titles'] = title
+        else:
+            kwargs['revids'] = revision
+        result = self.api_helper.query(**kwargs)
+        if not result or 'pages' not in result:
+            return None
+        title2raw = {}
+        for oldid, info in result['pages'].items():
+            try:
+                raw = info['revisions'][0]['*']
+                if self.redirect_rex.search(raw):
+                    raw = self.getRawArticle(info['title'])
+                if raw:
+                    title2raw[info['title']] = raw
+            except (KeyError, IndexError):
+                continue
+        return title2raw
+
     def getTemplate(self, name, followRedirects=True):
         """
         Note: *Not* following redirects is unsupported!
