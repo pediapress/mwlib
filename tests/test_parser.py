@@ -962,6 +962,16 @@ def test_small_tag():
     s=r.find(parser.Style)[0]
     assert s.caption=="small"
 
+def test_sup_tag():
+    r=parse("<sup>i</sup>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="sup"
+    
+def test_sub_tag():
+    r=parse("<sub>i</sub>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="sub"
+    
 def test_cite_tag():
     r=parse("<cite>i</cite>")
     s=r.find(parser.Style)[0]
