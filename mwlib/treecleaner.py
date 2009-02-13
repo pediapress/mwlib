@@ -112,7 +112,7 @@ class TreeCleaner(object):
         # list of css classes OR id's which trigger the removal of the node from the tree
         # the following list is wikipedia specific
         self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct',
-                                 'coordinates_3_ObenRechts', 'microformat'] # FIXME: should really be "geo microformat...
+                                 'coordinates_3_ObenRechts', 'microformat', 'coordinates'] # FIXME: should really be "geo microformat...
 
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
@@ -191,6 +191,8 @@ class TreeCleaner(object):
                           'removeBreakingReturns',
                           'buildDefinitionLists',
                           'restrictChildren',
+                          'fixReferenceNodes',
+                          'fixInfoBoxes',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
                           'fixChapterNesting',
                           'fixPreFormatted',
@@ -988,3 +990,44 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeInvisibleNodes(c)
             
+
+    def fixReferenceNodes(self, node):
+        
+        ref_nodes = node.getChildNodesByClass(Reference)
+        
+        name2children = {}
+
+        for ref_node in ref_nodes:
+            ref_name = ref_node.attributes.get('name')
+            if ref_name and ref_node.children and not name2children.has_key(ref_name):
+                name2children[ref_name] = ref_node.children
+
+        for ref_node in ref_nodes:
+            ref_name = ref_node.attributes.get('name')
+            if not ref_node.children and name2children.has_key(ref_name):
+                children = name2children[ref_name][:]
+                for child in children:
+                    ref_node.appendChild(child)
+            if ref_node.attributes.get('name'):
+                del ref_node.attributes['name']
+            
+        for ref_node in ref_nodes:
+            if not ref_node.children and ref_node.parent:
+                ref_node.parent.removeChild(ref_node)
+
+
+
+    def fixInfoBoxes(self, node):
+        """Optimize rendering of infoboxes"""
+        if node.__class__ == Table and node.attributes.get('class').lower().find('infobox') > -1:
+
+            # remove duplicate image caption
+            images = node.getChildNodesByClass(ImageLink)
+            for image in images:
+                for sibling in image.siblings:
+                    if image.children == sibling.children and sibling.parent:
+                        sibling.parent.removeChild(sibling)
+
+
+        for c in node.children:
+            self.fixInfoBoxes(c)
