@@ -90,6 +90,8 @@ ChangeLog
 - fix bug in serve with forced rendering
 - fix bug in writerbase when no URL is returned
 - return only unqiue image contributors, sorted
+- #expr with whitespace only argument now returns the empty string
+  instead of marking the result as an error.
 
 2009-2-9 release 0.9.7
 --------------------------------
