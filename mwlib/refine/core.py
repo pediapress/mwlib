@@ -737,6 +737,7 @@ parse_style_tags = combined_parser(
      get_recursive_tag_parser("strong"),
      get_recursive_tag_parser("cite"),
      get_recursive_tag_parser("i"),
+     get_recursive_tag_parser("u"),
      get_recursive_tag_parser("em"),
      get_recursive_tag_parser("big"),
      ])
