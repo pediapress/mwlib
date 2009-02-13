@@ -255,6 +255,13 @@ class TestWikiDB(object):
         loc = src['locals']
         assert loc
         assert isinstance(loc, unicode)
+
+    def test_getTemplatesForArticle(self):
+        result = self.w.getTemplatesForArticle(u'Germany')
+        assert result[u'Template:Dmoz']
+        for raw in result.values():
+            assert not self.w.redirect_rex.search(raw)
+
     
 
 class TestImageDB(object):
