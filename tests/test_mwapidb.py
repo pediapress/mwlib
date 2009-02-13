@@ -40,6 +40,7 @@ class TestWikiDB(object):
     
     def test_getURL(self):
         assert self.w.getURL(u'Mathematics') == '%sindex.php?title=Mathematics' % self.base_url
+        assert self.w.getURL(u'Mathematics', '123') == '%sindex.php?oldid=123' % self.base_url
     
     def test_getTemplate(self):
         raw = self.w.getTemplate('Infobox')

@@ -669,10 +669,9 @@ class WikiDB(wikidbbase.WikiDBBase):
                 name,
             )
         else:
-            return '%sindex%s?title=%s&oldid=%s' % (
+            return '%sindex%s?oldid=%s' % (
                 self.api_helper.base_url,
                 self.api_helper.script_extension,
-                name,
                 revision,
             )
     
