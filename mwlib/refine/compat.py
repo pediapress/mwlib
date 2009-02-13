@@ -117,7 +117,13 @@ def _change_classes(node):
             elif node.tagname=="em":
                 node.__class__=N.Style
                 node.caption="''"
-                
+            elif node.tagname=="sup":
+                node.__class__=N.Style
+                node.caption="sup"
+            elif node.tagname=="sub":
+                node.__class__=N.Style
+                node.caption="sub"
+
         if node.__class__==N.Link:
             ns = node.ns
             
