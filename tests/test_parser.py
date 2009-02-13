@@ -964,3 +964,8 @@ def test_hr_tag():
     s=r.find(parser.TagNode)[0]
     assert s.caption=="hr"
     
+def test_hr_line():
+    r=parse("------------")
+    s=r.find(parser.TagNode)[0]
+    assert s.caption=="hr"
+    
