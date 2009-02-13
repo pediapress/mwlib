@@ -97,7 +97,23 @@ def _change_classes(node):
                 node.__class__=N.PreFormatted
             elif node.tagname=='blockquote':
                 node.__class__=N.Style
-                node.caption = "-"                
+                node.caption = "-"
+            elif node.tagname=="strong":
+                node.__class__=N.Style
+                node.caption = "'''"
+            elif node.tagname=="cite":
+                node.__class__=N.Style
+                node.caption="cite"
+            elif node.tagname=="big":
+                node.__class__=N.Style
+                node.caption="big"
+            elif node.tagname=="i":
+                node.__class__=N.Style
+                node.caption="''"
+            elif node.tagname=="em":
+                node.__class__=N.Style
+                node.caption="''"
+                
         if node.__class__==N.Link:
             ns = node.ns
             

@@ -729,7 +729,15 @@ class combined_parser(object):
 
             refine = next
 
-parse_style_tags = combined_parser([parse_tt, parse_strike, parse_ins, parse_del, parse_small, parse_sup, parse_b, parse_center])
+parse_style_tags = combined_parser(
+    [parse_tt, parse_strike, parse_ins,
+     parse_del, parse_small, parse_sup, parse_b, parse_center,
+     get_recursive_tag_parser("strong"),
+     get_recursive_tag_parser("cite"),
+     get_recursive_tag_parser("i"),
+     get_recursive_tag_parser("em"),
+     get_recursive_tag_parser("big"),
+     ])
 
                 
 
