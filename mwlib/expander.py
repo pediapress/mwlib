@@ -16,7 +16,8 @@ from mwlib.templ.misc import DictDB, expandstr
 
 def get_templates(raw, title=u""):
     used = set()
-    todo = [parse(raw)]
+    e=Expander('', wikidb=DictDB())
+    todo = [parse(raw, replace_tags=e.replace_tags)]
     while todo:
         n = todo.pop()
         if isinstance(n, basestring):
@@ -35,7 +36,8 @@ def get_templates(raw, title=u""):
 def find_template(raw, name):
     """Return Template node with given name or None if there is no such template"""
     
-    todo = [parse(raw)]
+    e=Expander('', wikidb=DictDB())
+    todo = [parse(raw, replace_tags=e.replace_tags)]
     while todo:
         n = todo.pop()
         if isinstance(n, basestring):
