@@ -400,12 +400,15 @@ class ParserFunctions(object):
         import math
         if rl:
             try:
-                val = expr.expr(rl[0])
+                ex = rl[0].strip()
+                if not ex:
+                    return u""
+                val = expr.expr(ex)
                 if int(val)==val and math.fabs(val)<1e14:
                     return str(int(val))
                 r=str(float(val))
             except Exception, err:                
-                print >>sys.stderr, "ERROR: error while evaluating #expr:%r\n" % (rl[0],)
+                print >>sys.stderr, "ERROR: error while evaluating #expr:%r\n" % (ex,)
                 return self._error(err)
 
             if "e" in r:
@@ -423,7 +426,11 @@ class ParserFunctions(object):
 
     def IFEXPR(self, rl):
         try:
-            r = expr.expr(rl[0])
+            ex = rl[0].strip()
+            if ex:
+                r = expr.expr(rl[0])
+            else:
+                r = False
         except Exception, err:
             print >>sys.stderr, "ERROR: error while evaluating #ifexpr:%r\n" % (rl[0],)
             return self._error(err)
