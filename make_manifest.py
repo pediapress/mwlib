@@ -11,7 +11,7 @@ def main():
     files.append("docs/writers.html")
     files.append("docs/zipfile.html")
     files.append("mwlib/_mwscan.cc")
-    
+    files.append("mwlib/_uscan.cc")
     def remove(n):
         try:
             files.remove(n)

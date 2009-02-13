@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import sys
 from mwlib.utoken import tokenize, show, token as T, walknode
 from mwlib.refine import util
@@ -27,6 +30,8 @@ T.t_complex_line = "line"
 T.t_complex_named_url = "named_url"
 T.t_complex_style = "style"
 T.t_complex_node = "node"
+T.t_complex_preformatted = "preformatted"
+
 T.t_vlist = "vlist"
 
 T.children = None
@@ -241,7 +246,8 @@ class parse_sections(object):
                 caption.children.append(T(type=T.t_text, text=u"="*(l2-l1)))
             elif l1>l2:
                 caption.children.insert(0, T(type=T.t_text, text=u"="*(l1-l2)))
-                
+
+            self.refined.append(caption.children)
                 
             sub = blist([caption])
             sub.extend(tokens[current.endtitle+1:i])
@@ -328,7 +334,9 @@ class parse_singlequote(object):
                 last_apocount = s.apocount
 
                 if s.is_bold and s.is_italic:
-                    styles[i].caption = "'''''"
+                    styles[i].caption = "'''"
+                    inner = T(type=T.t_complex_style, caption="''", children=styles[i].children)
+                    styles[i].children = blist([inner])
                 elif s.is_bold:
                     styles[i].caption = "'''"
                 elif s.is_italic:
@@ -379,7 +387,42 @@ class parse_singlequote(object):
             finish()
                 
                     
+class parse_preformatted(object):
+    def __init__(self, tokens, refined, **kwargs):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+
+    def run(self):
+        #spec = object()
         
+        tokens = self.tokens
+        i = 0
+        start = None
+        while i<len(tokens):
+            t = tokens[i]
+            if t.type==T.t_pre:
+                assert start is None
+                start = i
+                i+=1
+            elif t.type==T.t_newline and start is not None:
+                tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+                self.refined.append(tokens[start].children)
+                i = start+1
+                start = None
+            elif t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline"):
+                start = None
+                i+=1
+            else:
+                i+=1
+
+        if start is not None:
+            tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+            self.refined.append(tokens[start].children)
+        self.refined.append(tokens)
+       
+                
+            
 class parse_lines(object):
     def __init__(self, tokens, refined, **kwargs):
         self.tokens = tokens
@@ -388,8 +431,8 @@ class parse_lines(object):
 
         
     def analyze(self, lines):
-
         def getchar(node):
+            assert node.type==T.t_complex_line
             if node.lineprefix:
                 return node.lineprefix[0]
             return None
@@ -402,49 +445,46 @@ class parse_lines(object):
         while startpos<len(lines)-1:
             prefix = getchar(lines[startpos])
             if prefix is None:
-                startpos += 1
+                lines[startpos].type = T.t_complex_node
+                self.refined.append(lines[startpos].children)
+                startpos+=1
                 continue
-            
-            i = startpos+1
-            while getchar(lines[i])==prefix:
-                i+=1
-
-            
-            sub = lines[startpos:i]
-            for x in sub:
-                if x.lineprefix:
-                    x.lineprefix = x.lineprefix[1:]
-            self.analyze(sub)
-
-
-            def makelist():
-                for idx, x in enumerate(sub):
-                    if x.type==T.t_complex_line:
-                        x.type=T.t_complex_tag
-                        x.tagname = "li"
-                        self.refined.append(x.children)
-                    else:
-                        sub[idx] = T(type=T.t_complex_tag, tagname="li", children=sub[idx:idx+1])                        
-                        self.refined.append(sub[idx].children)
-                        
+                
             if prefix==':':
-                node = T(type=T.t_complex_style, start=0, len=0, children=sub, caption=':')
-                self.refined.append(sub)
+                node = T(type=T.t_complex_style, caption=':')
+                newitem = lambda: T(type=T.t_complex_node)
             elif prefix=='*':
-                makelist()
-                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ul")
+                node = T(type=T.t_complex_tag, tagname="ul")
+                newitem = lambda: T(type=T.t_complex_tag, tagname="li")
             elif prefix=="#":
-                makelist()
-                node = T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname="ol")
+                node = T(type=T.t_complex_tag, tagname="ol")
+                newitem = lambda: T(type=T.t_complex_tag, tagname="li")
             elif prefix==';':
-                self.refined.append(sub)
-                node = T(type=T.t_complex_bold, start=0, len=0, children=sub)
+                node = T(type=T.t_complex_style, caption=';')
+                newitem = lambda: T(type=T.t_complex_node)
             else:
                 assert 0
                 
-            lines[startpos:i] = [node]
-            startpos += 1
+            node.children = blist()
+            
+            while startpos<len(lines)-1 and getchar(lines[startpos])==prefix:
+                # collect items
+                item = newitem()
+                item.children=blist()
+                item.children.append(lines[startpos])
+                del lines[startpos]
+                
+                while startpos<len(lines)-1 and prefix==getchar(lines[startpos]) and len(lines[startpos].lineprefix)>1:
+                    item.children.append(lines[startpos])
+                    del lines[startpos]
 
+                for x in item.children:
+                    x.lineprefix=x.lineprefix[1:]
+                self.analyze(item.children)
+                node.children.append(item)
+
+            lines.insert(startpos, node)
+            startpos += 1
 
         del lines[-1] # remove guard
         
@@ -663,8 +703,33 @@ class parse_links(object):
 
         self.refined.append(tokens)
         
+class combined_parser(object):
+    def __init__(self, parsers):
+        self.parsers = parsers
 
-            
+    def __call__(self, tokens, refined, **kwargs):
+        parsers = list(self.parsers)
+        refine = [tokens]
+        
+        while parsers:
+            p = parsers.pop()
+            #print "doing", p, "on:", refine
+
+            next = []
+
+            for x in refine:
+                if isinstance(x, (list, blist, tuple)):
+                    toks = x
+                else:
+                    toks = x.children
+                p(toks, next, **kwargs)
+
+            refine = next
+
+parse_style_tags = combined_parser([parse_tt, parse_strike, parse_ins, parse_del, parse_small, parse_sup, parse_b, parse_center])
+
+                
+
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -679,23 +744,13 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
-               parse_tt, parse_strike, parse_ins, parse_del,
-               parse_small, parse_sup, parse_b, parse_center, parse_lines,
+               parse_style_tags,               
+               parse_preformatted, parse_lines,
                parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
-    while parsers:
-        p = parsers.pop()
-        #print "doing", p, "on:", refine
-        
-        next = []
-        
-        for x in refine:
-            if isinstance(x, (list, blist, tuple)):
-                toks = x
-            else:
-                toks = x.children
-            p(toks, next, interwikimap=interwikimap, **kwargs)
 
-        refine = next
+
+    refined = []
+    combined_parser(parsers)(tokens, refined, interwikimap=interwikimap, **kwargs)
         
     return tokens

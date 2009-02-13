@@ -56,6 +56,18 @@ def build_deps():
         if err!=0:
             sys.exit("Error: re2c failed.")
             
+    if mtime("mwlib/_uscan.cc") < mtime("mwlib/_uscan.re"):
+        err=os.system("re2c --version")
+        if err!=0 and err != 512:
+            sys.exit("Error: please install re2c from http://re2c.org")
+        
+        cmd = "re2c -w --no-generation-date -o %s %s" % (distutils.util.convert_path('mwlib/_uscan.cc'),
+                                                         distutils.util.convert_path('mwlib/_uscan.re'))
+        print "Running", cmd
+        err = os.system(cmd)
+        
+        if err!=0:
+            sys.exit("Error: re2c failed.")
 def read_long_description():
     fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.txt")
     return open(fn).read()
@@ -71,7 +83,9 @@ def main():
     if sys.version_info[:2] < (2,6):
         install_requires.append("simplejson>=1.3")
 
-    ext_modules = [Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"])]
+    ext_modules = []
+    ext_modules.append(Extension("mwlib._mwscan", ["mwlib/_mwscan.cc"]))
+    ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
 
     import glob
     for x in glob.glob("mwlib/templ/*.c"):

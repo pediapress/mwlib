@@ -1,5 +1,8 @@
 
-from mwlib.utoken import tokenize, show, token as T
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
+from mwlib.utoken import show, token as T
 from mwlib.refine import util
 
 class parse_table_cells(object):
@@ -28,22 +31,36 @@ class parse_table_cells(object):
                 
                 del children[:i+1]
                 return
-    
+
+    def replace_tablecaption(self, children):
+        i = 0
+        while i<len(children):
+            if children[i].type == T.t_tablecaption:
+                children[i].type = T.t_special
+                children[i].text = u"|"
+                children.insert(i+1, T(type=T.t_text, text="+"))
+            i+=1
+            
+                
+                
     def run(self):
         tokens = self.tokens
         i = 0
         start = None
 
+        def makecell():
+            search_modifier = tokens[start].text.strip() in ("|", "!", "||")
+            sub = tokens[start+1:i]
+            self.replace_tablecaption(sub)
+            tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
+            if search_modifier:
+                self.find_modifier(tokens[start])
+            self.refined.append(tokens[start])
+        
         while i < len(tokens):
             if self.is_table_cell_start(tokens[i]):
                 if start is not None:
-                    search_modifier = tokens[start].text in ("|", "!", "||")
-                    sub = tokens[start+1:i]
-                    tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
-                    if search_modifier:
-                        self.find_modifier(tokens[start])
-                    self.refined.append(tokens[start])
-                        
+                    makecell()                        
                     start += 1
                     i = start+1
                 else:
@@ -51,14 +68,8 @@ class parse_table_cells(object):
                     i+=1
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
-                    sub = tokens[start+1:i]
-                    search_modifier = tokens[start].text in ("|", "!", "||")
-                    tokens[start:i+1] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
-                    
-                    if search_modifier:
-                        self.find_modifier(tokens[start])
-                    self.refined.append(tokens[start])
-                    
+                    i+=1
+                    makecell()                    
                     i = start+1
                     start = None
                 else:
@@ -67,14 +78,7 @@ class parse_table_cells(object):
                 i += 1
 
         if start is not None:
-            
-            search_modifier = tokens[start].text in ("|", "!", "||")
-            sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
-            
-            if search_modifier:
-                self.find_modifier(tokens[start])
-            self.refined.append(tokens[start])
+            makecell()
             
                 
 class parse_table_rows(object):
@@ -185,14 +189,19 @@ class parse_tables(object):
 
     def find_modifier(self, table):
         children = table.children
+        def compute_mod():
+            mod = T.join_as_text(children[:i])
+            #print "MODIFIER:", repr(mod)
+            table.vlist = util.parseParams(mod)
+            del children[:i]
+
+            
         for i,x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
-                mod = T.join_as_text(children[:i])
-                #print "MODIFIER:", repr(mod)
-                table.vlist = util.parseParams(mod)
-                del children[:i]
-                return
+                break
 
+        compute_mod()
+        
     def find_caption(self, table):
         children = table.children
         start = None
@@ -223,34 +232,30 @@ class parse_tables(object):
         i = 0
         stack = []
 
+        def maketable():
+            start = stack.pop()
+            starttoken = tokens[start]
+            sub = tokens[start+1:i]
+            tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
+            if starttoken.text.strip() == "{|":
+                self.find_modifier(tokens[start])
+            self.handle_rows(sub)
+            self.find_caption(tokens[start])
+            return start
+
+            
         while i < len(tokens):
             if self.is_table_start(tokens[i]):
                 stack.append(i)
                 i+=1
             elif self.is_table_end(tokens[i]):
                 if stack:
-                    start = stack.pop()
-                    starttoken = tokens[start]
-                    
-                    sub = tokens[start+1:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
-                    if starttoken.text == "{|":
-                        self.find_modifier(tokens[start])
-                    self.handle_rows(sub)
-                    self.find_caption(tokens[start])
-                    
-                    i = start+1
+                    i = maketable()+1
                 else:
                     i += 1
             else:
                 i += 1
 
         while stack:
-            start = stack.pop()
-            starttoken = tokens[start]
-            sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub)]
-            if starttoken.text == "{|":
-                self.find_modifier(tokens[start])
-            self.handle_rows(sub)
-            self.find_caption(tokens[start])
+            maketable()
+        

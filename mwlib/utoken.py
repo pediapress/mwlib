@@ -7,7 +7,7 @@
 
 import sys
 import re
-import _mwscan
+import _uscan as _mwscan
 import htmlentitydefs
 
 def walknode(node, filt=lambda x: True):
@@ -143,7 +143,8 @@ class token(object):
         if self.langlink:
             r.append(" langlink=")
             r.append(repr(self.langlink))
-            
+        if self.type==self.t_complex_style:
+            r.append(repr(self.caption))
         return u"".join(r)
 
     def show(self, out=None):

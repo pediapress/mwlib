@@ -41,11 +41,10 @@ def test_style():
     yield check_style, u"'''''''''''''''''''pp'''''", (3,2)
     yield check_style, u"'''test''bla", (2,)
 
-@xfail
 def test_style_fails():
     """http://code.pediapress.com/wiki/ticket/375"""
     
-    check_style(u"'''strong only ''also emphasized'' strong only'''", "'''", "''")
+    check_style(u"'''strong only ''also emphasized'' strong only'''", (3,3,2,3))
 
 def test_single_quote_after_style():
     """http://code.pediapress.com/wiki/ticket/20"""
@@ -161,6 +160,8 @@ blubb
 @xfail
 def test_cell_parse_bug():
     """http://code.pediapress.com/wiki/ticket/17"""
+    # mediawiki actually pulls out that ImageLink from the table...
+
     r=parse("""{|
 |-
 [[Image:bla.png|bla]]
@@ -194,13 +195,9 @@ def test_parse_comment():
     ex = """foo
 <!-- comment --->
 bar"""
-
-    def check(node):
-        paras = node.find(parser.Paragraph)
-        assert len(paras)==1, 'expected exactly one paragraph node'
-    
-    check(parse(ex))
-    check(parse(expander.expandstr(ex)))
+    expanded = expander.expandstr(ex)
+    print "EXPANDED:", expanded
+    assert "\n\n" not in expanded
 
 def test_nowiki_entities():
     """http://code.pediapress.com/wiki/ticket/40"""
@@ -221,14 +218,16 @@ def test_blockquote_with_two_paras():
     print 'BLOCKQUOTE:', node.children
     assert len(node.children)==1, "expected exactly one child node"
     
-@xfail
 def test_newlines_in_bold_tag():
     """http://code.pediapress.com/wiki/ticket/41"""
-    
     node = parse('<b>test\n\nfoo</b>')
-    print node
-    assert len(node.children)==1, "expected exactly one child node"
-
+    styles = node.find(parser.Style)
+    assert len(styles)==1, "expected exactly one style"
+    txt = styles[0].asText()
+    print "TXT:", txt
+    
+    assert "foo" in txt, "foo should be bold"
+    
 def test_percent_table_style(): 
     """http://code.pediapress.com/wiki/ticket/39. thanks xyb."""
     
@@ -433,7 +432,15 @@ def test_mailto_named():
 def test_namedurl_inside_link():
     r = parse("[http://foo.com baz]]]")
     assert r.find(parser.NamedURL), "expected a NamedURL"
-    
+
+def test_namedurl_with_style():
+    """http://code.pediapress.com/wiki/ticket/461"""
+    r=parse(u"[http://thetangent.org Internetpräsenz von ''The Tangent'']")
+    named = r.find(parser.NamedURL)
+    assert len(named)==1, "expected a NamedURL instance"
+    styles = named[0].find(parser.Style)
+    assert len(styles)==1, "expected a style"
+
 def test_mailto():
     r=parse("mailto:ralf@brainbot.com")
     assert r.find(parser.URL), "expected a URL node"
@@ -517,8 +524,12 @@ def test_table_markup_in_link_table_pipe_plus():
     
 def test_table_markup_in_link_table_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/11"""
-    r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
-    assert r.target=='bla', "wrong target"
+    
+    r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)
+    assert not r, "table should not contain a link"
+    
+#     r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
+#     assert r.target=='bla', "wrong target"
 
 def test_source_tag():
     source = "\nwhile(1){ {{#expr:1+1}}\n  i++;\n}\n\nreturn 0;\n"
@@ -603,8 +614,10 @@ def test_source_vlist():
 def test_not_pull_in_alpha_image():
     link=parse("[[Image:link.jpg|ab]]cd").find(parser.Link)[0]
     assert "cd" not in link.asText(), "'cd' not in linkstext"
-    
+
+@xfail
 def test_pull_in_alpha():
+    """http://code.pediapress.com/wiki/ticket/130"""
     link=parse("[[link|ab]]cd").find(parser.Link)[0]
     assert "cd" in link.asText(), "'cd' not in linkstext"
     
@@ -790,4 +803,169 @@ def test_p_tag():
     r=parse(s).find(parser.Paragraph)
     print "PARAGRAPHS:", r
     assert len(r)==2, "expected 2 paragraphs"
+    
+
+def test_table_style_parsing_1():
+    """http://code.pediapress.com/wiki/ticket/172"""
+    s = '{| class="prettytable"\n|-\n|blub\n|align="center"|+bla\n|}\n'
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    print "VLIST:", cells[1].vlist
+    assert cells[1].vlist == dict(align="center"), "bad vlist"
+
+@xfail
+def test_table_style_parsing_jtalbot():
+    """mentioned in http://code.pediapress.com/wiki/ticket/172,
+    but real issue is:
+    http://code.pediapress.com/wiki/ticket/366
+    """
+    s = '{| \n|-\n| cell 1 <ref>this|| not cell2</ref>\n|}\n'
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    assert len(cells)==1, "expected exactly one cell"
+
+
+def test_force_close_1():
+    s="""{|
+|-
+| <ul><li>bla</li>
+| bla 2
+|-
+| bla 3
+| bla 4
+|}
+"""
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    print "CELLS:", cells
+    assert len(cells)==4, "expected 4 cells"
+    
+@xfail
+def test_force_close_code():
+    s="before <code>inside<code> after"
+    r=parse(s)
+
+    tagnodes = r.find(parser.TagNode)
+    assert len(tagnodes)==1, "expected exactly one tagnode"
+    txt = tagnodes.asText()
+    print "TXT:", txt
+    assert "after" not in txt
+
+def test_force_close_section_in_li():
+    """example from http://code.pediapress.com/wiki/ticket/63"""
+    s="""<ul><li>item
+== section 1 ==
+baz
+"""
+    r=parse(s)
+    items = r.find(parser.Item)
+    assert len(items)==1, "epxected one item"
+    sections = items[0].find(parser.Section)
+    assert len(sections)==1, "expected exactly one section inside li"
+    
+    
+    
+    
+    
+def test_namedurl_inside_list():
+    r=parse(u"* [http://pediapress.com pediapress]")
+    urls = r.find(parser.NamedURL)
+    assert len(urls)==1, "expected exactly one NamedURL"
+
+def test_link_in_sectiontitle():
+    r=parse("== [[mainz]] ==")
+    links = r.find(parser.Link)
+    assert len(links)==1, "expected exactly one link"
+
+def test_table_whitespace_before_cell():
+    r=parse("""
+{|
+|-
+ | bgcolor="#aacccc" | cell1
+| cell2
+|}
+""")
+    cells = r.find(parser.Cell)
+    print "CELLS:", cells
+    assert len(cells)==2, "expected exactly 3 cells"
+    print "VLIST:", cells[0].vlist
+    assert cells[0].vlist==dict(bgcolor="#aacccc")
+    
+    
+def test_table_whitespace_before_row():
+    r=parse("""
+{|
+  |- bgcolor="#aacccc" 
+| | cell1
+| cell2
+|}
+""")
+    rows = r.find(parser.Row)
+    print "ROWS:", rows
+    assert len(rows)==1, "expected exactly one row"
+    print "VLIST:", rows[0].vlist
+    assert rows[0].vlist==dict(bgcolor="#aacccc")
+            
+
+def test_table_whitespace_before_begintable():
+    def check(s):
+        r=parse(s)
+        tables = r.find(parser.Table)
+        assert len(tables)==1, "expected exactly one table"
+        assert tables[0].vlist==dict(bgcolor="#aacccc")
+
+        
+    yield check, """
+ {| bgcolor="#aacccc" 
+|- 
+| cell1
+| cell2
+|}
+"""
+
+    
+    yield check, """
+:::{| bgcolor="#aacccc" 
+|- 
+| cell1
+| cell2
+|}
+"""
+
+
+def test_i_tag():
+    r=parse("<i>i</i>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="''"
+    
+def test_em_tag():
+    r=parse("<em>i</em>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="''"
+    
+def test_big_tag():
+    r=parse("<i>i</i>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="big"
+
+
+def test_cite_tag():
+    r=parse("<cite>i</cite>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="cite"
+    
+def test_strong_tag():
+    r=parse("<strong>i</strong>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="'''"
+
+def test_hr_tag():
+    r=parse("<hr>")
+    s=r.find(parser.TagNode)[0]
+    assert s.caption=="hr"
+    
+def test_hr_line():
+    r=parse("------------")
+    s=r.find(parser.TagNode)[0]
+    assert s.caption=="hr"
     

@@ -1,4 +1,7 @@
 
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 from mwlib.refine import core
 from mwlib.parser import nodes as N
 from mwlib.utoken import token as T
@@ -19,6 +22,7 @@ tok2class = {
     T.t_complex_node: N.Node,
     T.t_complex_line: N.Node,
     T.t_http_url: N.URL,
+    T.t_complex_preformatted: N.PreFormatted,
     }
 
 
@@ -87,7 +91,9 @@ def _change_classes(node):
                 node.caption = "'''"
             elif node.tagname=='pre':
                 node.__class__=N.PreFormatted
-                
+            elif node.tagname=='blockquote':
+                node.__class__=N.Style
+                node.caption = "-"                
         if node.__class__==N.Link:
             ns = node.ns
             
@@ -131,7 +137,5 @@ def _change_classes(node):
 def parse_txt(raw, **kwargs):
     sub = core.parse_txt(raw, **kwargs)
     article = T(type=T.t_complex_article, start=0, len=0, children=sub)
-    core.show(article)
     _change_classes(article)
-    article.show()
     return article
