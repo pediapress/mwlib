@@ -126,3 +126,6 @@ def test_unary_minus_sin():
     print val
     assert math.fabs(46.507864831337-val)<0.0001
     
+def test_empty_expr():
+    yield expandstr, "{{#expr:   }}", ""    
+    yield expandstr, "{{#ifexpr:    |yes|no}}", "no"
