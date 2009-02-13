@@ -214,21 +214,22 @@ class Expander(object):
         #show(self.parsed)
         self.parsedTemplateCache = {}
 
+    def _repl_from_uniq(self, mo):
+        u = mo.group(0)
+        return self.uniq2repl.get(u, u)
 
     def replace_uniq(self, txt):
-        def repl(mo):
-            u = mo.group(0)
-            return self.uniq2repl.get(u, u)
         
         rx=re.compile(r"UNIQ-\d+-[a-f0-9]+-QINU")
-        txt = rx.sub(repl, txt)
+        txt = rx.sub(self._repl_from_uniq, txt)
         return txt
     
         
         
+    def _repl_to_uniq(self, mo):
+        return self.get_uniq(mo.group(0))
+    
     def replace_tags(self, txt):
-        def repl(mo):
-            return self.get_uniq(mo.group(0))
         
         rx=re.compile("""(?:<nowiki>.*?</nowiki>)          # nowiki
 |(?:<math>.*?</math>)
@@ -237,7 +238,7 @@ class Expander(object):
 |(?:<ref[^<>]*/>)
 |(?:<source[^<>]*>.*?</source>)
 |(?:<pre.*?>.*?</pre>)""", re.VERBOSE | re.DOTALL | re.IGNORECASE)
-        newtxt = rx.sub(repl, txt)
+        newtxt = rx.sub(self._repl_to_uniq, txt)
         return newtxt
 
     def get_uniq(self, repl):
