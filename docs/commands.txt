@@ -342,12 +342,20 @@ Specific Options
 
   Maximum number of processes/threads. This is a hard limit. Default: 50.
 
-``--clean-cache=HOURS``
+The ``mw-serve-ctl`` command
+============================
 
-  Clean all cached files in --cache-dir that haven't been touched for the
+
+``--purge-cache=HOURS``
+
+  Remove all cached files in --cache-dir that haven't been touched for the
   last HOURS hours. This is meant to be run as a cron job.
 
-  
+``--clean-up``
+
+  Report errors for processes that have died irregularly.
+
+
 The ``mw-watch`` Command
 ========================
 
