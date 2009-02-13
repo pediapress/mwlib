@@ -48,9 +48,9 @@ class parse_table_cells(object):
         i = 0
         start = None
 
-        def makecell():
+        def makecell(skip_end=0):
             search_modifier = tokens[start].text.strip() in ("|", "!", "||")
-            sub = tokens[start+1:i]
+            sub = tokens[start+1:i-skip_end]
             self.replace_tablecaption(sub)
             tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
             if search_modifier:
@@ -69,7 +69,7 @@ class parse_table_cells(object):
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
                     i+=1
-                    makecell()                    
+                    makecell(skip_end=1)                    
                     i = start+1
                     start = None
                 else:

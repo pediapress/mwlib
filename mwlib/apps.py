@@ -553,14 +553,19 @@ def serve():
         metavar='HOURS',
     )
     options, args = parser.parse_args()
+
+    if args:
+        parser.error('no arguments supported')
     
     if options.clean_cache:
+        print '''WARNING: This option of mw-serve is deprecated and will be removed:
+Please use mw-serve-ctl --purge-cache instead!'''
         try:
             options.clean_cache = int(options.clean_cache)
         except ValueError:
             parser.error('--clean-cache value must be an integer')
-        from mwlib.serve import clean_cache
-        clean_cache(options.clean_cache*60*60, cache_dir=options.cache_dir)
+        from mwlib.serve import purge_cache
+        purge_cache(options.clean_cache*60*60, cache_dir=options.cache_dir)
         return
     
     if options.protocol not in proto2server:
@@ -648,6 +653,42 @@ def serve():
         utils.safe_unlink(options.pid_file)
     
     log.info('exit.')
+
+
+def serve_ctl():
+    parser = optparse.OptionParser(usage="%prog [OPTIONS]")
+    parser.add_option('--cache-dir',
+        help='cache directory (default: /var/cache/mw-serve/)',
+        default='/var/cache/mw-serve/',
+    )
+    parser.add_option('--clean-up',
+        help='report errors for died processes',
+        action='store_true',
+    )
+    parser.add_option('--purge-cache',
+        help='remove cache files that have not been touched for at least HOURS hours',
+        metavar='HOURS',
+    )
+    options, args = parser.parse_args()
+
+    if args:
+        parser.error('no arguments supported')
+    
+    if options.purge_cache:
+        try:
+            options.purge_cache = int(options.purge_cache)
+        except ValueError:
+            parser.error('--purge-cache value must be an integer')
+
+        from mwlib.serve import purge_cache
+
+        purge_cache(options.purge_cache*60*60, cache_dir=options.cache_dir)
+
+    if options.clean_up:
+        from mwlib.serve import clean_up
+
+        clean_up(cache_dir=options.cache_dir)
+
 
 def watch():
     parser = optparse.OptionParser(usage="%prog [OPTIONS]")

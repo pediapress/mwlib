@@ -183,14 +183,16 @@ class ZipCreator(object):
             self.status(status=u'fetching templates', article='')
         templates = set()
         for info in self.article_jobs:
-            try:
-                raw = self.articles[info['title']]['content']
-            except KeyError:
-                continue
-            
-            for name in expander.get_templates(raw, info['title']):
-                
-                templates.add((name, info['wikidb']))
+            if hasattr(info['wikidb'], 'getTemplatesForArticle'):
+                self.templates.update(info['wikidb'].getTemplatesForArticle(info['title'], revision=info.get('revision')))
+            else:
+                try:
+                    raw = self.articles[info['title']]['content']
+                except KeyError:
+                    continue
+
+                for name in expander.get_templates(raw, info['title']):
+                    templates.add((name, info['wikidb']))
                             
         self.num_templates = len(templates)
         self.template_count = 0 

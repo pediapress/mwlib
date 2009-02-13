@@ -40,6 +40,7 @@ class TestWikiDB(object):
     
     def test_getURL(self):
         assert self.w.getURL(u'Mathematics') == '%sindex.php?title=Mathematics' % self.base_url
+        assert self.w.getURL(u'Mathematics', '123') == '%sindex.php?oldid=123' % self.base_url
     
     def test_getTemplate(self):
         raw = self.w.getTemplate('Infobox')
@@ -254,6 +255,13 @@ class TestWikiDB(object):
         loc = src['locals']
         assert loc
         assert isinstance(loc, unicode)
+
+    def test_getTemplatesForArticle(self):
+        result = self.w.getTemplatesForArticle(u'Germany')
+        assert result[u'Dmoz']
+        for raw in result.values():
+            assert not self.w.redirect_rex.search(raw['content'])
+
     
 
 class TestImageDB(object):

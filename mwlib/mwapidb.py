@@ -669,10 +669,9 @@ class WikiDB(wikidbbase.WikiDBBase):
                 name,
             )
         else:
-            return '%sindex%s?title=%s&oldid=%s' % (
+            return '%sindex%s?oldid=%s' % (
                 self.api_helper.base_url,
                 self.api_helper.script_extension,
-                name,
                 revision,
             )
     
@@ -780,6 +779,45 @@ class WikiDB(wikidbbase.WikiDBBase):
         authors.append((("%s:%d"  % (ANON,num_anon),num_anon)))  #  append at the end
 #        print authors
         return [a for a,c in authors]
+
+    def getTemplatesForArticle(self, title, revision=None):
+        """Return a dictionary with all templates used in article with given
+        title and revision.
+        """
+        
+        kwargs = {
+            'generator': 'templates',
+            'gtllimit': 500,
+            'gtlnamespace': 10,
+            'prop': 'revisions',
+            'rvprop': 'content',
+        }
+        if revision is None:
+            kwargs['titles'] = title
+        else:
+            kwargs['revids'] = revision
+        result = self.api_helper.query(**kwargs)
+        if not result or 'pages' not in result:
+            return None
+        title2raw = {}
+        for oldid, info in result['pages'].items():
+            ns, name, full = namespace.splitname(info['title'], namespace.NS_TEMPLATE)
+            if ns != namespace.NS_TEMPLATE:
+                continue
+            try:
+                raw = info['revisions'][0]['*']
+                if self.redirect_rex.search(raw):
+                    raw = self.getTemplate(name)
+                if raw:
+                    d = {
+                        'content': raw,
+                        'content-type': 'text/x-wiki',
+                    }
+                    title2raw[name] = d
+                    self.template_cache[name] = d
+            except (KeyError, IndexError):
+                continue
+        return title2raw
 
     def getTemplate(self, name, followRedirects=True):
         """

@@ -535,8 +535,16 @@ class Application(wsgi.Application):
 
 # ==============================================================================
 
-def clean_cache(max_age, cache_dir):
-    """Clean all subdirectories of cache_dir whose mtime is before now-max_age
+def get_collection_dirs(cache_dir):
+    """Generator yielding full paths of collection directories"""
+
+    for dirpath, dirnames, filenames in os.walk(cache_dir):
+        for d in dirnames:
+            if collection_id_rex.match(d):
+                yield os.path.join(dirpath, d)
+
+def purge_cache(max_age, cache_dir):
+    """Remove all subdirectories of cache_dir whose mtime is before now-max_age
     
     @param max_age: max age of directories in seconds
     @type max_age: int
@@ -546,16 +554,47 @@ def clean_cache(max_age, cache_dir):
     """
     
     now = time.time()
-    for dirpath, dirnames, filenames in os.walk(cache_dir):
-        for d in dirnames:
-            if not collection_id_rex.match(d):
-                continue
-            path = os.path.join(dirpath, d)
-            if now - os.stat(path).st_mtime < max_age:
-                continue
-            try:
-                log.info('removing directory %r' % path)
-                shutil.rmtree(path)
-            except Exception, exc:
-                log.ERROR('could not remove directory %r: %s' % (path, exc))
+    for path in get_collection_dirs(cache_dir):
+        if now - os.stat(path).st_mtime < max_age:
+            continue
+        try:
+            log.info('removing directory %r' % path)
+            shutil.rmtree(path)
+        except Exception, exc:
+            log.ERROR('could not remove directory %r: %s' % (path, exc))
     
+def clean_up(cache_dir):
+    """Look for PID files whose processes have not finished/erred but ceised
+    to exist => remove cache directorie.
+    """
+
+    for path in get_collection_dirs(cache_dir):
+        for e in os.listdir(path):
+            if '.' not in e:
+                continue
+            parts = e.split('.')
+            if parts[0] != Application.pid_filename:
+                continue
+            ext = parts[1]
+            if not ext:
+                continue
+            pid_file = os.path.join(path, e)
+            try:
+                pid = int(open(pid_file, 'rb').read())
+            except ValueError:
+                log.ERROR('PID file %r with invalid contents' % pid_file)
+                continue
+            except IOError, exc:
+                log.ERROR('Could not read PID file %r: %s' % (pid_file, exc))
+                continue
+            
+            try:
+                os.kill(pid, 0)
+            except OSError, exc:
+                if exc.errno == 3: # No such process
+                    log.warn('Have dangling PID file %r' % pid_file)
+                    os.unlink(pid_file)
+                    error_file = os.path.join(path, '%s.%s' % (Application.error_filename, ext))
+                    if not os.path.exists(error_file):
+                        open(error_file, 'wb').write('Process died.\n')
+

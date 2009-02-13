@@ -56,6 +56,7 @@ def _change_classes(node):
             
         if node.tagname=='br':
             node.__class__=N.TagNode
+            node.caption="br"
 
         if node.type==T.t_complex_style:
             node.__class__=N.Style
@@ -97,7 +98,35 @@ def _change_classes(node):
                 node.__class__=N.PreFormatted
             elif node.tagname=='blockquote':
                 node.__class__=N.Style
-                node.caption = "-"                
+                node.caption = "-"
+            elif node.tagname=="strong":
+                node.__class__=N.Style
+                node.caption = "'''"
+            elif node.tagname=="cite":
+                node.__class__=N.Style
+                node.caption="cite"
+            elif node.tagname=="big":
+                node.__class__=N.Style
+                node.caption="big"
+            elif node.tagname=="small":
+                node.__class__=N.Style
+                node.caption="small"
+            elif node.tagname=="i":
+                node.__class__=N.Style
+                node.caption="''"
+            elif node.tagname=="em":
+                node.__class__=N.Style
+                node.caption="''"
+            elif node.tagname=="sup":
+                node.__class__=N.Style
+                node.caption="sup"
+            elif node.tagname=="sub":
+                node.__class__=N.Style
+                node.caption="sub"
+            elif node.tagname=="u":
+                node.__class__=N.Style
+                node.caption=="u"
+                
         if node.__class__==N.Link:
             ns = node.ns
             

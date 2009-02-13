@@ -106,6 +106,7 @@ def main():
                                             'mw-show = mwlib.apps:show',
                                             'mw-html = mwlib.apps:html',
                                             'mw-serve = mwlib.apps:serve',
+                                            'mw-serve-ctl = mwlib.apps:serve_ctl',
                                             'mw-watch = mwlib.apps:watch',
                                             'mw-testserve = mwlib.apps:testserve',
                                             ],

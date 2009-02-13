@@ -932,7 +932,16 @@ def test_table_whitespace_before_begintable():
 |}
 """
 
-
+def test_closing_td_in_cell():
+    r = parse("""
+{|
+<td>foo</td>
+|}""")
+    cell = r.find(parser.Cell)[0]
+    assert "td" not in cell.asText()
+    
+             
+    
 def test_i_tag():
     r=parse("<i>i</i>")
     s=r.find(parser.Style)[0]
@@ -944,15 +953,34 @@ def test_em_tag():
     assert s.caption=="''"
     
 def test_big_tag():
-    r=parse("<i>i</i>")
+    r=parse("<big>i</big>")
     s=r.find(parser.Style)[0]
     assert s.caption=="big"
 
+def test_small_tag():
+    r=parse("<small>i</small>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="small"
 
+def test_sup_tag():
+    r=parse("<sup>i</sup>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="sup"
+    
+def test_sub_tag():
+    r=parse("<sub>i</sub>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="sub"
+    
 def test_cite_tag():
     r=parse("<cite>i</cite>")
     s=r.find(parser.Style)[0]
     assert s.caption=="cite"
+    
+def test_u_tag():
+    r=parse("<u>i</u>")
+    s=r.find(parser.Style)[0]
+    assert s.caption=="u"
     
 def test_strong_tag():
     r=parse("<strong>i</strong>")
