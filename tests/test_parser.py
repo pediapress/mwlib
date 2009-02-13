@@ -953,7 +953,7 @@ def test_em_tag():
     assert s.caption=="''"
     
 def test_big_tag():
-    r=parse("<i>i</i>")
+    r=parse("<big>i</big>")
     s=r.find(parser.Style)[0]
     assert s.caption=="big"
 
