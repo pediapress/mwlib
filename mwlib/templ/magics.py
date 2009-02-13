@@ -9,6 +9,7 @@ http://meta.wikimedia.org/wiki/Help:Magic_words
 http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
+import sys
 import re
 import datetime
 import urllib
@@ -403,7 +404,8 @@ class ParserFunctions(object):
                 if int(val)==val and math.fabs(val)<1e14:
                     return str(int(val))
                 r=str(float(val))
-            except Exception, err:
+            except Exception, err:                
+                print >>sys.stderr, "ERROR: error while evaluating #expr:%r\n" % (rl[0],)
                 return self._error(err)
 
             if "e" in r:

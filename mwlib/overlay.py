@@ -3,6 +3,7 @@
 # See README.txt for additional licensing information.
 
 import os
+from mwlib import namespace
 
                  
 class OverlayDB(object):
@@ -30,33 +31,30 @@ class FlatDB(OverlayDB):
     def __init__(self, db, fn):
         self.fn = fn
         self.db = db
-        self.articles = {}
-        self.templates = {}
-        
+
+        self.docs = {}
         
         for block in unicode(open(fn, "rb").read(), 'utf-8').split(" "):
             if not block:
                 continue
             title, txt = block.split("\n", 1)
-            if title.startswith("Template:"):
-                title = title[len("Template:"):]
-                self.templates[title] = txt
-            elif title.startswith("Article:"):
-                title = title[len("Article:"):]
-                self.articles[title] = txt
-            else:
-                assert 0, "bad title"
 
+            ns, partial, full = namespace.splitname(title)
+            self.docs[(ns, partial)] = txt
+
+    
     def getTemplate(self, title, followRedirects=True):
+        ns, partial, full = namespace.splitname(title, defaultns=namespace.NS_TEMPLATE)
         try:
-            return self.templates[title]
+            return self.docs[(ns, partial)]
         except KeyError:
             pass
         return self.db.getTemplate(title, followRedirects=followRedirects)
     
     def getRawArticle(self, title, revision=None):
+        ns, partial, full = namespace.splitname(title)
         try:
-            return self.articles[title]
+            return self.docs[(ns, partial)]
         except KeyError:
             pass
         return self.db.getRawArticle(title, revision=revision)

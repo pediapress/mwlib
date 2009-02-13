@@ -714,8 +714,11 @@ class combined_parser(object):
         while parsers:
             p = parsers.pop()
             #print "doing", p, "on:", refine
-
-            next = []
+            
+            if not parsers:
+                next = refined
+            else:
+                next = []
 
             for x in refine:
                 if isinstance(x, (list, blist, tuple)):
