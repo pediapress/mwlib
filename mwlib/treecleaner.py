@@ -192,6 +192,7 @@ class TreeCleaner(object):
                           'buildDefinitionLists',
                           'restrictChildren',
                           'fixReferenceNodes',
+                          'fixInfoBoxes',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
                           'fixChapterNesting',
                           'fixPreFormatted',
@@ -1013,3 +1014,20 @@ class TreeCleaner(object):
         for ref_node in ref_nodes:
             if not ref_node.children and ref_node.parent:
                 ref_node.parent.removeChild(ref_node)
+
+
+
+    def fixInfoBoxes(self, node):
+        """Optimize rendering of infoboxes"""
+        if node.__class__ == Table and node.attributes.get('class').lower().find('infobox') > -1:
+
+            # remove duplicate image caption
+            images = node.getChildNodesByClass(ImageLink)
+            for image in images:
+                for sibling in image.siblings:
+                    if image.children == sibling.children and sibling.parent:
+                        sibling.parent.removeChild(sibling)
+
+
+        for c in node.children:
+            self.fixInfoBoxes(c)
