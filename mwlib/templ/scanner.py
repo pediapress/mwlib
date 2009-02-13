@@ -31,9 +31,12 @@ class symbols:
     noi = 4
     txt = 5
 
-def tokenize(txt, included=True):
+def tokenize(txt, included=True, replace_tags=None):
+    assert replace_tags is not None
+    
     txt = pp.preprocess(txt, included=included)
-                         
+    if replace_tags is not None:        
+        txt = replace_tags(txt)
             
     tokens = []
     for (v1, v2, v3, v4, v5) in splitrx.findall(txt):

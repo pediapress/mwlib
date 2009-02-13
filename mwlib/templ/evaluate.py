@@ -2,6 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import re
 from mwlib.templ import magics, log, DEBUG, parser, mwlocals
 
 
@@ -187,10 +188,12 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     del res[-2:]
     
 class Expander(object):
+    random_string = None 
     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
         self.pagename = pagename
         self.db = wikidb
+        self.uniq2repl = {}
         
         if self.db and hasattr(self.db, "getSource"):
             source = self.db.getSource(pagename) or {}
@@ -200,7 +203,6 @@ class Expander(object):
             local_values = None
             
             
-            
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
         self.resolver.local_values = local_values
@@ -208,10 +210,51 @@ class Expander(object):
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
 
-        self.parsed = parser.parse(txt, included=False)
+        self.parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags)
         #show(self.parsed)
         self.parsedTemplateCache = {}
+
+
+    def replace_uniq(self, txt):
+        def repl(mo):
+            u = mo.group(0)
+            return self.uniq2repl.get(u, u)
         
+        rx=re.compile(r"UNIQ-\d+-[a-f0-9]+-QINU")
+        txt = rx.sub(repl, txt)
+        return txt
+    
+        
+        
+    def replace_tags(self, txt):
+        def repl(mo):
+            return self.get_uniq(mo.group(0))
+        
+        rx=re.compile("""(?:<nowiki>.*?</nowiki>)          # nowiki
+|(?:<math>.*?</math>)
+|(?:<imagemap[^<>]*>.*?</imagemap>)
+|(?:<gallery[^<>]*>.*?</gallery>)
+|(?:<ref[^<>]*/>)
+|(?:<source[^<>]*>.*?</source>)
+|(?:<pre.*?>.*?</pre>)""", re.VERBOSE | re.DOTALL | re.IGNORECASE)
+        newtxt = rx.sub(repl, txt)
+        return newtxt
+
+    def get_uniq(self, repl):
+        r = self.get_random_string()
+        count = len(self.uniq2repl)
+        retval = "UNIQ-%s-%s-QINU" % (count, r)
+        self.uniq2repl[retval] = repl
+        return retval
+    
+        
+    def get_random_string(self):
+        if self.random_string is None:
+            import binascii
+            r=open("/dev/urandom").read(8)
+            self.__class__.random_string = binascii.hexlify(r)
+        return self.random_string
+
     def getParsedTemplate(self, name):
         if name.startswith("[[") or "|" in name:
             return None
@@ -235,7 +278,7 @@ class Expander(object):
             res = None
         else:
             log.info("parsing template", repr(name))
-            res = parser.parse(raw)
+            res = parser.parse(raw, replace_tags=self.replace_tags)
             if DEBUG:
                 print "TEMPLATE:", name, repr(raw)
                 #res.show()
@@ -249,4 +292,6 @@ class Expander(object):
         flatten(self.parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
         res[0] = u''
-        return u"".join(res)
+        res = u"".join(res)
+        res=self.replace_uniq(res)
+        return res

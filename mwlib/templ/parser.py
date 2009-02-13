@@ -54,13 +54,14 @@ from mwlib import lrucache
 class Parser(object):
     _cache = lrucache.mt_lrucache(2000)
     
-    def __init__(self, txt, included=True):
+    def __init__(self, txt, included=True, replace_tags=None):
         if isinstance(txt, str):
             txt = unicode(txt)
             
         self.txt = txt
         self.included = included
-
+        self.replace_tags = replace_tags
+        
     def getToken(self):
         return self.tokens[self.pos]
 
@@ -239,7 +240,7 @@ class Parser(object):
             pass
         
         
-        self.tokens = tokenize(self.txt, included=self.included)
+        self.tokens = tokenize(self.txt, included=self.included, replace_tags=self.replace_tags)
         self.pos = 0
         n = []
         
@@ -262,5 +263,5 @@ class Parser(object):
         
         return n
 
-def parse(txt, included=True):
-    return Parser(txt, included=included).parse()
+def parse(txt, included=True, replace_tags=None):
+    return Parser(txt, included=included, replace_tags=replace_tags).parse()
