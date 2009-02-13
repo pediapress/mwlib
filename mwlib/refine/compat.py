@@ -56,6 +56,7 @@ def _change_classes(node):
             
         if node.tagname=='br':
             node.__class__=N.TagNode
+            node.caption="br"
 
         if node.type==T.t_complex_style:
             node.__class__=N.Style
@@ -107,6 +108,9 @@ def _change_classes(node):
             elif node.tagname=="big":
                 node.__class__=N.Style
                 node.caption="big"
+            elif node.tagname=="small":
+                node.__class__=N.Style
+                node.caption="small"
             elif node.tagname=="i":
                 node.__class__=N.Style
                 node.caption="''"
