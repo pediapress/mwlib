@@ -784,10 +784,11 @@ class WikiDB(wikidbbase.WikiDBBase):
         """Return a dictionary with all templates used in article with given
         title and revision.
         """
-
+        
         kwargs = {
             'generator': 'templates',
             'gtllimit': 500,
+            'gtlnamespace': 10,
             'prop': 'revisions',
             'rvprop': 'content',
         }
@@ -800,12 +801,20 @@ class WikiDB(wikidbbase.WikiDBBase):
             return None
         title2raw = {}
         for oldid, info in result['pages'].items():
+            ns, name, full = namespace.splitname(info['title'], namespace.NS_TEMPLATE)
+            if ns != namespace.NS_TEMPLATE:
+                continue
             try:
                 raw = info['revisions'][0]['*']
                 if self.redirect_rex.search(raw):
-                    raw = self.getRawArticle(info['title'])
+                    raw = self.getTemplate(name)
                 if raw:
-                    title2raw[info['title']] = raw
+                    d = {
+                        'content': raw,
+                        'content-type': 'text/x-wiki',
+                    }
+                    title2raw[name] = d
+                    self.template_cache[name] = d
             except (KeyError, IndexError):
                 continue
         return title2raw

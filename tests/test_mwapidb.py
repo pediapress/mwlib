@@ -258,9 +258,9 @@ class TestWikiDB(object):
 
     def test_getTemplatesForArticle(self):
         result = self.w.getTemplatesForArticle(u'Germany')
-        assert result[u'Template:Dmoz']
+        assert result[u'Dmoz']
         for raw in result.values():
-            assert not self.w.redirect_rex.search(raw)
+            assert not self.w.redirect_rex.search(raw['content'])
 
     
 
