@@ -232,12 +232,12 @@ class Parser(object):
         return n
         
     def parse(self):
-        fp = digest(self.txt.encode('utf-8')).digest()
+#         fp = digest(self.txt.encode('utf-8')).digest()
         
-        try:
-            return self._cache[fp]
-        except KeyError:
-            pass
+#         try:
+#             return self._cache[fp]
+#         except KeyError:
+#             pass
         
         
         self.tokens = tokenize(self.txt, included=self.included, replace_tags=self.replace_tags)
@@ -259,7 +259,7 @@ class Parser(object):
         n=optimize(n)
         
         
-        self._cache[fp] = n
+#         self._cache[fp] = n
         
         return n
 
