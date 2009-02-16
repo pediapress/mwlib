@@ -76,7 +76,7 @@ def add_namespace_map(key, lang, project_name, extras={}):
     for k, v in zip(ns_data, _lang_ns_data_keys):
         insert(k,v)
 
-    insert(project_name, NS_PROJECT_TALK)
+    insert(project_name, NS_PROJECT)
     
     if '%s' in ns_data[-1]:
         insert(ns_data[-1] % project_name, NS_PROJECT_TALK)
