@@ -649,8 +649,12 @@ class parse_links(object):
                     colon = True
                 else:
                     colon = False
-                    
-                if not target:
+
+
+
+                ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
+ 
+                if not partial:
                     i+=1
                     if stack:
                         marks=stack.pop()
@@ -658,8 +662,6 @@ class parse_links(object):
                         marks=[]                        
                     continue
                 else:
-                    ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
-
                     langlink = None
                     interwiki = None
                     
