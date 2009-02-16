@@ -158,7 +158,7 @@ class TreeCleaner(object):
                 cleaner(child)
             if self.status_cb:
                 self.status_cb(progress=100*i/len(children))
-
+        
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
 
@@ -533,7 +533,7 @@ class TreeCleaner(object):
                 clean_parents.append(p)
             else:
                 break
-        clean_parents.reverse()
+        #clean_parents.reverse()
         parents = clean_parents
 
         if self.nesting_strictness == 'loose':
@@ -545,32 +545,33 @@ class TreeCleaner(object):
                 if node.__class__ != Section and node.__class__ in blocknodes and parent.__class__ in blocknodes:
                     return parent
         return None
+           
 
-    def _buildSubTree(self, root, path, problem_node, side):
-        if side == 'top':
-            remove_children = False
-            for c in root.children[:]:
-                if remove_children or c == problem_node:
-                    root.removeChild(c)
-                if c in path:
-                    remove_children= True
-        elif side == 'bottom':
-            remove_children = True
-            for c in root.children[:]:
-                if c in path:
-                    remove_children= False
-                if remove_children or c == problem_node:
-                    root.removeChild(c)
-        for c in root.children:
-            self._buildSubTree(c, path, problem_node, side)
-
-    def _buildMiddleTree(self, treestart, path2top, problem_node):        
-        for c in treestart:
-            if not c in path2top and c != problem_node and not problem_node in c.getParents():
-                treestart.removeChild(c)
-        for c in treestart:
-            self._buildMiddleTree(c, path2top, problem_node)
+    def _markNodes(self, node, divide, problem_node=None):
+        got_divide = False
+        for c in node.children:
+            if getattr(node, 'nesting_pos', None):
+                c.nesting_pos = node.nesting_pos
+                continue
+            if c in divide:
+                got_divide = True
+                if c == problem_node:
+                    c.nesting_pos = 'problem'
+                continue
+            if not got_divide:
+                c.nesting_pos = 'top'
+            else:
+                c.nesting_pos = 'bottom'
+        for c in node.children:
+            self._markNodes(c, divide, problem_node=problem_node)
             
+    def _filterTree(self, node, nesting_filter=[]):
+        if getattr(node, 'nesting_pos', None) in nesting_filter:
+            node.parent.removeChild(node)
+            return
+        for c in node.children:
+            self._filterTree(c, nesting_filter=nesting_filter)
+
     def _fixNesting(self, node):
         """Nesting of nodes is corrected.
 
@@ -592,57 +593,31 @@ class TreeCleaner(object):
          nbn_4
         """
 
-        # EXPLANATION OF ALGORITHM:
-        # 1. detect node (problem_child) with a parent that is forbidden (bad_parent)
-        # split the tree starting from the forbidden parent into three parts.
-        # middle path is the one leading from the first child of the bad_parent to the problem_child
-        # left tree is copied from original, all nodes further right than the
-        # path to the root node from the problem_child are remove
-        # same for right tree
-
         bad_parent = self._nestingBroken(node)
-        if bad_parent:
-            path2root = node.getParents()
-            problem_node = node
-            root = bad_parent.parent
-            path2root = path2root[path2root.index(root):]
-
-            if bad_parent == node.parent: # direct nesting of problematic node and forbidden parent
-                mtree = node                
-                i = node.parent.children.index(node)
-                if i > 0:
-                    ttree = node.parent.copy()
-                    ttree.children = ttree.children[:i]
-                else:
-                    ttree = None
-                if i < len(node.parent.children):                    
-                    btree = node.parent.copy()
-                    btree.children = btree.children[i+1:]
-                else:
-                    btree = None
-            else:
-                ttree = bad_parent.copy()
-                self._buildSubTree(ttree, path2root, problem_node, 'top')
-                mtree = path2root[2].copy()
-                self._buildMiddleTree(mtree, path2root, problem_node)
-                btree = bad_parent.copy()
-                self._buildSubTree(btree, path2root, problem_node, 'bottom')
-
-            new_children = []
-            if ttree:
-                new_children.append(ttree)
-            new_children.append(mtree)
-            if btree:
-                new_children.append(btree)                
-            self.report('replacing child', bad_parent, 'by', new_children)
-            root.replaceChild(bad_parent, new_children)
-            return True
-        else:
+        if not bad_parent:
             for c in node.children:
                 if self._fixNesting(c):
                     return True
+            return False
 
-        return False
+        divide = node.getParents()
+        divide.append(node)
+        self._markNodes(bad_parent, divide, problem_node=node)
+
+        top_tree = bad_parent.copy()
+        self._filterTree(top_tree, nesting_filter=['bottom', 'problem'])
+        middle_tree = bad_parent.copy()
+        self._filterTree(middle_tree, nesting_filter=['top', 'bottom'])
+        middle_tree = middle_tree.children[0]
+        bottom_tree = bad_parent.copy()
+        self._filterTree(bottom_tree, nesting_filter=['top', 'problem'])
+        
+        new_tree = [part for part in [top_tree, middle_tree, bottom_tree] if part != None]
+
+        if bad_parent.parent:
+            self.report('moved', node, 'from', bad_parent)
+            bad_parent.parent.replaceChild(bad_parent, new_tree)
+        return True
 
     def fixNesting(self, node):
         while self._fixNesting(node):
@@ -1002,20 +977,17 @@ class TreeCleaner(object):
             if ref_name and ref_node.children and not name2children.has_key(ref_name):
                 name2children[ref_name] = ref_node.children
 
+        moved_ref = {}
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
-            if not ref_node.children and name2children.has_key(ref_name):
+            if not ref_node.children and name2children.has_key(ref_name) and not moved_ref.get(ref_name):
                 children = name2children[ref_name][:]
                 for child in children:
                     ref_node.appendChild(child)
-            if ref_node.attributes.get('name'):
-                del ref_node.attributes['name']
-            
-        for ref_node in ref_nodes:
-            if not ref_node.children and ref_node.parent:
-                ref_node.parent.removeChild(ref_node)
-
-
+                moved_ref[ref_name] = True
+            if ref_node.children and moved_ref.get(ref_name):
+                for child in ref_node.children:
+                    ref_node.removeChild(child)
 
     def fixInfoBoxes(self, node):
         """Optimize rendering of infoboxes"""
