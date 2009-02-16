@@ -144,6 +144,15 @@ def parse_timeline(tokens, refined, **kwargs):
             
     refined.append(tokens)
     
+def parse_imagemap(tokens, refined, **kwargs):
+    from mwlib import imgmap
+    get_recursive_tag_parser("imagemap")(tokens, [], **kwargs)
+    for t in tokens:
+        if t.tagname=='imagemap':
+            t.imagemap =imgmap.ImageMapFromString(T.join_as_text(t.children))
+            del t.children[:]
+    refined.append(tokens)
+    
 def parse_math(tokens, refined, **kwargs):
     
     get_recursive_tag_parser("math")(tokens, [], **kwargs)
@@ -744,7 +753,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     parsers = [parse_singlequote, parse_urls,
                parse_style_tags,               
                parse_preformatted, parse_lines,
-               parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
+               parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
 
