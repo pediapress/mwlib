@@ -997,3 +997,13 @@ def test_hr_line():
     s=r.find(parser.TagNode)[0]
     assert s.caption=="hr"
     
+def test_broken_link():
+    r=parse("[[Image:|bla]]")
+    links = r.find(parser.Link)
+    assert not links, "expected no links"
+
+    
+def test_broken_link_whitespace():
+    r=parse("[[Image:   |bla]]")
+    links = r.find(parser.Link)
+    assert not links, "expected no links"
