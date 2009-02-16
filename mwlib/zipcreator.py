@@ -153,11 +153,8 @@ class ZipCreator(object):
                     if imagelink is not None:
                         self.image_infos.add((imagelink.target, imagedb, wikidb))
             # stats
-            k = node.__class__.__name__
-            if k in ('Text',):
-                stats[k] = stats.get(k, 0) + len(node.caption)
-            else:
-                stats[k] = stats.get(k, 0) + 1
+            k, w  = utils.get_nodeweight(node)
+            stats[k] = stats.get(k, 0) + w
 
 
     

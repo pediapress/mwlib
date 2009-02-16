@@ -515,3 +515,18 @@ def get_safe_url(url):
     except Exception, exc:
         log.warn('urlunparse() failed: %s' % exc)
     
+# ##########################################################################
+
+def get_nodeweight(obj):
+    """
+    utility function that returns a
+    node class and it's weight 
+    can be used for statistics
+    to get some stats when NO Advanced Nodes are available
+    """
+    k = obj.__class__.__name__
+    if k in ('Text',):
+        return k, len(obj.caption) 
+    elif k == 'ImageLink' and obj.isInline():
+        return 'InlineImageLink', 1
+    return k, 1
