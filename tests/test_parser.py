@@ -1007,3 +1007,11 @@ def test_broken_link_whitespace():
     r=parse("[[Image:   |bla]]")
     links = r.find(parser.Link)
     assert not links, "expected no links"
+
+def test_comment_inside_nowiki():
+    comment = 'this is a comment'
+    s=expander.expandstr('<pre><!-- this is a comment --></pre>')
+    assert comment in s
+    r=parse(s)
+    txt = r.asText()
+    assert 'this is a comment' in txt
