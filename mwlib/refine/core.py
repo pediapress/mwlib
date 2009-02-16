@@ -163,7 +163,6 @@ def parse_gallery(tokens, refined, **kwargs):
     def handle():
         sub = tokens[start+1:i]
         txt = T.join_as_text(sub)
-        print "GALLERY:", repr(txt)
         
         lines = [x.strip() for x in txt.split("\n")]
         sub = []
@@ -172,8 +171,6 @@ def parse_gallery(tokens, refined, **kwargs):
                 continue
 
             linode = parse_txt(u'[['+x+']]', **kwargs)
-            print "LINE:", repr(x)
-            print ":", linode
 
             if linode:
                 n = linode[0]
@@ -183,23 +180,7 @@ def parse_gallery(tokens, refined, **kwargs):
             sub.append(T(type=T.t_text, text=x))
             
         tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist)]
-        
-            
-            
-#             # either image link or text inside
-#             n=_parseAtomFromString(u'[['+x+']]',
-#                 lang=self.lang,
-#                 interwikimap=self.interwikimap,
-#             )
 
-#             if isinstance(n, ImageLink):
-#                 children.append(n)
-#             else:
-#                 children.append(Text(x))
-
-
-                
-        
     while i<len(tokens):
         t = tokens[i]
         if t.type==T.t_html_tag and t.tagname=='gallery':
