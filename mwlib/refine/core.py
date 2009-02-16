@@ -240,8 +240,9 @@ class parse_sections(object):
             l1 = tokens[current.start].text.count("=")
             l2 = tokens[current.endtitle].text.count("=")
             level = min (l1, l2)
-            
-            caption = T(type=T.t_complex_caption, start=0, len=0, children=tokens[current.start+1:current.endtitle])
+
+            # FIXME: make this a caption
+            caption = T(type=T.t_complex_node, start=0, len=0, children=tokens[current.start+1:current.endtitle]) 
             if l2>l1:
                 caption.children.append(T(type=T.t_text, text=u"="*(l2-l1)))
             elif l1>l2:
