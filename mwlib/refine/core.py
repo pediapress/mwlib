@@ -118,6 +118,8 @@ parse_ul = get_recursive_tag_parser("ul")
 parse_span = get_recursive_tag_parser("span")
 parse_p = get_recursive_tag_parser("p")
 parse_ref = get_recursive_tag_parser("ref")
+parse_references = get_recursive_tag_parser("references")
+
 parse_math = get_recursive_tag_parser("math")
 parse_small = get_recursive_tag_parser("small")
 parse_b = get_recursive_tag_parser("b")
@@ -754,7 +756,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_style_tags,               
                parse_preformatted, parse_lines,
                parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
-               parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
+               parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
 
     refined = []

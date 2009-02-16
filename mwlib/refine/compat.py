@@ -77,7 +77,8 @@ def _change_classes(node):
             if node.tagname=='p':
                 node.__class__=N.Paragraph
             elif node.tagname=='ref':
-                node.__class__=N.Ref
+                pass
+                #node.__class__=N.Ref
             elif node.tagname=='ul':
                 node.__class__=N.ItemList
             elif node.tagname=='ol':
