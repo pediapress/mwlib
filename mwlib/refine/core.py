@@ -118,6 +118,8 @@ parse_ul = get_recursive_tag_parser("ul")
 parse_span = get_recursive_tag_parser("span")
 parse_p = get_recursive_tag_parser("p")
 parse_ref = get_recursive_tag_parser("ref")
+parse_references = get_recursive_tag_parser("references")
+
 parse_math = get_recursive_tag_parser("math")
 parse_small = get_recursive_tag_parser("small")
 parse_b = get_recursive_tag_parser("b")
@@ -144,6 +146,15 @@ def parse_timeline(tokens, refined, **kwargs):
             
     refined.append(tokens)
     
+def parse_imagemap(tokens, refined, **kwargs):
+    from mwlib import imgmap
+    get_recursive_tag_parser("imagemap")(tokens, [], **kwargs)
+    for t in tokens:
+        if t.tagname=='imagemap':
+            t.imagemap =imgmap.ImageMapFromString(T.join_as_text(t.children))
+            del t.children[:]
+    refined.append(tokens)
+    
 def parse_math(tokens, refined, **kwargs):
     
     get_recursive_tag_parser("math")(tokens, [], **kwargs)
@@ -163,7 +174,6 @@ def parse_gallery(tokens, refined, **kwargs):
     def handle():
         sub = tokens[start+1:i]
         txt = T.join_as_text(sub)
-        print "GALLERY:", repr(txt)
         
         lines = [x.strip() for x in txt.split("\n")]
         sub = []
@@ -172,8 +182,6 @@ def parse_gallery(tokens, refined, **kwargs):
                 continue
 
             linode = parse_txt(u'[['+x+']]', **kwargs)
-            print "LINE:", repr(x)
-            print ":", linode
 
             if linode:
                 n = linode[0]
@@ -183,23 +191,7 @@ def parse_gallery(tokens, refined, **kwargs):
             sub.append(T(type=T.t_text, text=x))
             
         tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist)]
-        
-            
-            
-#             # either image link or text inside
-#             n=_parseAtomFromString(u'[['+x+']]',
-#                 lang=self.lang,
-#                 interwikimap=self.interwikimap,
-#             )
 
-#             if isinstance(n, ImageLink):
-#                 children.append(n)
-#             else:
-#                 children.append(Text(x))
-
-
-                
-        
     while i<len(tokens):
         t = tokens[i]
         if t.type==T.t_html_tag and t.tagname=='gallery':
@@ -240,8 +232,9 @@ class parse_sections(object):
             l1 = tokens[current.start].text.count("=")
             l2 = tokens[current.endtitle].text.count("=")
             level = min (l1, l2)
-            
-            caption = T(type=T.t_complex_caption, start=0, len=0, children=tokens[current.start+1:current.endtitle])
+
+            # FIXME: make this a caption
+            caption = T(type=T.t_complex_node, start=0, len=0, children=tokens[current.start+1:current.endtitle]) 
             if l2>l1:
                 caption.children.append(T(type=T.t_text, text=u"="*(l2-l1)))
             elif l1>l2:
@@ -648,8 +641,12 @@ class parse_links(object):
                     colon = True
                 else:
                     colon = False
-                    
-                if not target:
+
+
+
+                ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
+ 
+                if not partial:
                     i+=1
                     if stack:
                         marks=stack.pop()
@@ -657,8 +654,6 @@ class parse_links(object):
                         marks=[]                        
                     continue
                 else:
-                    ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
-
                     langlink = None
                     interwiki = None
                     
@@ -760,8 +755,8 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     parsers = [parse_singlequote, parse_urls,
                parse_style_tags,               
                parse_preformatted, parse_lines,
-               parse_math, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
-               parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
+               parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
+               parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
 
     refined = []

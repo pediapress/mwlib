@@ -77,7 +77,8 @@ def _change_classes(node):
             if node.tagname=='p':
                 node.__class__=N.Paragraph
             elif node.tagname=='ref':
-                node.__class__=N.Ref
+                pass
+                #node.__class__=N.Ref
             elif node.tagname=='ul':
                 node.__class__=N.ItemList
             elif node.tagname=='ol':
@@ -88,6 +89,8 @@ def _change_classes(node):
             elif node.tagname=="timeline":
                 node.__class__=N.Timeline
                 node.caption = node.timeline
+            elif node.tagname=="imagemap":
+                node.caption = node.imagemap
             elif node.tagname=="math":
                 node.__class__=N.Math
                 node.caption = node.math
