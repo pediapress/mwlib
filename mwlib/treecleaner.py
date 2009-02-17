@@ -335,8 +335,9 @@ class TreeCleaner(object):
 
 
     def transformSingleColTables(self, node):
-
-        if node.__class__ == Table and node.numcols == 1:
+        # "not 'box' in node.attr(class)" is a hack to detect infoboxes and thelike. they are not split into divs.
+        # tables like this should be detected and marked in a separate module probably
+        if node.__class__ == Table and node.numcols == 1 and not 'box' in node.attributes.get('class', ''):
             if not node.parents:
                 return
             divs = []
@@ -986,7 +987,7 @@ class TreeCleaner(object):
         ref_defined = {}
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
-            if not ref_name:
+            if not ref_name or not name2children.has_key(ref_name):
                 continue
             if ref_node.children:
                 if ref_defined.get(ref_name): # del children
@@ -1005,7 +1006,6 @@ class TreeCleaner(object):
     def fixInfoBoxes(self, node):
         """Optimize rendering of infoboxes"""
         if node.__class__ == Table and node.attributes.get('class', '').lower().find('infobox') > -1:
-
             # remove duplicate image caption
             images = node.getChildNodesByClass(ImageLink)
             for image in images:
