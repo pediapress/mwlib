@@ -564,6 +564,14 @@ class TreeCleaner(object):
                 c.nesting_pos = 'bottom'
         for c in node.children:
             self._markNodes(c, divide, problem_node=problem_node)
+
+    def _cleanUpMarks(self, node):
+        if hasattr(node, 'nesting_pos'):
+            del node.nesting_pos
+        for c in node.children:
+            self._cleanUpMarks(c)
+    
+
             
     def _filterTree(self, node, nesting_filter=[]):
         if getattr(node, 'nesting_pos', None) in nesting_filter:
@@ -614,9 +622,10 @@ class TreeCleaner(object):
         
         new_tree = [part for part in [top_tree, middle_tree, bottom_tree] if part != None]
 
-        if bad_parent.parent:
-            self.report('moved', node, 'from', bad_parent)
-            bad_parent.parent.replaceChild(bad_parent, new_tree)
+        self.report('moved', node, 'from', bad_parent)
+        parent = bad_parent.parent
+        parent.replaceChild(bad_parent, new_tree)
+        self._cleanUpMarks(parent)
         return True
 
     def fixNesting(self, node):
@@ -967,27 +976,31 @@ class TreeCleaner(object):
             
 
     def fixReferenceNodes(self, node):
-        
-        ref_nodes = node.getChildNodesByClass(Reference)
-        
+        ref_nodes = node.getChildNodesByClass(Reference)       
         name2children = {}
-
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
             if ref_name and ref_node.children and not name2children.has_key(ref_name):
                 name2children[ref_name] = ref_node.children
 
-        moved_ref = {}
+        ref_defined = {}
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
-            if not ref_node.children and name2children.has_key(ref_name) and not moved_ref.get(ref_name):
-                children = name2children[ref_name][:]
-                for child in children:
-                    ref_node.appendChild(child)
-                moved_ref[ref_name] = True
-            if ref_node.children and moved_ref.get(ref_name):
-                for child in ref_node.children:
-                    ref_node.removeChild(child)
+            if not ref_name:
+                continue
+            if ref_node.children:
+                if ref_defined.get(ref_name): # del children
+                    ref_node.children = []
+                else:
+                    ref_defined[ref_name] = True
+            else:                
+                if not ref_defined.get(ref_name): # move ref here
+                    children = name2children[ref_name]
+                    for child in children:
+                        ref_node.appendChild(child)
+                    ref_defined[ref_name] = True
+           
+
 
     def fixInfoBoxes(self, node):
         """Optimize rendering of infoboxes"""
