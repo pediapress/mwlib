@@ -227,8 +227,6 @@ class ZipCreator(object):
             sources=self.sources,
             images=self.images,
         )))
-        # add stats for later analysis
-        self.addObject('node_stats.json', json.dumps(self.node_stats)) 
     
     def fetchArticle(self, title, revision, wikidb):
         def fetch_article_job(job_id):
@@ -357,6 +355,11 @@ def make_zip_file(output, env,
         
         z.join()
         z.addObject('metabook.json', json.dumps(env.metabook))
+
+        # add stats for later analysis
+        z.node_stats["Chapter"] = len(metabook.get_item_list(env.metabook, filter_type='chapter'))
+        z.addObject('node_stats.json', json.dumps(z.node_stats)) 
+
         zf.close()
         if os.path.exists(output): # Windows...
             os.unlink(output)
