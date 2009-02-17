@@ -134,15 +134,15 @@ def _get_tags():
     return allowed
 
 class Parser(object):
-    def __init__(self, tokens, name='', lang=None, interwikimap=None):
+    def __init__(self, tokens, name='', lang=None, interwikimap=None, magicwords=None):
         self.tokens = tokens
         self.lang = lang
         self.interwikimap = interwikimap
+        self.magicwords = magicwords or []
         self.pos = 0
         self.name = name
         self.lastpos = 0
         self.count = 0
-        
         if lang:
             nsMap = '%s+en_mw' % lang
             if nsMap not in namespace.namespace_maps:
