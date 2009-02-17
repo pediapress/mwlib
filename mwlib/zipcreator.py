@@ -304,6 +304,23 @@ class ZipCreator(object):
                 self.fetchimages_status(progress=self.image_count*100/self.num_images)
         
         self.jobsched.add_job(name, fetch_image_job)
+
+    def check(self, articles):
+        for item in articles:
+            try:
+                article = self.articles[item['title']]
+            except KeyError:
+                raise RuntimeError('Could not fetch article %r' % item['title'])
+            if not article.get('url'):
+                raise RuntimeError('Have no URL for article %r' % item['title'])
+            if not article.get('source-url'):
+                raise RuntimeError('Have not source URL for article %r' % item['title'])
+            if not article.get('content'):
+                raise RuntimeError('Have empty content for article %r' % item['title'])
+            if not article['source-url'] in self.sources:
+                raise RuntimeError('Unknown source URL %r for article %r' % (
+                    article['source-url'], item['title']),
+                )
     
 
 # ==============================================================================
@@ -356,6 +373,9 @@ def make_zip_file(output, env,
             )
         
         z.join()
+        
+        z.check(articles)
+
         z.addObject('metabook.json', json.dumps(env.metabook))
         zf.close()
         if os.path.exists(output): # Windows...

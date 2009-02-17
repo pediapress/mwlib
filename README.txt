@@ -95,6 +95,7 @@ ChangeLog
 - added mw-serve-ctl command line tool (#447)
 - mwapidb: omit title in URLs with oldid
 - mwapidb: added getTemplatesForArticle() 
+- zipcreator: check articles and sources to prevent broken ZIP files
 
 2009-2-9 release 0.9.7
 --------------------------------
