@@ -422,7 +422,13 @@ class parse_lines(object):
         self.refined = refined
         self.run()
 
-        
+    def splitdl(self, item):
+        for i, x in enumerate(item.children):
+            if x.type==T.t_special and x.text==':':
+                s=T(type=T.t_complex_style, caption=':', children=item.children[i+1:])
+                del item.children[i:]
+                return s
+                 
     def analyze(self, lines):
         def getchar(node):
             assert node.type==T.t_complex_line
@@ -459,7 +465,7 @@ class parse_lines(object):
                 assert 0
                 
             node.children = blist()
-            
+            dd = None
             while startpos<len(lines)-1 and getchar(lines[startpos])==prefix:
                 # collect items
                 item = newitem()
@@ -475,10 +481,17 @@ class parse_lines(object):
                     x.lineprefix=x.lineprefix[1:]
                 self.analyze(item.children)
                 node.children.append(item)
-
+                if prefix==';' and item.children and item.children[0].type==T.t_complex_node:
+                    dd = self.splitdl(item.children[0])
+                    if dd is not None:
+                        break
+                    
             lines.insert(startpos, node)
             startpos += 1
-
+            if dd is not None:
+                lines.insert(startpos, dd)
+                self.refined.append(dd.children)
+                startpos += 1
         del lines[-1] # remove guard
         
     def run(self):
@@ -761,5 +774,5 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refined = []
     combined_parser(parsers)(tokens, refined, interwikimap=interwikimap, **kwargs)
-        
     return tokens
+
