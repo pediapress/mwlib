@@ -576,7 +576,7 @@ class WikiDB(wikidbbase.WikiDBBase):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'bot\b', re.IGNORECASE)
     redirect_rex = re.compile(r'^#redirect:?\s*?\[\[.*?\]\]', re.IGNORECASE)
-    
+    magicwords = None
     def __init__(self,
         base_url=None,
         username=None,
@@ -936,6 +936,7 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.getLocals()
             if self.locals:
                 self.source['locals'] = self.locals
+            self.source['magicwords'] = self.getMagicwords()
             return self.source
         except KeyError:
             return None
@@ -973,6 +974,15 @@ class WikiDB(wikidbbase.WikiDBBase):
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
 
+    def getMagicwords(self, source_url=None):
+        if self.magicwords is None:
+            res = self.api_helper.do_request(action='query', meta='siteinfo', siprop='magicwords')
+            try:
+                self.magicwords = res['query']['magicwords']
+            except KeyError:
+                self.magicwords = []
+        return self.magicwords
+            
     def getLocals(self, source_url=None):
         if hasattr(self, 'locals'):
             return self.locals
