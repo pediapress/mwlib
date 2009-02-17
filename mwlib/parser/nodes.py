@@ -453,7 +453,7 @@ class ImageLink(Link):
     upright = None
     
     def isInline(self):
-        return not bool(self.align or self.thumb)
+        return not bool(self.align or self.thumb or self.frame)
 
     def _readArgs(self):
         idx = 0
