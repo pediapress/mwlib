@@ -97,6 +97,7 @@ ChangeLog
 - mwapidb: added getTemplatesForArticle() 
 - zipcreator: check articles and sources to prevent broken ZIP files
 - mwapidb: do query continuation to find out all authors (#420)
+- serve: use a deterministic checksum for metabooks (#451)
 
 2009-2-9 release 0.9.7
 --------------------------------
