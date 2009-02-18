@@ -55,7 +55,6 @@ def test_poem():
 </poem>
 '''
     r = parse(raw)
-    print r
 
 
 def test_section():
@@ -63,4 +62,3 @@ def test_section():
 a <section begin=chapter1/> 1bla bla <section end=chapter1/> bla
 '''
     r = parse(raw)
-    print r

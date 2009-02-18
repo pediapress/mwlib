@@ -140,14 +140,17 @@ class PoemExtension(TagExtension):
         if "compact" in attributes:
             print self.__class__, "no attributes supported yet"
         res = []
-        res.append("\n")
-        for line in source.split():
-            res.append(":")
+        res.append(u"\n")
+        for line in source.split("\n"):
+            if line.strip():
+                res.append(":")
             if line.startswith(" "):
-                res.append("&nbsp;")
+                res.append(u"&nbsp;")
             res.append(line.strip())
-        res.append("\n")
-        return "\n".join(res)        
+            res.append(u"\n")
+        res.append(u"\n")
+        res = u"".join(res)
+        return self.parse(res)        
 register(PoemExtension)
 
 class LabledSectionTransclusionExtensionHotFix(TagExtension):
