@@ -42,11 +42,16 @@ def build_book(env, status_callback=None):
             if a is not None:
                 if "displaytitle" in item:
                     a.caption = item['displaytitle']
-                url = env.wiki.getURL(item['title'], item.get('revision'))
+                url = env.wiki.getURL(item['title'], item.get('revision'))                
                 if url:
                     a.url = unicode(urllib.unquote(url.encode('utf-8')), 'utf-8')
                 else:
                     a.url = None
+                source = env.wiki.getSource(item['title'], item.get('revision'))
+                if source:
+                    a.wikiurl = source.get('url', '')
+                else:
+                    a.wikiurl = None
                 a.authors = env.wiki.getAuthors(item['title'], revision=item.get('revision'))
                 book.children.append(a)
             else:

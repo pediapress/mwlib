@@ -130,9 +130,35 @@ class HieroExtension(TagExtension):
         from mwlib import parser
         tn = parser.TagNode("hiero")
         tn.append(parser.Text(source))
-        return tn
-    
+        return tn   
 register(HieroExtension)
+
+class PoemExtension(TagExtension):
+    # http://www.mediawiki.org/wiki/Extension:Poem
+    name = "poem"
+    def __call__(self, source, attributes):
+        if "compact" in attributes:
+            print self.__class__, "no attributes supported yet"
+        res = []
+        res.append(u"\n")
+        for line in source.split("\n"):
+            if line.strip():
+                res.append(":")
+            if line.startswith(" "):
+                res.append(u"&nbsp;")
+            res.append(line.strip())
+            res.append(u"\n")
+        res.append(u"\n")
+        res = u"".join(res)
+        return self.parse(res)        
+register(PoemExtension)
+
+class LabledSectionTransclusionExtensionHotFix(TagExtension):
+    #http://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion
+    name = "section"
+    def __call__(self, source, attributes):
+        return # simply skip for now
+register(LabledSectionTransclusionExtensionHotFix)
 
 # --- wiki travel extensions ----
 

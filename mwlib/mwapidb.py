@@ -199,7 +199,10 @@ class APIHelper(object):
     
     def is_usable(self):
         result = self.query(meta='siteinfo', ignore_errors=True)
-        if result and 'general' in result:
+        if result is None:
+            return False
+        result = result['query']
+        if 'general' in result:
             return True
         return False
     
@@ -285,8 +288,10 @@ class APIHelper(object):
         data = self.do_request(ignore_errors=ignore_errors, num_tries=num_tries, action='query', **kwargs)
         if data is None:
             return None
+        if 'query' not in data:
+            return None
         try:
-            return data['query']
+            return data
         except KeyError:
             log.error('Response from api%s did not contain a query result' % self.script_extension)
             return None
@@ -295,7 +300,7 @@ class APIHelper(object):
         q = self.query(**kwargs)
         if q is not None:
             try:
-                return q['pages'].values()[0]
+                return q['query']['pages'].values()[0]
             except (KeyError, IndexError):
                 return None
         return None
@@ -675,7 +680,7 @@ class WikiDB(wikidbbase.WikiDBBase):
                 revision,
             )
     
-    def getAuthors(self, title, revision=None):
+    def getAuthors(self, title, revision=None, _rvlimit=500):
         """Return names of non-bot, non-anon users for
         non-minor changes of given article (before given revsion).
         
@@ -691,34 +696,51 @@ class WikiDB(wikidbbase.WikiDBBase):
         @returns: sorted list of principal authors
         @rtype: list([unicode])
         """
+
         REVERT_LOOKBACK = 5 # number of revisions to check for same size (assuming a revert)
         USE_DIFF_SIZE = False # whether to sort by diffsize or by alphabet
         
-        # fetch data
-        for rvlimit in (500, 50): # some MWs only return the 50 last edits 
-            kwargs = {
-                'titles': title,
-                'redirects': 1,
-                'prop': 'revisions',
-                'rvprop': 'ids|user|flags|comment|size',
-                'rvlimit': rvlimit,
-                'rvdir': 'older',
-            }
-            if revision is not None:
-                kwargs['rvstartid'] = revision
-            result = self.api_helper.page_query(**kwargs)
-            if result is not None:
-                break
-        else:
-            return None
-        
+        kwargs = {
+            'titles': title,
+            'redirects': 1,
+            'prop': 'revisions',
+            'rvprop': 'ids|user|flags|comment|size',
+            'rvlimit': _rvlimit,
+            'rvdir': 'older',
+        }
+        if revision is not None:
+            kwargs['rvstartid'] = revision
+        result = self.api_helper.query(**kwargs)
+        if result is None and _rvlimit == 500:
+            # some MWs only return the 50 last edits 
+            return self.getAuthors(title, revision=revision, _rvlimit=50)
+
         try:
-            revs = result['revisions']
-        except KeyError:
+            revs = result['query']['pages'].values()[0]['revisions']
+        except (KeyError, IndexError):
             return None
 
-        
-        revs.reverse() # start with oldest edit
+        while 'query-continue' in result:
+            try:
+                kwargs['rvstartid'] = result['query-continue']['revisions']['rvstartid']
+            except KeyError:
+                log.error('Got bogus query-continuation from API')
+                break
+            result = self.api_helper.query(**kwargs)
+            if result is None:
+                log.error('Query continuation failed.')
+                break
+            try:
+                revs.extend(result['query']['pages'].values()[0]['revisions'])
+            except (KeyError, IndexError):
+                log.error('Query continuation failed.')
+                break
+
+        # Start with oldest edit:
+        # (note that we can *not* just pass rvdir=newer to API, because if we
+        # have a given article revision, we have to get revisions older than
+        # that)
+        revs.reverse() 
         
         # remove revs w/o size (happens with move)
         revs = [r for r in revs if "size" in r]
@@ -797,7 +819,10 @@ class WikiDB(wikidbbase.WikiDBBase):
         else:
             kwargs['revids'] = revision
         result = self.api_helper.query(**kwargs)
-        if not result or 'pages' not in result:
+        if not result:
+            return None
+        result = result['query']
+        if 'pages' not in result:
             return None
         title2raw = {}
         for oldid, info in result['pages'].items():
@@ -923,6 +948,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         result = self.api_helper.query(meta='siteinfo')
         if result is None:
             return None
+        result = result['query']
         try:
             g = result['general']
             self.source = metabook.make_source(
@@ -959,6 +985,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         )
         if not result:
             return
+        result = result['query']
         result = result.get('interwikimap', [])
         if not result:
             return
