@@ -176,11 +176,11 @@ class ImageMod(object):
                 aliases_regexp = aliases_regexp.replace('\\$1', '(\d+)')
             elif name == 'img_width':
                 aliases_regexp = aliases_regexp.replace('\\$1', '([0-9x]+)')
-            elif name in ['img_alt', 'img_link']:
-                aliases_regexp = aliases_regexp.replace('\\$1', '(.*)')
+            #elif name in ['img_alt', 'img_link']:
+            #    aliases_regexp = aliases_regexp.replace('\\$1', '(.*)')
             self.alias_map[name] = aliases_regexp
 
-    def parse(self, img_obj, mod):
+    def parse(self, mod):
         mod = mod.lower().strip()
         for mod_type, mod_reg in self.alias_map.items():
             rx = re.compile(mod_reg, re.IGNORECASE)
@@ -188,7 +188,6 @@ class ImageMod(object):
             if mo:
                 for match in  mo.groups()[::-1]:
                     if match:
-                        setattr(img_obj, mod_reg, match)
                         return (mod_type, match)
         return (None, None)
             

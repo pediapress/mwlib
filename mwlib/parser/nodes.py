@@ -473,7 +473,8 @@ class ImageLink(Link):
                 idx += 1
                 continue
 
-            mod_type, match = imagemod.parse(self, x.caption)
+            mod_type, match = imagemod.parse(x.caption)
+
             if mod_type is None:
                 idx += 1
                 continue
