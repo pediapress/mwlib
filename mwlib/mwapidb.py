@@ -680,7 +680,7 @@ class WikiDB(wikidbbase.WikiDBBase):
                 revision,
             )
     
-    def getAuthors(self, title, revision=None):
+    def getAuthors(self, title, revision=None, _rvlimit=500):
         """Return names of non-bot, non-anon users for
         non-minor changes of given article (before given revsion).
         
@@ -696,32 +696,29 @@ class WikiDB(wikidbbase.WikiDBBase):
         @returns: sorted list of principal authors
         @rtype: list([unicode])
         """
+
         REVERT_LOOKBACK = 5 # number of revisions to check for same size (assuming a revert)
         USE_DIFF_SIZE = False # whether to sort by diffsize or by alphabet
         
-        # fetch data
-        for rvlimit in (500, 50): # some MWs only return the 50 last edits 
-            kwargs = {
-                'titles': title,
-                'redirects': 1,
-                'prop': 'revisions',
-                'rvprop': 'ids|user|flags|comment|size',
-                'rvlimit': rvlimit,
-                'rvdir': 'older',
-            }
-            if revision is not None:
-                kwargs['rvstartid'] = revision
-            result = self.api_helper.page_query(**kwargs)
-            if result is not None:
-                break
-        else:
-            return None
-        
-        try:
-            revs = result['revisions']
-        except KeyError:
-            return None
+        kwargs = {
+            'titles': title,
+            'redirects': 1,
+            'prop': 'revisions',
+            'rvprop': 'ids|user|flags|comment|size',
+            'rvlimit': _rvlimit,
+            'rvdir': 'older',
+        }
+        if revision is not None:
+            kwargs['rvstartid'] = revision
+        result = self.api_helper.query(**kwargs)
+        if result is None and _rvlimit == 500:
+            # some MWs only return the 50 last edits 
+            return self.getAuthors(title, revision=revision, _rvlimit=50)
 
+        try:
+            revs = result['query']['pages'].values()[0]['revisions']
+        except (KeyError, IndexError):
+            return None
         
         revs.reverse() # start with oldest edit
         
