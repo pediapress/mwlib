@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 
 import re
+import StringIO
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 
 # ==============================================================================
 
@@ -171,3 +176,16 @@ def get_item_list(metabook, filter_type=None):
         if 'items' in item:
             result.extend(get_item_list(item))
     return result
+
+def calc_checksum(metabook):
+    sio = StringIO.StringIO()
+    sio.write(repr(metabook.get('title')))
+    sio.write(repr(metabook.get('subtitle')))
+    sio.write(repr(metabook.get('editor')))
+    for item in get_item_list(metabook):
+        sio.write(repr(item.get('type')))
+        sio.write(repr(item.get('title')))
+        sio.write(repr(item.get('displaytitle')))
+        sio.write(repr(item.get('revision')))
+    return md5(sio.getvalue()).hexdigest()
+

@@ -109,6 +109,8 @@ def parseString(
         input = te.expandTemplates()
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
+            if not src:
+                src = {} # this can happen for the license article
         else:
             src={}
 

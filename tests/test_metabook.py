@@ -41,6 +41,7 @@ Summary line 2
 test_metabook = {
     'type': 'collection',
     'version': metabook.METABOOK_VERSION,
+    'title': u'bla',
     'items': [
         {
             'type': 'chapter',
@@ -179,4 +180,14 @@ def test_get_item_list():
     for e, r in zip(expected, result):
         assert e['type'] == r['type']
         assert e['title'] == r['title']
+
+def test_checksum():
+    cs1 = metabook.calc_checksum(test_metabook)
+    print cs1
+    assert cs1
+    assert isinstance(cs1, str)
+
+    tm2 = dict(test_metabook)
+    tm2['title'] = tm2['title'] + '123'
+    assert metabook.calc_checksum(tm2) != cs1
 

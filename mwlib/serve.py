@@ -21,6 +21,7 @@ except ImportError:
     import simplejson as json
 
 from mwlib import filequeue, log, utils, wsgi, _version
+from mwlib.metabook import calc_checksum
 
 # ==============================================================================
 
@@ -52,7 +53,6 @@ def make_collection_id(data):
     sio = StringIO.StringIO()
     for key in (
         _version.version,
-        'metabook',
         'base_url',
         'script_extension',
         'template_blacklist',
@@ -61,6 +61,9 @@ def make_collection_id(data):
         'login_credentials',
     ):
         sio.write(repr(data.get(key)))
+    mb = data.get('metabook')
+    if mb:
+        sio.write(calc_checksum(json.loads(mb)))
     return md5(sio.getvalue()).hexdigest()[:16]
 
 # ==============================================================================
