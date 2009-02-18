@@ -95,7 +95,7 @@ class TreeCleaner(object):
         # when checking nesting, some Nodes prevent outside nodes to be visible to inner nodes
         # ex: Paragraphs can not be inside Paragraphs. but if the inner paragraph is inside a
         # table which itself is inside a paragraph this is not a problem
-        self.outsideParentsInvisible = [Table]
+        self.outsideParentsInvisible = [Table, Section]
         self.nesting_strictness = nesting_strictness # loose | strict
 
         
@@ -169,7 +169,7 @@ class TreeCleaner(object):
                           'removeNoPrintNodes',
                           'removeInvisibleNodes', 
                           'removeListOnlyParagraphs',
-                          'fixParagraphs', # was in xmltreecleaner
+                          'fixParagraphs',
                           'simplifyBlockNodes',
                           'fixNesting', 
                           'removeCriticalTables',
@@ -628,7 +628,7 @@ class TreeCleaner(object):
         parent.replaceChild(bad_parent, new_tree)
         self._cleanUpMarks(parent)
         return True
-
+    
     def fixNesting(self, node):
         while self._fixNesting(node):
             pass
