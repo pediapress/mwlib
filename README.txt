@@ -96,6 +96,7 @@ ChangeLog
 - mwapidb: omit title in URLs with oldid
 - mwapidb: added getTemplatesForArticle() 
 - zipcreator: check articles and sources to prevent broken ZIP files
+- mwapidb: do query continuation to find out all authors (#420)
 
 2009-2-9 release 0.9.7
 --------------------------------
