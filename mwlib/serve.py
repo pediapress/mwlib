@@ -267,6 +267,12 @@ class Application(wsgi.Application):
                 response['is_cached'] = True
                 return response
         
+        error_path = self.get_path(collection_id, self.error_filename, writer)
+        if os.path.exists(error_path):
+            log.info('removing error file %r' % error_path)
+            utils.safe_unlink(error_path)
+            force_render = True
+        
         status_path = self.get_path(collection_id, self.status_filename, writer)
         if os.path.exists(status_path):
             if force_render:
@@ -275,11 +281,6 @@ class Application(wsgi.Application):
             else:
                 log.info('status file exists %r' % status_path)
                 return response
-        
-        error_path = self.get_path(collection_id, self.error_filename, writer)
-        if os.path.exists(error_path):
-            log.info('removing error file %r' % error_path)
-            utils.safe_unlink(error_path)
         
         if self.mwrender_logfile:
             logfile = self.mwrender_logfile
