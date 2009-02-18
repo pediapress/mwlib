@@ -283,7 +283,7 @@ class Link(Node):
             namespace.namespace_maps[nsMap], interwikimap,
             )
     
-    def _specialize(self, specializeMap):
+    def _specialize(self, specializeMap, imagemod):
         """
         Handles different forms of link, e.g.:
             - [[Foo]]
@@ -339,7 +339,7 @@ class Link(Node):
             try:
                 prefix, suffix = title.rsplit('.', 1)
                 if suffix.lower() in ['jpg', 'jpeg', 'gif', 'png', 'svg']:
-                    self._readArgs() # calls Image._readArgs()
+                    self._readArgs(imagemod) # calls Image._readArgs()
                     return
             except ValueError:
                 pass
@@ -455,9 +455,10 @@ class ImageLink(Link):
     def isInline(self):
         return not bool(self.align or self.thumb or self.frame)
 
-    def _readArgs(self):
+    def _readArgs(self, imagemod):
         idx = 0
         last = []
+
         while idx<len(self.children):
             x = self.children[idx]
             if x == Control("|"):
@@ -472,55 +473,48 @@ class ImageLink(Link):
                 idx += 1
                 continue
 
-            x = x.caption.lower().strip()
+            mod_type, match = imagemod.parse(self, x.caption)
+            if mod_type is None:
+                idx += 1
+                continue
+
+# FIXME: disabled for now, since I don't know what these modifiers do, and what kind of parameters they expect
+##             if mod_type == 'img_link':
+##                 print "got link:", match
+##                 self.link = match
             
-            if x == 'thumb' or x=='thumbnail' or x == 'miniatur':
+##             if mod_type == 'img_alt':
+##                 self.alt = match
+
+            del self.children[idx]
+
+            if mod_type == 'img_thumbnail':
                 self.thumb = True
-                del self.children[idx]
-                continue
 
-            if x in ['left', 'right', 'center', 'none']:
-                self.align = x
-                del self.children[idx]
-                continue
+            if mod_type == 'img_left':
+                self.align = 'left'
+            if mod_type == 'img_right':
+                self.align = 'right'
+            if mod_type == 'img_center':
+                self.align = 'center'
+            if mod_type == 'img_none':
+                self.align = 'none'
 
-            if x == 'frame' or x=='framed' or x=='enframed' or x=='frameless':
-                self.frame = x
-                del self.children[idx]
-                continue
+            if mod_type in ['img_framed', 'img_frameless']:
+                self.frame = match
 
-            if x == 'border':
+            if mod_type == 'img_border':
                 self.border = True
-                del self.children[idx]
-                continue
 
-            if x.startswith('upright'):
-                res = re.search('(^upright=([0-9.]+)$)|(^upright$)', x)
-                if res:
-                    try:
-                        scale = float(res.group(2))
-                    except:
-                        scale = 0.75
-                    self.upright = scale
-                    del self.children[idx]
-                    continue
-
-
-            if x.startswith('print='):
-                self.printargs = x[len('print='):]
-
-            if x.startswith('alt='):
-                self.alt = x[len('alt='):]
-
-            if x.startswith('link='):
-                self.link = x[len('link='):]
-
-            if x.endswith('px'):
-                # x200px
-                # 100x200px
-                # 200px
-                x = x[:-2]
-                width, height = (x.split('x')+['0'])[:2]
+                
+            if mod_type == 'img_upright':
+                try:
+                    scale = float(match)
+                except ValueError:
+                    scale = 0.75
+            if mod_type == 'img_width':                
+                # x200px or 100x200px or 200px
+                width, height = (match.split('x')+['0'])[:2]
                 try:
                     width = int(width)
                 except ValueError:
@@ -533,13 +527,21 @@ class ImageLink(Link):
 
                 self.width = width
                 self.height = height
-                del self.children[idx]
-                continue
-            
-            idx += 1
-        
+                
+                
         if not self.children:
             self.children = last
+        
+
+##             if x.startswith('print='):
+##                 self.printargs = x[len('print='):]
+
+##             if x.startswith('alt='):
+##                 self.alt = x[len('alt='):]
+
+##             if x.startswith('link='):
+##                 self.link = x[len('link='):]
+
 
 defaultSpecializeMap = Link._setSpecializeMap('default') 
 # initialise the Link class (not sure -- anyone will use that?)
