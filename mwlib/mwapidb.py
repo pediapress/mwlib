@@ -711,9 +711,11 @@ class WikiDB(wikidbbase.WikiDBBase):
         if revision is not None:
             kwargs['rvstartid'] = revision
         result = self.api_helper.query(**kwargs)
-        if result is None and _rvlimit == 500:
-            # some MWs only return the 50 last edits 
-            return self.getAuthors(title, revision=revision, _rvlimit=50)
+        if result is None:
+            if _rvlimit == 500:
+                # some MWs only return the 50 last edits 
+                return self.getAuthors(title, revision=revision, _rvlimit=50)
+            return None
 
         try:
             revs = result['query']['pages'].values()[0]['revisions']
