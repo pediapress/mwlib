@@ -719,8 +719,28 @@ class WikiDB(wikidbbase.WikiDBBase):
             revs = result['query']['pages'].values()[0]['revisions']
         except (KeyError, IndexError):
             return None
-        
-        revs.reverse() # start with oldest edit
+
+        while 'query-continue' in result:
+            try:
+                kwargs['rvstartid'] = result['query-continue']['revisions']['rvstartid']
+            except KeyError:
+                log.error('Got bogus query-continuation from API')
+                break
+            result = self.api_helper.query(**kwargs)
+            if result is None:
+                log.error('Query continuation failed.')
+                break
+            try:
+                revs.extend(result['query']['pages'].values()[0]['revisions'])
+            except (KeyError, IndexError):
+                log.error('Query continuation failed.')
+                break
+
+        # Start with oldest edit:
+        # (note that we can *not* just pass rvdir=newer to API, because if we
+        # have a given article revision, we have to get revisions older than
+        # that)
+        revs.reverse() 
         
         # remove revs w/o size (happens with move)
         revs = [r for r in revs if "size" in r]
