@@ -199,7 +199,10 @@ class APIHelper(object):
     
     def is_usable(self):
         result = self.query(meta='siteinfo', ignore_errors=True)
-        if result and 'general' in result:
+        if result is None:
+            return False
+        result = result['query']
+        if 'general' in result:
             return True
         return False
     
@@ -285,8 +288,10 @@ class APIHelper(object):
         data = self.do_request(ignore_errors=ignore_errors, num_tries=num_tries, action='query', **kwargs)
         if data is None:
             return None
+        if 'query' not in data:
+            return None
         try:
-            return data['query']
+            return data
         except KeyError:
             log.error('Response from api%s did not contain a query result' % self.script_extension)
             return None
@@ -295,7 +300,7 @@ class APIHelper(object):
         q = self.query(**kwargs)
         if q is not None:
             try:
-                return q['pages'].values()[0]
+                return q['query']['pages'].values()[0]
             except (KeyError, IndexError):
                 return None
         return None
@@ -797,7 +802,10 @@ class WikiDB(wikidbbase.WikiDBBase):
         else:
             kwargs['revids'] = revision
         result = self.api_helper.query(**kwargs)
-        if not result or 'pages' not in result:
+        if not result:
+            return None
+        result = result['query']
+        if 'pages' not in result:
             return None
         title2raw = {}
         for oldid, info in result['pages'].items():
@@ -923,6 +931,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         result = self.api_helper.query(meta='siteinfo')
         if result is None:
             return None
+        result = result['query']
         try:
             g = result['general']
             self.source = metabook.make_source(
@@ -958,6 +967,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         )
         if not result:
             return
+        result = result['query']
         result = result.get('interwikimap', [])
         if not result:
             return
