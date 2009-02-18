@@ -85,8 +85,9 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
-2009-?-? release 0.9.?
+2009-2-18 release 0.9.8
 --------------------------------
+- localize image modifiers
 - fix bug in serve with forced rendering
 - fix bug in writerbase when no URL is returned
 - return only unqiue image contributors, sorted
