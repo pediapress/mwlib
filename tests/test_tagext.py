@@ -44,3 +44,23 @@ def test_rdf():
     r = parse(raw)
     assert not r.children
 
+
+def test_poem():
+    raw =''' 
+<poem>
+1bla bla
+2bla bla
+ 3bla bla
+4bla bla
+</poem>
+'''
+    r = parse(raw)
+    print r
+
+
+def test_section():
+    raw =''' 
+a <section begin=chapter1/> 1bla bla <section end=chapter1/> bla
+'''
+    r = parse(raw)
+    print r
