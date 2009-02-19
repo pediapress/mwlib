@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-2-19 release 0.9.9
+--------------------------------
+- do not call check() in zipcreator: better some missing articles than an error message
+
 2009-2-18 release 0.9.8
 --------------------------------
 - localize image modifiers
