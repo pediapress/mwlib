@@ -5,5 +5,5 @@ class _Version(tuple):
     def __str__(self):
         return '.'.join([str(x) for x in self])
 
-version = _Version((0,9,9))
+version = _Version((0,9,10,'dev'))
 del _Version
