@@ -168,13 +168,12 @@ def get_item_list(metabook, filter_type=None):
     @returns: flat list of items
     @rtype: [{}]
     """
-    
     result = []
     for item in metabook.get('items', []):
         if not filter_type or item['type'] == filter_type:
             result.append(item)
         if 'items' in item:
-            result.extend(get_item_list(item))
+            result.extend(get_item_list(item, filter_type=filter_type))
     return result
 
 def calc_checksum(metabook):

@@ -361,7 +361,7 @@ def make_zip_file(output, env,
                 wikidb=wikidb,
                 imagedb=imagedb,
             )
-        
+
         for license in env.get_licenses():
             z.parseArticle(
                 title=license['title'],
