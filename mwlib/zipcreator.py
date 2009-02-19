@@ -372,7 +372,9 @@ def make_zip_file(output, env,
         
         z.join()
         
-        z.check(articles)
+        # using check() is a bit rigorous: sometimes articles just cannot be
+        # fetched -- PDFs should be generated nevertheless
+        #z.check(articles)
 
         z.addObject('metabook.json', json.dumps(env.metabook))
 
