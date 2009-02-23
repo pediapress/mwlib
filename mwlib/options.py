@@ -37,8 +37,12 @@ class OptionParser(optparse.OptionParser):
             metavar='CATEGORY',
         )
         self.add_option("--print-template-prefix",
-            help="Prefix for print templates",
+            help="Prefix for print templates (deprecated: use --print-template-pattern)",
             metavar='PREFIX',
+        )
+        self.add_option("--print-template-pattern",
+            help="Prefix for print templates, '$1' is replaced by original template name",
+            metavar='SUBPAGE',
         )
         self.add_option("--template-blacklist",
             help="Title of article containing blacklisted templates",
@@ -108,7 +112,7 @@ class OptionParser(optparse.OptionParser):
         
         if self.options.no_threads:
             self.options.num_threads = 0
-        
+
         if self.args:
             if self.metabook is None:
                 self.metabook = metabook.make_metabook()
@@ -148,18 +152,23 @@ class OptionParser(optparse.OptionParser):
             template_exclusion_category = unicode(self.options.template_exclusion_category, 'utf-8')
         else:
             template_exclusion_category = None
-        if self.options.print_template_prefix:
-            print_template_prefix = unicode(self.options.print_template_prefix, 'utf-8')
+        if self.options.print_template_pattern:
+            print_template_pattern = unicode(self.options.print_template_pattern, 'utf-8')
         else:
-            print_template_prefix = None
+            print_template_pattern = None
+        if self.options.print_template_prefix:
+            if print_template_pattern is not None:
+                log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
+            else:
+                print_template_pattern = '%s$1' % unicode(self.options.print_template_prefix, 'utf-8')
         if template_blacklist\
             or template_exclusion_category\
-            or print_template_prefix:
+            or print_template_pattern:
             if hasattr(env.wiki, 'setTemplateExclusion'):
                 env.wiki.setTemplateExclusion(
                     blacklist=template_blacklist,
                     category=template_exclusion_category,
-                    prefix=print_template_prefix,
+                    pattern=print_template_pattern,
                 )
             else:
                 log.warn('WikiDB does not support setting a template blacklist')

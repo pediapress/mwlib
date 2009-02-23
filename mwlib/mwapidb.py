@@ -589,7 +589,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         domain=None,
         template_blacklist=None,
         template_exclusion_category=None,
-        print_template_prefix=None,
+        print_template_pattern=None,
         api_helper=None,
         script_extension=None,
     ):
@@ -615,8 +615,8 @@ class WikiDB(wikidbbase.WikiDBBase):
             be excluded (optional)
         @type template_exclusion_category: unicode
         
-        @param print_template_prefix: prefix for print templates (optional)
-        @type print_template_prefix: unicode
+        @param print_template_pattern: pattern for print templates (optional)
+        @type print_template_pattern: unicode
         
         @param api_helper: APIHelper instance
         @type api_helper: L{APIHelper}
@@ -642,13 +642,16 @@ class WikiDB(wikidbbase.WikiDBBase):
         self.setTemplateExclusion(
             blacklist=template_blacklist,
             category=template_exclusion_category,
-            prefix=print_template_prefix,
+            pattern=print_template_pattern,
         )
         self.source = None
     
-    def setTemplateExclusion(self, blacklist=None, category=None, prefix=None):
+    def setTemplateExclusion(self, blacklist=None, category=None, pattern=None):
         self.template_exclusion_category = category
-        self.print_template_prefix = prefix
+        if pattern is not None and '$1' not in pattern:
+            pattern = '%s$1' % pattern
+            log.warn('print template pattern does not contain "$1", using %r.' % pattern)
+        self.print_template_pattern = pattern
         self.template_blacklist = []
         if blacklist:
             raw = self.getRawArticle(blacklist)
@@ -865,9 +868,9 @@ class WikiDB(wikidbbase.WikiDBBase):
         except KeyError:
             pass
         
-        titles = ['Template:%s' % name]
-        if self.print_template_prefix:
-            titles.insert(0, 'Template:%s%s' % (self.print_template_prefix, name))
+        titles = [u'Template:%s' % name]
+        if self.print_template_pattern:
+            titles.insert(0, u'Template:%s' % (self.print_template_pattern.replace(u'$1', name),))
         for title in titles:
             raw = self.getRawArticle(title)
             if raw is None:

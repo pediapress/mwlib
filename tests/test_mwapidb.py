@@ -239,7 +239,7 @@ class TestWikiDB(object):
         w = WikiDB(
             base_url='http://simple.pediapress.com/w/',
         )
-        w.setTemplateExclusion(prefix=u'Vom Druck ausschließen')
+        w.setTemplateExclusion(pattern=u'Vom Druck ausschließen')
         assert w.getTemplate(u'blaß') is None
     
     def test_byte_order_mark(self):
