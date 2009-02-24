@@ -199,6 +199,7 @@ class TreeCleaner(object):
                           'fixListNesting',
                           'removeEmptyTextNodes',
                           'removeChildlessNodes', 
+                          'removeBreakingReturns',
                           ]
         self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
 
