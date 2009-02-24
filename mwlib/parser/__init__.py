@@ -173,9 +173,9 @@ class ImageMod(object):
             aliases = m['aliases']
             aliases_regexp = '|'.join(['^(%s)$' % re.escape(a) for a in aliases])
             if name == 'img_upright':
-                aliases_regexp = aliases_regexp.replace('\\$1', '(\d+)')
+                aliases_regexp = aliases_regexp.replace('\\$1', '\\s*(\\d+)\\s*')
             elif name == 'img_width':
-                aliases_regexp = aliases_regexp.replace('\\$1', '([0-9x]+)')
+                aliases_regexp = aliases_regexp.replace('\\$1', '\\s*([0-9x]+)\\s*')
             #elif name in ['img_alt', 'img_link']:
             #    aliases_regexp = aliases_regexp.replace('\\$1', '(.*)')
             self.alias_map[name] = aliases_regexp
