@@ -141,7 +141,7 @@ re2c:yyfill:enable = 0 ;
   any = [^\000];
   ftp = "ftp://" [-a-zA-Z0-9_+${}~?=/@#&*(),:.']+ ;
   mailto = "mailto:" [-a-zA-Z0-9_!#$%*./?|^{}`~&'+=]+ "@" [-a-zA-Z0-9_.]+ ;
-  url = "http" "s"? "://" [-\xe4\xc4\xf6\xd6\xfc\xdca-zA-Z_0-9./?=&:%:~()#+,@;!'$]+ ;
+  url = "http" "s"? "://" [-\xe4\xc4\xf6\xd6\xfc\xdca-zA-Z_0-9./?=&:%:~()#+,@;!'$*]+ ;
   entity_name = "&" [a-zA-Z0-9]+ ";";
   entity_hex = "&#" 'x' [a-fA-F0-9]+ ";";
   entity_dec = "&#" [0-9]+ ";";
