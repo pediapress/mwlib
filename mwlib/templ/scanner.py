@@ -32,8 +32,6 @@ class symbols:
     txt = 5
 
 def tokenize(txt, included=True, replace_tags=None):
-    assert replace_tags is not None
-    
     if replace_tags is not None:        
         txt = replace_tags(txt)
     txt = pp.preprocess(txt, included=included)
