@@ -3,6 +3,10 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import sys
+import os
+mwrefine = "MWREFINE" in os.environ
+
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
     Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell, Span, Row
@@ -12,7 +16,13 @@ from mwlib.uparser import parseString
 from mwlib import parser
 from mwlib.xfail import xfail
 
-import sys
+if mwrefine:
+    oxfail = lambda x: x
+    rxfail = xfail
+else:
+    oxfail = xfail
+    rxfail = lambda x: x
+
 
 def _treesanity(r):
     "check that parents match their children"
@@ -130,7 +140,7 @@ def test_identity():
 ##     buildAdvancedTree(r)
 ##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
 
-
+@oxfail
 def test_definitiondescription():
     raw = u"""
 == test ==
@@ -170,7 +180,7 @@ def test_defintion_list():
         assert dls[0].getChildNodesByClass(DefinitionDescription)
         raw = raw.replace('\n', '')
 
-
+@oxfail
 def test_ulist():
     """http://code.pediapress.com/wiki/ticket/222"""
     raw = u"""
