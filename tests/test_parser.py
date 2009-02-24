@@ -1033,3 +1033,10 @@ def test_comment_inside_nowiki():
     r=parse(s)
     txt = r.asText()
     assert 'this is a comment' in txt
+
+def test_imagemod_space_px():
+    """http://code.pediapress.com/wiki/ticket/475"""
+    r=parse("[[Image:Thales foo.jpg|400 px|right]]")
+    img = r.find(parser.ImageLink)[0]
+    txt=img.asText()
+    assert 'px' not in txt, 'should contain no children'
