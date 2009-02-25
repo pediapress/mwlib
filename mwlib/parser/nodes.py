@@ -513,6 +513,8 @@ class ImageLink(Link):
                     scale = float(match)
                 except ValueError:
                     scale = 0.75
+                self.upright = scale
+                
             if mod_type == 'img_width':                
                 # x200px or 100x200px or 200px
                 width, height = (match.split('x')+['0'])[:2]
