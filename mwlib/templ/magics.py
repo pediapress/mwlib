@@ -68,7 +68,6 @@ def urlquote(u):
         u = u.encode('utf-8')
     return urllib.quote(u)
 
-
 class OtherMagic(object):
     def DEFAULTSORT(self, args):
         """see http://en.wikipedia.org/wiki/Template:DEFAULTSORT"""
@@ -241,7 +240,7 @@ class PageMagic(object):
 
     def NAMESPACEE(self, args):
         """Returns the name of the namespace the current page resides in. (quoted)"""        
-        return urllib.quote(self.NAMESPACE(args))
+        return urlquote(self.NAMESPACE(args))
 
     def REVISIONID(self, args):
         """[MW1.5+] The unique identifying number of a page, see Help:Diff."""
@@ -263,7 +262,7 @@ class PageMagic(object):
 
     def LOCALURLE(self, args):
         """Returns the local URL of a given page. The page might not exist."""        
-        return urllib.quote(self.LOCALURL(args).encode('utf-8'))
+        return urlquote(self.LOCALURL(args))
     
     def URLENCODE(self, args):
         """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
