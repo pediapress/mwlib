@@ -85,9 +85,13 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
-2009-?-? release 0.9.?
+2009-2-25 release 0.9.11
 --------------------------------
 - added --print-template-pattern
+- fix bug in LOCALURLE with non-ascii characters (#473)
+- fix 'upright' image modifier handling (#459)
+- allow star inside URLs (#483)
+- allow whitespace in image width modifiers (#475) 
 
 2009-2-19 release 0.9.10
 --------------------------------
