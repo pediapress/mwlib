@@ -263,7 +263,7 @@ class PageMagic(object):
 
     def LOCALURLE(self, args):
         """Returns the local URL of a given page. The page might not exist."""        
-        return urllib.quote(self.LOCALURL(args))
+        return urllib.quote(self.LOCALURL(args).encode('utf-8'))
     
     def URLENCODE(self, args):
         """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
