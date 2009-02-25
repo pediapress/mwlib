@@ -1055,3 +1055,14 @@ def test_imagemod_space_px():
     img = r.find(parser.ImageLink)[0]
     txt=img.asText()
     assert 'px' not in txt, 'should contain no children'
+
+
+def test_imagemod_upright():
+    """http://code.pediapress.com/wiki/ticket/459"""
+
+    def doit(s, expected):
+        up = parse(s).find(parser.ImageLink)[0].upright
+        assert up==expected, 'expected %s got %s' % (expected, up)
+
+    yield doit,"[[Datei:bla.jpg|upright|thumb|foobar]]", 0.75
+    yield doit,"[[Datei:bla.jpg|upright=0.5|thumb|foobar]]", 0.5
