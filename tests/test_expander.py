@@ -392,3 +392,8 @@ def test_switch_default_template():
 def test_preserve_space_in_tag():
     expandstr("{{#tag:imagemap|cd }}", "<imagemap>cd </imagemap>")
 
+def test_localurle_umlaut():
+    """http://code.pediapress.com/wiki/ticket/473"""
+    r=expandstr(u"{{LOCALURLE:F\xfcbar}}")
+    assert r.endswith('/F%C3%BCbar')
+    
