@@ -491,6 +491,21 @@ def test_parse_preformatted_blockquote():
     stylenode = r.find(parser.Style)
     assert not r.find(parser.PreFormatted) and stylenode and stylenode[0].caption=='-', 'expected blockquote w/o preformatted node'
 
+@oxfail
+def test_preformatted_source_end():
+    """http://code.pediapress.com/wiki/ticket/174"""
+    
+    s="""  <source>
+
+  </source>
+* foo
+"""
+    r=parse(s)
+    p=r.find(parser.PreFormatted)[0]
+    lst = p.find(parser.ItemList)
+    assert not lst, 'Preformatted should not contain ItemList'
+
+    
 def test_parse_eolstyle_inside_blockquote():
     r=parse("<blockquote>\n:foo</blockquote>")
     stylenode = r.find(parser.Style)[-1]
