@@ -235,7 +235,7 @@ class Expander(object):
 |(?:<math>.*?</math>)
 |(?:<imagemap[^<>]*>.*?</imagemap>)
 |(?:<gallery[^<>]*>.*?</gallery>)
-|(?:<ref[^<>]*/>)
+|(?:<ref[^<>]*/?>)
 |(?:<source[^<>]*>.*?</source>)
 |(?:<pre.*?>.*?</pre>)""", re.VERBOSE | re.DOTALL | re.IGNORECASE)
         newtxt = rx.sub(self._repl_to_uniq, txt)
