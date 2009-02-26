@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+
+- fix template expansion bug with non self-closing ref tags containing
+  equal signs
+
 2009-2-25 release 0.9.11
 --------------------------------
 - added --print-template-pattern
