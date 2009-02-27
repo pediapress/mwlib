@@ -112,7 +112,7 @@ class TreeCleaner(object):
         # list of css classes OR id's which trigger the removal of the node from the tree
         # the following list is wikipedia specific
         self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct',
-                                 'coordinates_3_ObenRechts', 'microformat', 'coordinates'] # FIXME: should really be "geo microformat...
+                                 'coordinates_3_ObenRechts', 'microformat', 'coordinates', 'navbox'] # FIXME: should really be "geo microformat...
 
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
@@ -259,7 +259,7 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.removeChildlessNodes(c)
             
-
+    # FIXME: this method is obsolete as of now. 'navbox' is now a member of the noDisplayClasses and removed alltogether
     def removeCriticalTables(self, node):
         """Remove problematic table nodes - keep content.
                
