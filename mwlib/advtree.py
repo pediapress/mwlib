@@ -549,7 +549,7 @@ Open Issues: Math, Magic, (unknown) TagNode
 _blockNodes = (Blockquote, Book, Chapter, Article, Section, Paragraph, Div, Center,
                PreFormatted, Cell, Row, Table, Item, BreakingReturn,
                ItemList, Timeline, Cite, HorizontalRule, Gallery, Indented, 
-               DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Source)
+               DefinitionList, DefinitionTerm, DefinitionDescription, ReferenceList, Source, ImageMap)
 
 for k in _blockNodes:  
   k.isblocknode = True
