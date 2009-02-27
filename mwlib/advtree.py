@@ -306,6 +306,14 @@ class AdvancedNode:
         return attrs
 
 
+    def hasClassID(self, classIDs):
+        _class = self.attributes.get('class','').split(' ')
+        _id = self.attributes.get('id','')
+        for classID in classIDs:
+            if classID in _class or classID == _id:
+                return True
+        return False
+        
     def isVisible(self):
         """Return True if node is visble. Used to detect hidden elements."""
         if self.style.get('display', '').lower() == 'none':
