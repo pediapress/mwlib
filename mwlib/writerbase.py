@@ -44,7 +44,7 @@ def build_book(env, status_callback=None):
                     a.caption = item['displaytitle']
                 url = env.wiki.getURL(item['title'], item.get('revision'))                
                 if url:
-                    a.url = unicode(urllib.unquote(url.encode('utf-8')), 'utf-8')
+                    a.url = url
                 else:
                     a.url = None
                 source = env.wiki.getSource(item['title'], item.get('revision'))

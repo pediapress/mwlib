@@ -669,7 +669,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         return self.api_helper.login(username, password, domain=domain)
     
     def getURL(self, title, revision=None):
-        name = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
+        name = urllib.quote_plus(title.replace(" ", "_").encode('utf-8'), safe=':/@')
         if revision is None:
             return '%sindex%s?title=%s' % (
                 self.api_helper.base_url,
