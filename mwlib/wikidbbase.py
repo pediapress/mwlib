@@ -26,7 +26,6 @@ class WikiDBBase(object):
         """
         
         if isinstance(link, (parser.ArticleLink, parser.CategoryLink, parser.NamespaceLink)):
-            
             target = link.full_target or link.target
             
             if not target:
@@ -44,7 +43,7 @@ class WikiDBBase(object):
             if my_url is None:
                 return None
             my_title = urllib.quote(title.replace(" ", "_").encode('utf-8'), safe=':/@')
-            link_title = urllib.quote(link.full_target.replace(" ", "_").encode('utf-8'), safe=':/@')
+            link_title = urllib.quote(target.replace(" ", "_").encode('utf-8'), safe=':/@')
             pos = my_url.find(my_title)
             if pos == -1:
                 return None
