@@ -131,6 +131,8 @@ class TreeCleaner(object):
 
         self.style_nodes = [Italic, Emphasized, Strong, Overline, Underline, Sub, Sup, Small, Big, Var]
 
+        # list of classes or IDs of table nodes which are split into their content. used by splitTableToColumns
+        self.split_table_classIDs = ['mp-upper'] 
 
 
     def clean(self, cleanerMethods):
@@ -257,12 +259,6 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self.removeChildlessNodes(c)
             
-    def _tableIsCrititcal(self, table):
-        classAttr = table.attributes.get('class', '')
-        if re.findall(r'\bnavbox\b', classAttr):    
-            return True
-
-        return False
 
     def removeCriticalTables(self, node):
         """Remove problematic table nodes - keep content.
@@ -270,7 +266,7 @@ class TreeCleaner(object):
         The content is preserved if possible and only the outmost 'container' table is removed.
         """
 
-        if node.__class__ == Table and self._tableIsCrititcal(node):
+        if node.__class__ == Table and node.hasClassID(['navbox']):
             children = []
             for row in node.children:
                 for cell in row:
@@ -741,11 +737,7 @@ class TreeCleaner(object):
 
     def removeNoPrintNodes(self, node):
 
-        klasses = node.attributes.get('class', '').split()
-        klasses.extend(node.attributes.get('id', '').split())
-        klasses = set(klasses)
-        
-        if set(self.noDisplayClasses).intersection(klasses) and node.parent:
+        if node.hasClassID(self.noDisplayClasses) and node.parent:
             self.report('removing child', node)
             node.parent.removeChild(node)
             return
@@ -947,7 +939,10 @@ class TreeCleaner(object):
                 for cell in row.children:
                     if self._isBigCell(cell):
                         split_table = True
-                    
+                
+            if node.hasClassID(self.split_table_classIDs):
+                split_table = True
+                
             if split_table:
                 cols = [[] for i in range(node.numcols)]
 
