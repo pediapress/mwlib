@@ -1024,7 +1024,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         )
         try:
             self.locals = result['expandtemplates']['*']
-        except KeyError:
+        except (KeyError, TypeError):
             self.locals = None
         return self.locals
     
