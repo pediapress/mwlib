@@ -312,7 +312,7 @@ class ZipCreator(object):
             if not article.get('url'):
                 raise RuntimeError('Have no URL for article %r' % item['title'])
             if not article.get('source-url'):
-                raise RuntimeError('Have not source URL for article %r' % item['title'])
+                raise RuntimeError('Have no source URL for article %r' % item['title'])
             if not article.get('content'):
                 raise RuntimeError('Have empty content for article %r' % item['title'])
             if not article['source-url'] in self.sources:
