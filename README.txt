@@ -86,6 +86,9 @@ The remaining parts are distributed under the BSD license:
 ChangeLog
 ======================================================================
 
+2009-03-02 release 0.9.12
+-------------------------
+
 - fix template expansion bug with non self-closing ref tags containing
   equal signs
 
