@@ -391,10 +391,10 @@ ordinary paragraph. inside <br/> tags should not be removed
     assert numBR(tree) == 3
 
 def test_preserveEmptyTextNodes():
-    raw="""[[blub]] ''bla'' """
+    raw="""[[blub]] ''bla''"""
     tree, reports = cleanMarkup(raw) 
-    p = tree.find(Paragraph)[0]
-    assert isinstance(p.children[1], Text) and p.children[1].caption==' '
+    p = [x for x in tree.find(Text) if x.caption==u' ']
+    assert len(p)==1, 'expected one space node'
 
 def test_gallery():
     raw ="""<gallery>
