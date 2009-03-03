@@ -85,6 +85,9 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-??-?? release 0.9.??
+-------------------------
+- normalize template names when checking against blacklist
 
 - make NAMESPACE magic work for non-main namespaces
 - make NS template work
