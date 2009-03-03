@@ -191,6 +191,7 @@ class LocaltimeMagic(object):
         return self.now.strftime("%Y%m%d%H%M%S")
     
 class PageMagic(object):
+    source={}
     def __init__(self, pagename='', server="http://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
         self.qpagename = pagename.replace(' ', '_')
