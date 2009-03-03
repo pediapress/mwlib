@@ -15,7 +15,7 @@ import datetime
 import urllib
 import urlparse
 from mwlib.log import Log
-from mwlib import expr
+from mwlib import expr, namespace
 
 iferror_rx = re.compile(r'<(div|span|p|strong)\s([^<>]*\s)*?class="error"[^<>]*>', re.I)
 
@@ -236,7 +236,9 @@ class PageMagic(object):
 
     def NAMESPACE(self, args):
         """Returns the name of the namespace the current page resides in."""
-        return u""   # we currently only have articles living in the main/empty namespace
+        ns, partial, full = namespace.splitname(self.pagename)
+        return full[:-len(partial)-1]
+
 
     def NAMESPACEE(self, args):
         """Returns the name of the namespace the current page resides in. (quoted)"""        
