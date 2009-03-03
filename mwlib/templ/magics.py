@@ -255,8 +255,15 @@ class PageMagic(object):
 
     def NS(self, args):
         """Returns the name of a given namespace number."""
-        return "++NS not implemented++"
+        namespaces = self.source.get('namespaces', {})
+        ns = args[0]
+        try:
+            retval = namespaces[ns]['*']
+        except KeyError:
+            retval = ''
 
+        return retval 
+    
     def LOCALURL(self, args):
         """Returns the local URL of a given page. The page might not exist."""
         url = "/wiki/"+ "".join(args.get(0, u""))

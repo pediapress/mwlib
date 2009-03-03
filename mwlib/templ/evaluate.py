@@ -201,11 +201,12 @@ class Expander(object):
             local_values = mwlocals.parse_locals(local_values)
         else:
             local_values = None
-            
+            source = {}
             
         self.resolver = magics.MagicResolver(pagename=pagename)
         self.resolver.wikidb = wikidb
         self.resolver.local_values = local_values
+        self.resolver.source = source
         
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
