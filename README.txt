@@ -85,6 +85,9 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-??-?? release 0.9.??
+-------------------------
+- normalize template names when checking against blacklist
 
 2009-03-02 release 0.9.12
 -------------------------
