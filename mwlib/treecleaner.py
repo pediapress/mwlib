@@ -181,9 +181,7 @@ class TreeCleaner(object):
                           'transformSingleColTables',
                           'splitTableToColumns', 
                           'linearizeWideNestedTables',
-                          'moveReferenceListSection',
                           'removeBreakingReturns', 
-                          'removeEmptyReferenceLists',
                           'swapNodes',
                           'removeBigSectionsFromCells',
                           'transformNestedTables',
@@ -365,23 +363,6 @@ class TreeCleaner(object):
                 self.report('replaced single col table with items:',  parent.children)
         for c in node.children:
             self.transformSingleColTables(c)
-
-
-    def moveReferenceListSection(self, node):
-        """Move the section containing the reference list to the end of the article."""
-
-        if node.__class__ == Article:
-            sections = node.getChildNodesByClass(Section)
-            for section in sections:
-                reflists = section.getChildNodesByClass(ReferenceList)
-                if reflists and section.parent:
-                    self.report('moving section', section, 'to', node)
-                    section.parent.removeChild(section)
-                    node.appendChild(section)
-            return
-
-        for c in node.children:
-            self.moveReferenceListSection(c)        
         
 
     # FIXME: replace this by implementing and using
@@ -481,22 +462,6 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeBreakingReturns(c)
 
-    def removeEmptyReferenceLists(self, node):
-        """
-        empty ReferenceLists are removed. they typically stick in a section which only contains the ReferenceList. That section is also removed
-        """
-        if node.__class__ == ReferenceList:
-            sections = node.getParentNodesByClass(Section)
-            if sections:
-                section = sections[0]
-                display_text = []
-                for c in section.children[1:]:
-                    display_text.append(c.getAllDisplayText().strip())
-                if not ''.join(display_text).strip() and section.parent:
-                    section.parent.removeChild(section)
-
-        for c in node.children:
-            self.removeEmptyReferenceLists(c)
 
     def _fixParagraphs(self, node):
         """Move paragraphs to the child list of the last section (if existent)"""
