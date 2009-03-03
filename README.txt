@@ -86,6 +86,9 @@ The remaining parts are distributed under the BSD license:
 ChangeLog
 ======================================================================
 
+- make NAMESPACE magic work for non-main namespaces
+- make NS template work
+
 2009-03-02 release 0.9.12
 -------------------------
 
