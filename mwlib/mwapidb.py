@@ -661,7 +661,7 @@ class WikiDB(wikidbbase.WikiDBBase):
                 ))
             else:
                 self.template_blacklist = [
-                    template.lower().strip() 
+                    template.lower().strip().replace('_', ' ')
                     for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)
                 ]
             
@@ -858,8 +858,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         if ns!=namespace.NS_TEMPLATE:
             return self.getRawArticle(full)
         
-            
-        if name.lower() in self.template_blacklist:
+        if name.replace('_', ' ').lower() in self.template_blacklist:
             log.info("ignoring blacklisted template:" , repr(name))
             return None
         
