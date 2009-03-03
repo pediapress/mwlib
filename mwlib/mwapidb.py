@@ -943,14 +943,13 @@ class WikiDB(wikidbbase.WikiDBBase):
     def getSource(self, title, revision=None):
         """Return source for given article title and revision. For this WikiDB,
         the paramaters are not used.
-        
         @returns: source dict
         @rtype: dict
         """
         
         if self.source is not None:
             return self.source
-        result = self.api_helper.query(meta='siteinfo')
+        result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases|magicwords')
         if result is None:
             return None
         result = result['query']
@@ -967,7 +966,9 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.getLocals()
             if self.locals:
                 self.source['locals'] = self.locals
-            self.source['magicwords'] = self.getMagicwords()
+            self.source['magicwords'] = result['magicwords']
+            self.source['namespaces'] = result['namespaces']
+            self.source['namespacealiases'] = result['namespacealiases']
             return self.source
         except KeyError:
             return None
