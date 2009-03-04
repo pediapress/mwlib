@@ -240,14 +240,13 @@ class parse_sections(object):
             elif l1>l2:
                 caption.children.insert(0, T(type=T.t_text, text=u"="*(l1-l2)))
 
-            self.refined.append(caption.children)
-                
-            sub = blist([caption])
-            sub.extend(tokens[current.endtitle+1:i])
-            sect = T(type=T.t_complex_section, start=0, len=0, children=sub, level=level)
+            body = T(type=T.t_complex_node, children=tokens[current.endtitle+1:i])
+              
+            sect = T(type=T.t_complex_section, start=0, len=0, children=blist([caption, body]), level=level)
             tokens[current.start:i] = [sect] 
             
-            self.refined.append(tokens[current.start])
+            self.refined.append(caption)
+            self.refined.append(body)
 
             while sections and level<sections[-1].level:
                 sections.pop()
