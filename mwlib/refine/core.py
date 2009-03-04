@@ -402,7 +402,7 @@ class parse_preformatted(object):
                 self.refined.append(tokens[start].children)
                 i = start+1
                 start = None
-            elif t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline"):
+            elif t.blocknode or (t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline", "div")):
                 start = None
                 i+=1
             else:
@@ -803,8 +803,8 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
                parse_style_tags,               
-               parse_preformatted,
                parse_paragraphs,
+               parse_preformatted,
                parse_lines,
                parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
