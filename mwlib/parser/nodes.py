@@ -482,10 +482,10 @@ class ImageLink(Link):
             # FIXME: disabled for now, since I don't know what these modifiers do, and what kind of parameters they expect
 ##             if mod_type == 'img_alt':
 ##                 self.alt = match
-
-            #if mod_type == 'img_link':
-            #    print "got link:", match
-            #    self.link = match
+            
+            if mod_type == 'img_link':
+                print "got link:", match
+                self.link = match
             
 
             del self.children[idx]
@@ -501,9 +501,10 @@ class ImageLink(Link):
                 self.align = 'center'
             if mod_type == 'img_none':
                 self.align = 'none'
-
-            if mod_type in ['img_framed', 'img_frameless']:
-                self.frame = match
+            if mod_type == 'img_framed':
+                self.frame = 'frame'
+            if mod_type == 'img_frameless':
+                self.frame = 'frameless'
 
             if mod_type == 'img_border':
                 self.border = True
