@@ -182,6 +182,7 @@ class TreeCleaner(object):
                           'splitTableToColumns', 
                           'linearizeWideNestedTables',
                           'removeBreakingReturns', 
+                          'removeEmptyReferenceLists',
                           'swapNodes',
                           'removeBigSectionsFromCells',
                           'transformNestedTables',
@@ -977,3 +978,22 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.fixInfoBoxes(c)
+
+
+    def removeEmptyReferenceLists(self, node):
+        """
+        empty ReferenceLists are removed. they typically stick in a section which only contains the ReferenceList. That section is also removed
+        """
+        if node.__class__ == ReferenceList:
+            sections = node.getParentNodesByClass(Section)
+            if sections:
+                section = sections[0]
+                display_text = []
+                for c in section.children[1:]:
+                    display_text.append(c.getAllDisplayText().strip())
+                if not ''.join(display_text).strip() and section.parent:
+                    section.parent.removeChild(section)
+                        
+        for c in node.children:
+            self.removeEmptyReferenceLists(c)
+

@@ -479,13 +479,14 @@ class ImageLink(Link):
                 idx += 1
                 continue
 
-# FIXME: disabled for now, since I don't know what these modifiers do, and what kind of parameters they expect
-##             if mod_type == 'img_link':
-##                 print "got link:", match
-##                 self.link = match
-            
+            # FIXME: disabled for now, since I don't know what these modifiers do, and what kind of parameters they expect
 ##             if mod_type == 'img_alt':
 ##                 self.alt = match
+
+            #if mod_type == 'img_link':
+            #    print "got link:", match
+            #    self.link = match
+            
 
             del self.children[idx]
 
