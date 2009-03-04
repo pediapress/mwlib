@@ -41,6 +41,8 @@ class ImageUtils(object):
                 max_h = max_w/ar
             elif max_w/ar > max_h:
                 max_w = max_h*ar
+        if max_h and not max_w:
+            max_w = max_h*ar
 
         # check if thumb, then assign default width
         if getattr(img_node, 'thumb', None) or getattr(img_node, 'framed', None) or getattr(img_node, 'frameless', None) or getattr(img_node, 'align', None) in ['right', 'left']:
