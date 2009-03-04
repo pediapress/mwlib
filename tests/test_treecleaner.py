@@ -80,14 +80,18 @@ def test_fixLists2():
 * list item 1
 * list item 2
 some text in the same paragraph
+
+another paragraph
     """    
     # cleaner should do nothing
     tree, reports = cleanMarkup(raw)
+    tree.show()
     lists = tree.getChildNodesByClass(ItemList)
     li = lists[0]
     assert li.parent.__class__ == Paragraph
-    assert Text in [sib.__class__ for sib in li.siblings]
-
+    txt = ''.join([x.asText() for x in li.siblings])
+    assert u'some text in the same paragraph' in txt
+    assert u'another' not in txt
 
 def test_fixLists3():
     raw = r"""
