@@ -236,7 +236,7 @@ class parse_tables(object):
             start = stack.pop()
             starttoken = tokens[start]
             sub = tokens[start+1:i]
-            tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist)]
+            tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist, blocknode=True)]
             if starttoken.text.strip() == "{|":
                 self.find_modifier(tokens[start])
             self.handle_rows(sub)

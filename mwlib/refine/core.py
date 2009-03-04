@@ -37,7 +37,7 @@ T.t_vlist = "vlist"
 T.children = None
 
 
-def get_recursive_tag_parser(tagname, break_at=None):
+def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
     if break_at is None:
         break_at = lambda _: False
         
@@ -49,7 +49,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
             if stack and break_at(t):
                 start = stack.pop()
                 sub = tokens[start+1:i]
-                tokens[start:i] = [T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname=tagname)]
+                tokens[start:i] = [T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname=tagname, blocknode=blocknode)]
                 refined.append(tokens[start])
                 i=start+1
             elif t.type==T.t_html_tag and t.tagname==tagname:
@@ -62,7 +62,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
                 if stack:
                     start = stack.pop()
                     sub = tokens[start+1:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_tag, vlist=tokens[start].vlist, start=tokens[start].start, len=4, children=sub, tagname=tagname)]
+                    tokens[start:i+1] = [T(type=T.t_complex_tag, vlist=tokens[start].vlist, start=tokens[start].start, children=sub, tagname=tagname, blocknode=blocknode)]
                     refined.append(tokens[start])
                     i = start+1
                 else:
@@ -73,7 +73,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
         while stack:
             start = stack.pop()
             sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub, tagname=tagname)]
+            tokens[start:] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub, tagname=tagname, blocknode=blocknode)]
             refined.append(tokens[start])
 
         refined.append(tokens)
@@ -81,7 +81,7 @@ def get_recursive_tag_parser(tagname, break_at=None):
     
     return recursive_parse_tag
 
-def get_pre_parser(tagname):
+def get_pre_parser(tagname, blocknode=True):
     def parse(tokens, refined, **kwargs):
         i = 0
         start = None
@@ -95,7 +95,7 @@ def get_pre_parser(tagname):
                 i+=1
             elif start is not None and t.type==T.t_html_tag_end and t.tagname==tagname:
                 txt = T.join_as_text(tokens[start+1:i])
-                tokens[start:i+1] = [T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[start].vlist, children=[T(type=T.t_text, text=txt)])]
+                tokens[start:i+1] = [T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[start].vlist, children=[T(type=T.t_text, text=txt)], blocknode=blocknode)]
                 i = start+1
             else:
                 i+=1
@@ -105,7 +105,7 @@ def get_pre_parser(tagname):
 
     
     
-parse_div = get_recursive_tag_parser("div")
+parse_div = get_recursive_tag_parser("div", blocknode=True)
 
 def _li_break_at(token):
     if token.type==T.t_html_tag and token.tagname=="li":
@@ -113,10 +113,10 @@ def _li_break_at(token):
     return False
 parse_center = get_recursive_tag_parser("center")
 parse_li = get_recursive_tag_parser("li", _li_break_at)
-parse_ol = get_recursive_tag_parser("ol")
-parse_ul = get_recursive_tag_parser("ul")
+parse_ol = get_recursive_tag_parser("ol", blocknode=True)
+parse_ul = get_recursive_tag_parser("ul", blocknode=True)
 parse_span = get_recursive_tag_parser("span")
-parse_p = get_recursive_tag_parser("p")
+parse_p = get_recursive_tag_parser("p", blocknode=True)
 parse_ref = get_recursive_tag_parser("ref")
 parse_references = get_recursive_tag_parser("references")
 
@@ -129,14 +129,14 @@ parse_ins = get_recursive_tag_parser("ins")
 parse_del = get_recursive_tag_parser("del")
 parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
-parse_pre = get_pre_parser("pre")
+parse_pre = get_pre_parser("pre", blocknode=True)
 parse_source = get_pre_parser("source")
 parse_code_tag = get_recursive_tag_parser("code")
 
 
 def parse_timeline(tokens, refined, **kwargs):
     
-    get_recursive_tag_parser("timeline")(tokens, [], **kwargs)
+    get_recursive_tag_parser("timeline", blocknode=True)(tokens, [], **kwargs)
     
     for t in tokens:
         if t.tagname=='timeline':
@@ -148,7 +148,7 @@ def parse_timeline(tokens, refined, **kwargs):
     
 def parse_imagemap(tokens, refined, **kwargs):
     from mwlib import imgmap
-    get_recursive_tag_parser("imagemap")(tokens, [], **kwargs)
+    get_recursive_tag_parser("imagemap", blocknode=True)(tokens, [], **kwargs)
     for t in tokens:
         if t.tagname=='imagemap':
             t.imagemap =imgmap.ImageMapFromString(T.join_as_text(t.children))
@@ -190,7 +190,7 @@ def parse_gallery(tokens, refined, **kwargs):
                     continue
             sub.append(T(type=T.t_text, text=x))
             
-        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist)]
+        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist, blocknode=True)]
 
     while i<len(tokens):
         t = tokens[i]
@@ -240,14 +240,13 @@ class parse_sections(object):
             elif l1>l2:
                 caption.children.insert(0, T(type=T.t_text, text=u"="*(l1-l2)))
 
-            self.refined.append(caption.children)
-                
-            sub = blist([caption])
-            sub.extend(tokens[current.endtitle+1:i])
-            sect = T(type=T.t_complex_section, start=0, len=0, children=sub, level=level)
+            body = T(type=T.t_complex_node, children=tokens[current.endtitle+1:i])
+              
+            sect = T(type=T.t_complex_section, start=0, children=blist([caption, body]), level=level, blocknode=True)
             tokens[current.start:i] = [sect] 
             
-            self.refined.append(tokens[current.start])
+            self.refined.append(caption)
+            self.refined.append(body)
 
             while sections and level<sections[-1].level:
                 sections.pop()
@@ -399,7 +398,7 @@ class parse_preformatted(object):
                 start = i
                 i+=1
             elif t.type==T.t_newline and start is not None:
-                tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+                tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
                 self.refined.append(tokens[start].children)
                 i = start+1
                 start = None
@@ -410,7 +409,7 @@ class parse_preformatted(object):
                 i+=1
 
         if start is not None:
-            tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1])]
+            tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
             self.refined.append(tokens[start].children)
         self.refined.append(tokens)
        
@@ -451,16 +450,16 @@ class parse_lines(object):
                 
             if prefix==':':
                 node = T(type=T.t_complex_style, caption=':')
-                newitem = lambda: T(type=T.t_complex_node)
+                newitem = lambda: T(type=T.t_complex_node, blocknode=True)
             elif prefix=='*':
                 node = T(type=T.t_complex_tag, tagname="ul")
-                newitem = lambda: T(type=T.t_complex_tag, tagname="li")
+                newitem = lambda: T(type=T.t_complex_tag, tagname="li", blocknode=True)
             elif prefix=="#":
                 node = T(type=T.t_complex_tag, tagname="ol")
-                newitem = lambda: T(type=T.t_complex_tag, tagname="li")
+                newitem = lambda: T(type=T.t_complex_tag, tagname="li", blocknode=True)
             elif prefix==';':
                 node = T(type=T.t_complex_style, caption=';')
-                newitem = lambda: T(type=T.t_complex_node)
+                newitem = lambda: T(type=T.t_complex_node, blocknode=True)
             else:
                 assert 0
                 
@@ -726,7 +725,7 @@ class parse_paragraphs(object):
         def create(delta=1):
             sub = tokens[first:i]
             if sub:
-                tokens[first:i+delta] = [T(type=T.t_complex_tag, tagname='p', children=sub)]
+                tokens[first:i+delta] = [T(type=T.t_complex_tag, tagname='p', children=sub, blocknode=True)]
                 self.refined.append(tokens[first])
                 
         while i<len(self.tokens):
