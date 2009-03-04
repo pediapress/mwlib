@@ -70,8 +70,10 @@ para
 * list 3
     """
     tree, reports = cleanMarkup(raw)
+    tree.show()
     lists = tree.getChildNodesByClass(ItemList)
     for li in lists:
+        print li, li.getParents()
         assert _all([p.__class__ != Paragraph for p in li.getParents()])
     _treesanity(tree)   
 
