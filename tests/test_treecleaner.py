@@ -38,6 +38,7 @@ def cleanMarkup(raw):
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
     reports = tc.getReports()
+    showTree(tree)
     return (tree, reports)
 
 def cleanMarkupSingle(raw, cleanerMethod):
@@ -70,7 +71,6 @@ para
 * list 3
 """
     tree, reports = cleanMarkup(raw)
-    tree.show()
     lists = tree.getChildNodesByClass(ItemList)
     for li in lists:
         print li, li.getParents()
@@ -87,7 +87,6 @@ another paragraph
     """    
     # cleaner should do nothing
     tree, reports = cleanMarkup(raw)
-    tree.show()
     lists = tree.getChildNodesByClass(ItemList)
     li = lists[0]
     assert li.parent.__class__ == Paragraph
