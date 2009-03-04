@@ -267,6 +267,7 @@ class Link(Node):
             else:
                 res[prefix] = (InterwikiLink, d.get('renamed', prefix))
         
+        res[u'arz'] = (LangLink, u'arz')
         return res
     
     @classmethod

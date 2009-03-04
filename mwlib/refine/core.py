@@ -710,7 +710,43 @@ class parse_links(object):
                 i+=1
 
         self.refined.append(tokens)
-        
+
+
+
+class parse_paragraphs(object):
+    def __init__(self, tokens, refined, **kwargs):
+        self.tokens = tokens
+        self.refined = refined
+        self.run()
+
+    def run(self):
+        tokens = self.tokens
+        i = 0
+        first = 0
+        def create(delta=1):
+            sub = tokens[first:i]
+            if sub:
+                tokens[first:i+delta] = [T(type=T.t_complex_tag, tagname='p', children=sub)]
+                self.refined.append(tokens[first])
+                
+        while i<len(self.tokens):
+            t = tokens[i]
+            if t.type==T.t_break:
+                create()
+                first += 1
+                i = first
+            elif t.blocknode: # blocknode
+                create(delta=0)
+                first += 1
+                i = first
+            else:
+                i+=1
+                
+        if first:
+            create()
+            
+        self.refined.append(tokens)
+    
 class combined_parser(object):
     def __init__(self, parsers):
         self.parsers = parsers
@@ -751,7 +787,8 @@ parse_style_tags = combined_parser(
      ])
 
                 
-
+        
+                 
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -767,7 +804,9 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
                parse_style_tags,               
-               parse_preformatted, parse_lines,
+               parse_preformatted,
+               parse_paragraphs,
+               parse_lines,
                parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
