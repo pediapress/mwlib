@@ -484,7 +484,6 @@ class ImageLink(Link):
 ##                 self.alt = match
             
             if mod_type == 'img_link':
-                print "got link:", match
                 self.link = match
             
 
