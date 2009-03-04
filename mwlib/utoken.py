@@ -56,6 +56,7 @@ class token(object):
     interwiki = None
     langlink = None
     namespace = None
+    blocknode = False
     
     t_end = 0
     t_text = 1
