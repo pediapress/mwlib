@@ -68,7 +68,7 @@ para
 para
 
 * list 3
-    """
+"""
     tree, reports = cleanMarkup(raw)
     tree.show()
     lists = tree.getChildNodesByClass(ItemList)
