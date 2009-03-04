@@ -79,10 +79,9 @@ class TreeCleaner(object):
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
         # fixme rename to ancestors
-        self.forbidden_parents = {ImageLink:[PreFormatted, Reference],
+        self.forbidden_parents = {ImageLink:[PreFormatted],
                                   ItemList:[Div, PreFormatted],
                                   Source:self.inlineStyleNodes,
-                                  #Paragraph:[Paragraph],
                                   DefinitionList:[Paragraph],
                                   Blockquote:[PreFormatted],
                                   Center:[PreFormatted],
@@ -101,7 +100,12 @@ class TreeCleaner(object):
         
         # ex: delete preformatted nodes which are inside reference nodes,
         # all children off the preformatted node are kept
-        self.removeNodes = {PreFormatted:[Reference, PreFormatted], Cite:[Item, Reference], Code:[PreFormatted]}
+        self.removeNodes = {PreFormatted: [Reference, PreFormatted],
+                            Cite: [Item, Reference],
+                            Code: [PreFormatted],
+                            ImageLink: [Reference],
+                            Div: [Reference],
+                            }
 
         
         # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
