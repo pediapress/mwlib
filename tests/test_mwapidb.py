@@ -64,6 +64,13 @@ class TestWikiDB(object):
         authors = w.getAuthors(u'Egypt')
         print 'AUTHORS:', authors
         assert authors
+
+    def test_getAuthors2(self):
+        w = WikiDB('http://de.wikipedia.org/w/')
+        authors = w.getAuthors(u'Glarus (Begriffsklärung)',revision='5014')
+        print 'AUTHORS:', authors
+        assert authors == [u'Draggi', 'ANONIPEDITS:0']
+
     
     def test_parse_article_url(self):
         def p(url):

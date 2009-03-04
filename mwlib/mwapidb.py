@@ -579,7 +579,7 @@ class ImageDB(object):
     
 class WikiDB(wikidbbase.WikiDBBase):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
-    bot_rex = re.compile(r'bot\b', re.IGNORECASE)
+    bot_rex = re.compile(r'bot', re.IGNORECASE)
     redirect_rex = re.compile(r'^#redirect:?\s*?\[\[.*?\]\]', re.IGNORECASE)
     magicwords = None
     def __init__(self,
@@ -702,6 +702,7 @@ class WikiDB(wikidbbase.WikiDBBase):
 
         REVERT_LOOKBACK = 5 # number of revisions to check for same size (assuming a revert)
         USE_DIFF_SIZE = False # whether to sort by diffsize or by alphabet
+        FILTER_REVERTS = False # can not be used if 
         
         kwargs = {
             'titles': title,
@@ -741,16 +742,14 @@ class WikiDB(wikidbbase.WikiDBBase):
                 log.error('Query continuation failed.')
                 break
 
-        # Start with oldest edit:
-        # (note that we can *not* just pass rvdir=newer to API, because if we
-        # have a given article revision, we have to get revisions older than
-        # that)
-        revs.reverse() 
-        
-        # remove revs w/o size (happens with move)
-        revs = [r for r in revs if "size" in r]
-        
         def filter_reverts(revs):
+            # Start with oldest edit:
+            # (note that we can *not* just pass rvdir=newer to API, because if we
+            # have a given article revision, we have to get revisions older than
+            # that)
+            revs.reverse() 
+            # remove revs w/o size (happens with move)
+            revs = [r for r in revs if "size" in r]
             for i, r in enumerate(revs):
                 if "reverted" in r or i==0:
                     continue
@@ -760,11 +759,12 @@ class WikiDB(wikidbbase.WikiDBBase):
                         for jj in range(i,j+1): # skip the reverted, all in between, and the reverting edit 
                             revs[jj]['reverted'] = True 
                         break
-                
-#            print "reverted", [r for r in revs if "reverted" in r]
+            #print "reverted", [r for r in revs if "reverted" in r]
             return [r for r in revs if not "reverted" in r]
 
-        revs = list(filter_reverts(revs))
+        if FILTER_REVERTS:
+            revs = list(filter_reverts(revs))
+
         # calc an approximate size for each edit (true if author only *added* to the article)
         if USE_DIFF_SIZE:
             for i, r in enumerate(revs):
@@ -776,10 +776,9 @@ class WikiDB(wikidbbase.WikiDBBase):
         ANON = "ANONIPEDITS"
         authors = dict() # author:bytes
         for r in revs:
-#            print r
             if 'minor' in r:  
                 pass # include minor edits
-            if 'anon' in r or self.ip_rex.match(r['user']): # anon
+            if 'anon' in r and (not r['user'] or self.ip_rex.match(r['user'])): # anon
                 authors[ANON] = authors.get(ANON, 0) + 1
             elif self.bot_rex.search(r['user']) or self.bot_rex.search(r.get('comment', '')):
                 continue # filter bots
