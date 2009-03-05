@@ -10,7 +10,8 @@ parse = uparser.simpleparse
     
 def test_rot13():
     r=parse(u"""<rot13>test</rot13>""") # grfg
-    assert r.children[0].children[0].caption == u'rot13(test) is grfg'
+    txt = [x.caption for x in r.find(parser.Text)]
+    assert txt==[u'rot13(test) is grfg']
 
 def test_idl():
     stuff = u"\n\t\ta:=b '''c''' v"
