@@ -124,4 +124,13 @@ def test_no_row_modifier():
     print "CELLS:", cells
     assert len(cells)==2, "expected 2 cells"
     
-    
+def test_parse_para_vs_preformatted():
+    s=' foo\n\nbar\n'
+    r=refine.parse_txt(s)
+    refine.show(r)
+    pre = list(refine.walknode(r, lambda x: x.type==refine.T.t_complex_preformatted))[0]
+    refine.show(pre)
+    textnodes = list(refine.walknode(pre, lambda x: x.type==refine.T.t_text))
+    txt=''.join(textnodes)
+    assert u'bar' not in txt
+               
