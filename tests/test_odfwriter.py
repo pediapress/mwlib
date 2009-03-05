@@ -415,9 +415,10 @@ def test_italic():
     # DOES NOT WORK FOR ME in OpenOffice
     raw= r'''
 === a===
-B (''Molothrus ater'') are 
+B (''Molothrus ater'') are
+
+
 '''
     xml = getXML(raw)
     print xml
     assert "Molothrus" in xml
-    
