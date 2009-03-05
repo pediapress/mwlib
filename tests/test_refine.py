@@ -131,6 +131,6 @@ def test_parse_para_vs_preformatted():
     pre = list(refine.walknode(r, lambda x: x.type==refine.T.t_complex_preformatted))[0]
     refine.show(pre)
     textnodes = list(refine.walknode(pre, lambda x: x.type==refine.T.t_text))
-    txt=''.join(textnodes)
+    txt=''.join([x.text for x in textnodes])
     assert u'bar' not in txt
                
