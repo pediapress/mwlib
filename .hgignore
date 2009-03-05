@@ -5,6 +5,9 @@ syntax: glob
 *.pyc
 *~
 *.swp
+*.pdf
+*.zip
+t/*
 ID
 mwlib.egg-info
 build
@@ -19,3 +22,7 @@ mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
 .\#*
 \#*\#
+
+syntax: re
+^[a-z]$
+
