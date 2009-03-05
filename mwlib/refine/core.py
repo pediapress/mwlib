@@ -727,18 +727,28 @@ class parse_paragraphs(object):
             if sub:
                 tokens[first:i+delta] = [T(type=T.t_complex_tag, tagname='p', children=sub, blocknode=True)]
                 self.refined.append(tokens[first])
-                
+
+        
+        lastpre = None
         while i<len(self.tokens):
             t = tokens[i]
             if t.type==T.t_break:
                 create()
                 first += 1
                 i = first
+                lastpre = None
             elif t.blocknode: # blocknode
+                if lastpre:
+                    lastpre.type=T.t_text
                 create(delta=0)
                 first += 1
                 i = first
+                lastpre = None
             else:
+                if t.type==T.t_newline:
+                    lastpre = None
+                elif t.type==T.t_pre:
+                    lastpre = t
                 i+=1
                 
         if first:
@@ -803,8 +813,8 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
                parse_style_tags,               
-               parse_paragraphs,
                parse_preformatted,
+               parse_paragraphs,
                parse_lines,
                parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
