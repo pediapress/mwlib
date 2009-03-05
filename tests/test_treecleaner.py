@@ -33,7 +33,12 @@ def getTreeFromMarkup(raw):
     return parseString(title="Test", raw=raw, wikidb=DummyDB())
     
 def cleanMarkup(raw):
+    print "Parsing %r" % (raw,)
+    
     tree  = getTreeFromMarkup(raw)
+
+    showTree(tree)
+    print '='*20
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
@@ -51,7 +56,7 @@ def cleanMarkupSingle(raw, cleanerMethod):
     
 
 def showTree(tree):
-    parser.show(sys.stderr, tree, 0)
+    parser.show(sys.stdout, tree, 0)
     
 
 def test_fixLists():
