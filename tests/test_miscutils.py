@@ -22,7 +22,7 @@ def test_articleStartsWithInfobox1():
     raw = '''
 Some text in a paragraph
 
-Some text in a paragraph
+Some text in a paragraph [[http://ysfine.com]]
 
 {| class="infobox"
 |-

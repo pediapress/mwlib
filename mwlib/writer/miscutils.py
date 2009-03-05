@@ -20,12 +20,16 @@ def textInNode(node):
     amap = {advtree.Text:"caption", advtree.Link:"target", advtree.URL:"caption", advtree.Math:"caption", advtree.ImageLink:"caption" }
     access = amap.get(node.__class__, "")
     if access:
-        return len(getattr(node, access))
+        txt = getattr(node, access)
+        if txt:
+            return len(txt)
+        else:
+            return 0
     else:
         return 0
 
 def textBeforeInfoBox(node, infobox, txt_list=[]):
-    txt_list.append((textInNode(node), node==infobox))
+    txt_list.append((textInNode(node), node==infobox))        
     for c in node:
         textBeforeInfoBox(c, infobox, txt_list)
     sum_txt = 0    
