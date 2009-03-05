@@ -367,7 +367,7 @@ def test_removebreakingreturnsNoremove():
     raw = """
 <br/>
 <source>
-<br/>dummy code line 1 <br/> next line of code <br/>  
+int main()
 </source>
 
 <br/>
@@ -377,7 +377,6 @@ ordinary paragraph. inside <br/> tags should not be removed
 """
 
     tree, reports = cleanMarkup(raw) 
-    # the br tags inside the source tag are not converted to br nodes - they remain inside the text
     # the only br tags that should remain after cleaning are the ones inside the preformatted node
     assert numBR(tree) == 3
 
