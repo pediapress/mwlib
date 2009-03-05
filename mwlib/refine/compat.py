@@ -39,6 +39,13 @@ def _change_classes(node):
             node.caption = node.text
             node.children=[]
 
+        if node.type==T.t_complex_compat:
+            print node, node.compatnode
+            node.__class__ = node.compatnode.__class__
+            node.__dict__ = node.compatnode.__dict__
+            #node.children = [node.compatnode]
+            #node.__class__=N.Node
+            return
 
             
         klass = tok2class.get(node.type, N.Text)

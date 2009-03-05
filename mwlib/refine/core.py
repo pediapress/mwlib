@@ -6,7 +6,7 @@
 import sys
 from mwlib.utoken import tokenize, show, token as T, walknode
 from mwlib.refine import util
-from mwlib import namespace
+from mwlib import namespace, tagext
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 
@@ -31,6 +31,7 @@ T.t_complex_named_url = "named_url"
 T.t_complex_style = "style"
 T.t_complex_node = "node"
 T.t_complex_preformatted = "preformatted"
+T.t_complex_compat = "compat"
 
 T.t_vlist = "vlist"
 
@@ -755,7 +756,44 @@ class parse_paragraphs(object):
             create()
             
         self.refined.append(tokens)
-    
+
+class parse_tagextensions(object):
+    def __init__(self, tokens, refined, **kwargs):
+        self.tokens = tokens
+        self.refined = refined
+        self.tagextensions=tagext.default_registry
+        self.run()
+        
+    def run(self):
+        tokens = self.tokens
+        i = 0
+        start = None
+
+        def create():
+            txt = u''.join([x.text for x in tokens[start+1:i]])
+            
+            node = self.tagextensions[tagname](txt, tokens[start].vlist)
+            if node is None:
+                repl = []
+            else:
+                repl = [T(type=T.t_complex_compat, compatnode=node)]
+            tokens[start:i+1] = repl
+        
+        while i<len(tokens):
+            t = tokens[i]
+            if start is None and t.type==T.t_html_tag and t.tagname in self.tagextensions:
+                start = i
+                tagname = t.tagname
+            elif start is not None and t.type==T.t_html_tag_end and t.tagname==tagname:
+                create()
+                i = start+1
+                start = None
+            else:
+                i+=1
+        if start:
+            create()
+        self.refined.append(tokens)
+        
 class combined_parser(object):
     def __init__(self, parsers):
         self.parsers = parsers
@@ -816,6 +854,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
+               parse_tagextensions,
                parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
