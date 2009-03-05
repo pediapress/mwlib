@@ -18,7 +18,9 @@ def walknode(node, filt=lambda x: True):
                     yield k
         return
     
-    yield node
+    if filt(node):
+        yield node
+        
     if node.children:
         for x in node.children:
             for k in walknode(x):
