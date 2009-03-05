@@ -113,6 +113,7 @@ include mwlib/wiki.py
 include mwlib/wikidbbase.py
 include mwlib/writer/__init__.py
 include mwlib/writer/imageutils.py
+include mwlib/writer/miscutils.py
 include mwlib/writerbase.py
 include mwlib/wsgi.py
 include mwlib/xfail.py
@@ -148,6 +149,7 @@ include tests/test_imgmap.py
 include tests/test_jobsched.py
 include tests/test_math_utils.py
 include tests/test_metabook.py
+include tests/test_miscutils.py
 include tests/test_mwapidb.py
 include tests/test_mwscan.py
 include tests/test_netdb_imagedb.py
