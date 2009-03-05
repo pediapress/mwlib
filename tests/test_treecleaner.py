@@ -367,7 +367,9 @@ paragraph
     tree, reports = cleanMarkup(raw) 
     assert numBR(tree) == 0
 
-
+# mwlib.refine creates a whitespace only paragraph containing the first
+# br tag. in the old parser this first paragraph also contained the source node.
+@xfail
 def test_removebreakingreturnsNoremove():
     raw = """
 <br/>
