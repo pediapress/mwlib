@@ -25,4 +25,5 @@ mwlib/templ/nodes.c
 
 syntax: re
 ^[a-z]$
+^t[0-9]?\.py$
 
