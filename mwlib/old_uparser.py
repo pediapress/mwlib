@@ -96,11 +96,11 @@ def parseString(
     revision=None,
     lang=None,
     interwikimap=None,
+    magicwords=None
 ):
     """parse article with title from raw mediawiki text"""
     
     assert title is not None, 'no title given'
-    magicwords = None
     if raw is None:
         raw = wikidb.getRawArticle(title, revision=revision)
         assert raw is not None, "cannot get article %r" % (title,)
@@ -117,7 +117,8 @@ def parseString(
         if lang is None:
             lang = src.get('language')
             
-        magicwords = src.get('magicwords')
+        if magicwords is None:
+            magicwords = src.get('magicwords')
         if interwikimap is None and hasattr(wikidb, 'getInterwikiMap'):
             interwikimap = wikidb.getInterwikiMap(title, revision=revision)
     else:

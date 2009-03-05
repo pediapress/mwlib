@@ -1064,3 +1064,18 @@ def test_imagemod_upright():
 
     yield doit,"[[Datei:bla.jpg|upright|thumb|foobar]]", 0.75
     yield doit,"[[Datei:bla.jpg|upright=0.5|thumb|foobar]]", 0.5
+
+
+def test_imagemod_localised_magicwords():
+    magicwords = [
+        {u'aliases': [u'center', u'foobar'], u'case-sensitive': u'', u'name': u'img_center'},
+        ]
+    
+    def parsei(s, magicwords):
+        res=uparser.parseString(title='test',  raw=s, magicwords=magicwords)
+        img = res.find(parser.ImageLink)[0]
+        return img
+    
+    r=parsei(u'[[Image:bla.jpg|foobar]]', magicwords)
+    assert r.align==u'center'
+        
