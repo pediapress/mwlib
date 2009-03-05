@@ -63,10 +63,11 @@ class ImageMod(object):
         {u'aliases': [u'alt=$1'], u'case-sensitive': u'', u'name': u'img_alt'},
         ]
 
-    def __init__(self, magicwords):        
+    def __init__(self, magicwords=None):        
         self.alias_map = {}
         self.initAliasMap(self.default_magicwords)
-        self.initAliasMap(magicwords)
+        if magicwords is not None:
+            self.initAliasMap(magicwords)
 
     def initAliasMap(self, magicwords):
         for m in magicwords:            

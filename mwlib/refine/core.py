@@ -552,7 +552,7 @@ class parse_lines(object):
         self.refined.append(tokens)
         
 class parse_links(object):
-    def __init__(self, tokens, refined, lang=None, interwikimap=None, **kwargs):
+    def __init__(self, tokens, refined, lang=None, interwikimap=None, imagemod=None, **kwargs):
         self.tokens = tokens
         self.refined = refined
         self.lang = lang
@@ -564,57 +564,18 @@ class parse_links(object):
 
         self.nsmap = nsmap
             
-        
+        if imagemod is None:
+            imagemod = util.ImageMod()
+        self.imagemod = imagemod
         
         self.run()
 
     def handle_image_modifier(self, mod, node):
-        mod = mod.strip().lower()
-        if mod=='thumb' or mod=='thumbnail':
-            node.thumb = True
-            return True
-        
-        if mod in ('left', 'right', 'center', 'none'):
-            node.align = mod
-            return True
-        
-        if mod in ('frame', 'framed', 'enframed', 'frameless'):
-            node.frame = mod
-            return True
-        
-        if mod=='border':
-            node.border = True
-            return True
-
-        if mod.startswith('print='):
-            node.printargs = mod[len('print='):]
-
-        if mod.startswith('alt='):
-            node.alt = mod[len('alt='):]
-
-        if mod.startswith('link='):
-            node.link = mod[len('link='):]
-
-        if mod.endswith('px'):
-                # x200px
-                # 100x200px
-                # 200px
-                mod = mod[:-2]
-                width, height = (mod.split('x')+['0'])[:2]
-                try:
-                    width = int(width)
-                except ValueError:
-                    width = 0
-
-                try:
-                    height = int(height)
-                except ValueError:
-                    height = 0
-
-                node.width = width
-                node.height = height
-                return True
-        return False
+        mod_type, mod_match = self.imagemod.parse(mod)
+        if mod_type is None:
+            return False
+        util.handle_imagemod(node, mod_type, mod_match)
+        return True
     
     def extract_image_modifiers(self, marks, node):
         cap = None
