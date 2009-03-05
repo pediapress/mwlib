@@ -8,7 +8,7 @@
 """
 provide mechanism to support tag extensions, i.e. custom tags
 
-List of Teag Extensions:
+List of Tag Extensions:
 http://www.mediawiki.org/wiki/Category:Tag_extensions
 
 Examples for Sites and their supported tags:
