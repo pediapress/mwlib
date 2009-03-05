@@ -248,7 +248,7 @@ not_bol:
 				RET(t_text);
 			}
 		    }
-  "\n"{2,}	    {newline(); RET(t_break);}
+  "\n" ("\n" | " ")* "\n"	    {newline(); RET(t_break);}
   "\n"		    {newline(); RET(t_newline);}
   "||" | "|!" | "!!"              
 	{
