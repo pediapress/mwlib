@@ -133,10 +133,9 @@ blub
 """
     tree, reports = cleanMarkup(raw)
     showTree(tree)
-    assert len(tree.children) == 1
-    assert tree.children[0].__class__ == Paragraph
-    assert not tree.children[0].getChildNodesByClass(LangLink)
-
+    langlinks = tree.find(LangLink)
+    assert not langlinks, 'expected no LangLink instances'
+    
 def test_removeCriticalTables():
     raw = r'''
 {| class="navbox"
