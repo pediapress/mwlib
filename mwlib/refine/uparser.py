@@ -43,7 +43,7 @@ def parseString(
     else:
         input = raw
 
-    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap)
+    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap, magicwords=magicwords)
     
 #     tokens = utoken.tokenize(input, title)
 

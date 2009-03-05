@@ -806,6 +806,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
         for lang in languages:
             interwikimap[lang] = {'language': True}
 
+    kwargs['imagemod'] = util.ImageMod(kwargs.get('magicwords'))
     
     tokens = blist(tokenize(txt))
 
