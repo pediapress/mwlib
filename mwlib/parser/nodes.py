@@ -1,6 +1,7 @@
 import os
 import re    
 from mwlib import namespace
+from mwlib.refine.util import handle_imagemod
 
 if "MWREFINE" in os.environ:
     from mwlib.utoken import token as base
@@ -480,59 +481,10 @@ class ImageLink(Link):
                 idx += 1
                 continue
 
-            # FIXME: disabled for now, since I don't know what these modifiers do, and what kind of parameters they expect
-##             if mod_type == 'img_alt':
-##                 self.alt = match
-            
-            if mod_type == 'img_link':
-                self.link = match
-            
-
             del self.children[idx]
-
-            if mod_type == 'img_thumbnail':
-                self.thumb = True
-
-            if mod_type == 'img_left':
-                self.align = 'left'
-            if mod_type == 'img_right':
-                self.align = 'right'
-            if mod_type == 'img_center':
-                self.align = 'center'
-            if mod_type == 'img_none':
-                self.align = 'none'
-            if mod_type == 'img_framed':
-                self.frame = 'frame'
-            if mod_type == 'img_frameless':
-                self.frame = 'frameless'
-
-            if mod_type == 'img_border':
-                self.border = True
-
-                
-            if mod_type == 'img_upright':
-                try:
-                    scale = float(match)
-                except ValueError:
-                    scale = 0.75
-                self.upright = scale
-                
-            if mod_type == 'img_width':                
-                # x200px or 100x200px or 200px
-                width, height = (match.split('x')+['0'])[:2]
-                try:
-                    width = int(width)
-                except ValueError:
-                    width = 0
-
-                try:
-                    height = int(height)
-                except ValueError:
-                    height = 0
-
-                self.width = width
-                self.height = height
-                
+            
+            handle_imagemod(self, mod_type, match)
+            
                 
         if not self.children:
             self.children = last
