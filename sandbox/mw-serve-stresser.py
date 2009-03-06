@@ -41,11 +41,10 @@ def getRandomArticles(api, min=1, max=100):
     #"http://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=10"
     num = random.randint(min, max)
     articles = set()
-    while len(articles) < num:
+    for i in range(1+num/10):
         res = api.query(list="random", rnnamespace=0, rnlimit=10)
         if res is None or 'random' not in res:
-            log.warn('Could not get random articles')
-            time.sleep(0.5)
+            time.sleep(5)
             continue
         res = res["random"]
         for x in res:
@@ -159,6 +158,12 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
     arts = getRandomArticles(api, min=1, max=maxarticles)
     log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
+    if not arts:
+        reportError('render', metabook, res="getRandomArticlesFailed", baseurl, writer,
+                    from_email=from_email,
+                    mail_recipients=mail_recipients)
+        time.sleep(60)
+                    
     res = postRenderCommand(metabook, baseurl, serviceurl, writer)
     collection_id = res['collection_id']
     st = time.time()
