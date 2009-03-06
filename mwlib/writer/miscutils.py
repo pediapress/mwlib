@@ -49,4 +49,12 @@ def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
         return False
     return textBeforeInfoBox(article_node, infobox) <= max_text_until_infobox
 
+
+def articleStartsWithTable(article_node, max_text_until_infobox=0):
+    assert article_node.__class__ == advtree.Article, 'articleStartsWithInfobox needs to be called with Article node'
+    tables = article_node.getChildNodesByClass(advtree.Table)
+    if not tables:
+        return False
+    return textBeforeInfoBox(article_node, tables[0]) <= max_text_until_infobox
+
     
