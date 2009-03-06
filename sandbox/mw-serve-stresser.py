@@ -159,7 +159,7 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
     log.info('random articles: %r' % arts)
     metabook = getMetabook(arts)
     if not arts:
-        reportError('render', metabook, res="getRandomArticlesFailed", baseurl, writer,
+        reportError('render', metabook, "getRandomArticlesFailed", baseurl, writer,
                     from_email=from_email,
                     mail_recipients=mail_recipients)
         time.sleep(60)
