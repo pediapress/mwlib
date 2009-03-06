@@ -20,7 +20,7 @@ from mwlib import mwapidb, utils, log
 import mwlib.metabook
 
 
-RENDER_TIMEOUT_DEFAULT = 8*60 # 5 minutes
+RENDER_TIMEOUT_DEFAULT = 20*60 # 5 minutes
 LICENSE_URL = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
 
 system = 'mw-serve-stresser'
