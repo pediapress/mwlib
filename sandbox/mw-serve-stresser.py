@@ -41,12 +41,15 @@ def getRandomArticles(api, min=1, max=100):
     #"http://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=10"
     num = random.randint(min, max)
     articles = set()
-    for i in range(1+num/10):
+    steps = (1+num/10)
+    print num, steps
+    for i in range(steps):
         res = api.query(list="random", rnnamespace=0, rnlimit=10)
-        if res is None or 'random' not in res:
+        if res is None or 'query' not in res:
+            print res
             time.sleep(5)
             continue
-        res = res["random"]
+        res = res["query"]["random"]
         for x in res:
             articles.add(x["title"])
     return list(articles)[:max]
@@ -271,4 +274,6 @@ def main():
 
 
 if __name__ == '__main__':
+    #print getRandomArticles(mwapidb.APIHelper("http://en.wikipedia.org/w"), max=20)
     main()
+    
