@@ -27,8 +27,6 @@ def remove_comments(txt):
     return commentrx.sub(repl, txt)
 
 def preprocess(txt, included=True):
-    txt=remove_comments(txt)
-
     if included:
         txt = noincluderx.sub(u'', txt)
 
