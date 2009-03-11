@@ -801,17 +801,15 @@ def mark_style_tags(tokens):
     state = dict()
     
     def create():
-        assert state
-        assert start is not None
-        if i<=start:
-            return
-        
+        if not state or i<=start:
+            return False
+                
         children = tokens[start:i]
         for tag in state.keys():
             outer = T(type=T.t_complex_tag, tagname=tag, children=children)
             children = [outer]
         tokens[start:i] = [outer]
-        
+        return True
             
             
     while todo:
@@ -823,8 +821,7 @@ def mark_style_tags(tokens):
                 del tokens[i]
                 if t.tag_selfClosing:
                     continue
-                if state:
-                    create()
+                if create():
                     start += 1
                     i = start
                 start = i
@@ -837,8 +834,7 @@ def mark_style_tags(tokens):
                     i = start
                     del state[t.tagname]
             elif t.children:
-                if state and i>start:
-                    create()
+                if create():
                     i = start+1
                 assert tokens[i] is t
                 todo.append((i+1, tokens))
@@ -846,8 +842,7 @@ def mark_style_tags(tokens):
                 break
             else:
                 i+=1
-        if state:
-            create()
+        create()
             
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
