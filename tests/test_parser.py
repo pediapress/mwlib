@@ -1079,3 +1079,13 @@ def test_imagemod_localised_magicwords():
     r=parsei(u'[[Image:bla.jpg|foobar]]', magicwords)
     assert r.align==u'center'
         
+def test_paragraph_vs_italic():
+    """http://code.pediapress.com/wiki/ticket/514"""
+    r=parse("<i>first italic\n\nstill italic</i>")
+    styles = r.find(parser.Style)
+    txt = " ".join([x.asText() for x in styles])
+    assert "first italic" in txt
+    assert "still italic" in txt
+    paras = r.find(parser.Paragraph)
+    assert len(paras)==2
+    
