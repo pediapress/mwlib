@@ -47,7 +47,7 @@ def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
             infobox = table
     if not infobox:
         return False
-    return textBeforeInfoBox(article_node, infobox) <= max_text_until_infobox
+    return textBeforeInfoBox(article_node, infobox, []) <= max_text_until_infobox
 
 
 def articleStartsWithTable(article_node, max_text_until_infobox=0):
@@ -55,6 +55,6 @@ def articleStartsWithTable(article_node, max_text_until_infobox=0):
     tables = article_node.getChildNodesByClass(advtree.Table)
     if not tables:
         return False
-    return textBeforeInfoBox(article_node, tables[0]) <= max_text_until_infobox
+    return textBeforeInfoBox(article_node, tables[0], []) <= max_text_until_infobox
 
     
