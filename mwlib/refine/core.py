@@ -837,10 +837,10 @@ def mark_style_tags(tokens):
                     i = start
                     del state[t.tagname]
             elif t.children:
-                if state:
+                if state and i>start:
                     create()
-                    start += 1
-                    i = start
+                    i = start+1
+                assert tokens[i] is t
                 todo.append((i+1, tokens))
                 todo.append((0, t.children))
                 break
