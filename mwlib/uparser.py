@@ -4,9 +4,11 @@
 
 import os
 
-if "MWREFINE" in os.environ:
-    import sys
-    sys.stderr.write("USING NEW REFINE PARSER\n")
+use_mwrefine = (os.environ.get("MWREFINE", "").lower()!="no")
+
+if use_mwrefine:
     from mwlib.refine.uparser import simpleparse, parseString
 else:
+    import sys
+    sys.stderr.write("USING OLD PARSER\n")
     from mwlib.old_uparser import simpleparse, parseString

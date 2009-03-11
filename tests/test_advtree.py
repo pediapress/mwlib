@@ -5,7 +5,6 @@
 
 import sys
 import os
-mwrefine = "MWREFINE" in os.environ
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
@@ -16,7 +15,7 @@ from mwlib.uparser import parseString
 from mwlib import parser
 from mwlib.xfail import xfail
 
-if mwrefine:
+if os.environ.get("MWREFINE", "").lower()!="no":
     oxfail = lambda x: x
     rxfail = xfail
 else:

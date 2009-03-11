@@ -3,7 +3,7 @@ import re
 from mwlib import namespace
 from mwlib.refine.util import handle_imagemod
 
-if "MWREFINE" in os.environ:
+if os.environ.get("MWREFINE", "").lower()!="no":
     from mwlib.utoken import token as base
 else:
     base = object

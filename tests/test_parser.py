@@ -6,8 +6,6 @@
 
 import os
 
-mwrefine = "MWREFINE" in os.environ
-
 from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
 from mwlib.xfail import xfail
@@ -15,7 +13,7 @@ from mwlib.dummydb import DummyDB
 
 parse = uparser.simpleparse
 
-if mwrefine:
+if os.environ.get("MWREFINE", "").lower()!="no":
     oxfail = lambda x: x
     rxfail = xfail
 else:
