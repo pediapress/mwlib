@@ -1091,3 +1091,14 @@ def test_paragraph_vs_italic():
     paras = r.find(parser.Paragraph)
     assert len(paras)==2
     
+
+def test_pull_in_styletags_1():
+    s='<b> one\n\n== two ==\n\nthree\n</b>\nfour\n'
+    r=uparser.simpleparse(s)
+    styles = r.find(parser.Style)
+    txt = " ".join(x.asText() for x in styles)
+    assert "one" in txt
+    assert "two" in txt
+    assert "three" in txt
+    assert "four" not in txt
+    
