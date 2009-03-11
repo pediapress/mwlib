@@ -229,7 +229,6 @@ def test_blockquote_with_two_paras():
     print 'BLOCKQUOTE:', node.children
     assert len(node.children)==1, "expected exactly one child node"
 
-@xfail
 def test_newlines_in_bold_tag():
     """http://code.pediapress.com/wiki/ticket/41"""
     node = parse('<b>test\n\nfoo</b>')
@@ -568,8 +567,11 @@ def test_source_tag():
 
 def test_self_closing_style():
     "http://code.pediapress.com/wiki/ticket/93"
-    s=parse("<b />bla").find(parser.Style)[0]
-    assert s.children==[], 'expected empty style node'
+    styles=parse("<b />bla").find(parser.Style)
+    if not styles:
+        return
+    s = styles[0]
+    assert s.children==[], 'expected empty or no style node'
     
 def test_timeline():
     """http://code.pediapress.com/wiki/ticket/86 """
