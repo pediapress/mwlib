@@ -794,9 +794,61 @@ parse_style_tags = combined_parser(
      get_recursive_tag_parser("big"),
      ])
 
-                
+def mark_style_tags(tokens):
+    tags = set("tt strike ins del small sup sub b center strong cite i u em big".split())
+    todo = [(0, tokens)]
+
+    state = dict()
+    
+    def create():
+        assert state
+        assert start is not None
+        if i<=start:
+            return
         
-                 
+        children = tokens[start:i]
+        for tag in state.keys():
+            outer = T(type=T.t_complex_tag, tagname=tag, children=children)
+            children = [outer]
+        tokens[start:i] = [outer]
+        
+            
+            
+    while todo:
+        i, tokens = todo.pop()
+        start = i
+        while i<len(tokens):
+            t = tokens[i]
+            if t.type==T.t_html_tag and t.tagname in tags:
+                del tokens[i]
+                if t.tag_selfClosing:
+                    continue
+                if state:
+                    create()
+                    start += 1
+                    i = start
+                start = i
+                state[t.tagname]=1
+            elif t.type==T.t_html_tag_end and t.tagname in tags:
+                del tokens[i]
+                if t.tagname in state:
+                    create()
+                    start += 1
+                    i = start
+                    del state[t.tagname]
+            elif t.children:
+                if state:
+                    create()
+                    start += 1
+                    i = start
+                todo.append((i+1, tokens))
+                todo.append((0, t.children))
+                break
+            else:
+                i+=1
+        if state:
+            create()
+            
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -812,7 +864,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
-               parse_style_tags,               
+               # parse_style_tags,               
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
@@ -823,5 +875,6 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refined = []
     combined_parser(parsers)(tokens, refined, interwikimap=interwikimap, **kwargs)
+    mark_style_tags(tokens)
     return tokens
 
