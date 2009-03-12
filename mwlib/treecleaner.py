@@ -104,7 +104,7 @@ class TreeCleaner(object):
                             Cite: [Item, Reference],
                             Code: [PreFormatted],
                             ImageLink: [Reference],
-                            Div: [Reference],
+                            Div: [Reference, Item],
                             }
 
         
