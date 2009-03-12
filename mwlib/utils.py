@@ -287,7 +287,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         ignore_errors is True, and the request failed
     @rtype: str
     """
-    
+
     if not post_data and url in fetch_cache:
         return fetch_cache[url]
     

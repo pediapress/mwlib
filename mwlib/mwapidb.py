@@ -196,6 +196,9 @@ class APIHelper(object):
         self.query_cache = {}
         self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
         self.opener.addheaders = [('User-agent', 'mwlib')]
+
+    def __repr__(self):
+        return "<%s at %s baseurl=%s>" %(self.__class__.__name__, id(self), self.base_url) 
     
     def is_usable(self):
         result = self.query(meta='siteinfo', ignore_errors=True)
@@ -501,6 +504,41 @@ class ImageDB(object):
             return [t['title'].split(':', 1)[-1] for t in result['templates']]
         except KeyError:
             return []
+
+    def getContributorsFromInformationTemplate(self, raw, title, wikidb):
+                
+        def getUserLinks(raw):
+            def isUserLink(node):
+                return isinstance(node, parser.NamespaceLink) and node.namespace == namespace.NS_USER
+            
+            result = list(set([
+                u.target
+                for u in uparser.parseString(title,
+                    raw=raw,
+                    wikidb=wikidb,
+                ).filter(isUserLink)
+            ]))
+            result.sort()
+            return result
+            
+        expander = Expander(u'', title, wikidb)       
+        template = find_template(raw, 'Information')
+        if template is not None:
+            author = get_template_args(template, expander).get('Author', '').strip()
+            if author:
+                users = getUserLinks(author)
+                if users:
+                    users = list(set(users))
+                    users.sort()
+                    return users
+                
+                node = uparser.parseString('', raw=author, wikidb=wikidb)
+                advtree.extendClasses(node)
+                return [node.getAllDisplayText()]
+        
+        return getUserLinks(raw)
+
+
     
     def getContributors(self, name, wikidb=None):
         """Return list of image contributors
@@ -534,40 +572,7 @@ class ImageDB(object):
         raw = wikidb.getRawArticle(title)
         if not raw:
             return None
-
-        expander = Expander(u'', title, wikidb)
-        
-        
-        def getUserLinks(raw):
-            def isUserLink(node):
-                return isinstance(node, parser.NamespaceLink) and node.namespace == namespace.NS_USER
-            
-            result = list(set([
-                u.target
-                for u in uparser.parseString(title,
-                    raw=raw,
-                    wikidb=wikidb,
-                ).filter(isUserLink)
-            ]))
-            result.sort()
-            return result
-            
-        
-        template = find_template(raw, 'Information')
-        if template is not None:
-            author = get_template_args(template, expander).get('Author', '').strip()
-            if author:
-                users = getUserLinks(author)
-                if users:
-                    users = list(set(users))
-                    users.sort()
-                    return users
-                
-                node = uparser.parseString('', raw=author, wikidb=wikidb)
-                advtree.extendClasses(node)
-                return [node.getAllDisplayText()]
-        
-        users = getUserLinks(raw)
+        users = self.getContributorsFromInformationTemplate(raw, title, wikidb)
         if users:
             return users
         
