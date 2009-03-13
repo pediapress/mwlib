@@ -721,7 +721,7 @@ class WikiDB(wikidbbase.WikiDBBase):
             kwargs['rvstartid'] = revision
         result = self.api_helper.query(**kwargs)
         if result is None:
-            if _rvlimit == 500:
+            if _rvlimit > 50:
                 # some MWs only return the 50 last edits 
                 return self.getAuthors(title, revision=revision, _rvlimit=50)
             return None

@@ -88,7 +88,7 @@ def buildzip():
         action='store_true',
     )
     parser.add_option("-f", "--fastmode",
-        help='use EXPERIMENTAL NOT WORKING fast zip creator mode',
+        help='use EXPERIMENTAL fast zip creator mode',
         action='store_true',
     )
     options, args = parser.parse_args()

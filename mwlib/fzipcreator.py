@@ -1,7 +1,19 @@
 #! /usr/bin/env python
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
+
+"""
+Rewrite of zipcreator.py which should be faster, 
+since it relies totaly on the api.php and does not use the parser
+
+TODO:
+ * check if redirects work with revisions
+ * check if there are any other normalization issues
+ * store expanded license information
+ * use login to work with bot flag
+ * testing
+"""
+
 
 import os
 import re
@@ -61,18 +73,16 @@ class ZipCreator(object):
         @type num_threads: int
         """
 
-        
+        self.API_result_limit = 500 # 5000 for bots
+        self.API_request_limit = 50 # at max 50 titles at once
         self.zf = zf
         self.imagesize = imagesize
         self.status = status
         self.articles = {}
         self.templates = {}
-#        self.sources = {}
         self.images = {}
         self.node_stats = {} 
         self.num_articles = num_articles
-#       self.article_count = 0
-#       self.image_infos = set()    
         self.zf_lock = threading.RLock()
         if num_threads > 0:
             self.jobsched = jobsched.JobScheduler(num_threads)
@@ -148,7 +158,6 @@ class ZipCreator(object):
         
 
     def _fetchArticles(self, wikidb, jobs):
-        # NO SUPPORT FOR REVISIONS
         # NO ERROR HANDLING
         image_names = set()
         template_names = set()
@@ -177,7 +186,8 @@ class ZipCreator(object):
                     template_names.add(template["title"])
                 title = self.redirects.get(page["title"], page["title"])
                 if "revisions" in page:
-                    articles[title]['content'] =page["revisions"][0]["*"]
+                    articles[title]['content'] = page["revisions"][0]["*"]
+                    articles[title]['revision'] = unicode(page["revisions"][0]["revid"])
                 else:
                     articles[title] = None
 
@@ -191,17 +201,32 @@ class ZipCreator(object):
                         kargs[str(k)] = v
                 _fetch(**kargs)
 
-        titles = list(job["title"] for job in jobs)
-        for ftitles in splitlist(titles, max=50):
-            _fetch(
-                titles="|".join(ftitles),
-                redirects=1,
-                prop='revisions|templates|images',
-                rvprop='content',
-                imlimit=500,
-                tllimit=500,
-                )
-       
+        
+        kwargs = dict(redirects=1,
+                      prop='revisions|templates|images',
+                      rvprop='ids|content',
+                      imlimit=self.API_result_limit,
+                      tllimit=self.API_result_limit)
+
+        # prepare both, revids will be added
+        titles = list(job['title'] for job in jobs if not job['revision'])
+        revids = list(job['revision'] for job in jobs if job['revision'])
+
+        # fetch by title
+        if titles:
+            for x in splitlist(titles, max=self.API_request_limit):
+                k = kwargs.copy()
+                k['titles'] = "|".join(x)
+                _fetch(**k)
+
+        # fetch by revids
+        if revids:
+            for x in splitlist(revids, max=self.API_request_limit):
+                k = kwargs.copy()
+                k['revids'] = "|".join(x)
+                del k["redirects"] # FIXME? redirects won't be resolved ...
+                _fetch(**k)
+
         return template_names, image_names
         
 
@@ -233,13 +258,13 @@ class ZipCreator(object):
                         templates[title]['content'] = None
 
         titles = list(template_names.union(print_templates))
-        for ftitles in splitlist(titles, max=50):
+        for ftitles in splitlist(titles, max=self.API_request_limit):
             _fetch(
                 titles="|".join(ftitles),
                 redirects=1,
                 prop='revisions|categories',
                 rvprop='content',
-                cllimit=500,
+                cllimit=self.API_result_limit,
             )
 
         # substitute print templates
@@ -305,7 +330,7 @@ class ZipCreator(object):
                 _fetch(**kargs)
             """
 
-        for ftitles in splitlist(list(image_names), max=50):
+        for ftitles in splitlist(list(image_names), max=self.API_request_limit):
             _fetch_meta(
                 titles="|".join(ftitles),
                 redirects=1,
@@ -313,8 +338,8 @@ class ZipCreator(object):
                 prop='imageinfo|templates|revisions',
                 iiprop="url",
                 iiurlwidth=str(self.imagesize),
-                iilimit=500,
-                tllimit=500
+                iilimit=self.API_result_limit,
+                tllimit=self.API_result_limit
                 )
 
 
@@ -344,13 +369,13 @@ class ZipCreator(object):
                           if i and i["api"] == api and not i["templates"]]
             if not titles: # we should not need to fetch templates from the local wiki anymore
                 continue
-            for ftitles in splitlist(titles, max=50):
+            for ftitles in splitlist(titles, max=self.API_request_limit):
                 _fetch_shared_meta(api,
                     titles="|".join(ftitles),
                     redirects=1,
                     rvprop='content',
                     prop='templates|revisions',
-                    tllimit=500
+                    tllimit=self.API_result_limit
                     )
 
         # set contributors
@@ -397,7 +422,7 @@ class ZipCreator(object):
             return 
 
         def job(job_id):
-            contributors = wikidb.getAuthors(object["title"]) # FIXME revision
+            contributors = wikidb.getAuthors(object["title"], object.get("revision"), self.API_result_limit)
             if contributors:
                 object["contributors"] = contributors
 
@@ -463,6 +488,7 @@ class ZipCreator(object):
             licenses=self.licenses
         )
         self.addObject('content.json', json.dumps(data))
+#        del data["sources"]
 #        pretty.pprint(data)
 
 
@@ -481,12 +507,18 @@ class ZipCreator(object):
             template_names, image_names = self._fetchArticles(wikidb, jobs)
 
             # get all templates or their print version
-            self._fetchTemplates(wikidb, template_names)
-
+            def _getTemplates(jobname):
+                self._fetchTemplates(wikidb, template_names)
             
             # get images
-            imagedb = jobs[0]['imagedb']
-            self._fetchImages(wikidb, imagedb, image_names)
+            def _getImageData(jobname):
+                imagedb = jobs[0]['imagedb']
+                self._fetchImages(wikidb, imagedb, image_names)
+
+            # fetch image data and templates in parallel
+            self.jobsched.add_job("_getTemplates", _getTemplates)
+            self.jobsched.add_job("_getImageData", _getImageData)
+            self.jobsched.join()
 
             # get article contributors
             for a in self.articles.values():
@@ -497,10 +529,8 @@ class ZipCreator(object):
                 self.scheduleImageBinary(image)
             
             # get contributors for images w/o 
-            apis = set(i["api"] for i in self.images.values() if i)
+            apis = set(i["api"] for i in self.images.values() if i and i["api"])
             for api in apis:
-                if not api:
-                    continue
                 _wikidb = mwapidb.WikiDB(api_helper=api)
                 for i in self.images.values():
                     if i and not i["contributors"] and i["api"] == api:
@@ -508,6 +538,7 @@ class ZipCreator(object):
                         
         self.jobsched.join()
         self.writeContent()
+
 
 
     def check(self):
@@ -574,6 +605,7 @@ def make_zip_file(output, env,
         # fetched -- PDFs should be generated nevertheless
         #z.check(articles)
         z.addObject('metabook.json', json.dumps(env.metabook))
+#        pretty.pprint(env.metabook)
 
         zf.close()
         if os.path.exists(output): # Windows...
@@ -585,7 +617,24 @@ def make_zip_file(output, env,
     
         if status is not None:
             status(progress=100)
+#        checkzip(output)
         return output
     finally:
         if os.path.exists(tmpzip):
             utils.safe_unlink(tmpzip)
+        
+
+def checkzip(zip_filename):
+    "debug code"
+    import writerbase, wiki, zipwiki
+    env = wiki.makewiki(zip_filename)
+    env.wiki = zipwiki.Wiki(zip_filename)
+    env.images = zipwiki.ImageDB(zip_filename)
+    book = writerbase.build_book(env)
+    print book
+    print book.children
+    for i, obj in enumerate(book.allchildren()):
+        if obj.__class__.__name__ == "ImageLink":
+            imgPath = env.images.getDiskPath(obj.target)
+            print obj, imgPath
+    print i, "children in total"
