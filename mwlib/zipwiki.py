@@ -15,6 +15,14 @@ except ImportError:
 
 from mwlib import wikidbbase, namespace
 
+def nget(dict, name):
+    "normalize names"
+    try:
+        return dict[name]
+    except KeyError:
+        return dict[name[0].upper() + name[1:]] 
+
+
 class Wiki(wikidbbase.WikiDBBase):
     def __init__(self, zipfile):
         """
@@ -33,7 +41,7 @@ class Wiki(wikidbbase.WikiDBBase):
     
     def _getArticle(self, title, revision=None):
         try:
-            article = self.articles[title]
+            article = nget(self.articles,title)
             if revision is None or article['revision'] == revision:
                 return article
         except KeyError:
@@ -98,10 +106,8 @@ class Wiki(wikidbbase.WikiDBBase):
         ns, name, full = namespace.splitname(name, namespace.NS_TEMPLATE)
         if ns!=namespace.NS_TEMPLATE:
             return self.getRawArticle(full)
-        
-        
         try:
-            result = self.templates[name]['content']
+            result = nget(self.templates,name)['content']
             if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
                 return unicode(result, 'utf-8')
             return result
@@ -150,12 +156,14 @@ class ImageDB(object):
     
     def getDiskPath(self, name, size=None):
         try:
-            return self.diskpaths[name]
+            return nget(self.diskpaths,name)
         except KeyError:
             pass
         try:
             data = self.zf.read('images/%s' % name.replace("'", '-').encode('utf-8'))
         except KeyError: # no such file
+            if name[0] != name[0].upper():
+                return self.getDiskPath(name[0].upper() + name[1:], size)
             return None
         
         try:
@@ -175,13 +183,13 @@ class ImageDB(object):
     
     def getImageTemplates(self, name, wikidb=None):
         try:
-            return self.images[name]['templates']
+            return nget(self.images,name)['templates']
         except KeyError:
             return []
     
     def getContributors(self, name, wikidb=None):
         try:
-            return self.images[name]['contributors']
+            return nget(self.images,name)['contributors']
         except KeyError:
             return []
     
@@ -190,13 +198,13 @@ class ImageDB(object):
     
     def getURL(self, name, size=None):
         try:
-            return self.images[name]['url']
+            return nget(self.images, name)['url']
         except KeyError:
             return None
     
     def getDescriptionURL(self, name):
         try:
-            return self.images[name]['descriptionurl']
+            return nget(self.images,name)['descriptionurl']
         except KeyError:
             return None
     
