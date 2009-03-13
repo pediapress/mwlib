@@ -806,8 +806,7 @@ def test_link_with_quotes():
     """http://code.pediapress.com/wiki/ticket/303"""
     r=parse("[[David O'Leary]]")
     link = r.find(parser.ArticleLink)[0]
-    assert link
-    assert link.children[0].caption == "David O'Leary", 'Link caption no fully detected'
+    assert link.target == "David O'Leary", 'Link target not fully detected'
 
 def test_no_tab_removal():
     d = DummyDB()
