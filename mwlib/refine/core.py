@@ -653,7 +653,7 @@ class parse_links(object):
                         sub = tokens[marks[1]+1:marks[-1]]
 
                     if sub is None:
-                        sub = [T(type=T.t_text, start=0, len=0, text=target)]
+                        sub = [] #T(type=T.t_text, start=0, len=0, text=target)]
                         
                     node.children = sub
                     tokens[start:i+1] = [node]
