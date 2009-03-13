@@ -157,15 +157,12 @@ def parse_imagemap(tokens, refined, **kwargs):
     refined.append(tokens)
     
 def parse_math(tokens, refined, **kwargs):
-    
     get_recursive_tag_parser("math")(tokens, [], **kwargs)
     
     for t in tokens:
         if t.tagname=='math':
             t.math = T.join_as_text(t.children)
             del t.children[:]
-            
-            
     refined.append(tokens)
     
 def parse_gallery(tokens, refined, **kwargs):
@@ -864,7 +861,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_paragraphs,
                parse_lines,
                parse_tagextensions,
-               parse_math, parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
+               parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_ref, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
 
 

@@ -598,6 +598,10 @@ def test_math_stray():
     links=parse("<math />[[foobar]]").find(parser.Link)
     assert links, "expected a link"
 
+def test_math_basic():
+    m=parse("<math>foobar</math>").find(parser.Math)[0]
+    assert m.caption=="foobar"
+    
 def test_timeline_stray():
     """http://code.pediapress.com/wiki/ticket/102"""
     links=parse("</timeline>[[foobar]]").find(parser.Link)
