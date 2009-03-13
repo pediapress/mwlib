@@ -8,16 +8,17 @@ import re
 import tempfile
 import threading
 import zipfile
+import urlparse
 try:
     import json
 except ImportError:
     import simplejson as json
 
-from mwlib import expander, jobsched, metabook, mwapidb, parser, uparser, utils, dummydb
-from mwlib.recorddb import RecordDB
+from mwlib import jobsched, metabook 
+from mwlib import mwapidb, utils, dummydb, namespace
 import mwlib.log
 import pprint
-pretty =  pprint.PrettyPrinter(indent=4)
+pretty =  pprint.PrettyPrinter(indent=1)
 
 
 # ==============================================================================
@@ -27,11 +28,16 @@ log = mwlib.log.Log("fzipcreator")
 # ==============================================================================
 
 def splitlist(list, max=50):
+    "split a list in multiple parts"
     parts = []
     while len(list):
         parts.append(list[:max])
         list = list[max:]
     return parts
+
+def stripNS(title):
+    assert ":" in title
+    return title.split(":",1)[1]
 
 class ZipCreator(object):
 
@@ -162,11 +168,20 @@ class ZipCreator(object):
     def _fetchArticles(self, wikidb, jobs):
         # NO SUPPORT FOR REVISIONS
         # NO ERROR HANDLING
-        # CONTENT NOT STORED
         image_names = set()
         template_names = set()
         articles = self.articles # title -> {content, title}
 
+        for job in jobs:
+            d = dict(title=job['title'],
+                     revision=job['revision'],
+                     content=None,
+                     contributors=[],
+                     source = wikidb.getSource(job['title'], job['revision']),
+                     url = wikidb.getURL(job['title'], job['revision'])
+                     )
+            self.articles[job["title"]] = d
+ 
         def _fetch(**kargs):
             res =  wikidb.api_helper.query(**kargs)
             assert not "warnings" in res
@@ -180,8 +195,7 @@ class ZipCreator(object):
                     template_names.add(template["title"])
                 title = self.redirects.get(page["title"], page["title"])
                 if "revisions" in page:
-                    articles[title] = dict(content=page["revisions"][0]["*"],
-                                           title=title)
+                    articles[title]['content'] =page["revisions"][0]["*"]
                 else:
                     articles[title] = None
 
@@ -206,16 +220,11 @@ class ZipCreator(object):
                 tllimit=500,
                 )
        
-        # do something with the articles
-        print len(template_names), "template names"
-        print len(image_names), "image names"
-        print len(articles), "articles"
         return template_names, image_names
         
 
     def _fetchTemplates(self, wikidb, template_names):
         # NO ERROR HANDLING
-        # CONTENT NOT STORED
         print_templates = set()
         if wikidb.print_template_pattern:
             for name in template_names:
@@ -237,9 +246,9 @@ class ZipCreator(object):
                                           title=title)
                 # SKIP IF IN EXCLUDE CAT
                 for c in page.get("categories", []):
-                    cname = c["title"].split(":",1)[1] # NS stripped
+                    cname = stripNS(c["title"]) # NS stripped
                     if cname == wikidb.template_exclusion_category:
-                        del templates[title]
+                        templates[title]['content'] = None
 
         titles = list(template_names.union(print_templates))
         for ftitles in splitlist(titles, max=50):
@@ -257,15 +266,16 @@ class ZipCreator(object):
             if pname in templates:
                 templates[name]["content"] = templates[pname]["content"]
                 del templates[pname]
-
-        # do something with the articles
-        print len(templates), "templates of", len(template_names)
-        print len(template_names) - len(templates), "templates excluded in print"
+                
+        # filter  blacklisted templates
+        tbl = set(wikidb.template_blacklist) 
+        for title, item in self.templates.items():
+            if stripNS(title).lower() in tbl:
+                item["content"] = None
 
 
     def _fetchImages(self, wikidb, imagedb, image_names):
         # NO ERROR HANDLING
-        # CONTENT NOT STORED
         images = self.images
         for name in image_names:
             images[name] = dict(title=name, 
@@ -299,8 +309,11 @@ class ZipCreator(object):
                     if url and url.startswith('/'):
                         images[title]["url"]= urlparse.urljoin(imagedb.api_helper.base_url, url)
                     images[title]["api"] = mwapidb.get_api_helper(ii["descriptionurl"] or url)
+                else:
+                    images[title] = None
+                    continue 
                 for template in page.get("templates",[]):
-                    images[title]["templates"].append(template["title"])
+                    images[title]["templates"].append(stripNS(template["title"]))
                 if "revisions" in page:
                     images[title]["content"] = page["revisions"][0]["*"]
             """
@@ -333,7 +346,7 @@ class ZipCreator(object):
 #                pretty.pprint(page)
                 title = self.redirects.get(page["title"], page["title"])
                 for template in page.get("templates",[]):
-                    images[title]["templates"].append(template["title"])
+                    images[title]["templates"].append(stripNS(template["title"]))
                 images[title]["content"] = page["revisions"][0]["*"]
             for d in res.get("query-continue", {}).values():
                 for k,v in d.items(): # dict of len(1)
@@ -341,12 +354,12 @@ class ZipCreator(object):
                 _fetch_shared_meta(api, **kargs)
 
 
-        apis = set(i["api"] for i in images.values())
+        apis = set(i["api"] for i in images.values() if i)
         for api in apis:
             if not api:
                 continue
             titles = [i["title"] for i in images.values() \
-                          if i["api"] == api and not i["templates"]]
+                          if i and i["api"] == api and not i["templates"]]
             if not titles: # we should not need to fetch templates from the local wiki anymore
                 continue
             for ftitles in splitlist(titles, max=50):
@@ -363,35 +376,32 @@ class ZipCreator(object):
         _dummydb = dummydb.DummyDB()  
         for title, image in images.items():
             # parse contributors from "Template:Information" if available
-            if image["content"] and "Template:Information" in image["templates"]:
+            if image and image["content"] and "Information" in image["templates"]:
                 contributors = get_contributors(image["content"], title, _dummydb)
                 if contributors:
                     image["contributors"] = contributors
 
-        print len(images), "images"
-        print len(list(i for i in images.values() if i["contributors"])), "images with contributors"
-        # --- start threaded jobs to get the binaries
-
-
 
     def scheduleImageBinary(self, image):
-        
+        if not image:
+            return
+
         def job(job_id):
             url = image["thumburl"] or image["url"]
             assert url
             ext = url.rsplit('.')[-1]
-            size = None # FIXME
+            size = self.imagesize
             if size is not None:
                 ext = '%dpx.%s' % (size, ext)
             else:
                 ext = '.%s' % ext
             filename = os.path.join(self.tmpdir, utils.fsescape(image["title"] + ext))    
             if not utils.fetch_url(url, ignore_errors=True, output_filename=filename):
-                log.warn('Could not get image %r' % name)
+                log.warn('Could not get image %r' % image["name"])
                 return
             self.zf_lock.acquire()
             try:
-                zipname = u"images/%s" % image["title"].replace("'", '-')
+                zipname = u"images/%s" % stripNS(image["title"]).replace("'", '-')
                 self.zf.write(filename, zipname.encode("utf-8"))
             finally:
                 self.zf_lock.release()
@@ -401,13 +411,77 @@ class ZipCreator(object):
 
 
     def scheduleContributors(self, object, wikidb):
-        
+        if not object:
+            return 
+
         def job(job_id):
             contributors = wikidb.getAuthors(object["title"]) # FIXME revision
             if contributors:
                 object["contributors"] = contributors
 
         self.jobsched.add_job(object["title"], job)
+
+
+    def writeContent(self):
+
+        articles = {}
+        templates = {}
+        images = {}
+        sources = {}
+
+        def istemplate(name):
+            ns, partial, full = namespace.splitname(name)
+            return ns == namespace.NS_TEMPLATE
+
+
+        # prepare articles & sources
+        allpages = self.articles.items() + self.templates.items()
+        
+        for name, item in allpages:
+            if istemplate(name):
+                continue
+            articles[name] = {
+                'content-type': 'text/x-wiki',
+                'revision': item.get('revision'),
+                'content': item['content'],
+                'url': item.get('url'),
+                'authors': item.get('contributors',[]),
+                }
+            src  = item.get('source')
+            if src and 'url' in src:
+                articles[name]['source-url'] = src['url']
+                if src['url'] not in sources:
+                    sources[src['url']] = src
+
+        # prepare templates
+        for name, item in self.templates.items():
+            if not istemplate(name):
+                continue
+            ns, partial, full = namespace.splitname(name)
+            if ns==namespace.NS_TEMPLATE:
+                templates[partial] = {
+                    'content-type': 'text/x-wiki',
+                    'content': item['content'],
+                    }
+
+        # prepare images
+        for name, item in self.images.items():
+            if not item:
+                continue
+            images[stripNS(name)] = dict(url = item["thumburl"] or item['url'],
+                                         descriptionurl = item['descriptionurl'],
+                                         templates =  item['templates'],
+                                         contributors = item['contributors'])
+            
+        data = dict(
+            articles=articles,
+            templates=templates,
+            sources=sources,
+            images=images,
+        )
+        self.addObject('content.json', json.dumps(data))
+#        pretty.pprint(data)
+
 
 
     def join(self):
@@ -424,13 +498,10 @@ class ZipCreator(object):
             # get all article text next to template and image names 
             template_names, image_names = self._fetchArticles(wikidb, jobs)
 
-            # get all blacklisted templates, all excluded templates
-            tbl = set(wikidb.template_blacklist) # NS is stripped
-            template_names = set(t for t in template_names if not t.split(":",1)[1] in tbl)
-
             # get all templates or their print version
             self._fetchTemplates(wikidb, template_names)
 
+            
             # get images
             imagedb = jobs[0]['imagedb']
             self._fetchImages(wikidb, imagedb, image_names)
@@ -444,21 +515,35 @@ class ZipCreator(object):
                 self.scheduleImageBinary(image)
             
             # get contributors for images w/o 
-            apis = set(i["api"] for i in self.images.values())
+            apis = set(i["api"] for i in self.images.values() if i)
             for api in apis:
                 if not api:
                     continue
                 _wikidb = mwapidb.WikiDB(api_helper=api)
                 for i in self.images.values():
-                    if not i["contributors"] and i["api"] == api:
+                    if i and not i["contributors"] and i["api"] == api:
                         self.scheduleContributors(i, _wikidb)
                         
         self.jobsched.join()
-        for i in self.images.values():
-            if not i["api"]:
-                print i
+        self.writeContent()
 
 
+    def check(self):
+        for item in self.articles.values():
+            try:
+                article = self.articles[item['title']]
+            except KeyError:
+                raise RuntimeError('Could not fetch article %r' % item['title'])
+            if not article.get('url'):
+                raise RuntimeError('Have no URL for article %r' % item['title'])
+            if not article.get('source-url'):
+                raise RuntimeError('Have no source URL for article %r' % item['title'])
+            if not article.get('content'):
+                raise RuntimeError('Have empty content for article %r' % item['title'])
+            if not article['source-url'] in self.sources:
+                raise RuntimeError('Unknown source URL %r for article %r' % (
+                    article['source-url'], item['title']),
+                )
 
 def make_zip_file(output, env,
     status=None,
@@ -512,12 +597,7 @@ def make_zip_file(output, env,
         # using check() is a bit rigorous: sometimes articles just cannot be
         # fetched -- PDFs should be generated nevertheless
         #z.check(articles)
-
         z.addObject('metabook.json', json.dumps(env.metabook))
-
-        # add stats for later analysis
-        z.node_stats["Chapter"] = len(metabook.get_item_list(env.metabook, filter_type='chapter'))
-        z.addObject('node_stats.json', json.dumps(z.node_stats)) 
 
         zf.close()
         if os.path.exists(output): # Windows...
