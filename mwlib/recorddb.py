@@ -43,7 +43,6 @@ class RecordDB(object):
                 }
             
             return r
-    
                 
         self.articles[name] = {
             'revision': revision,

@@ -221,12 +221,14 @@ class ZipCreator(object):
             self.addImage(*i)
         self.jobsched.join()
       
-        self.addObject('content.json', json.dumps(dict(
+        data = dict(
             articles=self.articles,
             templates=self.templates,
             sources=self.sources,
             images=self.images,
-        )))
+        )
+        self.addObject('content.json', json.dumps(data))
+
     
     def fetchArticle(self, title, revision, wikidb):
         def fetch_article_job(job_id):
