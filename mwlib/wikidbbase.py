@@ -52,7 +52,10 @@ class WikiDBBase(object):
         if isinstance(link, (parser.LangLink, parser.InterwikiLink)):
             if not hasattr(self, 'getInterwikiMap'):
                 return None
-            prefix, target = link.full_target.split(':', 1)
+            try:
+                prefix, target = link.full_target.split(':', 1)
+            except ValueError:
+                return None
             prefix = prefix.lower()
             interwikimap = self.getInterwikiMap(title, revision=revision)
             if interwikimap and prefix in interwikimap:

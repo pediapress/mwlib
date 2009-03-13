@@ -49,8 +49,9 @@ def parseString(
 
 #     a = parser.Parser(tokens, title, lang=lang, interwikimap=interwikimap).parse()
     a.caption = title
-#     for x in postprocessors:
-#         x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)
+    from mwlib.old_uparser import postprocessors
+    for x in postprocessors:
+        x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)
     
     return a
 
