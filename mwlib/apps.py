@@ -130,7 +130,6 @@ def buildzip():
             else:
                 from mwlib import zipcreator
 
-        
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)
             

@@ -188,5 +188,14 @@ class OptionParser(optparse.OptionParser):
         if self.options.editor:
             env.metabook['editor'] = unicode(self.options.editor, 'utf-8')
         
+        # add default licenses
+        if self.options.config.startswith(":"):
+            mw_license_url = wiki.wpwikis.get(self.options.config[1:])['mw_license_url']
+            env.metabook.setdefault("licenses", []).append(dict(mw_license_url=mw_license_url,
+                                                                type="license"))
+
+
+
+
         return env
     

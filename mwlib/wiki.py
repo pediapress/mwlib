@@ -115,11 +115,13 @@ dispatch = dict(
     wiki = dict(mwapi=wiki_mwapi, cdb=wiki_cdb, net=wiki_net, zip=wiki_zip)
 )
 
+_en_license_url = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
 wpwikis = dict(
-    de = 'http://de.wikipedia.org/w/',
-    en = 'http://en.wikipedia.org/w/',
-    enwb = 'http://en.wikibooks.org/w',
-    commons = 'http://commons.wikimedia.org/w/',
+    de = dict(baseurl='http://de.wikipedia.org/w/', 
+              mw_license_url='http://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'),
+    en = dict(baseurl='http://en.wikipedia.org/w/', mw_license_url=_en_license_url),
+    enwb = dict(baseurl='http://en.wikibooks.org/w', mw_license_url=_en_license_url),
+    commons = dict(baseurl='http://commons.wikimedia.org/w/', mw_license_url=_en_license_url)
     )
 
 
@@ -206,8 +208,8 @@ def _makewiki(conf,
     
     url = None
     if conf.startswith(':'):
-        url = wpwikis.get(conf[1:])
-    
+        url = wpwikis.get(conf[1:])['baseurl']
+
     if conf.startswith("http://") or conf.startswith("https://"):
         url = conf
 
@@ -239,6 +241,8 @@ def _makewiki(conf,
         if metabook is None:
             res.metabook = res.wiki.metabook
         return res
+
+    
 
     cp = res.configparser
     
@@ -280,6 +284,8 @@ def makewiki(conf,
     if res.images:
         res.images.env = res
     
+
+
     try:
         overlaydir = os.environ['MWOVERLAY']
     except KeyError:

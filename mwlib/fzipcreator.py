@@ -82,7 +82,7 @@ class ZipCreator(object):
         self.redirects = {} # to -> from 
         self.normalizations = {} # to -> from 
         self.tmpdir = tempfile.mkdtemp()
-
+        self.licenses = []
 
     def addObject(self, name, value):
         """Add a file with name and contents value to the ZIP file
@@ -126,30 +126,12 @@ class ZipCreator(object):
             'imagedb': imagedb,
         })
     
-    def parseArticle(self, title,
-        revision=None,
-        raw=None,
-        wikidb=None,
-        imagedb=None,
-    ):
-        """Parse article with given title, revision and raw wikitext, adding all
-        referenced templates and images, but not adding the article itself.
-        
-        @param title: title of article
-        @type title: unicode
-        
-        @param revision: revision of article (optional)
-        @type revision: int
-        
-        @param raw: wikitext of article
-        @type raw: unicode
-        
-        @param wikidb: WikiDB to use
-        
-        @param imagedb: ImageDB to use (optional)
+    def addLicenses(self, licenses):
         """
-        print "parseArticle called", title
-
+        @param licenses: [dict(title="title", wikitext="raw expanded")]
+        @type licenses: list
+        """
+        self.licenses = licenses
 
     def _trace(self, res):
         # not separated by wikis
@@ -478,10 +460,10 @@ class ZipCreator(object):
             templates=templates,
             sources=sources,
             images=images,
+            licenses=self.licenses
         )
         self.addObject('content.json', json.dumps(data))
 #        pretty.pprint(data)
-
 
 
     def join(self):
@@ -584,13 +566,7 @@ def make_zip_file(output, env,
                 imagedb=imagedb,
             )
 
-        for license in env.get_licenses():
-            z.parseArticle(
-                title=license['title'],
-                raw=license['wikitext'],
-                wikidb=env.wiki,
-                imagedb=env.images,
-            )
+        z.addLicenses(env.get_licenses())
         
         z.join()
         
