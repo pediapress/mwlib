@@ -30,3 +30,16 @@ def test_parse_caption():
     t=n.find(parser.Table)[0]
     assert isinstance(t.children[0], parser.Caption), "expected a caption node"
     
+def test_table_header():
+    s = """
+{|
+|-
+! header1 !! header2
+|-
+| cell1 || cell2
+|}
+"""
+
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    assert len(cells)==4
