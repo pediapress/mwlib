@@ -20,8 +20,9 @@ def nget(dict, name):
     try:
         return dict[name]
     except KeyError:
-        return dict[name[0].upper() + name[1:]] 
-
+        if name:
+            return dict[name[0].upper() + name[1:]] 
+        raise KeyError
 
 class Wiki(wikidbbase.WikiDBBase):
     def __init__(self, zipfile):
