@@ -46,6 +46,7 @@ def _change_classes(node):
         
         if node.type==T.t_magicword:
             node.caption = u""
+            node.children = []
             node.__class__=N.Text
             return
         

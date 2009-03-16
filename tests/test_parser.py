@@ -1103,3 +1103,8 @@ def test_pull_in_styletags_1():
     assert "three" in txt
     assert "four" not in txt
     
+def test_magicwords():
+    txt = parse("__NOTOC__").asText()
+    print txt
+    assert "NOTOC" not in txt
+    
