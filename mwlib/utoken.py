@@ -181,7 +181,7 @@ def _analyze_html_tag(t):
         isEndToken = False
 
     name, values = _split_tag(name)
-    from mwlib.parser import parseParams
+    from mwlib.refine.util import parseParams
     t.vlist = parseParams(values)
     name = name.lower()
 
