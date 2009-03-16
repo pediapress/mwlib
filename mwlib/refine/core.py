@@ -48,7 +48,6 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
 
         def create():
             sub = tokens[start+1:i]
-            print "create", tokens[start], tokens[start].__dict__
             return [T(type=T.t_complex_tag, children=sub, tagname=tagname, blocknode=blocknode, vlist=tokens[start].vlist)]
         
         while i<len(tokens):
