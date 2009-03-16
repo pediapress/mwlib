@@ -47,12 +47,23 @@ class parse_table_cells(object):
         tokens = self.tokens
         i = 0
         start = None
-
+        first = None
+        
         def makecell(skip_end=0):
+            is_header = False
+            if tokens[start].tagname=="td":
+                is_header = True
+            elif "!" in tokens[start].text.strip():
+                is_header = True
+
+            if first is not None:
+                if "!" in first.text:
+                    is_header = True
+                
             search_modifier = tokens[start].text.strip() in ("|", "!", "||")
             sub = tokens[start+1:i-skip_end]
             self.replace_tablecaption(sub)
-            tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist)]
+            tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist, is_header=is_header)]
             if search_modifier:
                 self.find_modifier(tokens[start])
             self.refined.append(tokens[start])
@@ -66,6 +77,9 @@ class parse_table_cells(object):
                 else:
                     start = i
                     i+=1
+                    if first is None:
+                        first = tokens[start]
+                        
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
                     i+=1
