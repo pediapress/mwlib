@@ -1120,3 +1120,9 @@ def test_magicwords():
     print txt
     assert "NOTOC" not in txt
     
+def test_vlist_newline():
+    txt = parse('<ref\n\nname="bla">bla</ref>')
+    tag = txt.find(parser.TagNode)[0]
+    assert tag.vlist, "vlist should not be empty"
+    
+    
