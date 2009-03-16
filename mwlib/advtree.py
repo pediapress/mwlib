@@ -108,15 +108,13 @@ class AdvancedNode:
     def replaceChild(self, c, newchildren = []):
         """Remove child node c and replace with newchildren if given."""
 
-        assert self.hasChild(c), 'Error, unknown child'
         idx = _idIndex(self.children, c)
-        self.children = self.children[:idx] + self.children[idx+1:]
+        self.children[idx:idx+1] = newchildren
+        
         c._parentref = None
         assert not self.hasChild(c)
-        if newchildren:
-            self.children = self.children[:idx] + newchildren + self.children[idx:]
-            for nc in newchildren:
-                nc._parentref = weakref.ref(self)
+        for nc in newchildren:
+            nc._parentref = weakref.ref(self)
 
     def getParents(self):
         """Return list of parent nodes up to the root node.
