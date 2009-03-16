@@ -97,7 +97,7 @@ class FontSwitcher(object):
         for c in txt:
             ord_c = ord(c)
             if ord_c <= 32 or ord_c == 127:
-                if ord_c != 9:
+                if ord_c not in  [9, 10, 13]:
                     c =' '
                 if last_font:
                     font = last_font
