@@ -650,6 +650,12 @@ class parse_links(object):
                                     langlink = r['language']
                                 else:
                                     interwiki = r.get('renamed', prefix)
+                                    
+                            if prefix.strip().lower()=="arz":
+                                langlink = "arz"
+                                interwiki = None
+                                ns = None
+                                
                     node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nsmap=self.nsmap)
                     if langlink:
                         node.langlink = langlink
