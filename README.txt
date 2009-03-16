@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-?-? release 0.9.??
+-----------------------
+- fix bug in recorddb.py: do not overwrite articles
+
 2009-3-5 release 0.9.13
 -------------------------
 - normalize template names when checking against blacklist

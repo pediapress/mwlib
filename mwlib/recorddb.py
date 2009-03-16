@@ -31,6 +31,10 @@ class RecordDB(object):
         self.sources = sources
     
     def getRawArticle(self, name, revision=None):
+        if name in self.articles:
+            if revision is None or self.articles[name].get('revision') == revision: 
+                return self.articles[name]['content']
+
         r = self.db.getRawArticle(name, revision=revision)
         if r is None:
             return None
