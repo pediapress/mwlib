@@ -437,6 +437,14 @@ def test_mailto_named():
     r = parse("[mailto:ralf@brainbot.com me]")
     assert r.find(parser.NamedURL), "expected a NamedLink"
 
+def test_irc_named():
+    r = parse("[irc://freenode.net/pediapress #pediapress]")
+    assert r.find(parser.NamedURL), "expected a NamedLink"
+
+def test_irc():
+    r = parse("irc://freenode.net/pediapress #pediapress")
+    assert r.find(parser.URL), "expected a URL"
+    
 def test_namedurl_inside_link():
     r = parse("[http://foo.com baz]]]")
     assert r.find(parser.NamedURL), "expected a NamedURL"
