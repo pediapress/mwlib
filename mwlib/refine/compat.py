@@ -99,7 +99,8 @@ def _change_classes(node):
                 node.__class__=N.Timeline
                 node.caption = node.timeline
             elif node.tagname=="imagemap":
-                pass
+                if node.imagemap.imagelink:
+                    _change_classes(node.imagemap.imagelink)
             elif node.tagname=="math":
                 node.__class__=N.Math
                 node.caption = node.math

@@ -152,7 +152,15 @@ def parse_imagemap(tokens, refined, **kwargs):
     get_recursive_tag_parser("imagemap", blocknode=True)(tokens, [], **kwargs)
     for t in tokens:
         if t.tagname=='imagemap':
-            t.imagemap =imgmap.ImageMapFromString(T.join_as_text(t.children))
+            txt = T.join_as_text(t.children)
+            t.imagemap =imgmap.ImageMapFromString(txt)
+            if t.imagemap.image:
+                s = u"[["+t.imagemap.image+u"]]"
+                res = parse_txt(s, **kwargs)
+                if res and res[0].type==T.t_complex_link and res[0].ns==6:
+                    t.imagemap.imagelink = res[0]
+                    
+                show(res)
             del t.children[:]
     refined.append(tokens)
     
