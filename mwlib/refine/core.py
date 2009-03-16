@@ -114,7 +114,6 @@ def _li_break_at(token):
     if token.type==T.t_html_tag and token.tagname=="li":
         return True
     return False
-parse_center = get_recursive_tag_parser("center")
 parse_li = get_recursive_tag_parser("li", _li_break_at)
 parse_ol = get_recursive_tag_parser("ol", blocknode=True)
 parse_ul = get_recursive_tag_parser("ul", blocknode=True)
@@ -124,13 +123,6 @@ parse_ref = get_recursive_tag_parser("ref")
 parse_references = get_recursive_tag_parser("references")
 
 parse_math = get_recursive_tag_parser("math")
-parse_small = get_recursive_tag_parser("small")
-parse_b = get_recursive_tag_parser("b")
-parse_tt = get_recursive_tag_parser("tt")
-parse_strike = get_recursive_tag_parser("strike")
-parse_ins = get_recursive_tag_parser("ins")
-parse_del = get_recursive_tag_parser("del")
-parse_sup = get_recursive_tag_parser("sup")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 parse_pre = get_pre_parser("pre", blocknode=True)
 parse_source = get_pre_parser("source")
@@ -794,19 +786,6 @@ class combined_parser(object):
 
             refine = next
 
-parse_style_tags = combined_parser(
-    [parse_tt, parse_strike, parse_ins,
-     parse_del, parse_small,
-     parse_sup, get_recursive_tag_parser("sub"),
-     parse_b, parse_center,
-     get_recursive_tag_parser("strong"),
-     get_recursive_tag_parser("cite"),
-     get_recursive_tag_parser("i"),
-     get_recursive_tag_parser("u"),
-     get_recursive_tag_parser("em"),
-     get_recursive_tag_parser("big"),
-     ])
-
 def mark_style_tags(tokens):
     tags = set("tt strike ins del small sup sub b center strong cite i u em big".split())
     todo = [(0, tokens)]
@@ -872,7 +851,6 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
-               # parse_style_tags,               
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
