@@ -45,12 +45,17 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
     def recursive_parse_tag(tokens, refined, **kwargs):            
         i = 0
         stack = []
+
+        def create():
+            sub = tokens[start+1:i]
+            print "create", tokens[start], tokens[start].__dict__
+            return [T(type=T.t_complex_tag, children=sub, tagname=tagname, blocknode=blocknode, vlist=tokens[start].vlist)]
+        
         while i<len(tokens):
             t = tokens[i]
             if stack and break_at(t):
                 start = stack.pop()
-                sub = tokens[start+1:i]
-                tokens[start:i] = [T(type=T.t_complex_tag, start=0, len=0, children=sub, tagname=tagname, blocknode=blocknode)]
+                tokens[start:i] = create()
                 refined.append(tokens[start])
                 i=start+1
             elif t.type==T.t_html_tag and t.tagname==tagname:
@@ -62,8 +67,7 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
             elif t.type==T.t_html_tag_end and t.tagname==tagname:
                 if stack:
                     start = stack.pop()
-                    sub = tokens[start+1:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_tag, vlist=tokens[start].vlist, start=tokens[start].start, children=sub, tagname=tagname, blocknode=blocknode)]
+                    tokens[start:i+1] = create()
                     refined.append(tokens[start])
                     i = start+1
                 else:
@@ -73,8 +77,7 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
 
         while stack:
             start = stack.pop()
-            sub = tokens[start+1:]
-            tokens[start:] = [T(type=T.t_complex_tag, start=tokens[start].start, len=4, children=sub, tagname=tagname, blocknode=blocknode)]
+            tokens[start:] = create()
             refined.append(tokens[start])
 
         refined.append(tokens)
