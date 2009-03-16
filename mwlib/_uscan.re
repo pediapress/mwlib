@@ -142,6 +142,7 @@ re2c:yyfill:enable = 0 ;
   ftp = "ftp://" [-a-zA-Z0-9_+${}~?=/@#&*(),:.']+ ;
   mailto = "mailto:" [-a-zA-Z0-9_!#$%*./?|^{}`~&'+=]+ "@" [-a-zA-Z0-9_.]+ ;
   irc = "irc://" [a-zA-Z0-9./]+ ;
+  news = "news:" [a-ZA-Z0-9.]+ ;
   url = "http" "s"? "://" [-\xe4\xc4\xf6\xd6\xfc\xdca-zA-Z_0-9./?=&:%:~()#+,@;!'$*]+ ;
   entity_name = "&" [a-zA-Z0-9]+ ";";
   entity_hex = "&#" 'x' [a-fA-F0-9]+ ";";
@@ -231,6 +232,8 @@ not_bol:
   mailto {RET(t_http_url);}
   "[" irc {RET(t_urllink);}
   irc {RET(t_http_url);}
+  "[" news {RET(t_urllink);}
+  news {RET(t_http_url);}
   "[" ftp {RET(t_urllink);}
   ftp           {RET(t_http_url);}
   "[" url {RET(t_urllink);}
