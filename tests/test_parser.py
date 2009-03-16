@@ -1108,3 +1108,7 @@ def test_magicwords():
     print txt
     assert "NOTOC" not in txt
     
+    txt = parse("__NOTOC____NOEDITSECTION__").asText()
+    print txt
+    assert "NOTOC" not in txt
+    

@@ -233,7 +233,8 @@ not_bol:
   "[" url {RET(t_urllink);}
   url 		{RET(t_http_url);}
   magicword		{RET(t_magicword);}
-  [a-zA-Z0-9_]+				{RET(t_text);}
+  [a-zA-Z0-9]+				{RET(t_text);}
+  "_"+                     {RET(t_text);}
   "[["              {RET(t_2box_open);}
   "]]"              {RET(t_2box_close);}
   "="+ [ \t]*       {
