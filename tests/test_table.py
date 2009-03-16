@@ -43,3 +43,21 @@ def test_table_header():
     r=parse(s)
     cells = r.find(parser.Cell)
     assert len(cells)==4
+
+
+def test_table_header_2():
+    s="""
+{|
+|-
+! header 1 || header 2
+| header 3
+|-
+| cell 1 || cell 2
+! cell 3
+|}
+"""
+    r=parse(s)
+    cells = r.find(parser.Cell)
+    is_header = [x.is_header for x in cells]
+    assert is_header == [True, True, False, False, False, True]
+    
