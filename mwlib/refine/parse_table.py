@@ -47,18 +47,21 @@ class parse_table_cells(object):
         tokens = self.tokens
         i = 0
         start = None
-        first = None
+        self.is_header = False
         
         def makecell(skip_end=0):
-            is_header = False
-            if tokens[start].tagname=="td":
+            st = tokens[start].text.strip()
+            if st=="|":
+                self.is_header = False
+            elif st=="!":
+                self.is_header = True
+            is_header = self.is_header
+            
+            if tokens[start].tagname=="th":
                 is_header = True
-            elif "!" in tokens[start].text.strip():
-                is_header = True
+            elif tokens[start].tagname=="td":
+                is_header = False
 
-            if first is not None:
-                if "!" in first.text:
-                    is_header = True
                 
             search_modifier = tokens[start].text.strip() in ("|", "!", "||")
             sub = tokens[start+1:i-skip_end]
@@ -77,8 +80,6 @@ class parse_table_cells(object):
                 else:
                     start = i
                     i+=1
-                    if first is None:
-                        first = tokens[start]
                         
             elif self.is_table_cell_end(tokens[i]):
                 if start is not None:
