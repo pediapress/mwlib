@@ -444,6 +444,14 @@ def test_irc_named():
 def test_irc():
     r = parse("irc://freenode.net/pediapress #pediapress")
     assert r.find(parser.URL), "expected a URL"
+
+def test_news_named():
+    r = parse("[news:alt.foo.bar #pediapress]")
+    assert r.find(parser.NamedURL), "expected a NamedLink"
+
+def test_news():
+    r = parse("news:alt.foo.bar #pediapress")
+    assert r.find(parser.URL), "expected a URL"
     
 def test_namedurl_inside_link():
     r = parse("[http://foo.com baz]]]")
