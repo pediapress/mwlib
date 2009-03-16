@@ -43,8 +43,12 @@ def _change_classes(node):
             node.__class__ = node.compatnode.__class__
             node.__dict__ = node.compatnode.__dict__
             return
-
-            
+        
+        if node.type==T.t_magicword:
+            node.caption = u""
+            node.__class__=N.Text
+            return
+        
         klass = tok2class.get(node.type, N.Text)
         
             
