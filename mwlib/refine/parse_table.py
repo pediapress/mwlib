@@ -240,13 +240,14 @@ class parse_tables(object):
                 if modifier is not None:
                     mod = T.join_as_text(children[start:modifier])
                     vlist = util.parseParams(mod)
-                    sub = children[modifier:i]
+                    sub = children[modifier+1:i]
                 else:
                     sub = children[start+1:i]
                     vlist = {}
                     
                 caption = T(type=T.t_complex_caption, children=sub, vlist=vlist)
                 children[start:i] = [caption]
+                self.refined.append(caption)
                 return
             elif t.text=="|" and modifier is None:
                 modifier = i
