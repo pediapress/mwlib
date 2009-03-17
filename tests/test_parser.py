@@ -1139,3 +1139,11 @@ def test_vlist_newline():
 
     
     
+def test_span_vs_ref():
+    s="""<ref><span>bla</ref> after"""
+    r=parse(s)
+    spans = [x for x in r.find(parser.TagNode) if x.tagname=="span"]
+    print "SPAN:", spans
+    span = spans[0]
+    txt = span.asText()
+    assert "after" not in txt
