@@ -63,7 +63,7 @@ class parse_table_cells(object):
                 is_header = False
 
                 
-            search_modifier = tokens[start].text.strip() in ("|", "!", "||")
+            search_modifier = tokens[start].text.strip() in ("|", "!", "||", "!!")
             sub = tokens[start+1:i-skip_end]
             self.replace_tablecaption(sub)
             tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist, is_header=is_header)]
