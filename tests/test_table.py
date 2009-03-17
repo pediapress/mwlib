@@ -61,3 +61,17 @@ def test_table_header_2():
     is_header = [x.is_header for x in cells]
     assert is_header == [True, True, False, False, False, True]
     
+def test_caption_modifier():
+    s="""
+{|
+|+style="font-size: 1.25em;" | caption
+|-
+| cell1
+| cell2
+|}
+"""
+    r=parse(s)
+    c = r.find(parser.Caption)[0]
+    assert c.vlist
+    
+    
