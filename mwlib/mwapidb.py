@@ -293,11 +293,9 @@ class APIHelper(object):
             return None
         if 'query' not in data:
             return None
-        try:
-            return data
-        except KeyError:
-            log.error('Response from api%s did not contain a query result' % self.script_extension)
-            return None
+        if 'warnings' in data:
+            raise RuntimeError('Query result contained warning: %r' % data)
+        return data
     
     def page_query(self, **kwargs):
         q = self.query(**kwargs)
@@ -667,7 +665,7 @@ class WikiDB(wikidbbase.WikiDBBase):
             else:
                 self.template_blacklist = [
                     template.lower().strip().replace('_', ' ')
-                    for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw)
+                    for template in re.findall('\* *\[\[.*?:(.*?)\]\]', raw) # FIXME
                 ]
             
     def login(self, username, password, domain=None):
