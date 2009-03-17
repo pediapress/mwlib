@@ -138,6 +138,10 @@ class TreeCleaner(object):
         # list of classes or IDs of table nodes which are split into their content. used by splitTableToColumns
         self.split_table_classIDs = ['mp-upper'] 
 
+        # remove ImageLinks which end with the following file types
+        self.forbidden_file_endings = ['ogg']
+
+
 
     def is_skip_article(self, node):
         if node.__class__ == Article and node.caption in self.skip_articles:
@@ -184,6 +188,7 @@ class TreeCleaner(object):
                           'removeNoPrintNodes',
                           'removeInvisibleNodes', 
                           'removeListOnlyParagraphs',
+                          'removeInvalidFiletypes',
                           'fixParagraphs',
                           'simplifyBlockNodes',
                           'fixNesting', 
@@ -1088,3 +1093,13 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeDuplicateLinksInReferences(c)
                 
+    def removeInvalidFiletypes(self, node):
+        """remove ImageLinks which end with the following file types"""
+        if node.__class__ == ImageLink:
+            for file_ending in self.forbidden_file_endings:
+                if node.target.endswith(file_ending):
+                    self.report("removed invalid 'image' type with target %r", node.target)
+                    node.parent.removeChild(node)
+
+        for c in node.children:
+            self.removeInvalidFiletypes(c)
