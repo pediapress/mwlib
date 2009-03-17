@@ -74,4 +74,3 @@ def test_caption_modifier():
     c = r.find(parser.Caption)[0]
     assert c.vlist
     
-    

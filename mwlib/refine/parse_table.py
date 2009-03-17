@@ -232,13 +232,25 @@ class parse_tables(object):
                 return
             i+=1
 
+        modifier = None
+        
         while i<len(children):
             t = children[i]
             if t.text is None or t.text.startswith("\n"):
-                sub = children[start+1:i]
-                caption = T(type=T.t_complex_caption, start=0, len=0, children=sub)
+                if modifier is not None:
+                    mod = T.join_as_text(children[start:modifier])
+                    vlist = util.parseParams(mod)
+                    sub = children[modifier:i]
+                else:
+                    sub = children[start+1:i]
+                    vlist = {}
+                    
+                caption = T(type=T.t_complex_caption, children=sub, vlist=vlist)
                 children[start:i] = [caption]
                 return
+            elif t.text=="|" and modifier is None:
+                modifier = i
+                
             i += 1
             
     def run(self):
