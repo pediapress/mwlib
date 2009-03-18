@@ -1160,4 +1160,13 @@ between
     nodes = [x for x in r.find(parser.TagNode) if x.tagname=="source"]
     print nodes
     assert len(nodes)==2
+
+def test_style_tags_vlist():
+    s="""
+<font color="#00C000">green</font>
+"""
+    ftag = parse(s).find(parser.TagNode)[0]
+    print ftag
+    assert ftag.vlist
+    
     
