@@ -32,6 +32,9 @@ log = Log("mwapidb")
 class MWAPIError(RuntimeError):
     """MediaWiki API error"""
 
+class QueryWarningError(RuntimeError):
+    """MediaWiki API query contained warning"""
+
 # ==============================================================================
 
 articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+)(?P<path>.*)$')
@@ -294,7 +297,7 @@ class APIHelper(object):
         if 'query' not in data:
             return None
         if 'warnings' in data:
-            raise RuntimeError('Query result contained warning: %r' % data)
+            raise QueryWarningError('Query result contained warning: %r' % data)
         return data
     
     def page_query(self, **kwargs):
@@ -908,7 +911,10 @@ class WikiDB(wikidbbase.WikiDBBase):
         
         if self.source is not None:
             return self.source
-        result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases|magicwords')
+        try:
+            result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases|magicwords')
+        except QueryWarningError:
+            result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases')
         if result is None:
             return None
         result = result['query']
@@ -925,7 +931,7 @@ class WikiDB(wikidbbase.WikiDBBase):
             self.getLocals()
             if self.locals:
                 self.source['locals'] = self.locals
-            self.source['magicwords'] = result['magicwords']
+            self.source['magicwords'] = result.get('magicwords')
             self.source['namespaces'] = result['namespaces']
             self.source['namespacealiases'] = result['namespacealiases']
             return self.source

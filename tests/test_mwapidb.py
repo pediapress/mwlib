@@ -230,8 +230,8 @@ class TestWikiDB(object):
         assert self.w.getLinkURL(link, u'bla') == 'http://en.wikipedia.org/w/index.php?title=Wikipedia:test'
 
     @xfail
-    def test_siteinfoMagicWords(self):
-        """http://code.pediapress.com/wiki/ticket/538"""
+    def test_getLinkURLFail3(self):
+        """http://code.pediapress.com/wiki/ticket/537"""
 
         w = WikiDB(base_url='http://memory-alpha.org/en/')
         r = uparser.parseString(u'', u'[[3dgame:Test123]]', wikidb=w)
@@ -245,7 +245,6 @@ class TestWikiDB(object):
         link = r.find(parser.LangLink)[0]
         assert link.full_target == u'es:español'
         assert link.url == 'http://memory-alpha.org/es/wiki/espa%C3%B1ol'
-    
 
     def test_invalid_base_url(self):
         print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
