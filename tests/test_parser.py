@@ -1147,3 +1147,17 @@ def test_span_vs_ref():
     span = spans[0]
     txt = span.asText()
     assert "after" not in txt
+
+
+def test_double_source():
+    """http://code.pediapress.com/wiki/ticket/536"""
+    s="""
+<source lang=c>int main</source>
+between
+<source lang=c>int main2</source>
+"""
+    r=parse(s)
+    nodes = [x for x in r.find(parser.TagNode) if x.tagname=="source"]
+    print nodes
+    assert len(nodes)==2
+    
