@@ -31,6 +31,8 @@ class ZipCreator(object):
     """
     
     redirect_rex = re.compile(r'^#redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+
+    licenses = []
     
     def __init__(self, zf,
         imagesize=None,
@@ -220,12 +222,13 @@ class ZipCreator(object):
         for i in self.image_infos:
             self.addImage(*i)
         self.jobsched.join()
-      
+
         data = dict(
             articles=self.articles,
             templates=self.templates,
             sources=self.sources,
             images=self.images,
+            licenses=self.licenses,
         )
         self.addObject('content.json', json.dumps(data))
 
@@ -321,6 +324,17 @@ class ZipCreator(object):
                 raise RuntimeError('Unknown source URL %r for article %r' % (
                     article['source-url'], item['title']),
                 )
+
+    def getLicenses(self, env):
+        self.licenses = metabook.get_licenses(env.metabook)
+        for license in self.licenses:
+            self.parseArticle(
+                title=license['title'],
+                raw=license['wikitext'],
+                wikidb=env.wiki,
+                imagedb=env.images,
+            )
+
     
 
 # ==============================================================================
@@ -347,6 +361,8 @@ def make_zip_file(output, env,
             status=status,
             num_articles=len(articles),
         )
+
+        z.getLicenses(env)
         
         for item in articles:
             d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
@@ -364,16 +380,8 @@ def make_zip_file(output, env,
                 imagedb=imagedb,
             )
 
-        for license in env.get_licenses():
-            z.parseArticle(
-                title=license['title'],
-                raw=license['wikitext'],
-                wikidb=env.wiki,
-                imagedb=env.images,
-            )
-        
         z.join()
-        
+
         # using check() is a bit rigorous: sometimes articles just cannot be
         # fetched -- PDFs should be generated nevertheless
         #z.check(articles)

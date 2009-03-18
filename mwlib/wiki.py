@@ -7,7 +7,6 @@ import os
 from ConfigParser import ConfigParser
 import StringIO
 
-from mwlib import utils, metabook
 from mwlib.log import Log
 
 log = Log('mwlib.utils')
@@ -153,50 +152,6 @@ url=
             self.wiki = val
         else:
             raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
-    
-    def get_licenses(self):
-        """Return list of licenses
-        
-        @returns: list of dicts with license info
-        @rtype: [dict]
-        """
-        
-        if 'licenses' not in self.metabook:
-            return []
-        
-        licenses = []
-        for license in self.metabook['licenses']:
-            wikitext = ''
-            
-            if license.get('mw_license_url'):
-                wikitext = utils.fetch_url(
-                    license['mw_license_url'],
-                    ignore_errors=True,
-                    expected_content_type='text/x-wiki',
-                )
-                if wikitext:
-                    try:
-                        wikitext = unicode(wikitext, 'utf-8')
-                    except UnicodeError:
-                        wikitext = None
-            else:
-                wikitext = ''
-                if license.get('mw_rights_text'):
-                    wikitext = license['mw_rights_text']
-                if license.get('mw_rights_page'):
-                    wikitext += '\n\n[[%s]]' % license['mw_rights_page']
-                if license.get('mw_rights_url'):
-                    wikitext += '\n\n' + license['mw_rights_url']
-            
-            if not wikitext:
-                continue
-            
-            licenses.append({
-                'title': license.get('name', u'License'),
-                'wikitext': wikitext,
-            })
-        
-        return licenses
     
 
 def _makewiki(conf,

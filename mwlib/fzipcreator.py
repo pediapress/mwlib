@@ -7,7 +7,6 @@ Rewrite of zipcreator.py which should be faster,
 since it relies totaly on the api.php and does not use the parser
 
 TODO:
- * check if redirects work with revisions
  * check if there are any other normalization issues
  * store expanded license information
  * use login to work with bot flag
@@ -27,8 +26,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import jobsched, metabook 
-from mwlib import mwapidb, utils, dummydb, namespace
+from mwlib import mwapidb, utils, dummydb, namespace, metabook, jobsched
 import mwlib.log
 
 # ==============================================================================
@@ -146,6 +144,7 @@ class ZipCreator(object):
         """
 
         self.licenses = licenses
+        # FIXME: fetch transcluded stuff, images etc.
 
     def _trace(self, res):
         # not separated by wikis
@@ -556,6 +555,8 @@ def make_zip_file(output, env,
             status=status,
             num_articles=len(articles),
         )
+
+        z.addLicenses(metabook.get_licenses(env.metabook))
         
         for item in articles:
             d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
@@ -573,8 +574,6 @@ def make_zip_file(output, env,
                 imagedb=imagedb,
             )
 
-        z.addLicenses(env.get_licenses())
-        
         z.join()
         
         z.addObject('metabook.json', json.dumps(env.metabook))

@@ -39,6 +39,7 @@ class Wiki(wikidbbase.WikiDBBase):
         self.articles = content.get('articles', {})
         self.templates = content.get('templates', {})
         self.sources = content.get('sources', {})
+        self.licenses = content.get('licenses', {})
     
     def _getArticle(self, title, revision=None):
         try:
@@ -115,6 +116,9 @@ class Wiki(wikidbbase.WikiDBBase):
         except KeyError:
             pass
         return None
+
+    def getLicenses(self):
+        return self.licenses
     
 
 class ImageDB(object):
