@@ -186,31 +186,59 @@ class TestWikiDB(object):
         
         u = self.w.getLinkURL(make_link_node(parser.ArticleLink, u'/Bar'), u'Foo')
         assert u == 'http://en.wikipedia.org/w/index.php?title=Foo/Bar'
-    
+
+    @xfail
+    def test_getLinkURLFail0(self):
+        """http://code.pediapress.com/wiki/ticket/528"""
+
         r = uparser.parseString(u'', u'[[google:test]]', wikidb=self.w)
         parser.show(sys.stdout, r)
         link = r.find(parser.InterwikiLink)[0]
+        print link.full_target
+        assert link.full_target == 'google:test'
         assert link.target == 'test'
         assert self.w.getLinkURL(link, u'bla') == 'http://www.google.com/search?q=test'
-        
+
+        w = WikiDB(base_url='http://wikitravel.org/wiki/en/')
+        r = uparser.parseString(u'', u'[[Dmoz:Test123]]', wikidb=w)
+        link = r.find(parser.InterwikiLink)[0]
+        assert link.full_target == u'Dmoz:Test123'
+        assert link.url == 'http://dmoz.org/Regional/Test123'
+
+    @xfail
+    def test_getLinkURLFail1(self):
+        """http://code.pediapress.com/wiki/ticket/528"""
+
         r = uparser.parseString(u'', u'[[fr:test]]', wikidb=self.w)
         parser.show(sys.stdout, r)
         link = r.find(parser.LangLink)[0]
+        print link.full_target
+        assert link.full_target == 'fr:test'
         assert link.target == 'test'
         assert self.w.getLinkURL(link, u'bla') == 'http://fr.wikipedia.org/wiki/test'
-    
+
+    @xfail
+    def test_getLinkURLFail2(self):
+        """http://code.pediapress.com/wiki/ticket/537"""
+
         r = uparser.parseString(u'', u'[[Wikipedia:test]]', wikidb=self.w)
         parser.show(sys.stdout, r)
         link = r.find(parser.NamespaceLink)[0]
+        print link.full_target
+        assert link.full_target == 'Wikipedia:test'
         assert link.target == 'test'
         assert self.w.getLinkURL(link, u'bla') == 'http://en.wikipedia.org/w/index.php?title=Wikipedia:test'
-        
+
+    @xfail
+    def test_siteinfoMagicWords(self):
+        """http://code.pediapress.com/wiki/ticket/538"""
+
         w = WikiDB(base_url='http://memory-alpha.org/en/')
         r = uparser.parseString(u'', u'[[3dgame:Test123]]', wikidb=w)
         link = r.find(parser.InterwikiLink)[0]
         assert link.full_target == u'3dgame:Test123'
         assert link.url == 'http://3dgame.wikia.com/wiki/Test123'
-    
+
         # Wikia doesn't set the language attribute in interwikimap entries for lang links
         w = WikiDB(base_url='http://memory-alpha.org/en/')
         r = uparser.parseString(u'', u'[[es:español]]', wikidb=w)
@@ -218,12 +246,7 @@ class TestWikiDB(object):
         assert link.full_target == u'es:español'
         assert link.url == 'http://memory-alpha.org/es/wiki/espa%C3%B1ol'
     
-        w = WikiDB(base_url='http://wikitravel.org/wiki/en/')
-        r = uparser.parseString(u'', u'[[Dmoz:Test123]]', wikidb=w)
-        link = r.find(parser.InterwikiLink)[0]
-        assert link.full_target == u'Dmoz:Test123'
-        assert link.url == 'http://dmoz.org/Regional/Test123'
-    
+
     def test_invalid_base_url(self):
         print py.test.raises(MWAPIError, WikiDB, 'http://pediapress.com/')
     
