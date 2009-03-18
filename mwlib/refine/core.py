@@ -100,6 +100,7 @@ def get_pre_parser(tagname, blocknode=True):
                 txt = T.join_as_text(tokens[start+1:i])
                 tokens[start:i+1] = [T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[start].vlist, children=[T(type=T.t_text, text=txt)], blocknode=blocknode)]
                 i = start+1
+                start = None
             else:
                 i+=1
         refined.append(tokens)
