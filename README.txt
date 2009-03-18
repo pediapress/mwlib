@@ -88,6 +88,8 @@ ChangeLog
 2009-?-? release 0.9.??
 -----------------------
 - fix bug in recorddb.py: do not overwrite articles
+- removed mwapidb.WikiDB.getTemplatesForAritcle() which was borken and
+  wasn't used.
 
 2009-3-5 release 0.9.13
 -------------------------
