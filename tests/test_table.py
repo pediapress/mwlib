@@ -74,3 +74,39 @@ def test_caption_modifier():
     c = r.find(parser.Caption)[0]
     assert c.vlist
     
+
+def _get_styled_txt(s):
+    r=parse(s)
+    styles = r.find(parser.Style)
+    txt = " ".join(x.asText() for x in styles)
+    return txt
+
+def test_table_vs_style_tags_cell_barrier():
+    s="""
+{|
+|-
+| cell1<b>bold
+| cell2<b>
+|}
+after
+"""
+    txt = _get_styled_txt(s)
+    
+    assert "cell2" not in txt
+    assert "after" not in txt
+
+def test_table_vs_style_tags_continue_after():
+    s="""
+<b>
+{|
+|-
+| cell1
+| cell2
+|}
+after
+"""
+    
+    txt = _get_styled_txt(s)
+    assert "cell1" not in txt
+    assert "after" in txt
+    
