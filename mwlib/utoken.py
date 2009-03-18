@@ -225,7 +225,7 @@ class _compat_scanner(object):
         from mwlib.parser import _get_tags
         self.allowed_tags = _get_tags()
 
-        self.allowed_tags.update("table td tr th".split())
+        self.allowed_tags.update("table td tr th font".split())
         
 #         tmp = list(self.allowed_tags)
 #         tmp.sort()

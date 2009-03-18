@@ -788,7 +788,7 @@ class combined_parser(object):
             refine = next
 
 def mark_style_tags(tokens):
-    tags = set("tt strike ins del small sup sub b center strong cite i u em big".split())
+    tags = set("tt strike ins del small sup sub b center strong cite i u em big font".split())
     todo = [(0, dict(), tokens)]
 
     
@@ -797,8 +797,8 @@ def mark_style_tags(tokens):
             return False
                 
         children = tokens[start:i]
-        for tag in state.keys():
-            outer = T(type=T.t_complex_tag, tagname=tag, children=children)
+        for tag, tok in state.items():
+            outer = T(type=T.t_complex_tag, tagname=tag, children=children, vlist=tok.vlist)
             children = [outer]
         tokens[start:i] = [outer]
         return True
@@ -817,7 +817,7 @@ def mark_style_tags(tokens):
                     start += 1
                     i = start
                 start = i
-                state[t.tagname]=1
+                state[t.tagname]=t
             elif t.type==T.t_html_tag_end and t.tagname in tags:
                 del tokens[i]
                 if t.tagname in state:
