@@ -110,6 +110,7 @@ def get_pre_parser(tagname, blocknode=True):
     
     
 parse_div = get_recursive_tag_parser("div", blocknode=True)
+parse_center = get_recursive_tag_parser("center", blocknode=True)
 
 def _li_break_at(token):
     if token.type==T.t_html_tag and token.tagname=="li":
@@ -788,7 +789,7 @@ class combined_parser(object):
             refine = next
 
 def mark_style_tags(tokens):
-    tags = set("tt strike ins del small sup sub b center strong cite i u em big font".split())
+    tags = set("tt strike ins del small sup sub b strong cite i u em big font".split())
     todo = [(0, dict(), tokens)]
 
     
@@ -860,7 +861,8 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_lines,
                parse_tagextensions,
                parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
-               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links, parse_sections, parse_div, parse_pre, parse_tables]
+               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links, parse_sections,
+               parse_center, parse_div, parse_pre, parse_tables]
 
 
     refined = []
