@@ -788,9 +788,8 @@ class combined_parser(object):
 
 def mark_style_tags(tokens):
     tags = set("tt strike ins del small sup sub b center strong cite i u em big".split())
-    todo = [(0, tokens)]
+    todo = [(0, dict(), tokens)]
 
-    state = dict()
     
     def create():
         if not state or i<=start:
@@ -805,7 +804,7 @@ def mark_style_tags(tokens):
             
             
     while todo:
-        i, tokens = todo.pop()
+        i, state, tokens = todo.pop()
         start = i
         while i<len(tokens):
             t = tokens[i]
@@ -829,8 +828,12 @@ def mark_style_tags(tokens):
                 if create():
                     i = start+1
                 assert tokens[i] is t
-                todo.append((i+1, tokens))
-                todo.append((0, t.children))
+                if t.type in (T.t_complex_table, T.t_complex_table_row, T.t_complex_table_cell):
+                    todo.append((i+1, state, tokens))
+                    todo.append((0, dict(), t.children))                    
+                else:    
+                    todo.append((i+1, state, tokens))
+                    todo.append((0, state, t.children))
                 break
             else:
                 i+=1
