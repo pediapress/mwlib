@@ -242,7 +242,7 @@ class AdvancedNode:
         "Return all text that is intended for display"
         text = []
         if not amap:
-            amap = {Text:"caption", Link:"target", URL:"caption", Math:"caption", ImageLink:"caption" }
+            amap = {Text:"caption", Link:"target", URL:"caption", Math:"caption", ImageLink:"caption", ArticleLink:"target" }
         for n in self.allchildren():
             access = amap.get(n.__class__, "")
             if access:
