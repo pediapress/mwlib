@@ -87,10 +87,6 @@ def buildzip():
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
         action='store_true',
     )
-    parser.add_option("-f", "--fastmode",
-        help='use EXPERIMENTAL fast zip creator mode',
-        action='store_true',
-    )
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
@@ -125,10 +121,7 @@ def buildzip():
             env = parser.makewiki()
         
             from mwlib.status import Status
-            if options.fastmode:
-                import mwlib.fzipcreator as zipcreator
-            else:
-                from mwlib import zipcreator
+            import mwlib.fzipcreator as zipcreator
 
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)

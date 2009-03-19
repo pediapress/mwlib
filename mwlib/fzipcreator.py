@@ -579,6 +579,9 @@ def make_zip_file(output, env,
         z.addObject('metabook.json', json.dumps(env.metabook))
 
         zf.close()
+
+        checkzip(tmpzip) # DEBUG CODE
+
         if os.path.exists(output): # Windows...
             os.unlink(output)
         os.rename(tmpzip, output)
