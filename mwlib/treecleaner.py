@@ -9,7 +9,7 @@ import inspect
 import re
 
 from mwlib.advtree import removeNewlines
-from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
+from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, 
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
                            HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
@@ -65,7 +65,7 @@ class TreeCleaner(object):
         self.status_cb=status_cb
 
         # list of nodes which do not require child nodes
-        self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Chapter, Code,
+        self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Code,
                             HorizontalRule, ImageLink, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, URL]
 
@@ -105,6 +105,8 @@ class TreeCleaner(object):
                             Code: [PreFormatted],
                             ImageLink: [Reference],
                             Div: [Reference, Item],
+                            Center:[Reference],
+                            Teletyped:[Reference],
                             }
 
         
@@ -144,7 +146,7 @@ class TreeCleaner(object):
 
 
     def is_skip_article(self, node):
-        if node.__class__ == Article and node.caption in self.skip_articles:
+        if self.skip_articles and  node.__class__ == Article and node.caption in self.skip_articles:
             return True
         else:
             return False
@@ -162,15 +164,14 @@ class TreeCleaner(object):
         # FIXME: performance could be improved, if individual articles would be cleaned
         # the algorithm below splits on the first level, if a book is found
         # --> if chapters are used, whole chapters are cleaned which slows things down
-       
 
-        
         if self.tree.__class__ == Book :
             children = self.tree.children
         else:
             children = [self.tree]
 
         total_children = len(children)
+
         for (i, child) in enumerate(children):
             for cleaner in cleanerList:
                 cleaner(child)
@@ -214,7 +215,6 @@ class TreeCleaner(object):
                           'fixReferenceNodes',
                           'fixInfoBoxes',
                           'fixNesting', # pull DefinitionLists out of Paragraphs
-                          'fixChapterNesting',
                           'fixPreFormatted',
                           'fixListNesting',
                           'removeEmptyTextNodes',
@@ -865,27 +865,6 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeInvisibleLinks(c)
           
-
-    def fixChapterNesting(self, node):
-        """move all following siblings of a chapter up to the next chapter below the chapter"""
-        if self.is_skip_article(node):
-            return
-        if node.__class__ == Chapter and node.parent:
-            siblings = node.getAllSiblings()
-            siblings = siblings[siblings.index(node)+1:]
-            for idx, sib in enumerate(siblings):
-                if sib.__class__ == Chapter:
-                    siblings = siblings[:idx]
-                    break
-            for sib in siblings:
-                sib.parent.removeChild(sib)
-                node.appendChild(sib)
-                self.report('move node', sib, 'below chapter', node)
-            return
-
-        for c in node.children:
-            self.fixChapterNesting(c)
-
 
     def fixPreFormatted(self, node):
         """Rearrange PreFormatted nodes. Text is broken down into individual lines which are separated by BreakingReturns """
