@@ -121,7 +121,7 @@ class TreeCleaner(object):
 
         # list of css classes OR id's which trigger the removal of the node from the tree
         # the following list is wikipedia specific
-        self.noDisplayClasses = ['dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct',
+        self.noDisplayClasses = ['hiddenStructure', 'dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct',
                                  'coordinates_3_ObenRechts', 'microformat', 'navbox'] # FIXME: should really be "geo microformat...
 
 
@@ -181,7 +181,7 @@ class TreeCleaner(object):
                 cleaner(child)
             if self.status_cb:
                 self.status_cb(progress=100*i/len(children))
-        
+
     def cleanAll(self, skipMethods=[], skip_articles=[]):
         """Clean parse tree using all available cleaner methods."""
 
