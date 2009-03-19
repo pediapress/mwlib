@@ -4,6 +4,7 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import sys
 import copy
 import inspect
 import re
@@ -17,7 +18,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            Underline, URL, Var)
 
 from mwlib.treecleanerhelper import *
-
+from mwlib.parser import show
 
 def tryRemoveNode(node):
     if node.parent is not None:
@@ -187,7 +188,6 @@ class TreeCleaner(object):
                           'cleanSectionCaptions',
                           'removeChildlessNodes',
                           'removeNoPrintNodes',
-                          'removeInvisibleNodes', 
                           'removeListOnlyParagraphs',
                           'removeInvalidFiletypes',
                           'fixParagraphs',
@@ -747,13 +747,33 @@ class TreeCleaner(object):
             self.splitBigTableCells(c)
 
 
-    def removeNoPrintNodes(self, node):
+    def _getNamedRefs(self, node):
+        named_refs= []
+        for n in node.getChildNodesByClass(Reference) + [node]:
+            if n.__class__ == Reference and n.attributes.get('name'):
+                named_refs.append(n)
+        return named_refs
 
+    def _safeRemove(self, node, named_refs):
+        if node in named_refs:
+            node.no_display = True
+            return
+        for ref in named_refs:
+            ref.no_display = True
+            ref.moveto(node, prefix=True)
+        node.parent.removeChild(node)
+            
+    def removeNoPrintNodes(self, node):
         if self.is_skip_article(node):
             return
-        if node.hasClassID(self.noDisplayClasses) and node.parent:
-            self.report('removing child', node)
-            node.parent.removeChild(node)
+        if (node.hasClassID(self.noDisplayClasses) or not node.visible) and node.parent:
+            named_refs = self._getNamedRefs(node)
+            if named_refs:
+                self.report('removing child - keeping named reference', node)
+                self._safeRemove(node, named_refs)
+            else:
+                self.report('removing child', node)
+                node.parent.removeChild(node)
             return
 
         for c in node.children[:]:
@@ -972,23 +992,10 @@ class TreeCleaner(object):
                 node.parent.replaceChild(node, lin_cols)
 
         for c in node.children:
-            self.splitTableToColumns(c)
-
-
-    def removeInvisibleNodes(self, node):
-
-        if self.is_skip_article(node):
-            return
-        if not node.visible and node.parent:
-            node.parent.removeChild(node)
-            self.report("removed invisible node", node)
-
-        for c in node.children:
-            self.removeInvisibleNodes(c)
-            
+            self.splitTableToColumns(c)           
 
     def fixReferenceNodes(self, node):
-        ref_nodes = node.getChildNodesByClass(Reference)       
+        ref_nodes = node.getChildNodesByClass(Reference)
         name2children = {}
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
@@ -1012,7 +1019,6 @@ class TreeCleaner(object):
                         ref_node.appendChild(child)
                     ref_defined[ref_name] = True
            
-
 
     def fixInfoBoxes(self, node):
         """Optimize rendering of infoboxes"""

@@ -85,7 +85,7 @@ class AdvancedNode:
         idx = _idIndex(tp.children, targetnode)
         if not prefix:
             idx+=1
-        tp.children = tp.children[:idx] + [self] + tp.children[idx:]
+        tp.children.insert(idx, self)
         self._parentref = weakref.ref(tp)
 
     def hasChild(self, c):
