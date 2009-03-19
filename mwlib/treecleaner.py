@@ -18,7 +18,10 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            Underline, URL, Var)
 
 from mwlib.treecleanerhelper import *
-from mwlib.parser import show
+from mwlib import parser
+
+def show(n):
+    parser.show(sys.stdout, n, verbose=True)
 
 def tryRemoveNode(node):
     if node.parent is not None:
@@ -577,7 +580,7 @@ class TreeCleaner(object):
         if getattr(node, 'nesting_pos', None) in nesting_filter:
             node.parent.removeChild(node)
             return
-        for c in node.children:
+        for c in node.children[:]:
             self._filterTree(c, nesting_filter=nesting_filter)
 
     def _fixNesting(self, node):
@@ -621,7 +624,6 @@ class TreeCleaner(object):
         middle_tree = middle_tree.children[0]
         bottom_tree = bad_parent.copy()
         self._filterTree(bottom_tree, nesting_filter=['top', 'problem'])
-        
         new_tree = [part for part in [top_tree, middle_tree, bottom_tree] if part != None]
 
         self.report('moved', node, 'from', bad_parent)
@@ -633,7 +635,7 @@ class TreeCleaner(object):
     def fixNesting(self, node):
         while self._fixNesting(node):
             pass
-
+        
    
     # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
     # e.g. but only if the center is a direct and only child
