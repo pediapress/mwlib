@@ -251,7 +251,8 @@ def render():
     import pkg_resources
     from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
-    from mwlib import utils, zipwiki, zipcreator
+    from mwlib import utils, zipwiki
+    from mwlib import fzipcreator as zipcreator
     from mwlib.status import Status
     
     use_help = 'Use --help for usage information.'
