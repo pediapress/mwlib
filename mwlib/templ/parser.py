@@ -52,6 +52,7 @@ def optimize(node):
 from mwlib import lrucache
 
 class Parser(object):
+    use_cache = False
     _cache = lrucache.mt_lrucache(2000)
     
     def __init__(self, txt, included=True, replace_tags=None):
@@ -232,12 +233,12 @@ class Parser(object):
         return n
         
     def parse(self):
-#         fp = digest(self.txt.encode('utf-8')).digest()
-        
-#         try:
-#             return self._cache[fp]
-#         except KeyError:
-#             pass
+        if self.use_cache:
+            fp = digest(self.txt.encode('utf-8')).digest()     
+            try:
+                return self._cache[fp]
+            except KeyError:
+                pass
         
         
         self.tokens = tokenize(self.txt, included=self.included, replace_tags=self.replace_tags)
@@ -258,8 +259,8 @@ class Parser(object):
 
         n=optimize(n)
         
-        
-#         self._cache[fp] = n
+        if self.use_cache:
+            self._cache[fp] = n
         
         return n
 
