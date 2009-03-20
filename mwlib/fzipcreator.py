@@ -487,6 +487,8 @@ class ZipCreator(object):
 
         # prepare articles & sources
         for name, item in allpages:
+            if item is None:
+                continue
             if istemplate(name, item):
                 continue
             articles[name] = {
@@ -504,6 +506,8 @@ class ZipCreator(object):
 
         # prepare templates
         for name, item in self.templates.items():
+            if item is None:
+                continue
             if not istemplate(name, item):
                 continue
             ns, partial, full = namespace.splitname(name)
