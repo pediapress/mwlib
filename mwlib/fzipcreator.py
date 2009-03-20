@@ -344,6 +344,9 @@ class ZipCreator(object):
             self._trace(res)
 
             for page in res["query"]["pages"].values():
+                if not 'title' in page:
+                    log.warn('No title in page element of query result. Skipping.')
+                    continue
                 title = self.redirects.get(page["title"], page["title"])
                 title = stripNS(title)
                 images[title]["imagerepository"] = page.get("imagerepository")
