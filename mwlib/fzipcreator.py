@@ -230,7 +230,7 @@ class ZipCreator(object):
         return template_names, image_names
         
 
-    def _fetchTemplates(self, wikidb, template_names):
+    def _fetchTemplates(self, wikidb, template_names, image_names):
         print_templates = set()
         if wikidb.print_template_pattern:
             for name in template_names:
@@ -267,10 +267,17 @@ class ZipCreator(object):
             )
 
         # substitute print templates
+        print_templates = set()
         if wikidb.print_template_pattern:
             for name in template_names:
-                pname = wikidb.print_template_pattern.replace(u'$1', name)
+                rname = name
+                for k, v in self.redirects.items():
+                    if v == name:
+                        rname = k
+                        break
+                pname = wikidb.print_template_pattern.replace(u'$1', rname)
                 if pname in templates:
+                    print_templates.add(pname)
                     if name in templates:
                         templates[name]["content"] = templates[pname]["content"]
                     else:
@@ -282,6 +289,35 @@ class ZipCreator(object):
             for title, item in self.templates.items():
                 if stripNS(title).lower() in tbl:
                     item["content"] = None
+        
+        # fetch images and templates of print_templates
+
+        new_template_names = set()
+
+        def _fetch_pt(**kargs):
+            res =  wikidb.api_helper.query(ignore_errors=False, **kargs)
+            assert 'query-continue' not in res
+            self._trace(res)
+            for page in res["query"]["pages"].values():
+                for image in page.get("images", []):
+                    image_names.add(image["title"])
+                    print 'FOUND IMAGE', image['title']
+                for template in page.get("templates", []):
+                    t = template['title']
+                    if t not in templates:
+                        new_template_names.add(t)
+
+        for ptitles in splitlist(list(print_templates), max=self.API_result_limit):
+            _fetch_pt(
+                titles="|".join(ptitles),
+                redirects=1,
+                prop='templates|images',
+                tllimit=self.API_result_limit,
+                imlimit=self.API_result_limit,
+            )
+
+        if new_template_names:
+            self._fetchTemplates(new_template_names)
 
     def _fetchImages(self, wikidb, imagedb, image_names):
         images = self.images
@@ -502,18 +538,11 @@ class ZipCreator(object):
             template_names, image_names = self._fetchArticles(wikidb, jobs)
 
             # get all templates or their print version
-            def _getTemplates(jobname):
-                self._fetchTemplates(wikidb, template_names)
-            
-            # get images
-            def _getImageData(jobname):
-                imagedb = jobs[0]['imagedb']
-                self._fetchImages(wikidb, imagedb, image_names)
+            self._fetchTemplates(wikidb, template_names, image_names)
 
-            # fetch image data and templates in parallel
-            self.jobsched.add_job("_getTemplates", _getTemplates)
-            self.jobsched.add_job("_getImageData", _getImageData)
-            self.jobsched.join()
+            # get images
+            imagedb = jobs[0]['imagedb']
+            self._fetchImages(wikidb, imagedb, image_names)
 
             # get article contributors
             for a in self.articles.values():
