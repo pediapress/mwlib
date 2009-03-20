@@ -321,6 +321,9 @@ class ZipCreator(object):
 
     def _fetchImages(self, wikidb, imagedb, image_names):
         images = self.images
+
+        image_names = set([stripNS(n) for n in image_names])
+
         for name in image_names:
             images[name] = dict(title=name, 
                                 url=None, 
@@ -342,6 +345,7 @@ class ZipCreator(object):
 
             for page in res["query"]["pages"].values():
                 title = self.redirects.get(page["title"], page["title"])
+                title = stripNS(title)
                 images[title]["imagerepository"] = page.get("imagerepository")
                 if "imageinfo" in page and page["imageinfo"]:
                     ii = page["imageinfo"][0]
@@ -361,7 +365,7 @@ class ZipCreator(object):
 
         for ftitles in splitlist(list(image_names), max=self.API_request_limit):
             _fetch_meta(
-                titles="|".join(ftitles),
+                titles="|".join(['File:%s' % t for t in ftitles]),
                 redirects=1,
                 rvprop='content',
                 prop='imageinfo|templates|revisions',
@@ -372,13 +376,14 @@ class ZipCreator(object):
                 )
 
 
-        # Get templates:
+        # Get revision and templates for images from shared repository:
 
         def _fetch_shared_meta(api, **kargs):
             res = api.query(**kargs)
             self._trace(res)
             for page in res["query"]["pages"].values():
                 title = self.redirects.get(page["title"], page["title"])
+                title = stripNS(title)
                 for template in page.get("templates", []):
                     images[title]["templates"].append(stripNS(template["title"]))
                 images[title]["content"] = page["revisions"][0]["*"]
@@ -398,7 +403,7 @@ class ZipCreator(object):
                 continue
             for ftitles in splitlist(titles, max=self.API_request_limit):
                 _fetch_shared_meta(api,
-                    titles="|".join(ftitles),
+                    titles="|".join(['File:%s' % t for t in ftitles]),
                     redirects=1,
                     rvprop='content',
                     prop='templates|revisions',
@@ -435,7 +440,7 @@ class ZipCreator(object):
                 return
             self.zf_lock.acquire()
             try:
-                zipname = u"images/%s" % stripNS(image["title"]).replace("'", '-')
+                zipname = u"images/%s" % image["title"].replace("'", '-')
                 self.zf.write(filename, zipname.encode("utf-8"))
             finally:
                 self.zf_lock.release()
@@ -509,10 +514,10 @@ class ZipCreator(object):
         for name, item in self.images.items():
             if not item:
                 continue
-            images[stripNS(name)] = dict(url=item["thumburl"] or item['url'],
-                                         descriptionurl=item['descriptionurl'],
-                                         templates=item['templates'],
-                                         contributors=item['contributors'])
+            images[name] = dict(url=item["thumburl"] or item['url'],
+                                descriptionurl=item['descriptionurl'],
+                                templates=item['templates'],
+                                contributors=item['contributors'])
             
         data = dict(
             articles=articles,
