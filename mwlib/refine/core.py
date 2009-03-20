@@ -168,6 +168,15 @@ def parse_math(tokens, refined, **kwargs):
             t.math = T.join_as_text(t.children)
             del t.children[:]
     refined.append(tokens)
+
+def parse_inputbox(tokens, refined, **kwargs):
+    get_recursive_tag_parser("inputbox")(tokens, [], **kwargs)
+    
+    for t in tokens:
+        if t.tagname=='inputbox':
+            t.inputbox = T.join_as_text(t.children)
+            del t.children[:]
+    refined.append(tokens)
     
 def parse_gallery(tokens, refined, **kwargs):
     i = 0
@@ -844,6 +853,8 @@ def mark_style_tags(tokens):
 parse_h_tags = combined_parser(
     [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
 
+
+
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -865,6 +876,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_tagextensions,
                parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links,
+               parse_inputbox,
                parse_h_tags,
                parse_sections,
                parse_center, parse_div, parse_pre, parse_tables]
