@@ -449,16 +449,16 @@ class ZipCreator(object):
         self.jobsched.add_job(image["title"], job)
 
 
-    def scheduleContributors(self, object, wikidb):
+    def scheduleContributors(self, title, object, wikidb):
         if not object:
             return 
 
         def job(job_id):
-            contributors = wikidb.getAuthors(object["title"], object.get("revision"), self.API_result_limit)
+            contributors = wikidb.getAuthors(title, object.get("revision"), self.API_result_limit)
             if contributors:
                 object["contributors"] = contributors
 
-        self.jobsched.add_job(object["title"], job)
+        self.jobsched.add_job(title, job)
 
 
     def writeContent(self):
@@ -551,7 +551,7 @@ class ZipCreator(object):
 
             # get article contributors
             for a in self.articles.values():
-                self.scheduleContributors(a, wikidb)
+                self.scheduleContributors(a['title'], a, wikidb)
 
             # fetch image binaries
             for image in self.images.values():
@@ -563,7 +563,7 @@ class ZipCreator(object):
                 _wikidb = mwapidb.WikiDB(api_helper=api)
                 for i in self.images.values():
                     if i and not i["contributors"] and i["api"] == api:
-                        self.scheduleContributors(i, _wikidb)
+                        self.scheduleContributors('File:%s' % i['title'], i, _wikidb)
                         
         self.jobsched.join()
         self.writeContent()
