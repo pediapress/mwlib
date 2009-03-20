@@ -8,7 +8,7 @@ from __future__ import division
 import re
 import weakref
 
-from mwlib.advtree import Center
+from mwlib import advtree
 from mwlib.htmlcolornames import colorname2rgb_map
 
 def _colorFromStr(colorStr):
@@ -87,15 +87,18 @@ def rgbColorFromNode(node, greyScale=False, darknessLimit=0):
             return _rgb2GreyScale(color, darknessLimit)
     return color
 
-def alignmentFromNode(node):
-    align = node.style.get('text-align', '').lower()
-    if align in ['right', 'left', 'center', 'justify']:
-        return align
-    else: # special handling for nodes inside a center tag
-        try:
-            if node.getParentNodesByClass(Center):
-                return 'center'
-        except weakref.ReferenceError: # FIXME: this is only a workaround for a bug related to mwlib.rl table reformatting
-            return None
-    return None
 
+def getTextAlign(node):
+    """ return the text alignment of a node. possible return values are left|right|center|none"""
+    if node.__class__ == advtree.Cell and getattr(node, 'is_header', False):
+        return 'center'
+    align = node.style.get('text-align', 'none').lower()
+    if align == 'none':
+        align = node.attributes.get('align', 'none').lower()
+    if align not in ['left', 'center', 'right', 'justify', 'none']:
+        return 'left'
+    if node.__class__ == advtree.Center:
+        align = 'center'
+    if align == "none" and node.parent:
+        return getTextAlign(node.parent)
+    return align
