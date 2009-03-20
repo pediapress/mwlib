@@ -12,7 +12,7 @@ import re
 from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, 
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
-                           HorizontalRule, ImageLink, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
+                           HorizontalRule, ImageLink, ImageMap, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
                            Row, Section, Small, Source, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text,
                            Underline, URL, Var)
@@ -70,7 +70,7 @@ class TreeCleaner(object):
 
         # list of nodes which do not require child nodes
         self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Code,
-                            HorizontalRule, ImageLink, InterwikiLink, LangLink, Link, Math,
+                            HorizontalRule, ImageLink, ImageMap, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, URL]
 
         # FIXME: not used currently. remove if this is not used soon. could be used as reference
