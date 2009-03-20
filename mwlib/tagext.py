@@ -18,6 +18,10 @@ http://en.wikipedia.org/wiki/Special:Version
 http://wiki.services.openoffice.org/wiki/Special:Version 
 http://www.wikia.com/wiki/Special:Version
 http://en.wikibooks.org/wiki/Special:Version
+
+
+List of tags used by Wikia:
+http://code.pediapress.com/wiki/wiki/ParserExtensionTags
 """
 
 class ExtensionRegistry(object):
@@ -70,11 +74,33 @@ class TagExtension(object):
     def parse(self, txt):
         return _parse(txt)
 
+class IgnoreTagBase(TagExtension):
+    def __call__(self, source, attributes):
+        return # simply skip for now
+
 
 # ---
 # --- what follows are some implementations of TagExtensions
 # ---
-    
+
+# list of tags than can not easily be re implemented in PDFs 
+tags_to_ignore = ['chem', 'chess', 'choose', 'dpl', 'dynamicpagelist', 'feyn', 'forum',
+                  'go', 'googlemapkml', 'graph', 'greek', 'ling', 'plot', 'ppch', 
+                  'randomimage', 'schem', 'staff', 'teng', 'tipa', 'verbatim', 
+                  'aoaudio', 'aovideo', 'bloglist', 'cgamer', 'ggtube', "googlemap", 
+                  'gtrailer', 'gvideo', 'nicovideo', 'tangler', 'video', 'videogallery', 
+                  'wegame', 'youtube', 'imagelink', 'badge', 'comments', 'createform', 
+                  'fan', 'featuredimage', 'gallerypopulate', 'linkfilter', 'listpages', 
+                  'loggedin', 'loggedout', 'newusers', 'pollembed', 'randomfeatureduser', 
+                  'randomgameunit', 'randomimagebycategory', 'randomuserswithavatars', 
+                  'rss', 'siteactivity', 'userpoll', 'videogallerypopulate', 'vote', 
+                  'welcomeuser', 'xsound'] 
+for name in tags_to_ignore:
+    def _f(name):
+        class I(IgnoreTagBase):
+            name = name
+        register(I)
+    _f(name)
 
 class Rot13Extension(TagExtension):
     """
@@ -153,11 +179,11 @@ class PoemExtension(TagExtension):
         return self.parse(res)        
 register(PoemExtension)
 
-class LabledSectionTransclusionExtensionHotFix(TagExtension):
+
+
+class LabledSectionTransclusionExtensionHotFix(IgnoreTagBase):
     #http://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion
     name = "section"
-    def __call__(self, source, attributes):
-        return # simply skip for now
 register(LabledSectionTransclusionExtensionHotFix)
 
 # --- wiki travel extensions ----
@@ -208,3 +234,6 @@ register(DrinkExtension)
 class SleepExtension(ListingExtension):
     name = "sleep"
 register(SleepExtension)
+
+
+#print default_registry.name2ext
