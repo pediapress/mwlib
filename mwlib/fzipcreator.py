@@ -554,6 +554,8 @@ class ZipCreator(object):
 
             # get article contributors
             for a in self.articles.values():
+                if not a:
+                    continue
                 self.scheduleContributors(a['title'], a, wikidb)
 
             # fetch image binaries
