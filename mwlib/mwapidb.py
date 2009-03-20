@@ -308,6 +308,13 @@ class APIHelper(object):
             except (KeyError, IndexError):
                 return None
         return None
+
+    def content_query(self, title):
+        'quick and dirty content query'
+        r = self.page_query(**dict(titles=title ,prop='revisions',rvprop='content'))
+        if r and 'revisions' in r:
+            return r['revisions'][0]['*']
+
     
 
 # ==============================================================================

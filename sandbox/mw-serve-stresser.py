@@ -16,7 +16,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import mwapidb, utils, log
+from mwlib import mwapidb, utils, log, bookshelf
 import mwlib.metabook
 
 
@@ -65,6 +65,27 @@ def getMetabook(articles):
     addLicense(metabook)
     return metabook
 
+
+def getRandomMetabook(api, min=1, max=100):
+    b = bookshelf.Bookshelf(api)
+    booknames = b.booknames()
+    num_articles = -1
+    mbook = None
+    tries = 100
+    while tries and num_articles > max or num_articles < min:
+        tries -=1
+        if tries == 0:
+            return None
+        bn = random.choice(booknames)
+        log.info("getRandomMetabook trying %r" % bn)
+        c = api.content_query(bn)
+        if not c:
+            continue
+        mbook = mwlib.metabook.parse_collection_page(c)
+        num_articles = len(mwlib.metabook.get_item_list(mbook, "article"))
+        log.info("getRandomMetabook num arts min:%d this:%d max:%d" % (min, num_articles, max))
+    addLicense(mbook)
+    return mbook
 
 def addLicense(mbook):
     license_text = utils.fetch_url(
@@ -158,11 +179,12 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
                  mail_recipients=None,
                  render_timeout = RENDER_TIMEOUT_DEFAULT # seconds or None
                  ):
-    arts = getRandomArticles(api, min=1, max=maxarticles)
-    log.info('random articles: %r' % arts)
-    metabook = getMetabook(arts)
-    if not arts:
-        reportError('render', metabook, dict(reason="getRandomArticlesFailed"), baseurl, writer,
+#    arts = getRandomArticles(api, min=1, max=maxarticles)
+#    log.info('random articles: %r' % arts)
+#    metabook = getMetabook(arts)
+    metabook = getRandomMetabook(api, min=5, max=maxarticles)
+    if not metabook:
+        reportError('render', metabook, dict(reason="getRandomMetabook Failed"), baseurl, writer,
                     from_email=from_email,
                     mail_recipients=mail_recipients)
         time.sleep(60)
@@ -274,6 +296,6 @@ def main():
 
 
 if __name__ == '__main__':
-    #print getRandomArticles(mwapidb.APIHelper("http://en.wikipedia.org/w"), max=20)
+    #print getRandomMetabook(mwapidb.APIHelper("http://en.wikipedia.org/w"), min=10, max=20)
     main()
     
