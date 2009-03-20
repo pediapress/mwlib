@@ -271,8 +271,10 @@ class ZipCreator(object):
             for name in template_names:
                 pname = wikidb.print_template_pattern.replace(u'$1', name)
                 if pname in templates:
-                    templates[name]["content"] = templates[pname]["content"]
-                    del templates[pname]
+                    if name in templates:
+                        templates[name]["content"] = templates[pname]["content"]
+                    else:
+                        templates[name] = templates[pname]
                 
         # filter blacklisted templates
         if wikidb.template_blacklist:
@@ -280,7 +282,6 @@ class ZipCreator(object):
             for title, item in self.templates.items():
                 if stripNS(title).lower() in tbl:
                     item["content"] = None
-
 
     def _fetchImages(self, wikidb, imagedb, image_names):
         images = self.images
