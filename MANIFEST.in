@@ -29,6 +29,7 @@ include mwlib/_version.py
 include mwlib/advtree.py
 include mwlib/allnodes.py
 include mwlib/apps.py
+include mwlib/bookshelf.py
 include mwlib/caller.py
 include mwlib/cdb.py
 include mwlib/cdbwiki.py
@@ -88,7 +89,6 @@ include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/status.py
 include mwlib/strftime.py
-include mwlib/styleutils.py
 include mwlib/tagext.py
 include mwlib/templ/__init__.py
 include mwlib/templ/evaluate.py
@@ -115,6 +115,7 @@ include mwlib/wikidbbase.py
 include mwlib/writer/__init__.py
 include mwlib/writer/imageutils.py
 include mwlib/writer/miscutils.py
+include mwlib/writer/styleutils.py
 include mwlib/writerbase.py
 include mwlib/wsgi.py
 include mwlib/xfail.py
@@ -168,6 +169,7 @@ include tests/test_templ_pp.py
 include tests/test_timeline.py
 include tests/test_treecleaner.py
 include tests/test_utils.py
+include tests/test_writerutils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipcreator.py
 include tests/test_zipwiki.py
