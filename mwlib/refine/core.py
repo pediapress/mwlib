@@ -840,7 +840,10 @@ def mark_style_tags(tokens):
             else:
                 i+=1
         create()
-            
+
+parse_h_tags = combined_parser(
+    [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
+
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -861,7 +864,9 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_lines,
                parse_tagextensions,
                parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
-               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links, parse_sections,
+               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links,
+               parse_h_tags,
+               parse_sections,
                parse_center, parse_div, parse_pre, parse_tables]
 
 
