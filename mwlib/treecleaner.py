@@ -368,7 +368,7 @@ class TreeCleaner(object):
         # tables like this should be detected and marked in a separate module probably
         if self.is_skip_article(node):
             return
-        if node.__class__ == Table and node.numcols == 1 and not 'box' in node.attributes.get('class', ''):
+        if node.__class__ == Table and node.numcols == 1 and not 'box' in node.attributes.get('class', '') and len(node.getAllDisplayText()) > 500:
             if not node.parents:
                 return
             divs = []
