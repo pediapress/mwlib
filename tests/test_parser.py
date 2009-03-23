@@ -1136,6 +1136,7 @@ def test_vlist_newline():
     
     yield check, '<ref\n\nname="bla">bla</ref>'
     yield check, '<ref\n\nname\n\n=\n\n"bla">bla</ref>'
+    yield check, '<ref\n\nname\n\n=\n\n"bla\n">bla</ref>'
 
     
     

@@ -4,7 +4,7 @@
 
 import re
 
-paramrx = re.compile(r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:])+)))")
+paramrx = re.compile(r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:])+)))", re.DOTALL)
 def parseParams(s):
     def style2dict(s):
         res = {}
