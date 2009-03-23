@@ -756,6 +756,8 @@ class ODFWriter(object):
             frame.writeImageMapTo = innerframe
         return frame
 
+    def owriteFont(self, n):
+        pass # simply write children
 
     def owriteNode(self, n):
         pass # simply write children
