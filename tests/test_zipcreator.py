@@ -6,40 +6,42 @@ import shutil
 import tempfile
 from zipfile import ZipFile
 
-from mwlib import zipcreator, wiki, metabook
+from mwlib import zipcreator, wiki, metabook, wikidbbase
+
+norm = wikidbbase.normalize_title
 
 class FakeDB(object):
     articles = {
-        u'article1': {
-            'text': u'article text [[Image:Test.jpg]] {{template1}}',
+        u'Article1': {
+            'text': u'article text [[Image:Test.jpg]] {{Template1}}',
             'url': 'http://some/url/',
         },
     }
     templates = {
-        u'template1': u'template text',
+        u'Template1': u'template text',
     }
     def getRawArticle(self, title, revision=None):
         try:
-            return self.articles[title]['text']
+            return self.articles[norm(title)]['text']
         except KeyError:
             return None
     
     def getTemplate(self, title, followRedirects=False):
         try:
-            return self.templates[title]
+            return self.templates[norm(title)]
         except KeyError:
             return None
     
     def getURL(self, title, revision=None):
         try:
-            a = self.articles[title]
+            a = self.articles[norm(title)]
         except KeyError:
             return None
         return a['url']
     
     def getAuthors(self, title, revision=None):
         try:
-            a = self.articles[title]
+            a = self.articles[norm(title)]
         except KeyError:
             return None
         return [u'foo', u'bar']
@@ -60,9 +62,9 @@ class TestZipCreator(object):
         shutil.rmtree(self.tempdir)
     
     def test_addArticle(self):
-        self.creator.addArticle(u'article1', wikidb=self.fakedb, imagedb=None)
+        self.creator.addArticle(u'Article1', wikidb=self.fakedb, imagedb=None)
         self.creator.join()
-        assert u'template1' in self.creator.templates
+        assert u'Template1' in self.creator.templates
     
     def test_addObject(self):
         self.creator.addObject(u'fü', 'bär')
