@@ -81,7 +81,7 @@ class Wiki(wikidbbase.WikiDBBase):
         return source.get('interwikimap', None)
     
     def getRawArticle(self, title, revision=None):
-        ns, partial, full = namespace.splitname(title)
+        ns, partial, full = namespace.splitname(title) # FIXME: language
         if ns==namespace.NS_TEMPLATE:
             return self.getTemplate(partial)
         article = self._getArticle(title, revision=revision)
@@ -105,7 +105,7 @@ class Wiki(wikidbbase.WikiDBBase):
         return None
     
     def getTemplate(self, name, followRedirects=True):
-        ns, name, full = namespace.splitname(name, namespace.NS_TEMPLATE)
+        ns, name, full = namespace.splitname(name, namespace.NS_TEMPLATE) # FIXME: language
         if ns!=namespace.NS_TEMPLATE:
             return self.getRawArticle(full)
         try:
