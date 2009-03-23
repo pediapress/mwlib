@@ -162,7 +162,26 @@ class Parser(object):
             args.append(arg)
 
         return [optimize(x) for x in args]
-                    
+
+    def _is_good_name(self, node):
+
+        # we stop here on the first colon. this is wrong but we don't have
+        # the list of allowed magic functions here...
+        done = False
+        if isinstance(node, basestring):
+            node = [node]
+            
+        for x in node:
+            if not isinstance(x, basestring):
+                continue
+            if ":" in x:
+                x = x.split(":")[0]
+                done=True
+                
+            if "[" in x or "]" in x:
+                return False
+        return True
+    
     def templateFromChildren(self, children):
         if children and isinstance(children[0], unicode):
             s = children[0].strip().lower()
@@ -191,7 +210,10 @@ class Parser(object):
         name = optimize(name)
         if isinstance(name, unicode):
             name = name.strip()
-                    
+
+        if not self._is_good_name(name):
+            return Node([u"{{"] + children + [u"}}"])
+        
         args = self._parse_args(children[idx+1:], append_arg=append_arg)
         
         return Template([name, tuple(args)])
