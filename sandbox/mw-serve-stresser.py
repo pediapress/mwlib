@@ -84,6 +84,7 @@ def getRandomMetabook(api, min=1, max=100):
         mbook = mwlib.metabook.parse_collection_page(c)
         num_articles = len(mwlib.metabook.get_item_list(mbook, "article"))
         log.info("getRandomMetabook num arts min:%d this:%d max:%d" % (min, num_articles, max))
+    mbook['book_page'] = bn
     addLicense(mbook)
     return mbook
 
