@@ -87,6 +87,10 @@ def buildzip():
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
         action='store_true',
     )
+    parser.add_option('-f', '--fastzipcreator',
+        help='Use experimental new fzipcreator code',
+        action='store_true',
+    )
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
@@ -121,7 +125,10 @@ def buildzip():
             env = parser.makewiki()
         
             from mwlib.status import Status
-            import mwlib.fzipcreator as zipcreator
+            if options.fastzipcreator:
+                import mwlib.fzipcreator as zipcreator
+            else:
+                from mwlib import zipcreator
 
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)
@@ -241,7 +248,10 @@ def render():
     parser.add_option('-L', '--language',
         help='use translated strings in LANGUAGE',
     )
-    
+    parser.add_option('-f', '--fastzipcreator',
+        help='Use experimental new fzipcreator code',
+        action='store_true',
+    )
     options, args = parser.parse_args()
     
     import sys
@@ -252,7 +262,10 @@ def render():
     from mwlib.mwapidb import MWAPIError
     from mwlib.writerbase import WriterError
     from mwlib import utils, zipwiki
-    from mwlib import fzipcreator as zipcreator
+    if options.fastzipcreator:
+        from mwlib import fzipcreator as zipcreator
+    else:
+        from mwlib import zipcreator
     from mwlib.status import Status
     
     use_help = 'Use --help for usage information.'
