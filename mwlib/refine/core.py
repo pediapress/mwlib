@@ -873,13 +873,12 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
-               parse_tagextensions,
                parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links,
                parse_inputbox,
                parse_h_tags,
                parse_sections,
-               parse_center, parse_div, parse_pre, parse_tables]
+               parse_center, parse_div, parse_pre, parse_tables, parse_tagextensions]
 
 
     refined = []
