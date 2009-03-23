@@ -189,7 +189,7 @@ class Uniquifier(object):
     def get_uniq(self, repl):
         r = self.get_random_string()
         count = len(self.uniq2repl)
-        retval = "UNIQ-%s-%s-QINU" % (count, r)
+        retval = "\x7fUNIQ-%s-%s-QINU\x7f" % (count, r)
         self.uniq2repl[retval] = repl
         return retval
     
@@ -206,7 +206,7 @@ class Uniquifier(object):
         return self.uniq2repl.get(u, u)
 
     def replace_uniq(self, txt):
-        rx=re.compile(r"UNIQ-\d+-[a-f0-9]+-QINU")
+        rx=re.compile("\x7fUNIQ-\\d+-[a-f0-9]+-QINU\x7f")
         txt = rx.sub(self._repl_from_uniq, txt)
         return txt
     
