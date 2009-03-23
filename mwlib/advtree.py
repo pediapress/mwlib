@@ -497,6 +497,9 @@ class Div(TagNode, AdvancedNode):
 class Span(TagNode, AdvancedNode): # span is defined as inline node which is in theory correct. 
     _tag = "span"
 
+class Font(TagNode, AdvancedNode):
+    _tag = "font"
+
 class Strike(TagNode,AdvancedNode):
     _tag = "strike"
 
@@ -525,7 +528,7 @@ class TableCaption(TagNode, AdvancedNode):
     _tag = "caption"
 
     
-_tagNodeMap = dict( (k._tag,k) for k in [Source, Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap, Ruby, RubyBase, RubyText, Deleted, Inserted, TableCaption] )
+_tagNodeMap = dict( (k._tag,k) for k in [Source, Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap, Ruby, RubyBase, RubyText, Deleted, Inserted, TableCaption, Font] )
 _styleNodeMap["s"] = Strike # Special Handling for deprecated s style
 
 
