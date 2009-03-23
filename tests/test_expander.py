@@ -397,3 +397,7 @@ def test_localurle_umlaut():
     r=expandstr(u"{{LOCALURLE:F\xfcbar}}")
     assert r.endswith('/F%C3%BCbar')
     
+def test_equal_inside_link():
+    db= DictDB(t1="{{{1}}}")
+    expandstr("{{t1|[[abc|foo=5]]}}", "[[abc|foo=5]]", wikidb=db)
+           
