@@ -3,7 +3,9 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib import namespace
+from mwlib import namespace, wikidbbase
+
+norm = wikidbbase.normalize_title
 
 class RecordDB(object):
     """Proxy getRawArticle() and getTemplate() to another WikiDB and record all
@@ -41,12 +43,14 @@ class RecordDB(object):
         
         ns, partial, full = namespace.splitname(name)
         if ns==namespace.NS_TEMPLATE:
-            self.templates[partial] = {
+            self.templates[norm(partial)] = {
                 'content-type': 'text/x-wiki',
                 'content': r,
                 }
             
             return r
+
+        name = norm(name)
                 
         self.articles[name] = {
             'revision': revision,
@@ -68,6 +72,7 @@ class RecordDB(object):
         if ns!=namespace.NS_TEMPLATE:
             return self.getRawArticle(full)
             
+        name = norm(name)
         try:
             return self.templates[name]['content']
         except KeyError:

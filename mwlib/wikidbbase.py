@@ -5,6 +5,14 @@ from mwlib.log import Log
 
 log = Log('wikidbbase')
 
+
+def normalize_title(title):
+    if not isinstance(title, unicode):
+        title = unicode(title, 'utf-8')
+    title = title.replace('_', ' ')
+    title = title[0].upper() + title[1:]
+    return title
+
 class WikiDBBase(object):
     """Base class for WikiDBs"""
     
