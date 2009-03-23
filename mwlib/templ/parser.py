@@ -4,6 +4,7 @@
 
 from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import symbols, tokenize
+from mwlib.templ.marks import eqmark
 
 try:
     from hashlib import sha1 as digest
@@ -28,7 +29,7 @@ def optimize(node):
         res = []
         tmp = []
         for x in (optimize(x) for x in node):
-            if isinstance(x, basestring) and x!='=':
+            if isinstance(x, basestring) and x is not eqmark:
                 tmp.append(x)
             else:
                 if tmp:
@@ -149,6 +150,9 @@ class Parser(object):
                 args.append(arg)
                 arg = []
                 append_arg = True
+                continue
+            elif c==u"=" and linkcount==0:
+                arg.append(eqmark)
                 continue
             arg.append(c)
 
