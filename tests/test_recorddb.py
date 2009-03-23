@@ -1,27 +1,29 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-from mwlib import recorddb
+from mwlib import recorddb, wikidbbase
+
+norm = wikidbbase.normalize_title
 
 class FakeDB(object):
     articles = {
-        u'article1': {
+        u'Article1': {
             'text': u'article text [[Image:Test.jpg]] {{template1}}',
             'url': 'http://some/url/',
         },
     }
     templates = {
-        u'template1': u'template text',
+        u'Template1': u'template text',
     }
     def getRawArticle(self, title, revision=None):
         try:
-            return self.articles[title]['text']
+            return self.articles[norm(title)]['text']
         except KeyError:
             return None
     
     def getTemplate(self, title, followRedirects=False):
         try:
-            return self.templates[title]
+            return self.templates[norm(title)]
         except KeyError:
             return None
     
