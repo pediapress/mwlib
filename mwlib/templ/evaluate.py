@@ -10,7 +10,7 @@ class TemplateRecursion(Exception): pass
 
 def flatten(node, expander, variables, res):
     t=type(node)
-    if t is unicode or t is str:
+    if isinstance(node, (unicode, str)):
         res.append(node)
         return True
 
@@ -45,13 +45,10 @@ class MemoryLimitError(Exception):
 
 def equalsplit(node):
     if isinstance(node, basestring):
-        if '=' in node:
-            return node.split('=', 1)
-        else:
-            return None, node
+        return None, node
 
     try:
-        idx = node.index(u'=')
+        idx = node.index(eqmark)
     except ValueError:
         return None, node
 
@@ -60,13 +57,10 @@ def equalsplit(node):
     
 def equalsplit_25(node):
     if isinstance(node, basestring):
-        if '=' in node:
-            return node.split('=', 1)
-        else:
-            return None, node
+        return None, node
 
     try:
-        idx = list(node).index(u'=')
+        idx = list(node).index(eqmark)
     except ValueError:
         return None, node
 
@@ -163,7 +157,7 @@ def is_implicit_newline(raw):
             return True
     return False 
 
-from mwlib.templ.marks import mark, mark_start, mark_end, mark_maybe_newline, maybe_newline, dummy_mark
+from mwlib.templ.marks import mark, mark_start, mark_end, mark_maybe_newline, maybe_newline, dummy_mark, eqmark
 
 def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument
