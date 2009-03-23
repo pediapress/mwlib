@@ -145,7 +145,8 @@ class Parser(object):
             if c==u'[[':
                 linkcount += 1
             elif c==']]':
-                linkcount -= 1
+                if linkcount:
+                    linkcount -= 1
             elif c==u'|' and linkcount==0:
                 args.append(arg)
                 arg = []
