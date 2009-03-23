@@ -255,7 +255,7 @@ class Expander(object):
         return self.uniquifier.replace_tags(txt)
         
     def getParsedTemplate(self, name):
-        if name.startswith("[[") or "|" in name:
+        if not name or name.startswith("[[") or "|" in name:
             return None
 
         if name.startswith("/"):
