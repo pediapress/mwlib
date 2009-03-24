@@ -87,7 +87,7 @@ class token(object):
     t_row = 23
     t_tablecaption = 24
     t_urllink = 25
-
+    t_uniq = 26
     
     t_html_tag_end = 100
     

@@ -38,6 +38,7 @@ typedef enum {
 	t_row,
 	t_tablecaption,
 	t_urllink,
+	t_uniq,
 } mwtok;
 
 struct Token
@@ -239,6 +240,8 @@ not_bol:
   "[" url {RET(t_urllink);}
   url 		{RET(t_http_url);}
   magicword		{RET(t_magicword);}
+  "\X007F" "UNIQ-" [0-9]+ "-" [0-9a-f]+ "-QINU" "\X007f" {RET(t_uniq);}
+
   [a-zA-Z0-9]+				{RET(t_text);}
   "_"+                     {RET(t_text);}
   "[["              {RET(t_2box_open);}
