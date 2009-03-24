@@ -232,7 +232,8 @@ class _compat_scanner(object):
 #         print "ALLOWED:", " ".join(tmp)
         
         
-    def __call__(self, text):
+    def __call__(self, text, uniquifier=None):
+        
         if self.allowed_tags is None:
             self._init_allowed_tags()
 
@@ -269,7 +270,9 @@ class _compat_scanner(object):
                 res.append(t)
             elif type==token.t_html_tag:
                 s = g()
-
+                if uniquifier:
+                    s=uniquifier.replace_uniq(s)
+                    t.text = s
                 _analyze_html_tag(t)
                 isEndToken = t.tag_isEndToken
                 closingOrSelfClosing = isEndToken or t.tag_selfClosing
@@ -338,6 +341,6 @@ class _compat_scanner(object):
         
 compat_scan = _compat_scanner()
 
-def tokenize(input, name="unknown"):
+def tokenize(input, name="unknown", uniquifier=None):
     assert input is not None, "must specify input argument in tokenize"
-    return compat_scan(input)
+    return compat_scan(input, uniquifier=uniquifier)

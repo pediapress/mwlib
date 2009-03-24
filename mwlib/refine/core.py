@@ -6,7 +6,7 @@
 import sys
 from mwlib.utoken import tokenize, show, token as T, walknode
 from mwlib.refine import util
-from mwlib import namespace, tagext
+from mwlib import namespace, tagext, uniq
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 
@@ -177,6 +177,25 @@ def parse_inputbox(tokens, refined, **kwargs):
             t.inputbox = T.join_as_text(t.children)
             del t.children[:]
     refined.append(tokens)
+
+def _parse_gallery_txt(txt, **kwargs):
+    lines = [x.strip() for x in txt.split("\n")]
+    sub = []
+    for x in lines:
+        if not x:
+            continue
+
+        linode = parse_txt(u'[['+x+']]', **kwargs)
+
+        if linode:
+            n = linode[0]
+            if n.ns==namespace.NS_IMAGE:
+                sub.append(n)
+                continue
+        sub.append(T(type=T.t_text, text=x))
+    return sub
+
+    #tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist, blocknode=True)]
     
 def parse_gallery(tokens, refined, **kwargs):
     i = 0
@@ -185,22 +204,7 @@ def parse_gallery(tokens, refined, **kwargs):
     def handle():
         sub = tokens[start+1:i]
         txt = T.join_as_text(sub)
-        
-        lines = [x.strip() for x in txt.split("\n")]
-        sub = []
-        for x in lines:
-            if not x:
-                continue
-
-            linode = parse_txt(u'[['+x+']]', **kwargs)
-
-            if linode:
-                n = linode[0]
-                if n.ns==namespace.NS_IMAGE:
-                    sub.append(n)
-                    continue
-            sub.append(T(type=T.t_text, text=x))
-            
+        sub = _parse_gallery_txt(txt, **kwargs)
         tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist, blocknode=True)]
 
     while i<len(tokens):
@@ -853,8 +857,55 @@ def mark_style_tags(tokens):
 parse_h_tags = combined_parser(
     [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
 
+class parse_uniq(object):
+    def __init__(self, tokens, refined, uniquifier=None, **kw):
+        refined.append(tokens)
+        if uniquifier is None:
+            return
+        
+        for i, t in enumerate(tokens):
+            # if t.type==t.t_html_tag:
+            #     t.text = uniquifier.replace_uniq(t.text)
+            #     print "txt:", t.text
+            if t.type==T.t_uniq:
+                text = t.text
+                try:
+                    name, orig, groupdict = uniquifier.uniq2repl[text]
+                except KeyError:
+                    t.type==T.t_text
+                    continue
+                print "FOUND:", name, groupdict
+                tokens[i] = getattr(self, "create_"+str(name))(orig, groupdict, **kw)
+                
+    def create_source(self, orig, groupdict, **kw):
+        print 'CREATE_SOURCE'
+        children = [T(type=T.t_text, text="source_inner")]
+        return T(type=T.t_complex_tag, tagname="source", children=children)
 
+    def create_ref(self, orig, groupdict, **kw):
+        return T(type=T.t_complex_tag, tagname="ref") # , inner=groupdict["ref_inner"])
 
+    def create_gallery(self, orig, groupdict, **kw):
+        sub = _parse_gallery_txt(groupdict["gallery_inner"], **kw)
+        print "sub;", sub
+        # FIXME vlist
+        return T(type=T.t_complex_tag, tagname="gallery", children=sub)
+
+    def create_imagemap(self, orig, groupdict, **kw):
+        from mwlib import imgmap
+        txt = groupdict["imagemap_inner"]
+        t = T(type=T.t_complex_tag, tagname="imagemap")
+        t.imagemap =imgmap.ImageMapFromString(txt)
+        if t.imagemap.image:
+            s = u"[["+t.imagemap.image+u"]]"
+            res = parse_txt(s, **kw)
+            if res and res[0].type==T.t_complex_link and res[0].ns==6:
+                t.imagemap.imagelink = res[0]
+
+            show(res)
+        return t
+    
+    
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -865,20 +916,25 @@ def parse_txt(txt, interwikimap=None, **kwargs):
             interwikimap[lang] = {'language': True}
 
     kwargs['imagemod'] = util.ImageMod(kwargs.get('magicwords'))
-    
-    tokens = blist(tokenize(txt))
 
+    uniquifier = uniq.Uniquifier()
+    txt = uniquifier.replace_tags(txt)
+    kwargs["uniquifier"] = uniquifier
+    tokens = blist(tokenize(txt, uniquifier=uniquifier))
+
+    
+    
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
-               parse_imagemap, parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
+               parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
                parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links,
                parse_inputbox,
                parse_h_tags,
                parse_sections,
-               parse_center, parse_div, parse_pre, parse_tables, parse_tagextensions]
+               parse_center, parse_div, parse_pre, parse_tables, parse_tagextensions, parse_uniq]
 
 
     refined = []

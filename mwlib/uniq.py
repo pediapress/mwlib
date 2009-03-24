@@ -8,26 +8,24 @@ class Uniquifier(object):
     random_string = None 
     def __init__(self):
         self.uniq2repl = {}
-        
-    def get_uniq(self, repl, name):
-        r = self.get_random_string()
-        count = len(self.uniq2repl)
-        retval = "\x7fUNIQ-%s-%s-%s-QINU\x7f" % (name, count, r)
-        self.uniq2repl[retval] = repl
-        return retval
-    
-        
-    def get_random_string(self):
         if self.random_string is None:
             import binascii
             r=open("/dev/urandom").read(8)
             self.__class__.random_string = binascii.hexlify(r)
-        return self.random_string
-
-    def _repl_from_uniq(self, mo):
+       
+    def get_uniq(self, repl, name):
+        r = self.random_string
+        count = len(self.uniq2repl)
+        retval = "\x7fUNIQ-%s-%s-%s-QINU\x7f" % (name, count, r)
+        self.uniq2repl[retval] = repl
+        return retval
         
+    def _repl_from_uniq(self, mo):
         u = mo.group(0)
-        return self.uniq2repl.get(u, u)
+        t = self.uniq2repl.get(u, None)
+        if t is None:
+            return u
+        return t[1]
 
     def replace_uniq(self, txt):
         rx=re.compile("\x7fUNIQ-[a-z]+-\\d+-[a-f0-9]+-QINU\x7f")
@@ -35,20 +33,47 @@ class Uniquifier(object):
         return txt
     
     def _repl_to_uniq(self, mo):
-        for name, s in mo.groupdict().items():
-            if s:
-                return self.get_uniq(s, name)
+        groupdict = mo.groupdict()
+        for name, s in groupdict.items():
+            if s and "_" not in name:
+                return self.get_uniq((name, s, groupdict), name)
         assert 0
-        # print "GROUPS:", mo.groupdict()
-        # return self.get_uniq(mo.group(0))
     
     def replace_tags(self, txt):
-        rx=re.compile("""(?P<nowiki><nowiki>.*?</nowiki>)          # nowiki
-|(?P<math><math>.*?</math>)
-|(?P<imagemap><imagemap[^<>]*>.*?</imagemap>)
-|(?P<gallery><gallery[^<>]*>.*?</gallery>)
+
+        tags = ["(?:<nowiki>(?P<nowiki>.*?)</nowiki>)"]
+        def add_tag(name):
+            r = "(?P<%s>" % name
+            r += "<%s" % name
+            r += "(?P<%s_vlist>" % name
+            r += "\\s[^<>]*)?>"
+            r += "(?P<%s_inner>.*?)" % name
+            r += ">"
+            r += "</%s>)" % name
+            tags.append(r)
+            
+
+        add_tag("math")
+        add_tag("imagemap")
+        add_tag("gallery")
+        add_tag("source")
+        add_tag("pre")
+        add_tag("ref")
+        
+        rx =  '|'.join(tags)
+        if 1:
+            print rx
+            rx = re.compile(rx)
+            newtxt = rx.sub(self._repl_to_uniq, txt)
+            return newtxt
+
+            
+        rx=re.compile("""(?:<nowiki>(?P<nowiki>.*?)</nowiki>)          # nowiki
+|(?P<math><math>(?P<math_inner>.*?)</math>)
+|(?P<imagemap><imagemap[^<>]*>(?P<imagemap_inner>.*?)</imagemap>)
+|(?P<gallery><gallery(?P<gallery_vlist>[^<>]*)>(?P<gallery_inner>.*?)</gallery>)
 |(?P<ref><ref[^<>]*/?>)
-|(?P<source><source[^<>]*>.*?</source>)
-|(?P<pre><pre.*?>.*?</pre>)""", re.VERBOSE | re.DOTALL | re.IGNORECASE)
+|(?P<source><source[^<>]*>(?P<source_inner>.*?)</source>)
+|(?P<pre><pre.*?>(?P<pre_inner>.*?)</pre>)""", re.VERBOSE | re.DOTALL | re.IGNORECASE)
         newtxt = rx.sub(self._repl_to_uniq, txt)
         return newtxt
