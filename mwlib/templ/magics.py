@@ -387,7 +387,7 @@ class ParserFunctions(object):
 
     def IFEXIST(self, args):
         name = args[0]
-        if not self.wikidb:
+        if not name or not self.wikidb:
             return args.get(args[2], "")
         
         r=self.wikidb.getRawArticle(name)
