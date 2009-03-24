@@ -15,7 +15,11 @@ except ImportError:
 
 from mwlib import wikidbbase, namespace
 
-norm = wikidbbase.normalize_title
+def nget(d, key):
+    try:
+        return d[key]
+    except KeyError:
+        return d[wikidbbase.normalize_title(key)]
 
 class Wiki(wikidbbase.WikiDBBase):
     def __init__(self, zipfile):
@@ -36,7 +40,7 @@ class Wiki(wikidbbase.WikiDBBase):
     
     def _getArticle(self, title, revision=None):
         try:
-            article = self.articles[norm(title)]
+            article = nget(self.articles, title)
             if revision is None or article['revision'] == revision:
                 return article
         except KeyError:
@@ -102,7 +106,7 @@ class Wiki(wikidbbase.WikiDBBase):
         if ns!=namespace.NS_TEMPLATE:
             return self.getRawArticle(full)
         try:
-            result = self.templates[norm(name)]['content']
+            result = nget(self.templates, name)['content']
             if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
                 return unicode(result, 'utf-8')
             return result
@@ -154,7 +158,7 @@ class ImageDB(object):
     
     def getDiskPath(self, name, size=None):
         try:
-            return self.diskpaths[norm(name)]
+            return nget(self.diskpaths, name)
         except KeyError:
             pass
         try:
@@ -181,28 +185,25 @@ class ImageDB(object):
     
     def getImageTemplates(self, name, wikidb=None):
         try:
-            return self.images[norm(name)]['templates']
+            return nget(self.images, name)['templates']
         except KeyError:
             return []
     
     def getContributors(self, name, wikidb=None):
         try:
-            return self.images[norm(name)]['contributors']
+            return nget(self.images, name)['contributors']
         except KeyError:
             return []
     
-    def getPath(self):
-        raise NotImplemented('getPath() does not work with zipwiki.ImageDB!')
-    
     def getURL(self, name, size=None):
         try:
-            return self.images[norm(name)]['url']
+            return nget(self.images, name)['url']
         except KeyError:
             return None
     
     def getDescriptionURL(self, name):
         try:
-            return self.images[norm(name)]['descriptionurl']
+            return nget(self.images, name)['descriptionurl']
         except KeyError:
             return None
     
