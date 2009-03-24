@@ -7,8 +7,7 @@ log = Log('wikidbbase')
 
 
 def normalize_title(title):
-    if not title:
-        return u''
+    assert title, 'empty title'
     if not isinstance(title, unicode):
         title = unicode(title, 'utf-8')
     title = title.replace('_', ' ')
@@ -21,7 +20,8 @@ class WikiDBBase(object):
     def getLinkURL(self, link, title, revision=None):
         """Get a full HTTP URL for the given link object, parsed from an article
         in this WikiDB.
-        link node from parser
+        
+        @param link: link node from parser
         @type link: L{mwlib.parser.Link}
         
         @param title: title of containing article
