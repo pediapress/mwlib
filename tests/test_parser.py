@@ -837,7 +837,10 @@ def test_nowiki_inside_tags():
     r=parse(s)
     tags = r.find(parser.TagNode)
     assert tags, "no tag node found"
-
+    tag = tags[0]
+    print "vlist:". tag.vlist
+    assert tag.vlist=={'style': {u'color': u'#DF6108'}}, "bad vlist"
+    
 def test_misformed_tag():
     s='<div"barbaz">bold</div>'
     r=parse(s).find(parser.TagNode)
