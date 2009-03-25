@@ -864,7 +864,6 @@ def test_table_style_parsing_1():
     print "VLIST:", cells[1].vlist
     assert cells[1].vlist == dict(align="center"), "bad vlist"
 
-@xfail
 def test_table_style_parsing_jtalbot():
     """mentioned in http://code.pediapress.com/wiki/ticket/172,
     but real issue is:
