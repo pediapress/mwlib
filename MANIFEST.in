@@ -26,7 +26,6 @@ include mwlib/_mwscan.re
 include mwlib/_uscan.cc
 include mwlib/_uscan.re
 include mwlib/_version.py
-include mwlib/_xfail.py
 include mwlib/advtree.py
 include mwlib/allnodes.py
 include mwlib/apps.py
