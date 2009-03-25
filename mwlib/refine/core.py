@@ -904,7 +904,20 @@ class parse_uniq(object):
 
             show(res)
         return t
+
+    def create_nowiki(self, orig, groupdict, **kw):
+        txt = groupdict["nowiki"]
+        txt = util.replace_html_entities(txt)
+        return T(type=T.t_text, text=txt)
     
+    def create_pre(self, orig, groupdict, **kw):
+        txt = groupdict["pre_inner"]
+        children = [T(type=T.t_text, text=txt)]
+        
+        t = T(type=T.t_complex_tag, tagname="pre", children=children)
+        return t
+                    
+        
     
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
