@@ -244,11 +244,12 @@ class Expander(object):
         return res
             
         
-    def expandTemplates(self):
+    def expandTemplates(self, keep_uniq=False):
         res = ["\n"] # guard, against implicit newlines at the beginning
         flatten(self.parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
         res[0] = u''
         res = u"".join(res)
-        res=self.uniquifier.replace_uniq(res)
+        if not keep_uniq:
+            res=self.uniquifier.replace_uniq(res)
         return res

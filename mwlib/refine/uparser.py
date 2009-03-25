@@ -18,14 +18,17 @@ def parseString(
     magicwords=None
 ):
     """parse article with title from raw mediawiki text"""
-    
+
+    uniquifier = None
     assert title is not None, 'no title given'
     if raw is None:
         raw = wikidb.getRawArticle(title, revision=revision)
         assert raw is not None, "cannot get article %r" % (title,)
     if wikidb:
         te = expander.Expander(raw, pagename=title, wikidb=wikidb)
-        input = te.expandTemplates()
+        input = te.expandTemplates(True)
+        uniquifier = te.uniquifier
+        
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
             if not src:
@@ -43,11 +46,8 @@ def parseString(
     else:
         input = raw
 
-    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap, magicwords=magicwords)
+    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap, magicwords=magicwords, uniquifier=uniquifier)
     
-#     tokens = utoken.tokenize(input, title)
-
-#     a = parser.Parser(tokens, title, lang=lang, interwikimap=interwikimap).parse()
     a.caption = title
     from mwlib.old_uparser import postprocessors
     for x in postprocessors:

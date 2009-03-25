@@ -847,12 +847,12 @@ def parse_txt(txt, interwikimap=None, **kwargs):
 
     kwargs['imagemod'] = util.ImageMod(kwargs.get('magicwords'))
 
-    uniquifier = uniq.Uniquifier()
-    txt = uniquifier.replace_tags(txt)
-    kwargs["uniquifier"] = uniquifier
+    uniquifier = kwargs.get("uniquifier")
+    if uniquifier is None:
+        uniquifier = uniq.Uniquifier()
+        txt = uniquifier.replace_tags(txt)
+        kwargs["uniquifier"] = uniquifier
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
-
-    
     
     refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
