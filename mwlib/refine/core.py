@@ -759,8 +759,9 @@ parse_h_tags = combined_parser(
     [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
 
 class parse_uniq(object):
-    def __init__(self, tokens, refined, uniquifier=None, **kw):
+    def __init__(self, tokens, refined, **kw):
         refined.append(tokens)
+        uniquifier = kw.get("uniquifier")
         if uniquifier is None:
             return
         
@@ -785,13 +786,13 @@ class parse_uniq(object):
                 inner = groupdict.get("nowiki")
             else:
                 inner = groupdict.get(name+"_inner", u"")
-                
+
             try:
                 m = getattr(self, "create_"+str(name))
             except AttributeError:
                 m = self._create_generic
                 
-            tokens[i] = m(name, vlist, inner)
+            tokens[i] = m(name, vlist, inner, **kw)
                 
     def _create_generic(self, name, vlist, inner, **kw):
         children = [T(type=T.t_text, text=inner)]
@@ -802,7 +803,9 @@ class parse_uniq(object):
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=True)
     
     def create_ref(self, name, vlist, inner, **kw):
-        # fixme: expand templates
+        expander = kw.get("expander")
+        if expander is not None and inner:
+            inner = expander.parseAndExpand(inner, True)
         children = parse_txt(inner or u"", **kw)
         
         return T(type=T.t_complex_tag, tagname="ref", vlist=vlist, children=children)
@@ -844,7 +847,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
             interwikimap[prefix] = {'renamed': renamed}
         for lang in languages:
             interwikimap[lang] = {'language': True}
-
+    
     kwargs['imagemod'] = util.ImageMod(kwargs.get('magicwords'))
 
     uniquifier = kwargs.get("uniquifier")

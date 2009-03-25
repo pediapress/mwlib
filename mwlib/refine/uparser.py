@@ -45,8 +45,9 @@ def parseString(
             interwikimap = wikidb.getInterwikiMap(title, revision=revision)
     else:
         input = raw
-
-    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap, magicwords=magicwords, uniquifier=uniquifier)
+        te = None
+        
+    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap, magicwords=magicwords, uniquifier=uniquifier, expander=te)
     
     a.caption = title
     from mwlib.old_uparser import postprocessors

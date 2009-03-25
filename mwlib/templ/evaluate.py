@@ -242,14 +242,20 @@ class Expander(object):
                 
         self.parsedTemplateCache[name] = res
         return res
-            
-        
-    def expandTemplates(self, keep_uniq=False):
+
+    def _expand(self, parsed, keep_uniq=False):
         res = ["\n"] # guard, against implicit newlines at the beginning
-        flatten(self.parsed, self, ArgumentList(expander=self), res)
+        flatten(parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
         res[0] = u''
         res = u"".join(res)
         if not keep_uniq:
             res=self.uniquifier.replace_uniq(res)
         return res
+        
+    def parseAndExpand(self, txt, keep_uniq=False):
+        parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags)
+        return self._expand(parsed, keep_uniq=keep_uniq)
+    
+    def expandTemplates(self, keep_uniq=False):
+        return self._expand(self.parsed, keep_uniq=keep_uniq)
