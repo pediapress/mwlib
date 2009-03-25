@@ -48,7 +48,7 @@ class Uniquifier(object):
             (?P<NAME_vlist> \\s[^<>]*)?
             (/>
              |
-             >
+             (?<!/) >
             (?P<NAME_inner>.*?)
             </NAME>))
 """
