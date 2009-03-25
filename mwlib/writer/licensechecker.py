@@ -132,12 +132,17 @@ class LicenseChecker(object):
 
     @property
     def free_img_ratio(self):
-        return len(self.accepted_images)/(len(self.accepted_images) + len(self.rejected_images))
+        r = len(self.rejected_images)
+        a = len(self.accepted_images)
+        if a + r > 0:
+            ratio = a/(a+r)
+        else:
+            ratio = 1
+        return ratio
         
     def dumpStats(self):
         stats = []
-
-        stats.append('IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f' % (len(self.accepted_images), len(self.rejected_images), len(self.accepted_images)/(len(self.accepted_images) + len(self.rejected_images))))
+        stats.append('IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f' % (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio))
 
         images = set()
         for urls in self.unknown_licenses.values():
