@@ -710,7 +710,7 @@ def mark_style_tags(tokens):
     def create():
         if not state or i<=start:
             return False
-                
+
         children = tokens[start:i]
         for tag, tok in state.items():
             outer = T(type=T.t_complex_tag, tagname=tag, children=children, vlist=tok.vlist)
@@ -742,7 +742,8 @@ def mark_style_tags(tokens):
                     del state[t.tagname]
             elif t.children:
                 if create():
-                    i = start+1
+                    start += 1
+                    i = start
                 assert tokens[i] is t
                 if t.type in (T.t_complex_table, T.t_complex_table_row, T.t_complex_table_cell):
                     todo.append((i+1, state, tokens))
