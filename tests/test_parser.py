@@ -13,13 +13,6 @@ from mwlib.dummydb import DummyDB
 
 parse = uparser.simpleparse
 
-if os.environ.get("MWREFINE", "").lower()!="no":
-    oxfail = lambda x: x
-    rxfail = xfail
-else:
-    oxfail = xfail
-    rxfail = lambda x: x
-
 def test_headings():
     r=parse(u"""
 = 1 =
@@ -457,7 +450,6 @@ def test_namedurl_inside_link():
     r = parse("[http://foo.com baz]]]")
     assert r.find(parser.NamedURL), "expected a NamedURL"
 
-@oxfail
 def test_namedurl_with_style():
     """http://code.pediapress.com/wiki/ticket/461"""
     r=parse(u"[http://thetangent.org Internetpräsenz von ''The Tangent'']")
@@ -503,7 +495,6 @@ def test_parse_preformatted_blockquote():
     stylenode = r.find(parser.Style)
     assert not r.find(parser.PreFormatted) and stylenode and stylenode[0].caption=='-', 'expected blockquote w/o preformatted node'
 
-@oxfail
 def test_no_preformatted_with_source():
     """http://code.pediapress.com/wiki/ticket/174"""
     
@@ -560,7 +551,6 @@ def test_table_markup_in_link_table_pipe_plus():
     r=parse("{|\n|+\n|[[bla|+blubb]]\n|}").find(parser.Link)[0]
     assert r.target=='bla', "wrong target"
     
-@oxfail
 def test_table_markup_in_link_table_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/11"""
     
@@ -663,7 +653,7 @@ def test_not_pull_in_alpha_image():
     link=parse("[[Image:link.jpg|ab]]cd").find(parser.Link)[0]
     assert "cd" not in link.asText(), "'cd' not in linkstext"
 
-@rxfail
+@xfail
 def test_pull_in_alpha():
     """http://code.pediapress.com/wiki/ticket/130"""
     link=parse("[[link|ab]]cd").find(parser.Link)[0]
@@ -847,7 +837,6 @@ def test_misformed_tag():
     r=parse(s).find(parser.TagNode)
     assert len(r)==1, "expected a TagNode"
 
-@oxfail
 def test_p_tag():
     s=u"<p>para1</p><p>para2</p>"
     r=parse(s).find(parser.Paragraph)
@@ -855,7 +844,6 @@ def test_p_tag():
     assert len(r)==2, "expected 2 paragraphs"
     
 
-@oxfail
 def test_table_style_parsing_1():
     """http://code.pediapress.com/wiki/ticket/172"""
     s = '{| class="prettytable"\n|-\n|blub\n|align="center"|+bla\n|}\n'
@@ -874,7 +862,6 @@ def test_table_style_parsing_jtalbot():
     cells = r.find(parser.Cell)
     assert len(cells)==1, "expected exactly one cell"
 
-@oxfail
 def test_force_close_1():
     s="""{|
 |-
@@ -901,7 +888,6 @@ def test_force_close_code():
     print "TXT:", txt
     assert "after" not in txt
 
-@oxfail
 def test_force_close_section_in_li():
     """example from http://code.pediapress.com/wiki/ticket/63"""
     s="""<ul><li>item
@@ -1048,19 +1034,16 @@ def test_hr_line():
     s=r.find(parser.TagNode)[0]
     assert s.caption=="hr"
     
-@oxfail
 def test_broken_link():
     r=parse("[[Image:|bla]]")
     links = r.find(parser.Link)
     assert not links, "expected no links"
 
-@oxfail    
 def test_broken_link_whitespace():
     r=parse("[[Image:   |bla]]")
     links = r.find(parser.Link)
     assert not links, "expected no links"
 
-@oxfail
 def test_comment_inside_nowiki():
     comment = 'this is a comment'
     s=expander.expandstr('<pre><!-- this is a comment --></pre>')
