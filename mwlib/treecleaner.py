@@ -209,6 +209,7 @@ class TreeCleaner(object):
                           'removeBigSectionsFromCells',
                           'transformNestedTables',
                           'splitBigTableCells',
+                          'limitImageCaptionsize', 
                           'removeDuplicateLinksInReferences',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
@@ -1092,3 +1093,17 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeInvalidFiletypes(c)
+
+    def limitImageCaptionsize(self, node):
+
+        if node.__class__ == ImageLink:
+            txt = node.getAllDisplayText()
+            if len(txt) > 500:
+                brs = node.getChildNodesByClass(BreakingReturn)
+                for br in brs:
+                    br.parent.removeChild(br)
+                if brs:
+                    self.report('removed BreakingReturns from long image caption')
+
+        for c in node.children:
+            self.limitImageCaptionsize(c)
