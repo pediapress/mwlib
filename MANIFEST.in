@@ -173,6 +173,7 @@ include tests/test_tagext.py
 include tests/test_templ_pp.py
 include tests/test_timeline.py
 include tests/test_treecleaner.py
+include tests/test_uniq.py
 include tests/test_utils.py
 include tests/test_writerutils.py
 include tests/test_xhtmlwriter.py
