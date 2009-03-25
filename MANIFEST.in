@@ -26,6 +26,7 @@ include mwlib/_mwscan.re
 include mwlib/_uscan.cc
 include mwlib/_uscan.re
 include mwlib/_version.py
+include mwlib/_xfail.py
 include mwlib/advtree.py
 include mwlib/allnodes.py
 include mwlib/apps.py
@@ -106,6 +107,7 @@ include mwlib/texmap.py
 include mwlib/timeline.py
 include mwlib/treecleaner.py
 include mwlib/treecleanerhelper.py
+include mwlib/uniq.py
 include mwlib/uparser.py
 include mwlib/utils.py
 include mwlib/utoken.py
@@ -114,8 +116,10 @@ include mwlib/wiki.py
 include mwlib/wikidbbase.py
 include mwlib/writer/__init__.py
 include mwlib/writer/imageutils.py
+include mwlib/writer/licensechecker.py
 include mwlib/writer/miscutils.py
 include mwlib/writer/styleutils.py
+include mwlib/writer/wplicenses.csv
 include mwlib/writerbase.py
 include mwlib/wsgi.py
 include mwlib/xfail.py
@@ -146,6 +150,7 @@ include tests/test_expander.py
 include tests/test_expander_parser.py
 include tests/test_expander_time.py
 include tests/test_expr.py
+include tests/test_fzipwiki.py
 include tests/test_html.py
 include tests/test_imgmap.py
 include tests/test_jobsched.py
