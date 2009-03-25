@@ -963,11 +963,13 @@ class TreeCleaner(object):
                     return True
         return is_big
 
+
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
         if self.is_skip_article(node):
             return
+    
         if node.__class__ == Table:
             split_table = False
             for row in node.children:
@@ -992,8 +994,8 @@ class TreeCleaner(object):
                         lin_cols.append(item)
                 self.report('removed table. outputting linearize columns')
                 node.parent.replaceChild(node, lin_cols)
-
-        for c in node.children:
+            
+        for c in node.children[:]:
             self.splitTableToColumns(c)           
 
     def fixReferenceNodes(self, node):
