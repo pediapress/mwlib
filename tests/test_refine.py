@@ -145,3 +145,11 @@ def test_duplicate_nesting():
     for x in bolds:
         for y in x.children or []:
             assert y.tagname != "b"
+
+def test_ref_no_newline():
+    s=u"""<ref>* no item</ref>"""
+    r = refine.parse_txt(s)
+    refine.show(r)
+    linodes = list(refine.walknode(r, lambda x: x.tagname=="li"))
+    assert not linodes
+    
