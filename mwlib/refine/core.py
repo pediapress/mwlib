@@ -807,8 +807,14 @@ class parse_uniq(object):
         expander = kw.get("expander")
         if expander is not None and inner:
             inner = expander.parseAndExpand(inner, True)
-        children = parse_txt(inner or u"", **kw)
-        
+
+        if inner:
+            # <ref>* not an item</ref>
+            children = parse_txt("<br />"+inner, **kw)
+            del children[0]
+        else:
+            children = []
+            
         return T(type=T.t_complex_tag, tagname="ref", vlist=vlist, children=children)
 
     def create_timeline(self, name, vlist, inner, **kw):
