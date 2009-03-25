@@ -122,6 +122,9 @@ class token(object):
         r = [self.token2name.get(self.type, self.type)]
         if self.text is not None:
             r.append(repr(self.text)[1:])
+        if self.tagname:
+            r.append(" tagname=")
+            r.append(repr(self.tagname))
         if self.vlist:
             r.append(" vlist=")
             r.append(repr(self.vlist))
@@ -131,9 +134,6 @@ class token(object):
         if self.level:
             r.append(" level=")
             r.append(repr(self.level))
-        if self.tagname:
-            r.append(" tagname=")
-            r.append(repr(self.tagname))
         if self.ns is not None:
             r.append(" ns=")
             r.append(repr(self.ns))
