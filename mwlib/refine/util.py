@@ -3,6 +3,7 @@
 # See README.txt for additional licensing information.
 
 import re
+import htmlentitydefs
 
 paramrx = re.compile(r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:])+)))", re.DOTALL)
 def parseParams(s):
@@ -145,3 +146,22 @@ def handle_imagemod(self, mod_type, match):
 
         self.width = width
         self.height = height
+
+        
+def resolve_entity(e):
+    if e[1]=='#':
+        try:
+            if e[2]=='x' or e[2]=='X':
+                return unichr(int(e[3:-1], 16))
+            else:
+                return unichr(int(e[2:-1]))
+        except ValueError:
+            return e        
+    else:
+        try:
+            return unichr(htmlentitydefs.name2codepoint[e[1:-1]])
+        except KeyError:
+            return e
+
+def replace_html_entities(txt):
+    return re.sub("&.*?;", lambda mo: resolve_entity(mo.group(0)), txt)
