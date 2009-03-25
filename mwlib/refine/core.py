@@ -83,31 +83,6 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
     recursive_parse_tag.__name__ += "_"+tagname
     
     return recursive_parse_tag
-
-def get_pre_parser(tagname, blocknode=True):
-    def parse(tokens, refined, **kwargs):
-        i = 0
-        start = None
-        while i<len(tokens):
-            t = tokens[i]
-            if start is None and t.type==T.t_html_tag and t.tagname==tagname:
-                if t.tag_selfClosing:
-                    tokens[i] = T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[i].vlist)
-                else:
-                    start = i
-                i+=1
-            elif start is not None and t.type==T.t_html_tag_end and t.tagname==tagname:
-                txt = T.join_as_text(tokens[start+1:i])
-                tokens[start:i+1] = [T(type=T.t_complex_tag, tagname=tagname, vlist=tokens[start].vlist, children=[T(type=T.t_text, text=txt)], blocknode=blocknode)]
-                i = start+1
-                start = None
-            else:
-                i+=1
-        refined.append(tokens)
-    parse.__name__ += "_"+tagname+"_tag"
-    return parse
-
-    
     
 parse_div = get_recursive_tag_parser("div", blocknode=True)
 parse_center = get_recursive_tag_parser("center", blocknode=True)
@@ -124,41 +99,22 @@ parse_p = get_recursive_tag_parser("p", blocknode=True)
 parse_ref = get_recursive_tag_parser("ref")
 parse_references = get_recursive_tag_parser("references")
 
-parse_math = get_recursive_tag_parser("math")
 parse_blockquote = get_recursive_tag_parser("blockquote")
-parse_pre = get_pre_parser("pre", blocknode=True)
-parse_source = get_pre_parser("source")
 parse_code_tag = get_recursive_tag_parser("code")
 
 
-def parse_timeline(tokens, refined, **kwargs):
+# def parse_timeline(tokens, refined, **kwargs):
     
-    get_recursive_tag_parser("timeline", blocknode=True)(tokens, [], **kwargs)
+#     get_recursive_tag_parser("timeline", blocknode=True)(tokens, [], **kwargs)
     
-    for t in tokens:
-        if t.tagname=='timeline':
-            t.timeline = T.join_as_text(t.children)
-            del t.children[:]
+#     for t in tokens:
+#         if t.tagname=='timeline':
+#             t.timeline = T.join_as_text(t.children)
+#             del t.children[:]
             
             
-    refined.append(tokens)
+#     refined.append(tokens)
     
-def parse_imagemap(tokens, refined, **kwargs):
-    from mwlib import imgmap
-    get_recursive_tag_parser("imagemap", blocknode=True)(tokens, [], **kwargs)
-    for t in tokens:
-        if t.tagname=='imagemap':
-            txt = T.join_as_text(t.children)
-            t.imagemap =imgmap.ImageMapFromString(txt)
-            if t.imagemap.image:
-                s = u"[["+t.imagemap.image+u"]]"
-                res = parse_txt(s, **kwargs)
-                if res and res[0].type==T.t_complex_link and res[0].ns==6:
-                    t.imagemap.imagelink = res[0]
-                    
-                show(res)
-            del t.children[:]
-    refined.append(tokens)
     
 def parse_math(tokens, refined, **kwargs):
     get_recursive_tag_parser("math")(tokens, [], **kwargs)
@@ -864,37 +820,62 @@ class parse_uniq(object):
             return
         
         for i, t in enumerate(tokens):
-            # if t.type==t.t_html_tag:
-            #     t.text = uniquifier.replace_uniq(t.text)
-            #     print "txt:", t.text
-            if t.type==T.t_uniq:
-                text = t.text
-                try:
-                    name, orig, groupdict = uniquifier.uniq2repl[text]
-                except KeyError:
-                    t.type==T.t_text
-                    continue
-                print "FOUND:", name, groupdict
-                tokens[i] = getattr(self, "create_"+str(name))(orig, groupdict, **kw)
+            if t.type!=T.t_uniq:
+                continue
+            
+            text = t.text
+            try:
+                name, orig, groupdict = uniquifier.uniq2repl[text]
+            except KeyError:
+                t.type==T.t_text
+                continue
+            
+            vlist = groupdict.get(name+"_vlist")
+            if vlist:
+                vlist = util.parseParams(vlist)
+            else:
+                vlist = None
+
+            if name=="nowiki":
+                inner = groupdict.get("nowiki")
+            else:
+                inner = groupdict.get(name+"_inner", u"")
                 
-    def create_source(self, orig, groupdict, **kw):
-        print 'CREATE_SOURCE'
-        children = [T(type=T.t_text, text="source_inner")]
-        return T(type=T.t_complex_tag, tagname="source", children=children)
+            try:
+                m = getattr(self, "create_"+str(name))
+            except AttributeError:
+                m = self._create_generic
+                
+            tokens[i] = m(name, vlist, inner)
+                
+    def _create_generic(self, name, vlist, inner, **kw):
+        children = [T(type=T.t_text, text=inner)]
+        return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children)
 
-    def create_ref(self, orig, groupdict, **kw):
-        return T(type=T.t_complex_tag, tagname="ref") # , inner=groupdict["ref_inner"])
+    def create_source(self, name, vlist, inner, **kw):
+        children = [T(type=T.t_text, text=inner)]
+        return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=True)
+    
+    def create_ref(self, name, vlist, inner, **kw):
+        # fixme: expand templates
+        children = parse_txt(inner, **kw)
+        
+        return T(type=T.t_complex_tag, tagname="ref", vlist=vlist, children=children)
 
-    def create_gallery(self, orig, groupdict, **kw):
-        sub = _parse_gallery_txt(groupdict["gallery_inner"], **kw)
-        print "sub;", sub
-        # FIXME vlist
-        return T(type=T.t_complex_tag, tagname="gallery", children=sub)
+    def create_timeline(self, name, vlist, inner, **kw):
+        return T(type=T.t_complex_tag, tagname="timeline", vlist=vlist, timeline=inner, blocknode=True)
 
-    def create_imagemap(self, orig, groupdict, **kw):
+    def create_math(self, name, vlist, inner, **kw):
+        return T(type=T.t_complex_tag, tagname="math", vlist=vlist, math=inner)
+    
+    def create_gallery(self, name, vlist, inner, **kw):
+        sub = _parse_gallery_txt(inner, **kw)
+        return T(type=T.t_complex_tag, tagname="gallery", vlist=vlist, children=sub, blocknode=True)
+
+    def create_imagemap(self, name, vlist, inner, **kw):
         from mwlib import imgmap
-        txt = groupdict["imagemap_inner"]
-        t = T(type=T.t_complex_tag, tagname="imagemap")
+        txt = inner
+        t = T(type=T.t_complex_tag, tagname="imagemap", vlist=vlist)
         t.imagemap =imgmap.ImageMapFromString(txt)
         if t.imagemap.image:
             s = u"[["+t.imagemap.image+u"]]"
@@ -905,20 +886,11 @@ class parse_uniq(object):
             show(res)
         return t
 
-    def create_nowiki(self, orig, groupdict, **kw):
-        txt = groupdict["nowiki"]
+    def create_nowiki(self, name, vlist, inner, **kw):
+        txt = inner
         txt = util.replace_html_entities(txt)
         return T(type=T.t_text, text=txt)
-    
-    def create_pre(self, orig, groupdict, **kw):
-        txt = groupdict["pre_inner"]
-        children = [T(type=T.t_text, text=txt)]
-        
-        t = T(type=T.t_complex_tag, tagname="pre", children=children)
-        return t
-                    
-        
-    
+                        
 def parse_txt(txt, interwikimap=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
@@ -942,12 +914,12 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
-               parse_timeline, parse_gallery, parse_blockquote, parse_code_tag, parse_source, parse_math,
+               parse_gallery, parse_blockquote, parse_code_tag, 
                parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links,
                parse_inputbox,
                parse_h_tags,
                parse_sections,
-               parse_center, parse_div, parse_pre, parse_tables, parse_tagextensions, parse_uniq]
+               parse_center, parse_div, parse_tables, parse_tagextensions, parse_uniq]
 
 
     refined = []
