@@ -134,3 +134,14 @@ def test_parse_para_vs_preformatted():
     txt=''.join([x.text for x in textnodes])
     assert u'bar' not in txt
                
+def test_duplicate_nesting():
+    s=u"""<b>
+[[foo|bar]] between
+</b>"""
+    r = refine.parse_txt(s)
+    bolds = list(refine.walknode(r, lambda x: x.tagname=="b"))
+    refine.show(bolds)
+    
+    for x in bolds:
+        for y in x.children or []:
+            assert y.tagname != "b"
