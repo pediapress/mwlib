@@ -45,16 +45,21 @@ class Tag(nodes.Node):
         evaluate.flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
 
-        res.append("<%s>" % (name,))
+        tmpres = []
+        tmpres.append("<%s>" % (name,))
         
         if len(self)>1:
             tmp = []
             evaluate.flatten(self[1], expander, variables, tmp)
             evaluate._insert_implicit_newlines(tmp)
             tmp = u"".join(tmp)
-            res.append(tmp)
+            tmpres.append(tmp)
             
-        res.append("</%s>" % (name,))
+        tmpres.append("</%s>" % (name,))
+        tmpres = u"".join(tmpres)
+        tmpres = expander.uniquifier.replace_tags(tmpres)
+        res.append(tmpres)
+        
         
 
 class NoOutput(nodes.Node):
