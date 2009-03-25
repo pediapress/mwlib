@@ -33,27 +33,6 @@ class Exclude(py.test.collect.Directory):
             print "Skipping", bn, "-- needs network"
             return []
 
-        
         return py.test.collect.Directory.consider_file(self, path)
-        
-    def filefilter(self, path):
-        bn = path.basename
-        
-        if bn == 'test_xhtmlwriter.py' and xmllint_not_found:
-            print "Skipping", bn, "-- no xmllint found"
-            return False
-        if bn == 'test_timeline.py' and ploticus_not_found:
-            print "Skipping", bn, "-- no ploticus found"
-            return False
-        if bn == 'test_mathutils.py' and mathrenderer_not_found:
-            print "Skipping", bn, '-- blahtexml or texvc for math rendering not found'
-            return False
-        if not lxml and bn=='test_docbookwriter.py':
-            #print "Skipping", bn, "-- lxml not found"
-            return False
-        if xnet and bn in ('test_mwapidb.py', 'test_netdb_imagedb.py', 'test_zipwiki.py'):
-            print "Skipping", bn, "-- needs network"
-            return False
-        return super(Exclude, self).filefilter(path)
 
 Directory = Exclude
