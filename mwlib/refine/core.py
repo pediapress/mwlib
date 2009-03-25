@@ -96,34 +96,10 @@ parse_ol = get_recursive_tag_parser("ol", blocknode=True)
 parse_ul = get_recursive_tag_parser("ul", blocknode=True)
 parse_span = get_recursive_tag_parser("span")
 parse_p = get_recursive_tag_parser("p", blocknode=True)
-parse_ref = get_recursive_tag_parser("ref")
 parse_references = get_recursive_tag_parser("references")
 
 parse_blockquote = get_recursive_tag_parser("blockquote")
 parse_code_tag = get_recursive_tag_parser("code")
-
-
-# def parse_timeline(tokens, refined, **kwargs):
-    
-#     get_recursive_tag_parser("timeline", blocknode=True)(tokens, [], **kwargs)
-    
-#     for t in tokens:
-#         if t.tagname=='timeline':
-#             t.timeline = T.join_as_text(t.children)
-#             del t.children[:]
-            
-            
-#     refined.append(tokens)
-    
-    
-def parse_math(tokens, refined, **kwargs):
-    get_recursive_tag_parser("math")(tokens, [], **kwargs)
-    
-    for t in tokens:
-        if t.tagname=='math':
-            t.math = T.join_as_text(t.children)
-            del t.children[:]
-    refined.append(tokens)
 
 def parse_inputbox(tokens, refined, **kwargs):
     get_recursive_tag_parser("inputbox")(tokens, [], **kwargs)
@@ -151,37 +127,6 @@ def _parse_gallery_txt(txt, **kwargs):
         sub.append(T(type=T.t_text, text=x))
     return sub
 
-    #tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist, blocknode=True)]
-    
-def parse_gallery(tokens, refined, **kwargs):
-    i = 0
-    start = None
-
-    def handle():
-        sub = tokens[start+1:i]
-        txt = T.join_as_text(sub)
-        sub = _parse_gallery_txt(txt, **kwargs)
-        tokens[start:i+1] = [T(type=T.t_complex_tag, children=sub, tagname="gallery", vlist=tokens[start].vlist, blocknode=True)]
-
-    while i<len(tokens):
-        t = tokens[i]
-        if t.type==T.t_html_tag and t.tagname=='gallery':
-            if start is None:
-                start=i
-                i+=1
-            else:
-                handle()
-                i = start+1
-                start = None
-        elif t.type==T.t_html_tag_end and t.tagname=='gallery':
-            handle()
-            i = start+1
-            start = None
-        else:
-            i+=1
-                
-    refined.append(tokens)
-                
 class bunch(object):
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -858,7 +803,7 @@ class parse_uniq(object):
     
     def create_ref(self, name, vlist, inner, **kw):
         # fixme: expand templates
-        children = parse_txt(inner, **kw)
+        children = parse_txt(inner or u"", **kw)
         
         return T(type=T.t_complex_tag, tagname="ref", vlist=vlist, children=children)
 
@@ -914,8 +859,8 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
-               parse_gallery, parse_blockquote, parse_code_tag, 
-               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_ref, parse_links,
+               parse_blockquote, parse_code_tag, 
+               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links,
                parse_inputbox,
                parse_h_tags,
                parse_sections,
