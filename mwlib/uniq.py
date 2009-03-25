@@ -43,14 +43,17 @@ class Uniquifier(object):
 
         tags = ["(?:<nowiki>(?P<nowiki>.*?)</nowiki>)"]
         def add_tag(name):
-            r = "(?P<%s>" % name
-            r += "<%s" % name
-            r += "(?P<%s_vlist>" % name
-            r += "\\s[^<>]*)?>"
-            r += "(?P<%s_inner>.*?)" % name
-            r += ">"
-            r += "</%s>)" % name
-            tags.append(r)
+            r = """(?P<NAME>
+            <NAME
+            (?P<NAME_vlist> \\s[^<>]*)?
+            (/>
+             |
+             >
+            (?P<NAME_inner>.*?)
+            </NAME>))
+"""
+            
+            tags.append(r.replace("NAME", name))
             
 
         add_tag("math")
@@ -59,21 +62,9 @@ class Uniquifier(object):
         add_tag("source")
         add_tag("pre")
         add_tag("ref")
+        add_tag("timeline")
         
-        rx =  '|'.join(tags)
-        if 1:
-            print rx
-            rx = re.compile(rx)
-            newtxt = rx.sub(self._repl_to_uniq, txt)
-            return newtxt
-
-            
-        rx=re.compile("""(?:<nowiki>(?P<nowiki>.*?)</nowiki>)          # nowiki
-|(?P<math><math>(?P<math_inner>.*?)</math>)
-|(?P<imagemap><imagemap[^<>]*>(?P<imagemap_inner>.*?)</imagemap>)
-|(?P<gallery><gallery(?P<gallery_vlist>[^<>]*)>(?P<gallery_inner>.*?)</gallery>)
-|(?P<ref><ref[^<>]*/?>)
-|(?P<source><source[^<>]*>(?P<source_inner>.*?)</source>)
-|(?P<pre><pre.*?>(?P<pre_inner>.*?)</pre>)""", re.VERBOSE | re.DOTALL | re.IGNORECASE)
+        rx =  '\n|\n'.join(tags)
+        rx = re.compile(rx, re.VERBOSE | re.DOTALL | re.IGNORECASE)
         newtxt = rx.sub(self._repl_to_uniq, txt)
         return newtxt
