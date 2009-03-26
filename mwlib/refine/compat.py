@@ -49,7 +49,13 @@ def _change_classes(node):
             node.children = []
             node.__class__=N.Text
             return
-        
+
+        if node.type==T.t_html_tag_end:
+            node.caption = u""
+            node.children = []
+            node.__class__=N.Text
+            return
+            
         klass = tok2class.get(node.type, N.Text)
         
             
