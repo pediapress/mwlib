@@ -26,7 +26,10 @@ def walknode(node, filt=lambda x: True):
             for k in walknode(x):
                 if filt(k):
                     yield k
-            
+
+def walknodel(node, filt=lambda x:True):
+    return list(walknode(node, filt=filt))
+
 def show(node, out=None, indent=0, verbose=False):
     if node is None:
         return

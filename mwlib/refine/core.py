@@ -4,7 +4,7 @@
 # See README.txt for additional licensing information.
 
 import sys
-from mwlib.utoken import tokenize, show, token as T, walknode
+from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util
 from mwlib import namespace, tagext, uniq
 
@@ -793,7 +793,7 @@ class parse_uniq(object):
             except AttributeError:
                 m = self._create_generic
                 
-            tokens[i] = m(name, vlist, inner, **kw)
+            tokens[i] = m(name, vlist, inner or u"", **kw)
                 
     def _create_generic(self, name, vlist, inner, **kw):
         children = [T(type=T.t_text, text=inner)]
