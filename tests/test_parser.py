@@ -1157,3 +1157,11 @@ def test_style_tags_vlist():
     assert ftag.vlist
     
     
+def test_stray_tag():
+    s="abc</div>def"
+    txt = parse(s).asText()
+    print txt
+    assert "div" not in txt, "stray tag in output"
+    
+    
+    
