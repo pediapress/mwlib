@@ -173,10 +173,10 @@ re2c:yyfill:enable = 0 ;
 		goto not_bol;
 	}
 /*!re2c
-  " "* ":"* "{|"              {++tablemode; RET(t_begin_table);}
-  " "* "|}"              {--tablemode; RET(t_end_table);}
+  [ \t]* ":"* "{|"              {++tablemode; RET(t_begin_table);}
+  [ \t]* "|}"              {--tablemode; RET(t_end_table);}
 
-  " "* "|" "-"+         
+  [ \t]* "|" "-"+         
 	{
 		if (tablemode) 
 			RET(t_row);
@@ -187,7 +187,7 @@ re2c:yyfill:enable = 0 ;
 		RET(t_text);
 	}
 
-  " "* ("|" | "!")      
+  [ \t]* ("|" | "!")      
 	{
 		if (tablemode) {
 		        lineflags.rowchar=cursor[-1];
@@ -201,7 +201,7 @@ re2c:yyfill:enable = 0 ;
 		RET(t_text);
 	}
 
-  " "* "|" "+"+         
+  [ \t]* "|" "+"+         
 	{
 		if (tablemode) 
 			RET(t_tablecaption);
