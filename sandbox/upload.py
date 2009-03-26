@@ -22,7 +22,7 @@ def callapi(url, args):
     #q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
 
     res = urllib.urlopen(url, q).read()
-    res = json.loads(res)
+    res = json.loads(unicode(res, 'utf-8'))
     return res
 
 

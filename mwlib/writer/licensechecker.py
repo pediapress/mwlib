@@ -172,7 +172,7 @@ class LicenseChecker(object):
             fn = os.path.join(_dir, fn)
             if not fn.endswith('json'):
                 continue
-            content = open(fn).read()
+            content = unicode(open(fn).read(), 'utf-8')
             try:
                 licenses = json.loads(content)
             except ValueError:

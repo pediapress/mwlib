@@ -64,7 +64,7 @@ def make_collection_id(data):
         sio.write(repr(data.get(key)))
     mb = data.get('metabook')
     if mb:
-        sio.write(calc_checksum(json.loads(mb)))
+        sio.write(calc_checksum(json.loads(unicode(mb, 'utf-8'))))
     return md5(sio.getvalue()).hexdigest()[:16]
 
 # ==============================================================================
@@ -355,7 +355,7 @@ class Application(wsgi.Application):
         status_path = self.get_path(collection_id, self.status_filename, writer)
         try:
             f = open(status_path, 'rb')
-            return json.loads(f.read())
+            return json.loads(unicode(f.read(), 'utf-8'))
             f.close()
         except (IOError, ValueError):
             return {'progress': 0}
@@ -477,7 +477,7 @@ class Application(wsgi.Application):
         
         pod_api_url = post_data.get('pod_api_url', '')
         if pod_api_url:
-            result = json.loads(urllib2.urlopen(pod_api_url, data="any").read())
+            result = json.loads(unicode(urllib2.urlopen(pod_api_url, data="any").read(), 'utf-8'))
             post_url = result['post_url']
             response = {
                 'state': 'ok',

@@ -93,7 +93,7 @@ class OptionParser(optparse.OptionParser):
             return self.options, self.args
         
         if self.options.metabook:
-            self.metabook = json.loads(open(self.options.metabook, 'rb').read())
+            self.metabook = json.loads(unicode(open(self.options.metabook, 'rb').read(), 'utf-8'))
         
         if self.options.login is not None and ':' not in self.options.login:
             self.error('Please specify username and password as USERNAME:PASSWORD.')

@@ -111,7 +111,7 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer):
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return json.loads(res)
+    return json.loads(unicode(res, 'utf-8'))
 
 def postRenderKillCommand(collection_id, serviceurl, writer):
     log.info('POSTing render_kill command %r' % collection_id)
@@ -122,13 +122,13 @@ def postRenderKillCommand(collection_id, serviceurl, writer):
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return json.loads(res)
+    return json.loads(unicode(res, 'utf-8'))
 
 def getRenderStatus(colid, serviceurl, writer):
     #log.info('get render status')
     data = urllib.urlencode({"command": "render_status", "collection_id": colid, 'writer': writer})
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return json.loads(res)
+    return json.loads(unicode(res, 'utf-8'))
 
 def download(colid, serviceurl, writer):
     log.info('download')

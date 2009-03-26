@@ -47,5 +47,5 @@ class PODClient(object):
         self._post(data, content_type=content_type)
 
 def podclient_from_serviceurl(serviceurl):
-    result = json.loads(urllib2.urlopen(serviceurl, data="any").read())
+    result = json.loads(unicode(urllib2.urlopen(serviceurl, data="any").read(), 'utf-8'))
     return PODClient(result["post_url"], redirecturl=result["redirect_url"])

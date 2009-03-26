@@ -241,7 +241,7 @@ class APIHelper(object):
             ignore_errors=False,
             opener=self.opener,
         )
-        result = json.loads(result)
+        result = json.loads(unicode(result, 'utf-8'))
         if 'login' in result and result['login'].get('result') == 'Success':
             return True
         return False
