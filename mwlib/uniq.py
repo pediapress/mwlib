@@ -35,7 +35,7 @@ class Uniquifier(object):
     def _repl_to_uniq(self, mo):
         groupdict = mo.groupdict()
         for name, s in groupdict.items():
-            if s and "_" not in name:
+            if s is not None and "_" not in name:
                 return self.get_uniq((name, s, groupdict), name)
         assert 0
     
