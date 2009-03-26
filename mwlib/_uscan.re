@@ -240,7 +240,7 @@ not_bol:
   "[" url {RET(t_urllink);}
   url 		{RET(t_http_url);}
   magicword		{RET(t_magicword);}
-  "\X007F" "UNIQ-" [a-z]+ "-" [0-9]+ "-" [0-9a-f]+ "-QINU" "\X007f" {RET(t_uniq);}
+  "\X007F" "UNIQ-" [a-z0-9]+ "-" [0-9]+ "-" [0-9a-f]+ "-QINU" "\X007f" {RET(t_uniq);}
 
   [a-zA-Z0-9]+				{RET(t_text);}
   "_"+                     {RET(t_text);}

@@ -639,43 +639,6 @@ class parse_paragraphs(object):
             
         self.refined.append(tokens)
 
-class parse_tagextensions(object):
-    def __init__(self, tokens, refined, **kwargs):
-        self.tokens = tokens
-        self.refined = refined
-        self.tagextensions=tagext.default_registry
-        self.run()
-        
-    def run(self):
-        tokens = self.tokens
-        i = 0
-        start = None
-
-        def create():
-            txt = u''.join([x.text for x in tokens[start+1:i]])
-            
-            node = self.tagextensions[tagname](txt, tokens[start].vlist)
-            if node is None:
-                repl = []
-            else:
-                repl = [T(type=T.t_complex_compat, compatnode=node)]
-            tokens[start:i+1] = repl
-        
-        while i<len(tokens):
-            t = tokens[i]
-            if start is None and t.type==T.t_html_tag and t.tagname in self.tagextensions:
-                start = i
-                tagname = t.tagname
-            elif start is not None and t.type==T.t_html_tag_end and t.tagname==tagname:
-                create()
-                i = start+1
-                start = None
-            else:
-                i+=1
-        if start:
-            create()
-        self.refined.append(tokens)
-        
 class combined_parser(object):
     def __init__(self, parsers):
         self.parsers = parsers
@@ -761,44 +724,65 @@ parse_h_tags = combined_parser(
 
 class parse_uniq(object):
     def __init__(self, tokens, refined, **kw):
+        self.tagextensions=tagext.default_registry
+
         refined.append(tokens)
         uniquifier = kw.get("uniquifier")
         if uniquifier is None:
             return
-        
-        for i, t in enumerate(tokens):
+
+        i = 0
+        while i<len(tokens):
+            t = tokens[i]
             if t.type!=T.t_uniq:
+                i+=1
                 continue
             
             text = t.text
             try:
-                name, orig, groupdict = uniquifier.uniq2repl[text]
+                match = uniquifier.uniq2repl[text]
             except KeyError:
                 t.type==T.t_text
+                i+=1
                 continue
-            
-            vlist = groupdict.get(name+"_vlist")
+
+            vlist = match["vlist"]
             if vlist:
                 vlist = util.parseParams(vlist)
             else:
                 vlist = None
 
-            if name=="nowiki":
-                inner = groupdict.get("nowiki")
-            else:
-                inner = groupdict.get(name+"_inner", u"")
-
+            inner = match["inner"]
+            name = match["tagname"]
+            
             try:
                 m = getattr(self, "create_"+str(name))
             except AttributeError:
                 m = self._create_generic
                 
             tokens[i] = m(name, vlist, inner or u"", **kw)
+            if tokens[i] is None:
+                del tokens[i]
+            else:
+                i += 1
                 
+            
     def _create_generic(self, name, vlist, inner, **kw):
+        if not vlist:
+            vlist = {}
+        if name in self.tagextensions:
+            node = self.tagextensions[name](inner, vlist)
+            if node is None:
+                retval = None
+            else:
+                retval = T(type=T.t_complex_compat, compatnode=node)
+
+            return retval
+        
         children = [T(type=T.t_text, text=inner)]
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children)
 
+                 
     def create_source(self, name, vlist, inner, **kw):
         children = [T(type=T.t_text, text=inner)]
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=True)
@@ -874,7 +858,7 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_inputbox,
                parse_h_tags,
                parse_sections,
-               parse_center, parse_div, parse_tables, parse_tagextensions, parse_uniq]
+               parse_center, parse_div, parse_tables, parse_uniq]
 
 
     refined = []

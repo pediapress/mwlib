@@ -5,7 +5,8 @@
 import re
 
 class Uniquifier(object):
-    random_string = None 
+    random_string = None
+    rx = None
     def __init__(self):
         self.uniq2repl = {}
         if self.random_string is None:
@@ -25,46 +26,46 @@ class Uniquifier(object):
         t = self.uniq2repl.get(u, None)
         if t is None:
             return u
-        return t[1]
+        return t["complete"]
 
     def replace_uniq(self, txt):
-        rx=re.compile("\x7fUNIQ-[a-z]+-\\d+-[a-f0-9]+-QINU\x7f")
+        rx=re.compile("\x7fUNIQ-[a-z0-9]+-\\d+-[a-f0-9]+-QINU\x7f")
         txt = rx.sub(self._repl_from_uniq, txt)
         return txt
     
     def _repl_to_uniq(self, mo):
-        groupdict = mo.groupdict()
-        for name, s in groupdict.items():
-            if s is not None and "_" not in name:
-                return self.get_uniq((name, s, groupdict), name)
-        assert 0
+        tagname = mo.group("tagname").lower()
+        
+        r = dict(
+            tagname=tagname,
+            inner = mo.group("inner") or u"",
+            vlist = mo.group("vlist") or u"",
+            complete = mo.group(0) )
+
+        if tagname==u"nowiki":
+            r["complete"] = r["inner"]
+
+        return self.get_uniq(r, tagname)
     
     def replace_tags(self, txt):
+        rx = self.rx
+        if rx is None:
+            tags = set("nowiki math imagemap gallery source pre ref timeline".split())
+            from mwlib import tagext
+            tags.update(tagext.default_registry.names())
 
-        tags = ["(?:<nowiki>(?P<nowiki>.*?)</nowiki>)"]
-        def add_tag(name):
-            r = """(?P<NAME>
-            <NAME
-            (?P<NAME_vlist> \\s[^<>]*)?
-            (/>
-             |
-             (?<!/) >
-            (?P<NAME_inner>.*?)
-            </NAME>))
-"""
-            
-            tags.append(r.replace("NAME", name))
-            
+            rx = """
+                <(?P<tagname> NAMES)
+                (?P<vlist> \\s[^<>]*)?
+                (/>
+                 |
+                 (?<!/) >
+                (?P<inner>.*?)
+                </(?P=tagname)>)
+            """
 
-        add_tag("math")
-        add_tag("imagemap")
-        add_tag("gallery")
-        add_tag("source")
-        add_tag("pre")
-        add_tag("ref")
-        add_tag("timeline")
-        
-        rx =  '\n|\n'.join(tags)
-        rx = re.compile(rx, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+            rx = rx.replace("NAMES", "|".join(list(tags)))
+            rx = re.compile(rx, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+            self.rx = rx 
         newtxt = rx.sub(self._repl_to_uniq, txt)
         return newtxt
