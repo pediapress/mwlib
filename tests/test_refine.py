@@ -152,4 +152,27 @@ def test_ref_no_newline():
     refine.show(r)
     linodes = list(refine.walknode(r, lambda x: x.tagname=="li"))
     assert not linodes
+
+def test_tab_table():
+    s="""
+\t{|
+|-
+\t| cell1
+| cell2
+\t|}after
+"""
+    r = refine.parse_txt(s)
+    refine.show(r)
+    tables = []
+    
+    def allowed(node):
+        retval = bool(tables)
+        if node.type == T.t_complex_table:
+            tables.append(node)
+        return retval
+    nodes = [x for x in r if allowed(x)]
+    assert nodes, "bad  or no table"
+
+    cells = refine.walknodel(r, lambda x: x.type==T.t_complex_table_cell)
+    assert len(cells)==2, "expected two cells"
     
