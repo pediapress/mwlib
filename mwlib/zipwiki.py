@@ -31,8 +31,8 @@ class Wiki(wikidbbase.WikiDBBase):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
-        self.metabook = json.loads(self.zf.read("metabook.json"))
-        content = json.loads(self.zf.read('content.json'))
+        self.metabook = json.loads(unicode(self.zf.read("metabook.json"), 'utf-8'))
+        content = json.loads(unicode(self.zf.read('content.json'), 'utf-8'))
         self.articles = content.get('articles', {})
         self.templates = content.get('templates', {})
         self.sources = content.get('sources', {})
@@ -128,7 +128,7 @@ class ImageDB(object):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
-        content = json.loads(self.zf.read('content.json'))
+        content = json.loads(unicode(self.zf.read('content.json'), 'utf-8'))
         self.images = content['images']
         self._tmpdir = tmpdir
         self.diskpaths = {}
