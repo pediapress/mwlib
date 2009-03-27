@@ -2,11 +2,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import re    
-from mwlib import namespace, utoken
-from mwlib.refine.util import handle_imagemod
+from mwlib import utoken
 
-    
 class Node(utoken.token):
     """Base class for all nodes"""
     
@@ -78,13 +75,6 @@ class Ref(Node): pass
 class Item(Node): pass
 class ItemList(Node):
     numbered = False
-    def append(self, node, merge=False):
-        if not isinstance(node, Item):
-            c=Item()
-            c.append(node)
-            self.children.append(c)
-        else:
-            self.children.append(node)
 
 class Style(Node):
     """Describes text styles like italics, bold etc. The type of the style is
@@ -239,134 +229,9 @@ class Link(Node):
             return True
         return False
 
-    @classmethod
-    def _buildSpecializeMap(cls, namespaces, interwikimap):
-        """Return a dict mapping namespace prefixes to a tuple of form
-        (link_class, namespace_value).
-        """
-
-        from mwlib.lang import languages
-        
-        res = {}
-        
-        def reg(name, num):
-            name = name.lower()
-            if num == namespace.NS_CATEGORY:
-                res[name] = (CategoryLink, num)
-            elif num == namespace.NS_FILE:
-                res[name] = (ImageLink, num)
-            else:
-                res[name] = (NamespaceLink, num)
-        
-        for name, num in namespaces.iteritems():
-            reg(name, num)
-        
-        for prefix, d in interwikimap.items():
-            if 'language' in interwikimap[prefix] or prefix in languages:
-                res[prefix] = (LangLink, prefix)
-            else:
-                res[prefix] = (InterwikiLink, d.get('renamed', prefix))
-        
-        res[u'arz'] = (LangLink, u'arz')
-        return res
-    
-    @classmethod
-    def _setSpecializeMap(cls, nsMap='default', interwikimap=None):
-        if interwikimap is None:
-            from mwlib.lang import languages
-            interwikimap = {}
-            for prefix, renamed in namespace.dummy_interwikimap.items():
-                interwikimap[prefix] = {'renamed': renamed}
-            for lang in languages:
-                interwikimap[lang] = {'language': True}
-        
-        return cls._buildSpecializeMap(
-            namespace.namespace_maps[nsMap], interwikimap,
-            )
-    
-    def _specialize(self, specializeMap, imagemod):
-        """
-        Handles different forms of link, e.g.:
-            - [[Foo]]
-            - [[Foo|Bar]]
-            - [[Category:Foo]]
-            - [[:Category:Foo]]
-        """
-
-        if not self.children:
-            return
-
-        if type(self.children[0]) != Text:
-            return
-            
-        # Handle [[Foo|Bar]]
-        full_target = self.children[0].caption.strip()
-        del self.children[0]
-        if self.children and self.children[0] == Control("|"):
-            del self.children[0]
-
-        # Mark [[:Category:Foo]]. See below
-        if full_target.startswith(':'):
-            self.colon = True
-            full_target = full_target[1:]
-        self.full_target = full_target
-        
-        try:
-            ns, title = full_target.split(':', 1)
-        except ValueError:
-            self.namespace = namespace.NS_MAIN
-            self.target = full_target
-            self.__class__ = ArticleLink
-            return
-
-        self.__class__, self.namespace = specializeMap.get(
-            ns.lower(),
-            (ArticleLink, namespace.NS_MAIN),
-        )
-        
-        if self.colon and self.namespace != namespace.NS_MAIN:
-            # [[:Category:Foo]] should not be a category link
-            self.__class__ = NamespaceLink
-
-        if self.namespace == namespace.NS_MAIN:
-            # e.g. [[Blah: Foo]] is an ordinary article with a colon
-            self.target = full_target
-        else:
-            self.target = title
-
-        if self.__class__ == ImageLink:
-            # Handle images. First ensure they are syntactically sound.
-
-            try:
-                prefix, suffix = title.rsplit('.', 1)
-                if suffix.lower() in ['jpg', 'jpeg', 'gif', 'png', 'svg']:
-                    self._readArgs(imagemod) # calls Image._readArgs()
-                    return
-            except ValueError:
-                pass
-            # We can't handle this as an image, so default:
-            self.__class__ = NamespaceLink 
     
 
     capitalizeTarget = False # Wiki-dependent setting, e.g. Wikipedia => True
-
-    _SPACE_RE = re.compile('[_\s]+')
-    def _normalizeTarget(self):
-        """
-        Normalizes the format of the target with regards to whitespace and
-        capitalization (depending on capitalizeTarget setting).
-        """
-
-        if not self.target:
-            return
-
-        # really we should have a urllib.unquote() first, but in practice this
-        # format may be rare enough to ignore
-
-        # [[__init__]] -> [[init]]
-        self.target = self._SPACE_RE.sub(' ', self.target).strip()
-        if self.capitalizeTarget:
-            self.target = self.target[:1].upper() + self.target[1:]
 
 
 # Link forms:
@@ -455,53 +320,6 @@ class ImageLink(Link):
     
     def isInline(self):
         return not bool(self.align or self.thumb or self.frame)
-
-    def _readArgs(self, imagemod):
-        idx = 0
-        last = []
-
-        while idx<len(self.children):
-            x = self.children[idx]
-            if x == Control("|"):
-                if idx:
-                    last = self.children[:idx]
-                    
-                del self.children[:idx+1]
-                idx = 0
-                continue
-
-            if not type(x)==Text:
-                idx += 1
-                continue
-
-            mod_type, match = imagemod.parse(x.caption)
-
-            if mod_type is None:
-                idx += 1
-                continue
-
-            del self.children[idx]
-            
-            handle_imagemod(self, mod_type, match)
-            
-                
-        if not self.children:
-            self.children = last
-        
-
-##             if x.startswith('print='):
-##                 self.printargs = x[len('print='):]
-
-##             if x.startswith('alt='):
-##                 self.alt = x[len('alt='):]
-
-##             if x.startswith('link='):
-##                 self.link = x[len('link='):]
-
-
-defaultSpecializeMap = Link._setSpecializeMap('default') 
-# initialise the Link class (not sure -- anyone will use that?)
-
             
 class Text(Node):
     """Plain text
