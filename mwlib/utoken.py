@@ -221,22 +221,17 @@ def resolve_entity(e):
             return e
                          
 class _compat_scanner(object):
-    from mwlib.tagext import default_registry as tagextensions
     allowed_tags = None
 
     def _init_allowed_tags(self):
-        from mwlib.parser import _get_tags
-        self.allowed_tags = _get_tags()
-
-        self.allowed_tags.update("table td tr th font".split())
-        
-#         tmp = list(self.allowed_tags)
-#         tmp.sort()
-#         print "ALLOWED:", " ".join(tmp)
+        self.allowed_tags = set("""
+b big blockquote br center cite code del div em endfeed font h1 h2 h3
+h4 h5 h6 hr i index inputbox ins li ol p references rss s small span
+startfeed strike strong sub sup table td th tr tt u ul var
+""".split())
         
         
     def __call__(self, text, uniquifier=None):
-        
         if self.allowed_tags is None:
             self._init_allowed_tags()
 
