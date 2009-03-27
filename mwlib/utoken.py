@@ -9,6 +9,7 @@ import sys
 import re
 import _uscan as _mwscan
 import htmlentitydefs
+from mwlib.refine.util import resolve_entity
 
 def walknode(node, filt=lambda x: True):
     if not isinstance(node, token):
@@ -204,21 +205,6 @@ def dump_tokens(text, tokens):
 def scan(text):
     text += u"\0"*32    
     return _mwscan.scan(text)
-
-def resolve_entity(e):
-    if e[1]=='#':
-        try:
-            if e[2]=='x' or e[2]=='X':
-                return unichr(int(e[3:-1], 16))
-            else:
-                return unichr(int(e[2:-1]))
-        except ValueError:
-            return e        
-    else:
-        try:
-            return unichr(htmlentitydefs.name2codepoint[e[1:-1]])
-        except KeyError:
-            return e
                          
 class _compat_scanner(object):
     allowed_tags = None
