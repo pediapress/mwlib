@@ -48,11 +48,11 @@ register = default_registry.registerExtension
 
 def _parse(txt):
     """parse text....and try to return a 'better' (some inner) node"""
+    from mwlib.refine.compat import parse_txt
+    from mwlib import parser
     
-    from mwlib import scanner, parser
+    res = parse_txt(txt)
     
-    tokens = scanner.tokenize(txt)
-    res=parser.Parser(tokens, "unknown").parse()
 
     # res is an parser.Article. 
     if len(res.children)!=1:

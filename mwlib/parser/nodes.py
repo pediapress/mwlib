@@ -1,14 +1,13 @@
-import os
+
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import re    
-from mwlib import namespace
+from mwlib import namespace, utoken
 from mwlib.refine.util import handle_imagemod
 
-if os.environ.get("MWREFINE", "").lower()!="no":
-    from mwlib.utoken import token as base
-else:
-    base = object
     
-class Node(base):
+class Node(utoken.token):
     """Base class for all nodes"""
     
     caption = ''
