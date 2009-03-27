@@ -8,7 +8,7 @@
 import sys
 import re
 import _uscan as _mwscan
-from mwlib.refine.util import resolve_entity
+from mwlib.refine.util import resolve_entity, parseParams
 
 def walknode(node, filt=lambda x: True):
     if not isinstance(node, token):
@@ -184,7 +184,6 @@ def _analyze_html_tag(t):
         isEndToken = False
 
     name, values = _split_tag(name)
-    from mwlib.refine.util import parseParams
     t.vlist = parseParams(values)
     name = name.lower()
 
