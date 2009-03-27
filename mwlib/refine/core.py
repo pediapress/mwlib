@@ -91,7 +91,7 @@ def _li_break_at(token):
     if token.type==T.t_html_tag and token.tagname=="li":
         return True
     return False
-parse_li = get_recursive_tag_parser("li", _li_break_at)
+parse_li = get_recursive_tag_parser("li", _li_break_at, blocknode=True)
 parse_ol = get_recursive_tag_parser("ol", blocknode=True)
 parse_ul = get_recursive_tag_parser("ul", blocknode=True)
 parse_span = get_recursive_tag_parser("span")
