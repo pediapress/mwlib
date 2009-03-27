@@ -644,6 +644,7 @@ def test_http_url():
     yield checkurl, "http://pediapress.com/bla/$/blubb"
     yield checkurl, "http://pediapress.com/foo*bar"
     yield checkurl, "http://pediapress.com/foo|bar"
+    yield checkurl, "http://pediapress.com/{curly_braces}"
     
 def test_source_vlist():
     r=parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
