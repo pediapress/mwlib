@@ -21,8 +21,6 @@ include mwlib/EasyTimeline.pl
 include mwlib/Makefile
 include mwlib/__init__.py
 include mwlib/_expander.re
-include mwlib/_mwscan.cc
-include mwlib/_mwscan.re
 include mwlib/_uscan.cc
 include mwlib/_uscan.re
 include mwlib/_version.py
@@ -81,7 +79,6 @@ include mwlib/resources/__init__.py
 include mwlib/resources/outgoing_link.gif
 include mwlib/resources/pedia.css
 include mwlib/sanitychecker.py
-include mwlib/scanfile.py
 include mwlib/scanner.py
 include mwlib/scripts.txt
 include mwlib/serve.py
