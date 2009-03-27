@@ -13,8 +13,8 @@ from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_tabl
 try:
     from blist import blist
 except ImportError:
-    import warnings
-    warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
+    # import warnings
+    # warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
     blist = list
 
 T.t_complex_table = "complex_table"
