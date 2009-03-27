@@ -3,9 +3,9 @@
 
 RST2HTML = rst2html.py
 
-default:: subdirs
+default:: 
 
-all:: subdirs cython documentation MANIFEST.in
+all:: cython documentation MANIFEST.in
 
 cython:: mwlib/templ/nodes.c mwlib/templ/evaluate.c
 
@@ -17,9 +17,6 @@ mwlib/templ/evaluate.c: mwlib/templ/evaluate.py
 
 documentation:: README.html
 	cd docs; make all
-
-subdirs::
-	cd mwlib; make
 
 MANIFEST.in::
 	./make_manifest.py
