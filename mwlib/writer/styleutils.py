@@ -102,3 +102,43 @@ def getTextAlign(node):
     if align == "none" and node.parent:
         return getTextAlign(node.parent)
     return align
+
+def tableBorder(node):
+    borderBoxes = ['prettytable',
+                   'metadata',
+                   'wikitable',
+                   'infobox',
+                   'toccolours',
+                   'navbox',
+                   'float-right',
+                   'taxobox',
+                   'info',
+                   'collapsibleTable0',
+                   ]
+
+    attributes = node.attributes
+    style = attributes.get('style', {})
+
+    classes = set([ c.strip() for c in attributes.get('class','').split()])
+    if set(borderBoxes).intersection(classes):
+        return True
+
+    if style.get('border-style', None) == 'none':
+        return False
+    if attributes.get('border', "0") != "0" or \
+           style.get('border', "0") != "0" or \
+           style.get('border-style', "none") != 'none' or \
+           style.get('border-width', "0") != "0":
+        return True
+    
+    bgColor = attributes.get('background-color') or style.get('background-color')
+    if bgColor and bgColor!= 'transparent':
+        return True # FIXME this is probably not very accurate
+
+    bs = attributes.get('border-spacing',None)
+    if bs:
+        bs_val = re.match('(?P<bs>\d)',bs)
+        if bs_val and int(bs_val.groups('bs')[0]) > 0:
+            return True
+
+    return False
