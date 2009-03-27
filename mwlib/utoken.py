@@ -281,61 +281,10 @@ class _compat_scanner(object):
                 closingOrSelfClosing = isEndToken or t.tag_selfClosing
                 tagname = t.tagname
                 
-                if tagname in self.tagextensions or tagname in ('imagemap', 'gallery'):
-                    if closingOrSelfClosing:
-                        i+=1
-                        continue
+                if tagname in self.allowed_tags:
                     res.append(t)
-                    
-                    i+=1
-                    text_start = None
-                    text_end = None
-                    end_token = None
-                    
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if text_start is None:
-                            text_start = start
-                            
-                        if type==token.t_html_tag:
-                            this_tag = token(type=type, start=start, len=tlen, source=text)
-                            _analyze_html_tag(this_tag)
-                            if this_tag.tagname == tagname:
-                                end_token = this_tag
-                                break
-                        text_end = start+tlen
-                        
-                        i+=1
-
-                    if text_end:
-                        res.append(token(type=token.t_text, start=text_start, len=text_end-text_start, source=text))
-                        
-                    if end_token:
-                        res.append(end_token)
-                    
-                elif tagname=="nowiki":
-                    i+=1
-                    if isEndToken or t.tag_selfClosing:
-                        continue
-                    while i<numtokens:
-                        type, start, tlen = tokens[i]
-                        if type==token.t_html_tag:
-                            tt = token(type=type, start=start, len=tlen, source=text)
-                            _analyze_html_tag(tt)
-                            if tt.tagname=="nowiki":
-                                break
-
-                        
-                        if type==token.t_entity:
-                            res.append(token(type=token.t_text, start=start, len=tlen, source=text, text=resolve_entity(g())))
-                        else:
-                            res.append(token(type=token.t_text, start=start, len=tlen, source=text, text=text[start:start+tlen]))
-                        i+=1
                 else:
-                    if tagname in self.allowed_tags:
-                        res.append(t)
-                    else:
-                        res.append(token(type=token.t_text, start=start, len=tlen, source=text))
+                    res.append(token(type=token.t_text, start=start, len=tlen, source=text))
             else:
                 res.append(t)
             i+=1
