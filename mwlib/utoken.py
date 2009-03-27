@@ -8,7 +8,6 @@
 import sys
 import re
 import _uscan as _mwscan
-import htmlentitydefs
 from mwlib.refine.util import resolve_entity
 
 def walknode(node, filt=lambda x: True):
