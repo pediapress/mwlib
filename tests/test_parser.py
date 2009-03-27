@@ -10,6 +10,7 @@ from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
 from mwlib.xfail import xfail
 from mwlib.dummydb import DummyDB
+from mwlib.refine import util
 
 parse = uparser.simpleparse
 
@@ -243,9 +244,8 @@ def test_percent_table_style():
     check('{| class="toccolours" width=80% |}')
 
 def test_parseParams():
-    pp = parser.parseParams
     def check(s, expected):
-        res= parser.parseParams(s)
+        res= util.parseParams(s)
         print repr(s), "-->", res, "expected:", expected
 
         assert res==expected, "bad result"
