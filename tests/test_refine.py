@@ -187,4 +187,5 @@ def test_parse_ul_not_preformatted():
 """
     r=parse_txt(s)
     core.show(r)
-    assert 0
+    pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
+    assert not pre, "should contain no preformatted nodes"
