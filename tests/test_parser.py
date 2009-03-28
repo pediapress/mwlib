@@ -483,11 +483,11 @@ def test_pre_tag_link():
 
 def test_parse_preformatted_pipe():
     """http://code.pediapress.com/wiki/ticket/92"""
-    r=parse(" |foobar")
+    r=parse(" |foobar\n")
     assert r.find(parser.PreFormatted), "expected a preformatted node"
 
 def test_parse_preformatted_math():
-    r=parse(' <math>1+2=3</math>')
+    r=parse(' <math>1+2=3</math>\n')
     assert r.find(parser.PreFormatted), 'expected a preformatted node'
 
 def test_parse_preformatted_blockquote():

@@ -258,7 +258,16 @@ not_bol:
 				RET(t_text);
 			}
 		    }
-  "\n" ("\n" | " ")* "\n"	    {newline(); RET(t_break);}
+  "\n" ("\n" | " ")* "\n"	    
+		{newline();
+		 Py_UNICODE *tmp = cursor;
+
+		 cursor = start+1;
+		 found(t_newline);
+		 start += 1;
+		 cursor = tmp;  
+		 RET(t_break);
+		}
   "\n"		    {newline(); RET(t_newline);}
   "||" | "|!" | "!!"              
 	{

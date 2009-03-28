@@ -324,9 +324,9 @@ class parse_preformatted(object):
             else:
                 i+=1
 
-        if start is not None:
-            tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
-            self.refined.append(tokens[start].children)
+        # if start is not None:
+        #     tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
+        #     self.refined.append(tokens[start].children)
         self.refined.append(tokens)
        
                 
@@ -865,4 +865,3 @@ def parse_txt(txt, interwikimap=None, **kwargs):
     combined_parser(parsers)(tokens, refined, interwikimap=interwikimap, **kwargs)
     mark_style_tags(tokens)
     return tokens
-
