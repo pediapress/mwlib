@@ -13,7 +13,7 @@ from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_tabl
 try:
     from blist import blist
     import pkg_resources
-    pkg_resources.require("blist>=0.9.14")
+    pkg_resources.require("blist>=0.9.15")
 except ImportError:
     # import warnings
     # warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
