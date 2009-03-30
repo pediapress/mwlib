@@ -614,26 +614,17 @@ class parse_paragraphs(object):
                 self.refined.append(tokens[first])
 
         
-        lastpre = None
         while i<len(self.tokens):
             t = tokens[i]
             if t.type==T.t_break:
                 create()
                 first += 1
                 i = first
-                lastpre = None
             elif t.blocknode: # blocknode
-                if lastpre:
-                    lastpre.type=T.t_text
                 create(delta=0)
                 first += 1
                 i = first
-                lastpre = None
             else:
-                if t.type==T.t_newline:
-                    lastpre = None
-                elif t.type==T.t_pre:
-                    lastpre = t
                 i+=1
                 
         if first:
