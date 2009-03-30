@@ -189,3 +189,13 @@ def test_parse_ul_not_preformatted():
     core.show(r)
     pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
     assert not pre, "should contain no preformatted nodes"
+
+
+
+def test_link_vs_center():
+    """http://code.pediapress.com/wiki/ticket/559"""
+    s="""[[foo|bar <center> not closed]]"""
+    r=parse_txt(s)
+    core.show(r)
+    assert r[0].type==T.t_complex_link, "expected a link"
+    
