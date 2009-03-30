@@ -847,11 +847,13 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_paragraphs,
                parse_lines,
                parse_blockquote, parse_code_tag, 
-               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol, parse_links,
+               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol,
+               parse_center,
+               parse_links,
                parse_inputbox,
                parse_h_tags,
                parse_sections,
-               parse_center, parse_div, parse_tables, parse_uniq]
+               parse_div, parse_tables, parse_uniq]
 
 
     refined = []
