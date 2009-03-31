@@ -6,9 +6,8 @@ from mwlib.utoken import show, token as T
 from mwlib.refine import util
 
 class parse_table_cells(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
         
     def is_table_cell_start(self, token):
@@ -62,14 +61,20 @@ class parse_table_cells(object):
             elif tokens[start].tagname=="td":
                 is_header = False
 
+            if is_header:
+                tagname = "th"
+            else:
+                tagname = "td"
+                
                 
             search_modifier = tokens[start].text.strip() in ("|", "!", "||", "!!")
             sub = tokens[start+1:i-skip_end]
             self.replace_tablecaption(sub)
-            tokens[start:i] = [T(type=T.t_complex_table_cell, start=tokens[start].start, len=4, children=sub, vlist=tokens[start].vlist, is_header=is_header)]
+            tokens[start:i] = [T(type=T.t_complex_table_cell, tagname=tagname,
+                                 start=tokens[start].start, children=sub,
+                                 vlist=tokens[start].vlist, is_header=is_header)]
             if search_modifier:
                 self.find_modifier(tokens[start])
-            self.refined.append(tokens[start])
         
         while i < len(tokens):
             if self.is_table_cell_start(tokens[i]):
@@ -97,9 +102,8 @@ class parse_table_cells(object):
             
                 
 class parse_table_rows(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
         
     def is_table_row_start(self, token):
@@ -139,7 +143,7 @@ class parse_table_rows(object):
         def args():
             if rowbegintoken is None:
                 return {}
-            return dict(vlist=rowbegintoken.vlist, tagname=rowbegintoken.tagname)
+            return dict(vlist=rowbegintoken.vlist)
         
             
         while i < len(tokens):
@@ -151,10 +155,10 @@ class parse_table_rows(object):
             elif self.is_table_row_start(tokens[i]):
                 if start is not None:
                     children = tokens[start+remove_start:i]
-                    tokens[start:i] = [T(type=T.t_complex_table_row, start=tokens[start].start, len=4, children=children, **args())]
+                    tokens[start:i] = [T(type=T.t_complex_table_row, tagname="tr", start=tokens[start].start, children=children, **args())]
                     if should_find_modifier():
                         self.find_modifier(tokens[start])
-                    parse_table_cells(children, self.refined)
+                    parse_table_cells(children)
                     start += 1  # we didn't remove the start symbol above
                     rowbegintoken= tokens[start]
                     remove_start = 1
@@ -168,10 +172,10 @@ class parse_table_rows(object):
             elif self.is_table_row_end(tokens[i]):
                 if start is not None:
                     sub = tokens[start+remove_start:i]
-                    tokens[start:i+1] = [T(type=T.t_complex_table_row, start=tokens[start].start, len=4, children=sub, **args())]
+                    tokens[start:i+1] = [T(type=T.t_complex_table_row, tagname="tr", start=tokens[start].start, children=sub, **args())]
                     if should_find_modifier():
                         self.find_modifier(tokens[start])
-                    parse_table_cells(sub, self.refined)
+                    parse_table_cells(sub)
                     i = start+1
                     start = None
                     rowbegintoken = None
@@ -182,15 +186,14 @@ class parse_table_rows(object):
 
         if start is not None:
             sub = tokens[start+remove_start:]
-            tokens[start:] = [T(type=T.t_complex_table_row, start=tokens[start].start, len=4, children=sub, **args())]
+            tokens[start:] = [T(type=T.t_complex_table_row, tagname="tr", start=tokens[start].start, children=sub, **args())]
             if should_find_modifier():
                 self.find_modifier(tokens[start])
-            parse_table_cells(sub, self.refined)
+            parse_table_cells(sub)
         
 class parse_tables(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
         
     def is_table_start(self, token):
@@ -200,7 +203,7 @@ class parse_tables(object):
         return token.type==T.t_endtable or (token.type==T.t_html_tag_end and token.tagname=="table")
 
     def handle_rows(self, sublist):
-        parse_table_rows(sublist, self.refined)
+        parse_table_rows(sublist)
 
     def find_modifier(self, table):
         children = table.children
@@ -247,7 +250,6 @@ class parse_tables(object):
                     
                 caption = T(type=T.t_complex_caption, children=sub, vlist=vlist)
                 children[start:i] = [caption]
-                self.refined.append(caption)
                 return
             elif t.text=="|" and modifier is None:
                 modifier = i
@@ -256,7 +258,6 @@ class parse_tables(object):
             
     def run(self):
         tokens = self.tokens
-        self.refined.append(tokens)
         i = 0
         stack = []
 
@@ -264,7 +265,9 @@ class parse_tables(object):
             start = stack.pop()
             starttoken = tokens[start]
             sub = tokens[start+1:i]
-            tokens[start:i+1] = [T(type=T.t_complex_table, start=tokens[start].start, len=4, children=sub, vlist=starttoken.vlist, blocknode=True)]
+            tokens[start:i+1] = [T(type=T.t_complex_table,
+                                   tagname="table", start=tokens[start].start, children=sub,
+                                   vlist=starttoken.vlist, blocknode=True)]
             if starttoken.text.strip() == "{|":
                 self.find_modifier(tokens[start])
             self.handle_rows(sub)

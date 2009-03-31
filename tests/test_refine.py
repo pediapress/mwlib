@@ -11,7 +11,7 @@ parse_txt = core.parse_txt
 
 def test_parse_row_missing_beginrow():
     tokens = tokenize("<td>implicit row starts here</td><td>cell2</td>")
-    core.parse_table_rows(tokens, [])
+    core.parse_table_rows(tokens)
     show(tokens)
     assert len(tokens)==1
     assert tokens[0].type == T.t_complex_table_row
@@ -20,14 +20,14 @@ def test_parse_row_missing_beginrow():
 
 def test_parse_table_cells_missing_close():
     tokens = core.tokenize("<td>bla")
-    core.parse_table_cells(tokens, [])
+    core.parse_table_cells(tokens)
     show(tokens)
     assert tokens[0].type==T.t_complex_table_cell, "expected a complex table cell"
 
 
 def test_parse_table_cells_closed_by_next_cell():
     tokens = core.tokenize("<td>foo<td>bar")
-    core.parse_table_cells(tokens, [])
+    core.parse_table_cells(tokens)
     show(tokens)
     assert tokens[0].type==T.t_complex_table_cell
     assert tokens[1].type==T.t_complex_table_cell
@@ -39,7 +39,7 @@ def test_parse_table_cells_pipe():
     tokens = tokenize("{|\n|cell0||cell1||cell2\n|}")[2:-2]
     print "BEFORE:"
     show(tokens)
-    core.parse_table_cells(tokens, [])
+    core.parse_table_cells(tokens)
     print "AFTER"
     show(tokens)
     assert len(tokens)==3
@@ -58,23 +58,13 @@ def test_parse_cell_modifier():
     
     print "BEFORE:"
     show(tokens)
-    core.parse_table_cells(tokens, [])
+    core.parse_table_cells(tokens)
     print "AFTER"
     show(tokens)
     assert tokens[0].type == T.t_complex_table_cell
     assert tokens[0].vlist == dict(align="right")
     assert T.join_as_text(tokens[0].children)=="cell0|still_cell0"
-
-
-
-def test_parse_table_refined():
-    tokens = tokenize("<table><tr><td>cell1</td></tr></table>")
-    refined = []
-    core.parse_tables(tokens, refined)
-    print "REFINED:", refined
-    assert len(refined)==2
     
-
 def test_parse_table_modifier():
     tokens = tokenize("""{| border="1"
 |}
@@ -82,7 +72,7 @@ def test_parse_table_modifier():
     
     print "BEFORE:"
     show(tokens)
-    core.parse_tables(tokens, [])
+    core.parse_tables(tokens)
     
     print "AFTER:"
     show(tokens)
@@ -100,7 +90,7 @@ def test_parse_table_row_modifier():
     
     print "BEFORE:"
     show(tokens)
-    core.parse_table_rows(tokens, [])
+    core.parse_table_rows(tokens)
     
     print "AFTER:"
     show(tokens)
@@ -111,7 +101,7 @@ def test_parse_table_row_modifier():
 def test_parse_link():
     tokens = tokenize("[[link0]][[link2]]")
     refined = []
-    core.parse_links(tokens, [])
+    core.parse_links(tokens)
     show(tokens)
     assert len(tokens)==2
     assert tokens[0].type == T.t_complex_link

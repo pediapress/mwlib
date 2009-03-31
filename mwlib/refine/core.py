@@ -3,7 +3,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import sys
 from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util
 from mwlib import namespace, tagext, uniq
@@ -39,12 +38,29 @@ T.t_vlist = "vlist"
 
 T.children = None
 
+def get_token_walker(skip_types=set(), skip_tags=set()):
+    def walk(tokens):
+        todo = [tokens]
+        yield tokens
+        
+        while todo:
+            tmp = todo.pop()
+            for x in tmp:
+                if x.type not in skip_types and x.tagname not in skip_tags:
+                    if x.children is not None:
+                        yield x.children
+                        todo.append(x.children)
+                else:
+                    # print "skip", x, x.children
+                    if x.children is not None:
+                        todo.append(x.children)
+    return walk
 
 def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
     if break_at is None:
         break_at = lambda _: False
         
-    def recursive_parse_tag(tokens, refined, **kwargs):            
+    def recursive_parse_tag(tokens, **kwargs):            
         i = 0
         stack = []
 
@@ -57,7 +73,6 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
             if stack and break_at(t):
                 start = stack.pop()
                 tokens[start:i] = create()
-                refined.append(tokens[start])
                 i=start+1
             elif t.type==T.t_html_tag and t.tagname==tagname:
                 if t.tag_selfClosing:
@@ -69,7 +84,6 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
                 if stack:
                     start = stack.pop()
                     tokens[start:i+1] = create()
-                    refined.append(tokens[start])
                     i = start+1
                 else:
                     i+=1
@@ -79,9 +93,7 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
         while stack:
             start = stack.pop()
             tokens[start:] = create()
-            refined.append(tokens[start])
 
-        refined.append(tokens)
     recursive_parse_tag.__name__ += "_"+tagname
     
     return recursive_parse_tag
@@ -103,14 +115,13 @@ parse_references = get_recursive_tag_parser("references")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 parse_code_tag = get_recursive_tag_parser("code")
 
-def parse_inputbox(tokens, refined, **kwargs):
-    get_recursive_tag_parser("inputbox")(tokens, [], **kwargs)
+def parse_inputbox(tokens, **kwargs):
+    get_recursive_tag_parser("inputbox")(tokens, **kwargs)
     
     for t in tokens:
         if t.tagname=='inputbox':
             t.inputbox = T.join_as_text(t.children)
             del t.children[:]
-    refined.append(tokens)
 
 def _parse_gallery_txt(txt, **kwargs):
     lines = [x.strip() for x in txt.split("\n")]
@@ -134,9 +145,8 @@ class bunch(object):
         self.__dict__.update(kw)
         
 class parse_sections(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
         
     def run(self):
@@ -163,8 +173,6 @@ class parse_sections(object):
             sect = T(type=T.t_complex_section, start=0, children=blist([caption, body]), level=level, blocknode=True)
             tokens[current.start:i] = [sect] 
             
-            self.refined.append(caption)
-            self.refined.append(body)
 
             while sections and level<sections[-1].level:
                 sections.pop()
@@ -193,12 +201,10 @@ class parse_sections(object):
 
         if current.endtitle is not None:
             create()
-        self.refined.append(tokens)
 
 class parse_urls(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
         
     def run(self):
@@ -214,18 +220,15 @@ class parse_urls(object):
             elif t.type==T.t_special and t.text=="]" and start is not None:
                 sub = self.tokens[start+1:i]
                 self.tokens[start:i+1] = [T(type=T.t_complex_named_url, children=sub, caption=self.tokens[start].text[1:])]
-                self.refined.append(sub)
                 i = start
                 start = None
             else:
                 i+=1
                 
-        self.refined.append(tokens)
 
 class parse_singlequote(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
 
     def run(self):
@@ -298,9 +301,8 @@ class parse_singlequote(object):
                 
                     
 class parse_preformatted(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
 
     def run(self):
@@ -317,7 +319,6 @@ class parse_preformatted(object):
                 i+=1
             elif t.type==T.t_newline and start is not None:
                 tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
-                self.refined.append(tokens[start].children)
                 i = start+1
                 start = None
             elif t.blocknode or (t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline", "div")):
@@ -328,15 +329,12 @@ class parse_preformatted(object):
 
         # if start is not None:
         #     tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
-        #     self.refined.append(tokens[start].children)
-        self.refined.append(tokens)
        
                 
             
 class parse_lines(object):
-    def __init__(self, tokens, refined, **kwargs):
+    def __init__(self, tokens, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.run()
 
     def splitdl(self, item):
@@ -362,7 +360,6 @@ class parse_lines(object):
             prefix = getchar(lines[startpos])
             if prefix is None:
                 lines[startpos].type = T.t_complex_node
-                self.refined.append(lines[startpos].children)
                 startpos+=1
                 continue
                 
@@ -407,7 +404,6 @@ class parse_lines(object):
             startpos += 1
             if dd is not None:
                 lines.insert(startpos, dd)
-                self.refined.append(dd.children)
                 startpos += 1
         del lines[-1] # remove guard
         
@@ -466,12 +462,10 @@ class parse_lines(object):
             self.analyze(lines)
             self.tokens[firsttoken:] = lines                
 
-        self.refined.append(tokens)
         
 class parse_links(object):
-    def __init__(self, tokens, refined, lang=None, interwikimap=None, imagemod=None, **kwargs):
+    def __init__(self, tokens, lang=None, interwikimap=None, imagemod=None, **kwargs):
         self.tokens = tokens
-        self.refined = refined
         self.lang = lang
         self.interwikimap = interwikimap
         
@@ -584,7 +578,6 @@ class parse_links(object):
                     node.children = sub
                     tokens[start:i+1] = [node]
                     node.target = target
-                    self.refined.append(sub)
                     if stack:
                         marks = stack.pop()
                     else:
@@ -593,16 +586,18 @@ class parse_links(object):
             else:
                 i+=1
 
-        self.refined.append(tokens)
 
 
 
 class parse_paragraphs(object):
-    def __init__(self, tokens, refined, **kwargs):
-        self.tokens = tokens
-        self.refined = refined
-        self.run()
-
+    need_walker = False
+    
+    def __init__(self, tokens, **kwargs):
+        walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table"]), skip_types=set([T.t_complex_section]))
+        for t in walker(tokens):
+            self.tokens = t
+            self.run()
+        
     def run(self):
         tokens = self.tokens
         i = 0
@@ -611,7 +606,6 @@ class parse_paragraphs(object):
             sub = tokens[first:i]
             if sub:
                 tokens[first:i+delta] = [T(type=T.t_complex_tag, tagname='p', children=sub, blocknode=True)]
-                self.refined.append(tokens[first])
 
         
         while i<len(self.tokens):
@@ -629,37 +623,34 @@ class parse_paragraphs(object):
                 
         if first:
             create()
-            
-        self.refined.append(tokens)
+
+    
 
 class combined_parser(object):
     def __init__(self, parsers):
         self.parsers = parsers
 
-    def __call__(self, tokens, refined, **kwargs):
+    def __call__(self, tokens, **kwargs):
         parsers = list(self.parsers)
-        refine = [tokens]
+
+        default_walker = get_token_walker(skip_tags=set(["table", "tr"]), skip_types=set([T.t_complex_section]))
         
         while parsers:
             p = parsers.pop()
-            #print "doing", p, "on:", refine
-            
-            if not parsers:
-                next = refined
+
+            need_walker = getattr(p, "need_walker", True)
+            if need_walker:
+                # print "using default token walker for", p
+                walker = default_walker
+                for x in walker(tokens):
+                    p(x, **kwargs)
             else:
-                next = []
-
-            for x in refine:
-                if isinstance(x, (list, blist, tuple)):
-                    toks = x
-                else:
-                    toks = x.children
-                p(toks, next, **kwargs)
-
-            refine = next
+                p(tokens, **kwargs)
+                
 
 def mark_style_tags(tokens):
     tags = set("tt strike ins del small sup sub b strong cite i u em big font".split())
+
     todo = [(0, dict(), tokens)]
 
     
@@ -716,10 +707,9 @@ parse_h_tags = combined_parser(
     [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
 
 class parse_uniq(object):
-    def __init__(self, tokens, refined, **kw):
+    def __init__(self, tokens, **kw):
         self.tagextensions=tagext.default_registry
 
-        refined.append(tokens)
         uniquifier = kw.get("uniquifier")
         if uniquifier is None:
             return
@@ -841,7 +831,6 @@ def parse_txt(txt, interwikimap=None, **kwargs):
         kwargs["uniquifier"] = uniquifier
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
     
-    refine = [tokens]
     parsers = [parse_singlequote, parse_urls,
                parse_preformatted,
                parse_paragraphs,
@@ -855,8 +844,6 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_sections,
                parse_div, parse_tables, parse_uniq]
 
-
-    refined = []
-    combined_parser(parsers)(tokens, refined, interwikimap=interwikimap, **kwargs)
+    combined_parser(parsers)(tokens, interwikimap=interwikimap, **kwargs)
     mark_style_tags(tokens)
     return tokens
