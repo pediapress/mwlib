@@ -189,14 +189,15 @@ def test_link_vs_center():
     core.show(r)
     assert r[0].type==T.t_complex_link, "expected a link"
     
-def test_two_indent():
+def test_no_combine_dd_dt():
     """http://code.pediapress.com/wiki/ticket/549"""
-    s = """:first dd
-:second dd
-"""
-    r=parse_txt(s)
-    core.show(r)
-    styles = core.walknodel(r, lambda x: x.type==T.t_complex_style)
-    print styles
-    assert len(styles)==2
-    
+    def doit(s):
+        r=parse_txt(s)
+        core.show(r)
+        styles = core.walknodel(r, lambda x: x.type==T.t_complex_style)
+        print styles
+        assert len(styles)==2
+
+        
+    yield doit, ":first\n:second\n"
+    yield doit, ";first\n;second\n"
