@@ -813,6 +813,12 @@ def html():
             continue
 
         out=StringIO.StringIO()
+        def outwrite(arg, old=out.write):
+            """Switch to convert utf8 into bytestring (would raise an error on .getvalue())"""
+            if not isinstance(arg, str):
+                arg = arg.encode('utf-8')
+            old(arg)
+        out.write = outwrite
         out.write("""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -830,5 +836,5 @@ def html():
 
         fd, htmlfile = tempfile.mkstemp(".html")
         os.close(fd)
-        open(htmlfile, "wb").write(out.getvalue().encode('utf-8'))
+        open(htmlfile, "wb").write(out.getvalue())
         webbrowser.open("file://"+htmlfile)
