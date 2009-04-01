@@ -317,7 +317,9 @@ class MWXHTMLWriter(object):
         if self.debug:
             self.writeparsetree(book)
         if output:
-            open(output, "w").write(self.asstring())
+            if not hasattr(output, 'write'):
+                output = open(output, "w")
+            output.write(self.asstring())
 
     def xwriteBook(self, obj):
         e = ET.Element("div")
