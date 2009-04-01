@@ -399,7 +399,9 @@ class parse_lines(object):
                     dd = self.splitdl(item.children[0])
                     if dd is not None:
                         break
-                    
+                if prefix==":":
+                    break
+                
             lines.insert(startpos, node)
             startpos += 1
             if dd is not None:
