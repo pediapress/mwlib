@@ -203,6 +203,7 @@ class TreeCleaner(object):
                           'splitBigTableCells',
                           'limitImageCaptionsize', 
                           'removeDuplicateLinksInReferences',
+                          'removeLeadingParaInList',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
                           'removeBreakingReturns',
@@ -1041,3 +1042,12 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.limitImageCaptionsize(c)
+
+    def removeLeadingParaInList(self, node):
+
+        if node.__class__ == Item:
+            if node.children and node.children[0].__class__ == Paragraph:
+                node.replaceChild(node.children[0], node.children[0].children)
+
+        for c in node.children:
+            self.removeLeadingParaInList(c)
