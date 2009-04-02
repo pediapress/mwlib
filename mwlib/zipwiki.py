@@ -41,7 +41,7 @@ class Wiki(wikidbbase.WikiDBBase):
     def _getArticle(self, title, revision=None):
         try:
             article = nget(self.articles, title)
-            if revision is None or article['revision'] == revision:
+            if revision is None or article['revision'] is None or article['revision'] == revision:
                 return article
         except KeyError:
             pass
