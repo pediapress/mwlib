@@ -791,15 +791,18 @@ class WikiDB(wikidbbase.WikiDBBase):
         for r in revs:
             if 'minor' in r:  
                 pass # include minor edits
-            if 'anon' in r and (not r['user'] or self.ip_rex.match(r['user'])): # anon
+            user = r.get('user', u'')
+            if 'anon' in r and (not user or self.ip_rex.match(user)): # anon
                 authors[ANON] = authors.get(ANON, 0) + 1
-            elif self.bot_rex.search(r['user']) or self.bot_rex.search(r.get('comment', '')):
+            elif not user:
+                continue
+            elif self.bot_rex.search(user) or self.bot_rex.search(r.get('comment', '')):
                 continue # filter bots
             else:
                 if USE_DIFF_SIZE:
-                    authors[r['user']] = authors.get(r['user'], 0) + abs(r['diff_size'])
+                    authors[user] = authors.get(user, 0) + abs(r['diff_size'])
                 else:
-                    authors[r['user']] = authors.get(r['user'], 0) + 1
+                    authors[user] = authors.get(user, 0) + 1
         
         num_anon = authors.get(ANON, 0)
         try:
