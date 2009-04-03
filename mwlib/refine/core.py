@@ -60,7 +60,7 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
     if break_at is None:
         break_at = lambda _: False
         
-    def recursive_parse_tag(tokens, **kwargs):            
+    def recursive_parse_tag(tokens, xopts):            
         i = 0
         stack = []
 
@@ -115,22 +115,22 @@ parse_references = get_recursive_tag_parser("references")
 parse_blockquote = get_recursive_tag_parser("blockquote")
 parse_code_tag = get_recursive_tag_parser("code")
 
-def parse_inputbox(tokens, **kwargs):
-    get_recursive_tag_parser("inputbox")(tokens, **kwargs)
+def parse_inputbox(tokens, xopts):
+    get_recursive_tag_parser("inputbox")(tokens, xopts)
     
     for t in tokens:
         if t.tagname=='inputbox':
             t.inputbox = T.join_as_text(t.children)
             del t.children[:]
 
-def _parse_gallery_txt(txt, **kwargs):
+def _parse_gallery_txt(txt, xopts):
     lines = [x.strip() for x in txt.split("\n")]
     sub = []
     for x in lines:
         if not x:
             continue
 
-        linode = parse_txt(u'[['+x+']]', **kwargs)
+        linode = parse_txt(u'[['+x+']]', xopts)
 
         if linode:
             n = linode[0]
@@ -145,7 +145,7 @@ class bunch(object):
         self.__dict__.update(kw)
         
 class parse_sections(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
         
@@ -203,7 +203,7 @@ class parse_sections(object):
             create()
 
 class parse_urls(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
         
@@ -227,7 +227,7 @@ class parse_urls(object):
                 
 
 class parse_singlequote(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
 
@@ -301,7 +301,7 @@ class parse_singlequote(object):
                 
                     
 class parse_preformatted(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
 
@@ -333,7 +333,7 @@ class parse_preformatted(object):
                 
             
 class parse_lines(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
 
@@ -466,7 +466,11 @@ class parse_lines(object):
 
         
 class parse_links(object):
-    def __init__(self, tokens, lang=None, interwikimap=None, imagemod=None, **kwargs):
+    def __init__(self, tokens, xopts):
+        lang = xopts.lang
+        interwikimap = xopts.interwikimap
+        imagemod = xopts.imagemod
+        
         self.tokens = tokens
         self.lang = lang
         self.interwikimap = interwikimap
@@ -594,7 +598,7 @@ class parse_links(object):
 class parse_paragraphs(object):
     need_walker = False
     
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table"]), skip_types=set([T.t_complex_section]))
         for t in walker(tokens):
             self.tokens = t
@@ -632,7 +636,7 @@ class combined_parser(object):
     def __init__(self, parsers):
         self.parsers = parsers
 
-    def __call__(self, tokens, **kwargs):
+    def __call__(self, tokens, xopts):
         parsers = list(self.parsers)
 
         default_walker = get_token_walker(skip_tags=set(["table", "tr"]), skip_types=set([T.t_complex_section]))
@@ -645,9 +649,9 @@ class combined_parser(object):
                 # print "using default token walker for", p
                 walker = default_walker
                 for x in walker(tokens):
-                    p(x, **kwargs)
+                    p(x, xopts)
             else:
-                p(tokens, **kwargs)
+                p(tokens, xopts)
                 
 
 def mark_style_tags(tokens):
@@ -709,10 +713,10 @@ parse_h_tags = combined_parser(
     [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
 
 class parse_uniq(object):
-    def __init__(self, tokens, **kw):
+    def __init__(self, tokens, xopts):
         self.tagextensions=tagext.default_registry
 
-        uniquifier = kw.get("uniquifier")
+        uniquifier = xopts.uniquifier
         if uniquifier is None:
             return
 
@@ -745,14 +749,14 @@ class parse_uniq(object):
             except AttributeError:
                 m = self._create_generic
                 
-            tokens[i] = m(name, vlist, inner or u"", **kw)
+            tokens[i] = m(name, vlist, inner or u"", xopts)
             if tokens[i] is None:
                 del tokens[i]
             else:
                 i += 1
                 
             
-    def _create_generic(self, name, vlist, inner, **kw):
+    def _create_generic(self, name, vlist, inner, xopts):
         if not vlist:
             vlist = {}
         if name in self.tagextensions:
@@ -768,54 +772,68 @@ class parse_uniq(object):
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children)
 
                  
-    def create_source(self, name, vlist, inner, **kw):
+    def create_source(self, name, vlist, inner, xopts):
         children = [T(type=T.t_text, text=inner)]
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=True)
     
-    def create_ref(self, name, vlist, inner, **kw):
-        expander = kw.get("expander")
+    def create_ref(self, name, vlist, inner, xopts):
+        expander = xopts.expander
         if expander is not None and inner:
             inner = expander.parseAndExpand(inner, True)
 
         if inner:
             # <ref>* not an item</ref>
-            children = parse_txt("<br />"+inner, **kw)
+            children = parse_txt("<br />"+inner, xopts)
             del children[0]
         else:
             children = []
             
         return T(type=T.t_complex_tag, tagname="ref", vlist=vlist, children=children)
 
-    def create_timeline(self, name, vlist, inner, **kw):
+    def create_timeline(self, name, vlist, inner, xopts):
         return T(type=T.t_complex_tag, tagname="timeline", vlist=vlist, timeline=inner, blocknode=True)
 
-    def create_math(self, name, vlist, inner, **kw):
+    def create_math(self, name, vlist, inner, xopts):
         return T(type=T.t_complex_tag, tagname="math", vlist=vlist, math=inner)
     
-    def create_gallery(self, name, vlist, inner, **kw):
-        sub = _parse_gallery_txt(inner, **kw)
+    def create_gallery(self, name, vlist, inner, xopts):
+        sub = _parse_gallery_txt(inner, xopts)
         return T(type=T.t_complex_tag, tagname="gallery", vlist=vlist, children=sub, blocknode=True)
 
-    def create_imagemap(self, name, vlist, inner, **kw):
+    def create_imagemap(self, name, vlist, inner, xopts):
         from mwlib import imgmap
         txt = inner
         t = T(type=T.t_complex_tag, tagname="imagemap", vlist=vlist)
         t.imagemap =imgmap.ImageMapFromString(txt)
         if t.imagemap.image:
             s = u"[["+t.imagemap.image+u"]]"
-            res = parse_txt(s, **kw)
+            res = parse_txt(s, xopts)
             if res and res[0].type==T.t_complex_link and res[0].ns==6:
                 t.imagemap.imagelink = res[0]
 
             show(res)
         return t
 
-    def create_nowiki(self, name, vlist, inner, **kw):
+    def create_nowiki(self, name, vlist, inner, xopts):
         txt = inner
         txt = util.replace_html_entities(txt)
         return T(type=T.t_text, text=txt)
-                        
-def parse_txt(txt, interwikimap=None, **kwargs):
+
+class XBunch(object):
+    def __init__(self, **kw):
+        self.__dict__.update(kw)
+
+    def __getattr__(self, name):
+        return None
+    
+def parse_txt(txt, xopts=None, **kwargs):
+    if xopts is None:
+        xopts = XBunch(**kwargs)
+    else:
+        xopts.__dict__.update(**kwargs)
+        
+    interwikimap = xopts.interwikimap
+    
     if interwikimap is None:
         from mwlib.lang import languages
         interwikimap = {}
@@ -823,14 +841,15 @@ def parse_txt(txt, interwikimap=None, **kwargs):
             interwikimap[prefix] = {'renamed': renamed}
         for lang in languages:
             interwikimap[lang] = {'language': True}
+    xopts.interwikimap = interwikimap
     
-    kwargs['imagemod'] = util.ImageMod(kwargs.get('magicwords'))
+    xopts.imagemod = util.ImageMod(xopts.magicwords)
 
-    uniquifier = kwargs.get("uniquifier")
+    uniquifier = xopts.uniquifier
     if uniquifier is None:
         uniquifier = uniq.Uniquifier()
         txt = uniquifier.replace_tags(txt)
-        kwargs["uniquifier"] = uniquifier
+        xopts.uniquifier = uniquifier
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
     
     parsers = [parse_singlequote, parse_urls,
@@ -846,6 +865,6 @@ def parse_txt(txt, interwikimap=None, **kwargs):
                parse_sections,
                parse_div, parse_tables, parse_uniq]
 
-    combined_parser(parsers)(tokens, interwikimap=interwikimap, **kwargs)
+    combined_parser(parsers)(tokens, xopts)
     mark_style_tags(tokens)
     return tokens

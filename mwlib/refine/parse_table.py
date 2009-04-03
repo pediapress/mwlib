@@ -6,7 +6,7 @@ from mwlib.utoken import show, token as T
 from mwlib.refine import util
 
 class parse_table_cells(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
         
@@ -102,8 +102,9 @@ class parse_table_cells(object):
             
                 
 class parse_table_rows(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
         self.tokens = tokens
+        self.xopts = xopts
         self.run()
         
     def is_table_row_start(self, token):
@@ -158,7 +159,7 @@ class parse_table_rows(object):
                     tokens[start:i] = [T(type=T.t_complex_table_row, tagname="tr", start=tokens[start].start, children=children, **args())]
                     if should_find_modifier():
                         self.find_modifier(tokens[start])
-                    parse_table_cells(children)
+                    parse_table_cells(children, self.xopts)
                     start += 1  # we didn't remove the start symbol above
                     rowbegintoken= tokens[start]
                     remove_start = 1
@@ -175,7 +176,7 @@ class parse_table_rows(object):
                     tokens[start:i+1] = [T(type=T.t_complex_table_row, tagname="tr", start=tokens[start].start, children=sub, **args())]
                     if should_find_modifier():
                         self.find_modifier(tokens[start])
-                    parse_table_cells(sub)
+                    parse_table_cells(sub, self.xopts)
                     i = start+1
                     start = None
                     rowbegintoken = None
@@ -189,10 +190,11 @@ class parse_table_rows(object):
             tokens[start:] = [T(type=T.t_complex_table_row, tagname="tr", start=tokens[start].start, children=sub, **args())]
             if should_find_modifier():
                 self.find_modifier(tokens[start])
-            parse_table_cells(sub)
+            parse_table_cells(sub, self.xopts)
         
 class parse_tables(object):
-    def __init__(self, tokens, **kwargs):
+    def __init__(self, tokens, xopts):
+        self.xopts = xopts
         self.tokens = tokens
         self.run()
         
@@ -203,7 +205,7 @@ class parse_tables(object):
         return token.type==T.t_endtable or (token.type==T.t_html_tag_end and token.tagname=="table")
 
     def handle_rows(self, sublist):
-        parse_table_rows(sublist)
+        parse_table_rows(sublist, self.xopts)
 
     def find_modifier(self, table):
         children = table.children
