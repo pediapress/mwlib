@@ -50,7 +50,6 @@ da
 de
 diq
 dk
-dk:da
 dsb
 dv
 dz
