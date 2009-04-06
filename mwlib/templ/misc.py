@@ -19,7 +19,7 @@ class DictDB(object):
             normd[k.lower()] = v
         self.d = normd
         
-    def getRawArticle(self, title):
+    def getRawArticle(self, title, revision=None):
         return self.d[title.lower()]
 
     def getTemplate(self, title, dummy):

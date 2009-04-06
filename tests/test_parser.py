@@ -10,7 +10,7 @@ from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
 from mwlib.xfail import xfail
 from mwlib.dummydb import DummyDB
-from mwlib.refine import util
+from mwlib.refine import util, core
 
 parse = uparser.simpleparse
 
@@ -125,8 +125,17 @@ def test_switch_default():
     print "EXPANDED:", repr(res)
     assert "Nordrhein-Westfalen" in res
 
-def test_pipe_table():
+def test_tag_expand_vs_uniq():
+    db = DictDB(
+        Foo = """{{#tag:pre|inside pre}}"""
+        )
+    r=uparser.parseString(title="Foo", wikidb=db)
+    core.show(r)
+    pre = r.find(parser.PreFormatted)
+    assert len(pre)==1, "expected a preformatted node"
 
+def test_pipe_table():
+    
     db=DictDB(Foo="""
 bla
 {{{ {{Pipe}}}
