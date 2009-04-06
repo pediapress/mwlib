@@ -1,3 +1,4 @@
+from xml.sax.saxutils import quoteattr
 from mwlib.templ import nodes, evaluate
 
 class Subst(nodes.Node):
@@ -44,9 +45,18 @@ class Tag(nodes.Node):
         name = []
         evaluate.flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
+        parameters = u''
+
+        for parm in self[2:]:
+            tmp = []
+            evaluate.flatten(parm, expander, variables, tmp)
+            evaluate._insert_implicit_newlines(tmp)
+            key, value = evaluate.equalsplit(tmp)
+            parameters += ' ' + u'='.join([u''.join(key),
+                                           quoteattr(u''.join(value))])
 
         tmpres = []
-        tmpres.append("<%s>" % (name,))
+        tmpres.append("<%s%s>" % (name, parameters))
         
         if len(self)>1:
             tmp = []
@@ -57,7 +67,6 @@ class Tag(nodes.Node):
             
         tmpres.append("</%s>" % (name,))
         tmpres = u"".join(tmpres)
-        tmpres = expander.uniquifier.replace_tags(tmpres)
         res.append(tmpres)
         
         
