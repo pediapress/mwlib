@@ -51,8 +51,8 @@ class ImageUtils(object):
                 max_w = self.print_width_px
             if getattr(img_node, 'align', None) != 'center':
                 img_node.floating = True
-            if getattr(img_node, 'upright'):
-                max_w *= getattr(img_node, 'upright')
+            if getattr(img_node, 'upright', 1):
+                max_w *= getattr(img_node, 'upright', 1)
         if not max_w:
             max_w = min(self.print_width_px, px_w)
         max_w = min(self.print_width_px, max_w)
