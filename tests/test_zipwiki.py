@@ -30,8 +30,6 @@ class TestZipWiki(object):
         a = self.wikidb.getRawArticle(u'The Living Sea')
         assert isinstance(a, unicode)
         assert len(a) > 0
-        a = self.wikidb.getRawArticle(u'The Living Sea', revision=123)
-        assert a is None
     
     def test_getParsedArticle(self):
         p = self.wikidb.getParsedArticle(u'The Living Sea')
