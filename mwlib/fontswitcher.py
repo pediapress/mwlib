@@ -58,6 +58,10 @@ class FontSwitcher(object):
         self.default_font = None
         self.code_points2font = []
 
+        self.space_like_chars = [i for i in range(33) if not i in [9, 10, 13]] + [127]
+        self.ignore_chars = [173] # 173 = softhyphen
+        self.no_switch_chars = self.space_like_chars + self.ignore_chars
+
 
     def unregisterFont(self, unreg_font_name):
         registered_entries = []
@@ -96,8 +100,10 @@ class FontSwitcher(object):
         last_txt = []
         for c in txt:
             ord_c = ord(c)
-            if ord_c <= 32 or ord_c == 127:
-                if ord_c not in  [9, 10, 13]:
+            if ord_c in self.no_switch_chars:
+                if ord_c in self.ignore_chars:
+                    c = ''
+                if ord_c in self.space_like_chars:
                     c =' '
                 if last_font:
                     font = last_font
