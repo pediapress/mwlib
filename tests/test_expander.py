@@ -401,3 +401,5 @@ def test_equal_inside_link():
     db= DictDB(t1="{{{1}}}")
     expandstr("{{t1|[[abc|foo=5]]}}", "[[abc|foo=5]]", wikidb=db)
            
+def test_tag_parametrs():
+    expandstr('{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>')
