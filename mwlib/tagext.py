@@ -60,12 +60,15 @@ def _parse(txt):
         return res
 
     res = res.children[0]
+    
     if res.__class__==parser.Paragraph:
         res.__class__ = parser.Node
-        
-    if len(res.children)!=1:
-        return res
-    return res.children[0]
+
+    return res
+
+    # if len(res.children)!=1:
+    #     return res
+    # return res.children[0]
 
 class TagExtension(object):
     name=None
