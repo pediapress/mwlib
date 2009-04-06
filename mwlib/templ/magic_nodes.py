@@ -67,6 +67,7 @@ class Tag(nodes.Node):
             
         tmpres.append("</%s>" % (name,))
         tmpres = u"".join(tmpres)
+        tmpres = expander.uniquifier.replace_tags(tmpres)
         res.append(tmpres)
         
         
