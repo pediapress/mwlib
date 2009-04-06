@@ -773,6 +773,8 @@ class TreeCleaner(object):
 
     def buildDefinitionLists(self, node):
         if node.__class__ in [DefinitionTerm, DefinitionDescription]:
+            if node.getChildNodesByClass(ItemList) or node.getParentNodesByClass(ItemList):
+                return
             prev = node.getPrevious()
             parent = node.getParent()
             if prev.__class__ == DefinitionList: 
@@ -1056,7 +1058,6 @@ class TreeCleaner(object):
 
 
     def fixItemLists(self, node):
-
         if node.__class__ == ItemList:
             for child in node.children:
                 if child.__class__ != Item:
