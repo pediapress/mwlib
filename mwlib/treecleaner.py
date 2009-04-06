@@ -203,6 +203,7 @@ class TreeCleaner(object):
                           'splitBigTableCells',
                           'limitImageCaptionsize', 
                           'removeDuplicateLinksInReferences',
+                          'fixItemLists', 
                           'removeLeadingParaInList',
                           'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                           'removeNewlines', # imported from advtree - clean up newlines that are not needed
@@ -972,10 +973,11 @@ class TreeCleaner(object):
             # remove duplicate image caption
             images = node.getChildNodesByClass(ImageLink)
             for image in images:
+                if not hasattr(image, 'parent'): #image was removed already. see http://es.wikipedia.org/w/index.php?title=Miley_Cyrus&oldid=25320615
+                    continue
                 for sibling in image.siblings:
-                    if image.children == sibling.children and sibling.parent:
+                    if image.children and image.children == sibling.children and sibling.parent:
                         sibling.parent.removeChild(sibling)
-
 
         for c in node.children:
             self.fixInfoBoxes(c)
@@ -1051,3 +1053,17 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeLeadingParaInList(c)
+
+
+    def fixItemLists(self, node):
+
+        if node.__class__ == ItemList:
+            for child in node.children:
+                if child.__class__ != Item:
+                    i = Item()
+                    node.replaceChild(child, [i])
+                    i.appendChild(child)
+                    
+        for c in node.children:
+            self.fixItemLists(c)
+    
