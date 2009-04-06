@@ -81,6 +81,9 @@ include mwlib/sanitychecker.py
 include mwlib/scanner.py
 include mwlib/scripts.txt
 include mwlib/serve.py
+include mwlib/siteinfo/__init__.py
+include mwlib/siteinfo/_registry.py
+include mwlib/siteinfo/siteinfo_en.py
 include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/status.py
@@ -132,6 +135,7 @@ include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
 include sandbox/expr.txt
+include sandbox/fetch-langdata.py
 include sandbox/mw-serve-stresser.py
 include sandbox/time-expr.py
 include sandbox/upload.py
