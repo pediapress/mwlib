@@ -654,7 +654,7 @@ class combined_parser(object):
                 p(tokens, xopts)
                 
 
-def mark_style_tags(tokens):
+def mark_style_tags(tokens, xopts):
     tags = set("tt strike ins del small sup sub b strong cite i u em big font".split())
 
     todo = [(0, dict(), tokens)]
@@ -708,6 +708,8 @@ def mark_style_tags(tokens):
             else:
                 i+=1
         create()
+mark_style_tags.need_walker = False
+
 
 parse_h_tags = combined_parser(
     [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
@@ -852,7 +854,9 @@ def parse_txt(txt, xopts=None, **kwargs):
         xopts.uniquifier = uniquifier
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
     
-    parsers = [parse_singlequote, parse_urls,
+    parsers = [mark_style_tags,
+               parse_singlequote,
+               parse_urls,
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
@@ -866,5 +870,4 @@ def parse_txt(txt, xopts=None, **kwargs):
                parse_div, parse_tables, parse_uniq]
 
     combined_parser(parsers)(tokens, xopts)
-    mark_style_tags(tokens)
     return tokens
