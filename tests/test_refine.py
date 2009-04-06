@@ -202,3 +202,13 @@ def test_no_combine_dd_dt():
         
     yield doit, ":first\n:second\n"
     yield doit, ";first\n;second\n"
+
+def test_combine_preformatted():
+    """http://code.pediapress.com/wiki/ticket/569"""
+    s = " preformatted\n and more preformatted\n"
+    r=parse_txt(s)
+    core.show(r)
+    pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
+    assert len(pre)==1, "expected exactly one preformatted node"
+    
+    

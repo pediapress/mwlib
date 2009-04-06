@@ -306,8 +306,6 @@ class parse_preformatted(object):
         self.run()
 
     def run(self):
-        #spec = object()
-        
         tokens = self.tokens
         i = 0
         start = None
@@ -318,18 +316,20 @@ class parse_preformatted(object):
                 start = i
                 i+=1
             elif t.type==T.t_newline and start is not None:
-                tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
-                i = start+1
+                sub = tokens[start+1:i+1]
+                if start>0 and tokens[start-1].type==T.t_complex_preformatted:
+                    del tokens[start:i+1]
+                    tokens[start-1].children.extend(sub)
+                    i = start
+                else:    
+                    tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=sub, blocknode=True)]
+                    i = start+1
                 start = None
             elif t.blocknode or (t.type==T.t_complex_tag and t.tagname in ("blockquote", "table", "timeline", "div")):
                 start = None
                 i+=1
             else:
                 i+=1
-
-        # if start is not None:
-        #     tokens[start:i+1] = [T(type=T.t_complex_preformatted, children=tokens[start+1:i+1], blocknode=True)]
-       
                 
             
 class parse_lines(object):
