@@ -1,4 +1,8 @@
-siteinfo = {u'general': {u'base': u'http://en.wikipedia.org/wiki/Main_Page',
+
+# automatically genereted by sandbox/fetch-langdata.py
+
+siteinfo = \
+{u'general': {u'base': u'http://en.wikipedia.org/wiki/Main_Page',
               u'case': u'first-letter',
               u'fallback8bitEncoding': u'windows-1252',
               u'generator': u'MediaWiki 1.15alpha',
@@ -2293,3 +2297,7 @@ siteinfo = {u'general': {u'base': u'http://en.wikipedia.org/wiki/Main_Page',
                         u'canonical': u'MediaWiki talk',
                         u'id': 9,
                         u'subpages': u''}}}
+
+
+from mwlib.siteinfo._registry import register
+register('en', siteinfo)

@@ -17,9 +17,17 @@ def main():
             
             langdata[l] = res["query"]
             f=open("siteinfo_%s.py" % l, "wb")
-            f.write("siteinfo = ")
-            pprint.pprint(res["query"], f)
+            f.write("""
+# automatically genereted by sandbox/fetch-langdata.py
 
+siteinfo = \\
+""")
+            pprint.pprint(res["query"], f)
+            f.write("""
+
+from mwlib.siteinfo._registry import register
+register(%r, siteinfo)
+""" % l)
 if __name__=="__main__":
     main()
     
