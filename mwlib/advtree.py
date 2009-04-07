@@ -60,16 +60,17 @@ class AdvancedNode:
     build derived convinience functions
    """
 
-    _parentref = None # weak referece to parent element
+    parent = None # parent element
     isblocknode = False
 
     def copy(self):
         "return a copy of this node and all its children"
-        n = copy.copy(self)
-        n.children = []
-        n._parentref = None
-        for c in self:
-            n.appendChild(c.copy())
+        p = self.parent
+        try:
+            self.parent = None
+            n = copy.copy(self)
+        finally:
+            self.parent = p
         return n
 
 
@@ -86,7 +87,7 @@ class AdvancedNode:
         if not prefix:
             idx+=1
         tp.children.insert(idx, self)
-        self._parentref = weakref.ref(tp)
+        self.parent = tp
 
     def hasChild(self, c):
         """Check if node c is child of self"""
@@ -99,7 +100,7 @@ class AdvancedNode:
         
     def appendChild(self, c):
         self.children.append(c)
-        c._parentref = weakref.ref(self)
+        c.parent = self
 
     def removeChild(self, c):
         self.replaceChild(c, [])
@@ -110,11 +111,11 @@ class AdvancedNode:
 
         idx = _idIndex(self.children, c)
         self.children[idx:idx+1] = newchildren
-        
-        c._parentref = None
+
+        c.parent = None
         assert not self.hasChild(c)
         for nc in newchildren:
-            nc._parentref = weakref.ref(self)
+            nc.parent = self
 
     def getParents(self):
         """Return list of parent nodes up to the root node.
@@ -131,13 +132,8 @@ class AdvancedNode:
         return parents
 
     def getParent(self):
-        """Return the parent node or raise weakref.ReferenceError"""
-        if not self._parentref:
-            return None
-        x = self._parentref()
-        if not x:
-            raise weakref.ReferenceError
-        return x
+        """Return the parent node"""
+        return self.parent
 
     def getLevel(self):
         """Returns the number of nodes of same class in parents"""
@@ -328,7 +324,6 @@ class AdvancedNode:
     attributes = property(getAttributes)
     visible = property(isVisible)
     
-    parent = property(getParent)
     parents = property(getParents)
     next = property(getNext)
     previous = property(getPrevious)
@@ -574,7 +569,7 @@ def mixIn(pyClass, mixInClass, makeFirst=False):
 def extendClasses(node):
     for c in node.children[:]:
         extendClasses(c)
-        c._parentref = weakref.ref(node)            
+        c.parent = node
 
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
