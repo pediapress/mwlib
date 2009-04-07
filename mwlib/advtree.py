@@ -20,7 +20,7 @@ http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 """
 import re
 import weakref
-
+import time
 from mwlib.parser import Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
 from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
@@ -691,13 +691,13 @@ def buildAdvancedTree(root): # USE WITH CARE
     do not use this funcs without knowing whether these 
     Node modifications fit your problem
     """
-#    _validateParserTree(root)
-    extendClasses(root) 
-    fixTagNodes(root)
-    removeNodes(root)
-    removeNewlines(root)
-    fixStyleNodes(root) 
-#    _validateParents(root)       
+    funs = [extendClasses, fixTagNodes, removeNodes, removeNewlines,
+            fixStyleNodes,]
+    for f in funs:
+        stime=time.time()
+        f(root)
+        #print f, time.time()-stime
+        
 
 
 def _validateParserTree(node, parent=None):
