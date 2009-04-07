@@ -121,11 +121,14 @@ class AdvancedNode:
 
         The returned list starts with the root node.
         """
-        
-        if self.parent:
-            return self.parent.getParents() + [self.parent]
-        else:
-            return []
+
+        parents = []
+        n = self.parent
+        while n:
+            parents.append(n)
+            n = n.parent
+        parents.reverse()
+        return parents
 
     def getParent(self):
         """Return the parent node or raise weakref.ReferenceError"""
