@@ -663,20 +663,25 @@ def removeNewlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
-    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted) and not node.getParentNodesByClass(Source) and node.caption:
-        if node.caption.strip() == u"":
-            prev = node.previous or node.parent # previous sibling node or parentnode 
-            next = node.next or node.parent.next
-            if not next or next.isblocknode or not prev or prev.isblocknode: 
-                assert not node.children
-                np = node.parent
-                node.parent.removeChild(node)    
-                assert node.parent is None
-                assert not np.hasChild(node)
-        node.caption = node.caption.replace("\n", " ")
-      
-    for c in node.children[:]:
-        removeNewlines(c)            
+    if node.__class__ in (PreFormatted, Source):
+        return
+    
+    todo = [node]
+    while todo:
+        node = todo.pop()
+        if node.__class__ is Text and node.caption:
+            if not node.caption.strip():
+                prev = node.previous or node.parent # previous sibling node or parentnode 
+                next = node.next or node.parent.next
+                if not next or next.isblocknode or not prev or prev.isblocknode: 
+                    np = node.parent
+                    node.parent.removeChild(node)    
+            node.caption = node.caption.replace("\n", " ")
+
+        for c in node.children:
+            if c.__class__ in (PreFormatted, Source):
+                continue
+            todo.append(c)
 
 
 def buildAdvancedTree(root): # USE WITH CARE
