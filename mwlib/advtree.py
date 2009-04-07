@@ -19,7 +19,6 @@ http://meta.wikimedia.org/wiki/Help:Advanced_editing
 http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 """
 import re
-import weakref
 import time
 from mwlib.parser import Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
@@ -68,7 +67,7 @@ class AdvancedNode:
         p = self.parent
         try:
             self.parent = None
-            n = copy.copy(self)
+            n = copy.deepcopy(self)
         finally:
             self.parent = p
         return n
