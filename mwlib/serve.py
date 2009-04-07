@@ -568,7 +568,10 @@ def purge_cache(max_age, cache_dir):
     
     now = time.time()
     for path in get_collection_dirs(cache_dir):
-        if now - os.stat(path).st_atime < max_age:
+        for fn in os.listdir(path):
+            if now - os.stat(os.path.join(path, fn)).st_atime > max_age:
+                break
+        else:
             continue
         try:
             log.info('removing directory %r' % path)
