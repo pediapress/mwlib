@@ -7,7 +7,8 @@ log = Log('wikidbbase')
 
 
 def normalize_title(title):
-    assert title, 'empty title'
+    if not title:
+        return title
     if not isinstance(title, unicode):
         title = unicode(title, 'utf-8')
     title = title.replace('_', ' ')
