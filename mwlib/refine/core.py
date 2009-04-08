@@ -813,7 +813,6 @@ class parse_uniq(object):
             if res and res[0].type==T.t_complex_link and res[0].ns==6:
                 t.imagemap.imagelink = res[0]
 
-            show(res)
         return t
 
     def create_nowiki(self, name, vlist, inner, xopts):

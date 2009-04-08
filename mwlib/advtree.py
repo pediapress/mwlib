@@ -19,8 +19,7 @@ http://meta.wikimedia.org/wiki/Help:Advanced_editing
 http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 """
 import re
-import weakref
-
+import time
 from mwlib.parser import Math,  _VListNode, Ref, Link, URL, NamedURL # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink # not used but imported
 from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
@@ -60,16 +59,17 @@ class AdvancedNode:
     build derived convinience functions
    """
 
-    _parentref = None # weak referece to parent element
+    parent = None # parent element
     isblocknode = False
 
     def copy(self):
         "return a copy of this node and all its children"
-        n = copy.copy(self)
-        n.children = []
-        n._parentref = None
-        for c in self:
-            n.appendChild(c.copy())
+        p = self.parent
+        try:
+            self.parent = None
+            n = copy.deepcopy(self)
+        finally:
+            self.parent = p
         return n
 
 
@@ -86,7 +86,7 @@ class AdvancedNode:
         if not prefix:
             idx+=1
         tp.children.insert(idx, self)
-        self._parentref = weakref.ref(tp)
+        self.parent = tp
 
     def hasChild(self, c):
         """Check if node c is child of self"""
@@ -99,7 +99,7 @@ class AdvancedNode:
         
     def appendChild(self, c):
         self.children.append(c)
-        c._parentref = weakref.ref(self)
+        c.parent = self
 
     def removeChild(self, c):
         self.replaceChild(c, [])
@@ -110,31 +110,29 @@ class AdvancedNode:
 
         idx = _idIndex(self.children, c)
         self.children[idx:idx+1] = newchildren
-        
-        c._parentref = None
+
+        c.parent = None
         assert not self.hasChild(c)
         for nc in newchildren:
-            nc._parentref = weakref.ref(self)
+            nc.parent = self
 
     def getParents(self):
         """Return list of parent nodes up to the root node.
 
         The returned list starts with the root node.
         """
-        
-        if self.parent:
-            return self.parent.getParents() + [self.parent]
-        else:
-            return []
+
+        parents = []
+        n = self.parent
+        while n:
+            parents.append(n)
+            n = n.parent
+        parents.reverse()
+        return parents
 
     def getParent(self):
-        """Return the parent node or raise weakref.ReferenceError"""
-        if not self._parentref:
-            return None
-        x = self._parentref()
-        if not x:
-            raise weakref.ReferenceError
-        return x
+        """Return the parent node"""
+        return self.parent
 
     def getLevel(self):
         """Returns the number of nodes of same class in parents"""
@@ -325,7 +323,6 @@ class AdvancedNode:
     attributes = property(getAttributes)
     visible = property(isVisible)
     
-    parent = property(getParent)
     parents = property(getParents)
     next = property(getNext)
     previous = property(getPrevious)
@@ -571,7 +568,7 @@ def mixIn(pyClass, mixInClass, makeFirst=False):
 def extendClasses(node):
     for c in node.children[:]:
         extendClasses(c)
-        c._parentref = weakref.ref(node)            
+        c.parent = node
 
 # Nodes we defined above and that are separetly handled in extendClasses
 _advancedNodesMap = {Section: AdvancedSection, ImageLink:AdvancedImageLink, 
@@ -666,20 +663,25 @@ def removeNewlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
-    if node.__class__ == Text and not node.getParentNodesByClass(PreFormatted) and not node.getParentNodesByClass(Source) and node.caption:
-        if node.caption.strip() == u"":
-            prev = node.previous or node.parent # previous sibling node or parentnode 
-            next = node.next or node.parent.next
-            if not next or next.isblocknode or not prev or prev.isblocknode: 
-                assert not node.children
-                np = node.parent
-                node.parent.removeChild(node)    
-                assert node.parent is None
-                assert not np.hasChild(node)
-        node.caption = node.caption.replace("\n", " ")
-      
-    for c in node.children[:]:
-        removeNewlines(c)            
+    if node.__class__ in (PreFormatted, Source):
+        return
+    
+    todo = [node]
+    while todo:
+        node = todo.pop()
+        if node.__class__ is Text and node.caption:
+            if not node.caption.strip():
+                prev = node.previous or node.parent # previous sibling node or parentnode 
+                next = node.next or node.parent.next
+                if not next or next.isblocknode or not prev or prev.isblocknode: 
+                    np = node.parent
+                    node.parent.removeChild(node)    
+            node.caption = node.caption.replace("\n", " ")
+
+        for c in node.children:
+            if c.__class__ in (PreFormatted, Source):
+                continue
+            todo.append(c)
 
 
 def buildAdvancedTree(root): # USE WITH CARE
@@ -688,13 +690,13 @@ def buildAdvancedTree(root): # USE WITH CARE
     do not use this funcs without knowing whether these 
     Node modifications fit your problem
     """
-#    _validateParserTree(root)
-    extendClasses(root) 
-    fixTagNodes(root)
-    removeNodes(root)
-    removeNewlines(root)
-    fixStyleNodes(root) 
-#    _validateParents(root)       
+    funs = [extendClasses, fixTagNodes, removeNodes, removeNewlines,
+            fixStyleNodes,]
+    for f in funs:
+        stime=time.time()
+        f(root)
+        #print f, time.time()-stime
+        
 
 
 def _validateParserTree(node, parent=None):
