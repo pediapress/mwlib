@@ -56,17 +56,7 @@ def parseString(
     
     return a
 
-
 def simpleparse(raw):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
-    from mwlib import dummydb
-    db = dummydb.DummyDB()
-
     a=compat.parse_txt(raw)
     core.show(a)    
     return a
-    
-        
-#     tokens = scanner.tokenize(raw)
-#     r=parser.Parser(tokens, "unknown").parse()
-#     parser.show(sys.stdout, r, 0)
-#     return r
