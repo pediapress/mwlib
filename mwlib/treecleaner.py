@@ -7,7 +7,6 @@
 import sys
 import copy
 import inspect
-import re
 
 from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, 
@@ -17,7 +16,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            Row, Section, Small, Source, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
                            Underline, URL, Var)
 
-from mwlib.treecleanerhelper import *
+from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib import parser
 
 def show(n):
