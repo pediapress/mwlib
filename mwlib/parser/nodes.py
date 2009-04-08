@@ -13,11 +13,6 @@ class Node(utoken.token):
         self.children = []
         self.caption = caption
 
-    def hasContent(self):
-        for x in self.children:
-            if x.hasContent():
-                return True
-        return False
     
     def append(self, c, merge=False):
         if c is None:
@@ -224,10 +219,6 @@ class Link(Node):
     target = None
     colon = False
     url = None
-    def hasContent(self):
-        if self.target:
-            return True
-        return False
 
     
 
@@ -334,11 +325,6 @@ class Text(Node):
     def __init__(self, txt):
         self.caption = txt
         self.children = []
-
-    def hasContent(self):
-        if self.caption.strip():
-            return True
-        return False
     
 class Control(Text):
     pass
