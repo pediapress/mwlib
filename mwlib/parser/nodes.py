@@ -13,16 +13,6 @@ class Node(utoken.token):
         self.children = []
         self.caption = caption
 
-    
-    def append(self, c, merge=False):
-        if c is None:
-            return
-
-        if merge and type(c)==Text and self.children and type(self.children[-1])==Text:
-            self.children[-1].caption += c.caption
-        else:            
-            self.children.append(c)
-
     def __iter__(self):
         for x in self.children:
             yield x
