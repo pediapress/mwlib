@@ -151,24 +151,16 @@ class NamedURL(Node):
        [http://example.com/]
     """
 
-class _VListNode(Node):
-    def __init__(self, caption=''):
-        Node.__init__(self, caption)
-        self.vlist = {}
-
-    def __repr__(self):
-        return "%s %r %s: %s children" % (self.__class__.__name__, self.caption, self.vlist, len(self.children))
-    
-class Table(_VListNode):
+class Table(Node):
     pass
 
-class Row(_VListNode):
+class Row(Node):
     pass
 
-class Cell(_VListNode):
+class Cell(Node):
     pass
 
-class Caption(_VListNode):
+class Caption(Node):
     pass
 
 class Link(Node):

@@ -20,5 +20,5 @@ def show(out, node, indent=0, verbose=False):
 from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style, 
                                 Book, Chapter, Article, Paragraph, Section,
                                 Timeline, TagNode, PreFormatted, URL, NamedURL,
-                                _VListNode, Table, Row, Cell, Caption, Link, ArticleLink, SpecialLink,
+                                Table, Row, Cell, Caption, Link, ArticleLink, SpecialLink,
                                 NamespaceLink, InterwikiLink, LangLink, CategoryLink, ImageLink, Text, Control)
