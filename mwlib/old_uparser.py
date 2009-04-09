@@ -3,12 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-"""usable/user parser"""
-
 from mwlib import parser
-from mwlib.log import Log
-
-log = Log('uparser')
 
 def simplify(node, **kwargs):
     "concatenates textnodes in order to reduce the number of objects"
