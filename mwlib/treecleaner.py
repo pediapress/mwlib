@@ -825,7 +825,7 @@ class TreeCleaner(object):
                     self.report('removed style without children', node)
                 return
 
-        for c in node.children:
+        for c in node.children[:]:
             self.removeTextlessStyles(c)
         
 

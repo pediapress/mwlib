@@ -120,6 +120,8 @@ wpwikis = dict(
               mw_license_url='http://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'),
     en = dict(baseurl='http://en.wikipedia.org/w/', mw_license_url=_en_license_url),
     fr = dict(baseurl='http://fr.wikipedia.org/w/', mw_license_url=None),
+    es = dict(baseurl='http://es.wikipedia.org/w/', mw_license_url=None),
+    pt = dict(baseurl='http://pt.wikipedia.org/w/', mw_license_url=None),
     enwb = dict(baseurl='http://en.wikibooks.org/w', mw_license_url=_en_license_url),
     commons = dict(baseurl='http://commons.wikimedia.org/w/', mw_license_url=_en_license_url)
     )

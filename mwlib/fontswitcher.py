@@ -53,16 +53,26 @@ class Scripts(object):
     
 class FontSwitcher(object):
 
-    def __init__(self):
+    def __init__(self, char_blacklist_file=None):
         self.scripts = Scripts()        
         self.default_font = None
         self.code_points2font = []
 
         self.space_like_chars = [i for i in range(33) if not i in [9, 10, 13]] + [127]
         self.ignore_chars = [173] # 173 = softhyphen
-        self.no_switch_chars = self.space_like_chars + self.ignore_chars
+        self.no_switch_chars = self.space_like_chars + self.ignore_chars        
+        self.char_blacklist = self.readCharBlacklist(char_blacklist_file)
 
-
+    def readCharBlacklist(self, char_blacklist_file):
+        if not char_blacklist_file:
+            return {}       
+        char_blacklist = {}        
+        for char in open(char_blacklist_file).readlines():
+            if char:
+                char = int(char.strip())
+                char_blacklist[char]=True
+        return char_blacklist
+        
     def unregisterFont(self, unreg_font_name):
         registered_entries = []
         i = 0
@@ -100,11 +110,14 @@ class FontSwitcher(object):
         last_txt = []
         for c in txt:
             ord_c = ord(c)
-            if ord_c in self.no_switch_chars:
+            blacklisted = self.char_blacklist.get(ord_c, False)
+            if ord_c in self.no_switch_chars or blacklisted:
                 if ord_c in self.ignore_chars:
                     c = ''
                 if ord_c in self.space_like_chars:
-                    c =' '
+                    c = ' '
+                if blacklisted:
+                    c = unichr(9633) # U+25A1 WHITE SQUARE
                 if last_font:
                     font = last_font
                 else:
