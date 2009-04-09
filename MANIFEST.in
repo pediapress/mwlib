@@ -138,6 +138,7 @@ include sandbox/expr.txt
 include sandbox/fetch-langdata.py
 include sandbox/mw-serve-stresser.py
 include sandbox/time-expr.py
+include sandbox/time-parse.py
 include sandbox/upload.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
@@ -165,6 +166,7 @@ include tests/test_parser.py
 include tests/test_recorddb.py
 include tests/test_refine.py
 include tests/test_sanitychecker.py
+include tests/test_serve.py
 include tests/test_styleanalyzer.py
 include tests/test_table.py
 include tests/test_tagext.py
