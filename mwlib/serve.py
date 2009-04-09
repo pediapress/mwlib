@@ -557,7 +557,7 @@ def get_collection_dirs(cache_dir):
                 yield os.path.join(dirpath, d)
 
 def purge_cache(max_age, cache_dir):
-    """Remove all subdirectories of cache_dir whose atime is before now-max_age
+    """Remove all subdirectories of cache_dir whose mtime is before now-max_age
     
     @param max_age: max age of directories in seconds
     @type max_age: int
@@ -569,7 +569,7 @@ def purge_cache(max_age, cache_dir):
     now = time.time()
     for path in get_collection_dirs(cache_dir):
         for fn in os.listdir(path):
-            if now - os.stat(os.path.join(path, fn)).st_atime > max_age:
+            if now - os.stat(os.path.join(path, fn)).st_mtime > max_age:
                 break
         else:
             continue

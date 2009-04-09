@@ -32,7 +32,7 @@ class TestServe(object):
         d1 = self.mkcolldir('c1')
         d2 = self.mkcolldir('c2')
         time.sleep(2)
-        open(os.path.join(d1, 'output.rl'), 'rb').read() # touch atime
+        os.utime(os.path.join(d1, 'output.rl'), None)
         serve.purge_cache(1, self.tmpdir)
         assert os.path.exists(d1)
         assert not os.path.exists(d2)
