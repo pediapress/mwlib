@@ -49,6 +49,13 @@ def show(node, out=None, indent=0, verbose=False):
         for x in children:
             show(x, out=out, indent=indent+1, verbose=verbose)
             
+class _show(object):
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return lambda node, out=None: show(node, out=out)
+        else:
+            return lambda out=None: show(obj, out=out)
+            
 class token(object):
     caption = ''
     vlist = None
@@ -152,9 +159,9 @@ class token(object):
         if self.type==self.t_complex_style:
             r.append(repr(self.caption))
         return u"".join(r)
-
-    def show(self, out=None):
-        show(self, out=out)
+    
+            
+    show = _show()
     
 token2name = token.token2name
 for d in dir(token):
