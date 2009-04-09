@@ -4,8 +4,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import os
-
 from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
 from mwlib.xfail import xfail
@@ -818,6 +816,13 @@ def test_imagemap():
     poly 51 51 100 51 75 100 [[bleh| blubb]]
     </imagemap>
 ''')
+
+def test_bad_imagemap():
+    """http://code.pediapress.com/wiki/ticket/572"""
+    
+    r=parse("""<imagemap>
+foo bar baz
+</imagemap>""")
     
 def test_link_with_quotes():
     """http://code.pediapress.com/wiki/ticket/303"""
