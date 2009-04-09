@@ -826,7 +826,31 @@ class XBunch(object):
 
     def __getattr__(self, name):
         return None
-    
+
+def fixlitags(tokens, xopts):
+    root = T(type=T.t_complex_tag, tagname="div")
+    todo = [(root, tokens)]
+    while todo:
+        parent, tokens = todo.pop()
+        if parent.tagname not in ("ol", "ul"):
+            idx = 0
+            while idx<len(tokens):
+                start = idx
+                while idx<len(tokens) and tokens[idx].tagname=="li":
+                    idx+=1
+
+                if idx>start:
+                    lst = T(type=T.t_complex_tag, tagname="ul", children=tokens[start:idx])
+                    tokens[start:idx+1] = [lst]
+                    idx = start+1
+                else:
+                    idx += 1
+                    
+        for t in tokens:
+            if t.children:
+                todo.append((t, t.children))
+fixlitags.need_walker = False
+
 def parse_txt(txt, xopts=None, **kwargs):
     if xopts is None:
         xopts = XBunch(**kwargs)
@@ -853,7 +877,8 @@ def parse_txt(txt, xopts=None, **kwargs):
         xopts.uniquifier = uniquifier
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
     
-    parsers = [mark_style_tags,
+    parsers = [fixlitags,
+               mark_style_tags,
                parse_singlequote,
                parse_urls,
                parse_preformatted,

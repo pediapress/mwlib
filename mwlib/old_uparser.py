@@ -25,30 +25,6 @@ def simplify(node, **kwargs):
     for i,ii in enumerate(toremove):
         del node.children[ii-i]
 
-def fixlitags(node, **kwargs):
-    Text = parser.Text
-
-    if not isinstance(node, parser.ItemList):
-        idx = 0
-        while idx < len(node.children):
-            if isinstance(node.children[idx], parser.Item):
-                lst = parser.ItemList()
-                lst.children.append(node.children[idx])
-                node.children[idx] = lst
-                idx += 1
-                while idx<len(node.children):
-                    if isinstance(node.children[idx], parser.Item):
-                        lst.children.append(node.children[idx])
-                        del node.children[idx]
-                    elif node.children[idx]==Text("\n"):
-                        del node.children[idx]
-                    else:
-                        break                    
-            else:
-                idx += 1
-
-    for x in node.children:
-        fixlitags(x)
 
 def removeBoilerplate(node, **kwargs):
     i = 0
@@ -82,4 +58,4 @@ def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
     for x in node.children:
         addurls(x, title=title, revision=revision, wikidb=wikidb)
 
-postprocessors = [removeBoilerplate, simplify, fixlitags, addurls]
+postprocessors = [removeBoilerplate, simplify, addurls]
