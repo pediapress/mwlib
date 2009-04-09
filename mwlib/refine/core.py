@@ -9,15 +9,18 @@ from mwlib import namespace, tagext, uniq
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 
-try:
-    from blist import blist
-    import pkg_resources
-    pkg_resources.require("blist>=0.9.15")
-except ImportError:
-    # import warnings
-    # warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
-    blist = list
+# try:
+#     from blist import blist
+#     import pkg_resources
+#     pkg_resources.require("blist>=0.9.15")
+# except ImportError:
+#     # import warnings
+#     # warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
+#     blist = list
 
+blist = list
+
+    
 T.t_complex_table = "complex_table"
 T.t_complex_caption = "complex_caption"
 T.t_complex_table_row = "complex_table_row"
