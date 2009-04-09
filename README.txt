@@ -85,11 +85,11 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
-2009-4-? release 0.10.1
+2009-4-9 release 0.10.1
 -----------------------
 - the parser has been completely rewritten (mwlib.refine)
 - fix bug in recorddb.py: do not overwrite articles
-- removed mwapidb.WikiDB.getTemplatesForAritcle() which was borken and
+- removed mwapidb.WikiDB.getTemplatesForArticle() which was broken and
   wasn't used.
 
 2009-3-5 release 0.9.13
@@ -100,7 +100,6 @@ ChangeLog
 
 2009-03-02 release 0.9.12
 -------------------------
-
 - fix template expansion bug with non self-closing ref tags containing
   equal signs
 
