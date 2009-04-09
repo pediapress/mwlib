@@ -33,12 +33,12 @@ def fixlitags(node, **kwargs):
         while idx < len(node.children):
             if isinstance(node.children[idx], parser.Item):
                 lst = parser.ItemList()
-                lst.append(node.children[idx])
+                lst.children.append(node.children[idx])
                 node.children[idx] = lst
                 idx += 1
                 while idx<len(node.children):
                     if isinstance(node.children[idx], parser.Item):
-                        lst.append(node.children[idx])
+                        lst.children.append(node.children[idx])
                         del node.children[idx]
                     elif node.children[idx]==Text("\n"):
                         del node.children[idx]
