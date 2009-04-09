@@ -65,7 +65,7 @@ class FontSwitcher(object):
 
     def readCharBlacklist(self, char_blacklist_file):
         if not char_blacklist_file:
-            return []        
+            return {}       
         char_blacklist = {}        
         for char in open(char_blacklist_file).readlines():
             if char:
