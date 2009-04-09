@@ -809,8 +809,9 @@ class parse_uniq(object):
         from mwlib import imgmap
         txt = inner
         t = T(type=T.t_complex_tag, tagname="imagemap", vlist=vlist)
-        t.imagemap =imgmap.ImageMapFromString(txt)
+        t.imagemap = imgmap.ImageMapFromString(txt)
         if t.imagemap.image:
+            t.imagemap.imagelink = None
             s = u"[["+t.imagemap.image+u"]]"
             res = parse_txt(s, xopts)
             if res and res[0].type==T.t_complex_link and res[0].ns==6:
