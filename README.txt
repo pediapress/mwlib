@@ -85,8 +85,9 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
-2009-?-? release 0.9.??
+2009-4-? release 0.10.1
 -----------------------
+- the parser has been completely rewritten (mwlib.refine)
 - fix bug in recorddb.py: do not overwrite articles
 - removed mwapidb.WikiDB.getTemplatesForAritcle() which was borken and
   wasn't used.
