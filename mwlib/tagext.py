@@ -158,7 +158,7 @@ class HieroExtension(TagExtension):
     def __call__(self, source, attributes):
         from mwlib import parser
         tn = parser.TagNode("hiero")
-        tn.append(parser.Text(source))
+        tn.children.append(parser.Text(source))
         return tn   
 register(HieroExtension)
 
