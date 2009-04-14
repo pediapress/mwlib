@@ -403,3 +403,13 @@ def test_equal_inside_link():
            
 def test_tag_parametrs():
     expandstr('{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>')
+
+def test_rel2abs():
+    yield expandstr, "{{#rel2abs: ./quok | Help:Foo/bar/baz }}", "Help:Foo/bar/baz/quok"
+    yield expandstr, "{{#rel2abs: ../quok | Help:Foo/bar/baz }}", "Help:Foo/bar/quok"
+    yield expandstr, "{{#rel2abs: ../. | Help:Foo/bar/baz }}", "Help:Foo/bar"
+    
+    yield expandstr, "{{#rel2abs: ../quok/. | Help:Foo/bar/baz }}", "Help:Foo/bar/quok"
+    yield expandstr, "{{#rel2abs: ../../quok | Help:Foo/bar/baz }}", "Help:Foo/quok"
+    yield expandstr, "{{#rel2abs: ../../../quok | Help:Foo/bar/baz }}", "quok"
+    
