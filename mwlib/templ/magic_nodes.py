@@ -40,6 +40,33 @@ class Anchorencode(nodes.Node):
         e = urllib.quote_plus(arg.encode('utf-8'), ':').replace('%', '.').replace('+', '_')
         res.append(e)
 
+def _rel2abs(rel, base):
+    rel=rel.rstrip("/")
+    if rel in (u"", "."):
+        return base
+    if not (rel.startswith("/") or rel.startswith("./") or rel.startswith("../")):
+        base = u""
+
+    import posixpath
+    p = posixpath.normpath("/%s/%s/" % (base, rel)).strip("/")
+    return p
+
+    
+class rel2abs(nodes.Node):
+    def flatten(self, expander, variables, res):
+        arg = []
+        evaluate.flatten(self[0], expander, variables, arg)
+        arg = u"".join(arg).strip()
+
+        arg2 = []
+        if len(self)>1:
+            evaluate.flatten(self[1], expander, variables, arg2)
+        arg2 = u"".join(arg2).strip()
+        if not arg2:
+            arg2 = expander.pagename
+
+        res.append(_rel2abs(arg, arg2))
+        
 class Tag(nodes.Node):
     def flatten(self, expander, variables, res):
         name = []
@@ -88,4 +115,5 @@ registry = {'#time': Time,
             '#tag': Tag,
             'displaytitle': Displaytitle,
             'defaultsort': Defaultsort,
+            '#rel2abs': rel2abs,
             }
