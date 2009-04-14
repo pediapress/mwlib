@@ -412,4 +412,5 @@ def test_rel2abs():
     yield expandstr, "{{#rel2abs: ../quok/. | Help:Foo/bar/baz }}", "Help:Foo/bar/quok"
     yield expandstr, "{{#rel2abs: ../../quok | Help:Foo/bar/baz }}", "Help:Foo/quok"
     yield expandstr, "{{#rel2abs: ../../../quok | Help:Foo/bar/baz }}", "quok"
-    
+    yield expandstr, "{{#rel2abs: abc | foo}}", "abc"
+    yield expandstr, "{{#rel2abs: /abc | foo}}", "foo/abc"
