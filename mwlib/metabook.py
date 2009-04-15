@@ -29,7 +29,7 @@ def make_metabook(title=None, subtitle=None):
         metabook['subtitle'] = subtitle
     return metabook
 
-def make_source(name=None, url=None, language=None):
+def make_source(name=None, url=None, language=None, base_url=None, script_extension=None):
     source = {
         'type': 'source',
         'system': 'MediaWiki',
@@ -40,6 +40,10 @@ def make_source(name=None, url=None, language=None):
         source['url'] = url
     if language:
         source['language'] = language
+    if base_url:
+        source['base_url'] = base_url
+    if script_extension:
+        source['script_extension'] = script_extension
     return source
 
 def make_interwiki(api_entry=None):
