@@ -40,7 +40,7 @@ class QueryWarningError(RuntimeError):
 articleurl_rex = re.compile(r'^(?P<scheme_host_port>https?://[^/]+)(?P<path>.*)$')
 api_helper_cache = {}
 
-def get_api_helper(url):
+def get_api_helper(url, offline=False):
     """Return APIHelper instance for given (e.g. article) URL.
     
     @param url: URL of a MediaWiki article
@@ -72,7 +72,7 @@ def get_api_helper(url):
     for path in ('/w/', '/wiki/', '/'):
         base_url = '%s%s' % (prefix, path)
         api_helper = APIHelper(base_url)
-        if api_helper.is_usable():
+        if offline or api_helper.is_usable():
             api_helper_cache[prefix] = api_helper
             return api_helper
     
@@ -172,7 +172,7 @@ class APIHelper(object):
     """
     long_request = 2
     
-    def __init__(self, base_url, script_extension=None):
+    def __init__(self, base_url, script_extension=None, offline=False):
         """
         @param base_url: base URL of a MediaWiki, i.e. URL path to php scripts,
             e.g. 'http://en.wikipedia.org/w/' for English Wikipedia.
@@ -197,11 +197,27 @@ class APIHelper(object):
         if self.script_extension[0] != '.':
             self.script_extension = '.' + self.script_extension
         self.query_cache = {}
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-        self.opener.addheaders = [('User-agent', 'mwlib')]
+        if not offline:
+            self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+            self.opener.addheaders = [('User-agent', 'mwlib')]
 
     def __repr__(self):
         return "<%s at %s baseurl=%s>" %(self.__class__.__name__, id(self), self.base_url) 
+
+    def getURL(self, title, revision=None):
+        name = urllib.quote_plus(title.replace(" ", "_").encode('utf-8'), safe=':/@')
+        if revision is None:
+            return '%sindex%s?title=%s' % (
+                self.base_url,
+                self.script_extension,
+                name,
+            )
+        else:
+            return '%sindex%s?oldid=%s' % (
+                self.base_url,
+                self.script_extension,
+                revision,
+            )
     
     def is_usable(self):
         result = self.query(meta='siteinfo', ignore_errors=True)
@@ -682,19 +698,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         return self.api_helper.login(username, password, domain=domain)
     
     def getURL(self, title, revision=None):
-        name = urllib.quote_plus(title.replace(" ", "_").encode('utf-8'), safe=':/@')
-        if revision is None:
-            return '%sindex%s?title=%s' % (
-                self.api_helper.base_url,
-                self.api_helper.script_extension,
-                name,
-            )
-        else:
-            return '%sindex%s?oldid=%s' % (
-                self.api_helper.base_url,
-                self.api_helper.script_extension,
-                revision,
-            )
+        return self.api_helper.getURL(title, revision=revision)
     
     def getAuthors(self, title, revision=None, _rvlimit=500):
         """Return names of non-bot, non-anon users for
@@ -934,6 +938,8 @@ class WikiDB(wikidbbase.WikiDBBase):
                 url=g['base'],
                 name='%s (%s)' % (g['sitename'], g['lang']),
                 language=g['lang'],
+                base_url=self.api_helper.base_url,
+                script_extension=self.api_helper.script_extension,
             )
             self.getInterwikiMap(title, revision=revision)
             if self.interwikimap:

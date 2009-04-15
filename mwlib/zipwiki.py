@@ -93,6 +93,16 @@ class Wiki(wikidbbase.WikiDBBase):
         article = self._getArticle(title, revision=revision)
         if article:
             return article['url']
+        if len(self.sources) == 1:
+            from mwlib.mwapidb import APIHelper, get_api_helper
+
+            src = self.sources.values()[0]
+            if 'base_url' in src:
+                api_helper = APIHelper(src['base_url'], script_extension=src.get('script_extension'), offline=True)
+            else:
+                api_helper = get_api_helper(src['url'], offline=True)
+            if api_helper:
+                return api_helper.getURL(title, revision=revision)
         return None
     
     def getAuthors(self, title, revision=None):
