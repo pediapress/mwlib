@@ -77,13 +77,13 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
                 start = stack.pop()
                 tokens[start:i] = create()
                 i=start+1
-            elif t.type==T.t_html_tag and t.tagname==tagname:
+            elif t.type==T.t_html_tag and t.rawtagname==tagname:
                 if t.tag_selfClosing:
                     tokens[i].type = T.t_complex_tag
                 else:
                     stack.append(i)
                 i+=1
-            elif t.type==T.t_html_tag_end and t.tagname==tagname:
+            elif t.type==T.t_html_tag_end and t.rawtagname==tagname:
                 if stack:
                     start = stack.pop()
                     tokens[start:i+1] = create()
@@ -105,7 +105,7 @@ parse_div = get_recursive_tag_parser("div", blocknode=True)
 parse_center = get_recursive_tag_parser("center", blocknode=True)
 
 def _li_break_at(token):
-    if token.type==T.t_html_tag and token.tagname=="li":
+    if token.type==T.t_html_tag and token.rawtagname=="li":
         return True
     return False
 parse_li = get_recursive_tag_parser("li", _li_break_at, blocknode=True)
@@ -122,7 +122,7 @@ def parse_inputbox(tokens, xopts):
     get_recursive_tag_parser("inputbox")(tokens, xopts)
     
     for t in tokens:
-        if t.tagname=='inputbox':
+        if t.rawtagname=='inputbox':
             t.inputbox = T.join_as_text(t.children)
             del t.children[:]
 
@@ -680,7 +680,7 @@ def mark_style_tags(tokens, xopts):
         start = i
         while i<len(tokens):
             t = tokens[i]
-            if t.type==T.t_html_tag and t.tagname in tags:
+            if t.type==T.t_html_tag and t.rawtagname in tags:
                 del tokens[i]
                 if t.tag_selfClosing:
                     continue
@@ -688,14 +688,14 @@ def mark_style_tags(tokens, xopts):
                     start += 1
                     i = start
                 start = i
-                state[t.tagname]=t
-            elif t.type==T.t_html_tag_end and t.tagname in tags:
+                state[t.rawtagname]=t
+            elif t.type==T.t_html_tag_end and t.rawtagname in tags:
                 del tokens[i]
-                if t.tagname in state:
+                if t.rawtagname in state:
                     create()
                     start += 1
                     i = start
-                    del state[t.tagname]
+                    del state[t.rawtagname]
             elif t.children:
                 if create():
                     start += 1

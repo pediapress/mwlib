@@ -11,10 +11,10 @@ class parse_table_cells(object):
         self.run()
         
     def is_table_cell_start(self, token):
-        return token.type==T.t_column or (token.type==T.t_html_tag and token.tagname in ("td", "th"))
+        return token.type==T.t_column or (token.type==T.t_html_tag and token.rawtagname in ("td", "th"))
 
     def is_table_cell_end(self, token):
-        return token.type==T.t_html_tag_end and token.tagname in ("td", "th")
+        return token.type==T.t_html_tag_end and token.rawtagname in ("td", "th")
 
     def find_modifier(self, cell):
         children = cell.children
@@ -56,9 +56,9 @@ class parse_table_cells(object):
                 self.is_header = True
             is_header = self.is_header
             
-            if tokens[start].tagname=="th":
+            if tokens[start].rawtagname=="th":
                 is_header = True
-            elif tokens[start].tagname=="td":
+            elif tokens[start].rawtagname=="td":
                 is_header = False
 
             if is_header:
@@ -108,10 +108,10 @@ class parse_table_rows(object):
         self.run()
         
     def is_table_row_start(self, token):
-        return token.type==T.t_row or (token.type==T.t_html_tag and token.tagname=='tr')
+        return token.type==T.t_row or (token.type==T.t_html_tag and token.rawtagname=='tr')
 
     def is_table_row_end(self, token):
-        return token.type==T.t_html_tag_end and token.tagname=='tr'
+        return token.type==T.t_html_tag_end and token.rawtagname=='tr'
     
     def find_modifier(self, row):
         children = row.children
@@ -124,7 +124,7 @@ class parse_table_rows(object):
                 return
             
     def is_table_cell_start(self, token):
-        return token.type==T.t_column or (token.type==T.t_html_tag and token.tagname in ("td", "th"))
+        return token.type==T.t_column or (token.type==T.t_html_tag and token.rawtagname in ("td", "th"))
     
     def run(self):
         tokens = self.tokens
@@ -137,7 +137,7 @@ class parse_table_rows(object):
         def should_find_modifier():
             if rowbegintoken is None:
                 return False
-            if rowbegintoken.tagname:
+            if rowbegintoken.rawtagname:
                 return False
             return True
 
@@ -199,10 +199,10 @@ class parse_tables(object):
         self.run()
         
     def is_table_start(self, token):
-        return token.type==T.t_begintable or (token.type==T.t_html_tag and token.tagname=="table")
+        return token.type==T.t_begintable or (token.type==T.t_html_tag and token.rawtagname=="table")
 
     def is_table_end(self, token):
-        return token.type==T.t_endtable or (token.type==T.t_html_tag_end and token.tagname=="table")
+        return token.type==T.t_endtable or (token.type==T.t_html_tag_end and token.rawtagname=="table")
 
     def handle_rows(self, sublist):
         parse_table_rows(sublist, self.xopts)

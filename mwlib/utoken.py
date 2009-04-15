@@ -62,6 +62,8 @@ class token(object):
     target = None
     level = None
     children = None
+
+    rawtagname = None 
     tagname = None
     ns = None
     lineprefix = None
@@ -135,6 +137,10 @@ class token(object):
         if self.tagname:
             r.append(" tagname=")
             r.append(repr(self.tagname))
+        if self.rawtagname:
+            r.append(" rawtagname=")
+            r.append(repr(self.rawtagname))
+            
         if self.vlist:
             r.append(" vlist=")
             r.append(repr(self.vlist))
@@ -197,7 +203,7 @@ def _analyze_html_tag(t):
     if name=='br' or name=='references':
         isEndToken = False
 
-    t.tagname = name
+    t.rawtagname = name
     t.tag_selfClosing = selfClosing
     t.tag_isEndToken = isEndToken
     if isEndToken:
@@ -265,7 +271,7 @@ startfeed strike strong sub sup table td th tr tt u ul var
                 _analyze_html_tag(t)
                 isEndToken = t.tag_isEndToken
                 closingOrSelfClosing = isEndToken or t.tag_selfClosing
-                tagname = t.tagname
+                tagname = t.rawtagname
                 
                 if tagname in self.allowed_tags:
                     res.append(t)
