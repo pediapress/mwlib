@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-4-15 release 0.10.2
+------------------------
+- fix for getURL() method in zipwiki
+
 2009-4-9 release 0.10.1
 -----------------------
 - the parser has been completely rewritten (mwlib.refine)
