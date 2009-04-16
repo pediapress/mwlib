@@ -13,7 +13,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import wikidbbase, namespace
+from mwlib import wikidbbase, namespace, metabook
 
 def nget(d, key):
     try:
@@ -36,7 +36,7 @@ class Wiki(wikidbbase.WikiDBBase):
         self.articles = content.get('articles', {})
         self.templates = content.get('templates', {})
         self.sources = content.get('sources', {})
-        self.licenses = content.get('licenses', {})
+        self.licenses = content.get('licenses', None)
     
     def _getArticle(self, title, revision=None):
         try:
@@ -125,6 +125,13 @@ class Wiki(wikidbbase.WikiDBBase):
         return None
 
     def getLicenses(self):
+        if self.licenses is None:
+            # ZIP file of old mwlib version does not contain licenses...
+            try:
+                self.licenses = metabook.get_licenses(self.metabook)
+            except Exception, exc:
+                log.ERROR('Could not fetch licenses: %s' % exc)
+                self.licenses = []
         return self.licenses
     
 
