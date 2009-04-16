@@ -80,6 +80,8 @@ def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
             elif t.type==T.t_html_tag and t.rawtagname==tagname:
                 if t.tag_selfClosing:
                     tokens[i].type = T.t_complex_tag
+                    tokens[i].tagname = tokens[i].rawtagname
+                    tokens[i].rawtagname = None 
                 else:
                     stack.append(i)
                 i+=1
