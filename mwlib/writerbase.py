@@ -24,9 +24,12 @@ def build_book(env, status_callback=None):
         )))
         if num_articles > 0:
             progress_step = 100/num_articles
+    lastChapter = None
     for item in metabook.get_item_list(env.metabook):
         if item['type'] == 'chapter':
-            book.children.append(parser.Chapter(item['title'].strip()))
+            chapter = parser.Chapter(item['title'].strip())
+            book.appendChild(chapter)
+            lastChapter = chapter
         elif item['type'] == 'article':
             if status_callback is not None:
                 status_callback(
@@ -53,7 +56,10 @@ def build_book(env, status_callback=None):
                 else:
                     a.wikiurl = None
                 a.authors = env.wiki.getAuthors(item['title'], revision=item.get('revision'))
-                book.children.append(a)
+                if lastChapter:
+                    lastChapter.appendChild(a)
+                else:
+                    book.appendChild(a)
             else:
                 log.warn('No such article: %r' % item['title'])
 
