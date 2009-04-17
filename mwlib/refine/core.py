@@ -604,7 +604,7 @@ class parse_paragraphs(object):
     need_walker = False
     
     def __init__(self, tokens, xopts):
-        walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table"]), skip_types=set([T.t_complex_section]))
+        walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table", "tr"]), skip_types=set([T.t_complex_section]))
         for t in walker(tokens):
             self.tokens = t
             self.run()
