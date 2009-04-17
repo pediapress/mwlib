@@ -85,6 +85,11 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-4-17 release 0.10.3
+------------------------
+- fix issue with self-closing tags
+- fix issue with "disappearing" table rows
+
 2009-4-15 release 0.10.2
 ------------------------
 - fix for getURL() method in zipwiki
