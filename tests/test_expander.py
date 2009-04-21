@@ -402,7 +402,8 @@ def test_equal_inside_link():
     expandstr("{{t1|[[abc|foo=5]]}}", "[[abc|foo=5]]", wikidb=db)
            
 def test_tag_parametrs():
-    expandstr('{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>')
+    yield expandstr, '{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>'
+    yield expandstr, "{{#tag:div|contents|a}}"
 
 def test_rel2abs():
     yield expandstr, "{{#rel2abs: ./quok | Help:Foo/bar/baz }}", "Help:Foo/bar/baz/quok"
