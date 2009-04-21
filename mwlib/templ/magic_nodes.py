@@ -78,9 +78,10 @@ class Tag(nodes.Node):
             tmp = []
             evaluate.flatten(parm, expander, variables, tmp)
             evaluate._insert_implicit_newlines(tmp)
-            key, value = evaluate.equalsplit(tmp)
-            parameters += ' ' + u'='.join([u''.join(key),
-                                           quoteattr(u''.join(value))])
+            tmp = u"".join(tmp)
+            if "=" in tmp:
+                key, value = tmp.split("=", 1)
+                parameters += " %s=%s" % (key, quoteattr(value))
 
         tmpres = []
         tmpres.append("<%s%s>" % (name, parameters))
