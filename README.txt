@@ -85,6 +85,11 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-4-21 release 0.10.4
+------------------------
+- fix chapter handling
+- fix bad #tag params
+
 2009-4-17 release 0.10.3
 ------------------------
 - fix issue with self-closing tags
