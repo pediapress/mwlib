@@ -185,7 +185,12 @@ def _makewiki(conf,
             script_extension=script_extension,
         )
         return res
-    
+
+    if os.path.exists(os.path.join(conf, "siteinfo.json")):
+        from mwlib import nuwiki
+        nu = nuwiki.nuwiki(conf)
+        res.imagedb = res.wiki = nuwiki.adapt(nu)
+        return res
     
     # yes, I really don't want to type this everytime
     wc = os.path.join(conf, "wikiconf.txt")
