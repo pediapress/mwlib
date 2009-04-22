@@ -18,12 +18,15 @@ class WriterError(RuntimeError):
 def build_book(env, status_callback=None):
     book = parser.Book()
     progress = 0
-    if status_callback is not None:
-        num_articles = float(len(metabook.get_item_list(env.metabook,
-            filter_type='article',
-        )))
-        if num_articles > 0:
-            progress_step = 100/num_articles
+    if status_callback is None:
+        status_callback = lambda **kwargs: None
+        
+    num_articles = float(len(metabook.get_item_list(env.metabook,
+        filter_type='article',
+    )))
+    if num_articles > 0:
+        progress_step = 100/num_articles
+        
     lastChapter = None
     for item in metabook.get_item_list(env.metabook):
         if item['type'] == 'chapter':
@@ -31,13 +34,12 @@ def build_book(env, status_callback=None):
             book.appendChild(chapter)
             lastChapter = chapter
         elif item['type'] == 'article':
-            if status_callback is not None:
-                status_callback(
-                    status='parsing',
-                    progress=progress,
-                    article=item['title'],
-                )
-                progress += progress_step
+            status_callback(
+                status='parsing',
+                progress=progress,
+                article=item['title'],
+            )
+            progress += progress_step
             a = env.wiki.getParsedArticle(
                 title=item['title'],
                 revision=item.get('revision'),
@@ -63,8 +65,7 @@ def build_book(env, status_callback=None):
             else:
                 log.warn('No such article: %r' % item['title'])
 
-    if status_callback is not None:
-        status_callback(status='parsing', progress=progress, article='')
+    status_callback(status='parsing', progress=progress, article='')
     return book
 
 
