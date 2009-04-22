@@ -5,6 +5,7 @@
 import re
 from mwlib.templ import magics, log, DEBUG, parser, mwlocals
 from mwlib.uniq import Uniquifier
+from mwlib import nshandling, siteinfo
 
 class TemplateRecursion(Exception): pass
 
@@ -188,6 +189,15 @@ class Expander(object):
         self.pagename = pagename
         self.db = wikidb
         self.uniquifier = Uniquifier()
+
+        try:
+            si = self.db.get_siteinfo()
+        except Exception, err:
+            print "WARNING: failed to get siteinfo from %r: %r" % (self.db, err)
+            si = siteinfo.get_siteinfo("de")
+            
+        nshandler = nshandling.nshandler(si)
+            
         if self.db and hasattr(self.db, "getSource"):
             source = self.db.getSource(pagename) or {}
             local_values = source.get("locals", u"")
@@ -197,6 +207,9 @@ class Expander(object):
             source = {}
             
         self.resolver = magics.MagicResolver(pagename=pagename)
+        self.resolver.siteinfo = si
+        self.resolver.nshandler = nshandler
+        
         self.resolver.wikidb = wikidb
         self.resolver.local_values = local_values
         self.resolver.source = source

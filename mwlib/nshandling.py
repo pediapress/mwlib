@@ -3,8 +3,8 @@
 # See README.txt for additional licensing information.
 
 """
-namespace handling based on data extracted from the siteinfo.
-replace namespace.py
+namespace handling based on data extracted from the siteinfo as
+returned by api.php
 """
 
 NS_MEDIA          = -2

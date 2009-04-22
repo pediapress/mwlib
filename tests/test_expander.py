@@ -415,3 +415,6 @@ def test_rel2abs():
     yield expandstr, "{{#rel2abs: ../../../quok | Help:Foo/bar/baz }}", "quok"
     yield expandstr, "{{#rel2abs: abc | foo}}", "abc"
     yield expandstr, "{{#rel2abs: /abc | foo}}", "foo/abc"
+
+def test_namespace():
+    expandstr("{{NAMESPACE}}", "Benutzer", pagename="User:Schmir")

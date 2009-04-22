@@ -9,13 +9,12 @@ http://meta.wikimedia.org/wiki/Help:Magic_words
 http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
-import sys
 import re
 import datetime
 import urllib
 import urlparse
 from mwlib.log import Log
-from mwlib import expr, namespace
+from mwlib import expr
 
 iferror_rx = re.compile(r'<(div|span|p|strong)\s([^<>]*\s)*?class="error"[^<>]*>', re.I)
 
@@ -237,9 +236,8 @@ class PageMagic(object):
 
     def NAMESPACE(self, args):
         """Returns the name of the namespace the current page resides in."""
-        ns, partial, full = namespace.splitname(self.pagename)
+        ns, partial, full = self.nshandler.splitname(self.pagename)
         return full[:-len(partial)-1]
-
 
     def NAMESPACEE(self, args):
         """Returns the name of the namespace the current page resides in. (quoted)"""        
