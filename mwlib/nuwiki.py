@@ -14,11 +14,20 @@ class page(object):
         self.rawtext = rawtext
         
 class nuwiki(object):
-    _siteinfo = None
     def __init__(self, path):
         self.path = os.path.expanduser(path)
         self.revisions = {}
         self._read_revisions()
+        
+        self.redirects = self._loadjson("redirects.json", {})
+        self.siteinfo = self._loadjson("siteinfo.json", {})
+        
+        
+    def _loadjson(self, path, default=None):
+        path = self._pathjoin(path)
+        if self._exists(path):
+            return json.load(open(path, "rb"))
+        return default
         
     def _read_revisions(self):
         d=unicode(open(self._pathjoin("revisions-1.txt"), "rb").read(), "utf-8")
@@ -43,23 +52,15 @@ class nuwiki(object):
         return os.path.exists(p)
     
     def get_siteinfo(self):
-        if self._siteinfo is None:
-            p = self._pathjoin("siteinfo.json")
-            if self._exists(p):
-                self._siteinfo = json.load(open(p, "rb"))
-        return self._siteinfo
+        return self.siteinfo
     
     def get_page(self, name, revision=None):
-        try:
-            if revision is not None:
-                return self.revisions[revision]
-            return self.revisions[name]
-        except KeyError:
-            return None
+        if revision is not None:
+            return self.revisions.get(revision)
         
-
-
-        
+        name = self.redirects.get(name, name)
+        return self.revisions.get(name)
+    
 class adapt(object):
     def __init__(self, path_or_instance):
         if isinstance(path_or_instance, basestring):
@@ -70,8 +71,11 @@ class adapt(object):
         self.nsmapper = nshandling.nshandler(self.siteinfo)
         
     def __getattr__(self, name):
-        print "MISSING ATTRBUTE:", name
-        raise AttributeError()
+        try:
+            return getattr(self.nuwiki, name)
+        except AttributeError:
+            print "MISSING ATTRBUTE:", name
+            raise AttributeError()
     
         
     def getTemplate(self, title, followRedirects=True):
@@ -79,7 +83,6 @@ class adapt(object):
         p = self.nuwiki.get_page(fqtitle)
         if p:
             return p.rawtext
-        
             
     def getRawArticle(self, title, revision=None):
         fqtitle = self.nsmapper.get_fqname(title, defaultns=0)
