@@ -15,7 +15,6 @@ include docs/writers.txt
 include docs/zipfile.html
 include docs/zipfile.txt
 include example_conf.txt
-include extract-content.py
 include ez_setup.py
 include mwlib/EasyTimeline.pl
 include mwlib/__init__.py
@@ -62,7 +61,6 @@ include mwlib/odfstyles.py
 include mwlib/odfwriter.py
 include mwlib/old_uparser.py
 include mwlib/options.py
-include mwlib/overlay.py
 include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
 include mwlib/parser/styleanalyzer.py
@@ -85,6 +83,7 @@ include mwlib/serve.py
 include mwlib/siteinfo/__init__.py
 include mwlib/siteinfo/siteinfo-de.json
 include mwlib/siteinfo/siteinfo-en.json
+include mwlib/siteinfo/siteinfo-ja.json
 include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/status.py
