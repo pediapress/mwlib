@@ -5,10 +5,14 @@
 
 import os
 import sys
+import errno
 import pkg_resources
 from mwlib.options import OptionParser
+from mwlib import utils
 
 class Main(object):
+    zip_filename = None
+    
     def parse_options(self):
         parser = OptionParser(config_optional=True)
         parser.add_option("-o", "--output", help="write output to OUTPUT")
@@ -85,21 +89,50 @@ class Main(object):
                     print ' %s=%s:\t%s' % (name, param, info['help'])
                 else:
                     print ' %s:\t%s' % (name, info['help'])
-        
-    def __call__(self):    
-        options, args, parser = self.parse_options()
-        
-        self.options = options
-        
-        import tempfile
-        import errno
-        from mwlib.mwapidb import MWAPIError
-        from mwlib.writerbase import WriterError
-        from mwlib import utils, zipwiki, nuwiki
-        if options.fastzipcreator:
+
+    def get_environment(self):
+        from mwlib.status import Status
+        from mwlib import zipwiki, nuwiki
+        if self.options.fastzipcreator:
             from mwlib import fzipcreator as zipcreator
         else:
             from mwlib import zipcreator
+            
+        env = self.parser.makewiki()        
+        if ((isinstance(env.wiki, zipwiki.Wiki) and isinstance(env.images, zipwiki.ImageDB))
+            or isinstance(env.wiki, nuwiki.nuwiki)):
+            self.status = Status(self.options.status_file, progress_range=(0, 100))
+            return env
+        
+        
+            
+        self.zip_filename = zip_filename = zipcreator.make_zip_file(
+            self.options.keep_zip,
+            env,
+            status=self.status,
+            num_threads=self.options.num_threads,
+            imagesize=self.options.imagesize)
+        
+        if env.images:
+            try:
+                env.images.clear()
+            except OSError, err:
+                if err.errno!=errno.ENOENT:
+                    raise
+        env.wiki = zipwiki.Wiki(zip_filename)
+        env.images = zipwiki.ImageDB(zip_filename)
+        self.status = Status(self.options.status_file, progress_range=(71, 100))
+        return env
+            
+        
+    def __call__(self):    
+        options, args, parser = self.parse_options()
+        self.parser = parser
+        self.options = options
+        
+        import tempfile
+        from mwlib.mwapidb import MWAPIError
+        from mwlib.writerbase import WriterError
         from mwlib.status import Status
 
         use_help = 'Use --help for usage information.'
@@ -146,33 +179,13 @@ class Main(object):
         if options.pid_file:
             open(options.pid_file, 'wb').write('%d\n' % os.getpid())
 
-        status = Status(options.status_file, progress_range=(1, 70))
+        self.status = status = Status(options.status_file, progress_range=(1, 70))
         status(progress=0)
 
         env = None
         try:
             try:
-                env = parser.makewiki()            
-                if not isinstance(env.wiki, zipwiki.Wiki)\
-                    or not isinstance(env.images, zipwiki.ImageDB):
-                    zip_filename = zipcreator.make_zip_file(options.keep_zip, env,
-                        status=status,
-                        num_threads=options.num_threads,
-                        imagesize=options.imagesize,
-                    )
-                    if env.images:
-                        try:
-                            env.images.clear()
-                        except OSError, err:
-                            if err.errno!=errno.ENOENT:
-                                raise
-                    env.wiki = zipwiki.Wiki(zip_filename)
-                    env.images = zipwiki.ImageDB(zip_filename)
-                    status = Status(options.status_file, progress_range=(71, 100))
-                else:
-                    zip_filename = None
-                    status = Status(options.status_file, progress_range=(0, 100))
-
+                env = self.get_environment() 
                 fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
                 os.close(fd)
                 writer(env, output=tmpout, status_callback=status, **writer_options)
@@ -183,15 +196,15 @@ class Main(object):
                 if hasattr(writer, 'file_extension'):
                     kwargs['file_extension'] = writer.file_extension
                 status(status='finished', progress=100, **kwargs)
-                if options.keep_zip is None and zip_filename is not None:
-                    utils.safe_unlink(zip_filename)
+                if options.keep_zip is None and self.zip_filename is not None:
+                    utils.safe_unlink(self.zip_filename)
             except Exception, e:
                 import traceback
                 status(status='error')
                 if options.error_file:
                     fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
                     f = os.fdopen(fd, 'wb')
-                    if isinstance(e, WriterError) or isinstance(e, MWAPIError):
+                    if isinstance(e, (WriterError, MWAPIError)):
                         f.write(str(e))
                     else:
                         f.write('traceback\n')
