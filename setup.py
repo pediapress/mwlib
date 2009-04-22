@@ -88,7 +88,7 @@ def main():
         entry_points = {'console_scripts': ['mw-buildcdb = mwlib.apps:buildcdb',
                                             'mw-zip = mwlib.apps:buildzip',
                                             'mw-post = mwlib.apps:post',
-                                            'mw-render = mwlib.apps:render',
+                                            'mw-render = mwlib.apps.render:main',
                                             'mw-parse = mwlib.apps:parse',
                                             'mw-show = mwlib.apps:show',
                                             'mw-html = mwlib.apps:html',
