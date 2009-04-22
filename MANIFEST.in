@@ -82,8 +82,8 @@ include mwlib/scanner.py
 include mwlib/scripts.txt
 include mwlib/serve.py
 include mwlib/siteinfo/__init__.py
-include mwlib/siteinfo/_registry.py
-include mwlib/siteinfo/siteinfo_en.py
+include mwlib/siteinfo/siteinfo-de.json
+include mwlib/siteinfo/siteinfo-en.json
 include mwlib/snippets.py
 include mwlib/snippets.txt
 include mwlib/status.py
