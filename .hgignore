@@ -22,6 +22,7 @@ mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
 .\#*
 \#*\#
+.ropeproject/*
 
 syntax: re
 ^[a-z]$
