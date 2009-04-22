@@ -21,7 +21,7 @@ class nuwiki(object):
         
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
-        
+        self.nsmapper = nshandling.nshandler(self.siteinfo)        
         
     def _loadjson(self, path, default=None):
         path = self._pathjoin(path)
@@ -61,6 +61,11 @@ class nuwiki(object):
         name = self.redirects.get(name, name)
         return self.revisions.get(name)
     
+    def normalize_and_get_page(self, name, defaultns):
+        fqname = self.nsmapper.get_fqname(name, defaultns=defaultns)
+        return self.get_page(fqname)
+    
+    
 class adapt(object):
     def __init__(self, path_or_instance):
         if isinstance(path_or_instance, basestring):
@@ -68,7 +73,6 @@ class adapt(object):
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
-        self.nsmapper = nshandling.nshandler(self.siteinfo)
         
     def __getattr__(self, name):
         try:
@@ -79,24 +83,22 @@ class adapt(object):
     
         
     def getTemplate(self, title, followRedirects=True):
-        fqtitle = self.nsmapper.get_fqname(title, defaultns=10)
-        p = self.nuwiki.get_page(fqtitle)
+        p = self.nuwiki.normalize_and_get_page(title, defaultns=10)
         if p:
             return p.rawtext
             
     def getRawArticle(self, title, revision=None):
-        fqtitle = self.nsmapper.get_fqname(title, defaultns=0)
-        p = self.nuwiki.get_page(fqtitle)
+        if revision is not None:
+            return self.nuwiki.get_page(None, revision)
+        p = self.nuwiki.normalize_and_get_page(title, defaultns=0)
         if p:
             return p.rawtext
         
-    
     def getURL(self, name, revision):
         fqtitle = self.nsmapper.get_fqname(name)
         base = self.siteinfo["general"]["base"]
         return "%s/%s" % (base.rsplit("/", 1)[0], name)
     
-        
     def getAuthors(self, title, revision=None):
         return None
 
@@ -114,12 +116,10 @@ class adapt(object):
         raw = self.getRawArticle(title, revision=revision)
         if raw is None:
             return None
-        lang = None
-        # source = self.getSource(title, revision=revision)
-        # if source is not None:
-        #     lang = source.get('language')
-        from mwlib import uparser
+        si = self.nuwiki.get_siteinfo()
+        lang = si["general"]["lang"]
         
+        from mwlib import uparser        
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
 
     def getLinkURL(self, link, title, revision=None):
