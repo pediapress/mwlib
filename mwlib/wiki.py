@@ -189,7 +189,7 @@ def _makewiki(conf,
     if os.path.exists(os.path.join(conf, "siteinfo.json")):
         from mwlib import nuwiki
         nu = nuwiki.nuwiki(conf)
-        res.imagedb = res.wiki = nuwiki.adapt(nu)
+        res.images = res.wiki = nuwiki.adapt(nu)
         return res
     
     # yes, I really don't want to type this everytime
