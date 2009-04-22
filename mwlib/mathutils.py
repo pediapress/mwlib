@@ -17,8 +17,13 @@ from mwlib import log
 
 log = log.Log('mwlib.mathutils')
 
-texvc_available = not os.system('texvc > %s' % os.path.devnull)
-blahtexml_available = not os.system('blahtexml > %s' % os.path.devnull)
+def try_system(cmd):
+    n = os.path.devnull
+    cmd += " >%s 2>%s" % (n, n)
+    return os.system(cmd)
+
+texvc_available = not try_system("texvc")
+blahtexml_available = not try_system("blahtexml")
 
 def _renderMathBlahtex(latex, output_path, output_mode):
     if not blahtexml_available:
