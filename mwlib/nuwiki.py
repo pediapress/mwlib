@@ -122,3 +122,6 @@ class adapt(object):
     def getLinkURL(self, link, title, revision=None):
         return "http://" + link.target
         
+    def getLicenses(self):
+        return []
+    
