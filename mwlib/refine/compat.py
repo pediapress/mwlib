@@ -5,7 +5,7 @@
 from mwlib.refine import core
 from mwlib.parser import nodes as N
 from mwlib.utoken import token as T
-from mwlib import namespace
+from mwlib import nshandling
 
 
 tok2class = {
@@ -150,13 +150,13 @@ def _change_classes(node):
             ns = node.ns
             
             if node.colon:
-                ns = namespace.NS_SPECIAL
+                ns = nshandling.NS_SPECIAL
                 
-            if ns==namespace.NS_IMAGE:
+            if ns==nshandling.NS_IMAGE:
                 node.__class__ = N.ImageLink
-            elif ns==namespace.NS_MAIN:
+            elif ns==nshandling.NS_MAIN:
                 node.__class__ = N.ArticleLink
-            elif ns==namespace.NS_CATEGORY:
+            elif ns==nshandling.NS_CATEGORY:
                 node.__class__ = N.CategoryLink
             elif ns is not None:
                 node.__class__ = N.NamespaceLink
@@ -167,8 +167,8 @@ def _change_classes(node):
             elif node.langlink:
                 node.__class__ = N.LangLink
                 node.namespace, node.target = node.target.split(":", 1)
-                
-            ns, partial, full = namespace.splitname(node.target, nsmap=node.nsmap)
+
+            ns, partial, full = node.nshandler.splitname(node.target)
             node.target = partial.replace("_", " ").strip()
             node.full_target = full.replace("_", " ")
             if N.Link.capitalizeTarget:
