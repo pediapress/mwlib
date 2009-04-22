@@ -5,7 +5,8 @@
 
 from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util
-from mwlib import namespace, tagext, uniq
+from mwlib import tagext, uniq, nshandling
+from mwlib.namespace import dummy_interwikimap
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 
@@ -139,7 +140,7 @@ def _parse_gallery_txt(txt, xopts):
 
         if linode:
             n = linode[0]
-            if n.ns==namespace.NS_IMAGE:
+            if n.ns==nshandling.NS_IMAGE:
                 sub.append(n)
                 continue
         sub.append(T(type=T.t_text, text=x))
@@ -480,11 +481,8 @@ class parse_links(object):
         self.lang = lang
         self.interwikimap = interwikimap
         
-        nsmap = namespace.namespace_maps.get(lang)
-        if nsmap is None and lang:
-            nsmap = namespace.namespace_maps.get(lang+"+en_mw")
-
-        self.nsmap = nsmap
+        self.nshandler = nshandling.get_nshandler_for_lang(lang)
+        
             
         if imagemod is None:
             imagemod = util.ImageMod()
@@ -539,8 +537,7 @@ class parse_links(object):
                     colon = False
 
 
-
-                ns, partial, full = namespace.splitname(target, nsmap=self.nsmap)
+                ns, partial, full = self.nshandler.splitname(target)
  
                 if not partial:
                     i+=1
@@ -553,7 +550,7 @@ class parse_links(object):
                     langlink = None
                     interwiki = None
                     
-                    if ns==namespace.NS_MAIN:
+                    if ns==nshandling.NS_MAIN:
                         # could be an interwiki/language link. -> set ns=None
                         
                         if self.interwikimap and ':' in target:
@@ -571,14 +568,14 @@ class parse_links(object):
                                 interwiki = None
                                 ns = None
                                 
-                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nsmap=self.nsmap)
+                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler)
                     if langlink:
                         node.langlink = langlink
                     if interwiki:
                         node.interwiki = interwiki
                         
                     sub = None
-                    if ns==namespace.NS_IMAGE:
+                    if ns==nshandling.NS_IMAGE:
                         sub = self.extract_image_modifiers(marks, node)                        
                     elif len(marks)>2:
                         sub = tokens[marks[1]+1:marks[-1]]
@@ -868,7 +865,7 @@ def parse_txt(txt, xopts=None, **kwargs):
     if interwikimap is None:
         from mwlib.lang import languages
         interwikimap = {}
-        for prefix, renamed in namespace.dummy_interwikimap.items():
+        for prefix, renamed in dummy_interwikimap.items():
             interwikimap[prefix] = {'renamed': renamed}
         for lang in languages:
             interwikimap[lang] = {'language': True}
