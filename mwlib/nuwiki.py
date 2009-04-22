@@ -5,8 +5,7 @@
 import os
 import json
 
-from mwlib import nshandling
-
+from mwlib import nshandling, utils
 
 class page(object):
     def __init__(self, meta, rawtext):
@@ -45,8 +44,8 @@ class nuwiki(object):
             if title not in self.revisions:
                 self.revisions[title] = p
         
-    def _pathjoin(self, p):
-        return os.path.join(self.path, p)
+    def _pathjoin(self, *p):
+        return os.path.join(self.path, *p)
     
     def _exists(self, p):
         return os.path.exists(p)
@@ -64,7 +63,16 @@ class nuwiki(object):
     def normalize_and_get_page(self, name, defaultns):
         fqname = self.nsmapper.get_fqname(name, defaultns=defaultns)
         return self.get_page(fqname)
-    
+
+    def normalize_and_get_image_path(self, name):
+        ns, partial, fqname = self.nsmapper.splitname(name, defaultns=6)
+        if ns != 6:
+            return
+
+        p = self._pathjoin("images", utils.fsescape(fqname))
+        if self._exists(p):
+            return p
+
     
 class adapt(object):
     def __init__(self, path_or_instance):
@@ -127,4 +135,14 @@ class adapt(object):
         
     def getLicenses(self):
         return []
+
+    def clear(self):
+        pass
     
+    def getDiskPath(self, name, size=None):
+        return self.nuwiki.normalize_and_get_image_path(name)
+
+    def getDescriptionURL(self, name): # for an image
+        return "http://"+self.nuwiki.nsmapper.get_fqname(name, 6)
+    
+        
