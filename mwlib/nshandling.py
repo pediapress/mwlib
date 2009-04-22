@@ -12,7 +12,7 @@ class nsmapper(object):
         self.siteinfo = siteinfo
     
     def _find_namespace(self, name, defaultns=0):
-        name = name.lower()
+        name = name.lower().strip()
         namespaces = self.siteinfo["namespaces"].values()
         for ns in namespaces:
             star = ns["*"]
