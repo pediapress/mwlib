@@ -86,7 +86,7 @@ def main():
         version=str(version),
         dependency_links = ["http://labix.org/python-dateutil", "http://code.pediapress.com/dl/"],
         entry_points = {'console_scripts': ['mw-buildcdb = mwlib.apps:buildcdb',
-                                            'mw-zip = mwlib.apps:buildzip',
+                                            'mw-zip = mwlib.apps.buildzip:main',
                                             'mw-post = mwlib.apps:post',
                                             'mw-render = mwlib.apps.render:main',
                                             'mw-parse = mwlib.apps:parse',
