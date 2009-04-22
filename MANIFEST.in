@@ -107,6 +107,7 @@ include mwlib/texmap.py
 include mwlib/timeline.py
 include mwlib/treecleaner.py
 include mwlib/treecleanerhelper.py
+include mwlib/twisted_api.py
 include mwlib/uniq.py
 include mwlib/uparser.py
 include mwlib/utils.py
