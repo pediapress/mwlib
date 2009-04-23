@@ -246,6 +246,11 @@ class fsoutput(object):
         self.seen = set()
         self.imgcount = 0
         
+    def close(self):
+        self.revfile.close()
+        self.revfile = None
+        
+        
     def get_imagepath(self, title):
         p = os.path.join(self.path, "images", "%s" % (fsescape(title),))
         self.imgcount+=1
@@ -513,6 +518,7 @@ class fetcher(object):
     def finish(self):
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
+        self.fsout.close()
         
     def _refcall(self, fun):
         self._incref()
