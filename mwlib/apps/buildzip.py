@@ -98,7 +98,6 @@ def main():
     try:
         try:
             env = parser.makewiki()
-            print "type:", type(env.wiki)
             
             if isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
