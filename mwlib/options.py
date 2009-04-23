@@ -144,18 +144,15 @@ class OptionParser(optparse.OptionParser):
         )
         if self.options.noimages:
             env.images = None
-        if self.options.template_blacklist:
-            template_blacklist = unicode(self.options.template_blacklist, 'utf-8')
-        else:
-            template_blacklist = None
-        if self.options.template_exclusion_category:
-            template_exclusion_category = unicode(self.options.template_exclusion_category, 'utf-8')
-        else:
-            template_exclusion_category = None
-        if self.options.print_template_pattern:
-            print_template_pattern = unicode(self.options.print_template_pattern, 'utf-8')
-        else:
-            print_template_pattern = None
+
+        def unioption(s):
+            if s:
+                return unicode(s, "utf-8")
+
+        template_blacklist = unioption(self.options.template_blacklist)
+        template_exclusion_category = unioption(self.options.template_exclusion_category)
+        print_template_pattern = unioption(self.options.print_template_pattern)
+            
         if self.options.print_template_prefix:
             if print_template_pattern is not None:
                 log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
@@ -180,13 +177,15 @@ class OptionParser(optparse.OptionParser):
                 ))
             self.metabook = metabook.parse_collection_page(wikitext)
             env.metabook = self.metabook
-        
-        if self.options.title:
-            env.metabook['title'] = unicode(self.options.title, 'utf-8')
-        if self.options.subtitle:
-            env.metabook['subtitle'] = unicode(self.options.subtitle, 'utf-8')
-        if self.options.editor:
-            env.metabook['editor'] = unicode(self.options.editor, 'utf-8')
+
+        def setmb(name):
+            n = unicode(getattr(self.options, name) or "", "utf-8")
+            if n:
+                env.metabook[name] = n
+
+        setmb("title")
+        setmb("subtitle")
+        setmb("editor")
         
         # add default licenses
         if self.options.config.startswith(":"):
@@ -194,8 +193,4 @@ class OptionParser(optparse.OptionParser):
             env.metabook.setdefault("licenses", []).append(dict(mw_license_url=mw_license_url,
                                                                 type="license"))
 
-
-
-
         return env
-    
