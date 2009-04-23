@@ -42,6 +42,13 @@ def main():
                 webbrowser.open(podclient.redirecturl)
             finally:
                 os._exit(0)
+        import time
+        time.sleep(1)
+        try:
+            os.kill(pid, 9)
+        except:
+            pass
+              
     else:
         podclient = None
     
