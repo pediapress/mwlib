@@ -553,14 +553,14 @@ def doit(pages):
     
     f=fetcher(api, fs, pages)
     
-    
-      
+def pages_from_metabook(mb):
+    articles = metabook.get_item_list(mb, "article")
+    pages = [(x["title"], x.get("revision")) for x in articles]
+    return pages
     
 def main():
-    
     mb = json.load(open("metabook.json"))
-    articles = metabook.get_item_list(mb, "article")
-    pages = [(x["title"], x["revision"]) for x in articles]
+    pages = pages_from_metabook(mb)
     
     # pages = [("___user___:___schmir  __", None)] #, ("Mainz", None)]
     

@@ -6,6 +6,34 @@
 
 import os
 
+def hack(options=None, env=None, podclient=None, **kwargs):
+    imagesize = options.imagesize
+    metabook = env.metabook
+    base_url = env.wiki.api_helper.base_url
+    script_extension = env.wiki.api_helper.script_extension
+    api_url = "".join([base_url, "api", script_extension])
+    output = options.output
+
+    if output:
+        fsdir = output+".tmp"
+    else:
+        fsdir = tempfile.mkdtemp(prefix="nuwiki-")
+        
+
+    
+    from mwlib import twisted_api
+    from twisted.internet import reactor
+
+    def doit():
+        api = twisted_api.mwapi(api_url)
+        fsout = twisted_api.fsoutput(output)
+        fsout.dump_json(metabook=metabook)
+        pages = twisted_api.pages_from_metabook(metabook)
+        twisted_api.fetcher(api, fsout, pages)
+        
+    reactor.callLater(0.0, doit)    
+    reactor.run()
+    
 def main():    
     from mwlib.options import OptionParser
 
@@ -52,7 +80,7 @@ def main():
     else:
         podclient = None
     
-    from mwlib import utils
+    from mwlib import utils, mwapidb
     
     if options.daemonize:
         utils.daemonize()
@@ -64,28 +92,32 @@ def main():
     try:
         try:
             env = parser.makewiki()
-        
-            from mwlib.status import Status
-            if options.fastzipcreator:
-                import mwlib.fzipcreator as zipcreator
-            else:
-                from mwlib import zipcreator
+            print "type:", type(env.wiki)
+            
+            if isinstance(env.wiki, mwapidb.WikiDB):
+                hack(**locals())
+            else:    
+                from mwlib.status import Status
+                if options.fastzipcreator:
+                    import mwlib.fzipcreator as zipcreator
+                else:
+                    from mwlib import zipcreator
 
-            status = Status(podclient=podclient, progress_range=(1, 90))
-            status(progress=0)
-            
-            filename = zipcreator.make_zip_file(options.output, env,
-                status=status,
-                num_threads=options.num_threads,
-                imagesize=options.imagesize,
-            )
-            
-            status = Status(podclient=podclient, progress_range=(91, 100))
-            if podclient:
-                status(status='uploading', progress=0)
-                podclient.post_zipfile(filename)
-            
-            status(status='finished', progress=100)
+                status = Status(podclient=podclient, progress_range=(1, 90))
+                status(progress=0)
+
+                filename = zipcreator.make_zip_file(options.output, env,
+                    status=status,
+                    num_threads=options.num_threads,
+                    imagesize=options.imagesize,
+                )
+
+                status = Status(podclient=podclient, progress_range=(91, 100))
+                if podclient:
+                    status(status='uploading', progress=0)
+                    podclient.post_zipfile(filename)
+
+                status(status='finished', progress=100)
         except Exception, e:
             if status:
                 status(status='error')
