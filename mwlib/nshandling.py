@@ -28,10 +28,21 @@ NS_HELP_TALK      = 13
 NS_CATEGORY       = 14
 NS_CATEGORY_TALK  = 15
 
+class ilink(object):
+    url = ""
+    prefix = ""
+    local = ""
+    language = ""
+    
+# TODO: build fast lookup table for use in nshandler.splitname
 class nshandler(object):
     def __init__(self, siteinfo):
         self.siteinfo = siteinfo
-    
+
+        p = self.prefix2interwiki = {}
+        for k in siteinfo["interwikimap"]:
+            p[k["prefix"]] = k
+        
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
         namespaces = self.siteinfo["namespaces"].values()
@@ -74,7 +85,26 @@ class nshandler(object):
             prefix += ":"
             
         return (nsnum, suffix, "%s%s" % (prefix,  suffix))
-    
+
+    def resolve_interwiki(self, title):
+        name = title.replace("_", " ").strip()
+        if name.startswith(":"):
+            name = name[1:].strip()
+        if ":" not in name:
+            return None
+        prefix, suffix = name.split(":", 1)
+        prefix = prefix.strip().lower()
+        d = self.prefix2interwiki.get(prefix)
+        if d is None:
+            return None
+        
+        suffix = suffix.strip(" _\n\t\r").replace(" ", "_")
+        retval = ilink()
+        retval.__dict__.update(d)
+        retval.url = retval.url.replace("$1", suffix)
+        retval.partial = suffix
+        return retval
+        
 def get_nshandler_for_lang(lang):
     if lang is None:
         lang = "de" # FIXME: we currently need this to make the tests happy
