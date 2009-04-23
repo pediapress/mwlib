@@ -12,6 +12,7 @@ import urlparse
 import pprint
 from mwlib.utils import fsescape
 from mwlib.nshandling import nshandler 
+from mwlib import metabook
 
 from twisted.python import failure, log
 from twisted.web import client
@@ -556,8 +557,11 @@ def doit(pages):
       
     
 def main():
-    metabook = json.load(open("metabook.json"))
-    pages  = [(x["title"], None)  for x in metabook["items"]]
+    
+    mb = json.load(open("metabook.json"))
+    articles = metabook.get_item_list(mb, "article")
+    pages = [(x["title"], x["revision"]) for x in articles]
+    
     # pages = [("___user___:___schmir  __", None)] #, ("Mainz", None)]
     
     # log.startLogging(sys.stdout)
