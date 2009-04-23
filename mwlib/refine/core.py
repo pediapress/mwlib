@@ -162,6 +162,9 @@ class parse_sections(object):
         current = bunch(start=None, end=None, endtitle=None)
 
         def create():
+            if current.start is None or current.endtitle is None:
+                return False
+            
             l1 = tokens[current.start].text.count("=")
             l2 = tokens[current.endtitle].text.count("=")
             level = min (l1, l2)
@@ -187,12 +190,14 @@ class parse_sections(object):
                 current.start -= 1
 
             sections.append(sect)
-            
+            return True
+
+
+        
         while i<len(self.tokens):
             t = tokens[i]
             if t.type==T.t_section:
-                if current.endtitle is not None:
-                    create()                    
+                if create():
                     i = current.start+1
                     current = bunch(start=None, end=None, endtitle=None)
                 else:
@@ -204,8 +209,7 @@ class parse_sections(object):
             else:
                 i+=1
 
-        if current.endtitle is not None:
-            create()
+        create()
 
 class parse_urls(object):
     def __init__(self, tokens, xopts):
