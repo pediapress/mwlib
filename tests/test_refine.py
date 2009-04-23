@@ -210,5 +210,13 @@ def test_combine_preformatted():
     core.show(r)
     pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
     assert len(pre)==1, "expected exactly one preformatted node"
-    
+
+def test_bad_section():
+    """http://code.pediapress.com/wiki/ticket/588"""
+    s = """<div>
+div ends here
+== this is </div> a section title ==
+some text
+"""
+    r=parse_txt(s)
     
