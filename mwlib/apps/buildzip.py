@@ -1,3 +1,4 @@
+
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
@@ -35,7 +36,12 @@ def main():
         import webbrowser
         from mwlib.podclient import podclient_from_serviceurl
         podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
-        webbrowser.open(podclient.redirecturl)
+        pid = os.fork()
+        if not pid:
+            try:
+                webbrowser.open(podclient.redirecturl)
+            finally:
+                os._exit(0)
     else:
         podclient = None
     
