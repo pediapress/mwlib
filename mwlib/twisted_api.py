@@ -400,6 +400,8 @@ class fetcher(object):
         self.edits.extend(edits)
         
     def _got_pages(self, data):
+        r = data.get("redirects", [])
+        self._update_redirects(r)        
         self.fsout.write_pages(data)
         return data
 
