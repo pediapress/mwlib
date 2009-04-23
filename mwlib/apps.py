@@ -107,7 +107,12 @@ def buildzip():
         import webbrowser
         from mwlib.podclient import podclient_from_serviceurl
         podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
-        webbrowser.open(podclient.redirecturl)
+        pid = os.fork()
+        if not pid:
+            try:
+                webbrowser.open(podclient.redirecturl) # blocks on linux???
+            finally:
+                os._exit(0)                
     else:
         podclient = None
     
