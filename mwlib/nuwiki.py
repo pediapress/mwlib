@@ -97,8 +97,10 @@ class adapt(object):
             
     def getRawArticle(self, title, revision=None):
         if revision is not None:
-            return self.nuwiki.get_page(None, revision)
-        p = self.nuwiki.normalize_and_get_page(title, defaultns=0)
+            p = self.nuwiki.get_page(None, revision)
+        else:
+            p = self.nuwiki.normalize_and_get_page(title, defaultns=0)
+            
         if p:
             return p.rawtext
         
