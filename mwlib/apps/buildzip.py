@@ -5,6 +5,8 @@
 """mz-zip - installed via setuptools' entry_points"""
 
 import os
+import tempfile
+import shutil
 
 def hack(options=None, env=None, podclient=None, **kwargs):
     imagesize = options.imagesize
@@ -18,15 +20,19 @@ def hack(options=None, env=None, podclient=None, **kwargs):
         fsdir = output+".tmp"
     else:
         fsdir = tempfile.mkdtemp(prefix="nuwiki-")
+
+    if os.path.exists(fsdir):
+        shutil.rmtree(fsdir)
         
 
     
     from mwlib import twisted_api
     from twisted.internet import reactor
 
+    fsout = twisted_api.fsoutput(fsdir)
+
     def doit():
         api = twisted_api.mwapi(api_url)
-        fsout = twisted_api.fsoutput(output)
         fsout.dump_json(metabook=metabook)
         pages = twisted_api.pages_from_metabook(metabook)
         twisted_api.fetcher(api, fsout, pages)
