@@ -7,8 +7,41 @@
 import os
 import tempfile
 import shutil
+import zipfile
 
-def hack(options=None, env=None, podclient=None, **kwargs):
+def _walk(root):
+    retval = []
+    for dirpath, dirnames, files in os.walk(root):
+        retval.extend([os.path.normpath(os.path.join(dirpath, x))+"/" for x in dirnames])
+        retval.extend([os.path.normpath(os.path.join(dirpath, x)) for x in files])
+    retval = [x.replace("\\", "/") for x in retval]
+    retval.sort()
+    return retval
+
+                     
+def zipdir(dirname, output=None):
+    """recursively zip directory and write output to zipfile.
+    @param dirname: directory to zip
+    @param output: name of zip file that get's written
+    """
+    if not output:
+        output = dirname+".zip"
+
+    output = os.path.abspath(output)
+    cwd = os.getcwd()
+    try:
+        os.chdir(dirname)
+        files = _walk(".")
+        zf = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
+        for i in files:
+            if i.endswith("/"):
+                zf.writestr(zipfile.ZipInfo(i), "")
+            else:
+                zf.write(i)
+        zf.close()
+    finally:
+        os.chdir(cwd)
+def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     imagesize = options.imagesize
     metabook = env.metabook
     base_url = env.wiki.api_helper.base_url
@@ -39,7 +72,19 @@ def hack(options=None, env=None, podclient=None, **kwargs):
         
     reactor.callLater(0.0, doit)    
     reactor.run()
+    print "done"
     
+    if output:
+        filename = output
+    else:
+        filename = tempfile.mktemp()
+        
+    zipdir(fsdir, filename)
+    
+    if podclient:                
+        status(status='uploading', progress=0)
+        podclient.post_zipfile(filename)
+
 def main():    
     from mwlib.options import OptionParser
 
@@ -98,18 +143,18 @@ def main():
     try:
         try:
             env = parser.makewiki()
+            from mwlib.status import Status
+            status = Status(podclient=podclient, progress_range=(1, 90))
+            status(progress=0)
             
             if isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
             else:    
-                from mwlib.status import Status
                 if options.fastzipcreator:
                     import mwlib.fzipcreator as zipcreator
                 else:
                     from mwlib import zipcreator
 
-                status = Status(podclient=podclient, progress_range=(1, 90))
-                status(progress=0)
 
                 filename = zipcreator.make_zip_file(options.output, env,
                     status=status,
