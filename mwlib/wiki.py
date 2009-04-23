@@ -188,8 +188,7 @@ def _makewiki(conf,
 
     if os.path.exists(os.path.join(conf, "siteinfo.json")):
         from mwlib import nuwiki
-        nu = nuwiki.nuwiki(conf)
-        res.images = res.wiki = nuwiki.adapt(nu)
+        res.images = res.wiki = nuwiki.adapt(conf)
         return res
     
     # yes, I really don't want to type this everytime
@@ -200,6 +199,7 @@ def _makewiki(conf,
     if conf.lower().endswith(".zip"):
         import zipfile
         import json
+        conf = os.path.abspath(conf)
         
         zf = zipfile.ZipFile(conf)
         try:
@@ -208,15 +208,21 @@ def _makewiki(conf,
             format = "zipwiki"
             
         if format=="nuwiki":
-            raise NotImplementedError("not implemented")
-        else:        
+            from mwlib import nuwiki
+            res.images = res.wiki = nuwiki.adapt(zf)
+            if metabook is None:
+                res.metabook = res.wiki.metabook
+            return res
+        elif format=="zipwiki":
             from mwlib import zipwiki
             res.wiki = zipwiki.Wiki(conf)
             res.images = zipwiki.ImageDB(conf)
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res
-
+        else:
+            raise RuntimeError("unknown format %r" % (format,))
+        
     
 
     cp = res.configparser

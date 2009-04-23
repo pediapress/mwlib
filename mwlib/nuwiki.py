@@ -4,6 +4,8 @@
 
 import os
 import json
+import zipfile
+import tempfile
 
 from mwlib import nshandling, utils
 
@@ -76,11 +78,23 @@ class nuwiki(object):
     
 class adapt(object):
     def __init__(self, path_or_instance):
+        if isinstance(path_or_instance, zipfile.ZipFile):
+            zf = path_or_instance
+            tmpdir = tempfile.mkdtemp()
+            # os.mkdir(os.path.join(tmpdir, "images"))
+            zf.extractall(tmpdir)
+            path_or_instance = tmpdir
+            
+                
         if isinstance(path_or_instance, basestring):
             self.nuwiki = nuwiki(path_or_instance)
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
+
+        self.metabook = self.nuwiki._loadjson("metabook.json", None)
+        
+        
         
     def __getattr__(self, name):
         try:

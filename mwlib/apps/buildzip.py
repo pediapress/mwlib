@@ -12,7 +12,7 @@ import zipfile
 def _walk(root):
     retval = []
     for dirpath, dirnames, files in os.walk(root):
-        retval.extend([os.path.normpath(os.path.join(dirpath, x))+"/" for x in dirnames])
+        # retval.extend([os.path.normpath(os.path.join(dirpath, x))+"/" for x in dirnames])
         retval.extend([os.path.normpath(os.path.join(dirpath, x)) for x in files])
     retval = [x.replace("\\", "/") for x in retval]
     retval.sort()
