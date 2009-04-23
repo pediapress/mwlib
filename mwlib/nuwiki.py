@@ -75,8 +75,13 @@ class nuwiki(object):
         if self._exists(p):
             return p
 
+    def get_data(self, name):
+        return self._loadjson(name+".json")
+    
     
 class adapt(object):
+    edits = None
+    
     def __init__(self, path_or_instance):
         if isinstance(path_or_instance, zipfile.ZipFile):
             zf = path_or_instance
@@ -92,9 +97,7 @@ class adapt(object):
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
 
-        self.metabook = self.nuwiki._loadjson("metabook.json", None)
-        
-        
+        self.metabook = self.nuwiki.get_data("metabook")
         
     def __getattr__(self, name):
         try:
@@ -124,8 +127,19 @@ class adapt(object):
         return "%s/%s" % (base.rsplit("/", 1)[0], name)
     
     def getAuthors(self, title, revision=None):
-        return None
-
+        if self.edits is None:
+            edits = self.edits = {}
+            for edit in self.nuwiki.get_data("edits") or []:
+                title = edit.get("title")
+                revisions = edit.get("revisions")
+                edits[title] = revisions
+        
+        fqname = self.nsmapper.get_fqname(title)
+        revisions = self.edits.get(fqname, [])
+        authors = list(set([r["user"] for r in revisions]))  # FIXME: use a real implemtation
+        authors.sort()
+        return authors
+    
     def getSource(self, title, revision=None):
         res = {}
         res["script_extension"] = ".php"
