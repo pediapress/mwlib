@@ -394,6 +394,7 @@ class fetcher(object):
             
             sys.stdout.write("%s/%s/%s jobs -- %s/%s running" % (self.count_done, self.count_total, jt, self.api.num_running, self.api.max_connections))
             sys.stdout.write("\r")
+            sys.stdout.flush()
             
     def _got_edits(self, data):
         edits = data.get("pages").values()
