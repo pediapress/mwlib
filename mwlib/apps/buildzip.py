@@ -67,6 +67,8 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     def doit():
         api = twisted_api.mwapi(api_url)
         fsout.dump_json(metabook=metabook)
+        fsout.dump_json(nfo=dict(format="nuwiki"))
+        
         pages = twisted_api.pages_from_metabook(metabook)
         twisted_api.fetcher(api, fsout, pages)
         

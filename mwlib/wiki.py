@@ -198,12 +198,24 @@ def _makewiki(conf,
         conf = wc 
         
     if conf.lower().endswith(".zip"):
-        from mwlib import zipwiki
-        res.wiki = zipwiki.Wiki(conf)
-        res.images = zipwiki.ImageDB(conf)
-        if metabook is None:
-            res.metabook = res.wiki.metabook
-        return res
+        import zipfile
+        import json
+        
+        zf = zipfile.ZipFile(conf)
+        try:
+            format = json.loads(zf.read("nfo.json"))["format"]
+        except KeyError:
+            format = "zipwiki"
+            
+        if format=="nuwiki":
+            raise NotImplementedError("not implemented")
+        else:        
+            from mwlib import zipwiki
+            res.wiki = zipwiki.Wiki(conf)
+            res.images = zipwiki.ImageDB(conf)
+            if metabook is None:
+                res.metabook = res.wiki.metabook
+            return res
 
     
 
