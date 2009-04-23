@@ -17,7 +17,7 @@ def hack(options=None, env=None, podclient=None, **kwargs):
     output = options.output
 
     if output:
-        fsdir = output+".tmp"
+        fsdir = output+".nuwiki"
     else:
         fsdir = tempfile.mkdtemp(prefix="nuwiki-")
 
