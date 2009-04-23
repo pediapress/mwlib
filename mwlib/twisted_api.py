@@ -242,7 +242,7 @@ class fsoutput(object):
         assert not os.path.exists(self.path)
         os.makedirs(os.path.join(self.path, "images"))
         self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "wb")
-        self.revfile.write("\n -*- mode: wikipedia -*-\n")
+        # self.revfile.write("\n -*- mode: wikipedia -*-\n")
         self.seen = set()
         self.imgcount = 0
         
