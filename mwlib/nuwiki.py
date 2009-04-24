@@ -16,8 +16,11 @@ class page(object):
         
 class nuwiki(object):
     def __init__(self, path):
-        self.path = os.path.expanduser(path)
-
+        self.path = os.path.abspath(path)
+        d = os.path.join(self.path, "images", "safe")
+        if not os.path.exists(d):
+            os.mkdir(d)
+            
         self.excluded = set(x.get("title") for x in self._loadjson("excluded.json", []))            
         
         self.revisions = {}
@@ -92,10 +95,29 @@ class nuwiki(object):
         ns, partial, fqname = self.nsmapper.splitname(name, defaultns=6)
         if ns != 6:
             return
-
+        
+        if "/" in fqname:
+            return None
+        
+        
+        
+        
         p = self._pathjoin("images", utils.fsescape(fqname))
-        if self._exists(p):
-            return p
+        if not self._exists(p):
+            return None
+
+        if 1:
+            import md5
+            hd = md5.md5(fqname).hexdigest()
+            ext = os.path.splitext(p)[-1]
+            hd += ext
+                
+            safe_path = self._pathjoin("images", "safe", hd)
+            if not os.path.exists(safe_path):
+                os.symlink(os.path.join("..", utils.fsescape(fqname)), safe_path)
+            return safe_path
+        
+        return p
 
     def get_data(self, name):
         return self._loadjson(name+".json")
