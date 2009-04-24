@@ -17,12 +17,16 @@ class page(object):
 class nuwiki(object):
     def __init__(self, path):
         self.path = os.path.expanduser(path)
+
+        self.excluded = set(x.get("title") for x in self._loadjson("excluded.json", []))            
+        
         self.revisions = {}
         self._read_revisions()
         
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
         self.nsmapper = nshandling.nshandler(self.siteinfo)        
+
         
     def _loadjson(self, path, default=None):
         path = self._pathjoin(path)
@@ -36,16 +40,20 @@ class nuwiki(object):
 
         for p in pages[1:]:
             jmeta, rawtext = p.split("\n", 1)
-            meta = json.loads(jmeta)            
-            self.revisions[meta["revid"]] = page(meta, rawtext)
-
+            meta = json.loads(jmeta)
+            pg = page(meta, rawtext)
+            if pg.title not in self.excluded:
+                self.revisions[meta["revid"]] = pg
+            # else:
+            #     print "excluding:", repr(pg.title)
+                
         tmp = self.revisions.items()
         tmp.sort(reverse=True)
         for revid, p in tmp:
             title = p.title
             if title not in self.revisions:
                 self.revisions[title] = p
-        
+                
     def _pathjoin(self, *p):
         return os.path.join(self.path, *p)
     
