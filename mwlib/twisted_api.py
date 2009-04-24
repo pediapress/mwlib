@@ -14,7 +14,7 @@ from mwlib.nshandling import nshandler
 from mwlib import metabook, podclient, utils
 
 from twisted.python import failure, log
-from twisted.web import client
+from twisted.web import client 
 from twisted.internet import reactor, defer
 
 try:
@@ -111,6 +111,8 @@ class mwapi(object):
     api_request_limit = 20 # at most 50 titles at once
 
     max_connections = 20
+    siteinfo = None
+    max_retry_count = 2
     
     def __init__(self, baseurl):
         self.baseurl = baseurl
@@ -129,11 +131,11 @@ class mwapi(object):
         def done(val):
             if isinstance(val, failure.Failure):
                 errors.append(val)
-                if len(errors)<2:
+                if len(errors)<self.max_retry_count:
                     print "retrying: could not fetch %r" % (url,)
                     client.getPage(url).addCallbacks(done, done)
                 else:
-                    print "error: could not fetch %r" % (url,)
+                    # print "error: could not fetch %r" % (url,)
                     d.callback(val)
             else:
                 d.callback(val)
@@ -201,7 +203,14 @@ class mwapi(object):
         return self._request(**kwargs).addCallback(got_result)
 
     def get_siteinfo(self):
-        return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|magicwords|interwikimap")
+        def got_it(siteinfo):
+            self.siteinfo = siteinfo
+            return siteinfo
+        
+        if self.siteinfo is not None:
+            return defer.succeed(self.siteinfo)
+        
+        return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|magicwords|interwikimap").addCallback(got_it)
 
     def _update_kwargs(self, kwargs, titles, revids):
         assert titles or kwargs
@@ -231,11 +240,13 @@ class mwapi(object):
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
 
-    def fetch_imageinfo(self, titles):
+    def fetch_imageinfo(self, titles, iiurlwidth=800):
 
         kwargs = dict(prop="imageinfo",
-                      iiprop="url",
-                      iiurlwidth=800)
+                      iiprop="url|user|comment|url|sha1|metadata|templates",
+                      # iiprop="url",
+                      iiurlwidth=iiurlwidth)
+        
         self._update_kwargs(kwargs, titles, [])
         return self.do_request(action="query", **kwargs)
     
@@ -378,6 +389,8 @@ class fetcher(object):
         self.pages_todo = []
         self.revids_todo = []
         self.imageinfo_todo = []
+        self.imagedescription_todo = {} # base path -> list
+        self.basepath2mwapi = {}        # base path -> mwapi instance 
         
         self.scheduled = set()
 
@@ -544,6 +557,7 @@ class fetcher(object):
         # print "data:", data
         infos = data.get("pages", {}).values()
         # print infos[0]
+        new_basepaths = set()
         
         for i in infos:
             title = i.get("title")
@@ -556,12 +570,44 @@ class fetcher(object):
             # FIXME limit number of parallel downloads
             if thumburl:
                 self._refcall(lambda: client.downloadPage(str(thumburl), self.fsout.get_imagepath(title)))
+
+                descriptionurl = ii.get("descriptionurl", "")
+                if "/" in descriptionurl:
+                    path, localname = descriptionurl.rsplit("/", 1)
+                    if path in self.imagedescription_todo:
+                        self.imagedescription_todo[path].append((title, descriptionurl))
+                    else:
+                        new_basepaths.add(path)
+                        self.imagedescription_todo[path] = [(title, descriptionurl)]
+                        
+        for path in new_basepaths:
+            self._refcall(lambda path=path: self._get_mwapi_for_path(path))
+
+    def _get_mwapi_for_path(self, path):
+        if isinstance(path, unicode):
+            path = path.encode("utf-8")
+            
+        urls = guess_api_urls(path)
+        if not urls:
+            return defer.fail("cannot guess api url for %r" % (path,))
+
+        if self.api.baseurl in urls:
+            return defer.succeed(self.api)
+
+        dlist = []
+        for k in urls:
+            m = mwapi(k)
+            m.max_retry_count = 1
+            dlist.append(m.get_siteinfo().addCallback(lambda siteinfo, api=m: (api, siteinfo)))
+
+        def got_api(((api, siteinfo), idx)):
+            api.max_retry_count = 2
+            print "got api for %r @ %r" % (path, api)
+            return api
                 
-        # print "imageinfo:", infos
-        
-        
-    
-    
+                   
+        return defer.DeferredList(dlist, fireOnOneCallback=True, consumeErrors=True).addCallback(got_api)
+            
     def dispatch(self):
         limit = self.api.api_request_limit
 
@@ -637,8 +683,8 @@ def doit(pages):
     # return
     
     
-    # api.fetch_imageinfo(titles=["File:DSC00996.JPG", "File:MacedonEmpire.jpg"])
-    # return
+    api.fetch_imageinfo(titles=["File:DSC00996.JPG", "File:MacedonEmpire.jpg"]).addCallback(done)
+    return
     # api.fetch_used([p[0] for p in pages]).addCallback(done)
     # return
 
