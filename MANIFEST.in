@@ -27,6 +27,7 @@ include mwlib/allnodes.py
 include mwlib/apps/__init__.py
 include mwlib/apps/buildzip.py
 include mwlib/apps/render.py
+include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
 include mwlib/cdb.py
