@@ -41,6 +41,7 @@ def zipdir(dirname, output=None):
         zf.close()
     finally:
         os.chdir(cwd)
+        
 def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     imagesize = options.imagesize
     metabook = env.metabook
@@ -49,6 +50,7 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     api_url = "".join([base_url, "api", script_extension])
     output = options.output
 
+    
     if output:
         fsdir = output+".nuwiki"
     else:
@@ -61,6 +63,7 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     
     from mwlib import twisted_api
     from twisted.internet import reactor
+    
 
     fsout = twisted_api.fsoutput(fsdir)
 
@@ -70,11 +73,20 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
         fsout.dump_json(nfo=dict(format="nuwiki"))
         
         pages = twisted_api.pages_from_metabook(metabook)
-        twisted_api.fetcher(api, fsout, pages)
         
-    reactor.callLater(0.0, doit)    
-    reactor.run()
-    print "done"
+        twisted_api.fetcher(api, fsout, pages, podclient=podclient)
+
+    try:
+        if podclient is not None:
+            old_class = podclient.__class__
+            podclient.__class__ = twisted_api.PODClient
+
+        reactor.callLater(0.0, doit)
+        reactor.run()
+    finally:        
+        print "done"
+        if podclient is not None:
+            podclient.__class__ = old_class
     
     if output:
         filename = output
@@ -171,6 +183,9 @@ def main():
 
                 status(status='finished', progress=100)
         except Exception, e:
+            import traceback
+            traceback.print_exc()
+            print "ERROR:", e
             if status:
                 status(status='error')
             raise

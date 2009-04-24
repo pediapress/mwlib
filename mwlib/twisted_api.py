@@ -12,7 +12,7 @@ import urlparse
 import pprint
 from mwlib.utils import fsescape
 from mwlib.nshandling import nshandler 
-from mwlib import metabook
+from mwlib import metabook, podclient
 
 from twisted.python import failure, log
 from twisted.web import client
@@ -22,9 +22,36 @@ try:
     import json
 except ImportError:
     import simplejson as json
+
+class PODClient(podclient.PODClient):
+    nextdata = None
+    running = False
+    def _post(self, data, content_type=None):
+        if content_type is None:
+            content_type = "application/x-www-form-urlencoded"
+            headers = {'Content-Type': content_type}
+
         
+        def postit(postdata, headers):
+            client.getPage(self.posturl, method="POST", postdata=postdata, headers=headers).addCallbacks(done, done)
+        
+        def done(val):
+            if self.nextdata:
+                postdata, headers = self.nextdata
+                self.nextdata = None
+                reactor.callLater(0.0, postit, postdata, headers)
+            else:
+                self.running = False
+                
+        self.nextdata = (data, headers)
+        if self.running:
+            return
+        
+        self.running = True
+        reactor.callLater(0.0, postit, data, headers)
+
 def merge_data(dst, src):
-    orig = dst
+    orig = dst 
     
     args = (dst, src)
     
@@ -319,10 +346,11 @@ def getblock(lst, limit):
 
 
 class fetcher(object):
-    def __init__(self, api, fsout, pages):
+    def __init__(self, api, fsout, pages, podclient=None):
         self.api = api
         self.fsout = fsout
-
+        self.podclient = podclient
+        
         self.redirects = {}
         
         self.count_total = 0
@@ -386,19 +414,27 @@ class fetcher(object):
         self.fsout.write_siteinfo(siteinfo)
         
     def report(self):
+        qc = self.api.qccount
+        done = self.count_done+qc
+        total = self.count_total+qc
+
+        limit = self.api.api_request_limit
+        jt = self.count_total+len(self.pages_todo)//limit+len(self.revids_todo)//limit
+        jt += len(self.title2latest)
+        msg = "%s/%s/%s jobs -- %s/%s running" % (self.count_done, self.count_total, jt, self.api.num_running, self.api.max_connections)
+
+        if jt < 10:
+            progress = self.count_done
+        else:
+            progress =  100.0*self.count_done /  jt
+            
+        if self.podclient:
+            self.podclient.post_status(status=msg, progress=progress)
+
+            
         isatty = getattr(sys.stdout, "isatty", None)
         if isatty and isatty():
-            sys.stdout.write("\x1b[K")
-            qc = self.api.qccount
-            done = self.count_done+qc
-            total = self.count_total+qc
-            
-            limit = self.api.api_request_limit
-            jt = self.count_total+len(self.pages_todo)//limit+len(self.revids_todo)//limit
-            jt += len(self.title2latest)
-            
-            sys.stdout.write("%s/%s/%s jobs -- %s/%s running" % (self.count_done, self.count_total, jt, self.api.num_running, self.api.max_connections))
-            sys.stdout.write("\r")
+            sys.stdout.write("\x1b[K"+msg+"\r")
             sys.stdout.flush()
             
     def _got_edits(self, data):
