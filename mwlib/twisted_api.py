@@ -307,7 +307,6 @@ class fsoutput(object):
             revisions = p.get("revisions")
             
             if revisions is None:
-                print "bad:", p
                 continue
 
             tmp = []
@@ -352,11 +351,16 @@ def getblock(lst, limit):
 
 
 class fetcher(object):
-    def __init__(self, api, fsout, pages, podclient=None, template_exclusion_category=None):
+    def __init__(self, api, fsout, pages,
+                 podclient=None,
+                 print_template_pattern=None,
+                 template_exclusion_category=None):
+        
         self.api = api
         self.fsout = fsout
         self.podclient = podclient
         self.template_exclusion_category = template_exclusion_category
+        self.print_template_pattern = print_template_pattern
         
         self.redirects = {}
         
@@ -521,7 +525,14 @@ class fetcher(object):
             if t not in self.scheduled:
                 self.pages_todo.append(t)
                 self.scheduled.add(t)
-
+                
+            if self.print_template_pattern and ":" in t:
+                p, s = t.split(":", 1)
+                s = self.print_template_pattern.replace("$1", s)
+                
+                if t not in self.scheduled:
+                    self.pages_todo.append(t)
+                    self.scheduled.add(t)
         
     def _cb_imageinfo(self, data):
         # print "data:", data

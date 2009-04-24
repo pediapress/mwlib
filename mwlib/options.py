@@ -120,7 +120,10 @@ class OptionParser(optparse.OptionParser):
                 self.metabook['items'].append(metabook.make_article(
                     title=unicode(title, 'utf-8'),
                 ))
-        
+
+        if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
+            self.error("bad --print-template-pattern argument [must contain $1, but %r does not" % (self.options.print_template_pattern,))
+            
         return self.options, self.args
     
     def makewiki(self):
@@ -153,6 +156,7 @@ class OptionParser(optparse.OptionParser):
         template_exclusion_category = unioption(self.options.template_exclusion_category)
         print_template_pattern = unioption(self.options.print_template_pattern)
             
+        
         if self.options.print_template_prefix:
             if print_template_pattern is not None:
                 log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')

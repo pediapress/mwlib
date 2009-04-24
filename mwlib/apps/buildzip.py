@@ -51,6 +51,7 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     output = options.output
 
     template_exclusion_category = options.template_exclusion_category
+    print_template_pattern = options.print_template_pattern
     
     
     if output:
@@ -72,11 +73,20 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     def doit():
         api = twisted_api.mwapi(api_url)
         fsout.dump_json(metabook=metabook)
-        fsout.dump_json(nfo=dict(format="nuwiki"))
+        nfo = dict(format="nuwiki")
+        if print_template_pattern:
+            nfo["print_template_pattern"] = print_template_pattern
+            
+        nfo["script_extension"] = script_extension
+         
+        fsout.dump_json(nfo=nfo)
         
         pages = twisted_api.pages_from_metabook(metabook)
         
-        twisted_api.fetcher(api, fsout, pages, podclient=podclient, template_exclusion_category=template_exclusion_category)
+        twisted_api.fetcher(api, fsout, pages,
+                            podclient=podclient,
+                            print_template_pattern=print_template_pattern,
+                            template_exclusion_category=template_exclusion_category)
 
     try:
         if podclient is not None:
