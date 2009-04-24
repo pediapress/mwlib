@@ -28,7 +28,7 @@ class nuwiki(object):
         
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
-        self.nsmapper = nshandling.nshandler(self.siteinfo)        
+        self.nshandler = nshandling.nshandler(self.siteinfo)        
         self.nfo = self._loadjson("nfo.json", {})
         p = self.nfo.get("print_template_pattern")
         if p and "$1" in p:
@@ -88,14 +88,14 @@ class nuwiki(object):
         return self.revisions.get(name)
     
     def normalize_and_get_page(self, name, defaultns):
-        fqname = self.nsmapper.get_fqname(name, defaultns=defaultns)
+        fqname = self.nshandler.get_fqname(name, defaultns=defaultns)
         return self.get_page(fqname)
 
     def normalize_and_get_image_path(self, name):
         assert isinstance(name, basestring)
         name = unicode(name)
         
-        ns, partial, fqname = self.nsmapper.splitname(name, defaultns=6)
+        ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if ns != 6:
             return
         
@@ -176,7 +176,7 @@ class adapt(object):
             return p.rawtext
         
     def getURL(self, name, revision=None):
-        fqtitle = self.nsmapper.get_fqname(name)
+        fqtitle = self.nshandler.get_fqname(name)
         base = self.siteinfo["general"]["base"]
         return "%s/%s" % (base.rsplit("/", 1)[0], name)
     
@@ -188,7 +188,7 @@ class adapt(object):
                 revisions = edit.get("revisions")
                 edits[title] = revisions
         
-        fqname = self.nsmapper.get_fqname(title)
+        fqname = self.nshandler.get_fqname(title)
         revisions = self.edits.get(fqname, [])
         from mwlib.authors import get_authors
         authors = get_authors(revisions)
@@ -227,7 +227,7 @@ class adapt(object):
         return self.nuwiki.normalize_and_get_image_path(name)
 
     def getDescriptionURL(self, name): # for an image
-        return "http://"+self.nuwiki.nsmapper.get_fqname(name, 6)
+        return "http://"+self.nuwiki.nshandler.get_fqname(name, 6)
 
     def getImageTemplates(self, name, wikidb=None):
         return []
