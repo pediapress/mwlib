@@ -86,6 +86,9 @@ class nshandler(object):
             
         return (nsnum, suffix, "%s%s" % (prefix,  suffix))
 
+    def get_nsname_by_number(self, ns):
+        return self.siteinfo["namespaces"][str(ns)]["*"]
+        
     def resolve_interwiki(self, title):
         name = title.replace("_", " ").strip()
         if name.startswith(":"):

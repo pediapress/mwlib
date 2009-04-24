@@ -181,7 +181,12 @@ class mwapi(object):
         retval = {}
         
         def got_result(data):
-            error = data.get("error")
+            try:
+                error = data.get("error")
+            except:
+                print "ERROR:", data, kwargs
+                raise
+            
             if error:
                 return failure.Failure(RuntimeError(error.get("info", "")))
 
@@ -386,6 +391,7 @@ class fetcher(object):
         self.title2latest = {}
     
         self.edits = []
+        self.lambda_todo = []
         self.pages_todo = []
         self.revids_todo = []
         self.imageinfo_todo = []
@@ -574,15 +580,58 @@ class fetcher(object):
                 descriptionurl = ii.get("descriptionurl", "")
                 if "/" in descriptionurl:
                     path, localname = descriptionurl.rsplit("/", 1)
+                    t = (title, descriptionurl)
                     if path in self.imagedescription_todo:
-                        self.imagedescription_todo[path].append((title, descriptionurl))
+                        self.imagedescription_todo[path].append(t)
                     else:
                         new_basepaths.add(path)
-                        self.imagedescription_todo[path] = [(title, descriptionurl)]
+                        self.imagedescription_todo[path] = [t]
                         
         for path in new_basepaths:
-            self._refcall(lambda path=path: self._get_mwapi_for_path(path))
+            self._refcall(lambda: self._get_mwapi_for_path(path).addCallback(self._cb_got_api, path))
 
+
+
+    def _cb_image_edits(self, data):
+        pass
+
+    def _cb_image_contents(self, data):
+        pass
+    
+    def _cb_got_api(self, api, path):
+        todo = self.imagedescription_todo[path]
+        titles = set([x[0] for x in todo])
+        titles = [t for t in titles if "-d-"+t not in self.scheduled]
+        self.scheduled.update(["-d-"+x for x in titles])
+        if not titles:
+            return
+        
+        def got_siteinfo(siteinfo):
+            ns = nshandler(siteinfo)
+            nsname = ns.get_nsname_by_number(6)
+            
+            local_names=[]
+            for x in titles:
+                partial = x.split(":", 1)[1]
+                local_names.append("%s:%s" % (nsname, partial))
+
+
+            for bl in splitblocks(local_names, api.api_request_limit):
+                self.lambda_todo.append(lambda bl=bl: api.fetch_pages(titles=bl).addCallback(self._cb_image_contents))
+
+            for k in local_names:
+                self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits))
+                
+                                        
+            # return api.fetch_pages(titles=local_names).addCallback(done)
+            
+            
+        
+        
+        print "got api for", repr(path), len(todo)
+        return api.get_siteinfo().addCallback(got_siteinfo)
+        
+            
     def _get_mwapi_for_path(self, path):
         if isinstance(path, unicode):
             path = path.encode("utf-8")
@@ -594,6 +643,10 @@ class fetcher(object):
         if self.api.baseurl in urls:
             return defer.succeed(self.api)
 
+        if path in self.basepath2mwapi:
+            return defer.succed(self.basepath2mwapi[path])
+        
+        
         dlist = []
         for k in urls:
             m = mwapi(k)
@@ -602,9 +655,8 @@ class fetcher(object):
 
         def got_api(((api, siteinfo), idx)):
             api.max_retry_count = 2
-            print "got api for %r @ %r" % (path, api)
+            self.basepath2mwapi[path] = api
             return api
-                
                    
         return defer.DeferredList(dlist, fireOnOneCallback=True, consumeErrors=True).addCallback(got_api)
             
@@ -625,7 +677,9 @@ class fetcher(object):
             
         doit("revids", self.revids_todo)
         doit("titles", self.pages_todo)
-        
+
+        while self.lambda_todo:
+            self._refcall(self.lambda_todo.pop())
 
         self.report()
         
