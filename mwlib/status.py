@@ -39,23 +39,31 @@ class Status(object):
     def __call__(self, status=None, progress=None, article=None, auto_dump=True,
         **kwargs):
         if status is not None and status != self.status.get('status'):
-            log('STATUS: %s' % status)
             self.status['status'] = status
         
         if progress is not None:
             progress = min(max(0, progress), 100)
             progress = self.scaleProgress(progress)
             if progress > self.status.get('progress', -1):
-                log('PROGRESS: %d%%' % progress)
                 self.status['progress'] = progress
         
         if article is not None and article != self.status.get('article'):
-            log('ARTICLE: %r' % article)
             self.status['article'] = article
 
         if self.podclient is not None:
             self.podclient.post_status(**self.status)
-        
+
+        msg = []
+        msg.append("%s%%" % (self.status.get("progress", 0),))
+        msg.append(self.status.get("status", ""))
+        msg.append(self.status.get("article", ""))
+        msg = u" ".join(msg).encode("utf-8")
+
+        isatty = getattr(sys.stdout, "isatty", None)
+        if isatty and isatty():
+            sys.stdout.write("\x1b[K"+msg+"\r")
+        else:
+            sys.stdout.write(msg)
         sys.stdout.flush()
         
         self.status.update(kwargs)

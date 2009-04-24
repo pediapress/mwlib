@@ -124,7 +124,6 @@ class adapt(object):
         try:
             return getattr(self.nuwiki, name)
         except AttributeError:
-            print "MISSING ATTRBUTE:", name
             raise AttributeError()
     
         

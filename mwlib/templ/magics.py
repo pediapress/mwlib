@@ -415,7 +415,7 @@ class ParserFunctions(object):
                     return str(int(val))
                 r=str(float(val))
             except Exception, err:                
-                log("ERROR: error while evaluating #expr:%r\n" % (ex,))
+                # log("ERROR: error while evaluating #expr:%r\n" % (ex,))
                 return self._error(err)
 
             if "e" in r:
@@ -439,7 +439,7 @@ class ParserFunctions(object):
             else:
                 r = False
         except Exception, err:
-            log("ERROR: error while evaluating #ifexpr:%r\n" % (rl[0],))
+            # log("ERROR: error while evaluating #ifexpr:%r\n" % (rl[0],))
             return self._error(err)
 
         if r:
