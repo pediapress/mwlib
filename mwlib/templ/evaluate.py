@@ -244,10 +244,8 @@ class Expander(object):
             raw = self.db.getTemplate(name, True)
         
         if raw is None:
-            log.warn("no template", repr(name))
             res = None
         else:
-            log.info("parsing template", repr(name))
             res = parser.parse(raw, replace_tags=self.replace_tags)
             if DEBUG:
                 print "TEMPLATE:", name, repr(raw)
