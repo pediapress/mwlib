@@ -19,7 +19,7 @@ class nuwiki(object):
         self.path = os.path.abspath(path)
         d = os.path.join(self.path, "images", "safe")
         if not os.path.exists(d):
-            os.mkdir(d)
+            os.makedirs(d)
             
         self.excluded = set(x.get("title") for x in self._loadjson("excluded.json", []))            
         
