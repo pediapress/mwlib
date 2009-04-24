@@ -189,6 +189,9 @@ def _makewiki(conf,
     if os.path.exists(os.path.join(conf, "siteinfo.json")):
         from mwlib import nuwiki
         res.images = res.wiki = nuwiki.adapt(conf)
+        if metabook is None:
+            res.metabook = res.wiki.metabook
+        
         return res
     
     # yes, I really don't want to type this everytime
