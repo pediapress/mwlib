@@ -73,14 +73,15 @@ class nuwiki(object):
             return self.revisions.get(revision)
         
         name = self.redirects.get(name, name)
+        
         if self.make_print_template is not None:
             pname = self.make_print_template(name)
             r=self.revisions.get(pname)
             # print "returning print template", repr(pname)
             if r is not None:
+                # r.title = name # XXX not so sure about that one???
                 return r
             
-        
         return self.revisions.get(name)
     
     def normalize_and_get_page(self, name, defaultns):
