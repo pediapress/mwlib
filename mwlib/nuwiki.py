@@ -117,6 +117,11 @@ class nuwiki(object):
             
             hd = md5(fqname.encode("utf-8")).hexdigest()
             ext = os.path.splitext(p)[-1]
+            
+            # mediawiki gives us png's for these extensions. let's change them here.
+            if ext.lower() in (".gif", ".svg"):
+                print "change xt:", ext
+                ext = ".png"
             hd += ext
                 
             safe_path = self._pathjoin("images", "safe", hd)
