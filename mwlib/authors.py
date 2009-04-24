@@ -104,3 +104,5 @@ class inspect_authors(object):
         authors.append((("%s:%d"  % (ANON,num_anon),num_anon)))  #  append at the end
     #        print authors
         return [a for a,c in authors]
+
+get_authors = inspect_authors().get_authors

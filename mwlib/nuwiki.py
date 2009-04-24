@@ -118,7 +118,6 @@ class adapt(object):
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
-
         self.metabook = self.nuwiki.get_data("metabook")
         
     def __getattr__(self, name):
@@ -158,8 +157,8 @@ class adapt(object):
         
         fqname = self.nsmapper.get_fqname(title)
         revisions = self.edits.get(fqname, [])
-        authors = list(set([r["user"] for r in revisions]))  # FIXME: use a real implemtation
-        authors.sort()
+        from mwlib.authors import get_authors
+        authors = get_authors(revisions)
         return authors
     
     def getSource(self, title, revision=None):
