@@ -122,7 +122,7 @@ class OptionParser(optparse.OptionParser):
                 ))
 
         if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
-            self.error("bad --print-template-pattern argument [must contain $1, but %r does not" % (self.options.print_template_pattern,))
+            self.error("bad --print-template-pattern argument [must contain $1, but %r does not]" % (self.options.print_template_pattern,))
             
         return self.options, self.args
     
