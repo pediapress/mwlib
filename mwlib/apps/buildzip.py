@@ -43,13 +43,12 @@ def zipdir(dirname, output=None):
     finally:
         os.chdir(cwd)
         
-def hack(options=None, env=None, podclient=None, status=None, **kwargs):
+def hack(output=None, options=None, env=None, podclient=None, status=None, **kwargs):
     imagesize = options.imagesize
     metabook = env.metabook
     base_url = env.wiki.api_helper.base_url
     script_extension = env.wiki.api_helper.script_extension
     api_url = "".join([base_url, "api", script_extension])
-    output = options.output
 
     template_exclusion_category = options.template_exclusion_category
     print_template_pattern = options.print_template_pattern
@@ -115,7 +114,7 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     if output:
         filename = output
     else:
-        filename = tempfile.mktemp()
+        filename = tempfile.mktemp(suffix=".zip")
         
     zipdir(fsdir, filename)
     
@@ -123,6 +122,9 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
         status(status='uploading', progress=0)
         podclient.post_zipfile(filename)
 
+    return filename
+
+        
 def main():    
     from mwlib.options import OptionParser
 
@@ -184,6 +186,7 @@ def main():
             from mwlib.status import Status
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)
+            output = options.output
             
             if isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())

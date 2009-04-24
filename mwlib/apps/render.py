@@ -8,7 +8,7 @@ import sys
 import errno
 import pkg_resources
 from mwlib.options import OptionParser
-from mwlib import utils
+from mwlib import utils, wiki
 
 class Main(object):
     zip_filename = None
@@ -93,6 +93,7 @@ class Main(object):
     def get_environment(self):
         from mwlib.status import Status
         from mwlib import zipwiki, nuwiki
+        
         if self.options.fastzipcreator:
             from mwlib import fzipcreator as zipcreator
         else:
@@ -103,13 +104,11 @@ class Main(object):
             or isinstance(env.wiki, (nuwiki.nuwiki, nuwiki.adapt))):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
-            
-        self.zip_filename = zip_filename = zipcreator.make_zip_file(
-            self.options.keep_zip,
-            env,
-            status=self.status,
-            num_threads=self.options.num_threads,
-            imagesize=self.options.imagesize)
+
+        from mwlib.apps.buildzip import hack
+        self.zip_filename = hack(options=self.options, env=env, podclient=None, status=self.status)
+        # FIXME: keep zip ???
+        
         
         if env.images:
             try:
@@ -117,8 +116,8 @@ class Main(object):
             except OSError, err:
                 if err.errno!=errno.ENOENT:
                     raise
-        env.wiki = zipwiki.Wiki(zip_filename)
-        env.images = zipwiki.ImageDB(zip_filename)
+                
+        env = wiki.makewiki(self.zip_filename)
         self.status = Status(self.options.status_file, progress_range=(71, 100))
         return env
             
@@ -183,7 +182,8 @@ class Main(object):
         env = None
         try:
             try:
-                env = self.get_environment() 
+                env = self.get_environment()
+                
                 fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
                 os.close(fd)
                 writer(env, output=tmpout, status_callback=status, **writer_options)

@@ -92,6 +92,9 @@ class nuwiki(object):
         return self.get_page(fqname)
 
     def normalize_and_get_image_path(self, name):
+        assert isinstance(name, basestring)
+        name = unicode(name)
+        
         ns, partial, fqname = self.nsmapper.splitname(name, defaultns=6)
         if ns != 6:
             return
@@ -108,7 +111,7 @@ class nuwiki(object):
 
         if 1:
             import md5
-            hd = md5.md5(fqname).hexdigest()
+            hd = md5.md5(fqname.encode("utf-8")).hexdigest()
             ext = os.path.splitext(p)[-1]
             hd += ext
                 
