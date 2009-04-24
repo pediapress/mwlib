@@ -50,6 +50,8 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     api_url = "".join([base_url, "api", script_extension])
     output = options.output
 
+    template_exclusion_category = options.template_exclusion_category
+    
     
     if output:
         fsdir = output+".nuwiki"
@@ -74,7 +76,7 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
         
         pages = twisted_api.pages_from_metabook(metabook)
         
-        twisted_api.fetcher(api, fsout, pages, podclient=podclient)
+        twisted_api.fetcher(api, fsout, pages, podclient=podclient, template_exclusion_category=template_exclusion_category)
 
     try:
         if podclient is not None:
@@ -183,9 +185,6 @@ def main():
 
                 status(status='finished', progress=100)
         except Exception, e:
-            import traceback
-            traceback.print_exc()
-            print "ERROR:", e
             if status:
                 status(status='error')
             raise

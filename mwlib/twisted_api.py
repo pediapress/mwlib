@@ -262,6 +262,9 @@ class mwapi(object):
         return self.do_request(action="query", **kwargs)
         
 
+    def get_categorymembers(self, cmtitle):
+        return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle)
+    
 
 class fsoutput(object):
     def __init__(self, path):
@@ -291,6 +294,9 @@ class fsoutput(object):
                 
     def write_siteinfo(self, siteinfo):
         self.dump_json(siteinfo=siteinfo)
+
+    def write_excluded(self, excluded):
+        self.dump_json(excluded=excluded)
         
     def write_pages(self, data):
         pages = data.get("pages", {}).values()
@@ -346,10 +352,11 @@ def getblock(lst, limit):
 
 
 class fetcher(object):
-    def __init__(self, api, fsout, pages, podclient=None):
+    def __init__(self, api, fsout, pages, podclient=None, template_exclusion_category=None):
         self.api = api
         self.fsout = fsout
         self.podclient = podclient
+        self.template_exclusion_category = template_exclusion_category
         
         self.redirects = {}
         
@@ -412,6 +419,19 @@ class fetcher(object):
         
     def _cb_siteinfo(self, siteinfo):
         self.fsout.write_siteinfo(siteinfo)
+        self.nshandler = nshandler(siteinfo)
+        if self.template_exclusion_category:
+            ns, partial, fqname = self.nshandler.splitname(self.template_exclusion_category, 14)
+            if ns!=14:
+                print "bad category name:", repr(self.template_exclusion_category)
+            else:
+                self._refcall(lambda: self.api.get_categorymembers(fqname).addCallback(self._cb_excluded_category))
+            
+    def _cb_excluded_category(self, data):
+        members = data.get("categorymembers")
+        self.fsout.write_excluded(members)
+        
+        
         
     def report(self):
         qc = self.api.qccount
@@ -587,6 +607,10 @@ def doit(pages):
     api = mwapi("http://en.wikipedia.org/w/api.php")
     api.api_request_limit = 10
 
+    # api.get_categorymembers("Category:Exclude in print").addCallback(done)
+    # return
+    
+    
     # api.fetch_imageinfo(titles=["File:DSC00996.JPG", "File:MacedonEmpire.jpg"])
     # return
     # api.fetch_used([p[0] for p in pages]).addCallback(done)
