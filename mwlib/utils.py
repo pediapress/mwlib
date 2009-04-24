@@ -50,6 +50,16 @@ log = Log('mwlib.utils')
 
 # ==============================================================================
 
+def get_print_template_maker(pattern):
+    assert "$1" in pattern
+    
+    def make_print_template(title):
+        p, s = title.split(":", 1)
+        s = pattern.replace("$1", s)
+        return "%s:%s" % (p, s)
+        
+    return make_print_template
+
 def fsescape(s):
     """Escape string to be safely used in path names
     

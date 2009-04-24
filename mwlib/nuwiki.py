@@ -26,8 +26,13 @@ class nuwiki(object):
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
         self.nsmapper = nshandling.nshandler(self.siteinfo)        
-
-        
+        self.nfo = self._loadjson("nfo.json", {})
+        p = self.nfo.get("print_template_pattern")
+        if p and "$1" in p:
+            self.make_print_template = utils.get_print_template_maker(p)
+        else:
+            self.make_print_template = None
+            
     def _loadjson(self, path, default=None):
         path = self._pathjoin(path)
         if self._exists(path):
@@ -68,6 +73,14 @@ class nuwiki(object):
             return self.revisions.get(revision)
         
         name = self.redirects.get(name, name)
+        if self.make_print_template is not None:
+            pname = self.make_print_template(name)
+            r=self.revisions.get(pname)
+            # print "returning print template", repr(pname)
+            if r is not None:
+                return r
+            
+        
         return self.revisions.get(name)
     
     def normalize_and_get_page(self, name, defaultns):

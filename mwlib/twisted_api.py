@@ -10,9 +10,8 @@ import sys
 import urllib
 import urlparse
 import pprint
-from mwlib.utils import fsescape
 from mwlib.nshandling import nshandler 
-from mwlib import metabook, podclient
+from mwlib import metabook, podclient, utils
 
 from twisted.python import failure, log
 from twisted.web import client
@@ -282,7 +281,7 @@ class fsoutput(object):
         
         
     def get_imagepath(self, title):
-        p = os.path.join(self.path, "images", "%s" % (fsescape(title),))
+        p = os.path.join(self.path, "images", "%s" % (utils.fsescape(title),))
         self.imgcount+=1
         return p
         
@@ -361,6 +360,12 @@ class fetcher(object):
         self.podclient = podclient
         self.template_exclusion_category = template_exclusion_category
         self.print_template_pattern = print_template_pattern
+
+        if self.print_template_pattern:
+            self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
+        else:
+            self.make_print_template = None
+            
         
         self.redirects = {}
         
@@ -525,11 +530,9 @@ class fetcher(object):
             if t not in self.scheduled:
                 self.pages_todo.append(t)
                 self.scheduled.add(t)
-                
-            if self.print_template_pattern and ":" in t:
-                p, s = t.split(":", 1)
-                s = self.print_template_pattern.replace("$1", s)
-                
+
+            if self.print_template_pattern is not None and ":" in t:
+                t = self.make_print_template(t)                
                 if t not in self.scheduled:
                     self.pages_todo.append(t)
                     self.scheduled.add(t)
