@@ -141,7 +141,7 @@ class adapt(object):
         if p:
             return p.rawtext
         
-    def getURL(self, name, revision):
+    def getURL(self, name, revision=None):
         fqtitle = self.nsmapper.get_fqname(name)
         base = self.siteinfo["general"]["base"]
         return "%s/%s" % (base.rsplit("/", 1)[0], name)
@@ -194,5 +194,9 @@ class adapt(object):
 
     def getDescriptionURL(self, name): # for an image
         return "http://"+self.nuwiki.nsmapper.get_fqname(name, 6)
-    
+
+    def getImageTemplates(self, name, wikidb=None):
+        return []
         
+    def getContributors(self, name, wikidb=None): 
+        return []
