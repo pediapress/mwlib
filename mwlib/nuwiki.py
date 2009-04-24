@@ -110,8 +110,12 @@ class nuwiki(object):
             return None
 
         if 1:
-            import md5
-            hd = md5.md5(fqname.encode("utf-8")).hexdigest()
+            try:
+                from hashlib import md5
+            except ImportError:
+                from md5 import md5
+            
+            hd = md5(fqname.encode("utf-8")).hexdigest()
             ext = os.path.splitext(p)[-1]
             hd += ext
                 
