@@ -111,7 +111,7 @@ class mwapi(object):
     api_result_limit = 500 # 5000 for bots
     api_request_limit = 20 # at most 50 titles at once
 
-    max_connections = 5
+    max_connections = 20
     
     def __init__(self, baseurl):
         self.baseurl = baseurl
