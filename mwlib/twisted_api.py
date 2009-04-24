@@ -181,7 +181,6 @@ class mwapi(object):
         def got_result(data):
             error = data.get("error")
             if error:
-                print "error:", error.keys()
                 return failure.Failure(RuntimeError(error.get("info", "")))
 
             merge_data(retval, data["query"])
@@ -354,6 +353,7 @@ class fetcher(object):
                  podclient=None,
                  print_template_pattern=None,
                  template_exclusion_category=None):
+        self.fatal_error = "stopped by signal"
         
         self.api = api
         self.fsout = fsout
@@ -382,7 +382,10 @@ class fetcher(object):
         self.scheduled = set()
 
         
-        self._refcall(lambda:self.api.get_siteinfo().addCallback(self._cb_siteinfo))
+        self._refcall(lambda:self.api.get_siteinfo()
+                      .addCallback(self._cb_siteinfo)
+                      .addErrback(self.make_die_fun("could not get siteinfo")))
+                      
         titles, revids = self._split_titles_revids(pages)
         
 
@@ -582,6 +585,7 @@ class fetcher(object):
         
         if self.count_done==self.count_total:
             self.finish()
+            self.fatal_error = None
             print
             reactor.stop()
 
@@ -610,7 +614,15 @@ class fetcher(object):
         reactor.callLater(0.0, self.dispatch)
         if isinstance(val, failure.Failure):
             log.err(val)
+
+    def make_die_fun(self, reason):
+        def fatal(val):
+            self.fatal_error = reason
+            reactor.stop()
+            print "fatal: %s [%s]" % (reason, val)        
             
+        return fatal
+    
         
 def done(data):
     print "done", json.dumps(data, indent=4)

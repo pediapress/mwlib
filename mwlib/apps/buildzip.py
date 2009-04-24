@@ -4,6 +4,7 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
+import sys
 import os
 import tempfile
 import shutil
@@ -67,9 +68,13 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
     from mwlib import twisted_api
     from twisted.internet import reactor
     
+    
 
+
+    
+    options.fetcher = None # stupid python
     fsout = twisted_api.fsoutput(fsdir)
-
+    
     def doit():
         api = twisted_api.mwapi(api_url)
         fsout.dump_json(metabook=metabook)
@@ -83,10 +88,10 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
         
         pages = twisted_api.pages_from_metabook(metabook)
         
-        twisted_api.fetcher(api, fsout, pages,
-                            podclient=podclient,
-                            print_template_pattern=print_template_pattern,
-                            template_exclusion_category=template_exclusion_category)
+        options.fetcher = twisted_api.fetcher(api, fsout, pages,
+                                              podclient=podclient,
+                                              print_template_pattern=print_template_pattern,
+                                              template_exclusion_category=template_exclusion_category)
 
     try:
         if podclient is not None:
@@ -95,11 +100,18 @@ def hack(options=None, env=None, podclient=None, status=None, **kwargs):
 
         reactor.callLater(0.0, doit)
         reactor.run()
-    finally:        
-        print "done"
+    finally:
         if podclient is not None:
             podclient.__class__ = old_class
+
     
+    fetcher = options.fetcher
+    if fetcher.fatal_error:
+        print "error:", fetcher.fatal_error
+        sys.exit(10)
+    print "done"
+    
+
     if output:
         filename = output
     else:
