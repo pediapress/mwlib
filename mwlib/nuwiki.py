@@ -53,7 +53,7 @@ class nuwiki(object):
             if pg.title not in self.excluded:
                 revid = meta.get("revid")
                 if revid is None:
-                    self.revisions[p.title] = p
+                    self.revisions[pg.title] = pg
                     continue
 
                 self.revisions[meta["revid"]] = pg
@@ -237,5 +237,51 @@ class adapt(object):
     def getImageTemplates(self, name, wikidb=None):
         return []
         
-    def getContributors(self, name, wikidb=None): 
-        return []
+    def getContributors(self, name, wikidb=None):
+        fqname = self.nshandler.get_fqname(name, 6)
+
+        page = self.get_page(fqname)
+        if page is not None:
+            users = getContributorsFromInformationTemplate(page.rawtext, fqname, self)
+            if users:
+                print "GOT:", users
+                return users
+
+        return self.getAuthors(fqname)
+
+
+
+def getContributorsFromInformationTemplate(raw, title, wikidb):
+    from mwlib.expander import find_template, get_template_args, Expander
+    from mwlib import uparser, parser, advtree
+    
+    def getUserLinks(raw):
+        def isUserLink(node):
+            return isinstance(node, parser.NamespaceLink) and node.namespace == 2 # NS_USER
+
+        result = list(set([
+            u.target
+            for u in uparser.parseString(title,
+                raw=raw,
+                wikidb=wikidb,
+            ).filter(isUserLink)
+        ]))
+        result.sort()
+        return result
+
+    expander = Expander(u'', title, wikidb)       
+    template = find_template(raw, 'Information')
+    if template is not None:
+        author = get_template_args(template, expander).get('Author', '').strip()
+        if author:
+            users = getUserLinks(author)
+            if users:
+                users = list(set(users))
+                users.sort()
+                return users
+
+            node = uparser.parseString('', raw=author, wikidb=wikidb)
+            advtree.extendClasses(node)
+            return [node.getAllDisplayText()]
+
+    return getUserLinks(raw)
