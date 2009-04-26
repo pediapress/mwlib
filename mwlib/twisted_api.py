@@ -623,6 +623,8 @@ class fetcher(object):
     
     def _cb_got_api(self, api, path):
         todo = self.imagedescription_todo[path]
+        del self.imagedescription_todo[path]
+        
         titles = set([x[0] for x in todo])
         titles = [t for t in titles if "-d-"+t not in self.scheduled]
         self.scheduled.update(["-d-"+x for x in titles])
@@ -644,14 +646,8 @@ class fetcher(object):
 
             for k in local_names:
                 self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits))
-                
-                                        
-            # return api.fetch_pages(titles=local_names).addCallback(done)
-            
-            
         
-        
-        print "got api for", repr(path), len(todo)
+        # print "got api for", repr(path), len(todo)
         return api.get_siteinfo().addCallback(got_siteinfo)
         
             
