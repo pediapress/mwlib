@@ -51,6 +51,11 @@ class nuwiki(object):
             meta = json.loads(jmeta)
             pg = page(meta, rawtext)
             if pg.title not in self.excluded:
+                revid = meta.get("revid")
+                if revid is None:
+                    self.revisions[p.title] = p
+                    continue
+
                 self.revisions[meta["revid"]] = pg
             # else:
             #     print "excluding:", repr(pg.title)
@@ -120,7 +125,7 @@ class nuwiki(object):
             
             # mediawiki gives us png's for these extensions. let's change them here.
             if ext.lower() in (".gif", ".svg"):
-                print "change xt:", ext
+                # print "change xt:", ext
                 ext = ".png"
             hd += ext
                 

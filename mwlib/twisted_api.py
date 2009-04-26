@@ -330,12 +330,13 @@ class fsoutput(object):
                 tmp.append(x)
             
             for r in revisions:
-                revid = r["revid"]
+                revid = r.get("revid")
                 txt = r["*"]
                 if revid not in self.seen:
-                    # assert title not in self.seen
-                    self.seen.add(revid)
-                    rev = dict(title=title, ns=ns, revid=revid)
+                    rev = dict(title=title, ns=ns)
+                    if revid is not None:
+                        self.seen.add(revid)
+                        rev["revid"] = revid
 
                     header = "\n --page-- %s\n" % json.dumps(rev)
                     self.revfile.write(header)
@@ -601,7 +602,6 @@ class fetcher(object):
         # change title prefix to make them look like local pages
         for e in edits:
             title = e.get("title")
-            
             prefix, partial = title.split(":", 1)
             e["title"] = "%s:%s" % (local_nsname, partial)
 
@@ -613,10 +613,19 @@ class fetcher(object):
         
         pages = data.get("pages", {}).values()
         # change title prefix to make them look like local pages
-        for p in pages:    
+        for p in pages:
             title = p.get("title")
             prefix, partial = title.split(":", 1)
             p["title"] = "%s:%s" % (local_nsname, partial)
+
+            revisions = p.get("revisions", [])
+            # the revision id's could clash with some local ids. remove them.
+            for r in revisions:
+                try:
+                    del r["revid"]
+                except KeyError:
+                    pass
+            
             
         # XXX do we also need to handle redirects here?
         self.fsout.write_pages(data)
@@ -626,6 +635,7 @@ class fetcher(object):
         del self.imagedescription_todo[path]
         
         titles = set([x[0] for x in todo])
+        # "-d-" is just some prefix to make the names here not clash with local names
         titles = [t for t in titles if "-d-"+t not in self.scheduled]
         self.scheduled.update(["-d-"+x for x in titles])
         if not titles:
