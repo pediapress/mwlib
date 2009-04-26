@@ -593,10 +593,33 @@ class fetcher(object):
 
 
     def _cb_image_edits(self, data):
-        pass
+        edits = data.get("pages").values()
+
+        # FIXME: self.nshandler might not be initialized
+        local_nsname = self.nshandler.get_nsname_by_number(6)
+        
+        # change title prefix to make them look like local pages
+        for e in edits:
+            title = e.get("title")
+            
+            prefix, partial = title.split(":", 1)
+            e["title"] = "%s:%s" % (local_nsname, partial)
+
+        self.edits.extend(edits)
 
     def _cb_image_contents(self, data):
-        pass
+        # FIXME: self.nshandler might not be initialized
+        local_nsname = self.nshandler.get_nsname_by_number(6)
+        
+        pages = data.get("pages", {}).values()
+        # change title prefix to make them look like local pages
+        for p in pages:    
+            title = p.get("title")
+            prefix, partial = title.split(":", 1)
+            p["title"] = "%s:%s" % (local_nsname, partial)
+            
+        # XXX do we also need to handle redirects here?
+        self.fsout.write_pages(data)
     
     def _cb_got_api(self, api, path):
         todo = self.imagedescription_todo[path]
