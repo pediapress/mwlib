@@ -169,9 +169,6 @@ class mwapi(object):
         url = "%s?%s" % (self.baseurl, q)
         #print "url:", url
         
-        def decode(data):
-            return json.loads(data)
-
         d=defer.Deferred()
         self._todo.append((url, d))
         reactor.callLater(0.0, self._maybe_fetch)
@@ -280,7 +277,7 @@ class mwapi(object):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle)
     
 
-class fsoutput(object):
+class FSOutput(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
         assert not os.path.exists(self.path)
@@ -311,6 +308,9 @@ class fsoutput(object):
 
     def write_excluded(self, excluded):
         self.dump_json(excluded=excluded)
+
+    def write_licenses(self, licenses):
+        self.dump_json(licenses=licenses)
         
     def write_pages(self, data):
         pages = data.get("pages", {}).values()
@@ -342,7 +342,7 @@ class fsoutput(object):
                     self.revfile.write(header)
                     self.revfile.write(txt.encode("utf-8"))
                 # else:    
-                #     print "fsoutput: skipping duplicate:", dict(revid=revid, title=title)
+                #     print "FSOutput: skipping duplicate:", dict(revid=revid, title=title)
 
     def write_edits(self, edits):
         self.dump_json(edits=edits)
@@ -365,8 +365,8 @@ def getblock(lst, limit):
     return r
 
 
-class fetcher(object):
-    def __init__(self, api, fsout, pages,
+class Fetcher(object):
+    def __init__(self, api, fsout, pages, licenses,
                  podclient=None,
                  print_template_pattern=None,
                  template_exclusion_category=None):
@@ -374,6 +374,7 @@ class fetcher(object):
         
         self.api = api
         self.fsout = fsout
+        self.licenses = licenses
         self.podclient = podclient
         self.template_exclusion_category = template_exclusion_category
         self.print_template_pattern = print_template_pattern
@@ -420,7 +421,8 @@ class fetcher(object):
         
         fetch_used("titles", titles)
         fetch_used("revids", revids)
-        
+
+
         self._refcall(lambda: defer.DeferredList(dl).addCallbacks(self._cb_finish_used, self._cb_finish_used))
         
             
@@ -721,6 +723,7 @@ class fetcher(object):
     def finish(self):
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
+        self.fsout.write_licenses(self.licenses)
         self.fsout.close()
         
     def _refcall(self, fun):
@@ -772,10 +775,10 @@ def doit(pages):
     # return
 
     
-    fs = fsoutput("tmp")
+    fs = FSOutput("tmp")
 
     
-    f=fetcher(api, fs, pages)
+    f = Fetcher(api, fs, pages)
     
 def pages_from_metabook(mb):
     articles = metabook.get_item_list(mb, "article")

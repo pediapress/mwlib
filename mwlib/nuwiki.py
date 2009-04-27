@@ -140,7 +140,7 @@ class nuwiki(object):
         return self._loadjson(name+".json")
     
     
-class adapt(object):
+class Adapt(object):
     edits = None
     
     def __init__(self, path_or_instance):
@@ -220,10 +220,12 @@ class adapt(object):
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
 
     def getLinkURL(self, link, title, revision=None):
+        # TODO
+
         return "http://" + link.target
         
     def getLicenses(self):
-        return []
+        return self.nuwiki.get_data('licenses')
 
     def clear(self):
         pass
@@ -232,9 +234,13 @@ class adapt(object):
         return self.nuwiki.normalize_and_get_image_path(name)
 
     def getDescriptionURL(self, name): # for an image
+        # TODO
+
         return "http://"+self.nuwiki.nshandler.get_fqname(name, 6)
 
     def getImageTemplates(self, name, wikidb=None):
+        # TODO
+
         return []
         
     def getContributors(self, name, wikidb=None):

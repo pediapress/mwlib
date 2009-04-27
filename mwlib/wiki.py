@@ -188,7 +188,7 @@ def _makewiki(conf,
 
     if os.path.exists(os.path.join(conf, "siteinfo.json")):
         from mwlib import nuwiki
-        res.images = res.wiki = nuwiki.adapt(conf)
+        res.images = res.wiki = nuwiki.Adapt(conf)
         if metabook is None:
             res.metabook = res.wiki.metabook
         
@@ -212,7 +212,7 @@ def _makewiki(conf,
             
         if format=="nuwiki":
             from mwlib import nuwiki
-            res.images = res.wiki = nuwiki.adapt(zf)
+            res.images = res.wiki = nuwiki.Adapt(zf)
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res

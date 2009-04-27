@@ -65,6 +65,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, **kwa
 
     
     from mwlib import twisted_api
+    from mwlib.metabook import get_licenses
     from twisted.internet import reactor
     
     
@@ -72,7 +73,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, **kwa
 
     
     options.fetcher = None # stupid python
-    fsout = twisted_api.fsoutput(fsdir)
+    fsout = twisted_api.FSOutput(fsdir)
     
     def doit():
         api = twisted_api.mwapi(api_url)
@@ -87,7 +88,8 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, **kwa
         
         pages = twisted_api.pages_from_metabook(metabook)
         
-        options.fetcher = twisted_api.fetcher(api, fsout, pages,
+        options.fetcher = twisted_api.Fetcher(api, fsout, pages,
+                                              licenses=get_licenses(metabook),
                                               podclient=podclient,
                                               print_template_pattern=print_template_pattern,
                                               template_exclusion_category=template_exclusion_category)

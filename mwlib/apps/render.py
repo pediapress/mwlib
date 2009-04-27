@@ -101,7 +101,7 @@ class Main(object):
             
         env = self.parser.makewiki()        
         if ((isinstance(env.wiki, zipwiki.Wiki) and isinstance(env.images, zipwiki.ImageDB))
-            or isinstance(env.wiki, (nuwiki.nuwiki, nuwiki.adapt))):
+            or isinstance(env.wiki, (nuwiki.nuwiki, nuwiki.Adapt))):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
 
