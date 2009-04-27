@@ -1,12 +1,14 @@
 #! /usr/bin/env py.test
 
 from mwlib.refine import core
+from mwlib import nshandling
 
 tokenize = core.tokenize
 show = core.show
 T = core.T
 parse_txt = core.parse_txt
 empty = core.XBunch()
+empty.nshandler = nshandling.get_nshandler_for_lang('de')
 
 
 

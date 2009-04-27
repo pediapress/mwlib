@@ -6,8 +6,13 @@ import os
 import json
 import zipfile
 import tempfile
+import urllib
 
 from mwlib import nshandling, utils
+from mwlib.log import Log
+
+log = Log('nuwiki')
+
 
 class page(object):
     def __init__(self, meta, rawtext):
@@ -142,6 +147,7 @@ class nuwiki(object):
     
 class Adapt(object):
     edits = None
+    interwikimap = None
     
     def __init__(self, path_or_instance):
         if isinstance(path_or_instance, zipfile.ZipFile):
@@ -180,11 +186,17 @@ class Adapt(object):
         if p:
             return p.rawtext
         
-    def getURL(self, name, revision=None):
-        fqtitle = self.nshandler.get_fqname(name)
-        base = self.siteinfo["general"]["base"]
-        return "%s/%s" % (base.rsplit("/", 1)[0], name)
+    def getURL(self, name, revision=None, defaultns=nshandling.NS_MAIN):
+        p = '%(base_url)sindex%(script_extension)s?' % self.nfo
+        if revision is not None:
+            return p + 'oldid=%s' % revision
+        else:
+            fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
+            return p + 'title=%s' % urllib.quote(fqtitle.replace(' ', '_').encode('utf-8'), safe=':/@')
     
+    def getDescriptionURL(self, name):
+        return self.getURL(name, defaultns=nshandling.NS_FILE)
+
     def getAuthors(self, title, revision=None):
         if self.edits is None:
             edits = self.edits = {}
@@ -200,30 +212,26 @@ class Adapt(object):
         return authors
     
     def getSource(self, title, revision=None):
-        res = {}
-        res["script_extension"] = ".php"
-        res["type"] = "source"
-        res["url"] = self.siteinfo["general"]["base"]
-        res["base_url"] = res["url"]
-        res["name"] = self.siteinfo["general"]["lang"]
-        
-        return res
+        from mwlib.metabook import make_source
+
+        g = self.siteinfo['general']
+        return make_source(
+            name='%s (%s)' % (g['sitename'], g['lang']),
+            url=g['base'],
+            language=g['lang'],
+            base_url=self.nfo['base_url'],
+            script_extension=self.nfo['script_extension'],
+        )
 
     def getParsedArticle(self, title, revision=None):
         raw = self.getRawArticle(title, revision=revision)
         if raw is None:
             return None
-        si = self.nuwiki.get_siteinfo()
-        lang = si["general"]["lang"]
-        
+
         from mwlib import uparser        
-        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
 
-    def getLinkURL(self, link, title, revision=None):
-        # TODO
+        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"])
 
-        return "http://" + link.target
-        
     def getLicenses(self):
         return self.nuwiki.get_data('licenses')
 
@@ -233,16 +241,14 @@ class Adapt(object):
     def getDiskPath(self, name, size=None):
         return self.nuwiki.normalize_and_get_image_path(name)
 
-    def getDescriptionURL(self, name): # for an image
-        # TODO
-
-        return "http://"+self.nuwiki.nshandler.get_fqname(name, 6)
-
     def getImageTemplates(self, name, wikidb=None):
-        # TODO
+        from mwlib.expander import get_templates
 
-        return []
-        
+        fqname = self.nshandler.get_fqname(name, 6)
+        page = self.get_page(fqname)
+        if page is not None:
+            return get_templates(page.rawtext)
+
     def getContributors(self, name, wikidb=None):
         fqname = self.nshandler.get_fqname(name, 6)
 
@@ -250,7 +256,6 @@ class Adapt(object):
         if page is not None:
             users = getContributorsFromInformationTemplate(page.rawtext, fqname, self)
             if users:
-                print "GOT:", users
                 return users
 
         return self.getAuthors(fqname)

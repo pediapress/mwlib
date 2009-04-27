@@ -6,7 +6,6 @@
 from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util
 from mwlib import tagext, uniq, nshandling
-from mwlib.namespace import dummy_interwikimap
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 
@@ -477,15 +476,15 @@ class parse_lines(object):
         
 class parse_links(object):
     def __init__(self, tokens, xopts):
+        self.xopts = xopts
         lang = xopts.lang
-        interwikimap = xopts.interwikimap
         imagemod = xopts.imagemod
         
         self.tokens = tokens
         self.lang = lang
-        self.interwikimap = interwikimap
         
-        self.nshandler = nshandling.get_nshandler_for_lang(lang)
+        self.nshandler = xopts.nshandler
+        assert self.nshandler is not None, 'nshandler not set'
         
             
         if imagemod is None:
@@ -540,9 +539,22 @@ class parse_links(object):
                 else:
                     colon = False
 
+                ilink = self.nshandler.resolve_interwiki(target)
+                if ilink:
+                    url = ilink.url
+                    ns = None
+                    partial = ilink.partial
+                    langlink = ilink.language
+                    interwiki = ilink.prefix
+                else:
+                    ns, partial, full = self.nshandler.splitname(target)
+                    if self.xopts.wikidb is not None:
+                        url = self.xopts.wikidb.getURL(full)
+                    else:
+                        url = None
+                    langlink = None
+                    interwiki = None
 
-                ns, partial, full = self.nshandler.splitname(target)
- 
                 if not partial:
                     i+=1
                     if stack:
@@ -550,51 +562,30 @@ class parse_links(object):
                     else:
                         marks=[]                        
                     continue
-                else:
-                    langlink = None
-                    interwiki = None
-                    
-                    if ns==nshandling.NS_MAIN:
-                        # could be an interwiki/language link. -> set ns=None
-                        
-                        if self.interwikimap and ':' in target:
-                            prefix = target.split(":")[0]
-                            r = self.interwikimap.get(prefix.strip().lower(), None)
-                            if r is not None:
-                                ns = None
-                                if 'language' in r:
-                                    langlink = r['language']
-                                else:
-                                    interwiki = r.get('renamed', prefix)
-                                    
-                            if prefix.strip().lower()=="arz":
-                                langlink = "arz"
-                                interwiki = None
-                                ns = None
-                                
-                    node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler)
-                    if langlink:
-                        node.langlink = langlink
-                    if interwiki:
-                        node.interwiki = interwiki
-                        
-                    sub = None
-                    if ns==nshandling.NS_IMAGE:
-                        sub = self.extract_image_modifiers(marks, node)                        
-                    elif len(marks)>2:
-                        sub = tokens[marks[1]+1:marks[-1]]
 
-                    if sub is None:
-                        sub = [] #T(type=T.t_text, start=0, len=0, text=target)]
-                        
-                    node.children = sub
-                    tokens[start:i+1] = [node]
-                    node.target = target
-                    if stack:
-                        marks = stack.pop()
-                    else:
-                        marks = []
-                    i = start+1
+                node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler, url=url)
+                if langlink:
+                    node.langlink = langlink
+                if interwiki:
+                    node.interwiki = interwiki
+                    
+                sub = None
+                if ns==nshandling.NS_IMAGE:
+                    sub = self.extract_image_modifiers(marks, node)                        
+                elif len(marks)>2:
+                    sub = tokens[marks[1]+1:marks[-1]]
+
+                if sub is None:
+                    sub = [] #T(type=T.t_text, start=0, len=0, text=target)]
+                    
+                node.children = sub
+                tokens[start:i+1] = [node]
+                node.target = target
+                if stack:
+                    marks = stack.pop()
+                else:
+                    marks = []
+                i = start+1
             else:
                 i+=1
 
@@ -864,16 +855,8 @@ def parse_txt(txt, xopts=None, **kwargs):
     else:
         xopts.__dict__.update(**kwargs)
         
-    interwikimap = xopts.interwikimap
-    
-    if interwikimap is None:
-        from mwlib.lang import languages
-        interwikimap = {}
-        for prefix, renamed in dummy_interwikimap.items():
-            interwikimap[prefix] = {'renamed': renamed}
-        for lang in languages:
-            interwikimap[lang] = {'language': True}
-    xopts.interwikimap = interwikimap
+    if xopts.nshandler is None:
+        xopts.nshandler = nshandling.get_nshandler_for_lang(xopts.lang or 'en')
     
     xopts.imagemod = util.ImageMod(xopts.magicwords)
 
@@ -882,6 +865,7 @@ def parse_txt(txt, xopts=None, **kwargs):
         uniquifier = uniq.Uniquifier()
         txt = uniquifier.replace_tags(txt)
         xopts.uniquifier = uniquifier
+
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
     
     parsers = [fixlitags,

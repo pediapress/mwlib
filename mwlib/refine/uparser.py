@@ -2,7 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib import expander
+from mwlib import expander, nshandling
 from mwlib.log import Log
 from mwlib.refine import core, compat
 
@@ -14,12 +14,12 @@ def parseString(
     wikidb=None,
     revision=None,
     lang=None,
-    interwikimap=None,
     magicwords=None
 ):
     """parse article with title from raw mediawiki text"""
 
     uniquifier = None
+    siteinfo = None
     assert title is not None, 'no title given'
     if raw is None:
         raw = wikidb.getRawArticle(title, revision=revision)
@@ -28,6 +28,9 @@ def parseString(
         te = expander.Expander(raw, pagename=title, wikidb=wikidb)
         input = te.expandTemplates(True)
         uniquifier = te.uniquifier
+
+        if hasattr(wikidb, 'get_siteinfo'):
+            siteinfo = wikidb.get_siteinfo()
         
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
@@ -40,14 +43,15 @@ def parseString(
             lang = src.get('language')
         if magicwords is None:
             magicwords = src.get('magicwords')
-        
-        if interwikimap is None and hasattr(wikidb, 'getInterwikiMap'):
-            interwikimap = wikidb.getInterwikiMap(title, revision=revision)
     else:
         input = raw
         te = None
         
-    a = compat.parse_txt(input, lang=lang, interwikimap=interwikimap, magicwords=magicwords, uniquifier=uniquifier, expander=te)
+    if siteinfo is None:
+        nshandler = nshandling.get_nshandler_for_lang(lang)
+    else:
+        nshandler = nshandling.nshandler(siteinfo)
+    a = compat.parse_txt(input, wikidb=wikidb, nshandler=nshandler, lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
     
     a.caption = title
     from mwlib.old_uparser import postprocessors

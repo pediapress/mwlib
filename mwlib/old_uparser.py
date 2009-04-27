@@ -58,4 +58,4 @@ def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
     for x in node.children:
         addurls(x, title=title, revision=revision, wikidb=wikidb)
 
-postprocessors = [removeBoilerplate, simplify, addurls]
+postprocessors = [removeBoilerplate, simplify]
