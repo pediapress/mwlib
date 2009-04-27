@@ -114,8 +114,9 @@ class mwapi(object):
     siteinfo = None
     max_retry_count = 2
     
-    def __init__(self, baseurl):
+    def __init__(self, baseurl, script_extension='.php'):
         self.baseurl = baseurl
+        self.script_extension = script_extension
         self._todo = []
         self.num_running = 0
         self.qccount = 0

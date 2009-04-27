@@ -78,11 +78,13 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, **kwa
     def doit():
         api = twisted_api.mwapi(api_url)
         fsout.dump_json(metabook=metabook)
-        nfo = dict(format="nuwiki")
+        nfo = {
+            'format': 'nuwiki',
+            'base_url': base_url,
+            'script_extension': script_extension,
+        }
         if print_template_pattern:
             nfo["print_template_pattern"] = print_template_pattern
-            
-        nfo["script_extension"] = script_extension
          
         fsout.dump_json(nfo=nfo)
         
