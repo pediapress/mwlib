@@ -160,19 +160,14 @@ def _change_classes(node):
                 node.__class__ = N.CategoryLink
             elif ns is not None:
                 node.__class__ = N.NamespaceLink
-            elif node.interwiki:
-                node.__class__ = N.InterwikiLink
-                node.target = node.target.split(":")[1]
-                node.namespace = node.interwiki
             elif node.langlink:
                 node.__class__ = N.LangLink
-                node.namespace, node.target = node.target.split(":", 1)
+                node.namespace = node.target.split(":", 1)[0]
+            elif node.interwiki:
+                node.__class__ = N.InterwikiLink
+                node.namespace = node.interwiki
 
             ns, partial, full = node.nshandler.splitname(node.target)
-            node.target = partial.replace("_", " ").strip()
-            node.full_target = full.replace("_", " ")
-            if N.Link.capitalizeTarget:
-                node.target = node.target[:1].upper()+node.target[1:]
             if node.namespace is None:
                 node.namespace = node.ns
             

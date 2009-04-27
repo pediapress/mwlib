@@ -49,6 +49,7 @@ def fix_wikipedia_siteinfo(siteinfo):
 class nshandler(object):
     def __init__(self, siteinfo):
         self.siteinfo = siteinfo
+        self.capitalize = self.siteinfo['general'].get('case') == 'first-letter'
 
         p = self.prefix2interwiki = {}
         for k in siteinfo["interwikimap"]:
@@ -76,6 +77,11 @@ class nshandler(object):
 
     def get_fqname(self, title, defaultns=0):
         return self.splitname(title, defaultns=defaultns)[2]
+
+    def maybe_capitalize(self, t):
+        if self.capitalize:
+            return t[0:1].upper() + t[1:]
+        return t
     
     def splitname(self, title, defaultns=0):
         name = title.replace("_", " ").strip()
@@ -94,7 +100,7 @@ class nshandler(object):
             suffix = name
             nsnum = defaultns
 
-        suffix="%s%s" % (suffix[:1].upper(), suffix[1:])
+        suffix=self.maybe_capitalize(suffix)
         if prefix:
             prefix += ":"
             

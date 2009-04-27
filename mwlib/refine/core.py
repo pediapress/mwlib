@@ -546,8 +546,13 @@ class parse_links(object):
                     partial = ilink.partial
                     langlink = ilink.language
                     interwiki = ilink.prefix
+                    full = None
                 else:
-                    ns, partial, full = self.nshandler.splitname(target)
+                    if target.startswith('/') and self.xopts.title:
+                        ns, partial, full = self.nshandler.splitname(self.xopts.title + target)
+                    else:
+                        ns, partial, full = self.nshandler.splitname(target)
+
                     if self.xopts.wikidb is not None:
                         url = self.xopts.wikidb.getURL(full)
                     else:
@@ -581,6 +586,7 @@ class parse_links(object):
                 node.children = sub
                 tokens[start:i+1] = [node]
                 node.target = target
+                node.full_target = full
                 if stack:
                     marks = stack.pop()
                 else:

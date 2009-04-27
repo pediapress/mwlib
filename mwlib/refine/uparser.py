@@ -51,7 +51,7 @@ def parseString(
         nshandler = nshandling.get_nshandler_for_lang(lang)
     else:
         nshandler = nshandling.nshandler(siteinfo)
-    a = compat.parse_txt(input, wikidb=wikidb, nshandler=nshandler, lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
+    a = compat.parse_txt(input, title=title, wikidb=wikidb, nshandler=nshandler, lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
     
     a.caption = title
     from mwlib.old_uparser import postprocessors
@@ -60,7 +60,7 @@ def parseString(
     
     return a
 
-def simpleparse(raw):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
-    a=compat.parse_txt(raw)
+def simpleparse(raw,lang=None):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
+    a=compat.parse_txt(raw,lang=lang)
     core.show(a)    
     return a

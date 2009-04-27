@@ -79,7 +79,7 @@ def test_parse_image_inline():
     #img = [x for x in r.allchildren() if isinstance(x, parser.ImageLink)][0]
     #print "IMAGE:", img, img.isInline()
 
-    r=parse(u'{| cellspacing="2" border="0" cellpadding="3" bgcolor="#EFEFFF" width="100%"\n|-\n| width="12%" bgcolor="#EEEEEE"| 9. Juli 2006\n| width="13%" bgcolor="#EEEEEE"| Berlin\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of Italy.svg|30px]] \'\'\'Italien\'\'\'\n| width="3%" bgcolor="#EEEEEE"| \u2013\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of France.svg|30px]] Frankreich\n| width="3%" bgcolor="#EEEEEE"|\n| width="25%" bgcolor="#EEEEEE"| [[Fu\xdfball-Weltmeisterschaft 2006/Finalrunde#Finale: Italien .E2.80.93 Frankreich 6:4 n. E..2C 1:1 n. V. .281:1.2C 1:1.29|6:4 n. E., (1:1, 1:1, 1:1)]]\n|}\n')
+    r=parse(u'{| cellspacing="2" border="0" cellpadding="3" bgcolor="#EFEFFF" width="100%"\n|-\n| width="12%" bgcolor="#EEEEEE"| 9. Juli 2006\n| width="13%" bgcolor="#EEEEEE"| Berlin\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of Italy.svg|30px]] \'\'\'Italien\'\'\'\n| width="3%" bgcolor="#EEEEEE"| \u2013\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of France.svg|30px]] Frankreich\n| width="3%" bgcolor="#EEEEEE"|\n| width="25%" bgcolor="#EEEEEE"| [[Fu\xdfball-Weltmeisterschaft 2006/Finalrunde#Finale: Italien .E2.80.93 Frankreich 6:4 n. E..2C 1:1 n. V. .281:1.2C 1:1.29|6:4 n. E., (1:1, 1:1, 1:1)]]\n|}\n', lang='de')
     images = r.find(parser.ImageLink)
 
     assert len(images)==2
@@ -90,7 +90,7 @@ def test_parse_image_inline():
 
 def test_parse_image_6():
     """http://code.pediapress.com/wiki/ticket/6"""
-    r=parse("[[Bild:img.jpg|thumb|+some text]] [[Bild:img.jpg|thumb|some text]]")
+    r=parse("[[Bild:img.jpg|thumb|+some text]] [[Bild:img.jpg|thumb|some text]]", lang='de')
 
     images = r.find(parser.ImageLink)
     assert len(images)==2
@@ -685,7 +685,7 @@ def test_text_caption_none_bug():
         assert x.caption is not None
 
 def test_link_inside_gallery():
-    links = parse("<gallery>Bild:Guanosinmonophosphat protoniert.svg|[[Guanosinmonophosphat]] <br /> (GMP)</gallery>").find(parser.Link)
+    links = parse("<gallery>Bild:Guanosinmonophosphat protoniert.svg|[[Guanosinmonophosphat]] <br /> (GMP)</gallery>", lang='de').find(parser.Link)
     print links
     assert len(links)==2, "expected 2 links"
     
@@ -738,59 +738,53 @@ def test_piped_link():
 
 def test_category_link():
     r=parse("[[category:bla]]").find(parser.CategoryLink)[0]
-    assert r.target=='bla', "wrong target"
+    assert r.target=='category:bla', "wrong target"
     assert r.namespace == 14, "wrong namespace"
 
 def test_category_colon_link():
     r=parse("[[:category:bla]]").find(parser.SpecialLink)[0]
-    assert r.target=='bla', "wrong target"
+    assert r.target=='category:bla', "wrong target"
     assert r.namespace == 14, "wrong namespace"
     assert not isinstance(r, parser.CategoryLink)
 
 def test_image_link():
     t = uparser.parseString('', u'[[画像:Tajima mihonoura03s3200.jpg]]', lang='ja')
     r = t.find(parser.ImageLink)[0]
-    assert r.target == u'Tajima mihonoura03s3200.jpg'
+    assert r.target == u'画像:Tajima mihonoura03s3200.jpg'
     assert r.namespace == 6, "wrong namespace"
 
 def test_image_colon_link():
     r=parse("[[:image:bla.jpg]]").find(parser.SpecialLink)[0]
-    assert r.target=='bla.jpg'
+    assert r.target=='image:bla.jpg'
     assert r.namespace == 6, "wrong namespace"
     assert not isinstance(r, parser.ImageLink), "should not be an image link"
 
 def test_interwiki_link():
     r=parse("[[wikt:bla]]").find(parser.InterwikiLink)[0]
-    assert r.target=='bla', "wrong target"
-    assert r.namespace == 'wiktionary', "wrong namespace"
+    assert r.target=='wikt:bla', "wrong target"
+    assert r.namespace == 'wikt', "wrong namespace"
     r=parse("[[mw:bla]]").find(parser.InterwikiLink)[0]
-    assert r.target=='bla', "wrong target"
+    assert r.target=='mw:bla', "wrong target"
     assert r.namespace == 'mw', "wrong namespace"
 
 def test_language_link():
     r=parse("[[es:bla]]").find(parser.LangLink)[0]
-    assert r.target=='bla', "wrong target"
+    assert r.target=='es:bla', "wrong target"
     assert r.namespace == 'es', "wrong namespace"
 
 def test_long_language_link():
     r=parse("[[csb:bla]]").find(parser.LangLink)[0]
-    assert r.target=='bla', "wrong target"
+    assert r.target=='csb:bla', "wrong target"
     assert r.namespace == 'csb', "wrong namespace"
 
 def test_subpage_link():
     r = parse('[[/SomeSubPage]]').find(parser.ArticleLink)[0]
     assert r.target == '/SomeSubPage', "wrong target"
 
+@xfail
 def test_normalize():
-    r=parse("[[MediaWiki:__bla_ _]]").find(parser.NamespaceLink)[0]
-    assert r.target=='bla'
-    assert r.namespace == 8
-
-def test_normalize_with_caps():
-    parser.Link.capitalizeTarget = True
     r=parse("[[MediaWiki:__bla_ _ ]]").find(parser.NamespaceLink)[0]
-    parser.Link.capitalizeTarget = False
-    assert r.target=='Bla'
+    assert r.target=='MediaWiki:__bla_ _ '
     assert r.namespace == 8
 
 def test_quotes_in_tags():
@@ -1079,7 +1073,7 @@ def test_imagemod_upright():
     """http://code.pediapress.com/wiki/ticket/459"""
 
     def doit(s, expected):
-        up = parse(s).find(parser.ImageLink)[0].upright
+        up = parse(s, lang='de').find(parser.ImageLink)[0].upright
         assert up==expected, 'expected %s got %s' % (expected, up)
 
     yield doit,"[[Datei:bla.jpg|upright|thumb|foobar]]", 0.75
