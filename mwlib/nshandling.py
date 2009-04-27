@@ -33,6 +33,17 @@ class ilink(object):
     prefix = ""
     local = ""
     language = ""
+
+def fix_wikipedia_siteinfo(siteinfo):
+    prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
+    if 'arz' in prefixes:
+        return
+    siteinfo['interwikimap'].append({
+        'prefix': 'arz',
+        'language': 'arz',
+        'url': 'http://arz.wikipedia.org/wiki/$1',
+        'local': '',
+    })
     
 # TODO: build fast lookup table for use in nshandler.splitname
 class nshandler(object):
@@ -42,6 +53,9 @@ class nshandler(object):
         p = self.prefix2interwiki = {}
         for k in siteinfo["interwikimap"]:
             p[k["prefix"]] = k
+
+        if siteinfo['general']['sitename'] == 'Wikipedia':
+            fix_wikipedia_siteinfo(siteinfo)
         
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
