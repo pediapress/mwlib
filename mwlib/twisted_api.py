@@ -676,7 +676,7 @@ class Fetcher(object):
             return defer.succeed(self.api)
 
         if path in self.basepath2mwapi:
-            return defer.succed(self.basepath2mwapi[path])
+            return defer.succeed(self.basepath2mwapi[path])
         
         
         dlist = []
