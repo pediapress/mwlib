@@ -148,6 +148,45 @@ class nuwiki(object):
         return self._loadjson(name+".json")
     
     
+def extract_member(zipfile, member, targetpath):
+    """Copied from Python 2.6 stdlib zipfile.py module.
+
+       Extract the ZipInfo object 'member' to a physical
+       file on the path targetpath.
+    """
+
+    import shutil
+
+    # build the destination pathname, replacing
+    # forward slashes to platform specific separators.
+    if targetpath[-1:] in (os.path.sep, os.path.altsep):
+        targetpath = targetpath[:-1]
+
+    # don't include leading "/" from file name if present
+    if member.filename[0] == '/':
+        targetpath = os.path.join(targetpath, member.filename[1:])
+    else:
+        targetpath = os.path.join(targetpath, member.filename)
+
+    targetpath = os.path.normpath(targetpath)
+
+    # Create all upper directories if necessary.
+    upperdirs = os.path.dirname(targetpath)
+    if upperdirs and not os.path.exists(upperdirs):
+        os.makedirs(upperdirs)
+
+    if member.filename[-1] == '/':
+        os.mkdir(targetpath)
+        return targetpath
+
+    source = self.open(member, pwd=pwd)
+    target = file(targetpath, "wb")
+    shutil.copyfileobj(source, target)
+    source.close()
+    target.close()
+
+    return targetpath
+
 class Adapt(object):
     edits = None
     interwikimap = None
@@ -156,8 +195,12 @@ class Adapt(object):
         if isinstance(path_or_instance, zipfile.ZipFile):
             zf = path_or_instance
             tmpdir = tempfile.mkdtemp()
-            # os.mkdir(os.path.join(tmpdir, "images"))
-            zf.extractall(tmpdir)
+            if hasattr(zf, 'extractall'):
+                zf.extractall(tmpdir) # only available in Python >= 2.6
+            else:
+                for zipinfo in zf.infolist():
+                    extract_member(zf, zipinfo, tmpdir)
+
             path_or_instance = tmpdir
             
                 
