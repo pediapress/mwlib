@@ -147,13 +147,13 @@ class ZipCreator(object):
         stats = self.node_stats
         for node in parse_tree.allchildren():
             if isinstance(node, parser.ImageLink):
-                self.image_infos.add((node.target, imagedb, wikidb))
+                self.image_infos.add((node.target.split(':', 1)[1], imagedb, wikidb))
             elif isinstance(node, parser.TagNode) and node.caption == 'imagemap':
                 imagemap = getattr(node, 'imagemap', None)
                 if imagemap is not None:
                     imagelink = getattr(imagemap, 'imagelink', None)
                     if imagelink is not None:
-                        self.image_infos.add((imagelink.target, imagedb, wikidb))
+                        self.image_infos.add((imagelink.target.split(':', 1)[1], imagedb, wikidb))
             # stats
             k, w  = utils.get_nodeweight(node)
             stats[k] = stats.get(k, 0) + w
@@ -230,7 +230,7 @@ class ZipCreator(object):
             images=self.images,
             licenses=self.licenses,
         )
-        self.addObject('content.json', json.dumps(data))
+        self.addObject('content.json', json.dumps(data, indent=4))
 
     
     def fetchArticle(self, title, revision, wikidb):
@@ -386,11 +386,11 @@ def make_zip_file(output, env,
         # fetched -- PDFs should be generated nevertheless
         #z.check(articles)
 
-        z.addObject('metabook.json', json.dumps(env.metabook))
+        z.addObject('metabook.json', json.dumps(env.metabook, indent=4))
 
         # add stats for later analysis
         z.node_stats["Chapter"] = len(metabook.get_item_list(env.metabook, filter_type='chapter'))
-        z.addObject('node_stats.json', json.dumps(z.node_stats)) 
+        z.addObject('node_stats.json', json.dumps(z.node_stats, indent=4)) 
 
         zf.close()
         if os.path.exists(output): # Windows...
