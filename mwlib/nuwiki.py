@@ -3,10 +3,13 @@
 # See README.txt for additional licensing information.
 
 import os
-import json
 import zipfile
 import tempfile
 import urllib
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 from mwlib import nshandling, utils
 from mwlib.log import Log
