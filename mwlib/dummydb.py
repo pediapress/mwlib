@@ -8,3 +8,6 @@ class DummyDB(object):
 
     def getTemplate(self, name, followRedirects=False):
         return None
+
+    def getURL(self, title, revision=None):
+        return None
