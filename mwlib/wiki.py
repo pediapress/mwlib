@@ -201,7 +201,10 @@ def _makewiki(conf,
         
     if conf.lower().endswith(".zip"):
         import zipfile
-        import json
+        try:
+            import simplejson as json
+        except ImportError:
+            import json
         conf = os.path.abspath(conf)
         
         zf = zipfile.ZipFile(conf)
