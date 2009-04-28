@@ -149,13 +149,11 @@ class nuwiki(object):
     
     
 def extract_member(zipfile, member, targetpath):
-    """Copied from Python 2.6 stdlib zipfile.py module.
+    """Copied and adjusted from Python 2.6 stdlib zipfile.py module.
 
        Extract the ZipInfo object 'member' to a physical
        file on the path targetpath.
     """
-
-    import shutil
 
     # build the destination pathname, replacing
     # forward slashes to platform specific separators.
@@ -177,15 +175,8 @@ def extract_member(zipfile, member, targetpath):
 
     if member.filename[-1] == '/':
         os.mkdir(targetpath)
-        return targetpath
-
-    source = zipfile.open(member, pwd=pwd)
-    target = file(targetpath, "wb")
-    shutil.copyfileobj(source, target)
-    source.close()
-    target.close()
-
-    return targetpath
+    else:
+        open(targetpath, 'wb').write(zipfile.read(member.filename))
 
 class Adapt(object):
     edits = None
