@@ -179,7 +179,7 @@ def extract_member(zipfile, member, targetpath):
         os.mkdir(targetpath)
         return targetpath
 
-    source = self.open(member, pwd=pwd)
+    source = zipfile.open(member, pwd=pwd)
     target = file(targetpath, "wb")
     shutil.copyfileobj(source, target)
     source.close()
