@@ -139,8 +139,8 @@ def main():
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
         action='store_true',
     )
-    parser.add_option('-f', '--fastzipcreator',
-        help='Use experimental new fzipcreator code',
+    parser.add_option('--oldzipcreator',
+        help='Use old zipcreator code',
         action='store_true',
     )
     options, args = parser.parse_args()
@@ -192,14 +192,10 @@ def main():
             status(progress=0)
             output = options.output
             
-            if isinstance(env.wiki, mwapidb.WikiDB):
+            if not options.oldzipcreator and isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
             else:    
-                if options.fastzipcreator:
-                    import mwlib.fzipcreator as zipcreator
-                else:
-                    from mwlib import zipcreator
-
+                from mwlib import zipcreator
 
                 filename = zipcreator.make_zip_file(options.output, env,
                     status=status,
