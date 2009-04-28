@@ -86,4 +86,8 @@ class RecordDB(object):
     
     def getSource(self, title, revision=None):
         return self.db.getSource(title, revision=revision)
+
+    def getURL(self, title, revision=None):
+        return self.db.getURL(title, revision=revision)
+
     
