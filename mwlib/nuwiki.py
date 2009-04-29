@@ -288,6 +288,8 @@ class Adapt(object):
         page = self.get_page(fqname)
         if page is not None:
             return get_templates(page.rawtext)
+        print 'no such image: %r' % fqname
+        return []
 
     def getContributors(self, name, wikidb=None):
         fqname = self.nshandler.get_fqname(name, 6)
