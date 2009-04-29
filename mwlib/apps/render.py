@@ -106,10 +106,8 @@ class Main(object):
             return env
 
         from mwlib.apps.buildzip import hack
-        self.zip_filename = hack(options=self.options, env=env, podclient=None, status=self.status)
-        # FIXME: keep zip ???
-        
-        
+        self.zip_filename = hack(output=self.options.keep_zip, options=self.options, env=env, podclient=None, status=self.status, keep_tmpfiles=self.options.keep_tmpfiles)
+
         if env.images:
             try:
                 env.images.clear()

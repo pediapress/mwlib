@@ -43,7 +43,7 @@ def zipdir(dirname, output=None):
     finally:
         os.chdir(cwd)
         
-def hack(output=None, options=None, env=None, podclient=None, status=None, **kwargs):
+def hack(output=None, options=None, env=None, podclient=None, status=None, keep_tmpfiles=False, **kwargs):
     imagesize = options.imagesize
     metabook = env.metabook
     base_url = env.wiki.api_helper.base_url
@@ -121,6 +121,10 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, **kwa
         filename = tempfile.mktemp(suffix=".zip")
         
     zipdir(fsdir, filename)
+
+    if not keep_tmpfiles:
+        print 'removing %r' % fsdir
+        shutil.rmtree(fsdir, ignore_errors=True)
     
     if podclient:                
         status(status='uploading', progress=0)
@@ -142,6 +146,11 @@ def main():
     parser.add_option('--oldzipcreator',
         help='Use old zipcreator code',
         action='store_true',
+    )
+    parser.add_option('--keep-tmpfiles',                  
+        action='store_true',
+        default=False,
+        help="don't remove  temporary files like images",
     )
     options, args = parser.parse_args()
     
@@ -191,6 +200,7 @@ def main():
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)
             output = options.output
+            keep_tmpfiles = options.keep_tmpfiles
             
             if not options.oldzipcreator and isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
