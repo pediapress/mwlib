@@ -307,7 +307,7 @@ class Adapt(object):
 
 
 def getContributorsFromInformationTemplate(raw, title, wikidb):
-    from mwlib.expander import find_template, get_template_args, Expander
+    from mwlib.expander import find_template, get_templates, get_template_args, Expander
     from mwlib import uparser, parser, advtree
     
     def getUserLinks(raw):
@@ -324,19 +324,37 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
         result.sort()
         return result
 
-    expander = Expander(u'', title, wikidb)       
-    template = find_template(raw, 'Information')
-    if template is not None:
-        author = get_template_args(template, expander).get('Author', '').strip()
-        if author:
-            users = getUserLinks(author)
-            if users:
-                users = list(set(users))
-                users.sort()
-                return users
+    def get_authors_from_template_args(template):
+        args = get_template_args(template, expander)
 
-            node = uparser.parseString('', raw=author, wikidb=wikidb)
+        author_arg = args.get('Author', None)
+        if author_arg:
+            userlinks = getUserLinks(author_arg)
+            if userlinks:
+                return userlinks
+            node = uparser.parseString('', raw=args['Author'], wikidb=wikidb)
             advtree.extendClasses(node)
             return [node.getAllDisplayText()]
+
+        if args.args:
+            return getUserLinks('\n'.join([args.get(i, u'') for i in range(len(args.args))]))
+        
+        return []
+
+    expander = Expander(u'', title, wikidb)       
+
+    template = find_template(raw, 'Information')
+    if template is not None:
+        authors = get_authors_from_template_args(template)
+        if authors:
+            return authors
+
+    authors = []
+    for template in get_templates(raw):
+        t = find_template(raw, template)
+        if t is not None:
+            authors.extend(get_authors_from_template_args(t))
+    if authors:
+        return authors
 
     return getUserLinks(raw)
