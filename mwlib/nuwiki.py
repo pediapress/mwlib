@@ -86,7 +86,10 @@ class nuwiki(object):
     
     def get_page(self, name, revision=None):
         if revision is not None:
-            return self.revisions.get(revision)
+            try:
+                return self.revisions.get(int(revision))
+            except TypeError:
+                print "Warning: non-integer revision %r" % revision
         
         name = self.redirects.get(name, name)
         
