@@ -84,7 +84,7 @@ class nshandler(object):
         return t
     
     def splitname(self, title, defaultns=0):
-        name = title.replace("_", " ").strip()
+        name = title.replace("_", " ").replace('  ', ' ').strip()
         if name.startswith(":"):
             name = name[1:].strip()
 
