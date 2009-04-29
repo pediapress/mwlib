@@ -238,16 +238,18 @@ class Adapt(object):
         return self.getURL(name, defaultns=nshandling.NS_FILE)
 
     def getAuthors(self, title, revision=None):
+        from mwlib.authors import get_authors
+        
         if self.edits is None:
             edits = self.edits = {}
             for edit in self.nuwiki.get_data("edits") or []:
-                title = edit.get("title")
-                revisions = edit.get("revisions")
-                edits[title] = revisions
-        
+                try:
+                    edits[edit['title']] = edit.get("revisions")
+                except KeyError:
+                    continue
+
         fqname = self.nshandler.get_fqname(title)
         revisions = self.edits.get(fqname, [])
-        from mwlib.authors import get_authors
         authors = get_authors(revisions)
         return authors
     

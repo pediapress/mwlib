@@ -245,10 +245,8 @@ class mwapi(object):
         return self.do_request(action="query", **kwargs)
 
     def fetch_imageinfo(self, titles, iiurlwidth=800):
-
         kwargs = dict(prop="imageinfo",
-                      iiprop="url|user|comment|url|sha1|metadata|templates",
-                      # iiprop="url",
+                      iiprop="url|user|comment|url|sha1|metadata|size",
                       iiurlwidth=iiurlwidth)
         
         self._update_kwargs(kwargs, titles, [])
@@ -268,13 +266,6 @@ class mwapi(object):
 
         return self.do_request(action="query", **kwargs)
         
-    def get_imageinfo(self, titles):
-        kwargs = dict(prop="imageinfo",
-                      iiprop="user|comment|url|sha1|metadata|templates",
-                      titles="|".join(titles))
-        return self.do_request(action="query", **kwargs)
-        
-
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle)
     
@@ -584,6 +575,7 @@ class Fetcher(object):
             thumburl = ii.get("thumburl", None)
             # FIXME limit number of parallel downloads
             if thumburl:
+                # FIXME: add Callback that checks correct file size
                 self._refcall(lambda: client.downloadPage(str(thumburl), self.fsout.get_imagepath(title)))
 
                 descriptionurl = ii.get("descriptionurl", "")
