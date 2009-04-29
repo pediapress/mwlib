@@ -110,7 +110,7 @@ class mwapi(object):
     api_result_limit = 500 # 5000 for bots
     api_request_limit = 20 # at most 50 titles at once
 
-    max_connections = 20
+    max_connections = 3 
     siteinfo = None
     max_retry_count = 2
     
@@ -121,8 +121,9 @@ class mwapi(object):
         self.num_running = 0
         self.qccount = 0
         
-        
     def idle(self):
+        """Return whether another connection is possible at the moment"""
+
         return self.num_running < self.max_connections
 
     def _fetch(self, url):
@@ -353,6 +354,8 @@ class FSOutput(object):
         
                         
 def splitblocks(lst, limit):
+    """Split list lst in blocks of max. lmit entries. Return list of blocks."""
+
     res = []
     start = 0
     while start<len(lst):
@@ -361,6 +364,8 @@ def splitblocks(lst, limit):
     return res
 
 def getblock(lst, limit):
+    """Return first limit entries from list lst and remove them from the list"""
+
     r = lst[-limit:]
     del lst[-limit:]
     return r
@@ -728,6 +733,10 @@ class Fetcher(object):
         self.fsout.close()
         
     def _refcall(self, fun):
+        """Increment refcount, schedule call of fun (returns Deferred)
+        decrement refcount after fun has finished.
+        """
+
         self._incref()
         try:
             d=fun()
@@ -735,7 +744,6 @@ class Fetcher(object):
         except:
             print "function failed"
             raise
-            assert 0, "internal error"
         return d.addCallbacks(self._decref, self._decref)
         
     def _incref(self):
