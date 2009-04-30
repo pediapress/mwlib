@@ -2,6 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import evaluate
 
 class DictDB(object):
@@ -18,12 +19,19 @@ class DictDB(object):
         for k, v in self.d.items():
             normd[k.lower()] = v
         self.d = normd
+
+        self.siteinfo = get_siteinfo('de')
         
     def getRawArticle(self, title, revision=None):
         return self.d[title.lower()]
 
     def getTemplate(self, title, dummy):
         return self.d.get(title.lower(), u"")
+
+    def get_siteinfo(self):
+        return self.siteinfo
+
+
     
 def expandstr(s, expected=None, wikidb=None, pagename='thispage'):
     """debug function. expand templates in string s"""
