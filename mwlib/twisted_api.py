@@ -110,7 +110,7 @@ class mwapi(object):
     api_result_limit = 500 # 5000 for bots
     api_request_limit = 20 # at most 50 titles at once
 
-    max_connections = 3 
+    max_connections = 20
     siteinfo = None
     max_retry_count = 2
     
