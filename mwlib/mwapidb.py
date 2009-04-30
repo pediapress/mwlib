@@ -611,6 +611,8 @@ class WikiDB(wikidbbase.WikiDBBase):
     bot_rex = re.compile(r'bot', re.IGNORECASE)
     redirect_rex = re.compile(r'^#redirect:?\s*?\[\[.*?\]\]', re.IGNORECASE)
     magicwords = None
+    siteinfo = None
+
     def __init__(self,
         base_url=None,
         username=None,
@@ -926,12 +928,13 @@ class WikiDB(wikidbbase.WikiDBBase):
         if self.source is not None:
             return self.source
         try:
-            result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases|magicwords')
+            result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases|interwikimap|magicwords')
         except QueryWarningError:
-            result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases')
+            result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|namespacealiases|interwikimap')
         if result is None:
             return None
-        result = result['query']
+        self.siteinfo = result = result['query']
+        print result
         try:
             g = result['general']
             self.source = metabook.make_source(
@@ -953,6 +956,11 @@ class WikiDB(wikidbbase.WikiDBBase):
             return self.source
         except KeyError:
             return None
+
+    def get_siteinfo(self):
+        if self.siteinfo is None:
+            self.getSource(None)
+        return self.siteinfo
     
     def getInterwikiMap(self, title, revision=None):
         """Return interwiki map for article with given title and revision
@@ -965,15 +973,10 @@ class WikiDB(wikidbbase.WikiDBBase):
         
         if hasattr(self, 'interwikimap'):
             return self.interwikimap
+        if self.siteinfo is None:
+            self.getSource()
         self.interwikimap = {}
-        result = self.api_helper.query(
-            meta='siteinfo',
-            siprop='interwikimap',
-        )
-        if not result:
-            return
-        result = result['query']
-        result = result.get('interwikimap', [])
+        result = self.siteinfo.get('interwikimap', [])
         if not result:
             return
         for entry in result:

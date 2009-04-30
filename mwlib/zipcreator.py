@@ -229,6 +229,7 @@ class ZipCreator(object):
             sources=self.sources,
             images=self.images,
             licenses=self.licenses,
+            siteinfo=self.siteinfo,
         )
         self.addObject('content.json', json.dumps(data, indent=4))
 
@@ -364,6 +365,7 @@ def make_zip_file(output, env,
 
         z.getLicenses(env)
         
+        have_siteinfo = False
         for item in articles:
             d = mwapidb.parse_article_url(item['title'].encode('utf-8'))
             if d is not None:
@@ -379,6 +381,9 @@ def make_zip_file(output, env,
                 wikidb=wikidb,
                 imagedb=imagedb,
             )
+            if not have_siteinfo:
+                z.siteinfo = wikidb.get_siteinfo()
+                have_siteinfo = True
 
         z.join()
 

@@ -90,4 +90,7 @@ class RecordDB(object):
     def getURL(self, title, revision=None):
         return self.db.getURL(title, revision=revision)
 
+    def get_siteinfo(self):
+        return self.db.get_siteinfo()
+
     

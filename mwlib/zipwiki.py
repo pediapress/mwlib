@@ -37,6 +37,7 @@ class Wiki(wikidbbase.WikiDBBase):
         self.templates = content.get('templates', {})
         self.sources = content.get('sources', {})
         self.licenses = content.get('licenses', None)
+        self.siteinfo = content.get('siteinfo', None)
     
     def _getArticle(self, title, revision=None):
         try:
@@ -64,6 +65,12 @@ class Wiki(wikidbbase.WikiDBBase):
             return self.sources[article['source-url']]
         except KeyError:
             return None
+
+    def get_siteinfo(self):
+        if self.siteinfo is not None:
+            return self.siteinfo
+        from mwlib.siteinfo import get_siteinfo
+        return get_siteinfo('en')
     
     def getInterwikiMap(self, title, revision=None):
         """Return interwikimap for given article and revision
