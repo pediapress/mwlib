@@ -7,6 +7,9 @@ namespace handling based on data extracted from the siteinfo as
 returned by api.php
 """
 
+import re
+
+
 NS_MEDIA          = -2
 NS_SPECIAL        = -1
 NS_MAIN           =  0
