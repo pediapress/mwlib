@@ -80,6 +80,10 @@ class OptionParser(optparse.OptionParser):
             help='script extension for PHP scripts (default: .php)',
             default='.php',
         )
+        self.add_option('--oldzipcreator',
+            help='Use the old zipcreator code',
+            action='store_true',
+        )
     
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)

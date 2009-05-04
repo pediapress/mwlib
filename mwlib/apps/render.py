@@ -44,10 +44,6 @@ class Main(object):
         parser.add_option('-L', '--language',
             help='use translated strings in LANGUAGE',
         )
-        parser.add_option('-f', '--fastzipcreator',
-            help='Use experimental new fzipcreator code',
-            action='store_true',
-        )
         options, args = parser.parse_args()
         return options, args, parser
     
@@ -94,19 +90,22 @@ class Main(object):
         from mwlib.status import Status
         from mwlib import zipwiki, nuwiki
         
-        if self.options.fastzipcreator:
-            from mwlib import fzipcreator as zipcreator
-        else:
-            from mwlib import zipcreator
-            
         env = self.parser.makewiki()        
         if ((isinstance(env.wiki, zipwiki.Wiki) and isinstance(env.images, zipwiki.ImageDB))
             or isinstance(env.wiki, (nuwiki.nuwiki, nuwiki.Adapt))):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
 
-        from mwlib.apps.buildzip import hack
-        self.zip_filename = hack(output=self.options.keep_zip, options=self.options, env=env, podclient=None, status=self.status, keep_tmpfiles=self.options.keep_tmpfiles)
+        if self.options.oldzipcreator:
+            from mwlib import zipcreator
+            self.zip_filename = zipcreator.make_zip_file(self.options.keep_zip, env,
+                status=self.status,
+                num_threads=self.options.num_threads,
+                imagesize=self.options.imagesize,
+            )
+        else:
+            from mwlib.apps.buildzip import hack
+            self.zip_filename = hack(output=self.options.keep_zip, options=self.options, env=env, status=self.status, keep_tmpfiles=self.options.keep_tmpfiles)
 
         if env.images:
             try:

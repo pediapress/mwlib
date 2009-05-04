@@ -143,10 +143,6 @@ def main():
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
         action='store_true',
     )
-    parser.add_option('--oldzipcreator',
-        help='Use old zipcreator code',
-        action='store_true',
-    )
     parser.add_option('--keep-tmpfiles',                  
         action='store_true',
         default=False,
