@@ -682,12 +682,16 @@ class Fetcher(object):
             m.max_retry_count = 1
             dlist.append(m.get_siteinfo().addCallback(lambda siteinfo, api=m: (api, siteinfo)))
 
-        def got_api(((api, siteinfo), idx)):
-            api.max_retry_count = 2
-            self.basepath2mwapi[path] = api
-            return api
+        def got_api(results):
+            for r in results:
+                if r[0]:
+                    api, siteinfo = r[1]
+                    api.max_retry_count = 2
+                    self.basepath2mwapi[path] = api
+                    return api
+            return self.api # FIXME: better would be returning None, skipping images (?)
                    
-        return defer.DeferredList(dlist, fireOnOneCallback=True, consumeErrors=True).addCallback(got_api)
+        return defer.DeferredList(dlist, consumeErrors=True).addCallback(got_api)
             
     def dispatch(self):
         limit = self.api.api_request_limit
