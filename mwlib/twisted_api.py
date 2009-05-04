@@ -576,6 +576,8 @@ class Fetcher(object):
             # FIXME limit number of parallel downloads
             if thumburl:
                 # FIXME: add Callback that checks correct file size
+                if thumburl.startswith('/'):
+                    thumburl = urlparse.urljoin(self.api.baseurl, thumburl)
                 self._refcall(lambda: client.downloadPage(str(thumburl), self.fsout.get_imagepath(title)))
 
                 descriptionurl = ii.get("descriptionurl", "")
@@ -689,6 +691,7 @@ class Fetcher(object):
                     api.max_retry_count = 2
                     self.basepath2mwapi[path] = api
                     return api
+            self.basepath2mwapi[path] = self.api
             return self.api # FIXME: better would be returning None, skipping images (?)
                    
         return defer.DeferredList(dlist, consumeErrors=True).addCallback(got_api)
