@@ -48,6 +48,9 @@ class FakeDB(object):
     
     def getSource(self, name, revision=None):
         return {}
+
+    def get_siteinfo(self):
+        return None
     
 
 class TestZipCreator(object):

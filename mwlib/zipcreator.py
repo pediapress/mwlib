@@ -69,6 +69,7 @@ class ZipCreator(object):
         else:
             self.jobsched = jobsched.DummyJobScheduler()
         self.article_jobs = []
+        self.siteinfo = None
     
     def addObject(self, name, value):
         """Add a file with name and contents value to the ZIP file
