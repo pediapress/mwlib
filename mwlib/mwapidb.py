@@ -973,7 +973,7 @@ class WikiDB(wikidbbase.WikiDBBase):
         if hasattr(self, 'interwikimap'):
             return self.interwikimap
         if self.siteinfo is None:
-            self.getSource()
+            self.getSource(None)
         self.interwikimap = {}
         result = self.siteinfo.get('interwikimap', [])
         if not result:
