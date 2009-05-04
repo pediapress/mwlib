@@ -934,7 +934,6 @@ class WikiDB(wikidbbase.WikiDBBase):
         if result is None:
             return None
         self.siteinfo = result = result['query']
-        print result
         try:
             g = result['general']
             self.source = metabook.make_source(
