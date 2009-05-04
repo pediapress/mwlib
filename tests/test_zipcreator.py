@@ -50,7 +50,8 @@ class FakeDB(object):
         return {}
 
     def get_siteinfo(self):
-        return None
+        from mwlib.siteinfo import get_siteinfo
+        return get_siteinfo('de')
     
 
 class TestZipCreator(object):
