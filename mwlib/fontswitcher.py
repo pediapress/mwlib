@@ -6,7 +6,6 @@
 
 import re
 import os
-import string
 
 class Scripts(object):
 
