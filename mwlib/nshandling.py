@@ -87,6 +87,9 @@ class nshandler(object):
         return t
     
     def splitname(self, title, defaultns=0):
+        if not isinstance(title, unicode):
+            title = unicode(title, 'utf-8')
+
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
             name = name[1:].strip()
