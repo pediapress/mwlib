@@ -42,7 +42,10 @@ def parseString(
         if lang is None:
             lang = src.get('language')
         if magicwords is None:
-            magicwords = src.get('magicwords')
+            if 'magicwords' in siteinfo:
+                magicwords = siteinfo['magicwords']
+            else:
+                magicwords = src.get('magicwords')
     else:
         input = raw
         te = None
