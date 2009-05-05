@@ -173,8 +173,8 @@ class Main(object):
         if options.pid_file:
             open(options.pid_file, 'wb').write('%d\n' % os.getpid())
 
-        self.status = status = Status(options.status_file, progress_range=(1, 70))
-        status(progress=0)
+        self.status = Status(options.status_file, progress_range=(1, 70))
+        self.status(progress=0)
 
         env = None
         try:
@@ -183,19 +183,19 @@ class Main(object):
                 
                 fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
                 os.close(fd)
-                writer(env, output=tmpout, status_callback=status, **writer_options)
+                writer(env, output=tmpout, status_callback=self.status, **writer_options)
                 os.rename(tmpout, options.output)
                 kwargs = {}
                 if hasattr(writer, 'content_type'):
                     kwargs['content_type'] = writer.content_type
                 if hasattr(writer, 'file_extension'):
                     kwargs['file_extension'] = writer.file_extension
-                status(status='finished', progress=100, **kwargs)
+                self.status(status='finished', progress=100, **kwargs)
                 if options.keep_zip is None and self.zip_filename is not None:
                     utils.safe_unlink(self.zip_filename)
             except Exception, e:
                 import traceback
-                status(status='error')
+                self.status(status='error')
                 if options.error_file:
                     fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
                     f = os.fdopen(fd, 'wb')
