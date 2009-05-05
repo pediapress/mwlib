@@ -13,7 +13,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import wikidbbase, namespace, metabook
+from mwlib import wikidbbase, metabook, nshandling
 
 def nget(d, key):
     try:
@@ -21,24 +21,41 @@ def nget(d, key):
     except KeyError:
         return d[wikidbbase.normalize_title(key)]
 
-class Wiki(wikidbbase.WikiDBBase):
+
+class ZipWikiBase(wikidbbase.WikiDBBase):
     def __init__(self, zipfile):
         """
         @type zipfile: basestring or ZipFile
         """
-        
+
         if isinstance(zipfile, ZipFile):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
+
         self.metabook = json.loads(unicode(self.zf.read("metabook.json"), 'utf-8'))
         content = json.loads(unicode(self.zf.read('content.json'), 'utf-8'))
         self.articles = content.get('articles', {})
         self.templates = content.get('templates', {})
+        self.images = content.get('images', {})
         self.sources = content.get('sources', {})
         self.licenses = content.get('licenses', None)
         self.siteinfo = content.get('siteinfo', None)
-    
+        self.nshandler = nshandling.nshandler(self.get_siteinfo())
+
+    def get_siteinfo(self):
+        if self.siteinfo is not None:
+            return self.siteinfo
+
+        from mwlib.siteinfo import get_siteinfo
+        if self.sources:
+            self.siteinfo = get_siteinfo(self.sources.values()[0].get('language', 'en'))
+        else:
+            self.siteinfo = get_siteinfo('en')
+        return self.siteinfo
+
+
+class Wiki(ZipWikiBase):
     def _getArticle(self, title, revision=None):
         try:
             article = nget(self.articles, title)
@@ -66,12 +83,6 @@ class Wiki(wikidbbase.WikiDBBase):
         except KeyError:
             return None
 
-    def get_siteinfo(self):
-        if self.siteinfo is not None:
-            return self.siteinfo
-        from mwlib.siteinfo import get_siteinfo
-        return get_siteinfo('en')
-    
     def getInterwikiMap(self, title, revision=None):
         """Return interwikimap for given article and revision
         
@@ -85,8 +96,8 @@ class Wiki(wikidbbase.WikiDBBase):
         return source.get('interwikimap', None)
     
     def getRawArticle(self, title, revision=None):
-        ns, partial, full = namespace.splitname(title) # FIXME: language
-        if ns==namespace.NS_TEMPLATE:
+        ns, partial, full = self.nshandler.splitname(title)
+        if ns == nshandling.NS_TEMPLATE:
             return self.getTemplate(partial)
         article = self._getArticle(title, revision=revision)
         if article:
@@ -119,8 +130,8 @@ class Wiki(wikidbbase.WikiDBBase):
         return None
     
     def getTemplate(self, name, followRedirects=True):
-        ns, name, full = namespace.splitname(name, namespace.NS_TEMPLATE) # FIXME: language
-        if ns!=namespace.NS_TEMPLATE:
+        ns, name, full = self.nshandler.splitname(name, nshandling.NS_TEMPLATE)
+        if ns != nshandling.NS_TEMPLATE:
             return self.getRawArticle(full)
         try:
             result = nget(self.templates, name)['content']
@@ -142,18 +153,9 @@ class Wiki(wikidbbase.WikiDBBase):
         return self.licenses
     
 
-class ImageDB(object):
+class ImageDB(ZipWikiBase):
     def __init__(self, zipfile, tmpdir=None):
-        """
-        @type zipfile: basestring or ZipFile
-        """
-        
-        if isinstance(zipfile, ZipFile):
-            self.zf = zipfile
-        else:
-            self.zf = ZipFile(zipfile)
-        content = json.loads(unicode(self.zf.read('content.json'), 'utf-8'))
-        self.images = content['images']
+        super(ImageDB, self).__init__(zipfile)
         self._tmpdir = tmpdir
         self.diskpaths = {}
     
@@ -181,15 +183,14 @@ class ImageDB(object):
         return path
     
     def getDiskPath(self, name, size=None):
+        ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
         try:
-            return nget(self.diskpaths, name)
+            return nget(self.diskpaths, partial)
         except KeyError:
             pass
         try:
-            data = self.zf.read('images/%s' % name.replace("'", '-').encode('utf-8'))
+            data = self.zf.read('images/%s' % partial.replace("'", '-').encode('utf-8'))
         except KeyError: # no such file
-            if name[0] != name[0].upper():
-                return self.getDiskPath(name[0].upper() + name[1:], size)
             return None
         
         try:
@@ -202,9 +203,7 @@ class ImageDB(object):
             ext = '.gif.png'
         res = os.path.join(self.tmpdir, 'image%04d%s' % (len(self.diskpaths), ext))
         self.diskpaths[name] = res
-        f=open(res, "wb")
-        f.write(data)
-        f.close()
+        open(res, "wb").write(data)
         return res
     
     def getImageTemplates(self, name, wikidb=None):
