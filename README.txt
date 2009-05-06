@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-5-6 release 0.11.2
+-----------------------
+- fixes
+
 2009-5-5 release 0.11.1
 ------------------------
 - merge of the nuwiki branch: better, faster resource fetching with twisted_api,
