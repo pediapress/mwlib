@@ -10,8 +10,7 @@ import sys
 import urllib
 import urlparse
 import pprint
-from mwlib.nshandling import nshandler 
-from mwlib import metabook, podclient, utils
+from mwlib import metabook, podclient, utils, nshandling
 
 from twisted.python import failure, log
 from twisted.web import client 
@@ -381,6 +380,7 @@ class Fetcher(object):
         else:
             self.make_print_template = None
             
+        self._nshandler = None
         
         self.redirects = {}
         
@@ -450,7 +450,7 @@ class Fetcher(object):
         
     def _cb_siteinfo(self, siteinfo):
         self.fsout.write_siteinfo(siteinfo)
-        self.nshandler = nshandler(siteinfo)
+        self.nshandler = nshandling.nshandler(siteinfo)
         if self.template_exclusion_category:
             ns, partial, fqname = self.nshandler.splitname(self.template_exclusion_category, 14)
             if ns!=14:
@@ -595,10 +595,19 @@ class Fetcher(object):
 
 
 
+    def _get_nshandler(self):
+        if self._nshandler is not None:
+            return self._nshandler
+        return nshandling.get_nshandler_for_lang('en') # FIXME
+
+    def _set_nshandler(self, nshandler):
+        self._nshandler = nshandler
+
+    nshandler = property(_get_nshandler, _set_nshandler)
+
     def _cb_image_edits(self, data):
         edits = data.get("pages").values()
 
-        # FIXME: self.nshandler might not be initialized
         local_nsname = self.nshandler.get_nsname_by_number(6)
         
         # change title prefix to make them look like local pages
@@ -610,7 +619,6 @@ class Fetcher(object):
         self.edits.extend(edits)
 
     def _cb_image_contents(self, data):
-        # FIXME: self.nshandler might not be initialized
         local_nsname = self.nshandler.get_nsname_by_number(6)
         
         pages = data.get("pages", {}).values()
@@ -644,7 +652,7 @@ class Fetcher(object):
             return
         
         def got_siteinfo(siteinfo):
-            ns = nshandler(siteinfo)
+            ns = nshandling.nshandler(siteinfo)
             nsname = ns.get_nsname_by_number(6)
             
             local_names=[]
