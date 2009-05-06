@@ -52,7 +52,10 @@ def fix_wikipedia_siteinfo(siteinfo):
 class nshandler(object):
     def __init__(self, siteinfo):
         self.siteinfo = siteinfo
-        self.capitalize = self.siteinfo['general'].get('case') == 'first-letter'
+        try:
+            self.capitalize = self.siteinfo['general'].get('case') == 'first-letter'
+        except KeyError:
+            self.capitalize = True
 
         p = self.prefix2interwiki = {}
         for k in siteinfo["interwikimap"]:

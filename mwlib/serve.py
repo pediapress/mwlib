@@ -404,12 +404,21 @@ class Application(wsgi.Application):
                 'state': 'failed',
                 'error': text,
             }
+
+        status = self.read_status_file(collection_id, writer)
+        if status.get('state') == 'error':
+            return {
+                'collection_id': collection_id,
+                'writer': writer,
+                'state': 'failed',
+                'error': 'unknown error',
+            }
         
         return {
             'collection_id': collection_id,
             'writer': writer,
             'state': 'progress',
-            'status': self.read_status_file(collection_id, writer),
+            'status': status,
         }
     
     @json_response

@@ -111,7 +111,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
     fetcher = options.fetcher
     if fetcher.fatal_error:
         print "error:", fetcher.fatal_error
-        sys.exit(10)
+        raise RunimeError('Fatal error')
     print "done"
     
 

@@ -21,6 +21,13 @@ try:
 except ImportError:
     import simplejson as json
 
+def loads(s):
+    """Potentially remove UTF-8 BOM and call json.loads()"""
+
+    if s and isinstance(s, str) and s[:3] == '\xef\xbb\xbf':
+        s = s[3:]
+    return json.loads(s)
+
 class PODClient(podclient.PODClient):
     nextdata = None
     running = False
@@ -155,7 +162,7 @@ class mwapi(object):
             url, d = self._todo.pop()
             self.num_running += 1
             # print url
-            self._fetch(url).addCallbacks(decref, decref).addCallback(json.loads).chainDeferred(d)
+            self._fetch(url).addCallbacks(decref, decref).addCallback(loads).chainDeferred(d)
             
     def _request(self, **kwargs):
         args = {'format': 'json'}
