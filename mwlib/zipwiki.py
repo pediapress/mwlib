@@ -207,26 +207,30 @@ class ImageDB(ZipWikiBase):
         return res
     
     def getImageTemplates(self, name, wikidb=None):
+        ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
         try:
-            return nget(self.images, name)['templates']
+            return nget(self.images, partial)['templates']
         except KeyError:
             return []
     
     def getContributors(self, name, wikidb=None):
+        ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
         try:
-            return nget(self.images, name)['contributors']
+            return nget(self.images, partial)['contributors']
         except KeyError:
             return []
     
     def getURL(self, name, size=None):
+        ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
         try:
-            return nget(self.images, name)['url']
+            return nget(self.images, partial)['url']
         except KeyError:
             return None
     
     def getDescriptionURL(self, name):
+        ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
         try:
-            return nget(self.images, name)['descriptionurl']
+            return nget(self.images, partial)['descriptionurl']
         except KeyError:
             return None
     
