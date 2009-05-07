@@ -50,6 +50,49 @@ class TreeCleaner(object):
     """
 
 
+    cleanerMethods = ['removeEmptyTextNodes',
+                      'removeInvisibleLinks', 
+                      'cleanSectionCaptions',
+                      'removeChildlessNodes',
+                      'removeNoPrintNodes',
+                      'removeListOnlyParagraphs',
+                      'removeInvalidFiletypes',
+                      'fixParagraphs',
+                      'simplifyBlockNodes',
+                      'fixNesting', 
+                      'removeCriticalTables',
+                      'removeTextlessStyles', 
+                      'removeBrokenChildren',
+                      'fixTableColspans',
+                      'transformSingleColTables',
+                      'splitTableToColumns', 
+                      'linearizeWideNestedTables',
+                      'removeBreakingReturns', 
+                      'removeEmptyReferenceLists',
+                      'swapNodes',
+                      'removeBigSectionsFromCells',
+                      'transformNestedTables',
+                      'splitBigTableCells',
+                      'limitImageCaptionsize', 
+                      'removeDuplicateLinksInReferences',
+                      'fixItemLists', 
+                      'removeLeadingParaInList',
+                      'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
+                      'removeNewlines', # imported from advtree - clean up newlines that are not needed
+                      'removeBreakingReturns',
+                      'buildDefinitionLists',
+                      'restrictChildren',
+                      'fixReferenceNodes',
+                      'fixInfoBoxes',
+                      'fixNesting', # pull DefinitionLists out of Paragraphs
+                      'fixPreFormatted',
+                      'fixListNesting',
+                      'removeEmptyTextNodes',
+                      'removeChildlessNodes', 
+                      'removeBreakingReturns',
+                      ]
+
+
     def __init__(self, tree, save_reports=False, nesting_strictness='loose', status_cb=None):
         """Init with parsetree.
 
@@ -177,48 +220,7 @@ class TreeCleaner(object):
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
 
-        cleanerMethods = ['removeEmptyTextNodes',
-                          'removeInvisibleLinks', 
-                          'cleanSectionCaptions',
-                          'removeChildlessNodes',
-                          'removeNoPrintNodes',
-                          'removeListOnlyParagraphs',
-                          'removeInvalidFiletypes',
-                          'fixParagraphs',
-                          'simplifyBlockNodes',
-                          'fixNesting', 
-                          'removeCriticalTables',
-                          'removeTextlessStyles', 
-                          'removeBrokenChildren',
-                          'fixTableColspans',
-                          'transformSingleColTables',
-                          'splitTableToColumns', 
-                          'linearizeWideNestedTables',
-                          'removeBreakingReturns', 
-                          'removeEmptyReferenceLists',
-                          'swapNodes',
-                          'removeBigSectionsFromCells',
-                          'transformNestedTables',
-                          'splitBigTableCells',
-                          'limitImageCaptionsize', 
-                          'removeDuplicateLinksInReferences',
-                          'fixItemLists', 
-                          'removeLeadingParaInList',
-                          'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
-                          'removeNewlines', # imported from advtree - clean up newlines that are not needed
-                          'removeBreakingReturns',
-                          'buildDefinitionLists',
-                          'restrictChildren',
-                          'fixReferenceNodes',
-                          'fixInfoBoxes',
-                          'fixNesting', # pull DefinitionLists out of Paragraphs
-                          'fixPreFormatted',
-                          'fixListNesting',
-                          'removeEmptyTextNodes',
-                          'removeChildlessNodes', 
-                          'removeBreakingReturns',
-                          ]
-        self.clean([cm for cm in cleanerMethods if cm not in skipMethods])
+        self.clean([cm for cm in self.cleanerMethods if cm not in skipMethods])
 
     def report(self, *args):        
         if not self.save_reports:
