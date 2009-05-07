@@ -213,14 +213,20 @@ class mwapi(object):
         return self._request(**kwargs).addCallback(got_result)
 
     def get_siteinfo(self):
-        def got_it(siteinfo):
-            self.siteinfo = siteinfo
-            return siteinfo
-        
         if self.siteinfo is not None:
             return defer.succeed(self.siteinfo)
         
-        return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|magicwords|interwikimap").addCallback(got_it)
+        def got_it(siteinfo):
+            self.siteinfo = siteinfo
+            return siteinfo
+
+        def without_namespacealiases(failure):
+            return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|interwikimap").addCallback(got_it)
+
+        def without_magicwords(failure):
+            return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|interwikimap").addErrback(without_namespacealiases).addCallback(got_it)
+        
+        return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|magicwords|interwikimap").addErrback(without_magicwords).addCallback(got_it)
 
     def _update_kwargs(self, kwargs, titles, revids):
         assert titles or kwargs
