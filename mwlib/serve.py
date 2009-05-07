@@ -493,10 +493,10 @@ class Application(wsgi.Application):
         pod_api_url = post_data.get('pod_api_url', '')
         if pod_api_url:
             result = json.loads(unicode(urllib2.urlopen(pod_api_url, data="any").read(), 'utf-8'))
-            post_url = result['post_url']
+            post_url = result['post_url'].encode('utf-8')
             response = {
                 'state': 'ok',
-                'redirect_url': result['redirect_url'],
+                'redirect_url': result['redirect_url'].encode('utf-8'),
             }
         else:
             try:
