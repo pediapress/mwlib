@@ -18,11 +18,11 @@ except ImportError:
 
 class License(object):
 
-    def __init__(self, name='', display_name='', license_type=None):
+    def __init__(self, name='', display_name='', license_type=None, description=''):
         self.name = name
         self.display_name = display_name
         self.license_type = license_type # free|nonfree|unrelated|unknown
-        
+        self.description = description
 
     def __str__(self):
         if self.display_name:
@@ -33,6 +33,14 @@ class License(object):
                                                                        'type': self.license_type,
                                                                        'displayname': display_name,
                                                                        }
+
+    def __cmp__(self, other):
+        if self.display_name < other.display_name:
+            return -1
+        elif self.display_name == other.display_name:
+            return 0
+        else:
+            return 1
         
         
 class LicenseChecker(object):
@@ -52,7 +60,9 @@ class LicenseChecker(object):
             name = unicode(name, 'utf-8').lower()
             lic = License(name=name)
             lic.display_name = unicode(display_name, 'utf-8')
-            self.licenses[name] = lic.name
+            if license_description.startswith('-'):
+                license_description = license_description[1:]
+            lic.description = unicode(license_description.strip(), 'utf-8') 
             if license_type in ['free-display', 'nonfree-display']:
                 lic.license_type = 'free'
             elif license_type in ['nonfree']:
@@ -191,11 +201,43 @@ class LicenseChecker(object):
                                                                                                                'img_str': '\n'.join([repr(i) for i in list(urls)[:5]])
                 }
 
+    def dumpLicenseInfoContent(self):
+
+        licenses = [v for v in self.licenses.values()]
+        licenses.sort()
+
+        tmpl_txt = """
+{{/ImageLicenseItem
+|template_name=%(lic_name)s
+|license=%(display_name)s
+|display_allowed=%(allowed)s
+|license_text_url=
+|full_text_required=
+|description=%(description)s
+}}"""        
+        
+        #for templ, lic in self.licenses.items():
+        for lic in licenses:
+            if lic.license_type in ['free', 'nonfree']:
+                #print "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}" % {
+                print tmpl_txt % {
+                    'lic_name': lic.name.encode('utf-8'),
+                    'display_name': lic.display_name.encode('utf-8'),
+                    'allowed': 'yes' if lic.license_type=='free' else 'no',
+                    'description': lic.description.encode('utf-8'), 
+                    }
+                #print lic.name, lic.display_name, lic.license_type
+        
+
                     
 if __name__ == '__main__':
 
     lc = LicenseChecker()
-    lc.readFreeLicensesCSV()
+    lc.readLicensesCSV()
+
+    lc.dumpLicenseInfoContent()
+    sys.exit(1)
+
 
     if len(sys.argv) > 1:
         stats_dir = sys.argv[1]
