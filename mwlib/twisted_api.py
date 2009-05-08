@@ -229,8 +229,8 @@ class mwapi(object):
         return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|magicwords|interwikimap").addErrback(without_magicwords).addCallback(got_it)
 
     def _update_kwargs(self, kwargs, titles, revids):
-        assert titles or kwargs
-        
+        assert titles or revids and not (titles and revids), 'either titles or revids must be set'
+
         if titles:
             kwargs["titles"] = "|".join(titles)
         if revids:
@@ -239,9 +239,10 @@ class mwapi(object):
     def fetch_used(self, titles=None, revids=None):
         kwargs = dict(prop="revisions|templates|images",
                       rvprop='ids',
-                      redirects=1,
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)
+        if titles:
+            kwargs['redirects'] = 1
 
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
@@ -249,9 +250,10 @@ class mwapi(object):
     def fetch_pages(self, titles=None, revids=None):        
         kwargs = dict(prop="revisions",
                       rvprop='ids|content',
-                      redirects=1,
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)
+        if titles:
+            kwargs['redirects'] = 1
 
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
