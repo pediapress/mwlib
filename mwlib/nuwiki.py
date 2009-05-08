@@ -334,7 +334,9 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
                 return userlinks
             node = uparser.parseString('', raw=args['Author'], wikidb=wikidb)
             advtree.extendClasses(node)
-            return [node.getAllDisplayText()]
+            txt = node.getAllDisplayText().strip()
+            if txt:
+                return [txt]
 
         if args.args:
             return getUserLinks('\n'.join([args.get(i, u'') for i in range(len(args.args))]))
