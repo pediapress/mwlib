@@ -18,6 +18,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
 
 from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib import parser
+from mwlib.writer import styleutils
 
 def show(n):
     parser.show(sys.stdout, n, verbose=True)
@@ -923,6 +924,14 @@ class TreeCleaner(object):
                     if self._isBigCell(cell):
                         split_table = True
                 
+            if node.numcols == 2:
+                num_border_tables = 0
+                for t in node.getChildNodesByClass(Table):
+                    if styleutils.tableBorder(t):
+                        num_border_tables += 1
+                if num_border_tables >= 3:
+                    split_table = True
+                        
             if node.hasClassID(self.split_table_classIDs):
                 split_table = True
                 
