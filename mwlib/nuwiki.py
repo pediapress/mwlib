@@ -4,6 +4,7 @@
 
 import os
 import zipfile
+import shutil
 import tempfile
 import urllib
 try:
@@ -184,6 +185,7 @@ def extract_member(zipfile, member, targetpath):
 class Adapt(object):
     edits = None
     interwikimap = None
+    was_tmpdir = False
     
     def __init__(self, path_or_instance):
         if isinstance(path_or_instance, zipfile.ZipFile):
@@ -196,6 +198,7 @@ class Adapt(object):
                     extract_member(zf, zipinfo, tmpdir)
 
             path_or_instance = tmpdir
+            self.was_tmpdir = True
             
                 
         if isinstance(path_or_instance, basestring):
@@ -278,7 +281,9 @@ class Adapt(object):
         return self.nuwiki.get_data('licenses')
 
     def clear(self):
-        pass
+        if self.was_tmpdir and os.path.exists(self.nuwiki.path):
+            print 'removing %r' % self.nuwiki.path
+            shutil.rmtree(self.nuwiki.path, ignore_errors=True)
     
     def getDiskPath(self, name, size=None):
         return self.nuwiki.normalize_and_get_image_path(name)
