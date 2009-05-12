@@ -940,6 +940,12 @@ class WikiDB(wikidbbase.WikiDBBase):
                 pass
 
         if result is None:
+            try:
+                result = self.api_helper.query(meta='siteinfo', siprop='general|namespaces|interwikimap')
+            except QueryWarningError:
+                pass
+
+        if result is None:
             raise RuntimeError('Could not get siteinfo')
 
         self.siteinfo = result = result['query']

@@ -75,7 +75,7 @@ class nshandler(object):
                 return True, ns["id"], star
             
 
-        aliases = self.siteinfo["namespacealiases"]
+        aliases = self.siteinfo.get("namespacealiases", [])
         for a in aliases:
             if a["*"].lower()==name:
                 nsid = a["id"]
