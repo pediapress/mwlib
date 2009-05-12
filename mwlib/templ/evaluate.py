@@ -190,10 +190,14 @@ class Expander(object):
         self.db = wikidb
         self.uniquifier = Uniquifier()
 
+        si = None
         try:
             si = self.db.get_siteinfo()
         except Exception, err:
-            print "WARNING: failed to get siteinfo from %r: %r" % (self.db, err)
+            print 'Caught: %s' % err
+
+        if si is None:
+            print "WARNING: failed to get siteinfo from %r" % (self.db,)
             si = siteinfo.get_siteinfo("de")
             
         nshandler = nshandling.nshandler(si)
