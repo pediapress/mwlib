@@ -665,6 +665,7 @@ class TreeCleaner(object):
                 first_cell_content = node.children[0].children[0].children
                 if len(first_cell_content) == 1 and first_cell_content[0].__class__ == Table:
                     node.parent.replaceChild(node, first_cell_content)
+                    return
                 
             parent = node.parent
             rows = [ r for r in node.children if r.__class__ == Row]
