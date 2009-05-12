@@ -65,6 +65,7 @@ class TreeCleaner(object):
                       'removeTextlessStyles', 
                       'removeBrokenChildren',
                       'fixTableColspans',
+                      'removeEmptyTrailingTableRows',
                       'transformSingleColTables',
                       'splitTableToColumns', 
                       'linearizeWideNestedTables',
@@ -658,6 +659,13 @@ class TreeCleaner(object):
         """ Remove Container tables that only contain large nested tables"""
         
         if node.__class__ == Table and node.parent and not node.getParentNodesByClass(Table):
+
+            # remove tables which only contain a single table
+            if len(node.children) == 1 and node.numcols == 1:
+                first_cell_content = node.children[0].children[0].children
+                if len(first_cell_content) == 1 and first_cell_content[0].__class__ == Table:
+                    node.parent.replaceChild(node, first_cell_content)
+                
             parent = node.parent
             rows = [ r for r in node.children if r.__class__ == Row]
             captions = [ c for c in node.children if c.__class__ == Caption]
@@ -1078,3 +1086,18 @@ class TreeCleaner(object):
         for c in node.children:
             self.fixItemLists(c)
     
+
+    def _isEmptyRow(self, row):
+        for cell in row.children:
+            if cell.children:
+                return False
+        return True
+
+    def removeEmptyTrailingTableRows(self, node):
+
+        if node.__class__ == Table:
+            while node.children and self._isEmptyRow(node.children[-1]):
+                node.removeChild(node.children[-1])
+
+        for c in node.children:
+            self.removeEmptyTrailingTableRows(c)
