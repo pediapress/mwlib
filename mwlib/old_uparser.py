@@ -46,16 +46,4 @@ def removeBoilerplate(node, **kwargs):
         removeBoilerplate(x)
 
 
-def addurls(node, title=None, revision=None, wikidb=None, **kwargs):
-    """Add 'url' attribute to Link nodes with full HTTP URL to the target"""
-    
-    if wikidb is None or title is None:
-        return
-    if not hasattr(wikidb, 'getLinkURL'):
-        return
-    if isinstance(node, parser.Link) and not isinstance(node, parser.ImageLink):
-        node.url = wikidb.getLinkURL(node, title, revision=revision)
-    for x in node.children:
-        addurls(x, title=title, revision=revision, wikidb=wikidb)
-
 postprocessors = [removeBoilerplate, simplify]

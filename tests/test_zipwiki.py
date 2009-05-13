@@ -2,7 +2,6 @@
 
 import os
 import tempfile
-from zipfile import ZipFile
 
 from mwlib import parser, zipwiki
 
@@ -39,21 +38,6 @@ class TestZipWiki(object):
         url = self.wikidb.getURL(u'The Living Sea')
         assert url == 'http://en.wikipedia.org/w/index.php?title=The_Living_Sea'
 
-    def test_getLinkURL(self):
-        def make_link_node(cls, target, full_target=None):
-            link = cls()
-            link.target = target
-            link.full_target = full_target or target
-            if link.full_target[0] == ':':
-                link.full_target = link.full_target[1:]
-                link.colon = True
-            else:
-                link.colon = False
-            return link
-        
-        url = self.wikidb.getLinkURL(make_link_node(parser.NamespaceLink, u'Test', u':Category:Test'), u'The Living Sea')
-        assert url == 'http://en.wikipedia.org/w/index.php?title=Category:Test'
-    
     def test_getTemplate(self):
         t = self.wikidb.getTemplate(u'Infobox Film')
         assert isinstance(t, unicode)

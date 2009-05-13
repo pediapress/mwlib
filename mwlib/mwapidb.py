@@ -20,7 +20,7 @@ try:
 except ImportError:
     import simplejson as json
 
-from mwlib import utils, metabook, wikidbbase, uparser, parser, namespace, advtree
+from mwlib import utils, metabook, uparser, parser, namespace, advtree
 from mwlib.expander import find_template, get_template_args, Expander
 from mwlib.log import Log
 from mwlib.templ import mwlocals
@@ -606,7 +606,7 @@ class ImageDB(object):
 # ==============================================================================
 
     
-class WikiDB(wikidbbase.WikiDBBase):
+class WikiDB(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'bot', re.IGNORECASE)
     redirect_rex = re.compile(r'^#redirect:?\s*?\[\[.*?\]\]', re.IGNORECASE)
