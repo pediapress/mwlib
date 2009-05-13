@@ -27,6 +27,9 @@ class inspect_authors(object):
         @rtype: list([unicode])
         """
 
+        if not revs:
+            return []
+
         REVERT_LOOKBACK = 5 # number of revisions to check for same size (assuming a revert)
         USE_DIFF_SIZE = False # whether to sort by diffsize or by alphabet
         FILTER_REVERTS = False # can not be used if 
