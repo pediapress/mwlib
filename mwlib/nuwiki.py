@@ -18,12 +18,12 @@ from mwlib.log import Log
 log = Log('nuwiki')
 
 
-class page(object):
+class Page(object):
     def __init__(self, meta, rawtext):
         self.__dict__.update(meta)
         self.rawtext = rawtext
         
-class nuwiki(object):
+class NuWiki(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
         d = os.path.join(self.path, "images", "safe")
@@ -58,7 +58,7 @@ class nuwiki(object):
         for p in pages[1:]:
             jmeta, rawtext = p.split("\n", 1)
             meta = json.loads(jmeta)
-            pg = page(meta, rawtext)
+            pg = Page(meta, rawtext)
             if pg.title not in self.excluded:
                 revid = meta.get("revid")
                 if revid is None:
@@ -202,7 +202,7 @@ class Adapt(object):
             
                 
         if isinstance(path_or_instance, basestring):
-            self.nuwiki = nuwiki(path_or_instance)
+            self.nuwiki = NuWiki(path_or_instance)
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
