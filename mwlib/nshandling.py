@@ -63,7 +63,7 @@ class nshandler(object):
         for k in siteinfo.get("interwikimap", []):
             p[k["prefix"]] = k
 
-        if siteinfo['general']['sitename'] == 'Wikipedia' and 'interwikimap' in siteinfo:
+        if 'general' in siteinfo and siteinfo['general'].get('sitename') == 'Wikipedia' and 'interwikimap' in siteinfo:
             fix_wikipedia_siteinfo(siteinfo)
         
     def _find_namespace(self, name, defaultns=0):
