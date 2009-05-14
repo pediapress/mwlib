@@ -197,8 +197,8 @@ def main():
             status(progress=0)
             output = options.output
             keep_tmpfiles = options.keep_tmpfiles
-            
-            if not options.oldzipcreator and isinstance(env.wiki, mwapidb.WikiDB):
+
+            if not (options.login or options.oldzipcreator) and isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
             else:    
                 from mwlib import zipcreator
