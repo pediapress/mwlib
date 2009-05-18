@@ -222,3 +222,9 @@ some text
 """
     r=parse_txt(s)
     
+def test_mark_style_595():
+    """http://code.pediapress.com/wiki/ticket/595"""
+    r = parse_txt( '<b><i>[[Article link|Display text]]</i></b> after')
+    b = core.walknodel(r, lambda x: x.tagname=="b")
+    print b
+    assert len(b)==1, "expected exactly one bold node"
