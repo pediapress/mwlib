@@ -93,7 +93,7 @@ def getTextAlign(node):
     if node.__class__ == advtree.Cell and getattr(node, 'is_header', False):
         return 'center'
     align = node.style.get('text-align', 'none').lower()
-    if align == 'none':
+    if align == 'none' and node.__class__ == advtree.Div:
         align = node.attributes.get('align', 'none').lower()
     if align not in ['left', 'center', 'right', 'justify', 'none']:
         return 'left'
