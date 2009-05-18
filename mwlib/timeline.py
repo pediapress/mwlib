@@ -43,7 +43,7 @@ def drawTimeline(script, basedir=None):
     open(scriptfile, 'w').write(script)
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
     
-    err = os.system("perl %s -P /usr/bin/ploticus -T /tmp/ -i %s" % (et, scriptfile))
+    err = os.system("perl %s -P /usr/bin/ploticus -T %s -i %s" % (et, basedir, scriptfile))
     if err != 0:
         return None
 
