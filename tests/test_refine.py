@@ -222,3 +222,6 @@ some text
 """
     r=parse_txt(s)
     
+def test_unexpected_end():
+    """http://code.pediapress.com/wiki/ticket/607"""
+    parse_txt("{|")
