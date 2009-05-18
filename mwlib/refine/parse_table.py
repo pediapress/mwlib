@@ -209,22 +209,18 @@ class parse_tables(object):
 
     def find_modifier(self, table):
         children = table.children
-        n = None
-
         def compute_mod():
-            mod = T.join_as_text(children[:n])
+            mod = T.join_as_text(children[:i])
             #print "MODIFIER:", repr(mod)
             table.vlist = util.parseParams(mod)
-            del children[:n]
+            del children[:i]
 
             
         for i,x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
-                n = i
                 break
 
-        if n is not None:
-            compute_mod()
+        compute_mod()
         
     def find_caption(self, table):
         children = table.children
