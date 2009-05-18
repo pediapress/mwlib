@@ -96,7 +96,7 @@ class Main(object):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
 
-        if self.options.oldzipcreator:
+        if self.options.oldzipcreator or self.options.login:
             from mwlib import zipcreator
             self.zip_filename = zipcreator.make_zip_file(self.options.keep_zip, env,
                 status=self.status,
