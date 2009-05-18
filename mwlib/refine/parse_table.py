@@ -215,7 +215,7 @@ class parse_tables(object):
             table.vlist = util.parseParams(mod)
             del children[:i]
 
-            
+        i = 0    
         for i,x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
                 break
