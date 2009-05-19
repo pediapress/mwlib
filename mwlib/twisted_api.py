@@ -163,8 +163,9 @@ class mwapi(object):
             self.num_running += 1
             # print url
             self._fetch(url).addCallbacks(decref, decref).addCallback(loads).chainDeferred(d)
-            
-    def _request(self, **kwargs):
+
+
+    def _build_url(self,  **kwargs):
         args = {'format': 'json'}
         args.update(**kwargs)
         for k, v in args.items():
@@ -175,7 +176,10 @@ class mwapi(object):
         q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
 
         url = "%s?%s" % (self.baseurl, q)
-        #print "url:", url
+        return url
+    
+    def _request(self, **kwargs):
+        url = self._build_url(**kwargs)
         
         d=defer.Deferred()
         self._todo.append((url, d))
@@ -184,8 +188,10 @@ class mwapi(object):
         
     def do_request(self, **kwargs):
         retval = {}
+        last_qc = [None]
         
         def got_result(data):
+            
             try:
                 error = data.get("error")
             except:
@@ -199,14 +205,19 @@ class mwapi(object):
             
             qc = data.get("query-continue", {}).values()
             
-            if qc:
-                self.qccount += 1
-                
-                #print "query-continuel:", qc, kwargs
+            if qc: 
                 kw = kwargs.copy()
                 for d in qc:
                     for k,v in d.items(): # dict of len(1)
                         kw[str(k)] = v
+
+                if qc == last_qc[0]:
+                    print "warning: cannot continue this query:",  self._build_url(**kw)
+                    return retval
+
+                last_qc[0] = qc
+                        
+                self.qccount += 1
                 return self._request(**kw).addCallback(got_result)
             return retval
         
