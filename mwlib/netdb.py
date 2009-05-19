@@ -516,18 +516,3 @@ class NetDB(object):
             return None
         a = uparser.parseString(title=title, raw=raw, wikidb=self)
         return a
-
-
-class Overlay(NetDB):
-    def __init__(self, wikidb, templates):
-        self.__dict__.update(wikidb.__dict__)
-        self.overlay_templates = templates
-        
-    def getTemplate(self, name, followRedirects=False):
-        try:
-            return self.overlay_templates[name]
-        except KeyError:
-            pass
-        
-        return super(Overlay, self).getTemplate(name, followRedirects=followRedirects)
-    
