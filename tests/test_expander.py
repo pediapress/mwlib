@@ -434,5 +434,5 @@ foo was missing<ref>bar</ref> <!-- some comment--> baz
 """
     e = expander.Expander(s,  pagename="test",  wikidb = DictDB())
     raw =  e.expandTemplates()
-    print raw
+    print repr(raw)
     assert u"foo was missing" in raw, "text is missing"
