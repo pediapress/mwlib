@@ -150,7 +150,6 @@ include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
 include sandbox/expr.txt
-include sandbox/fetch-langdata.py
 include sandbox/mw-serve-stresser.py
 include sandbox/time-expr.py
 include sandbox/time-parse.py
@@ -175,6 +174,7 @@ include tests/test_mwapidb.py
 include tests/test_mwscan.py
 include tests/test_netdb_imagedb.py
 include tests/test_nshandling.py
+include tests/test_nuwiki.py
 include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
