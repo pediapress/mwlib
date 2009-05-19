@@ -3,17 +3,18 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+
 import sys
 import os
 import zlib
 import re
 
-from mwlib import cdb, dumpparser
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
-def normname(name):
-    name = name.strip().replace("_", " ")
-    name = name[:1].upper()+name[1:]
-    return name
+from mwlib import cdb, dumpparser, siteinfo, nshandling
 
 class ZCdbWriter(cdb.CdbMake):
     def __init__(self, indexpath, datapath=None):
@@ -88,12 +89,9 @@ class BuildWiki(object):
         try:
             count = 0
             for page in self.dumpParser:
-                m = {dumpparser.NS_MAIN:self.handleArticle,
-                     dumpparser.NS_TEMPLATE:self.handleTemplate,
-                     dumpparser.NS_CATEGORY:self.handleCategory,
-                     dumpparser.NS_PORTAL:self.handlePortal}
-                meth = m.get(page.namespace, self.handleOther)
-                meth(page)
+                title =  page.title
+                text =  page.text
+                self.writer.add(title,  text)
                 count += 1
                 if count % 5000 == 0:
                     self._write(" %s\n" % count)
@@ -102,108 +100,72 @@ class BuildWiki(object):
         finally:
             self.writer.finish()
 
-
     def _write(self, msg):
         sys.stdout.write(msg)
         sys.stdout.flush()
 
-    def handleArticle(self, page):
-        title, text, timestamp = page.title, page.text, page.timestamp
-        self.writer.add(u":"+title, text)
-
-    def handleTemplate(self, page):
-        title, text, timestamp = page.title, page.text, page.timestamp
-        self.writer.add(u"Template:"+title, text)
-
-    def handleCategory(self, page):
-        title, text, timestamp = page.title, page.text, page.timestamp
-        self.writer.add(u"Category:"+title, text)
-
-    def handlePortal(self, page):
-        title, text, timestamp = page.title, page.text, page.timestamp
-        self.writer.add(u"Portal:"+title, text)
-
-    def handleOther(self, page):
-        title, text, timestamp = page.title, page.text, page.timestamp
-        title = u"NS%d:%s" % (page.namespace, title)
-        self.writer.add(title, text)
+class page(object):
+    def __init__(self,  **kw):
+        self.__dict__.update(**kw)
         
-
-
 class WikiDB(object):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
 
     def __init__(self, dir, prefix='wiki'):
-        self.dir = dir
+        self.dir = os.path.abspath(dir)
         self.reader = ZCdbReader(os.path.join(self.dir, prefix))
+        lang = "de" # FIXME: guess language from xml namespace information???
+        self.siteinfo = siteinfo.get_siteinfo(lang)
+        self.nshandler =  nshandling.nshandler(self.siteinfo)
+        self.nfo =  dict(base_url="http://%s.wikipedia.org/w/" % (lang, ), # FIXME
+                         script_extension = ".php", 
+                         ) # FIXME
+        
+    def get_siteinfo(self):
+        return self.siteinfo
+    
+    def normalize_and_get_page(self, name, defaultns):
+        fqname = self.nshandler.get_fqname(name, defaultns=defaultns)
+        return self.get_page(fqname)
 
-    def getRawArticle(self, title, raw=None, revision=None, resolveRedirect=True):
-        title = normname(title)
+    def get_page(self,  name,  revision=None):
         try:
-            res = self.reader[":"+title]
+            rawtext = self.reader[name]
         except KeyError:
             return None
+        return page(rawtext=rawtext)
+    
+    def get_data(self, name):
+        return self._loadjson(name+".json")
+    
+    def _loadjson(self, path, default=None):
+        path = self._pathjoin(path)
+        if os.path.exists(path):
+            return json.load(open(path, "rb"))
+        return default
+    
+    def _pathjoin(self, *p):
+        return os.path.join(self.dir, *p)
 
-        if resolveRedirect:
-            mo = self.redirect_rex.search(res)
-            if mo:
-                redirect = mo.group('redirect')
-                redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
-                try:
-                    return self.getRawArticle(redirect)
-                except RuntimeError: # recursion
-                    return 
-        return res
-
-
-    def getRawPage(self, title, isArticle=False):
-        title = normname(title)
-        if isArticle:
-            title = u":" + title
-        try:
-            return self.reader[title]
-        except KeyError:
-            return None
-
-
-    def getTemplate(self, title, followRedirects=False):
-        if ":" in title:
-            title = title.split(':', 1)[1]
-
-        title = normname(title)
-        try:
-            res = self.reader["Template:"+title]
-        except KeyError:
-            return ''
-
-        mo = self.redirect_rex.search(res)
-        if mo:
-            redirect = mo.group('redirect')
-            redirect = normname(redirect.split("|", 1)[0].split("#", 1)[0])
-            if followRedirects:
-                return self.getTemplate(redirect, followRedirects=False)
-            else:
-                sys.stderr.write('Chained redirect not followed: %r -> %r' % (title, redirect))
-        return res
 
 
     def articles(self):
-        return (k[1:]
-                for k in self.reader.iterkeys()
-                if k[0] == ':')
-
+        for title in self.reader.iterkeys():
+            nsnum = self.nshandler.splitname(title)[0]
+            if nsnum==0:
+                yield title
+                
     def article_texts(self):
-        return ((k[1:], v)
-                for k,v in self.reader.iteritems()
-                if k[0] == ':')
+        for title, txt in self.reader.iteritems():
+            nsnum = self.nshandler.splitname(title)[0]
+            if nsnum==0:
+                yield title,  txt
         
-    def getURL(self, *args, **kwargs):
-        return "http://code.pediapress.com"
+    # def getURL(self, *args, **kwargs):
+    #     return "http://code.pediapress.com"
 
-    def getAuthors(self, *args, **kwargs):
-        return []
+    # def getAuthors(self, *args, **kwargs):
+    #     return []
     
-    
-    def getSource(self, *args, **kwargs):
-        return None
-    
+    # def getSource(self, *args, **kwargs):
+    #     return None

@@ -37,25 +37,6 @@ class Tags:
 
     siteinfo = ns + "siteinfo"
 
-NS_MEDIA          = -2
-NS_SPECIAL        = -1
-NS_MAIN           =  0
-NS_TALK           =  1
-NS_USER           =  2
-NS_USER_TALK      =  3
-NS_PROJECT        =  4
-NS_PROJECT_TALK   =  5
-NS_IMAGE          =  6
-NS_IMAGE_TALK     =  7
-NS_MEDIAWIKI      =  8
-NS_MEDIAWIKI_TALK =  9
-NS_TEMPLATE       = 10
-NS_TEMPLATE_TALK  = 11
-NS_HELP           = 12
-NS_HELP_TALK      = 13
-NS_CATEGORY       = 14
-NS_CATEGORY_TALK  = 15
-NS_PORTAL         = 100
 
 class Page(object):
     __slots__ = [
@@ -66,9 +47,6 @@ class Page(object):
         'minor', 'comment', 'text'
     ]
 
-    def __init__(self):
-        self.namespace_text = ''
-        self.namespace = NS_MAIN
 
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
 
@@ -88,26 +66,12 @@ class Page(object):
 
 
 class DumpParser(object):
-    namespaces = {
-        'template': NS_TEMPLATE,
-        'vorlage': NS_TEMPLATE,
-        'category': NS_CATEGORY,
-        'kategorie': NS_CATEGORY,
-        'image': NS_IMAGE,
-        'bild': NS_IMAGE,
-        'wikipedia': NS_PROJECT,
-        'portal':NS_PORTAL
-    }
-
-    default_namespaces = [NS_MAIN, NS_TEMPLATE, NS_CATEGORY, NS_PORTAL]
 
     tags = Tags()
 
     def __init__(self, xmlfilename,
-                 namespace_filter=default_namespaces,
                  ignore_redirects=False):
         self.xmlfilename = xmlfilename
-        self.namespace_filter = namespace_filter
         self.ignore_redirects = ignore_redirects
 
     def openInputStream(self):
@@ -126,12 +90,14 @@ class DumpParser(object):
         return elem.tag[elem.tag.rindex('}')+1:]
 
     def handleSiteinfo(self, siteinfo):
-        for nsElem in siteinfo.findall(self.tags.namespace):
-            try:
-                self.namespaces[nsElem.text.lower()] = int(nsElem.get('key'))
-            except AttributeError:
-                # text is probably None
-                pass
+        pass
+    
+        # for nsElem in siteinfo.findall(self.tags.namespace):
+        #     try:
+        #         self.namespaces[nsElem.text.lower()] = int(nsElem.get('key'))
+        #     except AttributeError:
+        #         # text is probably None
+        #         pass
         
     def __iter__(self):
         f = self.openInputStream()    
@@ -156,19 +122,9 @@ class DumpParser(object):
             tag = self.getTag(el)
             if tag == 'title':
                 title = unicode(el.text)
-                if ':' in title:
-                    ns, rest = title.split(':', 1)
-                    res.namespace = self.namespaces.get(ns.lower(), NS_MAIN)
-                    if res.namespace:
-                        title = rest
-                        res.namespace_text = ns
                 res.title = title
-                if res.namespace not in self.namespace_filter:
-                    return None
-
             elif tag == 'id':
                 res.pageid = int(el.text)
-
             elif tag == 'revision':
                 lastRevision = el
 
@@ -209,4 +165,3 @@ class DumpParser(object):
             elif self.getTag(el) == 'id':
                 userid = int(el.text)
         return (username, userid)
-

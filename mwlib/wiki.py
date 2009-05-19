@@ -63,10 +63,10 @@ def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
     )
 
 def wiki_cdb(path=None, **kwargs):
-    from mwlib import cdbwiki
+    from mwlib import cdbwiki,  nuwiki
     path = os.path.expanduser(path)
     db=cdbwiki.WikiDB(path)
-    return db
+    return nuwiki.adapt(db)
 
 def image_mwapi(
     base_url=None,
@@ -188,7 +188,7 @@ def _makewiki(conf,
 
     if os.path.exists(os.path.join(conf, "siteinfo.json")):
         from mwlib import nuwiki
-        res.images = res.wiki = nuwiki.Adapt(conf)
+        res.images = res.wiki = nuwiki.adapt(conf)
         if metabook is None:
             res.metabook = res.wiki.metabook
         
@@ -215,7 +215,7 @@ def _makewiki(conf,
             
         if format=="nuwiki":
             from mwlib import nuwiki
-            res.images = res.wiki = nuwiki.Adapt(zf)
+            res.images = res.wiki = nuwiki.adapt(zf)
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res

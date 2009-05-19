@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tempfile
 
-from mwlib.nuwiki import NuWiki, Adapt
+from mwlib.nuwiki import NuWiki, adapt
 
 class TestNuWiki(object):
     def setup_class(cls):
@@ -39,7 +39,7 @@ class TestNuWiki(object):
         assert self.nuwiki.nfo['base_url'] == 'http://de.wikipedia.org/w/'
 
 
-class TestAdapt(object):
+class Testadapt(object):
     pass
     
 

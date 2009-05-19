@@ -182,7 +182,7 @@ def extract_member(zipfile, member, targetpath):
     else:
         open(targetpath, 'wb').write(zipfile.read(member.filename))
 
-class Adapt(object):
+class adapt(object):
     edits = None
     interwikimap = None
     was_tmpdir = False
@@ -278,7 +278,7 @@ class Adapt(object):
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"])
 
     def getLicenses(self):
-        return self.nuwiki.get_data('licenses')
+        return self.nuwiki.get_data('licenses') or []
 
     def clear(self):
         if self.was_tmpdir and os.path.exists(self.nuwiki.path):
