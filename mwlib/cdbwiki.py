@@ -107,9 +107,19 @@ class BuildWiki(object):
 class page(object):
     def __init__(self,  **kw):
         self.__dict__.update(**kw)
-        
-class WikiDB(object):
+
+
+def get_redirect_matcher(siteinfo):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+
+    def redirect(text):
+        mo = redirect_rex.search(text)
+        if mo:
+            return mo.group('redirect').split("|", 1)[0]
+        return None
+    return redirect
+
+class WikiDB(object):
 
     def __init__(self, dir, prefix='wiki', lang="en"):
         self.dir = os.path.abspath(dir)
@@ -123,6 +133,7 @@ class WikiDB(object):
         self.nfo =  dict(base_url="http://%s.wikipedia.org/w/" % (lang, ), # FIXME
                          script_extension = ".php", 
                          ) # FIXME
+        self.redirect_matcher = get_redirect_matcher(self.siteinfo)
         
     def get_siteinfo(self):
         return self.siteinfo
@@ -132,9 +143,19 @@ class WikiDB(object):
         return self.get_page(fqname)
 
     def get_page(self,  name,  revision=None):
-        try:
-            rawtext = self.reader[name]
-        except KeyError:
+        count = 0
+        while count < 5:       
+            try:
+                rawtext = self.reader[name]
+            except KeyError:
+                return None
+            r =  self.redirect_matcher(rawtext)
+            if r is None:
+                break
+            # print "Redirect:",  (name,  r)
+            name =  r
+            count += 1
+        if r is not None:
             return None
         return page(rawtext=rawtext)
     
