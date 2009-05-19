@@ -418,3 +418,21 @@ def test_rel2abs():
 
 def test_namespace():
     expandstr("{{NAMESPACE}}", "Benutzer", pagename="User:Schmir")
+
+
+
+def test_preprocess_uniq_after_comment():
+    s = u"""
+<!--
+these <ref> tags should be ignored: <ref>
+-->
+
+foo was missing<ref>bar</ref> <!-- some comment--> baz
+
+
+<references />
+"""
+    e = expander.Expander(s,  pagename="test",  wikidb = DictDB())
+    raw =  e.expandTemplates()
+    print raw
+    assert u"foo was missing" in raw, "text is missing"
