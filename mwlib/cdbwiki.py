@@ -111,11 +111,14 @@ class page(object):
 class WikiDB(object):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
 
-    def __init__(self, dir, prefix='wiki'):
+    def __init__(self, dir, prefix='wiki', lang="en"):
         self.dir = os.path.abspath(dir)
         self.reader = ZCdbReader(os.path.join(self.dir, prefix))
-        lang = "de" # FIXME: guess language from xml namespace information???
+        
+        # FIXME: guess language from xml namespace information???
         self.siteinfo = siteinfo.get_siteinfo(lang)
+        if self.siteinfo is None:
+            raise RuntimeError("could not get siteinfo for language %r" % (lang,))
         self.nshandler =  nshandling.nshandler(self.siteinfo)
         self.nfo =  dict(base_url="http://%s.wikipedia.org/w/" % (lang, ), # FIXME
                          script_extension = ".php", 

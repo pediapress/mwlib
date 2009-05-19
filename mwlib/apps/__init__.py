@@ -30,6 +30,7 @@ def buildcdb():
 [wiki]
 type = nucdb
 path = %s
+lang = en
 
 [images]
 type = download

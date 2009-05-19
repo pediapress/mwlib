@@ -65,10 +65,10 @@ def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
 def wiki_obsolete_cdb(path=None,  **kwargs):
     raise RuntimeError("cdb file format has changed. please rebuild with mw-buildcdb")
 
-def wiki_nucdb(path=None, **kwargs):
+def wiki_nucdb(path=None, lang="en", **kwargs):
     from mwlib import cdbwiki,  nuwiki
     path = os.path.expanduser(path)
-    db=cdbwiki.WikiDB(path)
+    db=cdbwiki.WikiDB(path, lang=lang)
     return nuwiki.adapt(db)
 
 def image_mwapi(
