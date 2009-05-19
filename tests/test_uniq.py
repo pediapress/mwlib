@@ -18,3 +18,15 @@ def test_empty_nowiki():
     assert 'UNIQ' in s
     r=u.replace_uniq(s)
     assert r=="abcdef"
+
+def test_comment():
+    u = uniq.Uniquifier()
+    def repl(txt, expected):
+        res = u.replace_tags(txt)
+        print repr(txt),  "->",  repr(res)
+        assert res == expected
+
+    yield repl,  "foo<!-- bla -->bar",  "foobar"
+    yield repl,  "foo\n<!-- bla -->\nbar",  "foo\nbar"
+    yield repl,  "foo\n<!-- bla -->bar",  "foo\nbar"
+    yield repl,  "foo<!-- bla -->\nbar",  "foo\nbar"
