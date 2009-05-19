@@ -35,7 +35,15 @@ class Uniquifier(object):
         return txt
     
     def _repl_to_uniq(self, mo):
-        tagname = mo.group("tagname").lower()
+        tagname = mo.group("tagname")
+        if tagname is None:
+            # comment =  mo.group("comment")
+            if self.txt[mo.start()]=='\n' and self.txt[mo.end()-1]=='\n':
+                return '\n'
+            return (mo.group(2) or "")+(mo.group(3) or "")
+
+        else:
+            tagname = tagname.lower()
         
         r = dict(
             tagname=tagname,
@@ -49,6 +57,7 @@ class Uniquifier(object):
         return self.get_uniq(r, tagname)
     
     def replace_tags(self, txt):
+        self.txt = txt
         rx = self.rx
         if rx is None:
             tags = set("nowiki math imagemap gallery source pre ref timeline".split())
@@ -56,13 +65,15 @@ class Uniquifier(object):
             tags.update(tagext.default_registry.names())
 
             rx = """
+                (?P<comment> (\\n[ ]*)?<!--.*?-->([ ]*\\n)?) |
+                (?:
                 <(?P<tagname> NAMES)
                 (?P<vlist> \\s[^<>]*)?
                 (/>
                  |
                  (?<!/) >
                 (?P<inner>.*?)
-                </(?P=tagname)>)
+                </(?P=tagname)>))
             """
 
             rx = rx.replace("NAMES", "|".join(list(tags)))
