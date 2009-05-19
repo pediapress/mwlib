@@ -45,7 +45,7 @@ def build_deps():
             
     if mtime("mwlib/_uscan.cc") < mtime("mwlib/_uscan.re"):
         err=os.system("re2c --version")
-        if err!=0 and sys.platform!="win32":
+        if err not in (0, 512) and sys.platform!="win32":
             sys.exit("Error: please install re2c from http://re2c.org")
         
         cmd = "re2c -w --no-generation-date -o %s %s" % (distutils.util.convert_path('mwlib/_uscan.cc'),
