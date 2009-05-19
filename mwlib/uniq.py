@@ -2,6 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import os
 import re
 
 class Uniquifier(object):
@@ -11,7 +12,7 @@ class Uniquifier(object):
         self.uniq2repl = {}
         if self.random_string is None:
             import binascii
-            r=open("/dev/urandom").read(8)
+            r=os.urandom(8)
             self.__class__.random_string = binascii.hexlify(r)
        
     def get_uniq(self, repl, name):
