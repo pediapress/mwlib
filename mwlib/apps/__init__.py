@@ -28,7 +28,7 @@ def buildcdb():
     cdbwiki.BuildWiki(input, output)()
     open(os.path.join(output, "wikiconf.txt"), "w").write("""
 [wiki]
-type = cdb
+type = nucdb
 path = %s
 
 [images]

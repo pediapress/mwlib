@@ -62,7 +62,10 @@ def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
         defaultauthors=defaultauthors,
     )
 
-def wiki_cdb(path=None, **kwargs):
+def wiki_obsolete_cdb(path=None,  **kwargs):
+    raise RuntimeError("cdb file format has changed. please rebuild with mw-buildcdb")
+
+def wiki_nucdb(path=None, **kwargs):
     from mwlib import cdbwiki,  nuwiki
     path = os.path.expanduser(path)
     db=cdbwiki.WikiDB(path)
@@ -111,7 +114,7 @@ def image_zip(path=None, **kwargs):
 
 dispatch = dict(
     images = dict(mwapi=image_mwapi, download=image_download, zip=image_zip),
-    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_cdb, net=wiki_net, zip=wiki_zip)
+    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, net=wiki_net, zip=wiki_zip)
 )
 
 _en_license_url = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
