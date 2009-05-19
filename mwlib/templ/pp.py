@@ -7,7 +7,6 @@ import re
 rxc = lambda s: re.compile(s, re.DOTALL | re.IGNORECASE)
 
 onlyincluderx   = rxc("<onlyinclude>(.*?)</onlyinclude>")
-commentrx       = rxc(r"(\n *)?<!--.*?-->( *\n)?")
 noincluderx     = rxc("<noinclude>.*?(</noinclude>|$)")
 includeonlyrx   = rxc("<includeonly>.*?(?:</includeonly>|$)")
 
@@ -16,15 +15,6 @@ def get_remove_tags(tags):
     return lambda s: r.sub(u'', s)
 
 remove_not_included = get_remove_tags(["onlyinclude", "noinclude"])
-
-
-def remove_comments(txt):
-    def repl(m):
-        #print "M:", repr(txt[m.start():m.end()])
-        if txt[m.start()]=='\n' and txt[m.end()-1]=='\n':
-            return '\n'
-        return (m.group(1) or "")+(m.group(2) or "")
-    return commentrx.sub(repl, txt)
 
 def preprocess(txt, included=True):
     if included:

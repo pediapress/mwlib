@@ -36,7 +36,6 @@ def tokenize(txt, included=True, replace_tags=None):
 
     if replace_tags is not None:        
         txt = replace_tags(txt)
-    # txt = pp.remove_comments(txt)
     
     tokens = []
     for (v1, v2, v3, v4, v5) in splitrx.findall(txt):
