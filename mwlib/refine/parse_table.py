@@ -242,7 +242,7 @@ class parse_tables(object):
         while i<len(children):
             t = children[i]
             if t.text is None or t.text.startswith("\n"):
-                if modifier is not None:
+                if modifier:
                     mod = T.join_as_text(children[start:modifier])
                     vlist = util.parseParams(mod)
                     sub = children[modifier+1:i]
@@ -255,6 +255,8 @@ class parse_tables(object):
                 return
             elif t.text=="|" and modifier is None:
                 modifier = i
+            elif t.type == T.t_2box_open and modifier is None:
+                modifier =  0
                 
             i += 1
             
