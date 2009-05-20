@@ -185,24 +185,25 @@ class ImageDB(ZipWikiBase):
     def getDiskPath(self, name, size=None):
         ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
         try:
-            return nget(self.diskpaths, partial)
+            return self.diskpaths[partial]
         except KeyError:
             pass
         try:
-            data = self.zf.read('images/%s' % partial.replace("'", '-').encode('utf-8'))
+            fname = name[name.find(":") + 1:].replace("'", '-').replace('_',' ')            
+            data = self.zf.read('images/%s' % fname.encode('utf-8'))
         except KeyError: # no such file
-            return None
-        
+            return None        
         try:
-            ext = '.' + name.rsplit('.', 1)[1]
+            ext = '.' + partial.rsplit('.', 1)[1]
         except IndexError:
             ext = ''
         if ext.lower() == '.svg':
             ext = '.svg.png'
         elif ext.lower() == '.gif':
             ext = '.gif.png'
-        res = os.path.join(self.tmpdir, 'image%04d%s' % (len(self.diskpaths), ext))
-        self.diskpaths[name] = res
+        res = os.path.join(self.tmpdir, 'image%06d%s' % (len(self.diskpaths), ext))
+        assert not os.path.exists(res), "file %r already exists" % res
+        self.diskpaths[partial] = res
         open(res, "wb").write(data)
         return res
     
