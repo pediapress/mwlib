@@ -232,3 +232,17 @@ def test_mark_style_595():
 def test_unexpected_end():
     """http://code.pediapress.com/wiki/ticket/607"""
     parse_txt("{|")
+
+def test_link_in_table_caption():
+    """http://code.pediapress.com/wiki/ticket/578"""
+    s="""{| 
+|+ id="CFNP" [[bla | blubb]]
+|-
+| a || b
+|}
+"""
+    r =  parse_txt(s)
+    with_vlist =  core.walknodel(r, lambda x: bool(x.vlist))
+    print with_vlist
+    
+    assert not with_vlist,  "no node should contain a vlist"
