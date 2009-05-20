@@ -220,10 +220,15 @@ class LicenseChecker(object):
         for lic in licenses:
             if lic.license_type in ['free', 'nonfree']:
                 #print "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}" % {
+                if lic.license_type=='free':
+                    allowedstr = "yes"
+                else:
+                    allowedstr = "no"
+                    
                 print tmpl_txt % {
                     'lic_name': lic.name.encode('utf-8'),
                     'display_name': lic.display_name.encode('utf-8'),
-                    'allowed': 'yes' if lic.license_type=='free' else 'no',
+                    'allowed': allowedstr,
                     'description': lic.description.encode('utf-8'), 
                     }
                 #print lic.name, lic.display_name, lic.license_type
