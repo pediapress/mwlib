@@ -202,7 +202,7 @@ class ImageDB(ZipWikiBase):
         elif ext.lower() == '.gif':
             ext = '.gif.png'
         res = os.path.join(self.tmpdir, 'image%04d%s' % (len(self.diskpaths), ext))
-        self.diskpaths[name] = res
+        self.diskpaths[partial] = res
         open(res, "wb").write(data)
         return res
     
