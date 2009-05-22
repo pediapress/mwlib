@@ -9,7 +9,7 @@ import copy
 import inspect
 
 from mwlib.advtree import removeNewlines
-from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, 
+from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
                            HorizontalRule, ImageLink, ImageMap, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
@@ -113,7 +113,7 @@ class TreeCleaner(object):
         self.status_cb=status_cb
 
         # list of nodes which do not require child nodes
-        self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Code,
+        self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Chapter, Code, 
                             HorizontalRule, ImageLink, ImageMap, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, Timeline, URL]
 
