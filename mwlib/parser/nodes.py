@@ -18,7 +18,10 @@ class Node(utoken.token):
             yield x
 
     def __repr__(self):
-        return "%s %r: %s children" % (self.__class__.__name__, self.caption, len(self.children))
+        try:
+            return utoken.token.__repr__(self)
+        except:
+            return "%s %r: %s children" % (self.__class__.__name__, self.caption, len(self.children))
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)

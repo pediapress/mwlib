@@ -69,6 +69,7 @@ and more centering
 </center>
 '''
     tree = buildAdvTree(raw)
+    tree.show()
     cells = tree.getChildNodesByClass(advtree.Cell)
     correct_align = ['left', 'center', 'right', 'center', 'center', 'left']
     for (i, cell) in enumerate(cells):

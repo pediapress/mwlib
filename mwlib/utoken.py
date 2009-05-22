@@ -131,7 +131,10 @@ class token(object):
         self.__dict__.update(kw)
 
     def __repr__(self):
-        r = [self.token2name.get(self.type, self.type)]
+        if type(self) is token:
+            r = [self.token2name.get(self.type, self.type)]
+        else:
+            r =  [self.__class__.__name__]
         if self.text is not None:
             r.append(repr(self.text)[1:])
         if self.tagname:
