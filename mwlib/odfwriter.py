@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2008, PediaPress GmbH
+# Copyright (c) 2008-2009, PediaPress GmbH
 # See README.txt for additional licensing information.
 """
-ToDo:
+TODO:
  * add license handling
  * implement missing methods: Imagemap, Hiero, Timeline, Gallery
 
@@ -14,52 +14,25 @@ More Info:
 """
 
 from __future__ import division
+
 import sys
-try:
-    import odf
-except ImportError, e:
-    print "you need to install odfpy: http://opendocumentfellowship.com/projects/odfpy"
-    print "currently only version 0.7 is supported"
-    raise
+import odf
 
 from odf.opendocument import OpenDocumentText
 from odf import text, dc, meta, table, draw, math, element
-from mwlib import parser
 from mwlib.log import Log
-from mwlib import advtree 
+from mwlib import advtree, writerbase, odfconf, parser
 from mwlib import odfstyles as style
-from mwlib import writerbase
 from mwlib.treecleaner import TreeCleaner
-from mwlib import odfconf
-
 
 log = Log("odfwriter")
 
-# using alpha software is challenging as APIs change -------------------
-# check for ODF version and monkey patch stuff
+# check for ODF version
 e = element.Element(qname = ("a","n"))
-if hasattr(e, "elements"): # odfpy-0.7
-    log("assuming odfpy-0.7x")
-    def _f(self, c):
-        self.elements.append(e)
-    def _r(self):
-        return "<odf.element.Element tag=%s instance at %s>" % (self.qname[1], id(self))
-    element.Element.__repr__ = _r
-    element.Element.appendChild = _f
-    element.Element.lastChild = property(lambda s:s.elements[-1])
-    element.Element.setAttribute = element.Element.addAttribute
-else:
-    # assume the odfpy-08 api is stable
-    # but we don't support this now, as they changed their API
-    # easy_install odfpy==0.7.0  might help
-    raise Exception, "only version 0.7 of odfpy is supported"
-    assert hasattr(e, "appendChild")
-    assert hasattr(e, "lastChild")
-    assert hasattr(e, "setAttribute")
-
-# ------------ done patching --------------------------------------------
-
-
+assert hasattr(e, "appendChild")
+assert hasattr(e, "lastChild")
+assert hasattr(e, "setAttribute")
+del e
 
 def showNode(obj):
     attrs = obj.__dict__.keys()
@@ -69,8 +42,6 @@ def showNode(obj):
               ]
     if stuff:
         log(repr(stuff))
-
-
 
 class SkipChildren(object):
     "if returned by the writer no children are processed"
@@ -731,7 +702,7 @@ class ODFWriter(object):
         if obj.isInline():
                 return SkipChildren(innerframe) # FIXME something else formatting?
         else:
-            innerframe.addAttribute( "anchortype", "paragraph")
+            innerframe.setAttribute( "anchortype", "paragraph")
 
 
         widthIn = "%.2fin" % (width + style.frmOuter.internSpacing)
@@ -846,5 +817,3 @@ def main():
  
 if __name__=="__main__":
     main()
-
-
