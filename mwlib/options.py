@@ -149,6 +149,9 @@ class OptionParser(optparse.OptionParser):
             domain=domain,
             script_extension=script_extension,
         )
+        if not env.metabook:
+            self.metabook =  env.metabook =  metabook.make_metabook()
+            
         if self.options.noimages:
             env.images = None
 
