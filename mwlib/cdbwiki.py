@@ -111,12 +111,16 @@ class page(object):
 
 def get_redirect_matcher(siteinfo):
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
-
+    
+    nshandler =  nshandling.nshandler(siteinfo)
+    
     def redirect(text):
         mo = redirect_rex.search(text)
         if mo:
-            return mo.group('redirect').split("|", 1)[0]
+            name = mo.group('redirect').split("|", 1)[0]
+            return nshandler.get_fqname(name)
         return None
+    
     return redirect
 
 class WikiDB(object):
