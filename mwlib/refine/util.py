@@ -165,3 +165,6 @@ def resolve_entity(e):
 
 def replace_html_entities(txt):
     return re.sub("&.*?;", lambda mo: resolve_entity(mo.group(0)), txt)
+
+def remove_nowiki_tags(txt, _rx=re.compile("<nowiki>(.*?)</nowiki>",  re.IGNORECASE | re.DOTALL)):
+    return _rx.sub(lambda mo: mo.group(1), txt)

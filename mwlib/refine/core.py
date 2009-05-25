@@ -776,7 +776,10 @@ class parse_uniq(object):
         children = [T(type=T.t_text, text=inner)]
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children)
 
-                 
+    def create_pre(self, name, vlist, inner, xopts):
+        inner = util.replace_html_entities(util.remove_nowiki_tags(inner))
+        return self._create_generic(name,  vlist, inner, xopts)
+    
     def create_source(self, name, vlist, inner, xopts):
         children = [T(type=T.t_text, text=inner)]
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=True)
