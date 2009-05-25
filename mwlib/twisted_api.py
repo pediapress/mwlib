@@ -58,10 +58,6 @@ class PODClient(podclient.PODClient):
         reactor.callLater(0.0, postit, data, headers)
 
 def merge_data(dst, src):
-    orig = dst 
-    
-    args = (dst, src)
-    
     todo = [(dst, src)]
     while todo:
         dst, src = todo.pop()
@@ -72,14 +68,9 @@ def merge_data(dst, src):
         elif isinstance(dst, dict):
             for k, v in src.items():
                 if k in dst:
-                    
-                    #assert isinstance(dst[k], (dict,list)), "wrong type %r" % (dict(k=k, v=v, d=dst[k]),)
-                    
                     todo.append((dst[k], v))
                 else:
                     dst[k] = v
-        else:
-            assert dst==src
     
 def guess_api_urls(url):
     """
