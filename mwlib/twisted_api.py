@@ -372,7 +372,7 @@ class FSOutput(object):
         
                         
 def splitblocks(lst, limit):
-    """Split list lst in blocks of max. lmit entries. Return list of blocks."""
+    """Split list lst in blocks of max. limit entries. Return list of blocks."""
 
     res = []
     start = 0
