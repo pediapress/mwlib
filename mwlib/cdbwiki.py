@@ -124,7 +124,7 @@ def get_redirect_matcher(siteinfo):
     return redirect
 
 class WikiDB(object):
-
+    max_redirects = 5
     def __init__(self, dir, prefix='wiki', lang="en"):
         self.dir = os.path.abspath(dir)
         self.reader = ZCdbReader(os.path.join(self.dir, prefix))
@@ -148,11 +148,13 @@ class WikiDB(object):
 
     def get_page(self,  name,  revision=None):
         count = 0
-        while count < 5:       
+        names =  []
+        while count < self.max_redirects:       
             try:
                 rawtext = self.reader[name]
             except KeyError:
                 return None
+            names.append(name)
             r =  self.redirect_matcher(rawtext)
             if r is None:
                 break
@@ -161,7 +163,7 @@ class WikiDB(object):
             count += 1
         if r is not None:
             return None
-        return page(rawtext=rawtext)
+        return page(rawtext=rawtext, names=names)
     
     def get_data(self, name):
         return self._loadjson(name+".json")
