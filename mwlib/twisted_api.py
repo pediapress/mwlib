@@ -86,8 +86,8 @@ def guess_api_urls(url):
     @param url: URL of a MediaWiki article
     @type url: str
     
-    @returns: APIHelper instance or None if it couldn't be guessed
-    @rtype: @{APIHelper}
+    @returns: list of possible api.php urls
+    @rtype: list
     """
     
     try:
