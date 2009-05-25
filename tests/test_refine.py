@@ -246,3 +246,16 @@ def test_link_in_table_caption():
     print with_vlist
     
     assert not with_vlist,  "no node should contain a vlist"
+
+def test_html_entity_in_pre():
+    r = parse_txt("<pre>&gt;</pre>")
+    txt = r[0].children[0].text
+    print txt
+    assert txt == ">",  "wrong text"
+    
+def test_nowiki_in_pre():
+    """http://code.pediapress.com/wiki/ticket/617"""
+    r = parse_txt("<pre><nowiki>foo</nowiki></pre>")
+    txt = r[0].children[0].text
+    print txt
+    assert txt == "foo",  "wrong text"
