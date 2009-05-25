@@ -169,6 +169,11 @@ def _makewiki(conf,
     
     url = None
     if conf.startswith(':'):
+        if conf[1:] not in wpwikis:
+            wpwikis[conf[1:]] =  dict(baseurl = "http://%s.wikipedia.org/w/" % conf[1:],
+                                      mw_license_url =  None)
+            
+
         url = wpwikis.get(conf[1:])['baseurl']
 
     if conf.startswith("http://") or conf.startswith("https://"):
