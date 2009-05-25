@@ -35,7 +35,9 @@ class PODClient(podclient.PODClient):
         if content_type is None:
             content_type = "application/x-www-form-urlencoded"
             headers = {'Content-Type': content_type}
-
+        else:
+            headers =  {}
+            
         
         def postit(postdata, headers):
             client.getPage(self.posturl, method="POST", postdata=postdata, headers=headers).addCallbacks(done, done)
