@@ -6,14 +6,14 @@ import shutil
 import subprocess
 import tempfile
 
-from mwlib.nuwiki import NuWiki, adapt
+from mwlib.nuwiki import NuWiki
 
 class TestNuWiki(object):
     def setup_class(cls):
         cls.tmpdir = tempfile.mkdtemp()
         cls.zipfn = os.path.join(cls.tmpdir, 'test.zip')
         cls.nuwikidir = cls.zipfn + '.nuwiki'
-        subprocess.check_call(['mw-zip',
+        err = subprocess.call(['mw-zip',
             '-o', cls.zipfn,
             '-c', ':de',
             '--keep-tmpfiles',
@@ -22,7 +22,8 @@ class TestNuWiki(object):
             'Monty Python',
         ])
         assert os.path.isdir(cls.nuwikidir)
-    
+        assert err == 0,  "command failed"
+        
     def teardown_class(cls):
         if os.path.exists(cls.tmpdir):
             shutil.rmtree(cls.tmpdir)
@@ -37,9 +38,3 @@ class TestNuWiki(object):
         assert self.nuwiki.siteinfo['general']['lang'] == 'de'
         assert self.nuwiki.nshandler is not None
         assert self.nuwiki.nfo['base_url'] == 'http://de.wikipedia.org/w/'
-
-
-class Testadapt(object):
-    pass
-    
-
