@@ -245,11 +245,9 @@ startfeed strike strong sub sup table td th tr tt u ul var
         def g():
             return text[start:start+tlen]
 
-        i = 0
         numtokens = len(tokens)
-        while i < numtokens:
-            type, start, tlen = tokens[i]
-
+        for type,  start, tlen in tokens:
+            
             if type==token.t_begintable:
                 txt = g()
                 count = txt.count(":")
@@ -282,7 +280,6 @@ startfeed strike strong sub sup table td th tr tt u ul var
                     res.append(token(type=token.t_text, start=start, len=tlen, source=text))
             else:
                 res.append(t)
-            i+=1
 
         return res
         
