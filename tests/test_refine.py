@@ -259,3 +259,14 @@ def test_nowiki_in_pre():
     txt = r[0].children[0].text
     print txt
     assert txt == "foo",  "wrong text"
+
+def test_s_tag():
+    r = parse_txt("<s>strike</s>")
+    s = core.walknodel(r, lambda x: x.tagname == "s")
+    assert len(s) == 1
+    
+def test_var_tag():
+    r = parse_txt("<var>strike</var>")
+    s = core.walknodel(r, lambda x: x.tagname == "var")
+    assert len(s) == 1
+    
