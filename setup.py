@@ -75,7 +75,7 @@ def main():
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
 
     import glob
-    for x in glob.glob("mwlib/templ/*.c"):
+    for x in glob.glob("mwlib/*/*.c"):
         modname = x[:-2].replace("/", ".")
         ext_modules.append(Extension(modname, [x]))
         print "USING:", modname, x
