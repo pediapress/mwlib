@@ -8,6 +8,7 @@ from mwlib.refine import util
 from mwlib import tagext, uniq, nshandling
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
+from mwlib.refine.tagparser import tagparser
 
 # try:
 #     from blist import blist
@@ -876,7 +877,20 @@ def parse_txt(txt, xopts=None, **kwargs):
         xopts.uniquifier = uniquifier
 
     tokens = blist(tokenize(txt, uniquifier=uniquifier))
+
+    td1 =  tagparser()
+    a = td1.add
+    a("blockquote" , 5)
+    a("code"       , 10)
+    a("references" , 15)
+    a("span"       , 20)
+    a("li"         , 25, blocknode=True, nested=False)
+    a("p"          , 30, blocknode=True, nested=False)
+    a("ul"         , 35, blocknode=True)
+    a("ol"         , 40, blocknode=True)
+    a("center"     , 45, blocknode=True)
     
+        
     parsers = [fixlitags,
                mark_style_tags,
                parse_singlequote,
@@ -884,14 +898,24 @@ def parse_txt(txt, xopts=None, **kwargs):
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
-               parse_blockquote, parse_code_tag, 
-               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol,
-               parse_center,
+
+               td1, 
+               
                parse_links,
                parse_inputbox,
                parse_h_tags,
                parse_sections,
                parse_div, parse_tables, parse_uniq]
 
+
+    if 0:
+        i = parsers.index(td1)
+        parsers[i:i+1] = [
+               parse_blockquote, parse_code_tag, 
+               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol,
+               parse_center,]
+    
+
+    
     combined_parser(parsers)(tokens, xopts)
     return tokens
