@@ -44,20 +44,22 @@ T.children = None
 
 def get_token_walker(skip_types=set(), skip_tags=set()):
     def walk(tokens):
+        res =  []
         todo = [tokens]
-        yield tokens
+        res.append(tokens)
         
         while todo:
             tmp = todo.pop()
             for x in tmp:
                 if x.type not in skip_types and x.tagname not in skip_tags:
                     if x.children is not None:
-                        yield x.children
+                        res.append(x.children)
                         todo.append(x.children)
                 else:
                     # print "skip", x, x.children
                     if x.children is not None:
                         todo.append(x.children)
+        return res
     return walk
 
 def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
