@@ -146,17 +146,26 @@ class Application(wsgi.Application):
             method = getattr(self, 'do_%s' % command)
         except AttributeError:
             return self.http500()
+
+
+        lockfile = lock(self.new_collection_lockfile)
+        try:
+            collection_id = request.post_data.get('collection_id')
+            if not collection_id:
+                collection_id = self.new_collection(request.post_data)
+                is_new = True
+            else:
+                is_new = False
+        finally:
+            unlock(lockfile)
         
-        collection_id = request.post_data.get('collection_id')
-        if collection_id is None:
-            lockfile = lock(self.new_collection_lockfile)
-        else:
-            if not self.check_collection_id(collection_id):
-                return self.http404()
-            lockfile = lock(self.get_path(collection_id, 'lock'))
+        if not self.check_collection_id(collection_id):
+            return self.http404()
+
+        lockfile = lock(self.get_path(collection_id, 'lock'))
         try:
             try:
-                return method(request.post_data)
+                return method(collection_id, request.post_data, is_new)
             except Exception, exc:
                 return self.error_response('error executing command %r: %s' % (
                     command, exc,
@@ -224,12 +233,11 @@ class Application(wsgi.Application):
         return p
     
     @json_response
-    def do_render(self, post_data):
+    def do_render(self, collection_id, post_data, is_new=False):
         metabook_data = post_data.get('metabook')
-        collection_id = post_data.get('collection_id')
-        if not (metabook_data or collection_id):
+        if is_new and not metabook_data:
             return self.error_response('POST argument metabook or collection_id required')
-        if metabook_data and collection_id:
+        if not is_new and metabook_data:
             return self.error_response('Specify either metabook or collection_id, not both')
         try:
             base_url = post_data['base_url']
@@ -246,9 +254,6 @@ class Application(wsgi.Application):
         script_extension = post_data.get('script_extension', '')
         language = post_data.get('language', '')
         oldzipcreator = post_data.get('oldzipcreator', '')
-        
-        if not collection_id:
-            collection_id = self.new_collection(post_data)
         
         log.info('render %s %s' % (collection_id, writer))
         
@@ -366,12 +371,11 @@ class Application(wsgi.Application):
             return {'progress': 0}
     
     @json_response
-    def do_render_status(self, post_data):
-        try:
-            collection_id = post_data['collection_id']
-            writer = post_data.get('writer', self.default_writer)
-        except KeyError, exc:
-            return self.error_response('POST argument required: %s' % exc)
+    def do_render_status(self, collection_id, post_data, is_new=False):
+        if is_new:
+            return self.error_response('POST argument required: collection_id')
+
+        writer = post_data.get('writer', self.default_writer)
             
         log.info('render_status %s %s' % (collection_id, writer))
         
@@ -422,12 +426,11 @@ class Application(wsgi.Application):
         }
     
     @json_response
-    def do_render_kill(self, post_data):
-        try:
-            collection_id = post_data['collection_id']
-            writer = post_data.get('writer', self.default_writer)
-        except KeyError, exc:
-            return self.error_response('POST argument required: %s' % exc)
+    def do_render_kill(self, collection_id, post_data, is_new=False):
+        if is_new:
+            return self.error_response('POST argument required: collection_id')
+
+        writer = post_data.get('writer', self.default_writer)
         
         log.info('render_kill %s %s' % (collection_id, writer))
         
@@ -445,13 +448,11 @@ class Application(wsgi.Application):
             'killed': killed,
         }
     
-    def do_download(self, post_data):
-        try:
-            collection_id = post_data['collection_id']
-            writer = post_data.get('writer', self.default_writer)
-        except KeyError, exc:
-            log.ERROR('POST argument required: %s' % exc)
-            return self.http500()
+    def do_download(self, collection_id, post_data, is_new=False):
+        if is_new:
+            return self.error_response('POST argument required: collection_id')
+
+        writer = post_data.get('writer', self.default_writer)
         
         try:
             log.info('download %s %s' % (collection_id, writer))
@@ -476,7 +477,7 @@ class Application(wsgi.Application):
             return self.http500()
     
     @json_response
-    def do_zip_post(self, post_data):
+    def do_zip_post(self, collection_id, post_data, is_new=False):
         try:
             metabook_data = post_data['metabook']
             base_url = post_data['base_url']
@@ -504,8 +505,6 @@ class Application(wsgi.Application):
             except KeyError:
                 return self.error_response('POST argument required: post_url')
             response = {'state': 'ok'}
-        
-        collection_id = self.new_collection(post_data)
         
         log.info('zip_post %s %s' % (collection_id, pod_api_url))
         
