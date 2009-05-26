@@ -9,7 +9,12 @@ from mwlib import tagext, uniq, nshandling
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 from mwlib.refine.tagparser import tagparser
-    
+
+try:
+    from mwlib.refine import _core
+except ImportError:
+    _core =  None
+
 T.t_complex_table = "complex_table"
 T.t_complex_caption = "complex_caption"
 T.t_complex_table_row = "complex_table_row"
@@ -31,6 +36,9 @@ T.t_vlist = "vlist"
 T.children = None
 
 def get_token_walker(skip_types=set(), skip_tags=set()):
+    if _core is not None:
+        return _core.token_walker(skip_types = skip_types,  skip_tags = skip_tags)
+
     def walk(tokens):
         res =  []
         todo = [tokens]
