@@ -9,18 +9,6 @@ from mwlib import tagext, uniq, nshandling
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
 from mwlib.refine.tagparser import tagparser
-
-# try:
-#     from blist import blist
-#     import pkg_resources
-#     pkg_resources.require("blist>=0.9.15")
-# except ImportError:
-#     # import warnings
-#     # warnings.warn("using normal list. parsing might be slower. please run 'easy_install blist'")
-#     blist = list
-
-blist = list
-
     
 T.t_complex_table = "complex_table"
 T.t_complex_caption = "complex_caption"
@@ -181,7 +169,7 @@ class parse_sections(object):
 
             body = T(type=T.t_complex_node, children=tokens[current.endtitle+1:i])
               
-            sect = T(type=T.t_complex_section, start=0, children=blist([caption, body]), level=level, blocknode=True)
+            sect = T(type=T.t_complex_section, start=0, children=[caption, body], level=level, blocknode=True)
             tokens[current.start:i] = [sect] 
             
 
@@ -261,7 +249,7 @@ class parse_singlequote(object):
                 if s.is_bold and s.is_italic:
                     styles[i].caption = "'''"
                     inner = T(type=T.t_complex_style, caption="''", children=styles[i].children)
-                    styles[i].children = blist([inner])
+                    styles[i].children = [inner]
                 elif s.is_bold:
                     styles[i].caption = "'''"
                 elif s.is_italic:
@@ -390,12 +378,12 @@ class parse_lines(object):
             else:
                 assert 0
                 
-            node.children = blist()
+            node.children = []
             dd = None
             while startpos<len(lines)-1 and getchar(lines[startpos])==prefix:
                 # collect items
                 item = newitem()
-                item.children=blist()
+                item.children=[]
                 item.children.append(lines[startpos])
                 del lines[startpos]
                 
@@ -571,7 +559,7 @@ class parse_links(object):
                         marks=[]                        
                     continue
 
-                node = T(type=T.t_complex_link, start=0, len=0, children=blist(), ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler, url=url)
+                node = T(type=T.t_complex_link, start=0, len=0, children=[], ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler, url=url)
                 if langlink:
                     node.langlink = langlink
                 if interwiki:
@@ -878,7 +866,7 @@ def parse_txt(txt, xopts=None, **kwargs):
         txt = uniquifier.replace_tags(txt)
         xopts.uniquifier = uniquifier
 
-    tokens = blist(tokenize(txt, uniquifier=uniquifier))
+    tokens = tokenize(txt, uniquifier=uniquifier)
 
     td1 =  tagparser()
     a = td1.add

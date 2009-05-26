@@ -83,8 +83,7 @@ def _change_classes(node):
             
         if node.children is None:
             node.children = []
-        # else:
-        #     node.children = list(node.children) # advtree can't handle the blist
+            
         if node.vlist is None:
             node.vlist = {}
         if node.type==T.t_complex_tag:
