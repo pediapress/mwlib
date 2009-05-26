@@ -657,7 +657,7 @@ class combined_parser(object):
                 
 
 def mark_style_tags(tokens, xopts):
-    tags = set("tt strike ins del small sup sub b strong cite i u em big font".split())
+    tags = set("tt strike ins del small sup sub b strong cite i u em big font s var".split())
 
     todo = [(0, dict(), tokens)]
 
