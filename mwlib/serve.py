@@ -20,6 +20,8 @@ try:
 except ImportError:
     import simplejson as json
 
+from lockfile import FileLock
+
 from mwlib import filequeue, log, utils, wsgi, _version
 from mwlib.metabook import calc_checksum
 
@@ -84,21 +86,6 @@ def json_response(fn):
 
 # ==============================================================================
 
-def lock(filename):
-    if not hasattr(os, 'O_EXLOCK'):
-        # this OS does not support file-locks via os.open(),
-        # pretend we've got the lock
-        return None
-    fd = os.open(filename, os.O_CREAT|os.O_EXLOCK)
-    return fd
-
-def unlock(fd):
-    if fd is None:
-        return
-    os.close(fd)
-
-# ==============================================================================
-
 class Application(wsgi.Application):
     metabook_filename = 'metabook.json'
     error_filename = 'errors'
@@ -133,7 +120,6 @@ class Application(wsgi.Application):
         self.default_writer = default_writer
         self.report_from_mail = report_from_mail
         self.report_recipients = report_recipients
-        self.new_collection_lockfile = os.path.join(self.cache_dir, 'new_collection.lock')
     
     def dispatch(self, request):
         if request.method != 'POST':
@@ -148,7 +134,8 @@ class Application(wsgi.Application):
             return self.http500()
 
 
-        lockfile = lock(self.new_collection_lockfile)
+        lock = FileLock(os.path.join(self.cache_dir, 'global'))
+        lock.acquire()
         try:
             collection_id = request.post_data.get('collection_id')
             if not collection_id:
@@ -157,12 +144,13 @@ class Application(wsgi.Application):
             else:
                 is_new = False
         finally:
-            unlock(lockfile)
+            lock.release()
         
         if not self.check_collection_id(collection_id):
             return self.http404()
 
-        lockfile = lock(self.get_path(collection_id, 'lock'))
+        lock = FileLock(self.get_collection_dir(collection_id))
+        lock.acquire()
         try:
             try:
                 return method(collection_id, request.post_data, is_new)
@@ -171,7 +159,7 @@ class Application(wsgi.Application):
                     command, exc,
                 ))
         finally:
-            unlock(lockfile)
+            lock.release()
     
     @json_response
     def error_response(self, error, **kwargs):
