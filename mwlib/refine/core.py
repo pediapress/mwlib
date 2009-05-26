@@ -889,7 +889,11 @@ def parse_txt(txt, xopts=None, **kwargs):
     a("ul"         , 35, blocknode=True)
     a("ol"         , 40, blocknode=True)
     a("center"     , 45, blocknode=True)
-    
+
+    td_parse_h = tagparser()
+    for i in range(1, 7):
+        td_parse_h.add("h%s" % i, i)
+        
         
     parsers = [fixlitags,
                mark_style_tags,
@@ -903,7 +907,10 @@ def parse_txt(txt, xopts=None, **kwargs):
                
                parse_links,
                parse_inputbox,
-               parse_h_tags,
+
+               td_parse_h, 
+               # parse_h_tags,
+               
                parse_sections,
                parse_div, parse_tables, parse_uniq]
 
