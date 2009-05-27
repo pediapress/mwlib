@@ -151,7 +151,11 @@ class NuWiki(object):
 
     def get_data(self, name):
         return self._loadjson(name+".json")
-    
+
+    def articles(self):
+        res = list(set([p.title for p in self.revisions.values() if p.ns==0]))
+        res.sort()
+        return res
     
 def extract_member(zipfile, member, targetpath):
     """Copied and adjusted from Python 2.6 stdlib zipfile.py module.
