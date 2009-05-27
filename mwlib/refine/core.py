@@ -556,7 +556,7 @@ class parse_links(object):
                     langlink = None
                     interwiki = None
 
-                if not partial:
+                if not ilink and not partial:
                     i+=1
                     if stack:
                         marks=stack.pop()
