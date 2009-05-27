@@ -38,6 +38,7 @@ class NuWiki(object):
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
         self.nshandler = nshandling.nshandler(self.siteinfo)        
+        self.en_nshandler = nshandling.get_nshandler_for_lang('en') 
         self.nfo = self._loadjson("nfo.json", {})
         p = self.nfo.get("print_template_pattern")
         if p and "$1" in p:
@@ -115,7 +116,7 @@ class NuWiki(object):
         ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if ns != 6:
             return
-        
+
         if "/" in fqname:
             return None
         
@@ -288,27 +289,31 @@ class adapt(object):
     def getDiskPath(self, name, size=None):
         return self.nuwiki.normalize_and_get_image_path(name)
 
+    def get_image_description_page(self, name):
+        ns, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
+        page = self.get_page(fqname)
+        if page is not None:
+            return page
+        fqname = self.en_nshandler.get_fqname(partial, nshandling.NS_FILE)
+        return self.get_page(fqname)
+
     def getImageTemplates(self, name, wikidb=None):
         from mwlib.expander import get_templates
 
-        fqname = self.nshandler.get_fqname(name, 6)
-        page = self.get_page(fqname)
+        page = self.get_image_description_page(name)
         if page is not None:
             return get_templates(page.rawtext)
         print 'no such image: %r' % fqname
         return []
 
     def getContributors(self, name, wikidb=None):
-        fqname = self.nshandler.get_fqname(name, 6)
-
-        page = self.get_page(fqname)
-        if page is not None:
-            users = getContributorsFromInformationTemplate(page.rawtext, fqname, self)
-            if users:
-                return users
-
-        return self.getAuthors(fqname)
-
+        page = self.get_image_description_page(name)
+        if page is None:
+            return []
+        users = getContributorsFromInformationTemplate(page.rawtext, page.title, self)
+        if users:
+            return users
+        return self.getAuthors(page.title)
 
 
 def getContributorsFromInformationTemplate(raw, title, wikidb):
