@@ -269,4 +269,9 @@ def test_var_tag():
     r = parse_txt("<var>strike</var>")
     s = core.walknodel(r, lambda x: x.tagname == "var")
     assert len(s) == 1
-    
+
+def test_empty_link():
+    """http://code.pediapress.com/wiki/ticket/621"""
+    r = parse_txt("[[de:]]")
+    print r
+    assert r[0].type == T.t_complex_link
