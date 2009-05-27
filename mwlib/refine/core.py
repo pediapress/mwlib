@@ -35,9 +35,9 @@ T.t_vlist = "vlist"
 
 T.children = None
 
-def get_token_walker(skip_types=set(), skip_tags=set()):
+def get_token_walker(skip_tags=set()):
     if _core is not None:
-        return _core.token_walker(skip_types = skip_types,  skip_tags = skip_tags)
+        return _core.token_walker(skip_tags=skip_tags)
 
     def walk(tokens):
         res =  []
@@ -47,7 +47,7 @@ def get_token_walker(skip_types=set(), skip_tags=set()):
         while todo:
             tmp = todo.pop()
             for x in tmp:
-                if x.type not in skip_types and x.tagname not in skip_tags:
+                if x.tagname not in skip_tags:
                     if x.children is not None:
                         res.append(x.children)
                         todo.append(x.children)
@@ -169,7 +169,7 @@ class parse_sections(object):
             level = min (l1, l2)
 
             # FIXME: make this a caption
-            caption = T(type=T.t_complex_node, start=0, len=0, children=tokens[current.start+1:current.endtitle]) 
+            caption = T(type=T.t_complex_node, children=tokens[current.start+1:current.endtitle]) 
             if l2>l1:
                 caption.children.append(T(type=T.t_text, text=u"="*(l2-l1)))
             elif l1>l2:
@@ -177,7 +177,7 @@ class parse_sections(object):
 
             body = T(type=T.t_complex_node, children=tokens[current.endtitle+1:i])
               
-            sect = T(type=T.t_complex_section, start=0, children=[caption, body], level=level, blocknode=True)
+            sect = T(type=T.t_complex_section, tagname="@section", children=[caption, body], level=level, blocknode=True)
             tokens[current.start:i] = [sect] 
             
 
@@ -601,7 +601,7 @@ class parse_paragraphs(object):
     need_walker = False
     
     def __init__(self, tokens, xopts):
-        walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table", "tr"]), skip_types=set([T.t_complex_section]))
+        walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table", "tr", "@section"]))
         for t in walker(tokens):
             self.tokens = t
             self.run()
@@ -641,7 +641,7 @@ class combined_parser(object):
     def __call__(self, tokens, xopts):
         parsers = list(self.parsers)
 
-        default_walker = get_token_walker(skip_tags=set(["table", "tr"]), skip_types=set([T.t_complex_section]))
+        default_walker = get_token_walker(skip_tags=set(["table", "tr", "@section"]))
         
         while parsers:
             p = parsers.pop()
