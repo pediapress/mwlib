@@ -100,7 +100,8 @@ class nshandler(object):
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
             name = name[1:].strip()
-
+            defaultns = 0
+            
         if ":" in name:
             ns, partial_name = name.split(":", 1)
             was_namespace, nsnum, prefix = self._find_namespace(ns, defaultns=defaultns)

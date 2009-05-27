@@ -33,3 +33,4 @@ def test_fqname_defaultns():
 
     yield d, "user:schmir", "Benutzer:Schmir"
     yield d, "schmir", "Vorlage:Schmir"
+    yield d, ":schmir", "Schmir"
