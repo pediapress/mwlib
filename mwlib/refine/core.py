@@ -36,27 +36,25 @@ T.t_vlist = "vlist"
 T.children = None
 
 def get_token_walker(skip_tags=set()):
-    if _core is not None:
-        return _core.token_walker(skip_tags=skip_tags)
-
     def walk(tokens):
-        res =  []
+        res =  [tokens]
         todo = [tokens]
-        res.append(tokens)
         
         while todo:
             tmp = todo.pop()
             for x in tmp:
-                if x.tagname not in skip_tags:
-                    if x.children is not None:
-                        res.append(x.children)
-                        todo.append(x.children)
-                else:
-                    # print "skip", x, x.children
-                    if x.children is not None:
-                        todo.append(x.children)
+                children = x.children
+                if children:
+                    todo.append(children)
+                    if x.tagname not in skip_tags:
+                        res.append(children)
         return res
+    
     return walk
+
+if _core is not None:
+    get_token_walker = _core.token_walker
+    
 
 def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
     if break_at is None:
