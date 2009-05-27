@@ -55,66 +55,13 @@ if _core is not None:
     get_token_walker = _core.token_walker
     
 
-def get_recursive_tag_parser(tagname, break_at=None, blocknode=False):
-    if break_at is None:
-        break_at = lambda _: False
-        
-    def recursive_parse_tag(tokens, xopts):            
-        i = 0
-        stack = []
-
-        def create():
-            sub = tokens[start+1:i]
-            return [T(type=T.t_complex_tag, children=sub, tagname=tagname, blocknode=blocknode, vlist=tokens[start].vlist)]
-        
-        while i<len(tokens):
-            t = tokens[i]
-            if stack and break_at(t):
-                start = stack.pop()
-                tokens[start:i] = create()
-                i=start+1
-            elif t.type==T.t_html_tag and t.rawtagname==tagname:
-                if t.tag_selfClosing:
-                    tokens[i].type = T.t_complex_tag
-                    tokens[i].tagname = tokens[i].rawtagname
-                    tokens[i].rawtagname = None 
-                else:
-                    stack.append(i)
-                i+=1
-            elif t.type==T.t_html_tag_end and t.rawtagname==tagname:
-                if stack:
-                    start = stack.pop()
-                    tokens[start:i+1] = create()
-                    i = start+1
-                else:
-                    i+=1
-            else:
-                i+= 1
-
-        while stack:
-            start = stack.pop()
-            tokens[start:] = create()
-
-    recursive_parse_tag.__name__ += "_"+tagname
-    
-    return recursive_parse_tag
+def get_recursive_tag_parser(tagname, blocknode=False):
+    tp = tagparser()
+    tp.add(tagname, 10, blocknode=blocknode)
+    return tp
     
 parse_div = get_recursive_tag_parser("div", blocknode=True)
-parse_center = get_recursive_tag_parser("center", blocknode=True)
 
-def _li_break_at(token):
-    if token.type==T.t_html_tag and token.rawtagname=="li":
-        return True
-    return False
-parse_li = get_recursive_tag_parser("li", _li_break_at, blocknode=True)
-parse_ol = get_recursive_tag_parser("ol", blocknode=True)
-parse_ul = get_recursive_tag_parser("ul", blocknode=True)
-parse_span = get_recursive_tag_parser("span")
-parse_p = get_recursive_tag_parser("p", blocknode=True)
-parse_references = get_recursive_tag_parser("references")
-
-parse_blockquote = get_recursive_tag_parser("blockquote")
-parse_code_tag = get_recursive_tag_parser("code")
 
 def parse_inputbox(tokens, xopts):
     get_recursive_tag_parser("inputbox")(tokens, xopts)
@@ -709,10 +656,6 @@ def mark_style_tags(tokens, xopts):
         create()
 mark_style_tags.need_walker = False
 
-
-parse_h_tags = combined_parser(
-    [get_recursive_tag_parser("h%s" % x) for x in range(6,0,-1)])
-
 class parse_uniq(object):
     def __init__(self, tokens, xopts):
         self.tagextensions=tagext.default_registry
@@ -897,27 +840,14 @@ def parse_txt(txt, xopts=None, **kwargs):
                parse_preformatted,
                parse_paragraphs,
                parse_lines,
-
                td1, 
-               
                parse_links,
                parse_inputbox,
-
                td_parse_h, 
-               # parse_h_tags,
-               
                parse_sections,
-               parse_div, parse_tables, parse_uniq]
-
-
-    if 0:
-        i = parsers.index(td1)
-        parsers[i:i+1] = [
-               parse_blockquote, parse_code_tag, 
-               parse_references, parse_span, parse_li, parse_p, parse_ul, parse_ol,
-               parse_center,]
-    
-
+               parse_div,
+               parse_tables,
+               parse_uniq]
     
     combined_parser(parsers)(tokens, xopts)
     return tokens
