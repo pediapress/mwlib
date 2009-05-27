@@ -11,12 +11,10 @@ cdef class token_walker(object):
         
         cdef list res =  [tokens]
         cdef list todo = [tokens]
-        cdef list tmp
         cdef list children
         
         while todo:
-            tmp = todo.pop()
-            for x in tmp:
+            for x in todo.pop():
                 children = x.children
                 if children:
                     todo.append(children)

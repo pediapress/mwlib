@@ -41,8 +41,7 @@ def get_token_walker(skip_tags=set()):
         todo = [tokens]
         
         while todo:
-            tmp = todo.pop()
-            for x in tmp:
+            for x in todo.pop():
                 children = x.children
                 if children:
                     todo.append(children)
