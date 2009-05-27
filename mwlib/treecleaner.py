@@ -919,6 +919,11 @@ class TreeCleaner(object):
                     return True
                 if len(table.children) > 40:
                     return True
+
+        itemlists = cell.getChildNodesByClass(ItemList)
+        for itemlist in itemlists:
+            if len(itemlist.children) > 25:
+                return True
         return is_big
 
 
