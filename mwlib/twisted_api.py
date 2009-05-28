@@ -120,7 +120,7 @@ def try_api_urls(urls):
         m = mwapi(url)
         
         def got_api(si):
-            print si
+            # print si
             d.callback(m)
 
         m.ping().addCallbacks(got_api,  doit)
