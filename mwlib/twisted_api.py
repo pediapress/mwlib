@@ -104,6 +104,29 @@ def guess_api_urls(url):
         retval.append(base_url)
     return retval
 
+def try_api_urls(urls):
+    urls = list(urls)
+    urls.reverse()
+
+    
+    d = defer.Deferred()
+
+    def doit(_):
+        if not urls:
+            d.callback(None)
+            return
+        
+        url = urls.pop()
+        m = mwapi(url)
+        
+        def got_api(si):
+            print si
+            d.callback(m)
+
+        m.ping().addCallbacks(got_api,  doit)
+        
+    doit(None)
+    return d
 
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
@@ -120,7 +143,10 @@ class mwapi(object):
         self.num_running = 0
         self.qccount = 0
         self.cookies = {}
-        
+
+    def __repr__(self):
+        return "<mwapi %s at %s>" % (self.baseurl, hex(id(self)))
+    
     def idle(self):
         """Return whether another connection is possible at the moment"""
 
@@ -237,6 +263,9 @@ class mwapi(object):
         
         return self._request(**kwargs).addCallback(got_result)
 
+    def ping(self):
+        return self.do_request(action="query", meta="siteinfo",  siprop="general")
+        
     def get_siteinfo(self):
         if self.siteinfo is not None:
             return defer.succeed(self.siteinfo)
@@ -853,10 +882,13 @@ def main2():
     api = mwapi("http://muni/p3/api.php")
     api.login("ralf",  "xxx").addCallbacks(_stop, _stop)
     return
+
+def main3():
+    try_api_urls(["http://de.wikipedia.org/",  "http://de.wikipedia.org/w/api.php"]).addCallbacks(_stop, _stop)
     
 def main():
     # log.startLogging(sys.stdout)
-    reactor.callLater(0.0, main2)
+    reactor.callLater(0.0, main3)
     reactor.run()
     
 if __name__=="__main__":
