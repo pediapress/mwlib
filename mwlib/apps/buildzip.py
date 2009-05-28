@@ -74,7 +74,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
     
     from mwlib import twisted_api
     from mwlib.metabook import get_licenses
-    from twisted.internet import reactor
+    from twisted.internet import reactor,  defer
     
     
 
@@ -89,7 +89,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         api = twisted_api.mwapi(api_url)
         if username:
             return api.login(username, password, domain)
-        return defer.succeed(get_api)
+        return defer.succeed(api)
     
     def doit(api):
         fsout.dump_json(metabook=metabook)
