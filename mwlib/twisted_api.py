@@ -274,18 +274,23 @@ class mwapi(object):
     def get_siteinfo(self):
         if self.siteinfo is not None:
             return defer.succeed(self.siteinfo)
+
+        siprop = "general namespaces interwikimap namespacealiases magicwords".split()
+
+        def got_err(r):
+            siprop.pop()
+            if len(siprop)<3:
+                return r
+            return doit()
         
         def got_it(siteinfo):
             self.siteinfo = siteinfo
             return siteinfo
-
-        def without_namespacealiases(failure):
-            return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|interwikimap").addCallback(got_it)
-
-        def without_magicwords(failure):
-            return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|interwikimap").addErrback(without_namespacealiases).addCallback(got_it)
         
-        return self.do_request(action="query", meta="siteinfo", siprop="general|namespaces|namespacealiases|magicwords|interwikimap").addErrback(without_magicwords).addCallback(got_it)
+        def doit():
+            return self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop)).addCallbacks(got_it, got_err)
+
+        return doit()
 
     def _update_kwargs(self, kwargs, titles, revids):
         assert titles or revids and not (titles and revids), 'either titles or revids must be set'
