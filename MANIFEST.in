@@ -193,5 +193,4 @@ include tests/test_writerutils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipcreator.py
 include tests/test_zipwiki.py
-include tools/build_namespace_langs.py
 include tools/build_rng_grammar.py
