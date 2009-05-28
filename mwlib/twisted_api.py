@@ -119,12 +119,33 @@ class mwapi(object):
         self._todo = []
         self.num_running = 0
         self.qccount = 0
+        self.cookies = {}
         
     def idle(self):
         """Return whether another connection is possible at the moment"""
 
         return self.num_running < self.max_connections
 
+    def login(self, username, password, domain=None):
+        args = dict(action="login",
+                    lgname=username.encode("utf-8"), 
+                    lgpassword=password.encode("utf-8"), 
+                    format="json", 
+                    )
+        
+        if domain is not None:
+            args['lgdomain'] = domain.encode('utf-8')
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        postdata = urllib.urlencode(args)
+        
+        def got_page(res):
+            res = loads(res)
+            if res["login"]["result"]=="Success":
+                return
+            raise RuntimeError("login failed: %r" % (res, ))
+            
+        return client.getPage(self.baseurl, method="POST",  postdata=postdata, headers=headers,  cookies=self.cookies).addCallback(got_page)
+            
     def _fetch(self, url):
         errors = []
         d = defer.Deferred()
@@ -134,7 +155,7 @@ class mwapi(object):
                 errors.append(val)
                 if len(errors)<self.max_retry_count:
                     print "retrying: could not fetch %r" % (url,)
-                    client.getPage(url).addCallbacks(done, done)
+                    client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
                 else:
                     # print "error: could not fetch %r" % (url,)
                     d.callback(val)
@@ -142,7 +163,7 @@ class mwapi(object):
                 d.callback(val)
             
                 
-        client.getPage(url).addCallbacks(done, done)
+        client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
         return d
     
     def _maybe_fetch(self):
@@ -796,7 +817,11 @@ def done(data):
         
 
     
-def doit(pages):
+def main1(pages):
+    mb = json.load(open("metabook.json"))
+    pages = pages_from_metabook(mb)
+    
+    # pages = [("___user___:___schmir  __", None)] #, ("Mainz", None)]
     api = mwapi("http://en.wikipedia.org/w/api.php")
     api.api_request_limit = 10
 
@@ -819,15 +844,19 @@ def pages_from_metabook(mb):
     articles = metabook.get_item_list(mb, "article")
     pages = [(x["title"], x.get("revision")) for x in articles]
     return pages
+
+def _stop(res):
+    print res
+    reactor.stop()
+    
+def main2():
+    api = mwapi("http://muni/p3/api.php")
+    api.login("ralf",  "xxx").addCallbacks(_stop, _stop)
+    return
     
 def main():
-    mb = json.load(open("metabook.json"))
-    pages = pages_from_metabook(mb)
-    
-    # pages = [("___user___:___schmir  __", None)] #, ("Mainz", None)]
-    
     # log.startLogging(sys.stdout)
-    reactor.callLater(0.0, doit, pages)
+    reactor.callLater(0.0, main2)
     reactor.run()
     
 if __name__=="__main__":
