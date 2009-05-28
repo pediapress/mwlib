@@ -141,7 +141,7 @@ class mwapi(object):
         def got_page(res):
             res = loads(res)
             if res["login"]["result"]=="Success":
-                return
+                return self
             raise RuntimeError("login failed: %r" % (res, ))
             
         return client.getPage(self.baseurl, method="POST",  postdata=postdata, headers=headers,  cookies=self.cookies).addCallback(got_page)

@@ -48,12 +48,20 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
     metabook = env.metabook
     base_url = env.wiki.api_helper.base_url
     script_extension = env.wiki.api_helper.script_extension
+    
     api_url = "".join([base_url, "api", script_extension])
 
     template_exclusion_category = options.template_exclusion_category
     print_template_pattern = options.print_template_pattern
-    
-    
+
+    login = options.login
+    username, password, domain = None, None, None
+    if login:
+        if login.count(':') == 1:
+            username, password = unicode(login, 'utf-8').split(':', 1)
+        else:
+            username, password, domain = unicode(login, 'utf-8').split(':', 2)
+
     if output:
         fsdir = output+".nuwiki"
     else:
@@ -76,9 +84,14 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
     fsout = twisted_api.FSOutput(fsdir)
 
     licenses = get_licenses(metabook)
-    
-    def doit():
+
+    def get_api():
         api = twisted_api.mwapi(api_url)
+        if username:
+            return api.login(username, password, domain)
+        return defer.succeed(get_api)
+    
+    def doit(api):
         fsout.dump_json(metabook=metabook)
         nfo = {
             'format': 'nuwiki',
@@ -91,19 +104,25 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         fsout.dump_json(nfo=nfo)
         
         pages = twisted_api.pages_from_metabook(metabook)
-        
         options.fetcher = twisted_api.Fetcher(api, fsout, pages,
                                               licenses=licenses,
                                               podclient=podclient,
                                               print_template_pattern=print_template_pattern,
                                               template_exclusion_category=template_exclusion_category)
 
+    def start():
+        def login_failed(res):
+            print "login failed"
+            reactor.stop()
+            return res
+        get_api().addErrback(login_failed).addCallback(doit)
+        
     try:
         if podclient is not None:
             old_class = podclient.__class__
             podclient.__class__ = twisted_api.PODClient
 
-        reactor.callLater(0.0, doit)
+        reactor.callLater(0.0, start)
         reactor.run()
     finally:
         if podclient is not None:
@@ -200,7 +219,7 @@ def main():
             output = options.output
             keep_tmpfiles = options.keep_tmpfiles
 
-            if not (options.login or options.oldzipcreator) and isinstance(env.wiki, mwapidb.WikiDB):
+            if not options.oldzipcreator and isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
             else:    
                 from mwlib import zipcreator
