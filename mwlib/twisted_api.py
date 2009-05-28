@@ -118,15 +118,20 @@ def try_api_urls(urls):
         
         url = urls.pop()
         m = mwapi(url)
+        old_retry_count = m.max_retry_count
+        m.max_retry_count = 1
         
         def got_api(si):
-            # print si
+            m.max_retry_count = old_retry_count
             d.callback(m)
 
         m.ping().addCallbacks(got_api,  doit)
         
     doit(None)
     return d
+
+def find_api_for_url(url):
+    return try_api_urls(guess_api_urls(url))
 
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
@@ -264,7 +269,7 @@ class mwapi(object):
         return self._request(**kwargs).addCallback(got_result)
 
     def ping(self):
-        return self.do_request(action="query", meta="siteinfo",  siprop="general")
+        return self._request(action="query", meta="siteinfo",  siprop="general")
         
     def get_siteinfo(self):
         if self.siteinfo is not None:
@@ -884,7 +889,11 @@ def main2():
     return
 
 def main3():
-    try_api_urls(["http://de.wikipedia.org/",  "http://de.wikipedia.org/w/api.php"]).addCallbacks(_stop, _stop)
+    find_api_for_url("http://wiki.archlinux.org/index.php/Main_Page").addCallbacks(_stop, _stop)
+    
+            
+    try_api_urls(["http://wiki.archlinux.org/index.php/Main_Page",  "http://commons.wikipedia.org/w/api.php",  "http://de.wikipedia.org/w/api.php"]).addCallbacks(_stop, _stop)
+
     
 def main():
     # log.startLogging(sys.stdout)
