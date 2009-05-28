@@ -190,12 +190,3 @@ class WikiDB(object):
             nsnum = self.nshandler.splitname(title)[0]
             if nsnum==0:
                 yield title,  txt
-        
-    # def getURL(self, *args, **kwargs):
-    #     return "http://code.pediapress.com"
-
-    # def getAuthors(self, *args, **kwargs):
-    #     return []
-    
-    # def getSource(self, *args, **kwargs):
-    #     return None
