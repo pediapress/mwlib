@@ -100,41 +100,45 @@ def try_api_urls(urls):
 def find_api_for_url(url):
     return try_api_urls(guess_api_urls(url))
 
+class multiplier(object):
+    def __init__(self):
+        self.key2val = {}
+        self.waiting = {}
+
+    def _done(self,  val,  key):
+        self.key2val[key] = val
+        tmp = self.waiting[key]
+        del self.waiting[key]
+        for x in tmp:
+            x.callback(val)
+            
+    def get(self, key, fun, *args):
+        if key in self.key2val:
+            return defer.succeed(self.key2val[key])
+        
+        d = defer.Deferred()
+        if key in self.waiting:
+            self.waiting[key].append(d)
+            return d
+
+        fun(*args).addBoth(self._done, key)
+        self.waiting[key] = [d] 
+        return d
+                 
 class pool(object):
     def __init__(self):
-        self.url2mwapi = {}
-        self.waiting = {}
+        self.multi = multiplier()
         
-    def _got_api(self, val, mwapi, url):
-        if isinstance(val, failure.Failure) or val is None:
-            res = None
-        else:
-            res = mwapi
-            
-        self.url2mwapi[url] = res
-        
-        tmp = self.waiting[url]
-        del self.waiting[url]
-        
-        for x in tmp:
-            x.callback(res)
-                
-    def get_api(self,  url):
-        if url in self.url2mwapi:
-            return defer.succeed(self.url2mwapi[url])
-
-        d = defer.Deferred()
-        
-        if url in self.waiting:
-            self.waiting[url].append(d)
-            return d
-                        
+    def _connect(self,  url):
         m = mwapi(url)
-        m.ping().addBoth(self._got_api, m,  url)
-        self.waiting[url] = [d]
+        def done(res):
+            return m
         
-        return d
-            
+        return m.ping().addCallback(done)
+        
+    def get_api(self,  url):
+        return self.multi.get(url, self._connect,  url)
+    
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
     api_request_limit = 20 # at most 50 titles at once
