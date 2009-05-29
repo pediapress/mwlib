@@ -242,7 +242,7 @@ class fetcher(object):
             progress =  100.0*self.count_done /  jt
             
         if self.podclient:
-            self.podclient.post_status(status=msg, progress=progress)
+            self.podclient.post_status(status="", progress=progress)
 
             
         isatty = getattr(sys.stdout, "isatty", None)
