@@ -13,7 +13,7 @@ import pprint
 from mwlib import metabook, utils, nshandling
 
 from mwlib.net.pod import PODClient
-from mwlib.net.mwapi import mwapi,  guess_api_urls, find_api_for_url,  try_api_urls
+from mwlib.net.mwapi import mwapi,  guess_api_urls, find_api_for_url,  try_api_urls, multiplier
 
 try:
     import json
@@ -157,8 +157,9 @@ class Fetcher(object):
         
         self.scheduled = set()
 
+        self.simult = multiplier()
         
-        self._refcall(lambda:self.api.get_siteinfo()
+        self._refcall(lambda:self.get_siteinfo_for(self.api)
                       .addCallback(self._cb_siteinfo)
                       .addErrback(self.make_die_fun("could not get siteinfo")))
                       
@@ -184,6 +185,9 @@ class Fetcher(object):
         self.report()
         self.dispatch()
 
+    def get_siteinfo_for(self, m):
+        return self.simult.get(m.baseurl, m.get_siteinfo)
+                                
     def _split_titles_revids(self, pages):
         titles = set()
         revids = set()        
@@ -426,7 +430,7 @@ class Fetcher(object):
                 self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits))
         
         # print "got api for", repr(path), len(todo)
-        return api.get_siteinfo().addCallback(got_siteinfo)
+        return self.get_siteinfo_for(api).addCallback(got_siteinfo)
         
             
     def _get_mwapi_for_path(self, path):
@@ -448,7 +452,7 @@ class Fetcher(object):
         for k in urls:
             m = mwapi(k)
             m.max_retry_count = 1
-            dlist.append(m.get_siteinfo().addCallback(lambda siteinfo, api=m: (api, siteinfo)))
+            dlist.append(self.get_siteinfo_for(m).addCallback(lambda siteinfo, api=m: (api, siteinfo)))
 
         def got_api(results):
             for r in results:
