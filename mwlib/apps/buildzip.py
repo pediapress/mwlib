@@ -72,7 +72,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         
 
     
-    from mwlib import twisted_api
+    from mwlib.net import fetch
     from mwlib.metabook import get_licenses
     from twisted.internet import reactor,  defer
     
@@ -81,12 +81,12 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
 
     
     options.fetcher = None # stupid python
-    fsout = twisted_api.FSOutput(fsdir)
+    fsout = fetch.FSOutput(fsdir)
 
     licenses = get_licenses(metabook)
 
     def get_api():
-        api = twisted_api.mwapi(api_url)
+        api = fetch.mwapi(api_url)
         if username:
             return api.login(username, password, domain)
         return defer.succeed(api)
@@ -103,8 +103,8 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
          
         fsout.dump_json(nfo=nfo)
         
-        pages = twisted_api.pages_from_metabook(metabook)
-        options.fetcher = twisted_api.Fetcher(api, fsout, pages,
+        pages = fetch.pages_from_metabook(metabook)
+        options.fetcher = fetch.Fetcher(api, fsout, pages,
                                               licenses=licenses,
                                               podclient=podclient,
                                               print_template_pattern=print_template_pattern,
@@ -120,7 +120,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
     try:
         if podclient is not None:
             old_class = podclient.__class__
-            podclient.__class__ = twisted_api.PODClient
+            podclient.__class__ = fetch.PODClient
 
         reactor.callLater(0.0, start)
         reactor.run()
