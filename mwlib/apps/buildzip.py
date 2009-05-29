@@ -81,7 +81,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
 
     
     options.fetcher = None # stupid python
-    fsout = fetch.FSOutput(fsdir)
+    fsout = fetch.fsoutput(fsdir)
 
     licenses = get_licenses(metabook)
 
@@ -104,7 +104,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         fsout.dump_json(nfo=nfo)
         
         pages = fetch.pages_from_metabook(metabook)
-        options.fetcher = fetch.Fetcher(api, fsout, pages,
+        options.fetcher = fetch.fetcher(api, fsout, pages,
                                               licenses=licenses,
                                               podclient=podclient,
                                               print_template_pattern=print_template_pattern,

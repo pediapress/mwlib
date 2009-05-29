@@ -27,7 +27,7 @@ from twisted.internet import reactor, defer
 
     
 
-class FSOutput(object):
+class fsoutput(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
         assert not os.path.exists(self.path)
@@ -92,7 +92,7 @@ class FSOutput(object):
                     self.revfile.write(header)
                     self.revfile.write(txt.encode("utf-8"))
                 # else:    
-                #     print "FSOutput: skipping duplicate:", dict(revid=revid, title=title)
+                #     print "fsoutput: skipping duplicate:", dict(revid=revid, title=title)
 
     def write_edits(self, edits):
         self.dump_json(edits=edits)
@@ -119,7 +119,7 @@ def getblock(lst, limit):
     return r
 
 
-class Fetcher(object):
+class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
                  podclient=None,
                  print_template_pattern=None,
@@ -558,10 +558,10 @@ def main1(pages):
     # return
 
     
-    fs = FSOutput("tmp")
+    fs = fsoutput("tmp")
 
     
-    f = Fetcher(api, fs, pages)
+    f = fetcher(api, fs, pages)
     
 def pages_from_metabook(mb):
     articles = metabook.get_item_list(mb, "article")
