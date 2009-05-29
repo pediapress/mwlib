@@ -55,6 +55,10 @@ include mwlib/metabook.py
 include mwlib/mwapidb.py
 include mwlib/namespace.py
 include mwlib/namespace_langs.py
+include mwlib/net/__init__.py
+include mwlib/net/fetch.py
+include mwlib/net/mwapi.py
+include mwlib/net/pod.py
 include mwlib/netdb.py
 include mwlib/nshandling.py
 include mwlib/nuwiki.py
@@ -118,7 +122,6 @@ include mwlib/texmap.py
 include mwlib/timeline.py
 include mwlib/treecleaner.py
 include mwlib/treecleanerhelper.py
-include mwlib/twisted_api.py
 include mwlib/uniq.py
 include mwlib/uparser.py
 include mwlib/utils.py
