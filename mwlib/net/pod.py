@@ -1,5 +1,6 @@
 from twisted.internet import reactor
 from mwlib import podclient
+from twisted.web import client 
 
 class PODClient(podclient.PODClient):
     nextdata = None
