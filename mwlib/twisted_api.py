@@ -828,6 +828,7 @@ class Fetcher(object):
             d=fun()
             assert isinstance(d, defer.Deferred), "got %r" % (d,)
         except:
+            self._decref(None)
             print "function failed"
             raise
         return d.addCallbacks(self._decref, self._decref)
