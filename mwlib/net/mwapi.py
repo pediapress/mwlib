@@ -70,6 +70,8 @@ def guess_api_urls(url):
     return retval
 
 def try_api_urls(urls):
+    """return mwapi instance for the first url which looks like it's working api.php or None"""
+    
     urls = list(urls)
     urls.reverse()
 
@@ -98,6 +100,41 @@ def try_api_urls(urls):
 def find_api_for_url(url):
     return try_api_urls(guess_api_urls(url))
 
+class pool(object):
+    def __init__(self):
+        self.url2mwapi = {}
+        self.waiting = {}
+        
+    def _got_api(self, val, mwapi, url):
+        if isinstance(val, failure.Failure) or val is None:
+            res = None
+        else:
+            res = mwapi
+            
+        self.url2mwapi[url] = res
+        
+        tmp = self.waiting[url]
+        del self.waiting[url]
+        
+        for x in tmp:
+            x.callback(res)
+                
+    def get_api(self,  url):
+        if url in self.url2mwapi:
+            return defer.succeed(self.url2mwapi[url])
+
+        d = defer.Deferred()
+        
+        if url in self.waiting:
+            self.waiting[url].append(d)
+            return d
+                        
+        m = mwapi(url)
+        m.ping().addBoth(self._got_api, m,  url)
+        self.waiting[url] = [d]
+        
+        return d
+            
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
     api_request_limit = 20 # at most 50 titles at once
@@ -311,3 +348,26 @@ class mwapi(object):
         
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle)
+
+
+def stop(val):
+    print val
+    reactor.stop()
+    
+def main():
+    p = pool()
+    url = "http://de.wikipedia.org/w/api.php"
+
+    def show(r):
+        print "gotit:",  r
+        
+    
+    p.get_api(url).addBoth(show)
+    p.get_api(url).addBoth(show)
+    p.get_api(url).addBoth(show)
+    p.get_api(url).addBoth(show)
+    
+    
+if __name__=="__main__":
+    reactor.callLater(0.0,  main)
+    reactor.run()
