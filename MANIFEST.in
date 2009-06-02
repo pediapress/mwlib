@@ -47,6 +47,7 @@ include mwlib/jobsched.py
 include mwlib/l10n.py
 include mwlib/lang.py
 include mwlib/lang.txt
+include mwlib/linuxmem.py
 include mwlib/log.py
 include mwlib/lrucache.py
 include mwlib/mathml.py
@@ -59,7 +60,6 @@ include mwlib/net/__init__.py
 include mwlib/net/fetch.py
 include mwlib/net/mwapi.py
 include mwlib/net/pod.py
-include mwlib/netdb.py
 include mwlib/nshandling.py
 include mwlib/nuwiki.py
 include mwlib/odfconf.py
@@ -174,7 +174,6 @@ include tests/test_metabook.py
 include tests/test_miscutils.py
 include tests/test_mwapidb.py
 include tests/test_mwscan.py
-include tests/test_netdb_imagedb.py
 include tests/test_nshandling.py
 include tests/test_nuwiki.py
 include tests/test_odfwriter.py
