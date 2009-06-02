@@ -29,7 +29,7 @@ class Exclude(py.test.collect.Directory):
         if not lxml and bn=='test_docbookwriter.py':
             #print "Skipping", bn, "-- lxml not found"
             return []
-        if xnet and bn in ('test_mwapidb.py', 'test_netdb_imagedb.py', 'test_zipwiki.py'):
+        if xnet and bn in ('test_mwapidb.py', 'test_zipwiki.py'):
             print "Skipping", bn, "-- needs network"
             return []
 

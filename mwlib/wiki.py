@@ -37,30 +37,6 @@ def wiki_zip(path=None, url=None, name=None, **kwargs):
         log.warn('Unused parameters: %r' % kwargs)
     return zipwiki.Wiki(path)
 
-def wiki_net(articleurl=None, url=None, name=None, imagedescriptionurls=None,
-             templateurls=None, templateblacklist=None,
-             defaultauthors=None, **kwargs):
-    from mwlib import netdb
-    
-    if templateurls:
-        templateurls = [x for x in templateurls.split() if x]
-    else:
-        raise RuntimeError("templateurls parameter for netdb not set in [wiki] section")
-    
-    if imagedescriptionurls:
-        imagedescriptionurls = [x for x in imagedescriptionurls.split() if x]
-    else:
-        raise RuntimeError("imagedescriptionurls parameter for netdb not set in [wiki] section")
-    
-    if defaultauthors:
-        defaultauthors = [a.strip() for a in defaultauthors.split(',')]
-    
-    return netdb.NetDB(articleurl,
-        imagedescriptionurls=imagedescriptionurls,
-        templateurls=templateurls,
-        templateblacklist=templateblacklist,
-        defaultauthors=defaultauthors,
-    )
 
 def wiki_obsolete_cdb(path=None,  **kwargs):
     raise RuntimeError("cdb file format has changed. please rebuild with mw-buildcdb")
@@ -87,22 +63,6 @@ def image_mwapi(
         script_extension=script_extension,
     )
 
-def image_download(url=None, localpath=None, knownlicenses=None, **kwargs):
-    assert url, "must supply url in [images] section"
-    from mwlib import netdb
-
-    if localpath:
-        localpath = os.path.expanduser(localpath)
-    urls = [x for x in url.split() if x]
-    assert urls
-    
-    if knownlicenses:
-        knownlicenses = [x for x in knownlicenses.split() if x]
-    else:
-        knownlicenses = None
-    
-    imgdb = netdb.ImageDB(urls, cachedir=localpath, knownLicenses=knownlicenses)    
-    return imgdb
 
 def image_zip(path=None, **kwargs):
     from mwlib import zipwiki
@@ -113,8 +73,8 @@ def image_zip(path=None, **kwargs):
 
 
 dispatch = dict(
-    images = dict(mwapi=image_mwapi, download=image_download, zip=image_zip),
-    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, net=wiki_net, zip=wiki_zip)
+    images = dict(mwapi=image_mwapi, zip=image_zip),
+    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
 )
 
 _en_license_url = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
