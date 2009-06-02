@@ -46,11 +46,14 @@ def zipdir(dirname, output=None):
 def hack(output=None, options=None, env=None, podclient=None, status=None, keep_tmpfiles=False, **kwargs):
     imagesize = options.imagesize
     metabook = env.metabook
-    base_url = env.wiki.api_helper.base_url
-    script_extension = env.wiki.api_helper.script_extension
-    
+    base_url = env.wiki.url
+    script_extension = env.wiki.script_extension
+    if not base_url.endswith("/"):
+        base_url += "/"
     api_url = "".join([base_url, "api", script_extension])
-
+    if isinstance(api_url,  unicode):
+        api_url = api_url.encode("utf-8")
+        
     template_exclusion_category = options.template_exclusion_category
     print_template_pattern = options.print_template_pattern
 
@@ -112,7 +115,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
 
     def start():
         def login_failed(res):
-            print "login failed"
+            print "Fatal error: login failed:", res.getErrorMessage()
             reactor.stop()
             return res
         get_api().addErrback(login_failed).addCallback(doit)
@@ -130,6 +133,9 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
 
     
     fetcher = options.fetcher
+    if not fetcher:
+        raise RuntimeError("Fatal error")
+    
     if fetcher.fatal_error:
         print "error:", fetcher.fatal_error
         raise RuntimeError('Fatal error')
@@ -201,7 +207,7 @@ def main():
     else:
         podclient = None
     
-    from mwlib import utils, mwapidb
+    from mwlib import utils,  wiki
     
     if options.daemonize:
         utils.daemonize()
@@ -219,7 +225,7 @@ def main():
             output = options.output
             keep_tmpfiles = options.keep_tmpfiles
 
-            if isinstance(env.wiki, mwapidb.WikiDB):
+            if isinstance(env.wiki, wiki.dummy_web_wiki):
                 hack(**locals())
             else:
                 raise NotImplementedError("zip file creation from %r not supported" % (env.wiki,))

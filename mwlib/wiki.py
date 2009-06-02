@@ -31,6 +31,12 @@ def wiki_mwapi(
         script_extension=script_extension,
     )
 
+class dummy_web_wiki(object):
+    def __init__(self,  **kw):
+        self.__dict__.update(**kw)
+        
+        
+
 def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
     if kwargs:
@@ -140,18 +146,14 @@ def _makewiki(conf,
         url = conf
 
     if url:
-        res.wiki = wiki_mwapi(url,
+        res.wiki = dummy_web_wiki(url=url,
             username=username,
             password=password,
             domain=domain,
             script_extension=script_extension,
         )
-        res.images = image_mwapi(url,
-            username=username,
-            password=password,
-            domain=domain,
-            script_extension=script_extension,
-        )
+        res.image = None
+        
         return res
 
     if os.path.exists(os.path.join(conf, "siteinfo.json")):

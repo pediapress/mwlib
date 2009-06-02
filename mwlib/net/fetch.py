@@ -121,7 +121,7 @@ class fetcher(object):
                  podclient=None,
                  print_template_pattern=None,
                  template_exclusion_category=None):
-        
+        self._stopped = False 
         self.fatal_error = "stopped by signal"
         
         self.api = api
@@ -442,6 +442,9 @@ class fetcher(object):
         return self.apipool.try_api_urls(urls)
             
     def dispatch(self):
+        if self._stopped:
+            return
+        
         limit = self.api.api_request_limit
 
         def doit(name, lst):
@@ -468,8 +471,14 @@ class fetcher(object):
             self.finish()
             self.fatal_error = None
             print
-            reactor.stop()
+            self._stop_reactor()
 
+    def _stop_reactor(self):
+        if self._stopped:
+            return
+        reactor.stop()
+        self._stopped = True
+        
     def finish(self):
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
@@ -504,7 +513,7 @@ class fetcher(object):
     def make_die_fun(self, reason):
         def fatal(val):
             self.fatal_error = reason
-            reactor.stop()
+            self._stop_reactor()
             print "fatal: %s [%s]" % (reason, val)        
             
         return fatal
