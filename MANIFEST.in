@@ -43,7 +43,6 @@ include mwlib/fontswitcher.py
 include mwlib/htmlcolornames.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
-include mwlib/jobsched.py
 include mwlib/l10n.py
 include mwlib/lang.py
 include mwlib/lang.txt
@@ -146,7 +145,6 @@ include mwlib/xmlcat/xhtml-special.ent
 include mwlib/xmlcat/xhtml-symbol.ent
 include mwlib/xmlcat/xhtml1-transitional.dtd
 include mwlib/xmltreecleaner.py
-include mwlib/zipcreator.py
 include mwlib/zipwiki.py
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
@@ -168,7 +166,6 @@ include tests/test_expander_time.py
 include tests/test_expr.py
 include tests/test_html.py
 include tests/test_imgmap.py
-include tests/test_jobsched.py
 include tests/test_math_utils.py
 include tests/test_metabook.py
 include tests/test_miscutils.py
@@ -193,6 +190,5 @@ include tests/test_uniq.py
 include tests/test_utils.py
 include tests/test_writerutils.py
 include tests/test_xhtmlwriter.py
-include tests/test_zipcreator.py
 include tests/test_zipwiki.py
 include tools/build_rng_grammar.py
