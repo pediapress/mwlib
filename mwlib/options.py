@@ -52,15 +52,6 @@ class OptionParser(optparse.OptionParser):
             help='login with given USERNAME, PASSWORD and (optionally) DOMAIN',
             metavar='USERNAME:PASSWORD[:DOMAIN]',
         )
-        self.add_option('--no-threads',
-            action='store_true',
-            help='do not use threads to fetch articles and images in parallel',
-        )
-        self.add_option('--num-threads',
-            help='number of threads to fetch resources in parallel (default: 10)',
-            default='10',
-            metavar='NUM',
-        )
         self.add_option("-d", "--daemonize", action="store_true",
             help='become a daemon process as soon as possible',
         )
@@ -104,14 +95,6 @@ class OptionParser(optparse.OptionParser):
         except (ValueError, AssertionError):
             self.error('Argument for --imagesize must be an integer > 0.')
         
-        try:
-            self.options.num_threads = int(self.options.num_threads)
-            assert self.options.num_threads >= 0
-        except (ValueError, AssertionError):
-            self.error('Argument for --num-threads must be an integer >= 0.')
-        
-        if self.options.no_threads:
-            self.options.num_threads = 0
 
         if self.args:
             if self.metabook is None:
