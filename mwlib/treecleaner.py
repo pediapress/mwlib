@@ -94,6 +94,8 @@ class TreeCleaner(object):
                       'removeBreakingReturns',
                       ]
 
+    skipMethods = []
+
 
     def __init__(self, tree, save_reports=False, nesting_strictness='loose', status_cb=None):
         """Init with parsetree.
@@ -221,7 +223,7 @@ class TreeCleaner(object):
 
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
-
+        skipMethods = skipMethods or self.skipMethods
         self.clean([cm for cm in self.cleanerMethods if cm not in skipMethods])
 
     def report(self, *args):        
@@ -948,7 +950,7 @@ class TreeCleaner(object):
                         
             if node.hasClassID(self.split_table_classIDs):
                 split_table = True
-                
+
             if split_table:
                 cols = [[] for i in range(node.numcols)]
 
