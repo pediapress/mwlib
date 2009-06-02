@@ -241,7 +241,6 @@ class Application(wsgi.Application):
         force_render = bool(post_data.get('force_render'))
         script_extension = post_data.get('script_extension', '')
         language = post_data.get('language', '')
-        oldzipcreator = post_data.get('oldzipcreator', '')
         
         log.info('render %s %s' % (collection_id, writer))
         
@@ -312,8 +311,6 @@ class Application(wsgi.Application):
                 args.extend(['--print-template-pattern', print_template_pattern])
             if language:
                 args.extend(['--language', language])
-            if oldzipcreator:
-                args.extend(['--oldzipcreator'])
         else:
             log.info('rendering %r' % output_path)
             metabook_path = self.get_path(collection_id, self.metabook_filename)
@@ -342,8 +339,6 @@ class Application(wsgi.Application):
                 args.extend(['--script-extension', script_extension])
             if language:
                 args.extend(['--language', language])
-            if oldzipcreator:
-                args.extend(['--oldzipcreator'])
         
         self.queue_job('render', collection_id, args)
         
@@ -477,7 +472,6 @@ class Application(wsgi.Application):
         print_template_pattern = post_data.get('print_template_pattern', '')
         login_credentials = post_data.get('login_credentials', '')
         script_extension = post_data.get('script_extension', '')
-        oldzipcreator = post_data.get('oldzipcreator', '')
         
         pod_api_url = post_data.get('pod_api_url', '')
         if pod_api_url:
@@ -542,8 +536,6 @@ class Application(wsgi.Application):
                 args.extend(['--login', login_credentials])
             if script_extension:
                 args.extend(['--script-extension', script_extension])
-            if oldzipcreator:
-                args.extend(['--oldzipcreator'])
         
         self.queue_job('post', collection_id, args)
         

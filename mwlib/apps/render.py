@@ -96,16 +96,8 @@ class Main(object):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
 
-        if self.options.oldzipcreator or self.options.login:
-            from mwlib import zipcreator
-            self.zip_filename = zipcreator.make_zip_file(self.options.keep_zip, env,
-                status=self.status,
-                num_threads=self.options.num_threads,
-                imagesize=self.options.imagesize,
-            )
-        else:
-            from mwlib.apps.buildzip import hack
-            self.zip_filename = hack(output=self.options.keep_zip, options=self.options, env=env, status=self.status, keep_tmpfiles=self.options.keep_tmpfiles)
+        from mwlib.apps.buildzip import hack
+        self.zip_filename = hack(output=self.options.keep_zip, options=self.options, env=env, status=self.status, keep_tmpfiles=self.options.keep_tmpfiles)
 
         if env.images:
             try:

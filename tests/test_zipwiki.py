@@ -10,7 +10,7 @@ class TestZipWiki(object):
         fd, cls.zip_filename = tempfile.mkstemp()
         os.close(fd)
         print 'generating ZIP file'
-        rc = os.system('mw-zip --oldzipcreator -c :en -o %s "The Living Sea"' % cls.zip_filename)
+        rc = os.system('mw-zip -c :en -o %s "The Living Sea"' % cls.zip_filename)
         print 'ZIP file generation finished'
         assert rc == 0, 'Could not create ZIP file. Is mw-zip in PATH?'
     
@@ -73,6 +73,3 @@ class TestZipWiki(object):
         loc = src['locals']
         assert loc
         assert isinstance(loc, basestring)
-
-
-        

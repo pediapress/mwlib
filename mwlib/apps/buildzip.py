@@ -219,23 +219,10 @@ def main():
             output = options.output
             keep_tmpfiles = options.keep_tmpfiles
 
-            if not options.oldzipcreator and isinstance(env.wiki, mwapidb.WikiDB):
+            if isinstance(env.wiki, mwapidb.WikiDB):
                 hack(**locals())
-            else:    
-                from mwlib import zipcreator
-
-                filename = zipcreator.make_zip_file(options.output, env,
-                    status=status,
-                    num_threads=options.num_threads,
-                    imagesize=options.imagesize,
-                )
-
-                status = Status(podclient=podclient, progress_range=(91, 100))
-                if podclient:
-                    status(status='uploading', progress=0)
-                    podclient.post_zipfile(filename)
-
-                status(status='finished', progress=100)
+            else:
+                raise NotImplementedError("zip file creation from %r not supported" % (env.wiki,))
         except Exception, e:
             if status:
                 status(status='error')
