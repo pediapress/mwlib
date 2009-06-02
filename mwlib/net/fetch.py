@@ -8,10 +8,11 @@
 import os
 import sys
 import urlparse
+
 from mwlib import metabook, utils, nshandling
 
+from mwlib.net import mwapi
 from mwlib.net.pod import PODClient
-from mwlib.net.mwapi import mwapi, guess_api_urls, find_api_for_url, try_api_urls, multiplier, pool
 
 try:
     import json
@@ -22,8 +23,6 @@ except ImportError:
 from twisted.python import failure, log
 from twisted.web import client 
 from twisted.internet import reactor, defer
-
-    
 
 class fsoutput(object):
     def __init__(self, path):
@@ -126,7 +125,7 @@ class fetcher(object):
         self.fatal_error = "stopped by signal"
         
         self.api = api
-        self.apipool = pool()
+        self.apipool = mwapi.pool()
         self.apipool.multi.key2val[api.baseurl] = api
         
         self.fsout = fsout
@@ -158,7 +157,7 @@ class fetcher(object):
         
         self.scheduled = set()
 
-        self.simult = multiplier()
+        self.simult = mwapi.multiplier()
         
         self._refcall(lambda:self.get_siteinfo_for(self.api)
                       .addCallback(self._cb_siteinfo)
@@ -436,7 +435,7 @@ class fetcher(object):
         
             
     def _get_mwapi_for_path(self, path):
-        urls = guess_api_urls(path)
+        urls = mwapi.guess_api_urls(path)
         if not urls:
             return defer.fail("cannot guess api url for %r" % (path,))
 
@@ -510,61 +509,7 @@ class fetcher(object):
             
         return fatal
     
-        
-def done(data):
-    print "done", json.dumps(data, indent=4)
-        
-
-    
-def main1(pages):
-    mb = json.load(open("metabook.json"))
-    pages = pages_from_metabook(mb)
-    
-    # pages = [("___user___:___schmir  __", None)] #, ("Mainz", None)]
-    api = mwapi("http://en.wikipedia.org/w/api.php")
-    api.api_request_limit = 10
-
-    # api.get_categorymembers("Category:Exclude in print").addCallback(done)
-    # return
-    
-    
-    api.fetch_imageinfo(titles=["File:DSC00996.JPG", "File:MacedonEmpire.jpg"]).addCallback(done)
-    return
-    # api.fetch_used([p[0] for p in pages]).addCallback(done)
-    # return
-
-    
-    fs = fsoutput("tmp")
-
-    
-    f = fetcher(api, fs, pages)
-    
 def pages_from_metabook(mb):
     articles = metabook.get_item_list(mb, "article")
     pages = [(x["title"], x.get("revision")) for x in articles]
     return pages
-
-def _stop(res):
-    print res
-    reactor.stop()
-    
-def main2():
-    api = mwapi("http://muni/p3/api.php")
-    api.login("ralf",  "xxx").addCallbacks(_stop, _stop)
-    return
-
-def main3():
-    find_api_for_url("http://wiki.archlinux.org/index.php/Main_Page").addCallbacks(_stop, _stop)
-    
-            
-    try_api_urls(["http://wiki.archlinux.org/index.php/Main_Page",  "http://commons.wikipedia.org/w/api.php",  "http://de.wikipedia.org/w/api.php"]).addCallbacks(_stop, _stop)
-
-    
-def main():
-    # log.startLogging(sys.stdout)
-    reactor.callLater(0.0, main3)
-    reactor.run()
-    
-if __name__=="__main__":
-    main()
-    

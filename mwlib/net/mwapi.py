@@ -126,7 +126,6 @@ class pool(object):
         urls = list(urls)
         urls.reverse()
 
-
         d = defer.Deferred()
 
         def doit(_):

@@ -72,7 +72,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         
 
     
-    from mwlib.net import fetch
+    from mwlib.net import fetch, mwapi
     from mwlib.metabook import get_licenses
     from twisted.internet import reactor,  defer
     
@@ -86,7 +86,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
     licenses = get_licenses(metabook)
 
     def get_api():
-        api = fetch.mwapi(api_url)
+        api = mwapi.mwapi(api_url)
         if username:
             return api.login(username, password, domain)
         return defer.succeed(api)
