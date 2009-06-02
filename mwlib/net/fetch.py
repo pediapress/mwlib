@@ -7,9 +7,7 @@
 
 import os
 import sys
-import urllib
 import urlparse
-import pprint
 from mwlib import metabook, utils, nshandling
 
 from mwlib.net.pod import PODClient
