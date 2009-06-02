@@ -11,7 +11,7 @@ import urlparse
 from mwlib import metabook, utils, nshandling
 
 from mwlib.net.pod import PODClient
-from mwlib.net.mwapi import mwapi,  guess_api_urls, find_api_for_url,  try_api_urls, multiplier
+from mwlib.net.mwapi import mwapi, guess_api_urls, find_api_for_url, try_api_urls, multiplier, pool
 
 try:
     import json
@@ -122,9 +122,13 @@ class fetcher(object):
                  podclient=None,
                  print_template_pattern=None,
                  template_exclusion_category=None):
+        
         self.fatal_error = "stopped by signal"
         
         self.api = api
+        self.apipool = pool()
+        self.apipool.multi.key2val[api.baseurl] = api
+        
         self.fsout = fsout
         self.licenses = licenses
         self.podclient = podclient
@@ -151,7 +155,6 @@ class fetcher(object):
         self.revids_todo = []
         self.imageinfo_todo = []
         self.imagedescription_todo = {} # base path -> list
-        self.basepath2mwapi = {}        # base path -> mwapi instance 
         
         self.scheduled = set()
 
@@ -401,6 +404,7 @@ class fetcher(object):
         self.fsout.write_pages(data)
     
     def _cb_got_api(self, api, path):
+        assert api
         todo = self.imagedescription_todo[path]
         del self.imagedescription_todo[path]
         
@@ -432,37 +436,11 @@ class fetcher(object):
         
             
     def _get_mwapi_for_path(self, path):
-        if isinstance(path, unicode):
-            path = path.encode("utf-8")
-            
         urls = guess_api_urls(path)
         if not urls:
             return defer.fail("cannot guess api url for %r" % (path,))
 
-        if self.api.baseurl in urls:
-            return defer.succeed(self.api)
-
-        if path in self.basepath2mwapi:
-            return defer.succeed(self.basepath2mwapi[path])
-        
-        
-        dlist = []
-        for k in urls:
-            m = mwapi(k)
-            m.max_retry_count = 1
-            dlist.append(self.get_siteinfo_for(m).addCallback(lambda siteinfo, api=m: (api, siteinfo)))
-
-        def got_api(results):
-            for r in results:
-                if r[0]:
-                    api, siteinfo = r[1]
-                    api.max_retry_count = 2
-                    self.basepath2mwapi[path] = api
-                    return api
-            self.basepath2mwapi[path] = self.api
-            return self.api # FIXME: better would be returning None, skipping images (?)
-                   
-        return defer.DeferredList(dlist, consumeErrors=True).addCallback(got_api)
+        return self.apipool.try_api_urls(urls)
             
     def dispatch(self):
         limit = self.api.api_request_limit

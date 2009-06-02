@@ -45,7 +45,9 @@ def guess_api_urls(url):
     @returns: list of possible api.php urls
     @rtype: list
     """
-    
+    if isinstance(url, unicode):
+        url = url.encode("utf-8")
+        
     try:
         scheme, netloc, path, params, query, fragment = urlparse.urlparse(url)
     except ValueError:
@@ -69,33 +71,14 @@ def guess_api_urls(url):
         retval.append(base_url)
     return retval
 
-def try_api_urls(urls):
+def try_api_urls(urls, apipool=None):
     """return mwapi instance for the first url which looks like it's working api.php or None"""
-    
-    urls = list(urls)
-    urls.reverse()
+    if apipool is None:
+        apipool=pool()
 
-    
-    d = defer.Deferred()
+    return apipool.try_api_urls()
 
-    def doit(_):
-        if not urls:
-            d.callback(None)
-            return
         
-        url = urls.pop()
-        m = mwapi(url)
-        old_retry_count = m.max_retry_count
-        m.max_retry_count = 1
-        
-        def got_api(si):
-            m.max_retry_count = old_retry_count
-            d.callback(m)
-
-        m.ping().addCallbacks(got_api,  doit)
-        
-    doit(None)
-    return d
 
 def find_api_for_url(url):
     return try_api_urls(guess_api_urls(url))
@@ -138,6 +121,31 @@ class pool(object):
         
     def get_api(self,  url):
         return self.multi.get(url, self._connect,  url)
+    
+    def try_api_urls(self, urls):
+        urls = list(urls)
+        urls.reverse()
+
+
+        d = defer.Deferred()
+
+        def doit(_):
+            if not urls:
+                d.callback(None)
+                return
+
+            url = urls.pop()
+            
+            
+            def got_api(api):
+                d.callback(api)
+                return api
+            
+            # TODO: retry count
+            self.get_api(url).addCallbacks(got_api,  doit)
+
+        doit(None)
+        return d
     
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
@@ -364,12 +372,14 @@ def main():
 
     def show(r):
         print "gotit:",  r
-        
+
+    p.try_api_urls(["http://de.wikipedia.org/", "http://de.wikipedia.org/w/api.php"]).addBoth(stop)
+                   
     
-    p.get_api(url).addBoth(show)
-    p.get_api(url).addBoth(show)
-    p.get_api(url).addBoth(show)
-    p.get_api(url).addBoth(show)
+    # p.get_api(url).addBoth(show)
+    # p.get_api(url).addBoth(show)
+    # p.get_api(url).addBoth(show)
+    # p.get_api(url).addBoth(show)
     
     
 if __name__=="__main__":
