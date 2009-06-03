@@ -11,12 +11,14 @@ log = log.Log('mwlib.options')
 
 class OptionParser(optparse.OptionParser):
     def __init__(self, usage=None, config_optional=False):
+        self.config_values = []
         self.config_optional = config_optional
         if usage is None:
             usage = '%prog [OPTIONS] [ARTICLETITLE...]'
         optparse.OptionParser.__init__(self, usage=usage)
         self.metabook = None
-        self.add_option("-c", "--config",
+        self.add_option("-c", "--config", action="callback",
+                        nargs=1, type="string", callback=self._cb_config, 
             help="configuration file, ZIP file or base URL",
         )
         self.add_option("-i", "--imagesize",
@@ -71,9 +73,40 @@ class OptionParser(optparse.OptionParser):
             help='script extension for PHP scripts (default: .php)',
             default='.php',
         )
-    
+        
+    def _cb_config(self, option, opt, value, parser):
+        """handle multiple --config arguments by resetting parser.values and storing
+        the old value in parser.config_values""" 
+        
+        import copy
+        
+        config_values = parser.config_values
+        
+        if not config_values:
+            parser.config_values.append(parser.values)
+
+
+        config_values[-1] = copy.deepcopy(config_values[-1])
+
+        if parser.values.config:
+            del parser.largs[:]        
+        
+        parser.values.__dict__ = copy.deepcopy(config_values[0].__dict__)
+
+        config_values.append(parser.values)
+
+
+        parser.values.config = value
+        parser.values.pages = parser.largs
+
+        
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(self)
+        for c in self.config_values:
+            if not hasattr(c, "pages"):
+                c.pages = []
+            # print c.config,  c.pages
+            
         
         if self.options.logfile:
             start_logging(self.options.logfile)
