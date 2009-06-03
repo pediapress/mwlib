@@ -56,6 +56,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         
     template_exclusion_category = options.template_exclusion_category
     print_template_pattern = options.print_template_pattern
+    imagesize = options.imagesize
 
     login = options.login
     username, password, domain = None, None, None
@@ -111,7 +112,8 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
                                               licenses=licenses,
                                               podclient=podclient,
                                               print_template_pattern=print_template_pattern,
-                                              template_exclusion_category=template_exclusion_category)
+                                              template_exclusion_category=template_exclusion_category,
+                                              imagesize=imagesize)
 
     def start():
         def login_failed(res):

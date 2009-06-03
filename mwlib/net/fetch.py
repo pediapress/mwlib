@@ -120,7 +120,8 @@ class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
                  podclient=None,
                  print_template_pattern=None,
-                 template_exclusion_category=None):
+                 template_exclusion_category=None,
+                 imagesize=800):
         self._stopped = False 
         self.fatal_error = "stopped by signal"
         
@@ -133,6 +134,8 @@ class fetcher(object):
         self.podclient = podclient
         self.template_exclusion_category = template_exclusion_category
         self.print_template_pattern = print_template_pattern
+
+        self.imagesize = imagesize
 
         if self.print_template_pattern:
             self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
@@ -457,7 +460,7 @@ class fetcher(object):
         while self.imageinfo_todo and self.api.idle():
             bl = getblock(self.imageinfo_todo, limit)
             self.scheduled.update(bl)
-            self._refcall(lambda: self.api.fetch_imageinfo(titles=bl).addCallback(self._cb_imageinfo))
+            self._refcall(lambda: self.api.fetch_imageinfo(titles=bl, iiurlwidth=self.imagesize).addCallback(self._cb_imageinfo))
             
         doit("revids", self.revids_todo)
         doit("titles", self.pages_todo)
