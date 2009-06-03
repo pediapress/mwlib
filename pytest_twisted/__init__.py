@@ -90,7 +90,7 @@ class TwistedPlugin:
     def pytest_configure(self, config):
         twisted         = config.getvalue("twisted")
         twisted_logging = config.getvalue("twisted_logging")
-        if twisted:
+        if True: #twisted:
             self.twisted = True
             gr_twisted.switch(twisted_logging)
 
