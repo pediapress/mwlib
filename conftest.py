@@ -36,3 +36,4 @@ class Exclude(py.test.collect.Directory):
         return py.test.collect.Directory.consider_file(self, path)
 
 Directory = Exclude
+pytest_plugins = "pytest_twisted"
