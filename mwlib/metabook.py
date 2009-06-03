@@ -89,7 +89,7 @@ def parse_collection_page(wikitext):
     @param wikitext: wikitext of a MediaWiki collection page
     @type mwcollection: unicode
     
-    @returns: metabook dicitonary
+    @returns: metabook dictionary
     @rtype: dict
     """
     
