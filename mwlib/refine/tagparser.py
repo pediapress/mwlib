@@ -47,8 +47,17 @@ class tagparser(object):
         close.reverse()
         
         for i, t in close:
+            vlist=tokens[i].vlist
+            display = vlist.get("style", {}).get("display", "").lower()
+            if display=="inline":
+                blocknode = False
+            elif display=="block":
+                blocknode = True
+            else:
+                blocknode=t.blocknode
+            
             sub = tokens[i+1:pos]
-            tokens[i:pos] = [T(type=T.t_complex_tag,  children=sub,  tagname=t.tagname, blocknode=t.blocknode,  vlist=tokens[i].vlist)]
+            tokens[i:pos] = [T(type=T.t_complex_tag,  children=sub,  tagname=t.tagname, blocknode=blocknode,  vlist=tokens[i].vlist)]
             pos = i+1
             
         return pos
