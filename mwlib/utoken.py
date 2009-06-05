@@ -245,7 +245,6 @@ startfeed strike strong sub sup table td th tr tt u ul var
         def g():
             return text[start:start+tlen]
 
-        numtokens = len(tokens)
         for type,  start, tlen in tokens:
             
             if type==token.t_begintable:
@@ -270,8 +269,6 @@ startfeed strike strong sub sup table td th tr tt u ul var
                     s=uniquifier.replace_uniq(s)
                     t.text = s
                 _analyze_html_tag(t)
-                isEndToken = t.tag_isEndToken
-                closingOrSelfClosing = isEndToken or t.tag_selfClosing
                 tagname = t.rawtagname
                 
                 if tagname in self.allowed_tags:
