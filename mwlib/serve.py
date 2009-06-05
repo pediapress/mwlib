@@ -575,10 +575,13 @@ def purge_cache(max_age, cache_dir):
         except Exception, exc:
             log.ERROR('could not remove directory %r: %s' % (path, exc))
     
-def clean_up(cache_dir):
+def clean_up(cache_dir, max_running_time):
     """Look for PID files whose processes have not finished/erred but ceised
-    to exist => remove cache directorie.
+    to exist => remove cache directories. Look for long running processes =>
+    send SIGKILL.
     """
+
+    now = time.time()
 
     for path in get_collection_dirs(cache_dir):
         for e in os.listdir(path):
@@ -599,6 +602,8 @@ def clean_up(cache_dir):
             except IOError, exc:
                 log.ERROR('Could not read PID file %r: %s' % (pid_file, exc))
                 continue
+
+            error_file = os.path.join(path, '%s.%s' % (Application.error_filename, ext))
             
             try:
                 os.kill(pid, 0)
@@ -606,7 +611,29 @@ def clean_up(cache_dir):
                 if exc.errno == 3: # No such process
                     log.warn('Have dangling PID file %r' % pid_file)
                     os.unlink(pid_file)
-                    error_file = os.path.join(path, '%s.%s' % (Application.error_filename, ext))
                     if not os.path.exists(error_file):
                         open(error_file, 'wb').write('Process died.\n')
+                    continue
+
+            try:
+                st = os.stat(pid_file)
+            except Exception, exc:
+                log.ERROR('Could not stat pid file %r: %s' % (pid_file, exc))
+                continue
+            if now - st.st_mtime < max_running_time:
+                continue
+
+            log.warn('Have long running process with pid %d' % pid)
+            try:
+                log.info('sending SIGKILL to pid %d' % pid)
+                os.kill(pid, signal.SIGKILL)
+                if not os.path.exists(error_file):
+                    open(error_file, 'wb').write('Long running process killed.\n')
+            except Exception, exc:
+                log.ERROR('Could not send SIGKILL: %s' % exc)
+
+
+
+
+
 
