@@ -4,7 +4,6 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
-import sys
 import os
 import tempfile
 import shutil
@@ -42,21 +41,18 @@ def zipdir(dirname, output=None):
         zf.close()
     finally:
         os.chdir(cwd)
-        
-def hack(output=None, options=None, env=None, podclient=None, status=None, keep_tmpfiles=False, **kwargs):
-    imagesize = options.imagesize
-    metabook = env.metabook
-    base_url = env.wiki.url
-    script_extension = env.wiki.script_extension
+
+
+def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
+    from mwlib.net import fetch, mwapi
+    from mwlib.metabook import get_licenses
+    from twisted.internet import reactor,  defer
+
     if not base_url.endswith("/"):
         base_url += "/"
-    api_url = "".join([base_url, "api", script_extension])
+    api_url = "".join([base_url, "api", options.script_extension])
     if isinstance(api_url,  unicode):
         api_url = api_url.encode("utf-8")
-        
-    template_exclusion_category = options.template_exclusion_category
-    print_template_pattern = options.print_template_pattern
-    imagesize = options.imagesize
 
     login = options.login
     username, password, domain = None, None, None
@@ -66,24 +62,7 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         else:
             username, password, domain = unicode(login, 'utf-8').split(':', 2)
 
-    if output:
-        fsdir = output+".nuwiki"
-    else:
-        fsdir = tempfile.mkdtemp(prefix="nuwiki-")
 
-    if os.path.exists(fsdir):
-        shutil.rmtree(fsdir)
-        
-
-    
-    from mwlib.net import fetch, mwapi
-    from mwlib.metabook import get_licenses
-    from twisted.internet import reactor,  defer
-    
-    
-
-
-    
     options.fetcher = None # stupid python
     fsout = fetch.fsoutput(fsdir)
 
@@ -100,10 +79,10 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         nfo = {
             'format': 'nuwiki',
             'base_url': base_url,
-            'script_extension': script_extension,
+            'script_extension': options.script_extension,
         }
-        if print_template_pattern:
-            nfo["print_template_pattern"] = print_template_pattern
+        if options.print_template_pattern:
+            nfo["print_template_pattern"] = options.print_template_pattern
          
         fsout.dump_json(nfo=nfo)
         
@@ -111,9 +90,9 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         options.fetcher = fetch.fetcher(api, fsout, pages,
                                               licenses=licenses,
                                               podclient=podclient,
-                                              print_template_pattern=print_template_pattern,
-                                              template_exclusion_category=template_exclusion_category,
-                                              imagesize=imagesize)
+                                              print_template_pattern=options.print_template_pattern,
+                                              template_exclusion_category=options.template_exclusion_category,
+                                              imagesize=options.imagesize)
 
     def start():
         def login_failed(res):
@@ -142,24 +121,38 @@ def hack(output=None, options=None, env=None, podclient=None, status=None, keep_
         print "error:", fetcher.fatal_error
         raise RuntimeError('Fatal error')
     print "done"
-    
 
-    if output:
-        filename = output
-    else:
-        filename = tempfile.mktemp(suffix=".zip")
         
-    zipdir(fsdir, filename)
+def hack(output=None, options=None, env=None, podclient=None, status=None, keep_tmpfiles=False, **kwargs):
+    tmpdir = tempfile.mkdtemp()
+    try:
+        fsdir = os.path.join(tmpdir, 'nuwiki')
+        print 'creating nuwiki in %r' % fsdir
+        make_nuwiki(fsdir,
+            base_url=env.wiki.url,
+            metabook=env.metabook,
+            options=options,
+            podclient=podclient,
+        )
 
-    if not keep_tmpfiles:
-        print 'removing %r' % fsdir
-        shutil.rmtree(fsdir, ignore_errors=True)
-    
-    if podclient:                
-        status(status='uploading', progress=0)
-        podclient.post_zipfile(filename)
+        filename = tempfile.mktemp(suffix=".zip")
+        zipdir(fsdir, filename)
+        if output:
+            os.rename(filename, output)
+            filename = output
 
-    return filename
+        if podclient:                
+            status(status='uploading', progress=0)
+            podclient.post_zipfile(filename)
+
+        return filename
+
+    finally:
+        if not options.keep_tmpfiles:
+            print 'removing tmpdir %r' % tmpdir
+            shutil.rmtree(tmpdir, ignore_errors=True)
+        else:
+            print 'keeping tmpdir %r' % tmpdir
 
         
 def main():    
