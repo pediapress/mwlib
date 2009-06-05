@@ -138,8 +138,6 @@ class Expr(object):
         
         self.operand_stack = []
         operator_stack = []
-
-        seen_operand=False
         
         last_operand, last_operator = False, True
         
@@ -202,15 +200,12 @@ def expr(s):
 
 
 def main():
-    ParseException = ExprError
     import time
     try:
         import readline  # do not remove. makes raw_input use readline
         readline
     except ImportError:
         pass
-
-    ep = expr
   
     while 1:
         input_string = raw_input("> ")
