@@ -36,4 +36,6 @@ class Exclude(py.test.collect.Directory):
         return py.test.collect.Directory.consider_file(self, path)
 
 Directory = Exclude
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 pytest_plugins = "pytest_twisted"
