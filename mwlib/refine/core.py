@@ -402,7 +402,6 @@ class parse_lines(object):
                     self.analyze(lines)
                     self.tokens[firsttoken:i] = lines
                     i = firsttoken
-                    starttoken=None
                     lines=[]
                     firsttoken=None
                 else:

@@ -16,7 +16,6 @@ def getNodeHeight(node, params):
     
     height = 0
     nonFollowNodes = [Reference, NamedURL]
-    text = []
     amap = {Text:"caption", Link:"target", URL:"caption", Math:"caption", NamedURL:'caption'}
     access = amap.get(node.__class__, "")
     if access:

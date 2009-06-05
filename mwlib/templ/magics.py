@@ -494,8 +494,6 @@ class ParserFunctions(object):
         return "/".join(parts)
 
     def IFERROR(self, args):
-        errmark = '<strong class="error">'
-        
         val = args[0]
         bad=args[1]
         good = args.get(2, None)

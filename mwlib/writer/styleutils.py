@@ -6,7 +6,6 @@
 
 from __future__ import division
 import re
-import weakref
 
 from mwlib import advtree
 from mwlib.htmlcolornames import colorname2rgb_map

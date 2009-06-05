@@ -132,7 +132,6 @@ class parse_table_rows(object):
 
         start = None
         remove_start = 1
-        vlist = None
         rowbegintoken = None
         def should_find_modifier():
             if rowbegintoken is None:

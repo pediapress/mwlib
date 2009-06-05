@@ -2,7 +2,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import re
 from mwlib.templ import magics, log, DEBUG, parser, mwlocals
 from mwlib.uniq import Uniquifier
 from mwlib import nshandling, siteinfo
