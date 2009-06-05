@@ -123,7 +123,7 @@ def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
     print "done"
 
         
-def hack(output=None, options=None, env=None, podclient=None, status=None, keep_tmpfiles=False, **kwargs):
+def make_zip(output=None, options=None, env=None, podclient=None, status=None):
     tmpdir = tempfile.mkdtemp()
     try:
         fsdir = os.path.join(tmpdir, 'nuwiki')
@@ -218,10 +218,9 @@ def main():
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)
             output = options.output
-            keep_tmpfiles = options.keep_tmpfiles
 
             if isinstance(env.wiki, wiki.dummy_web_wiki):
-                hack(**locals())
+                make_zip(output, options, env, podclient=podclient, status=status)
             else:
                 raise NotImplementedError("zip file creation from %r not supported" % (env.wiki,))
         except Exception, e:

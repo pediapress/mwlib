@@ -96,8 +96,8 @@ class Main(object):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
 
-        from mwlib.apps.buildzip import hack
-        self.zip_filename = hack(output=self.options.keep_zip, options=self.options, env=env, status=self.status, keep_tmpfiles=self.options.keep_tmpfiles)
+        from mwlib.apps.buildzip import make_zip
+        self.zip_filename = make_zip(output=self.options.keep_zip, options=self.options, env=env, status=self.status)
 
         if env.images:
             try:
