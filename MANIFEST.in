@@ -146,6 +146,7 @@ include mwlib/xmlcat/xhtml-symbol.ent
 include mwlib/xmlcat/xhtml1-transitional.dtd
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py
+include pytest_twisted/__init__.py
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
