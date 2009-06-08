@@ -15,8 +15,6 @@ try:
 except ImportError:
     lxml = None
 
-lxml = None # someone please please fix those docbookwriter tests
-
 class Exclude(py.test.collect.Directory):
     def consider_file(self, path):
         bn = path.basename

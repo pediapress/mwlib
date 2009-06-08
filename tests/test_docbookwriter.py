@@ -36,6 +36,8 @@ def validate(xml):
     r = mwvalidate(xml)
     if len(r):
         print xml
+        print "error:"
+        print r
         raise ValidationError(r)
 
 
