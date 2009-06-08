@@ -4,14 +4,18 @@ xmllint_not_found = os.system('xmllint --version 2>/dev/null 1>/dev/null')
 ploticus_not_found = not os.path.isfile('/usr/bin/ploticus')
 mathrenderer_not_found =  os.system('blahtexml --help 2>/dev/null 1>/dev/null')
 
-xnet = 'XNET' in os.environ # eXclude NETwork tests
+xnet = os.environ.get("XNET", "") # eXclude NETwork tests
+try:
+    xnet = int(xnet)
+except ValueError:
+    pass
 
 try:
     import lxml
 except ImportError:
     lxml = None
 
-lxml = None # someplease please fix those docbookwriter tests
+lxml = None # someone please please fix those docbookwriter tests
 
 class Exclude(py.test.collect.Directory):
     def consider_file(self, path):
@@ -29,7 +33,7 @@ class Exclude(py.test.collect.Directory):
         if not lxml and bn=='test_docbookwriter.py':
             #print "Skipping", bn, "-- lxml not found"
             return []
-        if xnet and bn in ('test_mwapidb.py', 'test_zipwiki.py'):
+        if xnet and bn in ('test_mwapidb.py'):
             print "Skipping", bn, "-- needs network"
             return []
 
@@ -39,3 +43,19 @@ Directory = Exclude
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 pytest_plugins = "pytest_twisted"
+
+
+def pytest_configure(config):    
+    kw = config.getvalue("keyword")
+    if "xnet" in kw:
+        return
+    
+    if xnet:
+        print "conftest.py: disabling tests marked with keyword xnet."
+        print "conftest.py: set environment variable XNET=0 to enable them."
+        
+        if kw:
+            kw = kw+" -xnet"
+        else:
+            kw = "-xnet"
+        config.option.keyword = kw
