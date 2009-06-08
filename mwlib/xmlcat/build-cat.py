@@ -5,9 +5,12 @@ import urllib
 
 urls = open("urls.txt").read().split()
 for x in urls:
+    path = x[len("http://"):]
+    if os.path.exists(path):
+        continue
+    
     print "fetching", x,
     data = urllib.urlopen(x).read()
-    path = x[len("http://"):]
     dn = os.path.dirname(path)
     if not os.path.exists(dn):
         os.makedirs(dn)
