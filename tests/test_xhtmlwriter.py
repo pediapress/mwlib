@@ -121,10 +121,12 @@ break after <br/> and before this
 <var>var</var>
 th<!-- this is comment -->is includes a comment'''.decode("utf8")
 
-    for x in raw.split("\n"):
+    def get_xhtml_and_validate(txt):
         xhtml = getXHTML(x)
         validate(xhtml)
-
+        
+    for x in raw.split("\n"):
+        yield get_xhtml_and_validate, x
 
 def test_sections():
     raw='''
