@@ -15,11 +15,13 @@ DocBookWriter.ignoreUnknownNodes = False
 def getXML(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
+    print "before preprocess"
     show(sys.stdout, r)
     preprocess(r)
+    print "after preprocess"
     show(sys.stdout, r)
     dbw = DocBookWriter()
-    dbw.write(r)
+    dbw.dbwriteArticle(r)
     return dbw.asstring()
 
 
@@ -34,7 +36,7 @@ def validate(xml):
     r = mwvalidate(xml)
     if len(r):
         print xml
-        raise ValidationError, r
+        raise ValidationError(r)
 
 
 def test_pass():
