@@ -5,23 +5,22 @@ import os
 import shutil
 import subprocess
 import tempfile
+import zipfile
 
-from mwlib.nuwiki import NuWiki
+from mwlib.nuwiki import adapt
 
 class Test_nuwiki_xnet(object):
     def setup_class(cls):
         cls.tmpdir = tempfile.mkdtemp()
         cls.zipfn = os.path.join(cls.tmpdir, 'test.zip')
-        cls.nuwikidir = cls.zipfn + '.nuwiki'
         err = subprocess.call(['mw-zip',
             '-o', cls.zipfn,
             '-c', ':de',
-            '--keep-tmpfiles',
             '--print-template-pattern', '$1/Druck',
             '--template-exclusion-category', 'Vom Druck ausschließen',
             'Monty Python',
         ])
-        assert os.path.isdir(cls.nuwikidir)
+        assert os.path.isfile(cls.zipfn)
         assert err == 0,  "command failed"
         
     def teardown_class(cls):
@@ -29,7 +28,7 @@ class Test_nuwiki_xnet(object):
             shutil.rmtree(cls.tmpdir)
 
     def setup_method(self, method):
-        self.nuwiki = NuWiki(self.nuwikidir)
+        self.nuwiki = adapt(zipfile.ZipFile(self.zipfn, 'r')).nuwiki
 
     def test_init(self):
         assert 'Vorlage:ImDruckVerbergen' in self.nuwiki.excluded
