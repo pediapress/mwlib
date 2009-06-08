@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import zipfile
 
 from mwlib.nuwiki import adapt
 
@@ -27,7 +28,7 @@ class Test_nuwiki_xnet(object):
             shutil.rmtree(cls.tmpdir)
 
     def setup_method(self, method):
-        self.nuwiki = adapt(self.zipfn).nuwiki
+        self.nuwiki = adapt(zipfile.ZipFile(self.zipfn, 'r')).nuwiki
 
     def test_init(self):
         assert 'Vorlage:ImDruckVerbergen' in self.nuwiki.excluded
