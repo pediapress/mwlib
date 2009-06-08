@@ -54,8 +54,8 @@ class Test_xnet_zipwiki(object):
         assert os.stat(p).st_size > 0
         assert p == self.imagedb.getDiskPath(u'Thelivingseaimax.jpg', 123)
         
-        url = self.imagedb.getURL(u'Thelivingseaimax.jpg')
-        assert url == 'http://upload.wikimedia.org/wikipedia/en/1/13/Thelivingseaimax.jpg'
+        url = self.imagedb.getDescriptionURL(u'Thelivingseaimax.jpg')
+        assert url == 'http://en.wikipedia.org/w/index.php?title=File:Thelivingseaimax.jpg'
         
         templates = self.imagedb.getImageTemplates(u"Thelivingseaimax.jpg")
         print templates
