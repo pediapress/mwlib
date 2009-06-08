@@ -8,7 +8,7 @@ import tempfile
 
 from mwlib.nuwiki import NuWiki
 
-class TestNuWiki(object):
+class Test_nuwiki_xnet(object):
     def setup_class(cls):
         cls.tmpdir = tempfile.mkdtemp()
         cls.zipfn = os.path.join(cls.tmpdir, 'test.zip')
