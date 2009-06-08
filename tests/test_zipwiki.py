@@ -3,11 +3,11 @@
 import os
 import tempfile
 
-from mwlib import parser, zipwiki
+from mwlib import parser, wiki
 
-class TestZipWiki(object):
+class Test_xnet_zipwiki(object):
     def setup_class(cls):
-        fd, cls.zip_filename = tempfile.mkstemp()
+        fd, cls.zip_filename = tempfile.mkstemp(suffix=".zip")
         os.close(fd)
         print 'generating ZIP file'
         rc = os.system('mw-zip -c :en -o %s "The Living Sea"' % cls.zip_filename)
@@ -19,11 +19,14 @@ class TestZipWiki(object):
             os.unlink(cls.zip_filename)
     
     def setup_method(self, method):
-        self.wikidb = zipwiki.Wiki(self.zip_filename)
-        self.imagedb = zipwiki.ImageDB(self.zip_filename)
+        print "reading",  self.zip_filename
+        self.env = wiki.makewiki(self.zip_filename)
+        self.wikidb = self.env.wiki
+        self.imagedb = self.env.images
     
     def teardown_method(self, method):
-        self.imagedb.clean()
+        # self.imagedb.clean()
+        pass
     
     def test_getRawArticle(self):
         a = self.wikidb.getRawArticle(u'The Living Sea')
@@ -65,11 +68,3 @@ class TestZipWiki(object):
     def test_getSource(self):
         src = self.wikidb.getSource(u'The Living Sea')
         print src
-
-        interwikimap = src['interwikimap']
-        assert interwikimap
-        assert isinstance(interwikimap, dict)
-
-        loc = src['locals']
-        assert loc
-        assert isinstance(loc, basestring)
