@@ -124,7 +124,10 @@ def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
 
         
 def make_zip(output=None, options=None, env=None, podclient=None, status=None):
-    tmpdir = tempfile.mkdtemp()
+    if output:
+        tmpdir = tempfile.mkdtemp(dir=os.path.dirname(output))
+    else:
+        tmpdir = tempfile.mkdtemp()
     try:
         fsdir = os.path.join(tmpdir, 'nuwiki')
         print 'creating nuwiki in %r' % fsdir
@@ -135,7 +138,10 @@ def make_zip(output=None, options=None, env=None, podclient=None, status=None):
             podclient=podclient,
         )
 
-        filename = tempfile.mktemp(suffix=".zip")
+        if output:
+            fd, filename = tempfile.mkstemp(suffix='.zip', dir=os.path.dirname(output))
+        else:
+            fd, filename = tempfile.mkstemp(suffix='.zip')
         zipdir(fsdir, filename)
         if output:
             os.rename(filename, output)
