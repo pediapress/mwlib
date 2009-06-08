@@ -1,5 +1,8 @@
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
   <rewriteURI
-      uriStartString="http://www.w3.org/TR/xhtml1/DTD/"
-      rewritePrefix="./" />
+      uriStartString="http://www.w3.org/"
+      rewritePrefix="./www.w3.org/" />
+  <rewriteURI
+      uriStartString="http://www.oasis-open.org/"
+      rewritePrefix="./www.oasis-open.org/" />
 </catalog>
