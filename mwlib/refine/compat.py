@@ -129,6 +129,12 @@ def _change_classes(node):
             elif node.tagname=="small":
                 node.__class__=N.Style
                 node.caption="small"
+            elif node.tagname=="s":
+                node.__class__=N.Style
+                node.caption="s"                
+            elif node.tagname=="var":
+                node.__class__=N.Style
+                node.caption="var"
             elif node.tagname=="i":
                 node.__class__=N.Style
                 node.caption="''"

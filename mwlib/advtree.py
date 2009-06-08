@@ -444,7 +444,7 @@ class Cite(Style, AdvancedNode):
     _style = "cite"
     _tag = "cite"
 
-class Var(TagNode, AdvancedNode): 
+class Var(Style, AdvancedNode): 
     _tag = "var"
     _style = "var"
 
@@ -499,7 +499,10 @@ class Font(TagNode, AdvancedNode):
 
 class Strike(TagNode,AdvancedNode):
     _tag = "strike"
-
+    
+# class S(TagNode, AdvancedNode):
+#     _tag = "s"
+    
 class ImageMap(TagNode, AdvancedNode): # defined as block node, maybe incorrect
     _tag = "imagemap"
 
