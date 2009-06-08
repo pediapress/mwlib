@@ -142,6 +142,7 @@ def make_zip(output=None, options=None, env=None, podclient=None, status=None):
             fd, filename = tempfile.mkstemp(suffix='.zip', dir=os.path.dirname(output))
         else:
             fd, filename = tempfile.mkstemp(suffix='.zip')
+        os.close(fd)
         zipdir(fsdir, filename)
         if output:
             os.rename(filename, output)
