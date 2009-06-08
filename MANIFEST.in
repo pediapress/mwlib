@@ -131,6 +131,7 @@ include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/wikidbbase.py
 include mwlib/writer/__init__.py
+include mwlib/writer/formatter.py
 include mwlib/writer/imageutils.py
 include mwlib/writer/licensechecker.py
 include mwlib/writer/miscutils.py
