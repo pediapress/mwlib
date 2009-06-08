@@ -131,7 +131,7 @@ break after <br/> and before this
 th<!-- this is comment -->is includes a comment'''.decode("utf8")
 
     for x in raw.split("\n"):
-        xml = getXML(x)
+        yield getXML, x
 
 
 def test_sections():
