@@ -409,7 +409,7 @@ class parse_lines(object):
 
         if startline is not None:
             sub = self.tokens[startline+1:]
-            lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+            lines.append(T(type=T.t_complex_line, start=tokens[startline].start, children=sub, lineprefix=tokens[startline].text))
 
         if lines:
             self.analyze(lines)
@@ -510,7 +510,7 @@ class parse_links(object):
                         marks=[]                        
                     continue
 
-                node = T(type=T.t_complex_link, start=0, len=0, children=[], ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler, url=url)
+                node = T(type=T.t_complex_link, children=[], ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler, url=url)
                 if langlink:
                     node.langlink = langlink
                 if interwiki:
@@ -523,7 +523,7 @@ class parse_links(object):
                     sub = tokens[marks[1]+1:marks[-1]]
 
                 if sub is None:
-                    sub = [] #T(type=T.t_text, start=0, len=0, text=target)]
+                    sub = [] 
                     
                 node.children = sub
                 tokens[start:i+1] = [node]
