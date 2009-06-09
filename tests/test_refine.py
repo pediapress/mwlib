@@ -275,3 +275,22 @@ def test_empty_link():
     r = parse_txt("[[de:]]")
     print r
     assert r[0].type == T.t_complex_link
+
+
+
+def test_source():
+    r = parse_txt("foo <source>bar</source> baz")
+    show(r)
+    assert r[0].tagname=="p"
+    assert r[1].tagname=="source"
+    assert r[1].blocknode==True
+    assert r[2].tagname=="p"
+    
+def test_source_enclose():
+    r = parse_txt('foo <source enclose="none">bar</source> baz')
+    show(r)
+    assert r[0].type==T.t_text
+    assert r[1].tagname=="source"
+    assert r[1].blocknode==False
+    assert r[2].type==T.t_text
+    
