@@ -57,6 +57,8 @@ class Formatter(object):
         self.table_nesting = 0
         self.rel_font_size = 1
 
+        self.grouping_chars = ('', '')
+        
 
     def registerRenderStyles(self):
         # example for render styles in html. should probably be overridden when subclassed
@@ -82,6 +84,8 @@ class Formatter(object):
                     start.append(style_start % getattr(self, start_arg))
                 else:
                     start.append(style_start)
+        if start:
+            start.insert(0, self.grouping_chars[0])
         return ''.join(start)
 
     def endStyle(self):
@@ -89,6 +93,8 @@ class Formatter(object):
         for style, style_start, style_end, start_arg in self.render_styles[::-1]: # reverse style list
             if getattr(self, style, 0) > 0:
                 end.append(style_end)
+        if end:
+            end.append(self.grouping_chars[1])
         return ''.join(end)
 
 
