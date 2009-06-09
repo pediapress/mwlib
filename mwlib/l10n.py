@@ -85,7 +85,6 @@ def compile_messages(localedir='locale'):
         for f in filenames:
             if f.endswith('.po'):
                 path = os.path.join(dirpath, f)
-                print 'processing file %r' % (path,)
                 mo_filename = os.path.splitext(path)[0] + '.mo'
                 try:
                     execute('msgfmt', '--check-format', '--output-file', mo_filename, path)
