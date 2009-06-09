@@ -293,4 +293,10 @@ def test_source_enclose():
     assert r[1].tagname=="source"
     assert r[1].blocknode==False
     assert r[2].type==T.t_text
-    
+
+def test_urllink_in_link():
+    """http://code.pediapress.com/wiki/ticket/602"""
+    r = parse_txt("[[foo|[http://baz.com baz]]]")
+    nu = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
+    show(r)
+    assert len(nu)==1, "expected exactly one named url"
