@@ -721,7 +721,7 @@ class parse_uniq(object):
     def create_source(self, name, vlist, inner, xopts):
         children = [T(type=T.t_text, text=inner)]
         blocknode = True
-        if vlist and vlist.get("enclose",  "").lower()=="none":
+        if vlist and vlist.get("enclose",  "")=="none":
             blocknode=False
             
         return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=blocknode)
