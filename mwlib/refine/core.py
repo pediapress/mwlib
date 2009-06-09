@@ -720,7 +720,11 @@ class parse_uniq(object):
     
     def create_source(self, name, vlist, inner, xopts):
         children = [T(type=T.t_text, text=inner)]
-        return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=True)
+        blocknode = True
+        if vlist and vlist.get("enclose",  "").lower()=="none":
+            blocknode=False
+            
+        return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children, blocknode=blocknode)
     
     def create_ref(self, name, vlist, inner, xopts):
         expander = xopts.expander
