@@ -28,7 +28,7 @@ develop:: all
 	python setup.py develop
 
 sdist:: all
-	python setup.py build sdist
+	python setup.py -q build sdist
 
 sdist-upload:: all
 	python setup.py build sdist upload
