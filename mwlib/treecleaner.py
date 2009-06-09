@@ -939,12 +939,14 @@ class TreeCleaner(object):
                 for cell in row.children:
                     if self._isBigCell(cell):
                         split_table = True
-                
+
             if node.numcols == 2:
                 num_border_tables = 0
                 for t in node.getChildNodesByClass(Table):
                     if styleutils.tableBorder(t):
-                        num_border_tables += 1
+                        colspan = t.getParentNodesByClass(Cell)[0].colspan
+                        if colspan != 2:
+                            num_border_tables += 1
                 if num_border_tables >= 3:
                     split_table = True
                         
