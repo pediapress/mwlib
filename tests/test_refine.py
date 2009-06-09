@@ -297,6 +297,8 @@ def test_source_enclose():
 def test_urllink_in_link():
     """http://code.pediapress.com/wiki/ticket/602"""
     r = parse_txt("[[foo|[http://baz.com baz]]]")
+    li = core.walknodel(r, lambda x: x.type==T.t_complex_link)
+    assert len(li)==1,  "expected one link"
     nu = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
     show(r)
     assert len(nu)==1, "expected exactly one named url"
