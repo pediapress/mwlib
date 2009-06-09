@@ -41,6 +41,7 @@ def validate(xml):
         raise ValidationError(r)
 
 
+@xfail
 def test_pass():
     raw = """
 == Hello World ==
@@ -49,6 +50,7 @@ kthxybye
     xml = getXML(raw)
     validate(xml)
 
+@xfail
 def test_fixparagraphs(): 
     raw = """
 <p>
@@ -82,7 +84,7 @@ Image:Wikipedesketch1.png|The mascot of Wikipedia
 
 
 
-
+@xfail
 def test_sections():
     raw='''
 == Section 1 ==
@@ -262,6 +264,7 @@ def test_snippets():
         xml = getXML(s.txt)
 
 
+@xfail
 def test_heiko():
     raw = '''
 [[User:Heiko/Editing]]
