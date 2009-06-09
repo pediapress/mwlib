@@ -302,3 +302,12 @@ def test_urllink_in_link():
     nu = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
     show(r)
     assert len(nu)==1, "expected exactly one named url"
+
+def test_urllink_in_brackets():
+    """http://code.pediapress.com/wiki/ticket/556"""
+    r = parse_txt("[[http://example.com bla]]")
+    show(r)
+    nu = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
+    print nu
+    assert len(nu)==1,  "expexted exactly one named url"
+    
