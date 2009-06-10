@@ -122,6 +122,8 @@ class fetcher(object):
                  print_template_pattern=None,
                  template_exclusion_category=None,
                  imagesize=800):
+        self.result = defer.Deferred()
+        
         self._stopped = False 
         self.fatal_error = "stopped by signal"
         
@@ -477,9 +479,18 @@ class fetcher(object):
             self._stop_reactor()
 
     def _stop_reactor(self):
+        
         if self._stopped:
             return
-        reactor.stop()
+        
+        if self.fatal_error:
+            if isinstance(self.fatal_error, basestring):
+                self.result.errback(RuntimeError(self.fatal_error))
+            else:
+                self.result.errback(self.fatal_error)
+        else:
+            self.result.callback(None)
+            
         self._stopped = True
         
     def finish(self):

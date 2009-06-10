@@ -39,11 +39,11 @@ class start_fetcher(object):
                                      print_template_pattern=self.options.print_template_pattern,
                                      template_exclusion_category=self.options.template_exclusion_category,
                                      imagesize=self.options.imagesize)
-        
-    def run(self):
+        return self.fetcher.result
+    
+    def init_variables(self):
         base_url = self.base_url
         options = self.options
-        metabook = self.metabook
         
         if not base_url.endswith("/"):
             base_url += "/"
@@ -63,41 +63,36 @@ class start_fetcher(object):
         self.username,  self.password,  self.domain = username,  password,  domain
         
         self.fsout = fetch.fsoutput(self.fsdir)
-
-        self.licenses = get_licenses(metabook)
+        
+    def run(self):
+        self.init_variables()
+        
+        self.licenses = get_licenses(self.metabook)
         podclient = self.podclient
+        if podclient is not None:
+            old_class = podclient.__class__
+            podclient.__class__ = fetch.PODClient
 
-        def start():
-            def login_failed(res):
-                print "Fatal error: login failed:", res.getErrorMessage()
-                reactor.stop()
-                return res
-            self.get_api().addErrback(login_failed).addCallback(self.fetch_pages_from_metabook)
+        def login_failed(res):
+            print "Fatal error: login failed:", res.getErrorMessage()
+            return res
 
-        try:
-            if podclient is not None:
-                old_class = podclient.__class__
-                podclient.__class__ = fetch.PODClient
-
-            reactor.callLater(0.0, start)
-            reactor.run()
-        finally:
+        def reset_podclient(val):
             if podclient is not None:
                 podclient.__class__ = old_class
-
-
-        fetcher = self.fetcher
-        if not fetcher:
-            raise RuntimeError("Fatal error")
-
-        if fetcher.fatal_error:
-            print "error:", fetcher.fatal_error
-            raise RuntimeError('Fatal error')
-        print "done"
-
-
-
+            return val
+        
+        return self.get_api().addErrback(login_failed).addCallback(self.fetch_pages_from_metabook).addBoth(reset_podclient)
 
 def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
     sf = start_fetcher(fsdir=fsdir, base_url=base_url, metabook=metabook, options=options, podclient=podclient)
-    sf.run()
+
+    def done(val):
+        if val is None:
+            print "done"
+        else:
+            print "done:",  val
+        reactor.stop()
+        
+    reactor.callLater(0.0, lambda: sf.run().addBoth(done))
+    reactor.run()
