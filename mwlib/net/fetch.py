@@ -325,6 +325,16 @@ class fetcher(object):
                 if t not in self.scheduled:
                     self.pages_todo.append(t)
                     self.scheduled.add(t)
+
+    def _download_image(self, url, title):
+        path = self.fsout.get_imagepath(title)
+        tmp = path+u'\xb7'.encode("utf-8")
+        def done(val):
+            os.rename(tmp, path)
+            return val
+        
+        return client.downloadPage(str(url), tmp).addCallback(done)
+        
         
     def _cb_imageinfo(self, data):
         # print "data:", data
@@ -345,7 +355,7 @@ class fetcher(object):
                 # FIXME: add Callback that checks correct file size
                 if thumburl.startswith('/'):
                     thumburl = urlparse.urljoin(self.api.baseurl, thumburl)
-                self._refcall(lambda: client.downloadPage(str(thumburl), self.fsout.get_imagepath(title)))
+                self._refcall(lambda: self._download_image(thumburl, title))
 
                 descriptionurl = ii.get("descriptionurl", "")
                 if "/" in descriptionurl:
