@@ -43,84 +43,6 @@ def zipdir(dirname, output=None):
         os.chdir(cwd)
 
 
-def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
-    from mwlib.net import fetch, mwapi
-    from mwlib.metabook import get_licenses
-    from twisted.internet import reactor,  defer
-
-    if not base_url.endswith("/"):
-        base_url += "/"
-    api_url = "".join([base_url, "api", options.script_extension])
-    if isinstance(api_url,  unicode):
-        api_url = api_url.encode("utf-8")
-
-    login = options.login
-    username, password, domain = None, None, None
-    if login:
-        if login.count(':') == 1:
-            username, password = unicode(login, 'utf-8').split(':', 1)
-        else:
-            username, password, domain = unicode(login, 'utf-8').split(':', 2)
-
-
-    options.fetcher = None # stupid python
-    fsout = fetch.fsoutput(fsdir)
-
-    licenses = get_licenses(metabook)
-
-    def get_api():
-        api = mwapi.mwapi(api_url)
-        if username:
-            return api.login(username, password, domain)
-        return defer.succeed(api)
-    
-    def doit(api):
-        fsout.dump_json(metabook=metabook)
-        nfo = {
-            'format': 'nuwiki',
-            'base_url': base_url,
-            'script_extension': options.script_extension,
-        }
-        if options.print_template_pattern:
-            nfo["print_template_pattern"] = options.print_template_pattern
-         
-        fsout.dump_json(nfo=nfo)
-        
-        pages = fetch.pages_from_metabook(metabook)
-        options.fetcher = fetch.fetcher(api, fsout, pages,
-                                              licenses=licenses,
-                                              podclient=podclient,
-                                              print_template_pattern=options.print_template_pattern,
-                                              template_exclusion_category=options.template_exclusion_category,
-                                              imagesize=options.imagesize)
-
-    def start():
-        def login_failed(res):
-            print "Fatal error: login failed:", res.getErrorMessage()
-            reactor.stop()
-            return res
-        get_api().addErrback(login_failed).addCallback(doit)
-        
-    try:
-        if podclient is not None:
-            old_class = podclient.__class__
-            podclient.__class__ = fetch.PODClient
-
-        reactor.callLater(0.0, start)
-        reactor.run()
-    finally:
-        if podclient is not None:
-            podclient.__class__ = old_class
-
-    
-    fetcher = options.fetcher
-    if not fetcher:
-        raise RuntimeError("Fatal error")
-    
-    if fetcher.fatal_error:
-        print "error:", fetcher.fatal_error
-        raise RuntimeError('Fatal error')
-    print "done"
 
         
 def make_zip(output=None, options=None, env=None, podclient=None, status=None):
@@ -131,6 +53,7 @@ def make_zip(output=None, options=None, env=None, podclient=None, status=None):
     try:
         fsdir = os.path.join(tmpdir, 'nuwiki')
         print 'creating nuwiki in %r' % fsdir
+        from mwlib.apps.make_nuwiki import make_nuwiki
         make_nuwiki(fsdir,
             base_url=env.wiki.url,
             metabook=env.metabook,
