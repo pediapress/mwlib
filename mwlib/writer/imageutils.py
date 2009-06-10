@@ -30,11 +30,17 @@ class ImageUtils(object):
         self.img_inline_scale_factor = img_inline_scale_factor
         self.print_width_px = print_width_px
         
-    def getImageSize(self, img_node, img_path, max_print_width=None, max_print_height=None, fullsize_thumbs=False):
+    def getImageSize(self, img_node, img_path=None,
+                     max_print_width=None, max_print_height=None,
+                     fullsize_thumbs=False, img_size=None):
         max_w = getattr(img_node, 'width', None)
         max_h = getattr(img_node, 'height', None)
-        img = Image.open(img_path)
-        px_w, px_h = img.size
+        if img_path:
+            img = Image.open(img_path)
+            px_w, px_h = img.size
+        else:
+            px_w,  px_h = img_size
+            
         ar = px_w/px_h
         if max_h and max_w:
             if max_h*ar > max_w:
