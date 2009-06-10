@@ -192,14 +192,6 @@ class OptionParser(optparse.OptionParser):
                 )
             else:
                 log.warn('WikiDB does not support setting a template blacklist')
-        # if self.options.collectionpage:
-        #     wikitext = env.wiki.getRawArticle(unicode(self.options.collectionpage, 'utf-8'))
-        #     if wikitext is None:
-        #         raise RuntimeError('No such collection page: %r' % (
-        #             self.options.collectionpage,
-        #         ))
-        #     self.metabook = metabook.parse_collection_page(wikitext)
-        #     env.metabook = self.metabook
 
         def setmb(name):
             n = unicode(getattr(self.options, name) or "", "utf-8")

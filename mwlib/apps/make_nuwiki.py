@@ -3,7 +3,7 @@
 # See README.txt for additional licensing information.
 
 from mwlib.net import fetch, mwapi
-from mwlib.metabook import get_licenses
+from mwlib.metabook import get_licenses, parse_collection_page
 from twisted.internet import reactor,  defer
 
 class start_fetcher(object):
@@ -63,6 +63,16 @@ class start_fetcher(object):
         self.username,  self.password,  self.domain = username,  password,  domain
         
         self.fsout = fetch.fsoutput(self.fsdir)
+
+    def fetch_collectionpage(self, api):
+        if self.options.collectionpage is None:
+            return api
+        
+        def got_pages(val):
+            rawtext = val["pages"].values()[0]["revisions"][0]["*"]
+            self.metabook = parse_collection_page(rawtext)
+            return api
+        return api.fetch_pages([self.options.collectionpage]).addBoth(got_pages)
         
     def run(self):
         self.init_variables()
@@ -82,7 +92,11 @@ class start_fetcher(object):
                 podclient.__class__ = old_class
             return val
         
-        return self.get_api().addErrback(login_failed).addCallback(self.fetch_pages_from_metabook).addBoth(reset_podclient)
+        return (self.get_api()
+                .addErrback(login_failed)
+                .addCallback(self.fetch_collectionpage)
+                .addCallback(self.fetch_pages_from_metabook)
+                .addBoth(reset_podclient))
 
 def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
     sf = start_fetcher(fsdir=fsdir, base_url=base_url, metabook=metabook, options=options, podclient=podclient)
