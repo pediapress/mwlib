@@ -25,6 +25,7 @@ include mwlib/advtree.py
 include mwlib/allnodes.py
 include mwlib/apps/__init__.py
 include mwlib/apps/buildzip.py
+include mwlib/apps/make_nuwiki.py
 include mwlib/apps/render.py
 include mwlib/apps/serve.py
 include mwlib/apps/watch.py
