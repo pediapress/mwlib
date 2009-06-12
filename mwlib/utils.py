@@ -18,7 +18,6 @@ import tempfile
 import time
 import traceback
 import urllib
-import urllib2
 import urlparse
 import UserDict
 
@@ -316,39 +315,36 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     http = httplib2.Http(timeout=timeout)
     headers = {'User-agent': 'mwlib'}
 
-    try:
-        if post_data:
-            resp, data = http.request(url,
-                method='POST',
-                body=urllib.urlencode(post_data),
-                headers=headers,
-            )
-        else:
-            resp, data = http.request(url,
-                method='GET',
-                headers=headers,
-            )
-        if resp.status != 200:
-            raise RuntimeError('request to %r failed with status %r' % (
-                url, resp.status,
-            ))
-        if expected_content_type:
-            content_type = resp['content-type'].split(';')[0]
-            if content_type != expected_content_type:
-                msg = 'Got content-type %r, expected %r' % (
-                    content_type,
-                    expected_content_type,
-                )
-                if ignore_errors:
-                    log.warn(msg)
-                else:
-                    raise RuntimeError(msg)
-                return None
-    except urllib2.URLError, err:
+    if post_data:
+        resp, data = http.request(url,
+            method='POST',
+            body=urllib.urlencode(post_data),
+            headers=headers,
+        )
+    else:
+        resp, data = http.request(url,
+            method='GET',
+            headers=headers,
+        )
+    if resp.status != 200:
         if ignore_errors:
-            log.error("%s - while fetching %r" % (err, url))
+            log.error("Got status %s when fetching %r" % (resp.status, url))
             return None
-        raise RuntimeError('Could not fetch %r: %s' % (url, err))
+        raise RuntimeError('Could not fetch %r: got status %s' % (
+            url, resp.status,
+        ))
+    if expected_content_type:
+        content_type = resp['content-type'].split(';')[0]
+        if content_type != expected_content_type:
+            msg = 'Got content-type %r, expected %r' % (
+                content_type,
+                expected_content_type,
+            )
+            if ignore_errors:
+                log.warn(msg)
+            else:
+                raise RuntimeError(msg)
+            return None
     #log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
     
     if hasattr(fetch_cache, 'max_cacheable_size'):
