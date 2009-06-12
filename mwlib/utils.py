@@ -22,6 +22,8 @@ import urllib2
 import urlparse
 import UserDict
 
+import httplib2
+
 from mwlib.log import Log
 
 try:
@@ -303,22 +305,35 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     @rtype: str
     """
 
+    assert opener is None, 'opener argument is not supported any more'
+
     if not post_data and url in fetch_cache:
         return fetch_cache[url]
     
     log.info("fetching %r" % (url,))
     start_time = time.time()
-    socket.setdefaulttimeout(timeout)
-    if opener is None:
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'mwlib')]
+
+    http = httplib2.Http(timeout=timeout)
+    headers = {'User-agent': 'mwlib'}
+
     try:
         if post_data:
-            post_data = urllib.urlencode(post_data)
-        result = opener.open(url, post_data)
-        data = result.read()
+            resp, data = http.request(url,
+                method='POST',
+                body=urllib.urlencode(post_data),
+                headers=headers,
+            )
+        else:
+            resp, data = http.request(url,
+                method='GET',
+                headers=headers,
+            )
+        if resp.status != 200:
+            raise RuntimeError('request to %r failed with status %r' % (
+                url, resp.status,
+            ))
         if expected_content_type:
-            content_type = result.info().gettype()
+            content_type = resp['content-type'].split(';')[0]
             if content_type != expected_content_type:
                 msg = 'Got content-type %r, expected %r' % (
                     content_type,
