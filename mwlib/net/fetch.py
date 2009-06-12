@@ -128,6 +128,7 @@ class fetcher(object):
         self.fatal_error = "stopped by signal"
         
         self.api = api
+        self.api.report = self.report
         self.apipool = mwapi.pool()
         self.apipool.multi.key2val[api.baseurl] = api
         
@@ -233,13 +234,11 @@ class fetcher(object):
         
     def report(self):
         qc = self.api.qccount
-        done = self.count_done+qc
-        total = self.count_total+qc
 
         limit = self.api.api_request_limit
         jt = self.count_total+len(self.pages_todo)//limit+len(self.revids_todo)//limit
         jt += len(self.title2latest)
-        msg = "%s/%s/%s jobs -- %s/%s running" % (self.count_done, self.count_total, jt, self.api.num_running, self.api.max_connections)
+        msg = "%s/%s/%s jobs -- %s/%s running" % (self.count_done+qc, self.count_total+qc, jt+qc, self.api.num_running, self.api.max_connections)
 
         if jt < 10:
             progress = self.count_done

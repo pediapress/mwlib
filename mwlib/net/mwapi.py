@@ -164,6 +164,9 @@ class mwapi(object):
 
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.baseurl, hex(id(self)))
+
+    def report(self):
+        pass
     
     def idle(self):
         """Return whether another connection is possible at the moment"""
@@ -245,9 +248,14 @@ class mwapi(object):
         return d
         
     def do_request(self, **kwargs):
+        result = defer.Deferred()
+        
         retval = {}
         last_qc = [None]
-        
+
+        def got_err(err):
+            result.errback(err)
+
         def got_result(data):
             
             try:
@@ -257,8 +265,8 @@ class mwapi(object):
                 raise
             
             if error:
-                return failure.Failure(RuntimeError(error.get("info", "")))
-
+                raise RuntimeError((error.get("info", "")))
+            
             merge_data(retval, data["query"])
             
             qc = data.get("query-continue", {}).values()
@@ -269,17 +277,30 @@ class mwapi(object):
                     for k,v in d.items(): # dict of len(1)
                         kw[str(k)] = v
 
+                # print self._build_url(**kw)
                 if qc == last_qc[0]:
                     print "warning: cannot continue this query:",  self._build_url(**kw)
-                    return retval
+                    result.callback(retval)
+                    return
+                
 
                 last_qc[0] = qc
                         
                 self.qccount += 1
-                return self._request(**kw).addCallback(got_result)
-            return retval
-        
-        return self._request(**kwargs).addCallback(got_result)
+                
+                schedule(**kw)
+                self.report()
+                return
+            
+                # return self._request(**kw).addCallback(got_result)
+            result.callback(retval)
+
+        def schedule(**kwargs):
+            reactor.callLater(0.0, lambda: self._request(**kwargs).addCallback(got_result).addErrback(got_err))
+
+        schedule(**kwargs)
+            
+        return result
 
     def ping(self):
         return self._request(action="query", meta="siteinfo",  siprop="general")
