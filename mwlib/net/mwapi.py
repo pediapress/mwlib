@@ -379,7 +379,7 @@ class mwapi(object):
         return self.do_request(action="query", **kwargs)
         
     def get_categorymembers(self, cmtitle):
-        return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle)
+        return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
 
 
 def stop(val):
