@@ -367,7 +367,12 @@ class parse_lines(object):
         lines = []
         startline = None
         firsttoken = None
-                                   
+
+        def getlineprefix():
+            return (tokens[startline].text or "").strip()
+        
+            
+                          
         while i<len(self.tokens):
             t = tokens[i]
             if t.type in (T.t_item, T.t_colon):
@@ -377,13 +382,13 @@ class parse_lines(object):
                 i+=1
             elif t.type==T.t_newline and startline is not None:
                 sub = self.tokens[startline+1:i+1]
-                lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+                lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=getlineprefix()))
                 startline = None
                 i+=1
             elif t.type==T.t_break:
                 if startline is not None:
                     sub = self.tokens[startline+1:i]
-                    lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=tokens[startline].text))
+                    lines.append(T(type=T.t_complex_line, start=tokens[startline].start, len=0, children=sub, lineprefix=getlineprefix()))
                     startline=None
                 if lines:
                     self.analyze(lines)
@@ -409,7 +414,7 @@ class parse_lines(object):
 
         if startline is not None:
             sub = self.tokens[startline+1:]
-            lines.append(T(type=T.t_complex_line, start=tokens[startline].start, children=sub, lineprefix=tokens[startline].text))
+            lines.append(T(type=T.t_complex_line, start=tokens[startline].start, children=sub, lineprefix=getlineprefix()))
 
         if lines:
             self.analyze(lines)
