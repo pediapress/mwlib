@@ -310,4 +310,13 @@ def test_urllink_in_brackets():
     nu = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
     print nu
     assert len(nu)==1,  "expexted exactly one named url"
-    
+
+def test_lines_with_table_space():
+    parse_txt("""* foo
+ :{|
+ |-
+ | bar
+ | baz
+ |}
+""")
+
