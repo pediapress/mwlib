@@ -195,14 +195,14 @@ class Formatter(object):
             txt = txt.encode(self.output_encoding)
         return txt
 
-    def styleText(self, txt):
+    def styleText(self, txt, break_long=False):
         if not txt.strip():
             if self.output_encoding:
                 txt = txt.encode(self.output_encoding)
             return txt
         styled = []
         styled.append(self.startStyle())
-        styled.append(self.cleanText(txt))
+        styled.append(self.cleanText(txt, break_long=break_long))
         styled.append(self.endStyle())
         return ''.join(styled)
 
