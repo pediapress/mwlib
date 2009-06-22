@@ -638,11 +638,19 @@ def mark_style_tags(tokens, xopts):
                 state[t.rawtagname]=t
             elif t.type==T.t_html_tag_end and t.rawtagname in tags:
                 del tokens[i]
-                if t.rawtagname in state:
+                rawtagname = t.rawtagname
+                
+                if rawtagname not in state:
+                    if rawtagname=="sup":
+                        rawtagname="sub"
+                    elif rawtagname=="sub":
+                        rawtagname="sup"
+                        
+                if rawtagname in state:
                     if create():
                         start += 1
                         i = start
-                    del state[t.rawtagname]
+                    del state[rawtagname]
             elif t.children:
                 if create():
                     start += 1
