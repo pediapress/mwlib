@@ -1,4 +1,3 @@
-import cgi
 try:
     from email.mime.text import MIMEText
     from email.utils import make_msgid, formatdate
@@ -383,7 +382,7 @@ def ensure_dir(d):
 
 # ==============================================================================
 
-def send_mail(from_email, to_emails, subject, body, host='mail', port=25):
+def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', port=25):
     """Send an email via SMTP
     
     @param from_email: email address for From: header
@@ -412,90 +411,52 @@ def send_mail(from_email, to_emails, subject, body, host='mail', port=25):
     msg['To'] = ', '.join(to_emails)
     msg['Date'] = formatdate()
     msg['Message-ID'] = make_msgid()
+    if headers is not None:
+        for k, v in headers.items():
+            if not isinstance(v, str):
+                v = str(v)
+            msg[k] = v
     connection.sendmail(from_email, to_emails, msg.as_string())
     connection.close()
 
 
 # ==============================================================================
 
-
-def report(system='', subject='',
-    from_email=None, mail_recipients=None,
-    write_file=True,
-    **kw):
+def report(system='', subject='', from_email=None, mail_recipients=None, mail_headers=None, **kw):
+    log.report('system=%r subject=%r' % (system, subject))
     
-    if write_file:
-        path = os.path.expanduser("~/errors/%s" % system)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        fp = os.path.join(path, "%.2f.txt" % time.time())
-        precision = 3
-        while os.path.exists(fp):
-            fp = os.path.join(path, ("%%.%df.txt" % precision) % time.time())
-            precision += 1
-        outfile = open(fp, 'w', 0) # unbuffered
-    else:
-        fd, fp = tempfile.mkstemp()
-        outfile = os.fdopen(fd, 'w', 0)
-    
-    outfile.write(subject)
-    outfile.write("\n<pre>")
-    
-    class Wrap(object):
-        def write(self, x):
-            try:
-                outfile.write(cgi.escape(x))
-            except UnicodeError:
-                outfile.write(cgi.escape(repr(x)))
-    f = Wrap()
-    
-    print >>f, "SYSTEM:", repr(system)
-    
-    traceback.print_exc(file=f)
-    
+    text = []
+    text.append('SYSTEM: %r' % system)
+    text.append('%s\n' % traceback.format_exc())
     try:
         fqdn = socket.getfqdn()
     except:
         fqdn = 'not available'
+    text.append('CWD: %r' % os.getcwd())
+    text.append('ENV:\n%s\n' % pprint.pformat(os.environ))
+    text.append('KEYWORDS:\n')
+    for k, v in kw:
+        text.append('%r: %s' % (k, pprint.pformat(v)))
 
-    print >>f, "FQDN:", repr(fqdn)
-    
-    print >>f, "CWD:", repr(os.getcwd())
-    print >>f
-    
-    print >>f, "ENV:"
-    pprint.pprint(os.environ, stream=f)
-    
-    print >>f, "KEYWORDS:"    
-    pprint.pprint(kw, stream=f)
-    
-    print >>f, "BREAK"
-    
-    outfile.write('\n</pre>')
-    outfile.close()
-    
-    log.report('system=%r subject=%r. Wrote to file %r' % (system, subject, fp))
-    
-    if from_email and mail_recipients:
-        try:
-            text = open(fp, 'rb').read()
-            send_mail(
-                from_email,
-                mail_recipients,
-                'REPORT [%s]: %s' % (fqdn, subject),
-                text,
-            )
-            log.info('sent mail to %r' % mail_recipients)
-        except Exception, e:
-            log.ERROR('Could not send mail: %s' % e)
-    
-    if write_file:
-        return fp
-    
+    text = '\n'.join(text)
+
+    if not (from_email and mail_recipients):
+        return text
+
     try:
-        os.unlink(fp)
-    except:
-        pass
+        if not isinstance(subject, str):
+            subject = repr(subject)
+        send_mail(
+            from_email,
+            mail_recipients,
+            'REPORT [%s]: %s' % (fqdn, subject),
+            text,
+            headers=mail_headers,
+        )
+        log.info('sent mail to %r' % mail_recipients)
+    except Exception, e:
+        log.ERROR('Could not send mail: %s' % e)
+    return text
 
 # ==============================================================================
 
