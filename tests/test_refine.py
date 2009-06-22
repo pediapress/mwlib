@@ -320,3 +320,15 @@ def test_lines_with_table_space():
  |}
 """)
 
+def test_sub_close_sup():
+    """http://code.pediapress.com/wiki/ticket/634"""
+    r=parse_txt("<sup>foo</sub>bar")
+    show(r)
+    assert "bar" not in T.join_as_text(r[0].children), "bar should not be inside sup tag"
+    
+def test_sup_close_sub():
+    """http://code.pediapress.com/wiki/ticket/634"""
+    r=parse_txt("<sub>foo</sup>bar")
+    show(r)
+    assert "bar" not in T.join_as_text(r[0].children), "bar should not be inside sub tag"
+    
