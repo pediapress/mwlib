@@ -178,7 +178,6 @@ class Application(wsgi.Application):
             subject=subject,
             from_email=self.report_from_mail,
             mail_recipients=self.report_recipients,
-            write_file=False,
             **kwargs
         )
     
