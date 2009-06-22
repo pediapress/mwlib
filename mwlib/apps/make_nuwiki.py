@@ -35,7 +35,7 @@ class start_fetcher(object):
         pages = fetch.pages_from_metabook(metabook)
         self.fetcher = fetch.fetcher(api, fsout, pages,
                                      licenses=self.licenses,
-                                     podclient=self.podclient,
+                                     status=self.status, 
                                      print_template_pattern=self.options.print_template_pattern,
                                      template_exclusion_category=self.options.template_exclusion_category,
                                      imagesize=self.options.imagesize)
@@ -98,8 +98,8 @@ class start_fetcher(object):
                 .addCallback(self.fetch_pages_from_metabook)
                 .addBoth(reset_podclient))
 
-def make_nuwiki(fsdir, base_url, metabook, options, podclient=None):
-    sf = start_fetcher(fsdir=fsdir, base_url=base_url, metabook=metabook, options=options, podclient=podclient)
+def make_nuwiki(fsdir, base_url, metabook, options, podclient=None, status=None):
+    sf = start_fetcher(fsdir=fsdir, base_url=base_url, metabook=metabook, options=options, podclient=podclient, status=status)
 
     def done(val):
         if val is None:

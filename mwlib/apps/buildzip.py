@@ -59,6 +59,7 @@ def make_zip(output=None, options=None, env=None, podclient=None, status=None):
             metabook=env.metabook,
             options=options,
             podclient=podclient,
+            status=status,
         )
 
         if output:

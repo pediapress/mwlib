@@ -107,7 +107,7 @@ class Main(object):
                     raise
                 
         env = wiki.makewiki(self.zip_filename)
-        self.status = Status(self.options.status_file, progress_range=(71, 100))
+        self.status = Status(self.options.status_file, progress_range=(51, 100))
         return env
             
         
@@ -165,7 +165,7 @@ class Main(object):
         if options.pid_file:
             open(options.pid_file, 'wb').write('%d\n' % os.getpid())
 
-        self.status = Status(options.status_file, progress_range=(1, 70))
+        self.status = Status(options.status_file, progress_range=(1, 50))
         self.status(progress=0)
 
         env = None

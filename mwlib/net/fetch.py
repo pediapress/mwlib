@@ -118,7 +118,7 @@ def getblock(lst, limit):
 
 class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
-                 podclient=None,
+                 status=None,
                  print_template_pattern=None,
                  template_exclusion_category=None,
                  imagesize=800):
@@ -134,7 +134,7 @@ class fetcher(object):
         
         self.fsout = fsout
         self.licenses = licenses
-        self.podclient = podclient
+        self.status = status
         self.template_exclusion_category = template_exclusion_category
         self.print_template_pattern = print_template_pattern
 
@@ -245,9 +245,8 @@ class fetcher(object):
         else:
             progress =  100.0*self.count_done /  jt
             
-        if self.podclient:
-            self.podclient.post_status(status="", progress=progress)
-
+        if self.status:
+            self.status(status="fetching", progress=progress)
             
         isatty = getattr(sys.stdout, "isatty", None)
         if isatty and isatty():
