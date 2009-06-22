@@ -435,7 +435,7 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
     text.append('CWD: %r' % os.getcwd())
     text.append('ENV:\n%s\n' % pprint.pformat(os.environ))
     text.append('KEYWORDS:\n')
-    for k, v in kw:
+    for k, v in kw.items():
         text.append('%r: %s' % (k, pprint.pformat(v)))
 
     text = '\n'.join(text)
