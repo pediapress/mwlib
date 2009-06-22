@@ -19,6 +19,11 @@ def test_empty_nowiki():
     r=u.replace_uniq(s)
     assert r=="abcdef"
 
+def test_space_in_closing_tag():
+    u=uniq.Uniquifier()
+    s=u.replace_tags("foo<ref>bar</ref >baz")
+    assert "UNIQ" in s, "ref tag not recognized"
+    
 def test_comment():
     u = uniq.Uniquifier()
     def repl(txt, expected):
