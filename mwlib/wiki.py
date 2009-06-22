@@ -189,6 +189,13 @@ def _makewiki(conf,
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res
+        elif format==u'multi-nuwiki':
+            from mwlib import multiwiki, nuwiki
+            m=multiwiki.wiki(zf)
+            res.images = res.wiki = m # nuwiki.adapt(m)
+            if metabook is None:
+                res.metabook = res.wiki.metabook
+            return res
         elif format=="zipwiki":
             from mwlib import zipwiki
             res.wiki = zipwiki.Wiki(conf)
