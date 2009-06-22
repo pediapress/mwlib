@@ -103,7 +103,6 @@ def test_parse_table_row_modifier():
 
 def test_parse_link():
     tokens = tokenize("[[link0]][[link2]]")
-    refined = []
     core.parse_links(tokens, empty)
     show(tokens)
     assert len(tokens)==2
@@ -221,6 +220,7 @@ div ends here
 some text
 """
     r=parse_txt(s)
+    show(r)
     
 def test_mark_style_595():
     """http://code.pediapress.com/wiki/ticket/595"""
@@ -309,7 +309,7 @@ def test_urllink_in_brackets():
     show(r)
     nu = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
     print nu
-    assert len(nu)==1,  "expexted exactly one named url"
+    assert len(nu)==1,  "expected exactly one named url"
 
 def test_lines_with_table_space():
     parse_txt("""* foo
