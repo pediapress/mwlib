@@ -91,6 +91,10 @@ class ArgumentList(object):
 
     def __getitem__(self, n):
         self.count += 1
+        if isinstance(n, slice):
+            start = n.start or 0
+            stop = n.stop or len(self)
+            return [self.get(x,  None) or u"" for x in range(start, stop)]
         return self.get(n, None) or u''
         
     def get(self, n, default):
