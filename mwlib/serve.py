@@ -155,6 +155,7 @@ class Application(wsgi.Application):
             try:
                 return method(collection_id, request.post_data, is_new)
             except Exception, exc:
+                self.send_report_mail('exception', command=command)
                 return self.error_response('error executing command %r: %s' % (
                     command, exc,
                 ))
@@ -162,12 +163,11 @@ class Application(wsgi.Application):
             lock.release()
     
     @json_response
-    def error_response(self, error, **kwargs):
+    def error_response(self, error):
         if isinstance(error, str):
             error = unicode(error, 'utf-8', 'ignore')
         elif not isinstance(error, unicode):
             error = unicode(repr(error), 'ascii')
-        self.send_report_mail('error response', error=error, **kwargs)
         return {'error': error}
     
     def send_report_mail(self, subject, **kwargs):

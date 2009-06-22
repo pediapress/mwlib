@@ -445,7 +445,10 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
         fqdn = 'not available'
     text.append('CWD: %r' % os.getcwd())
     text.append('ENV:\n%s\n' % pprint.pformat(os.environ))
-    text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw))
+    text.append('KEYWORDS:\n')
+    for k, v in kw:
+        text.append('%r: %s' % (k, pprint.pformat(v)))
+
     text = '\n'.join(text)
 
     if not (from_email and mail_recipients):
