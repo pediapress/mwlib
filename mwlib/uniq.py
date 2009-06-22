@@ -73,7 +73,7 @@ class Uniquifier(object):
                  |
                  (?<!/) >
                 (?P<inner>.*?)
-                </(?P=tagname)>))
+                </(?P=tagname)\\s*>))
             """
 
             rx = rx.replace("NAMES", "|".join(list(tags)))
