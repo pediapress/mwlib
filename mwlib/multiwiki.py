@@ -5,7 +5,10 @@
 import os
 import tempfile
 import binascii
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 from mwlib import nuwiki
 
 class wiki(nuwiki.adapt):
