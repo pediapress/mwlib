@@ -80,19 +80,7 @@ class wiki(nuwiki.adapt):
         
     def normalize_and_get_page(self, title,  defaultns=0):
         # print "normalize and get_page:", repr(title)
-        
-        if title.startswith(self.magic):
-            prefix, name = title[len(self.magic):].split(":", 1)
-        else:
-            prefix=None
-            name = title
-            assert self.current_wiki
-            
-        n = self._get_nuwiki_by_prefix(prefix)
-        if n is not None:
-            self.current_wiki = n
-            return self.current_wiki.normalize_and_get_page(name,  defaultns=defaultns)
-            
+        title = self._switch_to_prefix(title)
         return self.current_wiki.normalize_and_get_page(title, defaultns=defaultns)
 
     def __getattr__(self, name):
