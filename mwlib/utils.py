@@ -433,8 +433,8 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
     except:
         fqdn = 'not available'
     text.append('CWD: %r\n' % os.getcwd())
-    text.append('ENV:\n%s\n' % pprint.pformat(dict(os.environ)))
-    text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw))
+    text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw, indent=4))
+    text.append('ENV:\n%s\n' % pprint.pformat(dict(os.environ), indent=4))
 
     text = '\n'.join(text)
 
