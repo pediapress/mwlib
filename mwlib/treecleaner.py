@@ -92,6 +92,7 @@ class TreeCleaner(object):
                       'removeEmptyTextNodes',
                       'removeChildlessNodes', 
                       'removeBreakingReturns',
+                      'removeEmptySections',
                       ]
 
     skipMethods = []
@@ -1121,3 +1122,22 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeEmptyTrailingTableRows(c)
+
+
+    def removeEmptySections(self, node):
+        """Remove section nodes which do not contain any text """
+        if node.__class__ == Section and node.parent:
+            if len(node.children) == 1:
+                node.parent.removeChild(node)
+                return
+            has_txt = False
+            for c in node.children[1:]:
+                if c.getAllDisplayText():
+                    has_txt = True
+                    break
+            if not has_txt:
+                node.parent.removeChild(node)
+                return
+        
+        for c in node.children:
+            self.removeEmptySections(c)
