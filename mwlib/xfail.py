@@ -1,3 +1,6 @@
 import py
-
-xfail = py.test.mark.xfail("expected failure")
+try:
+    xfail = py.test.mark.xfail("expected failure")
+except AttributeError:
+    xfail = py.test.xfail
+    
