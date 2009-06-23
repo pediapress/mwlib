@@ -2,7 +2,11 @@ import sys
 import datetime
 import re
 import calendar
-from dateutil.parser import parse as parsedate
+try:
+    from timelib import strtodatetime as parsedate
+except ImportError:
+    from dateutil.parser import parse as parsedate
+
 from mwlib.strftime import strftime
 
 def ampm(date):
