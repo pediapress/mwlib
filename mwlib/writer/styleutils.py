@@ -113,6 +113,7 @@ def tableBorder(node):
                    'taxobox',
                    'info',
                    'collapsibleTable0',
+                   'palaeobox',
                    ]
 
     attributes = node.attributes
