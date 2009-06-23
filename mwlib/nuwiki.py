@@ -18,12 +18,12 @@ from mwlib.log import Log
 log = Log('nuwiki')
 
 
-class Page(object):
+class page(object):
     def __init__(self, meta, rawtext):
         self.__dict__.update(meta)
         self.rawtext = rawtext
         
-class NuWiki(object):
+class nuwiki(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
         d = os.path.join(self.path, "images", "safe")
@@ -156,7 +156,10 @@ class NuWiki(object):
         res = list(set([p.title for p in self.revisions.values() if p.ns==0]))
         res.sort()
         return res
-    
+
+NuWiki = nuwiki
+Page = page
+
 def extract_member(zipfile, member, targetpath):
     """Copied and adjusted from Python 2.6 stdlib zipfile.py module.
 

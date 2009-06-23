@@ -92,7 +92,7 @@ def pytest_unconfigure(config):
     gr_twisted.switch(None)
 
 def pytest_pyfunc_call(pyfuncitem, *args, **kwargs):
-    args = args or pyfuncitem._args  # generator tests
+    args = args or pyfuncitem._args or () # generator tests
     # XXX1 kwargs?  
     # XXX2 we want to delegate actual call to next plugin
     #      (which may want to produce test coverage, etc.) 

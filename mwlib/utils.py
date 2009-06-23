@@ -426,17 +426,15 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
     log.report('system=%r subject=%r' % (system, subject))
     
     text = []
-    text.append('SYSTEM: %r' % system)
+    text.append('SYSTEM: %r\n' % system)
     text.append('%s\n' % traceback.format_exc())
     try:
         fqdn = socket.getfqdn()
     except:
         fqdn = 'not available'
-    text.append('CWD: %r' % os.getcwd())
-    text.append('ENV:\n%s\n' % pprint.pformat(os.environ))
-    text.append('KEYWORDS:\n')
-    for k, v in kw:
-        text.append('%r: %s' % (k, pprint.pformat(v)))
+    text.append('CWD: %r\n' % os.getcwd())
+    text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw, indent=4))
+    text.append('ENV:\n%s\n' % pprint.pformat(dict(os.environ), indent=4))
 
     text = '\n'.join(text)
 
