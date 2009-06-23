@@ -118,12 +118,15 @@ class TreeCleaner(object):
         self.childlessOK = [ArticleLink, BreakingReturn, CategoryLink, Cell, Chapter, Code, 
                             HorizontalRule, ImageLink, ImageMap, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, Timeline, URL]
+        # exceptions to the above. if any of the list items is explicitly set as a css style the node is not removed
+        self.childless_exceptions = {Div: [u'width', u'height']}
 
         # FIXME: not used currently. remove if this is not used soon. could be used as reference
         # list nodes that apply styles to their children
         # FIXME: Center node might be problematic. Center is a block node and not inline
         self.inlineStyleNodes = [Big, Center, Cite, Code, Deleted, Emphasized, Inserted, Italic,
                                  Overline, Small, Strike, Strong, Sub, Sup, Teletyped, Underline, Var]
+
 
         # USED IN fixNesting if nesting_strictness == 'loose'
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
@@ -267,7 +270,14 @@ class TreeCleaner(object):
 
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
-        if not node.children and node.__class__ not in self.childlessOK:
+        is_exception = False
+        if node.__class__ in self.childless_exceptions.keys() and node.style:
+            parser.show(sys.stdout, node)
+            for style_type in self.childless_exceptions[node.__class__]:
+                if style_type in node.style.keys():
+                    is_exception = True
+
+        if not node.children and node.__class__ not in self.childlessOK and not is_exception:
             if node.parent.__class__ == Section and not node.previous: 
                 return # make sure that the first child of a section is not removed - this is the section caption
             removeNode = node

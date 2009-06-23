@@ -141,3 +141,25 @@ def tableBorder(node):
             return True
 
     return False
+
+def parseLength(txt):
+    length_res = re.search(r'(?P<val>.*?)(?P<unit>(pt|px|em|%))', txt)
+    length = unit = None
+    if length_res:
+        unit = length_res.group('unit')
+        try:
+            length = float(length_res.group('val'))
+        except ValueError:
+            length = None
+    return (length, unit)
+    
+            
+def scaleLength(length_str):
+    length, unit = parseLength(length_str)
+    if unit == 'pt':
+        return length
+    elif unit == 'px':
+        return length * 10/12
+    elif unit == 'em':
+        return length * 10
+    return 0

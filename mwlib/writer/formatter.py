@@ -6,8 +6,7 @@
 
 from __future__ import division
 
-import re
-
+from mwlib.writer import styleutils
 
 class Formatter(object):
     """store the current formatting state"""
@@ -106,24 +105,18 @@ class Formatter(object):
         font_style = node_style.get('font-size')
         if not font_style:
             return
-
-        size_res = re.search(r'(?P<val>.*?)(?P<unit>(pt|px|em|%))', font_style)
-        if size_res:
-            unit = size_res.group('unit')
-            try:
-                val = float(size_res.group('val'))
-            except ValueError:
-                val = None
-            if val and unit in ['%', 'pt', 'px', 'em']:
-                if unit == '%':
-                    self.setRelativeFontSize(val/100)
-                elif unit ==  'pt':
-                    self.setRelativeFontSize(val/10)
-                elif unit ==  'px':
-                    self.setRelativeFontSize(val/12)
-                elif unit ==  'em':
-                    self.setRelativeFontSize(val)
-                return
+                
+        size, unit = styleutils.parseLength(font_style)
+        if size and unit in ['%', 'pt', 'px', 'em']:
+            if unit == '%':
+                self.setRelativeFontSize(size/100)
+            elif unit ==  'pt':
+                self.setRelativeFontSize(size/10)
+            elif unit ==  'px':
+                self.setRelativeFontSize(size/12)
+            elif unit ==  'em':
+                self.setRelativeFontSize(size)
+            return
 
         if font_style == 'xx-small':
             self.setRelativeFontSize(0.5)
