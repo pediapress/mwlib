@@ -96,3 +96,6 @@ def test_dateutil_raises_typeerror():
     yield expandstr, "{{#time:c|2007-09-27PM EDT}}"
     yield expandstr, "{{#iferror:{{#time:c|2007-09-27PM EDT}}|yes|no}}", "yes"
 
+
+def test_time_minus_days():
+    yield expandstr, "{{#time:Y-m-d| 20070827000000 -12 day}}", "2007-08-15"
