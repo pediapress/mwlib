@@ -64,7 +64,7 @@ def main():
     if os.path.exists(distutils.util.convert_path('Makefile')):
         build_deps()   # this is a hg checkout.
 
-    install_requires=["pyparsing>=1.4.11", "odfpy==0.9", "flup>=1.0", "python-dateutil>=1.4.1", "twisted>=8.2", "lockfile>=0.8"]
+    install_requires=["pyparsing>=1.4.11", "odfpy==0.9", "flup>=1.0", "twisted>=8.2", "lockfile>=0.8", "timelib>=0.2"]
     if sys.version_info[:2] < (2,5):
         install_requires.append("wsgiref>=0.1.2")
         install_requires.append("elementtree>=1.2.6")
@@ -84,7 +84,7 @@ def main():
     setup(
         name="mwlib",
         version=str(version),
-        dependency_links = ["http://labix.org/python-dateutil", "http://code.pediapress.com/dl/"],
+        dependency_links = ["http://code.pediapress.com/dl/"],
         entry_points = {'console_scripts': ['mw-buildcdb = mwlib.apps:buildcdb',
                                             'mw-zip = mwlib.apps.buildzip:main',
                                             'mw-post = mwlib.apps:post',
