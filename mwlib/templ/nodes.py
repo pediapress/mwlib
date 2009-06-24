@@ -188,6 +188,14 @@ class Template(Node):
         remainder = None
         if ":" in name:
             try_name, try_remainder = name.split(':', 1)
+            from mwlib.templ import magic_nodes
+            klass = magic_nodes.registry.get(try_name)
+            if klass is not None:
+                children = (try_remainder, )+self[1:]
+                # print "MAGIC:", klass,  children
+                klass(children).flatten(expander, variables, res)
+                return
+            
             if expander.resolver.has_magic(try_name):
                 name=try_name
                 remainder = try_remainder
