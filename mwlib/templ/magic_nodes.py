@@ -117,4 +117,6 @@ registry = {'#time': Time,
             'displaytitle': Displaytitle,
             'defaultsort': Defaultsort,
             '#rel2abs': rel2abs,
+            '#switch': nodes.SwitchNode, 
+            '#if': nodes.IfNode,
             }
