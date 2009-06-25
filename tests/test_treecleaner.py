@@ -37,13 +37,18 @@ def cleanMarkup(raw):
     
     tree  = getTreeFromMarkup(raw)
 
+    print "before treecleaner: >>>"
     showTree(tree)
+    print "<<<"
+    
     print '='*20
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
     reports = tc.getReports()
+    print "after treecleaner: >>>"
     showTree(tree)
+    print "<<<"
     return (tree, reports)
 
 def cleanMarkupSingle(raw, cleanerMethod):
