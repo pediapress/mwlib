@@ -188,24 +188,19 @@ class Template(Node):
         remainder = None
         if ":" in name:
             try_name, try_remainder = name.split(':', 1)
+            from mwlib.templ import magic_nodes
+            klass = magic_nodes.registry.get(try_name)
+            if klass is not None:
+                children = (try_remainder, )+self[1:]
+                # print "MAGIC:", klass,  children
+                klass(children).flatten(expander, variables, res)
+                return
+            
             if expander.resolver.has_magic(try_name):
                 name=try_name
                 remainder = try_remainder
                 
-            if name=='#if':
-                remainder=remainder.strip()
-                res.append(maybe_newline)
-                tmp = []
-                if remainder:
-                    if len(args)>=1:
-                        flatten(args[0], expander, variables, tmp)
-                else:
-                    if len(args)>=2:
-                        flatten(args[1], expander, variables, tmp)
-                res.append(u"".join(tmp).strip())
-                res.append(dummy_mark)
-                return
-            elif name=='#ifeq':
+            if name=='#ifeq':
                 res.append(maybe_newline)
                 tmp=[]
                 if len(args)>=1:
@@ -221,40 +216,6 @@ class Template(Node):
                     if len(args)>=3:
                         flatten(args[2], expander, variables, tmp)
                         res.append(u"".join(tmp).strip())
-                res.append(dummy_mark)
-                return
-            elif name=='#switch':
-                res.append(maybe_newline)
-                
-                remainder = remainder.strip()
-                default = None
-                for i, c in enumerate(args):
-                    k, v = equalsplit(c)
-                    if k is not None:
-                        tmp = []
-                        flatten(k, expander, variables, tmp)
-                        k=u"".join(tmp).strip()
-
-                    if k=='#default':
-                        default = v
-                        
-                        
-                    if (k is None and i==len(args)-1) or (k is not None and magics.maybe_numeric_compare(k, remainder)):
-                        tmp = []
-                        flatten(v, expander, variables, tmp)
-                        v = u"".join(tmp).strip()
-                        
-                        res.append(v)
-                        res.append(dummy_mark)
-                        return
-
-                if default is not None:
-                    tmp=[]
-                    flatten(default, expander, variables, tmp)
-                    tmp = u"".join(tmp).strip()
-                    res.append(tmp)
-                    
-                        
                 res.append(dummy_mark)
                 return
         

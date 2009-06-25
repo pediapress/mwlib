@@ -436,3 +436,11 @@ foo was missing<ref>bar</ref> <!-- some comment--> baz
     raw =  e.expandTemplates()
     print repr(raw)
     assert u"foo was missing" in raw, "text is missing"
+
+def test_dynamic_parserfun():
+    yield expandstr, "{{{{#if: 1|}}#time: Y-m-d | 2009-1-2}}", "2009-01-02"
+    
+    yield expandstr, "{{{{#if: 1|}}#switch: A | a=lower | A=UPPER }}", "UPPER"
+
+    yield expandstr, "{{{{#if: 1|}}#if: 1 | yes}}", "yes"
+    

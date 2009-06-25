@@ -2,7 +2,8 @@ import sys
 import datetime
 import re
 import calendar
-from dateutil.parser import parse as parsedate
+from timelib import strtodatetime as parsedate
+
 from mwlib.strftime import strftime
 
 def ampm(date):
@@ -81,7 +82,7 @@ def time(format, datestring=None):
             except ValueError:
                 pass
             except Exception, err:
-                sys.stderr.write("ERROR in dateutil: %r while parsing %r" % (err, datestring))
+                sys.stderr.write("ERROR in parsedate: %r while parsing %r" % (err, datestring))
                 pass
 
         if date is None:

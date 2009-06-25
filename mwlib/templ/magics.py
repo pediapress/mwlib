@@ -375,13 +375,6 @@ class ParserFunctions(object):
         name = args[0].strip()
         r= u"<%s>%s</%s>" % (name, args[1], name)
         return r
-    
-
-    def IF(self, rl):
-        if rl[0]:
-            return rl[1]
-        else:
-            return rl[2]
 
     def IFEXIST(self, args):
         name = args[0]
@@ -447,31 +440,6 @@ class ParserFunctions(object):
         else:
             return rl[2]
 
-    def SWITCH(self, args):
-        """see http://meta.wikimedia.org/wiki/ParserFunctions#.23switch:"""
-        cmpval = args[0].strip()
-        found=False # used for fall through 
-        for c in args[1:]:
-            if '=' in c:
-                val, result = c.split('=', 1)
-                val=val.strip()
-                result=result.strip()
-                if found or maybe_numeric_compare(val, cmpval):
-                    return result
-            else:
-                if maybe_numeric_compare(cmpval,c.strip()):
-                    found=True
-
-        d=args["#default"]
-        if d:
-            return d
-
-        
-        last = args[-1]
-
-        if '=' not in last:
-            return last
-        return u''
     
     def TITLEPARTS(self, args):
         title = args[0]

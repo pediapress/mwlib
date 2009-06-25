@@ -185,6 +185,12 @@ class Parser(object):
     def templateFromChildren(self, children):
         if children and isinstance(children[0], unicode):
             s = children[0].strip().lower()
+            
+            if s.startswith("#if:"):
+                return self.ifnodeFromChildren(children)
+            if s.startswith("#switch:"):
+                return self.switchnodeFromChildren(children)
+            
             if u':' in s:
                 from mwlib.templ import magic_nodes
                 name, first = s.split(':', 1)
@@ -192,10 +198,6 @@ class Parser(object):
                     return self.magicNodeFromChildren(children, magic_nodes.registry[name])
                 
                 
-            if s.startswith("#if:"):
-                return self.ifnodeFromChildren(children)
-            if s.startswith("#switch:"):
-                return self.switchnodeFromChildren(children)
             
         # find the name
         name = []
