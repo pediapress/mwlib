@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# Copyright (c) 2007-2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
 import StringIO
 try:
     from hashlib import md5
@@ -89,9 +92,9 @@ class interwiki(mbobj):
     local=False
 
     def __init__(self, api_entry):
-        api_entry=api_entry or dict()
-        
-        mbobj.__init__(self, **api_entry)
+        mbobj.__init__(self)
+        if api_entry:
+            self.__dict__.update(api_entry)
             
         self.local = bool(self.local)
 
