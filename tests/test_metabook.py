@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-from mwlib import metabook
+from mwlib import metabook,  myjson as json
 
 test_wikitext1 = '''== Title ==
 === Subtitle ===
@@ -40,7 +40,7 @@ Summary line 2
 
 test_metabook = {
     'type': 'collection',
-    'version': metabook.METABOOK_VERSION,
+    'version': 1, 
     'title': u'bla',
     'items': [
         {
@@ -74,11 +74,15 @@ test_metabook = {
     ],
 }
 
+test_metabook = json.loads(json.dumps(test_metabook))
+
 def test_parse_collection_page():
     #first parsestring
     mb = metabook.parse_collection_page(test_wikitext1)
+    print mb
+    
     assert mb['type'] == 'collection'
-    assert mb['version'] == metabook.METABOOK_VERSION
+    assert mb['version'] == 1
     assert mb['title'] == 'Title'
     assert mb['subtitle'] == 'Subtitle'
     assert mb['summary'] == 'Summary line 1 Summary line 2 '
@@ -106,7 +110,7 @@ def test_parse_collection_page():
     #second parsestring
     mb = metabook.parse_collection_page(test_wikitext2)
     assert mb['type'] == 'collection'
-    assert mb['version'] == metabook.METABOOK_VERSION
+    assert mb['version'] == metabook.collection.version
     assert mb['title'] == 'Title'
     assert mb['subtitle'] == 'Subtitle'
     assert mb['summary'] == 'Summary line 1 Summary line 2 '
@@ -186,8 +190,8 @@ def test_checksum():
     print cs1
     assert cs1
     assert isinstance(cs1, str)
-
-    tm2 = dict(test_metabook)
+    import copy
+    tm2 = copy.deepcopy(test_metabook)
+    
     tm2['title'] = tm2['title'] + '123'
     assert metabook.calc_checksum(tm2) != cs1
-

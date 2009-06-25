@@ -7,10 +7,7 @@ import zipfile
 import shutil
 import tempfile
 import urllib
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from mwlib import myjson as json
 
 from mwlib import nshandling, utils
 from mwlib.log import Log

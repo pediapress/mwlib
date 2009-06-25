@@ -1,9 +1,6 @@
 #! /usr/bin/env py.test
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from mwlib import myjson as json
 import os
 import shutil
 import tempfile
@@ -20,7 +17,7 @@ class TestServe(object):
         shutil.rmtree(cls.tmpdir)
 
     def mkcolldir(self, name):
-        cid = serve.make_collection_id({'metabook': json.dumps({'title': name})})
+        cid = serve.make_collection_id({'metabook': json.dumps({'title': name,  "type":"collection"})})
         d = os.path.join(self.tmpdir, cid[0], cid[:2], cid)
         os.makedirs(d)
         f = open(os.path.join(d, 'output.rl'), 'wb')

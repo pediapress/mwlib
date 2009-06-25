@@ -171,10 +171,7 @@ def _makewiki(conf,
         
     if conf.lower().endswith(".zip"):
         import zipfile
-        try:
-            import simplejson as json
-        except ImportError:
-            import json
+        from mwlib import myjson as json
         conf = os.path.abspath(conf)
         
         zf = zipfile.ZipFile(conf)

@@ -1,166 +1,118 @@
 #! /usr/bin/env python
 
-import re
 import StringIO
 try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
 
-from mwlib import utils
+import copy
 
-# ==============================================================================
+def parse_collection_page(txt):
+    from mwlib.parse_collection_page import parse_collection_page
+    return parse_collection_page(txt)
 
-METABOOK_VERSION = 1
-
-# ==============================================================================
-
-def make_metabook(title=None, subtitle=None):
-    metabook = {
-        'type': 'collection',
-        'version': METABOOK_VERSION,
-        'summary': '',
-        'items': [],
+class mbobj(object):
+    def __init__(self, **kw):
+        d = dict(type=self.__class__.__name__)
         
-    }
-    if title:
-        metabook['title'] = title
-    if subtitle:
-        metabook['subtitle'] = subtitle
-    return metabook
-
-def make_source(name=None, url=None, language=None, base_url=None, script_extension=None):
-    source = {
-        'type': 'source',
-        'system': 'MediaWiki',
-    }
-    if name:
-        source['name'] = name
-    if url:
-        source['url'] = url
-    if language:
-        source['language'] = language
-    if base_url:
-        source['base_url'] = base_url
-    if script_extension:
-        source['script_extension'] = script_extension
-    return source
-
-def make_interwiki(api_entry=None):
-    interwiki = {
-        'type': 'interwiki',
-    }
-    if api_entry is not None:
-        interwiki.update(api_entry)
-        if 'local' in interwiki:
-            interwiki['local'] = True
-        else:
-            interwiki['local'] = False
-    return interwiki
-
-def make_article(title=None, displaytitle=None, revision=None, content_type='text/x-wiki'):
-    article = {
-        'type': 'article',
-        'content-type': content_type,
-    }
-    if title:
-        article['title'] = title
-    if displaytitle:
-        article['displaytitle'] = displaytitle
-    if revision:
-        article['revision'] = revision
-    return article
-
-def make_chapter(title=None):
-    chapter = {
-        'type': 'chapter',
-        'items': [],
-    }
-    if title:
-        chapter['title'] = title
-    return chapter
-
-# ==============================================================================
-
-def parse_collection_page(wikitext):
-    """Parse wikitext of a MediaWiki collection page created by the Collection
-    extension for MediaWiki.
-    
-    @param wikitext: wikitext of a MediaWiki collection page
-    @type mwcollection: unicode
-    
-    @returns: metabook dictionary
-    @rtype: dict
-    """
-    
-    metabook = make_metabook()
-
-    title_rex = '^==\s+(?P<title>.*?)\s+==$'
-    subtitle_rex = '^===\s+(?P<subtitle>.*?)\s+===$'
-    chapter_rex = '^;(?P<chapter>.*?)$'
-    article_rex = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
-    oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.*?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
-    template_rex = '^\{\{(?P<template>.*?)\}\}$'
-    template_start_rex = '^(?P<template_start>\{\{)$'
-    template_end_rex = '.*?(?P<template_end>\}\})$'
-    summary_rex = '(?P<summary>.*)'
-    alltogether_rex = re.compile("(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)" % (
-        title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex,
-        template_rex, template_start_rex, template_end_rex, summary_rex,
-    ))
-    
-    summary = False
-    noTemplate = True
-    firstSummaryLine = True
-    for line in wikitext.splitlines():
-        if line == "": 
-            continue #drop empty lines
-        res = alltogether_rex.search(line.strip())
-        if not res:
-            continue
-        
-        #look for initial templates and summaries
-        #multilinetemplates need different handling to those that fit into one line
-        if res.group('template_end') or res.group('template'):
-            summary = True
-            noTemplate = False
-        elif res.group('template_start'):
-            noTemplate = False
-        elif res.group('summary'):
-            if firstSummaryLine:
-                firstSummaryLine = False
-        else:
-            summary = False
-            noTemplate = False
-
-        if res.group('title'):
-            metabook['title'] = res.group('title')
-        elif res.group('subtitle'):
-            metabook['subtitle'] = res.group('subtitle')
-        elif res.group('chapter'):
-            metabook['items'].append(make_chapter(
-                title=res.group('chapter').strip(),
-            ))
-        elif res.group('article'):
-            append_article(res.group('article'), res.group('displaytitle'), metabook)
-        elif res.group('oldarticle'):
-            append_article(res.group('oldarticle'), res.group('olddisplaytitle'), metabook, res.group('oldid'))
-        elif res.group('summary') and (noTemplate or summary):
-            metabook['summary'] += res.group('summary') + " "
+        for k in dir(self.__class__):
+            if k.startswith("__"):
+                continue
+            v = getattr(self.__class__, k)
+            if callable(v) or v is None:
+                continue
+            d[k] = v
             
-    return metabook
+        self.__dict__.update(copy.deepcopy(d))
+        self.__dict__.update(kw)
+        self.type = self.__class__.__name__
+        
+    def __getitem__(self, key):
+        try:
+            return getattr(self, str(key))
+        except AttributeError:
+            raise KeyError(repr(key))
+    
+    def __setitem__(self, key, val):
+        self.__dict__[key]=val
+
+    def __contains__(self,  key):
+        val = getattr(self, str(key), None)
+        return val is not None
+        
+    def get(self, key, default=None):
+        try:
+            return getattr(self, str(key))
+        except AttributeError:
+            return default
+        
+    def _json(self):
+        d = dict(type=self.__class__.__name__)
+        for k, v in self.__dict__.items():
+            if v is not None:
+                d[k]=v
+        return d
+    
+    def __repr__(self):
+        return "<%s %r>" % (self.__class__.__name__,  self.__dict__)
+                 
+class collection(mbobj):
+    title = None
+    subtitle=None
+    version = 1
+    summary = ""
+    items = []
+    licenses = []
+    
+    def append_article(self, title, displaytitle=None, revision=None):
+        title = title.strip()
+        if displaytitle is not None:
+            displaytitle = displaytitle.strip()
+        art = article(title=title, revision=revision, displaytitle=displaytitle)
+
+        if self.items and isinstance(self.items[-1], chapter):
+            self.items[-1].items.append(art)
+        else:
+            self.items.append(art)
+    
+class source(mbobj):
+    name=None
+    url=None
+    language=None
+    base_url=None
+    script_extension=None
+    system="MediaWiki"
+    
+
+class interwiki(mbobj):
+    local=False
+
+    def __init__(self, api_entry):
+        api_entry=api_entry or dict()
+        
+        mbobj.__init__(self, **api_entry)
+            
+        self.local = bool(self.local)
+
+
+class article(mbobj):
+    title=None
+    displaytitle=None
+    revision=None
+    content_type="text/x-wiki"
+    
+
+class chapter(mbobj):
+    items=[]
+    title=None
+
+
+# ==============================================================================
+
 
 def append_article(article, displaytitle, metabook, revision=None):
-    if revision:
-        article = make_article(title=article.strip(), revision=revision)
-    else:
-        article = make_article(title=article.strip())
-    if displaytitle:
-        article['displaytitle'] = displaytitle.strip()
-    if metabook['items'] and metabook['items'][-1]['type'] == 'chapter':
-        metabook['items'][-1]['items'].append(article)
-    else:
-        metabook['items'].append(article)
+    metabook.append_article(article, displaytitle, revision=revision)
 
 def get_item_list(metabook, filter_type=None):
     """Return a flat list of items in given metabook
@@ -175,10 +127,11 @@ def get_item_list(metabook, filter_type=None):
     @rtype: [{}]
     """
     result = []
-    for item in metabook.get('items', []):
+    for item in metabook.items:
         if not filter_type or item['type'] == filter_type:
             result.append(item)
-        if 'items' in item:
+        subitems = getattr(item, "items", None)
+        if subitems:
             result.extend(get_item_list(item, filter_type=filter_type))
     return result
 
@@ -200,10 +153,8 @@ def get_licenses(metabook):
     @returns: list of dicts with license info
     @rtype: [dict]
     """
-    
-    if 'licenses' not in metabook:
-        return []
-    
+    import re
+    from mwlib import utils
     licenses = []
     for license in metabook['licenses']:
         wikitext = ''
@@ -240,3 +191,8 @@ def get_licenses(metabook):
     
     return licenses
     
+make_metabook  = collection
+make_chapter   = chapter
+make_source    = source
+make_interwiki = interwiki
+make_article   = article
