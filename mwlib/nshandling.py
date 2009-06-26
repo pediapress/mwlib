@@ -38,17 +38,19 @@ class ilink(object):
     language = ""
 
 def fix_wikipedia_siteinfo(siteinfo):
-    prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
-    for p in "arz pnt".split():
+    return
+
+    # prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
+    # for p in "arz pnt".split():
         
-        if p in prefixes:
-            return
-        siteinfo['interwikimap'].append({
-            'prefix': p,
-            'language': p,
-            'url': 'http://%s.wikipedia.org/wiki/$1' % (p, ),
-            'local': '',
-        })
+    #     if p in prefixes:
+    #         return
+    #     siteinfo['interwikimap'].append({
+    #         'prefix': p,
+    #         'language': p,
+    #         'url': 'http://%s.wikipedia.org/wiki/$1' % (p, ),
+    #         'local': '',
+    #     })
     
 # TODO: build fast lookup table for use in nshandler.splitname
 class nshandler(object):
