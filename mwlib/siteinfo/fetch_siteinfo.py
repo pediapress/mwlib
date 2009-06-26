@@ -14,7 +14,7 @@ def fetch(lang):
     fn = 'siteinfo-%s.json' % lang
     print 'writing %r' % fn
     data = json.loads(data)['query']
-    json.dump(data, open(fn, 'wb'), indent=4)
+    json.dump(data, open(fn, 'wb'), indent=4, sort_keys=True)
 
 def main(argv):
     if len(argv) < 2:
