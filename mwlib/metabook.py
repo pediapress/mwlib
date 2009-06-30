@@ -3,7 +3,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import StringIO
 import warnings
 try:
     from hashlib import md5
