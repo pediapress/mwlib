@@ -46,7 +46,9 @@ class mbobj(object):
         
     def get(self, key, default=None):
         try:
-            return getattr(self, str(key))
+            val = getattr(self, str(key))
+            if val is None:
+                return default
         except AttributeError:
             return default
         
