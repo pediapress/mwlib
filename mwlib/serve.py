@@ -15,10 +15,8 @@ try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
-try:
-    import json
-except ImportError:
-    import simplejson as json
+
+from mwlib import myjson as json
 
 from lockfile import FileLock
 

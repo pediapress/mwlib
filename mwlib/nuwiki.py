@@ -7,10 +7,7 @@ import zipfile
 import shutil
 import tempfile
 import urllib
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from mwlib import myjson as json
 
 from mwlib import nshandling, utils
 from mwlib.log import Log
@@ -238,7 +235,13 @@ class adapt(object):
             return p.rawtext
         
     def getURL(self, name, revision=None, defaultns=nshandling.NS_MAIN):
-        p = '%(base_url)sindex%(script_extension)s?' % self.nfo
+        base_url = self.nfo["base_url"]
+        if not base_url.endswith("/"):
+            base_url += "/"
+        script_extension = self.nfo.get("script_extension") or ".php"
+
+
+        p = '%sindex%s?' % (base_url, script_extension)
         if revision is not None:
             return p + 'oldid=%s' % revision
         else:

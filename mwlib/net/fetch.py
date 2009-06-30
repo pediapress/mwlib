@@ -14,11 +14,7 @@ from mwlib import metabook, utils, nshandling
 from mwlib.net import mwapi
 from mwlib.net.pod import PODClient
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
+from mwlib import myjson as json
 
 from twisted.python import failure, log
 from twisted.web import client 

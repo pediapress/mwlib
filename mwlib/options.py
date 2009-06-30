@@ -1,8 +1,6 @@
 import optparse
-try:
-    import json
-except ImportError:
-    import simplejson as json
+
+from mwlib import myjson as json
 
 from mwlib.utils import start_logging
 from mwlib import wiki, metabook, log
@@ -133,9 +131,7 @@ class OptionParser(optparse.OptionParser):
             if self.metabook is None:
                 self.metabook = metabook.make_metabook()
             for title in self.args:
-                self.metabook['items'].append(metabook.make_article(
-                    title=unicode(title, 'utf-8'),
-                ))
+                self.metabook.append_article(unicode(title, 'utf-8'))
 
         if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
             self.error("bad --print-template-pattern argument [must contain $1, but %r does not]" % (self.options.print_template_pattern,))
@@ -205,7 +201,7 @@ class OptionParser(optparse.OptionParser):
         # add default licenses
         if self.options.config.startswith(":") and not env.metabook.get('licenses'):
             mw_license_url = wiki.wpwikis.get(self.options.config[1:])['mw_license_url']
-            env.metabook.setdefault("licenses", []).append(dict(mw_license_url=mw_license_url,
-                                                                type="license"))
+            env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
+                                              type="license"))
 
         return env

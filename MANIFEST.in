@@ -54,7 +54,9 @@ include mwlib/lrucache.py
 include mwlib/mathml.py
 include mwlib/mathutils.py
 include mwlib/metabook.py
+include mwlib/multiwiki.py
 include mwlib/mwapidb.py
+include mwlib/myjson.py
 include mwlib/namespace.py
 include mwlib/namespace_langs.py
 include mwlib/net/__init__.py
@@ -68,6 +70,7 @@ include mwlib/odfstyles.py
 include mwlib/odfwriter.py
 include mwlib/old_uparser.py
 include mwlib/options.py
+include mwlib/parse_collection_page.py
 include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
 include mwlib/parser/styleanalyzer.py
