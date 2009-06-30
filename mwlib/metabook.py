@@ -49,6 +49,7 @@ class mbobj(object):
             val = getattr(self, str(key))
             if val is None:
                 return default
+            return val
         except AttributeError:
             return default
         
