@@ -274,7 +274,6 @@ class TreeCleaner(object):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
         is_exception = False
         if node.__class__ in self.childless_exceptions.keys() and node.style:
-            parser.show(sys.stdout, node)
             for style_type in self.childless_exceptions[node.__class__]:
                 if style_type in node.style.keys():
                     is_exception = True
