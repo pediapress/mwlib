@@ -140,7 +140,7 @@ def get_item_list(metabook, filter_type=None):
     """
     result = []
     for item in metabook.items:
-        if not filter_type or item['type'] == filter_type:
+        if not filter_type or item.type == filter_type:
             result.append(item)
         subitems = getattr(item, "items", None)
         if subitems:
@@ -168,7 +168,7 @@ def get_licenses(metabook):
     import re
     from mwlib import utils
     licenses = []
-    for license in metabook['licenses']:
+    for license in metabook.licenses:
         wikitext = ''
 
         if license.get('mw_license_url'):

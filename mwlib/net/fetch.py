@@ -538,5 +538,5 @@ class fetcher(object):
     
 def pages_from_metabook(mb):
     articles = metabook.get_item_list(mb, "article")
-    pages = [(x["title"], x.get("revision")) for x in articles]
+    pages = [(x.title, x.revision) for x in articles]
     return pages
