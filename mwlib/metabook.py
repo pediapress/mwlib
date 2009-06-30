@@ -89,6 +89,10 @@ class collection(mbobj):
         else:
             self.items.append(art)
     
+    def dumps(self):
+        from mwlib import myjson
+        return myjson.dumps(self, sort_keys=True, indent=4)
+
 class source(mbobj):
     name=None
     url=None
@@ -149,16 +153,7 @@ def get_item_list(metabook, filter_type=None):
     return result
 
 def calc_checksum(metabook):
-    sio = StringIO.StringIO()
-    sio.write(repr(metabook.get('title')))
-    sio.write(repr(metabook.get('subtitle')))
-    sio.write(repr(metabook.get('editor')))
-    for item in get_item_list(metabook):
-        sio.write(repr(item.get('type')))
-        sio.write(repr(item.get('title')))
-        sio.write(repr(item.get('displaytitle')))
-        sio.write(repr(item.get('revision')))
-    return md5(sio.getvalue()).hexdigest()
+    return md5(metabook.dumps()).hexdigest() 
     
 def get_licenses(metabook):
     """Return list of licenses
