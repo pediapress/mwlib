@@ -4,6 +4,7 @@
 # See README.txt for additional licensing information.
 
 import StringIO
+import warnings
 try:
     from hashlib import md5
 except ImportError:
@@ -32,19 +33,25 @@ class mbobj(object):
         self.type = self.__class__.__name__
         
     def __getitem__(self, key):
+        warnings.warn("deprecated", DeprecationWarning, 2)
+    
         try:
             return getattr(self, str(key))
         except AttributeError:
             raise KeyError(repr(key))
     
     def __setitem__(self, key, val):
+        warnings.warn("deprecated", DeprecationWarning, 2)
+        
         self.__dict__[key]=val
 
     def __contains__(self,  key):
+        warnings.warn("deprecated", DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
         
     def get(self, key, default=None):
+        warnings.warn("deprecated", DeprecationWarning, 2)
         try:
             val = getattr(self, str(key))
             if val is None:
