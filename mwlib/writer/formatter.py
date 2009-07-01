@@ -171,7 +171,7 @@ class Formatter(object):
         elif self.source_mode:
             txt = self.font_switcher.fontifyText(txt)
         else:
-            if self.minimize_space_mode > 0:
+            if self.minimize_space_mode > 0 or break_long:
                 txt = self.escapeAndHyphenateText(txt)
             else:
                 txt = self.escapeText(txt)

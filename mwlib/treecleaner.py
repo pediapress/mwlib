@@ -66,6 +66,7 @@ class TreeCleaner(object):
                       'removeBrokenChildren',
                       'fixTableColspans',
                       'removeEmptyTrailingTableRows',
+                      'splitTableLists', 
                       'transformSingleColTables',
                       'splitTableToColumns', 
                       'linearizeWideNestedTables',
@@ -273,7 +274,6 @@ class TreeCleaner(object):
         """Remove nodes that have no children except for nodes in childlessOk list."""   
         is_exception = False
         if node.__class__ in self.childless_exceptions.keys() and node.style:
-            parser.show(sys.stdout, node)
             for style_type in self.childless_exceptions[node.__class__]:
                 if style_type in node.style.keys():
                     is_exception = True
@@ -1141,3 +1141,47 @@ class TreeCleaner(object):
         
         for c in node.children:
             self.removeEmptySections(c)
+
+
+    def splitTableLists(self, node):
+        """a table row which contains only itemlists is split into muliple rows."""
+        if node.__class__ == Row:
+            only_lists = True
+            max_items = 0
+            all_items = []
+            for cell in node.children:
+                items = cell.getChildNodesByClass(Item)
+                max_items = max(max_items, len(items))
+                all_items.append(items)
+                for item in cell:
+                    if item.__class__ != ItemList:
+                        only_lists = False
+                        break
+                if not only_lists:
+                    break
+            if only_lists and max_items > 5:
+                cells = node.children
+                for row_index in range(max_items):
+                    nr = node.copy()
+                    nr.children = []
+                    for (col_index, cell) in enumerate(cells):
+                        try:
+                            content = all_items[col_index][row_index]
+                        except IndexError:
+                            content = None
+                        nc = cell.copy()
+                        nc.children = []
+                        nc.compact = True
+                        if content:
+                            item_list = ItemList()
+                            item_list.appendChild(content)
+                            nc.appendChild(item_list)
+                        nr.appendChild(nc)                        
+                    nr.moveto(node, prefix=True)
+                    if row_index < max_items-1:
+                        nr.suppress_bottom_border = True
+                node.parent.removeChild(node)
+
+        for c in node.children:
+            self.splitTableLists(c)
+                
