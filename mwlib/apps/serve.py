@@ -215,6 +215,8 @@ Please use mw-serve-ctl --purge-cache instead!'''
 
 
 def serve_ctl():
+    from mwlib import utils
+
     parser = optparse.OptionParser(usage="%prog [OPTIONS]")
     parser.add_option('--cache-dir',
         help='cache directory (default: /var/cache/mw-serve/)',
@@ -233,10 +235,30 @@ def serve_ctl():
         metavar='SECONDS',
         default='3600',
     )
+    parser.add_option('--report-from-mail',
+        help='sender of error mails (--report-recipient also needed)',
+        metavar='EMAIL',
+    )
+    parser.add_option('--report-recipient',
+        help='recipient of error mails (--report-from-mail also needed)',
+        metavar='EMAIL',
+    )
     options, args = parser.parse_args()
 
     if args:
         parser.error('no arguments supported')
+
+    if options.report_recipient and options.report_from_mail:
+        def report(msg):
+            utils.report(
+                system='mw-serve-ctl',
+                subject='mw-serve-ctl error',
+                from_email=options.report_from_mail.encode('utf-8'),
+                mail_recipients=[options.report_recipient.encode('utf-8')],
+                msg=msg,
+            )
+    else:
+        report = None
     
     if options.purge_cache:
         try:
@@ -256,6 +278,6 @@ def serve_ctl():
         except ValueError:
             parser.error('--max-running-time value must be an integer')
 
-        clean_up(cache_dir=options.cache_dir, max_running_time=max_running_time)
+        clean_up(cache_dir=options.cache_dir, max_running_time=max_running_time, report=report)
 
 

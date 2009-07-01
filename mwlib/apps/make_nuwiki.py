@@ -101,12 +101,29 @@ class start_fetcher(object):
 def make_nuwiki(fsdir, base_url, metabook, options, podclient=None, status=None):
     sf = start_fetcher(fsdir=fsdir, base_url=base_url, metabook=metabook, options=options, podclient=podclient, status=status)
 
+    retval = []
     def done(val):
+        retval.append(val)
         if val is None:
             print "done"
         else:
             print "done:",  val
+            
         reactor.stop()
+
+        
         
     reactor.callLater(0.0, lambda: sf.run().addBoth(done))
     reactor.run()
+    import signal
+    signal.signal(signal.SIGINT,  signal.SIG_DFL)
+    signal.signal(signal.SIGTERM,  signal.SIG_DFL)
+    
+    if not retval:
+        raise KeyboardInterrupt("interrupted")
+            
+    retval = retval[0]
+    if retval is not None:
+        raise RuntimeError(str(retval))
+    
+              

@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import StringIO
+import warnings
 try:
     from hashlib import md5
 except ImportError:
@@ -32,21 +32,30 @@ class mbobj(object):
         self.type = self.__class__.__name__
         
     def __getitem__(self, key):
+        warnings.warn("deprecated", DeprecationWarning, 2)
+    
         try:
             return getattr(self, str(key))
         except AttributeError:
             raise KeyError(repr(key))
     
     def __setitem__(self, key, val):
+        warnings.warn("deprecated", DeprecationWarning, 2)
+        
         self.__dict__[key]=val
 
     def __contains__(self,  key):
+        warnings.warn("deprecated", DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
         
     def get(self, key, default=None):
+        warnings.warn("deprecated", DeprecationWarning, 2)
         try:
-            return getattr(self, str(key))
+            val = getattr(self, str(key))
+            if val is None:
+                return default
+            return val
         except AttributeError:
             return default
         
@@ -79,6 +88,10 @@ class collection(mbobj):
         else:
             self.items.append(art)
     
+    def dumps(self):
+        from mwlib import myjson
+        return myjson.dumps(self, sort_keys=True, indent=4)
+
 class source(mbobj):
     name=None
     url=None
@@ -131,7 +144,7 @@ def get_item_list(metabook, filter_type=None):
     """
     result = []
     for item in metabook.items:
-        if not filter_type or item['type'] == filter_type:
+        if not filter_type or item.type == filter_type:
             result.append(item)
         subitems = getattr(item, "items", None)
         if subitems:
@@ -139,16 +152,7 @@ def get_item_list(metabook, filter_type=None):
     return result
 
 def calc_checksum(metabook):
-    sio = StringIO.StringIO()
-    sio.write(repr(metabook.get('title')))
-    sio.write(repr(metabook.get('subtitle')))
-    sio.write(repr(metabook.get('editor')))
-    for item in get_item_list(metabook):
-        sio.write(repr(item.get('type')))
-        sio.write(repr(item.get('title')))
-        sio.write(repr(item.get('displaytitle')))
-        sio.write(repr(item.get('revision')))
-    return md5(sio.getvalue()).hexdigest()
+    return md5(metabook.dumps()).hexdigest() 
     
 def get_licenses(metabook):
     """Return list of licenses
@@ -159,7 +163,7 @@ def get_licenses(metabook):
     import re
     from mwlib import utils
     licenses = []
-    for license in metabook['licenses']:
+    for license in metabook.licenses:
         wikitext = ''
 
         if license.get('mw_license_url'):

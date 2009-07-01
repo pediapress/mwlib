@@ -43,7 +43,7 @@ class fsoutput(object):
     def dump_json(self, **kw):
         for k, v in kw.items():
             p = os.path.join(self.path, k+".json")
-            json.dump(v, open(p, "wb"), indent=4)
+            json.dump(v, open(p, "wb"), indent=4, sort_keys=True)
             
                 
     def write_siteinfo(self, siteinfo):
@@ -81,7 +81,7 @@ class fsoutput(object):
                         self.seen.add(revid)
                         rev["revid"] = revid
 
-                    header = "\n --page-- %s\n" % json.dumps(rev)
+                    header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
                     self.revfile.write(header)
                     self.revfile.write(txt.encode("utf-8"))
                 # else:    
@@ -538,5 +538,5 @@ class fetcher(object):
     
 def pages_from_metabook(mb):
     articles = metabook.get_item_list(mb, "article")
-    pages = [(x["title"], x.get("revision")) for x in articles]
+    pages = [(x.title, x.revision) for x in articles]
     return pages

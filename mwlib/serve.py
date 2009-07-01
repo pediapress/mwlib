@@ -572,13 +572,19 @@ def purge_cache(max_age, cache_dir):
         except Exception, exc:
             log.ERROR('could not remove directory %r: %s' % (path, exc))
     
-def clean_up(cache_dir, max_running_time):
+def clean_up(cache_dir, max_running_time, report=None):
     """Look for PID files whose processes have not finished/erred but ceised
     to exist => remove cache directories. Look for long running processes =>
     send SIGKILL.
     """
 
     now = time.time()
+
+
+    def error(msg):
+        log.ERROR(msg)
+        if report is not None:
+            report(msg)
 
     for path in get_collection_dirs(cache_dir):
         for e in os.listdir(path):
@@ -594,10 +600,10 @@ def clean_up(cache_dir, max_running_time):
             try:
                 pid = int(open(pid_file, 'rb').read())
             except ValueError:
-                log.ERROR('PID file %r with invalid contents' % pid_file)
+                error('pid file %r with invalid contents' % pid_file)
                 continue
             except IOError, exc:
-                log.ERROR('Could not read PID file %r: %s' % (pid_file, exc))
+                error('Could not read PID file %r: %s' % (pid_file, exc))
                 continue
 
             error_file = os.path.join(path, '%s.%s' % (Application.error_filename, ext))
@@ -606,7 +612,7 @@ def clean_up(cache_dir, max_running_time):
                 os.kill(pid, 0)
             except OSError, exc:
                 if exc.errno == 3: # No such process
-                    log.warn('Have dangling PID file %r' % pid_file)
+                    error('Have dangling pid file %r' % pid_file)
                     os.unlink(pid_file)
                     if not os.path.exists(error_file):
                         open(error_file, 'wb').write('Process died.\n')
@@ -615,19 +621,19 @@ def clean_up(cache_dir, max_running_time):
             try:
                 st = os.stat(pid_file)
             except Exception, exc:
-                log.ERROR('Could not stat pid file %r: %s' % (pid_file, exc))
+                error('Could not stat pid file %r: %s' % (pid_file, exc))
                 continue
             if now - st.st_mtime < max_running_time:
                 continue
 
-            log.warn('Have long running process with pid %d' % pid)
+            error('Have long running process with pid %d (%r)' % (pid, pid_file))
             try:
                 log.info('sending SIGKILL to pid %d' % pid)
                 os.kill(pid, signal.SIGKILL)
                 if not os.path.exists(error_file):
                     open(error_file, 'wb').write('Long running process killed.\n')
             except Exception, exc:
-                log.ERROR('Could not send SIGKILL: %s' % exc)
+                error('Could not send SIGKILL: %s' % exc)
 
 
 

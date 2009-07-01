@@ -103,9 +103,9 @@ class multiplier(object):
         if key in self.waiting:
             self.waiting[key].append(d)
             return d
-
-        fun(*args).addBoth(self._done, key)
+        
         self.waiting[key] = [d] 
+        fun(*args).addBoth(self._done, key)
         return d
                  
 class pool(object):
