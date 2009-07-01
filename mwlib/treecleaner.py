@@ -1143,8 +1143,32 @@ class TreeCleaner(object):
             self.removeEmptySections(c)
 
 
+    def _splitRow(self, node, max_items, all_items):
+        cells = node.children
+        node.children = []
+        for row_index in range(max_items):
+            nr = node.copy()
+            for (col_index, cell) in enumerate(cells):
+                try:
+                    content = all_items[col_index][row_index]
+                except IndexError:
+                    content = None
+                cell.children = []
+                nc = cell.copy()
+                nc.compact = True
+                if content:
+                    item_list = ItemList()
+                    item_list.appendChild(content)
+                    nc.appendChild(item_list)
+                nr.appendChild(nc)                        
+            nr.moveto(node, prefix=True)
+            if row_index < max_items-1:
+                nr.suppress_bottom_border = True
+        node.parent.removeChild(node)
+
     def splitTableLists(self, node):
         """a table row which contains only itemlists is split into muliple rows."""
+
         if node.__class__ == Row:
             only_lists = True
             max_items = 0
@@ -1160,28 +1184,9 @@ class TreeCleaner(object):
                 if not only_lists:
                     break
             if only_lists and max_items > 5:
-                cells = node.children
-                for row_index in range(max_items):
-                    nr = node.copy()
-                    nr.children = []
-                    for (col_index, cell) in enumerate(cells):
-                        try:
-                            content = all_items[col_index][row_index]
-                        except IndexError:
-                            content = None
-                        nc = cell.copy()
-                        nc.children = []
-                        nc.compact = True
-                        if content:
-                            item_list = ItemList()
-                            item_list.appendChild(content)
-                            nc.appendChild(item_list)
-                        nr.appendChild(nc)                        
-                    nr.moveto(node, prefix=True)
-                    if row_index < max_items-1:
-                        nr.suppress_bottom_border = True
-                node.parent.removeChild(node)
-
+                self._splitRow(node, max_items, all_items)
+                return
+            
         for c in node.children:
             self.splitTableLists(c)
                 
