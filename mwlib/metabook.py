@@ -202,7 +202,11 @@ def get_licenses(metabook):
     return licenses
 
 def make_interwiki(api_entry=None):
-    raise NotImplementedError("make_interwiki")
+    api_entry = api_entry or {}
+    d={}
+    for k, v in api_entry.items():
+        d[str(k)] = v
+    return interwiki(**d)
 
 make_metabook  = collection
 make_chapter   = chapter
