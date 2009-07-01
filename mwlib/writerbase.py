@@ -21,14 +21,12 @@ def build_book(env, status_callback=None):
     if status_callback is None:
         status_callback = lambda **kwargs: None
         
-    num_articles = float(len(metabook.get_item_list(env.metabook,
-        filter_type='article',
-    )))
+    num_articles = float(len(metabook.articles()))
     if num_articles > 0:
         progress_step = 100/num_articles
         
     lastChapter = None
-    for item in metabook.get_item_list(env.metabook):
+    for item in env.metabook.walk():
         if item['type'] == 'chapter':
             chapter = parser.Chapter(item['title'].strip())
             book.appendChild(chapter)

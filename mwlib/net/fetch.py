@@ -537,6 +537,6 @@ class fetcher(object):
         return fatal
     
 def pages_from_metabook(mb):
-    articles = metabook.get_item_list(mb, "article")
+    articles = mb.articles()
     pages = [(x.title, x.revision) for x in articles]
     return pages

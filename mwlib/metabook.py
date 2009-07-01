@@ -4,6 +4,7 @@
 # See README.txt for additional licensing information.
 
 import warnings
+from collections import deque
 try:
     from hashlib import md5
 except ImportError:
@@ -91,7 +92,22 @@ class collection(mbobj):
     def dumps(self):
         from mwlib import myjson
         return myjson.dumps(self, sort_keys=True, indent=4)
+    
+    def walk(self,  filter_type=None):
+        todo = deque(self.items)
+        res = []
+        while todo:
+            elem = todo.popleft()
+            if not filter_type or elem.type == filter_type:
+                res.append(elem)
+            items = getattr(elem, "items", None)
+            if items:
+                todo.extendleft(items[::-1])
+        return res
 
+    def articles(self):
+        return self.walk("article")
+            
 class source(mbobj):
     name=None
     url=None
@@ -136,14 +152,7 @@ def get_item_list(metabook, filter_type=None):
     @returns: flat list of items
     @rtype: [{}]
     """
-    result = []
-    for item in metabook.items:
-        if not filter_type or item.type == filter_type:
-            result.append(item)
-        subitems = getattr(item, "items", None)
-        if subitems:
-            result.extend(get_item_list(item, filter_type=filter_type))
-    return result
+    return metabook.walk(filter_type=filter_type)
 
 def calc_checksum(metabook):
     return md5(metabook.dumps()).hexdigest() 
