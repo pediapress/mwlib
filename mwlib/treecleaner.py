@@ -94,6 +94,7 @@ class TreeCleaner(object):
                       'removeChildlessNodes', 
                       'removeBreakingReturns',
                       'removeEmptySections',
+                      'markShortParagraph',
                       ]
 
     skipMethods = []
@@ -1190,3 +1191,15 @@ class TreeCleaner(object):
         for c in node.children:
             self.splitTableLists(c)
                 
+
+
+    def markShortParagraph(self, node):
+        """Hint for writers that allows for special handling of short paragraphs """
+        if node.__class__ == Paragraph \
+               and len(node.getAllDisplayText()) < 80 \
+               and not node.getParentNodesByClass(Table) \
+               and not any([c.isblocknode for c in node.children]):
+            node.short_paragraph = True
+            
+        for c in node.children:
+            self.markShortParagraph(c)
