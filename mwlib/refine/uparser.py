@@ -2,7 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib import expander, nshandling
+from mwlib import expander, nshandling, metabook
 from mwlib.log import Log
 from mwlib.refine import core, compat
 
@@ -31,13 +31,13 @@ def parseString(
 
         if hasattr(wikidb, 'get_siteinfo'):
             siteinfo = wikidb.get_siteinfo()
-        
+
+        src = None 
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
-            if not src:
-                src = {} # this can happen for the license article
-        else:
-            src={}
+            
+        if not src:
+            src=metabook.source()
             
         if lang is None:
             lang = src.language
