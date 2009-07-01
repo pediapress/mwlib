@@ -104,14 +104,6 @@ class source(mbobj):
 class interwiki(mbobj):
     local=False
 
-    def __init__(self, api_entry):
-        mbobj.__init__(self)
-        if api_entry:
-            self.__dict__.update(api_entry)
-            
-        self.local = bool(self.local)
-
-
 class article(mbobj):
     title=None
     displaytitle=None
@@ -197,9 +189,11 @@ def get_licenses(metabook):
         })
     
     return licenses
-    
+
+def make_interwiki(api_entry=None):
+    raise NotImplementedError("make_interwiki")
+
 make_metabook  = collection
 make_chapter   = chapter
 make_source    = source
-make_interwiki = interwiki
 make_article   = article
