@@ -291,7 +291,8 @@ def test_fixParagraphs():
 
 def test_cleanSectionCaptions():
     raw = r'''
-==<center>centered heading</center>==    
+==<center>centered heading</center>==
+bla
     '''
 
     tree, reports = cleanMarkup(raw)
