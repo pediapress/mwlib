@@ -1198,7 +1198,7 @@ class TreeCleaner(object):
         if node.__class__ == Paragraph \
                and len(node.getAllDisplayText()) < 80 \
                and not node.getParentNodesByClass(Table) \
-               and not any([c.isblocknode for c in node.children]):
+               and not _any([c.isblocknode for c in node.children]):
             node.short_paragraph = True
             
         for c in node.children:
