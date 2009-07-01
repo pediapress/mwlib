@@ -32,7 +32,7 @@ def main():
         data['metabook'] = open(data['metabook'], 'rb').read()
 
     client = Client(options.url)
-    if not client.request(command, data):
+    if not client.request(command, data, is_json=(command != 'download')):
         if client.error is not None:
             sys.exit('request failed: %s' % client.error)
         else:
