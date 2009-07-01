@@ -40,7 +40,7 @@ def parseString(
             src={}
             
         if lang is None:
-            lang = src.get('language')
+            lang = src.language
         if magicwords is None:
             if siteinfo is not None and 'magicwords' in siteinfo:
                 magicwords = siteinfo['magicwords']

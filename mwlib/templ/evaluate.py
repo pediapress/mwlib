@@ -207,7 +207,7 @@ class Expander(object):
             
         if self.db and hasattr(self.db, "getSource"):
             source = self.db.getSource(pagename) or {}
-            local_values = source.get("locals", u"")
+            local_values = source.locals or u""
             local_values = mwlocals.parse_locals(local_values)
         else:
             local_values = None

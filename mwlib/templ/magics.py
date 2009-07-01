@@ -254,7 +254,7 @@ class PageMagic(object):
 
     def NS(self, args):
         """Returns the name of a given namespace number."""
-        namespaces = self.source.get('namespaces', {})
+        namespaces = self.source.namespaces or {}
         ns = args[0]
         try:
             retval = namespaces[ns]['*']

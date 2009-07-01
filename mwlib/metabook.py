@@ -98,7 +98,9 @@ class source(mbobj):
     language=None
     base_url=None
     script_extension=None
+    locals = None
     system="MediaWiki"
+    namespaces = None
     
 
 class interwiki(mbobj):
