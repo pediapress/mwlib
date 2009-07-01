@@ -25,6 +25,7 @@ include mwlib/advtree.py
 include mwlib/allnodes.py
 include mwlib/apps/__init__.py
 include mwlib/apps/buildzip.py
+include mwlib/apps/client.py
 include mwlib/apps/make_nuwiki.py
 include mwlib/apps/render.py
 include mwlib/apps/serve.py
@@ -34,6 +35,7 @@ include mwlib/bookshelf.py
 include mwlib/caller.py
 include mwlib/cdb.py
 include mwlib/cdbwiki.py
+include mwlib/client.py
 include mwlib/docbook44grammar.py
 include mwlib/docbookwriter.py
 include mwlib/dummydb.py
