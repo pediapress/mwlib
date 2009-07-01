@@ -40,12 +40,19 @@ class FileJobPoller(object):
                 filename = self.poll()
                 if self.num_jobs < self.max_num_jobs and filename:
                     self.num_jobs += 1
-                    self.start_job(filename)
-                    self.log.info('child started: have %d jobs' % self.num_jobs)
+                    if self.start_job(filename):
+                        self.log.info('child started: have %d jobs' % self.num_jobs)
+                    else:
+                        # job has not been started
+                        self.num_jobs -= 1
                 else:
                     time.sleep(self.sleep_time)
                 while self.num_jobs > 0:
-                    pid, rc = os.waitpid(-1, os.WNOHANG)
+                    try:
+                        pid, rc = os.waitpid(-1, os.WNOHANG)
+                    except OSError, exc:
+                        self.log.ERROR('waitpid(-1) failed: %s' % exc)
+                        break
                     if (pid, rc) == (0, 0):
                         break
                     self.num_jobs -= 1
@@ -62,37 +69,54 @@ class FileJobPoller(object):
             path = os.path.join(self.queue_dir, filename)
             if not os.path.isfile(path):
                 continue
-            heapq.heappush(files, (os.stat(path).st_mtime, filename))
+            try:
+                mtime = os.stat(path).st_mtime
+            except Exception, exc:
+                self.log.ERROR('Could not stat %r: %s' % (path, exc))
+                continue
+            heapq.heappush(files, (mtime, filename))
         if files:
             return files[0][1]
         return None
     
     def start_job(self, filename):
+        """Fork, and execute job from given file
+        
+        @returns: whether a new job as been started
+        @rtype: bool
+        """
+
         src = os.path.join(self.queue_dir, filename)
         path = os.path.join(self.processing_dir, filename)
         try:
             os.rename(src, path)
         except Exception, exc:
-            self.log.warn('Could not rename %r to %r: %s' % (src, path, exc))
-            traceback.print_exc()
-            return
+            self.log.ERROR('Could not rename %r to %r: %s' % (src, path, exc))
+            return False
         self.log.info('starting job %r' % filename)
-        pid = os.fork()
-        if pid == 0:
+        try:
+            pid = os.fork()
+        except Exception, exc:
+            self.log.ERROR('Could not fork(): %s' % exc)
+            return False
+        if pid != 0:
+            return True
+
+        # child process:
+        try:
+            args = open(path, 'rb').read().split('\n')
+            self.log.info('executing: %r' % args)
             try:
-                args = open(path, 'rb').read().split('\n')
-                self.log.info('executing: %r' % args)
-                try:
-                    rc = subprocess.call(args)
-                    assert rc == 0, 'non-zero return code'
-                except Exception, exc:
-                    self.log.warn('Error executing %r: %s' % (args, exc))
-                    traceback.print_exc()
-            finally:
-                try:
-                    os.unlink(path)
-                except Exception, exc:
-                    self.log.warn('Could not remove file %r: %s' % (path, exc))
-                    traceback.print_exc()
-                os._exit(0)
-    
+                rc = subprocess.call(args)
+                assert rc == 0, 'non-zero return code'
+            except Exception, exc:
+                self.log.warn('Error executing %r: %s' % (args, exc))
+                traceback.print_exc()
+        finally:
+            try:
+                os.unlink(path)
+            except Exception, exc:
+                self.log.warn('Could not remove file %r: %s' % (path, exc))
+                traceback.print_exc()
+            os._exit(0)
+
