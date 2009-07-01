@@ -8,11 +8,7 @@ import shutil
 import tempfile
 from zipfile import ZipFile
 import urlparse
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
+from mwlib import myjson as json
 from mwlib import wikidbbase, metabook, nshandling
 
 def nget(d, key):
