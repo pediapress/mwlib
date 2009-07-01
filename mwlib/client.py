@@ -9,17 +9,18 @@ class Client(object):
     def __init__(self, url):
         self.url = url
 
-    def request(self, command, args):
+    def request(self, command, args, is_json=True):
         self.error = None
         post_data = dict(args)
         post_data['command'] = command
         f = urllib.urlopen(self.url, urllib.urlencode(post_data))
-        self.response = json.loads(f.read())
+        self.response = f.read()
         self.response_code = f.getcode()
-        if self.response_code == 200:
+        if self.response_code != 200:
+            return False
+        if is_json:
+            self.response = json.loads(self.response)
             if 'error' in self.response:
                 self.error = self.response['error']
                 return False
-        else:
-            return False
         return True
