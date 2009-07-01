@@ -95,6 +95,7 @@ def main():
                                             'mw-serve = mwlib.apps.serve:main',
                                             'mw-serve-ctl = mwlib.apps.serve:serve_ctl',
                                             'mw-watch = mwlib.apps.watch:main',
+                                            'mw-client = mwlib.apps.client:main',
                                             'mw-testserve = mwlib.apps:testserve',
                                             ],
                         'mwlib.writers': ['odf = mwlib.odfwriter:writer',
