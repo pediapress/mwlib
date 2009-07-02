@@ -69,7 +69,11 @@ class mbobj(object):
     
     def __repr__(self):
         return "<%s %r>" % (self.__class__.__name__,  self.__dict__)
-                 
+
+class wikiconf(mbobj):
+    baseurl = None
+    ident = None
+    
 class collection(mbobj):
     title = None
     subtitle=None
@@ -77,12 +81,13 @@ class collection(mbobj):
     summary = ""
     items = []
     licenses = []
+    wikis = []
     
-    def append_article(self, title, displaytitle=None, revision=None):
+    def append_article(self, title, displaytitle=None, **kw):
         title = title.strip()
         if displaytitle is not None:
             displaytitle = displaytitle.strip()
-        art = article(title=title, revision=revision, displaytitle=displaytitle)
+        art = article(title=title, displaytitle=displaytitle,  **kw)
 
         if self.items and isinstance(self.items[-1], chapter):
             self.items[-1].items.append(art)
@@ -127,8 +132,8 @@ class article(mbobj):
     displaytitle=None
     revision=None
     content_type="text/x-wiki"
+    wikiident=None
     
-
 class chapter(mbobj):
     items=[]
     title=None
