@@ -28,10 +28,11 @@ class Test_xnet_zipwiki(object):
         # self.imagedb.clean()
         pass
     
-    def test_getRawArticle(self):
-        a = self.wikidb.getRawArticle(u'The Living Sea')
-        assert isinstance(a, unicode)
-        assert len(a) > 0
+    def test_getArticle(self):
+        a = self.wikidb.normalize_and_get_page(u'The Living Sea', 0)
+        assert isinstance(a.rawtext, unicode)
+        assert a.rawtext
+        
     
     def test_getParsedArticle(self):
         p = self.wikidb.getParsedArticle(u'The Living Sea')
@@ -42,10 +43,8 @@ class Test_xnet_zipwiki(object):
         assert url == 'http://en.wikipedia.org/w/index.php?title=The_Living_Sea'
 
     def test_getTemplate(self):
-        t = self.wikidb.getTemplate(u'Infobox Film')
-        assert isinstance(t, unicode)
-        t = self.wikidb.getTemplate(u'no-such-template')
-        assert t is None
+        page = self.wikidb.normalize_and_get_page(u'Infobox Film', 10)
+        assert isinstance(page.rawtext, unicode)
     
     def test_ImageDB(self):
         p = self.imagedb.getDiskPath(u'Thelivingseaimax.jpg')

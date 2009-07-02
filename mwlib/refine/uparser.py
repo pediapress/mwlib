@@ -40,6 +40,7 @@ def parseString(
         src = None 
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
+            assert not isinstance(src, dict)
             
         if not src:
             src=metabook.source()
