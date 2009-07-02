@@ -57,10 +57,7 @@ include mwlib/mathml.py
 include mwlib/mathutils.py
 include mwlib/metabook.py
 include mwlib/multiwiki.py
-include mwlib/mwapidb.py
 include mwlib/myjson.py
-include mwlib/namespace.py
-include mwlib/namespace_langs.py
 include mwlib/net/__init__.py
 include mwlib/net/fetch.py
 include mwlib/net/mwapi.py
@@ -77,7 +74,6 @@ include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
 include mwlib/parser/styleanalyzer.py
 include mwlib/podclient.py
-include mwlib/recorddb.py
 include mwlib/refine/__init__.py
 include mwlib/refine/_core.pyx
 include mwlib/refine/compat.py
@@ -254,14 +250,12 @@ include tests/test_imgmap.py
 include tests/test_math_utils.py
 include tests/test_metabook.py
 include tests/test_miscutils.py
-include tests/test_mwapidb.py
 include tests/test_mwscan.py
 include tests/test_nshandling.py
 include tests/test_nuwiki.py
 include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
-include tests/test_recorddb.py
 include tests/test_refine.py
 include tests/test_sanitychecker.py
 include tests/test_serve.py
