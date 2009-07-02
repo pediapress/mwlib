@@ -381,9 +381,9 @@ class ParserFunctions(object):
         if not name or not self.wikidb:
             return args.get(args[2], "")
         
-        r=self.wikidb.getRawArticle(name)
+        page=self.wikidb.normalize_and_get_page(name, 0)
 
-        if r:
+        if page:
             return args[1]
         else:
             return args[2]

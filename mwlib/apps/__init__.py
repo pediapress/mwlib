@@ -62,9 +62,11 @@ def show():
     
     for a in articles:
         if options.template:
-            raw=db.getTemplate(a)
+            defaultns=10
         else:
-            raw=db.getRawArticle(a)
+            defaultns=0
+            
+        raw = db.normalize_and_get_page(a, defaultns)
 
         if raw:
             if options.expand:
@@ -173,7 +175,7 @@ def parse():
     import time
     for x in articles:
         try:
-            raw = db.getRawArticle(x)
+            raw = db.normalize_and_get_page(x, 0)
             # yes, raw can be None, when we have a redirect to a non-existing article.
             if raw is None: 
                 continue
