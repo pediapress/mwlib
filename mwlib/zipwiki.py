@@ -9,16 +9,25 @@ import tempfile
 from zipfile import ZipFile
 import urlparse
 from mwlib import myjson as json
-from mwlib import wikidbbase, metabook, nshandling
+from mwlib import metabook, nshandling
+
+def normalize_title(title):
+    if not title:
+        return title
+    if not isinstance(title, unicode):
+        title = unicode(title, 'utf-8')
+    title = title.replace('_', ' ')
+    title = title[0].upper() + title[1:]
+    return title
 
 def nget(d, key):
     try:
         return d[key]
     except KeyError:
-        return d[wikidbbase.normalize_title(key)]
+        return d[normalize_title(key)]
 
 
-class ZipWikiBase(wikidbbase.WikiDBBase):
+class ZipWikiBase(object):
     def __init__(self, zipfile):
         """
         @type zipfile: basestring or ZipFile
