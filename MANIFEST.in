@@ -48,15 +48,12 @@ include mwlib/htmlcolornames.py
 include mwlib/htmlwriter.py
 include mwlib/imgmap.py
 include mwlib/l10n.py
-include mwlib/lang.py
-include mwlib/lang.txt
 include mwlib/linuxmem.py
 include mwlib/log.py
 include mwlib/lrucache.py
 include mwlib/mathml.py
 include mwlib/mathutils.py
 include mwlib/metabook.py
-include mwlib/multiwiki.py
 include mwlib/myjson.py
 include mwlib/net/__init__.py
 include mwlib/net/fetch.py
@@ -82,7 +79,6 @@ include mwlib/refine/parse_table.py
 include mwlib/refine/tagparser.py
 include mwlib/refine/uparser.py
 include mwlib/refine/util.py
-include mwlib/rendermath.py
 include mwlib/resources/__init__.py
 include mwlib/resources/outgoing_link.gif
 include mwlib/resources/pedia.css
@@ -120,7 +116,6 @@ include mwlib/templ/nodes.py
 include mwlib/templ/parser.py
 include mwlib/templ/pp.py
 include mwlib/templ/scanner.py
-include mwlib/texmap.py
 include mwlib/timeline.py
 include mwlib/treecleaner.py
 include mwlib/treecleanerhelper.py
@@ -128,7 +123,6 @@ include mwlib/uniq.py
 include mwlib/uparser.py
 include mwlib/utils.py
 include mwlib/utoken.py
-include mwlib/web.py
 include mwlib/wiki.py
 include mwlib/wikidbbase.py
 include mwlib/writer/__init__.py
