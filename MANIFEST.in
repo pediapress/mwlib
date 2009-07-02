@@ -45,7 +45,6 @@ include mwlib/expr.py
 include mwlib/filequeue.py
 include mwlib/fontswitcher.py
 include mwlib/htmlcolornames.py
-include mwlib/htmlwriter.py
 include mwlib/imgmap.py
 include mwlib/l10n.py
 include mwlib/linuxmem.py
@@ -239,7 +238,6 @@ include tests/test_expander.py
 include tests/test_expander_parser.py
 include tests/test_expander_time.py
 include tests/test_expr.py
-include tests/test_html.py
 include tests/test_imgmap.py
 include tests/test_math_utils.py
 include tests/test_metabook.py
