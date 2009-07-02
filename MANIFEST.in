@@ -78,9 +78,6 @@ include mwlib/refine/parse_table.py
 include mwlib/refine/tagparser.py
 include mwlib/refine/uparser.py
 include mwlib/refine/util.py
-include mwlib/resources/__init__.py
-include mwlib/resources/outgoing_link.gif
-include mwlib/resources/pedia.css
 include mwlib/sanitychecker.py
 include mwlib/scripts.txt
 include mwlib/serve.py
@@ -123,7 +120,6 @@ include mwlib/uparser.py
 include mwlib/utils.py
 include mwlib/utoken.py
 include mwlib/wiki.py
-include mwlib/wikidbbase.py
 include mwlib/writer/__init__.py
 include mwlib/writer/formatter.py
 include mwlib/writer/imageutils.py
