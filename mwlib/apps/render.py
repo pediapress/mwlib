@@ -117,7 +117,6 @@ class Main(object):
         self.options = options
         
         import tempfile
-        from mwlib.mwapidb import MWAPIError
         from mwlib.writerbase import WriterError
         from mwlib.status import Status
 
@@ -191,7 +190,7 @@ class Main(object):
                 if options.error_file:
                     fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
                     f = os.fdopen(fd, 'wb')
-                    if isinstance(e, (WriterError, MWAPIError)):
+                    if isinstance(e, WriterError):
                         f.write(str(e))
                     else:
                         f.write('traceback\n')
