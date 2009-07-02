@@ -104,7 +104,7 @@ def main():
                                           ]},
         install_requires=install_requires,
         ext_modules=ext_modules,
-        packages=["mwlib", "mwlib.templ", "mwlib.resources"],
+        packages=["mwlib", "mwlib.templ"],
         namespace_packages=['mwlib'],
         include_package_data = True,
         zip_safe = False,
