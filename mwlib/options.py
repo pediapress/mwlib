@@ -129,7 +129,7 @@ class OptionParser(optparse.OptionParser):
 
         if self.args:
             if self.metabook is None:
-                self.metabook = metabook.make_metabook()
+                self.metabook = metabook.collection()
             for title in self.args:
                 self.metabook.append_article(unicode(title, 'utf-8'))
 
@@ -158,7 +158,7 @@ class OptionParser(optparse.OptionParser):
             script_extension=script_extension,
         )
         if not env.metabook:
-            self.metabook =  env.metabook =  metabook.make_metabook()
+            self.metabook =  env.metabook =  metabook.collection()
             
         if self.options.noimages:
             env.images = None

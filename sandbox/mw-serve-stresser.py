@@ -56,12 +56,12 @@ def getRandomArticles(api, min=1, max=100):
 
 
 def getMetabook(articles):
-    metabook = mwlib.metabook.make_metabook()
-    metabook['title'] = u"title test"
-    metabook['subtitle'] = u"sub title test"
+    metabook = mwlib.metabook.collection()
+    metabook.title = u"title test"
+    metabook.subtitle = u"sub title test"
     for a in articles:
-        article = mwlib.metabook.make_article(title=a)
-        metabook['items'].append(article)
+        article = mwlib.metabook.article(title=a)
+        metabook.items.append(article)
     addLicense(metabook)
     return metabook
 
