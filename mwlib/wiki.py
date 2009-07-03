@@ -69,7 +69,17 @@ name=
 url=
 """)
         self.configparser.readfp(defaults)
-    
+
+    def _get_wiki(self):
+        import warnings
+        warnings.warn("access with .wiki deprecated", DeprecationWarning, 2)
+        
+        return self._wiki
+    def _set_wiki(self, val):
+        self._wiki = val
+
+    wiki = property(_get_wiki, _set_wiki)
+                  
 def _makewiki(conf,
     metabook=None,
     username=None, password=None, domain=None,
@@ -188,5 +198,8 @@ def makewiki(conf,
     res.wiki.env = res
     if res.images:
         res.images.env = res
+
+    if res.metabook:
+        res.metabook.set_environment(res)
     
     return res

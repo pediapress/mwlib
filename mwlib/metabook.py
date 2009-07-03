@@ -141,6 +141,10 @@ class article(mbobj):
     content_type="text/x-wiki"
     wikiident=None
     _env = None
+
+    @property
+    def wiki(self):
+        return self._env.wiki
     
 class chapter(mbobj):
     items=[]
