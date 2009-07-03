@@ -218,22 +218,6 @@ class adapt(object):
             return getattr(self.nuwiki, name)
         except AttributeError:
             raise AttributeError()
-    
-        
-    def getTemplate(self, title, followRedirects=True):
-        p = self.nuwiki.normalize_and_get_page(title, defaultns=10)
-        if p:
-            return p.rawtext
-            
-    def getRawArticle(self, title, revision=None):
-        if revision is not None:
-            p = self.nuwiki.get_page(None, revision)
-        else:
-            p = self.nuwiki.normalize_and_get_page(title, defaultns=0)
-            
-        if p:
-            return p.rawtext
-        
     def getURL(self, name, revision=None, defaultns=nshandling.NS_MAIN):
         base_url = self.nfo["base_url"]
         if not base_url.endswith("/"):
@@ -280,7 +264,17 @@ class adapt(object):
         )
 
     def getParsedArticle(self, title, revision=None):
-        raw = self.getRawArticle(title, revision=revision)
+        if revision is not None:
+            page = self.nuwiki.get_page(None, revision)
+        else:
+            page = self.normalize_and_get_page(title, 0)
+
+        if page:
+            raw = page.rawtext
+        else:
+            raw = None
+            
+            
         if raw is None:
             return None
 

@@ -116,7 +116,7 @@ def test_switch_default():
 }}
 """)
 
-    te = expander.Expander(db.getRawArticle("Bonn"), pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page("Bonn", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
 
     
@@ -141,7 +141,7 @@ blubb
 """,
                    Pipe="|")
 
-    te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page("Foo", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
 
     
@@ -158,7 +158,7 @@ blubb
 """,
               Pipe="|")
 
-    te = expander.Expander(db.getRawArticle("Foo"), pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page("Foo", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     
     

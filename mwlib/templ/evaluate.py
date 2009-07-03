@@ -4,7 +4,7 @@
 
 from mwlib.templ import magics, log, DEBUG, parser, mwlocals
 from mwlib.uniq import Uniquifier
-from mwlib import nshandling, siteinfo
+from mwlib import nshandling, siteinfo, metabook
 
 class TemplateRecursion(Exception): pass
 
@@ -206,7 +206,7 @@ class Expander(object):
         nshandler = nshandling.nshandler(si)
             
         if self.db and hasattr(self.db, "getSource"):
-            source = self.db.getSource(pagename) or {}
+            source = self.db.getSource(pagename) or metabook.source()
             local_values = source.locals or u""
             local_values = mwlocals.parse_locals(local_values)
         else:
@@ -244,12 +244,12 @@ class Expander(object):
         except KeyError:
             pass
 
-        if name.startswith(":"):
-            log.info("including article")
-            raw = self.db.getRawArticle(name[1:])
+        page = self.db.normalize_and_get_page(name, 10)
+        if page:
+            raw = page.rawtext
         else:
-            raw = self.db.getTemplate(name, True)
-        
+            raw = None
+            
         if raw is None:
             res = None
         else:

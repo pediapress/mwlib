@@ -8,17 +8,32 @@ import shutil
 import tempfile
 from zipfile import ZipFile
 import urlparse
-from mwlib import myjson as json
-from mwlib import wikidbbase, metabook, nshandling
+from mwlib import myjson as json, metabook, nshandling
+
+def normalize_title(title):
+    if not title:
+        return title
+    if not isinstance(title, unicode):
+        title = unicode(title, 'utf-8')
+    title = title.replace('_', ' ')
+    title = title[0].upper() + title[1:]
+    return title
 
 def nget(d, key):
     try:
         return d[key]
     except KeyError:
-        return d[wikidbbase.normalize_title(key)]
+        return d[normalize_title(key)]
 
+class page(object):
+    source_url = None
+    authors = None
+    
+    def __init__(self, **kw):
+        self.__dict__.update(kw)
+        
 
-class ZipWikiBase(wikidbbase.WikiDBBase):
+class ZipWikiBase(object):
     def __init__(self, zipfile):
         """
         @type zipfile: basestring or ZipFile
@@ -31,13 +46,31 @@ class ZipWikiBase(wikidbbase.WikiDBBase):
 
         self.metabook = json.loads(unicode(self.zf.read("metabook.json"), 'utf-8'))
         content = json.loads(unicode(self.zf.read('content.json'), 'utf-8'))
-        self.articles = content.get('articles', {})
-        self.templates = content.get('templates', {})
+        
+        
         self.images = content.get('images', {})
         self.sources = content.get('sources', {})
         self.licenses = content.get('licenses', None)
         self.siteinfo = content.get('siteinfo', None)
         self.nshandler = nshandling.nshandler(self.get_siteinfo())
+
+        self.pages = {}
+
+        def addpages(name2val, defaultns):        
+            for title, vals in name2val.items():
+                title = self.nshandler.get_fqname(title, defaultns)
+
+                fixed = {}
+                for k, v in vals.items():
+                    k=str(k).replace("-",  "_")
+                    if k=="content":
+                        k="rawtext"
+                    fixed[k]=v
+                    
+                self.pages[title] = page(**fixed)
+
+        addpages(content.get('templates', {}), 10)
+        addpages(content.get('articles', {}), 0)
 
     def get_siteinfo(self):
         if self.siteinfo is not None:
@@ -45,22 +78,17 @@ class ZipWikiBase(wikidbbase.WikiDBBase):
 
         from mwlib.siteinfo import get_siteinfo
         if self.sources:
-            self.siteinfo = get_siteinfo(self.sources.values()[0].get('language', 'en'))
+            self.siteinfo = get_siteinfo(self.sources.values()[0].language or "en")
         else:
             self.siteinfo = get_siteinfo('en')
         return self.siteinfo
 
 
 class Wiki(ZipWikiBase):
-    def _getArticle(self, title, revision=None):
-        try:
-            article = nget(self.articles, title)
-            if revision is None or article['revision'] is None or article['revision'] == revision:
-                return article
-        except KeyError:
-            pass
-        return None
-    
+    def normalize_and_get_page(self, title, defaultns):
+        fqname = self.nshandler.get_fqname(title, defaultns)
+        return self.pages.get(fqname, None)
+        
     def getSource(self, title, revision=None):
         """Return source for article with given title and revision
         
@@ -70,14 +98,11 @@ class Wiki(ZipWikiBase):
         @param revision: article revision (optional)
         @type revision: unicode
         """
-        
-        article = self._getArticle(title, revision=revision)
-        if article is None:
+
+        page = self.normalize_and_get_page(title, 0)
+        if page is None:
             return None
-        try:
-            return self.sources[article['source-url']]
-        except KeyError:
-            return None
+        return self.sources[page.source_url]
 
     def getInterwikiMap(self, title, revision=None):
         """Return interwikimap for given article and revision
@@ -91,63 +116,49 @@ class Wiki(ZipWikiBase):
             return None
         return source.get('interwikimap', None)
     
-    def getRawArticle(self, title, revision=None):
-        ns, partial, full = self.nshandler.splitname(title)
-        if ns == nshandling.NS_TEMPLATE:
-            return self.getTemplate(partial)
-        article = self._getArticle(title, revision=revision)
-        if article:
-            result = article['content']
-            if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
-                return unicode(result, 'utf-8')
-            return result
-        return None
-    
     def getURL(self, title, revision=None):
-        article = self._getArticle(title, revision=revision)
-        if article:
-            return article['url']
-        if len(self.sources) == 1:
-            from mwlib.mwapidb import APIHelper, get_api_helper
-
-            src = self.sources.values()[0]
-            if 'base_url' in src:
-                api_helper = APIHelper(src['base_url'], script_extension=src.get('script_extension'), offline=True)
-            else:
-                api_helper = get_api_helper(src['url'], offline=True)
-            if api_helper:
-                return api_helper.getURL(title, revision=revision)
-        return None
+        page = self.normalize_and_get_page(title, 0)
+        if page is None:
+            return None
+        
+        return page.url
     
     def getAuthors(self, title, revision=None):
-        article = self._getArticle(title, revision=revision)
-        if article:
-            return article.get('authors', [])
-        return None
-    
-    def getTemplate(self, name, followRedirects=True):
-        ns, name, full = self.nshandler.splitname(name, nshandling.NS_TEMPLATE)
-        if ns != nshandling.NS_TEMPLATE:
-            return self.getRawArticle(full)
-        try:
-            result = nget(self.templates, name)['content']
-            if isinstance(result, str): # fix bug in some simplejson version w/ Python 2.4
-                return unicode(result, 'utf-8')
-            return result
-        except KeyError:
-            pass
-        return None
+        page = self.normalize_and_get_page(title, 0)
+        if page is None:
+            return None
+        
+        return page.authors or []
 
     def getLicenses(self):
         if self.licenses is None:
             # ZIP file of old mwlib version does not contain licenses...
             try:
                 self.licenses = metabook.get_licenses(self.metabook)
-            except Exception, exc:
-                log.ERROR('Could not fetch licenses: %s' % exc)
+            except Exception:
                 self.licenses = []
         return self.licenses
     
+    def getParsedArticle(self, title, revision=None):
+        page = self.normalize_and_get_page(title, 0)
+        if page:
+            raw = page.rawtext
+        else:
+            raw = None
+        
+        if raw is None:
+            return None
+
+        
+        lang = None
+        source = self.getSource(title, revision=revision)
+        
+        if source is not None:
+            lang = source.language
+        from mwlib import uparser
+        
+        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=lang)
+  
 
 class ImageDB(ZipWikiBase):
     def __init__(self, zipfile, tmpdir=None):
@@ -265,6 +276,3 @@ class FakeImageDB(ImageDB):
     
     def getImageTemplates(self, name, wikidb=None):
         raise NotImplemented('getImageTemplates() does not work with zipwiki.FakeImageDB!')
-    
-
-

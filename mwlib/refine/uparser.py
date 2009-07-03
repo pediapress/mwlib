@@ -22,7 +22,12 @@ def parseString(
     siteinfo = None
     assert title is not None, 'no title given'
     if raw is None:
-        raw = wikidb.getRawArticle(title, revision=revision)
+        page = wikidb.normalize_and_get_page(title, 0)
+        if page:
+            raw = page.rawtext
+        else:
+            raw = None
+        
         assert raw is not None, "cannot get article %r" % (title,)
     if wikidb:
         te = expander.Expander(raw, pagename=title, wikidb=wikidb)
@@ -35,6 +40,7 @@ def parseString(
         src = None 
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
+            assert not isinstance(src, dict)
             
         if not src:
             src=metabook.source()

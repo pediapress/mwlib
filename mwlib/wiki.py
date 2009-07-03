@@ -11,32 +11,10 @@ from mwlib.log import Log
 
 log = Log('mwlib.utils')
 
-
-def wiki_mwapi(
-    base_url=None,
-    template_blacklist=None,
-    template_exclusion_category=None,
-    username=None,
-    password=None,
-    domain=None,
-    script_extension=None,
-    **kwargs):
-    from mwlib import mwapidb
-    return mwapidb.WikiDB(base_url,
-        template_blacklist=template_blacklist,
-        template_exclusion_category=template_exclusion_category,
-        username=username,
-        password=password,
-        domain=domain,
-        script_extension=script_extension,
-    )
-
 class dummy_web_wiki(object):
     def __init__(self,  **kw):
         self.__dict__.update(**kw)
         
-        
-
 def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
     if kwargs:
@@ -53,23 +31,6 @@ def wiki_nucdb(path=None, lang="en", **kwargs):
     db=cdbwiki.WikiDB(path, lang=lang)
     return nuwiki.adapt(db)
 
-def image_mwapi(
-    base_url=None,
-    username=None,
-    password=None,
-    domain=None,
-    script_extension=None,
-    **kwargs
-):
-    from mwlib import mwapidb
-    return mwapidb.ImageDB(base_url,
-        username=username,
-        password=password,
-        domain=domain,
-        script_extension=script_extension,
-    )
-
-
 def image_zip(path=None, **kwargs):
     from mwlib import zipwiki
     if kwargs:
@@ -79,8 +40,8 @@ def image_zip(path=None, **kwargs):
 
 
 dispatch = dict(
-    images = dict(mwapi=image_mwapi, zip=image_zip),
-    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
+    images = dict(zip=image_zip),
+    wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
 )
 
 _en_license_url = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
@@ -186,13 +147,13 @@ def _makewiki(conf,
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res
-        elif format==u'multi-nuwiki':
-            from mwlib import multiwiki, nuwiki
-            m=multiwiki.wiki(zf)
-            res.images = res.wiki = m # nuwiki.adapt(m)
-            if metabook is None:
-                res.metabook = res.wiki.metabook
-            return res
+        # elif format==u'multi-nuwiki':
+        #     from mwlib import multiwiki, nuwiki
+        #     m=multiwiki.wiki(zf)
+        #     res.images = res.wiki = m # nuwiki.adapt(m)
+        #     if metabook is None:
+        #         res.metabook = res.wiki.metabook
+        #     return res
         elif format=="zipwiki":
             from mwlib import zipwiki
             res.wiki = zipwiki.Wiki(conf)
