@@ -140,6 +140,7 @@ class article(mbobj):
     revision=None
     content_type="text/x-wiki"
     wikiident=None
+    _env = None
     
 class chapter(mbobj):
     items=[]

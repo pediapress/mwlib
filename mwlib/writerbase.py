@@ -28,53 +28,41 @@ def build_book(env, status_callback=None):
     lastChapter = None
     for item in env.metabook.walk():
         if item.type == 'chapter':
-            chapter = parser.Chapter(item['title'].strip())
+            chapter = parser.Chapter(item.title.strip())
             book.appendChild(chapter)
             lastChapter = chapter
         elif item.type == 'article':
-            status_callback(
-                status='parsing',
-                progress=progress,
-                article=item['title'],
-            )
+            status_callback(status='parsing', progress=progress, article=item.title)
             progress += progress_step
 
             if item._env:
                 wiki = item._env.wiki
             else:
                 wiki = env.wiki
-                
-            a = wiki.getParsedArticle(
-                title=item['title'],
-                revision=item.get('revision'),
-            )
+            
+            a = wiki.getParsedArticle(title=item.title, revision=item.revision)
+            
             if a is not None:
-                if "displaytitle" in item:
-                    a.caption = item['displaytitle']
-                url = wiki.getURL(item['title'], item.get('revision'))                
+                if item.displaytitle is not None:
+                    a.caption = item.displaytitle
+                url = wiki.getURL(item.title, item.revision)                
                 if url:
                     a.url = url
                 else:
                     a.url = None
-                source = wiki.getSource(item['title'], item.get('revision'))
+                source = wiki.getSource(item.title, item.revision)
                 if source:
-                    a.wikiurl = source.get('url', '')
+                    a.wikiurl = source.url
                 else:
                     a.wikiurl = None
-                a.authors = wiki.getAuthors(item['title'], revision=item.get('revision'))
+                    
+                a.authors = wiki.getAuthors(item.title, revision=item.revision)
                 if lastChapter:
                     lastChapter.appendChild(a)
                 else:
                     book.appendChild(a)
             else:
-                log.warn('No such article: %r' % item['title'])
+                log.warn('No such article: %r' % item.title)
 
     status_callback(status='parsing', progress=progress, article='')
     return book
-
-
-def build_book_from_zip(zip_filename):
-    env = wiki.makewiki(zip_filename)
-    env.wiki = zipwiki.Wiki(zip_filename)
-    env.images = zipwiki.ImageDB(zip_filename)
-    return build_book(env)
