@@ -148,6 +148,10 @@ class article(mbobj):
     @property
     def wiki(self):
         return self._env.wiki
+
+class license(mbobj):
+    title=None
+    wikitext=None
     
 class chapter(mbobj):
     items=[]

@@ -187,6 +187,14 @@ def extract_member(zipfile, member, targetpath):
     else:
         open(targetpath, 'wb').write(zipfile.read(member.filename))
 
+def extractall(zf, dst):
+    if hasattr(zf, 'extractall'):
+        zf.extractall(dst) # only available in Python >= 2.6
+    else:
+        for zipinfo in zf.infolist():
+            extract_member(zf, zipinfo, dst)
+    
+       
 class adapt(object):
     edits = None
     interwikimap = None
@@ -196,16 +204,10 @@ class adapt(object):
         if isinstance(path_or_instance, zipfile.ZipFile):
             zf = path_or_instance
             tmpdir = tempfile.mkdtemp()
-            if hasattr(zf, 'extractall'):
-                zf.extractall(tmpdir) # only available in Python >= 2.6
-            else:
-                for zipinfo in zf.infolist():
-                    extract_member(zf, zipinfo, tmpdir)
-
+            extractall(zf, tmpdir)
             path_or_instance = tmpdir
             self.was_tmpdir = True
             
-                
         if isinstance(path_or_instance, basestring):
             self.nuwiki = NuWiki(path_or_instance)
         else:
@@ -283,8 +285,14 @@ class adapt(object):
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"])
 
     def getLicenses(self):
-        return self.nuwiki.get_data('licenses') or []
-
+        from mwlib import metabook
+        licenses = self.nuwiki.get_data('licenses') or []
+        res = []
+        for x in licenses:
+            if isinstance(x, dict):
+                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"]))
+        return res
+    
     def clear(self):
         if self.was_tmpdir and os.path.exists(self.nuwiki.path):
             print 'removing %r' % self.nuwiki.path

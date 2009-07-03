@@ -8,6 +8,7 @@ from ConfigParser import ConfigParser
 import StringIO
 
 from mwlib.log import Log
+from mwlib import myjson
 
 log = Log('mwlib.utils')
 
@@ -79,7 +80,55 @@ url=
         self._wiki = val
 
     wiki = property(_get_wiki, _set_wiki)
-                  
+    
+    def init_metabook(self):
+        if self.metabook:
+            self.metabook.set_environment(self)
+
+    def getLicenses(self):
+        return self.wiki.getLicenses()
+    
+class MultiEnvironment(Environment):
+    wiki = None
+    images = None
+    
+    def __init__(self, path):
+        Environment.__init__(self)
+        self.path = path
+        self.metabook = myjson.load(open(os.path.join(self.path, "metabook.json")))
+        self.id2env = {}
+        
+    def init_metabook(self):
+        from mwlib import nuwiki
+        if not self.metabook:
+            return
+        
+        for x in self.metabook.articles():
+            id = x.wikiident
+            assert id, "article has no wikiident: %r" % (x,)
+            assert "/" not in id
+            assert ".." not in id
+            
+            if id not in self.id2env:
+                env = Environment()
+                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path, id))
+                self.id2env[id] = env
+            else:
+                env = self.id2env[id]
+            x._env = env
+            
+    def getLicenses(self):
+        res = []
+        for x in self.id2env.values():
+            tmp = x.wiki.getLicenses()
+            for t in tmp:
+                t._env = x
+            res += tmp
+        
+        return res
+            
+            
+        
 def _makewiki(conf,
     metabook=None,
     username=None, password=None, domain=None,
@@ -140,13 +189,14 @@ def _makewiki(conf,
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res
-        # elif format==u'multi-nuwiki':
-        #     from mwlib import multiwiki, nuwiki
-        #     m=multiwiki.wiki(zf)
-        #     res.images = res.wiki = m # nuwiki.adapt(m)
-        #     if metabook is None:
-        #         res.metabook = res.wiki.metabook
-        #     return res
+        elif format==u'multi-nuwiki':
+            from mwlib import nuwiki
+            import tempfile
+            res.wiki = res.images = None
+            tmpdir = tempfile.mkdtemp()
+            nuwiki.extractall(zf, tmpdir)
+            res = MultiEnvironment(tmpdir)
+            return res
         elif format=="zipwiki":
             from mwlib import zipwiki
             res.wiki = zipwiki.Wiki(conf)
@@ -195,11 +245,11 @@ def makewiki(conf,
         domain=domain,
         script_extension=script_extension,
     )
-    res.wiki.env = res
+    if res.wiki:
+        res.wiki.env = res
     if res.images:
         res.images.env = res
 
-    if res.metabook:
-        res.metabook.set_environment(res)
+    res.init_metabook()
     
     return res
