@@ -290,7 +290,7 @@ class adapt(object):
         res = []
         for x in licenses:
             if isinstance(x, dict):
-                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"]))
+                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"],  _wiki=self))
         return res
     
     def clear(self):
