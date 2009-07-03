@@ -69,24 +69,7 @@ name=
 url=
 """)
         self.configparser.readfp(defaults)
-        
-    # __getitem__, __setitem__ for compatability (make it look like a dict)
-    def __getitem__(self, name):
-        if name=='images':
-            return self.images
-        if name=='wiki':
-            return self.wiki
-        raise KeyError("Environment.__getitem__ only works for 'wiki' or 'images', not %r" % (name,))
     
-    def __setitem__(self, name, val):
-        if name=='images':
-            self.images = val
-        elif name=='wiki':
-            self.wiki = val
-        else:
-            raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
-    
-
 def _makewiki(conf,
     metabook=None,
     username=None, password=None, domain=None,
