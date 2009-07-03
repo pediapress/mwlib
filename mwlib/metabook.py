@@ -63,7 +63,7 @@ class mbobj(object):
     def _json(self):
         d = dict(type=self.__class__.__name__)
         for k, v in self.__dict__.items():
-            if v is not None:
+            if v is not None and not k.startswith("_"):
                 d[k]=v
         return d
     
@@ -82,6 +82,7 @@ class collection(mbobj):
     items = []
     licenses = []
     wikis = []
+    _env = None
     
     def append_article(self, title, displaytitle=None, **kw):
         title = title.strip()
@@ -112,7 +113,13 @@ class collection(mbobj):
 
     def articles(self):
         return self.walk("article")
-            
+
+    def set_environment(self, env):
+        for x in self.articles():
+            if x._env is None:
+                x._env = env
+                
+        
 class source(mbobj):
     name=None
     url=None

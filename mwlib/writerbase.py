@@ -21,41 +21,47 @@ def build_book(env, status_callback=None):
     if status_callback is None:
         status_callback = lambda **kwargs: None
         
-    num_articles = float(len(metabook.articles()))
+    num_articles = float(len(env.metabook.articles()))
     if num_articles > 0:
         progress_step = 100/num_articles
         
     lastChapter = None
     for item in env.metabook.walk():
-        if item['type'] == 'chapter':
+        if item.type == 'chapter':
             chapter = parser.Chapter(item['title'].strip())
             book.appendChild(chapter)
             lastChapter = chapter
-        elif item['type'] == 'article':
+        elif item.type == 'article':
             status_callback(
                 status='parsing',
                 progress=progress,
                 article=item['title'],
             )
             progress += progress_step
-            a = env.wiki.getParsedArticle(
+
+            if item._env:
+                wiki = item._env.wiki
+            else:
+                wiki = env.wiki
+                
+            a = wiki.getParsedArticle(
                 title=item['title'],
                 revision=item.get('revision'),
             )
             if a is not None:
                 if "displaytitle" in item:
                     a.caption = item['displaytitle']
-                url = env.wiki.getURL(item['title'], item.get('revision'))                
+                url = wiki.getURL(item['title'], item.get('revision'))                
                 if url:
                     a.url = url
                 else:
                     a.url = None
-                source = env.wiki.getSource(item['title'], item.get('revision'))
+                source = wiki.getSource(item['title'], item.get('revision'))
                 if source:
                     a.wikiurl = source.get('url', '')
                 else:
                     a.wikiurl = None
-                a.authors = env.wiki.getAuthors(item['title'], revision=item.get('revision'))
+                a.authors = wiki.getAuthors(item['title'], revision=item.get('revision'))
                 if lastChapter:
                     lastChapter.appendChild(a)
                 else:
