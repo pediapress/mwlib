@@ -422,6 +422,31 @@ def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', p
 
 # ==============================================================================
 
+def asunicode(x):
+    if not isinstance(x, basestring):
+        x = repr(x)
+    
+    if isinstance(x, str):
+        x = unicode(x, "utf-8", "replace")
+
+    return x
+
+def ppdict(dct):
+    items = dct.items()
+    items.sort()
+    tmp = []
+    write = tmp.append
+    
+    for k, v in items:
+        write(u"*"+asunicode(k)+u"*")
+        v = asunicode(v)
+        lines = v.split("\n")
+        for x in lines:
+            write(" "*4+x)
+        write("")
+        
+    return u"\n".join(tmp)
+
 def report(system='', subject='', from_email=None, mail_recipients=None, mail_headers=None, **kw):
     log.report('system=%r subject=%r' % (system, subject))
     
@@ -433,7 +458,9 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
     except:
         fqdn = 'not available'
     text.append('CWD: %r\n' % os.getcwd())
-    text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw, indent=4))
+
+    text.append(ppdict(kw).encode("utf-8"))
+    # text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw, indent=4))
     text.append('ENV:\n%s\n' % pprint.pformat(dict(os.environ), indent=4))
 
     text = '\n'.join(text)
