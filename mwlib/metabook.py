@@ -26,6 +26,9 @@ class mbobj(object):
             v = getattr(self.__class__, k)
             if callable(v) or v is None:
                 continue
+            if isinstance(v, (property, )):
+                continue
+            
             d[k] = v
             
         self.__dict__.update(copy.deepcopy(d))
