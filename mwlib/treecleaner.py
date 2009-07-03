@@ -163,6 +163,7 @@ class TreeCleaner(object):
                             Div: [Reference, Item],
                             Center:[Reference],
                             Teletyped:[Reference],
+                            ReferenceList: [Reference],
                             }
 
         
