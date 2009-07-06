@@ -137,6 +137,14 @@ class Wiki(ZipWikiBase):
                 self.licenses = metabook.get_licenses(self.metabook)
             except Exception:
                 self.licenses = []
+
+                
+        for i, x in enumerate(self.licenses):
+            if isinstance(x, dict):
+                x=self.licenses[i] = metabook.license(title=x.get("title"), wikitext=x.get("wikitext"))
+                
+            x._wiki = self
+            
         return self.licenses
     
     def getParsedArticle(self, title, revision=None):

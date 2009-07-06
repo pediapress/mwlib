@@ -189,12 +189,12 @@ def get_licenses(metabook):
     """
     import re
     from mwlib import utils
-    licenses = []
-    for license in metabook.licenses:
+    retval = []
+    for l in metabook.licenses:
         wikitext = ''
 
-        if license.get('mw_license_url'):
-            url = license['mw_license_url']
+        if l.get('mw_license_url'):
+            url = l['mw_license_url']
             if re.match(r'^.*/index\.php.*action=raw', url) and 'templates=expand' not in url:
                 url += '&templates=expand'
             wikitext = utils.fetch_url(url,
@@ -208,22 +208,20 @@ def get_licenses(metabook):
                     wikitext = None
         else:
             wikitext = ''
-            if license.get('mw_rights_text'):
-                wikitext = license['mw_rights_text']
-            if license.get('mw_rights_page'):
-                wikitext += '\n\n[[%s]]' % license['mw_rights_page']
-            if license.get('mw_rights_url'):
-                wikitext += '\n\n' + license['mw_rights_url']
+            if l.get('mw_rights_text'):
+                wikitext = l['mw_rights_text']
+            if l.get('mw_rights_page'):
+                wikitext += '\n\n[[%s]]' % l['mw_rights_page']
+            if l.get('mw_rights_url'):
+                wikitext += '\n\n' + l['mw_rights_url']
         
         if not wikitext:
             continue
-        
-        licenses.append({
-            'title': license.get('name', u'License'),
-            'wikitext': wikitext,
-        })
+
+        retval.append(license(title=l.get('name', u'License'),
+                              wikitext=wikitext))
     
-    return licenses
+    return retval 
 
 def make_interwiki(api_entry=None):
     api_entry = api_entry or {}
