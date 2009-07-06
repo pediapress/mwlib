@@ -187,6 +187,14 @@ def extract_member(zipfile, member, targetpath):
     else:
         open(targetpath, 'wb').write(zipfile.read(member.filename))
 
+def extractall(zf, dst):
+    if hasattr(zf, 'extractall'):
+        zf.extractall(dst) # only available in Python >= 2.6
+    else:
+        for zipinfo in zf.infolist():
+            extract_member(zf, zipinfo, dst)
+    
+       
 class adapt(object):
     edits = None
     interwikimap = None
@@ -196,16 +204,10 @@ class adapt(object):
         if isinstance(path_or_instance, zipfile.ZipFile):
             zf = path_or_instance
             tmpdir = tempfile.mkdtemp()
-            if hasattr(zf, 'extractall'):
-                zf.extractall(tmpdir) # only available in Python >= 2.6
-            else:
-                for zipinfo in zf.infolist():
-                    extract_member(zf, zipinfo, tmpdir)
-
+            extractall(zf, tmpdir)
             path_or_instance = tmpdir
             self.was_tmpdir = True
             
-                
         if isinstance(path_or_instance, basestring):
             self.nuwiki = NuWiki(path_or_instance)
         else:
@@ -218,22 +220,6 @@ class adapt(object):
             return getattr(self.nuwiki, name)
         except AttributeError:
             raise AttributeError()
-    
-        
-    def getTemplate(self, title, followRedirects=True):
-        p = self.nuwiki.normalize_and_get_page(title, defaultns=10)
-        if p:
-            return p.rawtext
-            
-    def getRawArticle(self, title, revision=None):
-        if revision is not None:
-            p = self.nuwiki.get_page(None, revision)
-        else:
-            p = self.nuwiki.normalize_and_get_page(title, defaultns=0)
-            
-        if p:
-            return p.rawtext
-        
     def getURL(self, name, revision=None, defaultns=nshandling.NS_MAIN):
         base_url = self.nfo["base_url"]
         if not base_url.endswith("/"):
@@ -280,7 +266,17 @@ class adapt(object):
         )
 
     def getParsedArticle(self, title, revision=None):
-        raw = self.getRawArticle(title, revision=revision)
+        if revision is not None:
+            page = self.nuwiki.get_page(None, revision)
+        else:
+            page = self.normalize_and_get_page(title, 0)
+
+        if page:
+            raw = page.rawtext
+        else:
+            raw = None
+            
+            
         if raw is None:
             return None
 
@@ -289,8 +285,14 @@ class adapt(object):
         return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"])
 
     def getLicenses(self):
-        return self.nuwiki.get_data('licenses') or []
-
+        from mwlib import metabook
+        licenses = self.nuwiki.get_data('licenses') or []
+        res = []
+        for x in licenses:
+            if isinstance(x, dict):
+                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"],  _wiki=self))
+        return res
+    
     def clear(self):
         if self.was_tmpdir and os.path.exists(self.nuwiki.path):
             print 'removing %r' % self.nuwiki.path

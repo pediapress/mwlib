@@ -8,35 +8,14 @@ from ConfigParser import ConfigParser
 import StringIO
 
 from mwlib.log import Log
+from mwlib import myjson
 
 log = Log('mwlib.utils')
-
-
-def wiki_mwapi(
-    base_url=None,
-    template_blacklist=None,
-    template_exclusion_category=None,
-    username=None,
-    password=None,
-    domain=None,
-    script_extension=None,
-    **kwargs):
-    from mwlib import mwapidb
-    return mwapidb.WikiDB(base_url,
-        template_blacklist=template_blacklist,
-        template_exclusion_category=template_exclusion_category,
-        username=username,
-        password=password,
-        domain=domain,
-        script_extension=script_extension,
-    )
 
 class dummy_web_wiki(object):
     def __init__(self,  **kw):
         self.__dict__.update(**kw)
         
-        
-
 def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
     if kwargs:
@@ -53,23 +32,6 @@ def wiki_nucdb(path=None, lang="en", **kwargs):
     db=cdbwiki.WikiDB(path, lang=lang)
     return nuwiki.adapt(db)
 
-def image_mwapi(
-    base_url=None,
-    username=None,
-    password=None,
-    domain=None,
-    script_extension=None,
-    **kwargs
-):
-    from mwlib import mwapidb
-    return mwapidb.ImageDB(base_url,
-        username=username,
-        password=password,
-        domain=domain,
-        script_extension=script_extension,
-    )
-
-
 def image_zip(path=None, **kwargs):
     from mwlib import zipwiki
     if kwargs:
@@ -79,8 +41,8 @@ def image_zip(path=None, **kwargs):
 
 
 dispatch = dict(
-    images = dict(mwapi=image_mwapi, zip=image_zip),
-    wiki = dict(mwapi=wiki_mwapi, cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
+    images = dict(zip=image_zip),
+    wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
 )
 
 _en_license_url = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
@@ -108,24 +70,65 @@ name=
 url=
 """)
         self.configparser.readfp(defaults)
-        
-    # __getitem__, __setitem__ for compatability (make it look like a dict)
-    def __getitem__(self, name):
-        if name=='images':
-            return self.images
-        if name=='wiki':
-            return self.wiki
-        raise KeyError("Environment.__getitem__ only works for 'wiki' or 'images', not %r" % (name,))
-    
-    def __setitem__(self, name, val):
-        if name=='images':
-            self.images = val
-        elif name=='wiki':
-            self.wiki = val
-        else:
-            raise KeyError("Environment.__setitem__ only works for 'wiki' or 'images', not %r" % (name,))
-    
 
+    def _get_wiki(self):
+        import warnings
+        warnings.warn("access with .wiki deprecated", DeprecationWarning, 2)
+        
+        return self._wiki
+    def _set_wiki(self, val):
+        self._wiki = val
+
+    wiki = property(_get_wiki, _set_wiki)
+    
+    def init_metabook(self):
+        if self.metabook:
+            self.metabook.set_environment(self)
+
+    def getLicenses(self):
+        return self.wiki.getLicenses()
+    
+class MultiEnvironment(Environment):
+    wiki = None
+    images = None
+    
+    def __init__(self, path):
+        Environment.__init__(self)
+        self.path = path
+        self.metabook = myjson.load(open(os.path.join(self.path, "metabook.json")))
+        self.id2env = {}
+        
+    def init_metabook(self):
+        from mwlib import nuwiki
+        if not self.metabook:
+            return
+        
+        for x in self.metabook.articles():
+            id = x.wikiident
+            assert id, "article has no wikiident: %r" % (x,)
+            assert "/" not in id
+            assert ".." not in id
+            
+            if id not in self.id2env:
+                env = Environment()
+                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path, id))
+                self.id2env[id] = env
+            else:
+                env = self.id2env[id]
+            x._env = env
+            
+    def getLicenses(self):
+        res = []
+        for x in self.id2env.values():
+            tmp = x.wiki.getLicenses()
+            for t in tmp:
+                t._env = x
+            res += tmp
+        
+        return res
+            
+            
+        
 def _makewiki(conf,
     metabook=None,
     username=None, password=None, domain=None,
@@ -187,11 +190,12 @@ def _makewiki(conf,
                 res.metabook = res.wiki.metabook
             return res
         elif format==u'multi-nuwiki':
-            from mwlib import multiwiki, nuwiki
-            m=multiwiki.wiki(zf)
-            res.images = res.wiki = m # nuwiki.adapt(m)
-            if metabook is None:
-                res.metabook = res.wiki.metabook
+            from mwlib import nuwiki
+            import tempfile
+            res.wiki = res.images = None
+            tmpdir = tempfile.mkdtemp()
+            nuwiki.extractall(zf, tmpdir)
+            res = MultiEnvironment(tmpdir)
             return res
         elif format=="zipwiki":
             from mwlib import zipwiki
@@ -241,8 +245,11 @@ def makewiki(conf,
         domain=domain,
         script_extension=script_extension,
     )
-    res.wiki.env = res
+    if res.wiki:
+        res.wiki.env = res
     if res.images:
         res.images.env = res
+
+    res.init_metabook()
     
     return res

@@ -5,6 +5,11 @@
 from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import evaluate
 
+class page(object):
+    def __init__(self, rawtext):
+        self.rawtext = rawtext
+        
+                 
 class DictDB(object):
     """wikidb implementation used for testing"""
     def __init__(self, *args, **kw):
@@ -21,13 +26,10 @@ class DictDB(object):
         self.d = normd
 
         self.siteinfo = get_siteinfo('de')
+
+    def normalize_and_get_page(self, title, defaultns=0):
+        return page(self.d.get(title.lower(), u""))
         
-    def getRawArticle(self, title, revision=None):
-        return self.d[title.lower()]
-
-    def getTemplate(self, title, dummy):
-        return self.d.get(title.lower(), u"")
-
     def get_siteinfo(self):
         return self.siteinfo
 

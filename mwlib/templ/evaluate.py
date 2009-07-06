@@ -244,12 +244,12 @@ class Expander(object):
         except KeyError:
             pass
 
-        if name.startswith(":"):
-            log.info("including article")
-            raw = self.db.getRawArticle(name[1:])
+        page = self.db.normalize_and_get_page(name, 10)
+        if page:
+            raw = page.rawtext
         else:
-            raw = self.db.getTemplate(name, True)
-        
+            raw = None
+            
         if raw is None:
             res = None
         else:

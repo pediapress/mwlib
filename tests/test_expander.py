@@ -21,7 +21,7 @@ def test_undefined_variable():
     db = DictDB(Art="{{Pipe}}",
                 Pipe="{{{undefined_variable}}}")
     
-    te = expander.Expander(db.getRawArticle("Art"), pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page("Art", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
     assert u"{{{undefined_variable}}}" in res, "wrong expansion for undefined variable"
@@ -72,7 +72,7 @@ def test_alfred():
         a="{{ibox2|birth_date=1960}}",
         ibox2="{{{birth{{#if:{{{birthdate|}}}||_}}date}}}"
         )
-    te = expander.Expander(db.getRawArticle("a"), pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page("a", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
     assert "1960" in res
