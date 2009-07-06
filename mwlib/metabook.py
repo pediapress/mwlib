@@ -149,6 +149,10 @@ class article(mbobj):
     def wiki(self):
         return self._env.wiki
 
+    @property
+    def images(self):
+        return self._env.images
+    
 class license(mbobj):
     title=None
     wikitext=None
