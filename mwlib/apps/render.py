@@ -98,7 +98,7 @@ class Main(object):
             return env
 
         from mwlib.apps.buildzip import make_zip
-        self.zip_filename = make_zip(output=self.options.keep_zip, options=self.options, env=env, status=self.status)
+        self.zip_filename = make_zip(output=self.options.keep_zip, options=self.options, metabook=env.metabook, status=self.status)
 
         if env.images:
             try:
