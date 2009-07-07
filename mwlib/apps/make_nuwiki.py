@@ -8,6 +8,8 @@ from mwlib.metabook import get_licenses, parse_collection_page, collection
 from twisted.internet import reactor,  defer
 
 class start_fetcher(object):
+    progress = None
+    
     def __init__(self, **kw):
         self.fetcher = None
         self.__dict__.update(kw)
@@ -36,7 +38,8 @@ class start_fetcher(object):
         pages = fetch.pages_from_metabook(metabook)
         self.fetcher = fetch.fetcher(api, fsout, pages,
                                      licenses=self.licenses,
-                                     status=self.status, 
+                                     status=self.status,
+                                     progress=self.progress, 
                                      print_template_pattern=self.options.print_template_pattern,
                                      template_exclusion_category=self.options.template_exclusion_category,
                                      imagesize=self.options.imagesize)
@@ -97,17 +100,22 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     id2wiki = {}
     for x in metabook.wikis:
         id2wiki[x.ident] = (x, [])
-        
+
     for x in metabook.articles():
         assert x.wikiident in id2wiki
         id2wiki[x.wikiident][1].append(x)
 
+    if len(id2wiki)>1:
+        progress = fetch.shared_progress()
+    else:
+        progress=None
+        
     fetchers =[]
     for id, (wikiconf, articles) in id2wiki.items():
         my_fsdir = os.path.join(fsdir, id)
         my_mb = collection()
         my_mb.items = articles
-        fetchers.append(start_fetcher(fsdir=my_fsdir, base_url=wikiconf.baseurl, metabook=my_mb, options=options, podclient=podclient, status=status))
+        fetchers.append(start_fetcher(fsdir=my_fsdir, progress=progress, base_url=wikiconf.baseurl, metabook=my_mb, options=options, podclient=podclient, status=status))
 
     retval = []
     def done(listres):

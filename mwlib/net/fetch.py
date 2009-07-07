@@ -20,6 +20,50 @@ from twisted.python import failure, log
 from twisted.web import client 
 from twisted.internet import reactor, defer
 
+class shared_progress(object):
+    status=None
+    last_percent=0.0
+    
+    def __init__(self):
+        self.key2count = {}
+
+    def report(self):
+        isatty = getattr(sys.stdout, "isatty", None)
+        done, total = self.get_count()
+        if not total:
+            total = 1
+            
+        
+        if total < 50:
+            percent = done / 5.0
+        else:
+            percent =  100.0*done / total
+
+        if percent<self.last_percent:
+            percent=self.last_percent
+        else:
+            self.last_percent=percent
+            
+        if isatty and isatty():
+            msg = "%s/%s %.2f" % (done, total, percent)
+            sys.stdout.write("\x1b[K"+msg+"\r")
+            sys.stdout.flush()
+
+        if self.status:
+            self.status(status="fetching", progress=percent)
+
+    def set_count(self, key, done, total):
+        self.key2count[key] = (done, total) 
+        self.report()
+        
+    def get_count(self):
+        done  = 0
+        total = 0
+        for (d, t) in self.key2count.values():
+            done+=d
+            total+=t
+        return done, total
+    
 class fsoutput(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
@@ -115,6 +159,7 @@ def getblock(lst, limit):
 class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
                  status=None,
+                 progress=None,
                  print_template_pattern=None,
                  template_exclusion_category=None,
                  imagesize=800):
@@ -131,6 +176,8 @@ class fetcher(object):
         self.fsout = fsout
         self.licenses = licenses
         self.status = status
+        self.progress = progress or shared_progress()
+
         self.template_exclusion_category = template_exclusion_category
         self.print_template_pattern = print_template_pattern
 
@@ -229,11 +276,23 @@ class fetcher(object):
         
         
     def report(self):
+            
+        
         qc = self.api.qccount
 
         limit = self.api.api_request_limit
         jt = self.count_total+len(self.pages_todo)//limit+len(self.revids_todo)//limit
         jt += len(self.title2latest)
+
+
+        if self.progress:
+            self.progress.set_count(self, self.count_done+qc,  jt+qc)
+            return
+        
+                                    
+        
+
+        
         msg = "%s/%s/%s jobs -- %s/%s running" % (self.count_done+qc, self.count_total+qc, jt+qc, self.api.num_running, self.api.max_connections)
 
         if jt < 10:
