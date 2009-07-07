@@ -322,7 +322,7 @@ class fetcher(object):
 
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
-        tmp = path+u'\xb7'.encode("utf-8")
+        tmp = (path+u'\xb7').encode("utf-8")
         def done(val):
             os.rename(tmp, path)
             return val

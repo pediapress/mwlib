@@ -1,3 +1,4 @@
+import sys
 import optparse
 
 from mwlib import myjson as json
@@ -97,7 +98,7 @@ class OptionParser(optparse.OptionParser):
 
         
     def parse_args(self):
-        self.options, self.args = optparse.OptionParser.parse_args(self)
+        self.options, self.args = optparse.OptionParser.parse_args(self, args=[unicode(x, "utf-8") for x in sys.argv[1:]])
         for c in self.config_values:
             if not hasattr(c, "pages"):
                 c.pages = []
@@ -134,31 +135,13 @@ class OptionParser(optparse.OptionParser):
         return self.options, self.args
     
     def makewiki(self):
-        def unioption(s):
-            if s:
-                return unicode(s, "utf-8")
+        kw = self.options.__dict__.copy()
+        kw["metabook"] = self.metabook
         
-        username                    = unioption(self.options.username)
-        password                    = unioption(self.options.password)
-        domain                      = unioption(self.options.domain)
-        script_extension            = unioption(self.options.script_extension)
-        template_blacklist          = unioption(self.options.template_blacklist)
-        template_exclusion_category = unioption(self.options.template_exclusion_category)
-        print_template_pattern      = unioption(self.options.print_template_pattern)
-        
-
-        env = wiki.makewiki(self.options.config,
-                            metabook=self.metabook,
-                            username=username,
-                            password=password,
-                            domain=domain,
-                            template_blacklist=template_blacklist,
-                            template_exclusion_category=template_exclusion_category,
-                            print_template_pattern=print_template_pattern, 
-                            script_extension=script_extension)
+        env = wiki.makewiki(self.options.config, **kw)
         
         if not env.metabook:
-            self.metabook =  env.metabook =  metabook.collection()
+            self.metabook = env.metabook = metabook.collection()
             
         if self.options.noimages:
             env.images = None
