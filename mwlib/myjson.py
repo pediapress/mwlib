@@ -17,7 +17,7 @@ def object_hook(dct):
     except KeyError:
         type = None
         
-    if type in ["collection", "article", "chapter", "source", "interwiki",  "license"]:
+    if type in ["collection", "article", "chapter", "source", "interwiki",  "license",  "wikiconf"]:
         klass = getattr(metabook, type)
         d = {}
         for k, v in dct.items():
