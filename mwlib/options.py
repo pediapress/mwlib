@@ -45,9 +45,10 @@ class OptionParser(optparse.OptionParser):
         
         a("--template-blacklist", metavar="ARTICLE",
           help="Title of article containing blacklisted templates")
-        
-        a("--login", metavar="USERNAME:PASSWORD[:DOMAIN]",
-          help="login with given USERNAME, PASSWORD and (optionally) DOMAIN")
+
+        a("--username", help="username for login")
+        a("--password", help="password for login")
+        a("--domain",  help="domain for login")
         
         a("-d", "--daemonize", action="store_true",
           help="become a daemon process as soon as possible")
@@ -106,9 +107,6 @@ class OptionParser(optparse.OptionParser):
         
         if self.options.metabook:
             self.metabook = json.loads(unicode(open(self.options.metabook, 'rb').read(), 'utf-8'))
-            
-        if self.options.login is not None and ':' not in self.options.login:
-            self.error('Please specify username and password as USERNAME:PASSWORD.')
         
         try:
             self.options.imagesize = int(self.options.imagesize)
@@ -128,25 +126,17 @@ class OptionParser(optparse.OptionParser):
         return self.options, self.args
     
     def makewiki(self):
-        username, password, domain = None, None, None
-        if self.options.login:
-            if self.options.login.count(':') == 1:
-                username, password = unicode(self.options.login, 'utf-8').split(':', 1)
-            else:
-                username, password, domain = unicode(self.options.login, 'utf-8').split(':', 2)
-                
-        if self.options.script_extension:
-            script_extension = unicode(self.options.script_extension, 'utf-8')
-        else:
-            script_extension = None
-            
         def unioption(s):
             if s:
                 return unicode(s, "utf-8")
 
-        template_blacklist = unioption(self.options.template_blacklist)
+        username                    = unioption(self.options.username)
+        password                    = unioption(self.options.password)
+        domain                      = unioption(self.options.domain)
+        script_extension            = unioption(self.options.script_extension)
+        template_blacklist          = unioption(self.options.template_blacklist)
         template_exclusion_category = unioption(self.options.template_exclusion_category)
-        print_template_pattern = unioption(self.options.print_template_pattern)
+        print_template_pattern      = unioption(self.options.print_template_pattern)
         
         if self.options.print_template_prefix:
             if print_template_pattern is not None:
