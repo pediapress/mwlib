@@ -15,35 +15,35 @@ class Main(object):
     
     def parse_options(self):
         parser = OptionParser()
-        parser.add_option("-o", "--output", help="write output to OUTPUT")
-        parser.add_option("-w", "--writer", help='use writer backend WRITER')
-        parser.add_option("-W", "--writer-options",
-            help='";"-separated list of additional writer-specific options',
-        )
-        parser.add_option("-e", "--error-file", help='write errors to this file')
-        parser.add_option("-s", "--status-file",
-            help='write status/progress info to this file',
-        )
-        parser.add_option("--list-writers",
-            action='store_true',
-            help='list available writers and exit',
-        )
-        parser.add_option("--writer-info",
-            help='list information about given WRITER and exit',
-            metavar='WRITER',
-        )
-        parser.add_option('--keep-zip',
-            help='write ZIP file to FILENAME',
-            metavar='FILENAME',
-        )
-        parser.add_option('--keep-tmpfiles',                  
-            action='store_true',
-            default=False,
-            help="don't remove  temporary files like images",
-        )
-        parser.add_option('-L', '--language',
-            help='use translated strings in LANGUAGE',
-        )
+        a = parser.add_option
+        
+        a("-o", "--output", help="write output to OUTPUT")
+        
+        a("-w", "--writer", help='use writer backend WRITER')
+        
+        a("-W", "--writer-options",
+          help='";"-separated list of additional writer-specific options')
+        
+        a("-e", "--error-file", help='write errors to this file')
+        
+        a("-s", "--status-file",
+          help='write status/progress info to this file')
+        
+        a("--list-writers", action='store_true',
+          help='list available writers and exit')
+        
+        a("--writer-info", metavar='WRITER',
+          help='list information about given WRITER and exit')
+        
+        a('--keep-zip', metavar='FILENAME',
+            help='write ZIP file to FILENAME')
+        
+        a('--keep-tmpfiles', action='store_true', default=False,
+            help="don't remove  temporary files like images")
+        
+        a('-L', '--language',
+            help='use translated strings in LANGUAGE')
+        
         options, args = parser.parse_args()
         return options, args, parser
     
