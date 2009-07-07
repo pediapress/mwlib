@@ -14,7 +14,7 @@ class Main(object):
     zip_filename = None
     
     def parse_options(self):
-        parser = OptionParser(config_optional=True)
+        parser = OptionParser()
         parser.add_option("-o", "--output", help="write output to OUTPUT")
         parser.add_option("-w", "--writer", help='use writer backend WRITER')
         parser.add_option("-W", "--writer-options",

@@ -8,69 +8,66 @@ from mwlib import wiki, metabook, log
 log = log.Log('mwlib.options')
 
 class OptionParser(optparse.OptionParser):
-    def __init__(self, usage=None, config_optional=False):
+    def __init__(self, usage='%prog [OPTIONS] [ARTICLETITLE...]'):
         self.config_values = []
-        self.config_optional = config_optional
-        if usage is None:
-            usage = '%prog [OPTIONS] [ARTICLETITLE...]'
+        
         optparse.OptionParser.__init__(self, usage=usage)
+        
         self.metabook = None
-        self.add_option("-c", "--config", action="callback",
-                        nargs=1, type="string", callback=self._cb_config, 
-            help="configuration file, ZIP file or base URL",
-        )
-        self.add_option("-i", "--imagesize",
-            help="max. pixel size (width or height) for images (default: 800)",
-            default=800,
-        )
-        self.add_option("-m", "--metabook",
-            help="JSON encoded text file with article collection",
-        )
-        self.add_option('--collectionpage', help='Title of a collection page')
-        self.add_option("-x", "--noimages",
-            action="store_true",
-            help="exclude images",
-        )
-        self.add_option("-l", "--logfile", help="log to logfile")
-        self.add_option("--template-exclusion-category",
-            help="Name of category for templates to be excluded",
-            metavar='CATEGORY',
-        )
-        self.add_option("--print-template-prefix",
-            help="Prefix for print templates (deprecated: use --print-template-pattern)",
-            metavar='PREFIX',
-        )
-        self.add_option("--print-template-pattern",
-            help="Prefix for print templates, '$1' is replaced by original template name",
-            metavar='SUBPAGE',
-        )
-        self.add_option("--template-blacklist",
-            help="Title of article containing blacklisted templates",
-            metavar='ARTICLE',
-        )
-        self.add_option("--login",
-            help='login with given USERNAME, PASSWORD and (optionally) DOMAIN',
-            metavar='USERNAME:PASSWORD[:DOMAIN]',
-        )
-        self.add_option("-d", "--daemonize", action="store_true",
-            help='become a daemon process as soon as possible',
-        )
-        self.add_option('--pid-file',
-            help='write PID of daemonized process to this file',
-        )
-        self.add_option('--title',
-            help='title for article collection',
-        )
-        self.add_option('--subtitle',
-            help='subtitle for article collection',
-        )
-        self.add_option('--editor',
-            help='editor for article collection',
-        )
-        self.add_option('--script-extension',
-            help='script extension for PHP scripts (default: .php)',
-            default='.php',
-        )
+        
+        a = self.add_option
+        
+        a("-c", "--config", action="callback", nargs=1, type="string", callback=self._cb_config, 
+          help="configuration file, ZIP file or base URL")
+        
+        a("-i", "--imagesize",
+          default=800,
+          help="max. pixel size (width or height) for images (default: 800)")
+        
+        a("-m", "--metabook",
+          help="JSON encoded text file with article collection")
+        
+        a("--collectionpage", help="Title of a collection page")
+        
+        a("-x", "--noimages", action="store_true",
+          help="exclude images")
+        
+        a("-l", "--logfile", help="log to logfile")
+        
+        a("--template-exclusion-category", metavar="CATEGORY", 
+          help="Name of category for templates to be excluded")
+        
+        a("--print-template-prefix", metavar="PREFIX",
+          help="Prefix for print templates (deprecated: use --print-template-pattern)")
+        
+        a("--print-template-pattern", metavar="SUBPAGE",
+          help="Prefix for print templates, '$1' is replaced by original template name")
+        
+        a("--template-blacklist", metavar="ARTICLE",
+          help="Title of article containing blacklisted templates")
+        
+        a("--login", metavar="USERNAME:PASSWORD[:DOMAIN]",
+          help="login with given USERNAME, PASSWORD and (optionally) DOMAIN")
+        
+        a("-d", "--daemonize", action="store_true",
+          help="become a daemon process as soon as possible")
+        
+        a("--pid-file",
+          help="write PID of daemonized process to this file")
+        
+        a("--title",
+          help="title for article collection")
+        
+        a("--subtitle",
+          help="subtitle for article collection")
+        
+        a("--editor",
+          help="editor for article collection")
+        
+        a("--script-extension",
+          default=".php",
+          help="script extension for PHP scripts (default: .php)")
+        
         
     def _cb_config(self, option, opt, value, parser):
         """handle multiple --config arguments by resetting parser.values and storing
@@ -103,20 +100,13 @@ class OptionParser(optparse.OptionParser):
         for c in self.config_values:
             if not hasattr(c, "pages"):
                 c.pages = []
-            # print c.config,  c.pages
             
-        
         if self.options.logfile:
             start_logging(self.options.logfile)
         
-        if self.options.config is None:
-            if not self.config_optional:
-                self.error('Please specify --config option. See --help for all options.')
-            return self.options, self.args
-        
         if self.options.metabook:
             self.metabook = json.loads(unicode(open(self.options.metabook, 'rb').read(), 'utf-8'))
-        
+            
         if self.options.login is not None and ':' not in self.options.login:
             self.error('Please specify username and password as USERNAME:PASSWORD.')
         
@@ -126,12 +116,11 @@ class OptionParser(optparse.OptionParser):
         except (ValueError, AssertionError):
             self.error('Argument for --imagesize must be an integer > 0.')
         
-
-        if self.args:
+        for title in self.args:
             if self.metabook is None:
                 self.metabook = metabook.collection()
-            for title in self.args:
-                self.metabook.append_article(unicode(title, 'utf-8'))
+            
+            self.metabook.append_article(unicode(title, 'utf-8'))
 
         if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
             self.error("bad --print-template-pattern argument [must contain $1, but %r does not]" % (self.options.print_template_pattern,))
