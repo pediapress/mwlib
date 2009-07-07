@@ -15,13 +15,14 @@ log = Log('mwlib.utils')
 class dummy_web_wiki(object):
     def __init__(self,  **kw):
         self.__dict__.update(**kw)
-        
+    def __repr__(self):
+        return "<dummy_web_wiki %r" % self.__dict__
+    
 def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
     if kwargs:
         log.warn('Unused parameters: %r' % kwargs)
     return zipwiki.Wiki(path)
-
 
 def wiki_obsolete_cdb(path=None,  **kwargs):
     raise RuntimeError("cdb file format has changed. please rebuild with mw-buildcdb")
@@ -74,8 +75,8 @@ url=
     def _get_wiki(self):
         import warnings
         warnings.warn("access with .wiki deprecated", DeprecationWarning, 2)
-        
         return self._wiki
+    
     def _set_wiki(self, val):
         self._wiki = val
 
@@ -127,13 +128,7 @@ class MultiEnvironment(Environment):
         
         return res
             
-            
-        
-def _makewiki(conf,
-    metabook=None,
-    username=None, password=None, domain=None,
-    script_extension=None,
-):
+def _makewiki(conf, metabook=None, **kw):
     res = Environment(metabook)
     
     url = None
@@ -149,12 +144,7 @@ def _makewiki(conf,
         url = conf
 
     if url:
-        res.wiki = dummy_web_wiki(url=url,
-            username=username,
-            password=password,
-            domain=domain,
-            script_extension=script_extension,
-        )
+        res.wiki = dummy_web_wiki(url=url, **kw)
         res.image = None
         
         return res
@@ -234,17 +224,8 @@ def _makewiki(conf,
     assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res
 
-def makewiki(conf,
-    metabook=None,
-    username=None, password=None, domain=None,
-    script_extension=None,
-):
-    res = _makewiki(conf, metabook,
-        username=username,
-        password=password,
-        domain=domain,
-        script_extension=script_extension,
-    )
+def makewiki(conf, metabook=None, **kw):
+    res = _makewiki(conf, metabook=metabook, **kw)
     if res.wiki:
         res.wiki.env = res
     if res.images:
