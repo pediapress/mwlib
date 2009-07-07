@@ -119,7 +119,7 @@ class OptionParser(optparse.OptionParser):
             if self.metabook is None:
                 self.metabook = metabook.collection()
             
-            self.metabook.append_article(unicode(title, 'utf-8'))
+            self.metabook.append_article(title)
 
         if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
             self.error("bad --print-template-pattern argument [must contain $1, but %r does not]" % (self.options.print_template_pattern,))
@@ -147,7 +147,7 @@ class OptionParser(optparse.OptionParser):
             env.images = None
 
         def setmb(name):
-            n = unicode(getattr(self.options, name) or "", "utf-8")
+            n = getattr(self.options, name)
             if n:
                 env.metabook[name] = n
 
