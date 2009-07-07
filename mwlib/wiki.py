@@ -228,8 +228,8 @@ def _makewiki(conf,
             m = dispatch[s][t]
         except KeyError:
             raise RuntimeError("cannot handle type %r in section %r" % (t, s))
-        
-        res[s] = m(**args)
+
+        setattr(res, s, m(**args))
     
     assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res

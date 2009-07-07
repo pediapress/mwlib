@@ -31,11 +31,6 @@ def buildcdb():
 type = nucdb
 path = %s
 lang = en
-
-[images]
-type = download
-url = http://upload.wikimedia.org/wikipedia/commons/
-localpath = ~/images
 """ % (os.path.abspath(output),))
 
 def show():
