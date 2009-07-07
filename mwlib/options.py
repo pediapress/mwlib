@@ -122,14 +122,22 @@ class OptionParser(optparse.OptionParser):
 
         if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
             self.error("bad --print-template-pattern argument [must contain $1, but %r does not]" % (self.options.print_template_pattern,))
-            
+
+        
+        if self.options.print_template_prefix and self.options.print_template_pattern:
+            log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
+        elif self.options.print_template_prefix:
+            self.options.print_template_pattern = '%s$1' % unicode(self.options.print_template_prefix, 'utf-8')
+
+        del self.options.print_template_prefix
+        
         return self.options, self.args
     
     def makewiki(self):
         def unioption(s):
             if s:
                 return unicode(s, "utf-8")
-
+        
         username                    = unioption(self.options.username)
         password                    = unioption(self.options.password)
         domain                      = unioption(self.options.domain)
@@ -138,11 +146,6 @@ class OptionParser(optparse.OptionParser):
         template_exclusion_category = unioption(self.options.template_exclusion_category)
         print_template_pattern      = unioption(self.options.print_template_pattern)
         
-        if self.options.print_template_prefix:
-            if print_template_pattern is not None:
-                log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
-            else:
-                print_template_pattern = '%s$1' % unicode(self.options.print_template_prefix, 'utf-8')
 
         env = wiki.makewiki(self.options.config,
                             metabook=self.metabook,
