@@ -134,24 +134,12 @@ class OptionParser(optparse.OptionParser):
                 username, password = unicode(self.options.login, 'utf-8').split(':', 1)
             else:
                 username, password, domain = unicode(self.options.login, 'utf-8').split(':', 2)
+                
         if self.options.script_extension:
             script_extension = unicode(self.options.script_extension, 'utf-8')
         else:
             script_extension = None
-
-        env = wiki.makewiki(self.options.config,
-            metabook=self.metabook,
-            username=username,
-            password=password,
-            domain=domain,
-            script_extension=script_extension,
-        )
-        if not env.metabook:
-            self.metabook =  env.metabook =  metabook.collection()
             
-        if self.options.noimages:
-            env.images = None
-
         def unioption(s):
             if s:
                 return unicode(s, "utf-8")
@@ -159,24 +147,28 @@ class OptionParser(optparse.OptionParser):
         template_blacklist = unioption(self.options.template_blacklist)
         template_exclusion_category = unioption(self.options.template_exclusion_category)
         print_template_pattern = unioption(self.options.print_template_pattern)
-            
         
         if self.options.print_template_prefix:
             if print_template_pattern is not None:
                 log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
             else:
                 print_template_pattern = '%s$1' % unicode(self.options.print_template_prefix, 'utf-8')
-        if template_blacklist\
-            or template_exclusion_category\
-            or print_template_pattern:
-            if hasattr(env.wiki, 'setTemplateExclusion'):
-                env.wiki.setTemplateExclusion(
-                    blacklist=template_blacklist,
-                    category=template_exclusion_category,
-                    pattern=print_template_pattern,
-                )
-            else:
-                log.warn('WikiDB does not support setting a template blacklist')
+
+        env = wiki.makewiki(self.options.config,
+                            metabook=self.metabook,
+                            username=username,
+                            password=password,
+                            domain=domain,
+                            template_blacklist=template_blacklist,
+                            template_exclusion_category=template_exclusion_category,
+                            print_template_pattern=print_template_pattern, 
+                            script_extension=script_extension)
+        
+        if not env.metabook:
+            self.metabook =  env.metabook =  metabook.collection()
+            
+        if self.options.noimages:
+            env.images = None
 
         def setmb(name):
             n = unicode(getattr(self.options, name) or "", "utf-8")
@@ -186,7 +178,8 @@ class OptionParser(optparse.OptionParser):
         setmb("title")
         setmb("subtitle")
         setmb("editor")
-        
+
+        # FIXME
         # add default licenses
         if self.options.config.startswith(":") and not env.metabook.licenses:
             mw_license_url = wiki.wpwikis.get(self.options.config[1:])['mw_license_url']
