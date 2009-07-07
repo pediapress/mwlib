@@ -51,16 +51,10 @@ class start_fetcher(object):
         if isinstance(api_url,  unicode):
             api_url = api_url.encode("utf-8")
         self.api_url = api_url
-        
-        login = options.login
-        username, password, domain = None, None, None
-        if login:
-            if login.count(':') == 1:
-                username, password = unicode(login, 'utf-8').split(':', 1)
-            else:
-                username, password, domain = unicode(login, 'utf-8').split(':', 2)
 
-        self.username,  self.password,  self.domain = username,  password,  domain
+        self.username = options.username
+        self.password = options.password
+        self.domain   = options.domain
         
         self.fsout = fetch.fsoutput(self.fsdir)
 
