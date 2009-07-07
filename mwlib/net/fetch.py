@@ -24,9 +24,10 @@ class shared_progress(object):
     status=None
     last_percent=0.0
     
-    def __init__(self):
+    def __init__(self, status=None):
         self.key2count = {}
-
+        self.status=status
+        
     def report(self):
         isatty = getattr(sys.stdout, "isatty", None)
         done, total = self.get_count()

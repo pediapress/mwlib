@@ -106,7 +106,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         id2wiki[x.wikiident][1].append(x)
 
     if len(id2wiki)>1:
-        progress = fetch.shared_progress()
+        progress = fetch.shared_progress(status=status)
     else:
         progress=None
         
