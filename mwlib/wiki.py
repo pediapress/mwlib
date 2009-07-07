@@ -9,14 +9,9 @@ import StringIO
 
 from mwlib.log import Log
 from mwlib import myjson
+from mwlib.metabook import wikiconf
 
 log = Log('mwlib.utils')
-
-class dummy_web_wiki(object):
-    def __init__(self,  **kw):
-        self.__dict__.update(**kw)
-    def __repr__(self):
-        return "<dummy_web_wiki %r" % self.__dict__
     
 def wiki_zip(path=None, url=None, name=None, **kwargs):
     from mwlib import zipwiki
@@ -60,6 +55,8 @@ wpwikis = dict(
 
 
 class Environment(object):
+    wikiconf = None
+    
     def __init__(self, metabook=None):
         self.metabook = metabook
         self.images = None
@@ -144,9 +141,9 @@ def _makewiki(conf, metabook=None, **kw):
         url = conf
 
     if url:
-        res.wiki = dummy_web_wiki(url=url, **kw)
+        res.wiki = None
+        res.wikiconf = wikiconf(baseurl=url, **kw)
         res.image = None
-        
         return res
 
     if os.path.exists(os.path.join(conf, "siteinfo.json")):

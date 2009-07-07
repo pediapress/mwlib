@@ -108,10 +108,14 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     if len(id2wiki)>1:
         progress = fetch.shared_progress(status=status)
     else:
-        progress=None
+        progress = None
         
     fetchers =[]
     for id, (wikiconf, articles) in id2wiki.items():
+        if id is None:
+            id = ""
+            assert len(id2wiki)==1
+        assert "/" not in id, "bad id: %r" % (id,)
         my_fsdir = os.path.join(fsdir, id)
         my_mb = collection()
         my_mb.items = articles

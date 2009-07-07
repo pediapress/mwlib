@@ -76,7 +76,10 @@ class mbobj(object):
 class wikiconf(mbobj):
     baseurl = None
     ident = None
-    
+    def __init__(self, env=None, pages=None, **kw):
+        mbobj.__init__(self, **kw)
+        
+                 
 class collection(mbobj):
     title = None
     subtitle=None
@@ -118,11 +121,13 @@ class collection(mbobj):
         return self.walk("article")
 
     def set_environment(self, env):
+        if env.wikiconf:
+            self.wikis.append(env.wikiconf)
+            
         for x in self.articles():
             if x._env is None:
                 x._env = env
                 
-        
 class source(mbobj):
     name=None
     url=None

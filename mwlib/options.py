@@ -8,6 +8,13 @@ from mwlib import wiki, metabook, log
 
 log = log.Log('mwlib.options')
 
+def ndict(**kw):
+    for k, v in kw.items():
+        if v is None:
+            del kw[k]
+    return kw
+
+        
 class OptionParser(optparse.OptionParser):
     def __init__(self, usage='%prog [OPTIONS] [ARTICLETITLE...]'):
         self.config_values = []
@@ -138,7 +145,7 @@ class OptionParser(optparse.OptionParser):
         kw = self.options.__dict__.copy()
         kw["metabook"] = self.metabook
         
-        env = wiki.makewiki(**kw)
+        env = wiki.makewiki(**ndict(**kw))
         
         if not env.metabook:
             self.metabook = env.metabook = metabook.collection()
