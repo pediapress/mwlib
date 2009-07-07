@@ -124,8 +124,15 @@ class MultiEnvironment(Environment):
             res += tmp
         
         return res
-            
+
+def ndict(**kw):
+    for k, v in kw.items():
+        if v is None:
+            del kw[k]
+    return kw
+
 def _makewiki(conf, metabook=None, **kw):
+    kw = ndict(**kw)
     res = Environment(metabook)
     
     url = None
