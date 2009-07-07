@@ -45,22 +45,17 @@ def zipdir(dirname, output=None):
 
 
         
-def make_zip(output=None, options=None, env=None, podclient=None, status=None):
+def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
     if output:
         tmpdir = tempfile.mkdtemp(dir=os.path.dirname(output))
     else:
         tmpdir = tempfile.mkdtemp()
+        
     try:
         fsdir = os.path.join(tmpdir, 'nuwiki')
         print 'creating nuwiki in %r' % fsdir
         from mwlib.apps.make_nuwiki import make_nuwiki
-        make_nuwiki(fsdir,
-            base_url=env.wiki.url,
-            metabook=env.metabook,
-            options=options,
-            podclient=podclient,
-            status=status,
-        )
+        make_nuwiki(fsdir, metabook=metabook, options=options, podclient=podclient, status=status)
 
         if output:
             fd, filename = tempfile.mkstemp(suffix='.zip', dir=os.path.dirname(output))
@@ -145,15 +140,15 @@ def main():
     try:
         try:
             env = parser.makewiki()
+            assert env.metabook, "no metabook"
+            
             from mwlib.status import Status
             status = Status(podclient=podclient, progress_range=(1, 90))
             status(progress=0)
             output = options.output
-
-            if isinstance(env.wiki, wiki.dummy_web_wiki):
-                make_zip(output, options, env, podclient=podclient, status=status)
-            else:
-                raise NotImplementedError("zip file creation from %r not supported" % (env.wiki,))
+            
+            make_zip(output, options, env.metabook, podclient=podclient, status=status)
+            
         except Exception, e:
             if status:
                 status(status='error')

@@ -138,7 +138,7 @@ class OptionParser(optparse.OptionParser):
         kw = self.options.__dict__.copy()
         kw["metabook"] = self.metabook
         
-        env = wiki.makewiki(self.options.config, **kw)
+        env = wiki.makewiki(**kw)
         
         if not env.metabook:
             self.metabook = env.metabook = metabook.collection()
@@ -157,9 +157,9 @@ class OptionParser(optparse.OptionParser):
 
         # FIXME
         # add default licenses
-        if self.options.config.startswith(":") and not env.metabook.licenses:
-            mw_license_url = wiki.wpwikis.get(self.options.config[1:])['mw_license_url']
-            env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
-                                              type="license"))
+        # if self.options.config.startswith(":") and not env.metabook.licenses:
+        #     mw_license_url = wiki.wpwikis.get(self.options.config[1:])['mw_license_url']
+        #     env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
+        #                                       type="license"))
 
         return env

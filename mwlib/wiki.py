@@ -224,8 +224,12 @@ def _makewiki(conf, metabook=None, **kw):
     assert res.wiki is not None, '_makewiki should have set wiki attribute'
     return res
 
-def makewiki(conf, metabook=None, **kw):
-    res = _makewiki(conf, metabook=metabook, **kw)
+def makewiki(config, metabook=None, **kw):
+    if not config:
+        res = Environment(metabook)
+    else:
+        res = _makewiki(config, metabook=metabook, **kw)
+        
     if res.wiki:
         res.wiki.env = res
     if res.images:

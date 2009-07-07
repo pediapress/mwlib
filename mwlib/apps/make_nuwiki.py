@@ -2,8 +2,9 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import os
 from mwlib.net import fetch, mwapi
-from mwlib.metabook import get_licenses, parse_collection_page
+from mwlib.metabook import get_licenses, parse_collection_page, collection
 from twisted.internet import reactor,  defer
 
 class start_fetcher(object):
@@ -92,22 +93,31 @@ class start_fetcher(object):
                 .addCallback(self.fetch_pages_from_metabook)
                 .addBoth(reset_podclient))
 
-def make_nuwiki(fsdir, base_url, metabook, options, podclient=None, status=None):
-    sf = start_fetcher(fsdir=fsdir, base_url=base_url, metabook=metabook, options=options, podclient=podclient, status=status)
+def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
+    id2wiki = {}
+    for x in metabook.wikis:
+        id2wiki[x.ident] = (x, [])
+        
+    for x in metabook.articles():
+        assert x.wikiident in id2wiki
+        id2wiki[x.wikiident][1].append(x)
+
+    fetchers =[]
+    for id, (wikiconf, articles) in id2wiki.items():
+        my_fsdir = os.path.join(fsdir, id)
+        my_mb = collection()
+        my_mb.items = articles
+        fetchers.append(start_fetcher(fsdir=my_fsdir, base_url=wikiconf.baseurl, metabook=my_mb, options=options, podclient=podclient, status=status))
 
     retval = []
-    def done(val):
-        retval.append(val)
-        if val is None:
-            print "done"
-        else:
-            print "done:",  val
-            
+    def done(listres):
+        retval.extend(listres)
         reactor.stop()
 
-        
-        
-    reactor.callLater(0.0, lambda: sf.run().addBoth(done))
+    def run():
+        return defer.DeferredList([x.run() for x in fetchers])
+            
+    reactor.callLater(0.0, lambda: run().addBoth(done))
     reactor.run()
     import signal
     signal.signal(signal.SIGINT,  signal.SIG_DFL)
@@ -115,9 +125,7 @@ def make_nuwiki(fsdir, base_url, metabook, options, podclient=None, status=None)
     
     if not retval:
         raise KeyboardInterrupt("interrupted")
-            
-    retval = retval[0]
-    if retval is not None:
-        raise RuntimeError(str(retval))
-    
-              
+
+    for success, val in retval:
+        if not success:
+            raise RuntimeError(str(val))
