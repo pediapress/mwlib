@@ -5,6 +5,7 @@
 import os
 from mwlib.net import fetch, mwapi
 from mwlib.metabook import get_licenses, parse_collection_page, collection
+from mwlib import myjson
 from twisted.internet import reactor,  defer
 
 class start_fetcher(object):
@@ -105,7 +106,9 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         assert x.wikiident in id2wiki
         id2wiki[x.wikiident][1].append(x)
 
-    if len(id2wiki)>1:
+    is_multiwiki = len(id2wiki)>1
+    
+    if is_multiwiki:
         progress = fetch.shared_progress(status=status)
     else:
         progress = None
@@ -114,13 +117,20 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     for id, (wikiconf, articles) in id2wiki.items():
         if id is None:
             id = ""
-            assert len(id2wiki)==1
+            assert not is_multiwiki
         assert "/" not in id, "bad id: %r" % (id,)
         my_fsdir = os.path.join(fsdir, id)
         my_mb = collection()
         my_mb.items = articles
         fetchers.append(start_fetcher(fsdir=my_fsdir, progress=progress, base_url=wikiconf.baseurl, metabook=my_mb, options=options, podclient=podclient, status=status))
 
+    if is_multiwiki:
+        if not os.path.exists(fsdir):
+            os.makedirs(fsdir)
+        open(os.path.join(fsdir, "metabook.json"),  "wb").write(metabook.dumps())
+        myjson.dump(dict(format="multi-nuwiki"), open(os.path.join(fsdir, "nfo.json"), "wb"))
+        
+        
     retval = []
     def done(listres):
         retval.extend(listres)
