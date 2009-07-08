@@ -117,11 +117,9 @@ class Wiki(ZipWikiBase):
         return source.get('interwikimap', None)
     
     def getURL(self, title, revision=None):
-        page = self.normalize_and_get_page(title, 0)
-        if page is None:
-            return None
-        
-        return page.url
+        fqname = self.nshandler.get_fqname(title, 0)
+        baseurl = self.sources.values()[0].base_url
+        return "%s/index.php?title=%s" % (baseurl, title)
     
     def getAuthors(self, title, revision=None):
         page = self.normalize_and_get_page(title, 0)
