@@ -2,11 +2,12 @@
 
 import os
 import tempfile
-
+import glob
 def pytest_generate_tests(metafunc):
-    p = os.path.abspath(os.path.join(os.path.dirname(__file__),  "speisesalz.zip"))
+    zipfiles = glob.glob(os.path.abspath(os.path.join(os.path.dirname(__file__),  "*.zip")))
     for name in writer_names():
-        metafunc.addcall(id=name, funcargs=dict(writer=name, input=p))
+        for z in zipfiles:
+            metafunc.addcall(id="%s:%s" % (name, os.path.basename(z)), funcargs=dict(writer=name, input=z))
         
 def writer_names():
     import pkg_resources
