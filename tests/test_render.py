@@ -1,7 +1,13 @@
 #! /usr/bin/env py.test
+
 import os
 import tempfile
 
+def pytest_generate_tests(metafunc):
+    p = os.path.abspath(os.path.join(os.path.dirname(__file__),  "speisesalz.zip"))
+    for name in writer_names():
+        metafunc.addcall(id=name, funcargs=dict(writer=name, input=p))
+        
 def writer_names():
     import pkg_resources
     retval = []
@@ -15,7 +21,7 @@ def writer_names():
 
     return retval
 
-def render(writer, input):
+def test_render(writer, input):
     tmp = tempfile.mktemp()
     cmd = "mw-render -w %s -c %s -o %s" % (writer, input, tmp)
     print "running", cmd
@@ -25,11 +31,3 @@ def render(writer, input):
     finally:
         if os.path.exists(tmp):
             os.unlink(tmp)
-            
-
-def test_old_zipfile():
-    p = os.path.abspath(os.path.join(os.path.dirname(__file__),  "speisesalz.zip"))
-    
-    
-    for name in writer_names():
-        yield render, name, p
