@@ -96,7 +96,7 @@ def pytest_pyfunc_call(pyfuncitem):
     # XXX2 we want to delegate actual call to next plugin
     #      (which may want to produce test coverage, etc.) 
     args = pyfuncitem._args or ()
-    kwargs = pyfuncitem.funcargs or {}
+    kwargs = getattr(pyfuncitem, "funcargs", {})
     
     res = gr_twisted.switch(lambda: pyfuncitem.obj(*args, **kwargs))
     if res:
