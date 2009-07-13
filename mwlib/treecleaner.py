@@ -1176,7 +1176,7 @@ class TreeCleaner(object):
             max_items = 0
             all_items = []
             for cell in node.children:
-                items = cell.getChildNodesByClass(Item)
+                items = [ item for item in cell.getChildNodesByClass(Item) if not item.getParentNodesByClass(ItemList)]
                 max_items = max(max_items, len(items))
                 all_items.append(items)
                 for item in cell:
