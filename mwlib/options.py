@@ -165,5 +165,4 @@ class OptionParser(optparse.OptionParser):
             env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
                                               type="license"))
 
-            print env.metabook.dumps()
         return env
