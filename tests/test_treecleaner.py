@@ -429,6 +429,52 @@ def test_removeTextlessStyles():
     showTree(tree)
     assert tree.find(BreakingReturn) and not tree.find(Emphasized)
     
-    
 
-    
+def test_splitTableLists1():
+    raw = '''
+{|
+|-
+|
+* item 1
+* item 2
+* item 3
+* item 4
+* item 5
+* item 6
+
+|
+* item 7
+* item 8
+|}
+    '''
+    tree, reports = cleanMarkup(raw)
+    numrows = len(tree.getChildNodesByClass(Row))
+    assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
+
+
+def test_splitTableLists2():
+    raw = '''
+{|
+|-
+|
+* item 1
+** item 1.1
+** item 1.2
+** item 1.3
+** item 1.4
+** item 1.5
+** item 1.6
+* item 2
+* item 3
+* item 4
+* item 5
+* item 6
+
+|
+* item 7
+* item 8
+|}
+    '''
+    tree, reports = cleanMarkup(raw)
+    numrows = len(tree.getChildNodesByClass(Row))
+    assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
