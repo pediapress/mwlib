@@ -220,13 +220,17 @@ include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
 include sandbox/expr.txt
+include sandbox/multicoll.py
 include sandbox/mw-serve-stresser.py
 include sandbox/time-expr.py
 include sandbox/time-parse.py
 include sandbox/upload.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
+include tests/lambda.zip
 include tests/memeater.py
+include tests/speisesalz-nuwiki.zip
+include tests/speisesalz.zip
 include tests/test_advtree.py
 include tests/test_convert_templates.py
 include tests/test_docbookwriter.py
@@ -245,6 +249,7 @@ include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
 include tests/test_refine.py
+include tests/test_render.py
 include tests/test_sanitychecker.py
 include tests/test_serve.py
 include tests/test_styleanalyzer.py
