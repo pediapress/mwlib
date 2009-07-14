@@ -120,8 +120,11 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
             assert not is_multiwiki
         assert "/" not in id, "bad id: %r" % (id,)
         my_fsdir = os.path.join(fsdir, id)
-        my_mb = collection()
-        my_mb.items = articles
+        if is_multiwiki:
+            my_mb = collection()
+            my_mb.items = articles
+        else:
+            my_mb = metabook
         fetchers.append(start_fetcher(fsdir=my_fsdir, progress=progress, base_url=wikiconf.baseurl, metabook=my_mb, options=options, podclient=podclient, status=status))
 
     if is_multiwiki:

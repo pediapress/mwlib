@@ -157,11 +157,13 @@ class OptionParser(optparse.OptionParser):
         setmb("subtitle")
         setmb("editor")
 
-        # FIXME
         # add default licenses
-        # if self.options.config.startswith(":") and not env.metabook.licenses:
-        #     mw_license_url = wiki.wpwikis.get(self.options.config[1:])['mw_license_url']
-        #     env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
-        #                                       type="license"))
+        cfg = self.options.config or ""
+        
+        if cfg.startswith(":") and not env.metabook.licenses:
+            mw_license_url = wiki.wpwikis.get(cfg[1:])['mw_license_url']
+            env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
+                                              type="license"))
 
+            print env.metabook.dumps()
         return env
