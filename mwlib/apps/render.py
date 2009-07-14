@@ -152,7 +152,7 @@ class Main(object):
                     key, value = wopt.split('=', 1)
                 else:
                     key, value = wopt, True
-                writer_options[key] = value
+                writer_options[str(key)] = value
         if options.language:
             writer_options['lang'] = options.language
         for option in writer_options.keys():
