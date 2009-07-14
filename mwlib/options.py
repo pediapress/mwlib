@@ -144,6 +144,7 @@ class OptionParser(optparse.OptionParser):
         
         if not env.metabook:
             self.metabook = env.metabook = metabook.collection()
+            env.init_metabook()
             
         if self.options.noimages:
             env.images = None
