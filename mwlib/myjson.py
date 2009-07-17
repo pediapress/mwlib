@@ -7,6 +7,7 @@ from mwlib import metabook
 
 try:
     import json
+    from json import loads # protect us against http://pypi.python.org/pypi/python-json/
 except ImportError:
     import simplejson as json
 
