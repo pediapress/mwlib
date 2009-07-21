@@ -180,6 +180,8 @@ class Parser(object):
                 
             if "[" in x or "]" in x:
                 return False
+            if done:
+                break
         return True
     
     def templateFromChildren(self, children):
