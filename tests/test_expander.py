@@ -1,4 +1,5 @@
 #! /usr/bin/env py.test
+# -*- coding: utf-8 -*-
 
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
@@ -443,4 +444,13 @@ def test_dynamic_parserfun():
     yield expandstr, "{{{{#if: 1|}}#switch: A | a=lower | A=UPPER }}", "UPPER"
 
     yield expandstr, "{{{{#if: 1|}}#if: 1 | yes}}", "yes"
+    
+
+
+def test_iferror_switch_default():
+    """http://code.pediapress.com/wiki/ticket/648"""
+    yield expandstr, "{{#iferror: [[foo {{bar}}]] | yes|no}}", "no"
+    yield expandstr, u"""{{#switch: bla
+| #default = {{#iferror: [[foo {{bar}}]] | yes|no}}
+}}""", "no"
     
