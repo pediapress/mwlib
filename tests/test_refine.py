@@ -335,3 +335,24 @@ def test_sup_close_sub():
     show(r)
     assert "bar" not in T.join_as_text(r[0].children), "bar should not be inside sub tag"
     
+
+def test_dd_dt_tags_inside_table():
+    r=parse_txt("""{|
+|-
+| blubb <dl> bla <dt>foobazbar</dt>
+|}
+<dl> bla <dt>foobazbar</dt>
+""")
+    show(r)
+    #assert 0 # FIXME
+
+def test_left_to_right_mark():
+    def doit(s):
+        r=parse_txt(s)
+        show(r)
+        target = r[0].target
+        assert target=="Image:foo.jpg", "wrong target"
+        
+    for mark in (u"\u200e", u"\u200f"):
+        s=u"[[Image:foo.jpg" + mark + "|thumb|foobar]]"
+        yield doit, s
