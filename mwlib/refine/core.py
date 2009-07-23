@@ -480,6 +480,7 @@ class parse_links(object):
                 start = marks[0]
                 
                 target = T.join_as_text(tokens[start+1:marks[1]]).strip()
+                target=target.strip(u"\u200e\u200f")
                 if target.startswith(":"):
                     target = target[1:]
                     colon = True
