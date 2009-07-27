@@ -199,6 +199,11 @@ class TreeCleaner(object):
 
         # remove ImageLinks which end with the following file types
         self.forbidden_file_endings = ['ogg']
+        
+        # emtpy sections are removed by removeEmptySections
+        # all node classes that have content but no text need to be listed here to prevent removal
+        self.contentWithoutTextClasses = [Gallery]
+        
 
         
     def clean(self, cleanerMethods):
@@ -1134,7 +1139,7 @@ class TreeCleaner(object):
                 return
             has_txt = False
             for c in node.children[1:]:
-                if c.getAllDisplayText():
+                if c.getAllDisplayText() or c.__class__ in self.contentWithoutTextClasses:
                     has_txt = True
                     break
             if not has_txt:
