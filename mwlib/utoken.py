@@ -227,7 +227,7 @@ class _compat_scanner(object):
         self.allowed_tags = set("""
 b big blockquote br center cite code del div em endfeed font h1 h2 h3
 h4 h5 h6 hr i index inputbox ins li ol p references rss s small span
-startfeed strike strong sub sup table td th tr tt u ul var
+startfeed strike strong sub sup table td th tr tt u ul var dl dt dd
 """.split())
         
         
