@@ -169,7 +169,7 @@ class Formatter(object):
             txt = self.pre_mode_hook(txt)
             txt = self.font_switcher.fontifyText(txt)
         elif self.source_mode:
-            txt = self.font_switcher.fontifyText(txt)
+            pass
         else:
             if self.minimize_space_mode > 0 or break_long:
                 txt = self.escapeAndHyphenateText(txt)
