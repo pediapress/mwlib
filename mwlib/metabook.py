@@ -36,7 +36,7 @@ class mbobj(object):
         self.type = self.__class__.__name__
         
     def __getitem__(self, key):
-        warnings.warn("deprecated", DeprecationWarning, 2)
+        warnings.warn("deprecated __getitem__ [%r]" % (key,), DeprecationWarning, 2)
     
         try:
             return getattr(self, str(key))
@@ -44,17 +44,17 @@ class mbobj(object):
             raise KeyError(repr(key))
     
     def __setitem__(self, key, val):
-        warnings.warn("deprecated", DeprecationWarning, 2)
+        warnings.warn("deprecated __setitem__ [%r]=" % (key, ), DeprecationWarning, 2)
         
         self.__dict__[key]=val
 
     def __contains__(self,  key):
-        warnings.warn("deprecated", DeprecationWarning, 2)
+        warnings.warn("deprecated __contains__ %r in " % (key, ), DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
         
     def get(self, key, default=None):
-        warnings.warn("deprecated", DeprecationWarning, 2)
+        warnings.warn("deprecated call get(%r)" % (key, ), DeprecationWarning, 2)
         try:
             val = getattr(self, str(key))
             if val is None:
