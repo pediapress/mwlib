@@ -39,17 +39,10 @@ class state(object):
         assert count>=2, "internal error"
         
         if count==2:
-            if self.is_italic: # close italic
-                nextstate(is_italic=False)
-            else: # open italic
-                nextstate(is_italic=True)
+            nextstate(is_italic=not self.is_italic)
             
-
         if count==3:
-            if self.is_bold:
-                nextstate(is_bold=False)
-            else:
-                nextstate(is_bold=True)
+            nextstate(is_bold=not self.is_bold)
 
             s=self.clone(apocount=self.apocount+1, previous=previous)
             
