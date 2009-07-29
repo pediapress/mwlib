@@ -68,16 +68,6 @@ name=
 url=
 """)
         self.configparser.readfp(defaults)
-
-    def _get_wiki(self):
-        import warnings
-        warnings.warn("access with .wiki deprecated", DeprecationWarning, 2)
-        return self._wiki
-    
-    def _set_wiki(self, val):
-        self._wiki = val
-
-    wiki = property(_get_wiki, _set_wiki)
     
     def init_metabook(self):
         if self.metabook:
