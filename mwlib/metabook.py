@@ -128,9 +128,14 @@ class collection(mbobj):
             if x._env is None:
                 x._env = env
 
-    def get_wiki(self, ident):
+    def get_wiki(self, ident=None, baseurl=None):
+        assert ident is not None or baseurl is not None
+        assert ident is None or baseurl is None
+
         for wikiconf in self.wikis:
-            if wikiconf.ident == ident:
+            if ident is not None and wikiconf.ident == ident:
+                return wikiconf
+            if baseurl is not None and wikiconf.baseurl == baseurl:
                 return wikiconf
         return None
                 
