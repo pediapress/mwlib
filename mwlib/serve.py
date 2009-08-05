@@ -225,10 +225,10 @@ class Application(wsgi.Application):
         if not is_new and metabook_data:
             return self.error_response('Specify either metabook or collection_id, not both')
         try:
-            base_url = post_data['base_url']
             writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
+        base_url = post_data.get('base_url')
         writer_options = post_data.get('writer_options', '')
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
@@ -317,9 +317,10 @@ class Application(wsgi.Application):
                 f.close()
             args.extend([
                 '--metabook', metabook_path,
-                '--config', base_url,
                 '--keep-zip', zip_path,
             ])
+            if bae_url:
+                args.extend(['--config', base_url])
             if writer_options:
                 args.extend(['--writer-options', writer_options])
             if template_blacklist:
@@ -460,9 +461,9 @@ class Application(wsgi.Application):
     def do_zip_post(self, collection_id, post_data, is_new=False):
         try:
             metabook_data = post_data['metabook']
-            base_url = post_data['base_url']
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
+        base_url = post_data.get('base_url')
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
         print_template_prefix = post_data.get('print_template_prefix', '')
@@ -516,11 +517,12 @@ class Application(wsgi.Application):
                 self.mwzip_cmd,
                 '--logfile', logfile,
                 '--metabook', metabook_path,
-                '--config', base_url,
                 '--posturl', post_url,
                 '--output', zip_path,
                 '--pid-file', pid_path,
             ]
+            if base_url:
+                args.extend(['--config', base_url])
             if template_blacklist:
                 args.extend(['--template-blacklist', template_blacklist])
             if template_exclusion_category:

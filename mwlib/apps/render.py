@@ -132,10 +132,6 @@ class Main(object):
             self.show_writer_info(options.writer_info)
             return
         
-
-        if options.config is None:
-            parser.error('Please specify --config.\n' + use_help)
-
         if options.output is None:
             parser.error('Please specify an output file with --output.\n' + use_help)
 
