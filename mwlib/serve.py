@@ -319,7 +319,7 @@ class Application(wsgi.Application):
                 '--metabook', metabook_path,
                 '--keep-zip', zip_path,
             ])
-            if bae_url:
+            if base_url:
                 args.extend(['--config', base_url])
             if writer_options:
                 args.extend(['--writer-options', writer_options])
