@@ -127,6 +127,12 @@ class collection(mbobj):
         for x in self.articles():
             if x._env is None:
                 x._env = env
+
+    def get_wiki(self, ident):
+        for wikiconf in self.wikis:
+            if wikiconf.ident == ident:
+                return wikiconf
+        return None
                 
 class source(mbobj):
     name=None
