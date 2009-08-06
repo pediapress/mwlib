@@ -117,9 +117,14 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     for id, (wikiconf, articles) in id2wiki.items():
         if id is None:
             id = ""
-            assert not is_multiwiki
+            assert not is_multiwiki, "id must be set in multiwiki"
+
+        if not is_multiwiki:
+            id = ""
+        
         assert "/" not in id, "bad id: %r" % (id,)
         my_fsdir = os.path.join(fsdir, id)
+        
         if is_multiwiki:
             my_mb = collection()
             my_mb.items = articles
