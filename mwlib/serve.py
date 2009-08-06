@@ -19,13 +19,42 @@ except ImportError:
 from mwlib import myjson as json
 
 from lockfile import FileLock
+from webob import Request, Response
 
-from mwlib import filequeue, log, utils, wsgi, _version
+from mwlib import filequeue, log, utils, _version
 from mwlib.metabook import calc_checksum
 
 # ==============================================================================
 
 log = log.Log('mwlib.serve')
+
+# ==============================================================================
+
+
+class FileIterable(object):
+    def __init__(self, filename):
+        self.filename = filename
+
+    def __iter__(self):
+        return FileIterator(self.filename)
+
+
+class FileIterator(object):
+    chunk_size = 4096
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.fileobj = open(self.filename, 'rb')
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        chunk = self.fileobj.read(self.chunk_size)
+        if not chunk:
+            raise StopIteration()
+        return chunk
+
 
 # ==============================================================================
 
@@ -74,17 +103,14 @@ def json_response(fn):
     
     def wrapper(*args, **kwargs):
         result = fn(*args, **kwargs)
-        if isinstance(result, wsgi.Response):
+        if isinstance(result, Response):
             return result
-        return wsgi.Response(
-            content=json.dumps(result),
-            headers={'Content-Type': 'application/json'},
-        )
+        return Response(json.dumps(result), content_type='application/json')
     return wrapper
 
 # ==============================================================================
 
-class Application(wsgi.Application):
+class Application(object):
     metabook_filename = 'metabook.json'
     error_filename = 'errors'
     status_filename = 'status'
@@ -118,26 +144,34 @@ class Application(wsgi.Application):
         self.default_writer = default_writer
         self.report_from_mail = report_from_mail
         self.report_recipients = report_recipients
+
+    def __call__(self, environ, start_response):
+        request = Request(environ)
+
+        if request.method != 'POST':
+            response = Response(status=405, allowed='POST')
+        
+        response = self.dispatch(request)
+
+        return response(environ, start_response)
     
     def dispatch(self, request):
-        if request.method != 'POST':
-            return self.http405(permitted_methods='POST')
         try:
-            command = request.post_data['command']
+            command = request.params['command']
         except KeyError:
-            return self.http500()
+            return Response(status=500)
+
         try:
             method = getattr(self, 'do_%s' % command)
         except AttributeError:
-            return self.http500()
-
+            return Response(status=500)
 
         lock = FileLock(os.path.join(self.cache_dir, 'global'))
         lock.acquire()
         try:
-            collection_id = request.post_data.get('collection_id')
+            collection_id = request.params.get('collection_id')
             if not collection_id:
-                collection_id = self.new_collection(request.post_data)
+                collection_id = self.new_collection(request.params)
                 is_new = True
             else:
                 is_new = False
@@ -145,13 +179,13 @@ class Application(wsgi.Application):
             lock.release()
         
         if not self.check_collection_id(collection_id):
-            return self.http404()
+            return Response(status=404)
 
         lock = FileLock(self.get_collection_dir(collection_id))
         lock.acquire()
         try:
             try:
-                return method(collection_id, request.post_data, is_new)
+                return method(collection_id, request.params, is_new)
             except Exception, exc:
                 self.send_report_mail('exception', command=command)
                 return self.error_response('error executing command %r: %s' % (
@@ -439,15 +473,16 @@ class Application(wsgi.Application):
             log.info('download %s %s' % (collection_id, writer))
         
             output_path = self.get_path(collection_id, self.output_filename, writer)
-            status = self.read_status_file(collection_id, writer)
-            response = wsgi.Response(content=open(output_path, 'rb'))
             os.utime(output_path, None)
+            status = self.read_status_file(collection_id, writer)
+            response = Response(content_length=os.path.getsize(output_path))
+            response.app_iter = FileIterable(output_path)
             if 'content_type' in status:
-                response.headers['Content-Type'] = status['content_type'].encode('utf-8', 'ignore')
+                response.content_type = status['content_type'].encode('utf-8', 'ignore')
             else:
                 log.warn('no content type in status file')
             if 'file_extension' in status:
-                response.headers['Content-Disposition'] = 'inline; filename=collection.%s' %  (
+                response.content_disposition = 'inline; filename=collection.%s' %  (
                     status['file_extension'].encode('utf-8', 'ignore'),
                 )
             else:
