@@ -357,3 +357,21 @@ def test_left_to_right_mark():
     for mark in (u"\u200e", u"\u200f"):
         s=u"[[Image:foo.jpg" + mark + "|thumb|foobar]]"
         yield doit, s
+
+def test_image_blocknode():
+    
+    def blocknode(s):
+        r=parse_txt(s)[0]
+        assert r.blocknode
+        
+    def noblocknode(s):
+        r=parse_txt(s)[0]
+        assert not r.blocknode
+
+    yield noblocknode, "[[Image:foo.png]]"
+    yield noblocknode, "[[Image:foo.png|150px]]"
+    yield noblocknode, "[[Image:foo.png|frameless]]"
+    
+    yield blocknode, "[[Image:foo.png|left]]"
+    yield blocknode, "[[Image:foo.png|thumb]]"
+    yield blocknode, "[[Image:foo.png|frame]]"
