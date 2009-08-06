@@ -445,6 +445,9 @@ class parse_links(object):
         if mod_type is None:
             return False
         util.handle_imagemod(node, mod_type, mod_match)
+        if node.thumb or node.align or node.frame=="frame":
+            node.blocknode=True
+            
         return True
     
     def extract_image_modifiers(self, marks, node):

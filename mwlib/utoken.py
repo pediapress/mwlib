@@ -71,6 +71,12 @@ class token(object):
     langlink = None
     namespace = None
     blocknode = False
+
+    # image attributes
+    align = None
+    thumb = False
+    frame = None
+    
     
     t_end = 0
     t_text = 1
