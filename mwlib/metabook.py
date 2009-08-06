@@ -83,6 +83,7 @@ class wikiconf(mbobj):
 class collection(mbobj):
     title = None
     subtitle=None
+    editor = None
     version = 1
     summary = ""
     items = []
