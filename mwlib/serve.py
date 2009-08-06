@@ -482,7 +482,7 @@ class Application(object):
             else:
                 log.warn('no content type in status file')
             if 'file_extension' in status:
-                response.content_disposition = 'inline; filename=collection.%s' %  (
+                response.headers['Content-Disposition'] = 'inline; filename=collection.%s' %  (
                     status['file_extension'].encode('utf-8', 'ignore'),
                 )
             else:
