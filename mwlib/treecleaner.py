@@ -174,9 +174,20 @@ class TreeCleaner(object):
 
         # list of css classes OR id's which trigger the removal of the node from the tree
         # the following list is wikipedia specific
-        self.noDisplayClasses = ['hiddenStructure', 'dablink', 'editlink', 'metadata', 'noprint', 'portal', 'sisterproject', 'NavFrame', 'geo-multi-punct',
-                                 'coordinates_3_ObenRechts', 'microformat', 'navbox', 'Vorlage_Gesundheitshinweis'] # FIXME: should really be "geo microformat...
-
+        self.noDisplayClasses = ['hiddenStructure',
+                                 'dablink',
+                                 'editlink',
+                                 'metadata',
+                                 'noprint',
+                                 'portal',
+                                 'sisterproject',
+                                 'NavFrame',
+                                 'geo-multi-punct',
+                                 'coordinates_3_ObenRechts',
+                                 'microformat',
+                                 'navbox',
+                                 'Vorlage_Gesundheitshinweis',
+                                 ]
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
         # children of different classes are deleted
@@ -1098,7 +1109,7 @@ class TreeCleaner(object):
         if node.__class__ == Item:
             if node.children and node.children[0].__class__ == Paragraph:
                 node.replaceChild(node.children[0], node.children[0].children)
-
+                self.report('remove leading Paragraph in Item')
         for c in node.children:
             self.removeLeadingParaInList(c)
 
@@ -1110,6 +1121,7 @@ class TreeCleaner(object):
                     i = Item()
                     node.replaceChild(child, [i])
                     i.appendChild(child)
+                    self.report('ItemList contained %r. node wrapped in Item node' % child.__class__.__name__)
                     
         for c in node.children:
             self.fixItemLists(c)
@@ -1143,6 +1155,7 @@ class TreeCleaner(object):
                     has_txt = True
                     break
             if not has_txt:
+                self.report('removing empty section')
                 node.parent.removeChild(node)
                 return
         
@@ -1192,6 +1205,7 @@ class TreeCleaner(object):
                     break
             if only_lists and max_items > 5:
                 self._splitRow(node, max_items, all_items)
+                self.report('splitting list only table row')
                 return
             
         for c in node.children:
