@@ -1109,7 +1109,7 @@ class TreeCleaner(object):
         if node.__class__ == Item:
             if node.children and node.children[0].__class__ == Paragraph:
                 node.replaceChild(node.children[0], node.children[0].children)
-
+                self.report('remove leading Paragraph in Item')
         for c in node.children:
             self.removeLeadingParaInList(c)
 
@@ -1121,6 +1121,7 @@ class TreeCleaner(object):
                     i = Item()
                     node.replaceChild(child, [i])
                     i.appendChild(child)
+                    self.report('ItemList contained %r. node wrapped in Item node' % child.__class__.__name__)
                     
         for c in node.children:
             self.fixItemLists(c)
@@ -1154,6 +1155,7 @@ class TreeCleaner(object):
                     has_txt = True
                     break
             if not has_txt:
+                self.report('removing empty section')
                 node.parent.removeChild(node)
                 return
         
@@ -1203,6 +1205,7 @@ class TreeCleaner(object):
                     break
             if only_lists and max_items > 5:
                 self._splitRow(node, max_items, all_items)
+                self.report('splitting list only table row')
                 return
             
         for c in node.children:
