@@ -346,7 +346,7 @@ class mwapi(object):
         return self.do_request(action="query", **kwargs)
         
     def fetch_pages(self, titles=None, revids=None):        
-        kwargs = dict(prop="revisions",
+        kwargs = dict(prop="revisions|categories",
                       rvprop='ids|content',
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)

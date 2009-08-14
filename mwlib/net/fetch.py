@@ -192,6 +192,7 @@ class fetcher(object):
         self._nshandler = None
         
         self.redirects = {}
+        self.cat2members = {}
         
         self.count_total = 0
         self.count_done = 0
@@ -267,8 +268,8 @@ class fetcher(object):
             ns, partial, fqname = self.nshandler.splitname(self.template_exclusion_category, 14)
             if ns!=14:
                 print "bad category name:", repr(self.template_exclusion_category)
-            else:
-                self._refcall(lambda: self.api.get_categorymembers(fqname).addCallback(self._cb_excluded_category))
+            # else:
+            #     self._refcall(lambda: self.api.get_categorymembers(fqname).addCallback(self._cb_excluded_category))
             
     def _cb_excluded_category(self, data):
         members = data.get("categorymembers")
@@ -312,10 +313,32 @@ class fetcher(object):
     def _got_edits(self, data):
         edits = data.get("pages").values()
         self.edits.extend(edits)
+
+    def _add_catmember(self, title, entry):
+        try:
+            self.cat2members[title].append(entry)
+        except KeyError:
+            self.cat2members[title] = [entry]
+            
         
+    def _handle_categories(self, data):
+        pages = data.get("pages", {}).values()
+        for p in pages:
+            categories = p.get("categories")
+            if not categories:
+                continue
+            
+            e = dict(title = p.get("title"), ns = p.get("ns"), pageid=p.get("pageid"))
+
+            for c in categories:
+                cattitle = c.get("title")
+                if cattitle:
+                    self._add_catmember(cattitle, e)
+                
     def _got_pages(self, data):
         r = data.get("redirects", [])
-        self._update_redirects(r)        
+        self._update_redirects(r)
+        self._handle_categories(data)
         self.fsout.write_pages(data)
         return data
 
@@ -556,8 +579,16 @@ class fetcher(object):
             self.result.callback(None)
             
         self._stopped = True
-        
+
+    def _compute_excluded(self):
+        if self.template_exclusion_category:
+            ns, partial, fqname = self.nshandler.splitname(self.template_exclusion_category, 14)
+            excluded = self.cat2members.get(fqname)
+            if excluded:
+                self.fsout.write_excluded(excluded)
+            
     def finish(self):
+        self._compute_excluded()
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
