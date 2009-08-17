@@ -474,7 +474,7 @@ class Application(object):
             return response
         except Exception, exc:
             log.ERROR('exception in do_download(): %r' % exc)
-            return self.http500()
+            return Response(status=500)
     
     @json_response
     def do_zip_post(self, collection_id, post_data, is_new=False):
