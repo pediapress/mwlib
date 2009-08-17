@@ -85,11 +85,12 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
-2009-??-?? release ?????
+2009-8-17 release 0.12.1
 ------------------------
 - added mw-client and mw-check-service
 - mw-serve-ctl can now send report mails
 - fixes for race conditions in mwlib.filequeue (mw-watch)
+- lots of other improvements...
 
 2009-5-6 release 0.11.2
 -----------------------
