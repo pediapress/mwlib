@@ -305,7 +305,7 @@ class fix_tables(object):
             if x.type != T.t_complex_table:
                 continue
 
-            rows = [c for c in x.children if c.type==T.t_complex_table_row]
+            rows = [c for c in x.children if c.type in (T.t_complex_table_row, T.t_complex_caption)]
             if not rows:
                 x.type = T.t_complex_node
                 x.tagname = None
