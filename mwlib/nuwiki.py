@@ -266,7 +266,7 @@ class adapt(object):
         )
 
     def getParsedArticle(self, title, revision=None):
-        if revision is not None:
+        if revision:
             page = self.nuwiki.get_page(None, revision)
         else:
             page = self.normalize_and_get_page(title, 0)
