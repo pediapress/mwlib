@@ -149,9 +149,9 @@ class Application(object):
         request = Request(environ)
 
         if request.method != 'POST':
-            response = Response(status=405, allowed='POST')
-        
-        response = self.dispatch(request)
+            response = Response(status=405)
+        else:
+            response = self.dispatch(request)
 
         return response(environ, start_response)
     
