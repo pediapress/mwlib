@@ -7,7 +7,7 @@ from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util
 from mwlib import tagext, uniq, nshandling
 
-from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows
+from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows, fix_tables
 from mwlib.refine.tagparser import tagparser
 
 try:
@@ -872,6 +872,7 @@ def parse_txt(txt, xopts=None, **kwargs):
                td_parse_h, 
                parse_sections,
                parse_div,
+               fix_tables, 
                parse_tables,
                parse_uniq]
     

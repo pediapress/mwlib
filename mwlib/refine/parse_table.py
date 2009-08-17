@@ -293,3 +293,20 @@ class parse_tables(object):
         while stack:
             maketable()
         
+class fix_tables(object):
+    def __init__(self, tokens, xopts):
+        self.xopts = xopts
+        self.tokens = tokens
+        self.run()
+        
+    def run(self):
+        tokens = self.tokens
+        for x in tokens:
+            if x.type != T.t_complex_table:
+                continue
+
+            rows = [c for c in x.children if c.type==T.t_complex_table_row]
+            if not rows:
+                x.type = T.t_complex_node
+                x.tagname = None
+                
