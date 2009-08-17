@@ -53,7 +53,7 @@ def show():
 
     from mwlib import wiki, expander
     
-    db = wiki.makewiki(conf)['wiki']
+    db = wiki.makewiki(conf).wiki
     
     for a in articles:
         if options.template:
@@ -61,8 +61,12 @@ def show():
         else:
             defaultns=0
             
-        raw = db.normalize_and_get_page(a, defaultns)
-
+        page = db.normalize_and_get_page(a, defaultns)
+        if page:
+            raw = page.rawtext
+        else:
+            raw = None
+            
         if raw:
             if options.expand:
                 te = expander.Expander(raw, pagename=a, wikidb=db)
