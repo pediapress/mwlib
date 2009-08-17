@@ -390,17 +390,16 @@ class Application(object):
         if is_new:
             return self.error_response('POST argument required: collection_id')
 
+        def retval(**kw):
+            return dict(collection_id=collection_id, writer=writer, **kw)
+        
         writer = post_data.get('writer', self.default_writer)
             
         log.info('render_status %s %s' % (collection_id, writer))
         
         output_path = self.get_path(collection_id, self.output_filename, writer)
         if os.path.exists(output_path):
-            return {
-                'collection_id': collection_id,
-                'writer': writer,
-                'state': 'finished',
-            }
+            return retval(state="finished")
         
         error_path = self.get_path(collection_id, self.error_filename, writer)
         if os.path.exists(error_path):
@@ -417,28 +416,13 @@ class Application(object):
                     error=text,
                     metabook=metabook,
                 )
-            return {
-                'collection_id': collection_id,
-                'writer': writer,
-                'state': 'failed',
-                'error': text,
-            }
+            return retval(state="failed", error=text)
 
         status = self.read_status_file(collection_id, writer)
         if status.get('state') == 'error':
-            return {
-                'collection_id': collection_id,
-                'writer': writer,
-                'state': 'failed',
-                'error': 'unknown error',
-            }
+            return retval(state="failed", error="unknown error")
         
-        return {
-            'collection_id': collection_id,
-            'writer': writer,
-            'state': 'progress',
-            'status': status,
-        }
+        return retval(state="progress", status=status)
     
     @json_response
     def do_render_kill(self, collection_id, post_data, is_new=False):
