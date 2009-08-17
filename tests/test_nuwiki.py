@@ -31,7 +31,7 @@ class Test_nuwiki_xnet(object):
         self.nuwiki = adapt(zipfile.ZipFile(self.zipfn, 'r')).nuwiki
 
     def test_init(self):
-        assert 'Vorlage:ImDruckVerbergen' in self.nuwiki.excluded
+        assert 'Vorlage:Navigationsleiste' in self.nuwiki.excluded
         assert 'Monty Python' in self.nuwiki.revisions
         assert self.nuwiki.siteinfo['general']['base'] == 'http://de.wikipedia.org/wiki/Wikipedia:Hauptseite'
         assert self.nuwiki.siteinfo['general']['lang'] == 'de'
