@@ -247,8 +247,15 @@ def test_percent_table_style():
         assert t.vlist['width'] == u'80%', "got wrong value %r" % (t.vlist['width'],)
 
 
-    check('{| class="toccolours" width="80%" |}')
-    check('{| class="toccolours" width=80% |}')
+    check('''{| class="toccolours" width="80%"
+|-
+| foo
+|}''')
+    
+    check('''{| class="toccolours" width=80%
+|-
+| foo
+|}''')
 
 def test_parseParams():
     def check(s, expected):
