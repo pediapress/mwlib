@@ -128,7 +128,6 @@ include mwlib/writer/miscutils.py
 include mwlib/writer/styleutils.py
 include mwlib/writer/wplicenses.csv
 include mwlib/writerbase.py
-include mwlib/wsgi.py
 include mwlib/xfail.py
 include mwlib/xhtmlwriter.py
 include mwlib/xmlcat/__init__.py
