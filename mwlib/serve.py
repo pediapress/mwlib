@@ -366,7 +366,19 @@ class Application(object):
             if print_template_pattern:
                 args.extend(['--print-template-pattern', print_template_pattern])
             if login_credentials:
-                args.extend(['--login', login_credentials])
+                login = login_credentials.split(":", 2)
+                if len(login)==2:
+                    user, password = login
+                    domain=None
+                elif len(login)==3:
+                    user, password, domain = login
+                else:
+                    raise RuntimeError("bad login_credentials argument")
+                args.extend(["--username",  user, "--password", password])
+                
+                if domain:
+                    args.extend(["--domain", domain])
+                    
             if script_extension:
                 args.extend(['--script-extension', script_extension])
             if language:
