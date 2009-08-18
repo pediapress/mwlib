@@ -177,7 +177,7 @@ class fetcher(object):
         self.fsout = fsout
         self.licenses = licenses
         self.status = status
-        self.progress = progress or shared_progress()
+        self.progress = progress or shared_progress(status=status)
 
         self.template_exclusion_category = template_exclusion_category
         self.print_template_pattern = print_template_pattern
