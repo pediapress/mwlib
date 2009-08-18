@@ -242,7 +242,7 @@ class TreeCleaner(object):
             for cleaner in cleanerList:
                 cleaner(child)
             if self.status_cb:
-                self.status_cb(progress=100*i/len(children))
+                self.status_cb(progress=100*i/total_children)
 
     def cleanAll(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
