@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-8-18 release 0.12.2
+------------------------
+- fix status callbacks to pod partner
+
 2009-8-17 release 0.12.1
 ------------------------
 - added mw-client and mw-check-service
