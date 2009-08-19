@@ -3,7 +3,7 @@
 import os
 
 def main():
-    files = [x.strip() for x in os.popen("hg manifest")]
+    files = [x.strip() for x in os.popen("git ls-files")]
     files.append("README.html")
     files.append("docs/commands.html")
     files.append("docs/configfiles.html")
