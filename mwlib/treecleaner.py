@@ -144,6 +144,7 @@ class TreeCleaner(object):
                                   Paragraph:[PreFormatted],
                                   Section:[PreFormatted],
                                   Gallery:[PreFormatted],
+                                  Table:[DefinitionList]
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
