@@ -794,7 +794,7 @@ class TreeCleaner(object):
             if not node.children:
                 self.report('section contained no children')
                 return
-            if not node.children[0].children:
+            if not node.children[0].getAllDisplayText():
                 children = [BreakingReturn()]
                 if len(node.children) > 1: # at least one "content" node
                     children.extend(node.children)
