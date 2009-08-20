@@ -1,5 +1,3 @@
-syntax: glob
-
 *.so
 *.o
 *.pyc
@@ -10,7 +8,7 @@ syntax: glob
 t/*
 ID
 mwlib.egg-info
-build
+build/
 trunk
 mwlib/*.cc
 README.html
@@ -20,11 +18,4 @@ bla*
 t.py
 mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
-.\#*
-\#*\#
 .ropeproject/*
-
-syntax: re
-^[a-z]$
-^t[0-9]?\.py$
-
