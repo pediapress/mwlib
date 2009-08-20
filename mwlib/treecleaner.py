@@ -336,7 +336,6 @@ class TreeCleaner(object):
         1. SINGLE CELL COLSPAN: if a row contains a single cell, the
            colspanning amount is limited to the maximum table width
         """
-
         # SINGLE CELL COLSPAN 
         if node.__class__ == Table:
             maxwidth = 0
@@ -1146,9 +1145,10 @@ class TreeCleaner(object):
 
     def removeEmptySections(self, node):
         """Remove section nodes which do not contain any text """
-        if node.__class__ == Section and node.parent:
+        if node.__class__ == Section and node.parent and not node.getParentNodesByClass(Table):
             if len(node.children) == 1:
                 node.parent.removeChild(node)
+                self.report('removed empty section')
                 return
             has_txt = False
             for c in node.children[1:]:
