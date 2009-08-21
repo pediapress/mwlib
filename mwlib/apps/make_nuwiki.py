@@ -104,7 +104,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         id2wiki[x.ident] = (x, [])
 
     for x in metabook.articles():
-        assert x.wikiident in id2wiki
+        assert x.wikiident in id2wiki, "no wikiconf for %r (%s)" % (x.wikiident,  x)
         id2wiki[x.wikiident][1].append(x)
 
     is_multiwiki = len(id2wiki)>1
