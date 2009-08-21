@@ -358,7 +358,7 @@ class mwapi(object):
 
     def fetch_imageinfo(self, titles, iiurlwidth=800):
         kwargs = dict(prop="imageinfo",
-                      iiprop="url|user|comment|url|sha1|metadata|size",
+                      iiprop="url|user|comment|url|sha1|size",
                       iiurlwidth=iiurlwidth)
         
         self._update_kwargs(kwargs, titles, [])
