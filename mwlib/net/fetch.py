@@ -212,25 +212,25 @@ class fetcher(object):
         titles, revids = self._split_titles_revids(pages)
         
 
-        limit = self.api.api_request_limit
-        dl = []
+        self.fetch_used("titles", titles)
+        self.fetch_used("revids", revids)
+        
+        self.report()
+        self.dispatch()
 
-        def fetch_used(name, lst):            
+    def fetch_used(self, name, lst):
+        def doit():
+            dl = []
+            limit = self.api.api_request_limit
+
             for bl in splitblocks(lst, limit):
                 kw = {name:bl}
                 dl.append(self._refcall(lambda: self.api.fetch_used(fetch_images=self.fetch_images, **kw).addCallback(self._cb_used)))
 
+            return defer.DeferredList(dl)
+
+        return self._refcall(lambda: doit().addCallbacks(self._cb_finish_used, self._cb_finish_used))
         
-        fetch_used("titles", titles)
-        fetch_used("revids", revids)
-
-
-        self._refcall(lambda: defer.DeferredList(dl).addCallbacks(self._cb_finish_used, self._cb_finish_used))
-        
-            
-        self.report()
-        self.dispatch()
-
     def get_siteinfo_for(self, m):
         return self.simult.get(m.baseurl, m.get_siteinfo)
                                 
@@ -329,8 +329,36 @@ class fetcher(object):
                 cattitle = c.get("title")
                 if cattitle:
                     self._add_catmember(cattitle, e)
+
+    def _find_redirect(self,  data):
+        pages = data.get("pages", {}).values()
+        targets = []
+        for p in pages:
+            
+            title = p.get("title")
+            ns = p.get("ns")
+            revisions = p.get("revisions")
+            
+            if revisions is None:
+                continue
+            
+            for r in revisions:
+                revid = r.get("revid")
+                txt = r["*"]
+                if not txt:
+                    continue
+                
+                redirect = self.nshandler.redirect_matcher(txt)
+                if redirect:
+                    self.redirects[title] = redirect
+                    targets.append(redirect)
+                    
+        if targets:
+            self.fetch_used("titles", targets)
+            
                 
     def _got_pages(self, data):
+        self._find_redirect(data)
         r = data.get("redirects", [])
         self._update_redirects(r)
         self._handle_categories(data)
