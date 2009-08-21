@@ -163,7 +163,7 @@ class fetcher(object):
                  progress=None,
                  print_template_pattern=None,
                  template_exclusion_category=None,
-                 imagesize=800):
+                 imagesize=800, fetch_images=True):
         self.result = defer.Deferred()
         
         self._stopped = False 
@@ -183,6 +183,7 @@ class fetcher(object):
         self.print_template_pattern = print_template_pattern
 
         self.imagesize = imagesize
+        self.fetch_images = fetch_images
 
         if self.print_template_pattern:
             self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
@@ -223,7 +224,7 @@ class fetcher(object):
         def fetch_used(name, lst):            
             for bl in splitblocks(lst, limit):
                 kw = {name:bl}
-                dl.append(self._refcall(lambda: self.api.fetch_used(**kw).addCallback(self._cb_used)))
+                dl.append(self._refcall(lambda: self.api.fetch_used(fetch_images=self.fetch_images, **kw).addCallback(self._cb_used)))
 
         
         fetch_used("titles", titles)

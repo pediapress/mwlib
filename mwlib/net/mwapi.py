@@ -337,8 +337,13 @@ class mwapi(object):
         if revids:
             kwargs["revids"] = "|".join([str(x) for x in revids])
         
-    def fetch_used(self, titles=None, revids=None):
-        kwargs = dict(prop="revisions|templates|images",
+    def fetch_used(self, titles=None, revids=None, fetch_images=True):
+        if fetch_images:
+            prop = "revisions|templates|images"
+        else:
+            prop = "revisions|templates"
+            
+        kwargs = dict(prop=prop,
                       rvprop='ids',
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)

@@ -43,7 +43,8 @@ class start_fetcher(object):
                                      progress=self.progress, 
                                      print_template_pattern=self.options.print_template_pattern,
                                      template_exclusion_category=self.options.template_exclusion_category,
-                                     imagesize=self.options.imagesize)
+                                     imagesize=self.options.imagesize,
+                                     fetch_images=not self.options.noimages)
         return self.fetcher.result
     
     def init_variables(self):
