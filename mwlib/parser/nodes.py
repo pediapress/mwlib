@@ -83,7 +83,7 @@ class Chapter(Node):
     pass
     
 class Article(Node):
-    pass
+    url = None
     
 class Paragraph(Node):
     pass
