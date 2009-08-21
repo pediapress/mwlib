@@ -69,6 +69,8 @@ class nshandler(object):
 
         if 'general' in siteinfo and siteinfo['general'].get('sitename') == 'Wikipedia' and 'interwikimap' in siteinfo:
             fix_wikipedia_siteinfo(siteinfo)
+
+        self.redirect_matcher = get_redirect_matcher(siteinfo, self)
         
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
@@ -155,3 +157,18 @@ def get_nshandler_for_lang(lang):
         si = siteinfo.get_siteinfo("en")
         assert si, "siteinfo-en not found"
     return nshandler(si)
+
+def get_redirect_matcher(siteinfo, handler=None):
+    redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+
+    if handler is None:
+        handler =  nshandler(siteinfo)
+    
+    def redirect(text):
+        mo = redirect_rex.search(text)
+        if mo:
+            name = mo.group('redirect').split("|", 1)[0]
+            return handler.get_fqname(name)
+        return None
+    
+    return redirect

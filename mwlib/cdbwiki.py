@@ -109,19 +109,6 @@ class page(object):
         self.__dict__.update(**kw)
 
 
-def get_redirect_matcher(siteinfo):
-    redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
-    
-    nshandler =  nshandling.nshandler(siteinfo)
-    
-    def redirect(text):
-        mo = redirect_rex.search(text)
-        if mo:
-            name = mo.group('redirect').split("|", 1)[0]
-            return nshandler.get_fqname(name)
-        return None
-    
-    return redirect
 
 class WikiDB(object):
     max_redirects = 5
@@ -137,7 +124,7 @@ class WikiDB(object):
         self.nfo =  dict(base_url="http://%s.wikipedia.org/w/" % (lang, ), # FIXME
                          script_extension = ".php", 
                          ) # FIXME
-        self.redirect_matcher = get_redirect_matcher(self.siteinfo)
+        self.redirect_matcher = self.nshandler.redirect_matcher
         
     def get_siteinfo(self):
         return self.siteinfo
