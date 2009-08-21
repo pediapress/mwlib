@@ -1,0 +1,23 @@
+{
+    "items": [
+        {
+            "content_type": "text/x-wiki",
+            "revision": 32234800,
+            "title": "Kolumne (Satz)",
+            "type": "article",
+            "wikiident": "de"
+        }
+    ],
+    "licenses": [],
+    "summary": "",
+    "type": "collection",
+    "version": 1,
+    "wikis": [
+        {
+            "baseurl": "http://de.wikipedia.org/w/",
+            "ident": "de",
+            "type": "wikiconf"
+        }
+    ]
+}
+
