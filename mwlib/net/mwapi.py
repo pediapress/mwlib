@@ -1,13 +1,11 @@
 """api.php client, url guessing"""
 
+import os
 import urlparse
 import urllib
 from twisted.internet import reactor, defer
 from twisted.web import client 
 from twisted.python import failure
-
-
-
 
 try:
     import json
@@ -153,6 +151,10 @@ class mwapi(object):
     max_connections = 20
     siteinfo = None
     max_retry_count = 2
+    try:
+        rvlimit = int(os.environ.get("RVLIMIT", "500"))
+    except ValueError:
+        rvlimit = 500
     
     def __init__(self, baseurl, script_extension='.php'):
         self.baseurl = baseurl
@@ -162,6 +164,7 @@ class mwapi(object):
         self.qccount = 0
         self.cookies = {}
 
+        
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.baseurl, hex(id(self)))
 
@@ -364,7 +367,8 @@ class mwapi(object):
         self._update_kwargs(kwargs, titles, [])
         return self.do_request(action="query", **kwargs)
     
-    def get_edits(self, title, revision, rvlimit=500):
+    def get_edits(self, title, revision, rvlimit=None):
+        rvlimit = rvlimit or self.rvlimit
         kwargs = {
             'titles': title,
             'redirects': 1,
@@ -376,7 +380,21 @@ class mwapi(object):
         if revision is not None:
             kwargs['rvstartid'] = revision
 
-        return self.do_request(action="query", **kwargs)
+        def setrvlimit(res):
+            print "setting rvlimit to 50 for %s" % (self.baseurl, )
+            self.rvlimit=50
+            return res
+        
+        def retry(err):
+            if rvlimit <= 50:
+                return err
+            
+            kwargs["rvlimit"] = 50
+            
+            return self.do_request(action="query", **kwargs).addCallback(setrvlimit)
+                
+            
+        return self.do_request(action="query", **kwargs).addErrback(retry)
         
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
