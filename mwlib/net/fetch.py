@@ -110,12 +110,6 @@ class fsoutput(object):
             
             if revisions is None:
                 continue
-
-            tmp = []
-            for x in revisions:
-                x = x.copy()
-                x["*"] = len(x["*"])
-                tmp.append(x)
             
             for r in revisions:
                 revid = r.get("revid")
