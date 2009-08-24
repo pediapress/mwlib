@@ -531,3 +531,19 @@ def get_nodeweight(obj):
     elif k == 'ImageLink' and obj.isInline():
         return 'InlineImageLink', 1
     return k, 1
+
+# -- extract text from pdf file. used for testing only.
+def pdf2txt(path):
+    """extract text from pdf file"""
+    # based on http://code.activestate.com/recipes/511465/
+    import pyPdf
+    
+    content = []
+    pdf = pyPdf.PdfFileReader(file(path, "rb"))
+    
+    numpages = pdf.getNumPages()
+    for i in range(0, numpages):
+        # Extract text from page and add to content
+        content.append(pdf.getPage(i).extractText())
+
+    return "\n".join(content)
