@@ -84,11 +84,16 @@ class nuwiki(object):
         return self.siteinfo
     
     def get_page(self, name, revision=None):
-        if revision is not None:
+        if revision is not None and name not in self.redirects:
             try:
-                return self.revisions.get(int(revision))
+                page = self.revisions.get(int(revision))
             except TypeError:
                 print "Warning: non-integer revision %r" % revision
+            if page.rawtext:
+                redirect = self.nshandler.redirect_matcher(page.rawtext)
+                if redirect:
+                    return self.get_page(self.nshandler.get_fqname(redirect))
+            return page
         
         name = self.redirects.get(name, name)
         
@@ -249,6 +254,7 @@ class adapt(object):
                     continue
 
         fqname = self.nshandler.get_fqname(title)
+        fqname = self.redirects.get(fqname, fqname)
         revisions = self.edits.get(fqname, [])
         authors = get_authors(revisions)
         return authors
