@@ -422,6 +422,10 @@ class fetcher(object):
                 continue
             ii = ii[0]
             thumburl = ii.get("thumburl", None)
+
+            if thumburl is None: # fallback for old mediawikis
+                thumburl = ii.get("url", None)
+                
             # FIXME limit number of parallel downloads
             if thumburl:
                 # FIXME: add Callback that checks correct file size
