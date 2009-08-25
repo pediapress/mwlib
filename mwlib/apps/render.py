@@ -192,6 +192,7 @@ class Main(object):
                     else:
                         f.write('traceback\n')
                         traceback.print_exc(file=f) 
+                    f.write("sys.argv=%r\n" % (sys.argv, ))
                     f.close()
                     os.rename(tmpfile, options.error_file)
                 raise
