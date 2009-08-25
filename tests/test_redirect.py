@@ -25,7 +25,7 @@ def render_get_text(metabook):
 def no_redirect(mb):
     mb = os.path.join(here, mb)
     txt = render_get_text(mb)
-    print txt
+    print "txt:",  repr(txt)
     assert "redirect" not in txt.lower(), "redirect not resolved"
     
 
