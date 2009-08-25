@@ -71,7 +71,13 @@ class nshandler(object):
             fix_wikipedia_siteinfo(siteinfo)
 
         self.redirect_matcher = get_redirect_matcher(siteinfo, self)
-        
+
+    # workaround for a copy.deepcopy bug in python 2.4
+    # should be save to return the instance itself without copying
+    # since it's basically immutable.
+    def __deepcopy__(self, memo):
+        return self
+    
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
         namespaces = self.siteinfo["namespaces"].values()
