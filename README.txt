@@ -83,8 +83,12 @@ Credits
 project ((C) 2002-2004 Python Software Foundation).
 The remaining parts are distributed under the BSD license:
 
-ChangeLog
+Changelog
 ======================================================================
+2009-8-25 release 0.12.4
+------------------------
+- fix missing page case in get_page when looking for redirects
+
 2009-8-25 release 0.12.3
 ------------------------
 - better compatibility with older mediawiki installations
