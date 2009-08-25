@@ -85,6 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 ChangeLog
 ======================================================================
+2009-8-25 release 0.12.3
+------------------------
+- better compatibility with older mediawiki installations
+
 2009-8-18 release 0.12.2
 ------------------------
 - fix status callbacks to pod partner
