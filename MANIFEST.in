@@ -226,6 +226,8 @@ include sandbox/time-parse.py
 include sandbox/upload.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
+include tests/canthus.mb.json
+include tests/kolumne.mb.json
 include tests/lambda.zip
 include tests/memeater.py
 include tests/speisesalz-nuwiki.zip
@@ -247,6 +249,7 @@ include tests/test_nuwiki.py
 include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
+include tests/test_redirect.py
 include tests/test_refine.py
 include tests/test_render.py
 include tests/test_sanitychecker.py
@@ -263,3 +266,4 @@ include tests/test_writerutils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipwiki.py
 include tools/build_rng_grammar.py
+include tools/set-interwiki.py
