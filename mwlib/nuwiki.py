@@ -89,11 +89,12 @@ class nuwiki(object):
                 page = self.revisions.get(int(revision))
             except TypeError:
                 print "Warning: non-integer revision %r" % revision
-            if page.rawtext:
-                redirect = self.nshandler.redirect_matcher(page.rawtext)
-                if redirect:
-                    return self.get_page(self.nshandler.get_fqname(redirect))
-            return page
+            else:
+                if page and page.rawtext:
+                    redirect = self.nshandler.redirect_matcher(page.rawtext)
+                    if redirect:
+                        return self.get_page(self.nshandler.get_fqname(redirect))
+                return page
         
         name = self.redirects.get(name, name)
         
