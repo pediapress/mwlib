@@ -11,6 +11,8 @@ import StringIO
 import subprocess
 import time
 import urllib2
+import urlparse
+
 try:
     from hashlib import md5
 except ImportError:
@@ -250,7 +252,14 @@ class Application(object):
         if ext is not None:
             p += '.' + ext[:10]
         return p
+
+    def is_good_baseurl(self, url):
+        netloc = urlparse.urlparse(url)[1].lower()
+        if netloc.startswith("localhost") or netloc.startswith("127.0") or netloc.startswith("192.168"):
+            return False
+        return True
     
+                     
     @json_response
     def do_render(self, collection_id, post_data, is_new=False):
         metabook_data = post_data.get('metabook')
@@ -262,7 +271,13 @@ class Application(object):
             writer = post_data.get('writer', self.default_writer)
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
+        
         base_url = post_data.get('base_url')
+        
+        if base_url and not self.is_good_baseurl(base_url):
+            log.bad("bad base_url: %r" % (base_url, ))
+            return self.error_response("bad base_url %r. check your $wgServer and $wgScriptPath variables" % (base_url, ))
+        
         writer_options = post_data.get('writer_options', '')
         template_blacklist = post_data.get('template_blacklist', '')
         template_exclusion_category = post_data.get('template_exclusion_category', '')
