@@ -79,6 +79,7 @@ def splitRow(row, params):
             for c in cellchildren:
                 cell.appendChild(c)
             newrow.appendChild(cell)
+            newrow.suppress_bottom_border = True
         newrows.append(newrow)   
 
     return newrows
