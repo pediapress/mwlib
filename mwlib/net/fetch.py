@@ -9,7 +9,7 @@ import os
 import sys
 import urlparse
 
-from mwlib import metabook, utils, nshandling
+from mwlib import metabook, utils, nshandling, conf
 
 from mwlib.net import mwapi
 from mwlib.net.pod import PODClient
@@ -252,6 +252,9 @@ class fetcher(object):
         return titles, revids
 
     def _cb_finish_used(self, data):
+        if conf.noedits:
+            return
+        
         for title, rev in self.title2latest.items():
              self._refcall(lambda: self.api.get_edits(title, rev).addCallback(self._got_edits))
         self.title2latest = {}
