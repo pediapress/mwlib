@@ -22,8 +22,12 @@ class Status(object):
     ):
         self.filename = filename
         self.podclient = podclient
-        self.status = status or {}
+        if status is not None:
+            self.status = status
+        else:
+            self.status = {}
         self.progress_range = progress_range
+
     
     def getSubRange(self, start, end):
         progress_range = (self.scaleProgress(start), self.scaleProgress(end))
@@ -48,13 +52,18 @@ class Status(object):
                 self.status['progress'] = progress
         
         if article is not None and article != self.status.get('article'):
-            self.status['article'] = article
+            if 'article' in self.status and not article: # allow explicitly deleting the article from the status
+                del self.status['article']
+            else:
+                self.status['article'] = article
+            
+
 
         if self.podclient is not None:
             self.podclient.post_status(**self.status)
 
         msg = []
-        msg.append("%s%%" % (self.status.get("progress", 0),))
+        msg.append("%s%%" % (self.status.get("progress", self.progress_range[0]),))
         msg.append(self.status.get("status", ""))
         msg.append(self.status.get("article", ""))
         msg = u" ".join(msg).encode("utf-8")
