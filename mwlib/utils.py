@@ -77,7 +77,7 @@ def fsescape(s):
     res = []
     for x in s:
         c = ord(x)
-        if c>127 or c==47: # 47==slash
+        if c>127 or c==47 or c==92: # 47==slash, 92==backslash
             res.append("~%s~" % c)
         elif c==126: # ord("~")==126
             res.append("~~")
