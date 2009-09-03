@@ -113,6 +113,7 @@ class page(object):
 class WikiDB(object):
     max_redirects = 5
     def __init__(self, dir, prefix='wiki', lang="en"):
+        self.redirects = {}
         self.dir = os.path.abspath(dir)
         self.reader = ZCdbReader(os.path.join(self.dir, prefix))
         
