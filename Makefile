@@ -36,11 +36,14 @@ sdist-upload:: all
 egg:: all
 	python setup.py bdist_egg
 
-update::
-	git pull
+clean-install::
 	git clean -xfd
 	make sdist
 	easy_install dist/*
+
+update::
+	git pull
+	make clean-install
 
 clean::
 	rm -rf mwlib/*.pyc mwlib/*.so build dist mwlib.egg-info *.pyc docs/*.html README.html
