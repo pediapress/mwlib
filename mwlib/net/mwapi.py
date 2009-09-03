@@ -74,7 +74,7 @@ def try_api_urls(urls, apipool=None):
     if apipool is None:
         apipool=pool()
 
-    return apipool.try_api_urls()
+    return apipool.try_api_urls(urls)
 
         
 
