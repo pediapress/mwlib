@@ -130,7 +130,7 @@ class OptionParser(optparse.OptionParser):
         if self.options.print_template_prefix and self.options.print_template_pattern:
             log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
         elif self.options.print_template_prefix:
-            self.options.print_template_pattern = '%s$1' % unicode(self.options.print_template_prefix, 'utf-8')
+            self.options.print_template_pattern = '%s$1' % self.options.print_template_prefix
 
         del self.options.print_template_prefix
         
