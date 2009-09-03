@@ -312,7 +312,7 @@ class mwapi(object):
         if self.siteinfo is not None:
             return defer.succeed(self.siteinfo)
 
-        siprop = "general namespaces interwikimap namespacealiases magicwords".split()
+        siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
 
         def got_err(r):
             siprop.pop()
