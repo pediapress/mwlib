@@ -43,16 +43,17 @@ def guess_api_urls(url):
     @returns: list of possible api.php urls
     @rtype: list
     """
+    retval = []
     if isinstance(url, unicode):
         url = url.encode("utf-8")
         
     try:
         scheme, netloc, path, params, query, fragment = urlparse.urlparse(url)
     except ValueError:
-        return []
+        return retval
     
     if not (scheme and netloc):
-        return []
+        return retval
     
 
     path_prefix = ''
@@ -63,10 +64,10 @@ def guess_api_urls(url):
     
     prefix = '%s://%s%s' % (scheme, netloc, path_prefix)
 
-    retval = []
-    for path in ('/w/', '/wiki/', '/'):
-        base_url = '%s%sapi.php' % (prefix, path)
+    for _path in (path+"/", '/w/', '/wiki/', '/'):
+        base_url = '%s%sapi.php' % (prefix, _path)
         retval.append(base_url)
+    
     return retval
 
 def try_api_urls(urls, apipool=None):
