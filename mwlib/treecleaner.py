@@ -13,7 +13,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
                            HorizontalRule, ImageLink, ImageMap, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
-                           Row, Section, Small, Source, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
+                           Row, Section, Small, Source, Span, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
                            Underline, URL, Var)
 
 from mwlib.treecleanerhelper import getNodeHeight, splitRow
@@ -122,7 +122,8 @@ class TreeCleaner(object):
                             HorizontalRule, ImageLink, ImageMap, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, Timeline, URL]
         # exceptions to the above. if any of the list items is explicitly set as a css style the node is not removed
-        self.childless_exceptions = {Div: [u'width', u'height']}
+        self.childless_exceptions = {Div: [u'width', u'height'],
+                                     Span: [u'width', u'height'],}
 
         # FIXME: not used currently. remove if this is not used soon. could be used as reference
         # list nodes that apply styles to their children
