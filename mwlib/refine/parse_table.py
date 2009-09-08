@@ -310,3 +310,66 @@ class fix_tables(object):
                 x.type = T.t_complex_node
                 x.tagname = None
                 
+def extract_garbage(tokens, is_allowed,  is_whitespace=None):
+    if is_whitespace is None:
+        is_whitespace = lambda t: t.type in (T.t_newline,  T.t_break)
+        
+    res = []
+    i = 0
+    start = None
+    
+    while i<len(tokens):
+        if is_whitespace(tokens[i]):
+            if start is None:
+                start = i
+            i+=1
+        elif is_allowed(tokens[i]):
+            start = None
+            i+=1
+        else:
+            if start is None:
+                start = i
+            i+=1
+            
+            # find end of garbage
+            
+            while i<len(tokens):
+                if is_allowed(tokens[i]):
+                   break
+                i+= 1
+                
+            garbage = tokens[start:i]
+            del tokens[start:i]
+            i = start
+            res.append(T(type=T.t_complex_node, children=garbage))
+            
+    return res
+
+class remove_table_garbage(object):
+    need_walker = False
+    
+    def __init__(self, tokens, xopts):
+        from mwlib.refine import core
+        walker = core.get_token_walker()
+        for t in walker(tokens):
+            self.tokens = t
+            self.run()
+        
+    def run(self):
+        tokens = self.tokens
+        tableidx = 0
+        while tableidx<len(tokens):
+            if tokens[tableidx].type==T.t_complex_table:
+                # garbage = extract_garbage(tokens[tableidx].children,
+                #                           is_allowed=lambda t: t.type in (T.t_complex_table_row, T.t_complex_caption))
+
+                tmp = []
+                for c in tokens[tableidx].children:
+                    if c.type==T.t_complex_table_row:
+                        rowgarbage = extract_garbage(c.children,
+                                                     is_allowed=lambda t: t.type in (T.t_complex_table_cell, ))
+                        tmp.extend(rowgarbage)
+                        
+                        
+                tokens[tableidx+1:tableidx+1] = tmp
+            tableidx+=1

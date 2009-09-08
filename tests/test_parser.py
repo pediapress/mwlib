@@ -167,7 +167,6 @@ blubb
     assert "blubb" in res
     assert "{|" in res
 
-@xfail
 def test_cell_parse_bug():
     """http://code.pediapress.com/wiki/ticket/17"""
     # mediawiki actually pulls out that ImageLink from the table...
