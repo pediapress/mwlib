@@ -7,3 +7,8 @@ class _Version(tuple):
 
 version = _Version((0,12,4))
 del _Version
+
+try:
+    from mwlib._gitversion import gitid, gitversion
+except ImportError:
+    gitid = gitversion = ""
