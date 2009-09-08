@@ -416,51 +416,6 @@ class TreeCleaner(object):
         for c in node.children:
             self.transformSingleColTables(c)
         
-
-    # FIXME: replace this by implementing and using
-    # getParentStyleInfo(style='blub') where parent styles are needed
-    def inheritStyles(self, node, inheritStyle={}):
-        """style information is handed down to child nodes."""
-
-        def flattenStyle(styleHash):
-            res =  {}
-            for k,v in styleHash.items():
-                if isinstance(v,dict):
-                    for _k,_v in v.items():
-                        if isinstance(_v, basestring):
-                            res[_k.lower()] = _v.lower() 
-                        else:
-                            res[_k.lower()]= _v
-                else:
-                    if isinstance(v, basestring):
-                        res[k.lower()] = v.lower() 
-                    else:
-                        res[k.lower()] = v
-            return res
-
-        def cleanInheritStyles(styleHash):
-            sh = copy.copy(styleHash)
-            ignoreStyles = ['border', 'border-spacing', 'background-color', 'background', 'class', 'margin', 'padding', 'align', 'colspan', 'rowspan',
-                            'empty-cells', 'rules', 'clear', 'float', 'cellspacing', 'display', 'visibility']
-            for style in ignoreStyles:
-                sh.pop(style, None)
-            return sh
-
-        style = getattr(node, 'vlist', {})
-        nodeStyle = inheritStyle
-        if style:
-            nodeStyle.update(flattenStyle(style))
-            node.vlist = nodeStyle        
-        elif inheritStyle:
-            node.vlist = nodeStyle
-        else:
-            nodeStyle = {}
-
-        for c in node.children:
-            _is = cleanInheritStyles(nodeStyle)
-            self.inheritStyles(c, inheritStyle=_is)
-
-
     def _getNext(self, node): #FIXME: name collides with advtree.getNext
         if not (node.next or node.parent):
             return
@@ -962,7 +917,6 @@ class TreeCleaner(object):
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
-    
         if node.__class__ == Table:
             split_table = False
             for row in node.children:
@@ -1038,7 +992,7 @@ class TreeCleaner(object):
                 for sibling in image.siblings:
                     if image.children and image.children == sibling.children and sibling.parent:
                         sibling.parent.removeChild(sibling)
-
+                        self.report('fixed infobox')
         for c in node.children:
             self.fixInfoBoxes(c)
 
@@ -1056,6 +1010,7 @@ class TreeCleaner(object):
                     display_text.append(c.getAllDisplayText().strip())
                 if not ''.join(display_text).strip() and section.parent:
                     section.parent.removeChild(section)
+                    self.report('removed empty reference list')
                         
         for c in node.children:
             self.removeEmptyReferenceLists(c)
