@@ -12,3 +12,5 @@ try:
     from mwlib._gitversion import gitid, gitversion
 except ImportError:
     gitid = gitversion = ""
+
+display_version = gitversion or str(version)
