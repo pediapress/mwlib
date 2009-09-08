@@ -85,9 +85,10 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
-2009-8-25 release 0.12.4
+2009-9-8 release 0.12.5
 ------------------------
 - fix missing page case in get_page when looking for redirects
+- some minor bugfixes
 
 2009-8-25 release 0.12.3
 ------------------------

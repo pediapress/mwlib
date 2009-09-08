@@ -104,70 +104,6 @@ def escapeattr(val):
 
    
 
-class MWXMLWriter(object):
-    """
-    basic writer that translate parse tree nodes to XML
-    the emitted XML is lossless 1:1 representation of the parse tree
-    """
-
-    header='''<?xml version="1.0" encoding="UTF-8"?>
-'''
-    def __init__(self, env=None, status_callback=None):
-        self.root = ET.Element("mwlibxml")
-        
-    def getTree(self, debuginfo=""):
-        indent(self.root) # breaks XHTML (proper rendering at least) if activated!
-        return self.root
-    
-    def asstring(self):
-        return self.header + ET.tostring(self.getTree())
-    
-    def writeparsetree(self, tree):
-        out = StringIO.StringIO()
-        parser.show(out, tree)
-        self.root.append(ET.Comment(out.getvalue().replace("--", " - - ")))
-
-    def writeBook(self, book, output=None):
-        self.write(book)
-        self.writeparsetree(book)
-        if output:
-            open(output, "w").write(self.asstring())
-
-       
-    def writeText(self, obj, parent):
-        if parent.getchildren(): # add to tail of last tag
-            t = parent.getchildren()[-1]
-            if not t.tail:
-                t.tail = obj.caption
-            else:
-                t.tail += obj.caption
-        else:
-            if not parent.text:
-                parent.text = obj.caption
-            else:
-                parent.text += obj.caption
-
-    def write(self, obj, parent=None):
-        if parent is None:
-            parent = self.root
-        # if its text, append to last node
-        if isinstance(obj, parser.Text):
-            self.writeText(obj, parent)
-        else:
-            e = ET.SubElement(parent, obj.__class__.__name__.lower())
-            attrs = obj.__dict__.keys()
-            for k in attrs:
-                val = getattr(obj,k)
-                if k not in ("_parentref", "children") and val:
-                    if isinstance(val, dict):
-                        for kk, vv in val.items():
-                            e.set(kk, escapeattr(vv))
-                    else:
-                        e.set(k, escapeattr(val))
-            setVList(e, obj)
-            for c in obj.children[:]:
-                ce = self.write(c,e)
-            return e
 
 class SkipChildren(object):
     "if returned by the writer no children are processed"
@@ -778,12 +714,6 @@ def xhtmlwriter(env, output, status_callback, writer=MWXHTMLWriter):
 xhtmlwriter.description = 'XHTML 1.0 Transitional'
 xhtmlwriter.content_type = 'text/xml'
 xhtmlwriter.file_extension = 'html'
-
-def xmlwriter(env, output, status_callback):
-    xhtmlwriter(env, output, status_callback, writer=MWXMLWriter)
-xmlwriter.description = 'XML representation of the parse tree'
-xmlwriter.content_type = 'text/xml'
-xmlwriter.file_extension = 'xml'
 
 def main():
     for fn in sys.argv[1:]:

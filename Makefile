@@ -28,7 +28,11 @@ develop:: all
 	python setup.py develop
 
 sdist:: all
+	echo gitversion=\"$(shell git describe --tags)\" >mwlib/_gitversion.py
+	echo gitid=\"$(shell git rev-parse HEAD)\" >>mwlib/_gitversion.py
+
 	python setup.py -q build sdist
+	rm -f mwlib/_gitversion.py mwlib/_gitversion.pyc
 
 sdist-upload:: all
 	python setup.py build sdist upload
