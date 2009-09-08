@@ -7,7 +7,6 @@
 import sys
 import os
 import zlib
-import re
 
 try:
     import simplejson as json
