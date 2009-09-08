@@ -253,9 +253,12 @@ class parse_singlequote(object):
                 
                     
 class parse_preformatted(object):
+    need_walker = False
     def __init__(self, tokens, xopts):
-        self.tokens = tokens
-        self.run()
+        walker = get_token_walker(skip_tags=set(["table", "li", "tr", "@section"]))
+        for t in walker(tokens):
+            self.tokens = t
+            self.run()
 
     def run(self):
         tokens = self.tokens
