@@ -375,3 +375,17 @@ def test_image_blocknode():
     yield blocknode, "[[Image:foo.png|left]]"
     yield blocknode, "[[Image:foo.png|thumb]]"
     yield blocknode, "[[Image:foo.png|frame]]"
+
+def test_no_preformatted_inside_li():
+    """stupid: http://code.pediapress.com/wiki/ticket/676"""
+    r = parse_txt("""<ol><li>in li:
+  foo
+  bar
+</li></ol>
+""")
+    core.show(r)
+    pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
+    assert not pre,  "should not contain preformatted"
+    
+    
+
