@@ -96,6 +96,7 @@ def main():
                                             'mw-check-service = mwlib.apps.serve:check_service',
                                             'mw-watch = mwlib.apps.watch:main',
                                             'mw-client = mwlib.apps.client:main',
+                                            'mw-version = mwlib._version:main',
                                             ],
                         'mwlib.writers': ['odf = mwlib.odfwriter:writer',
                                           'xhtml = mwlib.xhtmlwriter:xhtmlwriter',
