@@ -389,3 +389,9 @@ def test_no_preformatted_inside_li():
     
     
 
+def test_preformatted_empty_line():
+    r=parse_txt("foo\n  pre1\n  \n  pre2\nbar\n")
+    core.show(r)
+    pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
+    assert len(pre)==1, "expected exactly one preformatted node"
+
