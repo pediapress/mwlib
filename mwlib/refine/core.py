@@ -796,6 +796,16 @@ class XBunch(object):
     def __getattr__(self, name):
         return None
 
+def fix_break_between_pre(tokens, xopt):
+    idx = 0
+    while idx<len(tokens)-1:
+        t = tokens[idx]
+        if t.type==T.t_break and t.text.startswith(" ") and tokens[idx+1].type==T.t_pre:
+            tokens[idx:idx+1] = [T(type=T.t_pre, text=" "), T(type=T.t_newline, text=u"\n")]
+            idx += 2
+        else:
+            idx+=1
+
 def fixlitags(tokens, xopts):
     root = T(type=T.t_complex_tag, tagname="div")
     todo = [(root, tokens)]
@@ -838,7 +848,7 @@ def parse_txt(txt, xopts=None, **kwargs):
         xopts.uniquifier = uniquifier
 
     tokens = tokenize(txt, uniquifier=uniquifier)
-
+    
     td1 =  tagparser()
     a = td1.add
     
@@ -878,7 +888,8 @@ def parse_txt(txt, xopts=None, **kwargs):
                remove_table_garbage, 
                fix_tables, 
                parse_tables,
-               parse_uniq]
+               parse_uniq,
+               fix_break_between_pre]
     
     combined_parser(parsers)(tokens, xopts)
     return tokens
