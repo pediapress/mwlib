@@ -39,6 +39,8 @@ typedef enum {
 	t_tablecaption,
 	t_urllink,
 	t_uniq,
+
+	t_ebad,
 } mwtok;
 
 struct Token
@@ -58,16 +60,25 @@ public:
 		cursor = start;
 		line_startswith_section = -1;
 		tablemode=0;
+		last_ebad = false;
 	}
 
 	int found(mwtok val) {
-		if (val==t_text && tokens.size()) {
+		if (val==t_ebad) {
+			last_ebad=true;
+			return tokens.size()-1;
+		}
+
+		if (val==t_text && tokens.size() && !last_ebad) {
 			Token &previous_token (tokens[tokens.size()-1]);
 			if (previous_token.type==val) {
 				previous_token.len += cursor-start;
 				return tokens.size()-1;
 			}
 		}
+		
+		last_ebad = false;
+
 		Token t;
 		t.type = val;
 		t.start = (start-source);
@@ -105,6 +116,7 @@ public:
 	Py_UNICODE *end;
 	vector<Token> tokens;
 
+	bool last_ebad;
 	int line_startswith_section;
 	int tablemode;
 	struct {
@@ -139,7 +151,7 @@ re2c:yyfill:enable = 0 ;
 */
 
 /*!re2c
-  any = [^\000];
+  any = [^\000\XEBAD];
   ftp = "ftp://" [-a-zA-Z0-9_+${}~?=/@#&*(),:.']+ ;
   mailto = "mailto:" [-a-zA-Z0-9_!#$%*./?|^{}`~&'+=]+ "@" [-a-zA-Z0-9_.]+ ;
   irc = "irc://" [a-zA-Z0-9./]+ ;
@@ -229,6 +241,7 @@ not_bol:
 	marker = cursor;
 
 /*!re2c
+  "\XEBAD" {RET(t_ebad);} 
   "[" mailto {RET(t_urllink);}
   mailto {RET(t_http_url);}
   "[" irc {RET(t_urllink);}

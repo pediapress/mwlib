@@ -57,13 +57,15 @@ class nuwiki(object):
             jmeta, rawtext = p.split("\n", 1)
             meta = json.loads(jmeta)
             pg = Page(meta, rawtext)
-            if pg.title not in self.excluded:
-                revid = meta.get("revid")
-                if revid is None:
-                    self.revisions[pg.title] = pg
-                    continue
+            if pg.title in self.excluded:
+                pg.rawtext = unichr(0xebad)
+            revid = meta.get("revid")
+            if revid is None:
+                self.revisions[pg.title] = pg
+                continue
 
-                self.revisions[meta["revid"]] = pg
+            self.revisions[meta["revid"]] = pg
+            
             # else:
             #     print "excluding:", repr(pg.title)
                 
