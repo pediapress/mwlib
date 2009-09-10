@@ -486,8 +486,9 @@ class Application(object):
             output_path = self.get_path(collection_id, self.output_filename, writer)
             os.utime(output_path, None)
             status = self.read_status_file(collection_id, writer)
-            response = Response(content_length=os.path.getsize(output_path))
+            response = Response()
             response.app_iter = FileIterable(output_path)
+            response.content_length = os.path.getsize(output_path)
             if 'content_type' in status:
                 response.content_type = status['content_type'].encode('utf-8', 'ignore')
             else:
