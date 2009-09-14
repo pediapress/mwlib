@@ -163,7 +163,7 @@ def parse():
     
     w = wiki.makewiki(conf)
     
-    db = w['wiki']
+    db = w.wiki
 
     if options.all:
         if not hasattr(db, "articles"):
@@ -174,7 +174,12 @@ def parse():
     import time
     for x in articles:
         try:
-            raw = db.normalize_and_get_page(x, 0)
+            page = db.normalize_and_get_page(x, 0)
+            if page:
+                raw = page.rawtext
+            else:
+                raw = None
+                
             # yes, raw can be None, when we have a redirect to a non-existing article.
             if raw is None: 
                 continue
