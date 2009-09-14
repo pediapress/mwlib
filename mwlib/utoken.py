@@ -173,6 +173,10 @@ class token(object):
             r.append(repr(self.langlink))
         if self.type==self.t_complex_style:
             r.append(repr(self.caption))
+        elif self.caption:
+            r.append("->")
+            r.append(repr(self.caption))
+            
         return u"".join(r)
     
             
