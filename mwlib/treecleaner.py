@@ -1062,7 +1062,7 @@ class TreeCleaner(object):
 
     def removeLeadingParaInList(self, node):
 
-        if node.__class__ == Item:
+        if node.__class__ in [Item, Reference]:
             if node.children and node.children[0].__class__ == Paragraph:
                 node.replaceChild(node.children[0], node.children[0].children)
                 self.report('remove leading Paragraph in Item')
