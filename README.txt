@@ -25,7 +25,7 @@ unpack it and run::
 
 (this will also install setuptools)
 
-You can also install the latest `mwlib tip`_ with::
+You can also install the latest `mwlib development version`_ with::
 
   $ easy_install mwlib==dev
 
@@ -248,4 +248,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _SpamBayes: http://spambayes.sourceforge.net/
 .. _PIL: http://www.pythonware.com/products/pil/
 .. _lxml: http://codespeak.net/lxml/
-.. _mwlib tip: http://code.pediapress.com/hg/mwlib/archive/tip.tar.gz#egg=mwlib-dev
+.. _mwlib development version: http://code.pediapress.com/git/mwlib/?p=mwlib;a=snapshot;h=HEAD;sf=tgz#egg=mwlib-dev
