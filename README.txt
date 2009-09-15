@@ -85,6 +85,20 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-9-15 release 0.12.6
+------------------------
+- fix for reference nodes
+- allow most characters in urls
+- fix for setting content-length in response
+- fix problem with blacklisted templates creating preformatted nodes (#630)
+- do not split preformatted nodes on non-empty whitespace only lines
+- do not create preformatted nodes inside li tags
+- pull garbage out of table rows. fix #17.
+- dont remove empty spans if an explicit size is given.
+- uncomment fix_wikipedia_siteinfo and add pnb as interwiki link
+- remove mwxml writer. 
+- add mw-version program
+
 2009-9-8 release 0.12.5
 ------------------------
 - fix missing page case in get_page when looking for redirects
