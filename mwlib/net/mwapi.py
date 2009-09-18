@@ -355,6 +355,17 @@ class mwapi(object):
 
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
+
+    def fetch_categories(self, titles=None, revids=None):
+        kwargs = dict(prop="categories",
+                      # rvprop='ids',
+                      imlimit=self.api_result_limit,
+                      tllimit=self.api_result_limit)
+        if titles:
+            kwargs['redirects'] = 1
+
+        self._update_kwargs(kwargs, titles, revids)
+        return self.do_request(action="query", **kwargs)
         
     def fetch_pages(self, titles=None, revids=None):        
         kwargs = dict(prop="revisions|categories",
