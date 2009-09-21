@@ -373,7 +373,7 @@ class mwapi(object):
         
     def fetch_pages(self, titles=None, revids=None):        
         kwargs = dict(prop="revisions|categories",
-                      rvprop='ids|content',
+                      rvprop='ids|content|timestamp|user',
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)
         if titles:
