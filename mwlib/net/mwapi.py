@@ -257,7 +257,7 @@ class mwapi(object):
         reactor.callLater(0.0, self._maybe_fetch)
         return d
         
-    def do_request(self, **kwargs):
+    def do_request(self, query_continue=True, **kwargs):
         result = defer.Deferred()
         
         retval = {}
@@ -281,7 +281,7 @@ class mwapi(object):
             
             qc = data.get("query-continue", {}).values()
             
-            if qc: 
+            if qc and query_continue:
                 kw = kwargs.copy()
                 for d in qc:
                     for k,v in d.items(): # dict of len(1)
