@@ -198,7 +198,12 @@ class mwapi(object):
             raise RuntimeError("login failed: %r" % (res, ))
             
         return client.getPage(self.baseurl, method="POST",  postdata=postdata, headers=headers,  cookies=self.cookies).addCallback(got_page)
-            
+
+    def post_request(self, **kw):
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        postdata = urllib.urlencode(kw)
+        return client.getPage(self.baseurl,  method="POST",  postdata=postdata, headers=headers, cookies=self.cookies)
+    
     def _fetch(self, url):
         errors = []
         d = defer.Deferred()
