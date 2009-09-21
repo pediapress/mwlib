@@ -215,8 +215,12 @@ class mwapi(object):
             else:
                 d.callback(val)
             
-                
-        client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
+        try:
+            client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
+        except Exception, err: # pyopenssl missing??
+            print "FATAL:", err
+            os._exit(10)
+            
         return d
     
     def _maybe_fetch(self):
