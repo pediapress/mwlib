@@ -201,6 +201,10 @@ class mwapi(object):
 
     def post_request(self, **kw):
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        for k,v in kw.items():
+            if isinstance(v, unicode):
+                kw[k] = v.encode("utf-8")
+        
         postdata = urllib.urlencode(kw)
         return client.getPage(self.baseurl,  method="POST",  postdata=postdata, headers=headers, cookies=self.cookies)
     
