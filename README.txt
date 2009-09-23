@@ -85,6 +85,11 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-9-23 release 0.12.7
+------------------------
+- ensure that files extracted from zip files end up in the destination
+  directory.
+
 2009-9-15 release 0.12.6
 ------------------------
 - fix for reference nodes
