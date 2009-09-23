@@ -72,7 +72,7 @@ class fsoutput(object):
         os.makedirs(os.path.join(self.path, "images"))
         self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "wb")
         # self.revfile.write("\n -*- mode: wikipedia -*-\n")
-        self.seen = set()
+        self.seen = dict()
         self.imgcount = 0
         
     def close(self):
@@ -117,9 +117,10 @@ class fsoutput(object):
                 if revid not in self.seen:
                     rev = dict(title=title, ns=ns)
                     if revid is not None:
-                        self.seen.add(revid)
+                        self.seen[revid] = rev
                         rev["revid"] = revid
-
+                    self.seen[title] = rev
+                    
                     header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
                     self.revfile.write(header)
                     self.revfile.write(txt.encode("utf-8"))
@@ -158,6 +159,8 @@ class fetcher(object):
                  print_template_pattern=None,
                  template_exclusion_category=None,
                  imagesize=800, fetch_images=True):
+        self.pages = pages
+        
         self.result = defer.Deferred()
         
         self._stopped = False 
@@ -590,8 +593,11 @@ class fetcher(object):
         self.report()
         
         if self.count_done==self.count_total:
-            self.finish()
-            self.fatal_error = None
+            try:
+                self.finish()
+                self.fatal_error = None
+            except Exception, err:
+                self.fatal_error = str(err)
             print
             self._stop_reactor()
 
@@ -616,8 +622,25 @@ class fetcher(object):
             excluded = self.cat2members.get(fqname)
             if excluded:
                 self.fsout.write_excluded(excluded)
-            
+                
+    def _sanity_check(self):
+        seen = self.fsout.seen
+        for title, revid in self.pages:
+            if revid is not None:
+                if revid in seen:
+                    continue
+
+            n = self.nshandler.get_fqname(title)
+            n = self.redirects.get(n, n)
+                
+            if n in seen:
+                continue
+            raise RuntimeError("%r could not be fetched" % ((title, revid), ))
+                    
+        seen = self.fsout.seen
+        
     def finish(self):
+        self._sanity_check()
         self._compute_excluded()
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
