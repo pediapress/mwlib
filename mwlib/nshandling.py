@@ -172,6 +172,7 @@ def get_redirect_matcher(siteinfo, handler=None):
         mo = redirect_rex.search(text)
         if mo:
             name = mo.group('redirect').split("|", 1)[0]
+            name = name.split("#")[0]
             return handler.get_fqname(name)
         return None
     
