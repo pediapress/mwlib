@@ -27,9 +27,7 @@ def merge_data(dst, src):
         assert type(dst)==type(src), "cannot merge %r with %r" % (type(dst), type(src))
         
         if isinstance(dst, list):
-            for x in src:
-                if x not in dst:
-                    dst.append(x)
+            dst.extend(src)
         elif isinstance(dst, dict):
             for k, v in src.items():
                 if k in dst:
