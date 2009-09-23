@@ -174,26 +174,21 @@ def extract_member(zipfile, member, dstdir):
 
     assert dstdir.endswith(os.path.sep), "/ missing at end"
     
-
-    # don't include leading "/" from file name if present
-    if member.filename[0] == '/':
-        targetpath = os.path.join(dstdir, member.filename[1:])
-    else:
-        targetpath = os.path.join(dstdir, member.filename)
-
-    targetpath = os.path.normpath(targetpath)
+    targetpath = os.path.normpath(os.path.join(dstdir, member.filename))
     
     if not targetpath.startswith(dstdir):
         raise RuntimeError("bad filename in zipfile %r" % (targetpath, ))
         
     # Create all upper directories if necessary.
-    upperdirs = os.path.dirname(targetpath)
-    if upperdirs and not os.path.exists(upperdirs):
+    if member.filename.endswith("/"):
+        upperdirs = targetpath
+    else:
+        upperdirs = os.path.dirname(targetpath)
+        
+    if not os.path.isdir(upperdirs):
         os.makedirs(upperdirs)
 
-    if member.filename[-1] == '/':
-        os.mkdir(targetpath)
-    else:
+    if not member.filename.endswith("/"):
         open(targetpath, 'wb').write(zipfile.read(member.filename))
 
 def extractall(zf, dst):
