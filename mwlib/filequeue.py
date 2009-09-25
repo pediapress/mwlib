@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 import traceback
+import cPickle
 
 from mwlib.log import Log
 from mwlib import utils
@@ -20,7 +21,8 @@ class FileJobQueuer(object):
         if os.path.exists(job_file):
             self.log.warn('Job file %r already exists' % job_file)
             return
-        open(job_file + '.tmp', 'wb').write('\n'.join(args))
+        
+        open(job_file + '.tmp', 'wb').write(cPickle.dumps(args))
         os.rename(job_file + '.tmp', job_file)
 
 
@@ -104,7 +106,7 @@ class FileJobPoller(object):
 
         # child process:
         try:
-            args = open(path, 'rb').read().split('\n')
+            args = cPickle.loads(open(path, 'rb').read())
             self.log.info('executing: %r' % args)
             try:
                 rc = subprocess.call(args)
