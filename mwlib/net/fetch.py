@@ -635,7 +635,8 @@ class fetcher(object):
                 
             if n in seen:
                 continue
-            raise RuntimeError("%r could not be fetched" % ((title, revid), ))
+            print "WARNING: %r could not be fetched" % ((title, revid),)
+            # raise RuntimeError("%r could not be fetched" % ((title, revid), ))
                     
         seen = self.fsout.seen
         
