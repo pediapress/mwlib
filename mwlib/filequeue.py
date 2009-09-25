@@ -68,6 +68,9 @@ class FileJobPoller(object):
     def poll(self):
         files = []
         for filename in os.listdir(self.queue_dir):
+            if filename.endswith(".tmp"):
+                continue
+            
             path = os.path.join(self.queue_dir, filename)
             if not os.path.isfile(path):
                 continue
