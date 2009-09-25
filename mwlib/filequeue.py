@@ -1,4 +1,3 @@
-import heapq
 import os
 import subprocess
 import time
@@ -79,9 +78,10 @@ class FileJobPoller(object):
             except Exception, exc:
                 self.log.ERROR('Could not stat %r: %s' % (path, exc))
                 continue
-            heapq.heappush(files, (mtime, filename))
+            files.append((mtime, filename))
+            
         if files:
-            return files[0][1]
+            return min(files)[1]
         return None
     
     def start_job(self, filename):
