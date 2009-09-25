@@ -68,7 +68,7 @@ def no_job_queue(job_type, collection_id, args):
     else:
         kwargs = {'close_fds': True}
     try:
-        log.info('queueing %r' % args)
+        log.info('queuing %r' % args)
         subprocess.Popen(args, **kwargs)
     except OSError, exc:
         raise RuntimeError('Could not execute command %r: %s' % (
@@ -615,7 +615,7 @@ def purge_cache(max_age, cache_dir):
             log.ERROR('could not remove directory %r: %s' % (path, exc))
     
 def clean_up(cache_dir, max_running_time, report=None):
-    """Look for PID files whose processes have not finished/erred but ceised
+    """Look for PID files whose processes have not finished/erred but ceased
     to exist => remove cache directories. Look for long running processes =>
     send SIGKILL.
     """
