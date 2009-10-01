@@ -41,7 +41,7 @@ dispatch = dict(
     wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
 )
 
-_en_license_url = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
+_en_license_url = 'http://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'
 wpwikis = dict(
     de = dict(baseurl='http://de.wikipedia.org/w/', 
               mw_license_url='http://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'),
