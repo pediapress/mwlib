@@ -11,16 +11,16 @@ def _readproc(key):
     '''
     try:
         v = open("/proc/self/status").read()
+         # get key line e.g. 'VmRSS:  9999  kB\n ...'
+        i = v.index(key)
+        v = v[i:].split(None, 3)  # whitespace
+        if len(v) < 3:
+            return 0.0  # invalid format?
+         # convert Vm value to bytes
+        return float(v[1]) * _scale[v[2]] 
     except:
         return 0.0  # non-Linux?
     
-     # get key line e.g. 'VmRSS:  9999  kB\n ...'
-    i = v.index(key)
-    v = v[i:].split(None, 3)  # whitespace
-    if len(v) < 3:
-        return 0.0  # invalid format?
-     # convert Vm value to bytes
-    return float(v[1]) * _scale[v[2]] 
 
 
 def memory():
@@ -46,3 +46,7 @@ def report():
     print "RES:", resident()
     print "STACK:", stacksize()
     print "-"*40
+
+if __name__=="__main__":
+    report()
+    
