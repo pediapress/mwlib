@@ -67,7 +67,7 @@ def parse_inputbox(tokens, xopts):
     get_recursive_tag_parser("inputbox")(tokens, xopts)
     
     for t in tokens:
-        if t.rawtagname=='inputbox':
+        if t.tagname=='inputbox':
             t.inputbox = T.join_as_text(t.children)
             del t.children[:]
 
