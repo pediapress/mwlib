@@ -68,7 +68,7 @@ def no_job_queue(job_type, collection_id, args):
     else:
         kwargs = {'close_fds': True}
     try:
-        log.info('queueing %r' % args)
+        log.info('queuing %r' % args)
         subprocess.Popen(args, **kwargs)
     except OSError, exc:
         raise RuntimeError('Could not execute command %r: %s' % (
@@ -147,6 +147,11 @@ class Application(object):
         self.report_from_mail = report_from_mail
         self.report_recipients = report_recipients
 
+        for i in range(0x100, 0x200):
+            p = os.path.join(self.cache_dir, hex(i)[3:])
+            if not os.path.isdir(p):
+                os.mkdir(p)
+            
     def __call__(self, environ, start_response):
         request = Request(environ)
 
@@ -161,24 +166,21 @@ class Application(object):
         try:
             command = request.params['command']
         except KeyError:
-            return Response(status=500)
+            log.error("no command given")
+            return Response(body="no command given", status=400)
 
         try:
             method = getattr(self, 'do_%s' % command)
         except AttributeError:
-            return Response(status=500)
+            log.error("no such command: %r" %(command, ))
+            return Response(body="no such command: %r" % (command, ), status=400)
 
-        lock = FileLock(os.path.join(self.cache_dir, 'global'))
-        lock.acquire()
-        try:
-            collection_id = request.params.get('collection_id')
-            if not collection_id:
-                collection_id = self.new_collection(request.params)
-                is_new = True
-            else:
-                is_new = False
-        finally:
-            lock.release()
+        collection_id = request.params.get('collection_id')
+        if not collection_id:
+            collection_id = self.new_collection(request.params)
+            is_new = True
+        else:
+            is_new = False
         
         if not self.check_collection_id(collection_id):
             return Response(status=404)
@@ -215,12 +217,8 @@ class Application(object):
             **kwargs
         )
     
-    def get_collection_dirs(self, collection_id):
-        assert len(collection_id) > 3, 'invalid collection ID'
-        return (self.cache_dir, collection_id[0], collection_id[:2], collection_id)
-    
     def get_collection_dir(self, collection_id):
-        return os.path.join(*self.get_collection_dirs(collection_id))
+        return os.path.join(self.cache_dir, collection_id[:2], collection_id)
     
     def check_collection_id(self, collection_id):
         """Return True iff collection with given ID exists"""
@@ -228,23 +226,18 @@ class Application(object):
         if not collection_id or not collection_id_rex.match(collection_id):
             return False
         collection_dir = self.get_collection_dir(collection_id)
-        if not os.path.exists(collection_dir):
-            return False
-        return True
+        return os.path.exists(collection_dir)
     
     def new_collection(self, post_data):
         collection_id = make_collection_id(post_data)
-        collection_dirs = self.get_collection_dirs(collection_id)
-        for i in range(len(collection_dirs)):
-            p = os.path.join(*collection_dirs[:i + 1])
-            if os.path.isdir(p):
-                continue
-            try:
-                log.info('Creating directory %r' % p)
-                os.mkdir(p)
-            except OSError, exc:
-                if getattr(exc, 'errno') not in (errno.EEXIST, errno.EISDIR):
-                    raise
+        colldir = self.get_collection_dir(collection_id)
+        
+        try:
+            log.info('Creating directory %r' % colldir)
+            os.mkdir(colldir)
+        except OSError, exc:
+            if getattr(exc, 'errno') not in (errno.EEXIST, errno.EISDIR):
+                raise
         return collection_id
     
     def get_path(self, collection_id, filename, ext=None):
@@ -622,7 +615,7 @@ def purge_cache(max_age, cache_dir):
             log.ERROR('could not remove directory %r: %s' % (path, exc))
     
 def clean_up(cache_dir, max_running_time, report=None):
-    """Look for PID files whose processes have not finished/erred but ceised
+    """Look for PID files whose processes have not finished/erred but ceased
     to exist => remove cache directories. Look for long running processes =>
     send SIGKILL.
     """

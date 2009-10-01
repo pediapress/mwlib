@@ -34,3 +34,9 @@ def test_fqname_defaultns():
     yield d, "user:schmir", "Benutzer:Schmir"
     yield d, "schmir", "Vorlage:Schmir"
     yield d, ":schmir", "Schmir"
+
+def test_redirect_matcher():
+    m = nshandling.get_nshandler_for_lang ("en").redirect_matcher
+    assert m("#REDIRECT [[Data structure#Active data structures]]")=="Data structure",  "bad redirect"
+    
+    

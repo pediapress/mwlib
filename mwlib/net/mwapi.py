@@ -196,7 +196,16 @@ class mwapi(object):
             raise RuntimeError("login failed: %r" % (res, ))
             
         return client.getPage(self.baseurl, method="POST",  postdata=postdata, headers=headers,  cookies=self.cookies).addCallback(got_page)
-            
+
+    def post_request(self, **kw):
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        for k,v in kw.items():
+            if isinstance(v, unicode):
+                kw[k] = v.encode("utf-8")
+        
+        postdata = urllib.urlencode(kw)
+        return client.getPage(self.baseurl,  method="POST",  postdata=postdata, headers=headers, cookies=self.cookies)
+    
     def _fetch(self, url):
         errors = []
         d = defer.Deferred()
@@ -213,8 +222,12 @@ class mwapi(object):
             else:
                 d.callback(val)
             
-                
-        client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
+        try:
+            client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
+        except Exception, err: # pyopenssl missing??
+            print "FATAL:", err
+            os._exit(10)
+            
         return d
     
     def _maybe_fetch(self):
@@ -251,7 +264,7 @@ class mwapi(object):
         reactor.callLater(0.0, self._maybe_fetch)
         return d
         
-    def do_request(self, **kwargs):
+    def do_request(self, query_continue=True, **kwargs):
         result = defer.Deferred()
         
         retval = {}
@@ -275,7 +288,7 @@ class mwapi(object):
             
             qc = data.get("query-continue", {}).values()
             
-            if qc: 
+            if qc and query_continue:
                 kw = kwargs.copy()
                 for d in qc:
                     for k,v in d.items(): # dict of len(1)
@@ -353,10 +366,21 @@ class mwapi(object):
 
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
+
+    def fetch_categories(self, titles=None, revids=None):
+        kwargs = dict(prop="categories",
+                      # rvprop='ids',
+                      imlimit=self.api_result_limit,
+                      tllimit=self.api_result_limit)
+        if titles:
+            kwargs['redirects'] = 1
+
+        self._update_kwargs(kwargs, titles, revids)
+        return self.do_request(action="query", **kwargs)
         
     def fetch_pages(self, titles=None, revids=None):        
         kwargs = dict(prop="revisions|categories",
-                      rvprop='ids|content',
+                      rvprop='ids|content|timestamp|user',
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)
         if titles:

@@ -165,42 +165,37 @@ class nuwiki(object):
 NuWiki = nuwiki
 Page = page
 
-def extract_member(zipfile, member, targetpath):
+def extract_member(zipfile, member, dstdir):
     """Copied and adjusted from Python 2.6 stdlib zipfile.py module.
 
        Extract the ZipInfo object 'member' to a physical
        file on the path targetpath.
     """
 
-    # build the destination pathname, replacing
-    # forward slashes to platform specific separators.
-    if targetpath[-1:] in (os.path.sep, os.path.altsep):
-        targetpath = targetpath[:-1]
-
-    # don't include leading "/" from file name if present
-    if member.filename[0] == '/':
-        targetpath = os.path.join(targetpath, member.filename[1:])
-    else:
-        targetpath = os.path.join(targetpath, member.filename)
-
-    targetpath = os.path.normpath(targetpath)
-
+    assert dstdir.endswith(os.path.sep), "/ missing at end"
+    
+    targetpath = os.path.normpath(os.path.join(dstdir, member.filename))
+    
+    if not targetpath.startswith(dstdir):
+        raise RuntimeError("bad filename in zipfile %r" % (targetpath, ))
+        
     # Create all upper directories if necessary.
-    upperdirs = os.path.dirname(targetpath)
-    if upperdirs and not os.path.exists(upperdirs):
+    if member.filename.endswith("/"):
+        upperdirs = targetpath
+    else:
+        upperdirs = os.path.dirname(targetpath)
+        
+    if not os.path.isdir(upperdirs):
         os.makedirs(upperdirs)
 
-    if member.filename[-1] == '/':
-        os.mkdir(targetpath)
-    else:
+    if not member.filename.endswith("/"):
         open(targetpath, 'wb').write(zipfile.read(member.filename))
 
 def extractall(zf, dst):
-    if hasattr(zf, 'extractall'):
-        zf.extractall(dst) # only available in Python >= 2.6
-    else:
-        for zipinfo in zf.infolist():
-            extract_member(zf, zipinfo, dst)
+    dst = os.path.normpath(os.path.abspath(dst))+os.path.sep
+    
+    for zipinfo in zf.infolist():
+        extract_member(zf, zipinfo, dst)
     
        
 class adapt(object):
