@@ -110,6 +110,9 @@ class Defaultsort(NoOutput):
 class Displaytitle(NoOutput):
     pass
 
+def make_switchnode(args):
+    return nodes.SwitchNode((args[0], args[1:]))
+
 registry = {'#time': Time,
             'subst': Subst,
             'anchorencode': Anchorencode,
@@ -117,6 +120,6 @@ registry = {'#time': Time,
             'displaytitle': Displaytitle,
             'defaultsort': Defaultsort,
             '#rel2abs': rel2abs,
-            '#switch': nodes.SwitchNode, 
+            '#switch': make_switchnode, 
             '#if': nodes.IfNode,
             }

@@ -191,7 +191,7 @@ class Template(Node):
             from mwlib.templ import magic_nodes
             klass = magic_nodes.registry.get(try_name)
             if klass is not None:
-                children = (try_remainder, )+self[1:]
+                children = (try_remainder, )+args
                 # print "MAGIC:", klass,  children
                 klass(children).flatten(expander, variables, res)
                 return
