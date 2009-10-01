@@ -13,8 +13,8 @@ def parse_collection_page(wikitext):
     """
     mb = metabook.collection()
 
-    title_rex = '^==\s+(?P<title>.*?)\s+==$'
-    subtitle_rex = '^===\s+(?P<subtitle>.*?)\s+===$'
+    title_rex = '^==(?P<title>[^=].*?[^=])==$'
+    subtitle_rex = '^===(?P<subtitle>[^=].*?[^=])===$'
     chapter_rex = '^;(?P<chapter>.*?)$'
     article_rex = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
     oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.*?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
@@ -52,9 +52,9 @@ def parse_collection_page(wikitext):
             noTemplate = False
 
         if res.group('title'):
-            mb.title = res.group('title')
+            mb.title = res.group('title').strip()
         elif res.group('subtitle'):
-            mb.subtitle = res.group('subtitle')
+            mb.subtitle = res.group('subtitle').strip()
         elif res.group('chapter'):
             mb.items.append(metabook.chapter(title=res.group('chapter').strip()))
         elif res.group('article'):
@@ -63,5 +63,5 @@ def parse_collection_page(wikitext):
             mb.append_article(title=res.group('oldarticle'), displaytitle=res.group('olddisplaytitle'), revision=res.group('oldid'))
         elif res.group('summary') and (noTemplate or summary):
             mb.summary += res.group('summary') + " "
-            
+
     return mb
