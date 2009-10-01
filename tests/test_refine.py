@@ -395,3 +395,9 @@ def test_preformatted_empty_line():
     pre = core.walknodel(r, lambda x: x.type==T.t_complex_preformatted)
     assert len(pre)==1, "expected exactly one preformatted node"
 
+def test_inputbox():  
+    s= "</inputbox>"
+    
+    r = core.parse_txt(s)
+    core.show(r)
+    
