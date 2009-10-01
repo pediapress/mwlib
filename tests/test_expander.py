@@ -454,3 +454,8 @@ def test_iferror_switch_default():
 | #default = {{#iferror: [[foo {{bar}}]] | yes|no}}
 }}""", "no"
     
+
+def test_variable_subst():
+    yield expandstr, "{{{{{subst|}}}#if: 1| yes| no}}", "yes"
+    yield expandstr, "{{{{{subst|}}}#expr: 1+1}}", "2"
+    yield expandstr, "{{{{{susbst|}}}#ifexpr: 1+1|yes|no}}", "yes"
