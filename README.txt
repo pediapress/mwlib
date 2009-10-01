@@ -85,6 +85,12 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-9-25 release 0.12.8
+------------------------
+- fix argument handling in mw-serve
+  Previously it had been possible to overwrite any file by passing
+  arguments containing newlines to mw-serve.
+
 2009-9-23 release 0.12.7
 ------------------------
 - ensure that files extracted from zip files end up in the destination

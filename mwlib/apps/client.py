@@ -36,7 +36,7 @@ def main():
         if client.error is not None:
             sys.exit('request failed: %s' % client.error)
         else:
-            sys.exit('request failed: got response code %d' % client.response_code)
+            sys.exit('request failed: got response code %d\n%r' % (client.response_code, client.response))
 
     if command=="download":
         print "got %s bytes" % (len(client.response), )

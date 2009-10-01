@@ -1,8 +1,8 @@
-import heapq
 import os
 import subprocess
 import time
 import traceback
+import cPickle
 
 from mwlib.log import Log
 from mwlib import utils
@@ -20,7 +20,8 @@ class FileJobQueuer(object):
         if os.path.exists(job_file):
             self.log.warn('Job file %r already exists' % job_file)
             return
-        open(job_file + '.tmp', 'wb').write('\n'.join(args))
+        
+        open(job_file + '.tmp', 'wb').write(cPickle.dumps(args))
         os.rename(job_file + '.tmp', job_file)
 
 
@@ -66,6 +67,9 @@ class FileJobPoller(object):
     def poll(self):
         files = []
         for filename in os.listdir(self.queue_dir):
+            if filename.endswith(".tmp"):
+                continue
+            
             path = os.path.join(self.queue_dir, filename)
             if not os.path.isfile(path):
                 continue
@@ -74,9 +78,10 @@ class FileJobPoller(object):
             except Exception, exc:
                 self.log.ERROR('Could not stat %r: %s' % (path, exc))
                 continue
-            heapq.heappush(files, (mtime, filename))
+            files.append((mtime, filename))
+            
         if files:
-            return files[0][1]
+            return min(files)[1]
         return None
     
     def start_job(self, filename):
@@ -104,7 +109,7 @@ class FileJobPoller(object):
 
         # child process:
         try:
-            args = open(path, 'rb').read().split('\n')
+            args = cPickle.loads(open(path, 'rb').read())
             self.log.info('executing: %r' % args)
             try:
                 rc = subprocess.call(args)
