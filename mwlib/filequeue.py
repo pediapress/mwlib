@@ -26,45 +26,57 @@ class FileJobQueuer(object):
 
 
 class FileJobPoller(object):
-    def __init__(self, queue_dir, processing_dir, sleep_time=1, max_num_jobs=5):
+    def __init__(self, queue_dir, processing_dir=None, sleep_time=1, max_num_jobs=5):
         self.queue_dir = utils.ensure_dir(queue_dir)
-        self.processing_dir = utils.ensure_dir(processing_dir)
         self.sleep_time = sleep_time
         self.max_num_jobs = max_num_jobs
         self.num_jobs = 0
         self.log = Log('FileJobPoller')
-    
+        self.files = []
+        
+    def _reap_children(self):
+        while self.num_jobs>0:
+            try:
+                if self.num_jobs==self.max_num_jobs:
+                    flags = 0
+                else:
+                    flags = os.WNOHANG
+                pid, rc = os.waitpid(-1, flags)
+            except OSError, exc:
+                self.log.ERROR('waitpid(-1) failed: %s' % exc)
+                break
+            if (pid, rc) == (0, 0):
+                break
+            self.num_jobs -= 1
+            self.log.info('child %s exited: %s. have %d jobs' % (pid, rc, self.num_jobs))
+            
     def run_forever(self):
         self.log.info('running with a max. of %d jobs' % self.max_num_jobs)
-        try:
-            while True:
-                filename = self.poll()
-                if self.num_jobs < self.max_num_jobs and filename:
-                    self.num_jobs += 1
-                    if self.start_job(filename):
-                        self.log.info('child started: have %d jobs' % self.num_jobs)
-                    else:
-                        # job has not been started
-                        self.num_jobs -= 1
-                else:
+        while True:
+            try:
+                self.poll()
+                if not self.files:
                     time.sleep(self.sleep_time)
+                
+                while self.num_jobs < self.max_num_jobs and self.files:
+                    self.start_job(self.files.pop())
+
+                self._reap_children()
+            except KeyboardInterrupt:
                 while self.num_jobs > 0:
-                    try:
-                        pid, rc = os.waitpid(-1, os.WNOHANG)
-                    except OSError, exc:
-                        self.log.ERROR('waitpid(-1) failed: %s' % exc)
-                        break
-                    if (pid, rc) == (0, 0):
-                        break
+                    os.waitpid(-1, 0)
                     self.num_jobs -= 1
-                    self.log.info('child killed: have %d jobs' % self.num_jobs)
-        except KeyboardInterrupt:
-            while self.num_jobs > 0:
-                os.waitpid(-1, 0)
-                self.num_jobs -= 1
+                break
+            except Exception, err:
+                self.log.error("caught exception: %r" % (err, ))
+                traceback.print_exc()
+                    
         self.log.info('exit')
     
     def poll(self):
+        if self.files:
+            return
+        
         files = []
         for filename in os.listdir(self.queue_dir):
             if filename.endswith(".tmp"):
@@ -79,10 +91,9 @@ class FileJobPoller(object):
                 self.log.ERROR('Could not stat %r: %s' % (path, exc))
                 continue
             files.append((mtime, filename))
-            
-        if files:
-            return min(files)[1]
-        return None
+
+        files.sort(reverse=True)
+        self.files = [x[1] for x in files]
     
     def start_job(self, filename):
         """Fork, and execute job from given file
@@ -92,36 +103,25 @@ class FileJobPoller(object):
         """
 
         src = os.path.join(self.queue_dir, filename)
-        path = os.path.join(self.processing_dir, filename)
         try:
-            os.rename(src, path)
-        except Exception, exc:
-            self.log.ERROR('Could not rename %r to %r: %s' % (src, path, exc))
-            return False
+            args = cPickle.loads(open(src, 'rb').read())
+        finally:
+            os.unlink(src)
+        
         self.log.info('starting job %r' % filename)
-        try:
-            pid = os.fork()
-        except Exception, exc:
-            self.log.ERROR('Could not fork(): %s' % exc)
-            return False
+        
+        pid = os.fork()
+        self.num_jobs+=1
+        
         if pid != 0:
             return True
 
         # child process:
         try:
-            args = cPickle.loads(open(path, 'rb').read())
-            self.log.info('executing: %r' % args)
             try:
-                rc = subprocess.call(args)
-                assert rc == 0, 'non-zero return code'
-            except Exception, exc:
-                self.log.warn('Error executing %r: %s' % (args, exc))
+                os.execvp(args[0], args)
+            except:
                 traceback.print_exc()
         finally:
-            try:
-                os.unlink(path)
-            except Exception, exc:
-                self.log.warn('Could not remove file %r: %s' % (path, exc))
-                traceback.print_exc()
-            os._exit(0)
-
+            self.log.warn('error running %r' % (args,))
+            os._exit(10)
