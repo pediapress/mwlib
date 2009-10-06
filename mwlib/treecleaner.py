@@ -725,7 +725,11 @@ class TreeCleaner(object):
             return
         for ref in named_refs:
             ref.no_display = True
-            ref.moveto(node, prefix=True)
+            table_parents = node.getParentNodesByClass(Table)
+            if table_parents:
+                ref.moveto(table_parents[0], prefix=True)
+            else:
+                ref.moveto(node, prefix=True)
         node.parent.removeChild(node)
             
     def removeNoPrintNodes(self, node):
