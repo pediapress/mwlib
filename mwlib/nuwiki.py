@@ -50,24 +50,31 @@ class nuwiki(object):
         return default
         
     def _read_revisions(self):
-        d=unicode(open(self._pathjoin("revisions-1.txt"), "rb").read(), "utf-8")
-        pages = d.split("\n --page-- ")
+        count = 1
+        while 1:
+            fn = self._pathjoin("revisions-%s.txt" % count)
+            if not os.path.exists(fn):
+                break
+            count += 1
+            print "reading", fn
+            d=unicode(open(self._pathjoin(fn), "rb").read(), "utf-8")
+            pages = d.split("\n --page-- ")
 
-        for p in pages[1:]:
-            jmeta, rawtext = p.split("\n", 1)
-            meta = json.loads(jmeta)
-            pg = Page(meta, rawtext)
-            if pg.title in self.excluded:
-                pg.rawtext = unichr(0xebad)
-            revid = meta.get("revid")
-            if revid is None:
-                self.revisions[pg.title] = pg
-                continue
+            for p in pages[1:]:
+                jmeta, rawtext = p.split("\n", 1)
+                meta = json.loads(jmeta)
+                pg = Page(meta, rawtext)
+                if pg.title in self.excluded:
+                    pg.rawtext = unichr(0xebad)
+                revid = meta.get("revid")
+                if revid is None:
+                    self.revisions[pg.title] = pg
+                    continue
 
-            self.revisions[meta["revid"]] = pg
-            
-            # else:
-            #     print "excluding:", repr(pg.title)
+                self.revisions[meta["revid"]] = pg
+
+                # else:
+                #     print "excluding:", repr(pg.title)
                 
         tmp = self.revisions.items()
         tmp.sort(reverse=True)
