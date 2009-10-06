@@ -90,6 +90,7 @@ class TreeCleaner(object):
                       'fixNesting', # pull DefinitionLists out of Paragraphs
                       'fixPreFormatted',
                       'fixListNesting',
+                      'handleOnlyInPrint',
                       'removeEmptyTextNodes',
                       'removeChildlessNodes', 
                       'removeBreakingReturns',
@@ -1184,3 +1185,22 @@ class TreeCleaner(object):
             
         for c in node.children:
             self.markShortParagraph(c)
+
+    def handleOnlyInPrint(self, node):
+        '''Remove nodes with the css class "printonly" which contain URLs.
+
+        printonly nodes are used in citations for example to explicitly print out URLs.
+        Since we handle URLs differently, we can ignore printonly nodes
+        '''
+        if 'printonly' in node.attributes.get('class', ''):
+            if _any([c.__class__ in [URL,
+                                     NamedURL,
+                                     ArticleLink,
+                                     NamespaceLink,
+                                     InterwikiLink,
+                                     SpecialLink] for c in node.children]):
+                self.report('removed "printonly" node:', node)
+                node.parent.removeChild(node)
+                return
+        for c in node.children:
+            self.handleOnlyInPrint(c)
