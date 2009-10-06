@@ -401,3 +401,19 @@ def test_inputbox():
     r = core.parse_txt(s)
     core.show(r)
     
+def test_ref_inside_caption():
+    s="""
+{|
+|+ table capshun <ref>references fun</ref>
+| hey || ho
+|}"""
+    r=core.parse_txt(s)
+    core.show(r)
+    cap = core.walknodel(r, lambda x:x.type==T.t_complex_caption)[0]
+    print "caption:"
+    core.show(cap)
+    refs= core.walknodel(cap, lambda x: x.tagname=="ref")
+    assert refs
+    
+    
+    
