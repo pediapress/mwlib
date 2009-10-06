@@ -908,7 +908,7 @@ class TreeCleaner(object):
             for table in tables:
                 if table.numcols > 30:
                     return True
-                if len(table.children) > 40:
+                if len(table.children) > 30:
                     return True
 
         itemlists = cell.getChildNodesByClass(ItemList)
