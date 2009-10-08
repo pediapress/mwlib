@@ -442,7 +442,7 @@ def get_collection_params(api):
         for k,v in re.findall("([a-z_]+)=(.*)", txt):
             v = v.strip()
 
-            if v.startswith("[["):
+            if v.startswith("[[") or not v:
                 continue
 
             if k in allowed:
