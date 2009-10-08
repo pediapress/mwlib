@@ -1,6 +1,8 @@
+# -*- compile-command: "python mwapi.py" -*-
 """api.php client, url guessing"""
 
 import os
+import re
 import urlparse
 import urllib
 from twisted.internet import reactor, defer
@@ -429,6 +431,34 @@ class mwapi(object):
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
 
+def get_collection_params(api):
+    def done(r):
+        r = json.loads(r)
+        allowed = "template_blacklist exclusion_category print_template_pattern".split()
+
+        txt = r["expandtemplates"]["*"]
+        
+        res = dict()
+        for k,v in re.findall("([a-z_]+)=(.*)", txt):
+            v = v.strip()
+
+            if v.startswith("[["):
+                continue
+
+            if k in allowed:
+                res[str(k)] = v
+            
+        return res
+
+    return api.post_request(action="expandtemplates",
+                            format="json",
+                            text="""
+template_blacklist={{Mediawiki:coll-template_blacklist_title}}
+exclusion_category={{Mediawiki:coll-exclusion_category_title}}
+print_template_pattern={{Mediawiki:coll-print_template_pattern}}
+""").addCallback(done)
+    
+    
 
 def stop(val):
     print val
@@ -437,13 +467,18 @@ def stop(val):
 def main():
     p = pool()
     url = "http://de.wikipedia.org/w/api.php"
+    # url = "http://simple.pediapress.com/w/api.php"
 
     def show(r):
-        print "gotit:",  r
+        print r
 
-    p.try_api_urls(["http://de.wikipedia.org/", "http://de.wikipedia.org/w/api.php"]).addBoth(stop)
+      # print "gotit:",  r
+
+    # p.try_api_urls(["http://de.wikipedia.org/", "http://de.wikipedia.org/w/api.php"]).addBoth(stop)
                    
-    
+    api = mwapi(url)
+    get_collection_params(api).addBoth(stop)
+
     # p.get_api(url).addBoth(show)
     # p.get_api(url).addBoth(show)
     # p.get_api(url).addBoth(show)
