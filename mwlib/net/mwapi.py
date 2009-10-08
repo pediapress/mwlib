@@ -434,7 +434,7 @@ class mwapi(object):
 def get_collection_params(api):
     def done(r):
         r = json.loads(r)
-        allowed = "template_blacklist exclusion_category print_template_pattern".split()
+        allowed = "template_blacklist template_exclusion_category print_template_pattern".split()
 
         txt = r["expandtemplates"]["*"]
         
@@ -454,7 +454,7 @@ def get_collection_params(api):
                             format="json",
                             text="""
 template_blacklist={{Mediawiki:coll-template_blacklist_title}}
-exclusion_category={{Mediawiki:coll-exclusion_category_title}}
+template_exclusion_category={{Mediawiki:coll-exclusion_category_title}}
 print_template_pattern={{Mediawiki:coll-print_template_pattern}}
 """).addCallback(done)
     

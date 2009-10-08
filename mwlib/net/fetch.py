@@ -176,48 +176,60 @@ class fetcher(object):
         self.status = status
         self.progress = progress or shared_progress(status=status)
 
-        self.template_exclusion_category = template_exclusion_category
-        self.print_template_pattern = print_template_pattern
 
         self.imagesize = imagesize
         self.fetch_images = fetch_images
 
-        if self.print_template_pattern:
-            self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
-        else:
-            self.make_print_template = None
-            
-        self._nshandler = None
-        
-        self.redirects = {}
-        self.cat2members = {}
-        
+        self.scheduled = set()
+
+        self.simult = mwapi.multiplier()
         self.count_total = 0
         self.count_done = 0
+        self.redirects = {}
+        self.cat2members = {}
+
 
         self.title2latest = {}
-    
+
         self.edits = []
         self.lambda_todo = []
         self.pages_todo = []
         self.revids_todo = []
         self.imageinfo_todo = []
         self.imagedescription_todo = {} # base path -> list
-        
-        self.scheduled = set()
-
-        self.simult = mwapi.multiplier()
+        self._nshandler = None
         
         self._refcall(lambda:self.get_siteinfo_for(self.api)
                       .addCallback(self._cb_siteinfo)
                       .addErrback(self.make_die_fun("could not get siteinfo")))
-                      
-        titles, revids = self._split_titles_revids(pages)
-        
 
-        self.fetch_used("titles", titles)
-        self.fetch_used("revids", revids)
-        
+
+
+        def got_coll_params(params):
+            self.__dict__.update(params)
+            if template_exclusion_category:
+                self.template_exclusion_category = template_exclusion_category
+
+            if print_template_pattern:
+                self.print_template_pattern = print_template_pattern
+
+            if self.print_template_pattern:
+                self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
+            else:
+                self.make_print_template = None
+
+            titles, revids = self._split_titles_revids(pages)
+
+            self.fetch_used("titles", titles)
+            self.fetch_used("revids", revids)
+
+            self.report()
+            self.dispatch()
+
+        self._refcall(lambda: (mwapi.get_collection_params(api)
+                          .addErrback(self.make_die_fun("could not get collection params"))
+                          .addCallback(got_coll_params)))
+
         self.report()
         self.dispatch()
 
