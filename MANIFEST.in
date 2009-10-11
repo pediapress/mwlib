@@ -228,9 +228,11 @@ include sandbox/upload.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
 include tests/canthus.mb.json
+include tests/fribidi-unicode-decode-error.zip
 include tests/kolumne.mb.json
 include tests/lambda.zip
 include tests/memeater.py
+include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
 include tests/speisesalz.zip
 include tests/test_advtree.py
