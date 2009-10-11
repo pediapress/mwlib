@@ -7,6 +7,7 @@ from mwlib.net import fetch, mwapi
 from mwlib.metabook import get_licenses, parse_collection_page, collection
 from mwlib import myjson
 from twisted.internet import reactor,  defer
+import urllib
 
 class start_fetcher(object):
     progress = None
@@ -65,14 +66,22 @@ class start_fetcher(object):
         self.fsout = fetch.fsoutput(self.fsdir)
 
     def fetch_collectionpage(self, api):
-        if self.options.collectionpage is None:
+        cp = self.options.collectionpage
+        if cp is None:
             return api
-        
+
+        try:
+            cp = unicode(urllib.unquote(str(cp)), "utf-8")
+        except Exception, err:
+            pass
+            # print "ERR:", err
+            
         def got_pages(val):
             rawtext = val["pages"].values()[0]["revisions"][0]["*"]
             self.metabook = parse_collection_page(rawtext)
             return api
-        return api.fetch_pages([self.options.collectionpage]).addBoth(got_pages)
+        
+        return api.fetch_pages([cp]).addBoth(got_pages)
         
     def run(self):
         self.init_variables()
