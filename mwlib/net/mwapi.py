@@ -435,10 +435,13 @@ def get_collection_params(api):
     def done(r):
         r = loads(r)
         allowed = "template_blacklist template_exclusion_category print_template_pattern".split()
-
-        txt = r["expandtemplates"]["*"]
-        
         res = dict()
+        try:
+            txt = r["expandtemplates"]["*"]
+        except KeyError:
+            return res
+        
+        
         for k,v in re.findall("([a-z_]+)=(.*)", txt):
             v = v.strip()
 

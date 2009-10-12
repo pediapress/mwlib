@@ -694,7 +694,8 @@ class fetcher(object):
             self.fatal_error = reason
             self._stop_reactor()
             print "fatal: %s [%s]" % (reason, val)        
-            
+            return val
+        
         return fatal
     
 def pages_from_metabook(mb):
