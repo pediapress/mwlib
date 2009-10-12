@@ -415,5 +415,22 @@ def test_ref_inside_caption():
     refs= core.walknodel(cap, lambda x: x.tagname=="ref")
     assert refs
     
-    
-    
+def test_tr_inside_caption():
+    """http://code.pediapress.com/wiki/ticket/709"""
+    s="""
+{|
+|+ table capshun <tr><td>bla</td></tr>
+|}"""
+    r=core.parse_txt(s)
+    core.show(r)
+    cap = core.walknodel(r, lambda x:x.type==T.t_complex_caption)[0]
+    print "caption:"
+    core.show(cap)
+
+    rows = core.walknodel(r, lambda x: x.type==T.t_complex_table_row)
+    print "ROWS:",  rows
+    assert len(rows)==1,  "no rows found"
+
+    rows = core.walknodel(cap, lambda x: x.type==T.t_complex_table_row)
+    print "ROWS:",  rows
+    assert len(rows)==0, "row in table caption found"
