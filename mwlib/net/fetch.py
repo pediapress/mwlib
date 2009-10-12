@@ -206,6 +206,10 @@ class fetcher(object):
 
 
         def got_coll_params(params):
+            self.print_template_pattern = None
+            self.template_exclusion_category = None
+            self.template_blacklist = None
+            
             self.__dict__.update(params)
             if template_exclusion_category:
                 self.template_exclusion_category = template_exclusion_category
