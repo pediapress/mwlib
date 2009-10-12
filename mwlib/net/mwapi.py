@@ -433,7 +433,7 @@ class mwapi(object):
 
 def get_collection_params(api):
     def done(r):
-        r = json.loads(r)
+        r = loads(r)
         allowed = "template_blacklist template_exclusion_category print_template_pattern".split()
 
         txt = r["expandtemplates"]["*"]
@@ -447,7 +447,6 @@ def get_collection_params(api):
 
             if k in allowed:
                 res[str(k)] = v
-            
         return res
 
     return api.post_request(action="expandtemplates",
