@@ -30,6 +30,10 @@ class IfNode(Node):
         flatten(self[0], expander, variables, cond)
         cond = u"".join(cond).strip()
 
+        # template blacklisting results in 0xebad
+        # see http://code.pediapress.com/wiki/ticket/700#comment:1
+        cond = cond.strip(unichr(0xebad))
+        
         res.append(maybe_newline)
         tmp = []
         if cond:
