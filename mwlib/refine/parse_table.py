@@ -241,7 +241,7 @@ class parse_tables(object):
         
         while i<len(children):
             t = children[i]
-            if not t.tagname and (t.text is None or t.text.startswith("\n")):
+            if t.tagname not in ("ref",) and (t.text is None or t.text.startswith("\n")):
                 if modifier:
                     mod = T.join_as_text(children[start:modifier])
                     vlist = util.parseParams(mod)
