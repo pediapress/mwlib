@@ -85,6 +85,22 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-10-13 release 0.12.9
+-------------------------
+- fix #709
+- allow higher resolution in math formulas
+- fetch collection parameters and use them (template exclusion category,...)
+- fix #699
+- fix <ref> inside table caption
+- refactor filequeue
+- adjust table splitting parameter
+- move invisible, named references out of table nodes
+- fix late #if
+- fix bug with inputboxes
+- fix parsing of collection pages: titles/subtitles may but do not need to have spaces
+- use new default license URL
+- fix race condition in mw-serve/mw-watch
+
 2009-9-25 release 0.12.8
 ------------------------
 - fix argument handling in mw-serve
