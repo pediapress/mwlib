@@ -78,11 +78,11 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     log.error('error converting math (blahtexml). source: %r \nerror: %r' % (latex, result))
     return None
 
-def _renderMathTexvc(latex, output_path, output_mode='png'):
+def _renderMathTexvc(latex, output_path, output_mode='png', resolution_in_dpi=120):
     """only render mode is png"""
     if not texvc_available:
         return None
-    cmd = ['texvc', output_path, output_path, latex.encode('utf-8')]
+    cmd = ['texvc', output_path, output_path, latex.encode('utf-8'), "UTF-8", str(resolution_in_dpi)]
     try:
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
@@ -100,7 +100,7 @@ def _renderMathTexvc(latex, output_path, output_mode='png'):
     log.error('error converting math (texvc). source: %r \nerror: %r' % (latex, result))              
     return None
     
-def renderMath(latex, output_path=None, output_mode='png', render_engine='blahtexml'):
+def renderMath(latex, output_path=None, output_mode='png', render_engine='blahtexml', resolution_in_dpi=120):
     """
     @param latex: LaTeX code
     @type latex: unicode
@@ -136,7 +136,7 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
     if render_engine == 'blahtexml':
         result = _renderMathBlahtex(latex, output_path=output_path, output_mode=output_mode)
     if not result and output_mode == 'png':
-        result = _renderMathTexvc(latex, output_path=output_path, output_mode=output_mode)
+        result = _renderMathTexvc(latex, output_path=output_path, output_mode=output_mode, resolution_in_dpi=resolution_in_dpi)
 
     if removeTmpDir:
         shutil.rmtree(output_path)
