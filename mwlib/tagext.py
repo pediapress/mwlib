@@ -87,17 +87,18 @@ class IgnoreTagBase(TagExtension):
 # ---
 
 # list of tags than can not easily be re implemented in PDFs 
-tags_to_ignore = ['chem', 'chess', 'choose', 'dpl', 'dynamicpagelist', 'feyn', 'forum',
-                  'go', 'googlemapkml', 'graph', 'greek', 'ling', 'plot', 'ppch', 
-                  'randomimage', 'schem', 'staff', 'teng', 'tipa', 'verbatim', 
-                  'aoaudio', 'aovideo', 'bloglist', 'cgamer', 'ggtube', "googlemap", 
-                  'gtrailer', 'gvideo', 'nicovideo', 'tangler', 'video', 'videogallery', 
-                  'wegame', 'youtube', 'imagelink', 'badge', 'comments', 'createform', 
-                  'fan', 'featuredimage', 'gallerypopulate', 'linkfilter', 'listpages', 
-                  'loggedin', 'loggedout', 'newusers', 'pollembed', 'randomfeatureduser', 
-                  'randomgameunit', 'randomimagebycategory', 'randomuserswithavatars', 
-                  'rss', 'siteactivity', 'userpoll', 'videogallerypopulate', 'vote', 
-                  'welcomeuser', 'xsound'] 
+tags_to_ignore = """chem chess choose dpl dynamicpagelist feyn forum
+go googlemapkml graph greek ling plot ppch
+randomimage schem staff teng tipa verbatim
+aoaudio aovideo bloglist cgamer ggtube googlemap
+gtrailer gvideo nicovideo tangler video videogallery
+wegame youtube imagelink badge comments createform
+fan featuredimage gallerypopulate linkfilter listpages
+loggedin loggedout newusers pollembed randomfeatureduser
+randomgameunit randomimagebycategory randomuserswithavatars
+rss siteactivity userpoll videogallerypopulate vote
+welcomeuser xsound pageby uml graphviz categorytree summary""".split()
+
 for name in tags_to_ignore:
     def _f(name):
         class I(IgnoreTagBase):
