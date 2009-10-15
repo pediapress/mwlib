@@ -430,12 +430,15 @@ class Application(object):
                     metabook = unicode(open(metabook_path, 'rb').read(), 'utf-8', 'ignore')
                 else:
                     metabook = None
-                self.send_report_mail('rendering failed',
-                    collection_id=collection_id,
-                    writer=writer,
-                    error=text,
-                    metabook=metabook,
-                )
+                mail_sent = self.get_path(collection_id, "mail-sent")
+                if not os.path.exists(mail_sent):
+                    self.send_report_mail('rendering failed',
+                        collection_id=collection_id,
+                        writer=writer,
+                        error=text,
+                        metabook=metabook,
+                    )
+                    open(mail_sent, "w")
             return retval(state="failed", error=text)
 
         status = self.read_status_file(collection_id, writer)
