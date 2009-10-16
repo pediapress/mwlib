@@ -308,6 +308,10 @@ class Application(object):
         if os.path.exists(error_path):
             log.info('removing error file %r' % error_path)
             utils.safe_unlink(error_path)
+            mail_sent = self.get_path(collection_id, "mail-sent")
+            if os.path.exists(mail_sent):
+                utils.safe_unlink(mail_sent)
+                
             force_render = True
         
         status_path = self.get_path(collection_id, self.status_filename, writer)
