@@ -160,7 +160,7 @@ class Formatter(object):
         for attr, val in styles:
             setattr(self, attr, val)
 
-    def cleanText(self, txt, break_long=False):
+    def cleanText(self, txt, break_long=False, escape=True):
         if not txt:
             return ''
 
@@ -171,10 +171,11 @@ class Formatter(object):
         elif self.source_mode:
             pass
         else:
-            if self.minimize_space_mode > 0 or break_long:
-                txt = self.escapeAndHyphenateText(txt)
-            else:
-                txt = self.escapeText(txt)
+            if escape:
+                if self.minimize_space_mode > 0 or break_long:
+                    txt = self.escapeAndHyphenateText(txt)
+                else:
+                    txt = self.escapeText(txt)
             txt = self.font_switcher.fontifyText(txt, break_long=break_long)
 
         if self.sectiontitle_mode:
