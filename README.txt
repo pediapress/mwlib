@@ -85,6 +85,14 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-10-20 release 0.12.10
+--------------------------
+- fix race condition when fetching siteinfo
+- introduce flag to suppress automatic escaping when cleaning text
+- sent error mails only once
+- add 'pageby', 'uml', 'graphviz', 'categorytree', 'summary' to list
+  of tags to ignore 
+
 2009-10-13 release 0.12.9
 -------------------------
 - fix #709
