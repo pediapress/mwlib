@@ -159,6 +159,10 @@ class fetcher(object):
                  print_template_pattern=None,
                  template_exclusion_category=None,
                  imagesize=800, fetch_images=True):
+        self.print_template_pattern = None
+        self.template_exclusion_category = None
+        self.template_blacklist = None
+
         self.pages = pages
         
         self.result = defer.Deferred()
@@ -206,9 +210,6 @@ class fetcher(object):
 
 
         def got_coll_params(params):
-            self.print_template_pattern = None
-            self.template_exclusion_category = None
-            self.template_blacklist = None
             
             self.__dict__.update(params)
             if template_exclusion_category:
