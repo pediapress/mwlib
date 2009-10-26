@@ -98,6 +98,11 @@ class Formatter(object):
 
 
     def setRelativeFontSize(self, rel_font_size):
+        # ignore anything too large. see search engine optimized article
+        # http://fr.wikipedia.org/wiki/Licensed_to_Ill (template "Infobox Musique (œuvre)")
+        if rel_font_size > 10:
+            return
+        rel_font_size = min(rel_font_size, 5)
         self.fontsize_style += 1
         self.rel_font_size = rel_font_size
     
