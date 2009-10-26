@@ -1121,7 +1121,7 @@ class TreeCleaner(object):
                 node.parent.removeChild(node)
                 return
         
-        for c in node.children:
+        for c in node.children[:]:
             self.removeEmptySections(c)
 
 
