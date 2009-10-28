@@ -64,7 +64,7 @@ class nuwiki(object):
                 jmeta, rawtext = p.split("\n", 1)
                 meta = json.loads(jmeta)
                 pg = Page(meta, rawtext)
-                if pg.title in self.excluded:
+                if pg.title in self.excluded and pg.ns!=0:
                     pg.rawtext = unichr(0xebad)
                 revid = meta.get("revid")
                 if revid is None:
