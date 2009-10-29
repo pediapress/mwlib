@@ -27,9 +27,14 @@ include mwlib/apps/__init__.py
 include mwlib/apps/buildzip.py
 include mwlib/apps/client.py
 include mwlib/apps/make_nuwiki.py
+include mwlib/apps/qserve.py
 include mwlib/apps/render.py
 include mwlib/apps/serve.py
 include mwlib/apps/watch.py
+include mwlib/async/__init__.py
+include mwlib/async/jobs.py
+include mwlib/async/rpcclient.py
+include mwlib/async/rpcserver.py
 include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
