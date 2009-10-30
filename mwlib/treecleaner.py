@@ -1141,6 +1141,7 @@ class TreeCleaner(object):
                 if content:
                     item_list = ItemList()
                     item_list.appendChild(content)
+                    item_list.compact = True
                     nc.appendChild(item_list)
                 nr.appendChild(nc)                        
             nr.moveto(node, prefix=True)
