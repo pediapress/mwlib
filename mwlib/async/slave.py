@@ -11,6 +11,9 @@ class worker(object):
     def dispatch(self, job):
         self.job = job
         self.jobid = job["jobid"]
+        self.priority = job["priority"]
+        self.jobid_prefix = None
+                    
         method = job["channel"]
         
         m=getattr(self, "rpc_"+method, None)
@@ -23,6 +26,14 @@ class worker(object):
     def updatejob(self, progress):
         return self.proxy.updatejob(jobid=self.jobid, progress=progress)
 
+    def addjob(self, channel, payload=None, jobid=None, prefix=None, wait=False):
+        """call addjob on proxy with the same priority as the current job"""
+        if jobid is None and prefix is not None:
+            jobid = "%s::%s" % (prefix, channel)
+            
+        return self.proxy.addjob(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait)
+    
+    
 def main(commands, host=None, port=None, numthreads=10):
     class workhandler(worker, commands):
         pass

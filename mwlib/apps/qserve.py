@@ -13,9 +13,14 @@ class db(object):
 class qplugin:
     running_jobs = None
     
-    def rpc_addjob(self, channel, payload=None, priority=0, jobid=None):
-        return self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid)
-
+    def rpc_addjob(self, channel, payload=None, priority=0, jobid=None, wait=False):
+        jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid)
+        if not wait:
+            return jobid
+        
+        res = self.workq.waitjobs([jobid])[0]
+        return res._json()
+    
     def rpc_pulljob(self, channels=None):
         if not channels:
             channels = []
