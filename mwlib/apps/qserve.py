@@ -28,7 +28,11 @@ class qplugin:
         
         return j._json()
 
-    def rpc_finishjob(self, jobid, result=None, error=None):
+    def rpc_finishjob(self, jobid, result=None, error=None, traceback=None):
+        if error:
+            print "error finish: %s: %r" % (jobid, error)
+        else:
+            print "finish: %s: %r" % (jobid, result)
         self.workq.finishjob(jobid, result=result, error=error)
         if self.running_jobs and jobid in self.running_jobs:
             del self.running_jobs[jobid]

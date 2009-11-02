@@ -70,7 +70,7 @@ class workq(object):
             job.serial = self.count
             
         if job.jobid is None:
-            job.jobid = self.serial
+            job.jobid = job.serial
 
         self.id2job[job.jobid] = job
         
