@@ -6,7 +6,12 @@ except ImportError:
 import socket
 
 class rpcclient(object):
-    def __init__(self, host="localhost", port=8080):
+    def __init__(self, host=None, port=None):
+        if host is None:
+            host = "localhost"
+        if port is None:
+            port = 14311
+            
         self.host = host
         self.port = port
         self.socket = None
@@ -44,7 +49,7 @@ class rpcclient(object):
     
 class serverproxy(object):
     _make_client = rpcclient
-    def __init__(self, host="localhost", port=14311, rpcclient=None):
+    def __init__(self, host=None, port=None, rpcclient=None):
         if rpcclient is None:
             rpcclient = self._make_client(host=host, port=port)
         self._rpcclient = rpcclient
