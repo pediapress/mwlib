@@ -15,7 +15,7 @@ class job(object):
         self.payload = payload
         self.priority = priority
         self.channel = channel
-        self.progress = {}
+        self.info = {}
         self.jobid = jobid
         self.finish_event = event.Event()
         
@@ -68,9 +68,9 @@ class workq(object):
         j.finish_event.set()
         
         
-    def updatejob(self, jobid, progress):
+    def updatejob(self, jobid, info):
         j = self.id2job[jobid]
-        j.progress.update(progress)
+        j.info.update(info)
         
     
                   

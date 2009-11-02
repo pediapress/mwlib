@@ -13,7 +13,7 @@ class db(object):
 class qplugin:
     running_jobs = None
     
-    def rpc_addjob(self, channel, payload=None, priority=0, jobid=None, wait=False):
+    def rpc_qadd(self, channel, payload=None, priority=0, jobid=None, wait=False):
         jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid)
         if not wait:
             return jobid
@@ -21,7 +21,7 @@ class qplugin:
         res = self.workq.waitjobs([jobid])[0]
         return res._json()
     
-    def rpc_pulljob(self, channels=None):
+    def rpc_qpull(self, channels=None):
         if not channels:
             channels = []
 
@@ -33,7 +33,7 @@ class qplugin:
         
         return j._json()
 
-    def rpc_finishjob(self, jobid, result=None, error=None, traceback=None):
+    def rpc_qfinish(self, jobid, result=None, error=None, traceback=None):
         if error:
             print "error finish: %s: %r" % (jobid, error)
         else:
@@ -42,15 +42,15 @@ class qplugin:
         if self.running_jobs and jobid in self.running_jobs:
             del self.running_jobs[jobid]
         
-    def rpc_updatejob(self, jobid, progress):
-        self.workq.updatejob(jobid, progress)
+    def rpc_qsetinfo(self, jobid, info):
+        self.workq.updatejob(jobid, info)
 
-    def rpc_jobinfo(self, jobid):
+    def rpc_qinfo(self, jobid):
         if jobid in self.workq.id2job:
             return self.workq.id2job[jobid]._json()
         return None
 
-    def rpc_waitjobs(self, jobids):
+    def rpc_qwait(self, jobids):
         res = self.workq.waitjobs(jobids)
         return [j._json() for j in res]
     

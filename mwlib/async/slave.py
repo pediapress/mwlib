@@ -23,15 +23,15 @@ class worker(object):
         kwargs = job.get("payload") or dict()
         return m(**kwargs)
     
-    def updatejob(self, progress):
-        return self.proxy.updatejob(jobid=self.jobid, progress=progress)
+    def qsetinfo(self, info):
+        return self.proxy.qsetinfo(jobid=self.jobid, info=info)
 
-    def addjob(self, channel, payload=None, jobid=None, prefix=None, wait=False):
-        """call addjob on proxy with the same priority as the current job"""
+    def qadd(self, channel, payload=None, jobid=None, prefix=None, wait=False):
+        """call qadd on proxy with the same priority as the current job"""
         if jobid is None and prefix is not None:
             jobid = "%s::%s" % (prefix, channel)
             
-        return self.proxy.addjob(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait)
+        return self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait)
     
     
 def main(commands, host=None, port=None, numthreads=10):
@@ -53,7 +53,7 @@ def main(commands, host=None, port=None, numthreads=10):
         
         while 1:
             try:
-                job = qs.pulljob(channels=channels)
+                job = qs.qpull(channels=channels)
             except Exception, err:
                 print "Error while calling pulljob:", str(err)
                 time.sleep(sleeptime)
@@ -70,14 +70,14 @@ def main(commands, host=None, port=None, numthreads=10):
             except Exception, err:
                 print "error:", err
                 try:
-                    qs.finishjob(jobid=job["jobid"], error=str(err))
+                    qs.qfinish(jobid=job["jobid"], error=str(err))
                     traceback.print_exc()
                 except:
                     pass
                 continue
 
             try:
-                qs.finishjob(jobid=job["jobid"], result=result)
+                qs.qfinish(jobid=job["jobid"], result=result)
             except:
                 pass
 

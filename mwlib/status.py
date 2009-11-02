@@ -104,7 +104,7 @@ class Status(object):
             self.jobid = jobid
 
         if self.qproxy:
-            self.qproxy.updatejob(jobid=self.jobid, progress=self.status)
+            self.qproxy.qsetinfo(jobid=self.jobid, info=self.status)
             return
             
         try:    
