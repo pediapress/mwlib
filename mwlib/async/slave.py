@@ -34,7 +34,9 @@ class worker(object):
         return self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait)
     
     
-def main(commands, host=None, port=None, numthreads=10):
+def main(commands, host="localhost", port=None, numthreads=10):
+    if port is None:
+        port = 14311
     class workhandler(worker, commands):
         pass
 
@@ -81,7 +83,7 @@ def main(commands, host=None, port=None, numthreads=10):
             except:
                 pass
 
-    print "pulling jobs for", ", ".join(channels)
+    print "pulling jobs from", "%s:%s" % (host, port), "for", ", ".join(channels)
     
     import threading
     for i in range(numthreads):
