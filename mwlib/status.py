@@ -14,6 +14,7 @@ from mwlib.log import Log
 log = Log('mwlib.status')
 
 class Status(object):
+    qproxy = None
     def __init__(self,
         filename=None,
         podclient=None,
@@ -83,6 +84,29 @@ class Status(object):
     def dump(self):
         if not self.filename:
             return
+
+        if not self.qproxy and self.filename.startswith("qserve://"):
+            fn = self.filename[len("qserve://"):]
+            host, jobid=fn.split("/")
+            try:
+                jobid = int(jobid)
+            except ValueError:
+                jobid = jobid.strip('"')
+                
+            if ":" in host:
+                host, port = host.split(":")
+                port = int(port)
+            else:
+                port = 14311
+
+            from mwlib.async import rpcclient
+            self.qproxy = rpcclient.serverproxy(host=host, port=port)
+            self.jobid = jobid
+
+        if self.qproxy:
+            self.qproxy.updatejob(jobid=self.jobid, progress=self.status)
+            return
+            
         try:    
             open(self.filename + '.tmp', 'wb').write(
                 json.dumps(self.status).encode('utf-8')
