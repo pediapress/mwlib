@@ -30,7 +30,8 @@ class job(object):
                     progress=self.progress,
                     jobid=self.jobid,
                     error=self.error,
-                    serial=self.serial, 
+                    serial=self.serial,
+                    done=self.done, 
                     result=self.result)
     
     
