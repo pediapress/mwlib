@@ -37,11 +37,28 @@ class job(object):
 class workq(object):
     def __init__(self):
         self.channel2q = {}
-        self.merged = {}
         
         self.count = 0
         self._waiters = []
         self.id2job = {}
+
+    def report(self):
+        import time
+        print "=== report %s ===" % (time.ctime(), )
+        print "count:", self.count
+        busy = []
+        for c, todo in self.channel2q.items():
+            if todo:
+                busy.append((c, len(todo)))
+        if busy:
+            print "busy channels:"
+            todo.sort()
+            for c, todo in busy:
+                print c, todo
+        else:
+            print "all channels idle"
+            
+        print
         
     def waitjobs(self, jobids):
         jobs = [self.id2job[j] for j in jobids]

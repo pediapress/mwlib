@@ -93,6 +93,15 @@ def main():
                                   
     
     d = db()
+
+    def report():
+        while 1:
+            d.workq.report()
+            gevent.sleep(20)
+        
+    import gevent
+    gevent.spawn(report)
+    
     
     class handler(request_handler, qplugin):
         workq = d.workq
