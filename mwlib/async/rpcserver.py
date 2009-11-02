@@ -31,6 +31,8 @@ class request_handler(dispatcher):
     def __init__(self, client=None, clientid=None, **kw):
         self.client = client
         self.clientid = clientid
+        super(request_handler, self).__init__(**kw)
+        
         
     def shutdown(self):
         super(request_handler, self).shutdown()
@@ -74,7 +76,7 @@ class server(object):
             clientid = "<%s %s:%s>" % (self.clientcount, client[1][0], client[1][1])
             
             sockfile = client[0].makefile()
-            handle_request = self.get_request_handler(client, clientid=clientid)
+            handle_request = self.get_request_handler(client=client, clientid=clientid)
             
             
             self.log("+connect: %s" % (clientid, ))

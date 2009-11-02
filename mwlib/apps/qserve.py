@@ -10,9 +10,10 @@ class db(object):
         self.key2data = {}
         self.workq = jobs.workq()
         
-class qplugin:
-    running_jobs = None
-    
+class qplugin(object):
+    def __init__(self,  **kw):
+        self.running_jobs = {}
+        
     def rpc_qadd(self, channel, payload=None, priority=0, jobid=None, wait=False):
         jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid)
         if not wait:
@@ -24,9 +25,6 @@ class qplugin:
     def rpc_qpull(self, channels=None):
         if not channels:
             channels = []
-
-        if self.running_jobs is None:
-            self.running_jobs = {}
             
         j = self.workq.pop(channels)
         self.running_jobs[j.jobid] = j
@@ -39,7 +37,7 @@ class qplugin:
         else:
             print "finish: %s: %r" % (jobid, result)
         self.workq.finishjob(jobid, result=result, error=error)
-        if self.running_jobs and jobid in self.running_jobs:
+        if jobid in self.running_jobs:
             del self.running_jobs[jobid]
         
     def rpc_qsetinfo(self, jobid, info):
@@ -55,16 +53,9 @@ class qplugin:
         return [j._json() for j in res]
     
     def shutdown(self):
-        if not self.running_jobs:
-            return
-        
         for j in self.running_jobs.values():
             # print "reschedule", j
             self.workq.pushjob(j)
-            
-        self.running_jobs = None
-        
-        
         
 def usage():
     print "mw-qserve [-p PORT] [-i INTERFACE]"
@@ -109,6 +100,9 @@ def main():
     
     
     class handler(request_handler, qplugin):
+        def __init__(self, **kwargs):
+            super(handler, self).__init__(**kwargs)
+            
         workq = d.workq
         db = d
 
