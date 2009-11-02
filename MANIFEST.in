@@ -35,6 +35,7 @@ include mwlib/async/__init__.py
 include mwlib/async/jobs.py
 include mwlib/async/rpcclient.py
 include mwlib/async/rpcserver.py
+include mwlib/async/slave.py
 include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
