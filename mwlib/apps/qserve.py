@@ -13,8 +13,8 @@ class db(object):
 class qplugin:
     running_jobs = None
     
-    def rpc_addjob(self, payload, priority=0, channel="default", jobid=None):
-        return self.workq.push(payload, priority=priority, channel=channel, jobid=jobid)
+    def rpc_addjob(self, method, payload=None, priority=0, channel="default", jobid=None):
+        return self.workq.push(method=method, payload=payload, priority=priority, channel=channel, jobid=jobid)
 
     def rpc_pulljob(self, channels=None):
         if not channels:

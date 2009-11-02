@@ -11,7 +11,8 @@ class job(object):
     error=None
     done=False
     
-    def __init__(self, payload, priority=0, channel="default", jobid=None):
+    def __init__(self, method, payload=None, priority=0, channel="default", jobid=None):
+        self.method = method
         self.payload = payload
         self.priority = priority
         self.channel = channel
@@ -23,17 +24,9 @@ class job(object):
         return cmp((self.priority, self.serial), (other.priority, other.serial))
 
     def _json(self):
-        
-        return dict(payload=self.payload,
-                    priority=self.priority,
-                    channel=self.channel,
-                    progress=self.progress,
-                    jobid=self.jobid,
-                    error=self.error,
-                    serial=self.serial,
-                    done=self.done, 
-                    result=self.result)
-    
+        d = self.__dict__.copy()
+        del d["finish_event"]
+        return d
     
 class workq(object):
     def __init__(self):
@@ -108,12 +101,12 @@ class workq(object):
         heapq.heappush(q, job)
         return job.jobid
         
-    def push(self, payload, priority=0, channel="default", jobid=None):
+    def push(self, method, payload=None, priority=0, channel="default", jobid=None):
         if jobid is not None:
             if jobid in self.id2job:
                 return jobid
             
-        return self.pushjob(job(payload, priority=priority, channel=channel, jobid=jobid))
+        return self.pushjob(job(method=method, payload=payload, priority=priority, channel=channel, jobid=jobid))
         
     def pop(self, channels):
         if not channels:
