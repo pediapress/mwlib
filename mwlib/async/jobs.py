@@ -11,8 +11,7 @@ class job(object):
     error=None
     done=False
     
-    def __init__(self, method, payload=None, priority=0, channel="default", jobid=None):
-        self.method = method
+    def __init__(self, channel, payload=None, priority=0, jobid=None):
         self.payload = payload
         self.priority = priority
         self.channel = channel
@@ -101,12 +100,12 @@ class workq(object):
         heapq.heappush(q, job)
         return job.jobid
         
-    def push(self, method, payload=None, priority=0, channel="default", jobid=None):
+    def push(self, channel, payload=None, priority=0, jobid=None):
         if jobid is not None:
             if jobid in self.id2job:
                 return jobid
             
-        return self.pushjob(job(method=method, payload=payload, priority=priority, channel=channel, jobid=jobid))
+        return self.pushjob(job(payload=payload, priority=priority, channel=channel, jobid=jobid))
         
     def pop(self, channels):
         if not channels:
