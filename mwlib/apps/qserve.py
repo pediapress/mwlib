@@ -13,8 +13,8 @@ class db(object):
 class qplugin:
     running_jobs = None
     
-    def rpc_addjob(self, payload, priority=0, channel="default"):
-        return self.workq.push(payload, priority=priority, channel=channel)
+    def rpc_addjob(self, payload, priority=0, channel="default", jobid=None):
+        return self.workq.push(payload, priority=priority, channel=channel, jobid=jobid)
 
     def rpc_pulljob(self, channels=None):
         if not channels:
@@ -24,16 +24,27 @@ class qplugin:
             self.running_jobs = {}
             
         j = self.workq.pop(channels)
-        self.running_jobs[j.serial] = j
+        self.running_jobs[j.jobid] = j
         
-        return j.__dict__
+        return j._json()
 
     def rpc_finishjob(self, jobid, result=None, error=None):
         self.workq.finishjob(jobid, result=result, error=error)
-
-    def rpc_updatejob(self, jobid, data):
-        self.workq.updatejob(jobid, data)
+        if self.running_jobs and jobid in self.running_jobs:
+            del self.running_jobs[jobid]
         
+    def rpc_updatejob(self, jobid, progress):
+        self.workq.updatejob(jobid, progress)
+
+    def rpc_jobinfo(self, jobid):
+        if jobid in self.workq.id2job:
+            return self.workq.id2job[jobid]._json()
+        return None
+
+    def rpc_waitjobs(self, jobids):
+        res = self.workq.waitjobs(jobids)
+        return [j._json() for j in res]
+    
     def shutdown(self):
         if not self.running_jobs:
             return

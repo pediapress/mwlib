@@ -44,7 +44,7 @@ class rpcclient(object):
     
 class serverproxy(object):
     _make_client = rpcclient
-    def __init__(self, host="localhost", port=8080, rpcclient=None):
+    def __init__(self, host="localhost", port=14311, rpcclient=None):
         if rpcclient is None:
             rpcclient = self._make_client(host=host, port=port)
         self._rpcclient = rpcclient

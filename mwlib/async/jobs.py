@@ -5,20 +5,35 @@ import gevent
 from gevent import event
 
 class job(object):
-    serial=None
+    serial = None
+    jobid=None
     result=None
     error=None
     done=False
     
-    def __init__(self, payload, priority=0, channel="default"):
+    def __init__(self, payload, priority=0, channel="default", jobid=None):
         self.payload = payload
         self.priority = priority
         self.channel = channel
-        self.metadata = {}
+        self.progress = {}
+        self.jobid = jobid
+        self.finish_event = event.Event()
         
     def __cmp__(self, other):
         return cmp((self.priority, self.serial), (other.priority, other.serial))
+
+    def _json(self):
         
+        return dict(payload=self.payload,
+                    priority=self.priority,
+                    channel=self.channel,
+                    progress=self.progress,
+                    jobid=self.jobid,
+                    error=self.error,
+                    serial=self.serial, 
+                    result=self.result)
+    
+    
 class workq(object):
     def __init__(self):
         self.channel2q = {}
@@ -28,16 +43,24 @@ class workq(object):
         self._waiters = []
         self.id2job = {}
         
+    def waitjobs(self, jobids):
+        jobs = [self.id2job[j] for j in jobids]
+        for j in jobs:
+            j.finish_event.wait()
 
+        return jobs
+            
     def finishjob(self, jobid, result=None, error=None):
         j = self.id2job[jobid]
         j.result = result
         j.error = error
         j.done = True
-
-    def updatejob(self, jobid, meta):
+        j.finish_event.set()
+        
+        
+    def updatejob(self, jobid, progress):
         j = self.id2job[jobid]
-        j.metadata.update(meta)
+        j.progress.update(progress)
         
     
                   
@@ -45,8 +68,11 @@ class workq(object):
         if job.serial is None:
             self.count += 1
             job.serial = self.count
+            
+        if job.jobid is None:
+            job.jobid = self.serial
 
-        self.id2job[job.serial] = job
+        self.id2job[job.jobid] = job
         
         channel = job.channel
         
@@ -54,7 +80,7 @@ class workq(object):
             if channel in watching or not watching:
                 del self._waiters[i]
                 ev.set(job)
-                return job.serial
+                return job.jobid
 
         try:
             q = self.channel2q[channel]
@@ -62,10 +88,14 @@ class workq(object):
             q = self.channel2q[channel] = []
             
         heapq.heappush(q, job)
-        return job.serial
+        return job.jobid
         
-    def push(self, payload, priority=0, channel="default"):
-        return self.pushjob(job(payload, priority=priority, channel="default"))
+    def push(self, payload, priority=0, channel="default", jobid=None):
+        if jobid is not None:
+            if jobid in self.id2job:
+                return jobid
+            
+        return self.pushjob(job(payload, priority=priority, channel=channel, jobid=jobid))
         
     def pop(self, channels):
         if not channels:

@@ -25,7 +25,6 @@ class dispatcher(object):
         m = getattr(self, cmdname, None)
         if not m:
             raise RuntimeError("no such method: %r" % (name, ))
-        
         return m(**kwargs)
     
 class request_handler(dispatcher):
@@ -97,6 +96,7 @@ class server(object):
                     response = json.dumps(dict(result=d))+"\n"
                 except Exception, err:
                     response = json.dumps(dict(error=str(err)))+"\n"
+                    traceback.print_exc()
                 
                 sockfile.write(response)
                 sockfile.flush()
