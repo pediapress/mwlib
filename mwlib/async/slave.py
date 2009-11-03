@@ -106,6 +106,7 @@ def main(commands, host="localhost", port=None, numthreads=10):
         t.start()
     
     try:
-        time.sleep(2**31)
+        while True:
+            time.sleep(2**26)
     finally:
         os._exit(0)
