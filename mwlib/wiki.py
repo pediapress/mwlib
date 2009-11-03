@@ -146,13 +146,22 @@ def _makewiki(conf, metabook=None, **kw):
         res.image = None
         return res
 
-    if os.path.exists(os.path.join(conf, "siteinfo.json")):
+    nfo_fn = os.path.join(conf, 'nfo.json')
+    if os.path.exists(nfo_fn):
         from mwlib import nuwiki
-        res.images = res.wiki = nuwiki.adapt(conf)
-        if metabook is None:
-            res.metabook = res.wiki.metabook
-        
-        return res
+        from mwlib import myjson as json
+
+        try:
+            format = json.load(open(nfo_fn, 'rb'))['format']
+        except KeyError:
+            pass
+        else:
+            if format == 'nuwiki':
+                res.images = res.wiki = nuwiki.adapt(conf)
+                res.metabook = res.wiki.metabook
+                return res
+            elif format == 'multi-nuwiki':
+                return MultiEnvironment(conf)
     
     # yes, I really don't want to type this everytime
     wc = os.path.join(conf, "wikiconf.txt")
@@ -179,7 +188,6 @@ def _makewiki(conf, metabook=None, **kw):
         elif format==u'multi-nuwiki':
             from mwlib import nuwiki
             import tempfile
-            res.wiki = res.images = None
             tmpdir = tempfile.mkdtemp()
             nuwiki.extractall(zf, tmpdir)
             res = MultiEnvironment(tmpdir)
