@@ -1,8 +1,23 @@
+import sys
 import os
 import time
 import traceback
 
 from mwlib.async.rpcclient import serverproxy
+
+def shorterrmsg():
+    etype, val, tb = sys.exc_info()
+    msg = []
+    a = msg.append
+    
+    a(etype.__name__)
+    a(": ")
+    a(str(val))
+    
+    file, lineno, name, line = traceback.extract_tb(tb)[-1]
+    a(" in function %s, file %s, line %s" % (name, file,  lineno))
+    
+    return "".join(msg)
 
 class worker(object):
     def __init__(self, proxy):
@@ -72,7 +87,7 @@ def main(commands, host="localhost", port=None, numthreads=10):
             except Exception, err:
                 print "error:", err
                 try:
-                    qs.qfinish(jobid=job["jobid"], error=str(err))
+                    qs.qfinish(jobid=job["jobid"], error=shorterrmsg())
                     traceback.print_exc()
                 except:
                     pass
