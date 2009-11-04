@@ -14,7 +14,7 @@ class job(object):
     deadline = None
     ttl = 3600
     
-    def __init__(self, channel, payload=None, priority=0, jobid=None, timeout=120):
+    def __init__(self, channel, payload=None, priority=0, jobid=None, timeout=120, ttl=None):
         self.payload = payload
         self.priority = priority
         self.channel = channel
@@ -23,6 +23,9 @@ class job(object):
         self.timeout = time.time()+timeout
         self.finish_event = event.Event()
         
+        if ttl is not None:
+            self.ttl = ttl
+            
     def __cmp__(self, other):
         return cmp((self.priority, self.serial), (other.priority, other.serial))
 
@@ -162,7 +165,7 @@ class workq(object):
         return job.jobid
 
 
-    def push(self, channel, payload=None, priority=0, jobid=None, timeout=None):
+    def push(self, channel, payload=None, priority=0, jobid=None, timeout=None, ttl=None):
         if jobid is not None:
             if jobid in self.id2job:
                 return jobid
@@ -171,7 +174,7 @@ class workq(object):
             timeout=120
             
         
-        return self.pushjob(job(payload=payload, priority=priority, channel=channel, jobid=jobid, timeout=timeout))
+        return self.pushjob(job(payload=payload, priority=priority, channel=channel, jobid=jobid, timeout=timeout, ttl=ttl))
         
     def pop(self, channels):
         if not channels:

@@ -15,8 +15,8 @@ class qplugin(object):
     def __init__(self,  **kw):
         self.running_jobs = {}
         
-    def rpc_qadd(self, channel, payload=None, priority=0, jobid=None, wait=False, timeout=None):
-        jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid, timeout=timeout)
+    def rpc_qadd(self, channel, payload=None, priority=0, jobid=None, wait=False, timeout=None, ttl=None):
+        jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid, timeout=timeout, ttl=ttl)
         if not wait:
             return jobid
         
