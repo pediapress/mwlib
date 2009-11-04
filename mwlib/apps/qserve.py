@@ -1,5 +1,6 @@
 #! /usr/bin/env python
-
+import os
+import cPickle
 import getopt # yes, getopt!
 import sys
 
@@ -64,13 +65,14 @@ def main():
     from mwlib.async.rpcserver import request_handler, server
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "p:i:h", ["port", "interface"])
+        opts, args = getopt.getopt(sys.argv[1:], "d:p:i:h", ["port", "interface"])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(10)
 
     port = 14311
     interface = "0.0.0.0"
+    datadir = None
     
     for o, a in opts:
         if o in ("-p", "--port"):
@@ -83,12 +85,23 @@ def main():
                 sys.exit(10)
         elif o in ("-i",  "--interface"):
             interface = a
+        elif o in ("-d"):
+            datadir = a
         elif o in ("-h", "--help"):
             usage()
             sys.exit(0)
-                                  
-    
-    d = db()
+
+    if datadir is not None:
+        qpath = os.path.join(datadir, "workq.pickle")
+    else:
+        qpath = None
+        
+    if qpath and os.path.exists(qpath):
+        print "loading", qpath
+        d = cPickle.load(open(qpath))
+        print "loaded", len(d.workq.id2job), "jobs"
+    else:
+        d = db()
 
     def report():
         while 1:
@@ -108,7 +121,15 @@ def main():
 
     s=server(port, host=interface, get_request_handler=handler)
     print "listening on %s:%s" % (interface, port)
-    s.run_forever()
+    try:
+        s.run_forever()
+    except KeyboardInterrupt:
+        print "interrupted"
+    finally:
+        if qpath:
+            print "saving", qpath
+            cPickle.dump(d, open(qpath, "w"), 2)
+        
     
 if __name__=="__main__":
     main()

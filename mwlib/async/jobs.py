@@ -22,6 +22,17 @@ class job(object):
     def __cmp__(self, other):
         return cmp((self.priority, self.serial), (other.priority, other.serial))
 
+    def __getstate__(self):
+        d = self.__dict__.copy()
+        del d["finish_event"]
+        return d
+    
+    def __setstate__(self, state):
+        self.__dict__ = state
+        self.finish_event = event.Event()
+        if self.done:
+            self.finish_event.set()
+            
     def _json(self):
         d = self.__dict__.copy()
         del d["finish_event"]
@@ -35,6 +46,16 @@ class workq(object):
         self._waiters = []
         self.id2job = {}
 
+    def __getstate__(self):
+        return dict(count=self.count, jobs=self.id2job.values())
+
+    def __setstate__(self, state):
+        self.__init__()
+        
+        self.count = state["count"]
+        for j in state["jobs"]:
+            self.id2job[j.jobid] = j
+        
     def report(self):
         import time
         print "=== report %s ===" % (time.ctime(), )
