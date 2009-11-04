@@ -97,7 +97,7 @@ def main():
                                             'mw-watch = mwlib.apps.watch:main',
                                             'mw-client = mwlib.apps.client:main',
                                             'mw-version = mwlib._version:main',
-                                            'mw-qserve = mwlib.apps.qserve:main', 
+                                            'mw-qserve = mwlib.async.qserve:main', 
                                             ],
                         'mwlib.writers': ['odf = mwlib.odfwriter:writer',
                                           'xhtml = mwlib.xhtmlwriter:xhtmlwriter',
