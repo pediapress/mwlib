@@ -60,10 +60,14 @@ class workq(object):
     def __setstate__(self, state):
         self.__init__()
         
+        self.timeoutq = []
         self.count = state["count"]
         for j in state["jobs"]:
             self.id2job[j.jobid] = j
-
+            if not j.done:
+                self.timeoutq.append((j.timeout, j))
+        heapq.heapify(self.timeoutq)
+        
     def _preenjobq(self, q):
         pop = heapq.heappop
         before = len(q)
