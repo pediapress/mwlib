@@ -47,7 +47,18 @@ class worker(object):
             jobid = "%s::%s" % (prefix, channel)
             
         return self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait)
+
+    def qaddw(self, channel, payload=None, jobid=None):
+        r = self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=True)
+        error = r.get("error")
+        if error is not None:
+            raise RuntimeError(error)
+        
+        return r["result"]
     
+        
+        
+        
     
 def main(commands, host="localhost", port=None, numthreads=10):
     if port is None:
