@@ -103,6 +103,12 @@ def main():
     else:
         d = db()
 
+
+    def watchdog():
+        while 1:
+            d.workq.dropdead()
+            gevent.sleep(30)
+            
     def report():
         while 1:
             d.workq.report()
@@ -110,7 +116,7 @@ def main():
         
     import gevent
     gevent.spawn(report)
-    
+    gevent.spawn(watchdog)
     
     class handler(request_handler, qplugin):
         def __init__(self, **kwargs):

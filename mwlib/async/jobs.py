@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import heapq
+import time
 import gevent
 from gevent import event
 
@@ -10,6 +11,8 @@ class job(object):
     result=None
     error=None
     done=False
+    deadline = None
+    ttl = 3600
     
     def __init__(self, channel, payload=None, priority=0, jobid=None):
         self.payload = payload
@@ -55,10 +58,28 @@ class workq(object):
         self.count = state["count"]
         for j in state["jobs"]:
             self.id2job[j.jobid] = j
+
+    def dropdead(self):
+        now = int(time.time())
+
+        dcount = 0
+        mcount = 0
+        for jid, job in self.id2job.items():
+            if job.deadline and job.deadline<now:
+                del self.id2job[jid]
+                dcount += 1
+                
+            if job.done and not job.deadline:
+                job.deadline = now+job.ttl
+                mcount += 1
+        if dcount or mcount:
+            print "watchdog: dropped %s jobs, marked %s jobs with a deadline" % (dcount, mcount)
+        
         
     def report(self):
         import time
         print "=== report %s ===" % (time.ctime(), )
+        print "have %s jobs" % len(self.id2job)
         print "count:", self.count
         busy = []
         for c, todo in self.channel2q.items():
