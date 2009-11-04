@@ -15,8 +15,8 @@ class qplugin(object):
     def __init__(self,  **kw):
         self.running_jobs = {}
         
-    def rpc_qadd(self, channel, payload=None, priority=0, jobid=None, wait=False):
-        jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid)
+    def rpc_qadd(self, channel, payload=None, priority=0, jobid=None, wait=False, timeout=None):
+        jobid = self.workq.push(payload=payload, priority=priority, channel=channel, jobid=jobid, timeout=timeout)
         if not wait:
             return jobid
         
@@ -92,6 +92,8 @@ def main():
             sys.exit(0)
 
     if datadir is not None:
+        if not os.path.isdir(datadir):
+            sys.exit("%r is not a directory" % (datadir, ))
         qpath = os.path.join(datadir, "workq.pickle")
     else:
         qpath = None
@@ -103,7 +105,11 @@ def main():
     else:
         d = db()
 
-
+    def handletimeouts():
+        while 1:
+            d.workq.handletimeouts()
+            gevent.sleep(1)
+            
     def watchdog():
         while 1:
             d.workq.dropdead()
@@ -117,6 +123,7 @@ def main():
     import gevent
     gevent.spawn(report)
     gevent.spawn(watchdog)
+    gevent.spawn(handletimeouts)
     
     class handler(request_handler, qplugin):
         def __init__(self, **kwargs):

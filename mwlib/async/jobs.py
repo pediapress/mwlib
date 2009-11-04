@@ -14,12 +14,13 @@ class job(object):
     deadline = None
     ttl = 3600
     
-    def __init__(self, channel, payload=None, priority=0, jobid=None):
+    def __init__(self, channel, payload=None, priority=0, jobid=None, timeout=120):
         self.payload = payload
         self.priority = priority
         self.channel = channel
         self.info = {}
         self.jobid = jobid
+        self.timeout = time.time()+timeout
         self.finish_event = event.Event()
         
     def __cmp__(self, other):
@@ -48,7 +49,8 @@ class workq(object):
         self.count = 0
         self._waiters = []
         self.id2job = {}
-
+        self.timeoutq = []
+        
     def __getstate__(self):
         return dict(count=self.count, jobs=self.id2job.values())
 
@@ -59,6 +61,22 @@ class workq(object):
         for j in state["jobs"]:
             self.id2job[j.jobid] = j
 
+    def handletimeouts(self):
+        now = time.time()
+        while self.timeoutq:
+            deadline, job = self.timeoutq[0]
+            if job.done:
+                heapq.heappop(self.timeoutq)
+                continue
+            if deadline > now:
+                break
+            
+            heapq.heappop(self.timeoutq)
+            job.error = "timeout"
+            job.done = True
+            job.finish_event.set()
+            print "timeout:", job._json()
+            
     def dropdead(self):
         now = int(time.time())
 
@@ -77,7 +95,6 @@ class workq(object):
         
         
     def report(self):
-        import time
         print "=== report %s ===" % (time.ctime(), )
         print "have %s jobs" % len(self.id2job)
         print "count:", self.count
@@ -140,14 +157,21 @@ class workq(object):
             q = self.channel2q[channel] = []
             
         heapq.heappush(q, job)
-        return job.jobid
+        heapq.heappush(self.timeoutq, (job.timeout, job))
         
-    def push(self, channel, payload=None, priority=0, jobid=None):
+        return job.jobid
+
+
+    def push(self, channel, payload=None, priority=0, jobid=None, timeout=None):
         if jobid is not None:
             if jobid in self.id2job:
                 return jobid
             
-        return self.pushjob(job(payload=payload, priority=priority, channel=channel, jobid=jobid))
+        if timeout is None:
+            timeout=120
+            
+        
+        return self.pushjob(job(payload=payload, priority=priority, channel=channel, jobid=jobid, timeout=timeout))
         
     def pop(self, channels):
         if not channels:
