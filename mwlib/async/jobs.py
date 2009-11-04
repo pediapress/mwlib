@@ -64,6 +64,21 @@ class workq(object):
         for j in state["jobs"]:
             self.id2job[j.jobid] = j
 
+    def _preenjobq(self, q):
+        pop = heapq.heappop
+        before = len(q)
+        while q and q[0].done:
+            pop(q)
+            
+        return before-len(q)
+    
+    def _preenall(self):
+        for k, v in self.channel2q.items():
+            c = self._preenjobq(v)
+            if c:
+                print "preen:", k,c
+                
+        
     def handletimeouts(self):
         now = time.time()
         while self.timeoutq:
@@ -79,7 +94,9 @@ class workq(object):
             job.done = True
             job.finish_event.set()
             print "timeout:", job._json()
-            
+
+        self._preenall()
+        
     def dropdead(self):
         now = int(time.time())
 
@@ -181,7 +198,9 @@ class workq(object):
             try_channels = self.channel2q.keys()
         else:
             try_channels = channels
-            
+
+        self._preenall()
+        
         jobs = []
         for c in try_channels:
             try:
