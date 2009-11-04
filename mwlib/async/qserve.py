@@ -59,13 +59,13 @@ class qplugin(object):
             self.workq.pushjob(j)
         
 def usage():
-    print "mw-qserve [-p PORT] [-i INTERFACE]"
+    print "mw-qserve [-p PORT] [-i INTERFACE] [-d DATADIR]"
 
 def main():
     from mwlib.async.rpcserver import request_handler, server
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:p:i:h", ["port", "interface"])
+        opts, args = getopt.getopt(sys.argv[1:], "d:p:i:h", ["help", "port", "interface"])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(10)
