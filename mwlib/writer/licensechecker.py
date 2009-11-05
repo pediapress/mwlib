@@ -120,7 +120,8 @@ class LicenseChecker(object):
 
 
     def displayImage(self, imgname):
-        assert self.image_db, 'No image_db passed when initializing LicenseChecker'
+        if self.image_db is None:
+            return False
         templates = [t.lower() for t in self.image_db.getImageTemplates(imgname)]
         licenses = self._getLicenses(templates, imgname)
         display_img = self._checkLicenses(licenses, imgname)
