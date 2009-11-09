@@ -65,7 +65,7 @@ def main():
     from mwlib.async.rpcserver import request_handler, server
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:p:i:h", ["help", "port", "interface"])
+        opts, args = getopt.getopt(sys.argv[1:], "d:p:i:h", ["help", "port=", "interface="])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(10)
