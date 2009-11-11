@@ -156,7 +156,11 @@ class nuwiki(object):
                 
             safe_path = self._pathjoin("images", "safe", hd)
             if not os.path.exists(safe_path):
-                os.symlink(os.path.join("..", utils.fsescape(fqname)), safe_path)
+                try:
+                    os.symlink(os.path.join("..", utils.fsescape(fqname)), safe_path)
+                except OSError, exc:
+                    if exc.errno != 17: # File exists
+                        raise
             return safe_path
         
         return p
