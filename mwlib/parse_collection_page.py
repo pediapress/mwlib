@@ -15,9 +15,9 @@ def parse_collection_page(wikitext):
 
     title_rex = '^==(?P<title>[^=].*?[^=])==$'
     subtitle_rex = '^===(?P<subtitle>[^=].*?[^=])===$'
-    chapter_rex = '^;(?P<chapter>.*?)$'
-    article_rex = '^:\[\[:?(?P<article>.*?)(?:\|(?P<displaytitle>.*?))?\]\]$'
-    oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.*?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
+    chapter_rex = '^;(?P<chapter>.+?)$'
+    article_rex = '^:\[\[:?(?P<article>.+?)(?:\|(?P<displaytitle>.*?))?\]\]$'
+    oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.+?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
     template_rex = '^\{\{(?P<template>.*?)\}\}$'
     template_start_rex = '^(?P<template_start>\{\{)$'
     template_end_rex = '.*?(?P<template_end>\}\})$'
