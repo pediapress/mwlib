@@ -176,7 +176,7 @@ class license(mbobj):
     
 class chapter(mbobj):
     items=[]
-    title=None
+    title=u''
 
 
 # ==============================================================================
