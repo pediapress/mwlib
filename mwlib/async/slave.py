@@ -41,15 +41,15 @@ class worker(object):
     def qsetinfo(self, info):
         return self.proxy.qsetinfo(jobid=self.jobid, info=info)
 
-    def qadd(self, channel, payload=None, jobid=None, prefix=None, wait=False):
+    def qadd(self, channel, payload=None, jobid=None, prefix=None, wait=False, timeout=None, ttl=None):
         """call qadd on proxy with the same priority as the current job"""
         if jobid is None and prefix is not None:
             jobid = "%s::%s" % (prefix, channel)
             
-        return self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait)
+        return self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=wait, timeout=timeout, ttl=ttl)
 
-    def qaddw(self, channel, payload=None, jobid=None):
-        r = self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=True)
+    def qaddw(self, channel, payload=None, jobid=None, timeout=None):
+        r = self.proxy.qadd(channel=channel, payload=payload, priority=self.priority, jobid=jobid, wait=True, timeout=timeout)
         error = r.get("error")
         if error is not None:
             raise RuntimeError(error)
