@@ -18,13 +18,25 @@ display_version = gitversion or str(version)
 def main():
     print "mwlib: %s (%s)" % (display_version, gitid)
     try:
-        from mwlib.rl._version import version as rlversion
-        print "mwlib.rl:", rlversion
-    except ImportError:
-        pass
+        from mwlib.rl import _gitversion
+        print "mwlib.rl", _gitversion.gitversion
+    except ImportError:        
+        try:
+            from mwlib.rl._version import version as rlversion
+            print "mwlib.rl:", rlversion
+        except ImportError:
+            pass
 
     try:
         from mwlib._extversion import version as extversion
         print "mwlib.ext:", extversion
     except ImportError:
         pass
+
+    try:
+        from mwlib.hiq import _gitversion
+    except ImportError:
+        pass
+    else:
+        print "mwlib.hiq",  _gitversion.gitversion
+        
