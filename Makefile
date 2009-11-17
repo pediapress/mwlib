@@ -27,6 +27,9 @@ README.html: README.txt
 develop:: all
 	python setup.py develop
 
+clean::
+	git clean -xfd
+
 sdist:: all
 	echo gitversion=\"$(shell git describe --tags)\" >mwlib/_gitversion.py
 	echo gitid=\"$(shell git rev-parse HEAD)\" >>mwlib/_gitversion.py
@@ -37,19 +40,13 @@ sdist:: all
 sdist-upload:: all
 	python setup.py build sdist upload
 
-egg:: all
-	python setup.py bdist_egg
+pip-install:: clean sdist
+	pip install dist/*
 
-clean-install::
-	git clean -xfd
-	make sdist
+easy-install:: clean sdist
 	easy_install dist/*
 
 update::
 	git pull
-	make clean-install
+	make easy-install
 
-clean::
-	rm -rf mwlib/*.pyc mwlib/*.so build dist mwlib.egg-info *.pyc docs/*.html README.html
-	rm -f mwlib/_mwscan.cc
-	rm -f mwlib/templ/*.so mwlib/templ/*.c
