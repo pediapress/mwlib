@@ -162,7 +162,22 @@ def _makewiki(conf, metabook=None, **kw):
                 return res
             elif format == 'multi-nuwiki':
                 return MultiEnvironment(conf)
-    
+
+    if os.path.exists(os.path.join(conf, "content.json")):
+        from mwlib import zipwiki
+        asciidir = conf.encode("utf-8")
+        class dirreader(object):
+            def read(self, fn):
+                return open(os.path.join(asciidir, fn),  "rb").read()
+            
+        res.wiki = zipwiki.Wiki(dirreader())
+        res.images = zipwiki.ImageDB(dirreader())
+        if metabook is None:
+            res.metabook = res.wiki.metabook
+        return res
+        
+        assert 0
+            
     # yes, I really don't want to type this everytime
     wc = os.path.join(conf, "wikiconf.txt")
     if os.path.exists(wc):

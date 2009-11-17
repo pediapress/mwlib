@@ -39,7 +39,7 @@ class ZipWikiBase(object):
         @type zipfile: basestring or ZipFile
         """
 
-        if isinstance(zipfile, ZipFile):
+        if hasattr(zipfile, "read"):
             self.zf = zipfile
         else:
             self.zf = ZipFile(zipfile)
