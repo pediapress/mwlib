@@ -385,13 +385,20 @@ class TreeCleaner(object):
     def transformSingleColTables(self, node):
         # "not 'box' in node.attr(class)" is a hack to detect infoboxes and thelike. they are not split into divs.
         # tables like this should be detected and marked in a separate module probably
-        if node.__class__ == Table and node.numcols == 1 and not 'box' in node.attributes.get('class', '') and len(node.getAllDisplayText()) > 500:
+        single_col = node.__class__ == Table and node.numcols == 1
+        infobox = 'box' in node.attributes.get('class', '')
+        is_long = len(node.getAllDisplayText()) > 500
+        if single_col:
+            all_images = len([True for c in node.getAllChildren() if c.__class__ not in [Row, Cell, ImageLink]]) > 0
+        else:
+            all_images = False
+        if single_col and ( (not infobox and is_long) or all_images):
             if not node.parents:
                 return
             divs = []
             items = []
             content_len = len(node.getAllDisplayText())
-            if content_len > 5000:
+            if content_len > 5000 or all_images:
                 div_wrapper = False
             else:
                 div_wrapper = True
