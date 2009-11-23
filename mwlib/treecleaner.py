@@ -240,7 +240,6 @@ class TreeCleaner(object):
             children = [self.tree]
 
         total_children = len(children)
-
         for (i, child) in enumerate(children):
             for cleaner in cleanerList:
                 cleaner(child)
@@ -389,7 +388,12 @@ class TreeCleaner(object):
         infobox = 'box' in node.attributes.get('class', '')
         is_long = len(node.getAllDisplayText()) > 500
         if single_col:
-            all_images = len([True for c in node.getAllChildren() if c.__class__ not in [Row, Cell, ImageLink]]) > 0
+            all_images = True
+            for row in node.children:
+                for cell in row.children:
+                    for item in cell.children:
+                        if item.__class__ != ImageLink:
+                            all_images = False
         else:
             all_images = False
         if single_col and ( (not infobox and is_long) or all_images):
