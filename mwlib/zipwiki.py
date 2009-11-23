@@ -204,7 +204,7 @@ class ImageDB(ZipWikiBase):
         try:
             fname = name[name.find(":") + 1:].replace("'", '-').replace('_',' ')            
             data = self.zf.read('images/%s' % fname.encode('utf-8'))
-        except KeyError: # no such file
+        except (KeyError,  IOError): # no such file
             return None        
         try:
             ext = '.' + partial.rsplit('.', 1)[1]
