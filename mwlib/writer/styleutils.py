@@ -87,10 +87,13 @@ def rgbColorFromNode(node, greyScale=False, darknessLimit=0):
     return color
 
 
-def getTextAlign(node):
-    """ return the text alignment of a node. possible return values are left|right|center|none"""
+def getBaseAlign(node):
     if node.__class__ == advtree.Cell and getattr(node, 'is_header', False):
         return 'center'
+    return 'none'
+
+
+def _getTextAlign(node):
     align = node.style.get('text-align', 'none').lower()
     if align == 'none' and node.__class__ in  [advtree.Div, advtree.Cell, advtree.Row]:
         align = node.attributes.get('align', 'none').lower()
@@ -100,6 +103,18 @@ def getTextAlign(node):
         align = 'center'
     if align == "none" and node.parent:
         return getTextAlign(node.parent)
+    return align
+
+
+def getTextAlign(node):
+    """ return the text alignment of a node. possible return values are left|right|center|none"""
+    nodes = node.getParents()
+    nodes.append(node)
+    align = getBaseAlign(node)
+    for n in nodes:
+        parent_align = _getTextAlign(n)
+        if parent_align != 'none':
+            align = parent_align
     return align
 
 def tableBorder(node):
