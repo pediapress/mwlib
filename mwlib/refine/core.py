@@ -315,19 +315,25 @@ class parse_lines(object):
         while startpos<len(lines)-1:
             prefix = getchar(lines[startpos])
             if prefix is None:
-                lines[startpos].type = T.t_complex_node
+                if lines[startpos].tagname:
+                    lines[startpos].type = T.t_complex_tag
+                else:
+                    lines[startpos].type = T.t_complex_node
                 startpos+=1
                 continue
-                
+
+            endtag = None
             if prefix==':':
                 node = T(type=T.t_complex_style, caption=':')
                 newitem = lambda: T(type=T.t_complex_node, blocknode=True)
             elif prefix=='*':
                 node = T(type=T.t_complex_tag, tagname="ul")
                 newitem = lambda: T(type=T.t_complex_tag, tagname="li", blocknode=True)
+                endtag = "ul"
             elif prefix=="#":
                 node = T(type=T.t_complex_tag, tagname="ol")
                 newitem = lambda: T(type=T.t_complex_tag, tagname="li", blocknode=True)
+                endtag = "ol"
             elif prefix==';':
                 node = T(type=T.t_complex_style, caption=';')
                 newitem = lambda: T(type=T.t_complex_node, blocknode=True)
@@ -336,16 +342,29 @@ class parse_lines(object):
                 
             node.children = []
             dd = None
+
+            def appendline():
+                line = lines[startpos]
+                if endtag:
+                    for i, x in enumerate(line.children):
+                        if x.rawtagname==endtag and x.type==T.t_html_tag_end:
+                            after = line.children[i+1:]
+                            del line.children[i:]
+                            item.children.append(line)
+                            lines[startpos] = T(type=T.t_complex_line, tagname="p", lineprefix=None, children=after)
+                            return
+                
+                item.children.append(lines[startpos])
+                del lines[startpos]
+                
             while startpos<len(lines)-1 and getchar(lines[startpos])==prefix:
                 # collect items
                 item = newitem()
                 item.children=[]
-                item.children.append(lines[startpos])
-                del lines[startpos]
+                appendline()
                 
                 while startpos<len(lines)-1 and prefix==getchar(lines[startpos]) and len(lines[startpos].lineprefix)>1:
-                    item.children.append(lines[startpos])
-                    del lines[startpos]
+                    appendline()
 
                 for x in item.children:
                     x.lineprefix=x.lineprefix[1:]
@@ -375,8 +394,6 @@ class parse_lines(object):
         def getlineprefix():
             return (tokens[startline].text or "").strip()
         
-            
-                          
         while i<len(self.tokens):
             t = tokens[i]
             if t.type in (T.t_item, T.t_colon):
