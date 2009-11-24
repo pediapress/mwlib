@@ -434,3 +434,21 @@ def test_tr_inside_caption():
     rows = core.walknodel(cap, lambda x: x.type==T.t_complex_table_row)
     print "ROWS:",  rows
     assert len(rows)==0, "row in table caption found"
+
+def test_ul_inside_star():
+    """http://code.pediapress.com/wiki/ticket/735"""
+    r=core.parse_txt("""
+* foo
+* bar </ul> baz
+""")
+    core.show(r)
+    ul = core.walknodel(r, lambda x: x.tagname=="ul")
+    def baz(x):
+        if x.text and "baz" in x.text:
+            return True
+        
+    b1 = core.walknodel(ul, baz)
+    b2 = core.walknodel(r, baz)
+    
+    assert not b1, "baz should not be inside ul"
+    assert b2,  "baz missing"
