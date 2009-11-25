@@ -226,6 +226,9 @@ class ImageDB(ZipWikiBase):
             return nget(self.images, partial)['templates']
         except KeyError:
             return []
+
+    getImageWords=getImageTemplates
+
     
     def getContributors(self, name, wikidb=None):
         ns, partial, full = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
