@@ -122,7 +122,7 @@ class LicenseChecker(object):
     def displayImage(self, imgname):
         if self.image_db is None:
             return False
-        templates = [t.lower() for t in self.image_db.getImageTemplates(imgname)]
+        templates = [t.lower() for t in self.image_db.getImageWords(imgname)]
         licenses = self._getLicenses(templates, imgname)
         display_img = self._checkLicenses(licenses, imgname)
         url = self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname

@@ -336,6 +336,17 @@ class adapt(object):
         print 'no such image: %r' % name
         return []
 
+    def getImageWords(self, name, wikidb=None):
+        import re
+        page = self.get_image_description_page(name)
+        if page is not None:
+            words = re.split('\{|\}|\[|\]| |\,|\|', page.rawtext)
+            return list(set([w.lower() for w in  words if w]))
+        print 'no such image: %r' % name
+        return []
+
+
+
     def getContributors(self, name, wikidb=None):
         page = self.get_image_description_page(name)
         if page is None:
