@@ -37,6 +37,14 @@ def main():
     print "got %s bytes" % (len(c.response), )
     
     open("tmp.pdf", "w").write(c.response)
+
+    c.request("zip_post", dict(
+            metabook=open(mb).read(), 
+            collection_id=cid,
+            pod_api_url="http://pediapress.com/api/collections/"))
+    print c.response
+    
+              
     
 if __name__=="__main__":
     main()
