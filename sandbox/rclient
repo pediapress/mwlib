@@ -1,0 +1,42 @@
+#! /usr/bin/env python
+
+import sys
+import time
+
+from mwlib import client
+from pprint import pprint
+
+def main():
+    mb = sys.argv[1]
+    
+    url = "http://localhost:8899/"
+    c = client.Client(url)
+    
+    data = dict(metabook=open(mb).read())
+    
+    c.request("render", data)
+    pprint(c.response)
+
+    cid = c.response["collection_id"]
+
+    
+    while 1:
+        c.request("render_status", dict(collection_id=cid))
+        state = c.response["state"]
+        if state=="finished":
+            print "==> rendering finished"
+            pprint(c.response)
+            break
+        
+        status = c.response["status"]
+        print status
+        time.sleep(1)
+
+    print "downloading..."
+    c.request("download", dict(collection_id=cid), is_json=False)
+    print "got %s bytes" % (len(c.response), )
+    
+    open("tmp.pdf", "w").write(c.response)
+    
+if __name__=="__main__":
+    main()
