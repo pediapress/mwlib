@@ -86,7 +86,6 @@ class TreeCleaner(object):
                       'buildDefinitionLists',
                       'restrictChildren',
                       'fixReferenceNodes',
-                      'fixInfoBoxes',
                       'fixNesting', # pull DefinitionLists out of Paragraphs
                       'fixPreFormatted',
                       'fixListNesting',
@@ -996,22 +995,6 @@ class TreeCleaner(object):
                         ref_node.appendChild(child)
                     ref_defined[ref_name] = True
            
-
-    def fixInfoBoxes(self, node):
-        """Optimize rendering of infoboxes"""
-        if node.__class__ == Table and node.attributes.get('class', '').lower().find('infobox') > -1:
-            # remove duplicate image caption
-            images = node.getChildNodesByClass(ImageLink)
-            for image in images:
-                if not hasattr(image, 'parent'): #image was removed already. see http://es.wikipedia.org/w/index.php?title=Miley_Cyrus&oldid=25320615
-                    continue
-                for sibling in image.siblings:
-                    if image.children and image.children == sibling.children and sibling.parent:
-                        sibling.parent.removeChild(sibling)
-                        self.report('fixed infobox')
-        for c in node.children:
-            self.fixInfoBoxes(c)
-
 
     def removeEmptyReferenceLists(self, node):
         """
