@@ -229,6 +229,7 @@ include sandbox/citeweb.py
 include sandbox/expr.txt
 include sandbox/multicoll.py
 include sandbox/mw-serve-stresser.py
+include sandbox/rclient
 include sandbox/time-expr.py
 include sandbox/time-parse.py
 include sandbox/upload.py
