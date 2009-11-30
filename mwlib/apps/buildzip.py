@@ -96,9 +96,15 @@ def main():
         default=False,
         help="don't remove  temporary files like images",
     )
+    
+    parser.add_option("-s", "--status-file",
+                      help='write status/progress info to this file')
+
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
+        
+                        
     if parser.metabook is None and options.collectionpage is None:
         parser.error('Neither --metabook nor, --collectionpage or arguments specified.\n' + use_help)
     if options.posturl and options.getposturl:
@@ -143,7 +149,7 @@ def main():
             assert env.metabook, "no metabook"
             
             from mwlib.status import Status
-            status = Status(podclient=podclient, progress_range=(1, 90))
+            status = Status(options.status_file, podclient=podclient, progress_range=(1, 90))
             status(progress=0)
             output = options.output
             
