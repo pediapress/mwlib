@@ -7,6 +7,7 @@
 from __future__ import division
 
 from mwlib.writer import styleutils
+from mwlib import advtree
 
 class Formatter(object):
     """store the current formatting state"""
@@ -21,9 +22,18 @@ class Formatter(object):
                                      'normal': [('strong_style', 'reset')],
                                      'lighter': [('strong_style', 'reset')], # treat lighter as normal
                                      },
-                     'text-decoration': {'overline': [('overline_style', 'change')],
-                                         'underline': [('underline_style', 'change')],
-                                         'line-through': [('strike_style', 'change')],
+                     'text-decoration': {'overline': [('overline_style', 'change'),
+                                                      ('underline_style', 'reset'),
+                                                      ('strike_style', 'reset'),
+                                                      ],
+                                         'underline': [('underline_style', 'change'),
+                                                       ('overline_style', 'reset'),
+                                                       ('strike_style', 'reset'),
+                                                       ],
+                                         'line-through': [('strike_style', 'change'),
+                                                          ('underline_style', 'reset'),
+                                                          ('overline_style', 'reset'),
+                                                          ],
                                          }
 
                      }
@@ -39,7 +49,8 @@ class Formatter(object):
         self.output_encoding = output_encoding
 
         self.render_styles = self.registerRenderStyles()
-
+        self.node_styles = self.registerNodeStyles()
+        
         for style, start_style, end_style, start_attr in self.render_styles:
             setattr(self, style, 0)
        
@@ -73,7 +84,20 @@ class Formatter(object):
             ('underline_style', '<u>', '</u>'),
             ('overline_style', '', '')
             ]
-        
+
+    def registerNodeStyles(self):
+        return {
+            advtree.Emphasized:'emphasized_style',
+            advtree.Strong: 'strong_style',
+            advtree.Small: 'small_style',
+            advtree.Big: 'big_style',
+            advtree.Sub: 'sub_style',
+            advtree.Sup: 'sup_style',
+            advtree.Teletyped: 'teletype_style',
+            advtree.Strike: 'strike_style',
+            advtree.Underline: 'underline_style',
+            advtree.Overline: 'overline_style',
+            }
 
     def startStyle(self):
         start = []
@@ -149,6 +173,11 @@ class Formatter(object):
 
         self.checkFontSize(node.style)
 
+    def changeNodeStyle(self, node):
+        style = self.node_styles.get(node.__class__)
+        if style:
+            setattr(self, style, getattr(self, style) + 1)
+
     def getCurrentStyles(self):
         styles = []
         for style, start, end, start_attr in self.render_styles:
@@ -158,6 +187,7 @@ class Formatter(object):
     
     def setStyle(self, node):
         current_styles = self.getCurrentStyles()
+        self.changeNodeStyle(node)
         self.changeCssStyle(node, mode='set')
         return current_styles
             
