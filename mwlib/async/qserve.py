@@ -52,6 +52,14 @@ class qplugin(object):
     def rpc_qwait(self, jobids):
         res = self.workq.waitjobs(jobids)
         return [j._json() for j in res]
+
+    def rpc_qkill(self, jobids):
+        self.workq.killjobs(jobids)
+        
+        for jobid in jobids:
+            if jobid in self.running_jobs:
+                del self.running_jobs[jobid]
+        
     
     def shutdown(self):
         for j in self.running_jobs.values():

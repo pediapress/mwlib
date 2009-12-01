@@ -100,6 +100,17 @@ class workq(object):
             print "timeout:", job._json()
 
         self._preenall()
+
+    def killjobs(self, jobids):
+        for jid in jobids:
+            if jid not in self.id2job:
+                continue
+            j = self.id2job[jid]
+            if not j.done:
+                j.done = True
+                j.error = "killed"
+                j.finish_event.set()
+                
         
     def dropdead(self):
         now = int(time.time())
@@ -188,7 +199,7 @@ class workq(object):
 
     def push(self, channel, payload=None, priority=0, jobid=None, timeout=None, ttl=None):
         if jobid is not None:
-            if jobid in self.id2job:
+            if jobid in self.id2job and self.id2job[jobid].error!="killed":
                 return jobid
             
         if timeout is None:
