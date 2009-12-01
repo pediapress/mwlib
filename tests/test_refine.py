@@ -452,3 +452,9 @@ def test_ul_inside_star():
     
     assert not b1, "baz should not be inside ul"
     assert b2,  "baz missing"
+
+def test_div_vs_link():
+    r = core.parse_txt("""[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]""")
+    core.show(r)
+    assert r[0].type==T.t_complex_link,  "expected an image link"
+    
