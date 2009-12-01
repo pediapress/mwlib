@@ -464,3 +464,9 @@ def test_link_vs_section():
     assert r[0].type != T.t_complex_link, "should not parse a link here"
     
     
+def test_div_vs_section():
+    r = core.parse_txt("""== foo <div style="background-color:#ff0000"> bar ==
+baz
+""")
+    core.show(r)
+    assert r[0].level==2,  "expected a section"    
