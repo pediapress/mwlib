@@ -457,4 +457,10 @@ def test_div_vs_link():
     r = core.parse_txt("""[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]""")
     core.show(r)
     assert r[0].type==T.t_complex_link,  "expected an image link"
+
+def test_link_vs_section():
+    r = core.parse_txt("[[acdc\n== foo ]] ==\n")
+    core.show(r)
+    assert r[0].type != T.t_complex_link, "should not parse a link here"
+    
     
