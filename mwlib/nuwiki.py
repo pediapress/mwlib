@@ -28,9 +28,8 @@ class nuwiki(object):
             try:
                 os.makedirs(d)
             except OSError, exc:
-                if exc.errno == 17: # file exists
-                    pass
-                raise
+                if exc.errno != 17: # file exists
+                    raise
             
         self.excluded = set(x.get("title") for x in self._loadjson("excluded.json", []))            
         
