@@ -15,13 +15,31 @@ def main():
     data = dict(metabook=open(mb).read())
     
     c.request("render", data)
+    
     pprint(c.response)
-
+    # >>> {u'collection_id': u'dfaa0d9a8bff06bb', u'is_cached': False, u'writer': u'rl'}
+    assert c.response["writer"]=="rl",  "expected rl"
+    assert c.response["collection_id"], "expected collection_id"
+    assert c.response["is_cached"] in (True, False), "expected boolean is_cached"
+    
     cid = c.response["collection_id"]
 
     
     while 1:
         c.request("render_status", dict(collection_id=cid))
+
+        print "here"
+        pprint(c.response)
+        # >>> {u'collection_id': u'dfaa0d9a8bff06bb',
+        #      u'state': u'progress',
+        #      u'status': {u'progress': 1, u'status': u'fetching'},
+        #      u'writer': u'rl'}
+
+        assert c.response["state"] in ("progress", "finished"),  "bad state: %r" % (state, )
+        assert c.response["writer"]=="rl"
+        assert isinstance(c.response.get("status", dict()),  dict),  "expected dict"
+        
+        print "done"
         state = c.response["state"]
         if state=="finished":
             print "==> rendering finished"
