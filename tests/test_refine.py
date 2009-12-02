@@ -470,3 +470,15 @@ baz
 """)
     core.show(r)
     assert r[0].level==2,  "expected a section"    
+
+def test_comment_in_gallery():
+    """http://code.pediapress.com/wiki/ticket/741"""
+    r = core.parse_txt("""<gallery>
+Image:ACDC_logo.gif|capshun<!--comment-->
+</gallery>
+""")
+    core.show(r)
+    txt = T.join_as_text(core.walknodel(r[0].children,  lambda x:True))
+    print "TXT:",  repr(txt)
+    assert "capshun" in txt, "bad text??"
+    assert "comment" not in txt,  "comment not stripped"
