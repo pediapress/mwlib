@@ -482,3 +482,15 @@ Image:ACDC_logo.gif|capshun<!--comment-->
     print "TXT:",  repr(txt)
     assert "capshun" in txt, "bad text??"
     assert "comment" not in txt,  "comment not stripped"
+
+def test_parserfun_in_gallery():
+    r = core.parse_txt("""<gallery>
+Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
+
+</gallery>
+""")
+    core.show(r)
+    txt = T.join_as_text(core.walknodel(r[0].children,  lambda x:True))
+    print "TXT:",  repr(txt)
+    assert "capshun" in txt, "bad text??"
+    assert "capshun yes" in txt,  "#if failed to expand"
