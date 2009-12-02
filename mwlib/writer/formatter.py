@@ -195,6 +195,13 @@ class Formatter(object):
         for attr, val in styles:
             setattr(self, attr, val)
 
+    def clearStyles(self, styles):
+        for attr, val in styles:
+            if attr == 'rel_font_size':
+                setattr(self, attr, 1)
+            else:
+                setattr(self, attr, 0)
+
     def cleanText(self, txt, break_long=False, escape=True):
         if not txt:
             return ''
