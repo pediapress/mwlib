@@ -404,6 +404,7 @@ class TreeCleaner(object):
             content_len = len(node.getAllDisplayText())
             if content_len > 4000 \
                    or all_images \
+                   or len(node.getChildNodesByClass(Cell)) > 30 and content_len > 500 \
                    or (node.getChildNodesByClass(Section) and node.getChildNodesByClass(ImageLink) and content_len > 1000):
                 div_wrapper = False
             else:
