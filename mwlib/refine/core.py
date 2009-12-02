@@ -79,14 +79,17 @@ def _parse_gallery_txt(txt, xopts):
         if not x:
             continue
 
-        linode = parse_txt(u'[['+x+']]', xopts)
+        assert xopts.expander is not None, "no expander in _parse_gallery_txt"
+        xnew = xopts.expander.parseAndExpand(x)
+            
+        linode = parse_txt(u'[['+xnew+']]', xopts)
 
         if linode:
             n = linode[0]
             if n.ns==nshandling.NS_IMAGE:
                 sub.append(n)
                 continue
-        sub.append(T(type=T.t_text, text=x))
+        sub.append(T(type=T.t_text, text=xnew))
     return sub
 
 class bunch(object):
@@ -853,7 +856,11 @@ def parse_txt(txt, xopts=None, **kwargs):
         xopts = XBunch(**kwargs)
     else:
         xopts.__dict__.update(**kwargs)
-        
+
+    if xopts.expander is None:
+        from mwlib.expander import Expander,  DictDB    
+        xopts.expander = Expander("", "pagename", wikidb=DictDB())
+            
     if xopts.nshandler is None:
         xopts.nshandler = nshandling.get_nshandler_for_lang(xopts.lang or 'en')
     
