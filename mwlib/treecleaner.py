@@ -166,6 +166,7 @@ class TreeCleaner(object):
                             Center:[Reference],
                             Teletyped:[Reference],
                             ReferenceList: [Reference],
+                            Teletyped: [Source],
                             }
 
         
