@@ -80,8 +80,8 @@ def _parse_gallery_txt(txt, xopts):
             continue
 
         assert xopts.expander is not None, "no expander in _parse_gallery_txt"
-        xnew = xopts.expander.parseAndExpand(x)
-            
+        xnew = xopts.expander.parseAndExpand(x, keep_uniq=True)
+
         linode = parse_txt(u'[['+xnew+']]', xopts)
 
         if linode:
