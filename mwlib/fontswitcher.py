@@ -49,6 +49,18 @@ class Scripts(object):
         for code_block in code_blocks:
             scripts = scripts.union(self.getScriptsForCodeBlock(code_block))
         return scripts
+
+    def getScripts(self, txt):
+        scripts = set()
+        idx = 0
+        txt_len = len(txt)
+        while idx < txt_len:
+            for block_start, block_end, script in self.code_block2scripts:
+                while idx < txt_len and block_start <= ord(txt[idx]) <= block_end:
+                    if txt[idx] != ' ':
+                        scripts.add(script)
+                    idx += 1
+        return list(scripts)
     
 class FontSwitcher(object):
 
@@ -103,7 +115,7 @@ class FontSwitcher(object):
                 return font_name
         return self.default_font
 
-    def getFontList(self, txt):
+    def getFontList(self, txt, spaces_to_default=False):
         txt_list = []
         last_font = None
         last_txt = []
@@ -130,6 +142,24 @@ class FontSwitcher(object):
             last_font = font
         if last_txt:
             txt_list.append((''.join(last_txt), last_font))
+
+
+        if spaces_to_default:
+            new_txt_list = []
+            for txt, font in txt_list:
+                if font!= self.default_font:
+                    if txt.startswith(' '):
+                        new_txt_list.append((' ', self.default_font))
+                        new_txt_list.append((txt[1:], font))
+                    elif txt.endswith(' '):
+                        new_txt_list.append((txt[:-1], font))
+                        new_txt_list.append((' ', self.default_font))
+                    else:
+                        new_txt_list.append((txt, font))
+                else:
+                    new_txt_list.append((txt, font))
+            txt_list = new_txt_list
+
         return txt_list
                 
 
