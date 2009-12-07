@@ -39,7 +39,7 @@ class ilink(object):
 
 def fix_wikipedia_siteinfo(siteinfo):
     prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
-    for p in "pnb ckb mwl mhr".split():
+    for p in "pnb ckb mwl mhr ace".split():
         
         if p in prefixes:
             return
