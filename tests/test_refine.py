@@ -503,3 +503,15 @@ def test_span_vs_lines():
 
     ul = core.walknodel(r, lambda x: x.tagname=="ul")
     assert len(ul)==1,  "expected one list"
+
+def test_named_url_in_double_brackets():
+    """http://code.pediapress.com/wiki/ticket/556"""
+    r = core.parse_txt("[[http://foo.com baz]]")
+    core.show(r)
+    named = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
+    assert len(named)==1, "expected a named url"
+    txt = T.join_as_text(r)
+    print "TXT:",  repr(txt)
+    assert "[" in txt, "missing ["
+    assert "]" in txt, "missing ]"
+    
