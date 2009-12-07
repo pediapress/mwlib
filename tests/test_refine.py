@@ -494,3 +494,12 @@ Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
     print "TXT:",  repr(txt)
     assert "capshun" in txt, "bad text??"
     assert "capshun yes" in txt,  "#if failed to expand"
+
+def test_span_vs_lines():
+    r = core.parse_txt("""* foo <span> bar
+* baz
+""")
+    core.show(r)
+
+    ul = core.walknodel(r, lambda x: x.tagname=="ul")
+    assert len(ul)==1,  "expected one list"
