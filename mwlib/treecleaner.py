@@ -152,7 +152,7 @@ class TreeCleaner(object):
         # when checking nesting, some Nodes prevent outside nodes to be visible to inner nodes
         # ex: Paragraphs can not be inside Paragraphs. but if the inner paragraph is inside a
         # table which itself is inside a paragraph this is not a problem
-        self.outsideParentsInvisible = [Table, Section]
+        self.outsideParentsInvisible = [Table, Section, Reference]
         self.nesting_strictness = nesting_strictness # loose | strict
 
         

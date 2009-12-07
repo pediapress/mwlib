@@ -264,6 +264,23 @@ para 2
         assert not para.getChildNodesByClass(Paragraph) 
 
 
+def test_fixNesting6():
+    raw =u"""''„Drei Affen, zehn Minuten.“'' <ref>Dilbert writes a poem and presents it to Dogbert:<poem style>
+''DOGBERT: I once read that given infinite time, a thousand monkeys with typewriters would eventually write the complete works of Shakespeare.''
+''DILBERT: But what about my poem?''
+''DOGBERT: Three monkeys, ten minutes.“''</poem></ref>
+
+<references/>
+    """
+
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    from pprint import pprint
+    pprint(reports)
+
+    assert len(tree.getChildNodesByClass(Reference)) == 1
+    
+
 def test_swapNodes():
     raw = r'''
 <u><center>Text</center></u>
@@ -478,3 +495,5 @@ def test_splitTableLists2():
     tree, reports = cleanMarkup(raw)
     numrows = len(tree.getChildNodesByClass(Row))
     assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
+
+
