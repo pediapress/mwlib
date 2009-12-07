@@ -102,7 +102,7 @@ def _getTextAlign(node):
     if node.__class__ == advtree.Center:
         align = 'center'
     if align == "none" and node.parent:
-        return getTextAlign(node.parent)
+        return _getTextAlign(node.parent)
     return align
 
 

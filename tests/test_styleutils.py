@@ -36,3 +36,38 @@ def test_getTextAlign():
         txt = cell.getAllDisplayText().strip()
         align = styleutils.getTextAlign(cell)
         assert txt == align, 'alignment not correctly parsed'
+
+
+def test_getTextAlign2():
+    raw =  '''
+left
+
+<div style="text-align:right;">
+right
+
+<div style="text-align:left;">
+left
+
+{| class="prettytable"
+|-
+| left 
+| style="text-align:right;" | right
+|}
+
+{| class="prettytable" style="text-align:right;"
+|-
+| right 
+| style="text-align:center;" | center
+|}
+</div>
+</div>'''
+
+    tree = getTreeFromMarkup(raw)
+    for cell in tree.getChildNodesByClass(advtree.Cell):
+        txt = cell.getAllDisplayText().strip()
+        align = styleutils.getTextAlign(cell)
+
+        if txt != align:
+            show(cell)
+        
+        assert txt == align, 'alignment not correctly parsed. expected:|%s|, got |%s|' % (txt, align)
