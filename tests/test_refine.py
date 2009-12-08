@@ -514,3 +514,17 @@ def test_named_url_in_double_brackets():
     assert "]" in txt, "missing ]"
     assert "[[" not in txt, "bad text"
     assert "]]" not in txt, "bad text"
+
+def test_link_vs_namedurl():
+    r = core.parse_txt("[[acdc [http://web.de bla]]")
+    core.show(r)
+    txt = T.join_as_text(r)
+    print "TXT:",  repr(txt)
+
+    assert "[[acdc " in txt, "wrong text"
+    assert txt.endswith("]"), "wrong text"
+
+    assert r[0].type != T.t_complex_link, "should not be an article link"
+
+    urls = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
+    assert len(urls)==1, "no named url found"
