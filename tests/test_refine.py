@@ -306,7 +306,6 @@ def test_urllink_in_link():
     show(r)
     assert len(nu)==1, "expected exactly one named url"
     
-@xfail
 def test_urllink_in_brackets():
     """http://code.pediapress.com/wiki/ticket/556"""
     r = parse_txt("[[http://example.com bla]]")
@@ -514,4 +513,5 @@ def test_named_url_in_double_brackets():
     print "TXT:",  repr(txt)
     assert "[" in txt, "missing ["
     assert "]" in txt, "missing ]"
-    
+    assert "[[" not in txt, "bad text"
+    assert "]]" not in txt, "bad text"
