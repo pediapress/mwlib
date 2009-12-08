@@ -909,10 +909,9 @@ def parse_txt(txt, xopts=None, **kwargs):
 
     tokens = tokenize(txt, uniquifier=uniquifier)
     
-    td1 =  tagparser()
-    a = td1.add
+    td2 =  tagparser()
+    a = td2.add
     
-    a("blockquote" , 5)
     a("code"       , 10)
     a("references" , 15)
     a("span"       , 20)
@@ -921,6 +920,11 @@ def parse_txt(txt, xopts=None, **kwargs):
     a("dl"         , 28, blocknode=True)
     a("dt"         , 26, blocknode=True, nested=False)
     a("dd"         , 26, blocknode=True, nested=True)
+
+
+    td1 =  tagparser()
+    a = td1.add
+    a("blockquote" , 5)
     
     a("p"          , 30, blocknode=True, nested=False)
     a("ul"         , 35, blocknode=True)
@@ -936,6 +940,7 @@ def parse_txt(txt, xopts=None, **kwargs):
                mark_style_tags,
                parse_singlequote,
                parse_preformatted,
+               td2, 
                parse_paragraphs,
                td1, 
                parse_lines,
