@@ -178,6 +178,13 @@ class parse_urls(object):
                 self.tokens[start:i+1] = [T(type=T.t_complex_named_url, children=sub, caption=self.tokens[start].text[1:])]
                 i = start
                 start = None
+            elif t.type==T.t_2box_close and start is not None:
+                self.tokens[i].type = T.t_special
+                self.tokens[i].text = "]"
+                sub = self.tokens[start+1:i]
+                self.tokens[start:i] = [T(type=T.t_complex_named_url, children=sub, caption=self.tokens[start].text[1:])]
+                i = start
+                start = None
             else:
                 i+=1
                 
@@ -817,6 +824,17 @@ class XBunch(object):
     def __getattr__(self, name):
         return None
 
+def fix_named_url_double_brackets(tokens, xopt):
+    idx = 0
+    while idx<len(tokens)-1:
+        t = tokens[idx]
+        if t.type==T.t_2box_open and tokens[idx+1].type==T.t_http_url:
+            tokens[idx].text = "["
+            tokens[idx].type = T.t_special
+            tokens[idx+1].text = "["+tokens[idx+1].text
+            tokens[idx+1].type = 25
+        idx += 1
+        
 def fix_break_between_pre(tokens, xopt):
     idx = 0
     while idx<len(tokens)-1:
@@ -914,6 +932,7 @@ def parse_txt(txt, xopts=None, **kwargs):
                fix_tables, 
                parse_tables,
                parse_uniq,
+               fix_named_url_double_brackets, 
                fix_break_between_pre]
     
     combined_parser(parsers)(tokens, xopts)
