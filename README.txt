@@ -13,6 +13,11 @@ MediaWiki articles.
 
 Installation
 ======================================================================
+Starting with version 0.12.11 released in december 2009 mwlib does not
+support python 2.4 anymore. Please use an older version of mwlib or
+upgrade your python installation to 2.6 (or 2.5). python 3.x is
+currently not supported.
+
 You need to have setuptools/easy_install installed. Installation
 should be as easy as typing::
   
