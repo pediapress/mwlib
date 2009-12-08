@@ -85,6 +85,33 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-12-8 release 0.12.11
+-------------------------
+- *beware* python 2.4 is not supported anymore
+- parse paragraphs before spans
+- parse named urls before links. 
+- fix urllinks inside links
+- fix named urls inside double brackets
+- avoid splitting up Reference nodes. 
+- parse lines/lists before span.
+- add getScripts method. improve rtl compat. for fontswitching
+- do not replace uniq strings with their content when preprocessing gallery tags. fixes e.g. ref tags inside gallery tags.
+- run template expansion for each line in gallery tags
+- handle mhr, ace, ckb, mwl interwiki links
+- add clearStyles method
+- add another condition to avoid single col tables in border-boxes
+- refactor node style handling
+- remove fixInfoBoxes from treecleaner
+- fix for identifiying image license information
+- handle closing ul/ol tags inside enumerations
+- correctly determine text alignment of node.
+- fix for image only table check
+- add code for simple rpc servers/clients based on the gevent library.
+- add flag for split itemlists
+- do not blacklist articles
+- add upper limit for font sizes
+
+
 2009-10-20 release 0.12.10
 --------------------------
 - fix race condition when fetching siteinfo
