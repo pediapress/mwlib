@@ -528,3 +528,16 @@ def test_link_vs_namedurl():
 
     urls = core.walknodel(r, lambda x: x.type==T.t_complex_named_url)
     assert len(urls)==1, "no named url found"
+
+def test_span_vs_paragraph():
+    """http://code.pediapress.com/wiki/ticket/751"""
+    r = core.parse_txt("foo<span>\n\nbar</span>\n\n")
+    core.show(r)
+    p = [x for x in r if x.tagname=="p"]
+    print "PARAS:",  p
+    assert len(p)==2,  "expected two paragraphs"
+
+    txts = [T.join_as_text(x.children) for x in p]
+    print txts
+    assert "foo" in txts[0]
+    assert "bar" in txts[1]
