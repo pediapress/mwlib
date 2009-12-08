@@ -824,6 +824,21 @@ class XBunch(object):
     def __getattr__(self, name):
         return None
 
+def fix_urllink_inside_link(tokens,  xopt):
+    idx = 0
+    while idx<len(tokens)-1:
+        t = tokens[idx]
+        if t.type==T.t_2box_open:
+            last = T.t_2box_open
+        elif t.type==T.t_urllink:
+            last = T.t_urllink
+        elif t.type==T.t_2box_close:
+            if tokens[idx+1].type==T.t_special and tokens[idx+1].text=="]" and last==T.t_urllink:
+                tokens[idx], tokens[idx+1] = tokens[idx+1], tokens[idx]
+
+        idx += 1
+        
+
 def fix_named_url_double_brackets(tokens, xopt):
     idx = 0
     while idx<len(tokens)-1:
@@ -832,9 +847,11 @@ def fix_named_url_double_brackets(tokens, xopt):
             tokens[idx].text = "["
             tokens[idx].type = T.t_special
             tokens[idx+1].text = "["+tokens[idx+1].text
-            tokens[idx+1].type = 25
+            tokens[idx+1].type = T.t_urllink
         idx += 1
-        
+    fix_urllink_inside_link(tokens, xopt)
+    
+    
 def fix_break_between_pre(tokens, xopt):
     idx = 0
     while idx<len(tokens)-1:
