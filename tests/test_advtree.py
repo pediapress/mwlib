@@ -8,7 +8,7 @@ import os
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
-    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell, Span, Row
+    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell, Span, Row, ImageLink
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
@@ -216,3 +216,61 @@ def test_attributes():
     assert isinstance(n.style, dict)
     assert isinstance(n.attributes, dict)
     assert n.style["background"]=="#FFDEAD"
+
+
+def getAdvTree(raw):
+    tree = parseString(title='test', raw=raw)
+    buildAdvancedTree(tree)
+    return tree
+
+def test_img_no_caption():
+    raw=u'''[[Image:Chicken.jpg|image caption]]
+
+[[Image:Chicken.jpg|none|image caption: align none]]
+
+[[Image:Chicken.jpg|none|200px|image caption: align none, 200px]]
+
+[[Image:Chicken.jpg|frameless|image caption frameless]]
+
+[[Image:Chicken.jpg|none|200px|align none, 200px]]
+
+<gallery perrow="2">
+Image:Luna-16.jpg
+Image:Lunokhod 1.jpg
+Image:Voyager.jpg
+Image:Cassini Saturn Orbit Insertion.jpg|
+</gallery>
+'''
+
+    tree = getAdvTree(raw)
+    images = tree.getChildNodesByClass(ImageLink)
+    assert len(images) == 9
+    for image in images:
+        assert image.render_caption == False
+   
+def test_img_has_caption():
+    raw=u'''[[Image:Chicken.jpg|thumb|image caption thumb]]
+
+[[Image:Chicken.jpg|framed|image caption framed]]
+
+[[Image:Chicken.jpg|none|thumb|align none, thumb]]
+
+<gallery perrow="2">
+Image:Luna-16.jpg|''[[Luna 16]]''<br>First unmanned lunar sample return
+Image:Lunokhod 1.jpg|''[[Lunokhod 1]]''<br>First lunar rover
+Image:Voyager.jpg|''[[Voyager 2]]''<br>First Uranus flyby<br>First Neptune flyby
+Image:Cassini Saturn Orbit Insertion.jpg|''[[Cassini–Huygens]]''<br>First Saturn orbiter
+</gallery>
+
+[[Image:Horton Erythromelalgia 1939.png|center|600px|<div align="center">"Erythromelalgia of the head", Horton&nbsp;1939<ref name="BTH39"/></div>|frame]]
+
+[[Image:Anatomie1.jpg|thumb|none|500px|Bild der anatomischen Verhältnisse. In Rot die Hauptschlagader (Carotis).]]
+'''
+
+    tree = getAdvTree(raw)
+    images = tree.getChildNodesByClass(ImageLink)
+    assert len(images) == 9
+    for image in images:
+        assert image.render_caption == True
+
+    

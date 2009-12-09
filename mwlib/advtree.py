@@ -375,6 +375,13 @@ class AdvancedSection(AdvancedNode):
 
 class AdvancedImageLink(AdvancedNode):
     isblocknode = property ( lambda s: not s.isInline() )
+
+    @property
+    def render_caption(self):
+        explicit_caption = bool(getattr(self, 'thumb') or getattr(self, 'frame','') == 'frame')
+        is_gallery = len(self.getParentNodesByClass(Gallery)) > 0
+        has_children = len(self.children) > 0
+        return (explicit_caption or is_gallery) and has_children
     
 class AdvancedMath(AdvancedNode):
     @property
@@ -696,9 +703,7 @@ def buildAdvancedTree(root): # USE WITH CARE
     funs = [extendClasses, fixTagNodes, removeNodes, removeNewlines,
             fixStyleNodes,]
     for f in funs:
-        stime=time.time()
         f(root)
-        #print f, time.time()-stime
         
 
 
