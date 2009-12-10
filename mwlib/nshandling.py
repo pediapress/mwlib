@@ -38,6 +38,16 @@ class ilink(object):
     language = ""
 
 def fix_wikipedia_siteinfo(siteinfo):
+
+    # --- http://code.pediapress.com/wiki/ticket/754
+
+    if u'\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [x.get("prefix", u"")[2:] for x in siteinfo.get("interwikimap", [])]:
+        print "WARNING: interwikimap contains garbage"
+        from mwlib import siteinfo as simod
+        en = simod.get_siteinfo("en")
+        siteinfo['interwikimap'] = list(en["interwikimap"])
+
+
     prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
     for p in "pnb ckb mwl mhr ace".split():
         
