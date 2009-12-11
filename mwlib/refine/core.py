@@ -826,6 +826,7 @@ class XBunch(object):
 
 def fix_urllink_inside_link(tokens,  xopt):
     idx = 0
+    last = None
     while idx<len(tokens)-1:
         t = tokens[idx]
         if t.type==T.t_2box_open:
