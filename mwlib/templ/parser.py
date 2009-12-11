@@ -228,14 +228,17 @@ class Parser(object):
 
         numbraces = len(txt)
         self.pos += 1
+
+        linkcount = 0
         
         while 1:
             ty, txt = self.getToken()
+
             if ty==symbols.bra_open:
                 n.append(self.parseOpenBrace())
             elif ty is None:
                 break
-            elif ty==symbols.bra_close:
+            elif ty==symbols.bra_close and linkcount==0:
                 closelen = len(txt)
                 if closelen==2 or numbraces==2:
                     t=self.templateFromChildren(n)
@@ -250,17 +253,22 @@ class Parser(object):
                     self._eatBrace(3)
                     numbraces -= 3
 
-                if numbraces==0:
-                    break
-                elif numbraces==1:
-                    n.insert(0, "{")
+                if numbraces < 2:
                     break
             elif ty==symbols.noi:
                 self.pos += 1 # ignore <noinclude>
             else: # link, txt
-                n.append(txt)
-                self.pos += 1                
+                if txt=="[[":
+                    linkcount += 1
+                elif txt=="]]" and linkcount>0:
+                    linkcount -= 1
 
+                n.append(txt)
+                self.pos += 1            
+
+        if numbraces:
+            n.insert(0, "{"*numbraces)
+            
         return n
         
     def parse(self):
