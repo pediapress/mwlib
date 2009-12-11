@@ -541,3 +541,7 @@ def test_span_vs_paragraph():
     print txts
     assert "foo" in txts[0]
     assert "bar" in txts[1]
+
+def test_last_unitialized():
+    """last variable was not initialized in fix_urllink_inside_link"""
+    core.parse_txt("]]]")
