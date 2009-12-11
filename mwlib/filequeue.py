@@ -118,10 +118,9 @@ class FileJobPoller(object):
 
         # child process:
         try:
-            try:
-                os.execvp(args[0], args)
-            except:
-                traceback.print_exc()
+            os.execvp(args[0], args)
+        except:
+            traceback.print_exc()
         finally:
             self.log.warn('error running %r' % (args,))
             os._exit(10)

@@ -166,36 +166,35 @@ class Main(object):
 
         env = None
         try:
-            try:
-                env = self.get_environment()
-                
-                fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
-                os.close(fd)
-                writer(env, output=tmpout, status_callback=self.status, **writer_options)
-                os.rename(tmpout, options.output)
-                kwargs = {}
-                if hasattr(writer, 'content_type'):
-                    kwargs['content_type'] = writer.content_type
-                if hasattr(writer, 'file_extension'):
-                    kwargs['file_extension'] = writer.file_extension
-                self.status(status='finished', progress=100, **kwargs)
-                if options.keep_zip is None and self.zip_filename is not None:
-                    utils.safe_unlink(self.zip_filename)
-            except Exception, e:
-                import traceback
-                self.status(status='error')
-                if options.error_file:
-                    fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
-                    f = os.fdopen(fd, 'wb')
-                    if isinstance(e, WriterError):
-                        f.write(str(e))
-                    else:
-                        f.write('traceback\n')
-                        traceback.print_exc(file=f) 
-                    f.write("sys.argv=%r\n" % (sys.argv, ))
-                    f.close()
-                    os.rename(tmpfile, options.error_file)
-                raise
+            env = self.get_environment()
+
+            fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
+            os.close(fd)
+            writer(env, output=tmpout, status_callback=self.status, **writer_options)
+            os.rename(tmpout, options.output)
+            kwargs = {}
+            if hasattr(writer, 'content_type'):
+                kwargs['content_type'] = writer.content_type
+            if hasattr(writer, 'file_extension'):
+                kwargs['file_extension'] = writer.file_extension
+            self.status(status='finished', progress=100, **kwargs)
+            if options.keep_zip is None and self.zip_filename is not None:
+                utils.safe_unlink(self.zip_filename)
+        except Exception, e:
+            import traceback
+            self.status(status='error')
+            if options.error_file:
+                fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
+                f = os.fdopen(fd, 'wb')
+                if isinstance(e, WriterError):
+                    f.write(str(e))
+                else:
+                    f.write('traceback\n')
+                    traceback.print_exc(file=f) 
+                f.write("sys.argv=%r\n" % (sys.argv, ))
+                f.close()
+                os.rename(tmpfile, options.error_file)
+            raise
         finally:
             if env is not None and env.images is not None:
                 try:

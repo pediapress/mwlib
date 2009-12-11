@@ -9,10 +9,9 @@ def test_many_styles():
     signal.signal(signal.SIGALRM, signal.default_int_handler)
     counts = [2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2]
     try:
-        try:
-            states = styleanalyzer.compute_path(counts)
-        except KeyboardInterrupt:
-            states = None
+        states = styleanalyzer.compute_path(counts)
+    except KeyboardInterrupt:
+        states = None
     finally:
         signal.alarm(0)
 

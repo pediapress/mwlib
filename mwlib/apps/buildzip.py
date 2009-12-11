@@ -144,21 +144,20 @@ def main():
     filename = None
     status = None
     try:
-        try:
-            env = parser.makewiki()
-            assert env.metabook, "no metabook"
+        env = parser.makewiki()
+        assert env.metabook, "no metabook"
             
-            from mwlib.status import Status
-            status = Status(options.status_file, podclient=podclient, progress_range=(1, 90))
-            status(progress=0)
-            output = options.output
+        from mwlib.status import Status
+        status = Status(options.status_file, podclient=podclient, progress_range=(1, 90))
+        status(progress=0)
+        output = options.output
             
-            make_zip(output, options, env.metabook, podclient=podclient, status=status)
+        make_zip(output, options, env.metabook, podclient=podclient, status=status)
             
-        except Exception, e:
-            if status:
-                status(status='error')
-            raise
+    except Exception, e:
+        if status:
+            status(status='error')
+        raise
     finally:
         if options.output is None and filename is not None:
             print 'removing %r' % filename

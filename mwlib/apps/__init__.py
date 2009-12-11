@@ -127,13 +127,12 @@ def post():
     status = Status(podclient=podclient)
     
     try:
-        try:
-            status(status='uploading', progress=0)
-            podclient.post_zipfile(options.input)
-            status(status='finished', progress=100)
-        except Exception, e:
-            status(status='error')
-            raise
+        status(status='uploading', progress=0)
+        podclient.post_zipfile(options.input)
+        status(status='finished', progress=100)
+    except Exception, e:
+        status(status='error')
+        raise
     finally:
         if options.pid_file:
             utils.safe_unlink(options.pid_file)

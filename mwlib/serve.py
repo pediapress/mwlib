@@ -185,13 +185,11 @@ class Application(object):
         lock = FileLock(self.get_collection_dir(collection_id))
         lock.acquire()
         try:
-            try:
-                return method(collection_id, request.params, is_new)
-            except Exception, exc:
-                self.send_report_mail('exception', command=command)
-                return self.error_response('error executing command %r: %s' % (
-                    command, exc,
-                ))
+            return method(collection_id, request.params, is_new)
+        except Exception, exc:
+            self.send_report_mail('exception', command=command)
+            return self.error_response('error executing command %r: %s' % (
+                    command, exc,))
         finally:
             lock.release()
     
