@@ -459,3 +459,7 @@ def test_variable_subst():
     yield expandstr, "{{{{{subst|}}}#if: 1| yes| no}}", "yes"
     yield expandstr, "{{{{{subst|}}}#expr: 1+1}}", "2"
     yield expandstr, "{{{{{susbst|}}}#ifexpr: 1+1|yes|no}}", "yes"
+
+def test_link_vs_expander():
+    """http://code.pediapress.com/wiki/ticket/752"""
+    yield expandstr, "{{#if: 1|  [[foo|bar}}123", "{{#if: 1|  [[foo|bar}}123"
