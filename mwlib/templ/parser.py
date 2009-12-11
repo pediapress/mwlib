@@ -6,10 +6,7 @@ from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import symbols, tokenize
 from mwlib.templ.marks import eqmark
 
-try:
-    from hashlib import sha1 as digest
-except ImportError:
-    from md5 import md5 as digest
+from hashlib import sha1 as digest
     
 
 def optimize(node):

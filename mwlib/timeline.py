@@ -8,10 +8,7 @@
 
 import os
 import tempfile
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
+from hashlib import md5
 
     
 _basedir = None

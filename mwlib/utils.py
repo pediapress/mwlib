@@ -1,9 +1,5 @@
-try:
-    from email.mime.text import MIMEText
-    from email.utils import make_msgid, formatdate
-except ImportError:
-    from email.MIMEText import MIMEText
-    from email.Utils import make_msgid, formatdate
+from email.mime.text import MIMEText
+from email.utils import make_msgid, formatdate
     
 import errno
 import os
@@ -23,25 +19,10 @@ import UserDict
 
 from mwlib.log import Log
 
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
+from hashlib import md5
 
 # provide all() for python 2.4
-try:
-    from __builtin__ import all
-except ImportError:
-    def all(iterable):
-        """all(iterable) -> bool
-
-        Return True if bool(x) is True for all values x in the iterable.
-        """
-        
-        for x in iterable:
-            if not x:
-                return False
-        return True
+all = all
 
 # ==============================================================================
 
