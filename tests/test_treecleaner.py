@@ -496,4 +496,36 @@ def test_splitTableLists2():
     numrows = len(tree.getChildNodesByClass(Row))
     assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
 
+def test_removeEmptySection():
+    raw = '''
+== section 1 ==
 
+== section 2 ==
+
+'''
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(Section)) == 0, 'section not removed'
+
+def test_noRemoveEmptySection():
+    raw = '''
+== section 1 ==
+[[Image:bla.png]]
+
+== section 2 ==
+
+[[Image:bla.png]]
+
+== section 3 ==
+
+<gallery>
+Image:bla.png
+</gallery>
+
+== section 4 ==
+<div>
+[[Image:bla.png]]
+</div>
+'''
+
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(Section)) == 4, 'section falsly removed'

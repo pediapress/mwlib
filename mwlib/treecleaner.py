@@ -217,7 +217,7 @@ class TreeCleaner(object):
         
         # emtpy sections are removed by removeEmptySections
         # all node classes that have content but no text need to be listed here to prevent removal
-        self.contentWithoutTextClasses = [Gallery]
+        self.contentWithoutTextClasses = [Gallery, ImageLink]
         
 
         
@@ -1113,10 +1113,16 @@ class TreeCleaner(object):
                 self.report('removed empty section')
                 return
             has_txt = False
-            for c in node.children[1:]:
-                if c.getAllDisplayText() or c.__class__ in self.contentWithoutTextClasses:
+            for klass in self.contentWithoutTextClasses:
+                if node.getChildNodesByClass(klass):
                     has_txt = True
                     break
+            if not has_txt:
+                for c in node.children[1:]:
+                    if c.getAllDisplayText():
+                        has_txt = True
+                        break
+
             if not has_txt:
                 self.report('removing empty section')
                 node.parent.removeChild(node)
