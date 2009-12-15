@@ -144,7 +144,7 @@ class TreeCleaner(object):
                                   Center:[PreFormatted],
                                   Paragraph:[PreFormatted],
                                   Section:[PreFormatted],
-                                  Gallery:[PreFormatted],
+                                  Gallery:[PreFormatted, DefinitionDescription, DefinitionList, DefinitionTerm],
                                   Table:[DefinitionList]
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
@@ -388,6 +388,7 @@ class TreeCleaner(object):
         single_col = node.__class__ == Table and node.numcols == 1
         infobox = 'box' in node.attributes.get('class', '')
         is_long = len(node.getAllDisplayText()) > 500
+        contains_gallery = len(node.getChildNodesByClass(Gallery)) > 0
         if single_col:
             all_images = True
             for row in node.children:
@@ -397,7 +398,7 @@ class TreeCleaner(object):
                             all_images = False
         else:
             all_images = False
-        if single_col and ( (not infobox and is_long) or all_images):
+        if single_col and ( (not infobox and is_long) or all_images or contains_gallery):
             if not node.parents:
                 return
             divs = []
@@ -406,7 +407,8 @@ class TreeCleaner(object):
             if content_len > 4000 \
                    or all_images \
                    or len(node.getChildNodesByClass(Cell)) > 30 and content_len > 500 \
-                   or (node.getChildNodesByClass(Section) and node.getChildNodesByClass(ImageLink) and content_len > 1000):
+                   or (node.getChildNodesByClass(Section) and node.getChildNodesByClass(ImageLink) and content_len > 1000) \
+                   or contains_gallery:
                 div_wrapper = False
             else:
                 div_wrapper = True
