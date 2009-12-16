@@ -90,6 +90,14 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2009-12-16 release 0.12.12
+--------------------------
+- dont remove sections containing only images.
+- improve handling of galleries
+- fix use of uninitialized last variable
+- do not 'split' links when expanding templates
+- quick workaround for http://code.pediapress.com/wiki/ticket/754
+
 2009-12-8 release 0.12.11
 -------------------------
 - *beware* python 2.4 is not supported anymore
