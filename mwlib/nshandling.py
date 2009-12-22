@@ -115,6 +115,9 @@ class nshandler(object):
         if not isinstance(title, unicode):
             title = unicode(title, 'utf-8')
 
+        if "#" in title:
+            title = title.split("#")[0]
+            
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
             name = name[1:].strip()
@@ -132,6 +135,7 @@ class nshandler(object):
             suffix = name
             nsnum = defaultns
 
+        suffix=suffix.strip(u"\u200e\u200f")
         suffix=self.maybe_capitalize(suffix)
         if prefix:
             prefix += ":"
