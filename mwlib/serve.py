@@ -2,6 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
+import sys
 import errno
 import os
 import re
@@ -95,7 +96,7 @@ def make_collection_id(data):
         mbobj = json.loads(unicode(mb, 'utf-8'))
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        print "new-collection %s\t%r" % (num_articles, data.get("base_url"))
+        sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
         
     return md5(sio.getvalue()).hexdigest()[:16]
 
