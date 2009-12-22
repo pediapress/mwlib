@@ -102,6 +102,17 @@ class mwapi(object):
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
 
+    def get_siteinfo(self):
+        siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
+        while len(siprop)>=3:
+            try:
+                r = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
+                return r
+            except Exception:
+                siprop.pop()
+        raise RuntimeError("could not get siteinfo")
+
+        
 
 def main():
     s = mwapi("http://en.wikipedia.org/w/api.php")
