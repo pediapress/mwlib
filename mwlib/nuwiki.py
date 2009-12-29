@@ -96,7 +96,7 @@ class nuwiki(object):
     def get_siteinfo(self):
         return self.siteinfo
     
-    def get_page(self, name, revision=None):
+    def _get_page(self, name, revision=None):
         if revision is not None and name not in self.redirects:
             try:
                 page = self.revisions.get(int(revision))
@@ -120,6 +120,12 @@ class nuwiki(object):
                 return r
             
         return self.revisions.get(name)
+
+    def get_page(self, name, revision=None):
+        retval = self._get_page(name,revision=revision)
+        if retval is None:
+            log.warning("missing page %r" % ((name,revision),))
+        return retval
     
     def normalize_and_get_page(self, name, defaultns):
         fqname = self.nshandler.get_fqname(name, defaultns=defaultns)
