@@ -36,7 +36,14 @@ class worker(object):
             raise RuntimeError("no such method %r" % (method, ))
         
         kwargs = job.get("payload") or dict()
-        return m(**kwargs)
+        tmp = {}
+        for k, v in kwargs.items():
+            if isinstance(k, unicode):
+                tmp[str(k)] = v
+            else:
+                tmp[k] = v
+                
+        return m(**tmp)
     
     def qsetinfo(self, info):
         return self.proxy.qsetinfo(jobid=self.jobid, info=info)
