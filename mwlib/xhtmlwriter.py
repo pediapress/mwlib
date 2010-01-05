@@ -159,7 +159,7 @@ class MWXHTMLWriter(object):
         assert self.root is not None
         indent(self.root) # breaks XHTML (proper rendering at least) if activated!
         if self.debug:
-            r = validate(self.header + ET.tostring(self.root))
+            r = validate(self.header + ET.tostring(self.root, "utf-8"))
             if r:
                 self.root.append(ET.Comment(r.replace("--", " - - ")))
         return self.root
@@ -175,7 +175,7 @@ class MWXHTMLWriter(object):
                 _r(c,obj)
         _r(self.root)
         #res = self.header + ET.tostring(self.getTree())
-        res = self.header + ET.tostring(self.root)
+        res = self.header + ET.tostring(self.root, "utf-8")
         return res
     
     def writeText(self, obj, parent):
