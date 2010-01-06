@@ -453,7 +453,12 @@ class fetcher(object):
         path = self.fsout.get_imagepath(title)
         tmp = (path+u'\xb7').encode("utf-8")
         def done(val):
-            os.rename(tmp, path)
+            if os.stat(tmp).st_size==0:
+                print "WARNING: empty image %r" % (url,)
+                os.unlink(tmp)
+            else:
+                os.rename(tmp, path)
+
             return val
         
         return client.downloadPage(str(url), tmp).addCallback(done)
