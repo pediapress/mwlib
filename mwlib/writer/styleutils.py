@@ -122,6 +122,7 @@ def tableBorder(node):
                    'metadata',
                    'wikitable',
                    'infobox',
+                   'infoboks',
                    'toccolours',
                    'navbox',
                    'float-right',
