@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import sys
 import os
 import time
@@ -128,3 +130,13 @@ def main(commands, host="localhost", port=None, numthreads=10):
             time.sleep(2**26)
     finally:
         os._exit(0)
+
+
+    
+if __name__=="__main__":
+    class commands:
+        def rpc_divide(self, a, b):
+            print "rpc_divide", (a,b)
+            return a / b
+        
+    main(commands)

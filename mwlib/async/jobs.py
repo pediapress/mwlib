@@ -159,6 +159,9 @@ class workq(object):
         j.result = result
         j.error = error
         j.done = True
+        if error:
+            j.ttl = min(10, j.ttl)
+            
         j.finish_event.set()
         
         

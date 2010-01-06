@@ -121,7 +121,7 @@ def main():
     def watchdog():
         while 1:
             d.workq.dropdead()
-            gevent.sleep(30)
+            gevent.sleep(15)
             
     def report():
         while 1:
