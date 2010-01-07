@@ -69,7 +69,7 @@ class worker(object):
         
         
     
-def main(commands, host="localhost", port=None, numthreads=10):
+def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
     if port is None:
         port = 14311
     class workhandler(worker, commands):
@@ -82,55 +82,103 @@ def main(commands, host="localhost", port=None, numthreads=10):
     channels.sort()
 
     assert channels, "no channels"
-    
-    def start_worker():
-        qs = serverproxy(host=host, port=port)
-                
+
+
+    def handle_one_job(qs):
         sleeptime = 0.5
         
         while 1:
             try:
                 job = qs.qpull(channels=channels)
+                break
             except Exception, err:
                 print "Error while calling pulljob:", str(err)
                 time.sleep(sleeptime)
                 if sleeptime<60:
                     sleeptime*=2
-                continue
-
-            sleeptime = 0.5
-            
-
-            print "got job:", job
+        
+        print "got job:", job
+        try:
+            result = workhandler(qs).dispatch(job)
+        except Exception, err:
+            print "error:", err
             try:
-                result = workhandler(qs).dispatch(job)
-            except Exception, err:
-                print "error:", err
-                try:
-                    qs.qfinish(jobid=job["jobid"], error=shorterrmsg())
-                    traceback.print_exc()
-                except:
-                    pass
-                continue
-
-            try:
-                qs.qfinish(jobid=job["jobid"], result=result)
+                qs.qfinish(jobid=job["jobid"], error=shorterrmsg())
+                traceback.print_exc()
             except:
                 pass
+            return
 
+        try:
+            qs.qfinish(jobid=job["jobid"], result=result)
+        except:
+            pass
+        
+    
+    
+    def start_worker():
+        qs = serverproxy(host=host, port=port)
+        while 1:
+            handle_one_job(qs)
+            
     print "pulling jobs from", "%s:%s" % (host, port), "for", ", ".join(channels)
-    
-    import threading
-    for i in range(numthreads):
-        t=threading.Thread(target=start_worker)
-        t.start()
-    
-    try:
-        while True:
-            time.sleep(2**26)
-    finally:
-        os._exit(0)
 
+    def run_with_threads():
+        import threading
+        for i in range(numthreads):
+            t=threading.Thread(target=start_worker)
+            t.start()
+
+        try:
+            while True:
+                time.sleep(2**26)
+        finally:
+            os._exit(0)
+
+    def run_with_procs():
+        children = set()
+
+        while 1:
+            while len(children)<numprocs:
+                try:
+                    pid = os.fork()
+                except:
+                    print "failed to fork child"
+                    time.sleep(1)
+                    continue
+                
+                if pid==0:
+                    try:
+                        qs = serverproxy(host=host, port=port)
+                        handle_one_job(qs)
+                    finally:
+                        os._exit(0)
+                print "forked", pid
+                children.add(pid)
+                
+            try:    
+                pid, st = os.waitpid(-1, 0)
+            except OSError:
+                continue
+
+            print "done",  pid
+            try:
+                children.remove(pid)
+            except KeyError:
+                pass
+            
+            
+                
+            
+            
+    if numprocs>0:
+        run_with_procs()
+    elif numthreads>0:
+        run_with_threads()
+    else:
+        assert 0, "bad"
+    
+        
 
     
 if __name__=="__main__":
@@ -139,4 +187,4 @@ if __name__=="__main__":
             print "rpc_divide", (a,b)
             return a / b
         
-    main(commands)
+    main(commands, numprocs=2)
