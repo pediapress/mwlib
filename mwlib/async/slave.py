@@ -83,6 +83,15 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
 
     assert channels, "no channels"
 
+    if numprocs:
+        def checkparent():
+            if os.getppid()==1:
+                print "parent died. exiting."
+                os._exit(0)
+    else:
+        def checkparent():
+            pass
+        
 
     def handle_one_job(qs):
         sleeptime = 0.5
@@ -92,11 +101,14 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
                 job = qs.qpull(channels=channels)
                 break
             except Exception, err:
+                checkparent()
                 print "Error while calling pulljob:", str(err)
                 time.sleep(sleeptime)
+                checkparent()
                 if sleeptime<60:
                     sleeptime*=2
-        
+
+        checkparent()            
         print "got job:", job
         try:
             result = workhandler(qs).dispatch(job)
