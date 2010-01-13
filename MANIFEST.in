@@ -53,6 +53,7 @@ include mwlib/filequeue.py
 include mwlib/fontswitcher.py
 include mwlib/htmlcolornames.py
 include mwlib/imgmap.py
+include mwlib/infobox_magic.py
 include mwlib/l10n.py
 include mwlib/linuxmem.py
 include mwlib/log.py
