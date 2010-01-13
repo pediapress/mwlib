@@ -253,14 +253,14 @@ class Expander(object):
         if raw is None:
             res = None
         else:
-            res = parser.parse(raw, replace_tags=self.replace_tags)
-            if DEBUG:
-                print "TEMPLATE:", name, repr(raw)
-                #res.show()
+            res = self._parse_raw_template(name=name, raw=raw)
                 
         self.parsedTemplateCache[name] = res
         return res
 
+    def _parse_raw_template(self, name, raw):
+        return parser.parse(raw, replace_tags=self.replace_tags)
+    
     def _expand(self, parsed, keep_uniq=False):
         res = ["\n"] # guard, against implicit newlines at the beginning
         flatten(parsed, self, ArgumentList(expander=self), res)
