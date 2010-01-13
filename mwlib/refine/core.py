@@ -666,6 +666,16 @@ def mark_style_tags(tokens, xopts):
                 del tokens[i]
                 if t.tag_selfClosing:
                     continue
+
+                if t.rawtagname in state:
+                    if create():
+                        start += 1
+                        i = start
+                    start = i
+                    
+                    del state[t.rawtagname]
+                    continue
+                    
                 if create():
                     start += 1
                     i = start
