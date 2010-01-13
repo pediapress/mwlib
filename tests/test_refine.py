@@ -545,3 +545,13 @@ def test_span_vs_paragraph():
 def test_last_unitialized():
     """last variable was not initialized in fix_urllink_inside_link"""
     core.parse_txt("]]]")
+
+def test_style_tag_closes_same():
+    r=core.parse_txt("foo<u>bar<u>baz")
+    core.show(r)
+    utags = core.walknodel(r, lambda x:x.tagname=="u")
+    
+    print "utags:", utags
+    txt = "".join([T.join_as_text(x.children) for x in utags])
+    print "txt:", txt
+    assert txt==u"bar"
