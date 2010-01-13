@@ -123,8 +123,8 @@ class nuwiki(object):
 
     def get_page(self, name, revision=None):
         retval = self._get_page(name,revision=revision)
-        if retval is None:
-            log.warning("missing page %r" % ((name,revision),))
+        # if retval is None:
+        #     log.warning("missing page %r" % ((name,revision),))
         return retval
     
     def normalize_and_get_page(self, name, defaultns):
