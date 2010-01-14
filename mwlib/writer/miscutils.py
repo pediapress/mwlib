@@ -8,7 +8,7 @@ from __future__ import division
 
 from mwlib import advtree
 
-def isInfobox(node):
+def hasInfoboxAttrs(node):
     infobox_classIDs = ['infobox', 'taxobox']
     if node.hasClassID(infobox_classIDs):
         return True
@@ -43,7 +43,7 @@ def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
     assert article_node.__class__ == advtree.Article, 'articleStartsWithInfobox needs to be called with Article node'
     infobox = None
     for table in article_node.getChildNodesByClass(advtree.Table):
-        if isInfobox(table):
+        if hasInfoboxAttrs(table):
             infobox = table
     if not infobox:
         return False

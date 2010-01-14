@@ -8,9 +8,6 @@ import sys
 import copy
 import inspect
 
-from mwlib import infobox_magic
-infobox_magic.install()
-
 from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
@@ -21,7 +18,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
 
 from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib import parser
-from mwlib.writer import styleutils
+from mwlib.writer import styleutils, miscutils
 
 def show(n):
     parser.show(sys.stdout, n, verbose=True)
@@ -54,10 +51,10 @@ class TreeCleaner(object):
     """
 
 
-    cleanerMethods = ['removeEmptyTextNodes',
+    cleanerMethods = ['markInfoboxes',
+                      'removeEmptyTextNodes',
                       'removeInvisibleLinks', 
                       'cleanSectionCaptions',
-                      'handleInfoboxMagic',
                       'removeChildlessNodes',
                       'removeNoPrintNodes',
                       'removeListOnlyParagraphs',
@@ -389,7 +386,6 @@ class TreeCleaner(object):
         # "not 'box' in node.attr(class)" is a hack to detect infoboxes and thelike. they are not split into divs.
         # tables like this should be detected and marked in a separate module probably
         single_col = node.__class__ == Table and node.numcols == 1
-        infobox = 'box' in node.attributes.get('class', '')
         is_long = len(node.getAllDisplayText()) > 500
         contains_gallery = len(node.getChildNodesByClass(Gallery)) > 0
         if single_col:
@@ -401,7 +397,7 @@ class TreeCleaner(object):
                             all_images = False
         else:
             all_images = False
-        if single_col and ( (not infobox and is_long) or all_images or contains_gallery):
+        if single_col and ( (not getattr(node, 'isInfobox', False) and is_long) or all_images or contains_gallery):
             if not node.parents:
                 return
             divs = []
@@ -902,17 +898,20 @@ class TreeCleaner(object):
 
     def linearizeWideNestedTables(self, node):
         """Remove wide tables which are nesting inside another table """
-        parent_tables = node.getParentNodesByClass(Table)
-        if node.__class__ == Table and parent_tables and node.numcols > 15 and not getattr(node, 'infobox', False):
-            while parent_tables:
-                parent_table = parent_tables.pop(0)
-                cell_items = []
-                for row in parent_table.children:
-                    for cell in row.children:
-                        for item in cell.children:
-                            cell_items.append(item)
-                self.report('wide nested table linearized. wrapper:', node, ' replaced by items:', cell_items)
-                parent_table.parent.replaceChild(parent_table, cell_items)
+        if node.__class__ == Table:
+            if getattr(node, 'isInfobox', False):
+                return
+            parent_tables = node.getParentNodesByClass(Table)            
+            if parent_tables and node.numcols > 15:
+                while parent_tables:
+                    parent_table = parent_tables.pop(0)
+                    cell_items = []
+                    for row in parent_table.children:
+                        for cell in row.children:
+                            for item in cell.children:
+                                cell_items.append(item)
+                    self.report('wide nested table linearized. wrapper:', node, ' replaced by items:', cell_items)
+                    parent_table.parent.replaceChild(parent_table, cell_items)
 
         for c in node.children:
             self.linearizeWideNestedTables(c)
@@ -942,7 +941,7 @@ class TreeCleaner(object):
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
-        if node.__class__ == Table and not getattr(node, 'infobox', False):
+        if node.__class__ == Table and not getattr(node, 'isInfobox', False):
             split_table = False
             for row in node.children:
                 for cell in row.children:
@@ -1216,16 +1215,19 @@ class TreeCleaner(object):
         for c in node.children:
             self.handleOnlyInPrint(c)
 
-    def handleInfoboxMagic(self, node):
-        '''Marked Infoboxes are handled here.
 
-        The parser adds DIVs around nodes from infobox templates. These DIVs are
-        removed here - the content is marked instead.
-        '''
-        if node.__class__ == Div and node.vlist.get('templatename', '').lower().startswith('infobox'):
-            for table in node.getChildNodesByClass(Table):
-                table.infobox = True
-            node.parent.replaceChild(node, node.children)
+    def markInfoboxes(self, node):
+        if node.__class__ == Article:
+            tables = node.getChildNodesByClass(Table)
+            found_infobox = False
+            for table in tables:
+                if miscutils.hasInfoboxAttrs(table):
+                    table.isInfobox = found_infobox = True
+            if found_infobox or not tables:
+                return
+            if miscutils.articleStartsWithTable(node, max_text_until_infobox=200):
+                tables[0].isInfobox = True
+            return
 
         for c in node.children:
-            self.handleInfoboxMagic(c)
+            self.markInfoboxes(c)
