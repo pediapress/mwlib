@@ -8,6 +8,9 @@ import sys
 import copy
 import inspect
 
+from mwlib import infobox_magic
+infobox_magic.install()
+
 from mwlib.advtree import removeNewlines
 from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
                            Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
@@ -54,6 +57,7 @@ class TreeCleaner(object):
     cleanerMethods = ['removeEmptyTextNodes',
                       'removeInvisibleLinks', 
                       'cleanSectionCaptions',
+                      'handleInfoboxMagic',
                       'removeChildlessNodes',
                       'removeNoPrintNodes',
                       'removeListOnlyParagraphs',
@@ -218,7 +222,6 @@ class TreeCleaner(object):
         # emtpy sections are removed by removeEmptySections
         # all node classes that have content but no text need to be listed here to prevent removal
         self.contentWithoutTextClasses = [Gallery, ImageLink]
-        
 
         
     def clean(self, cleanerMethods):
@@ -898,9 +901,9 @@ class TreeCleaner(object):
 
 
     def linearizeWideNestedTables(self, node):
-        """Remove wide (curr. hardcoded 15+ cols ;)) tables which are nesting inside another table """
+        """Remove wide tables which are nesting inside another table """
         parent_tables = node.getParentNodesByClass(Table)
-        if node.__class__ == Table and parent_tables and node.numcols > 15 :
+        if node.__class__ == Table and parent_tables and node.numcols > 15 and not getattr(node, 'infobox', False):
             while parent_tables:
                 parent_table = parent_tables.pop(0)
                 cell_items = []
@@ -939,7 +942,7 @@ class TreeCleaner(object):
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
-        if node.__class__ == Table:
+        if node.__class__ == Table and not getattr(node, 'infobox', False):
             split_table = False
             for row in node.children:
                 for cell in row.children:
@@ -1212,3 +1215,17 @@ class TreeCleaner(object):
                 return
         for c in node.children:
             self.handleOnlyInPrint(c)
+
+    def handleInfoboxMagic(self, node):
+        '''Marked Infoboxes are handled here.
+
+        The parser adds DIVs around nodes from infobox templates. These DIVs are
+        removed here - the content is marked instead.
+        '''
+        if node.__class__ == Div and node.vlist.get('templatename', '').lower().startswith('infobox'):
+            for table in node.getChildNodesByClass(Table):
+                table.infobox = True
+            node.parent.replaceChild(node, node.children)
+
+        for c in node.children:
+            self.handleInfoboxMagic(c)
