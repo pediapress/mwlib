@@ -2,8 +2,8 @@
 
 """api.php client, non-twisted version"""
 
-import urllib
-import urllib2
+import urllib, urllib2, cookielib
+
 
 
 try:
@@ -36,13 +36,15 @@ def merge_data(dst, src):
 class mwapi(object):    
     def __init__(self, apiurl):
         self.apiurl = apiurl
+        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+        self.edittoken = None
         
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.apiurl, hex(id(self)))
     
     def _fetch(self, url):
         # print "_fetch:", url
-        f=urllib2.urlopen(url)
+        f=self.opener.open(url)
         data = f.read()
         f.close()
         return data
@@ -63,7 +65,22 @@ class mwapi(object):
     def _request(self, **kwargs):
         url = self._build_url(**kwargs)
         return self._fetch(url)
-        
+    
+    def _post(self, **kwargs):
+        args = {'format': 'json'}
+        args.update(**kwargs)
+        for k, v in args.items():
+            if isinstance(v, unicode):
+                args[k] = v.encode('utf-8')
+                
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        postdata = urllib.urlencode(args)
+
+        req = urllib2.Request(self.apiurl, postdata, headers)
+
+        res = loads(self._fetch(req))
+        return res
+    
     def do_request(self, query_continue=True, **kwargs):
         last_qc = None
         
@@ -108,12 +125,37 @@ class mwapi(object):
             try:
                 r = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
                 return r
-            except Exception:
+            except Exception, err:
+                print "ERR:",err
                 siprop.pop()
         raise RuntimeError("could not get siteinfo")
 
+    def login(self, username, password, domain=None):
+        args = dict(action="login",
+                    lgname=username.encode("utf-8"), 
+                    lgpassword=password.encode("utf-8"), 
+                    format="json", 
+                    )
         
+        if domain is not None:
+            args['lgdomain'] = domain.encode('utf-8')
 
+        res = self._post(**args)
+        if res["login"]["result"]=="Success":
+            return
+
+        print "login failed:", res
+        
+        raise RuntimeError("login failed")
+
+    
+    def upload(self, title, txt, summary):
+        if self.edittoken is None:
+            res = self.do_request(action="query", prop="info|revisions",  intoken="edit",  titles=title)
+            self.edittoken = res["pages"].values()[0]["edittoken"]
+
+        self._post(action="edit", title=title, text=txt, token=self.edittoken, summary=summary,  format="json", bot=True)
+            
 def main():
     s = mwapi("http://en.wikipedia.org/w/api.php")
     print s.get_categorymembers("Category:Mainz")
