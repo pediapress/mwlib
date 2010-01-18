@@ -1,18 +1,7 @@
 import re
 from mwlib import metabook
 
-def parse_collection_page(wikitext):
-    """Parse wikitext of a MediaWiki collection page created by the Collection
-    extension for MediaWiki.
-    
-    @param wikitext: wikitext of a MediaWiki collection page
-    @type mwcollection: unicode
-    
-    @returns: metabook dictionary
-    @rtype: dict
-    """
-    mb = metabook.collection()
-
+def _buildrex():
     title_rex = '^==(?P<title>[^=].*?[^=])==$'
     subtitle_rex = '^===(?P<subtitle>[^=].*?[^=])===$'
     chapter_rex = '^;(?P<chapter>.+?)$'
@@ -26,14 +15,31 @@ def parse_collection_page(wikitext):
         title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex,
         template_rex, template_start_rex, template_end_rex, summary_rex,
     ))
+    return alltogether_rex
+
+
+alltogether_rex = _buildrex()
+
+def parse_collection_page(wikitext):
+    """Parse wikitext of a MediaWiki collection page created by the Collection
+    extension for MediaWiki.
+    
+    @param wikitext: wikitext of a MediaWiki collection page
+    @type mwcollection: unicode
+    
+    @returns: metabook.collection
+    @rtype: metabook.collection
+    """
+    mb = metabook.collection()
+
     
     summary = False
     noTemplate = True
-    firstSummaryLine = True
     for line in wikitext.splitlines():
-        if line == "": 
-            continue #drop empty lines
-        res = alltogether_rex.search(line.strip())
+        line = line.strip()
+        if not line:
+            continue
+        res = alltogether_rex.search(line)
         if not res:
             continue
         
@@ -45,8 +51,7 @@ def parse_collection_page(wikitext):
         elif res.group('template_start'):
             noTemplate = False
         elif res.group('summary'):
-            if firstSummaryLine:
-                firstSummaryLine = False
+            pass
         else:
             summary = False
             noTemplate = False
