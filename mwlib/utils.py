@@ -199,7 +199,6 @@ class PersistedDict(UserDict.UserDict):
         data = fetch_url(some_url, fetch_cache=cache, max_cacheable_size=5*1024*1024)
     """
     
-    cache_dir = os.path.join(tempfile.gettempdir(), 'mwlib-cache')
     
     def __init__(self, max_cacheable_size=1024*1024, *args, **kwargs):
         """
@@ -210,6 +209,7 @@ class PersistedDict(UserDict.UserDict):
         #super(PersistedDict, self).__init__(*args, **kwargs)
         UserDict.UserDict.__init__(self, *args, **kwargs)
         self.max_cacheable_size = max_cacheable_size
+        self.cache_dir = os.path.join(tempfile.gettempdir(), 'mwlib-cache')
         ensure_dir(self.cache_dir)
     
     def __getitem__(self, name):
