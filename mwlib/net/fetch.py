@@ -628,7 +628,7 @@ class fetcher(object):
         if self._stopped:
             return
         
-        if self.fatal_error:
+        if self.fatal_error is not None:
             if isinstance(self.fatal_error, basestring):
                 self.result.errback(RuntimeError(self.fatal_error))
             else:
