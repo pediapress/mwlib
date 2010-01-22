@@ -555,3 +555,8 @@ def test_style_tag_closes_same():
     txt = "".join([T.join_as_text(x.children) for x in utags])
     print "txt:", txt
     assert txt==u"bar"
+
+def test_hashmark_link():
+    r=core.parse_txt("[[#foo]]")
+    core.show(r)
+    assert r[0].type==T.t_complex_link, "not a link"
