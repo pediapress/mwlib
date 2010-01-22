@@ -74,8 +74,11 @@ class fsoutput(object):
         # self.revfile.write("\n -*- mode: wikipedia -*-\n")
         self.seen = dict()
         self.imgcount = 0
-        
+        self.nfo = None
+
     def close(self):
+        if self.nfo is not None:
+            self.dump_json(nfo=self.nfo)
         self.revfile.close()
         self.revfile = None
         
@@ -222,6 +225,7 @@ class fetcher(object):
                 self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
             else:
                 self.make_print_template = None
+
 
             titles, revids = self._split_titles_revids(pages)
 
@@ -668,6 +672,8 @@ class fetcher(object):
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
+        if self.fsout.nfo and self.print_template_pattern:
+            self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()
         
     def _refcall(self, fun):

@@ -34,8 +34,10 @@ class start_fetcher(object):
         }
         if self.options.print_template_pattern:
             nfo["print_template_pattern"] = self.options.print_template_pattern
+            
+        fsout.nfo = nfo
 
-        fsout.dump_json(nfo=nfo)
+        # fsout.dump_json(nfo=nfo)
 
         pages = fetch.pages_from_metabook(metabook)
         self.fetcher = fetch.fetcher(api, fsout, pages,
