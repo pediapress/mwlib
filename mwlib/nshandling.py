@@ -115,8 +115,8 @@ class nshandler(object):
         if not isinstance(title, unicode):
             title = unicode(title, 'utf-8')
 
-        if "#" in title:
-            title = title.split("#")[0]
+        # if "#" in title:
+        #     title = title.split("#")[0]
             
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
