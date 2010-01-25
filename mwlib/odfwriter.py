@@ -444,6 +444,11 @@ class ODFWriter(object):
     def owriteStrike(self, s):
         return text.Span(stylename=style.strike)
 
+    def owriteTagNode(self, node):
+        if getattr(node, 'caption', None) in ['hiero']:
+            return SkipChildren()
+        if getattr(node, 'caption', None) in ['abbr']:
+            return self.owriteUnderline(node)
 
 
 # ------- block formattings -------------------
