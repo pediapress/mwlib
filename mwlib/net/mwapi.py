@@ -284,7 +284,7 @@ class mwapi(object):
                 raise
             
             if error:
-                raise RuntimeError("%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs)))
+                raise RuntimeError("%r: [fetching %r]" % (error.get("info", ""), self._build_url(**kwargs)))
             
             merge_data(retval, data["query"])
             
