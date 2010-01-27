@@ -167,8 +167,12 @@ class Main(object):
         env = None
         try:
             env = self.get_environment()
-
-            fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output))
+            basename = os.path.basename(options.output)
+            if '.' in basename:
+                ext = '.' + basename.rsplit('.', 1)[-1]
+            else:
+                ext = ''
+            fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output), suffix=ext)
             os.close(fd)
             writer(env, output=tmpout, status_callback=self.status, **writer_options)
             os.rename(tmpout, options.output)
