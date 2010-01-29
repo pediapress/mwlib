@@ -141,10 +141,9 @@ class Application(object):
         self.mwzip_logfile = mwzip_logfile
         self.mwpost_cmd = mwpost_cmd
         self.mwpost_logfile = mwpost_logfile
+        self.queue_upload_job = self.queue_render_job = no_job_queue
         if queue_dir:
-            self.queue_job = filequeue.FileJobQueuer(utils.ensure_dir(queue_dir))
-        else:
-            self.queue_job = no_job_queue
+            self.queue_render_job = filequeue.FileJobQueuer(utils.ensure_dir(queue_dir))
         self.default_writer = default_writer
         self.report_from_mail = report_from_mail
         self.report_recipients = report_recipients
@@ -403,7 +402,7 @@ class Application(object):
             if language:
                 args.extend(['--language', language])
         
-        self.queue_job('render', collection_id, args)
+        self.queue_render_job('render', collection_id, args)
         
         return response
     
@@ -590,7 +589,7 @@ class Application(object):
             if script_extension:
                 args.extend(['--script-extension', script_extension])
         
-        self.queue_job('post', collection_id, args)
+        self.queue_upload_job('post', collection_id, args)
         
         return response
     
