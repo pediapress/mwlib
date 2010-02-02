@@ -7,7 +7,7 @@ import sys
 
 from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
-from mwlib.treecleaner import TreeCleaner, _all, _any
+from mwlib.treecleaner_new import TreeCleaner
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
@@ -44,7 +44,8 @@ def cleanMarkup(raw):
     print '='*20
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
-    tc.cleanAll(skipMethods=[])
+    #tc.cleanAll(skipMethods=[])
+    tc.clean(tree)
     reports = tc.getReports()
     print "after treecleaner: >>>"
     showTree(tree)
@@ -84,7 +85,7 @@ para
     lists = tree.getChildNodesByClass(ItemList)
     for li in lists:
         print li, li.getParents()
-        assert _all([p.__class__ != Paragraph for p in li.getParents()])
+        assert all([p.__class__ != Paragraph for p in li.getParents()])
     _treesanity(tree)   
 
 def test_fixLists2():
@@ -113,7 +114,7 @@ def test_fixLists3():
 """
     tree, reports = cleanMarkup(raw)
     assert len(tree.children) == 2 # 2 itemlists as only children of article
-    assert _all( [ c.__class__ == ItemList for c in tree.children])
+    assert all( [ c.__class__ == ItemList for c in tree.children])
     
 
 def test_childlessNodes():
@@ -194,7 +195,7 @@ def test_fixNesting2():
     '''
     tree, reports = cleanMarkup(raw)
     list_node = tree.getChildNodesByClass(ItemList)[0]
-    assert not _any([p.__class__ == Div for p in list_node.getParents()])
+    assert not any([p.__class__ == Div for p in list_node.getParents()])
 
 # the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
 # but maybe they are interesting in the future - therefore I did not delete them
@@ -287,7 +288,7 @@ def test_swapNodes():
     '''
     tree, reports = cleanMarkup(raw)
     center_node= tree.getChildNodesByClass(Center)[0]
-    assert not _any([p.__class__ == Underline for p in center_node.getParents()])
+    assert not any([p.__class__ == Underline for p in center_node.getParents()])
 
 @xfail
 def test_splitBigTableCells():
@@ -314,7 +315,7 @@ bla
 
     tree, reports = cleanMarkup(raw)
     section_node = tree.getChildNodesByClass(Section)[0]
-    assert _all([p.__class__ != Center for p in section_node.children[0].getAllChildren()])
+    assert all([p.__class__ != Center for p in section_node.children[0].getAllChildren()])
 
 def test_cleanSectionCaptions2():
     raw = """=== ===
@@ -529,3 +530,24 @@ Image:bla.png
 
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(Section)) == 4, 'section falsly removed'
+
+def test_invisibleLinks():
+    raw = '''
+== invisibleLinks ==
+Category links which should be invisible:
+
+[[Category:Polnische Geschichte|some deceiving text]]
+[[Category:1848er Revolution]]
+
+and language links:
+
+
+[[be:Гісторыя Польшчы]]
+[[bg:История на Полша]]
+[[ca:Història de Polònia]]
+'''.decode('utf-8')
+
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(LangLink)) == 0, 'removing LangLink failed'
+    assert len(tree.getChildNodesByClass(CategoryLink)) == 0, 'removing CategoryLink failed'
+    

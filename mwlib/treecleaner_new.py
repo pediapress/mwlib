@@ -1,0 +1,104 @@
+#! /usr/bin/env python
+#! -*- coding:utf-8 -*-
+
+# Copyright (c) 2007, 2008, 2009 PediaPress GmbH
+# See README.txt for additional licensing information.
+
+import sys
+
+from mwlib import parser
+from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
+                           Cite, Code,DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
+                           HorizontalRule, ImageLink, ImageMap, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
+                           Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
+                           Row, Section, Small, Source, Span, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
+                           Underline, URL, Var)
+
+
+def show(node):
+    parser.show(sys.stdout, node)
+
+def c(node):
+    return node.__class__
+
+class CleanerError(RuntimeError):
+    pass
+
+class TreeCleaner(object):
+
+    start_clean_methods=['invisibleLinks']
+    clean_methods=['emptyTextNodes']
+    finish_clean_methods=[]
+
+    def __init__(self, tree, save_reports=False, nesting_strictness='loose', status_cb=None):
+        self.dirty_nodes = []
+        
+    def getReports(self):
+        return []
+
+    def clean(self, tree):
+        print '*'*20, 'START cleaning'
+        self.dirty_nodes = [tree]
+        while self.dirty_nodes:
+            self.clean_tree(methods=self.start_clean_methods)
+
+        print '*'*20, 'MAIN cleaning'
+        self.dirty_nodes = [tree]
+        while self.dirty_nodes:
+            self.clean_tree(methods=self.clean_methods)
+
+        print '*'*20, 'STOP cleaning'
+        self.dirty_nodes = [tree]
+        while self.dirty_nodes:
+            self.clean_tree(methods=self.finish_clean_methods)
+
+
+        
+    def clean_tree(self, methods=[]):
+
+        node = self.dirty_nodes.pop(0)       
+        if not node:
+            return
+
+        skip_children = False
+
+        for method_name in methods:
+            try:
+                method_condition = getattr(self, method_name + 'Cond')
+                method_action = getattr(self, method_name + 'Action')
+            except AttributeError:
+                raise CleanerError('Cleaner method or action not implemented for name: %r' % method_name)
+            #print method_name
+            if method_condition(node):
+                print 'TRUE:', method_name, node.__class__.__name__
+                skip_children = method_action(node)
+                       
+        if not skip_children:
+            self.dirty_nodes.extend(node.children)
+
+    #################### START CLEAN
+
+    def invisibleLinksCond(self, node):
+        cond = (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon and node.parent
+        return cond
+        
+    def invisibleLinksAction(self, node):
+        node.parent.removeChild(node)
+        return True
+
+    ####################### MAIN CLEAN
+    
+    def emptyTextNodesCond(self, node):        
+        cond = c(node) == Text \
+                   and (not node.caption \
+                        or (node.previous \
+                            and node.previous.isblocknode \
+                            and node.next \
+                            and node.next.isblocknode \
+                            and not node.caption.strip()))
+        return cond
+        
+    def emptyTextNodesAction(self, node):
+        node.parent.removeChild(node)
+        return True
+
