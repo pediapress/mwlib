@@ -26,7 +26,9 @@ class CleanerError(RuntimeError):
 
 class TreeCleaner(object):
 
-    start_clean_methods=['invisibleLinks']
+    start_clean_methods=['invisibleLinks',
+                         'noPrint',
+                         ]
     clean_methods=['emptyTextNodes']
     finish_clean_methods=[]
 
@@ -68,7 +70,6 @@ class TreeCleaner(object):
                 method_action = getattr(self, method_name + 'Action')
             except AttributeError:
                 raise CleanerError('Cleaner method or action not implemented for name: %r' % method_name)
-            #print method_name
             if method_condition(node):
                 print 'TRUE:', method_name, node.__class__.__name__
                 skip_children = method_action(node)
@@ -79,12 +80,62 @@ class TreeCleaner(object):
     #################### START CLEAN
 
     def invisibleLinksCond(self, node):
-        cond = (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon and node.parent
+        cond = (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon
         return cond
         
     def invisibleLinksAction(self, node):
         node.parent.removeChild(node)
         return True
+
+    # list of css classes OR id's which trigger the removal of the node from the tree
+    noDisplayClasses = ['hiddenStructure',
+                        'dablink',
+                        'editlink',
+                        'metadata',
+                        'noprint',
+                        'portal',
+                        'sisterproject',
+                        'NavFrame',
+                        'geo-multi-punct',
+                        'coordinates_3_ObenRechts',
+                        'microformat',
+                        'navbox',
+                        'navbox-vertical',
+                        'Vorlage_Gesundheitshinweis',
+                        ]
+
+    def _getNamedRefs(self, node):
+        named_refs= []
+        for n in node.getChildNodesByClass(Reference) + [node]:
+            if n.__class__ == Reference and n.attributes.get('name'):
+                named_refs.append(n)
+        return named_refs
+
+    def _safeRemove(self, node, named_refs):
+        if node in named_refs:
+            node.no_display = True
+            return
+        for ref in named_refs:
+            ref.no_display = True
+            table_parents = node.getParentNodesByClass(Table)
+            if table_parents:
+                ref.moveto(table_parents[0], prefix=True)
+            else:
+                ref.moveto(node, prefix=True)
+        node.parent.removeChild(node)
+
+
+    def noPrintCond(self, node):
+        return (node.hasClassID(self.noDisplayClasses) or not node.visible) and node.parent
+
+    def noPrintAction(self, node):
+        named_refs = self._getNamedRefs(node)
+        if named_refs:
+            self._safeRemove(node, named_refs)
+        else:
+            node.parent.removeChild(node)
+        return True
+
 
     ####################### MAIN CLEAN
     

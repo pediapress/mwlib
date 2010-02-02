@@ -11,7 +11,7 @@ from mwlib.treecleaner_new import TreeCleaner
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
-                     Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
+                     Reference, ReferenceList, Row, Section, Source, SpecialLink, Span, Strong, Table, Text, Underline,
                      URL)
 
 from mwlib.xfail import xfail
@@ -551,3 +551,28 @@ and language links:
     assert len(tree.getChildNodesByClass(LangLink)) == 0, 'removing LangLink failed'
     assert len(tree.getChildNodesByClass(CategoryLink)) == 0, 'removing CategoryLink failed'
     
+
+def test_noPrint():
+    raw = '''
+hi
+
+<span class="noprint">text which is not printed</span>
+
+ho
+
+<div class="noprint">text which is not printed<ref name="bla">some reference which should be kept</ref></div>
+
+blub
+
+<ref class="noprint" name="tricky">Hey, dont display but dont remove</ref>
+    '''
+
+    tree, reports = cleanMarkup(raw)
+    assert len(tree.getChildNodesByClass(Span)) == 0, 'removing noPrint nodes (span) failed'
+    assert len(tree.getChildNodesByClass(Div)) == 0, 'removing noPrint nodes (div) failed'
+
+    refs = tree.getChildNodesByClass(Reference)
+    assert len(refs) == 2
+    
+    assert refs[0].no_display == True, 'this ref should be displayed'
+    assert refs[1].no_display == True, 'this ref should be hidden'
