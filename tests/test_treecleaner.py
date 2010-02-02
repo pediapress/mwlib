@@ -554,6 +554,7 @@ and language links:
 
 def test_noPrint():
     raw = '''
+== noPrint == 
 hi
 
 <span class="noprint">text which is not printed</span>

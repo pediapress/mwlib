@@ -18,8 +18,8 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
 def show(node):
     parser.show(sys.stdout, node)
 
-def c(node):
-    return node.__class__
+SKIPCHILDREN = 1
+
 
 class CleanerError(RuntimeError):
     pass
@@ -29,7 +29,8 @@ class TreeCleaner(object):
     start_clean_methods=['invisibleLinks',
                          'noPrint',
                          ]
-    clean_methods=['emptyTextNodes']
+    clean_methods=['emptyTextNodes',
+                   ]
     finish_clean_methods=[]
 
     def __init__(self, tree, save_reports=False, nesting_strictness='loose', status_cb=None):
@@ -62,7 +63,7 @@ class TreeCleaner(object):
         if not node:
             return
 
-        skip_children = False
+        result = None
 
         for method_name in methods:
             try:
@@ -71,21 +72,21 @@ class TreeCleaner(object):
             except AttributeError:
                 raise CleanerError('Cleaner method or action not implemented for name: %r' % method_name)
             if method_condition(node):
-                print 'TRUE:', method_name, node.__class__.__name__
-                skip_children = method_action(node)
+                print 'CLEANING:', method_name, node.__class__.__name__
+                result = method_action(node)
                        
-        if not skip_children:
+        if not result == SKIPCHILDREN:
             self.dirty_nodes.extend(node.children)
 
     #################### START CLEAN
 
     def invisibleLinksCond(self, node):
-        cond = (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon
-        return cond
+        return node.__class__ in [CategoryLink, LangLink] and not node.colon
+
         
     def invisibleLinksAction(self, node):
         node.parent.removeChild(node)
-        return True
+        return SKIPCHILDREN
 
     # list of css classes OR id's which trigger the removal of the node from the tree
     noDisplayClasses = ['hiddenStructure',
@@ -134,22 +135,25 @@ class TreeCleaner(object):
             self._safeRemove(node, named_refs)
         else:
             node.parent.removeChild(node)
-        return True
+        return SKIPCHILDREN
 
 
     ####################### MAIN CLEAN
     
     def emptyTextNodesCond(self, node):        
-        cond = c(node) == Text \
-                   and (not node.caption \
-                        or (node.previous \
-                            and node.previous.isblocknode \
-                            and node.next \
-                            and node.next.isblocknode \
-                            and not node.caption.strip()))
-        return cond
+        """Removes Text nodes which contain no text at all.
+
+        Text nodes which only contain whitespace are kept.
+        """
+        return node.__class__ == Text \
+               and (not node.caption \
+                    or (node.previous \
+                        and node.previous.isblocknode \
+                        and node.next \
+                        and node.next.isblocknode \
+                        and not node.caption.strip()))
         
     def emptyTextNodesAction(self, node):
         node.parent.removeChild(node)
-        return True
+        return SKIPCHILDREN
 
