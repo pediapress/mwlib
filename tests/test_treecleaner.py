@@ -577,3 +577,18 @@ blub
     
     assert refs[0].no_display == True, 'this ref should be displayed'
     assert refs[1].no_display == True, 'this ref should be hidden'
+
+def test_listOnlyParagraph():
+    raw = '''
+bla
+
+* ho, this is a list
+* and more
+
+blub
+    '''
+
+    tree, reports = cleanMarkup(raw)
+
+    li = tree.getChildNodesByClass(ItemList)[0]
+    assert li.parent.__class__ != Paragraph
