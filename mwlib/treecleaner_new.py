@@ -35,8 +35,11 @@ class TreeCleaner(object):
                          ]
     clean_methods=['removeEmptyTextNodes',
                    'handleListOnlyParagraphs', # FIXME: why not do this for all block nodes and not only for lists
+                   #'simplifyBlockNodes', # FIXME: paragraphs with one block node child are removed MERGE WITH THE ABOVE
                    'cleanSectionCaptions',
                    'removeChildlessNodes',
+                   #'fixParagraphs' FIXME: probably not needed. otherwise a proper node-nesting check should be performed
+                   'removeTextlessStyles', 
                    ]
     finish_clean_methods=['markShortParagraphs',
                           'markInfoboxes'
@@ -81,6 +84,9 @@ class TreeCleaner(object):
         # remove ImageLinks which end with the following file types
         self.forbidden_file_endings = ['ogg']
 
+        self.style_nodes = [Italic, Emphasized, Strong, Overline, Underline, Sub, Sup, Small, Big, Var]
+
+
     def getReports(self):
         return self.reports
 
@@ -102,6 +108,7 @@ class TreeCleaner(object):
 
         while self.dirty_nodes:
             node = self.dirty_nodes.pop(0)
+            assert node, 'None in dirty node queue'
             for cleaner in cleaner_methods:
                 result = cleaner(node)
                 if result == SKIPNOW:
@@ -128,6 +135,7 @@ class TreeCleaner(object):
 
     def insertDirtyNode(self, insert_node):
         '''Add a node to the dirty queue and delete all sub-nodes'''
+        assert insert_node, 'insert_node can not be None'
         sub_nodes = []
         for node in self.dirty_nodes:
             if insert_node in node.getParents():
@@ -257,6 +265,22 @@ class TreeCleaner(object):
                 removeNode.parent.removeChild(removeNode)
         for c in node.children[:]:
             self.removeChildlessNodes(c)
+
+
+    def removeTextlessStyles(self, node):
+        """Remove style nodes that have no children with text"""
+        if node.__class__ in self.style_nodes:
+            if not node.getAllDisplayText().strip() and node.parent:
+                if node.children:
+                    parent = node.parent
+                    parent.replaceChild(node, newchildren=node.children)
+                    self.insertDirtyNode(parent)
+                    self.report('remove style', node, 'with text-less children', node.children )
+                    return SKIPNOW
+                else:
+                    self.removeThis(node)                    
+                    self.report('removed style without children', node)
+                    return SKIPCHILDREN
 
 
     #################### END CLEAN

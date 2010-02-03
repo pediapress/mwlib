@@ -60,10 +60,10 @@ class TreeCleaner(object):
                       'removeListOnlyParagraphs', ###
                       'removeInvalidFiletypes', ###
                       'fixParagraphs',
-                      'simplifyBlockNodes',
+                      'simplifyBlockNodes', 
                       'fixNesting', 
                       'removeCriticalTables',
-                      'removeTextlessStyles', 
+                      'removeTextlessStyles', ### 
                       'removeBrokenChildren',
                       'fixTableColspans',
                       'removeEmptyTrailingTableRows',
@@ -95,7 +95,7 @@ class TreeCleaner(object):
                       'removeChildlessNodes', 
                       'removeBreakingReturns',
                       'removeEmptySections',
-                      'markShortParagraph',
+                      'markShortParagraph',###
                       ]
 
     skipMethods = []
