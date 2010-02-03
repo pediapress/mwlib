@@ -130,6 +130,8 @@ blub
 <u></u>
     """
     tree, reports = cleanMarkup(raw)
+    from pprint import pprint
+    pprint(reports)         
     assert len(tree.children) == 1 #assert only the 'blub' paragraph is left and the rest removed
     assert tree.children[0].__class__ == Paragraph  
 
@@ -592,3 +594,39 @@ blub
 
     li = tree.getChildNodesByClass(ItemList)[0]
     assert li.parent.__class__ != Paragraph
+
+def test_markInfoboxes(): # FIXME add test
+    raw = '''
+{| class="infobox"
+|-
+| bla || blub
+|-
+| bla || blub
+|}
+
+{| class="noInfoboxAtAll"
+|-
+| bla || blub
+|-
+| bla || blub
+|}
+
+'''
+    tree, reports = cleanMarkup(raw)
+    tables = tree.getChildNodesByClass(Table)
+    assert tables[0].isInfobox == True, 'table not marked as infobox'    
+    assert getattr(tables[1], 'isInfobox', False) == False, 'table falsely marked as infobox'
+    
+
+def testInvalidFiletypes():
+    raw = '''
+[[File:bla.ogg]]
+
+[[File:bla.jpg]]
+    '''
+
+    tree, reports = cleanMarkup(raw)
+
+    images = tree.getChildNodesByClass(ImageLink)
+    assert len(images) == 1
+    assert images[0].target.endswith('.jpg')

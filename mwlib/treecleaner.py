@@ -51,14 +51,14 @@ class TreeCleaner(object):
     """
 
 
-    cleanerMethods = ['markInfoboxes',
+    cleanerMethods = ['markInfoboxes', ###
                       'removeEmptyTextNodes', ###
                       'removeInvisibleLinks', ###
-                      'cleanSectionCaptions',
-                      'removeChildlessNodes',
+                      'cleanSectionCaptions', ###
+                      'removeChildlessNodes', ###
                       'removeNoPrintNodes',  ###
-                      'removeListOnlyParagraphs',
-                      'removeInvalidFiletypes',
+                      'removeListOnlyParagraphs', ###
+                      'removeInvalidFiletypes', ###
                       'fixParagraphs',
                       'simplifyBlockNodes',
                       'fixNesting', 
