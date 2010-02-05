@@ -14,7 +14,6 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
                            Row, Section, Small, Source, Span, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
                            Underline, URL, Var)
-
 from mwlib.writer import styleutils, miscutils
 
 def show(node):
@@ -32,14 +31,17 @@ class TreeCleaner(object):
     start_clean_methods=['removeInvisibleLinks',
                          'removeNoPrint',
                          'removeInvalidFiletypes',
+                         'buildDefinitionLists',
                          ]
     clean_methods=['removeEmptyTextNodes',
+                   'removeTextlessStyles',
                    'handleListOnlyParagraphs', # FIXME: why not do this for all block nodes and not only for lists
                    #'simplifyBlockNodes', # FIXME: paragraphs with one block node child are removed MERGE WITH THE ABOVE
                    'cleanSectionCaptions',
                    'removeChildlessNodes',
                    #'fixParagraphs' FIXME: probably not needed. otherwise a proper node-nesting check should be performed
-                   'removeTextlessStyles', 
+                   'removeBrokenChildren',
+                   'fixNesting',
                    ]
     finish_clean_methods=['markShortParagraphs',
                           'markInfoboxes'
@@ -86,7 +88,47 @@ class TreeCleaner(object):
 
         self.style_nodes = [Italic, Emphasized, Strong, Overline, Underline, Sub, Sup, Small, Big, Var]
 
+        self.inlineStyleNodes = [Big, Center, Cite, Code, Deleted, Emphasized, Inserted, Italic,
+                                 Overline, Small, Strike, Strong, Sub, Sup, Teletyped, Underline, Var]
 
+        # USED IN fixNesting if nesting_strictness == 'loose'
+        # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
+        # ex: pull image links out of preformatted nodes
+        # fixme rename to ancestors
+        self.forbidden_parents = {ImageLink:[PreFormatted],
+                                  ItemList:[Div, PreFormatted],
+                                  Source:self.inlineStyleNodes,
+                                  DefinitionList:[Paragraph],
+                                  Blockquote:[PreFormatted],
+                                  Center:[PreFormatted],
+                                  Paragraph:[PreFormatted],
+                                  Section:[PreFormatted],
+                                  Gallery:[PreFormatted, DefinitionDescription, DefinitionList, DefinitionTerm],
+                                  Table:[DefinitionList]
+                                  }
+        self.forbidden_parents[Source].append(PreFormatted)
+
+        # when checking nesting, some Nodes prevent outside nodes to be visible to inner nodes
+        # ex: Paragraphs can not be inside Paragraphs. but if the inner paragraph is inside a
+        # table which itself is inside a paragraph this is not a problem
+        self.outsideParentsInvisible = [Table, Section, Reference]
+        self.nesting_strictness = nesting_strictness # loose | strict
+
+        # ex: delete preformatted nodes which are inside reference nodes,
+        # all children off the preformatted node are kept
+        self.removeNodes = {PreFormatted: [Reference, PreFormatted],
+                            Cite: [Item, Reference],
+                            Code: [PreFormatted],
+                            ImageLink: [Reference],
+                            Div: [Reference, Item],
+                            Center:[Reference],
+                            Teletyped:[Reference],
+                            ReferenceList: [Reference],
+                            Teletyped: [Source],
+                            }
+
+
+        
     def getReports(self):
         return self.reports
 
@@ -282,6 +324,125 @@ class TreeCleaner(object):
                     self.report('removed style without children', node)
                     return SKIPCHILDREN
 
+    def _nestingBroken(self, node):
+        # FIXME: the list below is used and not node.isblocknode. is there a reason for that?
+        blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
+                      Blockquote, DefinitionList, HorizontalRule, Source)
+        parents = node.getParents()
+
+        clean_parents = []
+        parents.reverse()
+        for p in parents:
+            if p.__class__ not in self.outsideParentsInvisible:
+                clean_parents.append(p)
+            else:
+                break
+        #clean_parents.reverse()
+        parents = clean_parents
+
+        if self.nesting_strictness == 'loose':
+            for parent in parents:
+                if parent.__class__ in self.forbidden_parents.get(node.__class__, []):
+                    return parent
+        elif self.nesting_strictness == 'strict':
+            for parent in parents:
+                if node.__class__ != Section and node.__class__ in blocknodes and parent.__class__ in blocknodes:
+                    return parent
+        return None
+           
+
+    def _markNodes(self, node, divide, problem_node=None):
+        got_divide = False
+        for c in node.children:
+            if getattr(node, 'nesting_pos', None):
+                c.nesting_pos = node.nesting_pos
+                continue
+            if c in divide:
+                got_divide = True
+                if c == problem_node:
+                    c.nesting_pos = 'problem'
+                continue
+            if not got_divide:
+                c.nesting_pos = 'top'
+            else:
+                c.nesting_pos = 'bottom'
+        for c in node.children:
+            self._markNodes(c, divide, problem_node=problem_node)
+
+    def _cleanUpMarks(self, node):
+        if hasattr(node, 'nesting_pos'):
+            del node.nesting_pos
+        for c in node.children:
+            self._cleanUpMarks(c)
+            
+    def _filterTree(self, node, nesting_filter=[]):
+        if getattr(node, 'nesting_pos', None) in nesting_filter:
+            node.parent.removeChild(node)
+            return
+        for c in node.children[:]:
+            self._filterTree(c, nesting_filter=nesting_filter)
+
+    def fixNesting(self, node):
+        """Nesting of nodes is corrected.
+
+        The strictness depends on nesting_strictness which can either be 'loose' or 'strict'.
+        Depending on the strictness the _nestingBroken method uses different approaches to
+        detect forbidden nesting.
+
+        Example for 'strict' setting: (bn --> blocknode, nbn --> nonblocknode)
+        bn_1
+         nbn_2
+         bn_3
+         nbn_4
+
+        becomes:
+        bn_1.1
+         nbn_2
+        bn_3
+        bn_1.2
+         nbn_4
+        """
+
+        bad_parent = self._nestingBroken(node)
+        if not bad_parent:
+            return
+
+        divide = node.getParents()
+        divide.append(node)
+        self._markNodes(bad_parent, divide, problem_node=node)
+
+        top_tree = bad_parent.copy()
+        self._filterTree(top_tree, nesting_filter=['bottom', 'problem'])
+        middle_tree = bad_parent.copy()
+        self._filterTree(middle_tree, nesting_filter=['top', 'bottom'])
+        middle_tree = middle_tree.children[0]
+        bottom_tree = bad_parent.copy()
+        self._filterTree(bottom_tree, nesting_filter=['top', 'problem'])
+        new_tree = [part for part in [top_tree, middle_tree, bottom_tree] if part != None]
+        
+        self.report('moved', node, 'from', bad_parent)
+        parent = bad_parent.parent
+        parent.replaceChild(bad_parent, new_tree)
+        self._cleanUpMarks(parent)
+
+        self.insertDirtyNode(parent)
+        return SKIPNOW      
+
+
+    def removeBrokenChildren(self, node):
+        """Remove Nodes (while keeping their children) which can't be nested with their parents."""
+        if node.__class__ in self.removeNodes.keys():
+            if any([parent.__class__ in self.removeNodes[node.__class__] for parent in node.parents]):
+                if node.children:
+                    self.report('replaced child', node, node.children)
+                    parent = node.parent
+                    parent.replaceChild(node, newchildren=node.children)
+                    self.insertDirtyNode(parent)
+                    return SKIPNOW
+                else:
+                    self.report('removed child', node)
+                    self.removeThis(node)
+                    return SKIPNOW
 
     #################### END CLEAN
 
@@ -305,6 +466,25 @@ class TreeCleaner(object):
             if miscutils.articleStartsWithTable(node, max_text_until_infobox=200):
                 tables[0].isInfobox = True
 
+
+    def buildDefinitionLists(self, node):
+        if node.__class__ in [DefinitionTerm, DefinitionDescription]:
+            if node.getChildNodesByClass(ItemList) or node.getParentNodesByClass(ItemList):
+                return
+            parent = node.getParent()
+            if parent.__class__ == DefinitionList:
+                return
+            prev = node.getPrevious()
+            if prev.__class__ == DefinitionList: 
+                node.moveto(prev.getLastChild())
+                self.report('moved node to prev. definition list')
+            else: 
+                dl = DefinitionList()
+                parent.replaceChild(node, [dl])
+                dl.appendChild(node)
+                self.report('created new definition list')
+            self.insertDirtyNode(parent)
+                
 
     ################# DEBUG STUFF
 

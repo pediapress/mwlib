@@ -59,9 +59,9 @@ class TreeCleaner(object):
                       'removeNoPrintNodes',  ###
                       'removeListOnlyParagraphs', ###
                       'removeInvalidFiletypes', ###
-                      'fixParagraphs',
-                      'simplifyBlockNodes', 
-                      'fixNesting', 
+                      'fixParagraphs', ###  ommiting
+                      'simplifyBlockNodes', ### ommiting
+                      'fixNesting',  ###
                       'removeCriticalTables',
                       'removeTextlessStyles', ### 
                       'removeBrokenChildren',
@@ -84,7 +84,7 @@ class TreeCleaner(object):
                       'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                       'removeNewlines', # imported from advtree - clean up newlines that are not needed
                       'removeBreakingReturns',
-                      'buildDefinitionLists',
+                      'buildDefinitionLists', ###
                       'restrictChildren',
                       'fixReferenceNodes',
                       'fixNesting', # pull DefinitionLists out of Paragraphs

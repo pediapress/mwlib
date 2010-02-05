@@ -183,10 +183,19 @@ def test_removeBrokenChildren():
 <ref>
  preformatted text
 </ref>
-    '''
+
+<ref>
+<p>bla</p>
+<div>
+ some preformatted text in a div
+</div>
+blub
+</ref>
+'''
     
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(PreFormatted)) == 0
+
 
 def test_fixNesting2():
     raw = r'''
@@ -216,29 +225,29 @@ def test_fixNesting2():
 ##     for para in paras:
 ##         assert not para.getChildNodesByClass(Paragraph)
 
-## def test_fixNesting4():
-##     raw = """
-## <strike>
+# def test_fixNesting4():
+#     raw = """
+# <strike>
 
-## <div>
-##  indented para 1
+# <div>
+#  indented para 1
 
-## regular para
+# regular para
 
-##  indented para 2
+#  indented para 2
 
-## </div>
+# </div>
 
-## </strike>
-## """
+# </strike>
+# """
 
-##     tree = getTreeFromMarkup(raw)    
-##     tree, reports = cleanMarkup(raw)
-##     paras = tree.getChildNodesByClass(Paragraph)
-##     for para in paras:
-##         assert not para.getChildNodesByClass(Paragraph)
+#     tree = getTreeFromMarkup(raw)    
+#     tree, reports = cleanMarkup(raw)
+#     paras = tree.getChildNodesByClass(Paragraph)
+#     for para in paras:
+#         assert not para.getChildNodesByClass(Paragraph)
         
-      
+
 def test_fixNesting5():
     raw = """
 <strike>
@@ -263,6 +272,7 @@ para 2
 
     tree, reports = cleanMarkup(raw)
     paras = tree.getChildNodesByClass(Paragraph)
+
     for para in paras:
         assert not para.getChildNodesByClass(Paragraph) 
 
@@ -282,7 +292,29 @@ def test_fixNesting6():
     pprint(reports)
 
     assert len(tree.getChildNodesByClass(Reference)) == 1
-    
+
+
+def test_fixNesting7():
+    raw='''
+<div>
+<p>
+
+<div>
+
+;bla
+:blub
+;bla2
+:blub
+
+</div>
+
+</p>
+</div>
+    '''
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    dl = tree.getChildNodesByClass(DefinitionList)[0]
+    assert not dl.getParentNodesByClass(Paragraph)
 
 def test_swapNodes():
     raw = r'''
@@ -630,3 +662,54 @@ def testInvalidFiletypes():
     images = tree.getChildNodesByClass(ImageLink)
     assert len(images) == 1
     assert images[0].target.endswith('.jpg')
+
+
+def test_buildDefinitionLists():
+    raw = '''
+;dt1
+:dd1
+;dt2
+:dd2
+'''
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    dl = tree.getChildNodesByClass(DefinitionList)[0]
+    assert dl and len(dl.children)==4
+
+
+def test_buildDefinitionLists2():
+    raw = '''
+<ul>
+<li>
+;dt1
+:dd1
+;dt2
+:dd2
+</li>
+<li>bla</li>
+</ul>
+'''
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    dl = tree.getChildNodesByClass(DefinitionList)
+    assert not dl
+
+def test_buildDefinitionLists3():
+    raw = '''
+<div>
+hi
+
+;dt1
+:dd1
+;dt2
+:dd2
+
+bla
+</div>
+'''
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    dl = tree.getChildNodesByClass(DefinitionList)[0]
+    assert not dl.getParentNodesByClass(Paragraph), 'DefinitionList should have been pulled out of Paragraph' 
+    assert len(tree.getChildNodesByClass(Paragraph)) == 2, 'Paragraphs falsely thrown away'
+
