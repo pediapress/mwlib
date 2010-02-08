@@ -59,7 +59,12 @@ class qplugin(object):
         for jobid in jobids:
             if jobid in self.running_jobs:
                 del self.running_jobs[jobid]
-        
+
+    def rpc_qdrop(self, jobids):
+        self.workq.dropjobs(jobids)
+
+    def rpc_qprefixmatch(self, prefix):
+        return list(self.workq.prefixmatch(prefix))
     
     def shutdown(self):
         for j in self.running_jobs.values():

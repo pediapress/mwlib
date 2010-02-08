@@ -13,6 +13,7 @@ class job(object):
     done=False
     deadline = None
     ttl = 3600
+    drop = False
     
     def __init__(self, channel, payload=None, priority=0, jobid=None, timeout=120, ttl=None):
         self.payload = payload
@@ -110,18 +111,23 @@ class workq(object):
                 j.done = True
                 j.error = "killed"
                 j.finish_event.set()
-                
-        
+
+    def dropjobs(self, jobids):
+        for jid in jobids:
+            if jid not in self.id2job:
+                continue
+            self.id2job[jid].drop = True
+
     def dropdead(self):
         now = int(time.time())
 
         dcount = 0
         mcount = 0
         for jid, job in self.id2job.items():
-            if job.deadline and job.deadline<now:
+            if job.drop or (job.deadline and job.deadline < now):
                 del self.id2job[jid]
                 dcount += 1
-                
+
             if job.done and not job.deadline:
                 job.deadline = now+job.ttl
                 mcount += 1
@@ -152,6 +158,8 @@ class workq(object):
         for j in jobs:
             j.finish_event.wait()
 
+        self.dropdead()
+
         return jobs
             
     def finishjob(self, jobid, result=None, error=None):
@@ -163,8 +171,7 @@ class workq(object):
             j.ttl = min(10, j.ttl)
             
         j.finish_event.set()
-        
-        
+
     def updatejob(self, jobid, info):
         j = self.id2job[jobid]
         j.info.update(info)
@@ -237,3 +244,8 @@ class workq(object):
             j = ev.get()
             
         return j
+
+    def prefixmatch(self, prefix):
+        for jobid in self.id2job:
+            if jobid.startswith(prefix):
+                yield jobid
