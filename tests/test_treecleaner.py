@@ -7,7 +7,18 @@ import sys
 
 from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
-from mwlib.treecleaner_new import TreeCleaner
+
+#from mwlib.treecleaner_new import TreeCleaner
+import os
+if os.environ.get('TREENEW'):
+    print 'using new treecleaner'
+    from mwlib.treecleaner_new import TreeCleaner
+    new_treecleaner = True
+else:
+    from mwlib.treecleaner import TreeCleaner
+    new_treecleaner = False
+    
+
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
                      Cite, Code, DefinitionList, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
@@ -44,8 +55,10 @@ def cleanMarkup(raw):
     print '='*20
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
-    #tc.cleanAll(skipMethods=[])
-    tc.clean(tree)
+    if new_treecleaner:
+        tc.clean(tree)
+    else:
+        tc.cleanAll(skipMethods=[])
     reports = tc.getReports()
     print "after treecleaner: >>>"
     showTree(tree)
@@ -378,9 +391,10 @@ def test_removebreakingreturnsInside():
 | text
 |}
 '''
-    tree, reports = cleanMarkup(raw) # 1 & 2
+    tree, reports = cleanMarkup(raw)
     assert numBR(tree) == 0
-
+    assert len(tree.getChildNodesByClass(Table)) == 1
+    assert not tree.getChildNodesByClass(Source)
 
 def test_removebreakingreturnsOutside():
     # remove BRs at the outside 'borders' of block nodes
@@ -408,7 +422,7 @@ text
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     assert numBR(tree) == 0
-
+    assert False
 
 def test_removebreakingreturnsMultiple():
     # remove BRs at the outside 'borders' of block nodes

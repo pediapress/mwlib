@@ -35,6 +35,7 @@ class TreeCleaner(object):
                          ]
     clean_methods=['removeEmptyTextNodes',
                    'removeTextlessStyles',
+                   'removeBreakingReturns',
                    'handleListOnlyParagraphs', # FIXME: why not do this for all block nodes and not only for lists
                    #'simplifyBlockNodes', # FIXME: paragraphs with one block node child are removed MERGE WITH THE ABOVE
                    'cleanSectionCaptions',
@@ -167,17 +168,23 @@ class TreeCleaner(object):
         if args:
             msg = ' '.join([repr(arg) for arg in args])        
         self.reports.append((caller, msg))        
+        print caller, msg # FIXME: remove for production use
+
 
     ################## UTILS
 
     def removeThis(self, node):
         parent = node.parent
-        parent.removeChild(node)
         self.insertDirtyNode(parent)
+        parent.removeChild(node)
+        assert node not in self.dirty_nodes
 
     def insertDirtyNode(self, insert_node):
         '''Add a node to the dirty queue and delete all sub-nodes'''
         assert insert_node, 'insert_node can not be None'
+        if insert_node in self.dirty_nodes and False: # move node to start of queue
+            self.dirty_nodes.remove(insert_node)
+            self.dirty_nodes.insert(0, insert_node)
         sub_nodes = []
         for node in self.dirty_nodes:
             if insert_node in node.getParents():
@@ -191,7 +198,7 @@ class TreeCleaner(object):
 
     def removeInvisibleLinks(self, node):
         if node.__class__ in [CategoryLink, LangLink] and not node.colon:
-            node.parent.removeChild(node)
+            self.removeThis(node)
             self.report('remove invisible link', node)
             return SKIPCHILDREN
 
@@ -253,8 +260,26 @@ class TreeCleaner(object):
                         and node.next \
                         and node.next.isblocknode)):            
             self.removeThis(node)
-            self.report('removed empty text node')
-            return SKIPCHILDREN
+            self.report('removed empty text node', node.vlist.get('CID'))
+            return SKIPNOW
+
+    def removeChildlessNodes(self, node):
+        """Remove nodes that have no children except for nodes in childlessOk list."""
+        is_exception = False
+        if node.__class__ in self.childless_exceptions.keys() and node.style:
+            for style_type in self.childless_exceptions[node.__class__]:
+                if style_type in node.style.keys():
+                    is_exception = True
+
+        if not node.children and node.__class__ not in self.childlessOK and not is_exception:
+            if node.parent.__class__ == Section and not node.previous:
+                return # make sure that the first child of a section is not removed - this is the section caption
+            removeNode = node
+            while removeNode.parent and not removeNode.siblings and removeNode.parent.__class__ not in self.childlessOK:
+                removeNode = removeNode.parent
+            if removeNode.parent:
+                self.report('removed:', removeNode)
+                self.removeThis(removeNode)
 
     def handleListOnlyParagraphs(self, node):
         if node.__class__ == Paragraph \
@@ -288,27 +313,6 @@ class TreeCleaner(object):
                     c.parent.replaceChild(c, c.children)
 
 
-    def removeChildlessNodes(self, node):
-        """Remove nodes that have no children except for nodes in childlessOk list."""   
-        is_exception = False
-        if node.__class__ in self.childless_exceptions.keys() and node.style:
-            for style_type in self.childless_exceptions[node.__class__]:
-                if style_type in node.style.keys():
-                    is_exception = True
-
-        if not node.children and node.__class__ not in self.childlessOK and not is_exception:
-            if node.parent.__class__ == Section and not node.previous: 
-                return # make sure that the first child of a section is not removed - this is the section caption
-            removeNode = node
-            while removeNode.parent and not removeNode.siblings and removeNode.parent.__class__ not in self.childlessOK:
-                removeNode = removeNode.parent
-            if removeNode.parent:
-                self.report('removed:', removeNode)
-                removeNode.parent.removeChild(removeNode)
-        for c in node.children[:]:
-            self.removeChildlessNodes(c)
-
-
     def removeTextlessStyles(self, node):
         """Remove style nodes that have no children with text"""
         if node.__class__ in self.style_nodes:
@@ -322,7 +326,7 @@ class TreeCleaner(object):
                 else:
                     self.removeThis(node)                    
                     self.report('removed style without children', node)
-                    return SKIPCHILDREN
+                    return SKIPNOW
 
     def _nestingBroken(self, node):
         # FIXME: the list below is used and not node.isblocknode. is there a reason for that?
@@ -444,6 +448,62 @@ class TreeCleaner(object):
                     self.removeThis(node)
                     return SKIPNOW
 
+    def _getNext(self, node): #FIXME: name collides with advtree.getNext
+        if not (node.next or node.parent):
+            return
+        next = node.next or node.parent.next
+        if next and not next.isblocknode:
+            if not next.getAllDisplayText().strip():
+                return self._getNext(next)
+        return next
+
+    def _getPrev(self, node): #FIXME: name collides with advtree.getPrev(ious)
+        if not (node.previous or node.parent):
+            return
+        prev = node.previous or node.parent 
+        if prev and not prev.isblocknode:
+            if not prev.getAllDisplayText().strip():
+                return self._getPrev(prev)
+        return prev
+
+    def _nextAdjacentNode(self, node):
+        if node and node.next:
+            res = node.next.getFirstLeaf() or node.next
+            return res
+        if node.parent:
+            return self._nextAdjacentNode(node.parent)
+        return None
+
+
+    def removeBreakingReturns(self, node): 
+        """Remove BreakingReturns that occur around blocknodes or as the first/last element inside a blocknode."""
+
+        if node.isblocknode and node.parent:
+            dirty = True
+            changed = False
+            while dirty:
+                check_node = [node.getFirstLeaf(),
+                             node.getLastLeaf(),
+                             self._getNext(node),
+                             self._getPrev(node)
+                             ]
+                check_node = set(check_node) # remove duplicates
+                dirty = False
+                for n in check_node:
+                    if n.__class__ == BreakingReturn:
+                        self.report('removing node', n)
+                        n.parent.removeChild(n)
+                        dirty = True
+                        changed = True
+            if changed:
+                self.insertDirtyNode(node)
+
+        if node.__class__ == BreakingReturn:
+            next_node = self._nextAdjacentNode(node)
+            if next_node.__class__ == BreakingReturn:
+                self.removeThis(node)
+                return SKIPNOW
+
     #################### END CLEAN
 
     def markShortParagraphs(self, node):
@@ -494,7 +554,7 @@ class TreeCleaner(object):
 
     node_id = 0
     def setNodeIds(self, node):
-        node.vlist['CLEANER_ID']= self.node_id
+        node.vlist['CID']= self.node_id
         self.node_id += 1
         for c in node.children:
             self.setNodeIds(c)

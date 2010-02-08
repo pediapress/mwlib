@@ -64,7 +64,7 @@ class TreeCleaner(object):
                       'fixNesting',  ###
                       'removeCriticalTables',
                       'removeTextlessStyles', ### 
-                      'removeBrokenChildren',
+                      'removeBrokenChildren', ###
                       'fixTableColspans',
                       'removeEmptyTrailingTableRows',
                       'splitTableLists', 
