@@ -113,18 +113,22 @@ class workq(object):
                 j.finish_event.set()
 
     def dropjobs(self, jobids):
+        "Mark jobs to be dropped when waitjobs() is called on them"
+
         for jid in jobids:
             if jid not in self.id2job:
                 continue
             self.id2job[jid].drop = True
 
     def dropdead(self):
+        "Drop jobs w/ expired deadline, add deadline to finished jobs w/out one"
+
         now = int(time.time())
 
         dcount = 0
         mcount = 0
         for jid, job in self.id2job.items():
-            if job.drop or (job.deadline and job.deadline < now):
+            if job.deadline and job.deadline < now:
                 del self.id2job[jid]
                 dcount += 1
 
@@ -154,12 +158,13 @@ class workq(object):
         print
         
     def waitjobs(self, jobids):
-        jobs = [self.id2job[j] for j in jobids]
+        "Wait for jobs to finish. Drop jobs marked by dropjobs()."
+
+        jobs = [self.id2job[jid] for jid in jobids]
         for j in jobs:
             j.finish_event.wait()
-
-        self.dropdead()
-
+            if j.drop:
+                del self.id2job[j.jobid]
         return jobs
             
     def finishjob(self, jobid, result=None, error=None):
