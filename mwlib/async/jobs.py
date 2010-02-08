@@ -252,5 +252,5 @@ class workq(object):
 
     def prefixmatch(self, prefix):
         for jobid in self.id2job:
-            if jobid.startswith(prefix):
+            if isinstance(jobid, basestring) and jobid.startswith(prefix):
                 yield jobid
