@@ -177,7 +177,7 @@ class TreeCleaner(object):
         parent = node.parent
         self.insertDirtyNode(parent)
         parent.removeChild(node)
-        assert node not in self.dirty_nodes
+        assert all([dn is not node for dn in self.dirty_nodes]), 'node should have been removed from dirty queue'
 
     def insertDirtyNode(self, insert_node):
         '''Add a node to the dirty queue and delete all sub-nodes'''
