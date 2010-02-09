@@ -61,6 +61,7 @@ class TreeCleaner(object):
                       'removeInvalidFiletypes',
                       'fixParagraphs',
                       'simplifyBlockNodes',
+                      'removeAbsolutePositionedNode',
                       'fixNesting', 
                       'removeCriticalTables',
                       'removeTextlessStyles', 
@@ -219,8 +220,8 @@ class TreeCleaner(object):
         # emtpy sections are removed by removeEmptySections
         # all node classes that have content but no text need to be listed here to prevent removal
         self.contentWithoutTextClasses = [Gallery, ImageLink]
-
         
+
     def clean(self, cleanerMethods):
         """Clean parse tree using cleaner methods in the methodList."""
         cleanerList = []
@@ -1231,3 +1232,19 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.markInfoboxes(c)
+
+
+    def removeAbsolutePositionedNode(self, node):
+
+        def pos(n):
+            return n.style.get('position', '').lower().strip()
+
+        if pos(node) == 'relative':
+            if all([pos(c) == 'absolute' for c in node.children]):
+                if node.parent:
+                    node.parent.removeChild(node)
+                    self.report('removed absolute positioned node', node)
+                    return
+
+        for c in node.children:
+            self.removeAbsolutePositionedNode(c)
