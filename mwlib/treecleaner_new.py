@@ -134,10 +134,10 @@ class TreeCleaner(object):
         return self.reports
 
     def clean(self, tree):
+        self.tree = tree
         self.setNodeIds(tree) # FIXME: used for debugging - disable in production
         print '*'*20, 'START cleaning'
         self.clean_tree(tree, methods=self.start_clean_methods)
-
         print '*'*20, 'MAIN cleaning'
         self.clean_tree(tree, methods=self.clean_methods)
 
@@ -173,6 +173,7 @@ class TreeCleaner(object):
 
     ################## UTILS
 
+
     def removeThis(self, node):
         parent = node.parent
         self.insertDirtyNode(parent)
@@ -191,6 +192,7 @@ class TreeCleaner(object):
                 sub_nodes.append(node)
         for node in sub_nodes:
             self.dirty_nodes.remove(node)
+
         self.dirty_nodes.insert(0, insert_node)
 
 
@@ -265,6 +267,7 @@ class TreeCleaner(object):
 
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""
+
         is_exception = False
         if node.__class__ in self.childless_exceptions.keys() and node.style:
             for style_type in self.childless_exceptions[node.__class__]:
@@ -280,6 +283,8 @@ class TreeCleaner(object):
             if removeNode.parent:
                 self.report('removed:', removeNode)
                 self.removeThis(removeNode)
+                return SKIPNOW
+
 
     def handleListOnlyParagraphs(self, node):
         if node.__class__ == Paragraph \
@@ -423,10 +428,10 @@ class TreeCleaner(object):
         bottom_tree = bad_parent.copy()
         self._filterTree(bottom_tree, nesting_filter=['top', 'problem'])
         new_tree = [part for part in [top_tree, middle_tree, bottom_tree] if part != None]
-        
-        self.report('moved', node, 'from', bad_parent)
+
         parent = bad_parent.parent
         parent.replaceChild(bad_parent, new_tree)
+        self.report('moved', node, 'from', bad_parent)
         self._cleanUpMarks(parent)
 
         self.insertDirtyNode(parent)

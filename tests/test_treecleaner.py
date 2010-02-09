@@ -422,7 +422,6 @@ text
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     assert numBR(tree) == 0
-    assert False
 
 def test_removebreakingreturnsMultiple():
     # remove BRs at the outside 'borders' of block nodes
