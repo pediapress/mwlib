@@ -34,8 +34,9 @@ class Formatter(object):
                                                           ('underline_style', 'reset'),
                                                           ('overline_style', 'reset'),
                                                           ],
-                                         }
-
+                                         },
+                     'color': {'*':('color_style', styleutils.rgbColorFromNode)
+                               },
                      }
 
 
@@ -170,6 +171,11 @@ class Formatter(object):
                         setattr(self, render_style, getattr(self, render_style) + 1)
                     elif action == 'reset':
                         setattr(self, render_style, 0)
+                if css[node_style].keys() == ['*']:
+                    attr_name, method = css[node_style]['*']
+                    val = method(node)
+                    if val:
+                        setattr(self, attr_name, val)
 
         self.checkFontSize(node.style)
 
