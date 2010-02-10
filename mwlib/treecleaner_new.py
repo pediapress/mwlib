@@ -416,6 +416,9 @@ class TreeCleaner(object):
         if not bad_parent:
             return
 
+        # since we copy the tree, we need to clean and update the dirty queue first
+        self.insertDirtyNode(bad_parent.parent)
+
         divide = node.getParents()
         divide.append(node)
         self._markNodes(bad_parent, divide, problem_node=node)
@@ -434,7 +437,6 @@ class TreeCleaner(object):
         self.report('moved', node, 'from', bad_parent)
         self._cleanUpMarks(parent)
 
-        self.insertDirtyNode(parent)
         return SKIPNOW      
 
 
