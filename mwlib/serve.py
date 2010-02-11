@@ -402,6 +402,7 @@ class Application(object):
             if language:
                 args.extend(['--language', language])
         
+        Status(status_path)(status='job queued')
         self.queue_render_job('render', collection_id, args)
         
         return response
