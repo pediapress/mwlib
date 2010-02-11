@@ -65,15 +65,15 @@ class TreeCleaner(object):
                       'removeCriticalTables',
                       'removeTextlessStyles', ### 
                       'removeBrokenChildren', ###
-                      'fixTableColspans',
-                      'removeEmptyTrailingTableRows',
-                      'splitTableLists', 
-                      'transformSingleColTables',
-                      'splitTableToColumns', 
-                      'linearizeWideNestedTables',
-                      'removeBreakingReturns', 
-                      'removeEmptyReferenceLists',
-                      'swapNodes',
+                      'fixTableColspans', # TABLE
+                      'removeEmptyTrailingTableRows', # TABLE
+                      'splitTableLists',  # TABLE
+                      'transformSingleColTables', # TABLE
+                      'splitTableToColumns',  # TABLE
+                      'linearizeWideNestedTables', # TABLE
+                      'removeBreakingReturns',  ###
+                      'removeEmptyReferenceLists', ### more general removeBlacklistedNodes  supersedes this
+                      'swapNodes', ### not needed any more. the parser now handles the two cases
                       'removeBigSectionsFromCells',
                       'transformNestedTables',
                       'splitBigTableCells',

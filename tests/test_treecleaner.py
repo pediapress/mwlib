@@ -289,7 +289,6 @@ para 2
     for para in paras:
         assert not para.getChildNodesByClass(Paragraph) 
 
-
 def test_fixNesting6():
     raw =u"""''„Drei Affen, zehn Minuten.“'' <ref>Dilbert writes a poem and presents it to Dogbert:<poem style>
 ''DOGBERT: I once read that given infinite time, a thousand monkeys with typewriters would eventually write the complete works of Shakespeare.''
@@ -305,7 +304,6 @@ def test_fixNesting6():
     pprint(reports)
 
     assert len(tree.getChildNodesByClass(Reference)) == 1
-
 
 def test_fixNesting7():
     raw='''
@@ -329,13 +327,6 @@ def test_fixNesting7():
     dl = tree.getChildNodesByClass(DefinitionList)[0]
     assert not dl.getParentNodesByClass(Paragraph)
 
-def test_swapNodes():
-    raw = r'''
-<u><center>Text</center></u>
-    '''
-    tree, reports = cleanMarkup(raw)
-    center_node= tree.getChildNodesByClass(Center)[0]
-    assert not any([p.__class__ == Underline for p in center_node.getParents()])
 
 @xfail
 def test_splitBigTableCells():
@@ -726,3 +717,16 @@ bla
     assert not dl.getParentNodesByClass(Paragraph), 'DefinitionList should have been pulled out of Paragraph' 
     assert len(tree.getChildNodesByClass(Paragraph)) == 2, 'Paragraphs falsely thrown away'
 
+
+def test_removeDuplicateLinksInReferences():
+    raw = '''
+<ref name="SM"><cite id="JMH"><span class="citation "
+id="CITEREFJ.C3.B6rg-Michael_Hormann2008">Jörg-Michael Hormann&#32;(2008-05-17)&#32;(in German)&#32;(PDF),&#32;[http://zeppelin-bis-airbus.de/daten/presse/index.php?dir=Aktuelles/Aktuelles%20f%FCr%20die%20Presse%20und%20von%20der%20Presse/Archiv/&file=Starnberger%20Merkur%2017.Mai%202008%20Lokales.pdf ''<nowiki />Anfang vom Ende des ersten "Jumbo"<nowiki />''],&#32;Starnberger Merkur,&#32;pp.&nbsp;9<span class="printonly">,&#32;http://zeppelin-bis-airbus.de/daten/presse/index.php?dir=Aktuelles/Aktuelles%20f%FCr%20die%20Presse%20und%20von%20der%20Presse/Archiv/&file=Starnberger%20Merkur%2017.Mai%202008%20Lokales.pdf</span><span class="reference-accessdate">,&#32;retrieved 2009-05-03</span></span><span
+    class="Z3988"
+    title="ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&rft.genre=book&rft.btitle=Anfang+vom+Ende+des+ersten+%22Jumbo%22&rft.aulast=J%C3%B6rg-Michael+Hormann&rft.au=J%C3%B6rg-Michael+Hormann&rft.date=2008-05-17&rft.pages=pp.%26nbsp%3B9&rft.pub=Starnberger+Merkur&rft_id=http%3A%2F%2Fzeppelin-bis-airbus.de%2Fdaten%2Fpresse%2Findex.php%3Fdir%3DAktuelles%2FAktuelles%2520f%25FCr%2520die%2520Presse%2520und%2520von%2520der%2520Presse%2FArchiv%2F%26file%3DStarnberger%2520Merkur%252017.Mai%25202008%2520Lokales.pdf&rfr_id=info:sid/en.wikipedia.org:Special:ExpandTemplates"><span style="display: none;">&nbsp;</span></span></cite></ref> 
+<references/>
+'''.decode('utf-8')
+
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    assert not tree.getChildNodesByClass(URL), 'URL not removed'

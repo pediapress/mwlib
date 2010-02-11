@@ -31,6 +31,7 @@ class TreeCleaner(object):
     start_clean_methods=['removeInvisibleLinks',
                          'removeNoPrint',
                          'removeInvalidFiletypes',
+                         'removeBlacklistedNodes', 
                          'buildDefinitionLists',
                          ]
     clean_methods=['removeEmptyTextNodes',
@@ -43,6 +44,7 @@ class TreeCleaner(object):
                    #'fixParagraphs' FIXME: probably not needed. otherwise a proper node-nesting check should be performed
                    'removeBrokenChildren',
                    'fixNesting',
+                   'removeDuplicateLinksInReferences',
                    ]
     finish_clean_methods=['markShortParagraphs',
                           'markInfoboxes'
@@ -128,6 +130,7 @@ class TreeCleaner(object):
                             Teletyped: [Source],
                             }
 
+        self.node_blacklist = []
 
         
     def getReports(self):
@@ -173,6 +176,14 @@ class TreeCleaner(object):
 
     ################## UTILS
 
+    def firstCheck(self, node):
+        cleaner_method = inspect.stack()[1][3]
+        check_flag = 'tc_%s' % cleaner_method
+        if hasattr(node, check_flag):
+            return False
+        else:
+            setattr(node, check_flag, True)
+            return True
 
     def removeThis(self, node):
         parent = node.parent
@@ -245,6 +256,11 @@ class TreeCleaner(object):
                 self.report("removed invalid 'image' type with target %r", node.target)
                 self.removeThis(node)
 
+
+    def removeBlacklistedNodes(self, node):
+        if node.__class__ in self.node_blacklist:
+            self.report('removed blacklisted node', node)
+            self.removeThis(node)
 
     ####################### MAIN CLEAN
     
@@ -510,6 +526,23 @@ class TreeCleaner(object):
             if next_node.__class__ == BreakingReturn:
                 self.removeThis(node)
                 return SKIPNOW
+
+    def removeDuplicateLinksInReferences(self, node):
+        if node.__class__ == Reference and self.firstCheck(node):
+            seen_targets = set()
+            removed_link = False
+            for link in [c for c in node.getAllChildren() if c.__class__ in [NamedURL, URL, ArticleLink]]:
+                target = getattr(link, 'caption', None)
+                if target:
+                    if target in seen_targets:
+                        self.report('removing duplicate link from reference', link)
+                        link.parent.removeChild(link)
+                        removed_link = True
+                    else:
+                        seen_targets.add(target)
+            if removed_link:
+                self.insertDirtyNode(node)
+                return SKIPCHILDREN
 
     #################### END CLEAN
 
