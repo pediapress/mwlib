@@ -23,6 +23,7 @@ from webob import Request, Response
 
 from mwlib import filequeue, log, utils, _version
 from mwlib.metabook import calc_checksum
+from mwlib.status import Status
 
 # ==============================================================================
 
