@@ -669,6 +669,7 @@ def clean_up(cache_dir, max_running_time, report=None):
                 os.kill(pid, 0)
             except OSError, exc:
                 if exc.errno == 3: # No such process
+                    sys.exc_clear()
                     error('Have dangling pid file %r' % pid_file)
                     os.unlink(pid_file)
                     if not os.path.exists(error_file):
@@ -683,7 +684,7 @@ def clean_up(cache_dir, max_running_time, report=None):
             if now - st.st_mtime < max_running_time:
                 continue
 
-            error('Have long running process with pid %d (%r)' % (pid, pid_file))
+            error('Have long running process with pid %d (%s s, pid file %r)' % (pid, now - st.st_mtime, pid_file))
             try:
                 log.info('sending SIGKILL to pid %d' % pid)
                 os.kill(pid, signal.SIGKILL)
