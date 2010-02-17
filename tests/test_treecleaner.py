@@ -78,7 +78,7 @@ def showTree(tree):
     parser.show(sys.stdout, tree, 0)
     
 
-def test_fixLists():
+def test_fixLists1():
     raw = r"""
 para
 
@@ -99,7 +99,8 @@ para
     for li in lists:
         print li, li.getParents()
         assert all([p.__class__ != Paragraph for p in li.getParents()])
-    _treesanity(tree)   
+    _treesanity(tree)
+    assert False
 
 def test_fixLists2():
     raw = r"""

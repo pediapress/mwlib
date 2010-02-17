@@ -544,6 +544,25 @@ class TreeCleaner(object):
                 self.insertDirtyNode(node)
                 return SKIPCHILDREN
 
+
+    nodeFilter = {
+        ItemList:[Item],
+        Gallery: [ImageLink],
+        }
+            
+    def filterChildren(self, node):
+        removed_node = False
+        if node.__class__ in self.nodeFilter and self.firstCheck(node):
+            for c in node.children[:]:
+                if c.__class__ not in self.nodeFilter[node.__class__]:
+                    self.removeThis(c)
+                    #node.removeChild(c)
+                    self.report('removed restricted child %s from parent %s' % (c, node))
+                    removed_node = True
+            if removed_node:
+                return SKIPNOW
+
+
     #################### END CLEAN
 
     def markShortParagraphs(self, node):
