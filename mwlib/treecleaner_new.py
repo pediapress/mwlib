@@ -45,6 +45,7 @@ class TreeCleaner(object):
                    'removeBrokenChildren',
                    'fixNesting',
                    'removeDuplicateLinksInReferences',
+                   'filterChildren',
                    ]
     finish_clean_methods=['markShortParagraphs',
                           'markInfoboxes'
@@ -131,6 +132,13 @@ class TreeCleaner(object):
                             }
 
         self.node_blacklist = []
+
+        # keys are nodes which can only have child nodes of types inside the valuelist.
+        # children of different classes are deleted
+        self.nodeFilter = {ItemList:[Item],
+                           Gallery: [ImageLink],
+                           }
+
 
         
     def getReports(self):
@@ -544,22 +552,14 @@ class TreeCleaner(object):
                 self.insertDirtyNode(node)
                 return SKIPCHILDREN
 
-
-    nodeFilter = {
-        ItemList:[Item],
-        Gallery: [ImageLink],
-        }
             
     def filterChildren(self, node):
-        removed_node = False
         if node.__class__ in self.nodeFilter and self.firstCheck(node):
-            for c in node.children[:]:
-                if c.__class__ not in self.nodeFilter[node.__class__]:
-                    self.removeThis(c)
-                    #node.removeChild(c)
-                    self.report('removed restricted child %s from parent %s' % (c, node))
-                    removed_node = True
-            if removed_node:
+            filter_list = [c for c in node.children if c.__class__ not in self.nodeFilter[node.__class__]]
+            for n in filter_list:
+                self.removeThis(n)
+                self.report('filter child %s from parent %s' % (n, node))
+            if filter_list:
                 return SKIPNOW
 
 

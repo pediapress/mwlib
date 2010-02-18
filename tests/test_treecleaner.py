@@ -731,3 +731,41 @@ id="CITEREFJ.C3.B6rg-Michael_Hormann2008">Jörg-Michael Hormann&#32;(2008-05-17)
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     assert not tree.getChildNodesByClass(URL), 'URL not removed'
+
+def test_filterChildren():
+    raw = '''
+<gallery>
+<p> paragraph inside gallery</p>
+</gallery>
+
+
+<gallery>
+Image:dummy.png|image caption
+Image:dummy.jpg|blah
+<div>remove me!</div>
+</gallery>
+
+<ul>
+
+<li>blah</li>
+
+<p>i do not belong here</p>
+
+<li>blub</li>
+
+</ul>
+    '''
+
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    galleries = tree.getChildNodesByClass(Gallery)
+    assert len(galleries) == 1 \
+           and len(galleries[0].children) == 2 \
+           and not galleries[0].getChildNodesByClass(Div) \
+           and not galleries[0].getChildNodesByClass(Paragraph), 'gallery not stripped of junk'
+
+
+    itemlists = tree.getChildNodesByClass(ItemList)
+    assert len(itemlists) == 1 \
+           and len(itemlists[0].children) == 2 \
+           and not itemlists[0].getChildNodesByClass(Paragraph), 'itemlist not stripped of junk'

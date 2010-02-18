@@ -79,13 +79,13 @@ class TreeCleaner(object):
                       'splitBigTableCells',
                       'limitImageCaptionsize', 
                       'removeDuplicateLinksInReferences',
-                      'fixItemLists', 
+                      'fixItemLists', ### merged with restrictChildren in filterChildren
                       'removeLeadingParaInList',
                       'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                       'removeNewlines', # imported from advtree - clean up newlines that are not needed
                       'removeBreakingReturns',
                       'buildDefinitionLists', ###
-                      'restrictChildren',
+                      'restrictChildren',### merged with fixItemLists in filterChildren
                       'fixReferenceNodes',
                       'fixNesting', # pull DefinitionLists out of Paragraphs
                       'fixPreFormatted',
