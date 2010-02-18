@@ -46,6 +46,7 @@ class TreeCleaner(object):
                    'fixNesting',
                    'removeDuplicateLinksInReferences',
                    'filterChildren',
+                   'removeLeadingParas',
                    ]
     finish_clean_methods=['markShortParagraphs',
                           'markInfoboxes'
@@ -135,10 +136,12 @@ class TreeCleaner(object):
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
         # children of different classes are deleted
-        self.nodeFilter = {ItemList:[Item],
+        self.node_filter = {ItemList:[Item],
                            Gallery: [ImageLink],
                            }
 
+
+        self.no_leading_para = [Item, Reference]
 
         
     def getReports(self):
@@ -554,14 +557,22 @@ class TreeCleaner(object):
 
             
     def filterChildren(self, node):
-        if node.__class__ in self.nodeFilter and self.firstCheck(node):
-            filter_list = [c for c in node.children if c.__class__ not in self.nodeFilter[node.__class__]]
+        if node.__class__ in self.node_filter and self.firstCheck(node):
+            filter_list = [c for c in node.children if c.__class__ not in self.node_filter[node.__class__]]
             for n in filter_list:
                 self.removeThis(n)
                 self.report('filter child %s from parent %s' % (n, node))
             if filter_list:
                 return SKIPNOW
 
+
+    def removeLeadingParas(self, node):
+        if node.__class__ in [Item, Reference]:
+            if node.children and node.children[0].__class__ == Paragraph:
+                node.replaceChild(node.children[0], node.children[0].children)
+                self.report('remove leading Paragraph in Item')
+                self.insertDirtyNode(node)
+                return SKIPCHILDREN
 
     #################### END CLEAN
 

@@ -769,3 +769,19 @@ Image:dummy.jpg|blah
     assert len(itemlists) == 1 \
            and len(itemlists[0].children) == 2 \
            and not itemlists[0].getChildNodesByClass(Paragraph), 'itemlist not stripped of junk'
+
+
+def test_removeLeadingParas():
+    raw= '''
+<ul>
+<li><p>leading para</p><p>another para</p></li>
+<li>hey</li>
+</ul>
+    '''
+
+    tree, reports = cleanMarkup(raw)
+    showTree(tree)
+    ul = tree.getChildNodesByClass(ItemList)
+    assert len(ul[0].children) == 2 \
+           and ul[0].children[0].children[0].__class__ == Text, 'leading para in list not stripped'
+
