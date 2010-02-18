@@ -293,10 +293,6 @@ class PageMagic(object):
 
 
 class NumberMagic(object):
-    def DISPLAYTITLE(self, args):
-        """[MW 1.7+] (unclear)"""
-        return ""
-
     def NUMBEROFARTICLES(self, args):
         """A variable which returns the total number of articles on the Wiki."""
         return "0"

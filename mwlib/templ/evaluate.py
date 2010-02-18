@@ -187,6 +187,7 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
 
     
 class Expander(object):
+    magic_displaytitle = None   # set via {{DISPLAYTITLE:...}}
     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
         self.pagename = pagename

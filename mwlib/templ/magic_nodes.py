@@ -107,8 +107,13 @@ class NoOutput(nodes.Node):
 class Defaultsort(NoOutput):
     pass
 
-class Displaytitle(NoOutput):
-    pass
+class Displaytitle(nodes.Node):
+    def flatten(self, expander, variables, res):
+        name = []
+        evaluate.flatten(self[0], expander, variables, name)
+        name = u"".join(name).strip()
+        expander.magic_displaytitle = name
+        
 
 def make_switchnode(args):
     return nodes.SwitchNode((args[0], args[1:]))

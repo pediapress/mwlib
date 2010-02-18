@@ -63,6 +63,9 @@ def parseString(
     a = compat.parse_txt(input, title=title, wikidb=wikidb, nshandler=nshandler, lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
     
     a.caption = title
+    if te and te.magic_displaytitle:
+        a.caption = te.magic_displaytitle
+        
     from mwlib.old_uparser import postprocessors
     for x in postprocessors:
         x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)
