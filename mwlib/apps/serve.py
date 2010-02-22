@@ -262,9 +262,9 @@ def serve_ctl():
     
     if options.purge_cache:
         try:
-            options.purge_cache = int(options.purge_cache)
+            options.purge_cache = float(options.purge_cache)
         except ValueError:
-            parser.error('--purge-cache value must be an integer')
+            parser.error('--purge-cache value must be a positive number')
 
         from mwlib.serve import purge_cache
 
