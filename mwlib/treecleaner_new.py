@@ -23,9 +23,6 @@ def show(node):
 SKIPCHILDREN = 1
 SKIPNOW = 2
 
-# class CleanerError(RuntimeError):
-#     pass
-
 class TreeCleaner(object):
 
     start_clean_methods=['removeInvisibleLinks',
@@ -49,7 +46,8 @@ class TreeCleaner(object):
                    'removeLeadingParas',
                    ]
     finish_clean_methods=['markShortParagraphs',
-                          'markInfoboxes'
+                          'markInfoboxes',
+                          'fixReferenceNodes',
                           ]
 
     def __init__(self, tree, save_reports=False, nesting_strictness='loose', status_cb=None):
@@ -574,6 +572,7 @@ class TreeCleaner(object):
                 self.insertDirtyNode(node)
                 return SKIPCHILDREN
 
+
     #################### END CLEAN
 
     def markShortParagraphs(self, node):
@@ -615,6 +614,33 @@ class TreeCleaner(object):
                 self.report('created new definition list')
             self.insertDirtyNode(parent)
                 
+
+    def fixReferenceNodes(self, node):
+        if not self.firstCheck(self):
+            return
+        ref_nodes = [ (ref, ref.attributes.get('name')) for ref in node.getChildNodesByClass(Reference)]
+        name2children = {}
+        for (ref_node, ref_name) in ref_nodes:
+            if ref_name and ref_node.children and not name2children.has_key(ref_name):
+                name2children[ref_name] = ref_node.children
+
+        ref_defined = {}
+        for (ref_node, ref_name) in ref_nodes:
+            if not ref_name or not name2children.has_key(ref_name):
+                continue
+            if ref_node.children:
+                if ref_defined.get(ref_name): # del children
+                    ref_node.children = []
+                else:
+                    ref_defined[ref_name] = True
+            else:
+                if not ref_defined.get(ref_name): # move ref here
+                    children = name2children[ref_name]
+                    show(children)
+                    for child in children:
+                        ref_node.appendChild(child)
+                    ref_defined[ref_name] = True
+                    self.report('moved reference nodes', children)
 
     ################# DEBUG STUFF
 

@@ -785,3 +785,26 @@ def test_removeLeadingParas():
     assert len(ul[0].children) == 2 \
            and ul[0].children[0].children[0].__class__ == Text, 'leading para in list not stripped'
 
+
+def test_fixReferenceNodes():
+    raw = '''
+<ref>unnamed reference - unchanged by treecleaner</ref>
+
+<ref name="test1">bla, bla</ref>
+
+<ref name="test1"/>
+
+<ref name="test2"/>
+
+<ref name="test2">blub, blub</ref>
+
+    '''
+
+    tree, reports = cleanMarkup(raw)
+    refs = tree.getChildNodesByClass(Reference)
+    for i in [0,1,3]:
+        assert refs[i].children
+    for i in [2,4]:
+        assert not refs[i].children
+    assert refs[1].vlist['name'] == refs[2].vlist['name']
+    assert refs[3].vlist['name'] == refs[4].vlist['name']
