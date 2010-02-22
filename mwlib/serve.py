@@ -18,7 +18,6 @@ from hashlib import md5
 
 from mwlib import myjson as json
 
-from lockfile import FileLock
 from webob import Request, Response
 
 from mwlib import filequeue, log, utils, _version
@@ -30,6 +29,18 @@ from mwlib.status import Status
 log = log.Log('mwlib.serve')
 
 # ==============================================================================
+
+
+def FileLock(path, threaded=True):
+    """lazy wrapper around lockfile.Lockfile.
+    
+    importing the lockfile module creates a temporary file for the
+    SQLiteFileLock class. This fails when when the disk is full and
+    will stop mw-serve-ctl from running
+    """
+    
+    import lockfile
+    return lockfile.FileLock(path, threaded=threaded)
 
 
 class FileIterable(object):
