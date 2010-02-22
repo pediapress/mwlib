@@ -107,25 +107,11 @@ def main():
         help='recipient of error mails (--report-from-mail also needed)',
         metavar='EMAIL',
     )
-    parser.add_option('--clean-cache',
-        help='clean cache files that have not been touched for at least HOURS hours and exit',
-        metavar='HOURS',
-    )
     options, args = parser.parse_args()
 
     if args:
         parser.error('no arguments supported')
     
-    if options.clean_cache:
-        print '''WARNING: This option of mw-serve is deprecated and will be removed:
-Please use mw-serve-ctl --purge-cache instead!'''
-        try:
-            options.clean_cache = int(options.clean_cache)
-        except ValueError:
-            parser.error('--clean-cache value must be an integer')
-        from mwlib.serve import purge_cache
-        purge_cache(options.clean_cache*60*60, cache_dir=options.cache_dir)
-        return
     
     if options.protocol not in proto2server:
         parser.error('unsupported protocol (must be one of %s)' % (
