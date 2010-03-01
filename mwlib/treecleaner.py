@@ -78,7 +78,7 @@ class TreeCleaner(object):
                       'removeBigSectionsFromCells',
                       'transformNestedTables',
                       'splitBigTableCells',
-                      'limitImageCaptionsize', 
+                      'limitImageCaptionsize',
                       'removeDuplicateLinksInReferences',
                       'fixItemLists', 
                       'removeLeadingParaInList',
@@ -169,7 +169,10 @@ class TreeCleaner(object):
                             Teletyped:[Reference],
                             ReferenceList: [Reference],
                             Teletyped: [Source],
+                            Table:[ImageLink],
                             }
+        self.removeNodesAllChildren = {Table:[ImageLink], # used to indicate that children should be removed
+                                       }
 
         
         # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
@@ -370,7 +373,7 @@ class TreeCleaner(object):
         """Remove Nodes (while keeping their children) which can't be nested with their parents."""
         if node.__class__ in self.removeNodes.keys():
             if _any([parent.__class__ in self.removeNodes[node.__class__] for parent in node.parents]):
-                if node.children:
+                if node.children and not _any([ parent.__class__ in self.removeNodesAllChildren[node.__class__] for parent in node.parents]):
                     children = node.children
                     self.report('replaced child', node, children)
                     node.parent.replaceChild(node, newchildren=children)
@@ -1248,3 +1251,4 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.removeAbsolutePositionedNode(c)
+
