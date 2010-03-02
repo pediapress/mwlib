@@ -117,6 +117,14 @@ def getTextAlign(node):
             align = parent_align
     return align
 
+def getVerticalAlign(node):
+    align = None
+    for n in node.parents + [node]:
+        _align = n.style.get('vertical-align', None) or n.vlist.get('valign', None)
+        if _align in ['top', 'middle', 'bottom']:
+            align = _align
+    return align or 'top'
+
 def tableBorder(node):
     borderBoxes = ['prettytable',
                    'metadata',
