@@ -171,6 +171,7 @@ class TreeCleaner(object):
                             Teletyped: [Source],
                             Table:[ImageLink],
                             }
+
         self.removeNodesAllChildren = {Table:[ImageLink], # used to indicate that children should be removed
                                        }
 
@@ -373,7 +374,7 @@ class TreeCleaner(object):
         """Remove Nodes (while keeping their children) which can't be nested with their parents."""
         if node.__class__ in self.removeNodes.keys():
             if _any([parent.__class__ in self.removeNodes[node.__class__] for parent in node.parents]):
-                if node.children and not _any([ parent.__class__ in self.removeNodesAllChildren.get(node.__class__) for parent in node.parents]):
+                if node.children and not _any([ parent.__class__ in self.removeNodesAllChildren.get(node.__class__, []) for parent in node.parents]):
                     children = node.children
                     self.report('replaced child', node, children)
                     node.parent.replaceChild(node, newchildren=children)
