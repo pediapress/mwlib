@@ -342,9 +342,12 @@ class StringMagic(object):
             width=int(args[1])
         except ValueError:
             return s
-        
-        fillchar = args[2] or u'0'
-        return s.rjust(width, fillchar[0])
+
+        fillstr = args[2] or u'0'
+        if len(fillstr) == 1:
+            return s.rjust(width, fillstr)
+        else:
+            return ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))]) + s
     
     def PADRIGHT(self, args):
         s=args[0]
@@ -352,9 +355,12 @@ class StringMagic(object):
             width=int(args[1])
         except ValueError:
             return s
-        
-        fillchar = args[2] or u'0'
-        return s.ljust(width, fillchar[0])
+
+        fillstr = args[2] or u'0'
+        if len(fillstr) == 1:
+            return s.ljust(width, fillstr)
+        else:
+            return s + ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
         
     
 class ParserFunctions(object):

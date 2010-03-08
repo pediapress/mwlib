@@ -289,11 +289,17 @@ def test_padleft():
     yield expandstr, "{{padleft:7|3|0}}", "007"
     yield expandstr, "{{padleft:0|3|0}}", "000"
     yield expandstr, "{{padleft:bcd|6|a}}", "aaabcd"
+    yield expandstr, "{{padleft:|3|abcde}}", "abc"
+    yield expandstr, "{{padleft:bla|5|xyz}}", "xybla"
+    yield expandstr, "{{padleft:longstring|3|abcde}}", "longstring"
     # {{padleft:cafe|8|-}} = ----cafe 
 
 def test_padright():   
     yield expandstr, "{{padright:bcd|6|a}}", "bcdaaa"
     yield expandstr, "{{padright:0|6|a}}", "0aaaaa"
+    yield expandstr, "{{padright:|3|abcde}}", "abc"
+    yield expandstr, "{{padright:bla|5|xyz}}", "blaxy"
+    yield expandstr, "{{padright:longstring|3|abcde}}", "longstring"
     
 def test_urlencode():
     expandstr('{{urlencode:x y @}}', 'x+y+%40')
