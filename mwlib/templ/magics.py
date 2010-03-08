@@ -344,11 +344,8 @@ class StringMagic(object):
             return s
 
         fillstr = args[2] or u'0'
-        if len(fillstr) == 1:
-            return s.rjust(width, fillstr)
-        else:
-            return ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))]) + s
-    
+        return ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))]) + s
+
     def PADRIGHT(self, args):
         s=args[0]
         try:
@@ -357,11 +354,8 @@ class StringMagic(object):
             return s
 
         fillstr = args[2] or u'0'
-        if len(fillstr) == 1:
-            return s.ljust(width, fillstr)
-        else:
-            return s + ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
-        
+        return s + ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
+
     
 class ParserFunctions(object):
     wikidb = None
