@@ -9,7 +9,7 @@ from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
 from mwlib.treecleaner import TreeCleaner, _all, _any
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                     Cite, Code, DefinitionList, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
+                     Cite, Code, DefinitionList, DefinitionDescription, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
                      ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
                      Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
                      URL)
@@ -184,6 +184,17 @@ def test_removeBrokenChildren():
     
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(PreFormatted)) == 0
+
+def test_fixNesting1():
+    raw = '''
+:{|
+|-
+||bla||blub
+|}
+    '''
+    tree, reports = cleanMarkup(raw)
+    table = tree.getChildNodesByClass(Table)[0]
+    assert not table.getParentNodesByClass(DefinitionDescription)
 
 def test_fixNesting2():
     raw = r'''
