@@ -154,7 +154,7 @@ class nuwiki(object):
             
             hd = md5(fqname.encode("utf-8")).hexdigest()
             ext = os.path.splitext(p)[-1]
-            
+            ext = ext.replace(' ', '')
             # mediawiki gives us png's for these extensions. let's change them here.
             if ext.lower() in (".gif", ".svg"):
                 # print "change xt:", ext
@@ -169,7 +169,6 @@ class nuwiki(object):
                     if exc.errno != 17: # File exists
                         raise
             return safe_path
-        
         return p
 
     def get_data(self, name):
