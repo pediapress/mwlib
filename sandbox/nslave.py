@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import os
+import os, subprocess
 import simplejson as json
 
 cachedir = "cache"
@@ -8,6 +8,12 @@ cachedir = "cache"
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
 
+def system(args):
+    print "running %r" % (" ".join(args))
+    retcode = subprocess.call(args)
+    if retcode != 0:
+        raise RuntimeError("command failed: %r" % args)
+    
 
 class commands(object):
     def statusfile(self):
@@ -39,9 +45,7 @@ class commands(object):
             f.write(metabook_data)
             f.close()
 
-        cmd = " ".join(args)
-        print "running:", cmd
-        os.system(cmd)
+        system(args)
 
     def rpc_render(self, metabook_data=None, collection_id=None, base_url=None, writer=None):
         writer = writer or "rl"
@@ -51,7 +55,7 @@ class commands(object):
 
         self.qaddw(channel="makezip", payload=dict(metabook_data=metabook_data, collection_id=collection_id), jobid="%s:makezip" % (collection_id, ))
         args = ["mw-render",  "-w",  writer, "-c", getpath("collection.zip"), "-o", getpath("output.%s" % writer),  "--status", self.statusfile()]
-        os.system(" ".join(args))
+        system(args)
 
     def rpc_post(self, metabook_data=None, collection_id=None, base_url=None, post_url=None):
         dir = get_collection_dir(collection_id)
@@ -61,7 +65,7 @@ class commands(object):
         self.qaddw(channel="makezip", payload=dict(metabook_data=metabook_data, collection_id=collection_id), jobid="%s:makezip" % (collection_id, ))
         print locals()
         args = ["mw-post", "-i", getpath("collection.zip"), "-p", post_url]
-        os.system(" ".join(args))
+        system(args)
         
         
 from mwlib.async.slave import main

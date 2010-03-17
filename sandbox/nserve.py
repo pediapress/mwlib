@@ -391,7 +391,7 @@ class Application(object):
         
         jobid="%s:render-%s" % (collection_id, writer)
         
-        res = self.qserve.qinfo(jobid=jobid)
+        res = self.qserve.qinfo(jobid=jobid) or {}
         info = res.get("info", {})
         done = res.get("done", False)
         error = res.get("error", None)
@@ -405,7 +405,7 @@ class Application(object):
         
         if not info:
             jobid="%s:makezip" % (collection_id,)
-            res = self.qserve.qinfo(jobid=jobid)
+            res = self.qserve.qinfo(jobid=jobid) or {}
             info = res.get("info", {})
         
         return retval(state="progress", status=info)
