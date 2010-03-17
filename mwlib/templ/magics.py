@@ -384,14 +384,6 @@ class ParserFunctions(object):
         else:
             return args[2]
 
-
-            
-    def IFEQ(self, rl):
-        if maybe_numeric_compare(rl[0], rl[1]):
-            return rl[2]
-        else:
-            return rl[3]
-
     def EXPR(self, rl):
         import math
         if rl:

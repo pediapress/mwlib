@@ -46,6 +46,39 @@ class IfNode(Node):
         res.append(u"".join(tmp).strip())
         res.append(dummy_mark)
 
+class IfeqNode(Node):
+    def flatten(self, expander, variables, res):        
+        v1 = []
+        flatten(self[0], expander, variables, v1)
+        v1 = u"".join(v1).strip()
+
+        v2 = []
+        if len(self)>1:
+            flatten(self[1], expander, variables, v2)
+        v2 = u"".join(v2).strip()
+
+
+
+
+        from mwlib.templ.magics import maybe_numeric_compare
+
+        res.append(maybe_newline)
+        tmp = []
+        
+
+
+        if maybe_numeric_compare(v1,v2):
+            if len(self)>2:
+                flatten(self[2], expander, variables, tmp)
+        else:
+            if len(self)>3:
+                flatten(self[3], expander, variables, tmp)
+        
+        _insert_implicit_newlines(tmp)
+        res.append(u"".join(tmp).strip())
+        res.append(dummy_mark)
+
+
 def maybe_numeric(a):
     try:
         return int(a)

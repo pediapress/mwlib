@@ -127,4 +127,5 @@ registry = {'#time': Time,
             '#rel2abs': rel2abs,
             '#switch': make_switchnode, 
             '#if': nodes.IfNode,
+            '#ifeq': nodes.IfeqNode,
             }
