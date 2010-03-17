@@ -261,6 +261,9 @@ def test_implicit_newline_colon():
 def test_implicit_newline_semicolon():
     expandstr("foo {{tt}}", "foo \n;", wikidb=DictDB(tt=";"))
 
+def test_implicit_newline_ifeq():
+    expandstr("{{#ifeq: 1 | 1 | foo {{#if: 1 | {{{!}} }}}}", "foo \n{|", wikidb=DictDB({"!":"|"}))
+
 def test_empty_template():
     """test for http://code.pediapress.com/wiki/ticket/126"""
     expandstr("{{}}", "")
