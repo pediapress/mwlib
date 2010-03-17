@@ -8,10 +8,7 @@ import sys
 import errno
 import os
 import re
-import shutil
-import signal
 import StringIO
-import time
 import urllib2
 import urlparse
 import traceback
@@ -501,105 +498,6 @@ class Application(object):
         self.qserve.qadd(channel="post", jobid="%s:post" % collection_id,
                          payload=dict(collection_id=collection_id, metabook_data=metabook_data, post_url=post_url))
         return response
-    
-
-# ==============================================================================
-
-def get_collection_dirs(cache_dir):
-    """Generator yielding full paths of collection directories"""
-
-    for dirpath, dirnames, filenames in os.walk(cache_dir):
-        for d in dirnames:
-            if collection_id_rex.match(d):
-                yield os.path.join(dirpath, d)
-
-def purge_cache(max_age, cache_dir):
-    """Remove all subdirectories of cache_dir whose mtime is before now-max_age
-    
-    @param max_age: max age of directories in seconds
-    @type max_age: int
-    
-    @param cache_dir: cache directory
-    @type cache_dir: basestring
-    """
-    
-    now = time.time()
-    for path in get_collection_dirs(cache_dir):
-        for fn in os.listdir(path):
-            if now - os.stat(os.path.join(path, fn)).st_mtime > max_age:
-                break
-        else:
-            continue
-        try:
-            log.info('removing directory %r' % path)
-            shutil.rmtree(path)
-        except Exception, exc:
-            log.ERROR('could not remove directory %r: %s' % (path, exc))
-    
-def clean_up(cache_dir, max_running_time, report=None):
-    """Look for PID files whose processes have not finished/erred but ceased
-    to exist => remove cache directories. Look for long running processes =>
-    send SIGKILL.
-    """
-
-    now = time.time()
-
-
-    def error(msg):
-        log.ERROR(msg)
-        if report is not None:
-            report(msg)
-
-    for path in get_collection_dirs(cache_dir):
-        for e in os.listdir(path):
-            if '.' not in e:
-                continue
-            parts = e.split('.')
-            if parts[0] != Application.pid_filename:
-                continue
-            ext = parts[1]
-            if not ext:
-                continue
-            pid_file = os.path.join(path, e)
-            try:
-                pid = int(open(pid_file, 'rb').read())
-            except ValueError:
-                error('pid file %r with invalid contents' % pid_file)
-                continue
-            except IOError, exc:
-                error('Could not read PID file %r: %s' % (pid_file, exc))
-                continue
-
-            error_file = os.path.join(path, '%s.%s' % (Application.error_filename, ext))
-            
-            try:
-                os.kill(pid, 0)
-            except OSError, exc:
-                if exc.errno == 3: # No such process
-                    sys.exc_clear()
-                    error('Have dangling pid file %r' % pid_file)
-                    os.unlink(pid_file)
-                    if not os.path.exists(error_file):
-                        open(error_file, 'wb').write('Process died.\n')
-                    continue
-
-            try:
-                st = os.stat(pid_file)
-            except Exception, exc:
-                error('Could not stat pid file %r: %s' % (pid_file, exc))
-                continue
-            if now - st.st_mtime < max_running_time:
-                continue
-
-            error('Have long running process with pid %d (%s s, pid file %r)' % (pid, now - st.st_mtime, pid_file))
-            try:
-                log.info('sending SIGKILL to pid %d' % pid)
-                os.kill(pid, signal.SIGKILL)
-                if not os.path.exists(error_file):
-                    open(error_file, 'wb').write('Long running process killed.\n')
-            except Exception, exc:
-                error('Could not send SIGKILL: %s' % exc)
-
 
 from gevent.wsgi import WSGIServer,  WSGIHandler
 
