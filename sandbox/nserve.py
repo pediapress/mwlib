@@ -243,7 +243,7 @@ class Application(object):
     
 
 
-    def _get_params(self, post_data):
+    def _get_params(self, post_data,  collection_id):
         g = post_data.get
         params = bunch()
         params.__dict__ = dict(
@@ -259,12 +259,15 @@ class Application(object):
             force_render = bool(g('force_render')), 
             script_extension = g('script_extension', ''), 
             language = g('language', ''))
+        
+        params.collection_id = collection_id
+        
         return params
     
     
     @json_response
     def do_render(self, collection_id, post_data, is_new=False):
-        params = self._get_params(post_data)        
+        params = self._get_params(post_data,  collection_id=collection_id)
         metabook_data = params.metabook_data
         base_url = params.base_url
         writer = params.writer
@@ -289,7 +292,7 @@ class Application(object):
             'is_cached': False,
         }
         
-        self.qserve.qadd(channel="render", payload=dict(collection_id=collection_id, metabook_data=metabook_data),
+        self.qserve.qadd(channel="render", payload=dict(params=params.__dict__), 
                          jobid="%s:render-%s" % (collection_id, writer))
 
         return response
