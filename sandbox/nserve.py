@@ -501,15 +501,12 @@ class Application(object):
 
 from gevent.wsgi import WSGIServer,  WSGIHandler
 
-class handler(WSGIHandler):
-    def alog_request(self, *args, **kwargs):
-        pass
 
 def main():
     application = Application()
     
     address = "localhost", 8899
-    server = WSGIServer(address, application,  handler_class=handler)
+    server = WSGIServer(address, application)
     
     try:
         print "listening on %s:%d" % address
