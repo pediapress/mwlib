@@ -495,7 +495,7 @@ class Application(object):
         
         log.info('zip_post %s %s' % (collection_id, pod_api_url))
 
-        self.qserve.qadd(channel="post", jobid="%s:post" % collection_id,
+        self.qserve.qadd(channel="post", # jobid="%s:post" % collection_id,
                          payload=dict(collection_id=collection_id, metabook_data=metabook_data, post_url=post_url))
         return response
 
