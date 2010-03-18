@@ -257,7 +257,8 @@ class Application(object):
             print_template_pattern = g('print_template_pattern', ''), 
             login_credentials = g('login_credentials', ''), 
             force_render = bool(g('force_render')), 
-            script_extension = g('script_extension', ''), 
+            script_extension = g('script_extension', ''),
+            pod_api_url = post_data.get('pod_api_url', ''), 
             language = g('language', ''))
         
         params.collection_id = collection_id
@@ -468,20 +469,14 @@ class Application(object):
     
     @json_response
     def do_zip_post(self, collection_id, post_data, is_new=False):
+        params = self._get_params(post_data, collection_id=collection_id)
+        
         try:
             metabook_data = post_data['metabook']
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
         
-        base_url = post_data.get('base_url')
-        template_blacklist = post_data.get('template_blacklist', '')
-        template_exclusion_category = post_data.get('template_exclusion_category', '')
-        print_template_prefix = post_data.get('print_template_prefix', '')
-        print_template_pattern = post_data.get('print_template_pattern', '')
-        login_credentials = post_data.get('login_credentials', '')
-        script_extension = post_data.get('script_extension', '')
-        
-        pod_api_url = post_data.get('pod_api_url', '')
+        pod_api_url = params.pod_api_url
         if pod_api_url:
             result = json.loads(unicode(urllib2.urlopen(pod_api_url, data="any").read(), 'utf-8'))
             post_url = result['post_url'].encode('utf-8')
@@ -497,9 +492,10 @@ class Application(object):
             response = {'state': 'ok'}
         
         log.info('zip_post %s %s' % (collection_id, pod_api_url))
-
+        params.post_url = post_url
+        
         self.qserve.qadd(channel="post", # jobid="%s:post" % collection_id,
-                         payload=dict(collection_id=collection_id, metabook_data=metabook_data, post_url=post_url))
+                         payload=dict(params=params.__dict__))
         return response
 
 from gevent.wsgi import WSGIServer,  WSGIHandler
@@ -508,7 +504,7 @@ from gevent.wsgi import WSGIServer,  WSGIHandler
 def main():
     application = Application()
     
-    address = "localhost", 8899
+    address = "0.0.0.0", 8899
     server = WSGIServer(address, application)
     
     try:
@@ -520,3 +516,4 @@ def main():
 
 if __name__=="__main__":
     main()
+    

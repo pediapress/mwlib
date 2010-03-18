@@ -96,16 +96,17 @@ class commands(object):
         return doit(**params)
     
                
-    def rpc_post(self, metabook_data=None, collection_id=None, base_url=None, post_url=None):
-        dir = get_collection_dir(collection_id)
-        def getpath(p):
-            return os.path.join(dir, p)
+    def rpc_post(self, params):
+        def doit(metabook_data=None, collection_id=None, base_url=None, post_url=None, **kw):
+            dir = get_collection_dir(collection_id)
+            def getpath(p):
+                return os.path.join(dir, p)
 
-        self.qaddw(channel="makezip", payload=dict(metabook_data=metabook_data, collection_id=collection_id), jobid="%s:makezip" % (collection_id, ))
-        print locals()
-        args = ["mw-post", "-i", getpath("collection.zip"), "-p", post_url]
-        system(args)
-        
+            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ))
+            args = ["mw-post", "-i", getpath("collection.zip"), "-p", post_url]
+            system(args)
+        return doit(**params)
+              
         
 from mwlib.async.slave import main
 main(commands,numprocs=2)
