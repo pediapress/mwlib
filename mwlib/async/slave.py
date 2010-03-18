@@ -109,7 +109,7 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
                     sleeptime*=2
 
         checkparent()            
-        print "got job:", job
+        # print "got job:", job
         try:
             result = workhandler(qs).dispatch(job)
         except Exception, err:
@@ -165,7 +165,7 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
                         handle_one_job(qs)
                     finally:
                         os._exit(0)
-                print "forked", pid
+                # print "forked", pid
                 children.add(pid)
                 
             try:    
@@ -173,7 +173,7 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
             except OSError:
                 continue
 
-            print "done",  pid
+            # print "done",  pid
             try:
                 children.remove(pid)
             except KeyError:
