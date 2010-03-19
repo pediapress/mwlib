@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import random
 import heapq
 import time
 import gevent
@@ -195,11 +195,16 @@ class workq(object):
         
         channel = job.channel
         
+        alternatives = []
         for i, (watching, ev) in enumerate(self._waiters):
             if channel in watching or not watching:
-                del self._waiters[i]
-                ev.set(job)
-                return job.jobid
+                alternatives.append((i,ev))
+
+        if alternatives:
+            i, ev = random.choice(alternatives)
+            del self._waiters[i]
+            ev.set(job)
+            return job.jobid
 
         try:
             q = self.channel2q[channel]
