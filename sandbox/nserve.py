@@ -68,31 +68,6 @@ class colldir(object):
 
     def getpath(self, p):
         return os.path.join(self.dir, p)
-    
-class FileIterable(object):
-    def __init__(self, filename):
-        self.filename = filename
-
-    def __iter__(self):
-        return FileIterator(self.filename)
-
-class FileIterator(object):
-    chunk_size = 4096
-
-    def __init__(self, filename):
-        self.filename = filename
-        self.fileobj = open(self.filename, 'rb')
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        chunk = self.fileobj.read(self.chunk_size)
-        if not chunk:
-            raise StopIteration()
-        return chunk
-
-
 
 collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
 
@@ -396,10 +371,9 @@ class Application(object):
         
             output_path = self.get_path(collection_id, self.output_filename, writer)
             os.utime(output_path, None)
-            response = Response()
+            data = open(output_path, "rb").read()
             
-            response.app_iter = FileIterable(output_path)
-            response.content_length = os.path.getsize(output_path)
+            response = Response(data, content_length=len(data))
             
             if w.content_type:
                 response.content_type = w.content_type
