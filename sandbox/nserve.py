@@ -21,14 +21,46 @@ from webob import Request, Response
 
 from mwlib import log, utils, _version
 from mwlib.metabook import calc_checksum
-from mwlib.status import Status
 
 from mwlib.async import rpcclient
 
 log = log.Log('mwlib.serve')
 
 class bunch(object):
-    pass
+    def __init__(self, **kw):
+        self.__dict__.update(kw)
+
+    def __repr__(self):
+        return "bunch(%s)" % (", ".join(["%s=%r" % (k, v) for k, v in self.__dict__.items()]), )
+
+    
+# -- we try to load all writers here but also keep a list of known writers
+# -- these writers do not have to be installed on the machine that's running the server
+# -- and we also like to speedup the get_writers method
+    
+name2writer = {'rl': bunch(file_extension='pdf', name='rl', content_type='application/pdf'),
+               'xhtml': bunch(file_extension='html', name='xhtml', content_type='text/xml'),
+               'xl': bunch(file_extension='pdf', name='xl', content_type='application/pdf'),
+               'odf': bunch(file_extension='odt', name='odf', content_type='application/vnd.oasis.opendocument.text')}
+
+def get_writers(name2writer):
+    import pkg_resources
+    
+    for entry_point in pkg_resources.iter_entry_points('mwlib.writers'):
+        if entry_point.name in name2writer:
+            continue
+        
+        try:
+            writer = entry_point.load()
+            name2writer[entry_point.name] = bunch(name=entry_point.name,
+                                                  file_extension=writer.file_extension,
+                                                  content_type=writer.content_type)
+        except Exception:
+            continue
+
+    return name2writer
+
+get_writers(name2writer)
 
 class colldir(object):
     def __init__(self, path):
@@ -36,7 +68,6 @@ class colldir(object):
 
     def getpath(self, p):
         return os.path.join(self.dir, p)
-
     
 class FileIterable(object):
     def __init__(self, filename):
@@ -87,7 +118,6 @@ def make_collection_id(data):
         
     return md5(sio.getvalue()).hexdigest()[:16]
 
-# ==============================================================================
 
 def json_response(fn):
     """Decorator wrapping result of decorated function in JSON response"""
@@ -99,7 +129,6 @@ def json_response(fn):
         return Response(json.dumps(result), content_type='application/json')
     return wrapper
 
-# ==============================================================================
 
 class Application(object):
     metabook_filename = 'metabook.json'
@@ -274,8 +303,9 @@ class Application(object):
         writer = params.writer
         force_render = params.force_render
         
-        
-        
+        if writer not in name2writer:
+            return self.error_response("unknown writer %r" % writer)
+    
         if is_new and not metabook_data:
             return self.error_response('POST argument metabook or collection_id required')
         if not is_new and metabook_data:
@@ -297,89 +327,6 @@ class Application(object):
                          jobid="%s:render-%s" % (collection_id, writer))
 
         return response
-        
-        # args = [
-        #     self.mwrender_cmd,
-        #     '--logfile', logfile,
-        #     '--error-file', error_path,
-        #     '--status-file', status_path,
-        #     '--writer', writer,
-        #     '--output', output_path,
-        # ]
-        
-
-        
-        # zip_path = self.get_path(collection_id, self.zip_filename)
-        # if not force_render and os.path.exists(zip_path):
-        #     log.info('using existing ZIP file to render %r' % output_path)
-        #     args.extend(['--config', zip_path])
-        #     if writer_options:
-        #         args.extend(['--writer-options', writer_options])
-        #     if template_blacklist:
-        #         args.extend(['--template-blacklist', template_blacklist])
-        #     if template_exclusion_category:
-        #         args.extend(['--template-exclusion-category', template_exclusion_category])
-        #     if print_template_prefix:
-        #         args.extend(['--print-template-prefix', print_template_prefix])
-        #     if print_template_pattern:
-        #         args.extend(['--print-template-pattern', print_template_pattern])
-        #     if language:
-        #         args.extend(['--language', language])
-        # else:
-        #     log.info('rendering %r' % output_path)
-        #     metabook_path = self.get_path(collection_id, self.metabook_filename)
-        #     if metabook_data:
-        #         f = open(metabook_path, 'wb')
-        #         f.write(metabook_data)
-        #         f.close()
-        #     args.extend([
-        #         '--metabook', metabook_path,
-        #         '--keep-zip', zip_path,
-        #     ])
-        #     if base_url:
-        #         args.extend(['--config', base_url])
-        #     if writer_options:
-        #         args.extend(['--writer-options', writer_options])
-        #     if template_blacklist:
-        #         args.extend(['--template-blacklist', template_blacklist])
-        #     if template_exclusion_category:
-        #         args.extend(['--template-exclusion-category', template_exclusion_category])
-        #     if print_template_prefix:
-        #         args.extend(['--print-template-prefix', print_template_prefix])
-        #     if print_template_pattern:
-        #         args.extend(['--print-template-pattern', print_template_pattern])
-        #     if login_credentials:
-        #         login = login_credentials.split(":", 2)
-        #         if len(login)==2:
-        #             user, password = login
-        #             domain=None
-        #         elif len(login)==3:
-        #             user, password, domain = login
-        #         else:
-        #             raise RuntimeError("bad login_credentials argument")
-        #         args.extend(["--username",  user, "--password", password])
-                
-        #         if domain:
-        #             args.extend(["--domain", domain])
-                    
-        #     if script_extension:
-        #         args.extend(['--script-extension', script_extension])
-        #     if language:
-        #         args.extend(['--language', language])
-        
-        # Status(status_path)(status='job queued', progress=0)
-        # self.queue_render_job('render', collection_id, args)
-        
-        # return response
-    
-    def read_status_file(self, collection_id, writer):
-        status_path = self.get_path(collection_id, self.status_filename, writer)
-        try:
-            f = open(status_path, 'rb')
-            return json.loads(unicode(f.read(), 'utf-8'))
-            f.close()
-        except (IOError, ValueError):
-            return {'progress': 0}
     
     @json_response
     def do_render_status(self, collection_id, post_data, is_new=False):
@@ -442,26 +389,25 @@ class Application(object):
             return self.error_response('POST argument required: collection_id')
 
         writer = post_data.get('writer', self.default_writer)
+        w=name2writer[writer]
         
         try:
             log.info('download %s %s' % (collection_id, writer))
         
             output_path = self.get_path(collection_id, self.output_filename, writer)
             os.utime(output_path, None)
-            status = self.read_status_file(collection_id, writer)
             response = Response()
+            
             response.app_iter = FileIterable(output_path)
             response.content_length = os.path.getsize(output_path)
-            if 'content_type' in status:
-                response.content_type = status['content_type'].encode('utf-8', 'ignore')
-            else:
-                log.warn('no content type in status file')
-            if 'file_extension' in status:
-                response.headers['Content-Disposition'] = 'inline; filename=collection.%s' %  (
-                    status['file_extension'].encode('utf-8', 'ignore'),
-                )
-            else:
-                log.warn('no file extension in status file')
+            
+            if w.content_type:
+                response.content_type = w.content_type
+                
+            if w.file_extension:
+                response.headers['Content-Disposition'] = 'inline; filename=collection.%s' % (
+                    w.file_extension.encode('utf-8', 'ignore'))
+            
             return response
         except Exception, exc:
             log.ERROR('exception in do_download(): %r' % exc)
@@ -498,10 +444,9 @@ class Application(object):
                          payload=dict(params=params.__dict__))
         return response
 
-from gevent.wsgi import WSGIServer,  WSGIHandler
-
-
 def main():
+    from gevent.wsgi import WSGIServer
+
     application = Application()
     
     address = "0.0.0.0", 8899
@@ -512,8 +457,7 @@ def main():
         server.serve_forever()
     except KeyboardInterrupt:
         server.stop()
-        print "Bye bye"
+        print "bye."
 
 if __name__=="__main__":
     main()
-    
