@@ -125,7 +125,18 @@ class commands(object):
             args = ["mw-post", "-i", getpath("collection.zip"), "-p", post_url]
             system(args)
         return doit(**params)
-              
+
+def main():
+    global cachedir
+    import argv
+    opts, args = argv.parse(sys.argv[1:], "--cachedir=")
+    for o, a in opts:
+        if o=="--cachedir":
+            cachedir = a
+            
         
-from mwlib.async.slave import main
-main(commands,numprocs=2)
+    from mwlib.async import slave
+    slave.main(commands, numprocs=16, argv=args)
+    
+if __name__=="__main__":        
+    main()

@@ -69,9 +69,31 @@ class worker(object):
         
         
     
-def main(commands, host="localhost", port=None, numthreads=10, numprocs=0):
+def main(commands, host="localhost", port=None, numthreads=10, numprocs=0, argv=None):
     if port is None:
         port = 14311
+
+    if argv:
+        import getopt
+        
+        try:
+            opts, args = getopt.getopt(argv, "", ["host=", "port=", "numthreads=", "numprocs="])
+        except getopt.GetoptError, err:
+            print str(err)
+            sys.exit(10)
+            
+        for o, a in opts:
+            if o=="--host":
+                host = a
+            if o=="--port":
+                port = int(a)
+            if o=="--numthreads":
+                numthreads=int(a)
+                numprocs=0
+            if o=="--numprocs":
+                numprocs=int(a)
+                numthreads=0
+                
     class workhandler(worker, commands):
         pass
 
