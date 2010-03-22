@@ -368,9 +368,33 @@ class Application(object):
         
         try:
             log.info('download %s %s' % (collection_id, writer))
-        
+
+            redir = os.environ.get("NSERVE_REDIRECT")
+            if redir:
+                response = Response()
+                response.status = 301
+                url = "%s/%s/%s/output.%s" % (redir, collection_id[:2], collection_id, writer)
+                print "REDIRECT:", url
+                response.location = url
+                return response
+
+
+            if 1:
+                response=Response()
+                response.headers["X-Accel-Redirect"] = "/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
+
+
+                if w.content_type:
+                    response.content_type = w.content_type
+                
+                if w.file_extension:
+                    response.headers['Content-Disposition'] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
+
+                return response
+            
             output_path = self.get_path(collection_id, self.output_filename, writer)
             os.utime(output_path, None)
+            
             data = open(output_path, "rb").read()
             
             response = Response(data, content_length=len(data))
