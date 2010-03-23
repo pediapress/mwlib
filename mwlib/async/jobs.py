@@ -138,7 +138,12 @@ class workq(object):
         if dcount or mcount:
             print "watchdog: dropped %s jobs, marked %s jobs with a deadline" % (dcount, mcount)
         
-        
+    def getstats(self):
+        stats = dict(count=self.count,
+                     numjobs=len(self.id2job),
+                     busy = dict([(c, len(todo)) for c, todo in self.channel2q.items()]))
+        return stats
+
     def report(self):
         print "=== report %s ===" % (time.ctime(), )
         print "have %s jobs" % len(self.id2job)

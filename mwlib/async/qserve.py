@@ -66,6 +66,9 @@ class qplugin(object):
     def rpc_qprefixmatch(self, prefix):
         return list(self.workq.prefixmatch(prefix))
     
+    def rpc_getstats(self):
+        return self.workq.getstats()
+    
     def shutdown(self):
         for j in self.running_jobs.values():
             # print "reschedule", j
