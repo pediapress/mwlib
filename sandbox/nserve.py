@@ -295,10 +295,10 @@ class Application(object):
             'is_cached': False,
         }
 
-        self.qserve.qadd(channel="makezip", payload=dict(params=params.__dict__), jobid="%s:makezip" % (collection_id, ))
+        self.qserve.qadd(channel="makezip", payload=dict(params=params.__dict__), jobid="%s:makezip" % (collection_id, ), timeout=20*60)
         
         self.qserve.qadd(channel="render", payload=dict(params=params.__dict__), 
-                         jobid="%s:render-%s" % (collection_id, writer))
+                         jobid="%s:render-%s" % (collection_id, writer),  timeout=20*60)
 
         return response
     
