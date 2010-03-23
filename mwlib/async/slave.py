@@ -72,12 +72,15 @@ class worker(object):
 def main(commands, host="localhost", port=None, numthreads=10, numprocs=0, argv=None):
     if port is None:
         port = 14311
-
+        
+    channels = []
+    skip_channels = []
+    
     if argv:
         import getopt
         
         try:
-            opts, args = getopt.getopt(argv, "", ["host=", "port=", "numthreads=", "numprocs="])
+            opts, args = getopt.getopt(argv, "c:s:", ["host=", "port=", "numthreads=", "numprocs=", "channel=",  "skip="])
         except getopt.GetoptError, err:
             print str(err)
             sys.exit(10)
@@ -93,16 +96,33 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0, argv=
             if o=="--numprocs":
                 numprocs=int(a)
                 numthreads=0
+            if o=="-c" or o=="--channel":
+                channels.append(a)
+            if o=="-s" or o=="--skip":
+                skip_channels.append(a)
                 
+            
+            
     class workhandler(worker, commands):
         pass
 
-    channels=[]
+    available_channels=[]
     for x in dir(workhandler):
         if x.startswith("rpc_"):
-            channels.append(x[len("rpc_"):])
-    channels.sort()
+            available_channels.append(x[len("rpc_"):])
+    available_channels.sort()
+    
+    if not channels:
+        channels = available_channels
+    else:
+        for c in channels:
+            assert c in available_channels, "no such channel: %s" % c
 
+    for c in skip_channels:
+        channels.remove(c)
+        
+    
+            
     assert channels, "no channels"
 
     if numprocs:
