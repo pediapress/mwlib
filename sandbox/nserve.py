@@ -297,6 +297,8 @@ class Application(object):
             'writer': writer,
             'is_cached': False,
         }
+
+        self.qserve.qadd(channel="makezip", payload=dict(params=params.__dict__), jobid="%s:makezip" % (collection_id, ))
         
         self.qserve.qadd(channel="render", payload=dict(params=params.__dict__), 
                          jobid="%s:render-%s" % (collection_id, writer))
