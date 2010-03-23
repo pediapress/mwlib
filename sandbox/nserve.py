@@ -3,6 +3,8 @@
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 import gevent.monkey
 gevent.monkey.patch_socket()
+# import setproctitle
+# setproctitle.setproctitle("nserve")
 
 import sys
 import errno
@@ -105,6 +107,37 @@ def json_response(fn):
     return wrapper
 
 
+busy=False
+def wait_idle():
+    global busy
+    qserve = rpcclient.serverproxy()
+    while 1:
+        try:
+            stats = qserve.getstats()
+            
+            numrender = stats.get("busy",  {}).get("render", 0)
+            print "stats:", numrender, stats
+            
+            if numrender>30:
+                if not busy:
+                    print "SYSTEM OVERLOAD"
+                    busy = True
+            else:
+                if busy:
+                    print "RESUMING OPERATION"
+                    busy = False
+                    
+        except Exception, err:
+            try:
+                print "ERROR in wait_idle:", err
+            except:
+                pass
+        finally:
+            gevent.sleep(2)
+            
+    
+
+
 class Application(object):
     metabook_filename = 'metabook.json'
     error_filename = 'errors'
@@ -189,12 +222,12 @@ class Application(object):
                     command, exc,))
     
     @json_response
-    def error_response(self, error):
+    def error_response(self, error, **kw):
         if isinstance(error, str):
             error = unicode(error, 'utf-8', 'ignore')
         elif not isinstance(error, unicode):
             error = unicode(repr(error), 'ascii')
-        return {'error': error}
+        return dict(error=error, **kw)
     
     def send_report_mail(self, subject, **kwargs):
         if not (self.report_from_mail and self.report_recipients):
@@ -274,6 +307,9 @@ class Application(object):
         base_url = params.base_url
         writer = params.writer
         force_render = params.force_render
+
+        if busy:
+            return self.error_response("system overloaded. please try again later.", queue_full=1)
         
         if writer not in name2writer:
             return self.error_response("unknown writer %r" % writer)
@@ -456,6 +492,7 @@ def main():
     
     address = "0.0.0.0", 8899
     server = WSGIServer(address, app)
+    gevent.spawn(wait_idle)
     
     try:
         print "listening on %s:%d" % address
