@@ -121,8 +121,9 @@ class Application(object):
                  default_writer='rl',
                  report_from_mail=None,
                  report_recipients=None):
+
+        self.cache_dir = cache_dir
         
-        self.cache_dir = utils.ensure_dir(cache_dir)
         self.mwrender_cmd = "mw-render"
         self.mwrender_logfile = "render-logfile"
         self.mwzip_cmd = "mw-zip"
@@ -138,10 +139,6 @@ class Application(object):
         self.qserve = rpcclient.serverproxy()
         
         
-        for i in range(0x100, 0x200):
-            p = os.path.join(self.cache_dir, hex(i)[3:])
-            if not os.path.isdir(p):
-                os.mkdir(p)
             
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -447,10 +444,18 @@ class Application(object):
 def main():
     from gevent.wsgi import WSGIServer
 
-    application = Application()
+    cachedir = "cache"
+    cachedir = utils.ensure_dir(cachedir)
+    for i in range(0x100, 0x200):
+        p = os.path.join(cachedir, hex(i)[3:])
+        if not os.path.isdir(p):
+            os.mkdir(p)
+
+    def app(*args, **kwargs):
+        return Application(cachedir)(*args, **kwargs)
     
     address = "0.0.0.0", 8899
-    server = WSGIServer(address, application)
+    server = WSGIServer(address, app)
     
     try:
         print "listening on %s:%d" % address
