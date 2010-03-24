@@ -146,14 +146,6 @@ class Application(object):
                  report_recipients=None):
 
         self.cache_dir = cache_dir
-        
-        self.mwrender_cmd = "mw-render"
-        self.mwrender_logfile = "render-logfile"
-        self.mwzip_cmd = "mw-zip"
-        self.mwzip_logfile = "zip-logfile"
-        self.mwpost_cmd = "mw-post"
-        self.mwpost_logfile = "post-logfile"
-        
             
         self.default_writer = default_writer
         self.report_from_mail = report_from_mail
@@ -161,8 +153,6 @@ class Application(object):
 
         self.qserve = rpcclient.serverproxy()
         
-        
-            
     def __call__(self, environ, start_response):
         request = Request(environ)
 
@@ -383,7 +373,7 @@ class Application(object):
             'writer': writer,
             'killed': killed,
         }
-    
+        
     def do_download(self, collection_id, post_data, is_new=False):
         if is_new:
             return self.error_response('POST argument required: collection_id')
