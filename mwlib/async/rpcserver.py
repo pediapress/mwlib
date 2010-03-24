@@ -89,7 +89,7 @@ class server(object):
             handle_request = self.get_request_handler(client=client, clientid=clientid)
             
             
-            self.log("+connect: %s" % (clientid, ))
+            # self.log("+connect: %s" % (clientid, ))
                      
             while 1:
                 line = sockfile.readline()
@@ -116,7 +116,7 @@ class server(object):
             traceback.print_exc()
 
         finally:
-            self.log("-disconnect: %s" % (clientid,))
+            # self.log("-disconnect: %s" % (clientid,))
             client[0].close()
             sockfile.close()
             handle_request.shutdown()
