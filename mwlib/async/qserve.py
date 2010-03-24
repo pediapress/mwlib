@@ -81,7 +81,7 @@ def main():
     from mwlib.async.rpcserver import request_handler, server
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:p:i:h", ["help", "port=", "interface="])
+        opts, args = getopt.getopt(sys.argv[1:], "a:d:p:i:h", ["help", "port=", "interface="])
     except getopt.GetoptError, err:
         print str(err)
         sys.exit(10)
@@ -89,6 +89,9 @@ def main():
     port = 14311
     interface = "0.0.0.0"
     datadir = None
+
+    allowed_ips = set()
+    
     
     for o, a in opts:
         if o in ("-p", "--port"):
@@ -103,6 +106,8 @@ def main():
             interface = a
         elif o in ("-d"):
             datadir = a
+        elif o in ("-a"):
+            allowed_ips.add(a)
         elif o in ("-h", "--help"):
             usage()
             sys.exit(0)
@@ -148,7 +153,13 @@ def main():
         workq = d.workq
         db = d
 
-    s=server(port, host=interface, get_request_handler=handler)
+    if allowed_ips:
+        def is_allowed((ip, port)):
+            return ip in allowed_ips
+    else:
+        is_allowed = lambda x: True
+    
+    s=server(port, host=interface, get_request_handler=handler, is_allowed=is_allowed)
     print "listening on %s:%s" % (interface, port)
     try:
         s.run_forever()

@@ -39,13 +39,18 @@ class request_handler(dispatcher):
         
     
 class server(object):
-    def __init__(self, port=8080, host="", get_request_handler=None, secret=None):
+    def __init__(self, port=8080, host="", get_request_handler=None, secret=None, is_allowed=None):
         self.port = port
         self.host = host
         self.secret = secret
         self.get_request_handler = get_request_handler
         self.sock = socket.tcp_listener((self.host, self.port))
         self.clientcount = 0
+        
+        if is_allowed is None:
+            self.is_allowed = lambda x: True
+        else:
+            self.is_allowed = is_allowed
         
     def run_forever(self):
         socket.tcp_server(self.sock, self.handle_client)
@@ -69,8 +74,13 @@ class server(object):
 
     def log(self, msg):
         print msg
-        
+                    
     def handle_client(self, client):
+        if not self.is_allowed(client[1]):
+            self.log("+DENY %r" % (client[1], ))
+            client[0].close()
+            return
+        
         try:
             self.clientcount+=1
             clientid = "<%s %s:%s>" % (self.clientcount, client[1][0], client[1][1])
