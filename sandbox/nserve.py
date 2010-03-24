@@ -183,10 +183,10 @@ class Application(object):
         except:
             pass
 
-        if request.method != 'POST':
-            response = Response(status=405)
-        else:
-            response = self.dispatch(request)
+        # if request.method != 'POST':
+        #     response = Response(status=405)
+        # else:
+        response = self.dispatch(request)
 
         return response(environ, start_response)
     
