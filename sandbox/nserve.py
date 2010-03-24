@@ -139,16 +139,6 @@ def wait_idle():
 
 
 class Application(object):
-    metabook_filename = 'metabook.json'
-    error_filename = 'errors'
-    status_filename = 'status'
-    output_filename = 'output'
-    pid_filename = 'pid'
-    zip_filename = 'collection.zip'
-    mwpostlog_filename = 'mw-post.log'
-    mwziplog_filename = 'mw-zip.log'
-    mwrenderlog_filename = 'mw-render.log'
-    
     def __init__(self,
                  cache_dir="cache",
                  default_writer='rl',
@@ -427,7 +417,7 @@ class Application(object):
 
                 return response
             
-            output_path = self.get_path(collection_id, self.output_filename, writer)
+            output_path = self.get_path(collection_id, "output", writer)
             os.utime(output_path, None)
             
             data = open(output_path, "rb").read()
