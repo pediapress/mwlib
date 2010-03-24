@@ -635,7 +635,6 @@ def purge_cache(max_age, cache_dir):
         else:
             continue
         try:
-            log.info('removing directory %r' % path)
             shutil.rmtree(path)
         except Exception, exc:
             log.ERROR('could not remove directory %r: %s' % (path, exc))
