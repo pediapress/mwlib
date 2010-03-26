@@ -118,7 +118,7 @@ def wait_idle():
             numrender = stats.get("busy",  {}).get("render", 0)
             print "stats:", numrender, stats
             
-            if numrender>30:
+            if numrender>10:
                 if not busy:
                     print "SYSTEM OVERLOAD"
                     busy = True
