@@ -356,7 +356,6 @@ def ensure_dir(d):
     """
     
     if not os.path.isdir(d):
-        log.info('mkdir -r %r' % d)
         os.makedirs(d)
     return d
 

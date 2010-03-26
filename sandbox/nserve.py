@@ -454,9 +454,13 @@ class Application(object):
         return response
 
 def main():
-    #from gevent.wsgi import WSGIServer
-    from gevent.pywsgi import WSGIServer
-
+    if 0:
+        from gevent.wsgi import WSGIServer
+    else:
+        from gevent.pywsgi import WSGIServer, Server
+        Server.log_message = lambda *args, **kwargs: None
+        
+        
     cachedir = "cache"
     cachedir = utils.ensure_dir(cachedir)
     for i in range(0x100, 0x200):
