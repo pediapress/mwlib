@@ -320,8 +320,6 @@ class Application(object):
             return dict(collection_id=collection_id, writer=writer, **kw)
         
         writer = post_data.get('writer', self.default_writer)
-            
-        log.info('render_status %s %s' % (collection_id, writer))
         
         jobid="%s:render-%s" % (collection_id, writer)
         
