@@ -229,7 +229,6 @@ class Application(object):
         colldir = self.get_collection_dir(collection_id)
         
         try:
-            log.info('Creating directory %r' % colldir)
             os.mkdir(colldir)
         except OSError, exc:
             if getattr(exc, 'errno') not in (errno.EEXIST, errno.EISDIR):
