@@ -106,36 +106,55 @@ def json_response(fn):
         return Response(json.dumps(result), content_type='application/json')
     return wrapper
 
+from mwlib import lrucache
+busy=dict()
+collid2qserve = lrucache.lrucache(4000)
 
-busy=False
-def wait_idle():
-    global busy
-    qserve = rpcclient.serverproxy()
+    
+
+def wait_idle((host, port),  busy):
+    ident = (host, port)
+    busy[ident] = True
+    numerrors = 0
+    
+    qserve = rpcclient.serverproxy(host=host, port=port)
     while 1:
         try:
             stats = qserve.getstats()
+            numerrors = 0
             
             numrender = stats.get("busy",  {}).get("render", 0)
-            print "stats:", numrender, stats
-            
+
             if numrender>10:
-                if not busy:
-                    print "SYSTEM OVERLOAD"
-                    busy = True
+                if not busy[ident]:
+                    print "SYSTEM OVERLOADED on %r" % (ident, )
+                    busy[ident] = True
             else:
-                if busy:
-                    print "RESUMING OPERATION"
-                    busy = False
+                if busy[ident]:
+                    print "RESUMING OPERATION on %r" % (ident, )
+                    busy[ident] = False
                     
         except Exception, err:
+            numerrors+=1
+                
             try:
-                print "ERROR in wait_idle:", err
+                if numerrors==2:
+                    busy[ident]=True
+                    print "SYTEM DOWN: %r" % (ident, )
+                print "ERROR in wait_idle for %r:%s" % (ident, err)
             except:
                 pass
         finally:
             gevent.sleep(2)
             
-    
+def choose_idle_qserve():
+    print "choose_idle:", busy
+    import random
+    idle = [k for k, v in busy.items() if not v]
+    print "IDLE:", idle
+    if not idle:
+        return None
+    return random.choice(idle) # XXX probably store number of render jobs in busy
 
 
 class Application(object):
@@ -151,7 +170,7 @@ class Application(object):
         self.report_from_mail = report_from_mail
         self.report_recipients = report_recipients
 
-        self.qserve = rpcclient.serverproxy()
+        # self.qserve = rpcclient.serverproxy()
         
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -182,7 +201,17 @@ class Application(object):
             is_new = True
         else:
             is_new = False
-        
+
+        try:
+            qserve = collid2qserve[collection_id]
+        except KeyError:
+            qserve = choose_idle_qserve()
+            if qserve is None:
+                return self.error_response("system overloaded. please try again later.", queue_full=1)
+            collid2qserve[collection_id] = qserve
+            
+        self.qserve = rpcclient.serverproxy(host=qserve[0], port=qserve[1])
+            
         if not self.check_collection_id(collection_id):
             return Response(status=404)
 
@@ -272,8 +301,8 @@ class Application(object):
         writer = params.writer
         force_render = params.force_render
 
-        if busy:
-            return self.error_response("system overloaded. please try again later.", queue_full=1)
+        # if busy:
+        #     return self.error_response("system overloaded. please try again later.", queue_full=1)
         
         if writer not in name2writer:
             return self.error_response("unknown writer %r" % writer)
@@ -444,14 +473,37 @@ class Application(object):
                          payload=dict(params=params.__dict__))
         return response
 
+def _parse_qs(qs):
+    for i, x in enumerate(qs):
+        if ":" in x:
+            host, port = x.split(":", 1)
+            port = int(port)
+            qs[i] = (host, port)
+        else:
+            qs[i] = (x, 14311)
+    
 def main():
     if 0:
         from gevent.wsgi import WSGIServer
     else:
         from gevent.pywsgi import WSGIServer, Server
         Server.log_message = lambda *args, **kwargs: None
-        
-        
+
+    import argv
+    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
+    qs = []
+    port = 8899
+    for o,a in opts:
+        if o=="--port":
+            port = int(a)
+        elif o=="--qserve":
+            qs.append(a)
+
+    if not qs:
+        qs.append("localhost:14311")
+
+    _parse_qs(qs)
+            
     cachedir = "cache"
     cachedir = utils.ensure_dir(cachedir)
     for i in range(0x100, 0x200):
@@ -462,9 +514,11 @@ def main():
     def app(*args, **kwargs):
         return Application(cachedir)(*args, **kwargs)
     
-    address = "0.0.0.0", 8899
+    address = "0.0.0.0", port
     server = WSGIServer(address, app)
-    gevent.spawn(wait_idle)
+
+    for x in qs:
+        gevent.spawn(wait_idle, x, busy)
     
     try:
         print "listening on %s:%d" % address
