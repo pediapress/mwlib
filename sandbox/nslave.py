@@ -78,9 +78,12 @@ class commands(object):
                 return os.path.join(dir, p)
 
             zip_path = getpath("collection.zip")
-            if os.path.exists(zip_path):
-                return
-
+            if os.path.isdir(dir):
+                if os.path.exists(zip_path):
+                    return
+            else:
+                os.mkdir(dir)
+                
             metabook_path = getpath("metabook.json")
 
             args = ["mw-zip", "-o", zip_path, "-m", metabook_path, "--status", self.statusfile()]

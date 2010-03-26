@@ -221,18 +221,10 @@ class Application(object):
         
         if not collection_id or not collection_id_rex.match(collection_id):
             return False
-        collection_dir = self.get_collection_dir(collection_id)
-        return os.path.exists(collection_dir)
+        return True
     
     def new_collection(self, post_data):
         collection_id = make_collection_id(post_data)
-        colldir = self.get_collection_dir(collection_id)
-        
-        try:
-            os.mkdir(colldir)
-        except OSError, exc:
-            if getattr(exc, 'errno') not in (errno.EEXIST, errno.EISDIR):
-                raise
         return collection_id
     
     def get_path(self, collection_id, filename, ext=None):
