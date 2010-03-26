@@ -156,13 +156,6 @@ class Application(object):
     def __call__(self, environ, start_response):
         request = Request(environ)
 
-        try:
-            log.request_info('remote_addr: %s, referer: %s' % (
-                request.remote_addr, request.referer
-            ))
-        except:
-            pass
-
         # if request.method != 'POST':
         #     response = Response(status=405)
         # else:
