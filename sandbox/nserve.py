@@ -338,7 +338,12 @@ class Application(object):
         if not info:
             jobid="%s:makezip" % (collection_id,)
             res = self.qserve.qinfo(jobid=jobid) or {}
-            info = res.get("info", {})
+            
+            done = res.get("done", False)
+            if not done:
+                info = res.get("info", {})
+            else:
+                info = dict(status="data fetched. waiting for render process..")
         
         return retval(state="progress", status=info)
     
