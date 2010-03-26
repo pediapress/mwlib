@@ -458,7 +458,8 @@ class Application(object):
         return response
 
 def main():
-    from gevent.wsgi import WSGIServer
+    #from gevent.wsgi import WSGIServer
+    from gevent.pywsgi import WSGIServer
 
     cachedir = "cache"
     cachedir = utils.ensure_dir(cachedir)
