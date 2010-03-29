@@ -7,7 +7,6 @@ gevent.monkey.patch_socket()
 # setproctitle.setproctitle("nserve")
 
 import sys
-import errno
 import os
 import re
 import StringIO
@@ -396,6 +395,45 @@ class Application(object):
 
         writer = post_data.get('writer', self.default_writer)
         w=name2writer[writer]
+
+
+        
+        jobid="%s:render-%s" % (collection_id, writer)        
+        res = self.qserve.qinfo(jobid=jobid) or {}
+        download_url = res["result"]["url"]
+
+        print "fetching", download_url
+        f = urllib2.urlopen(download_url)
+        info = f.info()
+
+        response = Response()
+
+        for h in ("Content-Length",): # "Content-Type", "Content-Disposition"):            
+            v = info.getheader(h)
+            if v:
+                print "copy header:", h, v
+                response.headers[h] = v
+
+        if w.content_type:
+            response.content_type = w.content_type
+                
+        if w.file_extension:
+            response.headers['Content-Disposition'] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
+        
+                
+        def readdata():
+            while 1:
+                d = f.read(4096)
+                if not d:
+                    break
+                yield d
+                
+        response.app_iter = readdata()
+        return response
+    
+        
+        
+        
         
         try:
             log.info('download %s %s' % (collection_id, writer))
@@ -484,7 +522,8 @@ def _parse_qs(qs):
     
 def main():
     if 0:
-        from gevent.wsgi import WSGIServer
+        from gevent.wsgi import WSGIServer,  WSGIHandler
+        WSGIHandler.log_request = lambda *args, **kwargs: None
     else:
         from gevent.pywsgi import WSGIServer, Server
         Server.log_message = lambda *args, **kwargs: None
