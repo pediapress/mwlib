@@ -3,6 +3,7 @@
 import os, sys, time, subprocess
 
 cachedir = "cache"
+cacheurl = None
 
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
@@ -109,11 +110,18 @@ class commands(object):
                 return os.path.join(dir, p)
 
             self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ))
-            args = ["mw-render",  "-w",  writer, "-c", getpath("collection.zip"), "-o", getpath("output.%s" % writer),  "--status", self.statusfile()]
+            outfile = getpath("output.%s" % writer)
+            args = ["mw-render",  "-w",  writer, "-c", getpath("collection.zip"), "-o", outfile,  "--status", self.statusfile()]
 
             args.extend(_get_args(**params))
             
             system(args)
+            os.chmod(outfile, 0644)
+            url = cacheurl+"/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
+            return dict(url=url)
+        
+        
+        
             
         return doit(**params)
     
@@ -130,13 +138,19 @@ class commands(object):
         return doit(**params)
 
 def main():
-    global cachedir
+    global cachedir, cacheurl
     import argv
-    opts, args = argv.parse(sys.argv[1:], "--cachedir=")
+    opts, args = argv.parse(sys.argv[1:], "--cachedir= --url=")
     for o, a in opts:
         if o=="--cachedir":
             cachedir = a
-            
+        if o=="--url":
+            cacheurl = a
+
+    if not cacheurl:
+        sys.exit("--url option missing")
+        
+        
         
     from mwlib.async import slave
     slave.main(commands, numprocs=16, argv=args)
