@@ -69,7 +69,7 @@ class worker(object):
         
         
     
-def main(commands, host="localhost", port=None, numthreads=10, numprocs=0, argv=None):
+def main(commands, host="localhost", port=None, numthreads=10, numprocs=0, numgreenlets=0, argv=None):
     if port is None:
         port = 14311
         
@@ -220,12 +220,21 @@ def main(commands, host="localhost", port=None, numthreads=10, numprocs=0, argv=
                 children.remove(pid)
             except KeyError:
                 pass
+
+    def run_with_gevent():
+        import gevent
+        for i in range(numgreenlets):
+            gevent.spawn(start_worker)
             
+        try:
+            while True:
+                time.sleep(2**26)
+        finally:
+            os._exit(0)
             
-                
-            
-            
-    if numprocs>0:
+    if numgreenlets>0:
+        run_with_gevent()
+    elif numprocs>0:
         run_with_procs()
     elif numthreads>0:
         run_with_threads()
