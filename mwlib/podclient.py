@@ -1,7 +1,6 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
-import urllib
-import urllib2
+import os, time, urlparse, urllib, urllib2, httplib
 
 try:
     import json
@@ -38,7 +37,60 @@ class PODClient(object):
                 article = article.encode('utf-8')
             post_data['article'] = article
         self._post(urllib.urlencode(post_data))
-    
+
+    def streaming_post_zipfile(self, filename, fh=None):
+        if fh is None:
+            fh = open(filename, "rb")
+            
+        boundary = "-"*20 + ("%f" % time.time()) + "-"*20
+        
+        items = []
+        items.append("--" + boundary)
+        items.append('Content-Disposition: form-data; name="collection"; filename="collection.zip"')
+        items.append('Content-Type: application/octet-stream')
+        items.append('')
+        items.append('')
+
+        before = "\r\n".join(items)
+
+        items = []
+        items.append('')
+        items.append('--' + boundary + '--')
+        items.append('')
+        after = "\r\n".join(items)
+        
+        clen = len(before)+len(after)+os.path.getsize(filename)
+        
+        print "POSTING TO:", self.posturl
+            
+        pr = urlparse.urlparse(self.posturl)
+        path = pr.path
+        if pr.query:
+            path += "?"+pr.query
+            
+        h = httplib.HTTP(pr.hostname, pr.port)
+        h.putrequest("POST", path)
+        h.putheader("Host", pr.netloc)
+        h.putheader("Content-Length", str(clen))
+        h.putheader("User-Agent", "Python-urllib/2.6")
+        h.putheader("Content-Type", "multipart/form-data; boundary=%s" % boundary)
+        h.endheaders()
+        
+        h.send(before)
+
+        while 1:
+            data = fh.read(4096)
+            if not data:
+                break
+            h.send(data)
+        
+        h.send(after)
+        
+        errcode, errmsg, headers = h.getreply()
+        # h.file.read()
+        
+        print "ERRCODE:", (errcode, errmsg, headers)
+        
     def post_zipfile(self, filename):
         f = open(filename, "rb")
         content_type, data = get_multipart('collection.zip', f.read(), 'collection')
