@@ -88,8 +88,11 @@ class PODClient(object):
         
         errcode, errmsg, headers = h.getreply()
         # h.file.read()
-        
         print "ERRCODE:", (errcode, errmsg, headers)
+        
+        if errcode!=200:
+            raise RuntimeError("upload failed: %r" % (errmsg,))
+        
         
     def post_zipfile(self, filename):
         f = open(filename, "rb")
