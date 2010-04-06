@@ -339,6 +339,7 @@ class Application(object):
             return dict(collection_id=collection_id, writer=writer, **kw)
         
         writer = post_data.get('writer', self.default_writer)
+        w=name2writer[writer]
         
         jobid="%s:render-%s" % (collection_id, writer)
         
@@ -351,9 +352,22 @@ class Application(object):
             return retval(state="failed", error=error)
 
         if done:
-            return retval(state="finished")
+            more = dict()
+            
+            try:
+                if res["result"]:
+                    more["url"] = res["result"]["url"]
+            except KeyError:
+                pass
+            
+            if w.content_type:
+                more["content_type"] = w.content_type
 
-        
+            if w.file_extension:
+                more["content_disposition"] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
+            
+            return retval(state="finished", **more)
+
         if not info:
             jobid="%s:makezip" % (collection_id,)
             res = self.qserve.qinfo(jobid=jobid) or {}
