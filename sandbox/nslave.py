@@ -117,8 +117,9 @@ class commands(object):
             
             system(args)
             os.chmod(outfile, 0644)
+            size = os.path.getsize(outfile)            
             url = cacheurl+"/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
-            return dict(url=url)
+            return dict(url=url, size=size)
         
         
         

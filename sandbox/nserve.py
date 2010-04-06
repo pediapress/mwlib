@@ -357,6 +357,7 @@ class Application(object):
             try:
                 if res["result"]:
                     more["url"] = res["result"]["url"]
+                    more["content_length"] = res["result"]["size"]
             except KeyError:
                 pass
             
