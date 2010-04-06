@@ -808,6 +808,25 @@ class parse_uniq(object):
         sub = _parse_gallery_txt(inner, xopts)
         return T(type=T.t_complex_tag, tagname="gallery", vlist=vlist, children=sub, blocknode=True)
 
+    def create_poem(self, name, vlist, inner, xopts):
+        expander = xopts.expander
+        if expander is not None and inner:
+            inner = expander.parseAndExpand(inner, True)
+
+        res = []
+        res.append(u"\n")
+        for line in inner.split("\n"):
+            if line.strip():
+                res.append(":")
+            if line.startswith(" "):
+                res.append(u"&nbsp;")
+            res.append(line.strip())
+            res.append(u"\n")
+        res.append(u"\n")
+        res = u"".join(res)
+        children = parse_txt(res, xopts)
+        return T(type=T.t_complex_tag, tagname="poem", vlist=vlist, children=children)
+    
     def create_imagemap(self, name, vlist, inner, xopts):
         from mwlib import imgmap
         txt = inner
