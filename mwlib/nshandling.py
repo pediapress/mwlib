@@ -75,10 +75,21 @@ class nshandler(object):
         for k in siteinfo.get("interwikimap", []):
             p[k["prefix"]] = k
 
+        self.set_redirect_matcher(siteinfo)
+
+    def set_redirect_matcher(self, siteinfo):
         if 'general' in siteinfo and siteinfo['general'].get('sitename') == 'Wikipedia' and 'interwikimap' in siteinfo:
             fix_wikipedia_siteinfo(siteinfo)
-
         self.redirect_matcher = get_redirect_matcher(siteinfo, self)
+
+    def __getstate__(self):
+        d=self.__dict__.copy()
+        del d['redirect_matcher']
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.set_redirect_matcher(self.siteinfo)
 
     # workaround for a copy.deepcopy bug in python 2.4
     # should be save to return the instance itself without copying

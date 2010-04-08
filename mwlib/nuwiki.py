@@ -41,12 +41,25 @@ class nuwiki(object):
         self.nshandler = nshandling.nshandler(self.siteinfo)        
         self.en_nshandler = nshandling.get_nshandler_for_lang('en') 
         self.nfo = self._loadjson("nfo.json", {})
+
+        self.set_make_print_template()
+
+    def __getstate__(self):
+        d = self.__dict__.copy()
+        del d['make_print_template']
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.set_make_print_template()
+
+    def set_make_print_template(self):
         p = self.nfo.get("print_template_pattern")
         if p and "$1" in p:
             self.make_print_template = utils.get_print_template_maker(p)
         else:
             self.make_print_template = None
-            
+
     def _loadjson(self, path, default=None):
         path = self._pathjoin(path)
         if self._exists(path):
@@ -240,6 +253,13 @@ class adapt(object):
             return getattr(self.nuwiki, name)
         except AttributeError:
             raise AttributeError()
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+
     def getURL(self, name, revision=None, defaultns=nshandling.NS_MAIN):
         base_url = self.nfo["base_url"]
         if not base_url.endswith("/"):
