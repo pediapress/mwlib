@@ -540,8 +540,13 @@ def main():
         from gevent.wsgi import WSGIServer,  WSGIHandler
         WSGIHandler.log_request = lambda *args, **kwargs: None
     else:
-        from gevent.pywsgi import WSGIServer, Server
-        Server.log_message = lambda *args, **kwargs: None
+        from gevent.pywsgi import WSGIServer
+        try:
+            from gevent.pywsgi import Server
+            Server.log_message = lambda *args, **kwargs: None
+        except ImportError:
+            pass
+
 
     import argv
     opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
