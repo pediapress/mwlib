@@ -536,17 +536,13 @@ def _parse_qs(qs):
             qs[i] = (x, 14311)
     
 def main():
-    if 0:
-        from gevent.wsgi import WSGIServer,  WSGIHandler
-        WSGIHandler.log_request = lambda *args, **kwargs: None
-    else:
-        from gevent.pywsgi import WSGIServer
-        try:
-            from gevent.pywsgi import Server
-            Server.log_message = lambda *args, **kwargs: None
-        except ImportError:
-            pass
+    from gevent import pywsgi as wsgi
+    # from gevent import wsgi
 
+    WSGIServer = wsgi.WSGIServer
+    WSGIHandler = wsgi.WSGIHandler
+
+    WSGIHandler.log_request = lambda *args, **kwargs: None
 
     import argv
     opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
