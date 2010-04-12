@@ -560,3 +560,10 @@ def test_hashmark_link():
     r=core.parse_txt("[[#foo]]")
     core.show(r)
     assert r[0].type==T.t_complex_link, "not a link"
+
+def test_ref_drop_text_newlines():
+    """http://code.pediapress.com/wiki/ticket/812"""
+    r=core.parse_txt("<ref>bar\n\n</ref>")
+    core.show(r)
+    txt = T.join_as_text(core.walknodel(r, lambda x: 1))
+    assert "bar" in txt, "text dropped"
