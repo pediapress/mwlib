@@ -792,7 +792,10 @@ class parse_uniq(object):
         if inner:
             # <ref>* not an item</ref>
             children = parse_txt("<br />"+inner, xopts)
-            del children[0]
+            if children[0].children: # paragraph had been created...
+                del children[0].children[0]
+            else:
+                del children[0]
         else:
             children = []
             
