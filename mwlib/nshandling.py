@@ -65,6 +65,9 @@ class nshandler(object):
     def __init__(self, siteinfo):
         assert siteinfo is not None
 
+        if 'general' in siteinfo and siteinfo['general'].get('server').endswith(".wikipedia.org") and 'interwikimap' in siteinfo:
+            fix_wikipedia_siteinfo(siteinfo)
+
         self.siteinfo = siteinfo
         try:
             self.capitalize = self.siteinfo['general'].get('case') == 'first-letter'
@@ -78,8 +81,6 @@ class nshandler(object):
         self.set_redirect_matcher(siteinfo)
 
     def set_redirect_matcher(self, siteinfo):
-        if 'general' in siteinfo and siteinfo['general'].get('sitename') == 'Wikipedia' and 'interwikimap' in siteinfo:
-            fix_wikipedia_siteinfo(siteinfo)
         self.redirect_matcher = get_redirect_matcher(siteinfo, self)
 
     def __getstate__(self):
