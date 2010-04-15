@@ -65,7 +65,7 @@ class nshandler(object):
     def __init__(self, siteinfo):
         assert siteinfo is not None
 
-        if 'general' in siteinfo and siteinfo['general'].get('server').endswith(".wikipedia.org") and 'interwikimap' in siteinfo:
+        if 'general' in siteinfo and siteinfo['general'].get('server', '').endswith(".wikipedia.org") and 'interwikimap' in siteinfo:
             fix_wikipedia_siteinfo(siteinfo)
 
         self.siteinfo = siteinfo
