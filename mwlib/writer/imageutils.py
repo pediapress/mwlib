@@ -55,7 +55,7 @@ class ImageUtils(object):
             max_w = max_w or self.default_thumb_width
             if fullsize_thumbs:
                 max_w = self.print_width_px
-            if getattr(img_node, 'align', None) != 'center':
+            if getattr(img_node, 'align', None) not in ['center', 'none']:
                 img_node.floating = True
             if getattr(img_node, 'upright', 1):
                 max_w *= getattr(img_node, 'upright', 1)
