@@ -8,6 +8,7 @@
 import os
 import sys
 import urlparse
+import time
 
 from mwlib import metabook, utils, nshandling, conf
 
@@ -27,6 +28,7 @@ class shared_progress(object):
     def __init__(self, status=None):
         self.key2count = {}
         self.status=status
+        self.stime=time.time()
         
     def report(self):
         isatty = getattr(sys.stdout, "isatty", None)
@@ -40,13 +42,24 @@ class shared_progress(object):
         else:
             percent =  100.0*done / total
 
-        if percent<self.last_percent:
-            percent=min(self.last_percent+0.01, 100.0)
+        percent = round(percent, 3)
 
+        needed = time.time()-self.stime
+        if needed<60.0:
+            percent *= needed/60.0
+            
+        if percent<=self.last_percent:
+            if percent>50.0:
+                percent=min(self.last_percent+0.01, 100.0)
+            else:
+                percent=self.last_percent
+
+        
+                
         self.last_percent=percent
             
         if isatty and isatty():
-            msg = "%s/%s %.2f" % (done, total, percent)
+            msg = "%s/%s %.2f %.2fs" % (done, total, percent, needed)
             sys.stdout.write("\x1b[K"+msg+"\r")
             sys.stdout.flush()
 
