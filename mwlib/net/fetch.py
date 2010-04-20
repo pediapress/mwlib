@@ -308,30 +308,8 @@ class fetcher(object):
         jt = self.count_total+len(self.pages_todo)//limit+len(self.revids_todo)//limit
         jt += len(self.title2latest)
 
+        self.progress.set_count(self, self.count_done+qc,  jt+qc)
 
-        if self.progress:
-            self.progress.set_count(self, self.count_done+qc,  jt+qc)
-            return
-        
-                                    
-        
-
-        
-        msg = "%s/%s/%s jobs -- %s/%s running" % (self.count_done+qc, self.count_total+qc, jt+qc, self.api.num_running, self.api.max_connections)
-
-        if jt < 10:
-            progress = self.count_done
-        else:
-            progress =  100.0*self.count_done /  jt
-            
-        if self.status:
-            self.status(status="fetching", progress=progress)
-            
-        isatty = getattr(sys.stdout, "isatty", None)
-        if isatty and isatty():
-            sys.stdout.write("\x1b[K"+msg+"\r")
-            sys.stdout.flush()
-            
     def _got_edits(self, data):
         edits = data.get("pages").values()
         self.edits.extend(edits)
