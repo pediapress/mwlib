@@ -37,7 +37,7 @@ class Status(object):
         return Status(filename=self.filename, podclient=self.podclient, status=self.status, progress_range=progress_range)
     
     def scaleProgress(self, progress):
-        return int(
+        return (
             self.progress_range[0]
             + progress*(self.progress_range[1] - self.progress_range[0])/100
             )
