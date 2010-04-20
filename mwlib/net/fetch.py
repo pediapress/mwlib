@@ -46,12 +46,17 @@ class shared_progress(object):
             self.last_percent=percent
             
         if isatty and isatty():
-            msg = "%s/%s %.2f" % (done, total, percent)
+            msg = "%s/%s %.3f" % (done, total, percent)
             sys.stdout.write("\x1b[K"+msg+"\r")
             sys.stdout.flush()
 
         if self.status:
-            self.status(status="fetching", progress=percent)
+            try:
+                s=self.status.stdout
+                self.status.stdout = None
+                self.status(status="fetching", progress=percent)
+            finally:
+                self.status.stdout = s
 
     def set_count(self, key, done, total):
         self.key2count[key] = (done, total) 

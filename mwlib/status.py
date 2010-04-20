@@ -15,6 +15,8 @@ log = Log('mwlib.status')
 
 class Status(object):
     qproxy = None
+    stdout = sys.stdout
+    
     def __init__(self,
         filename=None,
         podclient=None,
@@ -69,12 +71,13 @@ class Status(object):
         msg.append(self.status.get("article", ""))
         msg = u" ".join(msg).encode("utf-8")
 
-        isatty = getattr(sys.stdout, "isatty", None)
-        if isatty and isatty():
-            sys.stdout.write("\x1b[K"+msg+"\r")
-        else:
-            sys.stdout.write(msg)
-        sys.stdout.flush()
+        if self.stdout:
+            isatty = getattr(self.stdout, "isatty", None)
+            if isatty and isatty():
+                self.stdout.write("\x1b[K"+msg+"\r")
+            else:
+                self.stdout.write(msg)
+            self.stdout.flush()
         
         self.status.update(kwargs)
         
