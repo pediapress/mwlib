@@ -233,6 +233,7 @@ include sandbox/multicoll.py
 include sandbox/mw-serve-stresser.py
 include sandbox/nserve.py
 include sandbox/nslave.py
+include sandbox/postman.py
 include sandbox/rclient
 include sandbox/time-expr.py
 include sandbox/time-parse.py
