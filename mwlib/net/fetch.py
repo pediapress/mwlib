@@ -41,12 +41,12 @@ class shared_progress(object):
             percent =  100.0*done / total
 
         if percent<self.last_percent:
-            percent=self.last_percent
-        else:
-            self.last_percent=percent
+            percent=min(self.last_percent+0.01, 100.0)
+
+        self.last_percent=percent
             
         if isatty and isatty():
-            msg = "%s/%s %.3f" % (done, total, percent)
+            msg = "%s/%s %.2f" % (done, total, percent)
             sys.stdout.write("\x1b[K"+msg+"\r")
             sys.stdout.flush()
 
