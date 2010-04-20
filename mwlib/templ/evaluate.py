@@ -237,15 +237,19 @@ class Expander(object):
         if not name or name.startswith("[[") or "|" in name:
             return None
 
+
         if name.startswith("/"):
             name = self.pagename+name
-            
+            ns = 0
+        else:
+            ns = 10
+
         try:
             return self.parsedTemplateCache[name]
         except KeyError:
             pass
 
-        page = self.db.normalize_and_get_page(name, 10)
+        page = self.db.normalize_and_get_page(name, ns)
         if page:
             raw = page.rawtext
         else:
