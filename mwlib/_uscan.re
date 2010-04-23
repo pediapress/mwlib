@@ -186,7 +186,7 @@ re2c:yyfill:enable = 0 ;
 	}
 /*!re2c
   [ \t]* ":"* "{|"              {++tablemode; RET(t_begin_table);}
-  [ \t]* "|}"              {--tablemode; RET(t_end_table);}
+  [ \t]* "|}"              {if (--tablemode<0) tablemode=0; RET(t_end_table);}
 
   [ \t]* "|" "-"+         
 	{
