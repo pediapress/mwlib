@@ -129,9 +129,9 @@ class parse_sections(object):
             tokens[current.start:i] = [sect] 
             
 
-            while sections and level<sections[-1].level:
+            while sections and level<=sections[-1].level:
                 sections.pop()
-            if sections and level>sections[-1].level:
+            if sections:
                 sections[-1].children.append(tokens[current.start])
                 del tokens[current.start]
                 current.start -= 1
