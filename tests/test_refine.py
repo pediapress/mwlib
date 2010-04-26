@@ -7,7 +7,11 @@ from mwlib.xfail import xfail
 tokenize = core.tokenize
 show = core.show
 T = core.T
-parse_txt = core.parse_txt
+
+def parse_txt(*args, **kwargs):
+    p=core.parse_txt(*args, **kwargs)
+    core.show(p)
+    return p
 
 def empty():
     empty = core.XBunch()
@@ -567,3 +571,13 @@ def test_ref_drop_text_newlines():
     core.show(r)
     txt = T.join_as_text(core.walknodel(r, lambda x: 1))
     assert "bar" in txt, "text dropped"
+
+def test_sections_same_depth():
+    s="""=Level 1=
+foo
+==Level 2A==
+bar
+==Level 2B==
+baz"""
+    r=parse_txt(s)
+    assert len(r)==1, "section not nested"
