@@ -175,6 +175,27 @@ def test_fixTableColspans():
     cell = t.children[0].children[0]
     assert cell.colspan == 2
 
+def test_fixTableColspans2():
+    '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
+    raw = r'''
+{|
+|-
+| colspan="2" | bla1
+|-
+| colspan="3" | bla2
+
+|}
+    '''
+    tree, reports = cleanMarkup(raw)
+    t = tree.getChildNodesByClass(Table)[0]
+    cell = t.children[0].children[0]
+    showTree(t)
+    assert False, 'bla'
+    assert cell.colspan == 2
+
+
+
+
 def test_removeBrokenChildren():
     raw = r'''
 <ref>
