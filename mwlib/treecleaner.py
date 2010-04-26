@@ -62,7 +62,8 @@ class TreeCleaner(object):
                       'fixParagraphs',
                       'simplifyBlockNodes',
                       'removeAbsolutePositionedNode',
-                      'fixNesting', 
+                      'fixNesting',
+                      'unNestEndingCellContent',
                       'removeCriticalTables',
                       'removeTextlessStyles', 
                       'removeBrokenChildren',
@@ -1253,3 +1254,34 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeAbsolutePositionedNode(c)
 
+
+    def _unNestCond(self, node):
+        tables = node.getChildNodesByClass(Table)
+        if tables:
+            for table in tables:
+                if len(table.children) > 20:
+                    return True
+        return False
+
+
+    def unNestEndingCellContent(self, node):
+        '''http://de.wikipedia.org/w/index.php?title=Bahnstrecke_Berlin%E2%80%93Dresden&oldid=72891289'''
+        if node.__class__ == Table and not node.getParentNodesByClass(Table):
+            last_row = node.children[-1]
+            if not last_row or  len(last_row.children) != 1:
+                return
+            last_cell = last_row.children[0]
+            if last_cell.colspan != node.numcols:
+                return
+            if self._unNestCond(last_cell):
+                d = Div()
+                d.border = 1
+                d.vlist = last_cell.vlist
+                for item in last_cell.children:
+                    d.appendChild(item)
+                last_cell.children = []
+                d.moveto(node)
+                self.report('moved content behind table', d)
+
+        for c in node.children:
+            self.unNestEndingCellContent(c)
