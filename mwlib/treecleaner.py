@@ -1271,7 +1271,7 @@ class TreeCleaner(object):
             if not last_row or  len(last_row.children) != 1:
                 return
             last_cell = last_row.children[0]
-            if last_cell.colspan != node.numcols:
+            if last_cell.__class__ != Cell or last_cell.colspan != node.numcols:
                 return
             if self._unNestCond(last_cell):
                 d = Div()
