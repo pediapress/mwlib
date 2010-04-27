@@ -376,10 +376,14 @@ class ParserFunctions(object):
         name = args[0]
         if not name or not self.wikidb:
             return args.get(args[2], "")
-        
-        page=self.wikidb.normalize_and_get_page(name, 0)
 
-        if page:
+        nsnum, suffix, full = self.wikidb.nshandler.splitname(name)
+        if nsnum==-2:
+            exists = bool(self.wikidb.normalize_and_get_image_path(name.split(":")[1]))
+        else:
+            exists = bool(self.wikidb.normalize_and_get_page(name, 0))
+
+        if exists:
             return args[1]
         else:
             return args[2]
