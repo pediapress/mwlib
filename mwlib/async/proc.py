@@ -9,6 +9,8 @@ def got_signal(ev, signum):
     while 1:
         try:
             pid, st = os.waitpid(-1, os.WNOHANG)
+            if pid==0:
+                return
             pid2status[pid].set(st)
         except OSError:
             return
