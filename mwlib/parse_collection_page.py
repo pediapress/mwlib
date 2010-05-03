@@ -1,5 +1,27 @@
-import re
-from mwlib import metabook
+import os, re, binascii
+from mwlib import metabook, expander
+
+uniq = "--%s--" % binascii.hexlify(os.urandom(16))
+
+def extract_metadata(raw, fields, template_name="saved_book"):
+    fields = list(fields)
+    fields.append("")
+
+    templ = "".join(u"%s%s\n{{{%s|}}}\n" % (uniq, f, f) for f in fields)
+    db = expander.DictDB({template_name:templ})
+
+    te = expander.Expander(raw, pagename="", wikidb=db)
+    res = te.expandTemplates()
+
+    d = {}
+    for x in res.split(uniq)[1:-1]:
+        name, val = x.split("\n", 1)
+        val = val.strip()
+        d[name] = val
+
+    return d
+
+
 
 def _buildrex():
     title_rex = '^==(?P<title>[^=].*?[^=])==$'
