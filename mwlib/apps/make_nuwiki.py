@@ -81,6 +81,10 @@ class start_fetcher(object):
         def got_pages(val):
             rawtext = val["pages"].values()[0]["revisions"][0]["*"]
             self.metabook = parse_collection_page(rawtext)
+            p = os.path.join(self.fsout.path, "collectionpage.txt")
+            if isinstance(rawtext, unicode):
+                rawtext=rawtext.encode("utf-8")
+            open(p,"wb").write(rawtext)
             return api
         
         return api.fetch_pages([cp]).addBoth(got_pages)
