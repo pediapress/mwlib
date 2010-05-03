@@ -22,13 +22,13 @@ class DictDB(object):
 
         normd = {}
         for k, v in self.d.items():
-            normd[k.lower()] = v
+            normd[k.lower().replace(" ",  "_")] = v
         self.d = normd
 
         self.siteinfo = get_siteinfo('de')
 
     def normalize_and_get_page(self, title, defaultns=0):
-        return page(self.d.get(title.lower(), u""))
+        return page(self.d.get(title.lower().replace(" ", "_"), u""))
         
     def get_siteinfo(self):
         return self.siteinfo
