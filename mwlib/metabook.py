@@ -81,6 +81,12 @@ class collection(mbobj):
     title = None
     subtitle=None
     editor = None
+    cover_image = None
+    cover_color = None
+    text_color = None
+    description = None
+    sort_as = None
+
     version = 1
     summary = ""
     items = []

@@ -4,6 +4,7 @@
 
 import os
 from mwlib.net import fetch, mwapi
+from mwlib.parse_collection_page import extract_metadata
 from mwlib.metabook import get_licenses, parse_collection_page, collection
 from mwlib import myjson
 from twisted.internet import reactor,  defer
@@ -80,7 +81,16 @@ class start_fetcher(object):
             
         def got_pages(val):
             rawtext = val["pages"].values()[0]["revisions"][0]["*"]
-            self.metabook = parse_collection_page(rawtext)
+            mb = self.metabook = parse_collection_page(rawtext)
+            # XXX: localised template parameter names???
+            meta = extract_metadata(rawtext, ("cover-image", "cover-color", "text-color", "editor", "description", "sort_as"))
+            mb.editor = meta["editor"]
+            mb.cover_image = meta["cover-image"]
+            mb.cover_color = meta["cover-color"]
+            mb.text_color = meta["text-color"]
+            mb.description = meta["description"]
+            mb.sort_as = meta["sort_as"]
+
             p = os.path.join(self.fsout.path, "collectionpage.txt")
             if isinstance(rawtext, unicode):
                 rawtext=rawtext.encode("utf-8")
