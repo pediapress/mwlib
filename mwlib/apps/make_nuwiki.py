@@ -48,6 +48,7 @@ class start_fetcher(object):
                                      print_template_pattern=self.options.print_template_pattern,
                                      template_exclusion_category=self.options.template_exclusion_category,
                                      imagesize=self.options.imagesize,
+                                     cover_image=metabook.cover_image,
                                      fetch_images=not self.options.noimages)
         return self.fetcher.result
     

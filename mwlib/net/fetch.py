@@ -179,10 +179,12 @@ class fetcher(object):
                  progress=None,
                  print_template_pattern=None,
                  template_exclusion_category=None,
+                 cover_image=None,
                  imagesize=800, fetch_images=True):
         self.print_template_pattern = None
         self.template_exclusion_category = None
         self.template_blacklist = None
+        self.cover_image = cover_image
 
         self.pages = pages
         
@@ -427,6 +429,10 @@ class fetcher(object):
         for p in pages:
             images.update(self._extract_title(p.get("images", [])))
             templates.update(self._extract_title(p.get("templates", [])))
+
+        if self.cover_image:
+            images.add(self.nshandler.get_fqname(self.cover_image, 6))
+            self.cover_image = None
 
         for i in images:
             if i not in self.scheduled:
