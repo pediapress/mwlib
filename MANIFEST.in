@@ -32,6 +32,7 @@ include mwlib/apps/serve.py
 include mwlib/apps/watch.py
 include mwlib/async/__init__.py
 include mwlib/async/jobs.py
+include mwlib/async/proc.py
 include mwlib/async/qserve.py
 include mwlib/async/rpcclient.py
 include mwlib/async/rpcserver.py
