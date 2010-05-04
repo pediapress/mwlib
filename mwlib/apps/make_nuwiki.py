@@ -16,7 +16,8 @@ class start_fetcher(object):
     def __init__(self, **kw):
         self.fetcher = None
         self.__dict__.update(kw)
-        
+        self.nfo = {}
+
     def get_api(self):
         api = mwapi.mwapi(self.api_url)
         if self.username:
@@ -28,11 +29,14 @@ class start_fetcher(object):
         metabook=self.metabook
         
         fsout.dump_json(metabook=metabook)
-        nfo = {
-            'format': 'nuwiki',
-            'base_url': self.base_url,
-            'script_extension': self.options.script_extension,
-        }
+        nfo = self.nfo.copy()
+
+        nfo.update({
+                'format': 'nuwiki',
+                'base_url': self.base_url,
+                'script_extension': self.options.script_extension})
+
+
         if self.options.print_template_pattern:
             nfo["print_template_pattern"] = self.options.print_template_pattern
             
@@ -79,7 +83,10 @@ class start_fetcher(object):
         except Exception, err:
             pass
             # print "ERR:", err
-            
+
+        self.nfo["collectionpage"] = cp
+
+
         def got_pages(val):
             rawtext = val["pages"].values()[0]["revisions"][0]["*"]
             mb = self.metabook = parse_collection_page(rawtext)
