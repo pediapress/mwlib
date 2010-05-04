@@ -53,9 +53,9 @@ class server(object):
             self.is_allowed = is_allowed
         
     def run_forever(self):
-        socket.tcp_server(self.sock, self.handle_client)
+        from gevent.server import StreamServer
+        StreamServer(self.sock, self.handle_client).serve_forever()
 
-        
     # def auth():
             # if secret:
             #     random_string = base64.encodestring(os.urandom(16)).strip()
@@ -75,7 +75,8 @@ class server(object):
     def log(self, msg):
         print msg
                     
-    def handle_client(self, client):
+    def handle_client(self, sock, addr):
+        client = (sock, addr)
         if not self.is_allowed(client[1]):
             self.log("+DENY %r" % (client[1], ))
             client[0].close()
