@@ -190,8 +190,7 @@ def test_fixTableColspans2():
     t = tree.getChildNodesByClass(Table)[0]
     cell = t.children[0].children[0]
     showTree(t)
-    assert False, 'bla'
-    assert cell.colspan == 2
+    assert cell.colspan == 1
 
 
 
