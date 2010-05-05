@@ -192,6 +192,41 @@ def test_fixTableColspans2():
     showTree(t)
     assert cell.colspan == 1
 
+def test_fixTableColspans3():
+    '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
+    raw = r'''
+{| cellpadding="0" cellspacing="0" border="0" style="margin:0px; padding:0px; border:0px; background-color:transparent; vertical-align:middle;"
+|-
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | Ägyptische Hieroglyphen können die Funktion von [[Schriftzeichen|Phonogrammen, Ideogrammen]] oder [[Determinativ]]en übernehmen. Die meisten Hieroglyphen können eine oder maximal zwei dieser Funktionen übernehmen, einzelne auch alle drei. Welche Funktion ein Zeichen hat, zeigt der Kontext, in vielen Fällen lassen sich die Verwendungen kaum abgrenzen. So ist das Zeichen <hiero>ra</hiero> Ideogramm in <hiero>ra:Z1</hiero> ''r<span class="Unicode">ˁ(w)</span>'' (Sonnengott) „Re“, in der vollständigeren Schreibung des gleichen Wortes als <hiero>r:a-ra:Z1</hiero> dient es nur als Determinativ; das Zeichen <hiero>pr</hiero> wird im Wort <hiero>pr:r-D54</hiero> ''pr(j)'' „herausgehen“ als Phonogramm ''pr'' aufgefasst, während es in <hiero>pr:Z1</hiero> ''pr(w)'' „Haus“ als Logogramm fungiert. Aufschluss darüber, ob und wie ein Zeichen gelesen werden kann, gibt im Allgemeinen die Zeichenliste der ''Egyptian Grammar'' von [[Alan Gardiner]],<ref>Gardiner 1927</ref> die jedoch nicht vollständig und in Einzelfällen überholt ist.
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+|}
+    '''
+    tree, reports = cleanMarkup(raw)
+    t = tree.getChildNodesByClass(Table)[0]
+    assert t.numcols == 1, 'Empty cells not removed'
+    cell = t.children[0].children[0]
+    showTree(t)
+    assert cell.colspan == 1
+
+
 
 
 
