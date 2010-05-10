@@ -365,9 +365,25 @@ class TreeCleaner(object):
                     if colspan and colspan > maxwidth:
                         self.report('fixed colspan from', cell.vlist.get('colspan', 'undefined'), 'to', maxwidth)
                         cell.vlist['colspan'] = maxwidth
-
-                        
         # /SINGLE CELL COLSPAN
+
+        def emptyEndingCell(row):
+            if not row.children:
+                return False
+            last_cell = row.children[-1]
+            if not last_cell.children:
+                return last_cell
+
+        if node.__class__ == Table:
+            # FIX for: http://de.wikipedia.org/w/index.php?title=Benutzer:Volker.haas/Test&oldid=73993014
+            if len(node.children) == 1 and node.children[0].__class__ == Row:
+                row = node.children[0]
+                cell =  emptyEndingCell(row)
+                while cell:
+                    cell.parent.removeChild(cell)
+                    cell = emptyEndingCell(row)
+                    self.report('removed empty cell in single-row table')
+
         for c in node.children:
             self.fixTableColspans(c)
 
