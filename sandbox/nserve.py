@@ -216,8 +216,12 @@ class Application(object):
         try:
             return method(collection_id, request.params, is_new)
         except Exception, exc:
+            print "ERROR while dispatching %r: %s" % (command, dict(collection_id=collection_id, is_new=is_new, qserve=qserve))
             traceback.print_exc()
             self.send_report_mail('exception', command=command)
+            if command=="download":
+                raise exc
+
             return self.error_response('error executing command %r: %s' % (
                     command, exc,))
     
