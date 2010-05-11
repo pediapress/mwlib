@@ -5,6 +5,7 @@ import gevent.monkey
 gevent.monkey.patch_socket()
 # import setproctitle
 # setproctitle.setproctitle("nserve")
+from geventutil import worker
 
 import sys
 import os
@@ -573,7 +574,7 @@ def main():
     server = WSGIServer(address, app)
 
     for x in qs:
-        gevent.spawn(wait_idle, x, busy)
+        worker.Worker.spawn(wait_idle, x, busy).set_max_rate((5, 0))
     
     try:
         print "listening on %s:%d" % address
