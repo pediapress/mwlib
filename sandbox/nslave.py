@@ -1,19 +1,22 @@
 #! /usr/bin/env python
 
-import os, sys, time, subprocess
+from gevent import monkey
+monkey.patch_all()
+
+import os, sys, time
 
 cachedir = "cache"
 cacheurl = None
+
+from mwlib.async import proc
 
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
 
 def system(args):
     stime=time.time()
-    devnull = open("/dev/null", "r")
-    p = subprocess.Popen(args, stdin=devnull, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    retcode = p.wait()
+
+    retcode, stdout = proc.run_cmd(args)
 
     d = time.time()-stime
 
@@ -26,8 +29,7 @@ def system(args):
     if retcode != 0:
         a(stdout)
         a("\n====================\n")
-        a(stderr)
-        
+
         writemsg()
         raise RuntimeError("command failed: %r" % args)
 
@@ -140,13 +142,16 @@ class commands(object):
 
 def main():
     global cachedir, cacheurl
+    numgreenlets = 10
     import argv
-    opts, args = argv.parse(sys.argv[1:], "--cachedir= --url=")
+    opts, args = argv.parse(sys.argv[1:], "--cachedir= --url= --numprocs=")
     for o, a in opts:
         if o=="--cachedir":
             cachedir = a
         if o=="--url":
             cacheurl = a
+        if o=="--numprocs":
+            numgreenlets = int(a)
 
     if not cacheurl:
         sys.exit("--url option missing")
@@ -154,7 +159,7 @@ def main():
         
         
     from mwlib.async import slave
-    slave.main(commands, numprocs=16, argv=args)
+    slave.main(commands, numgreenlets=numgreenlets, argv=args)
     
 if __name__=="__main__":        
     main()
