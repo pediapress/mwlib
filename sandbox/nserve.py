@@ -148,10 +148,8 @@ def wait_idle((host, port),  busy):
             gevent.sleep(2)
             
 def choose_idle_qserve():
-    print "choose_idle:", busy
     import random
     idle = [k for k, v in busy.items() if not v]
-    print "IDLE:", idle
     if not idle:
         return None
     return random.choice(idle) # XXX probably store number of render jobs in busy
