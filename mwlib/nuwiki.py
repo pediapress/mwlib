@@ -35,7 +35,8 @@ class nuwiki(object):
         
         self.revisions = {}
         self._read_revisions()
-        
+
+        self.imageinfo = self._loadjson("imageinfo.json", {})
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
         self.nshandler = nshandling.nshandler(self.siteinfo)        

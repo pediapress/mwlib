@@ -181,6 +181,7 @@ class fetcher(object):
                  template_exclusion_category=None,
                  cover_image=None,
                  imagesize=800, fetch_images=True):
+        self.imageinfo = {}
         self.print_template_pattern = None
         self.template_exclusion_category = None
         self.template_blacklist = None
@@ -483,6 +484,7 @@ class fetcher(object):
             if not ii:
                 continue
             ii = ii[0]
+            self.imageinfo[title] = ii
             thumburl = ii.get("thumburl", None)
 
             if thumburl is None: # fallback for old mediawikis
@@ -674,6 +676,7 @@ class fetcher(object):
         self.fsout.write_edits(self.edits)
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
+        self.fsout.dump_json(imageinfo=self.imageinfo)
         if self.fsout.nfo and self.print_template_pattern:
             self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()
