@@ -89,6 +89,7 @@ class TreeCleaner(object):
                       'buildDefinitionLists',
                       'restrictChildren',
                       'fixReferenceNodes',
+                      'removeBrokenChildren',
                       'fixNesting', # pull DefinitionLists out of Paragraphs
                       'fixPreFormatted',
                       'fixListNesting',
@@ -148,7 +149,7 @@ class TreeCleaner(object):
                                   Paragraph:[PreFormatted],
                                   Section:[PreFormatted],
                                   Gallery:[PreFormatted, DefinitionDescription, DefinitionList, DefinitionTerm],
-                                  Table:[DefinitionList, DefinitionDescription]
+                                  Table:[DefinitionList, DefinitionDescription],
                                   }
         self.forbidden_parents[Source].append(PreFormatted)
 
