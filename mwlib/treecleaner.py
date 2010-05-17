@@ -171,6 +171,7 @@ class TreeCleaner(object):
                             ReferenceList: [Reference],
                             Teletyped: [Source],
                             Table:[ImageLink],
+                            Reference:[Reference],
                             }
 
         self.removeNodesAllChildren = {Table:[ImageLink], # used to indicate that children should be removed
