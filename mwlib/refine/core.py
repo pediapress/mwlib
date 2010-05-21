@@ -802,6 +802,7 @@ class parse_uniq(object):
         return T(type=T.t_complex_tag, tagname="ref", vlist=vlist, children=children)
 
     def create_timeline(self, name, vlist, inner, xopts):
+        inner = util.replace_html_entities(util.remove_nowiki_tags(inner))
         return T(type=T.t_complex_tag, tagname="timeline", vlist=vlist, timeline=inner, blocknode=True)
 
     def create_math(self, name, vlist, inner, xopts):
