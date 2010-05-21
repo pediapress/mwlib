@@ -11,7 +11,26 @@ import tempfile
 import subprocess
 from hashlib import md5
 
-    
+font = None
+
+def _setupenv():
+    global font
+
+    if "GDFONTPATH" in os.environ:
+        font = "FreeSans"
+        return
+
+    paths = [os.path.expanduser("~/mwlibfonts/freefont"),
+             "/usr/share/fonts/TTF",
+             "/usr/share/fonts/truetype/freefont"]
+
+    for p in paths:
+        if os.path.exists(os.path.join(p, "FreeSans.ttf")):
+            os.environ["GDFONTPATH"] = p
+            font = "FreeSans"
+
+_setupenv()
+
 _basedir = None
 def _get_global_basedir():
     global _basedir
@@ -41,7 +60,7 @@ def drawTimeline(script, basedir=None):
     open(scriptfile, 'w').write(script)
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
     
-    err = os.system("perl %s -P /usr/bin/ploticus -T %s -i %s" % (et, basedir, scriptfile))
+    err = os.system("perl %s -P /usr/bin/ploticus -f %s -T %s -i %s" % (et, font or "ascii", basedir, scriptfile))
     if err != 0:
         return None
 
