@@ -3406,7 +3406,7 @@ sub WritePlotFile
 # $cmd = "$pl $map -" . $fmt . " -o $file_bitmap $file_script -tightcrop" ; # -v $file_bitmap" ;
 # $cmd = "$pl $map -" . $fmt . " -o $file_bitmap $file_script -tightcrop -diagfile $file_pl_info -errfile $file_pl_err" ;
   $cmd = EscapeShellArg($pl) . " $map -" . $fmt . " -o " .
-    EscapeShellArg($file_bitmap) . " " . EscapeShellArg($file_script) . " -tightcrop -font " . EscapeShellArg($font_file);
+    EscapeShellArg($file_bitmap) . " " . EscapeShellArg($file_script) . " -scale 3 -tightcrop -font " . EscapeShellArg($font_file);
   print "$cmd\n";
   system ($cmd) ;
 
