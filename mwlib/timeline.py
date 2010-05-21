@@ -45,18 +45,6 @@ def drawTimeline(script, basedir=None):
     if err != 0:
         return None
 
-    svgfile = os.path.join(basedir, ident+'.svg')
-    if os.path.exists(svgfile):
-        try:
-            subprocess.call(['convert',
-                             '-density', '200',
-                             svgfile,
-                             pngfile                         
-                             ])
-        except OSError:
-            pass
-        os.unlink(svgfile)
-
     if os.path.exists(pngfile):
         return pngfile
 
