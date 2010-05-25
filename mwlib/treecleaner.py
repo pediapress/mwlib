@@ -1285,6 +1285,8 @@ class TreeCleaner(object):
     def unNestEndingCellContent(self, node):
         '''http://de.wikipedia.org/w/index.php?title=Bahnstrecke_Berlin%E2%80%93Dresden&oldid=72891289'''
         if node.__class__ == Table and not node.getParentNodesByClass(Table):
+            if not node.children:
+                return
             last_row = node.children[-1]
             if not last_row or  len(last_row.children) != 1:
                 return
