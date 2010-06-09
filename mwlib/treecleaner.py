@@ -410,7 +410,7 @@ class TreeCleaner(object):
         # "not 'box' in node.attr(class)" is a hack to detect infoboxes and thelike. they are not split into divs.
         # tables like this should be detected and marked in a separate module probably
         single_col = node.__class__ == Table and node.numcols == 1
-        is_long = len(node.getAllDisplayText()) > 500
+        is_long = len(node.getAllDisplayText()) > 2500
         contains_gallery = len(node.getChildNodesByClass(Gallery)) > 0
         if single_col:
             all_images = True
