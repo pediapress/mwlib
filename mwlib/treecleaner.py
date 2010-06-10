@@ -1008,6 +1008,9 @@ class TreeCleaner(object):
         name2children = {}
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
+            if ref_name != ref_name.strip('"'):
+                ref_name = ref_name.strip('"')
+                ref_node.vlist['name'] = ref_name
             if ref_name and ref_node.children and not name2children.has_key(ref_name):
                 name2children[ref_name] = ref_node.children
 
