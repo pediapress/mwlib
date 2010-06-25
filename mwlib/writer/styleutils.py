@@ -184,7 +184,7 @@ def scaleLength(length_str):
     if unit == 'pt':
         return length
     elif unit == 'px':
-        return length * 10/12
+        return length * 12/16
     elif unit == 'em':
-        return length * 10
+        return length * 9.6
     return 0
