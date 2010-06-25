@@ -177,14 +177,16 @@ def parseLength(txt):
         except ValueError:
             length = None
     return (length, unit)
-    
+
+mw_px2pt = 12/16
+mw_em2pt = 9.6
             
 def scaleLength(length_str):
     length, unit = parseLength(length_str)
     if unit == 'pt':
         return length
     elif unit == 'px':
-        return length * 12/16
+        return length * mw_px2pt
     elif unit == 'em':
-        return length * 9.6
+        return length * mw_em2pt
     return 0
