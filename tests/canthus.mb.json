@@ -1,7 +1,7 @@
 {
     "items": [
         {
-            "content-type": "text/x-wiki", 
+            "content_type": "text/x-wiki",
             "currentVersion": 1, 
             "latest": 300591834, 
             "revision": 300591834, 

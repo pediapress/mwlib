@@ -50,12 +50,12 @@ test_metabook = {
                 {
                     'type': 'article',
                     'title': 'Article 1',
-                    'content-type': 'text/x-wiki',
+                    'content_type': 'text/x-wiki',
                 },
                 {
                     'type': 'article',
                     'title': 'Article 2',
-                    'content-type': 'text/x-wiki',
+                    'content_type': 'text/x-wiki',
                 },
             ],
         },
@@ -67,7 +67,7 @@ test_metabook = {
                     'type': 'article',
                     'title': 'Article 3',
                     'displaytitle': 'Display Title',
-                    'content-type': 'text/x-wiki',
+                    'content_type': 'text/x-wiki',
                 },
             ],
         },
