@@ -83,7 +83,7 @@ class mwapi(object):
     
     def do_request(self, query_continue=True, **kwargs):
         last_qc = None
-        
+        action = kwargs["action"]
         retval = {}
         todo = kwargs
         while todo is not None:
@@ -94,7 +94,7 @@ class mwapi(object):
             error = data.get("error")
             if error:
                 raise RuntimeError("%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs)))
-            merge_data(retval, data["query"])
+            merge_data(retval, data[action])
             
             qc = data.get("query-continue", {}).values()
             

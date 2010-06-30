@@ -90,7 +90,7 @@ type (string):
 
     Fixed value "article"
 
-content-type (string):
+content_type (string):
 
     Fixed value "text/x-wiki"
 
@@ -122,7 +122,7 @@ authors (list of strings):
 source-url (string)
 
     URL of source wiki. This URL is the key to an item in the sources dictionary
-    in the content.json object of the ZIP file (see zipfile.txt).
+    in the content.json object of the ZIP file.
 
 
 Chapter
@@ -214,7 +214,7 @@ Given in `JSON`_ notation::
             {
                 "type": "article",
                 "title": "Top-level Article",
-                "content-type": "text/x-wiki"
+                "content_type": "text/x-wiki"
             },
             {
                 "type": "chapter",
@@ -225,13 +225,13 @@ Given in `JSON`_ notation::
                         "title": "First Article in Chapter",
                         "revision": "1234",
                         "timestamp": 122331212312,
-                        "content-type": "text/x-wiki"
+                        "content_type": "text/x-wiki"
                         "source-url": "http://en.wikipedia.org/wiki/Main_Page",
                     },
                     {
                         "type": "article",
                         "title": "Second Article in Chapter",
-                        "content-type": "text/x-wiki"
+                        "content_type": "text/x-wiki"
                         "source-url": "http://en.wikipedia.org/wiki/Main_Page",
                     }
                 ]

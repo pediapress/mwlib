@@ -13,7 +13,6 @@ include docs/metabook.txt
 include docs/writers.html
 include docs/writers.txt
 include docs/zipfile.html
-include docs/zipfile.txt
 include ez_setup.py
 include mwlib/EasyTimeline.pl
 include mwlib/__init__.py
