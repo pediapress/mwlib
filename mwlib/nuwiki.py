@@ -205,7 +205,10 @@ def extract_member(zipfile, member, dstdir):
 
     assert dstdir.endswith(os.path.sep), "/ missing at end"
     
-    targetpath = os.path.normpath(os.path.join(dstdir, member.filename))
+    fn = member.filename
+    if isinstance(fn, str):
+        fn = unicode(fn, 'utf-8')
+    targetpath = os.path.normpath(os.path.join(dstdir, fn))
     
     if not targetpath.startswith(dstdir):
         raise RuntimeError("bad filename in zipfile %r" % (targetpath, ))
