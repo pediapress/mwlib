@@ -179,7 +179,7 @@ class mwapi(object):
 
         return self.num_running < self.max_connections
 
-    def login(self, username, password, domain=None):
+    def login(self, username, password, domain=None, lgtoken=None):
         args = dict(action="login",
                     lgname=username.encode("utf-8"), 
                     lgpassword=password.encode("utf-8"), 
@@ -188,11 +188,18 @@ class mwapi(object):
         
         if domain is not None:
             args['lgdomain'] = domain.encode('utf-8')
+
+        if lgtoken is not None:
+            args["lgtoken"] = lgtoken.encode("utf-8")
+
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         postdata = urllib.urlencode(args)
         
         def got_page(res):
             res = loads(res)
+            if res["login"]["result"]=="NeedToken" and lgtoken is None:
+                return self.login(username, password, domain=domain, lgtoken=res["login"]["token"])
+
             if res["login"]["result"]=="Success":
                 return self
             raise RuntimeError("login failed: %r" % (res, ))
