@@ -195,7 +195,17 @@ class Main(object):
                 else:
                     f.write('traceback\n')
                     traceback.print_exc(file=f) 
-                f.write("sys.argv=%r\n" % (sys.argv, ))
+                argv = [sys.argv[0]]
+                skip = False
+                for arg in sys.argv[1:]:
+                    if arg == '--password':
+                        skip = True
+                    elif skip:
+                        skip = False
+                        argv.append('{OMITTED}')
+                        continue
+                    argv.append(arg)
+                f.write("sys.argv=%r\n" % (argv, ))
                 f.close()
                 os.rename(tmpfile, options.error_file)
             raise
