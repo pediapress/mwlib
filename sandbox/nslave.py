@@ -42,7 +42,8 @@ def _get_args(writer_options=None,
               print_template_prefix=None,
               print_template_pattern=None,
               language=None,
-              zip_only=False, 
+              zip_only=False,
+              login_credentials=None,
               **kw):
     
     args = []
@@ -56,6 +57,13 @@ def _get_args(writer_options=None,
         args.extend(['--print-template-prefix', print_template_prefix])
     if print_template_pattern:
         args.extend(['--print-template-pattern', print_template_pattern])
+
+    if login_credentials:
+        username, password, domain = (login_credentials.split(":", 3)+[None]*3)[:3]
+        assert username and password, "bad login_credentials"
+        args.extend(["--username", username, "--password", password])
+        if domain:
+            args.extend(["--domain", domain])
 
     if zip_only:
         return args
