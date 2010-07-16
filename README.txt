@@ -90,6 +90,45 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2010-7-16 release 0.12.13
+--------------------------
+- omit passwords from error file
+- make login work with latest mediawiki.
+- use content_type, not content-type in metabooks
+- filter crap from ref node names
+- try to set GDFONTPATH to some sane value. call EasyTimeline with font argument.
+- do not scale easytimeline images after rendering rather scale then in EasyTimeline.pl
+- update EasyTimeline to 1.13
+- another fix for nested references
+- fix for broken tables
+- make #IFEXIST handle images
+- add treecleaner method to avoid large cells
+- fix img alignment
+- fix nesting of section with same level
+- do not let tablemode get negative.
+- fix #815
+- call fix_wikipedia_siteinfo based on contents of server (instead of sitename)
+- workaround for broken interwikimap. fixes #807
+- handle the case, where the <br> ends up in a new paragraph. fixes #804
+- move the poem tag implementation to mwlib.refine.core and make it expand templates
+- add #ifeq node. fixes #800
+- fix for images with spaces in file extensions
+- fix and test for #795
+- pull tables out of DefinitionDescriptions
+- add getVerticalAlign to styleutils
+- remove tables from image captions
+- remove --clean-cache option to mw-serve
+- allow floats as --purge-cache argument
+- workaround for buggy lockfile module.
+- implement DISPLAYTITLE
+- generate higher resolution timelines
+- handle abbr and hiero tags
+- make sure print_template_pattern is written to nfo.json, when
+  getting it as part of the collection params
+- relax odfpy requirement a bit
+- make hash-mark only links work again
+- remove empty images
+
 2009-12-16 release 0.12.12
 --------------------------
 - dont remove sections containing only images.
