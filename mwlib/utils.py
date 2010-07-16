@@ -527,3 +527,18 @@ def pdf2txt(path):
         content.append(pdf.getPage(i).extractText())
 
     return "\n".join(content)
+
+
+
+def garble_password(argv):
+    argv = list(argv)
+    idx = 0
+    while True:
+        try:
+            idx = argv[idx:].index('--password') + 1
+        except ValueError:
+            break
+        if idx >= len(argv):
+            break
+        argv[idx] = '{OMITTED}'
+    return argv
