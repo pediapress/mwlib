@@ -9,6 +9,7 @@ cachedir = "cache"
 cacheurl = None
 
 from mwlib.async import proc
+from mwlib.utils import garble_password
 
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
@@ -20,9 +21,10 @@ def system(args):
 
     d = time.time()-stime
 
+    pub_args = garble_password(args)
     msg = []
     a = msg.append
-    a("%s %s %r\n" % (retcode, d, args))
+    a("%s %s %r\n" % (retcode, d, pub_args))
         
     writemsg = lambda: sys.stderr.write("".join(msg))
     
@@ -31,7 +33,7 @@ def system(args):
         a("\n====================\n")
 
         writemsg()
-        raise RuntimeError("command failed: %r" % args)
+        raise RuntimeError("command failed: %r" % pub_args)
 
     writemsg()
     
