@@ -278,6 +278,7 @@ class mwapi(object):
         
         retval = {}
         last_qc = [None]
+        action = kwargs["action"]
 
         def got_err(err):
             result.errback(err)
@@ -293,7 +294,7 @@ class mwapi(object):
             if error:
                 raise RuntimeError("%r: [fetching %r]" % (error.get("info", ""), self._build_url(**kwargs)))
             
-            merge_data(retval, data["query"])
+            merge_data(retval, data[action])
             
             qc = data.get("query-continue", {}).values()
             
