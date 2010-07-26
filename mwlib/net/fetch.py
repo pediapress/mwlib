@@ -181,6 +181,8 @@ class fetcher(object):
                  template_exclusion_category=None,
                  cover_image=None,
                  imagesize=800, fetch_images=True):
+        self.parsed_html = []
+
         self.imageinfo = {}
         self.print_template_pattern = None
         self.template_exclusion_category = None
@@ -250,6 +252,9 @@ class fetcher(object):
 
             titles, revids = self._split_titles_revids(pages)
 
+            self.fetch_html("page", titles)
+            self.fetch_html("oldid", revids)
+
             self.fetch_used("titles", titles)
             self.fetch_used("revids", revids)
 
@@ -262,6 +267,20 @@ class fetcher(object):
 
         self.report()
         self.dispatch()
+
+    def fetch_html(self, name, lst):
+        def got_html(res):
+            self.parsed_html.append(res)
+            return res
+
+        def doit():
+            dl = []
+            for c in lst:
+                kw = {name: c}
+                dl.append(self._refcall(lambda: self.api.do_request(action="parse", redirects="1", **kw).addCallback(got_html)))
+            return defer.DeferredList(dl)
+
+        return self._refcall(lambda: doit())
 
     def fetch_used(self, name, lst):
         def doit():
@@ -677,6 +696,7 @@ class fetcher(object):
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
         self.fsout.dump_json(imageinfo=self.imageinfo)
+        self.fsout.dump_json(parsed_html=self.parsed_html)
         if self.fsout.nfo and self.print_template_pattern:
             self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()
