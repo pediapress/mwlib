@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import os, signal
-from gevent import socket, core, event
+from gevent import socket, core, event, Timeout
 
 pid2status = {}
 
@@ -17,7 +17,7 @@ def got_signal(ev, signum):
 
 core.event(core.EV_SIGNAL|core.EV_PERSIST, signal.SIGCHLD, got_signal).add()
 
-def run_cmd(args):
+def run_cmd(args, timeout=None):
     sp = socket.socketpair()
     pid = os.fork()
     if pid==0:
@@ -33,15 +33,27 @@ def run_cmd(args):
     sp[1].close()
 
     chunks = []
-    while 1:
-        chunk = sp[0].recv(4096)
-        if not chunk:
-            break
-        chunks.append(chunk)
 
-    output = "".join(chunks)
-    del chunks, chunk
+    timeout = Timeout(timeout)
+    timeout.start()
+    try:
+        while 1:
+            chunk = sp[0].recv(4096)
+            if not chunk:
+                break
+            chunks.append(chunk)
 
-    st = pid2status[pid].get()
-    del pid2status[pid]
-    return st, output
+        st = pid2status[pid].get()
+        del pid2status[pid]
+
+        return st, "".join(chunks)
+    except Timeout, t:
+        if t is not timeout:
+            raise
+
+    os.kill(pid, 9)
+
+    with Timeout(1):
+        st = pid2status[pid].get()
+        del pid2status[pid]
+        return st, "".join(chunks)
