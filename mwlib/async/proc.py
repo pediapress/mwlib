@@ -50,6 +50,8 @@ def run_cmd(args, timeout=None):
     except Timeout, t:
         if t is not timeout:
             raise
+    finally:
+        timeout.cancel()
 
     os.kill(pid, 9)
 
