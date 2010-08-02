@@ -14,10 +14,10 @@ from mwlib.utils import garble_password
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
 
-def system(args):
+def system(args, timeout=None):
     stime=time.time()
 
-    retcode, stdout = proc.run_cmd(args)
+    retcode, stdout = proc.run_cmd(args, timeout=timeout)
 
     d = time.time()-stime
 
@@ -110,7 +110,7 @@ class commands(object):
                 f.write(metabook_data)
                 f.close()
 
-            system(args)
+            system(args, timeout=90.0)
 
         return doit(**params)
     
