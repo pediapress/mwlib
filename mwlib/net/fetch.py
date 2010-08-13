@@ -269,7 +269,8 @@ class fetcher(object):
         self.dispatch()
 
     def fetch_html(self, name, lst):
-        def got_html(res):
+        def got_html(res,value):
+            res[name] = value
             self.parsed_html.append(res)
             return res
 
@@ -277,7 +278,7 @@ class fetcher(object):
             dl = []
             for c in lst:
                 kw = {name: c}
-                dl.append(self._refcall(lambda: self.api.do_request(action="parse", redirects="1", **kw).addCallback(got_html)))
+                dl.append(self._refcall(lambda: self.api.do_request(action="parse", redirects="1", **kw).addCallback(got_html,c)))
             return defer.DeferredList(dl)
 
         return self._refcall(lambda: doit())
