@@ -25,6 +25,8 @@ def run_cmd(args, timeout=None):
         try:
             os.dup2(sp[1].fileno(), 1)
             os.dup2(sp[1].fileno(), 2)
+            sp[0].close()
+            sp[1].close()
             os.execvp(args[0], args)
         finally:
             os._exit(10)
