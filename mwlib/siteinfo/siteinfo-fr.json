@@ -1,22 +1,23 @@
 {
     "general": {
         "articlepath": "/wiki/$1", 
-        "base": "http://fr.wikipedia.org/wiki/Accueil", 
+        "base": "http://fr.wikipedia.org/wiki/Wikip%C3%A9dia:Accueil_principal", 
         "case": "first-letter", 
         "dbtype": "mysql", 
         "dbversion": "4.0.40-wikimedia-log", 
         "fallback8bitEncoding": "windows-1252", 
-        "generator": "MediaWiki 1.16alpha", 
+        "generator": "MediaWiki 1.16wmf4", 
         "lang": "fr", 
-        "mainpage": "Accueil", 
+        "mainpage": "Wikip\u00e9dia:Accueil principal", 
         "phpsapi": "apache2handler", 
-        "phpversion": "5.2.4-2ubuntu5wm1", 
-        "rev": 52086, 
+        "phpversion": "5.2.4-2ubuntu5.7wm1", 
+        "rev": 71190, 
         "rights": "Creative Commons Attribution-Share Alike 3.0 Unported", 
         "script": "/w/index.php", 
         "scriptpath": "/w", 
         "server": "http://fr.wikipedia.org", 
         "sitename": "Wikip\u00e9dia", 
+        "time": "2010-08-26T15:04:55Z", 
         "timeoffset": 120, 
         "timezone": "Europe/Paris", 
         "variantarticlepath": false, 
@@ -1454,7 +1455,7 @@
             "url": "http://ksh.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Kurd\u00ee / \u0643\u0648\u0631\u062f\u06cc", 
+            "language": "Kurd\u00ee", 
             "local": "", 
             "prefix": "ku", 
             "url": "http://ku.wikipedia.org/wiki/$1"
@@ -1777,7 +1778,7 @@
             "url": "http://myv.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "\u0645\u064e\u0632\u0650\u0631\u0648\u0646\u064a", 
+            "language": "\u0645\u0627\u0632\u0650\u0631\u0648\u0646\u06cc", 
             "local": "", 
             "prefix": "mzn", 
             "url": "http://mzn.wikipedia.org/wiki/$1"
@@ -2712,7 +2713,7 @@
             "url": "http://wiki.toolserver.org/view/$1"
         }, 
         {
-            "language": "Tatar\u00e7a/\u0422\u0430\u0442\u0430\u0440\u0447\u0430", 
+            "language": "\u0422\u0430\u0442\u0430\u0440\u0447\u0430/Tatar\u00e7a", 
             "local": "", 
             "prefix": "tt", 
             "url": "http://tt.wikipedia.org/wiki/$1"
@@ -3273,6 +3274,156 @@
     "magicwords": [
         {
             "aliases": [
+                "expr"
+            ], 
+            "name": "expr"
+        }, 
+        {
+            "aliases": [
+                "if"
+            ], 
+            "name": "if"
+        }, 
+        {
+            "aliases": [
+                "ifeq"
+            ], 
+            "name": "ifeq"
+        }, 
+        {
+            "aliases": [
+                "ifexpr"
+            ], 
+            "name": "ifexpr"
+        }, 
+        {
+            "aliases": [
+                "iferror"
+            ], 
+            "name": "iferror"
+        }, 
+        {
+            "aliases": [
+                "switch"
+            ], 
+            "name": "switch"
+        }, 
+        {
+            "aliases": [
+                "#default"
+            ], 
+            "name": "default"
+        }, 
+        {
+            "aliases": [
+                "ifexist"
+            ], 
+            "name": "ifexist"
+        }, 
+        {
+            "aliases": [
+                "time"
+            ], 
+            "name": "time"
+        }, 
+        {
+            "aliases": [
+                "timel"
+            ], 
+            "name": "timel"
+        }, 
+        {
+            "aliases": [
+                "rel2abs"
+            ], 
+            "name": "rel2abs"
+        }, 
+        {
+            "aliases": [
+                "titleparts"
+            ], 
+            "name": "titleparts"
+        }, 
+        {
+            "aliases": [
+                "len"
+            ], 
+            "name": "len"
+        }, 
+        {
+            "aliases": [
+                "pos"
+            ], 
+            "name": "pos"
+        }, 
+        {
+            "aliases": [
+                "rpos"
+            ], 
+            "name": "rpos"
+        }, 
+        {
+            "aliases": [
+                "sub"
+            ], 
+            "name": "sub"
+        }, 
+        {
+            "aliases": [
+                "count"
+            ], 
+            "name": "count"
+        }, 
+        {
+            "aliases": [
+                "replace"
+            ], 
+            "name": "replace"
+        }, 
+        {
+            "aliases": [
+                "explode"
+            ], 
+            "name": "explode"
+        }, 
+        {
+            "aliases": [
+                "categorytree"
+            ], 
+            "name": "categorytree"
+        }, 
+        {
+            "aliases": [
+                "noplayer"
+            ], 
+            "name": "ogg_noplayer"
+        }, 
+        {
+            "aliases": [
+                "noicon"
+            ], 
+            "name": "ogg_noicon"
+        }, 
+        {
+            "aliases": [
+                "thumbtime=$1"
+            ], 
+            "name": "ogg_thumbtime"
+        }, 
+        {
+            "aliases": [
+                "UseLiquidThreads"
+            ], 
+            "name": "useliquidthreads"
+        }, 
+        {
+            "aliases": [
+                "lqtpagelimit"
+            ], 
+            "name": "lqtpagelimit"
+        }, 
+        {
+            "aliases": [
                 "#REDIRECTION", 
                 "#REDIRECT"
             ], 
@@ -3326,11 +3477,20 @@
         {
             "aliases": [
                 "MOISACTUEL", 
+                "MOIS2ACTUEL", 
                 "CURRENTMONTH", 
                 "CURRENTMONTH2"
             ], 
             "case-sensitive": "", 
             "name": "currentmonth"
+        }, 
+        {
+            "aliases": [
+                "MOIS1ACTUEL", 
+                "CURRENTMONTH1"
+            ], 
+            "case-sensitive": "", 
+            "name": "currentmonth1"
         }, 
         {
             "aliases": [
@@ -3359,6 +3519,7 @@
         {
             "aliases": [
                 "JOURACTUEL", 
+                "JOUR1ACTUEL", 
                 "CURRENTDAY"
             ], 
             "case-sensitive": "", 
@@ -3407,11 +3568,20 @@
         {
             "aliases": [
                 "MOISLOCAL", 
+                "MOIS2LOCAL", 
                 "LOCALMONTH", 
                 "LOCALMONTH2"
             ], 
             "case-sensitive": "", 
             "name": "localmonth"
+        }, 
+        {
+            "aliases": [
+                "MOIS1LOCAL", 
+                "LOCALMONTH1"
+            ], 
+            "case-sensitive": "", 
+            "name": "localmonth1"
         }, 
         {
             "aliases": [
@@ -3440,6 +3610,7 @@
         {
             "aliases": [
                 "JOURLOCAL", 
+                "JOUR1LOCAL", 
                 "LOCALDAY"
             ], 
             "case-sensitive": "", 
@@ -3791,6 +3962,7 @@
         {
             "aliases": [
                 "ligne de base", 
+                "base", 
                 "baseline"
             ], 
             "case-sensitive": "", 
@@ -3882,6 +4054,13 @@
         }, 
         {
             "aliases": [
+                "ESPACENX:", 
+                "NSE:"
+            ], 
+            "name": "nse"
+        }, 
+        {
+            "aliases": [
                 "URLLOCALE:", 
                 "LOCALURL:"
             ], 
@@ -3917,6 +4096,13 @@
         }, 
         {
             "aliases": [
+                "CHEMINSTYLE", 
+                "STYLEPATH"
+            ], 
+            "name": "stylepath"
+        }, 
+        {
+            "aliases": [
                 "GRAMMAIRE:", 
                 "GRAMMAR:"
             ], 
@@ -3928,6 +4114,24 @@
                 "GENDER:"
             ], 
             "name": "gender"
+        }, 
+        {
+            "aliases": [
+                "__SANSCONVERSIONTITRE__", 
+                "__SANSCT__", 
+                "__NOTITLECONVERT__", 
+                "__NOTC__"
+            ], 
+            "name": "notitleconvert"
+        }, 
+        {
+            "aliases": [
+                "__SANSCONVERSIONCONTENU__", 
+                "__SANSCC__", 
+                "__NOCONTENTCONVERT__", 
+                "__NOCC__"
+            ], 
+            "name": "nocontentconvert"
         }, 
         {
             "aliases": [
@@ -3972,6 +4176,7 @@
         {
             "aliases": [
                 "JOURVERSION", 
+                "JOUR1VERSION", 
                 "REVISIONDAY"
             ], 
             "case-sensitive": "", 
@@ -4008,6 +4213,14 @@
             ], 
             "case-sensitive": "", 
             "name": "revisiontimestamp"
+        }, 
+        {
+            "aliases": [
+                "UTILISATEURVERSION", 
+                "REVISIONUSER"
+            ], 
+            "case-sensitive": "", 
+            "name": "revisionuser"
         }, 
         {
             "aliases": [
@@ -4192,6 +4405,7 @@
         {
             "aliases": [
                 "BOURRAGEGAUCHE", 
+                "BOURREGAUCHE", 
                 "PADLEFT"
             ], 
             "name": "padleft"
@@ -4199,6 +4413,7 @@
         {
             "aliases": [
                 "BOURRAGEDROITE", 
+                "BOURREDROITE", 
                 "PADRIGHT"
             ], 
             "name": "padright"
@@ -4270,6 +4485,16 @@
         }, 
         {
             "aliases": [
+                "NOMBREDANSGROUPE", 
+                "NBDANSGROUPE", 
+                "NUMBERINGROUP", 
+                "NUMINGROUP"
+            ], 
+            "case-sensitive": "", 
+            "name": "numberingroup"
+        }, 
+        {
+            "aliases": [
                 "__REDIRECTIONSTATIQUE__", 
                 "__STATICREDIRECT__"
             ], 
@@ -4286,20 +4511,6 @@
         }, 
         {
             "aliases": [
-                "CURRENTMONTH1"
-            ], 
-            "case-sensitive": "", 
-            "name": "currentmonth1"
-        }, 
-        {
-            "aliases": [
-                "LOCALMONTH1"
-            ], 
-            "case-sensitive": "", 
-            "name": "localmonth1"
-        }, 
-        {
-            "aliases": [
                 "MSG:"
             ], 
             "name": "msg"
@@ -4309,6 +4520,12 @@
                 "SUBST:"
             ], 
             "name": "subst"
+        }, 
+        {
+            "aliases": [
+                "SAFESUBST:"
+            ], 
+            "name": "safesubst"
         }, 
         {
             "aliases": [
@@ -4346,39 +4563,10 @@
         }, 
         {
             "aliases": [
-                "__NOTITLECONVERT__", 
-                "__NOTC__"
-            ], 
-            "name": "notitleconvert"
-        }, 
-        {
-            "aliases": [
-                "__NOCONTENTCONVERT__", 
-                "__NOCC__"
-            ], 
-            "name": "nocontentconvert"
-        }, 
-        {
-            "aliases": [
-                "REVISIONUSER"
-            ], 
-            "case-sensitive": "", 
-            "name": "revisionuser"
-        }, 
-        {
-            "aliases": [
                 "__INDEX__"
             ], 
             "case-sensitive": "", 
             "name": "index"
-        }, 
-        {
-            "aliases": [
-                "NUMBERINGROUP", 
-                "NUMINGROUP"
-            ], 
-            "case-sensitive": "", 
-            "name": "numberingroup"
         }, 
         {
             "aliases": [
@@ -4450,136 +4638,160 @@
         "-1": {
             "*": "Sp\u00e9cial", 
             "canonical": "Special", 
+            "case": "first-letter", 
             "id": -1
         }, 
         "-2": {
             "*": "M\u00e9dia", 
             "canonical": "Media", 
+            "case": "first-letter", 
             "id": -2
         }, 
         "0": {
             "*": "", 
+            "case": "first-letter", 
             "content": "", 
             "id": 0
         }, 
         "1": {
             "*": "Discussion", 
             "canonical": "Talk", 
+            "case": "first-letter", 
             "id": 1, 
             "subpages": ""
         }, 
         "10": {
             "*": "Mod\u00e8le", 
             "canonical": "Template", 
+            "case": "first-letter", 
             "id": 10, 
             "subpages": ""
         }, 
         "100": {
             "*": "Portail", 
             "canonical": "Portail", 
+            "case": "first-letter", 
             "id": 100, 
             "subpages": ""
         }, 
         "101": {
             "*": "Discussion Portail", 
             "canonical": "Discussion Portail", 
+            "case": "first-letter", 
             "id": 101, 
             "subpages": ""
         }, 
         "102": {
             "*": "Projet", 
             "canonical": "Projet", 
+            "case": "first-letter", 
             "id": 102, 
             "subpages": ""
         }, 
         "103": {
             "*": "Discussion Projet", 
             "canonical": "Discussion Projet", 
+            "case": "first-letter", 
             "id": 103, 
             "subpages": ""
         }, 
         "104": {
             "*": "R\u00e9f\u00e9rence", 
             "canonical": "R\u00e9f\u00e9rence", 
+            "case": "first-letter", 
             "id": 104
         }, 
         "105": {
             "*": "Discussion R\u00e9f\u00e9rence", 
             "canonical": "Discussion R\u00e9f\u00e9rence", 
+            "case": "first-letter", 
             "id": 105
         }, 
         "11": {
             "*": "Discussion mod\u00e8le", 
             "canonical": "Template talk", 
+            "case": "first-letter", 
             "id": 11, 
             "subpages": ""
         }, 
         "12": {
             "*": "Aide", 
             "canonical": "Help", 
+            "case": "first-letter", 
             "id": 12, 
             "subpages": ""
         }, 
         "13": {
             "*": "Discussion aide", 
             "canonical": "Help talk", 
+            "case": "first-letter", 
             "id": 13, 
             "subpages": ""
         }, 
         "14": {
             "*": "Cat\u00e9gorie", 
             "canonical": "Category", 
+            "case": "first-letter", 
             "id": 14
         }, 
         "15": {
             "*": "Discussion cat\u00e9gorie", 
             "canonical": "Category talk", 
+            "case": "first-letter", 
             "id": 15, 
             "subpages": ""
         }, 
         "2": {
             "*": "Utilisateur", 
             "canonical": "User", 
+            "case": "first-letter", 
             "id": 2, 
             "subpages": ""
         }, 
         "3": {
             "*": "Discussion utilisateur", 
             "canonical": "User talk", 
+            "case": "first-letter", 
             "id": 3, 
             "subpages": ""
         }, 
         "4": {
             "*": "Wikip\u00e9dia", 
             "canonical": "Project", 
+            "case": "first-letter", 
             "id": 4, 
             "subpages": ""
         }, 
         "5": {
             "*": "Discussion Wikip\u00e9dia", 
             "canonical": "Project talk", 
+            "case": "first-letter", 
             "id": 5, 
             "subpages": ""
         }, 
         "6": {
             "*": "Fichier", 
             "canonical": "File", 
+            "case": "first-letter", 
             "id": 6
         }, 
         "7": {
             "*": "Discussion fichier", 
             "canonical": "File talk", 
+            "case": "first-letter", 
             "id": 7, 
             "subpages": ""
         }, 
         "8": {
             "*": "MediaWiki", 
             "canonical": "MediaWiki", 
+            "case": "first-letter", 
             "id": 8
         }, 
         "9": {
             "*": "Discussion MediaWiki", 
             "canonical": "MediaWiki talk", 
+            "case": "first-letter", 
             "id": 9, 
             "subpages": ""
         }

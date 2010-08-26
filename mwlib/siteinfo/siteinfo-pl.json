@@ -4,19 +4,20 @@
         "base": "http://pl.wikipedia.org/wiki/Strona_g%C5%82%C3%B3wna", 
         "case": "first-letter", 
         "dbtype": "mysql", 
-        "dbversion": "4.0.40-wikimedia-log", 
+        "dbversion": "5.1.43-wm-log", 
         "fallback8bitEncoding": "iso-8859-2", 
-        "generator": "MediaWiki 1.16alpha", 
+        "generator": "MediaWiki 1.16wmf4", 
         "lang": "pl", 
         "mainpage": "Strona g\u0142\u00f3wna", 
         "phpsapi": "apache2handler", 
-        "phpversion": "5.2.4-2ubuntu5wm1", 
-        "rev": 52086, 
+        "phpversion": "5.2.4-2ubuntu5.7wm1", 
+        "rev": 71190, 
         "rights": "Creative Commons Attribution-Share Alike 3.0 Unported", 
         "script": "/w/index.php", 
         "scriptpath": "/w", 
         "server": "http://pl.wikipedia.org", 
         "sitename": "Wikipedia", 
+        "time": "2010-08-26T15:05:01Z", 
         "timeoffset": 120, 
         "timezone": "Europe/Berlin", 
         "variantarticlepath": false, 
@@ -1454,7 +1455,7 @@
             "url": "http://ksh.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Kurd\u00ee / \u0643\u0648\u0631\u062f\u06cc", 
+            "language": "Kurd\u00ee", 
             "local": "", 
             "prefix": "ku", 
             "url": "http://ku.wikipedia.org/wiki/$1"
@@ -1777,7 +1778,7 @@
             "url": "http://myv.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "\u0645\u064e\u0632\u0650\u0631\u0648\u0646\u064a", 
+            "language": "\u0645\u0627\u0632\u0650\u0631\u0648\u0646\u06cc", 
             "local": "", 
             "prefix": "mzn", 
             "url": "http://mzn.wikipedia.org/wiki/$1"
@@ -2712,7 +2713,7 @@
             "url": "http://wiki.toolserver.org/view/$1"
         }, 
         {
-            "language": "Tatar\u00e7a/\u0422\u0430\u0442\u0430\u0440\u0447\u0430", 
+            "language": "\u0422\u0430\u0442\u0430\u0440\u0447\u0430/Tatar\u00e7a", 
             "local": "", 
             "prefix": "tt", 
             "url": "http://tt.wikipedia.org/wiki/$1"
@@ -3271,6 +3272,156 @@
         }
     ], 
     "magicwords": [
+        {
+            "aliases": [
+                "expr"
+            ], 
+            "name": "expr"
+        }, 
+        {
+            "aliases": [
+                "if"
+            ], 
+            "name": "if"
+        }, 
+        {
+            "aliases": [
+                "ifeq"
+            ], 
+            "name": "ifeq"
+        }, 
+        {
+            "aliases": [
+                "ifexpr"
+            ], 
+            "name": "ifexpr"
+        }, 
+        {
+            "aliases": [
+                "iferror"
+            ], 
+            "name": "iferror"
+        }, 
+        {
+            "aliases": [
+                "switch"
+            ], 
+            "name": "switch"
+        }, 
+        {
+            "aliases": [
+                "#default"
+            ], 
+            "name": "default"
+        }, 
+        {
+            "aliases": [
+                "ifexist"
+            ], 
+            "name": "ifexist"
+        }, 
+        {
+            "aliases": [
+                "time"
+            ], 
+            "name": "time"
+        }, 
+        {
+            "aliases": [
+                "timel"
+            ], 
+            "name": "timel"
+        }, 
+        {
+            "aliases": [
+                "rel2abs"
+            ], 
+            "name": "rel2abs"
+        }, 
+        {
+            "aliases": [
+                "titleparts"
+            ], 
+            "name": "titleparts"
+        }, 
+        {
+            "aliases": [
+                "len"
+            ], 
+            "name": "len"
+        }, 
+        {
+            "aliases": [
+                "pos"
+            ], 
+            "name": "pos"
+        }, 
+        {
+            "aliases": [
+                "rpos"
+            ], 
+            "name": "rpos"
+        }, 
+        {
+            "aliases": [
+                "sub"
+            ], 
+            "name": "sub"
+        }, 
+        {
+            "aliases": [
+                "count"
+            ], 
+            "name": "count"
+        }, 
+        {
+            "aliases": [
+                "replace"
+            ], 
+            "name": "replace"
+        }, 
+        {
+            "aliases": [
+                "explode"
+            ], 
+            "name": "explode"
+        }, 
+        {
+            "aliases": [
+                "categorytree"
+            ], 
+            "name": "categorytree"
+        }, 
+        {
+            "aliases": [
+                "noplayer"
+            ], 
+            "name": "ogg_noplayer"
+        }, 
+        {
+            "aliases": [
+                "noicon"
+            ], 
+            "name": "ogg_noicon"
+        }, 
+        {
+            "aliases": [
+                "thumbtime=$1"
+            ], 
+            "name": "ogg_thumbtime"
+        }, 
+        {
+            "aliases": [
+                "UseLiquidThreads"
+            ], 
+            "name": "useliquidthreads"
+        }, 
+        {
+            "aliases": [
+                "lqtpagelimit"
+            ], 
+            "name": "lqtpagelimit"
+        }, 
         {
             "aliases": [
                 "#PATRZ", 
@@ -3895,6 +4046,12 @@
         }, 
         {
             "aliases": [
+                "SAFESUBST:"
+            ], 
+            "name": "safesubst"
+        }, 
+        {
+            "aliases": [
                 "MSGNW:"
             ], 
             "name": "msgnw"
@@ -3987,6 +4144,12 @@
         }, 
         {
             "aliases": [
+                "NSE:"
+            ], 
+            "name": "nse"
+        }, 
+        {
+            "aliases": [
                 "LOCALURL:"
             ], 
             "name": "localurl"
@@ -4014,6 +4177,12 @@
                 "SCRIPTPATH"
             ], 
             "name": "scriptpath"
+        }, 
+        {
+            "aliases": [
+                "STYLEPATH"
+            ], 
+            "name": "stylepath"
         }, 
         {
             "aliases": [
@@ -4328,127 +4497,149 @@
         "-1": {
             "*": "Specjalna", 
             "canonical": "Special", 
+            "case": "first-letter", 
             "id": -1
         }, 
         "-2": {
             "*": "Media", 
             "canonical": "Media", 
+            "case": "first-letter", 
             "id": -2
         }, 
         "0": {
             "*": "", 
+            "case": "first-letter", 
             "content": "", 
             "id": 0
         }, 
         "1": {
             "*": "Dyskusja", 
             "canonical": "Talk", 
+            "case": "first-letter", 
             "id": 1, 
             "subpages": ""
         }, 
         "10": {
             "*": "Szablon", 
             "canonical": "Template", 
+            "case": "first-letter", 
             "id": 10, 
             "subpages": ""
         }, 
         "100": {
             "*": "Portal", 
             "canonical": "Portal", 
+            "case": "first-letter", 
             "id": 100, 
             "subpages": ""
         }, 
         "101": {
             "*": "Dyskusja portalu", 
             "canonical": "Dyskusja portalu", 
+            "case": "first-letter", 
             "id": 101, 
             "subpages": ""
         }, 
         "102": {
             "*": "Wikiprojekt", 
             "canonical": "Wikiprojekt", 
+            "case": "first-letter", 
             "id": 102, 
             "subpages": ""
         }, 
         "103": {
             "*": "Dyskusja Wikiprojektu", 
             "canonical": "Dyskusja Wikiprojektu", 
+            "case": "first-letter", 
             "id": 103, 
             "subpages": ""
         }, 
         "11": {
             "*": "Dyskusja szablonu", 
             "canonical": "Template talk", 
+            "case": "first-letter", 
             "id": 11, 
             "subpages": ""
         }, 
         "12": {
             "*": "Pomoc", 
             "canonical": "Help", 
+            "case": "first-letter", 
             "id": 12, 
             "subpages": ""
         }, 
         "13": {
             "*": "Dyskusja pomocy", 
             "canonical": "Help talk", 
+            "case": "first-letter", 
             "id": 13, 
             "subpages": ""
         }, 
         "14": {
             "*": "Kategoria", 
             "canonical": "Category", 
+            "case": "first-letter", 
             "id": 14, 
             "subpages": ""
         }, 
         "15": {
             "*": "Dyskusja kategorii", 
             "canonical": "Category talk", 
+            "case": "first-letter", 
             "id": 15, 
             "subpages": ""
         }, 
         "2": {
             "*": "Wikipedysta", 
             "canonical": "User", 
+            "case": "first-letter", 
             "id": 2, 
             "subpages": ""
         }, 
         "3": {
             "*": "Dyskusja wikipedysty", 
             "canonical": "User talk", 
+            "case": "first-letter", 
             "id": 3, 
             "subpages": ""
         }, 
         "4": {
             "*": "Wikipedia", 
             "canonical": "Project", 
+            "case": "first-letter", 
             "id": 4, 
             "subpages": ""
         }, 
         "5": {
             "*": "Dyskusja Wikipedii", 
             "canonical": "Project talk", 
+            "case": "first-letter", 
             "id": 5, 
             "subpages": ""
         }, 
         "6": {
             "*": "Plik", 
             "canonical": "File", 
+            "case": "first-letter", 
             "id": 6
         }, 
         "7": {
             "*": "Dyskusja pliku", 
             "canonical": "File talk", 
+            "case": "first-letter", 
             "id": 7, 
             "subpages": ""
         }, 
         "8": {
             "*": "MediaWiki", 
             "canonical": "MediaWiki", 
+            "case": "first-letter", 
             "id": 8
         }, 
         "9": {
             "*": "Dyskusja MediaWiki", 
             "canonical": "MediaWiki talk", 
+            "case": "first-letter", 
             "id": 9, 
             "subpages": ""
         }

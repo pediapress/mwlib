@@ -4,19 +4,20 @@
         "base": "http://de.wikipedia.org/wiki/Wikipedia:Hauptseite", 
         "case": "first-letter", 
         "dbtype": "mysql", 
-        "dbversion": "5.1.33-log", 
+        "dbversion": "4.0.40-wikimedia-log", 
         "fallback8bitEncoding": "windows-1252", 
-        "generator": "MediaWiki 1.16alpha", 
+        "generator": "MediaWiki 1.16wmf4", 
         "lang": "de", 
         "mainpage": "Wikipedia:Hauptseite", 
         "phpsapi": "apache2handler", 
-        "phpversion": "5.2.4-2ubuntu5wm1", 
-        "rev": 52086, 
+        "phpversion": "5.2.4-2ubuntu5.7wm1", 
+        "rev": 71190, 
         "rights": "Creative Commons Attribution-Share Alike 3.0 Unported", 
         "script": "/w/index.php", 
         "scriptpath": "/w", 
         "server": "http://de.wikipedia.org", 
         "sitename": "Wikipedia", 
+        "time": "2010-08-26T15:04:52Z", 
         "timeoffset": 120, 
         "timezone": "Europe/Berlin", 
         "variantarticlepath": false, 
@@ -1454,7 +1455,7 @@
             "url": "http://ksh.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Kurd\u00ee / \u0643\u0648\u0631\u062f\u06cc", 
+            "language": "Kurd\u00ee", 
             "local": "", 
             "prefix": "ku", 
             "url": "http://ku.wikipedia.org/wiki/$1"
@@ -1777,7 +1778,7 @@
             "url": "http://myv.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "\u0645\u064e\u0632\u0650\u0631\u0648\u0646\u064a", 
+            "language": "\u0645\u0627\u0632\u0650\u0631\u0648\u0646\u06cc", 
             "local": "", 
             "prefix": "mzn", 
             "url": "http://mzn.wikipedia.org/wiki/$1"
@@ -2712,7 +2713,7 @@
             "url": "http://wiki.toolserver.org/view/$1"
         }, 
         {
-            "language": "Tatar\u00e7a/\u0422\u0430\u0442\u0430\u0440\u0447\u0430", 
+            "language": "\u0422\u0430\u0442\u0430\u0440\u0447\u0430/Tatar\u00e7a", 
             "local": "", 
             "prefix": "tt", 
             "url": "http://tt.wikipedia.org/wiki/$1"
@@ -3273,6 +3274,156 @@
     "magicwords": [
         {
             "aliases": [
+                "expr"
+            ], 
+            "name": "expr"
+        }, 
+        {
+            "aliases": [
+                "if"
+            ], 
+            "name": "if"
+        }, 
+        {
+            "aliases": [
+                "ifeq"
+            ], 
+            "name": "ifeq"
+        }, 
+        {
+            "aliases": [
+                "ifexpr"
+            ], 
+            "name": "ifexpr"
+        }, 
+        {
+            "aliases": [
+                "iferror"
+            ], 
+            "name": "iferror"
+        }, 
+        {
+            "aliases": [
+                "switch"
+            ], 
+            "name": "switch"
+        }, 
+        {
+            "aliases": [
+                "#default"
+            ], 
+            "name": "default"
+        }, 
+        {
+            "aliases": [
+                "ifexist"
+            ], 
+            "name": "ifexist"
+        }, 
+        {
+            "aliases": [
+                "time"
+            ], 
+            "name": "time"
+        }, 
+        {
+            "aliases": [
+                "timel"
+            ], 
+            "name": "timel"
+        }, 
+        {
+            "aliases": [
+                "rel2abs"
+            ], 
+            "name": "rel2abs"
+        }, 
+        {
+            "aliases": [
+                "titleparts"
+            ], 
+            "name": "titleparts"
+        }, 
+        {
+            "aliases": [
+                "len"
+            ], 
+            "name": "len"
+        }, 
+        {
+            "aliases": [
+                "pos"
+            ], 
+            "name": "pos"
+        }, 
+        {
+            "aliases": [
+                "rpos"
+            ], 
+            "name": "rpos"
+        }, 
+        {
+            "aliases": [
+                "sub"
+            ], 
+            "name": "sub"
+        }, 
+        {
+            "aliases": [
+                "count"
+            ], 
+            "name": "count"
+        }, 
+        {
+            "aliases": [
+                "replace"
+            ], 
+            "name": "replace"
+        }, 
+        {
+            "aliases": [
+                "explode"
+            ], 
+            "name": "explode"
+        }, 
+        {
+            "aliases": [
+                "categorytree"
+            ], 
+            "name": "categorytree"
+        }, 
+        {
+            "aliases": [
+                "noplayer"
+            ], 
+            "name": "ogg_noplayer"
+        }, 
+        {
+            "aliases": [
+                "noicon"
+            ], 
+            "name": "ogg_noicon"
+        }, 
+        {
+            "aliases": [
+                "thumbtime=$1"
+            ], 
+            "name": "ogg_thumbtime"
+        }, 
+        {
+            "aliases": [
+                "UseLiquidThreads"
+            ], 
+            "name": "useliquidthreads"
+        }, 
+        {
+            "aliases": [
+                "lqtpagelimit"
+            ], 
+            "name": "lqtpagelimit"
+        }, 
+        {
+            "aliases": [
                 "#WEITERLEITUNG", 
                 "#REDIRECT"
             ], 
@@ -3323,11 +3474,20 @@
         {
             "aliases": [
                 "JETZIGER_MONAT", 
+                "JETZIGER_MONAT_2", 
                 "CURRENTMONTH", 
                 "CURRENTMONTH2"
             ], 
             "case-sensitive": "", 
             "name": "currentmonth"
+        }, 
+        {
+            "aliases": [
+                "JETZIGER_MONAT_1", 
+                "CURRENTMONTH1"
+            ], 
+            "case-sensitive": "", 
+            "name": "currentmonth1"
         }, 
         {
             "aliases": [
@@ -3403,12 +3563,21 @@
         }, 
         {
             "aliases": [
-                "JETZIGER_KALENDERMONAT", 
+                "LOKALER_MONAT", 
+                "LOKALER_MONAT_2", 
                 "LOCALMONTH", 
                 "LOCALMONTH2"
             ], 
             "case-sensitive": "", 
             "name": "localmonth"
+        }, 
+        {
+            "aliases": [
+                "LOKALER_MONAT_1", 
+                "LOCALMONTH1"
+            ], 
+            "case-sensitive": "", 
+            "name": "localmonth1"
         }, 
         {
             "aliases": [
@@ -3867,6 +4036,13 @@
         }, 
         {
             "aliases": [
+                "STYLEPFAD", 
+                "STYLEPATH"
+            ], 
+            "name": "stylepath"
+        }, 
+        {
+            "aliases": [
                 "GRAMMATIK:", 
                 "GRAMMAR:"
             ], 
@@ -4239,23 +4415,15 @@
         }, 
         {
             "aliases": [
-                "CURRENTMONTH1"
-            ], 
-            "case-sensitive": "", 
-            "name": "currentmonth1"
-        }, 
-        {
-            "aliases": [
-                "LOCALMONTH1"
-            ], 
-            "case-sensitive": "", 
-            "name": "localmonth1"
-        }, 
-        {
-            "aliases": [
                 "MSG:"
             ], 
             "name": "msg"
+        }, 
+        {
+            "aliases": [
+                "SAFESUBST:"
+            ], 
+            "name": "safesubst"
         }, 
         {
             "aliases": [
@@ -4311,6 +4479,12 @@
             ], 
             "case-sensitive": "", 
             "name": "img_text_bottom"
+        }, 
+        {
+            "aliases": [
+                "NSE:"
+            ], 
+            "name": "nse"
         }, 
         {
             "aliases": [
@@ -4412,113 +4586,133 @@
         "-1": {
             "*": "Spezial", 
             "canonical": "Special", 
+            "case": "first-letter", 
             "id": -1
         }, 
         "-2": {
             "*": "Media", 
             "canonical": "Media", 
+            "case": "first-letter", 
             "id": -2
         }, 
         "0": {
             "*": "", 
+            "case": "first-letter", 
             "content": "", 
             "id": 0
         }, 
         "1": {
             "*": "Diskussion", 
             "canonical": "Talk", 
+            "case": "first-letter", 
             "id": 1, 
             "subpages": ""
         }, 
         "10": {
             "*": "Vorlage", 
             "canonical": "Template", 
+            "case": "first-letter", 
             "id": 10
         }, 
         "100": {
             "*": "Portal", 
             "canonical": "Portal", 
+            "case": "first-letter", 
             "id": 100, 
             "subpages": ""
         }, 
         "101": {
             "*": "Portal Diskussion", 
             "canonical": "Portal Diskussion", 
+            "case": "first-letter", 
             "id": 101, 
             "subpages": ""
         }, 
         "11": {
             "*": "Vorlage Diskussion", 
             "canonical": "Template talk", 
+            "case": "first-letter", 
             "id": 11, 
             "subpages": ""
         }, 
         "12": {
             "*": "Hilfe", 
             "canonical": "Help", 
+            "case": "first-letter", 
             "id": 12, 
             "subpages": ""
         }, 
         "13": {
             "*": "Hilfe Diskussion", 
             "canonical": "Help talk", 
+            "case": "first-letter", 
             "id": 13, 
             "subpages": ""
         }, 
         "14": {
             "*": "Kategorie", 
             "canonical": "Category", 
+            "case": "first-letter", 
             "id": 14
         }, 
         "15": {
             "*": "Kategorie Diskussion", 
             "canonical": "Category talk", 
+            "case": "first-letter", 
             "id": 15, 
             "subpages": ""
         }, 
         "2": {
             "*": "Benutzer", 
             "canonical": "User", 
+            "case": "first-letter", 
             "id": 2, 
             "subpages": ""
         }, 
         "3": {
             "*": "Benutzer Diskussion", 
             "canonical": "User talk", 
+            "case": "first-letter", 
             "id": 3, 
             "subpages": ""
         }, 
         "4": {
             "*": "Wikipedia", 
             "canonical": "Project", 
+            "case": "first-letter", 
             "id": 4, 
             "subpages": ""
         }, 
         "5": {
             "*": "Wikipedia Diskussion", 
             "canonical": "Project talk", 
+            "case": "first-letter", 
             "id": 5, 
             "subpages": ""
         }, 
         "6": {
             "*": "Datei", 
             "canonical": "File", 
+            "case": "first-letter", 
             "id": 6
         }, 
         "7": {
             "*": "Datei Diskussion", 
             "canonical": "File talk", 
+            "case": "first-letter", 
             "id": 7, 
             "subpages": ""
         }, 
         "8": {
             "*": "MediaWiki", 
             "canonical": "MediaWiki", 
+            "case": "first-letter", 
             "id": 8
         }, 
         "9": {
             "*": "MediaWiki Diskussion", 
             "canonical": "MediaWiki talk", 
+            "case": "first-letter", 
             "id": 9, 
             "subpages": ""
         }
