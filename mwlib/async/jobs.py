@@ -54,7 +54,8 @@ class workq(object):
         self._waiters = []
         self.id2job = {}
         self.timeoutq = []
-        
+        self._channel2count = {}
+
     def __getstate__(self):
         return dict(count=self.count, jobs=self.id2job.values())
 
@@ -82,8 +83,30 @@ class workq(object):
             c = self._preenjobq(v)
             if c:
                 print "preen:", k,c
-                
-        
+
+    def _mark_finished(self, job, **kw):
+        if job.done:
+            return
+
+        for k, v in kw.items():
+            setattr(job, k, v)
+        job.done = True
+        job.finish_event.set()
+
+        try:
+            c = self._channel2count[job.channel]
+        except KeyError:
+            c = self._channel2count[job.channel] = dict(error=0, timeout=0, killed=0, success=0)
+
+        e = job.error
+        if e is None:
+            c["success"] += 1
+        else:
+            if e in ("timeout", "killed"):
+                c[e] += 1
+            elif e:
+                c["error"] += 1
+
     def handletimeouts(self):
         now = time.time()
         while self.timeoutq:
@@ -95,9 +118,7 @@ class workq(object):
                 break
             
             heapq.heappop(self.timeoutq)
-            job.error = "timeout"
-            job.done = True
-            job.finish_event.set()
+            self._mark_finished(job, error="timeout")
             print "timeout:", job._json()
 
         self._preenall()
@@ -108,9 +129,7 @@ class workq(object):
                 continue
             j = self.id2job[jid]
             if not j.done:
-                j.done = True
-                j.error = "killed"
-                j.finish_event.set()
+                self._mark_finished(j, error="killed")
 
     def dropjobs(self, jobids):
         "Mark jobs to be dropped when waitjobs() is called on them"
@@ -141,6 +160,7 @@ class workq(object):
     def getstats(self):
         stats = dict(count=self.count,
                      numjobs=len(self.id2job),
+                     channel2stat = self._channel2count,
                      busy = dict([(c, len(todo)) for c, todo in self.channel2q.items()]))
         return stats
 
@@ -174,13 +194,12 @@ class workq(object):
             
     def finishjob(self, jobid, result=None, error=None):
         j = self.id2job[jobid]
-        j.result = result
-        j.error = error
-        j.done = True
         if error:
-            j.ttl = min(10, j.ttl)
-            
-        j.finish_event.set()
+            ttl = min(10, j.ttl)
+        else:
+            ttl = j.ttl
+
+        self._mark_finished(j, result=result, error=error, ttl=ttl)
 
     def updatejob(self, jobid, info):
         j = self.id2job[jobid]
