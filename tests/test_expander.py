@@ -475,3 +475,112 @@ def test_variable_subst():
 def test_link_vs_expander():
     """http://code.pediapress.com/wiki/ticket/752"""
     yield expandstr, "{{#if: 1|  [[foo|bar}}123", "{{#if: 1|  [[foo|bar}}123"
+
+def test_pagemagic():
+    def expand_page(tpl, expected):
+        return expandstr('{{%s}}' % tpl, expected,
+                pagename='Benutzer:Anonymous user!/sandbox/my page')
+
+    def expand_talk(tpl, expected):
+        return expandstr('{{%s}}' % tpl, expected,
+                pagename='Benutzer Diskussion:Anonymous user!/sandbox/my page')
+
+    yield expand_page, 'PAGENAME', 'Anonymous user!/sandbox/my page'
+    yield expand_page, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'PAGENAME', 'Anonymous user!/sandbox/my page'
+    yield expand_talk, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
+    yield expand_page, 'BASEPAGENAME', 'Anonymous user!/sandbox'
+    yield expand_page, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
+    yield expand_talk, 'BASEPAGENAME', 'Anonymous user!/sandbox'
+    yield expand_talk, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
+    yield expand_page, 'SUBPAGENAME', 'my page'
+    yield expand_page, 'SUBPAGENAMEE', 'my_page'
+    yield expand_talk, 'SUBPAGENAME', 'my page'
+    yield expand_talk, 'SUBPAGENAMEE', 'my_page'
+    yield expand_page, 'NAMESPACE', 'Benutzer'
+    yield expand_page, 'NAMESPACEE', 'Benutzer'
+    yield expand_talk, 'NAMESPACE', 'Benutzer Diskussion'
+    yield expand_talk, 'NAMESPACEE', 'Benutzer_Diskussion'
+    yield expand_page, 'FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_page, 'FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_page, 'TALKSPACE', 'Benutzer Diskussion'
+    yield expand_page, 'TALKSPACEE', 'Benutzer_Diskussion'
+    yield expand_talk, 'TALKSPACE', 'Benutzer Diskussion'
+    yield expand_talk, 'TALKSPACEE', 'Benutzer_Diskussion'
+    yield expand_page, 'SUBJECTSPACE', 'Benutzer'
+    yield expand_page, 'SUBJECTSPACEE', 'Benutzer'
+    yield expand_talk, 'SUBJECTSPACE', 'Benutzer'
+    yield expand_talk, 'SUBJECTSPACEE', 'Benutzer'
+    yield expand_page, 'ARTICLESPACE', 'Benutzer'
+    yield expand_page, 'ARTICLESPACEE', 'Benutzer'
+    yield expand_talk, 'ARTICLESPACE', 'Benutzer'
+    yield expand_talk, 'ARTICLESPACEE', 'Benutzer'
+    yield expand_page, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
+    yield expand_page, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_page, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_page, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_page, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_page, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+
+def test_pagemagic_with_arg():
+    def expand_page(tpl, expected):
+        return expandstr('{{%s:%s}}' % (tpl, 'Benutzer:Anonymous user!/sandbox/my page'),
+                expected, pagename='Help:Irrelevant')
+
+    def expand_talk(tpl, expected):
+        return expandstr('{{%s:%s}}' % (tpl, 'Benutzer Diskussion:Anonymous user!/sandbox/my page'),
+                expected, pagename='Help:Irrelevant')
+
+    yield expand_page, 'PAGENAME', 'Anonymous user!/sandbox/my page'
+    yield expand_page, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'PAGENAME', 'Anonymous user!/sandbox/my page'
+    yield expand_talk, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
+    yield expand_page, 'BASEPAGENAME', 'Anonymous user!/sandbox'
+    yield expand_page, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
+    yield expand_talk, 'BASEPAGENAME', 'Anonymous user!/sandbox'
+    yield expand_talk, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
+    yield expand_page, 'SUBPAGENAME', 'my page'
+    yield expand_page, 'SUBPAGENAMEE', 'my_page'
+    yield expand_talk, 'SUBPAGENAME', 'my page'
+    yield expand_talk, 'SUBPAGENAMEE', 'my_page'
+    yield expand_page, 'NAMESPACE', 'Benutzer'
+    yield expand_page, 'NAMESPACEE', 'Benutzer'
+    yield expand_talk, 'NAMESPACE', 'Benutzer Diskussion'
+    yield expand_talk, 'NAMESPACEE', 'Benutzer_Diskussion'
+    yield expand_page, 'FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_page, 'FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_page, 'TALKSPACE', 'Benutzer Diskussion'
+    yield expand_page, 'TALKSPACEE', 'Benutzer_Diskussion'
+    yield expand_talk, 'TALKSPACE', 'Benutzer Diskussion'
+    yield expand_talk, 'TALKSPACEE', 'Benutzer_Diskussion'
+    yield expand_page, 'SUBJECTSPACE', 'Benutzer'
+    yield expand_page, 'SUBJECTSPACEE', 'Benutzer'
+    yield expand_talk, 'SUBJECTSPACE', 'Benutzer'
+    yield expand_talk, 'SUBJECTSPACEE', 'Benutzer'
+    yield expand_page, 'ARTICLESPACE', 'Benutzer'
+    yield expand_page, 'ARTICLESPACEE', 'Benutzer'
+    yield expand_talk, 'ARTICLESPACE', 'Benutzer'
+    yield expand_talk, 'ARTICLESPACEE', 'Benutzer'
+    yield expand_page, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
+    yield expand_page, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_page, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_page, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_page, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_page, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    yield expand_talk, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
+    yield expand_talk, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+
