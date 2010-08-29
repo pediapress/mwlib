@@ -244,7 +244,7 @@ class PageMagic(object):
     def BASEPAGENAME(self, pagename):
         """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
         """
-        return pagename.rsplit('/', 1)[0]
+        return self.nshandler.splitname(pagename)[1].rsplit('/', 1)[0]
 
     BASEPAGENAMEE = _quoted(BASEPAGENAME)
 
@@ -255,6 +255,46 @@ class PageMagic(object):
         return full[:-len(partial)-1]
 
     NAMESPACEE = _quoted(NAMESPACE)
+
+    @_wrap_pagename
+    def TALKSPACE(self, pagename):
+        ns, partial, fullname = self.nshandler.splitname(pagename)
+        if not ns % 2:
+            ns += 1
+        return self.nshandler.get_nsname_by_number(ns)
+
+    TALKSPACEE = _quoted(TALKSPACE)
+
+    @_wrap_pagename
+    def SUBJECTSPACE(self, pagename):
+        ns, partial, fullname = self.nshandler.splitname(pagename)
+        if ns % 2:
+            ns -= 1
+        return self.nshandler.get_nsname_by_number(ns)
+
+    SUBJECTSPACEE = _quoted(SUBJECTSPACE)
+    ARTICLESPACE = SUBJECTSPACE
+    ARTICLESPACEE = SUBJECTSPACEE
+
+    @_wrap_pagename
+    def TALKPAGENAME(self, pagename):
+        ns, partial, fullname = self.nshandler.splitname(pagename)
+        if not ns % 2:
+            ns += 1
+        return self.nshandler.get_nsname_by_number(ns) + ':' + partial
+
+    TALKPAGENAMEE = _quoted(TALKPAGENAME)
+
+    @_wrap_pagename
+    def SUBJECTPAGENAME(self, pagename):
+        ns, partial, fullname = self.nshandler.splitname(pagename)
+        if ns % 2:
+            ns -= 1
+        return self.nshandler.get_nsname_by_number(ns) + ':' + partial
+
+    SUBJECTPAGENAMEE = _quoted(SUBJECTPAGENAME)
+    ARTICLEPAGENAME = SUBJECTPAGENAME
+    ARTICLEPAGENAMEE = SUBJECTPAGENAMEE
 
     def REVISIONID(self, args):
         """[MW1.5+] The unique identifying number of a page, see Help:Diff."""
