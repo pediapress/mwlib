@@ -189,59 +189,72 @@ class LocaltimeMagic(object):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
         return self.now.strftime("%Y%m%d%H%M%S")
     
+from functools import wraps
+
 class PageMagic(object):
     source={}
     def __init__(self, pagename='', server="http://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
-        self.qpagename = pagename.replace(' ', '_')
         self.server = server
         self.revisionid = revisionid
         
         self.niceurl = urlparse.urljoin(self.server, 'wiki')
+
+    def _wrap_pagename(f):
+        @wraps(f)
+        def wrapper(self, args):
+            pagename = self.pagename
+            if args.args:
+                pagename = args.args[0]
+            return f(self, pagename)
+        return wrapper
+
+    def _quoted(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            return urlquote(f(*args, **kwargs).replace(' ', '_'))
+        return wrapper
         
-    def PAGENAME(self, args):
+    @_wrap_pagename
+    def PAGENAME(self, pagename):
         """Returns the name of the current page, including all levels (Title/Subtitle/Sub-subtitle)"""
-        return self.pagename
+        return self.nshandler.splitname(pagename)[1]
     
-    def PAGENAMEE(self, args):
-        """same as PAGENAME but More URL-friendly percent encoded
-        special characters (To use an articlename in an external link).
-        """
-        return urlquote(self.qpagename)
+    """same as PAGENAME but More URL-friendly percent encoded
+    special characters (To use an articlename in an external link).
+    """
+    PAGENAMEE = _quoted(PAGENAME)
 
-    def FULLPAGENAME(self, args):
-        return self.pagename # FIXME
+    @_wrap_pagename
+    def FULLPAGENAME(self, pagename):
+        return pagename
 
-    def FULLPAGENAMEE(self, args):
-        return urlquote(self.qpagename)
+    FULLPAGENAMEE = _quoted(FULLPAGENAME)
     
-    def SUBPAGENAME(self, args):
+    @_wrap_pagename
+    def SUBPAGENAME(self, pagename):
         """[MW1.6+] Returns the name of the current page, excluding parent
         pages ('Title/Subtitle' becomes 'Subtitle').
         """        
-        return self.pagename.split('/')[-1]
+        return pagename.split('/')[-1]
 
-    def SUBPAGENAMEE(self, args):
-        return urlquote(self.qpagename.split('/')[-1])
+    SUBPAGENAMEE = _quoted(SUBPAGENAME)
 
-    def BASEPAGENAME(self, args):
+    @_wrap_pagename
+    def BASEPAGENAME(self, pagename):
         """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
         """
-        return self.pagename.rsplit('/', 1)[0]
+        return pagename.rsplit('/', 1)[0]
 
-    def BASEPAGENAMEE(self, args):
-        """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
-        """
-        return urlquote(self.qpagename.rsplit('/', 1)[0])
+    BASEPAGENAMEE = _quoted(BASEPAGENAME)
 
-    def NAMESPACE(self, args):
+    @_wrap_pagename
+    def NAMESPACE(self, pagename):
         """Returns the name of the namespace the current page resides in."""
-        ns, partial, full = self.nshandler.splitname(self.pagename)
+        ns, partial, full = self.nshandler.splitname(pagename)
         return full[:-len(partial)-1]
 
-    def NAMESPACEE(self, args):
-        """Returns the name of the namespace the current page resides in. (quoted)"""        
-        return urlquote(self.NAMESPACE(args))
+    NAMESPACEE = _quoted(NAMESPACE)
 
     def REVISIONID(self, args):
         """[MW1.5+] The unique identifying number of a page, see Help:Diff."""
