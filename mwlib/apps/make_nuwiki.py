@@ -90,6 +90,8 @@ class start_fetcher(object):
         def got_pages(val):
             rawtext = val["pages"].values()[0]["revisions"][0]["*"]
             mb = self.metabook = parse_collection_page(rawtext)
+            wikitrust(api.baseurl, mb) # XXX blocking twisted reactor. we really should use gevent
+
             # XXX: localised template parameter names???
             meta = extract_metadata(rawtext, ("cover-image", "cover-color", "text-color", "editor", "description", "sort_as"))
             mb.editor = meta["editor"]
@@ -135,7 +137,8 @@ def wikitrust(baseurl, metabook):
     if not os.environ.get("TRUSTEDREVS"):
         return
 
-    if baseurl!="http://en.wikipedia.org/w/":
+
+    if not baseurl.startswith("http://en.wikipedia.org/w/"):
         return
 
     from mwlib import trustedrevs
