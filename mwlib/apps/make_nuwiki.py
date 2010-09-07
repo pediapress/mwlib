@@ -151,7 +151,8 @@ def wikitrust(baseurl, metabook):
         try:
             r = tr.getTrustedRevision(x.title)
             x.revision = r["revid"]
-            print "chosen trusted revision", r
+
+            print "chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r" % (r["title"], r["age"], r["revid"], r["user"])
         except Exception, err:
             print "error choosing trusted revision for", repr(x.title),  repr(err)
 
