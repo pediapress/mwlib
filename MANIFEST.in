@@ -123,6 +123,7 @@ include mwlib/templ/scanner.py
 include mwlib/timeline.py
 include mwlib/treecleaner.py
 include mwlib/treecleanerhelper.py
+include mwlib/trustedrevs.py
 include mwlib/uniq.py
 include mwlib/uparser.py
 include mwlib/utils.py
@@ -284,3 +285,4 @@ include tests/test_xhtmlwriter.py
 include tests/test_zipwiki.py
 include tools/build_rng_grammar.py
 include tools/set-interwiki.py
+include tox.ini
