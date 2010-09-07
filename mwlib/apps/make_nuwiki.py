@@ -131,6 +131,27 @@ class start_fetcher(object):
                 .addCallback(self.fetch_pages_from_metabook)
                 .addBoth(reset_podclient))
 
+def wikitrust(baseurl, metabook):
+    if not os.environ.get("TRUSTEDREVS"):
+        return
+
+    if baseurl!="http://en.wikipedia.org/w/":
+        return
+
+    from mwlib import trustedrevs
+    tr = trustedrevs.TrustedRevisions()
+
+    for x in metabook.articles():
+        if x.revision:
+            continue
+
+        try:
+            r = tr.getTrustedRevision(x.title)
+            x.revision = r["revid"]
+            print "chosen trusted revision", r
+        except Exception, err:
+            print "error choosing trusted revision for", repr(x.title),  repr(err)
+
 def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     id2wiki = {}
     for x in metabook.wikis:
@@ -164,6 +185,9 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
             my_mb.items = articles
         else:
             my_mb = metabook
+
+        wikitrust(wikiconf.baseurl, my_mb)
+
         fetchers.append(start_fetcher(fsdir=my_fsdir, progress=progress, base_url=wikiconf.baseurl, metabook=my_mb, options=options, podclient=podclient, status=status))
 
     if is_multiwiki:
