@@ -428,9 +428,6 @@ def test_tag_parametrs():
     yield expandstr, '{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>'
     yield expandstr, "{{#tag:div|contents|a}}"
 
-def test_tag_ref():
-    yield expandstr, '{{#tag:ref|<ref>bbb</ref>|group=~}}', '<ref group="~"><ref>bbb</ref></ref>'
-
 def test_rel2abs():
     yield expandstr, "{{#rel2abs: ./quok | Help:Foo/bar/baz }}", "Help:Foo/bar/baz/quok"
     yield expandstr, "{{#rel2abs: ../quok | Help:Foo/bar/baz }}", "Help:Foo/bar/quok"
