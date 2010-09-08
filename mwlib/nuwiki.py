@@ -39,6 +39,7 @@ class nuwiki(object):
         self.imageinfo = self._loadjson("imageinfo.json", {})
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
+        self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
         self.nshandler = nshandling.nshandler(self.siteinfo)        
         self.en_nshandler = nshandling.get_nshandler_for_lang('en') 
         self.nfo = self._loadjson("nfo.json", {})
@@ -193,6 +194,14 @@ class nuwiki(object):
         res.sort()
         return res
 
+    def extractHTML(self, parsed_html):
+        html = {}
+        for article in parsed_html:
+            title = article.get('displaytitle')
+            if title:
+                html[title] = article.get('text', {}).get('*', '')
+        return html
+
 NuWiki = nuwiki
 Page = page
 
@@ -309,6 +318,9 @@ class adapt(object):
             base_url=self.nfo['base_url'],
             script_extension=self.nfo['script_extension'],
         )
+
+    def getHTML(self, title):
+        return self.nuwiki.html.get(title, '')
 
     def getParsedArticle(self, title, revision=None):
         if revision:
