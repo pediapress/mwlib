@@ -128,17 +128,21 @@ class ArgumentList(object):
                     flatten(name, self.expander, self.variables, tmp)
                     _insert_implicit_newlines(tmp)
                     name = u"".join(tmp).strip()
+                    do_strip = True
                 else:
                     name = str(self.varcount)
                     self.varcount+=1
-                
-                self.namedargs[name] = val
+                    do_strip = False
+
+                if do_strip and isinstance(val, unicode):
+                    val = val.strip()
+                self.namedargs[name] = (do_strip, val)
                 
                 if n==name:
                     break
 
         try:
-            val = self.namedargs[n]
+            do_strip, val = self.namedargs[n]
             if isinstance(val, unicode):
                 return val
         except KeyError:
@@ -147,8 +151,11 @@ class ArgumentList(object):
         tmp = []
         flatten(val, self.expander, self.variables, tmp)
         _insert_implicit_newlines(tmp)
-        tmp=u"".join(tmp).strip()
-        self.namedargs[n] = tmp
+        tmp=u"".join(tmp)
+        if do_strip:
+            tmp = tmp.strip()
+            
+        self.namedargs[n] = (do_strip, tmp)
         return tmp
     
 def is_implicit_newline(raw):
