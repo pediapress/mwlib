@@ -226,7 +226,7 @@ class TreeCleaner(object):
         
         # emtpy sections are removed by removeEmptySections
         # all node classes that have content but no text need to be listed here to prevent removal
-        self.contentWithoutTextClasses = [Gallery, ImageLink]
+        self.contentWithoutTextClasses = [Gallery, ImageLink, ReferenceList]
         
 
     def clean(self, cleanerMethods):
