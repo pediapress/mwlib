@@ -213,7 +213,7 @@ def _analyze_html_tag(t):
     t.vlist = parseParams(values)
     name = name.lower()
 
-    if name=='br' or name=='references':
+    if name=='br':
         isEndToken = False
 
     t.rawtagname = name

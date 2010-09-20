@@ -946,7 +946,6 @@ def parse_txt(txt, xopts=None, **kwargs):
     a = td2.add
     
     a("code"       , 10)
-    a("references" , 15)
     a("span"       , 20)
     
     a("li"         , 25, blocknode=True, nested=False)
@@ -958,6 +957,7 @@ def parse_txt(txt, xopts=None, **kwargs):
     td1 =  tagparser()
     a = td1.add
     a("blockquote" , 5)
+    a("references" , 15)
     
     a("p"          , 30, blocknode=True, nested=False)
     a("ul"         , 35, blocknode=True)
