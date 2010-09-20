@@ -581,3 +581,12 @@ bar
 baz"""
     r=parse_txt(s)
     assert len(r)==1, "section not nested"
+
+def test_references_with_paragraphs():
+    s="<references>\n\n<ref>bla</ref>\n\n</references>"
+    r = core.parse_txt(s)
+    core.show(r)
+    references = core.walknodel(r, lambda x: x.tagname=="references")
+    assert len(references)==1, "expected exactly one references node, got %s" % len(references)
+    refs = core.walknodel(references, lambda x: x.tagname=="ref")
+    assert len(refs)==1, "expected exactly one ref node inside the references node, got %s" % len(refs)
