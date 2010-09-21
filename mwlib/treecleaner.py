@@ -62,6 +62,7 @@ class TreeCleaner(object):
                       'fixParagraphs',
                       'simplifyBlockNodes',
                       'removeAbsolutePositionedNode',
+                      'removeScrollElements',
                       'fixNesting',
                       'unNestEndingCellContent',
                       'removeCriticalTables',
@@ -959,12 +960,14 @@ class TreeCleaner(object):
         for itemlist in itemlists:
             if len(itemlist.children) > 25:
                 return True
+
         return is_big
 
 
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
+
         if node.__class__ == Table and not getattr(node, 'isInfobox', False):
             split_table = False
             for row in node.children:
@@ -972,7 +975,7 @@ class TreeCleaner(object):
                     if self._isBigCell(cell):
                         split_table = True
 
-            if node.numcols == 2:
+            if node.numcols == 2 and not split_table:
                 num_border_tables = 0
                 for t in node.getChildNodesByClass(Table):
                     if styleutils.tableBorder(t):
@@ -999,7 +1002,7 @@ class TreeCleaner(object):
                         lin_cols.append(item)
                 self.report('removed table. outputting linearize columns')
                 node.parent.replaceChild(node, lin_cols)
-            
+
         for c in node.children[:]:
             self.splitTableToColumns(c)           
 
@@ -1306,3 +1309,34 @@ class TreeCleaner(object):
 
         for c in node.children:
             self.unNestEndingCellContent(c)
+
+
+    def removeScrollElements(self, node):
+        '''overflow:auto
+http://en.wikipedia.org/wiki/Pope_John_Paul_II
+http://de.wikipedia.org/wiki/Portal:Maschinenbau/Themenliste_Maschinenbau
+http://de.wikipedia.org/wiki/Portal:Ethnologie
+'''
+        if node.style and node.parent and node.style.get('overflow', '').lower() == 'auto':
+            height = styleutils.scaleLength(node.style.get('height', ''))
+            if height > 100:
+                if node.getParentNodesByClass(Table) or node.__class__ == Table :
+                    node.force_tablesplit = True
+                    if node.getParentNodesByClass(Table):
+                        table_node = node.getParentNodesByClass(Table)[0]
+                    else:
+                        table_node = node
+                    content = []
+                    for cell in table_node.getChildNodesByClass(Cell):
+                        content.extend(cell.children)
+                    table_node.parent.replaceChild(table_node, content)
+                    self.report('removed overflow:auto table')
+                    return
+                else:
+                    continue_node = node.parent
+                    node.parent.replaceChild(node, node.children)
+                    node = continue_node
+                    self.report('removed overflow:auto element')
+
+        for c in node.children:
+            self.removeScrollElements(c)
