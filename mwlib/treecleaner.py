@@ -988,6 +988,19 @@ class TreeCleaner(object):
             if node.hasClassID(self.split_table_classIDs):
                 split_table = True
 
+            if node.numcols >= 3 and len(node.getAllDisplayText())>2500:
+                # table in "impact" section of http://en.wikipedia.org/wiki/Futurama
+                headings = [False]*node.numcols
+                lists = [False]*node.numcols
+                for row in node.children:
+                    for col_idx, cell in enumerate(row.children):
+                        if cell.getChildNodesByClass(Section) or cell.getChildNodesByClass(Big):
+                            headings[col_idx] = True
+                        if cell.getChildNodesByClass(ItemList):
+                            lists[col_idx] = True
+                if any(headings) and all(lists):
+                    split_table = True
+
             if split_table:
                 cols = [[] for i in range(node.numcols)]
 
