@@ -105,7 +105,9 @@ def make_collection_id(data):
         sio.write(repr(data.get(key)))
     mb = data.get('metabook')
     if mb:
-        mbobj = json.loads(unicode(mb, 'utf-8'))
+        if isinstance(mb, str):
+            mb = unicode(mb, 'utf-8')
+        mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
