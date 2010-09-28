@@ -197,9 +197,9 @@ class nuwiki(object):
     def extractHTML(self, parsed_html):
         html = {}
         for article in parsed_html:
-            title = article.get('displaytitle')
+            title = article.get('page')
             if title:
-                html[title] = article.get('text', {}).get('*', '')
+                html[title] = article
         return html
 
 NuWiki = nuwiki
@@ -320,7 +320,7 @@ class adapt(object):
         )
 
     def getHTML(self, title):
-        return self.nuwiki.html.get(title, '')
+        return self.nuwiki.html.get(title, {})
 
     def getParsedArticle(self, title, revision=None):
         if revision:
