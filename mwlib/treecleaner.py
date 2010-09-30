@@ -63,6 +63,7 @@ class TreeCleaner(object):
                       'simplifyBlockNodes',
                       'removeAbsolutePositionedNode',
                       'removeScrollElements',
+                      'galleryFix',
                       'fixNesting',
                       'unNestEndingCellContent',
                       'removeCriticalTables',
@@ -1353,3 +1354,13 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
 
         for c in node.children:
             self.removeScrollElements(c)
+
+
+    def galleryFix(self, node):
+        '''move gallery nodes out of tables.'''
+        galleries = node.getChildNodesByClass(Gallery)
+        for g in galleries:
+            tables = g.getParentNodesByClass(Table)
+            if tables:
+                g.moveto(tables[0])
+                self.report('removed gallery from table')
