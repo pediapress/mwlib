@@ -1145,6 +1145,7 @@ class TreeCleaner(object):
         if node.__class__ == Table:
             while node.children and self._isEmptyRow(node.children[-1]):
                 node.removeChild(node.children[-1])
+                self.report('remove emtpy trailing table row')
 
         for c in node.children:
             self.removeEmptyTrailingTableRows(c)
