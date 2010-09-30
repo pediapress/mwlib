@@ -56,7 +56,7 @@ def _rgb2GreyScale(rgb_triple, darknessLimit=1):
     grey = min(1, max(darknessLimit, 0.3*rgb_triple[0] + 0.59*rgb_triple[1] + 0.11*rgb_triple[2] ))
     return (grey, grey, grey)
 
-def rgbBgColorFromNode(node, greyScale=False, darknessLimit=0):
+def rgbBgColorFromNode(node, greyScale=False, darknessLimit=0, follow=True):
     """Extract background color from node attributes/style. Result is a rgb triple w/ individual values between [0...1]
 
     The darknessLimit parameter is only used when greyScale is requested. This is for b/w output formats that do not
@@ -72,6 +72,8 @@ def rgbBgColorFromNode(node, greyScale=False, darknessLimit=0):
         color = _colorFromStr(colorStr.lower())
         if greyScale and color:
             return _rgb2GreyScale(color, darknessLimit)
+    elif node.parent and follow:
+        return rgbBgColorFromNode(node.parent, greyScale=greyScale, darknessLimit=darknessLimit)
     return color
 
 def rgbColorFromNode(node, greyScale=False, darknessLimit=0):
@@ -84,6 +86,8 @@ def rgbColorFromNode(node, greyScale=False, darknessLimit=0):
         color = _colorFromStr(colorStr.lower())
         if greyScale and color:
             return _rgb2GreyScale(color, darknessLimit)
+    elif node.parent:
+        return rgbColorFromNode(node.parent, greyScale=greyScale, darknessLimit=darknessLimit)
     return color
 
 
