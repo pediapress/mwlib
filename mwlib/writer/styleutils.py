@@ -187,6 +187,8 @@ mw_em2pt = 9.6
             
 def scaleLength(length_str, reference=None):
     length, unit = parseLength(length_str)
+    if not length:
+        return 0
     if unit == 'pt':
         return length
     elif unit == 'px':
