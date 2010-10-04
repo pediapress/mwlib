@@ -202,6 +202,7 @@ class TreeCleaner(object):
                                  'navbox',
                                  'navbox-vertical',
                                  'Vorlage_Gesundheitshinweis',
+                                 'collapsible',
                                  ]
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
