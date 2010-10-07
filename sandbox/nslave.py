@@ -127,7 +127,7 @@ class commands(object):
 
             args.extend(_get_args(**params))
             
-            system(args)
+            system(args, timeout=15*60.0)
             os.chmod(outfile, 0644)
             size = os.path.getsize(outfile)            
             url = cacheurl+"/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
