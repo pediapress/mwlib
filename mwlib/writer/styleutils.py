@@ -134,6 +134,7 @@ def tableBorder(node):
                    'metadata',
                    'wikitable',
                    'infobox',
+                   'ujinfobox', # used in hu.wikipedia
                    'infoboks',
                    'toccolours',
                    'navbox',
