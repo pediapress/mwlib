@@ -135,6 +135,7 @@ def tableBorder(node):
                    'wikitable',
                    'infobox',
                    'ujinfobox', # used in hu.wikipedia
+                   'infobox_v2', # used in fr.wikipedia
                    'infoboks',
                    'toccolours',
                    'navbox',
