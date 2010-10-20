@@ -110,7 +110,7 @@ class commands(object):
                 f.write(metabook_data)
                 f.close()
 
-            system(args, timeout=90.0)
+            system(args, timeout=8*60.0)
 
         return doit(**params)
     
