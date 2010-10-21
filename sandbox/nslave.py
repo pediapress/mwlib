@@ -33,7 +33,8 @@ def system(args, timeout=None):
         a("\n====================\n")
 
         writemsg()
-        raise RuntimeError("command failed: %r" % pub_args)
+        lines = ["    " + x for x in stdout[4096:].split("\n")]
+        raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" % (retcode, pub_args,  "\n".join(lines)))
 
     writemsg()
     
