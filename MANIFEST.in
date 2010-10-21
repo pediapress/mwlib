@@ -219,7 +219,6 @@ include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py
 include sandbox/anywikisampler.py
-include sandbox/argv.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
 include sandbox/expr.txt
