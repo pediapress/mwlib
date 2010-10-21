@@ -29,12 +29,6 @@ include mwlib/apps/render.py
 include mwlib/apps/serve.py
 include mwlib/apps/watch.py
 include mwlib/async/__init__.py
-include mwlib/async/jobs.py
-include mwlib/async/proc.py
-include mwlib/async/qserve.py
-include mwlib/async/rpcclient.py
-include mwlib/async/rpcserver.py
-include mwlib/async/slave.py
 include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
@@ -223,7 +217,6 @@ include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent
 include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py
-include pytest_twisted/__init__.py
 include sandbox/anywikisampler.py
 include sandbox/argv.py
 include sandbox/bigswitch.py
