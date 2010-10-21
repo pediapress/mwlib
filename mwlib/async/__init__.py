@@ -3,8 +3,8 @@ initpkg(
     __name__,
     dict(
         jobs = "qs.jobs",
-        proc = "qs.proc.py",
-        qserve = "qs.qserve.py",
+        proc = "qs.proc",
+        qserve = "qs.qserve",
         rpcclient = "qs.rpcclient",
         rpcserver = "qs.rpcserver",
         slave = "qs.slave"))
