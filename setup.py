@@ -107,6 +107,7 @@ def main():
         ext_modules=ext_modules,
         packages=["mwlib", "mwlib.templ"],
         namespace_packages=['mwlib'],
+        scripts = "sandbox/nslave.py sandbox/nserve.py sandbox/postman.py".split(),
         include_package_data = True,
         zip_safe = False,
         url = "http://code.pediapress.com/",
