@@ -3,10 +3,11 @@
 import gevent, gevent.monkey
 gevent.monkey.patch_all()
 
-import os, sys
+import os, sys, getpass, socket, traceback, StringIO
 
 from mwlib.podclient import PODClient
 from mwlib.status import Status
+from mwlib.utils import send_mail
 
 cachedir = "cache"
 
@@ -116,6 +117,21 @@ def report_exception(posturl, (tp, err, tb)):
     podclient = PODClient(posturl)
     podclient.post_status(error=str(err))
 
+mailfrom = "%s@%s" % (getpass.getuser(), socket.gethostname())
+
+def report_exception_mail(subject, exc_info):
+    mailto = os.environ.get("MAILTO")
+    if not mailto:
+        print "MAILTO not set. not sending email."
+        return
+
+    print "sending mail to", mailto
+
+    f=StringIO.StringIO()
+    traceback.print_exception(*exc_info, file=f)
+
+    send_mail(mailfrom, [mailto], subject, f.getvalue())
+
 
 class commands(object):
     def statusfile(self):
@@ -154,7 +170,10 @@ class commands(object):
             try:
                 return _doit(**params)
             except Exception:
-                gevent.spawn(report_exception, post_url, sys.exc_info())
+                exc_info = sys.exc_info()
+                gevent.spawn(report_exception, post_url, exc_info)
+                gevent.spawn(report_exception_mail, "zip upload failed", exc_info)
+                del exc_info
                 raise
 
         return doit(**params)
