@@ -506,6 +506,12 @@ class parse_links(object):
                     stack.append(marks)
                 marks = [i]
                 i+=1
+            elif t.type == T.t_newline and len(marks) < 2:
+                if stack:
+                    marks = stack.pop()
+                else:
+                    marks = []
+                i += 1
             elif t.type==T.t_special and t.text=="|":
                 marks.append(i)
                 i+=1
