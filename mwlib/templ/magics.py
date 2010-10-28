@@ -307,7 +307,12 @@ class PageMagic(object):
 
     def NS(self, args):
         """Returns the name of a given namespace number."""
-        namespaces = self.source.namespaces or {}
+        try:
+            namespaces = self.siteinfo["namespaces"]
+        except (AttributeError, KeyError):
+            from mwlib import siteinfo
+            namespaces = siteinfo.get_siteinfo("en")["namespaces"]
+
         ns = args[0]
         try:
             retval = namespaces[ns]['*']
