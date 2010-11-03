@@ -947,7 +947,8 @@ class TreeCleaner(object):
     def _isBigCell(self, cell):
         is_big = False
         content_len = len(cell.getAllDisplayText())
-        if content_len > 5000:
+        num_images = 1 + len(cell.getChildNodesByClass(ImageLink))
+        if content_len > 5000/num_images:
             return True
 
         tables = cell.getChildNodesByClass(Table)
@@ -969,7 +970,6 @@ class TreeCleaner(object):
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
-
         if node.__class__ == Table and not getattr(node, 'isInfobox', False):
             split_table = False
             for row in node.children:
