@@ -579,7 +579,8 @@ class MWXHTMLWriter(object):
     xwriteDefinitionTerm = xwriteGenericElement
     xwriteDefinitionDescription = xwriteGenericElement
     xwriteFont = xwriteGenericElement
-    
+    xwriteAbbreviation = xwriteGenericElement
+
     def xwritePreFormatted(self, n):
         return ET.Element("pre")
 
