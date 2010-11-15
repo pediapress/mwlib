@@ -83,7 +83,8 @@ class TreeCleaner(object):
                       'splitBigTableCells',
                       'limitImageCaptionsize',
                       'removeDuplicateLinksInReferences',
-                      'fixItemLists', 
+                      'fixItemLists',
+                      'fixSubSup',
                       'removeLeadingParaInList',
                       'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                       'removeNewlines', # imported from advtree - clean up newlines that are not needed
@@ -1369,3 +1370,12 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
             if tables:
                 g.moveto(tables[0])
                 self.report('removed gallery from table')
+
+    def fixSubSup(self, node):
+        if node.__class__ in [Sup, Sub] and node.parent:
+            parser.show(sys.stdout, node)
+            if len(node.getAllDisplayText())>200:
+                node.parent.replaceChild(node, node.children)
+                self.report('removed long sup/sub')
+        for c in node.children:
+            self.fixSubSup(c)
