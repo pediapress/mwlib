@@ -534,8 +534,10 @@ class Inserted(TagNode, AdvancedNode):
 class TableCaption(TagNode, AdvancedNode): 
     _tag = "caption"
 
+class Abbreviation(TagNode, AdvancedNode):
+    _tag = "abbr"
     
-_tagNodeMap = dict( (k._tag,k) for k in [Source, Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap, Ruby, RubyBase, RubyText, Deleted, Inserted, TableCaption, Font, DefinitionList, DefinitionTerm, DefinitionDescription] )
+_tagNodeMap = dict( (k._tag,k) for k in [Source, Code, BreakingReturn, HorizontalRule, Index, Teletyped, Reference, ReferenceList, Gallery, Center, Div, Span, Strike, ImageMap, Ruby, RubyBase, RubyText, Deleted, Inserted, TableCaption, Font, DefinitionList, DefinitionTerm, DefinitionDescription, Abbreviation] )
 _styleNodeMap["s"] = Strike # Special Handling for deprecated s style
 
 
