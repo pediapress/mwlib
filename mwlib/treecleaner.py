@@ -1373,7 +1373,6 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
 
     def fixSubSup(self, node):
         if node.__class__ in [Sup, Sub] and node.parent:
-            parser.show(sys.stdout, node)
             if len(node.getAllDisplayText())>200:
                 node.parent.replaceChild(node, node.children)
                 self.report('removed long sup/sub')
