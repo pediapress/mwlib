@@ -1267,14 +1267,15 @@ class TreeCleaner(object):
 
     def markInfoboxes(self, node):
         if node.__class__ == Article:
+            article_ns = getattr(node, 'ns', 0)
             tables = node.getChildNodesByClass(Table)
             found_infobox = False
             for table in tables:
-                if miscutils.hasInfoboxAttrs(table):
+                if miscutils.hasInfoboxAttrs(table) and article_ns != 100:
                     table.isInfobox = found_infobox = True
             if found_infobox or not tables:
                 return
-            if miscutils.articleStartsWithTable(node, max_text_until_infobox=200):
+            if miscutils.articleStartsWithTable(node, max_text_until_infobox=200) and article_ns != 100:
                 tables[0].isInfobox = True
             return
 
