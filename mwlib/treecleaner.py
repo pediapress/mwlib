@@ -52,6 +52,7 @@ class TreeCleaner(object):
 
 
     cleanerMethods = ['markInfoboxes',
+                      'removeEditLinks',
                       'removeEmptyTextNodes',
                       'removeInvisibleLinks', 
                       'cleanSectionCaptions',
@@ -1379,3 +1380,12 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
                 self.report('removed long sup/sub')
         for c in node.children:
             self.fixSubSup(c)
+
+    def removeEditLinks(self, node):
+
+        if node.__class__ == NamedURL and node.caption.endswith('?action=edit'):
+            self.report('removing edit link', node)
+            node.parent.removeChild(node)
+
+        for c in node:
+            self.removeEditLinks(c)
