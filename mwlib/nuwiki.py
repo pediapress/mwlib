@@ -171,7 +171,7 @@ class nuwiki(object):
             ext = os.path.splitext(p)[-1]
             ext = ext.replace(' ', '')
             # mediawiki gives us png's for these extensions. let's change them here.
-            if ext.lower() in (".gif", ".svg"):
+            if ext.lower() in (".gif", ".svg", '.tif', '.tiff'):
                 # print "change xt:", ext
                 ext = ".png"
             hd += ext
