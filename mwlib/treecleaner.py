@@ -90,6 +90,7 @@ class TreeCleaner(object):
                       'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                       'removeNewlines', # imported from advtree - clean up newlines that are not needed
                       'removeBreakingReturns',
+                      'removeSeeAlso',
                       'buildDefinitionLists',
                       'restrictChildren',
                       'fixReferenceNodes',
@@ -1389,3 +1390,21 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
 
         for c in node:
             self.removeEditLinks(c)
+
+    def removeSeeAlso(self, node):
+        try:
+            seealso_section =  _('See also')
+        except NameError:
+            seealso_section = 'See also'
+
+
+        if node.__class__ == Section \
+           and len(node.children):
+            section_title = node.children[0].children[0].caption
+            if section_title == seealso_section:
+                self.report('removed see also section', node)
+                node.parent.removeChild(node)
+
+        for c in node:
+            self.removeSeeAlso(c)
+
