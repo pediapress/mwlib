@@ -1400,7 +1400,10 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
 
         if node.__class__ == Section \
            and len(node.children):
-            section_title = node.children[0].children[0].caption
+            try:
+                section_title = node.children[0].children[0].caption
+            except IndexError:
+                section_title = ''
             if section_title == seealso_section:
                 self.report('removed see also section', node)
                 node.parent.removeChild(node)
