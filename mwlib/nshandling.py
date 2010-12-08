@@ -49,7 +49,7 @@ def fix_wikipedia_siteinfo(siteinfo):
 
 
     prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
-    for p in "pnb ckb mwl mhr ace krc pcd frr".split():
+    for p in "pnb ckb mwl mhr ace krc pcd frr koi gag bjn pfl".split():
         
         if p in prefixes:
             return
