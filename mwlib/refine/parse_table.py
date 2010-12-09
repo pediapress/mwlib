@@ -269,6 +269,10 @@ class parse_tables(object):
             start = stack.pop()
             starttoken = tokens[start]
             sub = tokens[start+1:i]
+            from mwlib.refine import core
+            tp = core.tagparser()
+            tp.add("caption", 5)
+            tp(sub, self.xopts)
             tokens[start:i+1] = [T(type=T.t_complex_table,
                                    tagname="table", start=tokens[start].start, children=sub,
                                    vlist=starttoken.vlist, blocknode=True)]

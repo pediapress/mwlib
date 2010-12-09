@@ -31,7 +31,8 @@ tok2class = {
 def _change_classes(node):
     if isinstance(node, T):
         if node.type==T.t_complex_table and node.children:
-            node.children = [x for x in node.children if x.type in (T.t_complex_table_row, T.t_complex_caption)]
+
+            node.children = [x for x in node.children if x.type in (T.t_complex_table_row, T.t_complex_caption) or x.tagname == "caption"]
         elif node.type==T.t_complex_table_row and node.children:
             node.children = [x for x in node.children if x.type==T.t_complex_table_cell]
 
@@ -90,6 +91,8 @@ def _change_classes(node):
             node.caption = node.tagname
             if node.tagname=='p':
                 node.__class__=N.Paragraph
+            elif node.tagname=='caption':
+                node.__class__=N.Caption
             elif node.tagname=='ref':
                 pass
                 #node.__class__=N.Ref
