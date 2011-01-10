@@ -881,12 +881,13 @@ class TreeCleaner(object):
 
     def removeInvisibleLinks(self, node):
         """Remove category links that are not displayed in the text, but only used to stick the article in a category"""
+
         if (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon and node.parent:
             node.parent.removeChild(node)
             self.report('remove invisible link', node)
             return
 
-        for c in node.children:
+        for c in node.children[:]:
             self.removeInvisibleLinks(c)
           
 
