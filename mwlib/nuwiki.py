@@ -197,7 +197,7 @@ class nuwiki(object):
     def extractHTML(self, parsed_html):
         html = {}
         for article in parsed_html:
-            title = article.get('page')
+            title = article.get('page', article.get('displaytitle'))
             if title:
                 html[title] = article
         return html
