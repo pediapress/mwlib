@@ -51,7 +51,8 @@ class TreeCleaner(object):
     """
 
 
-    cleanerMethods = ['markInfoboxes',
+    cleanerMethods = ['cleanVlist',
+                      'markInfoboxes',
                       'removeEditLinks',
                       'removeEmptyTextNodes',
                       'removeInvisibleLinks', 
@@ -1412,3 +1413,13 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
         for c in node:
             self.removeSeeAlso(c)
 
+
+
+    def cleanVlist(self, node):
+        if node.vlist:
+            for attr, val in node.vlist.items():
+                if attr != attr.lower():
+                    node.vlist[attr.lower()] = val
+
+        for c in node:
+            self.cleanVlist(c)
