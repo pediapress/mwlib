@@ -166,6 +166,7 @@ re2c:yyfill:enable = 0 ;
 
   magicword = ( "__TOC__" 
 	      | "__NOTOC__"
+	      | "__NOINDEX__"
 	      | "__FORCETOC__"
 	      | "__NOEDITSECTION__"
 	      | "__NEWSECTIONLINK__"
