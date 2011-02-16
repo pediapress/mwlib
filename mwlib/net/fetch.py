@@ -518,7 +518,7 @@ class fetcher(object):
                 self._refcall(lambda: self._download_image(thumburl, title))
 
                 descriptionurl = ii.get("descriptionurl", "")
-                if "/" in descriptionurl:
+                if descriptionurl and "/" in descriptionurl:
                     path, localname = descriptionurl.rsplit("/", 1)
                     t = (title, descriptionurl)
                     if path in self.imagedescription_todo:
