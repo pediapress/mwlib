@@ -158,7 +158,6 @@ class mwapi(object):
         rvlimit = int(os.environ.get("RVLIMIT", "500"))
     except ValueError:
         rvlimit = 500
-    
     def __init__(self, baseurl, script_extension='.php'):
         self.baseurl = baseurl
         self.script_extension = script_extension
@@ -267,7 +266,6 @@ class mwapi(object):
     
     def _request(self, **kwargs):
         url = self._build_url(**kwargs)
-        
         d=defer.Deferred()
         self._todo.append((url, d))
         reactor.callLater(0.0, self._maybe_fetch)
@@ -400,9 +398,11 @@ class mwapi(object):
         return self.do_request(action="query", **kwargs)
 
     def fetch_imageinfo(self, titles, iiurlwidth=800):
-        kwargs = dict(prop="imageinfo",
+        kwargs = dict(prop="imageinfo|info",
                       iiprop="url|user|comment|url|sha1|size",
-                      iiurlwidth=iiurlwidth)
+                      iiurlwidth=iiurlwidth,
+                      inprop='url'
+                      )
         
         self._update_kwargs(kwargs, titles, [])
         return self.do_request(action="query", **kwargs)
@@ -430,7 +430,7 @@ class mwapi(object):
                 return err
             
             kwargs["rvlimit"] = 50
-            
+
             return self.do_request(action="query", **kwargs).addCallback(setrvlimit)
                 
             

@@ -492,7 +492,6 @@ class fetcher(object):
         
         
     def _cb_imageinfo(self, data):
-        # print "data:", data
         infos = data.get("pages", {}).values()
         # print infos[0]
         new_basepaths = set()
@@ -518,6 +517,9 @@ class fetcher(object):
                 self._refcall(lambda: self._download_image(thumburl, title))
 
                 descriptionurl = ii.get("descriptionurl", "")
+                if not descriptionurl:
+                    descriptionurl = i.get('fullurl', '')
+
                 if descriptionurl and "/" in descriptionurl:
                     path, localname = descriptionurl.rsplit("/", 1)
                     t = (title, descriptionurl)
