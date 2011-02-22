@@ -68,7 +68,8 @@ def guess_api_urls(url):
 
     for _path in (path+"/", '/w/', '/wiki/', '/'):
         base_url = '%s%sapi.php' % (prefix, _path)
-        retval.append(base_url)
+        if base_url not in retval:
+            retval.append(base_url)
     
     return retval
 
