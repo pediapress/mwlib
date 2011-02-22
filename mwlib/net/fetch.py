@@ -9,6 +9,7 @@ import os
 import sys
 import urlparse
 import time
+from collections import defaultdict
 
 from mwlib import metabook, utils, nshandling, conf
 
@@ -218,6 +219,8 @@ class fetcher(object):
         self.redirects = {}
         self.cat2members = {}
 
+        self.img_fetch_count = defaultdict(int)
+        self.img_max_retries = 2
 
         self.title2latest = {}
 
@@ -479,6 +482,8 @@ class fetcher(object):
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
         tmp = (path+u'\xb7').encode("utf-8")
+        self.img_fetch_count[str(url)] += 1
+
         def done(val):
             if os.stat(tmp).st_size==0:
                 print "WARNING: empty image %r" % (url,)
@@ -487,10 +492,25 @@ class fetcher(object):
                 os.rename(tmp, path)
 
             return val
-        
-        return client.downloadPage(str(url), tmp).addCallback(done)
-        
-        
+
+        def failed(failure):
+            print 'download failed for ', str(url)
+            if failure.getErrorMessage() in ['Connection was closed cleanly.',
+                                             'User timeout caused connection failure.',
+                                             ]:
+                retries = self.img_fetch_count.get(str(url), 0)
+                if retries <= self.img_max_retries:
+                    print 'retrying download! (%d)' % retries
+                    self._download_image(url, title)
+                else:
+                    print 'skipping img, max retry count reached'
+            else:
+                print 'unknown download error:', failure.getErrorMessage()
+                print failure
+
+        return client.downloadPage(str(url), tmp).addCallback(done).addErrback(failed)
+
+
     def _cb_imageinfo(self, data):
         infos = data.get("pages", {}).values()
         # print infos[0]
@@ -607,7 +627,6 @@ class fetcher(object):
             for k in local_names:
                 self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits))
         
-        # print "got api for", repr(path), len(todo)
         return self.get_siteinfo_for(api).addCallback(got_siteinfo)
         
             
@@ -615,7 +634,6 @@ class fetcher(object):
         urls = mwapi.guess_api_urls(path)
         if not urls:
             return defer.fail("cannot guess api url for %r" % (path,))
-
         return self.apipool.try_api_urls(urls)
             
     def dispatch(self):
