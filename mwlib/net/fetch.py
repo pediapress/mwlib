@@ -9,6 +9,7 @@ import os
 import sys
 import urlparse
 import time
+from lxml import etree
 from collections import defaultdict
 
 from mwlib import metabook, utils, nshandling, conf
@@ -271,17 +272,43 @@ class fetcher(object):
         self.report()
         self.dispatch()
 
+    def extension_img_urls(self, data):
+        html = data['text']['*']
+        root = etree.HTML(html)
+
+        img_urls = set()
+        for img_node in root.xpath('.//img'):
+            src = img_node.get('src')
+            frags = src.split('/')
+            if len(frags):
+                fullurl = urlparse.urljoin(self.api.baseurl, src)
+                if img_node.get('class') != 'thumbimage' and \
+                       ('extensions' in src or 'math' in src):
+
+                    img_urls.add(fullurl)
+        if img_urls:
+            print 'found %d extension images' % len(img_urls)
+        return img_urls
+
+
     def fetch_html(self, name, lst):
         def got_html(res,value):
             res[name] = value
             self.parsed_html.append(res)
-            return res
+            img_urls = self.extension_img_urls(res)
+            return img_urls
+
+        def fetch_extension_images(urls):
+            for url in urls:
+                fn = url.rsplit('/', 1)[1]
+                title = self.nshandler.splitname(fn, defaultns=6)[2]
+                self._refcall(lambda: self._download_image(str(url), title))
 
         def doit():
             dl = []
             for c in lst:
                 kw = {name: c}
-                dl.append(self._refcall(lambda: self.api.do_request(action="parse", redirects="1", **kw).addCallback(got_html,c)))
+                dl.append(self._refcall(lambda: self.api.do_request(action="parse", redirects="1", **kw).addCallback(got_html,c).addCallback(fetch_extension_images)))
             return defer.DeferredList(dl)
 
         return self._refcall(lambda: doit())
@@ -483,7 +510,6 @@ class fetcher(object):
         path = self.fsout.get_imagepath(title)
         tmp = (path+u'\xb7').encode("utf-8")
         self.img_fetch_count[str(url)] += 1
-
         def done(val):
             if os.stat(tmp).st_size==0:
                 print "WARNING: empty image %r" % (url,)

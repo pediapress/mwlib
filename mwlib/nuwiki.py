@@ -149,7 +149,6 @@ class nuwiki(object):
     def normalize_and_get_image_path(self, name):
         assert isinstance(name, basestring)
         name = unicode(name)
-        
         ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if ns != 6:
             return
@@ -162,7 +161,10 @@ class nuwiki(object):
         
         p = self._pathjoin("images", utils.fsescape(fqname))
         if not self._exists(p):
-            return None
+            fqname = 'File:' + partial # Fallback to default language english
+            p = self._pathjoin("images", utils.fsescape(fqname))
+            if not self._exists(p):
+                return None
 
         if 1:
             from hashlib import md5
