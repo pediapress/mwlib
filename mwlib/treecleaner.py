@@ -67,6 +67,7 @@ class TreeCleaner(object):
                       'removeScrollElements',
                       'galleryFix',
                       'fixNesting',
+                      'removeChildlessNodes',
                       'unNestEndingCellContent',
                       'removeCriticalTables',
                       'removeTextlessStyles', 
