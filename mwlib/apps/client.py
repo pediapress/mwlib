@@ -39,7 +39,9 @@ def main():
             sys.exit('request failed: got response code %d\n%r' % (client.response_code, client.response))
 
     if command=="download":
-        print "got %s bytes" % (len(client.response), )
+        fn = 'output'
+        open(fn, 'w').write(client.response)
+        print 'wrote %d bytes to %r' % (len(client.response), fn)
     else:
         print json.dumps(client.response, indent=4)
     
