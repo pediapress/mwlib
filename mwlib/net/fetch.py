@@ -214,6 +214,7 @@ class fetcher(object):
 
         self.scheduled = set()
 
+
         self.simult = mwapi.multiplier()
         self.count_total = 0
         self.count_done = 0
@@ -222,6 +223,7 @@ class fetcher(object):
 
         self.img_fetch_count = defaultdict(int)
         self.img_max_retries = 2
+        self.sem = defer.DeferredSemaphore(15)
 
         self.title2latest = {}
 
@@ -534,7 +536,8 @@ class fetcher(object):
                 print 'unknown download error:', failure.getErrorMessage()
                 print failure
 
-        return client.downloadPage(str(url), tmp).addCallback(done).addErrback(failed)
+        d = self.sem.run(client.downloadPage, str(url), tmp)
+        return d.addCallback(done).addErrback(failed)
 
 
     def _cb_imageinfo(self, data):
