@@ -150,7 +150,7 @@ class pool(object):
     
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
-    api_request_limit = 20 # at most 50 titles at once
+    api_request_limit = 15 # at most 50 titles at once
 
     max_connections = 20
     siteinfo = None
@@ -218,7 +218,7 @@ class mwapi(object):
     def _fetch(self, url):
         errors = []
         d = defer.Deferred()
-        
+
         def done(val):
             if isinstance(val, failure.Failure):
                 errors.append(val)
@@ -230,13 +230,13 @@ class mwapi(object):
                     d.callback(val)
             else:
                 d.callback(val)
-            
+
         try:
             client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
         except Exception, err: # pyopenssl missing??
             print "FATAL:", err
             os._exit(10)
-            
+
         return d
     
     def _maybe_fetch(self):
@@ -283,7 +283,6 @@ class mwapi(object):
             result.errback(err)
 
         def got_result(data):
-
             try:
                 error = data.get("error")
             except:
