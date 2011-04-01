@@ -150,7 +150,7 @@ class pool(object):
     
 class mwapi(object):
     api_result_limit = 500 # 5000 for bots
-    api_request_limit = 20 # at most 50 titles at once
+    api_request_limit = 15 # at most 50 titles at once
 
     max_connections = 20
     siteinfo = None
@@ -218,7 +218,7 @@ class mwapi(object):
     def _fetch(self, url):
         errors = []
         d = defer.Deferred()
-        
+
         def done(val):
             if isinstance(val, failure.Failure):
                 errors.append(val)
@@ -230,13 +230,13 @@ class mwapi(object):
                     d.callback(val)
             else:
                 d.callback(val)
-            
+
         try:
             client.getPage(url, cookies=self.cookies).addCallbacks(done, done)
         except Exception, err: # pyopenssl missing??
             print "FATAL:", err
             os._exit(10)
-            
+
         return d
     
     def _maybe_fetch(self):
@@ -271,10 +271,10 @@ class mwapi(object):
         self._todo.append((url, d))
         reactor.callLater(0.0, self._maybe_fetch)
         return d
-        
+
     def do_request(self, query_continue=True, **kwargs):
         result = defer.Deferred()
-        
+
         retval = {}
         last_qc = [None]
         action = kwargs["action"]
@@ -283,41 +283,38 @@ class mwapi(object):
             result.errback(err)
 
         def got_result(data):
-            
             try:
                 error = data.get("error")
             except:
                 print "ERROR:", data, kwargs
                 raise
-            
+
             if error:
                 raise RuntimeError("%r: [fetching %r]" % (error.get("info", ""), self._build_url(**kwargs)))
-            
+
             merge_data(retval, data[action])
-            
+
             qc = data.get("query-continue", {}).values()
-            
+
             if qc and query_continue:
                 kw = kwargs.copy()
+
                 for d in qc:
                     for k,v in d.items(): # dict of len(1)
                         kw[str(k)] = v
-
-                # print self._build_url(**kw)
                 if qc == last_qc[0]:
                     print "warning: cannot continue this query:",  self._build_url(**kw)
                     result.callback(retval)
                     return
-                
 
                 last_qc[0] = qc
-                        
+
                 self.qccount += 1
-                
+
                 schedule(**kw)
                 self.report()
                 return
-            
+
                 # return self._request(**kw).addCallback(got_result)
             result.callback(retval)
 
@@ -325,7 +322,7 @@ class mwapi(object):
             reactor.callLater(0.0, lambda: self._request(**kwargs).addCallback(got_result).addErrback(got_err))
 
         schedule(**kwargs)
-            
+
         return result
 
     def ping(self):
@@ -376,19 +373,9 @@ class mwapi(object):
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
 
-    def fetch_categories(self, titles=None, revids=None):
-        kwargs = dict(prop="categories",
-                      # rvprop='ids',
-                      imlimit=self.api_result_limit,
-                      tllimit=self.api_result_limit)
-        if titles:
-            kwargs['redirects'] = 1
-
-        self._update_kwargs(kwargs, titles, revids)
-        return self.do_request(action="query", **kwargs)
-        
-    def fetch_pages(self, titles=None, revids=None):        
-        kwargs = dict(prop="revisions|categories",
+    @defer.inlineCallbacks
+    def fetch_pages(self, titles=None, revids=None):
+        kwargs = dict(prop="revisions",
                       rvprop='ids|content|timestamp|user',
                       imlimit=self.api_result_limit,
                       tllimit=self.api_result_limit)
@@ -396,7 +383,19 @@ class mwapi(object):
             kwargs['redirects'] = 1
 
         self._update_kwargs(kwargs, titles, revids)
-        return self.do_request(action="query", **kwargs)
+
+        rev_result = yield self.do_request(action="query", **kwargs)
+
+        kwargs = dict(prop="categories",
+                      cllimit=self.api_result_limit,
+                      )
+        if titles:
+            kwargs['redirects'] = 1
+
+        self._update_kwargs(kwargs, titles, revids)
+        cat_result = yield self.do_request(action="query", **kwargs)
+        merge_data(rev_result, cat_result)
+        defer.returnValue(rev_result)
 
     def fetch_imageinfo(self, titles, iiurlwidth=800):
         kwargs = dict(prop="imageinfo|info",
