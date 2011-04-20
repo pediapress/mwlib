@@ -90,6 +90,27 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2010-10-29 release 0.12.14
+--------------------------
+- magics.py: fix NS magic function.
+- refine/core.py: do not parse links if link target would contain newlines.
+- setup.py: require lockfile==0.8.
+- add xr formatting in #time
+- replace mwlib.async with qserve package.
+- move fontswitcher to writer dir
+- remove collapsible elements
+- fix for #830
+- move gallery nodes out of tables.
+- handle overflow:auto crap
+- fix for reference handling
+- better handling for references nodes.
+- fix for ReferenceLists
+- fix whitespace handling and implicit newlines in template arguments. fixes http://code.pediapress.com/wiki/ticket/877.
+- Add support for more PageMagic as per http://meta.wikimedia.org/wiki/Help:Magic_words
+- Fix PageMagic to consider page as argument
+- fetch parsed html from mediawiki and store it as parsed_html.json. We store the raw result from mediawiki since it's not clear what's really needed.
+- make mwapi work for non query actions.
+
 2010-7-16 release 0.12.13
 --------------------------
 - omit passwords from error file

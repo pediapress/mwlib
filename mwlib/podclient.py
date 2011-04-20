@@ -24,18 +24,23 @@ class PODClient(object):
             headers = {}
         return urllib2.urlopen(urllib2.Request(self.posturl, data, headers=headers)).read()
     
-    def post_status(self, status=None, progress=None, article=None):
+    def post_status(self, status=None, progress=None, article=None, error=None):
         post_data = {}
-        if status is not None:
-            if not isinstance(status, str):
-                status = status.encode('utf-8')
-            post_data['status'] = status
+
+        def setv(name, val):
+            if val is None:
+                return
+            if not isinstance(val, str):
+                val = val.encode("utf-8")
+            post_data[name] = val
+
+        setv("status", status)
+        setv("error", error)
+        setv("article", article)
+
         if progress is not None:
             post_data['progress'] = '%d' % progress
-        if article is not None:
-            if not isinstance(article, str):
-                article = article.encode('utf-8')
-            post_data['article'] = article
+
         self._post(urllib.urlencode(post_data))
 
     def streaming_post_zipfile(self, filename, fh=None):

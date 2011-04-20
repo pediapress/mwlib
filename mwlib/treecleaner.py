@@ -51,7 +51,9 @@ class TreeCleaner(object):
     """
 
 
-    cleanerMethods = ['markInfoboxes',
+    cleanerMethods = ['cleanVlist',
+                      'markInfoboxes',
+                      'removeEditLinks',
                       'removeEmptyTextNodes',
                       'removeInvisibleLinks', 
                       'cleanSectionCaptions',
@@ -65,6 +67,7 @@ class TreeCleaner(object):
                       'removeScrollElements',
                       'galleryFix',
                       'fixNesting',
+                      'removeChildlessNodes',
                       'unNestEndingCellContent',
                       'removeCriticalTables',
                       'removeTextlessStyles', 
@@ -83,11 +86,13 @@ class TreeCleaner(object):
                       'splitBigTableCells',
                       'limitImageCaptionsize',
                       'removeDuplicateLinksInReferences',
-                      'fixItemLists', 
+                      'fixItemLists',
+                      'fixSubSup',
                       'removeLeadingParaInList',
                       'removeChildlessNodes', # methods above might leave empty nodes behind - clean up
                       'removeNewlines', # imported from advtree - clean up newlines that are not needed
                       'removeBreakingReturns',
+                      'removeSeeAlso',
                       'buildDefinitionLists',
                       'restrictChildren',
                       'fixReferenceNodes',
@@ -877,12 +882,13 @@ class TreeCleaner(object):
 
     def removeInvisibleLinks(self, node):
         """Remove category links that are not displayed in the text, but only used to stick the article in a category"""
+
         if (node.__class__ == CategoryLink or node.__class__ == LangLink) and not node.colon and node.parent:
             node.parent.removeChild(node)
             self.report('remove invisible link', node)
             return
 
-        for c in node.children:
+        for c in node.children[:]:
             self.removeInvisibleLinks(c)
           
 
@@ -946,7 +952,8 @@ class TreeCleaner(object):
     def _isBigCell(self, cell):
         is_big = False
         content_len = len(cell.getAllDisplayText())
-        if content_len > 5000:
+        num_images = 1 + len(cell.getChildNodesByClass(ImageLink))
+        if content_len > 5000/num_images:
             return True
 
         tables = cell.getChildNodesByClass(Table)
@@ -968,7 +975,6 @@ class TreeCleaner(object):
             
     def splitTableToColumns(self, node):
         """Removes a table if contained cells are very large. Column content is linearized."""
-
         if node.__class__ == Table and not getattr(node, 'isInfobox', False):
             split_table = False
             for row in node.children:
@@ -1265,14 +1271,15 @@ class TreeCleaner(object):
 
     def markInfoboxes(self, node):
         if node.__class__ == Article:
+            article_ns = getattr(node, 'ns', 0)
             tables = node.getChildNodesByClass(Table)
             found_infobox = False
             for table in tables:
-                if miscutils.hasInfoboxAttrs(table):
+                if miscutils.hasInfoboxAttrs(table) and article_ns != 100:
                     table.isInfobox = found_infobox = True
             if found_infobox or not tables:
                 return
-            if miscutils.articleStartsWithTable(node, max_text_until_infobox=200):
+            if miscutils.articleStartsWithTable(node, max_text_until_infobox=200) and article_ns != 100:
                 tables[0].isInfobox = True
             return
 
@@ -1368,3 +1375,51 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
             if tables:
                 g.moveto(tables[0])
                 self.report('removed gallery from table')
+
+    def fixSubSup(self, node):
+        if node.__class__ in [Sup, Sub] and node.parent:
+            if len(node.getAllDisplayText())>200:
+                node.parent.replaceChild(node, node.children)
+                self.report('removed long sup/sub')
+        for c in node.children:
+            self.fixSubSup(c)
+
+    def removeEditLinks(self, node):
+
+        if node.__class__ == NamedURL and node.caption.endswith('?action=edit'):
+            self.report('removing edit link', node)
+            node.parent.removeChild(node)
+
+        for c in node:
+            self.removeEditLinks(c)
+
+    def removeSeeAlso(self, node):
+        try:
+            seealso_section =  _('See also')
+        except NameError:
+            seealso_section = 'See also'
+
+
+        if node.__class__ == Section \
+           and len(node.children):
+            try:
+                section_title = node.children[0].children[0].caption
+            except IndexError:
+                section_title = ''
+            if isinstance(section_title, basestring) and section_title.strip() == seealso_section:
+                self.report('removed see also section', node)
+                node.parent.removeChild(node)
+
+        for c in node:
+            self.removeSeeAlso(c)
+
+
+
+    def cleanVlist(self, node):
+        if node.vlist:
+            for attr, val in node.vlist.items():
+                if attr != attr.lower():
+                    node.vlist[attr.lower()] = val
+
+        for c in node:
+            self.cleanVlist(c)

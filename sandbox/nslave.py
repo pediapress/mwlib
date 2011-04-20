@@ -33,7 +33,8 @@ def system(args, timeout=None):
         a("\n====================\n")
 
         writemsg()
-        raise RuntimeError("command failed: %r" % pub_args)
+        lines = ["    " + x for x in stdout[-4096:].split("\n")]
+        raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" % (retcode, pub_args,  "\n".join(lines)))
 
     writemsg()
     
@@ -110,7 +111,7 @@ class commands(object):
                 f.write(metabook_data)
                 f.close()
 
-            system(args, timeout=90.0)
+            system(args, timeout=8*60.0)
 
         return doit(**params)
     
@@ -127,7 +128,7 @@ class commands(object):
 
             args.extend(_get_args(**params))
             
-            system(args)
+            system(args, timeout=15*60.0)
             os.chmod(outfile, 0644)
             size = os.path.getsize(outfile)            
             url = cacheurl+"/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)

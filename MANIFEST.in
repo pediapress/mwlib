@@ -1,6 +1,7 @@
 include MANIFEST.in
 include README.html
 include README.txt
+include argv.py
 include cgi-bin/mwlib.cgi
 include conftest.py
 include docs/Makefile
@@ -21,6 +22,7 @@ include mwlib/_uscan.re
 include mwlib/_version.py
 include mwlib/advtree.py
 include mwlib/allnodes.py
+include mwlib/apipkg.py
 include mwlib/apps/__init__.py
 include mwlib/apps/buildzip.py
 include mwlib/apps/client.py
@@ -29,12 +31,6 @@ include mwlib/apps/render.py
 include mwlib/apps/serve.py
 include mwlib/apps/watch.py
 include mwlib/async/__init__.py
-include mwlib/async/jobs.py
-include mwlib/async/proc.py
-include mwlib/async/qserve.py
-include mwlib/async/rpcclient.py
-include mwlib/async/rpcserver.py
-include mwlib/async/slave.py
 include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
@@ -49,7 +45,6 @@ include mwlib/dumpparser.py
 include mwlib/expander.py
 include mwlib/expr.py
 include mwlib/filequeue.py
-include mwlib/fontswitcher.py
 include mwlib/htmlcolornames.py
 include mwlib/imgmap.py
 include mwlib/infobox_magic.py
@@ -87,7 +82,6 @@ include mwlib/refine/tagparser.py
 include mwlib/refine/uparser.py
 include mwlib/refine/util.py
 include mwlib/sanitychecker.py
-include mwlib/scripts.txt
 include mwlib/serve.py
 include mwlib/siteinfo/__init__.py
 include mwlib/siteinfo/fetch_siteinfo.py
@@ -130,10 +124,12 @@ include mwlib/utils.py
 include mwlib/utoken.py
 include mwlib/wiki.py
 include mwlib/writer/__init__.py
+include mwlib/writer/fontswitcher.py
 include mwlib/writer/formatter.py
 include mwlib/writer/imageutils.py
 include mwlib/writer/licensechecker.py
 include mwlib/writer/miscutils.py
+include mwlib/writer/scripts.txt
 include mwlib/writer/styleutils.py
 include mwlib/writer/wplicenses.csv
 include mwlib/writerbase.py
@@ -223,9 +219,7 @@ include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent
 include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd
 include mwlib/xmltreecleaner.py
 include mwlib/zipwiki.py
-include pytest_twisted/__init__.py
 include sandbox/anywikisampler.py
-include sandbox/argv.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
 include sandbox/expr.txt

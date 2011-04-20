@@ -3,10 +3,11 @@
 import gevent, gevent.monkey
 gevent.monkey.patch_all()
 
-import os, sys
+import os, sys, getpass, socket, traceback, StringIO
 
 from mwlib.podclient import PODClient
 from mwlib.status import Status
+from mwlib.utils import send_mail
 
 cachedir = "cache"
 
@@ -110,9 +111,28 @@ def report_mwzip_status(posturl, jobid, host, port):
         else:
             gevent.sleep(0.5)
         
-        
-        
-    
+def report_exception(posturl, (tp, err, tb)):
+    print "reporting error to", posturl, repr(str(err)[:50])
+
+    podclient = PODClient(posturl)
+    podclient.post_status(error=str(err))
+
+mailfrom = "%s@%s" % (getpass.getuser(), socket.gethostname())
+
+def report_exception_mail(subject, exc_info):
+    mailto = os.environ.get("MAILTO")
+    if not mailto:
+        print "MAILTO not set. not sending email."
+        return
+
+    print "sending mail to", mailto
+
+    f=StringIO.StringIO()
+    traceback.print_exception(*exc_info, file=f)
+
+    send_mail(mailfrom, [mailto], subject, f.getvalue())
+
+
 class commands(object):
     def statusfile(self):
         host = self.proxy._rpcclient.host
@@ -120,7 +140,9 @@ class commands(object):
         return 'qserve://%s:%s/%s' % (host, port, self.jobid)
     
     def rpc_post(self, params):
-        def doit(metabook_data=None, collection_id=None, base_url=None, post_url=None, **kw):
+        post_url = params["post_url"]
+
+        def _doit(metabook_data=None, collection_id=None, base_url=None, post_url=None, **kw):
             dir = get_collection_dir(collection_id)
             def getpath(p):
                 return os.path.join(dir, p)
@@ -143,7 +165,17 @@ class commands(object):
             finally:
                 g.kill()
                 del g
-            
+
+        def doit(**params):
+            try:
+                return _doit(**params)
+            except Exception:
+                exc_info = sys.exc_info()
+                gevent.spawn(report_exception, post_url, exc_info)
+                gevent.spawn(report_exception_mail, "zip upload failed", exc_info)
+                del exc_info
+                raise
+
         return doit(**params)
 
 def main():

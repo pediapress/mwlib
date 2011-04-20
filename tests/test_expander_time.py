@@ -72,6 +72,9 @@ def test_codes():
 
     yield e, "r", "Sat, 09 Feb 2008 10:55:17 +0000"
     
+    yield e, "xrY", "MMVIII"
+    yield e, "xrU", "XVI", "1970-1-1 + 16 second"
+    yield e, 'xr"foobar"', "foobar"
 
 
 def test_examples():

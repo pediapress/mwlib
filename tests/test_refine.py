@@ -590,3 +590,19 @@ def test_references_with_paragraphs():
     assert len(references)==1, "expected exactly one references node, got %s" % len(references)
     refs = core.walknodel(references, lambda x: x.tagname=="ref")
     assert len(refs)==1, "expected exactly one ref node inside the references node, got %s" % len(refs)
+
+def test_newline_in_link_target():
+    """http://code.pediapress.com/wiki/ticket/906"""
+    s = "[[Albert\nEinstein]]"
+    r = core.parse_txt(s)
+    core.show(r)
+    links = core.walknodel(r, lambda x: x.type == T.t_complex_link)
+    assert not links, "links found"
+
+def test_newline_in_link_text():
+    """http://code.pediapress.com/wiki/ticket/906"""
+    s = "[[Albert Einstein | Albert\nEinstein]]"
+    r = core.parse_txt(s)
+    core.show(r)
+    links = core.walknodel(r, lambda x: x.type == T.t_complex_link)
+    assert links, "no links found"

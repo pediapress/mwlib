@@ -5,6 +5,8 @@
 *.swp
 *.pdf
 *.zip
+*.orig
+*.rej
 t/*
 ID
 mwlib.egg-info
@@ -18,4 +20,6 @@ bla*
 t.py
 mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
-.ropeproject/*
+/.tox/
+/.ropeproject/
+/dist/

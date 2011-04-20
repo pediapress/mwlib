@@ -2,6 +2,7 @@ import sys
 import datetime
 import re
 import calendar
+import roman
 from timelib import strtodatetime as parsedate
 
 from mwlib.strftime import strftime
@@ -12,7 +13,7 @@ def ampm(date):
     else:
         return "pm"
 
-rx = re.compile('"[^"]*"|\\\\.|.')
+rx = re.compile('"[^"]*"|xr|\\\\.|.')
 codemap = dict(
     y = '%y',
     Y = '%Y',
@@ -41,11 +42,13 @@ codemap = dict(
     c = "%Y-%m-%dT%H:%M:%S+00:00",
     r = "%a, %d %b %Y %H:%M:%S +0000",
     t = lambda d: str(calendar.monthrange(d.year, d.month)[1]),
+    xr = ("process_next", lambda n: roman.toRoman(int(n))),
     )
 
 
 def formatdate(format, date):
     split = rx.findall(format)
+    process_next = None
 
     tmp = []
     for x in split:
@@ -58,11 +61,22 @@ def formatdate(format, date):
             else:
                 tmp.append(x)
         else:
-            if isinstance(f, basestring):
-                tmp.append(strftime(date, f))
-            else:
-                tmp.append(f(date))
+            if isinstance(f, tuple):
+                process_next = f[1]
+                continue
 
+            if isinstance(f, basestring):
+                res = strftime(date, f)
+            else:
+                res = f(date)
+
+            if process_next:
+                try:
+                    res = process_next(res)
+                except ValueError:
+                    pass
+                process_next = None
+            tmp.append(res)
 
     tmp = u"".join(tmp).strip()
     return tmp

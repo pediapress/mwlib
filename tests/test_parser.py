@@ -945,13 +945,13 @@ def test_table_whitespace_before_cell():
     
     
 def test_table_whitespace_before_row():
-    r=parse("""
+    r=parse('''
 {|
   |- bgcolor="#aacccc" 
 | | cell1
 | cell2
 |}
-""")
+''')
     rows = r.find(parser.Row)
     print "ROWS:", rows
     assert len(rows)==1, "expected exactly one row"
@@ -967,22 +967,22 @@ def test_table_whitespace_before_begintable():
         assert tables[0].vlist==dict(bgcolor="#aacccc")
 
         
-    yield check, """
+    yield check, '''
  {| bgcolor="#aacccc" 
 |- 
 | cell1
 | cell2
 |}
-"""
+'''
 
     
-    yield check, """
+    yield check, '''
 :::{| bgcolor="#aacccc" 
 |- 
 | cell1
 | cell2
 |}
-"""
+'''
 
 def test_closing_td_in_cell():
     r = parse("""
@@ -1128,6 +1128,11 @@ def test_magicwords():
     txt = parse("__NOTOC____NOEDITSECTION__").asText()
     print txt
     assert "NOTOC" not in txt
+
+    txt = parse('__NOINDEX__').asText()
+    print txt
+    assert 'NOINDEX' not in txt
+
     
 def test_vlist_newline():
     def check(txt):

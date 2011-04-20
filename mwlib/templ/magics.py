@@ -307,7 +307,12 @@ class PageMagic(object):
 
     def NS(self, args):
         """Returns the name of a given namespace number."""
-        namespaces = self.source.namespaces or {}
+        try:
+            namespaces = self.siteinfo["namespaces"]
+        except (AttributeError, KeyError):
+            from mwlib import siteinfo
+            namespaces = siteinfo.get_siteinfo("en")["namespaces"]
+
         ns = args[0]
         try:
             retval = namespaces[ns]['*']
@@ -338,7 +343,11 @@ class PageMagic(object):
     def FULLURL(self, args):
         a=args[0].capitalize().replace(' ', '_')
         a=urllib.quote_plus(a.encode('utf-8'))
-        return '%s/%s' % (self.niceurl, a)
+        if len(args)>=2:
+            q = "?%s" % args[1]
+        else:
+            q = ""
+        return '%s/%s%s' % (self.niceurl, a, q)
     
     @noarg        
     def SERVERNAME(self):

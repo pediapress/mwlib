@@ -149,7 +149,6 @@ class nuwiki(object):
     def normalize_and_get_image_path(self, name):
         assert isinstance(name, basestring)
         name = unicode(name)
-        
         ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if ns != 6:
             return
@@ -162,7 +161,10 @@ class nuwiki(object):
         
         p = self._pathjoin("images", utils.fsescape(fqname))
         if not self._exists(p):
-            return None
+            fqname = 'File:' + partial # Fallback to default language english
+            p = self._pathjoin("images", utils.fsescape(fqname))
+            if not self._exists(p):
+                return None
 
         if 1:
             from hashlib import md5
@@ -171,7 +173,7 @@ class nuwiki(object):
             ext = os.path.splitext(p)[-1]
             ext = ext.replace(' ', '')
             # mediawiki gives us png's for these extensions. let's change them here.
-            if ext.lower() in (".gif", ".svg"):
+            if ext.lower() in (".gif", ".svg", '.tif', '.tiff'):
                 # print "change xt:", ext
                 ext = ".png"
             hd += ext
@@ -197,9 +199,8 @@ class nuwiki(object):
     def extractHTML(self, parsed_html):
         html = {}
         for article in parsed_html:
-            title = article.get('page')
-            if title:
-                html[title] = article
+            _id = article.get('page') or article.get('oldid')
+            html[_id] = article
         return html
 
 NuWiki = nuwiki
@@ -319,8 +320,11 @@ class adapt(object):
             script_extension=self.nfo['script_extension'],
         )
 
-    def getHTML(self, title):
-        return self.nuwiki.html.get(title, {})
+    def getHTML(self, title, revision=None):
+        if revision:
+            return self.nuwiki.html.get(revision, {})
+        else:
+            return self.nuwiki.html.get(title, {})
 
     def getParsedArticle(self, title, revision=None):
         if revision:

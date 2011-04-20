@@ -40,7 +40,7 @@ class Formatter(object):
                      }
 
 
-    def __init__(self, font_switcher=None, output_encoding=None):
+    def __init__(self, font_switcher=None, output_encoding=None, word_split_len=20):
 
         self.font_switcher = font_switcher
 
@@ -69,7 +69,7 @@ class Formatter(object):
         self.rel_font_size = 1
 
         self.grouping_chars = ('', '')
-        
+        self.word_split_len = word_split_len
 
     def registerRenderStyles(self):
         # example for render styles in html. should probably be overridden when subclassed
@@ -220,7 +220,7 @@ class Formatter(object):
             pass
         else:
             if escape:
-                if self.minimize_space_mode > 0 or break_long:
+                if self.minimize_space_mode > 0 or (break_long and max(len(w) for w in txt.split(' ')) > self.word_split_len):
                     txt = self.escapeAndHyphenateText(txt)
                 else:
                     txt = self.escapeText(txt)

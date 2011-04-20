@@ -594,3 +594,7 @@ def test_pagemagic_with_arg():
     yield expand_talk, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
     yield expand_talk, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
 
+
+def test_ns():
+    """http://code.pediapress.com/wiki/ticket/902"""
+    yield expandstr, "{{NS:2}}", "Benutzer"
