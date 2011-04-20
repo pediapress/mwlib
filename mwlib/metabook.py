@@ -157,6 +157,11 @@ class source(mbobj):
 class interwiki(mbobj):
     local=False
 
+class custom(mbobj):
+    title=None
+    content=None
+    content_type='text/x-wiki'
+
 class article(mbobj):
     title=None
     displaytitle=None
@@ -258,3 +263,4 @@ make_metabook  = collection
 make_chapter   = chapter
 make_source    = source
 make_article   = article
+make_custom    = custom
