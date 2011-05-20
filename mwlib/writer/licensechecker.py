@@ -56,7 +56,7 @@ class LicenseChecker(object):
             fn = os.path.join(os.path.dirname(__file__), 'wplicenses.csv')
         for (name, display_name, license_type, dummy, license_description) in csv.reader(open(fn)):
             if not name:
-                continue            
+                continue
             name = unicode(name, 'utf-8').lower()
             lic = License(name=name)
             lic.display_name = unicode(display_name, 'utf-8')
@@ -97,9 +97,9 @@ class LicenseChecker(object):
         return licenses       
 
 
-    def _checkLicenses(self, licenses, imgname):
+    def _checkLicenses(self, licenses, imgname, stats=True):
         assert self.image_db, 'No image_db passed when initializing LicenseChecker'
-        for lic in licenses:            
+        for lic in licenses:
             if lic.license_type == 'free':
                 self.license_display_name[imgname] = lic.display_name
                 return True
@@ -107,7 +107,7 @@ class LicenseChecker(object):
                 self.license_display_name[imgname] = lic.display_name
                 return False
         for lic in licenses:
-            if lic.license_type == 'unknown':
+            if lic.license_type == 'unknown' and stats:
                 urls = self.unknown_licenses.get(lic.name, set())
                 urls.add(self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname)
                 self.unknown_licenses[lic.name] = urls
@@ -122,9 +122,14 @@ class LicenseChecker(object):
     def displayImage(self, imgname):
         if self.image_db is None:
             return False
-        templates = [t.lower() for t in self.image_db.getImageWords(imgname)]
+        templates = [t.lower() for t in self.image_db.getImageTemplates(imgname)]
         licenses = self._getLicenses(templates, imgname)
         display_img = self._checkLicenses(licenses, imgname)
+        if not display_img:
+            templates = [t.lower() for t in self.image_db.getImageWords(imgname)]
+            licenses = self._getLicenses(templates, imgname)
+            display_img = self._checkLicenses(licenses, imgname, stats=False)
+
         url = self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname
         if display_img:
             self.accepted_images.add(url)
@@ -190,17 +195,19 @@ class LicenseChecker(object):
                 print 'no json object found in file', fn
                 continue
             for (license, urls) in licenses.items():
-                if self.licenses.get(license, False) == False:
+                if not self.licenses.get(license, False):
                     seen_urls = unknown_licenses.get(license, set())
                     seen_urls.update(set(urls))
                     unknown_licenses[license] = seen_urls
         sorted_licenses = [ (len(urls), license, urls) for license, urls in unknown_licenses.items()]
         sorted_licenses.sort(reverse=True)
         for num_urls, license, urls in sorted_licenses:
-            print "\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n" % { 'template': repr(license),
-                                                                                                               'num_images': num_urls,
-                                                                                                               'img_str': '\n'.join([repr(i) for i in list(urls)[:5]])
-                }
+            args = { 'template': repr(license),
+                     'num_images': num_urls,
+                     'img_str': '\n'.join([i.encode('utf-8') for i in list(urls)[:5]])
+                     }
+            print "\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n" % args
+
 
     def dumpLicenseInfoContent(self):
 
@@ -241,8 +248,8 @@ if __name__ == '__main__':
     lc = LicenseChecker()
     lc.readLicensesCSV()
 
-    lc.dumpLicenseInfoContent()
-    sys.exit(1)
+    # lc.dumpLicenseInfoContent()
+    # sys.exit(1)
 
 
     if len(sys.argv) > 1:
