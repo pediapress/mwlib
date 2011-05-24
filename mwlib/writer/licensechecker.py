@@ -122,14 +122,9 @@ class LicenseChecker(object):
     def displayImage(self, imgname):
         if self.image_db is None:
             return False
-        templates = [t.lower() for t in self.image_db.getImageTemplates(imgname)]
+        templates = [t.lower() for t in self.image_db.getImageTemplatesAndArgs(imgname)]
         licenses = self._getLicenses(templates, imgname)
         display_img = self._checkLicenses(licenses, imgname)
-        if not display_img:
-            templates = [t.lower() for t in self.image_db.getImageWords(imgname)]
-            licenses = self._getLicenses(templates, imgname)
-            display_img = self._checkLicenses(licenses, imgname, stats=False)
-
         url = self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname
         if display_img:
             self.accepted_images.add(url)
@@ -139,7 +134,7 @@ class LicenseChecker(object):
 
 
     def getLicenseDisplayName(self, imgname):
-        text = self.license_display_name.get(imgname, None)        
+        text = self.license_display_name.get(imgname, None)
         if not text == None:
             return text
         else:
@@ -202,7 +197,7 @@ class LicenseChecker(object):
         sorted_licenses = [ (len(urls), license, urls) for license, urls in unknown_licenses.items()]
         sorted_licenses.sort(reverse=True)
         for num_urls, license, urls in sorted_licenses:
-            args = { 'template': repr(license),
+            args = { 'template': license.encode('utf-8'),
                      'num_images': num_urls,
                      'img_str': '\n'.join([i.encode('utf-8') for i in list(urls)[:5]])
                      }

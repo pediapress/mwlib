@@ -382,6 +382,24 @@ class adapt(object):
         print 'no such image: %r' % name
         return []
 
+    def getImageTemplatesAndArgs(self, name, wikidb=None):
+        from mwlib.expander import get_templates, get_template_args
+        page = self.get_image_description_page(name)
+        if page is not None:
+            templates = get_templates(page.rawtext)
+            from mwlib.expander import find_template
+            args = set()
+            for t in templates:
+                tmpl = find_template(page.rawtext, t)
+                arg_list = tmpl[1]
+                for arg in arg_list:
+                    if isinstance(arg, basestring) and len(arg) > 3 and ' ' not in arg:
+                        args.add(arg)
+            templates.update(args)
+            return templates
+        return []
+
+
     def getImageWords(self, name, wikidb=None):
         import re
         page = self.get_image_description_page(name)
