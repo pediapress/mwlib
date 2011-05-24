@@ -54,7 +54,11 @@ class LicenseChecker(object):
     def readLicensesCSV(self, fn=None):
         if not fn:
             fn = os.path.join(os.path.dirname(__file__), 'wplicenses.csv')
-        for (name, display_name, license_type, dummy, license_description) in csv.reader(open(fn)):
+        for data in csv.reader(open(fn)):
+            try:
+                (name, display_name, license_type, dummy, license_description) = data
+            except ValueError:
+                continue
             if not name:
                 continue
             name = unicode(name, 'utf-8').lower()
