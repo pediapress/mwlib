@@ -240,10 +240,19 @@ class AdvancedNode:
         "Return all text that is intended for display"
         text = []
         if not amap:
-            amap = {Text:"caption", Link:"target", URL:"caption", Math:"caption", ImageLink:"caption", ArticleLink:"target" }
+            amap = {Text:"caption",
+                    Link:"target",
+                    URL:"caption",
+                    Math:"caption",
+                    ImageLink:"caption",
+                    ArticleLink:"target",
+                    NamespaceLink:"target"}
+        skip_on_children = [Link, NamespaceLink]
         for n in self.allchildren():
             access = amap.get(n.__class__, "")
             if access:
+                if n.__class__ in skip_on_children and n.children:
+                    continue
                 text.append( getattr(n, access) )
         alltext = [t for t in text if t]
         if alltext:
