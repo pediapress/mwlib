@@ -33,6 +33,7 @@ class License(object):
                                                                        'type': self.license_type,
                                                                        'displayname': display_name,
                                                                        }
+    __repr__ = __str__
 
     def __cmp__(self, other):
         if self.display_name < other.display_name:
@@ -83,7 +84,7 @@ class LicenseChecker(object):
         
         
     def _checkFilterType(self, filter_type=None, default_filter='blacklist'):
-        if filter_type in ['blacklist', 'whitelist']:
+        if filter_type in ['blacklist', 'whitelist', 'nofilter']:
             return filter_type
         else:
             return default_filter
@@ -109,17 +110,17 @@ class LicenseChecker(object):
                 return True
             elif lic.license_type == 'nonfree':
                 self.license_display_name[imgname] = lic.display_name
-                return False
+                return True if self.filter_type == 'nofilter' else False
         for lic in licenses:
             if lic.license_type == 'unknown' and stats:
                 urls = self.unknown_licenses.get(lic.name, set())
                 urls.add(self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname)
                 self.unknown_licenses[lic.name] = urls
-            
+
         self.license_display_name[imgname] = ''
         if self.filter_type == 'whitelist':
             return False
-        elif self.filter_type == 'blacklist':
+        elif self.filter_type in ['blacklist', 'nofilter']:
             return True
 
 
@@ -154,7 +155,7 @@ class LicenseChecker(object):
         else:
             ratio = 1
         return ratio
-        
+
     def dumpStats(self):
         stats = []
         stats.append('IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f' % (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio))
