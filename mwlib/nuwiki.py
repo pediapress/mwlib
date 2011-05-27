@@ -430,6 +430,7 @@ class adapt(object):
 def getContributorsFromInformationTemplate(raw, title, wikidb):
     from mwlib.expander import find_template, get_templates, get_template_args, Expander
     from mwlib import uparser, parser, advtree
+    from mwlib.templ.parser import parse
     
     def getUserLinks(raw):
         def isUserLink(node):
@@ -461,23 +462,21 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
 
         if args.args:
             return getUserLinks('\n'.join([args.get(i, u'') for i in range(len(args.args))]))
-        
+
         return []
 
-    expander = Expander(u'', title, wikidb)       
-
-    template = find_template(raw, 'Information')
+    expander = Expander(u'', title, wikidb)
+    parsed_raw = [parse(raw, replace_tags=expander.replace_tags)]
+    template = find_template(None, 'Information', parsed_raw[:])
     if template is not None:
         authors = get_authors_from_template_args(template)
         if authors:
             return authors
-
     authors = []
     for template in get_templates(raw):
-        t = find_template(raw, template)
+        t = find_template(None, template, parsed_raw[:])
         if t is not None:
             authors.extend(get_authors_from_template_args(t))
     if authors:
         return authors
-
     return getUserLinks(raw)
