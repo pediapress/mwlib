@@ -42,8 +42,7 @@ class License(object):
             return 0
         else:
             return 1
-        
-        
+
 class LicenseChecker(object):
 
     def __init__(self, image_db=None, filter_type=None):
@@ -51,7 +50,8 @@ class LicenseChecker(object):
         self.filter_type = self._checkFilterType(filter_type, default_filter='blacklist')
         self.licenses = {}
         self.initStats()
-        
+        self.display_cache = {}
+
     def readLicensesCSV(self, fn=None):
         if not fn:
             fn = os.path.join(os.path.dirname(__file__), 'wplicenses.csv')
@@ -81,14 +81,12 @@ class LicenseChecker(object):
         self.rejected_images = set()
         self.accepted_images = set()
         self.license_display_name = {}
-        
-        
+
     def _checkFilterType(self, filter_type=None, default_filter='blacklist'):
         if filter_type in ['blacklist', 'whitelist', 'nofilter']:
             return filter_type
         else:
             return default_filter
-
 
     def _getLicenses(self, templates, imgname):
         licenses = []
@@ -99,7 +97,7 @@ class LicenseChecker(object):
                 lic = License(name=template)
                 lic.license_type = 'unknown'
             licenses.append(lic)
-        return licenses       
+        return licenses
 
 
     def _checkLicenses(self, licenses, imgname, stats=True):
@@ -125,6 +123,8 @@ class LicenseChecker(object):
 
 
     def displayImage(self, imgname):
+        if imgname in self.display_cache:
+            return self.display_cache[imgname]
         if self.image_db is None:
             return False
         templates = [t.lower() for t in self.image_db.getImageTemplatesAndArgs(imgname)]
@@ -135,6 +135,7 @@ class LicenseChecker(object):
             self.accepted_images.add(url)
         else:
             self.rejected_images.add(url)
+        self.display_cache[imgname] = display_img
         return display_img
 
 
