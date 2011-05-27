@@ -33,11 +33,14 @@ def get_templates(raw, title=u""):
         
     return used
 
-def find_template(raw, name):
+def find_template(raw, name, parsed_raw=None):
     """Return Template node with given name or None if there is no such template"""
     
-    e=Expander('', wikidb=DictDB())
-    todo = [parse(raw, replace_tags=e.replace_tags)]
+    if not parsed_raw:
+        e=Expander('', wikidb=DictDB())
+        todo = [parse(raw, replace_tags=e.replace_tags)]
+    else:
+        todo = parsed_raw
     while todo:
         n = todo.pop()
         if isinstance(n, basestring):

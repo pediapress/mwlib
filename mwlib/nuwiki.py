@@ -388,9 +388,15 @@ class adapt(object):
         if page is not None:
             templates = get_templates(page.rawtext)
             from mwlib.expander import find_template
+            from mwlib.templ.evaluate import Expander
+            from mwlib.templ.parser import parse
+            from mwlib.templ.misc import DictDB
             args = set()
+            e=Expander('', wikidb=DictDB())
+            # avoid parsing with every call to find_template
+            parsed_raw=[parse(page.rawtext, replace_tags=e.replace_tags)]
             for t in templates:
-                tmpl = find_template(page.rawtext, t)
+                tmpl = find_template(None, t, parsed_raw[:])
                 arg_list = tmpl[1]
                 for arg in arg_list:
                     if isinstance(arg, basestring) and len(arg) > 3 and ' ' not in arg:
