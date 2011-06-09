@@ -5,7 +5,6 @@
 # See README.txt for additional licensing information.
 
 import sys
-import copy
 import inspect
 
 from mwlib.advtree import removeNewlines
@@ -231,11 +230,11 @@ class TreeCleaner(object):
 
         # remove ImageLinks which end with the following file types
         self.forbidden_file_endings = ['ogg']
-        
+
         # emtpy sections are removed by removeEmptySections
         # all node classes that have content but no text need to be listed here to prevent removal
         self.contentWithoutTextClasses = [Gallery, ImageLink]
-        
+
 
     def clean(self, cleanerMethods):
         """Clean parse tree using cleaner methods in the methodList."""
@@ -245,7 +244,7 @@ class TreeCleaner(object):
             if f:
                 cleanerList.append(f)
             else:
-                raise 'TreeCleaner has no method: %r' % method            
+                raise 'TreeCleaner has no method: %r' % method
 
         # FIXME: performance could be improved, if individual articles would be cleaned
         # the algorithm below splits on the first level, if a book is found
@@ -259,7 +258,14 @@ class TreeCleaner(object):
         total_children = len(children)
         for (i, child) in enumerate(children):
             for cleaner in cleanerList:
-                cleaner(child)
+                try:
+                    cleaner(child)
+                except Exception, e:
+                    self.report('ERROR:', e)
+                    print 'TREECLEANER ERROR in %s: %r' % (getattr(child, 'caption', u'').encode('utf-8'),
+                                                           repr(e))
+                    import traceback
+                    traceback.print_exc()
             if self.status_cb:
                 self.status_cb(progress=100*i/total_children)
 
@@ -268,15 +274,15 @@ class TreeCleaner(object):
         skipMethods = skipMethods or self.skipMethods
         self.clean([cm for cm in self.cleanerMethods if cm not in skipMethods])
 
-    def report(self, *args):        
+    def report(self, *args):
         if not self.save_reports:
             return
         caller = inspect.stack()[1][3]
         msg = ''
         if args:
-            msg = ' '.join([repr(arg) for arg in args])        
-        self.reports.append((caller, msg))        
-        
+            msg = ' '.join([repr(arg) for arg in args])
+        self.reports.append((caller, msg))
+
     def getReports(self):
         return self.reports
 
