@@ -95,6 +95,8 @@ class Formatter(object):
             advtree.Sub: 'sub_style',
             advtree.Sup: 'sup_style',
             advtree.Teletyped: 'teletype_style',
+            advtree.Code: 'teletype_style',
+            advtree.Var: 'teletype_style',
             advtree.Strike: 'strike_style',
             advtree.Underline: 'underline_style',
             advtree.Overline: 'overline_style',
