@@ -538,6 +538,9 @@ class parse_links(object):
                 else:
                     if target.startswith('/') and self.xopts.title:
                         ns, partial, full = self.nshandler.splitname(self.xopts.title + target)
+                        if full.endswith('/'):
+                            full = full[:-1]
+                            target = target[1:-1]
                     else:
                         ns, partial, full = self.nshandler.splitname(target)
 
@@ -553,7 +556,7 @@ class parse_links(object):
                     if stack:
                         marks=stack.pop()
                     else:
-                        marks=[]                        
+                        marks=[]
                     continue
 
                 node = T(type=T.t_complex_link, children=[], ns=ns, colon=colon, lang=self.lang, nshandler=self.nshandler, url=url)
