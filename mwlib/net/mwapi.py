@@ -441,7 +441,11 @@ class mwapi(object):
 
 def get_collection_params(api):
     def done(r):
-        r = loads(r)
+        try:
+            r = loads(r)
+        except ValueError:
+            print '#'*80, '\nPOST REQUEST FAILED! Response:', r, '\n', '#'*80
+            raise RuntimeError('collection params could not be loaded in json')
         allowed = "template_blacklist template_exclusion_category print_template_pattern".split()
         res = dict()
         try:
@@ -459,7 +463,6 @@ def get_collection_params(api):
             if k in allowed:
                 res[str(k)] = v
         return res
-
     return api.post_request(action="expandtemplates",
                             format="json",
                             text="""
