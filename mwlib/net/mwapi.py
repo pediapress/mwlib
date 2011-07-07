@@ -70,7 +70,8 @@ def guess_api_urls(url):
         base_url = '%s%sapi.php' % (prefix, _path)
         if base_url not in retval:
             retval.append(base_url)
-    
+    if url.endswith('/index.php'):
+        retval.append(url[:-len('index.php')] + 'api.php')
     return retval
 
 def try_api_urls(urls, apipool=None):
