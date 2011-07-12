@@ -2,9 +2,10 @@
 
 from mwlib.expander import parse
 from mwlib.siteinfo import get_siteinfo
-from mwlib.templ import nodes
+from mwlib.templ import nodes, magic_nodes
 
 nl_siteinfo = get_siteinfo("nl")
+
 
 def test_no_arguments():
     t = parse(u"{{bla}}")
@@ -47,3 +48,14 @@ def test_parse_switch_localized():
     print t
     assert isinstance(t, nodes.SwitchNode)
 
+
+def test_parse_time():
+    t = parse(u"{{#time:Y-m-d|2006-09-28}}")
+    print t
+    assert isinstance(t, magic_nodes.Time)
+
+
+def test_parse_time_localized():
+    t = parse(u"{{#tijd:Y-m-d|2006-09-28}}")
+    print t
+    assert isinstance(t, magic_nodes.Time)
