@@ -232,29 +232,14 @@ class Expander(object):
         
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
-        self._build_aliasmap()
+        self.aliasmap = parser.aliasmap(self.siteinfo)
 
         self.parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo)
         #show(self.parsed)
         self.parsedTemplateCache = {}
 
-    def  _build_aliasmap(self):
-        self.aliasmap = aliasmap = {}
-        for d in self.siteinfo["magicwords"]:
-            name = d["name"]
-            aliases = d["aliases"]
-            hashname = "#" + name
-            for a in aliases:
-                aliasmap[a] = name
-                aliasmap["#"+a] = hashname
-
     def resolve_magic_alias(self, name):
-        if name.startswith("#"):
-            t = self.aliasmap.get(name[1:])
-            if t:
-                return "#" + t
-        else:
-            return self.aliasmap.get(name)
+        return self.aliasmap.resolve_magic_alias(name)
 
     def replace_tags(self, txt):
         return self.uniquifier.replace_tags(txt)
