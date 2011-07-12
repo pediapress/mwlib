@@ -8,7 +8,28 @@ from mwlib.templ.scanner import symbols, tokenize
 from mwlib.templ.marks import eqmark
 
 from hashlib import sha1 as digest
-    
+
+class aliasmap(object):
+    def __init__(self, siteinfo):
+        _map = {}
+        for d in siteinfo["magicwords"]:
+            name = d["name"]
+            aliases = d["aliases"]
+            hashname = "#" + name
+            for a in aliases:
+                _map[a] = name
+                _map["#"+a] = hashname
+
+        self._map = _map
+
+    def resolve_magic_alias(self, name):
+        if name.startswith("#"):
+            t = self._map.get(name[1:])
+            if t:
+                return "#" + t
+        else:
+            return self._map.get(name)
+
 
 def optimize(node):
     if type(node) is tuple:
@@ -77,6 +98,8 @@ class Parser(object):
                 rx = "^#(%s):" % ("|".join(aliases),)
                 self.name2rx[name] = re.compile(rx)
                 # print name, rx
+
+        self.aliasmap = aliasmap(self.siteinfo)
 
     def getToken(self):
         return self.tokens[self.pos]
@@ -209,6 +232,7 @@ class Parser(object):
             if u':' in s:
                 from mwlib.templ import magic_nodes
                 name, first = s.split(':', 1)
+                name = self.aliasmap.resolve_magic_alias(name) or name
                 if name in magic_nodes.registry:
                     return self.magicNodeFromChildren(children, magic_nodes.registry[name])
                 

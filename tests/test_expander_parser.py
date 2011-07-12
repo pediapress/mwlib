@@ -56,6 +56,6 @@ def test_parse_time():
 
 
 def test_parse_time_localized():
-    t = parse(u"{{#tijd:Y-m-d|2006-09-28}}")
+    t = parse(u"{{#tijd:Y-m-d|2006-09-28}}", siteinfo=nl_siteinfo)
     print t
     assert isinstance(t, magic_nodes.Time)
