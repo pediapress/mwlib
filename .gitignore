@@ -23,3 +23,4 @@ mwlib/templ/nodes.c
 /.tox/
 /.ropeproject/
 /dist/
+__pycache__/

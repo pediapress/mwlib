@@ -226,6 +226,8 @@ class Template(Node):
         if ":" in name:
             try_name, try_remainder = name.split(':', 1)
             from mwlib.templ import magic_nodes
+            try_name = expander.resolve_magic_alias(try_name) or try_name
+
             klass = magic_nodes.registry.get(try_name)
             if klass is not None:
                 children = (try_remainder, )+args

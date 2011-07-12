@@ -3,10 +3,12 @@
 # See README.txt for additional licensing information.
 
 class DummyDB(object):
+    def __init__(self, lang="en"):
+        from mwlib import siteinfo
+        self.siteinfo = siteinfo.get_siteinfo(lang)
+
     def getURL(self, title, revision=None):
         return None
 
     def get_siteinfo(self):
-        from mwlib import siteinfo
-        return siteinfo.get_siteinfo("en")
-    
+        return self.siteinfo

@@ -1,6 +1,10 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
+import pytest, os
+if not os.path.isfile('/usr/bin/ploticus'):
+    pytest.skip("no ploticus")
+
 from mwlib import timeline
 
 example_script = """ImageSize  = width:800 height:100
