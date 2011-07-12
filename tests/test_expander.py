@@ -4,8 +4,9 @@
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
 from mwlib.xfail import xfail
+from mwlib.dummydb import DummyDB
 
-        
+
 def parse_and_show(s):
     res=expander.parse(s)
     print "PARSE:", repr(s)    
@@ -598,3 +599,10 @@ def test_pagemagic_with_arg():
 def test_ns():
     """http://code.pediapress.com/wiki/ticket/902"""
     yield expandstr, "{{NS:2}}", "Benutzer"
+
+
+def test_localized_expander():
+    db = DummyDB("nl")
+    e = expander.Expander(u"{{#als: 1 | yes | no}}", wikidb=db)
+    res = e.expandTemplates()
+    assert res == "yes"

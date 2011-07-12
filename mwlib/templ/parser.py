@@ -2,6 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import re
 from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import symbols, tokenize
 from mwlib.templ.marks import eqmark
@@ -53,14 +54,30 @@ class Parser(object):
     use_cache = False
     _cache = lrucache.mt_lrucache(2000)
     
-    def __init__(self, txt, included=True, replace_tags=None):
+    def __init__(self, txt, included=True, replace_tags=None, siteinfo=None):
         if isinstance(txt, str):
             txt = unicode(txt)
             
         self.txt = txt
         self.included = included
         self.replace_tags = replace_tags
-        
+        if siteinfo is None:
+            from mwlib.siteinfo import get_siteinfo
+            siteinfo = get_siteinfo("en")
+        self.siteinfo = siteinfo
+        self.name2rx = {"if": re.compile("^#if:"),
+                        "switch": re.compile("^#switch:")}
+
+
+        magicwords = self.siteinfo["magicwords"]
+        for d in magicwords:
+            name = d["name"]
+            if name in ("if", "switch"):
+                aliases = [re.escape(x) for x in d["aliases"]]
+                rx = "^#(%s):" % ("|".join(aliases),)
+                self.name2rx[name] = re.compile(rx)
+                # print name, rx
+
     def getToken(self):
         return self.tokens[self.pos]
 
@@ -184,10 +201,9 @@ class Parser(object):
     def templateFromChildren(self, children):
         if children and isinstance(children[0], unicode):
             s = children[0].strip().lower()
-            
-            if s.startswith("#if:"):
+            if self.name2rx["if"].match(s):
                 return self.ifnodeFromChildren(children)
-            if s.startswith("#switch:"):
+            if self.name2rx["switch"].match(s):
                 return self.switchnodeFromChildren(children)
             
             if u':' in s:
@@ -300,5 +316,5 @@ class Parser(object):
         
         return n
 
-def parse(txt, included=True, replace_tags=None):
-    return Parser(txt, included=included, replace_tags=replace_tags).parse()
+def parse(txt, included=True, replace_tags=None, siteinfo=None):
+    return Parser(txt, included=included, replace_tags=replace_tags, siteinfo=siteinfo).parse()

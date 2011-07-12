@@ -212,7 +212,8 @@ class Expander(object):
             si = siteinfo.get_siteinfo("de")
             
         nshandler = nshandling.nshandler(si)
-            
+        self.siteinfo = si
+
         if self.db and hasattr(self.db, "getSource"):
             source = self.db.getSource(pagename) or metabook.source()
             local_values = source.locals or u""
@@ -232,7 +233,7 @@ class Expander(object):
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
 
-        self.parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags)
+        self.parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo)
         #show(self.parsed)
         self.parsedTemplateCache = {}
 
