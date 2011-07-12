@@ -232,6 +232,7 @@ class Parser(object):
             if u':' in s:
                 from mwlib.templ import magic_nodes
                 name, first = s.split(':', 1)
+                name = self.aliasmap.resolve_magic_alias(name) or name
                 if name in magic_nodes.registry:
                     return self.magicNodeFromChildren(children, magic_nodes.registry[name])
                 
