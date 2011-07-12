@@ -551,7 +551,6 @@ class TreeCleaner(object):
         blocknodes = (Paragraph, PreFormatted, ItemList, Section, Table,
                       Blockquote, DefinitionList, HorizontalRule, Source)
         parents = node.getParents()
-
         clean_parents = []
         parents.reverse()
         for p in parents:
@@ -604,6 +603,15 @@ class TreeCleaner(object):
         for c in node.children[:]:
             self._filterTree(c, nesting_filter=nesting_filter)
 
+    def _isException(self, node):
+        try:
+            has_direction = node.vlist['style']['direction']
+        except (KeyError, AttributeError):
+            return False
+        else:
+            return True
+
+
     def _fixNesting(self, node):
         """Nesting of nodes is corrected.
 
@@ -624,6 +632,9 @@ class TreeCleaner(object):
         bn_1.2
          nbn_4
         """
+
+        if self._isException(node):
+            return
 
         bad_parent = self._nestingBroken(node)
         if not bad_parent:
