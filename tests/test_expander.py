@@ -606,3 +606,16 @@ def test_localized_expander():
     e = expander.Expander(u"{{#als: 1 | yes | no}}", wikidb=db)
     res = e.expandTemplates()
     assert res == "yes"
+
+
+def test_localized_expr():
+    db = DummyDB("nl")
+    e = expander.Expander(u"{{#expressie: 1+2*3}}", wikidb=db)
+    res = e.expandTemplates()
+    assert res == "7"
+
+def test_resolve_magic_alias():
+    db = DummyDB("nl")
+    e = expander.Expander(u"{{#als: 1 | yes | no}}", wikidb=db)
+    assert e.resolve_magic_alias(u"#als") == u"#if"
+    assert e.resolve_magic_alias(u"#foobar") is None
