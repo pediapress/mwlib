@@ -12,15 +12,19 @@ from hashlib import sha1 as digest
 class aliasmap(object):
     def __init__(self, siteinfo):
         _map = {}
+        _name2aliases = {}
+
         for d in siteinfo["magicwords"]:
             name = d["name"]
             aliases = d["aliases"]
+            _name2aliases[name] = aliases
             hashname = "#" + name
             for a in aliases:
                 _map[a] = name
                 _map["#"+a] = hashname
 
         self._map = _map
+        self._name2aliases = _name2aliases
 
     def resolve_magic_alias(self, name):
         if name.startswith("#"):
@@ -29,6 +33,9 @@ class aliasmap(object):
                 return "#" + t
         else:
             return self._map.get(name)
+
+    def get_aliases(self, name):
+        return self._name2aliases.get(name) or []
 
 
 def optimize(node):
