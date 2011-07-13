@@ -608,11 +608,19 @@ def test_localized_expander():
     assert res == "yes"
 
 
+def test_localized_switch_default():
+    db = DummyDB("nl")
+    e = expander.Expander(u"{{#switch: 1 | #standaard=foobar}}", wikidb=db)
+    res = e.expandTemplates()
+    assert res == "foobar"
+
+
 def test_localized_expr():
     db = DummyDB("nl")
     e = expander.Expander(u"{{#expressie: 1+2*3}}", wikidb=db)
     res = e.expandTemplates()
     assert res == "7"
+
 
 def test_resolve_magic_alias():
     db = DummyDB("nl")

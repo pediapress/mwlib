@@ -171,8 +171,13 @@ class SwitchNode(Node):
                 break
             
         if retval is None:
-            retval = self.fast.get("#default", (None, u''))[1]
-            
+            for a in expander.aliasmap.get_aliases("default") or ["#default"]:
+                retval = self.fast.get(a)
+                if retval is not None:
+                    retval = retval[1]
+                    break
+            retval = retval or u""
+
         tmp = []
         flatten(retval, expander, variables, tmp)
         _insert_implicit_newlines(tmp)
