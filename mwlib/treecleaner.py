@@ -606,7 +606,7 @@ class TreeCleaner(object):
     def _isException(self, node):
         try:
             has_direction = node.vlist['style']['direction']
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError, TypeError):
             return False
         else:
             return True
