@@ -17,6 +17,8 @@ class Formatter(object):
                                     'oblique': [('emphasized_style', 'change')],
                                     'normal': [('emphasized_style', 'reset')]
                                     },
+                     'font-family': {'Courier':[('teletype_style', 'change')],
+                                     },
                      'font-weight': {'bold': [('strong_style', 'change')],
                                      'bolder': [('strong_style', 'change')], # bolder and bold are treated the same
                                      'normal': [('strong_style', 'reset')],
