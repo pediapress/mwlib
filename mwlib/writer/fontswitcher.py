@@ -70,8 +70,11 @@ class FontSwitcher(object):
         self.code_points2font = []
 
         self.space_like_chars = [i for i in range(33) if not i in [9, 10, 13]] + [127]
-        self.ignore_chars = [173] # 173 = softhyphen
-        self.no_switch_chars = self.space_like_chars + self.ignore_chars        
+        self.remove_chars = [173] # 173 = softhyphen
+        self.ignore_chars = [8206, # left to right mark
+                           8207, # right to left mark
+                           ]
+        self.no_switch_chars = self.space_like_chars + self.ignore_chars + self.remove_chars
         self.char_blacklist = self.readCharBlacklist(char_blacklist_file)
 
     def readCharBlacklist(self, char_blacklist_file):
@@ -123,7 +126,7 @@ class FontSwitcher(object):
             ord_c = ord(c)
             blacklisted = self.char_blacklist.get(ord_c, False)
             if ord_c in self.no_switch_chars or blacklisted:
-                if ord_c in self.ignore_chars:
+                if ord_c in self.remove_chars:
                     c = ''
                 if ord_c in self.space_like_chars:
                     c = ' '
