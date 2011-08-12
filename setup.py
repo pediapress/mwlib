@@ -68,9 +68,6 @@ def main():
                       "flup>=1.0", "twisted>=8.2", "lockfile==0.8",
                       "timelib>=0.2", "WebOb>=0.9", "pyPdf>=1.12",
                       "apipkg", "qserve", "roman", "lxml"]
-    if sys.version_info[:2] < (2,5):
-        install_requires.append("wsgiref>=0.1.2")
-        install_requires.append("elementtree>=1.2.6")
     if sys.version_info[:2] < (2,6):
         install_requires.append("simplejson>=1.3")
 
