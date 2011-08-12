@@ -37,7 +37,7 @@ sdist:: all
 	python setup.py -q build sdist
 	rm -f mwlib/_gitversion.py mwlib/_gitversion.pyc
 
-sdist-upload:: all
+sdist-upload:: sdist
 	python setup.py build sdist upload
 
 pip-install:: clean sdist
