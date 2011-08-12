@@ -90,6 +90,64 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2011-08-12 release 0.12.15
+--------------------------
+- require lxml.
+- dont switch fonts for direction switch chars lrm/rlm
+- set teletype style by css
+- fix rtl direction check bug
+- quick fix in order to support the kbd tag.
+- fix switch statements with localized #default case.
+- dont remove direction switching nodes
+- resolve aliases when expanding templates.
+- support localized parser functions.
+- make tests work with latest py.test 2.1.
+- add support for css direction switching
+- Code and Var nodes now use teletype style
+- be more verbose when collection params can not be retrieved
+- fix subpage links (bugzilla #28055)
+- fix for https://bugzilla.wikimedia.org/show_bug.cgi?id=29354
+- dont die on treecleaner errors
+- remove paragraphs from galleries
+- add license templates
+- get rid of some more parsing calls
+- cache img display info in licensehandler
+- speed up getting template args (for licensehandling)
+- always show full text of contributors of images
+- fix for getAllDisplayText
+- add nofilter to licensehandling
+- make licensechecker less fragile to bad config format
+- improve image license handling
+- improve stats for licensechecker
+- add custom element to metabook
+- dont throw away collapsible boxes. fixes: #935
+- decrease api_request_limit
+- limit max. simultaneous img downloads to 15
+- moar categories. less whitespace. untangle revision/category fetching
+- increase standard resolution of images
+- fix getting html with revisions
+- clean up after fixNesting
+- fetch extension images
+- prevent adding same api url twice
+- retry failed img downloads
+- workaround for missing descriptionurl
+- fix: descriptionurl returned from api seems be "false" sometimes.
+- fix for #925. make syntaxhighlighting work again
+- fix for #755
+- support older mediawikis
+- add lower bound on word splitting hints
+- mwlib.refine: parse <caption> tags inside tables
+- be more generous when trying to detect see also
+- fix for "See Also "Section removal
+- fix #905: remove See also sections.
+- remove edit links
+- magics.py: handle second argument to fullurl magic function.
+- convert tiff images to png
+- fix for infobox detection
+- handle Abbreviation node in xhtmlwriter
+- add Abbreviation node
+- improve table splitting
+
 2010-10-29 release 0.12.14
 --------------------------
 - magics.py: fix NS magic function.
