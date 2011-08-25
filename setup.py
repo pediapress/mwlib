@@ -4,6 +4,15 @@
 # See README.txt for additional licensing information.
 
 import sys, os, time, glob
+
+if not (2, 4) < sys.version_info[:2] < (3, 0):
+    sys.exit("""
+***** ERROR ***********************************************************
+* mwlib does not work with your python version. You need to use python
+* 2.5, 2.6 or 2.7
+***********************************************************************
+""")
+
 try:
     from setuptools import setup, Extension
 except ImportError:
