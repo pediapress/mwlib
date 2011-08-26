@@ -38,8 +38,6 @@ include mwlib/cdb.py
 include mwlib/cdbwiki.py
 include mwlib/client.py
 include mwlib/conf.py
-include mwlib/docbook44grammar.py
-include mwlib/docbookwriter.py
 include mwlib/dummydb.py
 include mwlib/dumpparser.py
 include mwlib/expander.py
@@ -241,7 +239,6 @@ include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
 include tests/test_advtree.py
 include tests/test_convert_templates.py
-include tests/test_docbookwriter.py
 include tests/test_ebad.py
 include tests/test_expander.py
 include tests/test_expander_parser.py
@@ -274,6 +271,5 @@ include tests/test_utils.py
 include tests/test_writerutils.py
 include tests/test_xhtmlwriter.py
 include tests/test_zipwiki.py
-include tools/build_rng_grammar.py
 include tools/set-interwiki.py
 include tox.ini
