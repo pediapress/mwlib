@@ -8,7 +8,7 @@ rxc = lambda s: re.compile(s, re.DOTALL | re.IGNORECASE)
 
 onlyincluderx   = rxc("<onlyinclude>(.*?)</onlyinclude>")
 noincluderx     = rxc("<noinclude(?:\s[^<>]*)?>.*?(</noinclude>|$)")
-includeonlyrx   = rxc("<includeonly>.*?(?:</includeonly>|$)")
+includeonlyrx   = rxc("<includeonly(?:\s[^<>]*)?>.*?(?:</includeonly>|$)")
 
 def get_remove_tags(tags):
     r=rxc("</?(%s)>" % ("|".join(tags)))
