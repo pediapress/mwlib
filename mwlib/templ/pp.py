@@ -10,11 +10,13 @@ onlyincluderx   = rxc("<onlyinclude>(.*?)</onlyinclude>")
 noincluderx     = rxc("<noinclude(?:\s[^<>]*)?>.*?(</noinclude>|$)")
 includeonlyrx   = rxc("<includeonly(?:\s[^<>]*)?>.*?(?:</includeonly>|$)")
 
+
 def get_remove_tags(tags):
-    r=rxc("</?(%s)(?:\s[^<>]*)?>" % ("|".join(tags)))
+    r = rxc("</?(%s)(?:\s[^<>]*)?>" % ("|".join(tags)))
     return lambda s: r.sub(u'', s)
 
 remove_not_included = get_remove_tags(["onlyinclude", "noinclude"])
+
 
 def preprocess(txt, included=True):
     if included:
@@ -26,5 +28,5 @@ def preprocess(txt, included=True):
     else:
         txt = includeonlyrx.sub(u'', txt)
         txt = remove_not_included(txt)
-    
+
     return txt
