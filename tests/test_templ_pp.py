@@ -7,7 +7,7 @@ def preprocess(s, expected, included=True):
     res = pp.preprocess(s, included=included)
     
     print "preprocess(%r) -> %r" % (s, res)
-    if expected:
+    if expected is not None:
         assert res==expected, "bad preprocess result"
         
 def test_includeonly_included():
@@ -16,3 +16,11 @@ def test_includeonly_included():
     yield d, "foo<includeonly>bar baz\n\n\nbla", "foo"
     yield d, "foo<ONLYINCLUDE>123</onlyinclude>456", "foo123456"
     yield d, "foo<NOINCLUDE>123</noinclude>456", "foo123456"
+
+def test_noinclude_ws():
+    yield preprocess, "<noinclude>foo</noinclude>", "", True
+    yield preprocess, "<noinclude >foo</noinclude>", "", True
+    yield preprocess, "<noinclude sadf asdf asd>foo</noinclude>", "", True
+    yield preprocess, "<noinclude\n\t>foo</noinclude>", "", True
+
+    yield preprocess, "<noincludetypo>foo</noinclude>", "<noincludetypo>foo</noinclude>", True
