@@ -41,7 +41,6 @@ class bunch(object):
 # -- and we also like to speedup the get_writers method
     
 name2writer = {'rl': bunch(file_extension='pdf', name='rl', content_type='application/pdf'),
-               'xhtml': bunch(file_extension='html', name='xhtml', content_type='text/xml'),
                'xl': bunch(file_extension='pdf', name='xl', content_type='application/pdf'),
                'odf': bunch(file_extension='odt', name='odf', content_type='application/vnd.oasis.opendocument.text')}
 
