@@ -25,3 +25,9 @@ def test_noinclude_ws():
     yield preprocess, "<noinclude\n\t>foo</noinclude>", "", True
 
     yield preprocess, "<noincludetypo>foo</noinclude>", "<noincludetypo>foo</noinclude>", True
+
+def test_includeonly_ws():
+    yield preprocess, "<includeonly>foo</includeonly>", "", False
+    yield preprocess, "<includeonly >foo</includeonly>", "", False
+    yield preprocess, "<includeonly\n>foo</includeonly>", "", False
+
