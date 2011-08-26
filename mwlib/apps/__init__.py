@@ -7,31 +7,6 @@
 import optparse
 import os
 
-def buildcdb():
-    parser = optparse.OptionParser(usage="%prog --input XMLDUMP --output OUTPUT")
-    parser.add_option("-i", "--input", help="input file")
-    parser.add_option("-o", "--output", help="write output to OUTPUT")
-    options, args = parser.parse_args()
-    
-    if args:
-        parser.error("too many arguments.")
-
-    
-    input = options.input
-    output = options.output
-
-    if not (input and output):
-        parser.error("missing argument.")
-        
-    from mwlib import cdbwiki
-
-    cdbwiki.BuildWiki(input, output)()
-    open(os.path.join(output, "wikiconf.txt"), "w").write("""
-[wiki]
-type = nucdb
-path = %s
-lang = en
-""" % (os.path.abspath(output),))
 
 def show():
     parser = optparse.OptionParser()
