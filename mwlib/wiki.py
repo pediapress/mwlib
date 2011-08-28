@@ -13,11 +13,6 @@ from mwlib.metabook import wikiconf
 
 log = Log('mwlib.utils')
     
-def wiki_zip(path=None, url=None, name=None, **kwargs):
-    from mwlib import zipwiki
-    if kwargs:
-        log.warn('Unused parameters: %r' % kwargs)
-    return zipwiki.Wiki(path)
 
 def wiki_obsolete_cdb(path=None,  **kwargs):
     raise RuntimeError("cdb file format has changed. please rebuild with mw-buildcdb")
@@ -28,17 +23,10 @@ def wiki_nucdb(path=None, lang="en", **kwargs):
     db=cdbwiki.WikiDB(path, lang=lang)
     return nuwiki.adapt(db)
 
-def image_zip(path=None, **kwargs):
-    from mwlib import zipwiki
-    if kwargs:
-        log.warn('Unused parameters: %r' % kwargs)
-    return zipwiki.ImageDB(path)
-
 
 
 dispatch = dict(
-    images = dict(zip=image_zip),
-    wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb, zip=wiki_zip)
+    wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb)
 )
 
 _en_license_url = 'http://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'
@@ -164,20 +152,8 @@ def _makewiki(conf, metabook=None, **kw):
                 return MultiEnvironment(conf)
 
     if os.path.exists(os.path.join(conf, "content.json")):
-        from mwlib import zipwiki
-        asciidir = conf.encode("utf-8")
-        class dirreader(object):
-            def read(self, fn):
-                return open(os.path.join(asciidir, fn),  "rb").read()
-            
-        res.wiki = zipwiki.Wiki(dirreader())
-        res.images = zipwiki.ImageDB(dirreader())
-        if metabook is None:
-            res.metabook = res.wiki.metabook
-        return res
-        
-        assert 0
-            
+        raise RuntimeError("old zip wikis are not supported anymore")
+
     # yes, I really don't want to type this everytime
     wc = os.path.join(conf, "wikiconf.txt")
     if os.path.exists(wc):
@@ -192,8 +168,8 @@ def _makewiki(conf, metabook=None, **kw):
         try:
             format = json.loads(zf.read("nfo.json"))["format"]
         except KeyError:
-            format = "zipwiki"
-            
+            raise RuntimeError("old zip wikis are not supported anymore")
+
         if format=="nuwiki":
             from mwlib import nuwiki
             res.images = res.wiki = nuwiki.adapt(zf)
@@ -206,13 +182,6 @@ def _makewiki(conf, metabook=None, **kw):
             tmpdir = tempfile.mkdtemp()
             nuwiki.extractall(zf, tmpdir)
             res = MultiEnvironment(tmpdir)
-            return res
-        elif format=="zipwiki":
-            from mwlib import zipwiki
-            res.wiki = zipwiki.Wiki(conf)
-            res.images = zipwiki.ImageDB(conf)
-            if metabook is None:
-                res.metabook = res.wiki.metabook
             return res
         else:
             raise RuntimeError("unknown format %r" % (format,))

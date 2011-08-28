@@ -5,7 +5,7 @@
 
 import urllib
 
-from mwlib import parser, log, metabook, zipwiki, wiki
+from mwlib import parser, log, metabook, wiki
 
 # import functions needed by most writers that should be accessible through writerbase
 from mwlib.mathutils import renderMath

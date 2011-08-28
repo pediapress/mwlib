@@ -1,4 +1,6 @@
 include MANIFEST.in
+include MANIFEST.in
+include MANIFEST.in
 include README.html
 include README.txt
 include argv.py
@@ -218,7 +220,6 @@ include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml-special.ent
 include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml-symbol.ent
 include mwlib/xmlcat/www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd
 include mwlib/xmltreecleaner.py
-include mwlib/zipwiki.py
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
@@ -231,7 +232,6 @@ include sandbox/postman.py
 include sandbox/rclient
 include sandbox/time-expr.py
 include sandbox/time-parse.py
-include sandbox/upload.py
 include sandbox/xmlserver/xml-server.py
 include setup.py
 include tests/canthus.mb.json
@@ -241,7 +241,6 @@ include tests/lambda.zip
 include tests/memeater.py
 include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
-include tests/speisesalz.zip
 include tests/test_advtree.py
 include tests/test_convert_templates.py
 include tests/test_docbookwriter.py

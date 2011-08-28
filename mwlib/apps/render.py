@@ -88,11 +88,10 @@ class Main(object):
 
     def get_environment(self):
         from mwlib.status import Status
-        from mwlib import zipwiki, nuwiki
+        from mwlib import nuwiki
         
         env = self.parser.makewiki()        
-        if ((isinstance(env.wiki, zipwiki.Wiki) and isinstance(env.images, zipwiki.ImageDB))
-            or isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt))
+        if (isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt))
             or isinstance(env, wiki.MultiEnvironment)):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
