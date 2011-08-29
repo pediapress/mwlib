@@ -9,6 +9,11 @@ class Subst(nodes.Node):
         
         res.append("{{subst:%s}}" % (name,))
 
+class Safesubst(nodes.Template):
+    def _get_args(self):
+        return self[1:]
+
+
 class Time(nodes.Node):
     def flatten(self, expander, variables, res):
         format = []
@@ -120,6 +125,7 @@ def make_switchnode(args):
 
 registry = {'#time': Time,
             'subst': Subst,
+            'safesubst': Safesubst,
             'anchorencode': Anchorencode,
             '#tag': Tag,
             'displaytitle': Displaytitle,

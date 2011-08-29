@@ -216,7 +216,9 @@ class Template(Node):
             except:
                 pass
             
-        
+    def _get_args(self):
+        return self[1]
+
     def _flatten(self, expander, variables, res):
         
         name = []
@@ -225,8 +227,8 @@ class Template(Node):
         if len(name)>256*1024:
             raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
 
-        args = self[1]
-        
+        args = self._get_args()
+
         remainder = None
         if ":" in name:
             try_name, try_remainder = name.split(':', 1)
