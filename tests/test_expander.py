@@ -627,3 +627,9 @@ def test_resolve_magic_alias():
     e = expander.Expander(u"{{#als: 1 | yes | no}}", wikidb=db)
     assert e.resolve_magic_alias(u"#als") == u"#if"
     assert e.resolve_magic_alias(u"#foobar") is None
+
+
+def test_safesubst():
+    yield expandstr, "{{safesubst:#expr:1+2}}", "3"
+    yield expandstr, "{{{{{|safesubst:}}}#expr:1+3}}", "4"
+    yield expandstr, "{{safesubst:#if: 1| yes | no}}", "yes"
