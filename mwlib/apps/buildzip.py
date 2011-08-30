@@ -28,19 +28,10 @@ def zipdir(dirname, output=None):
         output = dirname+".zip"
 
     output = os.path.abspath(output)
-    cwd = os.getcwd()
-    try:
-        os.chdir(dirname)
-        files = _walk(".")
-        zf = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
-        for i in files:
-            if i.endswith("/"):
-                zf.writestr(zipfile.ZipInfo(i), "")
-            else:
-                zf.write(i)
-        zf.close()
-    finally:
-        os.chdir(cwd)
+    zf = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
+    for i in _walk(dirname):
+        zf.write(i, i[len(dirname)+1:])
+    zf.close()
 
 
 
