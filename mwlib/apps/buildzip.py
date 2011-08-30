@@ -19,10 +19,11 @@ def _walk(root):
     return retval
 
                      
-def zipdir(dirname, output=None):
+def zipdir(dirname, output=None, skip_ext=None):
     """recursively zip directory and write output to zipfile.
     @param dirname: directory to zip
     @param output: name of zip file that get's written
+    @para skip_ext: skip files with the specified extension
     """
     if not output:
         output = dirname+".zip"
@@ -30,6 +31,8 @@ def zipdir(dirname, output=None):
     output = os.path.abspath(output)
     zf = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
     for i in _walk(dirname):
+        if skip_ext and os.path.splitext(i)[1] == skip_ext:
+            continue
         zf.write(i, i[len(dirname)+1:])
     zf.close()
 
