@@ -6,18 +6,18 @@
         "dbtype": "mysql", 
         "dbversion": "5.1.43-wm-log", 
         "fallback8bitEncoding": "iso-8859-2", 
-        "generator": "MediaWiki 1.16wmf4", 
+        "generator": "MediaWiki 1.17wmf1", 
         "lang": "pl", 
         "mainpage": "Strona g\u0142\u00f3wna", 
         "phpsapi": "apache2handler", 
-        "phpversion": "5.2.4-2ubuntu5.7wm1", 
-        "rev": 71190, 
+        "phpversion": "5.2.4-2ubuntu5.12wm1", 
+        "rev": 95690, 
         "rights": "Creative Commons Attribution-Share Alike 3.0 Unported", 
         "script": "/w/index.php", 
         "scriptpath": "/w", 
         "server": "http://pl.wikipedia.org", 
         "sitename": "Wikipedia", 
-        "time": "2010-08-26T15:05:01Z", 
+        "time": "2011-08-31T09:39:48Z", 
         "timeoffset": 120, 
         "timezone": "Europe/Berlin", 
         "variantarticlepath": false, 
@@ -101,7 +101,7 @@
             "url": "http://an.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Anglo-Saxon", 
+            "language": "\u00c6nglisc", 
             "local": "", 
             "prefix": "ang", 
             "url": "http://ang.wikipedia.org/wiki/$1"
@@ -169,7 +169,7 @@
             "url": "http://ay.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Az\u0259rbaycan", 
+            "language": "Az\u0259rbaycanca", 
             "local": "", 
             "prefix": "az", 
             "url": "http://az.wikipedia.org/wiki/$1"
@@ -180,7 +180,7 @@
             "url": "http://pl.wikibooks.org/wiki/$1"
         }, 
         {
-            "language": "\u0411\u0430\u0448\u04a1\u043e\u0440\u0442", 
+            "language": "\u0411\u0430\u0448\u04a1\u043e\u0440\u0442\u0441\u0430", 
             "local": "", 
             "prefix": "ba", 
             "url": "http://ba.wikipedia.org/wiki/$1"
@@ -214,7 +214,7 @@
             "url": "http://be.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f (\u0442\u0430\u0440\u0430\u0448\u043a\u0435\u0432\u0456\u0446\u0430)", 
+            "language": "\u202a\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f (\u0442\u0430\u0440\u0430\u0448\u043a\u0435\u0432\u0456\u0446\u0430)\u202c", 
             "local": "", 
             "prefix": "be-x-old", 
             "url": "http://be-x-old.wikipedia.org/wiki/$1"
@@ -633,7 +633,6 @@
             "url": "http://www.pgdpcanada.net/wiki/index.php/$1"
         }, 
         {
-            "language": "Dansk (deprecated:da)", 
             "local": "", 
             "prefix": "dk", 
             "url": "http://dk.wikipedia.org/wiki/$1"
@@ -1467,7 +1466,7 @@
             "url": "http://kv.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Kernewek", 
+            "language": "Kernowek", 
             "local": "", 
             "prefix": "kw", 
             "url": "http://kw.wikipedia.org/wiki/$1"
@@ -1980,7 +1979,7 @@
             "url": "http://orthodoxwiki.org/$1"
         }, 
         {
-            "language": "\u0418\u0440\u043e\u043d\u0430\u0443", 
+            "language": "\u0418\u0440\u043e\u043d", 
             "local": "", 
             "prefix": "os", 
             "url": "http://os.wikipedia.org/wiki/$1"
@@ -2677,7 +2676,6 @@
             "url": "http://toolserver.org/$1"
         }, 
         {
-            "language": "Toki Pona (deprecated:tokipona)", 
             "local": "", 
             "prefix": "tp", 
             "url": "http://tp.wikipedia.org/wiki/$1"
@@ -2767,7 +2765,7 @@
             "url": "http://udm.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Uyghurche\u200e / \u0626\u06c7\u064a\u063a\u06c7\u0631\u0686\u06d5", 
+            "language": "\u0626\u06c7\u064a\u063a\u06c7\u0631\u0686\u06d5 / Uyghurche\u200e", 
             "local": "", 
             "prefix": "ug", 
             "url": "http://ug.wikipedia.org/wiki/$1"
@@ -3388,6 +3386,12 @@
         }, 
         {
             "aliases": [
+                "urldecode"
+            ], 
+            "name": "urldecode"
+        }, 
+        {
+            "aliases": [
                 "categorytree"
             ], 
             "name": "categorytree"
@@ -3465,6 +3469,13 @@
                 "__NOEDITSECTION__"
             ], 
             "name": "noeditsection"
+        }, 
+        {
+            "aliases": [
+                "__BEZNAG\u0141\u00d3WKA__", 
+                "__NOHEADER__"
+            ], 
+            "name": "noheader"
         }, 
         {
             "aliases": [
@@ -3621,6 +3632,13 @@
         }, 
         {
             "aliases": [
+                "podst:", 
+                "SUBST:"
+            ], 
+            "name": "subst"
+        }, 
+        {
+            "aliases": [
                 "ma\u0142y", 
                 "thumbnail", 
                 "thumb"
@@ -3683,11 +3701,20 @@
         {
             "aliases": [
                 "bezramki", 
-                "bez ramki", 
+                "bez_ramki", 
                 "frameless"
             ], 
             "case-sensitive": "", 
             "name": "img_frameless"
+        }, 
+        {
+            "aliases": [
+                "strona=$1", 
+                "page=$1", 
+                "page $1"
+            ], 
+            "case-sensitive": "", 
+            "name": "img_page"
         }, 
         {
             "aliases": [
@@ -3798,6 +3825,14 @@
         }, 
         {
             "aliases": [
+                "__LINKNOWEJSEKCJI__", 
+                "__NEWSECTIONLINK__"
+            ], 
+            "case-sensitive": "", 
+            "name": "newsectionlink"
+        }, 
+        {
+            "aliases": [
                 "#J\u0118ZYK:", 
                 "#LANGUAGE:"
             ], 
@@ -3827,9 +3862,21 @@
         }, 
         {
             "aliases": [
-                "__NOHEADER__"
+                "DOMY\u015aLNIESORTUJ", 
+                "DEFAULTSORT:", 
+                "DEFAULTSORTKEY:", 
+                "DEFAULTCATEGORYSORT:"
             ], 
-            "name": "noheader"
+            "case-sensitive": "", 
+            "name": "defaultsort"
+        }, 
+        {
+            "aliases": [
+                "__KATEGORIAUKRYTA__", 
+                "__HIDDENCAT__"
+            ], 
+            "case-sensitive": "", 
+            "name": "hiddencat"
         }, 
         {
             "aliases": [
@@ -4040,12 +4087,6 @@
         }, 
         {
             "aliases": [
-                "SUBST:"
-            ], 
-            "name": "subst"
-        }, 
-        {
-            "aliases": [
                 "SAFESUBST:"
             ], 
             "name": "safesubst"
@@ -4062,14 +4103,6 @@
             ], 
             "case-sensitive": "", 
             "name": "img_width"
-        }, 
-        {
-            "aliases": [
-                "page=$1", 
-                "page $1"
-            ], 
-            "case-sensitive": "", 
-            "name": "img_page"
         }, 
         {
             "aliases": [
@@ -4162,6 +4195,12 @@
         }, 
         {
             "aliases": [
+                "ARTICLEPATH"
+            ], 
+            "name": "articlepath"
+        }, 
+        {
+            "aliases": [
                 "SERVER"
             ], 
             "name": "server"
@@ -4242,6 +4281,13 @@
         }, 
         {
             "aliases": [
+                "REVISIONMONTH1"
+            ], 
+            "case-sensitive": "", 
+            "name": "revisionmonth1"
+        }, 
+        {
+            "aliases": [
                 "REVISIONYEAR"
             ], 
             "case-sensitive": "", 
@@ -4275,6 +4321,18 @@
         }, 
         {
             "aliases": [
+                "CANONICALURL:"
+            ], 
+            "name": "canonicalurl"
+        }, 
+        {
+            "aliases": [
+                "CANONICALURLE:"
+            ], 
+            "name": "canonicalurle"
+        }, 
+        {
+            "aliases": [
                 "RAW:"
             ], 
             "name": "raw"
@@ -4292,13 +4350,6 @@
             ], 
             "case-sensitive": "", 
             "name": "rawsuffix"
-        }, 
-        {
-            "aliases": [
-                "__NEWSECTIONLINK__"
-            ], 
-            "case-sensitive": "", 
-            "name": "newsectionlink"
         }, 
         {
             "aliases": [
@@ -4378,15 +4429,6 @@
         }, 
         {
             "aliases": [
-                "DEFAULTSORT:", 
-                "DEFAULTSORTKEY:", 
-                "DEFAULTCATEGORYSORT:"
-            ], 
-            "case-sensitive": "", 
-            "name": "defaultsort"
-        }, 
-        {
-            "aliases": [
                 "FILEPATH:"
             ], 
             "name": "filepath"
@@ -4396,13 +4438,6 @@
                 "tag"
             ], 
             "name": "tag"
-        }, 
-        {
-            "aliases": [
-                "__HIDDENCAT__"
-            ], 
-            "case-sensitive": "", 
-            "name": "hiddencat"
         }, 
         {
             "aliases": [
@@ -4461,6 +4496,24 @@
                 "dateformat"
             ], 
             "name": "formatdate"
+        }, 
+        {
+            "aliases": [
+                "PATH"
+            ], 
+            "name": "url_path"
+        }, 
+        {
+            "aliases": [
+                "WIKI"
+            ], 
+            "name": "url_wiki"
+        }, 
+        {
+            "aliases": [
+                "QUERY"
+            ], 
+            "name": "url_query"
         }
     ], 
     "namespacealiases": [
@@ -4552,6 +4605,20 @@
             "canonical": "Dyskusja Wikiprojektu", 
             "case": "first-letter", 
             "id": 103, 
+            "subpages": ""
+        }, 
+        "104": {
+            "*": "Archiwum", 
+            "canonical": "Archiwum", 
+            "case": "first-letter", 
+            "id": 104, 
+            "subpages": ""
+        }, 
+        "105": {
+            "*": "Dyskusja archiwum", 
+            "canonical": "Dyskusja archiwum", 
+            "case": "first-letter", 
+            "id": 105, 
             "subpages": ""
         }, 
         "11": {

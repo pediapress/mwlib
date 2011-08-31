@@ -4,20 +4,20 @@
         "base": "http://sv.wikipedia.org/wiki/Portal:Huvudsida", 
         "case": "first-letter", 
         "dbtype": "mysql", 
-        "dbversion": "5.1.43-wm-log", 
+        "dbversion": "5.1.43-wm3193-log", 
         "fallback8bitEncoding": "windows-1252", 
-        "generator": "MediaWiki 1.16wmf4", 
+        "generator": "MediaWiki 1.17wmf1", 
         "lang": "sv", 
         "mainpage": "Portal:Huvudsida", 
         "phpsapi": "apache2handler", 
-        "phpversion": "5.2.4-2ubuntu5.7wm1", 
-        "rev": 71190, 
+        "phpversion": "5.2.4-2ubuntu5.12wm1", 
+        "rev": 95690, 
         "rights": "Creative Commons Attribution-Share Alike 3.0 Unported", 
         "script": "/w/index.php", 
         "scriptpath": "/w", 
         "server": "http://sv.wikipedia.org", 
         "sitename": "Wikipedia", 
-        "time": "2010-08-26T15:05:03Z", 
+        "time": "2011-08-31T09:39:51Z", 
         "timeoffset": 120, 
         "timezone": "Europe/Berlin", 
         "variantarticlepath": false, 
@@ -101,7 +101,7 @@
             "url": "http://an.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Anglo-Saxon", 
+            "language": "\u00c6nglisc", 
             "local": "", 
             "prefix": "ang", 
             "url": "http://ang.wikipedia.org/wiki/$1"
@@ -169,7 +169,7 @@
             "url": "http://ay.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Az\u0259rbaycan", 
+            "language": "Az\u0259rbaycanca", 
             "local": "", 
             "prefix": "az", 
             "url": "http://az.wikipedia.org/wiki/$1"
@@ -180,7 +180,7 @@
             "url": "http://sv.wikibooks.org/wiki/$1"
         }, 
         {
-            "language": "\u0411\u0430\u0448\u04a1\u043e\u0440\u0442", 
+            "language": "\u0411\u0430\u0448\u04a1\u043e\u0440\u0442\u0441\u0430", 
             "local": "", 
             "prefix": "ba", 
             "url": "http://ba.wikipedia.org/wiki/$1"
@@ -214,7 +214,7 @@
             "url": "http://be.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f (\u0442\u0430\u0440\u0430\u0448\u043a\u0435\u0432\u0456\u0446\u0430)", 
+            "language": "\u202a\u0411\u0435\u043b\u0430\u0440\u0443\u0441\u043a\u0430\u044f (\u0442\u0430\u0440\u0430\u0448\u043a\u0435\u0432\u0456\u0446\u0430)\u202c", 
             "local": "", 
             "prefix": "be-x-old", 
             "url": "http://be-x-old.wikipedia.org/wiki/$1"
@@ -633,7 +633,6 @@
             "url": "http://www.pgdpcanada.net/wiki/index.php/$1"
         }, 
         {
-            "language": "Dansk (deprecated:da)", 
             "local": "", 
             "prefix": "dk", 
             "url": "http://dk.wikipedia.org/wiki/$1"
@@ -1467,7 +1466,7 @@
             "url": "http://kv.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Kernewek", 
+            "language": "Kernowek", 
             "local": "", 
             "prefix": "kw", 
             "url": "http://kw.wikipedia.org/wiki/$1"
@@ -1980,7 +1979,7 @@
             "url": "http://orthodoxwiki.org/$1"
         }, 
         {
-            "language": "\u0418\u0440\u043e\u043d\u0430\u0443", 
+            "language": "\u0418\u0440\u043e\u043d", 
             "local": "", 
             "prefix": "os", 
             "url": "http://os.wikipedia.org/wiki/$1"
@@ -2677,7 +2676,6 @@
             "url": "http://toolserver.org/$1"
         }, 
         {
-            "language": "Toki Pona (deprecated:tokipona)", 
             "local": "", 
             "prefix": "tp", 
             "url": "http://tp.wikipedia.org/wiki/$1"
@@ -2767,7 +2765,7 @@
             "url": "http://udm.wikipedia.org/wiki/$1"
         }, 
         {
-            "language": "Uyghurche\u200e / \u0626\u06c7\u064a\u063a\u06c7\u0631\u0686\u06d5", 
+            "language": "\u0626\u06c7\u064a\u063a\u06c7\u0631\u0686\u06d5 / Uyghurche\u200e", 
             "local": "", 
             "prefix": "ug", 
             "url": "http://ug.wikipedia.org/wiki/$1"
@@ -3337,6 +3335,13 @@
         }, 
         {
             "aliases": [
+                "tidl", 
+                "timel"
+            ], 
+            "name": "timel"
+        }, 
+        {
+            "aliases": [
                 "ers\u00e4tt", 
                 "replace"
             ], 
@@ -3344,9 +3349,10 @@
         }, 
         {
             "aliases": [
-                "timel"
+                "explodera", 
+                "explode"
             ], 
-            "name": "timel"
+            "name": "explode"
         }, 
         {
             "aliases": [
@@ -3392,9 +3398,9 @@
         }, 
         {
             "aliases": [
-                "explode"
+                "urldecode"
             ], 
-            "name": "explode"
+            "name": "urldecode"
         }, 
         {
             "aliases": [
@@ -4185,7 +4191,7 @@
         }, 
         {
             "aliases": [
-                "FULLURL:. FULLTURL:", 
+                "FULLTURL:", 
                 "FULLURL:"
             ], 
             "name": "fullurl"
@@ -4480,6 +4486,12 @@
         }, 
         {
             "aliases": [
+                "ARTICLEPATH"
+            ], 
+            "name": "articlepath"
+        }, 
+        {
+            "aliases": [
                 "SERVER"
             ], 
             "name": "server"
@@ -4506,9 +4518,28 @@
         }, 
         {
             "aliases": [
+                "REVISIONMONTH1"
+            ], 
+            "case-sensitive": "", 
+            "name": "revisionmonth1"
+        }, 
+        {
+            "aliases": [
                 "PLURAL:"
             ], 
             "name": "plural"
+        }, 
+        {
+            "aliases": [
+                "CANONICALURL:"
+            ], 
+            "name": "canonicalurl"
+        }, 
+        {
+            "aliases": [
+                "CANONICALURLE:"
+            ], 
+            "name": "canonicalurle"
         }, 
         {
             "aliases": [
@@ -4561,6 +4592,24 @@
                 "special"
             ], 
             "name": "special"
+        }, 
+        {
+            "aliases": [
+                "PATH"
+            ], 
+            "name": "url_path"
+        }, 
+        {
+            "aliases": [
+                "WIKI"
+            ], 
+            "name": "url_wiki"
+        }, 
+        {
+            "aliases": [
+                "QUERY"
+            ], 
+            "name": "url_query"
         }
     ], 
     "namespacealiases": [
