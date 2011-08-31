@@ -17,10 +17,11 @@ def fetch(lang):
     json.dump(data, open(fn, 'wb'), indent=4, sort_keys=True)
 
 def main(argv):
-    if len(argv) < 2:
-        sys.exit('Usage: %s LANGUAGE1 [LANGUAGE2 [...]]' % argv[0])
+    languages = argv[1:]
+    if not languages:
+        languages = "de en es fr it ja nl no pl pt simple sv".split()
 
-    for lang in argv[1:]:
+    for lang in languages:
         fetch(lang.lower())
 
 if __name__ == '__main__':
