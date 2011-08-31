@@ -30,11 +30,6 @@ unpack it and run::
 
 (this will also install setuptools)
 
-You can also install the latest `mwlib development version`_ with::
-
-  $ easy_install mwlib==dev
-
-(However, you need to have re2c installed for that to work).
 
 
 You will also need:
@@ -90,6 +85,16 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2011-08-31 release 0.12.16
+--------------------------
+- remove xhtmlwriter
+- remove docbookwriter
+- fix_wikipedia_siteinfo for kdb, ltg and xmf
+- remove zipwiki
+- implement safesubst
+- match noinclude and onlyinclude tags with whitespace
+- bail out when running setup.py with an unsupported python version
+
 2011-08-12 release 0.12.15
 --------------------------
 - require lxml.
@@ -441,4 +446,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _SpamBayes: http://spambayes.sourceforge.net/
 .. _PIL: http://www.pythonware.com/products/pil/
 .. _lxml: http://codespeak.net/lxml/
-.. _mwlib development version: http://code.pediapress.com/git/mwlib/?p=mwlib;a=snapshot;h=HEAD;sf=tgz#egg=mwlib-dev
