@@ -8,6 +8,7 @@ import urllib
 from twisted.internet import reactor, defer
 from twisted.web import client 
 from twisted.python import failure
+from mwlib import conf
 
 try:
     import json
@@ -150,16 +151,8 @@ class pool(object):
         return d
     
 class mwapi(object):
-    api_result_limit = 500 # 5000 for bots
-    api_request_limit = 15 # at most 50 titles at once
-
-    max_connections = 20
     siteinfo = None
-    max_retry_count = 2
-    try:
-        rvlimit = int(os.environ.get("RVLIMIT", "500"))
-    except ValueError:
-        rvlimit = 500
+
     def __init__(self, baseurl, script_extension='.php'):
         self.baseurl = baseurl
         self.script_extension = script_extension
@@ -168,7 +161,12 @@ class mwapi(object):
         self.qccount = 0
         self.cookies = {}
 
-        
+        self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)
+        self.api_request_limit = conf.get("fetch", "api_request_limit", 15, int)
+        self.max_connections = conf.get("fetch", "max_connections", 20, int)
+        self.max_retry_count = conf.get("fetch", "max_retry_count", 2, int)
+        self.rvlimit = conf.get("fetch", "rvlimit", 500, int)
+
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.baseurl, hex(id(self)))
 
