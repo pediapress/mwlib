@@ -18,6 +18,8 @@ class confbase(object):
     def readrc(self, path=None):
         if path is None:
             path = os.path.expanduser("~/.mwlibrc")
+            if not os.path.exists(path):
+                return
         self._inicfg = py.iniconfig.IniConfig(path, None)
 
     def get(self, section, name, default=None, convert=str):
