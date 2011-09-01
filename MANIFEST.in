@@ -16,6 +16,7 @@ include docs/writers.txt
 include ez_setup.py
 include mwlib/EasyTimeline.pl
 include mwlib/__init__.py
+include mwlib/_conf.py
 include mwlib/_expander.re
 include mwlib/_uscan.cc
 include mwlib/_uscan.re
