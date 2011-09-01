@@ -8,7 +8,7 @@ import sys
 import errno
 import pkg_resources
 from mwlib.options import OptionParser
-from mwlib import utils, wiki
+from mwlib import utils, wiki, conf
 
 class Main(object):
     zip_filename = None
@@ -113,6 +113,8 @@ class Main(object):
         
     def __call__(self):    
         options, args, parser = self.parse_options()
+        conf.readrc()
+
         self.parser = parser
         self.options = options
         

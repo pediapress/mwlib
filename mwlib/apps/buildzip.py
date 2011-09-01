@@ -77,6 +77,7 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
         
 def main():    
     from mwlib.options import OptionParser
+    from mwlib import conf
 
     parser = OptionParser()
     parser.add_option("-o", "--output", help="write output to OUTPUT")
@@ -95,7 +96,7 @@ def main():
                       help='write status/progress info to this file')
 
     options, args = parser.parse_args()
-    
+    conf.readrc()
     use_help = 'Use --help for usage information.'
         
                         
