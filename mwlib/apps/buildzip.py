@@ -74,6 +74,9 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
         else:
             print 'keeping tmpdir %r' % tmpdir
 
+        from mwlib import linuxmem
+        print 'MEMORY USED:', linuxmem.memory()
+
         
 def main():    
     from mwlib.options import OptionParser
