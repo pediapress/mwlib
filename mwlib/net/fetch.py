@@ -9,6 +9,7 @@ import os
 import sys
 import urlparse
 import time
+import shelve
 from lxml import etree
 from collections import defaultdict
 
@@ -18,6 +19,7 @@ from mwlib.net import mwapi
 from mwlib.net.pod import PODClient
 
 from mwlib import myjson as json
+from mwlib.authors import get_authors
 
 from twisted.python import failure, log
 from twisted.web import client 
@@ -84,6 +86,7 @@ class shared_progress(object):
             done+=d
             total+=t
         return done, total
+
     
 class fsoutput(object):
     def __init__(self, path):
@@ -95,6 +98,13 @@ class fsoutput(object):
         self.seen = dict()
         self.imgcount = 0
         self.nfo = None
+        self.authors = shelve.open(os.path.join(self.path, 'authors.shelve'))
+
+    def add_author(self, title, authors):
+        if isinstance(title, unicode):
+            title = title.encode('utf-8')
+        self.authors[title]=json.dumps(authors)
+        self.authors.sync()
 
     def close(self):
         if self.nfo is not None:
@@ -150,8 +160,8 @@ class fsoutput(object):
                 # else:    
                 #     print "fsoutput: skipping duplicate:", dict(revid=revid, title=title)
 
-    def write_edits(self, edits):
-        self.dump_json(edits=edits)
+    def write_authors(self):
+        self.authors.close()
 
     def write_redirects(self, redirects):
         self.dump_json(redirects=redirects)
@@ -227,7 +237,6 @@ class fetcher(object):
 
         self.title2latest = {}
 
-        self.edits = []
         self.lambda_todo = []
         self.pages_todo = []
         self.revids_todo = []
@@ -385,7 +394,10 @@ class fetcher(object):
 
     def _got_edits(self, data):
         edits = data.get("pages").values()
-        self.edits.extend(edits)
+        for e in edits:
+            title = e['title'][:]
+            authors = get_authors(e['revisions'])
+            self.fsout.add_author(title, authors)
 
     def _add_catmember(self, title, entry):
         try:
@@ -600,11 +612,10 @@ class fetcher(object):
         
         # change title prefix to make them look like local pages
         for e in edits:
-            title = e.get("title")
-            prefix, partial = title.split(":", 1)
-            e["title"] = "%s:%s" % (local_nsname, partial)
-
-        self.edits.extend(edits)
+            prefix, partial = e['title'].split(":", 1)
+            title  = '%s:%s' % (local_nsname, partial)
+            authors = get_authors(e['revisions'])
+            self.fsout.add_author(title, authors)
 
     def _cb_image_contents(self, data):
         local_nsname = self.nshandler.get_nsname_by_number(6)
@@ -742,7 +753,7 @@ class fetcher(object):
     def finish(self):
         self._sanity_check()
         self._compute_excluded()
-        self.fsout.write_edits(self.edits)
+        self.fsout.write_authors()
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
         self.fsout.dump_json(imageinfo=self.imageinfo)

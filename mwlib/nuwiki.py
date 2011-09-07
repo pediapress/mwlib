@@ -7,6 +7,7 @@ import zipfile
 import shutil
 import tempfile
 import urllib
+import shelve
 from mwlib import myjson as json
 
 from mwlib import nshandling, utils
@@ -19,7 +20,8 @@ class page(object):
     def __init__(self, meta, rawtext):
         self.__dict__.update(meta)
         self.rawtext = rawtext
-        
+
+
 class nuwiki(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
@@ -35,7 +37,12 @@ class nuwiki(object):
         
         self.revisions = {}
         self._read_revisions()
-
+        fn = os.path.join(self.path, 'authors.shelve')
+        if not os.path.exists(fn):
+            self.authors = None
+            log.warn('no authors present. parsing revision info instead')
+        else:
+            self.authors = shelve.open(fn)
         self.imageinfo = self._loadjson("imageinfo.json", {})
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
@@ -292,21 +299,27 @@ class adapt(object):
         return self.getURL(name, defaultns=nshandling.NS_FILE)
 
     def getAuthors(self, title, revision=None):
-        from mwlib.authors import get_authors
-        
-        if self.edits is None:
-            edits = self.edits = {}
-            for edit in self.nuwiki.get_data("edits") or []:
-                try:
-                    edits[edit['title']] = edit.get("revisions")
-                except KeyError:
-                    continue
-
         fqname = self.nshandler.get_fqname(title)
         fqname = self.redirects.get(fqname, fqname)
-        revisions = self.edits.get(fqname, [])
-        authors = get_authors(revisions)
-        return authors
+
+        if self.nuwiki.authors is not None:
+            authors = self.nuwiki._edits[fqname.encode('utf-8')]
+            authors = json.loads(authors)
+            return authors
+        else:
+            from mwlib.authors import get_authors
+            if self.edits is None:
+                edits = self.edits = {}
+                for edit in self.nuwiki.get_data("edits") or []:
+                    try:
+                        edits[edit['title']] = edit.get("revisions")
+                    except KeyError:
+                        continue
+
+            revisions = self.edits.get(fqname, [])
+            authors = get_authors(revisions)
+
+            return authors
     
     def getSource(self, title, revision=None):
         from mwlib.metabook import make_source
