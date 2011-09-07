@@ -303,7 +303,7 @@ class adapt(object):
         fqname = self.redirects.get(fqname, fqname)
 
         if self.nuwiki.authors is not None:
-            authors = self.nuwiki._edits[fqname.encode('utf-8')]
+            authors = self.nuwiki.authors[fqname.encode('utf-8')]
             authors = json.loads(authors)
             return authors
         else:
