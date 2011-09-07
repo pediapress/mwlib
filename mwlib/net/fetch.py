@@ -99,6 +99,13 @@ class fsoutput(object):
         self.imgcount = 0
         self.nfo = None
         self.authors = shelve.open(os.path.join(self.path, 'authors.shelve'))
+        self.html = shelve.open(os.path.join(self.path, 'html.shelve'))
+
+
+    def add_html(self, title, html):
+        if isinstance(title, unicode):
+            title = title.encode('utf-8')
+        self.html[title] = html
 
     def add_author(self, title, authors):
         if isinstance(title, unicode):
@@ -163,6 +170,9 @@ class fsoutput(object):
     def write_authors(self):
         self.authors.close()
 
+    def write_html(self):
+        self.html.close()
+
     def write_redirects(self, redirects):
         self.dump_json(redirects=redirects)
         
@@ -193,7 +203,6 @@ class fetcher(object):
                  template_exclusion_category=None,
                  cover_image=None,
                  imagesize=800, fetch_images=True):
-        self.parsed_html = []
 
         self.imageinfo = {}
         self.print_template_pattern = None
@@ -297,15 +306,13 @@ class fetcher(object):
                        ('extensions' in src or 'math' in src):
 
                     img_urls.add(fullurl)
-        if img_urls:
-            print 'found %d extension images' % len(img_urls)
         return img_urls
 
 
     def fetch_html(self, name, lst):
         def got_html(res,value):
             res[name] = value
-            self.parsed_html.append(res)
+            self.fsout.add_html(value, res)
             img_urls = self.extension_img_urls(res)
             return img_urls
 
@@ -757,7 +764,7 @@ class fetcher(object):
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
         self.fsout.dump_json(imageinfo=self.imageinfo)
-        self.fsout.dump_json(parsed_html=self.parsed_html)
+        self.fsout.write_html()
         if self.fsout.nfo and self.print_template_pattern:
             self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()

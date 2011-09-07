@@ -34,19 +34,29 @@ class nuwiki(object):
                     raise
             
         self.excluded = set(x.get("title") for x in self._loadjson("excluded.json", []))            
-        
+
         self.revisions = {}
         self._read_revisions()
+
         fn = os.path.join(self.path, 'authors.shelve')
         if not os.path.exists(fn):
             self.authors = None
             log.warn('no authors present. parsing revision info instead')
         else:
             self.authors = shelve.open(fn)
+
+        fn = os.path.join(self.path, 'html.shelve')
+        if not os.path.exists(fn):
+            self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
+            log.warn('no html present. parsing revision info instead')
+            self.convert_utf8 = False
+        else:
+            self.html = shelve.open(fn)
+            self.convert_utf8 = True # shelf doesn't support unicode keys
+
         self.imageinfo = self._loadjson("imageinfo.json", {})
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
-        self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
         self.nshandler = nshandling.nshandler(self.siteinfo)        
         self.en_nshandler = nshandling.get_nshandler_for_lang('en') 
         self.nfo = self._loadjson("nfo.json", {})
@@ -334,6 +344,8 @@ class adapt(object):
         )
 
     def getHTML(self, title, revision=None):
+        if isinstance(title, unicode) and self.convert_utf8:
+            title = title.encode('utf-8')
         if revision:
             return self.nuwiki.html.get(revision, {})
         else:
