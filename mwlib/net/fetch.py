@@ -98,20 +98,26 @@ class fsoutput(object):
         self.seen = dict()
         self.imgcount = 0
         self.nfo = None
-        self.authors = shelve.open(os.path.join(self.path, 'authors.shelve'))
-        self.html = shelve.open(os.path.join(self.path, 'html.shelve'))
+        self.db_storage_list = []
 
+    def close_db_storages(self):
+        for name in self.db_storage_list:
+            storage = getattr(self, name)
+            storage.close()
 
-    def add_html(self, title, html):
-        if isinstance(title, unicode):
-            title = title.encode('utf-8')
-        self.html[title] = html
+    def add_db_storage(self, name):
+        '''storage can be access like a regular dict: self.name[key] '''
+        fn = os.path.join(self.path, name + '.shelve')
+        setattr(self, name, shelve.open(fn))
+        self.db_storage_list.append(name)
 
-    def add_author(self, title, authors):
-        if isinstance(title, unicode):
-            title = title.encode('utf-8')
-        self.authors[title]=json.dumps(authors)
-        self.authors.sync()
+    def set_db_key(self, name, key, value):
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        storage = getattr(self, name, None)
+        assert storage is not None, 'storage not existant %s' % name
+        storage[key] = value
+        storage.sync()
 
     def close(self):
         if self.nfo is not None:
@@ -179,7 +185,6 @@ class fsoutput(object):
                         
 def splitblocks(lst, limit):
     """Split list lst in blocks of max. limit entries. Return list of blocks."""
-
     res = []
     start = 0
     while start<len(lst):
@@ -204,7 +209,6 @@ class fetcher(object):
                  cover_image=None,
                  imagesize=800, fetch_images=True):
 
-        self.imageinfo = {}
         self.print_template_pattern = None
         self.template_exclusion_category = None
         self.template_blacklist = None
@@ -292,6 +296,9 @@ class fetcher(object):
         self.report()
         self.dispatch()
 
+        for storage in ['authors', 'html', 'imageinfo']:
+            self.fsout.add_db_storage(storage)
+        
     def extension_img_urls(self, data):
         html = data['text']['*']
         root = etree.HTML(html)
@@ -312,7 +319,7 @@ class fetcher(object):
     def fetch_html(self, name, lst):
         def got_html(res,value):
             res[name] = value
-            self.fsout.add_html(value, res)
+            self.fsout.set_db_key('html', value, res)
             img_urls = self.extension_img_urls(res)
             return img_urls
 
@@ -404,7 +411,7 @@ class fetcher(object):
         for e in edits:
             title = e['title'][:]
             authors = get_authors(e['revisions'])
-            self.fsout.add_author(title, authors)
+            self.fsout.set_db_key('authors', title, authors)
 
     def _add_catmember(self, title, entry):
         try:
@@ -571,7 +578,7 @@ class fetcher(object):
             if not ii:
                 continue
             ii = ii[0]
-            self.imageinfo[title] = ii
+            self.fsout.set_db_key('imageinfo', title, ii)
             thumburl = ii.get("thumburl", None)
 
             if thumburl is None: # fallback for old mediawikis
@@ -622,7 +629,7 @@ class fetcher(object):
             prefix, partial = e['title'].split(":", 1)
             title  = '%s:%s' % (local_nsname, partial)
             authors = get_authors(e['revisions'])
-            self.fsout.add_author(title, authors)
+            self.fsout.set_db_key('authors', title, authors)
 
     def _cb_image_contents(self, data):
         local_nsname = self.nshandler.get_nsname_by_number(6)
@@ -760,11 +767,9 @@ class fetcher(object):
     def finish(self):
         self._sanity_check()
         self._compute_excluded()
-        self.fsout.write_authors()
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
-        self.fsout.dump_json(imageinfo=self.imageinfo)
-        self.fsout.write_html()
+        self.fsout.close_db_storages()
         if self.fsout.nfo and self.print_template_pattern:
             self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()

@@ -54,7 +54,15 @@ class nuwiki(object):
             self.html = shelve.open(fn)
             self.convert_utf8 = True # shelf doesn't support unicode keys
 
-        self.imageinfo = self._loadjson("imageinfo.json", {})
+        fn = os.path.join(self.path, 'imageinfo.shelve')
+        if not os.path.exists(fn):
+            self.imageinfo = self._loadjson("imageinfo.json", {})
+            log.warn('loading imageinfo from pickle')
+            self.convert_utf8 = False
+        else:
+            self.imageinfo = shelve.open(fn)
+            self.convert_utf8 = True # shelf doesn't support unicode keys
+
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
         self.nshandler = nshandling.nshandler(self.siteinfo)        
@@ -314,7 +322,6 @@ class adapt(object):
 
         if self.nuwiki.authors is not None:
             authors = self.nuwiki.authors[fqname.encode('utf-8')]
-            authors = json.loads(authors)
             return authors
         else:
             from mwlib.authors import get_authors
