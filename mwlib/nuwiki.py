@@ -7,7 +7,7 @@ import zipfile
 import shutil
 import tempfile
 import urllib
-import shelve
+import anydbm
 from mwlib import myjson as json
 
 from mwlib import nshandling, utils
@@ -21,6 +21,24 @@ class page(object):
         self.__dict__.update(meta)
         self.rawtext = rawtext
 
+class DumbJsonDB(object):
+
+    def __init__(self, fn):
+        self.db = anydbm.open(fn)
+
+    def __getitem__(self, key):
+        v = self.db.get(key, '')
+        if v:
+            return json.loads(v)
+        else:
+            return None
+
+    def get(self, key, default=None):
+        res = self[key]
+        if res == None:
+            return default
+        else:
+            return res
 
 class nuwiki(object):
     def __init__(self, path):
@@ -38,29 +56,29 @@ class nuwiki(object):
         self.revisions = {}
         self._read_revisions()
 
-        fn = os.path.join(self.path, 'authors.shelve')
+        fn = os.path.join(self.path, 'authors.db')
         if not os.path.exists(fn):
             self.authors = None
             log.warn('no authors present. parsing revision info instead')
         else:
-            self.authors = shelve.open(fn)
+            self.authors = DumbJsonDB(fn)
 
-        fn = os.path.join(self.path, 'html.shelve')
+        fn = os.path.join(self.path, 'html.db')
         if not os.path.exists(fn):
             self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
             log.warn('no html present. parsing revision info instead')
             self.convert_utf8 = False
         else:
-            self.html = shelve.open(fn)
+            self.html = DumbJsonDB(fn)
             self.convert_utf8 = True # shelf doesn't support unicode keys
 
-        fn = os.path.join(self.path, 'imageinfo.shelve')
+        fn = os.path.join(self.path, 'imageinfo.db')
         if not os.path.exists(fn):
             self.imageinfo = self._loadjson("imageinfo.json", {})
             log.warn('loading imageinfo from pickle')
             self.convert_utf8 = False
         else:
-            self.imageinfo = shelve.open(fn)
+            self.imageinfo = DumbJsonDB(fn)
             self.convert_utf8 = True # shelf doesn't support unicode keys
 
         self.redirects = self._loadjson("redirects.json", {})

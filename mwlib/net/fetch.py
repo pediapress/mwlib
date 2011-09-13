@@ -9,7 +9,7 @@ import os
 import sys
 import urlparse
 import time
-import shelve
+import anydbm
 from lxml import etree
 from collections import defaultdict
 
@@ -107,8 +107,8 @@ class fsoutput(object):
 
     def add_db_storage(self, name):
         '''storage can be access like a regular dict: self.name[key] '''
-        fn = os.path.join(self.path, name + '.shelve')
-        setattr(self, name, shelve.open(fn))
+        fn = os.path.join(self.path, name + '.db')
+        setattr(self, name, anydbm.open(fn, 'n'))
         self.db_storage_list.append(name)
 
     def set_db_key(self, name, key, value):
@@ -116,7 +116,7 @@ class fsoutput(object):
             key = key.encode('utf-8')
         storage = getattr(self, name, None)
         assert storage is not None, 'storage not existant %s' % name
-        storage[key] = value
+        storage[key] = json.dumps(value)
         storage.sync()
 
     def close(self):
