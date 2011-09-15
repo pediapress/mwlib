@@ -23,8 +23,13 @@ class page(object):
 
 class DumbJsonDB(object):
 
-    def __init__(self, fn):
-        self.db = sqlite3dbm.open(fn)
+    def __init__(self, fn, allow_pickle=False):
+        self.fn = fn
+        self.allow_pickle = allow_pickle
+        self.read_db()
+
+    def read_db(self):
+        self.db = sqlite3dbm.open(self.fn)
 
     def __getitem__(self, key):
         v = self.db.get(key, '')
@@ -40,8 +45,22 @@ class DumbJsonDB(object):
         else:
             return res
 
+    def __getstate__(self):
+        # FIXME: pickling zip based containers not supported and currently not needed.
+        # if desired the content of the db file need to be persisted...
+        assert self.allow_pickle, 'ERROR: pickling not allowed for zip files. Use unzipped zip file instead'
+        d = self.__dict__.copy()
+        del d['db']
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.read_db()
+
+
+
 class nuwiki(object):
-    def __init__(self, path):
+    def __init__(self, path, allow_pickle=False):
         self.path = os.path.abspath(path)
         d = os.path.join(self.path, "images", "safe")
         if not os.path.exists(d):
@@ -61,21 +80,21 @@ class nuwiki(object):
             self.authors = None
             log.warn('no authors present. parsing revision info instead')
         else:
-            self.authors = DumbJsonDB(fn)
+            self.authors = DumbJsonDB(fn, allow_pickle=allow_pickle)
 
         fn = os.path.join(self.path, 'html.db')
         if not os.path.exists(fn):
             self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
             log.warn('no html present. parsing revision info instead')
         else:
-            self.html = DumbJsonDB(fn)
+            self.html = DumbJsonDB(fn, allow_pickle=allow_pickle)
 
         fn = os.path.join(self.path, 'imageinfo.db')
         if not os.path.exists(fn):
             self.imageinfo = self._loadjson("imageinfo.json", {})
             log.warn('loading imageinfo from pickle')
         else:
-            self.imageinfo = DumbJsonDB(fn)
+            self.imageinfo = DumbJsonDB(fn, allow_pickle=allow_pickle)
 
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
@@ -295,7 +314,7 @@ class adapt(object):
             self.was_tmpdir = True
             
         if isinstance(path_or_instance, basestring):
-            self.nuwiki = NuWiki(path_or_instance)
+            self.nuwiki = NuWiki(path_or_instance, allow_pickle=not self.was_tmpdir)
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
