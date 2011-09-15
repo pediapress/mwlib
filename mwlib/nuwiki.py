@@ -7,7 +7,7 @@ import zipfile
 import shutil
 import tempfile
 import urllib
-import anydbm
+import sqlite3dbm
 from mwlib import myjson as json
 
 from mwlib import nshandling, utils
@@ -24,7 +24,7 @@ class page(object):
 class DumbJsonDB(object):
 
     def __init__(self, fn):
-        self.db = anydbm.open(fn)
+        self.db = sqlite3dbm.open(fn)
 
     def __getitem__(self, key):
         v = self.db.get(key, '')
@@ -67,19 +67,15 @@ class nuwiki(object):
         if not os.path.exists(fn):
             self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
             log.warn('no html present. parsing revision info instead')
-            self.convert_utf8 = False
         else:
             self.html = DumbJsonDB(fn)
-            self.convert_utf8 = True # shelf doesn't support unicode keys
 
         fn = os.path.join(self.path, 'imageinfo.db')
         if not os.path.exists(fn):
             self.imageinfo = self._loadjson("imageinfo.json", {})
             log.warn('loading imageinfo from pickle')
-            self.convert_utf8 = False
         else:
             self.imageinfo = DumbJsonDB(fn)
-            self.convert_utf8 = True # shelf doesn't support unicode keys
 
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
@@ -339,7 +335,7 @@ class adapt(object):
         fqname = self.redirects.get(fqname, fqname)
 
         if self.nuwiki.authors is not None:
-            authors = self.nuwiki.authors[fqname.encode('utf-8')]
+            authors = self.nuwiki.authors[fqname]
             return authors
         else:
             from mwlib.authors import get_authors
@@ -369,8 +365,6 @@ class adapt(object):
         )
 
     def getHTML(self, title, revision=None):
-        if isinstance(title, unicode) and self.convert_utf8:
-            title = title.encode('utf-8')
         if revision:
             return self.nuwiki.html.get(revision, {})
         else:

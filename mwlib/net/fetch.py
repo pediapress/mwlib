@@ -9,7 +9,7 @@ import os
 import sys
 import urlparse
 import time
-import anydbm
+import sqlite3dbm
 from lxml import etree
 from collections import defaultdict
 
@@ -98,26 +98,16 @@ class fsoutput(object):
         self.seen = dict()
         self.imgcount = 0
         self.nfo = None
-        self.db_storage_list = []
 
-    def close_db_storages(self):
-        for name in self.db_storage_list:
-            storage = getattr(self, name)
-            storage.close()
+        for storage in ['authors', 'html', 'imageinfo']:
+            fn = os.path.join(self.path, storage + '.db')
+            setattr(self, storage, sqlite3dbm.open(fn, 'n'))
 
-    def add_db_storage(self, name):
-        '''storage can be access like a regular dict: self.name[key] '''
-        fn = os.path.join(self.path, name + '.db')
-        setattr(self, name, anydbm.open(fn, 'n'))
-        self.db_storage_list.append(name)
 
     def set_db_key(self, name, key, value):
-        if isinstance(key, unicode):
-            key = key.encode('utf-8')
         storage = getattr(self, name, None)
         assert storage is not None, 'storage not existant %s' % name
         storage[key] = json.dumps(value)
-        storage.sync()
 
     def close(self):
         if self.nfo is not None:
@@ -295,9 +285,6 @@ class fetcher(object):
 
         self.report()
         self.dispatch()
-
-        for storage in ['authors', 'html', 'imageinfo']:
-            self.fsout.add_db_storage(storage)
         
     def extension_img_urls(self, data):
         html = data['text']['*']
@@ -769,7 +756,6 @@ class fetcher(object):
         self._compute_excluded()
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
-        self.fsout.close_db_storages()
         if self.fsout.nfo and self.print_template_pattern:
             self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()
