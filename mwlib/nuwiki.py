@@ -45,6 +45,9 @@ class DumbJsonDB(object):
         else:
             return res
 
+    def items(self):
+        return self.db.items()
+
     def __getstate__(self):
         # FIXME: pickling zip based containers not supported and currently not needed.
         # if desired the content of the db file need to be persisted...
