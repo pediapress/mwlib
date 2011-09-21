@@ -356,7 +356,7 @@ class adapt(object):
         fqname = self.nshandler.get_fqname(title)
         fqname = self.redirects.get(fqname, fqname)
 
-        if self.nuwiki.authors is not None:
+        if getattr(self.nuwiki, 'authors', None) is not None:
             authors = self.nuwiki.authors[fqname]
             return authors
         else:
