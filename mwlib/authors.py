@@ -32,13 +32,13 @@ class inspect_authors(object):
         revs.sort(cmp=mycmp)
 
         ANON = "ANONIPEDITS"
-        authors = dict()  # author:bytes
+        authors = {ANON: 0}  # author:bytes
         for r in revs:
             if 'minor' in r:
                 pass  # include minor edits
             user = r.get('user', u'')
             if 'anon' in r and (not user or self.ip_rex.match(user)):  # anon
-                authors[ANON] = authors.get(ANON, 0) + 1
+                authors[ANON] += 1
             elif not user:
                 continue
             elif self.bot_rex.search(user) or self.bot_rex.search(r.get('comment', '')):
@@ -46,11 +46,8 @@ class inspect_authors(object):
             else:
                 authors[user] = authors.get(user, 0) + 1
 
-        num_anon = authors.get(ANON, 0)
-        try:
-            del authors[ANON]
-        except KeyError:
-            pass
+        num_anon = authors[ANON]
+        del authors[ANON]
 
         authors = authors.items()
         authors.sort()
