@@ -8,7 +8,7 @@ import urllib
 from twisted.internet import reactor, defer
 from twisted.web import client 
 from twisted.python import failure
-from mwlib import conf
+from mwlib import conf, authors
 
 try:
     import json
@@ -271,7 +271,7 @@ class mwapi(object):
         reactor.callLater(0.0, self._maybe_fetch)
         return d
 
-    def do_request(self, query_continue=True, **kwargs):
+    def do_request(self, query_continue=True, merge_data=merge_data, **kwargs):
         result = defer.Deferred()
 
         retval = {}
@@ -431,10 +431,21 @@ class mwapi(object):
             kwargs["rvlimit"] = 50
 
             return self.do_request(action="query", **kwargs).addCallback(setrvlimit)
-                
-            
-        return self.do_request(action="query", **kwargs).addErrback(retry)
-        
+
+        get_authors = authors.inspect_authors()
+
+
+        def merge_data(retval, newdata):
+            edits = newdata["pages"].values()
+            for e in edits:
+                revs = e["revisions"]
+                get_authors.scan_edits(revs)
+
+
+        return (self.do_request(action="query", merge_data=merge_data, **kwargs)
+                .addErrback(retry)
+                .addCallback(lambda res: get_authors))
+
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
 

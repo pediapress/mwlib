@@ -363,7 +363,8 @@ class fetcher(object):
             return
         
         for title, rev in self.title2latest.items():
-             self._refcall(lambda: self.api.get_edits(title, rev).addCallback(self._got_edits))
+             self._refcall(lambda: self.api.get_edits(title, rev).addCallback(self._got_edits, title))
+
         self.title2latest = {}
         
     def _cb_siteinfo(self, siteinfo):
@@ -393,12 +394,10 @@ class fetcher(object):
 
         self.progress.set_count(self, self.count_done+qc,  jt+qc)
 
-    def _got_edits(self, data):
-        edits = data.get("pages").values()
-        for e in edits:
-            title = e['title'][:]
-            authors = get_authors(e['revisions'])
-            self.fsout.set_db_key('authors', title, authors)
+    def _got_edits(self, inspect_authors, title):
+        authors = inspect_authors.get_authors()
+        # print "GOT_EDITS:", title, authors
+        self.fsout.set_db_key('authors', title, authors)
 
     def _add_catmember(self, title, entry):
         try:
@@ -606,17 +605,15 @@ class fetcher(object):
 
     nshandler = property(_get_nshandler, _set_nshandler)
 
-    def _cb_image_edits(self, data):
-        edits = data.get("pages").values()
-
+    def _cb_image_edits(self, get_authors, title):
         local_nsname = self.nshandler.get_nsname_by_number(6)
-        
+
         # change title prefix to make them look like local pages
-        for e in edits:
-            prefix, partial = e['title'].split(":", 1)
-            title  = '%s:%s' % (local_nsname, partial)
-            authors = get_authors(e['revisions'])
-            self.fsout.set_db_key('authors', title, authors)
+        prefix, partial = title.split(":", 1)
+        title  = '%s:%s' % (local_nsname, partial)
+
+        authors = get_authors.get_authors()
+        self.fsout.set_db_key('authors', title, authors)
 
     def _cb_image_contents(self, data):
         local_nsname = self.nshandler.get_nsname_by_number(6)
@@ -666,7 +663,7 @@ class fetcher(object):
                 self.lambda_todo.append(lambda bl=bl: api.fetch_pages(titles=bl).addCallback(self._cb_image_contents))
 
             for k in local_names:
-                self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits))
+                self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits, k))
         
         return self.get_siteinfo_for(api).addCallback(got_siteinfo)
         
