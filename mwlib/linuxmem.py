@@ -1,11 +1,11 @@
 _scale = dict(kB=1024.0,  KB=1024.0,
-              mB=1024.0*1024.0, MB=1024.0*1024.0)
+              mB=1024.0 * 1024.0, MB=1024.0 * 1024.0)
 
 # convert byte o MB
 for k, v in _scale.items():
-    _scale[k] = v / (1024.0*1024.0)
-    
-              
+    _scale[k] = v / (1024.0 * 1024.0)
+
+
 def _readproc(key):
     '''Private.
     '''
@@ -17,10 +17,9 @@ def _readproc(key):
         if len(v) < 3:
             return 0.0  # invalid format?
          # convert Vm value to bytes
-        return float(v[1]) * _scale[v[2]] 
+        return float(v[1]) * _scale[v[2]]
     except:
         return 0.0  # non-Linux?
-    
 
 
 def memory():
@@ -40,9 +39,10 @@ def stacksize():
     '''
     return _readproc('VmStk:')
 
+
 def report():
     print "memory used: res=%.1f virt=%.1f" % (resident(), memory())
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     report()
-    
