@@ -1,0 +1,88 @@
+#! /usr/bin/env py.test
+
+from mwlib import authors
+
+example_1 = [
+    {u'comment': u'Dated {{Dead link}}. (Build p607)',
+     u'minor': u'',
+     u'parentid': 417308957,
+     u'revid': 417310285,
+     u'size': 925,
+     u'user': u'SmackBot'},
+    {u'comment': u'{{dead link}}',
+     u'parentid': 397347170,
+     u'revid': 417308957,
+     u'size': 909,
+     u'user': u'Denelson83'},
+    {u'comment': u'',
+     u'parentid': 304555476,
+     u'revid': 397347170,
+     u'size': 896,
+     u'user': u'Palaeozoic99'},
+    {u'comment': u'narrower cat',
+     u'parentid': 228403955,
+     u'revid': 304555476,
+     u'size': 880,
+     u'user': u'The Tom'},
+    {u'comment': u'remove line',
+     u'minor': u'',
+     u'parentid': 222909353,
+     u'revid': 228403955,
+     u'size': 878,
+     u'user': u'Kwanesum'},
+    {u'comment': u'',
+     u'parentid': 222907785,
+     u'revid': 222909353,
+     u'size': 884,
+     u'user': u'Skookum1'},
+    {u'comment': u'stub sort',
+     u'parentid': 192472026,
+     u'revid': 222907785,
+     u'size': 884,
+     u'user': u'Skookum1'},
+    {u'comment': u'add category',
+     u'revid': 192472026,
+     u'size': 850,
+     u'user': u'CosmicPenguin'},
+    {u'comment': u'migrate coor to {{[[Template:Coord|coord]]}}, add name parameter  using [[Project:AutoWikiBrowser|AWB]]',
+     u'minor': u'',
+     u'revid': 189340607,
+     u'size': 807,
+     u'user': u'Qyd'},
+    {u'comment': u'removing extra ]',
+     u'minor': u'',
+     u'parentid': 100254749,
+     u'revid': 100254810,
+     u'size': 783,
+     u'user': u'Nationalparks'},
+    {u'comment': u'expanded with link',
+     u'parentid': 75720259,
+     u'revid': 100254749,
+     u'size': 784,
+     u'user': u'Nationalparks'},
+    {u'comment': u'coor, links',
+     u'parentid': 47218945,
+     u'revid': 75720259,
+     u'size': 583,
+     u'user': u'Qyd'},
+    {u'comment': u'info, cat',
+     u'minor': u'',
+     u'parentid': 47218755,
+     u'revid': 47218945,
+     u'size': 457,
+     u'user': u'Nationalparks'},
+    {u'comment': u'new stub',
+     u'parentid': 0,
+     u'revid': 47218755,
+     u'size': 362,
+     u'user': u'Nationalparks'}]
+
+
+def test_empty():
+    assert authors.get_authors([]) == []
+
+
+def test_example_1():
+    a = authors.get_authors(example_1)
+    print a
+    assert a == [u'CosmicPenguin', u'Denelson83', u'Kwanesum', u'Nationalparks', u'Palaeozoic99', u'Qyd', u'Skookum1', u'The Tom', 'ANONIPEDITS:0']

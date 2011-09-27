@@ -154,6 +154,7 @@ include tests/memeater.py
 include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
 include tests/test_advtree.py
+include tests/test_authors.py
 include tests/test_convert_templates.py
 include tests/test_ebad.py
 include tests/test_expander.py
