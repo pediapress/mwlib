@@ -44,7 +44,7 @@ class inspect_authors(object):
 
         authors = list(self.authors)
         authors.sort()
-        if self.num_anon:
+        if authors or self.num_anon:
             authors.append("%s:%d" % (self.ANON, self.num_anon))  # append anon
         return authors
 
