@@ -4,10 +4,8 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
-import os
-import tempfile
-import shutil
-import zipfile
+import os, sys, tempfile, shutil, zipfile
+
 
 def _walk(root):
     retval = []
@@ -74,10 +72,11 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
         else:
             print 'keeping tmpdir %r' % tmpdir
 
-        from mwlib import linuxmem
-        print 'MEMORY USED:', linuxmem.memory()
+        if sys.platform in ("linux2", "linux3"):
+            from mwlib import linuxmem
+            linuxmem.report()
 
-        
+
 def main():    
     from mwlib.options import OptionParser
     from mwlib import conf
