@@ -41,11 +41,7 @@ def stacksize():
     return _readproc('VmStk:')
 
 def report():
-    print "-"*40
-    print "MEM:", memory()
-    print "RES:", resident()
-    print "STACK:", stacksize()
-    print "-"*40
+    print "memory used: res=%.1f virt=%.1f" % (resident(), memory())
 
 if __name__=="__main__":
     report()
