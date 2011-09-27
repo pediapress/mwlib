@@ -9,7 +9,6 @@ import re
 class inspect_authors(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'bot', re.IGNORECASE)
-    redirect_rex = re.compile(r'^#redirect:?\s*?\[\[.*?\]\]', re.IGNORECASE)
 
     def get_authors(self, revs):
         """Return names of non-bot, non-anon users for non-minor
