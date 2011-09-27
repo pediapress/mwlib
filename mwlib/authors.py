@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2007-2009 PediaPress GmbH
+# Copyright (c) 2007-2011 PediaPress GmbH
 # See README.txt for additional licensing information.
 
 import re
@@ -9,8 +9,27 @@ import re
 class inspect_authors(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
     bot_rex = re.compile(r'bot', re.IGNORECASE)
+    ANON = "ANONIPEDITS"
 
-    def get_authors(self, revs):
+    def __init__(self):
+        self.num_anon = 0
+        self.authors = set()
+
+    def scan_edits(self, revs):
+        authors = self.authors
+
+        for r in revs:
+            user = r.get('user', u'')
+            if 'anon' in r and (not user or self.ip_rex.match(user)):  # anon
+                self.num_anon += 1
+            elif not user:
+                continue
+            elif self.bot_rex.search(user) or self.bot_rex.search(r.get('comment', '')):
+                continue  # filter bots
+            else:
+                authors.add(user)
+
+    def get_authors(self):
         """Return names of non-bot, non-anon users for changes of
         given article (before given revision).
 
@@ -23,38 +42,14 @@ class inspect_authors(object):
         @rtype: list([unicode])
         """
 
-        if not revs:
-            return []
-
-        def mycmp(r1, r2):
-            return cmp(r1.get("revid"), r2.get("revid"))
-
-        revs.sort(cmp=mycmp)
-
-        ANON = "ANONIPEDITS"
-        authors = {ANON: 0}  # author:bytes
-        for r in revs:
-            if 'minor' in r:
-                pass  # include minor edits
-            user = r.get('user', u'')
-            if 'anon' in r and (not user or self.ip_rex.match(user)):  # anon
-                authors[ANON] += 1
-            elif not user:
-                continue
-            elif self.bot_rex.search(user) or self.bot_rex.search(r.get('comment', '')):
-                continue  # filter bots
-            else:
-                authors[user] = authors.get(user, 0) + 1
-
-        num_anon = authors[ANON]
-        del authors[ANON]
-
-        authors = authors.items()
+        authors = list(self.authors)
         authors.sort()
+        if self.num_anon:
+            authors.append("%s:%d" % (self.ANON, self.num_anon))  # append anon
+        return authors
 
-        # append anon
-        authors.append((("%s:%d" % (ANON, num_anon), num_anon)))  # append at the end
-    #        print authors
-        return [a for a, c in authors]
 
-get_authors = inspect_authors().get_authors
+def get_authors(revs):
+    i = inspect_authors()
+    i.scan_edits(revs)
+    return i.get_authors()
