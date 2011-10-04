@@ -240,6 +240,7 @@ class fetcher(object):
         self.img_fetch_count = defaultdict(int)
         self.img_max_retries = 2
         self.sem = defer.DeferredSemaphore(15)
+        self.fetch_pages_semaphore = defer.DeferredSemaphore(10)
 
         self.title2latest = {}
 
@@ -663,7 +664,7 @@ class fetcher(object):
 
 
             for bl in splitblocks(local_names, api.api_request_limit):
-                self.lambda_todo.append(lambda bl=bl: api.fetch_pages(titles=bl).addCallback(self._cb_image_contents))
+                self.lambda_todo.append(lambda bl=bl: self.fetch_pages_semaphore.run(api.fetch_pages, titles=bl).addCallback(self._cb_image_contents))
 
             for k in local_names:
                 self.lambda_todo.append(lambda title=k: api.get_edits(title, None).addCallback(self._cb_image_edits, k))
@@ -688,7 +689,7 @@ class fetcher(object):
                 bl = getblock(lst, limit)
                 self.scheduled.update(bl)
                 kw = {name:bl}
-                self._refcall(lambda: self.api.fetch_pages(**kw).addCallback(self._got_pages))
+                self._refcall(lambda: self.fetch_pages_semaphore.run(self.api.fetch_pages, **kw).addCallback(self._got_pages))
 
         while self.imageinfo_todo and self.api.idle():
             bl = getblock(self.imageinfo_todo, limit)
