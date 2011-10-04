@@ -64,6 +64,9 @@ class shared_progress(object):
             
         if isatty and isatty():
             msg = "%s/%s %.2f %.2fs" % (done, total, percent, needed)
+            if sys.platform in ("linux2", "linux3"):
+                from mwlib import linuxmem
+                msg += " %.1fMB" % linuxmem.resident()
             sys.stdout.write("\x1b[K"+msg+"\r")
             sys.stdout.flush()
 
