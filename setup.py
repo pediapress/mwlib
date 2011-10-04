@@ -79,7 +79,7 @@ def main():
         build_deps()   # this is a git clone
 
     install_requires = ["pyparsing>=1.4.11", "odfpy>=0.9, <0.10",
-                        "flup>=1.0", "twisted>=8.2", "lockfile==0.8",
+                        "flup>=1.0", "gevent", "lockfile==0.8",
                         "timelib>=0.2", "WebOb>=0.9", "pyPdf>=1.12",
                         "apipkg", "qserve", "roman", "lxml", "py>=1.4",
                         "sqlite3dbm"]

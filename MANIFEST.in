@@ -57,8 +57,6 @@ include mwlib/metabook.py
 include mwlib/myjson.py
 include mwlib/net/__init__.py
 include mwlib/net/fetch.py
-include mwlib/net/mwapi.py
-include mwlib/net/pod.py
 include mwlib/net/sapi.py
 include mwlib/nshandling.py
 include mwlib/nuwiki.py

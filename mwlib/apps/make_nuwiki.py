@@ -3,12 +3,14 @@
 # See README.txt for additional licensing information.
 
 import os
-from mwlib.net import fetch, mwapi
+from mwlib.net import fetch, sapi as mwapi
+
 from mwlib.parse_collection_page import extract_metadata
 from mwlib.metabook import get_licenses, parse_collection_page, collection
 from mwlib import myjson
-from twisted.internet import reactor,  defer
 import urllib
+import gevent
+import gevent.pool
 
 class start_fetcher(object):
     progress = None
@@ -20,9 +22,11 @@ class start_fetcher(object):
 
     def get_api(self):
         api = mwapi.mwapi(self.api_url)
+        api.set_limit()
+
         if self.username:
-            return api.login(self.username, self.password, self.domain)
-        return defer.succeed(api)
+            api.login(self.username, self.password, self.domain)
+        return api
 
     def fetch_pages_from_metabook(self,  api):
         fsout = self.fsout
@@ -54,8 +58,7 @@ class start_fetcher(object):
                                      imagesize=self.options.imagesize,
                                      cover_image=metabook.cover_image,
                                      fetch_images=not self.options.noimages)
-        return self.fetcher.result
-    
+
     def init_variables(self):
         base_url = self.base_url
         options = self.options
@@ -80,58 +83,41 @@ class start_fetcher(object):
 
         try:
             cp = unicode(urllib.unquote(str(cp)), "utf-8")
-        except Exception, err:
+        except Exception:
             pass
-            # print "ERR:", err
 
         self.nfo["collectionpage"] = cp
 
+        val = api.fetch_pages([cp])
+        rawtext = val["pages"].values()[0]["revisions"][0]["*"]
+        mb = self.metabook = parse_collection_page(rawtext)
+        wikitrust(api.baseurl, mb)
 
-        def got_pages(val):
-            rawtext = val["pages"].values()[0]["revisions"][0]["*"]
-            mb = self.metabook = parse_collection_page(rawtext)
-            wikitrust(api.baseurl, mb) # XXX blocking twisted reactor. we really should use gevent
+        # XXX: localised template parameter names???
+        meta = extract_metadata(rawtext, ("cover-image", "cover-color", "text-color", "editor", "description", "sort_as"))
+        mb.editor = meta["editor"]
+        mb.cover_image = meta["cover-image"]
+        mb.cover_color = meta["cover-color"]
+        mb.text_color = meta["text-color"]
+        mb.description = meta["description"]
+        mb.sort_as = meta["sort_as"]
 
-            # XXX: localised template parameter names???
-            meta = extract_metadata(rawtext, ("cover-image", "cover-color", "text-color", "editor", "description", "sort_as"))
-            mb.editor = meta["editor"]
-            mb.cover_image = meta["cover-image"]
-            mb.cover_color = meta["cover-color"]
-            mb.text_color = meta["text-color"]
-            mb.description = meta["description"]
-            mb.sort_as = meta["sort_as"]
+        p = os.path.join(self.fsout.path, "collectionpage.txt")
+        if isinstance(rawtext, unicode):
+            rawtext=rawtext.encode("utf-8")
+        open(p,"wb").write(rawtext)
+        return api
 
-            p = os.path.join(self.fsout.path, "collectionpage.txt")
-            if isinstance(rawtext, unicode):
-                rawtext=rawtext.encode("utf-8")
-            open(p,"wb").write(rawtext)
-            return api
-        
-        return api.fetch_pages([cp]).addBoth(got_pages)
-        
+
     def run(self):
         self.init_variables()
         
         self.licenses = get_licenses(self.metabook)
-        podclient = self.podclient
-        if podclient is not None:
-            old_class = podclient.__class__
-            podclient.__class__ = fetch.PODClient
 
-        def login_failed(res):
-            print "Fatal error: login failed:", res.getErrorMessage()
-            return res
+        api = self.get_api()
+        self.fetch_collectionpage(api)
+        self.fetch_pages_from_metabook(api)
 
-        def reset_podclient(val):
-            if podclient is not None:
-                podclient.__class__ = old_class
-            return val
-        
-        return (self.get_api()
-                .addErrback(login_failed)
-                .addCallback(self.fetch_collectionpage)
-                .addCallback(self.fetch_pages_from_metabook)
-                .addBoth(reset_podclient))
 
 def wikitrust(baseurl, metabook):
     if not os.environ.get("TRUSTEDREVS"):
@@ -199,25 +185,12 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
             os.makedirs(fsdir)
         open(os.path.join(fsdir, "metabook.json"),  "wb").write(metabook.dumps())
         myjson.dump(dict(format="multi-nuwiki"), open(os.path.join(fsdir, "nfo.json"), "wb"))
-        
-        
-    retval = []
-    def done(listres):
-        retval.extend(listres)
-        reactor.stop()
 
-    def run():
-        return defer.DeferredList([x.run() for x in fetchers])
-            
-    reactor.callLater(0.0, lambda: run().addBoth(done))
-    reactor.run()
+    pool = gevent.pool.Pool()
+    for x in fetchers:
+        pool.spawn(x.run)
+    pool.join(raise_error=True)
+
     import signal
     signal.signal(signal.SIGINT,  signal.SIG_DFL)
     signal.signal(signal.SIGTERM,  signal.SIG_DFL)
-    
-    if not retval:
-        raise KeyboardInterrupt("interrupted")
-
-    for success, val in retval:
-        if not success:
-            raise RuntimeError(str(val))

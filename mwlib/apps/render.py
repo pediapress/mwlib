@@ -3,6 +3,9 @@
 
 """mw-render -- installed via setuptools' entry_points"""
 
+from gevent import monkey
+monkey.patch_all(thread=False)
+
 import os
 import sys
 import errno
