@@ -285,10 +285,9 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
 
     if not post_data and url in fetch_cache:
         return fetch_cache[url]
-    
     log.info("fetching %r" % (url,))
-    start_time = time.time()
-    socket.setdefaulttimeout(timeout)
+    if not hasattr(socket, "_delegate_methods"):  # not using gevent?
+        socket.setdefaulttimeout(timeout)
     if opener is None:
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'mwlib')]
