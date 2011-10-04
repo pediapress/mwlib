@@ -5,25 +5,18 @@
 
 """client for mediawiki's api.php using twisted"""
 
-import os
-import sys
-import urlparse
-import time
+import os, sys, urlparse, time, collections
+
 import sqlite3dbm
 from lxml import etree
-from collections import defaultdict
 
-from mwlib import metabook, utils, nshandling, conf
-
+from mwlib import utils, nshandling, conf, myjson as json
 from mwlib.net import mwapi
-from mwlib.net.pod import PODClient
-
-from mwlib import myjson as json
-from mwlib.authors import get_authors
 
 from twisted.python import failure, log
 from twisted.web import client 
 from twisted.internet import reactor, defer
+
 
 class shared_progress(object):
     status=None
@@ -237,7 +230,7 @@ class fetcher(object):
         self.redirects = {}
         self.cat2members = {}
 
-        self.img_fetch_count = defaultdict(int)
+        self.img_fetch_count = collections.defaultdict(int)
         self.img_max_retries = 2
         self.sem = defer.DeferredSemaphore(15)
         self.fetch_pages_semaphore = defer.DeferredSemaphore(10)
