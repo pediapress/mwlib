@@ -4,7 +4,7 @@
 # See README.txt for additional licensing information.
 
 import os, sys, urlparse, urllib2, time
-import gevent, gevent.pool, gevent.coros
+import gevent, gevent.pool, gevent.coros, gevent.event
 
 import sqlite3dbm
 from lxml import etree
@@ -175,6 +175,16 @@ def getblock(lst, limit):
     return r
 
 
+def callwhen(event, fun):
+    while 1:
+        try:
+            event.wait()
+            event.clear()
+            fun()
+        except Exception:
+            pass
+
+
 class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
                  status=None,
@@ -184,6 +194,7 @@ class fetcher(object):
                  cover_image=None,
                  imagesize=800, fetch_images=True):
 
+        self.dispatch_event = gevent.event.Event()
         self.api_semaphore = gevent.coros.Semaphore(20)
 
         self.print_template_pattern = None
@@ -258,11 +269,15 @@ class fetcher(object):
         pool.spawn(self.fetch_used, "revids", revids)
 
         self.report()
-        while 1:
-            self.dispatch()
-            if not pool:
-                break
-            pool.join()
+        self.dispatch_gr = gevent.spawn(callwhen, self.dispatch_event, self.dispatch)
+        try:
+            while 1:
+                self.dispatch()
+                if not pool:
+                    break
+                pool.join()
+        finally:
+            self.dispatch_gr.kill()
 
         self.finish()
 
@@ -730,7 +745,7 @@ class fetcher(object):
 
     def _decref(self):
         self.count_done += 1
-        self.dispatch()
+        self.dispatch_event.set()
 
 
 def pages_from_metabook(mb):
