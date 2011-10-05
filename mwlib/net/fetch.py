@@ -321,13 +321,11 @@ class fetcher(object):
 
     def fetch_used(self, name, lst):
         limit = self.api.api_request_limit
-
         pool = gevent.pool.Pool()
         blocks = splitblocks(lst, limit)
         self.count_total += len(blocks)
         for bl in blocks:
-            kw = {name: bl, "fetch_images": self.fetch_images}
-            pool.add(self._refcall_noinc(lambda kw=kw: self._cb_used(self.api.fetch_used(**kw))))
+            pool.add(self._refcall_noinc(self.fetch_used_block, name, bl))
         pool.join()
 
         if conf.noedits:
@@ -339,7 +337,10 @@ class fetcher(object):
         for title, rev in items:
             self._refcall_noinc(self.get_edits, title, rev)
 
-    def _cb_used(self, used):
+    def fetch_used_block(self, name, lst):
+        kw = {name: lst, "fetch_images": self.fetch_images}
+        used = self.api.fetch_used(**kw)
+
         self._update_redirects(used.get("redirects", []))
 
         pages = used.get("pages", {}).values()
