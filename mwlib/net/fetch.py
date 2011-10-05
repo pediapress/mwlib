@@ -262,22 +262,19 @@ class fetcher(object):
         self.pool = pool = gevent.pool.Pool()
         self.refcall_pool = gevent.pool.Pool(1024)
 
-        pool.spawn(self.fetch_html, "page", titles)
-        pool.spawn(self.fetch_html, "oldid", revids)
+        self._refcall(self.fetch_html, "page", titles)
+        self._refcall(self.fetch_html, "oldid", revids)
 
-        pool.spawn(self.fetch_used, "titles", titles)
-        pool.spawn(self.fetch_used, "revids", revids)
+        self._refcall(self.fetch_used, "titles", titles)
+        self._refcall(self.fetch_used, "revids", revids)
 
+    def run(self):
         self.report()
-        self.dispatch_gr = gevent.spawn(callwhen, self.dispatch_event, self.dispatch)
+        dispatch_gr = gevent.spawn(callwhen, self.dispatch_event, self.dispatch)
         try:
-            while 1:
-                self.dispatch()
-                if not pool:
-                    break
-                pool.join()
+            self.pool.join()
         finally:
-            self.dispatch_gr.kill()
+            dispatch_gr.kill()
 
         self.finish()
 

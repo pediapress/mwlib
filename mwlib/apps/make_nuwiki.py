@@ -58,6 +58,7 @@ class start_fetcher(object):
                                      imagesize=self.options.imagesize,
                                      cover_image=metabook.cover_image,
                                      fetch_images=not self.options.noimages)
+        self.fetcher.run()
 
     def init_variables(self):
         base_url = self.base_url
