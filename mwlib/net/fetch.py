@@ -315,16 +315,19 @@ class fetcher(object):
                 title = self.nshandler.splitname(fn, defaultns=6)[2]
                 self._refcall(self._download_image, str(url), title)
 
+        self.count_total += len(lst)
         for c in lst:
-            self._refcall(fetch, c)
+            self._refcall_noinc(fetch, c)
 
     def fetch_used(self, name, lst):
         limit = self.api.api_request_limit
 
         pool = gevent.pool.Pool()
-        for bl in splitblocks(lst, limit):
+        blocks = splitblocks(lst, limit)
+        self.count_total += len(blocks)
+        for bl in blocks:
             kw = {name: bl, "fetch_images": self.fetch_images}
-            pool.add(self._refcall(lambda kw=kw: self._cb_used(self.api.fetch_used(**kw))))
+            pool.add(self._refcall_noinc(lambda kw=kw: self._cb_used(self.api.fetch_used(**kw))))
         pool.join()
 
         if conf.noedits:
@@ -332,9 +335,9 @@ class fetcher(object):
 
         items = self.title2latest.items()
         self.title2latest = {}
-
+        self.count_total += len(items)
         for title, rev in items:
-            self._refcall(self.get_edits, title, rev)
+            self._refcall_noinc(self.get_edits, title, rev)
 
     def _cb_used(self, used):
         self._update_redirects(used.get("redirects", []))
@@ -727,25 +730,21 @@ class fetcher(object):
         """Increment refcount, schedule call of fun
         decrement refcount after fun has finished.
         """
-        self._incref()
+        self.count_total += 1
+        self.report()
+        return self._refcall_noinc(fun, *args, **kw)
 
+    def _refcall_noinc(self, fun, *args, **kw):
         def refcall_fun():
             try:
                 fun(*args, **kw)
             finally:
-                self._decref()
+                self.count_done += 1
+                self.dispatch_event.set()
 
         gr = self.refcall_pool.spawn(refcall_fun)
         self.pool.add(gr)
         return gr
-
-    def _incref(self):
-        self.count_total += 1
-        self.report()
-
-    def _decref(self):
-        self.count_done += 1
-        self.dispatch_event.set()
 
 
 def pages_from_metabook(mb):
