@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import os, sys, urlparse, urllib2, time
+import os, sys, urlparse, urllib2, time, traceback
 import gevent, gevent.pool, gevent.coros, gevent.event
 
 import sqlite3dbm
@@ -181,7 +181,10 @@ def callwhen(event, fun):
             event.wait()
             event.clear()
             fun()
+        except gevent.GreenletExit:
+            raise
         except Exception:
+            traceback.print_exc()
             pass
 
 
