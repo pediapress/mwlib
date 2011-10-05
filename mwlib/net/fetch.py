@@ -528,7 +528,8 @@ class fetcher(object):
         gr = self.image_download_pool.spawn(download)
         self.pool.add(gr)
 
-    def _cb_imageinfo(self, data):
+    def fetch_imageinfo(self, titles):
+        data = self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize)
         infos = data.get("pages", {}).values()
         # print infos[0]
         new_basepaths = set()
@@ -681,13 +682,10 @@ class fetcher(object):
                 kw = {name: bl}
                 self._refcall(fetch_pages, **kw)
 
-        def fetch_imageinfo(titles):
-            self._cb_imageinfo(self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize))
-
         while self.imageinfo_todo and self.api.idle():
             bl = getblock(self.imageinfo_todo, limit)
             self.scheduled.update(bl)
-            self._refcall(fetch_imageinfo, bl)
+            self._refcall(self.fetch_imageinfo, bl)
 
         doit("revids", self.revids_todo)
         doit("titles", self.pages_todo)
