@@ -340,7 +340,7 @@ class fetcher(object):
             for url in img_urls:
                 fn = url.rsplit('/', 1)[1]
                 title = self.nshandler.splitname(fn, defaultns=6)[2]
-                self._refcall(self._download_image, str(url), title)
+                self.schedule_download_image(str(url), title)
 
         self.count_total += len(lst)
         for c in lst:
@@ -516,12 +516,14 @@ class fetcher(object):
             if t and f:
                 self.redirects[f] = t
 
-    def _download_image(self, url, title):
+    def schedule_download_image(self, url, title):
         key = (url, title)
         if key in self.scheduled:
             return
         self.scheduled.add(key)
+        self._refcall(self._download_image, url, title)
 
+    def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
         temp_path = (path + u'\xb7').encode("utf-8")
         gr = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
@@ -551,7 +553,7 @@ class fetcher(object):
                 # FIXME: add Callback that checks correct file size
                 if thumburl.startswith('/'):
                     thumburl = urlparse.urljoin(self.api.baseurl, thumburl)
-                self._refcall(self._download_image, thumburl, title)
+                self.schedule_download_image(thumburl, title)
 
                 descriptionurl = ii.get("descriptionurl", "")
                 if not descriptionurl:
