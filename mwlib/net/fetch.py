@@ -188,6 +188,33 @@ def callwhen(event, fun):
             pass
 
 
+def download_to_file(url, path, temp_path):
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', 'mwlib')]
+
+    try:
+        out = None
+        size_read = 0
+        f = opener.open(url)
+        while 1:
+            data = f.read(16384)
+            if not data:
+                break
+            size_read += len(data)
+            if out is None:
+                out = open(temp_path, "wb")
+            out.write(data)
+
+        if out is not None:
+            out.close()
+            os.rename(temp_path, path)
+        # print "GOT", url, size_read
+
+    except Exception, err:
+        print "ERROR DOWNLOADING", url, err
+        raise
+
+
 class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
                  status=None,
@@ -490,40 +517,14 @@ class fetcher(object):
                 self.redirects[f] = t
 
     def _download_image(self, url, title):
-        if (title, url) in self.scheduled:
+        key = (url, title)
+        if key in self.scheduled:
             return
+        self.scheduled.add(key)
 
-        self.scheduled.add((title, url))
         path = self.fsout.get_imagepath(title)
-        tmp = (path + u'\xb7').encode("utf-8")
-
-        def download():
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'mwlib')]
-
-            try:
-                out = None
-                size_read = 0
-                f = opener.open(url)
-                while 1:
-                    data = f.read(16384)
-                    if not data:
-                        break
-                    size_read += len(data)
-                    if out is None:
-                        out = open(tmp, "wb")
-                    out.write(data)
-
-                if out is not None:
-                    out.close()
-                    os.rename(tmp, path)
-                # print "GOT", url, size_read
-
-            except Exception, err:
-                print "ERROR DOWNLOADING", url, err
-                raise
-
-        gr = self.image_download_pool.spawn(download)
+        temp_path = (path + u'\xb7').encode("utf-8")
+        gr = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
         self.pool.add(gr)
 
     def fetch_imageinfo(self, titles):
