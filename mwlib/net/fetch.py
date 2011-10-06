@@ -40,10 +40,7 @@ class shared_progress(object):
             percent *= needed / 60.0
 
         if percent <= self.last_percent:
-            if percent > 50.0:
-                percent = min(self.last_percent + 0.01, 100.0)
-            else:
-                percent = self.last_percent
+            percent = self.last_percent
 
         self.last_percent = percent
 
