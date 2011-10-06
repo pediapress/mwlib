@@ -97,7 +97,9 @@ class fsoutput(object):
 
         for storage in ['authors', 'html', 'imageinfo']:
             fn = os.path.join(self.path, storage + '.db')
-            setattr(self, storage, sqlite3dbm.open(fn, 'n'))
+            db = sqlite3dbm.open(fn, 'n')
+            db.conn.execute("PRAGMA synchronous = 0")
+            setattr(self, storage, db)
 
 
     def set_db_key(self, name, key, value):
