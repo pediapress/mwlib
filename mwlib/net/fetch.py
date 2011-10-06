@@ -262,7 +262,7 @@ class fetcher(object):
 
         titles, revids = self._split_titles_revids(pages)
 
-        self.pool = pool = gevent.pool.Pool()
+        self.pool = gevent.pool.Pool()
         self.refcall_pool = gevent.pool.Pool(1024)
 
         self._refcall(self.fetch_html, "page", titles)
@@ -452,14 +452,12 @@ class fetcher(object):
         for p in pages:
 
             title = p.get("title")
-            ns = p.get("ns")
             revisions = p.get("revisions")
 
             if revisions is None:
                 continue
 
             for r in revisions:
-                revid = r.get("revid")
                 txt = r["*"]
                 if not txt:
                     continue
