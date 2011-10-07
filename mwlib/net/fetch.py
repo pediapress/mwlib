@@ -578,16 +578,6 @@ class fetcher(object):
 
     nshandler = property(_get_nshandler, _set_nshandler)
 
-    def _cb_image_edits(self, get_authors, title):
-        local_nsname = self.nshandler.get_nsname_by_number(6)
-
-        # change title prefix to make them look like local pages
-        prefix, partial = title.split(":", 1)
-        title = '%s:%s' % (local_nsname, partial)
-
-        authors = get_authors.get_authors()
-        self.fsout.set_db_key('authors', title, authors)
-
     def fetch_image_page(self, titles, api):
         data = api.fetch_pages(titles)
 
