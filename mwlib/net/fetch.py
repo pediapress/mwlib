@@ -437,10 +437,6 @@ class fetcher(object):
         # print "GOT_EDITS:", title, authors
         self.fsout.set_db_key('authors', title, authors)
 
-    def _cb_excluded_category(self, data):
-        members = data.get("categorymembers")
-        self.fsout.write_excluded(members)
-
     def report(self):
         qc = self.api.qccount
 
