@@ -14,7 +14,7 @@ class aliasmap(object):
         _map = {}
         _name2aliases = {}
 
-        for d in siteinfo["magicwords"]:
+        for d in siteinfo.get("magicwords", []):
             name = d["name"]
             aliases = d["aliases"]
             _name2aliases[name] = aliases
@@ -97,7 +97,7 @@ class Parser(object):
                         "switch": re.compile("^#switch:")}
 
 
-        magicwords = self.siteinfo["magicwords"]
+        magicwords = self.siteinfo.get("magicwords", [])
         for d in magicwords:
             name = d["name"]
             if name in ("if", "switch"):
