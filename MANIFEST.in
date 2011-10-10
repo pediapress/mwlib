@@ -178,6 +178,7 @@ include tests/test_styleanalyzer.py
 include tests/test_styleutils.py
 include tests/test_table.py
 include tests/test_tagext.py
+include tests/test_templ_parser.py
 include tests/test_templ_pp.py
 include tests/test_timeline.py
 include tests/test_treecleaner.py
