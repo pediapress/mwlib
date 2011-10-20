@@ -118,34 +118,39 @@ def wait_idle((host, port),  busy):
     ident = (host, port)
     busy[ident] = True
     numerrors = 0
+    prefix = "watch: %s:%s:" % (host, port)
+    
+    def log(msg):
+        print prefix, msg
 
     qserve = rpcclient.serverproxy(host=host, port=port)
     while 1:
         try:
-            stats = qserve.getstats()
+            try:
+                with gevent.Timeout(3.0):
+                    stats = qserve.getstats()
+            except gevent.Timeout:
+                raise RuntimeError("timeout calling getstats")
             numerrors = 0
 
             numrender = stats.get("busy",  {}).get("render", 0)
 
             if numrender > 10:
                 if not busy[ident]:
-                    print "SYSTEM OVERLOADED on %r" % (ident, )
+                    log("system overloaded")
                     busy[ident] = True
             else:
                 if busy[ident]:
-                    print "RESUMING OPERATION on %r" % (ident, )
+                    log("resuming operation")
                     busy[ident] = False
-
+        except gevent.GreenletExit:
+            raise
         except Exception, err:
             numerrors += 1
-
-            try:
-                if numerrors == 2:
-                    busy[ident] = True
-                    print "SYTEM DOWN: %r" % (ident, )
-                print "ERROR in wait_idle for %r:%s" % (ident, err)
-            except:
-                pass
+            if numerrors == 2:
+                busy[ident] = True
+                log("system down")
+            log("error in wait_idle: %s" % (err,))
         finally:
             gevent.sleep(2)
 
