@@ -4,9 +4,6 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
-from gevent import monkey
-monkey.patch_all(thread=False)
-
 import os, sys, tempfile, shutil, zipfile
 
 
@@ -80,7 +77,10 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
             linuxmem.report()
 
 
-def main():    
+def main():
+    from gevent import monkey
+    monkey.patch_all(thread=False)
+
     from mwlib.options import OptionParser
     from mwlib import conf
 
