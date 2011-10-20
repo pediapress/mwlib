@@ -5,9 +5,12 @@
 import gevent.monkey
 gevent.monkey.patch_socket()
 
+
 # import setproctitle
 # setproctitle.setproctitle("nserve")
-from geventutil import worker
+
+from qs.misc import call_in_loop
+from gevent import pool, pywsgi
 
 import sys,  os, re, StringIO, urllib2, urlparse, traceback
 
@@ -529,12 +532,7 @@ def _parse_qs(qs):
 
 
 def main():
-    from gevent import pywsgi as wsgi
-
-    WSGIServer = wsgi.WSGIServer
-    WSGIHandler = wsgi.WSGIHandler
-
-    WSGIHandler.log_request = lambda *args, **kwargs: None
+    pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     import argv
     opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
@@ -562,10 +560,11 @@ def main():
         return Application(cachedir)(*args, **kwargs)
 
     address = "0.0.0.0", port
-    server = WSGIServer(address, app)
+    server = pywsgi.WSGIServer(address, app)
 
+    watchers = pool.Pool()
     for x in qs:
-        worker.Worker.spawn(wait_idle, x, busy).set_max_rate((5, 0))
+        watchers.spawn(call_in_loop(5.0, wait_idle, x, busy))
 
     try:
         print "listening on %s:%d" % address
