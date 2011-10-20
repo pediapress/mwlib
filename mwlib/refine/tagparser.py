@@ -1,6 +1,6 @@
 
 # Copyright (c) 2009 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 """parse tags in parallel"""
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2007-2009 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB

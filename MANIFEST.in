@@ -1,6 +1,6 @@
 include MANIFEST.in
 include README.html
-include README.txt
+include README.rst
 include argv.py
 include cgi-bin/mwlib.cgi
 include conftest.py

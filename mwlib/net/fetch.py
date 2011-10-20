@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Copyright (c) 2007-2011 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 import os, sys, urlparse, urllib2, time, traceback
 import gevent, gevent.pool, gevent.coros, gevent.event

@@ -2,7 +2,7 @@
 # -*- compile-command: "../../tests/test_refine.py" -*-
 
 # Copyright (c) 2007-2009 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util

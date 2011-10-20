@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Copyright (c) 2007-2009 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 from optparse import OptionParser
 import os

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Copyright (c) PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 """api.php client"""
 

@@ -1,5 +1,5 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 RST2HTML ?= rst2html.py
 
@@ -21,8 +21,8 @@ documentation:: README.html
 MANIFEST.in::
 	./make_manifest.py
 
-README.html: README.txt
-	$(RST2HTML) README.txt >README.html
+README.html: README.rst
+	$(RST2HTML) README.rst >README.html
 
 develop:: all
 	python setup.py develop

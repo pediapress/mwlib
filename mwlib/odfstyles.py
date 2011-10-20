@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 #
 #  This file defines the styles for odfwriter.py
 #  This file mainly connects

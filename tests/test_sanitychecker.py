@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 # Copyright (c) 2007-2009 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 from mwlib.advtree import buildAdvancedTree, PreFormatted, Text, Section, ImageLink, Row, Cell, Table, Article, Strong
 from mwlib.sanitychecker import Forbid, Allow, Require, Equal, ChildrenOf, AllChildrenOf, SanityException
 from mwlib.sanitychecker import ParentOf, ParentsOf, SiblingsOf, SanityChecker, removecb, exceptioncb, RequireChild

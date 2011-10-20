@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Copyright (c) 2008-2009, PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 """
 TODO:
  * add license handling

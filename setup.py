@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Copyright (c) 2007-2011 PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 import sys, os, time, glob
 
@@ -71,7 +71,7 @@ def build_deps():
 
 
 def read_long_description():
-    return open("README.txt").read()
+    return open("README.rst").read()
 
 
 def main():

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 # Copyright (c) 2008, PediaPress GmbH
-# See README.txt for additional licensing information.
+# See README.rst for additional licensing information.
 
 class OdfConf(object):
         paper = {
