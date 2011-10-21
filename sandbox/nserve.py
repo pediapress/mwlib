@@ -106,45 +106,72 @@ busy = dict()
 collid2qserve = lrucache.lrucache(4000)
 
 
-def wait_idle((host, port),  busy):
-    ident = (host, port)
-    busy[ident] = True
-    numerrors = 0
-    prefix = "watch: %s:%s:" % (host, port)
+class watch_qserve(object):
+    getstats_timeout = 3.0
+    sleeptime = 2.0
 
-    def log(msg):
-        print prefix, msg
+    def __init__(self, (host, port), busy):
+        self.host = host
+        self.port = port
+        self.busy = busy
+        self.ident = (host, port)
+        self.prefix = "watch: %s:%s:" % (host, port)
+        self.qserve = None
 
-    qserve = rpcclient.serverproxy(host=host, port=port)
-    while 1:
+    def log(self, msg):
+        print self.prefix, msg
+
+    def _serverproxy(self):
+        return rpcclient.serverproxy(host=self.host, port=self.port)
+
+    def _mark_busy(self, is_busy):
+        if is_busy and busy[self.ident] != is_busy:
+            self.log(is_busy)
+
+        if not is_busy and busy[self.ident]:
+            self.log("resuming operation")
+
+        self.busy[self.ident] = is_busy
+
+    def _sleep(self):
+        gevent.sleep(self.sleeptime)
+
+    def _getstats(self):
+        if self.qserve is None:
+            self.qserve = self._serverproxy()
         try:
-            try:
-                with gevent.Timeout(3.0):
-                    stats = qserve.getstats()
-            except gevent.Timeout:
-                raise RuntimeError("timeout calling getstats")
-            numerrors = 0
+            with gevent.Timeout(self.getstats_timeout):
+                return self.qserve.getstats()
+        except gevent.Timeout:
+            self.qserve = None
+            raise RuntimeError("timeout calling getstats")
+        except BaseException:
+            self.qserve = None
+            raise
 
+    def _iterate(self):
+        try:
+            stats = self._getstats()
             numrender = stats.get("busy",  {}).get("render", 0)
-
             if numrender > 10:
-                if not busy[ident]:
-                    log("system overloaded")
-                    busy[ident] = True
+                self._mark_busy("system overloaded")
             else:
-                if busy[ident]:
-                    log("resuming operation")
-                    busy[ident] = False
+                self._mark_busy(False)
         except gevent.GreenletExit:
             raise
         except Exception, err:
-            numerrors += 1
-            if numerrors == 2:
-                busy[ident] = True
-                log("system down")
-            log("error in wait_idle: %s" % (err,))
-        finally:
-            gevent.sleep(2)
+            self._mark_busy("system down")
+            self.log("error in watch_qserve: %s" % (err,))
+
+    def __call__(self):
+        self.busy[self.ident] = True
+        while 1:
+            try:
+                self._iterate()
+            except gevent.GreenletExit:
+                raise
+            finally:
+                self._sleep()
 
 
 def choose_idle_qserve():
@@ -561,7 +588,7 @@ def main():
 
     watchers = pool.Pool()
     for x in qs:
-        watchers.spawn(call_in_loop(5.0, wait_idle, x, busy))
+        watchers.spawn(call_in_loop(5.0, watch_qserve(x, busy)))
 
     try:
         print "listening on %s:%d" % address
