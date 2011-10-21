@@ -63,14 +63,6 @@ def get_writers(name2writer):
 
 get_writers(name2writer)
 
-
-class colldir(object):
-    def __init__(self, path):
-        self.dir = os.path.abspath(path)
-
-    def getpath(self, p):
-        return os.path.join(self.dir, p)
-
 collection_id_rex = re.compile(r'^[a-f0-9]{16}$')
 
 
