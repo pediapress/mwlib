@@ -1,6 +1,22 @@
 #! /usr/bin/env py.test
 
-import pytest, gevent, nserve
+import pytest, gevent, nserve, urllib, urllib2
+import wsgi_intercept.urllib2_intercept
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
+
+def post(**kw):
+    try:
+        r = urllib2.urlopen('http://app.de/', urllib.urlencode(kw))
+        data = r.read()
+        data = json.loads(data)
+        return (r.code, data)
+    except urllib2.HTTPError, e:
+        return (e.code, e.read())
 
 
 def get_exception_raiser(msg, exception_class=RuntimeError):
@@ -12,8 +28,14 @@ raise_greenletexit = get_exception_raiser("killed", gevent.GreenletExit)
 
 
 def pytest_funcarg__app(request):
+    wsgi_intercept.urllib2_intercept.install_opener()
+    request.addfinalizer(wsgi_intercept.urllib2_intercept.uninstall_opener)
+
     tmpdir = request.getfuncargvalue("tmpdir")
     app = nserve.Application(tmpdir.strpath)
+    wsgi_intercept.add_wsgi_intercept('app.de', 80, lambda: app)
+    request.addfinalizer(lambda: wsgi_intercept.remove_wsgi_intercept("app.de", 80))
+
     return app
 
 
@@ -85,3 +107,38 @@ def test_watch_qserve_call_killable(wq):
     wq._getstats = raise_greenletexit
     wq._sleep = get_exception_raiser("do not call sleep")
     pytest.raises(gevent.GreenletExit, wq)
+
+
+def test_app_no_command(app):
+    code, data = post()
+    assert (code, data) == (400, "no command given")
+
+
+def test_app_unknown_command(app):
+    code, data = post(command="gohome")
+    assert code == 400
+    assert "no such command" in data
+
+
+def test_app_do_render_overloaded(app):
+    code, data = post(command="render")
+    print code, data
+
+    assert code == 200
+    assert "overloaded" in data["error"]
+
+
+def test_app_do_render_missing_metabook(app, busy):
+    busy[("host1", 8000)] = False
+
+    code, data = post(command="render")
+    print code, data
+
+    assert code == 200
+    assert "metabook or collection_id required" in data["error"]
+
+
+def test_app_dispatch_bad_collid(app, busy):
+    code, data = post(command="render", collection_id="a" * 15)
+    print code, data
+    assert code == 404
