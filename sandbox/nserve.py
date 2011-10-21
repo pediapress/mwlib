@@ -71,7 +71,7 @@ class colldir(object):
     def getpath(self, p):
         return os.path.join(self.dir, p)
 
-collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
+collection_id_rex = re.compile(r'^[a-f0-9]{16}$')
 
 
 def make_collection_id(data):
