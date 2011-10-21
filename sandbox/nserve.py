@@ -170,8 +170,7 @@ class watch_qserve(object):
                 self._iterate()
             except gevent.GreenletExit:
                 raise
-            finally:
-                self._sleep()
+            self._sleep()
 
 
 def choose_idle_qserve():
