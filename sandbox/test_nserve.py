@@ -9,6 +9,13 @@ def pytest_funcarg__app(request):
     return app
 
 
+def pytest_funcarg__busy(request):
+    busy = {}
+    monkeypatch = request.getfuncargvalue("monkeypatch")
+    monkeypatch.setattr(nserve, "busy", busy)
+    return busy
+
+
 # -- tests
 
 def test_make_collection_id_version(monkeypatch):
@@ -30,9 +37,7 @@ def test_check_collection_id(app):
     assert not cc("g" * 16)
 
 
-def test_choose_idle_qserve(monkeypatch):
-    busy = {}
-    monkeypatch.setattr(nserve, "busy", busy)
+def test_choose_idle_qserve(monkeypatch, busy):
     assert nserve.choose_idle_qserve() is None
     busy["host1"] = True
     assert nserve.choose_idle_qserve() is None
