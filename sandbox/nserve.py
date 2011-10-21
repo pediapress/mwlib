@@ -227,6 +227,8 @@ class Application(object):
             is_new = True
         else:
             is_new = False
+            if not self.check_collection_id(collection_id):
+                return Response(status=404)
 
         try:
             qserve = collid2qserve[collection_id]
@@ -237,9 +239,6 @@ class Application(object):
             collid2qserve[collection_id] = qserve
 
         self.qserve = rpcclient.serverproxy(host=qserve[0], port=qserve[1])
-
-        if not self.check_collection_id(collection_id):
-            return Response(status=404)
 
         try:
             return method(collection_id, request.params, is_new)
