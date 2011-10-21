@@ -141,6 +141,7 @@ include sandbox/nserve.py
 include sandbox/nslave.py
 include sandbox/postman.py
 include sandbox/rclient
+include sandbox/test_nserve.py
 include sandbox/time-expr.py
 include sandbox/time-parse.py
 include setup.py
