@@ -76,8 +76,8 @@ collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
 
 def make_collection_id(data):
     sio = StringIO.StringIO()
+    sio.write(str(_version.version))
     for key in (
-        _version.version,
         'base_url',
         'script_extension',
         'template_blacklist',
@@ -119,7 +119,7 @@ def wait_idle((host, port),  busy):
     busy[ident] = True
     numerrors = 0
     prefix = "watch: %s:%s:" % (host, port)
-    
+
     def log(msg):
         print prefix, msg
 
