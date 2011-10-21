@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-import pytest, gevent, nserve, time
+import pytest, gevent, nserve
 
 
 def get_exception_raiser(msg, exception_class=RuntimeError):
