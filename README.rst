@@ -85,6 +85,14 @@ The remaining parts are distributed under the BSD license:
 
 Changelog
 ======================================================================
+2011-10-24 release 0.12.17
+--------------------------
+- handle siteinfo without "magicwords" key in templ.parser
+- use gevent instead of twisted in mw-zip/mw-render
+- show memory usage in mw-zip
+- use sqlite3dmb to store html
+- fix directionality of math nodes for RTL documents
+
 2011-08-31 release 0.12.16
 --------------------------
 - remove xhtmlwriter
