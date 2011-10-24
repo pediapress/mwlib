@@ -34,9 +34,9 @@ def main():
     system("tox")
     if not dirty:
         system("git tag %s" % version)
-        system("make sdist")
+        system("%s setup.py sdist" % sys.executable)
         system("%s setup.py register" % sys.executable, dry_run)
-        system("make sdist-upload", dry_run)
+        system("%s setup.py sdist upload" % sys.executable, dry_run)
     else:
         print "WARNING: build was dirty. did not upload or tag a release"
         sys.exit(1)
