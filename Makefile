@@ -5,7 +5,7 @@ RST2HTML ?= rst2html.py
 
 default:: 
 
-all:: cython documentation MANIFEST.in
+all:: mwlib/_uscan.cc cython documentation MANIFEST.in
 
 cython:: mwlib/templ/nodes.c mwlib/templ/evaluate.c
 
@@ -14,6 +14,9 @@ mwlib/templ/nodes.c: mwlib/templ/nodes.py
 
 mwlib/templ/evaluate.c: mwlib/templ/evaluate.py
 	cython mwlib/templ/evaluate.py
+
+mwlib/_uscan.cc: mwlib/_uscan.re
+	re2c -w --no-generation-date -o mwlib/_uscan.cc mwlib/_uscan.re
 
 documentation:: README.html
 	cd docs; make all

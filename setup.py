@@ -55,19 +55,9 @@ def mtime(fn):
 def build_deps():
     # we will *not* add support for automatic generation of those files as that
     # might break with source distributions from pypi
-
-    if mtime("mwlib/_uscan.cc") < mtime("mwlib/_uscan.re"):
-        err = os.system("re2c --version")
-        if err not in (0, 512) and sys.platform != "win32":
-            sys.exit("Error: please install re2c from http://re2c.org")
-
-        cmd = "re2c -w --no-generation-date -o %s %s" % ('mwlib/_uscan.cc',
-                                                         'mwlib/_uscan.re')
-        print "Running", cmd
-        err = os.system(cmd)
-
-        if err != 0:
-            sys.exit("Error: re2c failed.")
+    err = os.system("make all")
+    if err != 0:
+        sys.exit("Error: make failed")
 
 
 def read_long_description():
