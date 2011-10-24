@@ -165,23 +165,27 @@ class mwapi(object):
                 siprop.pop()
         raise RuntimeError("could not get siteinfo")
 
-    def login(self, username, password, domain=None):
+    def login(self, username, password, domain=None, lgtoken=None):
         args = dict(action="login",
                     lgname=username.encode("utf-8"),
                     lgpassword=password.encode("utf-8"),
-                    format="json",
-                    )
+                    format="json")
 
         if domain is not None:
             args['lgdomain'] = domain.encode('utf-8')
 
+        if lgtoken is not None:
+            args["lgtoken"] = lgtoken.encode("utf-8")
+
         res = self._post(**args)
-        if res["login"]["result"] == "Success":
+
+        login_result = res["login"]["result"]
+        if login_result == "NeedToken" and lgtoken is None:
+            return self.login(username, password, domain=domain, lgtoken=res["login"]["token"])
+        elif login_result == "Success":
             return
 
-        print "login failed:", res
-
-        raise RuntimeError("login failed")
+        raise RuntimeError("login failed: %r" % res)
 
     def fetch_used(self, titles=None, revids=None, fetch_images=True):
         if fetch_images:
