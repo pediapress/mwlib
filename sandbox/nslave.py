@@ -122,7 +122,7 @@ class commands(object):
             def getpath(p):
                 return os.path.join(dir, p)
 
-            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ))
+            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
             outfile = getpath("output.%s" % writer)
             args = ["mw-render",  "-w",  writer, "-c", getpath("collection.zip"), "-o", outfile,  "--status", self.statusfile()]
 
@@ -146,7 +146,7 @@ class commands(object):
             def getpath(p):
                 return os.path.join(dir, p)
 
-            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ))
+            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ), timeout=20*60)
             args = ["mw-post", "-i", getpath("collection.zip"), "-p", post_url]
             system(args)
         return doit(**params)
