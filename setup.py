@@ -71,7 +71,7 @@ def main():
     install_requires = ["pyparsing>=1.4.11", "odfpy>=0.9, <0.10",
                         "flup>=1.0", "gevent", "lockfile==0.8",
                         "timelib>=0.2", "WebOb>=0.9", "pyPdf>=1.12",
-                        "apipkg", "qserve>=0.2.1", "roman", "lxml", "py>=1.4",
+                        "apipkg", "qserve>=0.2.3", "roman", "lxml", "py>=1.4",
                         "sqlite3dbm"]
     if sys.version_info[:2] < (2, 6):
         install_requires.append("simplejson>=1.3")
