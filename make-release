@@ -15,7 +15,7 @@ def system(cmd, dry_run=False):
 
 
 def main():
-    dry_run = True
+    dry_run = "dry" in os.environ
     st, tags = commands.getstatusoutput("git tag")
     assert st == 0, "failed to get tags"
     tags = set(tags.split())
