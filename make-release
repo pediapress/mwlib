@@ -1,0 +1,45 @@
+#! /usr/bin/env python
+
+import commands, os, sys
+
+
+def system(cmd, dry_run=False):
+    print "====> Running", cmd
+    if dry_run:
+        return
+
+    cmd += " 2>&1 |sed -e 's/^/      /'"
+    st = os.system(cmd)
+    assert st == 0, "command %s failed" % (cmd,)
+    print
+
+
+def main():
+    dry_run = True
+    st, tags = commands.getstatusoutput("git tag")
+    assert st == 0, "failed to get tags"
+    tags = set(tags.split())
+    import setup
+    version = setup.get_version()
+
+    assert version not in tags, "already have tagged %s" % version
+
+    print "building version", version
+    st, descr = commands.getstatusoutput("git describe --all --dirty")
+    assert st == 0
+    dirty = "-dirty" in descr
+    if dirty:
+        print "working directory is dirty"
+
+    system("tox")
+    if not dirty:
+        system("git tag %s" % version)
+        system("make sdist")
+        system("%s setup.py register" % sys.executable, dry_run)
+        system("make sdist-upload", dry_run)
+    else:
+        print "WARNING: build was dirty. did not upload or tag a release"
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
