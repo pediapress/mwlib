@@ -22,12 +22,13 @@ def loads(s):
         s = s[3:]
     return json.loads(s)
 
+
 def merge_data(dst, src):
     todo = [(dst, src)]
     while todo:
         dst, src = todo.pop()
-        assert type(dst)==type(src), "cannot merge %r with %r" % (type(dst), type(src))
-        
+        assert type(dst) == type(src), "cannot merge %r with %r" % (type(dst), type(src))
+
         if isinstance(dst, list):
             dst.extend(src)
         elif isinstance(dst, dict):
@@ -36,8 +37,9 @@ def merge_data(dst, src):
                     todo.append((dst[k], v))
                 else:
                     dst[k] = v
-    
-class mwapi(object):    
+
+
+class mwapi(object):
     def __init__(self, apiurl):
         self.apiurl = apiurl
         self.baseurl = apiurl  # XXX
@@ -62,37 +64,37 @@ class mwapi(object):
 
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.apiurl, hex(id(self)))
-    
+
     def _fetch(self, url):
         f = self.opener.open(url)
         data = f.read()
         f.close()
         return data
 
-    def _build_url(self,  **kwargs):
+    def _build_url(self, **kwargs):
         args = {'format': 'json'}
         args.update(**kwargs)
         for k, v in args.items():
             if isinstance(v, unicode):
                 args[k] = v.encode('utf-8')
         q = urllib.urlencode(args)
-        q = q.replace('%3A', ':') # fix for wrong quoting of url for images
-        q = q.replace('%7C', '|') # fix for wrong quoting of API queries (relevant for redirects)
+        q = q.replace('%3A', ':')  # fix for wrong quoting of url for images
+        q = q.replace('%7C', '|')  # fix for wrong quoting of API queries (relevant for redirects)
 
         url = "%s?%s" % (self.apiurl, q)
         return url
-    
+
     def _request(self, **kwargs):
         url = self._build_url(**kwargs)
         return self._fetch(url)
-    
+
     def _post(self, **kwargs):
         args = {'format': 'json'}
         args.update(**kwargs)
         for k, v in args.items():
             if isinstance(v, unicode):
                 args[k] = v.encode('utf-8')
-                
+
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         postdata = urllib.urlencode(args)
 
@@ -120,13 +122,13 @@ class mwapi(object):
         while todo is not None:
             kwargs = todo
             todo = None
-            
+
             data = json.loads(self._request(**kwargs))
             error = data.get("error")
             if error:
                 raise RuntimeError("%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs)))
             merge_data(retval, data[action])
-            
+
             qc = data.get("query-continue", {}).values()
 
             if qc and query_continue:
@@ -134,13 +136,13 @@ class mwapi(object):
                 self.report()
                 kw = kwargs.copy()
                 for d in qc:
-                    for k,v in d.items(): # dict of len(1)
+                    for k, v in d.items():  # dict of len(1)
                         kw[str(k)] = v
 
                 if qc == last_qc:
                     print "warning: cannot continue this query:",  self._build_url(**kw)
                     return retval
-                
+
                 last_qc = qc
                 todo = kw
 
@@ -148,37 +150,37 @@ class mwapi(object):
 
     def ping(self):
         return self.do_request(action="query", meta="siteinfo",  siprop="general")
-                
+
     def get_categorymembers(self, cmtitle):
         return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
 
     def get_siteinfo(self):
         siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
-        while len(siprop)>=3:
+        while len(siprop) >= 3:
             try:
                 r = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
                 return r
             except Exception, err:
-                print "ERR:",err
+                print "ERR:", err
                 siprop.pop()
         raise RuntimeError("could not get siteinfo")
 
     def login(self, username, password, domain=None):
         args = dict(action="login",
-                    lgname=username.encode("utf-8"), 
-                    lgpassword=password.encode("utf-8"), 
-                    format="json", 
+                    lgname=username.encode("utf-8"),
+                    lgpassword=password.encode("utf-8"),
+                    format="json",
                     )
-        
+
         if domain is not None:
             args['lgdomain'] = domain.encode('utf-8')
 
         res = self._post(**args)
-        if res["login"]["result"]=="Success":
+        if res["login"]["result"] == "Success":
             return
 
         print "login failed:", res
-        
+
         raise RuntimeError("login failed")
 
     def fetch_used(self, titles=None, revids=None, fetch_images=True):
@@ -263,7 +265,6 @@ class mwapi(object):
         if revision is not None:
             kwargs['rvstartid'] = revision
 
-
         # def setrvlimit(res):
         #     print "setting rvlimit to 50 for %s" % (self.baseurl, )
         #     self.rvlimit=50
@@ -310,7 +311,6 @@ def guess_api_urls(url):
     if not (scheme and netloc):
         return retval
 
-
     path_prefix = ''
     if '/wiki/' in path:
         path_prefix = path[:path.find('/wiki/')]
@@ -319,7 +319,7 @@ def guess_api_urls(url):
 
     prefix = '%s://%s%s' % (scheme, netloc, path_prefix)
 
-    for _path in (path+"/", '/w/', '/wiki/', '/'):
+    for _path in (path + "/", '/w/', '/wiki/', '/'):
         base_url = '%s%sapi.php' % (prefix, _path)
         if base_url not in retval:
             retval.append(base_url)
@@ -337,7 +337,6 @@ template_exclusion_category={{Mediawiki:coll-exclusion_category_title}}
 print_template_pattern={{Mediawiki:coll-print_template_pattern}}
 """)
 
-
     allowed = "template_blacklist template_exclusion_category print_template_pattern".split()
     res = dict()
     try:
@@ -345,8 +344,7 @@ print_template_pattern={{Mediawiki:coll-print_template_pattern}}
     except KeyError:
         return res
 
-
-    for k,v in re.findall("([a-z_]+)=(.*)", txt):
+    for k, v in re.findall("([a-z_]+)=(.*)", txt):
         v = v.strip()
 
         if v.startswith("[[") or not v:
@@ -360,6 +358,6 @@ print_template_pattern={{Mediawiki:coll-print_template_pattern}}
 def main():
     s = mwapi("http://en.wikipedia.org/w/api.php")
     print s.get_categorymembers("Category:Mainz")
-    
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
