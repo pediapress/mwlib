@@ -541,7 +541,8 @@ class Application(object):
         params.post_url = post_url
 
         self.qserve.qadd(channel="post",  # jobid="%s:post" % collection_id,
-                         payload=dict(params=params.__dict__))
+                         payload=dict(params=params.__dict__),
+                         timeout=20 * 60)
         return response
 
 
