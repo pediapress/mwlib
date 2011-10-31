@@ -53,6 +53,9 @@ class mwapi(object):
         self.rvlimit = conf.get("fetch", "rvlimit", 500, int)
         self.limit_fetch_semaphore = None
 
+    def report(self):
+        pass
+
     def set_limit(self, limit=None):
         assert self.limit_fetch_semaphore is None, "limit already set"
 
