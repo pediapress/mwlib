@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import commands, os, sys
+import commands, os, sys, subprocess
 
 
 def system(cmd, dry_run=False):
@@ -8,9 +8,21 @@ def system(cmd, dry_run=False):
     if dry_run:
         return
 
-    cmd += " 2>&1 |sed -e 's/^/      /'"
-    st = os.system(cmd)
-    assert st == 0, "command %s failed" % (cmd,)
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    nl = True
+    while 1:
+        char = popen.stdout.read(1)
+        if not char:
+            break
+        if nl:
+            sys.stdout.write("    ")
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        nl = char == "\n"
+
+    st = popen.wait()
+    if st != 0:
+        sys.exit("Error: command %r failed" % cmd)
     print
 
 
