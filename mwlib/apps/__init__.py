@@ -83,18 +83,11 @@ def post():
     parser = optparse.OptionParser(usage="%prog OPTIONS")
     parser.add_option("-i", "--input", help="ZIP file to POST")
     parser.add_option('-l', '--logfile',
-        help='log output to LOGFILE',
-    )
+        help='log output to LOGFILE')
     parser.add_option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
     parser.add_option("-g", "--getposturl",
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
-        action='store_true',
-    )
-    parser.add_option("-d", "--daemonize", action="store_true",
-        help='become a daemon process as soon as possible')
-    parser.add_option('--pid-file',
-        help='write PID of daemonized process to this file',
-    )
+        action='store_true')
     options, args = parser.parse_args()
     
     use_help = 'Use --help for usage information.'
@@ -117,13 +110,7 @@ def post():
     
     if options.logfile:
         utils.start_logging(options.logfile)
-    
-    if options.daemonize:
-        utils.daemonize()
-    if options.pid_file:
-        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
-    
-    
+
     status = Status(podclient=podclient)
     
     try:
@@ -133,9 +120,6 @@ def post():
     except Exception, e:
         status(status='error')
         raise
-    finally:
-        if options.pid_file:
-            utils.safe_unlink(options.pid_file)
 
 
 def parse():
