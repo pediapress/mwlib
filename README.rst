@@ -7,71 +7,21 @@ mwlib - MediaWiki parser and utility library
 
 Overview
 ======================================================================
-mwlib provides a library for parsing MediaWiki_ articles.  It is
-currently aimed at developers, who have a need to somehow handle
-MediaWiki articles.
+mwlib provides a library for parsing MediaWiki articles and
+converting them to different output formats. mwlib is used by
+wikipedia's "Print/export" feature in order to generate PDF documents
+from wikipedia articles.
 
-Installation
-======================================================================
-mwlib will work with python 2.5, 2.6 and 2.7. It will *not* work with
-python versions >= 3 or < 2.5.
-
-You need to have setuptools/easy_install installed. Installation
-should be as easy as typing::
-  
-  $ easy_install mwlib
-
-If you don't have setuptools installed, download the source package, 
-unpack it and run::
-
-  $ python setup.py install
-
-(this will also install setuptools)
-
-
-
-You will also need:
-
-*LaTeX*
-  LaTeX is used for rendering of mathematical formulas.
-
-*perl*
-  perl is used to drive the ``EasyTimeline.pl`` script, which produces
-  timeline images.
-
-*PIL*
- PIL_ is the Python Imaging Library and is used for image handling.
-
-*blahtexml*
- Blahtex is a program written in C++, which converts an equation given
- in a syntax close to TeX into MathML. It is designed by David Harvey
- and is aimed at supporting equations in MediaWiki. 
- (http://gva.noekeon.org/blahtexml/)
-
-*texvc*
-  texvc (TeX validator and converter) is a program which validates
-  (AMS) LaTeX mathematical expressions and converts them to HTML,
-  MathML, or PNG graphics. (see http://en.wikipedia.org/wiki/Texvc).
-
-
-Commands
-======================================================================
-The commands (i.e. command-line tools) provided by mwlib are described
-in ``docs/commands.txt``.
-
-
-Contact/Further Information
-======================================================================
-For further information please visit our Trac instance running at
-http://code.pediapress.com/.
-The current development version can also be found there.
+Documentation
+=================
+Please visit http://mwlib.readthedocs.org/en/latest/index.html for
+detailed documentation.
 
 Credits
 ======================================================================
 ``mwlib/cdb.py`` is based on the cdb implementation from the SpamBayes_
 project ((C) 2002-2004 Python Software Foundation).
 The remaining parts are distributed under the BSD license:
-
 
 License
 ======================================================================
@@ -107,7 +57,4 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-.. _MediaWiki: http://www.mediawiki.org/
 .. _SpamBayes: http://spambayes.sourceforge.net/
-.. _PIL: http://www.pythonware.com/products/pil/
-.. _lxml: http://codespeak.net/lxml/
