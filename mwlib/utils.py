@@ -175,8 +175,6 @@ def get_multipart(filename, data, name):
 
     return content_type, body
 
-# ==============================================================================
-
 
 class PersistedDict(UserDict.UserDict):
     """Subclass of dict that persists its contents in tempdir. Every value is
@@ -222,8 +220,6 @@ class PersistedDict(UserDict.UserDict):
     def fname(self, key):
         return os.path.join(self.cache_dir, md5(key).hexdigest())
 
-
-# ==============================================================================
 
 def safe_unlink(filename):
     """Never failing os.unlink()"""
@@ -349,8 +345,6 @@ def ensure_dir(d):
         os.makedirs(d)
     return d
 
-
-# ==============================================================================
 
 def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', port=25):
     """Send an email via SMTP
