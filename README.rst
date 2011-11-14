@@ -13,10 +13,8 @@ MediaWiki articles.
 
 Installation
 ======================================================================
-Starting with version 0.12.11 released in december 2009 mwlib does not
-support python 2.4 anymore. Please use an older version of mwlib or
-upgrade your python installation to 2.6 (or 2.5). python 3.x is
-currently not supported.
+mwlib will work with python 2.5, 2.6 and 2.7. It will *not* work with
+python versions >= 3 or < 2.5.
 
 You need to have setuptools/easy_install installed. Installation
 should be as easy as typing::
@@ -44,9 +42,6 @@ You will also need:
 *PIL*
  PIL_ is the Python Imaging Library and is used for image handling.
 
-*lxml*
- lxml_ is needed for the docbookwriter.
-
 *blahtexml*
  Blahtex is a program written in C++, which converts an equation given
  in a syntax close to TeX into MathML. It is designed by David Harvey
@@ -64,12 +59,6 @@ Commands
 The commands (i.e. command-line tools) provided by mwlib are described
 in ``docs/commands.txt``.
 
-Configuration
-======================================================================
-The format of configuration files is described in
-``docs/configfiles.txt``.
-
-See ``example_conf.py`` for an example configuration.
 
 Contact/Further Information
 ======================================================================

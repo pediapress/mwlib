@@ -2,13 +2,11 @@ include MANIFEST.in
 include README.html
 include README.rst
 include argv.py
-include cgi-bin/mwlib.cgi
 include conftest.py
 include docs/Makefile
 include docs/commands.html
 include docs/commands.txt
 include docs/configfiles.html
-include docs/configfiles.txt
 include docs/metabook.html
 include docs/metabook.txt
 include docs/writers.html
@@ -30,7 +28,6 @@ include mwlib/apps/client.py
 include mwlib/apps/make_nuwiki.py
 include mwlib/apps/render.py
 include mwlib/apps/serve.py
-include mwlib/apps/watch.py
 include mwlib/async/__init__.py
 include mwlib/authors.py
 include mwlib/bookshelf.py

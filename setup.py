@@ -69,9 +69,9 @@ def main():
         build_deps()   # this is a git clone
 
     install_requires = ["pyparsing>=1.4.11", "odfpy>=0.9, <0.10",
-                        "flup>=1.0", "gevent", "lockfile==0.8",
-                        "timelib>=0.2", "WebOb>=0.9", "pyPdf>=1.12",
-                        "apipkg", "qserve>=0.2.3", "roman", "lxml", "py>=1.4",
+                        "gevent", "lockfile==0.8", "timelib>=0.2",
+                        "WebOb>=0.9", "pyPdf>=1.12", "apipkg",
+                        "qserve>=0.2.3", "roman", "lxml", "py>=1.4",
                         "sqlite3dbm"]
     if sys.version_info[:2] < (2, 6):
         install_requires.append("simplejson>=1.3")
@@ -93,7 +93,6 @@ def main():
                                           'mw-render = mwlib.apps.render:main',
                                           'mw-parse = mwlib.apps:parse',
                                           'mw-show = mwlib.apps:show',
-                                          'mw-serve = mwlib.apps.serve:main',
                                           'mw-serve-ctl = mwlib.apps.serve:serve_ctl',
                                           'mw-check-service = mwlib.apps.serve:check_service',
                                           'mw-watch = mwlib.apps.watch:main',
