@@ -89,36 +89,6 @@ def start_logging(path, stderr_only=False):
         os.close(null)
 
 
-def daemonize(dev_null=False):
-    """Deamonize current process
-
-    Note: This only works on systems that have os.fork(), i.e. it doesn't work
-    on Windows.
-
-    See http://www.erlenstar.demon.co.uk/unix/faq_toc.html#TOC16
-
-    @param dev_null: if True, redirect stdin, stdout and stderr to /dev/null
-    @type dev_null: bool
-    """
-
-    if os.fork():    # launch child and...
-        os._exit(0)  # ... kill off parent
-    os.setsid()
-    pid = os.fork()  # launch child and...
-    if pid:
-        os._exit(0)  # ... kill off parent again.
-    os.umask(077)
-    if dev_null:
-        null = os.open(os.path.devnull, os.O_RDWR)
-        for i in range(3):
-            try:
-                os.dup2(null, i)
-            except OSError, e:
-                if e.errno != errno.EBADF:
-                    raise
-        os.close(null)
-
-
 def shell_exec(cmd):
     """Execute cmd in a subshell
 
