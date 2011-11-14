@@ -128,51 +128,6 @@ def get_multipart(filename, data, name):
     return content_type, body
 
 
-class PersistedDict(UserDict.UserDict):
-    """Subclass of dict that persists its contents in tempdir. Every value is
-    stored in a file whose filename is based on the md5 sum of the key. All
-    values must be strings!
-
-    Example usage with fetch_url()::
-
-        from mwlib.utils import Cache, fetch_url
-        cache = Cache()
-        data = fetch_url(some_url, fetch_cache=cache, max_cacheable_size=5*1024*1024)
-    """
-
-    def __init__(self, max_cacheable_size=1024 * 1024, *args, **kwargs):
-        """
-        @param max_cacheable_size: max. size in bytes for each cache value
-        @type max_cacheable_size: int
-        """
-
-        #super(PersistedDict, self).__init__(*args, **kwargs)
-        UserDict.UserDict.__init__(self, *args, **kwargs)
-        self.max_cacheable_size = max_cacheable_size
-        self.cache_dir = os.path.join(tempfile.gettempdir(), 'mwlib-cache')
-        ensure_dir(self.cache_dir)
-
-    def __getitem__(self, name):
-        fn = self.fname(name)
-        if os.path.exists(fn):
-            return open(fn, 'rb').read()
-        raise KeyError(name)
-
-    def __setitem__(self, name, value):
-        assert isinstance(value, str), 'only string values are supported'
-
-        fn = self.fname(name)
-        if not os.path.exists(fn):
-            return open(fn, 'wb').write(value)
-
-    def __contains__(self, name):
-        fn = self.fname(name)
-        return os.path.exists(fn)
-
-    def fname(self, key):
-        return os.path.join(self.cache_dir, md5(key).hexdigest())
-
-
 def safe_unlink(filename):
     """Never failing os.unlink()"""
 
