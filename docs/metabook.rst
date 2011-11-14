@@ -1,5 +1,5 @@
 ~~~~~~~~~~~~~~~
-mwlib Metabooks
+Metabooks
 ~~~~~~~~~~~~~~~
 
 A Metabook describes a collection of articles and chapters together with some

@@ -1,8 +1,8 @@
 .. -*- mode: rst; coding: utf-8 -*-
 
-~~~~~~~~~~~~~~
-mwlib Commands
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+command line tools
+~~~~~~~~~~~~~~~~~~~
 
 Common Options
 ==============

@@ -1,6 +1,6 @@
 .. -*- mode: rst; coding: utf-8 -*-
 
-mwlib Writers
+Writers
 =============
 
 A *writer* in mwlib generates output from a collection of MediaWiki articles
