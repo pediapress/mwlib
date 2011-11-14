@@ -89,24 +89,6 @@ def start_logging(path, stderr_only=False):
         os.close(null)
 
 
-def shell_exec(cmd):
-    """Execute cmd in a subshell
-
-    @param cmd: command to execute with os.system(), if given as unicode it's
-        converted to str using sys.getfilesystemencoding()
-    @type cmd: basestring
-
-    @returns: exit code of command
-    @rtype: int
-    """
-
-    if isinstance(cmd, unicode):
-        enc = sys.getfilesystemencoding()
-        assert enc is not None, 'no filesystem encoding (set LANG)'
-        cmd = cmd.encode(enc, 'ignore')
-    return os.system(cmd)
-
-
 def get_multipart(filename, data, name):
     """Build data in format multipart/form-data to be used to POST binary data
 
