@@ -24,3 +24,6 @@ mwlib/templ/nodes.c
 /.ropeproject/
 /dist/
 __pycache__/
+/docs/_build/
+/docs/_static/
+/docs/_templates/
