@@ -1,5 +1,12 @@
 Changelog
 ======================================================================
+2011-XXXX  release 0.13.1
+--------------------------
+- replaced mw-serve with XXX
+- removed CGI support
+- removed lots of obsolete code
+
+
 2011-10-24 release 0.12.17
 --------------------------
 - handle siteinfo without "magicwords" key in templ.parser
