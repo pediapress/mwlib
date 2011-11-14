@@ -160,11 +160,6 @@ class Main(object):
                 print 'Warning: unknown writer option %r' % option
                 del writer_options[option]
 
-        if options.daemonize:
-            utils.daemonize()
-        if options.pid_file:
-            open(options.pid_file, 'wb').write('%d\n' % os.getpid())
-
         self.status = Status(options.status_file, progress_range=(1, 33))
         self.status(progress=0)
 
@@ -211,8 +206,6 @@ class Main(object):
                 except OSError, e:
                     if e.errno!=errno.ENOENT:
                         print 'ERROR: Could not remove temporary images: %s' % e, e.errno
-            if options.pid_file:
-                utils.safe_unlink(options.pid_file)
 
 def main():
     return Main()()

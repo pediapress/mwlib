@@ -136,10 +136,6 @@ def main():
     
     from mwlib import utils,  wiki
     
-    if options.daemonize:
-        utils.daemonize()
-    if options.pid_file:
-        open(options.pid_file, 'wb').write('%d\n' % os.getpid())
 
     filename = None
     status = None
@@ -162,5 +158,3 @@ def main():
         if options.output is None and filename is not None:
             print 'removing %r' % filename
             utils.safe_unlink(filename)
-        if options.pid_file:
-            utils.safe_unlink(options.pid_file)

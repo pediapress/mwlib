@@ -97,15 +97,6 @@ one command.
 
   Log output to the given file.
 
-``-d, --daemonize``
-
-  Become a daemon process as soon as possible. This doesn't work on Windows.
-
-``--pid-file=PID_FILE``
-
-  To be used together with --daemonize: Write process ID of daemon process to
-  this file.
-  
 ``--login=USERNAME:PASSWORD[:DOMAIN]``
 
   For MediaWikis that restrict the viewing of pages, login with given USERNAME,
@@ -113,17 +104,7 @@ one command.
   
   Currently this is only supported for mwapidb, i.e. when the --config argument
   is a base URL or shortcut, or when ``type=mwapi`` in the configuration file.
-  
-``--num-threads=NUM``
 
-  Number of threads to fetch resources in parallel. Set to 0 or use
-  ``--no-threads`` to not use threading. Default is 10.
-
-``--no-threads``
-
-  If given, do not use multiple threads to fetch resources in
-  parallel. This overrides ``--num-threads``.
- 
 ``--title``
 
   Specify a title for the article collection. This is e.g. used by some writers

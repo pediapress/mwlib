@@ -52,13 +52,7 @@ class OptionParser(optparse.OptionParser):
         a("--username", help="username for login")
         a("--password", help="password for login")
         a("--domain",  help="domain for login")
-        
-        a("-d", "--daemonize", action="store_true",
-          help="become a daemon process as soon as possible")
-        
-        a("--pid-file",
-          help="write PID of daemonized process to this file")
-        
+
         a("--title",
           help="title for article collection")
         
