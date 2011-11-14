@@ -1,52 +1,21 @@
 import optparse
-import os
 
 
 def serve_ctl():
-    from mwlib import utils
-
     parser = optparse.OptionParser(usage="%prog [OPTIONS]")
     parser.add_option('--cache-dir',
         help='cache directory (default: /var/cache/mw-serve/)',
         default='/var/cache/mw-serve/',
     )
-    parser.add_option('--clean-up',
-        help='report errors for died processes, kill long-running processes',
-        action='store_true',
-    )
     parser.add_option('--purge-cache',
         help='remove cache files that have not been touched for at least HOURS hours',
         metavar='HOURS',
     )
-    parser.add_option('--max-running-time',
-        help='number of seconds a process is allowed to run before it gets killed on --clean-up (default: 3600)',
-        metavar='SECONDS',
-        default='3600',
-    )
-    parser.add_option('--report-from-mail',
-        help='sender of error mails (--report-recipient also needed)',
-        metavar='EMAIL',
-    )
-    parser.add_option('--report-recipient',
-        help='recipient of error mails (--report-from-mail also needed)',
-        metavar='EMAIL',
-    )
+
     options, args = parser.parse_args()
 
     if args:
         parser.error('no arguments supported')
-
-    if options.report_recipient and options.report_from_mail:
-        def report(msg):
-            utils.report(
-                system='mw-serve-ctl',
-                subject='mw-serve-ctl error',
-                from_email=options.report_from_mail.encode('utf-8'),
-                mail_recipients=[options.report_recipient.encode('utf-8')],
-                msg=msg,
-            )
-    else:
-        report = None
 
     if options.purge_cache:
         try:
@@ -55,18 +24,7 @@ def serve_ctl():
             parser.error('--purge-cache value must be a positive number')
 
         from mwlib.serve import purge_cache
-
         purge_cache(options.purge_cache*60*60, cache_dir=options.cache_dir)
-
-    if options.clean_up:
-        from mwlib.serve import clean_up
-
-        try:
-            max_running_time = int(options.max_running_time)
-        except ValueError:
-            parser.error('--max-running-time value must be an integer')
-
-        clean_up(cache_dir=options.cache_dir, max_running_time=max_running_time, report=report)
 
 
 def check_service():
