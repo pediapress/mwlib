@@ -11,10 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   basics
    installation
    commands
    internals
    changelog
+   collection
 
 
 

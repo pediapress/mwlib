@@ -1,3 +1,5 @@
+.. _mwlib-install:
+
 ~~~~~~~~~~~~~~~~~~~~~~~
 Installation of mwlib
 ~~~~~~~~~~~~~~~~~~~~~~~
