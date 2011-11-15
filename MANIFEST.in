@@ -12,6 +12,7 @@ include docs/conf.py
 include docs/configfiles.html
 include docs/index.rst
 include docs/installation.rst
+include docs/internals.rst
 include docs/metabook.html
 include docs/metabook.rst
 include docs/writers.html

@@ -1,6 +1,6 @@
-~~~~~~~~~~~~~~
-Installation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+Installation of mwlib
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Basic Prerequisites
 ====================

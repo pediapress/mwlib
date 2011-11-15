@@ -13,15 +13,14 @@ Contents:
 
    installation
    commands
-   writers
-   metabook
+   internals
    changelog
+
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 

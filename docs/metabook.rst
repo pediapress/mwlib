@@ -1,6 +1,5 @@
-~~~~~~~~~~~~~~~
 Metabooks
-~~~~~~~~~~~~~~~
+==============
 
 A Metabook describes a collection of articles and chapters together with some
 metadata like title or version. The actual data (e.g. the wikitext of
@@ -13,7 +12,7 @@ serialized in `JSON`_ format.
 
 
 Metabook Types
-==============
+---------------
 
 Every dictionary contained in the Metabook (and the Metabook dicionary itself)
 has a type. The different types are described below. The Metabook dictionary
@@ -200,7 +199,7 @@ language (string, optional)
 
 
 Example
-=======
+-----------------
 
 Given in `JSON`_ notation::
 
