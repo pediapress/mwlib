@@ -4,6 +4,9 @@
 Installation of mwlib
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+If you're running Ubuntu 10.04 or a similar system, and you just want
+to copy and paste some commands, please read :ref:`ubuntu install`
+
 Basic Prerequisites
 ====================
 
@@ -96,6 +99,7 @@ following programs depending on your needs:
 - latex
 - blahtexml
 
+.. _`ubuntu install`:
 
 Installation Instructions for Ubuntu 10.04 LTS
 ==============================================
