@@ -7,6 +7,8 @@ Installation of mwlib
 If you're running Ubuntu 10.04 or a similar system, and you just want
 to copy and paste some commands, please read :ref:`ubuntu install`
 
+Microsoft Windows is *not* supported.
+
 Basic Prerequisites
 ====================
 
@@ -20,8 +22,6 @@ package. In order to compile pil from source the libjpeg, zlib,
 freetype and lcms header files and libraries must be present on the
 system. Compiling lxml requires the libxslt and libxml2 header files
 and libraries.
-
-Microsoft Windows is *not* supported.
 
 mwlib is split into multiple namespace packages, that each provide
 different functionality:
@@ -78,6 +78,8 @@ pyfribidi package::
    pip install -i http://pypi.pediapress.com/simple/ pyfribidi
 
 
+.. _`test install`:
+
 Testing the installation
 ============================
 Use the following two commands to test the installation::
@@ -128,3 +130,5 @@ Install texvc::
 
   git clone https://github.com/pediapress/texvc
   cd texvc; make; make install PREFIX=~/pp
+
+Then :ref:`test the installation<test install>`.
