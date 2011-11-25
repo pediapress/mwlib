@@ -5,7 +5,9 @@ include argv.py
 include changelog.rst
 include conftest.py
 include docs/Makefile
+include docs/basics.rst
 include docs/changelog.rst
+include docs/collection.rst
 include docs/commands.html
 include docs/commands.rst
 include docs/conf.py
