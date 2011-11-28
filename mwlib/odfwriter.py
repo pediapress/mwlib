@@ -253,8 +253,10 @@ class ODFWriter(object):
         return r 
 
     def owriteChapter(self, obj):
-        text = obj.caption
-        log("Unhandled Chapter %r" % obj) # FIXME
+        title = obj.caption
+        item = text.Section(stylename=style.sect, name=title)
+        item.addElement(text.H(outlinelevel=1, text=title, stylename=style.chapter))
+        return item
 
     def owriteSection(self, obj):
         hXstyles = (style.h0,style.h1,style.h2,style.h3,style.h4,style.h5)

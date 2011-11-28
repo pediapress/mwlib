@@ -375,6 +375,20 @@ ArticleHeader.addElement(
 h0 = ArticleHeader #alternative name
 
 
+chapter = style.Style(name="Chapter", family="paragraph", defaultoutlinelevel="1")
+chapter.addElement(
+    style.ParagraphProperties(
+        margintop="0.3in",marginbottom="0.15in", keepwithnext="always"
+    )
+)
+chapter.addElement(
+    style.TextProperties(
+        fontsize="32pt", fontname="DejaVuSans"
+    )
+)
+
+
+
 h1 = style.Style(name="Heading1", family="paragraph", defaultoutlinelevel="2")
 h1.addElement(
     style.ParagraphProperties(
@@ -586,61 +600,59 @@ formula = style.Style(name="Formula", family="graphic")
 
 
 def applyStylesToDoc(doc):
-    doc.fontfacedecls.addElement(dejaVuSerif)
-    doc.fontfacedecls.addElement(dejaVuSans)
-    doc.fontfacedecls.addElement(dejaVuMono)
-    doc.fontfacedecls.addElement(dejaVuSansMono)
-    
-    #doc.styles.addElement(defStyleParagraph)
-    
-    doc.styles.addElement(dumbcolumn)
-    doc.styles.addElement(indentedSingle)
-    doc.styles.addElement(indentedDouble)
-    doc.styles.addElement(indentedTriple)
-    doc.styles.addElement(strike)
-    doc.styles.addElement(big)
-    doc.styles.addElement(small)
-    doc.styles.addElement(blockquote)
-    doc.styles.addElement(ArticleHeader)
-    #doc.styles.addElement(fixed)
-    doc.styles.addElement(cite)
-    doc.styles.addElement(underline)
-    doc.styles.addElement(sup)
-    doc.styles.addElement(sub)
-    doc.styles.addElement(center)
-    doc.styles.addElement(teletyped)
-    doc.styles.addElement(formula)
-    doc.styles.addElement(h0)
-    doc.styles.addElement(h1)
-    doc.styles.addElement(h2)
-    doc.styles.addElement(h3)
-    doc.styles.addElement(h4)
-    doc.styles.addElement(h5)
+
+    for font in [dejaVuSerif,
+                 dejaVuSans,
+                 dejaVuMono,
+                 dejaVuSansMono,
+                 ]:
+        doc.fontfacedecls.addElement(font)
+
     doc.automaticstyles.addElement(sect)
-    doc.styles.addElement(sectTable)
-    doc.styles.addElement(textbody)
-    #doc.styles.addElement(subtitle)
-    #doc.styles.addElement(title)
-    #doc.styles.addElement(photo)
-    #doc.styles.addElement(graphic)
-    doc.styles.addElement(strong)
-    doc.styles.addElement(emphasis)
-    doc.styles.addElement(preformatted)
-    doc.styles.addElement(code)
-    doc.styles.addElement(source)
-    doc.styles.addElement(footnotelist)
-    doc.styles.addElement(footnote)
-    doc.styles.addElement(hr)
-    doc.styles.addElement(numberedlist)
-    doc.styles.addElement(unorderedlist)
-    doc.styles.addElement(definitionlist)
-    doc.styles.addElement(definitionterm)
-    
-    doc.styles.addElement(frmOuterCenter)
-    doc.styles.addElement(frmOuterLeft)
-    doc.styles.addElement(frmOuterRight)
-    doc.styles.addElement(frmInner)
-    doc.styles.addElement(imgCaption)
-    doc.styles.addElement(tableCaption)
-    doc.styles.addElement(sectTable)
+
+    for style in [dumbcolumn,
+                  indentedSingle,
+                  indentedDouble,
+                  indentedTriple,
+                  strike,
+                  big,
+                  small,
+                  blockquote,
+                  ArticleHeader,
+                  cite,
+                  underline,
+                  sup,
+                  sub,
+                  center,
+                  teletyped,
+                  formula,
+                  chapter,
+                  h0,
+                  h1,
+                  h2,
+                  h3,
+                  h4,
+                  h5,
+                  sectTable,
+                  textbody,
+                  strong,
+                  emphasis,
+                  preformatted,
+                  code,
+                  source,
+                  footnotelist,
+                  footnote,
+                  hr,
+                  numberedlist,
+                  unorderedlist,
+                  definitionlist,
+                  definitionterm,
+                  frmOuterCenter,
+                  frmOuterLeft,
+                  frmOuterRight,
+                  frmInner,
+                  imgCaption,
+                  tableCaption,
+                  sectTable,]:
+        doc.styles.addElement(style)
 
