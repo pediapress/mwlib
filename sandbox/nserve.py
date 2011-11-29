@@ -7,10 +7,6 @@ from __future__ import with_statement
 import gevent.monkey
 gevent.monkey.patch_socket()
 
-
-# import setproctitle
-# setproctitle.setproctitle("nserve")
-
 from qs.misc import call_in_loop
 from gevent import pool, pywsgi
 
@@ -192,12 +188,7 @@ class Application(object):
 
     def __call__(self, environ, start_response):
         request = Request(environ)
-
-        # if request.method != 'POST':
-        #     response = Response(status=405)
-        # else:
         response = self.dispatch(request)
-
         return response(environ, start_response)
 
     def dispatch(self, request):
@@ -305,10 +296,6 @@ class Application(object):
         metabook_data = params.metabook_data
         base_url = params.base_url
         writer = params.writer
-        force_render = params.force_render
-
-        # if busy:
-        #     return self.error_response("system overloaded. please try again later.", queue_full=1)
 
         if writer not in name2writer:
             return self.error_response("unknown writer %r" % writer)
@@ -398,13 +385,6 @@ class Application(object):
         log.info('render_kill %s %s' % (collection_id, writer))
 
         killed = False
-        # pid_path = self.get_path(collection_id, self.pid_filename, writer)
-        # try:
-        #     pid = int(open(pid_path, 'rb').read())
-        #     os.kill(pid, signal.SIGKILL)
-        #     killed = True
-        # except (OSError, ValueError, IOError):
-        #     pass
         return {
             'collection_id': collection_id,
             'writer': writer,
@@ -450,55 +430,12 @@ class Application(object):
         response.app_iter = readdata()
         return response
 
-        try:
-            log.info('download %s %s' % (collection_id, writer))
-
-            redir = os.environ.get("NSERVE_REDIRECT")
-            if redir:
-                response = Response()
-                response.status = 301
-                url = "%s/%s/%s/output.%s" % (redir, collection_id[:2], collection_id, writer)
-                print "REDIRECT:", url
-                response.location = url
-                return response
-
-            if 1:
-                response = Response()
-                response.headers["X-Accel-Redirect"] = "/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
-
-                if w.content_type:
-                    response.content_type = w.content_type
-
-                if w.file_extension:
-                    response.headers['Content-Disposition'] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
-
-                return response
-
-            output_path = self.get_path(collection_id, "output", writer)
-            os.utime(output_path, None)
-
-            data = open(output_path, "rb").read()
-
-            response = Response(data, content_length=len(data))
-
-            if w.content_type:
-                response.content_type = w.content_type
-
-            if w.file_extension:
-                response.headers['Content-Disposition'] = 'inline; filename=collection.%s' % (
-                    w.file_extension.encode('utf-8', 'ignore'))
-
-            return response
-        except Exception, exc:
-            log.ERROR('exception in do_download(): %r' % exc)
-            return Response(status=500)
-
     @json_response
     def do_zip_post(self, collection_id, post_data, is_new=False):
         params = self._get_params(post_data, collection_id=collection_id)
 
         try:
-            metabook_data = post_data['metabook']
+            post_data['metabook']
         except KeyError, exc:
             return self.error_response('POST argument required: %s' % exc)
 
