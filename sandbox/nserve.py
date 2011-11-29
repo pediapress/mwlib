@@ -186,17 +186,9 @@ def choose_idle_qserve():
 class Application(object):
     def __init__(self,
                  cache_dir="cache",
-                 default_writer='rl',
-                 report_from_mail=None,
-                 report_recipients=None):
-
+                 default_writer='rl'):
         self.cache_dir = cache_dir
-
         self.default_writer = default_writer
-        self.report_from_mail = report_from_mail
-        self.report_recipients = report_recipients
-
-        # self.qserve = rpcclient.serverproxy()
 
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -245,7 +237,6 @@ class Application(object):
         except Exception, exc:
             print "ERROR while dispatching %r: %s" % (command, dict(collection_id=collection_id, is_new=is_new, qserve=qserve))
             traceback.print_exc()
-            self.send_report_mail('exception', command=command)
             if command == "download":
                 raise exc
 
@@ -259,17 +250,6 @@ class Application(object):
         elif not isinstance(error, unicode):
             error = unicode(repr(error), 'ascii')
         return dict(error=error, **kw)
-
-    def send_report_mail(self, subject, **kwargs):
-        if not (self.report_from_mail and self.report_recipients):
-            return
-        utils.report(
-            system='mwlib.serve',
-            subject=subject,
-            from_email=self.report_from_mail,
-            mail_recipients=self.report_recipients,
-            **kwargs
-        )
 
     def get_collection_dir(self, collection_id):
         return os.path.join(self.cache_dir, collection_id[:2], collection_id)
