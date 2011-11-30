@@ -13,6 +13,7 @@ import os, sys
 import re
 from mwlib import xfail
 from StringIO import StringIO
+import py
 
 ODFWriter.ignoreUnknownNodes = False
 
@@ -25,6 +26,9 @@ odtfile_cb = removefile
 # calling this in process speeds up the tests considerably.
 
 def _get_odflint_module():
+    exe = py.path.local.sysfind("odflint")
+    assert exe is not None, "odflint not found"
+
     argv = sys.argv[:]
     stderr = sys.stderr
     odflint = sys.__class__("odflint")
@@ -32,13 +36,10 @@ def _get_odflint_module():
     try:
         sys.stderr = StringIO()
         del sys.argv[1:]
-        exec("""
-import pkg_resources
-try:
-    pkg_resources.run_script('odfpy', 'odflint')
-except SystemExit:
-    pass
-""", odflint.__dict__)
+        try:
+            execfile(exe.strpath, odflint.__dict__)
+        except SystemExit:
+            pass
         return odflint
     finally:
         sys.argv[:] = argv
