@@ -46,10 +46,6 @@ sdist-upload:: sdist
 pip-install:: clean sdist
 	pip install dist/*
 
-easy-install:: clean sdist
-	easy_install dist/*
-
 update::
 	git pull
-	make easy-install
-
+	make pip-install
