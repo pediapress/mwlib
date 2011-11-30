@@ -1,35 +1,21 @@
 #! /usr/bin/env py.test
 
-from mwlib import myjson as json
-import os
-import shutil
-import tempfile
 import time
-
+from mwlib import myjson as json
 from mwlib import serve
 
 
-class TestServe(object):
-    def setup_class(cls):
-        cls.tmpdir = tempfile.mkdtemp()
+def mkcolldir(tmpdir, name):
+    cid = serve.make_collection_id({'metabook': json.dumps({'title': name,  "type": "collection"})})
+    d = tmpdir.join(cid[0], cid[:2], cid).ensure(dir=1)
+    d.join("output.rl").write("bla")
+    return d
 
-    def teardown_class(cls):
-        shutil.rmtree(cls.tmpdir)
 
-    def mkcolldir(self, name):
-        cid = serve.make_collection_id({'metabook': json.dumps({'title': name,  "type":"collection"})})
-        d = os.path.join(self.tmpdir, cid[0], cid[:2], cid)
-        os.makedirs(d)
-        f = open(os.path.join(d, 'output.rl'), 'wb')
-        f.write('bla')
-        f.close()
-        return d
-
-    def test_purge_cache(self):
-        d1 = self.mkcolldir('c1')
-        d2 = self.mkcolldir('c2')
-        t = time.time() - 2
-        os.utime(os.path.join(d2, 'output.rl'), (t, t))
-        serve.purge_cache(1, self.tmpdir)
-        assert os.path.exists(d1)
-        assert not os.path.exists(d2)
+def test_purge_cache(tmpdir):
+    d1 = mkcolldir(tmpdir, 'c1')
+    d2 = mkcolldir(tmpdir, 'c2')
+    d2.join("output.rl").setmtime(time.time() - 2)
+    serve.purge_cache(1, tmpdir.strpath)
+    assert d1.check()
+    assert not d2.check()
