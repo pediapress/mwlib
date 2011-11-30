@@ -28,8 +28,8 @@ class TestServe(object):
     def test_purge_cache(self):
         d1 = self.mkcolldir('c1')
         d2 = self.mkcolldir('c2')
-        time.sleep(2)
-        os.utime(os.path.join(d1, 'output.rl'), None)
+        t = time.time() - 2
+        os.utime(os.path.join(d2, 'output.rl'), (t, t))
         serve.purge_cache(1, self.tmpdir)
         assert os.path.exists(d1)
         assert not os.path.exists(d2)
