@@ -12,6 +12,7 @@ import tempfile
 import os, sys
 import re
 from mwlib import xfail
+from StringIO import StringIO
 
 ODFWriter.ignoreUnknownNodes = False
 
@@ -19,6 +20,41 @@ ODFWriter.ignoreUnknownNodes = False
 def removefile(fn):
     os.remove(fn)
 odtfile_cb = removefile
+
+# read the odflint script as module.
+# calling this in process speeds up the tests considerably.
+
+def _get_odflint_module():
+    argv = sys.argv[:]
+    stderr = sys.stderr
+    odflint = sys.__class__("odflint")
+
+    try:
+        sys.stderr = StringIO()
+        del sys.argv[1:]
+        exec("""
+import pkg_resources
+try:
+    pkg_resources.run_script('odfpy', 'odflint')
+except SystemExit:
+    pass
+""", odflint.__dict__)
+        return odflint
+    finally:
+        sys.argv[:] = argv
+        sys.stderr = stderr
+
+odflint = _get_odflint_module()
+
+def lintfile(path):
+    stdout, stderr = sys.stdout, sys.stderr
+    try:
+        sys.stdout = sys.stderr = StringIO()
+        odflint.lint(path)
+        return sys.stdout.getvalue()
+    finally:
+        sys.stdout = stdout
+        sys.stderr = stderr
 
 
 class ValidationError(Exception):
@@ -34,10 +70,7 @@ def validate(odfw):
     fh, tfn = tempfile.mkstemp() 
     odfw.getDoc().save(tfn, True)
     tfn +=".odt"
-    cmd = "odflint %s" %tfn
-    p =subprocess.Popen(cmd, shell=True,stderr=subprocess.PIPE,stdout=subprocess.PIPE, close_fds=True)
-    p.wait()
-    r = p.stderr.read() + p.stdout.read()
+    r = lintfile(tfn)
     if len(r):
         raise ValidationError, r
     odtfile_cb(tfn)
