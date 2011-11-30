@@ -2,18 +2,16 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
+
+import os, sys, re, tempfile
+from StringIO import StringIO
+import py
+
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import advtree
 import mwlib.parser
 from mwlib.odfwriter import ODFWriter, preprocess
-import subprocess
-import tempfile
-import os, sys
-import re
-from mwlib import xfail
-from StringIO import StringIO
-import py
 
 ODFWriter.ignoreUnknownNodes = False
 
@@ -456,3 +454,4 @@ B (''Molothrus ater'') are
     xml = getXML(raw)
     print xml
     assert "Molothrus" in xml
+
