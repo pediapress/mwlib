@@ -31,7 +31,9 @@ develop:: all
 	python setup.py develop
 
 clean::
-	git clean -xfd
+	rm -rf build dist
+	rm -f mwlib/templ/evaluate.c mwlib/templ/nodes.c mwlib/_uscan.cc
+	rm -f mwlib/_gitversion.py*
 
 sdist:: all
 	echo gitversion=\"$(shell git describe --tags)\" >mwlib/_gitversion.py
