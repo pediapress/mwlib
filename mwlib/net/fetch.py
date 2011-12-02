@@ -239,6 +239,7 @@ class fetcher(object):
 
         self.api = api
         self.api.report = self.report
+        self.api_cache = {self.api.apiurl: self.api,}
 
         self.fsout = fsout
         self.licenses = licenses
@@ -639,11 +640,15 @@ class fetcher(object):
     def _get_mwapi_for_path(self, path):
         urls = mwapi.guess_api_urls(path)
         for url in urls:
+            if url in self.api_cache:
+                return self.api_cache[url]
+        for url in urls:
             try:
-                res = mwapi.mwapi(url)
-                res.ping()
-                res.set_limit()
-                return res
+                api = mwapi.mwapi(url)
+                api.ping()
+                api.set_limit()
+                self.api_cache[url] = api
+                return api
             except Exception:
                 # traceback.print_exc()
                 continue
