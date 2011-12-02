@@ -46,6 +46,7 @@ sdist-upload:: sdist
 	python setup.py build sdist upload
 
 pip-install:: clean sdist
+	pip uninstall -y mwlib || true
 	pip install dist/*
 
 update::
