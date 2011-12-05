@@ -13,11 +13,11 @@ Contents:
 
    basics
    installation
+   renderserver
    commands
    internals
    changelog
    collection
-
 
 
 Indices and tables
