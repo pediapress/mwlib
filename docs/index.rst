@@ -16,8 +16,8 @@ Contents:
    renderserver
    commands
    internals
-   changelog
    collection
+   changelog
 
 
 Indices and tables
