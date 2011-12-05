@@ -5,7 +5,7 @@ monkey.patch_all()
 
 import os, sys, time
 
-cachedir = "cache"
+cachedir = None
 cacheurl = None
 
 from mwlib.async import proc
@@ -163,6 +163,9 @@ def main():
             cacheurl = a
         if o=="--numprocs":
             numgreenlets = int(a)
+
+    if cachedir is None:
+        sys.exit("nslave.py: missing --cachedir argument")
 
     if not cacheurl:
         sys.exit("--url option missing")
