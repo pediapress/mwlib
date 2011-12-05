@@ -477,21 +477,26 @@ def main():
     pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     import argv
-    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
+    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port= --cachedir=")
     qs = []
     port = 8899
+    cachedir = None
+
     for o, a in opts:
         if o == "--port":
             port = int(a)
         elif o == "--qserve":
             qs.append(a)
+        elif o == "--cachedir":
+            cachedir = a
+
+    if cachedir is None:
+        sys.exit("nserve.py: missing --cachedir argument")
 
     if not qs:
         qs.append("localhost:14311")
 
     _parse_qs(qs)
-
-    cachedir = "cache"
     cachedir = utils.ensure_dir(cachedir)
     for i in range(0x100, 0x200):
         p = os.path.join(cachedir, hex(i)[3:])
