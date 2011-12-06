@@ -131,7 +131,7 @@ def test_app_do_render_overloaded(app):
 def test_app_do_render_missing_metabook(app, busy):
     busy[("host1", 8000)] = False
 
-    code, data = post(command="render")
+    code, data = post(command="render", writer="odf")
     print code, data
 
     assert code == 200
