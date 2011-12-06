@@ -1,25 +1,21 @@
 #! /usr/bin/env python
 
-from __future__ import with_statement
-
 """WSGI server interface to mw-render and mw-zip/mw-post"""
+
+from __future__ import with_statement
 
 import gevent.monkey
 gevent.monkey.patch_socket()
 
-from qs.misc import call_in_loop
-from gevent import pool, pywsgi
-
-import sys,  os, re, StringIO, urllib2, urlparse, traceback
-
+import sys, re, StringIO, urllib2, urlparse, traceback
 from hashlib import md5
 
 from webob import Request, Response
+from gevent import pool, pywsgi
 
-from mwlib import myjson as json
-from mwlib import log, utils, _version
+from qs.misc import call_in_loop
+from mwlib import myjson as json, log, _version
 from mwlib.metabook import calc_checksum
-
 from mwlib.async import rpcclient
 
 log = log.Log('mwlib.serve')
