@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'mwlib'
-copyright = u'2011, Volker Haas, Ralf Schmitt, Johannes Beigel'
+copyright = u'PediaPress GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
