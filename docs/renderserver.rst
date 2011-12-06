@@ -7,7 +7,7 @@ Running a renderserver
 Overview
 --------------
 
-Running a renderserver requires running multiple programs [#mw-serve]_:
+Running a renderserver consists in running multiple programs [#mw-serve]_:
 
 nserve.py
   nserve is a HTTP server. The Collection extension is talking to that
@@ -46,3 +46,63 @@ Another alternative is to use `supervisor <http://supervisord.org/>`_.
    program at all by using the mwlib.cgi script. These programs have
    been removed in favor of the new tools, which provide the ability
    to scale an installation.
+
+nserve.py usage
+----------------
+nserve understands the following options:
+
+``--port=PORT``
+
+  specify port to listen on. Default is to listen on port 8899 on any
+  interface.
+
+``--qserve=HOST:PORT``
+  register qserve instance running on host HOST listening on port PORT
+
+Any additional arguments are interpreted as additional qserve
+instances to register.
+
+The following command starts nserve listening on port 8000 using two
+qserve instances::
+
+  nserve.py --port 8000 example1:14311 example2
+
+
+
+mw-qserve usage
+---------------
+mw-qserve understands the following options:
+
+``-p PORT``
+  specify port to listen on. Default is to listen on port 14311
+
+``-i INTERFACE``
+  specify interface to listen on. Default is to listen on any
+  interface.
+
+
+
+nslave.py usage
+------------------
+nslave understands the following options:
+
+``--cachedir=CACHEDIR``
+
+  specify cachedir to use. this is where nslave.py will store
+  generated documents.
+
+``--url=URL``
+  specify url under which the cache directory is being served
+
+``--numprocs=NUMPROCS``
+  allow up to NUMPROCS parallel jobs to be executed
+
+
+
+postman.py usage
+-------------------
+postman understands the following options:
+
+``--cachedir=CACHDIR``
+  specify cachedir to use. use the same value as specified when
+  calling nslave.py
