@@ -475,6 +475,8 @@ def main():
         elif o == "--qserve":
             qs.append(a)
 
+    qs += args
+
     if not qs:
         qs.append("localhost:14311")
 
