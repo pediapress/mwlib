@@ -11,23 +11,25 @@ cacheurl = None
 from mwlib.async import proc
 from mwlib.utils import garble_password
 
+
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
 
+
 def system(args, timeout=None):
-    stime=time.time()
+    stime = time.time()
 
     retcode, stdout = proc.run_cmd(args, timeout=timeout)
 
-    d = time.time()-stime
+    d = time.time() - stime
 
     pub_args = garble_password(args)
     msg = []
     a = msg.append
     a("%s %s %r\n" % (retcode, d, pub_args))
-        
+
     writemsg = lambda: sys.stderr.write("".join(msg))
-    
+
     if retcode != 0:
         a(stdout)
         a("\n====================\n")
@@ -37,7 +39,7 @@ def system(args, timeout=None):
         raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" % (retcode, pub_args,  "\n".join(lines)))
 
     writemsg()
-    
+
 
 def _get_args(writer_options=None,
               template_blacklist=None,
@@ -48,10 +50,9 @@ def _get_args(writer_options=None,
               zip_only=False,
               login_credentials=None,
               **kw):
-    
+
     args = []
-    
-        
+
     if template_blacklist:
         args.extend(['--template-blacklist', template_blacklist])
     if template_exclusion_category:
@@ -62,7 +63,7 @@ def _get_args(writer_options=None,
         args.extend(['--print-template-pattern', print_template_pattern])
 
     if login_credentials:
-        username, password, domain = (login_credentials.split(":", 3)+[None]*3)[:3]
+        username, password, domain = (login_credentials.split(":", 3) + [None] * 3)[:3]
         assert username and password, "bad login_credentials"
         args.extend(["--username", username, "--password", password])
         if domain:
@@ -70,7 +71,7 @@ def _get_args(writer_options=None,
 
     if zip_only:
         return args
-    
+
     if writer_options:
         args.extend(['--writer-options', writer_options])
 
@@ -79,15 +80,17 @@ def _get_args(writer_options=None,
 
     return args
 
+
 class commands(object):
     def statusfile(self):
         host = self.proxy._rpcclient.host
         port = self.proxy._rpcclient.port
         return 'qserve://%s:%s/%s' % (host, port, self.jobid)
-        
+
     def rpc_makezip(self, params=None):
-        def doit(metabook_data=None, collection_id=None, base_url=None,  **kw):
+        def doit(metabook_data=None, collection_id=None, base_url=None, **kw):
             dir = get_collection_dir(collection_id)
+
             def getpath(p):
                 return os.path.join(dir, p)
 
@@ -97,13 +100,13 @@ class commands(object):
                     return
             else:
                 os.mkdir(dir)
-                
+
             metabook_path = getpath("metabook.json")
 
             args = ["mw-zip", "-o", zip_path, "-m", metabook_path, "--status", self.statusfile()]
             if base_url:
                 args.extend(['--config', base_url])
-                
+
             args.extend(_get_args(zip_only=True, **params))
 
             if metabook_data:
@@ -111,14 +114,15 @@ class commands(object):
                 f.write(metabook_data)
                 f.close()
 
-            system(args, timeout=8*60.0)
+            system(args, timeout=8 * 60.0)
 
         return doit(**params)
-    
+
     def rpc_render(self, params=None):
         def doit(metabook_data=None, collection_id=None, base_url=None, writer=None, **kw):
             writer = writer or "rl"
             dir = get_collection_dir(collection_id)
+
             def getpath(p):
                 return os.path.join(dir, p)
 
@@ -127,29 +131,27 @@ class commands(object):
             args = ["mw-render",  "-w",  writer, "-c", getpath("collection.zip"), "-o", outfile,  "--status", self.statusfile()]
 
             args.extend(_get_args(**params))
-            
-            system(args, timeout=15*60.0)
+
+            system(args, timeout=15 * 60.0)
             os.chmod(outfile, 0644)
-            size = os.path.getsize(outfile)            
-            url = cacheurl+"/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
+            size = os.path.getsize(outfile)
+            url = cacheurl + "/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
             return dict(url=url, size=size)
-        
-        
-        
-            
+
         return doit(**params)
-    
-               
+
     def rpc_post(self, params):
         def doit(metabook_data=None, collection_id=None, base_url=None, post_url=None, **kw):
             dir = get_collection_dir(collection_id)
+
             def getpath(p):
                 return os.path.join(dir, p)
 
-            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ), timeout=20*60)
+            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
             args = ["mw-post", "-i", getpath("collection.zip"), "-p", post_url]
             system(args)
         return doit(**params)
+
 
 def main():
     global cachedir, cacheurl
@@ -157,11 +159,11 @@ def main():
     import argv
     opts, args = argv.parse(sys.argv[1:], "--cachedir= --url= --numprocs=")
     for o, a in opts:
-        if o=="--cachedir":
+        if o == "--cachedir":
             cachedir = a
-        if o=="--url":
+        if o == "--url":
             cacheurl = a
-        if o=="--numprocs":
+        if o == "--numprocs":
             numgreenlets = int(a)
 
     if cachedir is None:
@@ -169,11 +171,9 @@ def main():
 
     if not cacheurl:
         sys.exit("--url option missing")
-        
-        
-        
+
     from mwlib.async import slave
     slave.main(commands, numgreenlets=numgreenlets, argv=args)
-    
-if __name__=="__main__":        
+
+if __name__ == "__main__":
     main()
