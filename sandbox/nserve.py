@@ -180,10 +180,7 @@ def choose_idle_qserve():
 
 
 class Application(object):
-    def __init__(self,
-                 cache_dir="cache",
-                 default_writer='rl'):
-        self.cache_dir = cache_dir
+    def __init__(self, default_writer='rl'):
         self.default_writer = default_writer
 
     def __call__(self, environ, start_response):
@@ -242,9 +239,6 @@ class Application(object):
             error = unicode(repr(error), 'ascii')
         return dict(error=error, **kw)
 
-    def get_collection_dir(self, collection_id):
-        return os.path.join(self.cache_dir, collection_id[:2], collection_id)
-
     def check_collection_id(self, collection_id):
         """Return True iff collection with given ID exists"""
 
@@ -255,12 +249,6 @@ class Application(object):
     def new_collection(self, post_data):
         collection_id = make_collection_id(post_data)
         return collection_id
-
-    def get_path(self, collection_id, filename, ext=None):
-        p = os.path.join(self.get_collection_dir(collection_id), filename)
-        if ext is not None:
-            p += '.' + ext[:10]
-        return p
 
     def is_good_baseurl(self, url):
         netloc = urlparse.urlparse(url)[1].lower()
@@ -477,34 +465,23 @@ def main():
     pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     import argv
-    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port= --cachedir=")
+    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
     qs = []
     port = 8899
-    cachedir = None
 
     for o, a in opts:
         if o == "--port":
             port = int(a)
         elif o == "--qserve":
             qs.append(a)
-        elif o == "--cachedir":
-            cachedir = a
-
-    if cachedir is None:
-        sys.exit("nserve.py: missing --cachedir argument")
 
     if not qs:
         qs.append("localhost:14311")
 
     _parse_qs(qs)
-    cachedir = utils.ensure_dir(cachedir)
-    for i in range(0x100, 0x200):
-        p = os.path.join(cachedir, hex(i)[3:])
-        if not os.path.isdir(p):
-            os.mkdir(p)
 
     def app(*args, **kwargs):
-        return Application(cachedir)(*args, **kwargs)
+        return Application()(*args, **kwargs)
 
     address = "0.0.0.0", port
     server = pywsgi.WSGIServer(address, app)
