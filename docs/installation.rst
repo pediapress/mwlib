@@ -132,3 +132,14 @@ Install texvc::
   cd texvc; make; make install PREFIX=~/pp
 
 Then :ref:`test the installation<test install>`.
+
+
+Development version
+==============================
+The source code is managed via git and hosted on github. Please visit
+`pediapress's profile on github <https://github.com/pediapress>`_ to
+get an overview of what's available and for further instruction on how
+to checkout the repositories.
+
+You will also need to install cython, re2c and gettext if you plan to
+build from the git repositories.
