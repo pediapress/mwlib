@@ -5,7 +5,8 @@
 from __future__ import with_statement
 
 import gevent.monkey
-gevent.monkey.patch_socket()
+if __name__ == "__main__":
+    gevent.monkey.patch_all()
 
 import sys, re, StringIO, urllib2, urlparse, traceback
 from hashlib import md5
