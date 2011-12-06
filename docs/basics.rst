@@ -16,3 +16,12 @@ public render server run by pediapress GmbH. Please read
 
 If you need to run your own render server instance, you'll have to
 install mwlib and mwlib.rl first. Please read :doc:`installation`.
+
+Contact/Need help
+==================
+If you need help with mwlib or the Collection extension you can either
+browse the `mwlib mailing list
+<http://groups.google.com/group/mwlib>`_ or `subscribe to it via mail <mailto:mwlib+subscribe@googlegroups.com>`_.
+
+The developers can also be found on IRC in the `#pediapress channel
+<irc://irc.freenode.net/pediapress>`_
