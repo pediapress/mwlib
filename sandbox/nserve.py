@@ -34,10 +34,11 @@ class bunch(object):
 # -- these writers do not have to be installed on the machine that's running the server
 # -- and we also like to speedup the get_writers method
 
-name2writer = {'rl': bunch(file_extension='pdf', name='rl', content_type='application/pdf'),
+name2writer = {'odf': bunch(file_extension='odt', name='odf', content_type='application/vnd.oasis.opendocument.text'),
+               'rl': bunch(file_extension='pdf', name='rl', content_type='application/pdf'),
+               'xhtml': bunch(file_extension='html', name='xhtml', content_type='text/xml'),
                'xl': bunch(file_extension='pdf', name='xl', content_type='application/pdf'),
-               'odf': bunch(file_extension='odt', name='odf', content_type='application/vnd.oasis.opendocument.text')}
-
+               'zim': bunch(file_extension='zim', name='zim', content_type='application/zim')}
 
 def get_writers(name2writer):
     import pkg_resources
