@@ -7,7 +7,16 @@ Running a renderserver
 Overview
 --------------
 
-Running a renderserver consists in running multiple programs [#mw-serve]_:
+Running a renderserver consists in running multiple programs [#mw-serve]_.
+Unless you have some special requirements, you should be able to start
+a working renderserver by running the following commands::
+
+  $ nserve.py
+  $ mw-qserve
+  $ nslave.py --cachedir ~/cache/
+  $ postman.py
+
+These programs have the following purposes:
 
 nserve.py
   nserve is a HTTP server. The Collection extension is talking to that
@@ -23,11 +32,10 @@ mw-qserve
 nslave.py
   nslave pulls new jobs from exactly one mw-qserve instance and calls
   the mw-zip and mw-render programs in order to download article
-  collections and convert them to different output formats.
-  nslave uses a cache directory to store the generated documents.
-
-  You also need to start a webserver like nginx or apache serving the
-  content of the cache directory for each nslave instance
+  collections and convert them to different output formats.  nslave
+  uses a cache directory to store the generated documents.  nslave
+  also starts an internal http server serving the content of the cache
+  directory.
 
 postman.py
   postman uploads zip collections to pediapress in case someone likes
@@ -40,6 +48,7 @@ using `runit <http://smarden.org/runit/>`_ for process
 supervision. `daemontools <http://cr.yp.to/daemontools.html>`_ is
 similar solution.
 Another alternative is to use `supervisor <http://supervisord.org/>`_.
+
 
 .. [#mw-serve] In mwlib prior to version 0.13 it was possible to get
    away with running a single ``mw-serve`` program or even running no
@@ -91,12 +100,15 @@ nslave understands the following options:
   specify cachedir to use. this is where nslave.py will store
   generated documents.
 
+``--serve-files-port``
+  port on which to start the http server (default is 8898)
+
 ``--url=URL``
-  specify url under which the cache directory is being served
+  specify url under which the cache directory is being served. The
+  default is to compute this value dynamically.
 
 ``--numprocs=NUMPROCS``
   allow up to NUMPROCS parallel jobs to be executed
-
 
 
 postman.py usage
