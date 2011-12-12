@@ -40,6 +40,7 @@ name2writer = {'odf': bunch(file_extension='odt', name='odf', content_type='appl
                'xl': bunch(file_extension='pdf', name='xl', content_type='application/pdf'),
                'zim': bunch(file_extension='zim', name='zim', content_type='application/zim')}
 
+
 def get_writers(name2writer):
     import pkg_resources
 
@@ -360,22 +361,6 @@ class Application(object):
                 info = dict(status="data fetched. waiting for render process..")
 
         return retval(state="progress", status=info)
-
-    @json_response
-    def do_render_kill(self, collection_id, post_data, is_new=False):
-        if is_new:
-            return self.error_response('POST argument required: collection_id')
-
-        writer = post_data.get('writer', self.default_writer)
-
-        log.info('render_kill %s %s' % (collection_id, writer))
-
-        killed = False
-        return {
-            'collection_id': collection_id,
-            'writer': writer,
-            'killed': killed,
-        }
 
     def do_download(self, collection_id, post_data, is_new=False):
         if is_new:
