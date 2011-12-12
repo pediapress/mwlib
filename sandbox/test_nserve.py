@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-import pytest, gevent, nserve, urllib, urllib2
+import pytest, gevent, nserve, urllib, urllib2, bottle
 import wsgi_intercept.urllib2_intercept
 
 try:
@@ -30,13 +30,9 @@ raise_greenletexit = get_exception_raiser("killed", gevent.GreenletExit)
 def pytest_funcarg__app(request):
     wsgi_intercept.urllib2_intercept.install_opener()
     request.addfinalizer(wsgi_intercept.urllib2_intercept.uninstall_opener)
-
-    tmpdir = request.getfuncargvalue("tmpdir")
-    app = nserve.Application(tmpdir.strpath)
-    wsgi_intercept.add_wsgi_intercept('app.de', 80, lambda: app)
+    wsgi_intercept.add_wsgi_intercept('app.de', 80, bottle.default_app)
     request.addfinalizer(lambda: wsgi_intercept.remove_wsgi_intercept("app.de", 80))
-
-    return app
+    return None
 
 
 def pytest_funcarg__busy(request):
@@ -66,8 +62,8 @@ def test_make_collection_id_version(monkeypatch):
     assert id1 != id2
 
 
-def test_check_collection_id(app):
-    cc = app.check_collection_id
+def test_check_collection_id():
+    cc = nserve.Application().check_collection_id
     assert not cc("a" * 15)
     assert not cc("a" * 17)
     assert cc("a" * 16)

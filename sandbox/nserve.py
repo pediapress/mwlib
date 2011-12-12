@@ -11,7 +11,6 @@ if __name__ == "__main__":
 import sys, re, StringIO, urllib2, urlparse, traceback
 from hashlib import md5
 
-from webob import Request, Response
 from gevent import pool, pywsgi
 
 from qs.misc import call_in_loop
@@ -86,17 +85,6 @@ def make_collection_id(data):
         sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
 
     return md5(sio.getvalue()).hexdigest()[:16]
-
-
-def json_response(fn):
-    """Decorator wrapping result of decorated function in JSON response"""
-
-    def wrapper(*args, **kwargs):
-        result = fn(*args, **kwargs)
-        if isinstance(result, Response):
-            return result
-        return Response(json.dumps(result), content_type='application/json')
-    return wrapper
 
 from mwlib import lrucache
 busy = dict()
@@ -178,27 +166,31 @@ def choose_idle_qserve():
     return random.choice(idle)  # XXX probably store number of render jobs in busy
 
 
+from bottle import request, default_app, post, get, HTTPResponse
+
+
+@get('<path:re:.*>')
+@post('<path:re:.*>')
+def dispatch_command(path):
+    return Application().dispatch(request)
+
+
 class Application(object):
     def __init__(self, default_writer='rl'):
         self.default_writer = default_writer
-
-    def __call__(self, environ, start_response):
-        request = Request(environ)
-        response = self.dispatch(request)
-        return response(environ, start_response)
 
     def dispatch(self, request):
         try:
             command = request.params['command']
         except KeyError:
             log.error("no command given")
-            return Response(body="no command given", status=400)
+            raise HTTPResponse("no command given", status=400)
 
         try:
             method = getattr(self, 'do_%s' % command)
         except AttributeError:
             log.error("no such command: %r" % (command, ))
-            return Response(body="no such command: %r" % (command, ), status=400)
+            raise HTTPResponse("no such command: %r" % (command, ), status=400)
 
         collection_id = request.params.get('collection_id')
         if not collection_id:
@@ -207,7 +199,7 @@ class Application(object):
         else:
             is_new = False
             if not self.check_collection_id(collection_id):
-                return Response(status=404)
+                raise HTTPResponse(status=404)
 
         try:
             qserve = collid2qserve[collection_id]
@@ -230,7 +222,6 @@ class Application(object):
             return self.error_response('error executing command %r: %s' % (
                     command, exc,))
 
-    @json_response
     def error_response(self, error, **kw):
         if isinstance(error, str):
             error = unicode(error, 'utf-8', 'ignore')
@@ -277,7 +268,6 @@ class Application(object):
 
         return params
 
-    @json_response
     def do_render(self, collection_id, post_data, is_new=False):
         params = self._get_params(post_data,  collection_id=collection_id)
         metabook_data = params.metabook_data
@@ -311,7 +301,6 @@ class Application(object):
 
         return response
 
-    @json_response
     def do_render_status(self, collection_id, post_data, is_new=False):
         if is_new:
             return self.error_response('POST argument required: collection_id')
@@ -377,19 +366,19 @@ class Application(object):
         f = urllib2.urlopen(download_url)
         info = f.info()
 
-        response = Response()
+        header = {}
 
-        for h in ("Content-Length",):  # "Content-Type", "Content-Disposition"):
+        for h in ("Content-Length",):
             v = info.getheader(h)
             if v:
                 print "copy header:", h, v
-                response.headers[h] = v
+                header[h] = v
 
         if w.content_type:
-            response.content_type = w.content_type
+            header["Content-Type"] = w.content_type
 
         if w.file_extension:
-            response.headers['Content-Disposition'] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
+            header['Content-Disposition'] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
 
         def readdata():
             while 1:
@@ -398,10 +387,8 @@ class Application(object):
                     break
                 yield d
 
-        response.app_iter = readdata()
-        return response
+        return HTTPResponse(output=readdata(), header=header)
 
-    @json_response
     def do_zip_post(self, collection_id, post_data, is_new=False):
         params = self._get_params(post_data, collection_id=collection_id)
 
@@ -445,7 +432,7 @@ def _parse_qs(qs):
 
 
 def main():
-    pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
+    # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     import argv
     opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
@@ -465,11 +452,8 @@ def main():
 
     _parse_qs(qs)
 
-    def app(*args, **kwargs):
-        return Application()(*args, **kwargs)
-
     address = "0.0.0.0", port
-    server = pywsgi.WSGIServer(address, app)
+    server = pywsgi.WSGIServer(address, default_app())
 
     watchers = pool.Pool()
     for x in qs:
