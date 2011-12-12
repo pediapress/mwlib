@@ -3,13 +3,37 @@
 from gevent import monkey
 monkey.patch_all()
 
-import os, sys, time
+import os, sys, time, socket
 
 cachedir = None
 cacheurl = None
 
 from mwlib.async import proc
 from mwlib.utils import garble_password
+
+
+# -- find_ip is copied from woof sources
+# Utility function to guess the IP (as a string) where the server can
+# be reached from the outside. Quite nasty problem actually.
+
+def find_ip():
+   # we get a UDP-socket for the TEST-networks reserved by IANA.  It
+   # is highly unlikely, that there is special routing used for these
+   # networks, hence the socket later should give us the ip address of
+   # the default route.  We're doing multiple tests, to guard against
+   # the computer being part of a test installation.
+
+    candidates = []
+    for test_ip in ["192.0.2.0", "198.51.100.0", "203.0.113.0"]:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect((test_ip, 80))
+        ip_addr = s.getsockname()[0]
+        s.close()
+        if ip_addr in candidates:
+            return ip_addr
+        candidates.append(ip_addr)
+
+    return candidates[0]
 
 
 def get_collection_dir(collection_id):
@@ -141,25 +165,64 @@ class commands(object):
         return doit(**params)
 
 
+def start_serving_files(cachedir, port):
+    from gevent.pywsgi import WSGIServer
+    from bottle import route, static_file, default_app
+    cachedir = os.path.abspath(cachedir)
+
+    @route('/cache/:filename#.*#')
+    def server_static(filename):
+        response = static_file(filename, root=cachedir, mimetype="application/octet-stream")
+        if filename.endswith(".rl"):
+            response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
+        return response
+    s = WSGIServer(("", port), default_app())
+    s.start()
+    return s
+
+
+def make_cachedir(cachedir):
+    if not os.path.isdir(cachedir):
+        os.makedirs(cachedir)
+    for i in range(0x100, 0x200):
+        p = os.path.join(cachedir, hex(i)[3:])
+        if not os.path.isdir(p):
+            os.mkdir(p)
+
+
 def main():
     global cachedir, cacheurl
     numgreenlets = 10
+    http_port = 8898
+    serve_files = True
     import argv
-    opts, args = argv.parse(sys.argv[1:], "--cachedir= --url= --numprocs=")
+    opts, args = argv.parse(sys.argv[1:], "--serve-files-port= --serve-files --cachedir= --url= --numprocs=")
     for o, a in opts:
         if o == "--cachedir":
             cachedir = a
-        if o == "--url":
+        elif o == "--url":
             cacheurl = a
-        if o == "--numprocs":
+        elif o == "--numprocs":
             numgreenlets = int(a)
+        elif o == "--no-serve-files":
+            serve_files = False
+        elif o == "--serve-files-port":
+            http_port = int(a)
 
     if cachedir is None:
         sys.exit("nslave.py: missing --cachedir argument")
 
+    if serve_files:
+        wsgi_server = start_serving_files(cachedir, http_port)
+        port = wsgi_server.socket.getsockname()[1]
+        if not cacheurl:
+            cacheurl = "http://%s:%s/cache" % (find_ip(), port)
+        print "serving files from %r at url %s" % (cachedir, cacheurl)
+
     if not cacheurl:
         sys.exit("--url option missing")
 
+    make_cachedir(cachedir)
     from mwlib.async import slave
     slave.main(commands, numgreenlets=numgreenlets, argv=args)
 
