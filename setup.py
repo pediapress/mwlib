@@ -114,7 +114,8 @@ def main():
         maintainer_email="info@pediapress.com",
         long_description=read_long_description())
 
-    checkpil()
+    if "install" in sys.argv or "develop" in sys.argv:
+        checkpil()
 
 if __name__ == '__main__':
     main()
