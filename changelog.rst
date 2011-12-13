@@ -5,12 +5,12 @@ Changelog
 mwlib
 ==========================
 
-2011-XXXX  release 0.13.1
+2011-12-13  release 0.13.1
 --------------------------
-- replaced mw-serve with XXX
+- replaced mw-serve with nserve.py
 - removed CGI support
 - removed lots of obsolete code
-
+- updated documentation, available online at http://mwlib.readthedocs.org
 
 2011-10-24 release 0.12.17
 --------------------------

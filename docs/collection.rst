@@ -137,7 +137,7 @@ people do not have to change them:
 
 ``$wgCollectionContentTypeToFilename`` (array)
    An array matching content types to filenames for downloaded documents. The
-   default is:
+   default is::
 
 	  $wgCollectionContentTypeToFilename = array(
 		  'application/pdf' => 'collection.pdf',
