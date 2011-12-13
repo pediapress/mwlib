@@ -196,7 +196,7 @@ def main():
     http_port = 8898
     serve_files = True
     import argv
-    opts, args = argv.parse(sys.argv[1:], "--serve-files-port= --serve-files --cachedir= --url= --numprocs=")
+    opts, args = argv.parse(sys.argv[1:], "--no-serve-files --serve-files-port= --serve-files --cachedir= --url= --numprocs=")
     for o, a in opts:
         if o == "--cachedir":
             cachedir = a
