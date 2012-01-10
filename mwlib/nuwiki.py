@@ -257,6 +257,16 @@ class nuwiki(object):
         res.sort()
         return res
 
+    def select(self, start, end):
+        res = set()
+        for p in self.revisions.values():
+            suffix = self.nshandler.splitname(p.title, p.ns)[1]
+            if start <= suffix <= end:
+                res.add(p.title)
+        res = list(res)
+        res.sort()
+        return res
+
     def extractHTML(self, parsed_html):
         html = {}
         for article in parsed_html:

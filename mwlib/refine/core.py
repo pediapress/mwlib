@@ -858,6 +858,27 @@ class parse_uniq(object):
         txt = util.replace_html_entities(txt)
         return T(type=T.t_text, text=txt)
 
+    def create_pages(self, name, vlist, inner, xopts):
+        expander = xopts.expander
+
+        if not vlist:
+            vlist = {}
+        s = vlist.get("from")
+        e = vlist.get("to")
+        children = []
+        if s and e and expander:
+            pages = expander.db.select(s, e)
+            rawtext = u"".join(u"{{%s}}\n" % x for x in pages)
+            te = expander.__class__(rawtext, pagename=xopts.pagename, wikidb=expander.db)
+            children = parse_txt(te.expandTemplates(True),
+                                 xopts=XBunch(**xopts.__dict__),
+                                 expander=te,
+                                 uniquifier=te.uniquifier)
+
+
+        return T(type=T.t_complex_tag, tagname=name, vlist=vlist, children=children)
+
+
 class XBunch(object):
     def __init__(self, **kw):
         self.__dict__.update(kw)

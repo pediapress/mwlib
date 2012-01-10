@@ -94,7 +94,7 @@ aoaudio aovideo bloglist cgamer ggtube googlemap
 gtrailer gvideo nicovideo tangler video videogallery
 wegame youtube imagelink badge comments createform
 fan featuredimage gallerypopulate linkfilter listpages
-loggedin loggedout newusers pollembed randomfeatureduser
+loggedin loggedout newusers pagequality pollembed randomfeatureduser
 randomgameunit randomimagebycategory randomuserswithavatars
 rss siteactivity userpoll videogallerypopulate vote
 welcomeuser xsound pageby uml graphviz categorytree summary""".split()
