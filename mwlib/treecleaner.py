@@ -134,8 +134,9 @@ class TreeCleaner(object):
                             HorizontalRule, ImageLink, ImageMap, InterwikiLink, LangLink, Link, Math,
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, Timeline, URL]
         # exceptions to the above. if any of the list items is explicitly set as a css style the node is not removed
-        self.childless_exceptions = {Div: [u'width', u'height'],
-                                     Span: [u'width', u'height'],}
+        common_attrs = [u'width', u'height', u'page-break-before', u'page-break-after']
+        self.childless_exceptions = {Div: common_attrs,
+                                     Span: common_attrs}
 
         # FIXME: not used currently. remove if this is not used soon. could be used as reference
         # list nodes that apply styles to their children
