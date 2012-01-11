@@ -135,7 +135,7 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
 
     if render_engine == 'blahtexml':
         result = _renderMathBlahtex(latex, output_path=output_path, output_mode=output_mode)
-    if not len(result) and output_mode == 'png':
+    if not result and output_mode == 'png':
         result = _renderMathTexvc(latex, output_path=output_path, output_mode=output_mode, resolution_in_dpi=resolution_in_dpi)
 
     if removeTmpDir:
