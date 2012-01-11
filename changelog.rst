@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2012-01-11  release 0.13.2
+--------------------------
+- add support for adding spacing for cjk text
+- add initial support for the pages tag
+- protect page-break info from removal in divs and spans
 
 2011-12-13  release 0.13.1
 --------------------------
