@@ -156,6 +156,8 @@ include tests/fribidi-unicode-decode-error.zip
 include tests/kolumne.mb.json
 include tests/lambda.zip
 include tests/memeater.py
+include tests/pages-tag-numeric.zip
+include tests/pages-tag.zip
 include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
 include tests/test_advtree.py

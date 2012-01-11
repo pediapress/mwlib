@@ -211,7 +211,7 @@ class Expander(object):
             print "WARNING: failed to get siteinfo from %r" % (self.db,)
             si = siteinfo.get_siteinfo("de")
             
-        nshandler = nshandling.nshandler(si)
+        self.nshandler = nshandler = nshandling.nshandler(si)
         self.siteinfo = si
 
         if self.db and hasattr(self.db, "getSource"):

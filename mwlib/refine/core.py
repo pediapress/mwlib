@@ -867,7 +867,21 @@ class parse_uniq(object):
         e = vlist.get("to")
         children = []
         if s and e and expander:
-            pages = expander.db.select(s, e)
+            nshandler = expander.nshandler
+            page_ns = nshandler._find_namespace("Page")[1]
+
+            try:
+                si = int(s)
+                ei = int(e)
+            except ValueError:
+                s = nshandler.get_fqname(s, page_ns)
+                e = nshandler.get_fqname(e, page_ns)
+                pages = expander.db.select(s, e)
+            else:
+                base = vlist.get("index", "")
+                base = nshandler.get_fqname(base, page_ns)
+                pages = [u"%s/%s" % (base, i) for i in range(si, ei+1)]
+
             rawtext = u"".join(u"{{%s}}\n" % x for x in pages)
             te = expander.__class__(rawtext, pagename=xopts.pagename, wikidb=expander.db)
             children = parse_txt(te.expandTemplates(True),
