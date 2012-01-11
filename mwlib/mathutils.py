@@ -42,7 +42,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
         except:
             curdir = None
         os.chdir(output_path)
-    latex = latex.strip()
+    latex = latex.lstrip()
     if not latex:
         return None
 
