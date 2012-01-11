@@ -41,7 +41,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
             curdir = os.getcwd()
         except:
             curdir = None
-        os.chdir(output_path)    
+        os.chdir(output_path)
     latex = latex.strip()
     if not latex:
         return None
@@ -70,7 +70,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
                     if os.path.exists(png_fn):
                         return png_fn
         elif output_mode == 'mathml':
-            mathml = p.getiterator('mathml')            
+            mathml = p.getiterator('mathml')
             if mathml:
                 mathml = mathml[0]
                 mathml.set("xmlns","http://www.w3.org/1998/Math/MathML")
@@ -96,19 +96,19 @@ def _renderMathTexvc(latex, output_path, output_mode='png', resolution_in_dpi=12
             png_fn = os.path.join(output_path, result[1:33] + '.png')
             if os.path.exists(png_fn):
                 return png_fn
-            
-    log.error('error converting math (texvc). source: %r \nerror: %r' % (latex, result))              
+
+    log.error('error converting math (texvc). source: %r \nerror: %r' % (latex, result))
     return None
-    
+
 def renderMath(latex, output_path=None, output_mode='png', render_engine='blahtexml', resolution_in_dpi=120):
     """
     @param latex: LaTeX code
     @type latex: unicode
-    
+
     @param output_mode: one of the values 'png' or 'mathml'. mathml only works
         with blahtexml as render_engine
     @type output_mode: str
-    
+
     @param render_engine: one of the value 'blahtexml' or 'texvc'
     @type render_engine: str
 
@@ -121,7 +121,7 @@ def renderMath(latex, output_path=None, output_mode='png', render_engine='blahte
     assert render_engine in ("texvc", "blahtexml")
     assert isinstance(latex, unicode), 'latex must be of type unicode'
 
-    
+
     if output_mode == 'png' and not output_path:
         log.error('math rendering with output_mode png requires an output_path')
         raise Exception("output path required")
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 ## \end{array}
 ##                  """,
 ##         ]
-    
+
     print renderMath(latex,  output_mode='mathml')
     print renderMath(latex,  output_path="/tmp/", output_mode='png')
     print renderMath(latex,  output_path="/tmp/", output_mode='png', render_engine='texvc')
