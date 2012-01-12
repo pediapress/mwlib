@@ -4,13 +4,19 @@ Changelog
 
 mwlib
 ==========================
-2012-01-11  release 0.13.2
+2012-01-12 release 0.13.3
+--------------------------
+- fix pagename when expanding <pages> tag
+- handle the case where NAMESPACE is called as a template
+- get rid of lxml warnings
+
+2012-01-11 release 0.13.2
 --------------------------
 - add support for adding spacing for cjk text
 - add initial support for the pages tag
 - protect page-break info from removal in divs and spans
 
-2011-12-13  release 0.13.1
+2011-12-13 release 0.13.1
 --------------------------
 - replaced mw-serve with nserve.py
 - removed CGI support
