@@ -3,7 +3,6 @@
 
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
-from mwlib.xfail import xfail
 from mwlib.dummydb import DummyDB
 
 
@@ -15,10 +14,8 @@ def parse_and_show(s):
 
 
 def test_noexpansion_inside_pre():
-    db = DictDB(Art="<pre>A{{Pipe}}B</pre>",
-                Pipe="C")
-
     res = expandstr("<pre>A{{Pipe}}B</pre>", "<pre>A{{Pipe}}B</pre>", wikidb=DictDB(Pipe="C"))
+    print res
 
 
 def test_undefined_variable():
