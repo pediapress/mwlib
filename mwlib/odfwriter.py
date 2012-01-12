@@ -520,7 +520,7 @@ class ODFWriter(object):
         """
         #log("math")
         r = writerbase.renderMath(obj.caption, output_mode='mathml', render_engine='blahtexml')
-        if not r:
+        if r is None:
             log("writerbase.renderMath failed!")
             return
         #print mathml.ET.tostring(r)
