@@ -17,6 +17,7 @@ def getTreeFromMarkup(raw):
 def show(tree):
     parser.show(sys.stdout, tree)
 
+
 def test_articleStartsWithInfobox1():
 
     raw = '''
@@ -35,4 +36,3 @@ Some more text
     #show(tree)
     assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=100) == True
     assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=10) == False
-

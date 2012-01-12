@@ -20,12 +20,12 @@ default [[{{{Ziel|{{{2}}}}}}|{{{Titel|{{{Ziel|{{{2}}}}}}}}}]]
 }}
 """
 
+
 def main():
-    
+
     db = DictDB(d4=d4)
     expandstr(d4, wikidb=db)
 
-    
-if __name__=='__main__':
-    main()
 
+if __name__ == '__main__':
+    main()

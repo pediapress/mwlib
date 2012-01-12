@@ -7,6 +7,7 @@ from mwlib.siteinfo import get_siteinfo
 si = copy.deepcopy(get_siteinfo("en"))
 del si["magicwords"]
 
+
 def test_aliasmap_no_magicwords():
     parser.aliasmap(si)
 

@@ -15,9 +15,9 @@ Colors =
   id:neogene   value:rgb(0.99215,0.8,0.54)
   id:paleogene value:rgb(1,0.7019,0)
   id:cretaceous   value:rgb(0.5,0.764,0.1098)
-  id:jurassic      value:rgb(0.302,0.706,0.5) 
-  id:triassic    value:rgb(0.403,0.765,0.716) 
-  id:permian   value:rgb(0.404,0.776,0.867) 
+  id:jurassic      value:rgb(0.302,0.706,0.5)
+  id:triassic    value:rgb(0.403,0.765,0.716)
+  id:permian   value:rgb(0.404,0.776,0.867)
   id:carboniferous     value:rgb(0.6,0.741,0.855)
   id:devonian  value:rgb(0.6,0.6,0.788)
   id:silurian  value:rgb(0.694,0.447,0.714)
@@ -26,13 +26,13 @@ Colors =
   id:neoproterozoic    value:rgb(0.792,0.647,0.583)
   id:mesoproterozoic    value:rgb(0.867,0.761,0.533)
   id:paleoproterozoic    value:rgb(0.702,0.698,0.369)
-  id:eoarchean    value:rgb(0.5,0.565,0.565)   
-  id:paleoarchean    value:rgb(0.6,0.592,0.569)   
-  id:mesoarchean    value:rgb(0.698,0.65,0.6)   
-  id:neoarchean    value:rgb(0.796,0.804,0.784)   
-  id:ediacaran     value:rgb(0.918,0.847,0.737)   
+  id:eoarchean    value:rgb(0.5,0.565,0.565)
+  id:paleoarchean    value:rgb(0.6,0.592,0.569)
+  id:mesoarchean    value:rgb(0.698,0.65,0.6)
+  id:neoarchean    value:rgb(0.796,0.804,0.784)
+  id:ediacaran     value:rgb(0.918,0.847,0.737)
   id:cryogenian    value:rgb(0.863,0.671,0.667)
-  id:tonian        value:rgb(0.796,0.643,0.424)  
+  id:tonian        value:rgb(0.796,0.643,0.424)
   id:stratherian   value:rgb(1,1,0.8)   # light yellow
   id:calymmian     value:rgb(1,1,0.8)   # light yellow
   id:orosirian     value:rgb(1,1,0.8)   # light yellow
@@ -64,24 +64,24 @@ PlotData=
 
   at:      0   align:right  $markred
   at:   -542   align:left   $markred shift:(2,3)
-  from: -542   till:    0   text:[[Phanerozoic]]  color:phanerozoic   
-  from:-2500   till: -542   text:[[Proterozoic]]  color:proterozoic   
-  from:-3800   till: -2500  text:[[Archean]]      color:archean   
+  from: -542   till:    0   text:[[Phanerozoic]]  color:phanerozoic
+  from:-2500   till: -542   text:[[Proterozoic]]  color:proterozoic
+  from:-3800   till: -2500  text:[[Archean]]      color:archean
   from: start  till: -3800  text:[[Hadean]]       color:hadean
 
 
   bar:era
 
-  from:  -65.5 till:    0   text:[[Cenozoic|C~z]] shift:(0,1.5)        color:cenozoic        
-  from: -251   till:  -65.5 text:[[Mesozoic|Meso~zoic]] shift:(0,1.5)  color:mesozoic        
-  from: -542   till: -251 text:[[Paleozoic|Paleo~zoic]] shift:(0,1.5)  color:paleozoic 
-  from: -1000  till:  -542  text:[[Neoproterozoic|Neoprote-~rozoic]] shift:(0,1.8) color:neoproterozoic   
-  from:-1600   till:  -1000  text:[[Mesoproterozoic]] color:mesoproterozoic  
-  from:-2500   till: -1600  text:[[Paleoproterozoic]] color:paleoproterozoic 
-  from:-2800   till: -2500  text:[[Neoarchean|Neo-~archean]] shift:(0,1.5)     color:neoarchean       
-  from:-3200   till: -2800  text:[[Mesoarchean|Meso-~archean]] shift:(0,1.5)   color:mesoarchean      
-  from:-3600   till: -3200  text:[[Paleoarchean|Paleo-~archean]] shift:(0,1.5) color:paleoarchean     
-  from:-3800   till: -3600  text:[[Eoarchean|Eoar-~chean]] shift:(0,0.5) color:eoarchean fontsize:6       
+  from:  -65.5 till:    0   text:[[Cenozoic|C~z]] shift:(0,1.5)        color:cenozoic
+  from: -251   till:  -65.5 text:[[Mesozoic|Meso~zoic]] shift:(0,1.5)  color:mesozoic
+  from: -542   till: -251 text:[[Paleozoic|Paleo~zoic]] shift:(0,1.5)  color:paleozoic
+  from: -1000  till:  -542  text:[[Neoproterozoic|Neoprote-~rozoic]] shift:(0,1.8) color:neoproterozoic
+  from:-1600   till:  -1000  text:[[Mesoproterozoic]] color:mesoproterozoic
+  from:-2500   till: -1600  text:[[Paleoproterozoic]] color:paleoproterozoic
+  from:-2800   till: -2500  text:[[Neoarchean|Neo-~archean]] shift:(0,1.5)     color:neoarchean
+  from:-3200   till: -2800  text:[[Mesoarchean|Meso-~archean]] shift:(0,1.5)   color:mesoarchean
+  from:-3600   till: -3200  text:[[Paleoarchean|Paleo-~archean]] shift:(0,1.5) color:paleoarchean
+  from:-3800   till: -3600  text:[[Eoarchean|Eoar-~chean]] shift:(0,0.5) color:eoarchean fontsize:6
   from:start   till: -3800  color:white
 
   bar:period
@@ -112,8 +112,8 @@ PlotData=
   from: start  till:  -2500 color:white
 """
 
+
 def test_draw_timeline():
     fp = timeline.drawTimeline(example_script)
     print "result in", fp
     assert fp, "no image file created"
-    

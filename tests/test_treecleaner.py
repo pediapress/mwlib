@@ -16,6 +16,7 @@ from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, Cat
 
 from mwlib.xfail import xfail
 
+
 def _treesanity(r):
     "check that parents match their children"
     for c in r.allchildren():
@@ -25,23 +26,24 @@ def _treesanity(r):
         for cc in c:
             assert cc.parent
             assert cc.parent is c
-            
+
 
 def getTreeFromMarkup(raw):
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parseString
     return parseString(title="Test", raw=raw, wikidb=DummyDB())
-    
+
+
 def cleanMarkup(raw):
     print "Parsing %r" % (raw,)
-    
-    tree  = getTreeFromMarkup(raw)
+
+    tree = getTreeFromMarkup(raw)
 
     print "before treecleaner: >>>"
     showTree(tree)
     print "<<<"
-    
-    print '='*20
+
+    print '=' * 20
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
@@ -51,18 +53,19 @@ def cleanMarkup(raw):
     print "<<<"
     return (tree, reports)
 
+
 def cleanMarkupSingle(raw, cleanerMethod):
-    tree  = getTreeFromMarkup(raw)
+    tree = getTreeFromMarkup(raw)
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.clean([cleanerMethod])
     reports = tc.getReports()
     return (tree, reports)
-    
+
 
 def showTree(tree):
     parser.show(sys.stdout, tree, 0)
-    
+
 
 def test_fixLists():
     raw = r"""
@@ -85,7 +88,8 @@ para
     for li in lists:
         print li, li.getParents()
         assert _all([p.__class__ != Paragraph for p in li.getParents()])
-    _treesanity(tree)   
+    _treesanity(tree)
+
 
 def test_fixLists2():
     raw = r"""
@@ -94,7 +98,7 @@ def test_fixLists2():
 some text in the same paragraph
 
 another paragraph
-    """    
+    """
     # cleaner should do nothing
     tree, reports = cleanMarkup(raw)
     lists = tree.getChildNodesByClass(ItemList)
@@ -104,6 +108,7 @@ another paragraph
     assert u'some text in the same paragraph' in txt
     assert u'another' not in txt
 
+
 def test_fixLists3():
     raw = r"""
 * ul1
@@ -112,14 +117,14 @@ def test_fixLists3():
 # ol2
 """
     tree, reports = cleanMarkup(raw)
-    assert len(tree.children) == 2 # 2 itemlists as only children of article
-    assert _all( [ c.__class__ == ItemList for c in tree.children])
-    
+    assert len(tree.children) == 2  # 2 itemlists as only children of article
+    assert _all([c.__class__ == ItemList for c in tree.children])
+
 
 def test_childlessNodes():
     raw = r"""
 blub
-    
+
 <source></source>
 
 *
@@ -129,8 +134,8 @@ blub
 <u></u>
     """
     tree, reports = cleanMarkup(raw)
-    assert len(tree.children) == 1 #assert only the 'blub' paragraph is left and the rest removed
-    assert tree.children[0].__class__ == Paragraph  
+    assert len(tree.children) == 1  # assert only the 'blub' paragraph is left and the rest removed
+    assert tree.children[0].__class__ == Paragraph
 
 
 def test_removeLangLinks():
@@ -145,7 +150,8 @@ blub
     showTree(tree)
     langlinks = tree.find(LangLink)
     assert not langlinks, 'expected no LangLink instances'
-    
+
+
 def test_removeCriticalTables():
     raw = r'''
 {| class="navbox"
@@ -155,7 +161,7 @@ def test_removeCriticalTables():
 |}
 
 blub
-'''    
+'''
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(Table)) == 0
 
@@ -175,6 +181,7 @@ def test_fixTableColspans():
     cell = t.children[0].children[0]
     assert cell.colspan == 2
 
+
 def test_fixTableColspans2():
     '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
     raw = r'''
@@ -192,31 +199,32 @@ def test_fixTableColspans2():
     showTree(t)
     assert cell.colspan == 1
 
+
 def test_fixTableColspans3():
     '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
     raw = ur'''
 {| cellpadding="0" cellspacing="0" border="0" style="margin:0px; padding:0px; border:0px; background-color:transparent; vertical-align:middle;"
 |-
 | style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | Ägyptische Hieroglyphen können die Funktion von [[Schriftzeichen|Phonogrammen, Ideogrammen]] oder [[Determinativ]]en übernehmen. Die meisten Hieroglyphen können eine oder maximal zwei dieser Funktionen übernehmen, einzelne auch alle drei. Welche Funktion ein Zeichen hat, zeigt der Kontext, in vielen Fällen lassen sich die Verwendungen kaum abgrenzen. So ist das Zeichen <hiero>ra</hiero> Ideogramm in <hiero>ra:Z1</hiero> ''r<span class="Unicode">ˁ(w)</span>'' (Sonnengott) „Re“, in der vollständigeren Schreibung des gleichen Wortes als <hiero>r:a-ra:Z1</hiero> dient es nur als Determinativ; das Zeichen <hiero>pr</hiero> wird im Wort <hiero>pr:r-D54</hiero> ''pr(j)'' „herausgehen“ als Phonogramm ''pr'' aufgefasst, während es in <hiero>pr:Z1</hiero> ''pr(w)'' „Haus“ als Logogramm fungiert. Aufschluss darüber, ob und wie ein Zeichen gelesen werden kann, gibt im Allgemeinen die Zeichenliste der ''Egyptian Grammar'' von [[Alan Gardiner]],<ref>Gardiner 1927</ref> die jedoch nicht vollständig und in Einzelfällen überholt ist.
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
-| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | 
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
+| style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
 |}
     '''
     tree, reports = cleanMarkup(raw)
@@ -227,18 +235,16 @@ def test_fixTableColspans3():
     assert cell.colspan == 1
 
 
-
-
-
 def test_removeBrokenChildren():
     raw = r'''
 <ref>
  preformatted text
 </ref>
     '''
-    
+
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(PreFormatted)) == 0
+
 
 def test_fixNesting1():
     raw = '''
@@ -250,6 +256,7 @@ def test_fixNesting1():
     tree, reports = cleanMarkup(raw)
     table = tree.getChildNodesByClass(Table)[0]
     assert not table.getParentNodesByClass(DefinitionDescription)
+
 
 def test_fixNesting2():
     raw = r'''
@@ -295,13 +302,13 @@ def test_fixNesting2():
 ## </strike>
 ## """
 
-##     tree = getTreeFromMarkup(raw)    
+##     tree = getTreeFromMarkup(raw)
 ##     tree, reports = cleanMarkup(raw)
 ##     paras = tree.getChildNodesByClass(Paragraph)
 ##     for para in paras:
 ##         assert not para.getChildNodesByClass(Paragraph)
-        
-      
+
+
 def test_fixNesting5():
     raw = """
 <strike>
@@ -327,11 +334,11 @@ para 2
     tree, reports = cleanMarkup(raw)
     paras = tree.getChildNodesByClass(Paragraph)
     for para in paras:
-        assert not para.getChildNodesByClass(Paragraph) 
+        assert not para.getChildNodesByClass(Paragraph)
 
 
 def test_fixNesting6():
-    raw =u"""''„Drei Affen, zehn Minuten.“'' <ref>Dilbert writes a poem and presents it to Dogbert:<poem style>
+    raw = u"""''„Drei Affen, zehn Minuten.“'' <ref>Dilbert writes a poem and presents it to Dogbert:<poem style>
 ''DOGBERT: I once read that given infinite time, a thousand monkeys with typewriters would eventually write the complete works of Shakespeare.''
 ''DILBERT: But what about my poem?''
 ''DOGBERT: Three monkeys, ten minutes.“''</poem></ref>
@@ -345,15 +352,16 @@ def test_fixNesting6():
     pprint(reports)
 
     assert len(tree.getChildNodesByClass(Reference)) == 1
-    
+
 
 def test_swapNodes():
     raw = r'''
 <u><center>Text</center></u>
     '''
     tree, reports = cleanMarkup(raw)
-    center_node= tree.getChildNodesByClass(Center)[0]
+    center_node = tree.getChildNodesByClass(Center)[0]
     assert not _any([p.__class__ == Underline for p in center_node.getParents()])
+
 
 @xfail
 def test_splitBigTableCells():
@@ -363,11 +371,11 @@ def test_splitBigTableCells():
     specific and the output has to be verfied
     '''
     assert False
-    
+
 
 @xfail
 def test_fixParagraphs():
-    raw = r'''  ''' #FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
+    raw = r'''  '''  # FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
     tree, reports = cleanMarkup(raw)
     assert False
 
@@ -382,6 +390,7 @@ bla
     section_node = tree.getChildNodesByClass(Section)[0]
     assert _all([p.__class__ != Center for p in section_node.children[0].getAllChildren()])
 
+
 def test_cleanSectionCaptions2():
     raw = """=== ===
     bla
@@ -390,9 +399,10 @@ def test_cleanSectionCaptions2():
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(Section)) == 0
 
-    
+
 def numBR(tree):
     return len(tree.getChildNodesByClass(BreakingReturn))
+
 
 def test_removebreakingreturnsInside():
     # remove BRs at the inside 'borders' of block nodes
@@ -409,7 +419,7 @@ def test_removebreakingreturnsInside():
 | text
 |}
 '''
-    tree, reports = cleanMarkup(raw) # 1 & 2
+    tree, reports = cleanMarkup(raw)  # 1 & 2
     assert numBR(tree) == 0
 
 
@@ -453,11 +463,13 @@ paragraph
 paragraph
 '''
 
-    tree, reports = cleanMarkup(raw) 
+    tree, reports = cleanMarkup(raw)
     assert numBR(tree) == 0
 
 # mwlib.refine creates a whitespace only paragraph containing the first
 # br tag. in the old parser this first paragraph also contained the source node.
+
+
 @xfail
 def test_removebreakingreturnsNoremove():
     raw = """
@@ -469,21 +481,23 @@ int main()
 <br/>
  <br/> bla <br/> blub
 
-ordinary paragraph. inside <br/> tags should not be removed 
+ordinary paragraph. inside <br/> tags should not be removed
 """
 
-    tree, reports = cleanMarkup(raw) 
+    tree, reports = cleanMarkup(raw)
     # the only br tags that should remain after cleaning are the ones inside the preformatted node
     assert numBR(tree) == 3
 
+
 def test_preserveEmptyTextNodes():
-    raw="""[[blub]] ''bla''"""
-    tree, reports = cleanMarkup(raw) 
-    p = [x for x in tree.find(Text) if x.caption==u' ']
-    assert len(p)==1, 'expected one space node'
+    raw = """[[blub]] ''bla''"""
+    tree, reports = cleanMarkup(raw)
+    p = [x for x in tree.find(Text) if x.caption == u' ']
+    assert len(p) == 1, 'expected one space node'
+
 
 def test_gallery():
-    raw ="""<gallery>
+    raw = """<gallery>
 Image:There_Screenshot02.jpg|Activities include hoverboarding, with the ability to perform stunts such as dropping down from space
 Image:Scenery.jpg|A wide pan over a seaside thatched-roof village
 |Members can join and create interest groups
@@ -496,22 +510,23 @@ Image:|Zona Island, a place where new members first log in
 <!-- Deleted image removed: Image:OldWaterinHole.jpg|The Old Waterin' Hole: a place where users can sit and chat while in a social club/bar-like environment. -->
 </gallery>"""
 
-    tree, reports = cleanMarkup(raw) 
+    tree, reports = cleanMarkup(raw)
     gallery = tree.find(Gallery)[0]
     assert len(gallery.children) == 6
 
+
 def test_removeTextlessStyles():
 
-    raw ="'''bold text'''"
+    raw = "'''bold text'''"
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     assert tree.find(Strong)
 
-    raw ="text <em><br/></em> text"
+    raw = "text <em><br/></em> text"
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     assert tree.find(BreakingReturn) and not tree.find(Emphasized)
-    
+
 
 def test_splitTableLists1():
     raw = '''
@@ -562,6 +577,7 @@ def test_splitTableLists2():
     numrows = len(tree.getChildNodesByClass(Row))
     assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
 
+
 def test_removeEmptySection():
     raw = '''
 == section 1 ==
@@ -571,6 +587,7 @@ def test_removeEmptySection():
 '''
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(Section)) == 0, 'section not removed'
+
 
 def test_noRemoveEmptySection():
     raw = '''

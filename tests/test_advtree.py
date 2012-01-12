@@ -16,7 +16,6 @@ from mwlib import parser
 from mwlib.xfail import xfail
 
 
-
 def _treesanity(r):
     "check that parents match their children"
     for c in r.allchildren():
@@ -42,26 +41,25 @@ def test_copy():
     r = parseString(title="X33", raw=raw, wikidb=db)
     buildAdvancedTree(r)
     c = r.copy()
-    _treesanity(c)    
-    
+    _treesanity(c)
+
     def _check(n1, n2):
         assert n1.caption == n2.caption
         assert n1.__class__ == n2.__class__
         assert len(n1.children) == len(n2.children)
-        for i,c1 in enumerate(n1):
+        for i, c1 in enumerate(n1):
             _check(c1, n2.children[i])
-    
-    _check(r,c)
-    
 
-            
+    _check(r, c)
+
+
 def test_removeNewlines():
 
     # test no action within preformattet
     t = PreFormatted()
     text = u"\t \n\t\n\n  \n\n"
     tn = Text(text)
-    t.children.append( tn )
+    t.children.append(tn)
     buildAdvancedTree(t)
     _treesanity(t)
     assert tn.caption == text
@@ -69,23 +67,22 @@ def test_removeNewlines():
     # tests remove node w/ whitespace only if at border
     t = Section()
     tn = Text(text)
-    t.children.append( tn )
+    t.children.append(tn)
     buildAdvancedTree(t)
     _treesanity(t)
     #assert tn.caption == u""
-    assert not t.children 
+    assert not t.children
 
     # test remove newlines
     text = u"\t \n\t\n\n KEEP  \n\n"
     t = Section()
     tn = Text(text)
-    t.children.append( tn )
+    t.children.append(tn)
     buildAdvancedTree(t)
     _treesanity(t)
-    assert tn.caption.count("\n") == 0 
+    assert tn.caption.count("\n") == 0
     assert len(tn.caption) == len(text)
-    assert t.children 
-    
+    assert t.children
 
 
 def test_identity():
@@ -103,36 +100,32 @@ def test_identity():
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
     buildAdvancedTree(r)
-    _treesanity(r)    
-    
+    _treesanity(r)
+
     brs = r.getChildNodesByClass(BreakingReturn)
-    for i,br in enumerate(brs):
+    for i, br in enumerate(brs):
         assert br in br.siblings
         assert i == _idIndex(br.parent.children, br)
-        assert len([x for x in br.parent.children if x is not br]) == len(brs)-1
+        assert len([x for x in br.parent.children if x is not br]) == len(brs) - 1
         for bbr in brs:
             if br is bbr:
                 continue
             assert br == bbr
             assert br is not bbr
-            
 
 
-# FIXME isNavBox removed from advtree. could be implemented in general treecleaner - move test there            
+# FIXME isNavBox removed from advtree. could be implemented in general treecleaner - move test there
 ## def test_isnavbox():
 ##     raw = """
 ## == test ==
-
 ## <div class="noprint">
 ## some text
 ## </div>
 ## """.decode("utf8")
-
 ##     db = DummyDB()
 ##     r = parseString(title="X33", raw=raw, wikidb=db)
 ##     buildAdvancedTree(r)
 ##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
-
 def test_definitiondescription():
     raw = u"""
 == test ==
@@ -146,14 +139,13 @@ def test_definitiondescription():
     db = DummyDB()
     r = parseString(title="t", raw=raw, wikidb=db)
     parser.show(sys.stdout, r)
-    
+
     buildAdvancedTree(r)
     dd = r.getChildNodesByClass(DefinitionDescription)
-    print "DD:",dd
+    print "DD:", dd
     for c in dd:
-        assert c.indentlevel==1
-    assert len(dd)==4
-    
+        assert c.indentlevel == 1
+    assert len(dd) == 4
 
 
 @xfail
@@ -172,6 +164,7 @@ def test_defintion_list():
         assert dls[0].getChildNodesByClass(DefinitionDescription)
         raw = raw.replace('\n', '')
 
+
 def test_ulist():
     """http://code.pediapress.com/wiki/ticket/222"""
     raw = u"""
@@ -185,7 +178,7 @@ def test_ulist():
 
 
 def test_colspan():
-    raw  = '''<table><tr><td colspan="bogus">no colspan </td></tr></table>'''
+    raw = '''<table><tr><td colspan="bogus">no colspan </td></tr></table>'''
     r = parseString(title='t', raw=raw)
     buildAdvancedTree(r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 1
@@ -201,7 +194,6 @@ def test_colspan():
     assert r.getChildNodesByClass(Cell)[0].colspan is 2
 
 
-
 def test_attributes():
     t1 = '''
 {|
@@ -215,7 +207,7 @@ def test_attributes():
     print n.attributes, n.style
     assert isinstance(n.style, dict)
     assert isinstance(n.attributes, dict)
-    assert n.style["background"]=="#FFDEAD"
+    assert n.style["background"] == "#FFDEAD"
 
 
 def getAdvTree(raw):
@@ -223,8 +215,9 @@ def getAdvTree(raw):
     buildAdvancedTree(tree)
     return tree
 
+
 def test_img_no_caption():
-    raw=u'''[[Image:Chicken.jpg|image caption]]
+    raw = u'''[[Image:Chicken.jpg|image caption]]
 
 [[Image:Chicken.jpg|none|image caption: align none]]
 
@@ -247,9 +240,10 @@ Image:Cassini Saturn Orbit Insertion.jpg|
     assert len(images) == 9
     for image in images:
         assert image.render_caption == False
-   
+
+
 def test_img_has_caption():
-    raw=u'''[[Image:Chicken.jpg|thumb|image caption thumb]]
+    raw = u'''[[Image:Chicken.jpg|thumb|image caption thumb]]
 
 [[Image:Chicken.jpg|framed|image caption framed]]
 
@@ -272,5 +266,3 @@ Image:Cassini Saturn Orbit Insertion.jpg|''[[Cassini–Huygens]]''<br>First Satu
     assert len(images) == 9
     for image in images:
         assert image.render_caption == True
-
-    

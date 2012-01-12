@@ -10,20 +10,24 @@ from mwlib import advtree
 from mwlib.treecleaner import TreeCleaner
 from mwlib.writer import styleutils
 
+
 def showTree(tree):
     parser.show(sys.stdout, tree, 0)
+
 
 def getTreeFromMarkup(raw):
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parseString
     return parseString(title="Test", raw=raw, wikidb=DummyDB())
 
+
 def buildAdvTree(raw):
-    tree  = getTreeFromMarkup(raw)
+    tree = getTreeFromMarkup(raw)
     advtree.buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
     return tree
+
 
 def test_textalign1():
     raw = '''

@@ -6,15 +6,15 @@ import shutil
 import tempfile
 
 from mwlib.mathutils import renderMath
-from mwlib.xfail import xfail 
+from mwlib.xfail import xfail
+
 
 class TestMathUtils(object):
     def setup_method(self, method):
         self.tmpdir = tempfile.mkdtemp()
-    
+
     def teardown_method(self, method):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
-
 
     def blahtexml_present(self):
         ret = os.system('blahtexml')
@@ -31,7 +31,6 @@ class TestMathUtils(object):
         else:
             return True
 
-    
     def test_math(self):
         latexlist = [r"\sqrt{4}=2",
                      r"a^2 + b^2 = c^2\,",
@@ -51,7 +50,7 @@ class TestMathUtils(object):
                 res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='texvc')
                 assert res
 
-    @xfail 
+    @xfail
     def test_math_complex(self):
 
         latex = r"""\begin{array}{ccc}
@@ -67,12 +66,10 @@ class TestMathUtils(object):
             assert res
         else:
             assert False
-    
+
     def test_single_quote_bug(self):
         """http://code.pediapress.com/wiki/ticket/241"""
-        
+
         if self.texvc_present():
             res = renderMath(u"f'(x) = x", self.tmpdir, output_mode='png', render_engine='texvc')
             assert res
-
-

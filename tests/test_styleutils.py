@@ -11,6 +11,7 @@ from mwlib import parser
 from mwlib import advtree
 from mwlib.writer import styleutils
 
+
 def getTreeFromMarkup(raw):
     tree = parseString(title="Test", raw=raw, wikidb=DummyDB())
     advtree.buildAdvancedTree(tree)
@@ -20,8 +21,9 @@ def getTreeFromMarkup(raw):
 def show(tree):
     parser.show(sys.stdout, tree)
 
+
 def test_getTextAlign():
-    raw =  '''
+    raw = '''
 {|
 |-
 ! center
@@ -39,7 +41,7 @@ def test_getTextAlign():
 
 
 def test_getTextAlign2():
-    raw =  '''
+    raw = '''
 left
 
 <div style="text-align:right;">
@@ -50,13 +52,13 @@ left
 
 {| class="prettytable"
 |-
-| left 
+| left
 | style="text-align:right;" | right
 |}
 
 {| class="prettytable" style="text-align:right;"
 |-
-| right 
+| right
 | style="text-align:center;" | center
 |}
 </div>
@@ -69,5 +71,5 @@ left
 
         if txt != align:
             show(cell)
-        
+
         assert txt == align, 'alignment not correctly parsed. expected:|%s|, got |%s|' % (txt, align)

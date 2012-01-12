@@ -40,7 +40,7 @@ Summary line 2
 
 test_metabook = {
     'type': 'collection',
-    'version': 1, 
+    'version': 1,
     'title': u'bla',
     'items': [
         {
@@ -76,11 +76,12 @@ test_metabook = {
 
 test_metabook = json.loads(json.dumps(test_metabook))
 
+
 def test_parse_collection_page():
     #first parsestring
     mb = metabook.parse_collection_page(test_wikitext1)
     print mb
-    
+
     assert mb['type'] == 'collection'
     assert mb['version'] == 1
     assert mb['title'] == 'Title'
@@ -106,7 +107,7 @@ def test_parse_collection_page():
     assert arts[1]['title'] == 'Article 4'
     assert arts[1]['revision'] == '4'
     assert arts[1]['displaytitle'] == 'Display Title 2'
-    
+
     #second parsestring
     mb = metabook.parse_collection_page(test_wikitext2)
     assert mb['type'] == 'collection'
@@ -135,6 +136,7 @@ def test_parse_collection_page():
     assert arts[1]['revision'] == '4'
     assert arts[1]['displaytitle'] == 'Display Title 2'
 
+
 def test_get_item_list():
     expected = [
         {
@@ -158,13 +160,13 @@ def test_get_item_list():
             'title': 'Article 3',
         },
     ]
-    
+
     result = test_metabook.walk()
     assert len(result) == len(expected)
     for e, r in zip(expected, result):
         assert e['type'] == r['type']
         assert e['title'] == r['title']
-    
+
     expected = [
         {
             'type': 'article',
@@ -185,6 +187,7 @@ def test_get_item_list():
         assert e['type'] == r['type']
         assert e['title'] == r['title']
 
+
 def test_checksum():
     cs1 = metabook.calc_checksum(test_metabook)
     print cs1
@@ -192,6 +195,6 @@ def test_checksum():
     assert isinstance(cs1, str)
     import copy
     tm2 = copy.deepcopy(test_metabook)
-    
+
     tm2['title'] = tm2['title'] + '123'
     assert metabook.calc_checksum(tm2) != cs1

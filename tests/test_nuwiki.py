@@ -9,6 +9,7 @@ import zipfile
 
 from mwlib.nuwiki import adapt
 
+
 class Test_nuwiki_xnet(object):
     def setup_class(cls):
         cls.tmpdir = tempfile.mkdtemp()
@@ -22,7 +23,7 @@ class Test_nuwiki_xnet(object):
         ])
         assert os.path.isfile(cls.zipfn)
         assert err == 0,  "command failed"
-        
+
     def teardown_class(cls):
         if os.path.exists(cls.tmpdir):
             shutil.rmtree(cls.tmpdir)
