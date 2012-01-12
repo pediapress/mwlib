@@ -520,6 +520,14 @@ def test_pagename():
     yield expandstr, "{{PAGENAME:acdc}}", "Acdc"
 
 
+def test_namespace_as_template_type_error():
+    """https://github.com/pediapress/mwlib/issues/3"""
+    yield expandstr, "{{NAMESPACE|}}"
+    yield expandstr, "{{NAMESPACE|foo}}"
+    yield expandstr, "{{NAMESPACE|foo|bla}}"
+    yield expandstr, "{{NAMESPACE||bla}}"
+
+
 def test_preprocess_uniq_after_comment():
     s = u"""
 <!--

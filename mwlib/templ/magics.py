@@ -205,7 +205,7 @@ class PageMagic(object):
         def wrapper(self, args):
             pagename = self.pagename
             if args.args:
-                pagename = args.args[0]
+                pagename = args[0]
             return f(self, pagename)
         return wrapper
 
