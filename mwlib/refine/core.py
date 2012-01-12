@@ -883,7 +883,7 @@ class parse_uniq(object):
                 pages = [u"%s/%s" % (base, i) for i in range(si, ei+1)]
 
             rawtext = u"".join(u"{{%s}}\n" % x for x in pages)
-            te = expander.__class__(rawtext, pagename=xopts.pagename, wikidb=expander.db)
+            te = expander.__class__(rawtext, pagename=expander.pagename, wikidb=expander.db)
             children = parse_txt(te.expandTemplates(True),
                                  xopts=XBunch(**xopts.__dict__),
                                  expander=te,
