@@ -505,7 +505,19 @@ def test_rel2abs():
 
 
 def test_namespace():
-    expandstr("{{NAMESPACE}}", "Benutzer", pagename="User:Schmir")
+    yield expandstr, "{{NAMESPACE}}", "Benutzer", None, "User:Schmir"
+    yield expandstr, "{{NAMESPACE}}", ""
+    yield expandstr, "{{NAMESPACE:Mainz}}", ""
+    yield expandstr, "{{NAMESPACE:User_talk:Schmir}}", "Benutzer Diskussion"
+    yield expandstr, "{{NAMESPACE:User talk:Schmir}}", "Benutzer Diskussion"
+    yield expandstr, "{{NAMESPACE:  benutzer diskussion:Schmir}}", "Benutzer Diskussion"
+
+
+def test_pagename():
+    yield expandstr, "{{PAGENAME}}", "Thispage"
+    yield expandstr, "{{PAGENAME|Mainz}}", "Mainz"
+    yield expandstr, "{{PAGENAME:User:Schmir}}", "Schmir"
+    yield expandstr, "{{PAGENAME:acdc}}", "Acdc"
 
 
 def test_preprocess_uniq_after_comment():
