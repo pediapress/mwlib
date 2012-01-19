@@ -94,7 +94,6 @@ def main():
                                           'mw-show = mwlib.apps:show',
                                           'mw-serve-ctl = mwlib.apps.serve:serve_ctl',
                                           'mw-check-service = mwlib.apps.serve:check_service',
-                                          'mw-watch = mwlib.apps.watch:main',
                                           'mw-client = mwlib.apps.client:main',
                                           'mw-version = mwlib._version:main',
                                           'mw-qserve = qs.qserve:main'],
