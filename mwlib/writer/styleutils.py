@@ -14,23 +14,26 @@ def _colorFromStr(colorStr):
 
     def hex2rgb(r, g, b):
         try:
-            return (int(r, 16) / 255, int(g, 16) / 255, int(b, 16) / 255)
+            conv = lambda c: max(0, min(1.0, int(c, 16) / 255))
+            return (conv(r), conv(g), conv(b))
         except ValueError:
             return None
     def hexshort2rgb(r, g, b):
         try:
-            return (int(2*r, 16) / 255, int(2*g, 16) / 255, int(2*b, 16) / 255)
+            conv = lambda c: max(0, min(1.0, int(2*c, 16) / 255))
+            return (conv(r), conv(g), conv(b))
         except:
-            return None           
+            return None
     def rgb2rgb(r, g, b):
         try:
-            return (int(r) / 255, int(g) / 255, int(b) / 255)
+            conv = lambda c: max(0, min(1.0, int(c) / 255))
+            return (conv(r), conv(g), conv(b))
         except ValueError:
             return None
     def colorname2rgb(colorStr):
         rgb = colorname2rgb_map.get(colorStr.lower(), None)
         if rgb:
-            return tuple(channel/255 for channel in rgb)
+            return tuple(max(0, min(1, channel/255)) for channel in rgb)
         else:
             return None
                    
