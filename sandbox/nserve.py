@@ -435,15 +435,18 @@ def main():
     # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     import argv
-    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port=")
+    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port= -i= --interface=")
     qs = []
     port = 8899
-
+    interface = "0.0.0.0"
     for o, a in opts:
         if o == "--port":
             port = int(a)
         elif o == "--qserve":
             qs.append(a)
+        elif o in ("-i", "--interface"):
+            interface = a
+
 
     qs += args
 
@@ -452,7 +455,7 @@ def main():
 
     _parse_qs(qs)
 
-    address = "0.0.0.0", port
+    address = interface, port
     server = pywsgi.WSGIServer(address, default_app())
 
     watchers = pool.Pool()
