@@ -4,9 +4,9 @@ import pytest, gevent, nserve, urllib, urllib2, bottle
 import wsgi_intercept.urllib2_intercept
 
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 
 def post(**kw):

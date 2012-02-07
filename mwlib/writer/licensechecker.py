@@ -11,9 +11,9 @@ import csv
 import sys
 import tempfile
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 
 class License(object):

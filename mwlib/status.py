@@ -5,9 +5,9 @@
 import os
 import sys
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 from mwlib.log import Log
 

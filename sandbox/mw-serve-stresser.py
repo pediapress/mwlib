@@ -12,9 +12,9 @@ import random
 import subprocess
 import sys
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 from mwlib import mwapidb, utils, log, bookshelf
 import mwlib.metabook

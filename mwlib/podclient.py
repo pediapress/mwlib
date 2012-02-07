@@ -3,9 +3,9 @@
 import os, time, urlparse, urllib, urllib2, httplib
 
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 from mwlib.log import Log
 from mwlib.utils import get_multipart

@@ -6,7 +6,10 @@
 """
 
 import sys
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 def main():
     if len(sys.argv)!=2:

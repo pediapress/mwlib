@@ -12,9 +12,9 @@ import SimpleHTTPServer
 import urllib2
 from mwlib.utils import daemonize
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 # init host and port fu**ed up style # FIXME
 host, port = "localhost", 8000
