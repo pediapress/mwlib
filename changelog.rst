@@ -4,6 +4,16 @@ Changelog
 
 mwlib
 ==========================
+
+2012-02-15 mwlib 0.13.4
+--------------------------
+- require qserve >= 0.2.7 in order to be compatible with the latest gevent
+- move our custom argument parser to mwlib
+- prefer simplejson to json
+- allow nserve to listen on a specific interface with -i/--interface
+- fix styleutils: limit rgb values to [0,1]
+- remove mw-watch in setup.py
+
 2012-01-12 release 0.13.3
 --------------------------
 - fix pagename when expanding <pages> tag
