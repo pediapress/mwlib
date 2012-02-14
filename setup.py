@@ -102,7 +102,6 @@ def main():
         ext_modules=ext_modules,
         packages=["mwlib", "mwlib.templ"],
         namespace_packages=['mwlib'],
-        py_modules=["argv"],
         scripts="sandbox/nslave.py sandbox/nserve.py sandbox/postman.py".split(),
         include_package_data=True,
         zip_safe=False,

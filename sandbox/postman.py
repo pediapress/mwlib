@@ -180,7 +180,7 @@ class commands(object):
 
 def main():
     global cachedir
-    import argv
+    from mwlib import argv
     opts, args = argv.parse(sys.argv[1:], "--cachedir=")
     for o, a in opts:
         if o=="--cachedir":

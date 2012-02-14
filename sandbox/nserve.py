@@ -434,7 +434,7 @@ def _parse_qs(qs):
 def main():
     # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
-    import argv
+    from mwlib import argv
     opts,  args = argv.parse(sys.argv[1:], "--qserve= --port= -i= --interface=")
     qs = []
     port = 8899

@@ -1,7 +1,6 @@
 include MANIFEST.in
 include README.html
 include README.rst
-include argv.py
 include changelog.rst
 include conftest.py
 include docs/Makefile
@@ -37,6 +36,7 @@ include mwlib/apps/client.py
 include mwlib/apps/make_nuwiki.py
 include mwlib/apps/render.py
 include mwlib/apps/serve.py
+include mwlib/argv.py
 include mwlib/async/__init__.py
 include mwlib/authors.py
 include mwlib/bookshelf.py

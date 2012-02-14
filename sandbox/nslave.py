@@ -195,7 +195,7 @@ def main():
     numgreenlets = 10
     http_port = 8898
     serve_files = True
-    import argv
+    from mwlib import argv
     opts, args = argv.parse(sys.argv[1:], "--no-serve-files --serve-files-port= --serve-files --cachedir= --url= --numprocs=")
     for o, a in opts:
         if o == "--cachedir":
