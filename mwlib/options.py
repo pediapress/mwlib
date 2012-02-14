@@ -24,7 +24,7 @@ class OptionParser(optparse.OptionParser):
           help="configuration file, ZIP file or base URL")
         
         a("-i", "--imagesize",
-          default=1199,
+          default=1200,
           help="max. pixel size (width or height) for images (default: 1200)")
         
         a("-m", "--metabook",
