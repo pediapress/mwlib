@@ -168,6 +168,7 @@ include tests/test_expander.py
 include tests/test_expander_parser.py
 include tests/test_expander_time.py
 include tests/test_expr.py
+include tests/test_iferror_rx.py
 include tests/test_imgmap.py
 include tests/test_math_utils.py
 include tests/test_metabook.py
