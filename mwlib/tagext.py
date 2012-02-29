@@ -144,6 +144,15 @@ class IDLExtension(TagExtension):
         return self.parse('<source lang="idl">%s</source>' % source)        
 register(IDLExtension)
 
+class Syntaxhighlight(TagExtension):
+    '''http://www.mediawiki.org/wiki/Syntaxhighlight'''
+    name = "syntaxhighlight"
+    def __call__(self, source, attributes):
+        return self.parse('<source%s>%s</source>' % (''.join(' %s=%s' % (k, v)
+                                                               for k, v in attributes.items()),
+                                                      source))
+register(Syntaxhighlight)
+
 class RDFExtension(TagExtension):
     # http://www.mediawiki.org/wiki/Extension:RDF
     # uses turtle notation :(
