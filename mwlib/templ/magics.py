@@ -16,7 +16,7 @@ import urlparse
 from mwlib.log import Log
 from mwlib import expr
 
-iferror_rx = re.compile(r'<(div|span|p|strong)\s([^<>]*\s)*?class="error"[^<>]*>', re.I)
+iferror_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
 
 log = Log("expander")
 
