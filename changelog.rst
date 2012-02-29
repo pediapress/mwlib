@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2012-02-29 mwlib 0.13.5
+--------------------------
+- simplify the brain-damaged iferror_rx regular expression, fixes #10
+- support syntaxhighlight nodes
 
 2012-02-15 mwlib 0.13.4
 --------------------------
