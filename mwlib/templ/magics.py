@@ -16,6 +16,7 @@ import urlparse
 from mwlib.log import Log
 from mwlib import expr
 
+iferror_fast_rx = re.compile(r'class="error"', re.I)
 iferror_rx = re.compile(r'<(div|span|p|strong)\s([^<>]*\s)*?class="error"[^<>]*>', re.I)
 
 log = Log("expander")
@@ -106,7 +107,7 @@ class TimeMagic(object):
         """[MW1.5+] current month abbreviated Jan .. Dec."""
         return self.utcnow.strftime("%b")
 
-    @noarg        
+    @noarg
     def CURRENTMONTHNAME(self):
         """current month in named form January .. December.   """
         return self.utcnow.strftime("%B")
@@ -130,7 +131,7 @@ class TimeMagic(object):
     def CURRENTTIMESTAMP(self):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
         return self.utcnow.strftime("%Y%m%d%H%M%S")
-    
+
 class LocaltimeMagic(object):
     now = datetime.datetime.now()
 
@@ -164,7 +165,7 @@ class LocaltimeMagic(object):
         """[MW1.5+] current month abbreviated Jan .. Dec."""
         return self.now.strftime("%b")
 
-    @noarg        
+    @noarg
     def LOCALMONTHNAME(self):
         """current month in named form January .. December.   """
         return self.now.strftime("%B")
@@ -188,7 +189,7 @@ class LocaltimeMagic(object):
     def LOCALTIMESTAMP(self):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
         return self.now.strftime("%Y%m%d%H%M%S")
-    
+
 from functools import wraps
 
 class PageMagic(object):
@@ -197,7 +198,7 @@ class PageMagic(object):
         self.pagename = pagename
         self.server = server
         self.revisionid = revisionid
-        
+
         self.niceurl = urlparse.urljoin(self.server, 'wiki')
 
     def _wrap_pagename(f):
@@ -214,12 +215,12 @@ class PageMagic(object):
         def wrapper(*args, **kwargs):
             return urlquote(f(*args, **kwargs).replace(' ', '_'))
         return wrapper
-        
+
     @_wrap_pagename
     def PAGENAME(self, pagename):
         """Returns the name of the current page, including all levels (Title/Subtitle/Sub-subtitle)"""
         return self.nshandler.splitname(pagename)[1]
-    
+
     """same as PAGENAME but More URL-friendly percent encoded
     special characters (To use an articlename in an external link).
     """
@@ -230,12 +231,12 @@ class PageMagic(object):
         return pagename
 
     FULLPAGENAMEE = _quoted(FULLPAGENAME)
-    
+
     @_wrap_pagename
     def SUBPAGENAME(self, pagename):
         """[MW1.6+] Returns the name of the current page, excluding parent
         pages ('Title/Subtitle' becomes 'Subtitle').
-        """        
+        """
         return pagename.split('/')[-1]
 
     SUBPAGENAMEE = _quoted(SUBPAGENAME)
@@ -319,17 +320,17 @@ class PageMagic(object):
         except KeyError:
             retval = ''
 
-        return retval 
-    
+        return retval
+
     def LOCALURL(self, args):
         """Returns the local URL of a given page. The page might not exist."""
         url = "/wiki/"+ "".join(args.get(0, u""))
-        return url 
+        return url
 
     def LOCALURLE(self, args):
-        """Returns the local URL of a given page. The page might not exist."""        
+        """Returns the local URL of a given page. The page might not exist."""
         return urlquote(self.LOCALURL(args))
-    
+
     def URLENCODE(self, args):
         """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
         url = urllib.quote_plus(args[0].encode('utf-8'))
@@ -348,8 +349,8 @@ class PageMagic(object):
         else:
             q = ""
         return '%s/%s%s' % (self.niceurl, a, q)
-    
-    @noarg        
+
+    @noarg
     def SERVERNAME(self):
         return self.server[len('http://'):]
 
@@ -358,7 +359,7 @@ class NumberMagic(object):
     def NUMBEROFARTICLES(self, args):
         """A variable which returns the total number of articles on the Wiki."""
         return "0"
-    
+
     def NUMBEROFPAGES(self, args):
         """[MW1.7+] Returns the total number of pages. """
         return "0"
@@ -418,7 +419,7 @@ class StringMagic(object):
         fillstr = args[2] or u'0'
         return s + ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
 
-    
+
 class ParserFunctions(object):
     wikidb = None
     def _error(self,s):
@@ -426,9 +427,9 @@ class ParserFunctions(object):
 
     def LANGUAGE(self, args):
         """implement http://meta.wikimedia.org/wiki/Help:Parser_function#.23language:"""
-        
+
         return args[0] # FIXME this is just a dummy implementation.
-    
+
     def TAG(self, args):
         name = args[0].strip()
         r= u"<%s>%s</%s>" % (name, args[1], name)
@@ -461,7 +462,7 @@ class ParserFunctions(object):
                 if int(val)==val and math.fabs(val)<1e14:
                     return str(int(val))
                 r=str(float(val))
-            except Exception, err:                
+            except Exception, err:
                 # log("ERROR: error while evaluating #expr:%r\n" % (ex,))
                 return self._error(err)
 
@@ -476,7 +477,7 @@ class ParserFunctions(object):
                 return fixed
             return r
         return u"0"
-    
+
 
     def IFEXPR(self, rl):
         try:
@@ -494,22 +495,22 @@ class ParserFunctions(object):
         else:
             return rl[2]
 
-    
+
     def TITLEPARTS(self, args):
         title = args[0]
         try:
             numseg = int(args[1])
         except ValueError:
             numseg = 0
-            
+
         try:
             start = int(args[2])
         except ValueError:
             start = 1
-        
-        if start>0:    
+
+        if start>0:
             start -= 1
-            
+
         parts = title.split("/")[start:]
         if numseg:
             parts = parts[:numseg]
@@ -521,16 +522,22 @@ class ParserFunctions(object):
         good = args.get(2, None)
         if good is None:
             good = val
-            
-        if iferror_rx.search(val):
-            return bad
+
+        # Two-stage regex search in case val is a long string with many tags
+        iferror_m = iferror_fast_rx.search(val)
+        if iferror_m:
+            error_tag_start = val.rfind('<', 0, iferror_m.start())
+            error_tag_end = val.find('>', iferror_m.start())
+            if iferror_rx.match(val[error_tag_start:error_tag_end+1]):
+                return bad
+            else:
+                return good
         else:
             return good
-        
-        
+
 for x in dir(ParserFunctions):
     if x.startswith("_"):
-        continue    
+        continue
     setattr(ParserFunctions, "#"+x, getattr(ParserFunctions, x))
     delattr(ParserFunctions, x)
 
@@ -546,17 +553,17 @@ class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMag
             return None
 
         upper = name.upper()
-        
+
         if self.local_values:
             try:
                 return self.local_values[upper]
             except KeyError:
                 pass
-        
+
         m = getattr(self, upper, None)
         if m is None:
             return None
-        
+
         if isinstance(m, basestring):
             return m
 
@@ -569,8 +576,8 @@ class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMag
             name = str(name)
         except UnicodeEncodeError:
             return False
-        
-        
+
+
         m = getattr(self, name.upper(), None)
         return m is not None
 
