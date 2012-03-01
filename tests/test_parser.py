@@ -717,6 +717,12 @@ def test_http_url():
     yield checkurl, "http://pediapress.com/foo|bar"
     yield checkurl, "http://pediapress.com/{curly_braces}"
 
+def test_schemeless_url():
+
+    url = '[//toolserver.org/~geohack/geohack.php?pagename=Benutzer%3AVolker.haas/Test&language=de&params=51.4213888889_N_9.64805555556_E_dim:100_region:DE-NI_type:waterbody&title=Namentlicher+Beginn+Weser]'
+
+    caption = parse(url).find(parser.NamedURL)[0].caption
+    assert caption == url[1:-1]
 
 def test_source_vlist():
     r = parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
