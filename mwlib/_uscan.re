@@ -157,6 +157,7 @@ re2c:yyfill:enable = 0 ;
   irc = "irc://" [a-zA-Z0-9./]+ ;
   news = "news:" [a-ZA-Z0-9.]+ ;
   url = "http" "s"? "://" [^\X005D[<>"\X0000-\X0020\X007F]+;
+  relurl = "//" [^\X005D[<>"\X0000-\X0020\X007F]+;
   entity_name = "&" [a-zA-Z0-9]+ ";";
   entity_hex = "&#" 'x' [a-fA-F0-9]+ ";";
   entity_dec = "&#" [0-9]+ ";";
@@ -252,7 +253,8 @@ not_bol:
   "[" ftp {RET(t_urllink);}
   ftp           {RET(t_http_url);}
   "[" url {RET(t_urllink);}
-  url 		{RET(t_http_url);}
+  "[" relurl    {RET(t_urllink);}
+  url           {RET(t_http_url);}
   magicword		{RET(t_magicword);}
   "\X007F" "UNIQ-" [a-z0-9]+ "-" [0-9]+ "-" [0-9a-f]+ "-QINU" "\X007f" {RET(t_uniq);}
 
