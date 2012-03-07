@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2012-03-07 mwlib 0.13.6
+--------------------------
+- make mw-zip -gg post test.pediapress.com
+- implement protocol relative urls in named links
+
 2012-02-29 mwlib 0.13.5
 --------------------------
 - simplify the brain-damaged iferror_rx regular expression, fixes #10
