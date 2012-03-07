@@ -89,7 +89,7 @@ def main():
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
         help='get POST URL from PediaPress.com, open upload page in webbrowser',
-        action='store_true',
+        action='count',
     )
     parser.add_option('--keep-tmpfiles',                  
         action='store_true',
@@ -115,9 +115,13 @@ def main():
         from mwlib.podclient import PODClient
         podclient = PODClient(options.posturl)
     elif options.getposturl:
+        if options.getposturl>1:
+            serviceurl = 'http://test.pediapress.com/api/collections/'
+        else:
+            serviceurl = 'http://pediapress.com/api/collections/'
         import webbrowser
         from mwlib.podclient import podclient_from_serviceurl
-        podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
+        podclient = podclient_from_serviceurl(serviceurl)
         pid = os.fork()
         if not pid:
             try:
