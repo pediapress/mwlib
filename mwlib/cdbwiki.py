@@ -71,9 +71,11 @@ class ZCdbReader(cdb.Cdb):
 
 
 class BuildWiki(object):
-    def __init__(self, dumpfile, outputdir, prefix='wiki'):
+    def __init__(self, dumpfile, outputdir, prefix='wiki', ignore_redirects=False):
         if type(dumpfile) in (type(''), type(u'')):
-            self.dumpParser = dumpparser.DumpParser(dumpfile)
+            if ignore_redirects:
+                print "Ignoring redirects."
+            self.dumpParser = dumpparser.DumpParser(dumpfile, ignore_redirects)
         else:
             self.dumpParser = dumpfile
         self.output_path = os.path.join(outputdir, prefix)
