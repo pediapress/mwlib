@@ -430,8 +430,10 @@ class TreeCleaner(object):
         single_col = node.__class__ == Table and node.numcols == 1
         is_long = len(node.getAllDisplayText()) > 2500
         contains_gallery = len(node.getChildNodesByClass(Gallery)) > 0
+        many_cells = False
         if single_col:
             all_images = True
+            many_cells = len(node.getChildNodesByClass(Cell)) > 200
             for row in node.children:
                 for cell in row.children:
                     for item in cell.children:
@@ -439,7 +441,8 @@ class TreeCleaner(object):
                             all_images = False
         else:
             all_images = False
-        if single_col and ( (not getattr(node, 'isInfobox', False) and is_long) or all_images or contains_gallery):
+        if single_col and ( (not getattr(node, 'isInfobox', False) and (is_long or many_cells))
+                            or all_images or contains_gallery):
             if not node.parents:
                 return
             divs = []
