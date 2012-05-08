@@ -5,7 +5,6 @@
 # See README.rst for additional licensing information.
 
 import sys
-import inspect
 import unicodedata
 
 from mwlib.advtree import removeNewlines
@@ -281,7 +280,7 @@ class TreeCleaner(object):
     def report(self, *args):
         if not self.save_reports:
             return
-        caller = inspect.stack()[1][3]
+        caller = sys._getframe(1).f_code.co_name
         msg = ''
         if args:
             msg = ' '.join([repr(arg) for arg in args])
