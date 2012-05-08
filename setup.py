@@ -71,9 +71,8 @@ def main():
     install_requires = ["pyparsing>=1.4.11", "odfpy>=0.9, <0.10",
                         "gevent", "timelib>=0.2", "bottle>=0.10",
                         "pyPdf>=1.12", "apipkg", "qserve>=0.2.7",
-                        "roman", "lxml", "py>=1.4", "sqlite3dbm"]
-    if sys.version_info[:2] < (2, 6):
-        install_requires.append("simplejson>=1.3")
+                        "roman", "lxml", "py>=1.4", "sqlite3dbm",
+                        "simplejson>=2.5"]
 
     ext_modules = []
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
