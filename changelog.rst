@@ -4,6 +4,14 @@ Changelog
 
 mwlib
 ==========================
+2012-05-08 mwlib 0.13.7
+--------------------------
+- unconditionally require simplejson
+- workaround a inspect module bug
+- fix pypi url used by tox
+- improve transformSingleColTables in treecleaner
+- expose DumpParser's redirect-ignoring functionality as an optional boolean command-line flag to mw-buildcdb
+
 2012-03-07 mwlib 0.13.6
 --------------------------
 - make mw-zip -gg post test.pediapress.com
