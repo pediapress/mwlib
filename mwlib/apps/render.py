@@ -13,6 +13,28 @@ import pkg_resources
 from mwlib.options import OptionParser
 from mwlib import utils, wiki, conf
 
+
+def init_tmp_cleaner():
+    import tempfile, shutil, time
+    tempfile.tempdir = tempfile.mkdtemp(prefix="tmp-%s" % os.path.basename(sys.argv[0]))
+    os.environ["TMP"] = os.environ["TEMP"] = os.environ["TMPDIR"] = tempfile.tempdir
+    try:
+        pid = os.fork()
+    except:
+        shutil.rmtree(tempfile.tempdir)
+        raise
+
+    if pid == 0:
+        os.setpgrp()
+        while 1:
+            if os.getppid() == 1:
+                try:
+                    shutil.rmtree(tempfile.tempdir)
+                finally:
+                    os._exit(0)
+            time.sleep(1)
+
+
 class Main(object):
     zip_filename = None
     
@@ -159,6 +181,8 @@ class Main(object):
             if option not in getattr(writer, 'options', {}):
                 print 'Warning: unknown writer option %r' % option
                 del writer_options[option]
+
+        init_tmp_cleaner()
 
         self.status = Status(options.status_file, progress_range=(1, 33))
         self.status(progress=0)
