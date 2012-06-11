@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2012-06-11 mwlib 0.13.8
+--------------------------
+- do not embed apipkg anymore
+- make sure temp files are removed even if mw-render is killed
+
 2012-05-08 mwlib 0.13.7
 --------------------------
 - unconditionally require simplejson
