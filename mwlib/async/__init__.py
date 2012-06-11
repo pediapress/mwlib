@@ -1,4 +1,4 @@
-from mwlib.apipkg import initpkg
+from apipkg import initpkg
 initpkg(
     __name__,
     dict(
