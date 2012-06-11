@@ -160,6 +160,7 @@ include tests/pages-tag.zip
 include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
 include tests/test_advtree.py
+include tests/test_async_import.py
 include tests/test_authors.py
 include tests/test_convert_templates.py
 include tests/test_ebad.py
