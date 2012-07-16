@@ -8,7 +8,7 @@ import gevent.monkey
 if __name__ == "__main__":
     gevent.monkey.patch_all()
 
-import sys, re, StringIO, urllib2, urlparse, traceback
+import sys, re, StringIO, urllib2, urlparse, traceback, urllib, unicodedata
 from hashlib import md5
 
 from gevent import pool, pywsgi
@@ -175,6 +175,30 @@ def dispatch_command(path):
     return Application().dispatch(request)
 
 
+def get_content_disposition(filename, ext):
+    if isinstance(filename, str):
+        filename = unicode(filename)
+
+    if filename:
+        filename = filename.strip()
+
+    if not filename:
+        filename = u"collection"
+
+
+    # see http://code.activestate.com/recipes/251871-latin1-to-ascii-the-unicode-hammer/
+    asciifn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore")
+    asciifn = re.sub("[;:\"']", "", asciifn) or "collection"
+
+
+    r = "inline; filename=%s.%s" % (asciifn, ext)
+    if isinstance(filename, unicode):
+        filename = filename.encode("utf-8")
+    if filename and filename != asciifn:
+        r += ";filename*=UTF-8''%s.%s" % (urllib.quote(filename), ext)
+    return r
+
+
 class Application(object):
     def __init__(self, default_writer='rl'):
         self.default_writer = default_writer
@@ -328,6 +352,7 @@ class Application(object):
                 if res["result"]:
                     more["url"] = res["result"]["url"]
                     more["content_length"] = res["result"]["size"]
+                    more["suggested_filename"] = res["result"].get("suggested_filename", "")
             except KeyError:
                 pass
 
@@ -335,7 +360,8 @@ class Application(object):
                 more["content_type"] = w.content_type
 
             if w.file_extension:
-                more["content_disposition"] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
+                more["content_disposition"] = get_content_disposition(more.get("suggested_filename", None),
+                                                                      w.file_extension)
 
             return retval(state="finished", **more)
 

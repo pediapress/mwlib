@@ -1,4 +1,5 @@
 #! /usr/bin/env py.test
+# -*- coding: utf-8 -*-
 
 import pytest, gevent, nserve, urllib, urllib2, bottle
 import wsgi_intercept.urllib2_intercept
@@ -138,3 +139,13 @@ def test_app_dispatch_bad_collid(app, busy):
     code, data = post(command="render", collection_id="a" * 15)
     print code, data
     assert code == 404
+
+
+@pytest.mark.parametrize(("filename", "ext", "expected"), [
+        (u"Motörhead", "pdf", "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf"),
+        (None, "pdf", "inline; filename=collection.pdf"),
+        ("  ;;;", "pdf", "inline; filename=collection.pdf;filename*=UTF-8''%3B%3B%3B.pdf"),
+        ("foo", "pdf", "inline; filename=foo.pdf")])
+def test_get_content_disposition(filename, ext, expected):
+    res = nserve.get_content_disposition(filename, ext)
+    assert res == expected

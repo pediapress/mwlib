@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
-from gevent import monkey
-monkey.patch_all()
+if __name__ == "__main__":
+    from gevent import monkey
+    monkey.patch_all()
 
 import os, sys, time, socket
 
@@ -105,6 +106,23 @@ def _get_args(writer_options=None,
     return args
 
 
+def suggest_filename(metabook_data):
+    if not metabook_data:
+        return None
+
+    from mwlib import myjson
+    mb = myjson.loads(metabook_data)
+
+    def suggestions():
+        yield mb.title
+        for a in mb.items:
+            yield a.title
+
+    for x in suggestions():
+        if x and x.strip():
+            return x.strip()
+
+
 class commands(object):
     def statusfile(self):
         host = self.proxy._rpcclient.host
@@ -160,7 +178,8 @@ class commands(object):
             os.chmod(outfile, 0644)
             size = os.path.getsize(outfile)
             url = cacheurl + "/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
-            return dict(url=url, size=size)
+            return dict(url=url, size=size,
+                        suggested_filename=suggest_filename(metabook_data) or "")
 
         return doit(**params)
 
