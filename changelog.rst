@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2012-06-17 mwlib 0.13.10
+--------------------------
+- fix handling of filenames with spaces
+
 2012-06-17 mwlib 0.13.9
 --------------------------
 - use filenames derived from content for downloads
