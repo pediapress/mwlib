@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2012-06-17 mwlib 0.13.9
+--------------------------
+- use filenames derived from content for downloads
+- synchronize documentation with MediaWiki
+
 2012-06-11 mwlib 0.13.8
 --------------------------
 - do not embed apipkg anymore
