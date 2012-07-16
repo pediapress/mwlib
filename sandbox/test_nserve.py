@@ -145,6 +145,7 @@ def test_app_dispatch_bad_collid(app, busy):
         (u"Motörhead", "pdf", "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf"),
         (None, "pdf", "inline; filename=collection.pdf"),
         ("  ;;;", "pdf", "inline; filename=collection.pdf;filename*=UTF-8''%3B%3B%3B.pdf"),
+        ("Peter Hartz", "pdf", "inline; filename=Peter-Hartz.pdf;filename*=UTF-8''Peter%20Hartz.pdf"),
         ("foo", "pdf", "inline; filename=foo.pdf")])
 def test_get_content_disposition(filename, ext, expected):
     res = nserve.get_content_disposition(filename, ext)

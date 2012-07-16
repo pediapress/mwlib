@@ -189,7 +189,7 @@ def get_content_disposition(filename, ext):
     # see http://code.activestate.com/recipes/251871-latin1-to-ascii-the-unicode-hammer/
     asciifn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore")
     asciifn = re.sub("[;:\"']", "", asciifn) or "collection"
-
+    asciifn = asciifn.replace(" ", "-")
 
     r = "inline; filename=%s.%s" % (asciifn, ext)
     if isinstance(filename, unicode):
