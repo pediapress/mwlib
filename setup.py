@@ -72,7 +72,7 @@ def main():
                         "gevent", "timelib>=0.2", "bottle>=0.10",
                         "pyPdf>=1.12", "apipkg>=1.2", "qserve>=0.2.7",
                         "roman", "lxml", "py>=1.4", "sqlite3dbm",
-                        "simplejson>=2.5"]
+                        "simplejson>=2.3"]
 
     ext_modules = []
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
