@@ -13,6 +13,11 @@ if not (2, 4) < sys.version_info[:2] < (3, 0):
 ***********************************************************************
 """)
 
+
+from distutils.util import strtobool
+PP_MAINTAINER = strtobool(os.environ.get("PP_MAINTAINER", "0"))
+
+
 try:
     from setuptools import setup, Extension
 except ImportError:
@@ -28,7 +33,7 @@ def get_version():
 
 
 def checkpil():
-    if "PP_MAINTAINER" in os.environ:
+    if PP_MAINTAINER:
         return
 
     try:
@@ -71,11 +76,14 @@ def main():
     if os.path.exists('Makefile'):
         build_deps()   # this is a git clone
 
-    install_requires = ["pyparsing>=1.4.11", "odfpy>=0.9, <0.10",
-                        "gevent", "timelib>=0.2", "bottle>=0.10",
-                        "pyPdf>=1.12", "apipkg>=1.2", "qserve>=0.2.7",
-                        "roman", "lxml", "py>=1.4", "sqlite3dbm",
-                        "simplejson>=2.3"]
+    install_requires = ["pyparsing>=1.4.11", "timelib>=0.2",
+                        "bottle>=0.10", "pyPdf>=1.12", "apipkg>=1.2",
+                        "qserve>=0.2.7", "lxml", "py>=1.4",
+                        "sqlite3dbm", "simplejson>=2.3"]
+
+    if not PP_MAINTAINER:
+        install_requires += ["roman", "gevent", "odfpy>=0.9, <0.10"]
+
 
     ext_modules = []
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
