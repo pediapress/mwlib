@@ -28,6 +28,9 @@ def get_version():
 
 
 def checkpil():
+    if "PP_MAINTAINER" in os.environ:
+        return
+
     try:
         from PIL import Image
         return
