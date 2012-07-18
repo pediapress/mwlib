@@ -150,3 +150,13 @@ def test_app_dispatch_bad_collid(app, busy):
 def test_get_content_disposition(filename, ext, expected):
     res = nserve.get_content_disposition(filename, ext)
     assert res == expected
+
+
+def test_content_disposition_comma():
+    a, u = nserve.get_content_disposition_values("foo,bar", "pdf")
+    assert a == "foo-bar"
+
+def test_content_disposition_merge():
+    a, u = nserve.get_content_disposition_values("foo ,\"bar", "pdf")
+    assert a == "foo-bar"
+
