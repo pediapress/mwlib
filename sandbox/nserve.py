@@ -175,7 +175,7 @@ def dispatch_command(path):
     return Application().dispatch(request)
 
 
-def get_content_disposition(filename, ext):
+def get_content_disposition_values(filename, ext):
     if isinstance(filename, str):
         filename = unicode(filename)
 
@@ -185,17 +185,23 @@ def get_content_disposition(filename, ext):
     if not filename:
         filename = u"collection"
 
-
     # see http://code.activestate.com/recipes/251871-latin1-to-ascii-the-unicode-hammer/
     asciifn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore")
     asciifn = re.sub("[;:\"']", "", asciifn) or "collection"
     asciifn = asciifn.replace(" ", "-")
 
-    r = "inline; filename=%s.%s" % (asciifn, ext)
     if isinstance(filename, unicode):
         filename = filename.encode("utf-8")
-    if filename and filename != asciifn:
-        r += ";filename*=UTF-8''%s.%s" % (urllib.quote(filename), ext)
+
+    return (asciifn, filename)
+
+
+def get_content_disposition(filename, ext):
+    asciifn, utf8fn = get_content_disposition_values(filename, ext)
+
+    r = "inline; filename=%s.%s" % (asciifn, ext)
+    if utf8fn and utf8fn != asciifn:
+        r += ";filename*=UTF-8''%s.%s" % (urllib.quote(utf8fn), ext)
     return r
 
 
