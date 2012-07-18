@@ -4,6 +4,13 @@ Changelog
 
 mwlib
 ==========================
+2012-06-18 mwlib 0.13.11
+--------------------------
+- skip checkpil if PP_MAINTAINER is set
+- relax simplejson requirement a bit
+- fix content disposition header when filenames contain commas
+- make it easier to test the content disposition logic
+
 2012-06-17 mwlib 0.13.10
 --------------------------
 - fix handling of filenames with spaces
