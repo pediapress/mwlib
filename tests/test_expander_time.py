@@ -1,7 +1,6 @@
 #! /usr/bin/env py.test
 
 from mwlib.expander import expandstr
-from mwlib.xfail import xfail
 
 
 def test_codes():

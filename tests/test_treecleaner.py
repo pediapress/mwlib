@@ -3,8 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import sys
-
+import sys, pytest
 from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
 from mwlib.treecleaner import TreeCleaner, _all, _any
@@ -14,7 +13,6 @@ from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, Cat
                      Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
                      URL)
 
-from mwlib.xfail import xfail
 
 
 def _treesanity(r):
@@ -363,7 +361,7 @@ def test_swapNodes():
     assert not _any([p.__class__ == Underline for p in center_node.getParents()])
 
 
-@xfail
+@pytest.mark.xfail
 def test_splitBigTableCells():
     '''
     Splitting big table cells can not properly be tested here.
@@ -373,7 +371,7 @@ def test_splitBigTableCells():
     assert False
 
 
-@xfail
+@pytest.mark.xfail
 def test_fixParagraphs():
     raw = r'''  '''  # FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
     tree, reports = cleanMarkup(raw)
@@ -470,7 +468,7 @@ paragraph
 # br tag. in the old parser this first paragraph also contained the source node.
 
 
-@xfail
+@pytest.mark.xfail
 def test_removebreakingreturnsNoremove():
     raw = """
 <br/>

@@ -1,8 +1,8 @@
 #! /usr/bin/env py.test
 
+import pytest
 from mwlib.refine import core
 from mwlib import nshandling
-from mwlib.xfail import xfail
 
 tokenize = core.tokenize
 show = core.show

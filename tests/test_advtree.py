@@ -3,8 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import sys
-import os
+import sys, pytest
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
@@ -13,7 +12,6 @@ from mwlib.advtree import (
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
-from mwlib.xfail import xfail
 
 
 def _treesanity(r):
@@ -148,7 +146,7 @@ def test_definitiondescription():
     assert len(dd) == 4
 
 
-@xfail
+@pytest.mark.xfail
 def test_defintion_list():
     """http://code.pediapress.com/wiki/ticket/221"""
     raw = u''';termA

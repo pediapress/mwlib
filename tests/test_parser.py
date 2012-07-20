@@ -4,9 +4,9 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import pytest
 from mwlib import parser, expander, uparser
 from mwlib.expander import DictDB
-from mwlib.xfail import xfail
 from mwlib.dummydb import DummyDB
 from mwlib.refine import util, core
 
@@ -734,7 +734,7 @@ def test_not_pull_in_alpha_image():
     assert "cd" not in link.asText(), "'cd' not in linkstext"
 
 
-@xfail
+@pytest.mark.xfail
 def test_pull_in_alpha():
     """http://code.pediapress.com/wiki/ticket/130"""
     link = parse("[[link|ab]]cd").find(parser.Link)[0]
@@ -868,7 +868,7 @@ def test_subpage_link():
     assert r.target == '/SomeSubPage', "wrong target"
 
 
-@xfail
+@pytest.mark.xfail
 def test_normalize():
     r = parse("[[MediaWiki:__bla_ _ ]]").find(parser.NamespaceLink)[0]
     assert r.target == 'MediaWiki:__bla_ _ '
@@ -984,7 +984,7 @@ def test_force_close_1():
     assert len(cells) == 4, "expected 4 cells"
 
 
-@xfail
+@pytest.mark.xfail
 def test_force_close_code():
     s = "before <code>inside<code> after"
     r = parse(s)

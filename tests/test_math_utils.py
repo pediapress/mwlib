@@ -1,12 +1,8 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-import os
-import shutil
-import tempfile
-
+import os, shutil, tempfile, pytest
 from mwlib.mathutils import renderMath
-from mwlib.xfail import xfail
 
 
 class TestMathUtils(object):
@@ -50,7 +46,7 @@ class TestMathUtils(object):
                 res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='texvc')
                 assert res
 
-    @xfail
+    @pytest.mark.xfail
     def test_math_complex(self):
 
         latex = r"""\begin{array}{ccc}
