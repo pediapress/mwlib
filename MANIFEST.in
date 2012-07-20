@@ -19,7 +19,6 @@ include docs/metabook.rst
 include docs/renderserver.rst
 include docs/writers.html
 include docs/writers.rst
-include ez_setup.py
 include mwlib/EasyTimeline.pl
 include mwlib/__init__.py
 include mwlib/_conf.py

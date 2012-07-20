@@ -8,22 +8,15 @@ import sys, os, time, glob
 if not (2, 4) < sys.version_info[:2] < (3, 0):
     sys.exit("""
 ***** ERROR ***********************************************************
-* mwlib does not work with your python version. You need to use python
-* 2.5, 2.6 or 2.7
+* mwlib does not work with python %s.%s. You need to use python 2.5,
+* 2.6 or 2.7
 ***********************************************************************
-""")
+""" % sys.version_info[:2])
 
 
+from setuptools import setup, Extension
 from distutils.util import strtobool
 PP_MAINTAINER = strtobool(os.environ.get("PP_MAINTAINER", "0"))
-
-
-try:
-    from setuptools import setup, Extension
-except ImportError:
-    import ez_setup
-    ez_setup.use_setuptools()
-    from setuptools import setup, Extension
 
 
 def get_version():
@@ -42,14 +35,14 @@ def checkpil():
     except ImportError:
         pass
 
-    print """
+    sys.stdout.write("""
 
     *****************************************************
     * please install the python imaging library (PIL)
     * from http://www.pythonware.com/products/pil/
     *****************************************************
 
-    """
+    """)
     # give them some time to read it, we really need it and can't install with setuptools
     time.sleep(5)
 
@@ -68,10 +61,6 @@ def build_deps():
         sys.exit("Error: make failed")
 
 
-def read_long_description():
-    return open("README.rst").read()
-
-
 def main():
     if os.path.exists('Makefile'):
         build_deps()   # this is a git clone
@@ -84,14 +73,12 @@ def main():
     if not PP_MAINTAINER:
         install_requires += ["roman", "gevent", "odfpy>=0.9, <0.10"]
 
-
     ext_modules = []
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
 
     for x in glob.glob("mwlib/*/*.c"):
         modname = x[:-2].replace("/", ".")
         ext_modules.append(Extension(modname, [x]))
-        print "USING:", modname, x
 
     setup(
         name="mwlib",
@@ -120,10 +107,11 @@ def main():
         license="BSD License",
         maintainer="pediapress.com",
         maintainer_email="info@pediapress.com",
-        long_description=read_long_description())
+        long_description=open("README.rst").read())
 
     if "install" in sys.argv or "develop" in sys.argv:
         checkpil()
+
 
 if __name__ == '__main__':
     main()
