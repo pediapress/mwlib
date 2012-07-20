@@ -16,7 +16,7 @@ def main():
         except ValueError:
             pass
     
-    remove("make_manifest.py")
+    remove("make-manifest")
     remove("Makefile")
     remove(".gitignore")
     remove("make-release")

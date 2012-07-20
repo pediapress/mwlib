@@ -19,6 +19,12 @@ include docs/metabook.rst
 include docs/renderserver.rst
 include docs/writers.html
 include docs/writers.rst
+include mw-post
+include mw-qserve
+include mw-render
+include mw-serve-ctl
+include mw-version
+include mw-zip
 include mwlib/EasyTimeline.pl
 include mwlib/__init__.py
 include mwlib/_conf.py

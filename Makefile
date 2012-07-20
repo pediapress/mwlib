@@ -22,7 +22,7 @@ documentation:: README.html
 	cd docs; make html
 
 MANIFEST.in::
-	./make_manifest.py
+	./make-manifest
 
 README.html: README.rst
 	$(RST2HTML) README.rst >README.html
