@@ -15,18 +15,11 @@ log = Log('mwlib.utils')
     
 
 def wiki_obsolete_cdb(path=None,  **kwargs):
-    raise RuntimeError("cdb file format has changed. please rebuild with mw-buildcdb")
-
-def wiki_nucdb(path=None, lang="en", **kwargs):
-    from mwlib import cdbwiki,  nuwiki
-    path = os.path.expanduser(path)
-    db=cdbwiki.WikiDB(path, lang=lang)
-    return nuwiki.adapt(db)
-
+    raise RuntimeError("cdb file format is not supported anymore.")
 
 
 dispatch = dict(
-    wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_nucdb)
+    wiki = dict(cdb=wiki_obsolete_cdb, nucdb=wiki_obsolete_cdb)
 )
 
 _en_license_url = 'http://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'

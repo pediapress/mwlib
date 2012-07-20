@@ -17,15 +17,9 @@ Documentation
 Please visit http://mwlib.readthedocs.org/en/latest/index.html for
 detailed documentation.
 
-Credits
-======================================================================
-``mwlib/cdb.py`` is based on the cdb implementation from the SpamBayes_
-project ((C) 2002-2004 Python Software Foundation).
-The remaining parts are distributed under the BSD license:
-
 License
 ======================================================================
-Copyright (c) 2007-2011 PediaPress GmbH
+Copyright (c) 2007-2012 PediaPress GmbH
 
 All rights reserved.
 

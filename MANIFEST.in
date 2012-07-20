@@ -39,8 +39,6 @@ include mwlib/async/__init__.py
 include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
-include mwlib/cdb.py
-include mwlib/cdbwiki.py
 include mwlib/client.py
 include mwlib/conf.py
 include mwlib/dummydb.py
