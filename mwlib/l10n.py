@@ -8,8 +8,7 @@ ext2lang = {
 
 def execute(*args):
     popen = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output = popen.stdout.read()
-    errors = popen.stdout.read()
+    output, errors = popen.communicate()
     popen.wait()
     if errors:
         raise RuntimeError('Errors while executing %r: %s' % (
