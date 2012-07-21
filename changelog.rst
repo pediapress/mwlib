@@ -4,6 +4,16 @@ Changelog
 
 mwlib
 ==========================
+
+2012-06-18 mwlib 0.14.0
+--------------------------
+- get rid of the _Version class, up version to 0.14.0
+- install scripts via plain old distutils instead of "console_scripts" entry point
+- remove cdbwiki
+- remove mwlib.xfail, use pytest.mark.xfail instead
+- expect setuptools or distribute to be installed
+- remove some problematic dependencies in PP_MAINTAINER mode
+
 2012-06-18 mwlib 0.13.11
 --------------------------
 - skip checkpil if PP_MAINTAINER is set
