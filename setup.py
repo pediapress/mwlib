@@ -15,6 +15,7 @@ if not (2, 4) < sys.version_info[:2] < (3, 0):
 
 
 from setuptools import setup, Extension
+from distutils.command.build import build
 from distutils.util import strtobool
 PP_MAINTAINER = strtobool(os.environ.get("PP_MAINTAINER", "0"))
 
@@ -25,53 +26,30 @@ def get_version():
     return str(d["version"])
 
 
-def checkpil():
-    if PP_MAINTAINER:
-        return
+class MakeBuild(build):
+    def run(self):
+        self.run_make()
+        build.run(self)
 
-    try:
-        from PIL import Image
-        return
-    except ImportError:
-        pass
-
-    sys.stdout.write("""
-
-    *****************************************************
-    * please install the python imaging library (PIL)
-    * from http://www.pythonware.com/products/pil/
-    *****************************************************
-
-    """)
-    # give them some time to read it, we really need it and can't install with setuptools
-    time.sleep(5)
-
-
-def mtime(fn):
-    if os.path.exists(fn):
-        return os.stat(fn).st_mtime
-    return 0
-
-
-def build_deps():
-    # we will *not* add support for automatic generation of those files as that
-    # might break with source distributions from pypi
-    err = os.system("make all")
-    if err != 0:
-        sys.exit("Error: make failed")
-
+    def run_make(self):
+        if not os.path.exists('Makefile'):
+            return
+        
+        # we will *not* add support for automatic generation of those files as that
+        # might break with source distributions from pypi
+        err = os.system("make all")
+        if err != 0:
+            sys.exit("Error: make failed")
+        
 
 def main():
-    if os.path.exists('Makefile'):
-        build_deps()   # this is a git clone
-
     install_requires = ["pyparsing>=1.4.11", "timelib>=0.2",
                         "bottle>=0.10", "pyPdf>=1.12", "apipkg>=1.2",
                         "qserve>=0.2.7", "lxml", "py>=1.4",
-                        "sqlite3dbm", "simplejson>=2.3"]
+                        "sqlite3dbm", "simplejson>=2.3", "cython"]
 
     if not PP_MAINTAINER:
-        install_requires += ["roman", "gevent", "odfpy>=0.9, <0.10"]
+        install_requires += ["roman", "gevent", "PIL", "odfpy>=0.9, <0.10"]
 
     ext_modules = []
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
@@ -83,6 +61,7 @@ def main():
     setup(
         name="mwlib",
         version=get_version(),
+        cmd_class={'build': MakeBuild},
         entry_points={'mwlib.writers': ['odf = mwlib.odfwriter:writer']},
         install_requires=install_requires,
         ext_modules=ext_modules,
@@ -98,9 +77,6 @@ def main():
         maintainer="pediapress.com",
         maintainer_email="info@pediapress.com",
         long_description=open("README.rst").read())
-
-    if "install" in sys.argv or "develop" in sys.argv:
-        checkpil()
 
 
 if __name__ == '__main__':
