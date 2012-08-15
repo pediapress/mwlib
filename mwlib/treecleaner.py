@@ -428,6 +428,7 @@ class TreeCleaner(object):
         # tables like this should be detected and marked in a separate module probably
         single_col = node.__class__ == Table and node.numcols == 1
         is_long = len(node.getAllDisplayText()) > 2500
+
         contains_gallery = len(node.getChildNodesByClass(Gallery)) > 0
         many_cells = False
         if single_col:
@@ -440,8 +441,18 @@ class TreeCleaner(object):
                             all_images = False
         else:
             all_images = False
+        if node.__class__ == Table:
+            nested_tables = node.getChildNodesByClass(Table)
+            nested_rows = 0
+            for t in nested_tables:
+                nested_rows = max(nested_rows, len(t.getChildNodesByClass(Row)))
+            many_nested_rows = nested_rows > 35
+        else:
+            many_nested_rows = False
         if single_col and ( (not getattr(node, 'isInfobox', False) and (is_long or many_cells))
-                            or all_images or contains_gallery):
+                            or ((is_long or many_nested_rows) and many_cells)
+                            or all_images or contains_gallery
+                            ):
             if not node.parents:
                 return
             divs = []
@@ -466,7 +477,7 @@ class TreeCleaner(object):
                         divs.append(d)
                     else:
                         for item in cell:
-                            items.append(item)                            
+                            items.append(item)
             parent = node.parent
             if div_wrapper:
                 parent.replaceChild(node, divs)
@@ -476,7 +487,7 @@ class TreeCleaner(object):
                 self.report('replaced single col table with items:',  parent.children)
         for c in node.children:
             self.transformSingleColTables(c)
-        
+
     def _getNext(self, node): #FIXME: name collides with advtree.getNext
         if not (node.next or node.parent):
             return
