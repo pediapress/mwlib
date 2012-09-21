@@ -27,7 +27,7 @@ def _myround(a,b):
 pattern = """
 (?:\s+)
 |((?:(?:\d+)(?:\.\d+)?
- |(?:\.\d+)) (?:e(?:\+|-)?\d+)?)
+ |(?:\.\d+)))
 |(\+|-|\*|/|>=|<=|<>|!=|[a-zA-Z]+|.)
 """
 
@@ -87,6 +87,9 @@ a("ceil", 9, lambda x: int(math.ceil(x)))
 a("floor", 9, lambda x: int(math.floor(x)))
 a("trunc", 9, long, 1)
 
+a("e", 11, lambda x, y: x * 10 ** y)
+a("E", 11, lambda x, y: x * 10 ** y)
+
 a("*", 8, lambda x,y: x*y)
 a("/", 8, lambda x,y: x/y)
 a("div", 8, lambda x,y: x/y)
@@ -121,7 +124,7 @@ class Expr(object):
         except KeyError:
             pass
         
-        if "." in s or "e" in s.lower():
+        if "." in s:
             return float(s)
         return long(s)
     
@@ -142,6 +145,9 @@ class Expr(object):
         last_operand, last_operator = False, True
         
         for operand, operator in tokens:
+            if operand in ("e", "E") and (last_operand or last_operator == ")"):
+                operand, operator = operator, operand
+
             if operand:
                 if last_operand:
                     raise ExprError("expected operator")

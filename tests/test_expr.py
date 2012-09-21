@@ -156,3 +156,10 @@ def test_unary_minus_sin():
 def test_empty_expr():
     yield expandstr, "{{#expr:   }}", ""
     yield expandstr, "{{#ifexpr:    |yes|no}}", "no"
+
+
+def test_braindamaged_scientific():
+    yield ee, "{{#expr: (-1)e(-0.5)}}", -0.31622776601684
+    yield expandstr, "{{#expr:1e2e3}}", "100000"
+    yield ee, "{{#expr:2*e}}", 2 * math.e
+    yield ee, "{{#expr: e E E}}", 1420.9418661882
