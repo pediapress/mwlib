@@ -1,3 +1,4 @@
+import locale
 from xml.sax.saxutils import quoteattr
 from mwlib.templ import nodes, evaluate
 
@@ -124,6 +125,57 @@ class Displaytitle(nodes.Node):
         expander.magic_displaytitle = name
 
 
+def reverse_formatnum(val):
+    try:
+        return str(locale.atoi(val))
+    except ValueError:
+        pass
+
+    try:
+        return str(locale.atof(val))
+    except ValueError:
+        pass
+
+    return val
+
+
+def formatnum(val):
+    try:
+        val = long(val)
+    except ValueError:
+        pass
+    else:
+        return locale.format("%d", val, True)
+
+    try:
+        val = float(val)
+    except ValueError:
+        return val
+
+    return locale.format("%f", val, 1, True)
+
+
+class Formatnum(nodes.Node):
+    def flatten(self, expander, variables, res):
+        arg0 = []
+        evaluate.flatten(self[0], expander, variables, arg0)
+        arg0 = u"".join(arg0)
+
+        if len(self) > 1:
+            arg1 = []
+            evaluate.flatten(self[1], expander, variables, arg1)
+            arg1 = u"".join(arg1)
+        else:
+            arg1 = u""
+
+        if arg1.strip() in (u"r", u"R"):
+            res.append(reverse_formatnum(arg0))
+        else:
+            res.append(formatnum(arg0))
+
+        # print "FORMATNUM:", (arg0, arg1, res[-1])
+
+
 def make_switchnode(args):
     return nodes.SwitchNode((args[0], args[1:]))
 
@@ -138,4 +190,5 @@ registry = {'#time': Time,
             '#switch': make_switchnode,
             '#if': nodes.IfNode,
             '#ifeq': nodes.IfeqNode,
+            'formatnum': Formatnum
             }
