@@ -11,7 +11,7 @@ import sys
 import errno
 import pkg_resources
 from mwlib.options import OptionParser
-from mwlib import utils, wiki, conf
+from mwlib import utils, wiki, conf, _locale
 
 
 def init_tmp_cleaner():
@@ -190,6 +190,12 @@ class Main(object):
         env = None
         try:
             env = self.get_environment()
+
+            try:
+                _locale.set_locale_from_lang(env.wiki.siteinfo["general"]["lang"])
+            except BaseException, err:
+                print "Error: could not set locale", err
+
             basename = os.path.basename(options.output)
             if '.' in basename:
                 ext = '.' + basename.rsplit('.', 1)[-1]
