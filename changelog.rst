@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2012-09-24 mwlib 0.14.1
+--------------------------
+- implement locale aware formatnum
+- implement wikipedia's braindamaged scientific notation
+- adapt single col splitting heuristics of treecleaner
 
 2012-06-18 mwlib 0.14.0
 --------------------------
