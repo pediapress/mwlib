@@ -152,7 +152,7 @@ def formatnum(val):
     except ValueError:
         return val
 
-    return locale.format("%f", val, True)
+    return locale.format("%g", val, True)
 
 
 class Formatnum(nodes.Node):
