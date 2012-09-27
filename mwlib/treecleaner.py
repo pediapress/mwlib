@@ -198,6 +198,7 @@ class TreeCleaner(object):
         # the following list is wikipedia specific
         self.noDisplayClasses = ['hiddenStructure',
                                  'dablink',
+                                 'rellink',
                                  'editlink',
                                  'metadata',
                                  'noprint',
