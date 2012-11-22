@@ -148,14 +148,16 @@ def tableBorder(node):
                    'collapsibleTable0',
                    'palaeobox',
                    ]
-
+    noBorderBoxes = ['cquote',
+                     ]
     attributes = node.attributes
     style = attributes.get('style', {})
 
     classes = set([ c.strip() for c in attributes.get('class','').split()])
     if set(borderBoxes).intersection(classes):
         return True
-
+    if set(noBorderBoxes).intersection(classes):
+        return False
     if style.get('border-style', None) == 'none':
         return False
     if attributes.get('border', "0") != "0" or \
@@ -163,7 +165,7 @@ def tableBorder(node):
            style.get('border-style', "none") != 'none' or \
            style.get('border-width', "0") != "0":
         return True
-    
+
     bgColor = attributes.get('background-color') or style.get('background-color')
     if bgColor and bgColor!= 'transparent':
         return True # FIXME this is probably not very accurate
