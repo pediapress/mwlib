@@ -126,7 +126,7 @@ class mwapi(object):
             kwargs = todo
             todo = None
 
-            data = json.loads(self._request(**kwargs))
+            data = loads(self._request(**kwargs))
             error = data.get("error")
             if error:
                 raise RuntimeError("%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs)))
