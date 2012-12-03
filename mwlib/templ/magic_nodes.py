@@ -139,7 +139,7 @@ def reverse_formatnum(val):
     return val
 
 
-def formatnum(val):
+def _formatnum(val):
     try:
         val = long(val)
     except ValueError:
@@ -154,6 +154,13 @@ def formatnum(val):
 
     return locale.format("%g", val, True)
 
+
+def formatnum(val):
+    res = _formatnum(val)
+    if isinstance(res, str):
+        return unicode(res, "utf-8", "replace")
+    else:
+        return res
 
 class Formatnum(nodes.Node):
     def flatten(self, expander, variables, res):
