@@ -4,6 +4,13 @@ Changelog
 
 mwlib
 ==========================
+2012-12-03 mwlib 0.14.2
+-------------------------
+- remove byte order mark (bom) in _do_request
+- return unicode from formatnum
+- improve table border code
+- add noprint css class "rellink"
+
 2012-09-24 mwlib 0.14.1
 --------------------------
 - implement locale aware formatnum
