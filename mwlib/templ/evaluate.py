@@ -221,8 +221,15 @@ class Expander(object):
         else:
             local_values = None
             source = {}
-            
-        self.resolver = magics.MagicResolver(pagename=pagename)
+
+        # XXX we really should call Expander with a nuwiki.page object.
+        revisionid = 0
+        if self.db and hasattr(self.db, "nuwiki") and pagename:
+            page = self.db.nuwiki.get_page(self.pagename)
+            if page is not None:
+                revisionid = page.revid or 0
+
+        self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revisionid)
         self.resolver.siteinfo = si
         self.resolver.nshandler = nshandler
         
