@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2012-12-04 mwlib 0.14.3
+-------------------------
+- prefer UTF-8 locales for use in formatnum
+
 2012-12-03 mwlib 0.14.2
 -------------------------
 - remove byte order mark (bom) in _do_request
