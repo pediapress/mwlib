@@ -1,5 +1,4 @@
 include MANIFEST.in
-include README.html
 include README.rst
 include changelog.rst
 include conftest.py
@@ -7,17 +6,13 @@ include docs/Makefile
 include docs/basics.rst
 include docs/changelog.rst
 include docs/collection.rst
-include docs/commands.html
 include docs/commands.rst
 include docs/conf.py
-include docs/configfiles.html
 include docs/index.rst
 include docs/installation.rst
 include docs/internals.rst
-include docs/metabook.html
 include docs/metabook.rst
 include docs/renderserver.rst
-include docs/writers.html
 include docs/writers.rst
 include mw-post
 include mw-qserve
