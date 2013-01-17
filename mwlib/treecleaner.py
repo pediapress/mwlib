@@ -150,7 +150,7 @@ class TreeCleaner(object):
         # ex: pull image links out of preformatted nodes
         # fixme rename to ancestors
         self.forbidden_parents = {ImageLink:[PreFormatted],
-                                  ItemList:[Div, PreFormatted],
+                                  ItemList:[PreFormatted],
                                   Source:self.inlineStyleNodes,
                                   DefinitionList:[Paragraph],
                                   Blockquote:[PreFormatted],
