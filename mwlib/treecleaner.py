@@ -65,6 +65,7 @@ class TreeCleaner(object):
                       'removeAbsolutePositionedNode',
                       'removeScrollElements',
                       'galleryFix',
+                      'fixRegionListTables',
                       'fixNesting',
                       'removeChildlessNodes',
                       'unNestEndingCellContent',
@@ -1478,3 +1479,19 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
             p = m.parent
             if all(self._isLTR(c) for c in p.children):
                 p.vlist['dir'] = 'ltr'
+
+    # wikivoyage tweaks
+    def fixRegionListTables(self, node):
+        if (node.vlist
+            and node.vlist.get('id', '') == 'region_list'
+            and isinstance(node, Div)):
+            rows = node.getChildNodesByClass(Row)
+            t = Table()
+            for row in rows:
+                t.appendChild(row)
+            for c in node.children[:]:
+                if isinstance(c, Table):
+                    node.removeChild(c)
+            node.appendChild(t)
+        for c in node:
+            self.fixRegionListTables(c)
