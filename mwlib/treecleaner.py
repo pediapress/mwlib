@@ -454,6 +454,7 @@ class TreeCleaner(object):
         if single_col and ( (not getattr(node, 'isInfobox', False) and (is_long or many_cells))
                             or ((is_long or many_nested_rows) and many_cells)
                             or all_images or contains_gallery
+                            or len(node.getChildNodesByClass(Row)) == 1
                             ):
             if not node.parents:
                 return
