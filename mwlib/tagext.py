@@ -186,13 +186,14 @@ class ListingExtension(TagExtension):
              ("alt",u"(''%s'')"),
              ("address",u", %s"),
              ("directions",u" (''%s'')"),
-             ("phone", u", Phone:%s"),
-             ("fax", u", Fax:%s"),
-             ("url", u" [%s]"),
+             ("phone", u", ☎ %s"),
+             ("fax", u", fax: %s"),
+             ("email", u", e-mail: %s"),
+             ("url", u", %s"),
              ("hours", u", %s"),
              ("price", u", %s"),
-             ("lat", u", Latitude:%s"),
-             ("long", u", Longitude: %s"),
+             # ("lat", u", Latitude: %s"), # disable in print as it is disabled in WP as well
+             # ("long", u", Longitude: %s"),
              ("tags", u", Tags: %s")]
     def __call__(self, source, attributes):
         t = u"".join(v%attributes[k] for k,v in self.attrs if attributes.get(k,None))
