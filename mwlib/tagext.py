@@ -97,7 +97,7 @@ fan featuredimage gallerypopulate linkfilter listpages
 loggedin loggedout newusers pagequality pollembed randomfeatureduser
 randomgameunit randomimagebycategory randomuserswithavatars
 rss siteactivity userpoll videogallerypopulate vote
-welcomeuser xsound pageby uml graphviz categorytree summary""".split()
+welcomeuser xsound pageby uml graphviz categorytree summary slippymap""".split()
 
 for name in tags_to_ignore:
     def _f(name):
