@@ -65,7 +65,7 @@ def main():
     if os.path.exists('Makefile'):
         build_deps()   # this is a git clone
 
-    install_requires = ["pyparsing>=1.4.11", "timelib>=0.2",
+    install_requires = ["pyparsing>=1.4.11,<1.6", "timelib>=0.2",
                         "bottle>=0.10", "pyPdf>=1.12", "apipkg>=1.2",
                         "qserve>=0.2.7", "lxml", "py>=1.4",
                         "sqlite3dbm", "simplejson>=2.3"]
