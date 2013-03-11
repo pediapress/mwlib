@@ -17,6 +17,7 @@ log = Log('nuwiki')
 
 
 class page(object):
+    expanded = 0
     def __init__(self, meta, rawtext):
         self.__dict__.update(meta)
         self.rawtext = rawtext
@@ -409,16 +410,17 @@ class adapt(object):
 
         if page:
             raw = page.rawtext
+            expandTemplates = not page.expanded
         else:
             raw = None
-            
-            
+            expandTemplates = True
+
         if raw is None:
             return None
 
         from mwlib import uparser        
 
-        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"])
+        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"], expandTemplates=expandTemplates)
 
     def getLicenses(self):
         from mwlib import metabook

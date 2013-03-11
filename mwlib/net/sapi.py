@@ -190,11 +190,17 @@ class mwapi(object):
 
         raise RuntimeError("login failed: %r" % res)
 
-    def fetch_used(self, titles=None, revids=None, fetch_images=True):
+    def fetch_used(self, titles=None, revids=None, fetch_images=True, expanded=False):
         if fetch_images:
-            prop = "revisions|templates|images"
+            if expanded:
+                prop = "images"
+            else:
+                prop = "revisions|templates|images"
         else:
-            prop = "revisions|templates"
+            if expanded:
+                prop = ""
+            else:
+                prop = "revisions|templates"
 
         kwargs = dict(prop=prop,
                       rvprop='ids',

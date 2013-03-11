@@ -14,8 +14,8 @@ def parseString(
     wikidb=None,
     revision=None,
     lang=None,
-    magicwords=None
-):
+    magicwords=None,
+    expandTemplates=True):
     """parse article with title from raw mediawiki text"""
 
     uniquifier = None
@@ -29,7 +29,7 @@ def parseString(
             raw = None
         
         assert raw is not None, "cannot get article %r" % (title,)
-    if wikidb:
+    if wikidb and expandTemplates:
         te = expander.Expander(raw, pagename=title, wikidb=wikidb)
         input = te.expandTemplates(True)
         uniquifier = te.uniquifier

@@ -5,11 +5,11 @@
 
 import sys, os, time, glob
 
-if not (2, 4) < sys.version_info[:2] < (3, 0):
+if not (2, 5) < sys.version_info[:2] < (3, 0):
     sys.exit("""
 ***** ERROR ***********************************************************
-* mwlib does not work with python %s.%s. You need to use python 2.5,
-* 2.6 or 2.7
+* mwlib does not work with python %s.%s. You need to use python 2.6 or
+* 2.7
 ***********************************************************************
 """ % sys.version_info[:2])
 
