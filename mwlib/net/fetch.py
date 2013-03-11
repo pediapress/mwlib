@@ -119,6 +119,17 @@ class fsoutput(object):
     def write_licenses(self, licenses):
         self.dump_json(licenses=licenses)
 
+    def write_expanded_page(self, title, ns, txt, revid=None):
+        rev = dict(title=title, ns=ns, expanded=1)
+        if revid is not None:
+            rev["revid"] = revid
+
+        header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
+        self.revfile.write(header)
+        self.revfile.write(txt.encode("utf-8"))
+        self.seen[title] = rev
+
+
     def write_pages(self, data):
         pages = data.get("pages", {}).values()
         for p in pages:
@@ -295,8 +306,38 @@ class fetcher(object):
         self._refcall(self.fetch_html, "page", titles)
         self._refcall(self.fetch_html, "oldid", revids)
 
-        self._refcall(self.fetch_used, "titles", titles)
-        self._refcall(self.fetch_used, "revids", revids)
+        self._refcall(self.fetch_used, "titles", titles, True)
+        self._refcall(self.fetch_used, "revids", revids, True)
+
+        for t in titles:
+            self._refcall(self.expand_templates_from_title, t)
+
+        for r in revids:
+            self._refcall(self.expand_templates_from_revid, int(r))
+
+    def expand_templates_from_revid(self, revid):
+        res = self.api.do_request(action="query", prop="revisions", rvprop="content", revids=str(revid))
+        page = res["pages"].values()[0]
+
+        title = page["title"]
+        text = page["revisions"][0]["*"]
+        res = self.api.do_request(action="expandtemplates", title=title, text=text)
+        txt = res.get("*")
+        if txt:
+            self.fsout.write_expanded_page(title, page["ns"], txt, revid=revid)
+
+    def expand_templates_from_title(self, title):
+        nsnum, suffix, fqname = self.nshandler.splitname(title)
+
+        if nsnum == 0:
+            text = u"{{:%s}}" % title
+        else:
+            text = u"{{%s}}" % title
+
+        res = self.api.do_request(action="expandtemplates", title=title, text=text)
+        txt = res.get("*")
+        if txt:
+            self.fsout.write_expanded_page(title, nsnum, txt)
 
     def run(self):
         self.report()
@@ -346,13 +387,13 @@ class fetcher(object):
         for c in lst:
             self._refcall_noinc(fetch, c)
 
-    def fetch_used(self, name, lst):
+    def fetch_used(self, name, lst, expanded=False):
         limit = self.api.api_request_limit
         pool = gevent.pool.Pool()
         blocks = splitblocks(lst, limit)
         self.count_total += len(blocks)
         for bl in blocks:
-            pool.add(self._refcall_noinc(self.fetch_used_block, name, bl))
+            pool.add(self._refcall_noinc(self.fetch_used_block, name, bl, expanded))
         pool.join()
 
         if conf.noedits:
@@ -364,8 +405,8 @@ class fetcher(object):
         for title, rev in items:
             self._refcall_noinc(self.get_edits, title, rev)
 
-    def fetch_used_block(self, name, lst):
-        kw = {name: lst, "fetch_images": self.fetch_images}
+    def fetch_used_block(self, name, lst, expanded):
+        kw = {name: lst, "fetch_images": self.fetch_images, "expanded": expanded}
         used = self.api.fetch_used(**kw)
 
         self._update_redirects(used.get("redirects", []))
