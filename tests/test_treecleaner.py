@@ -197,7 +197,7 @@ def test_fixTableColspans2():
     showTree(t)
     assert cell.colspan == 1
 
-
+# test changed after 3258e2f7978fc4592567bb64977ba5404ee949da
 def test_fixTableColspans3():
     '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
     raw = ur'''
@@ -226,11 +226,11 @@ def test_fixTableColspans3():
 |}
     '''
     tree, reports = cleanMarkup(raw)
-    t = tree.getChildNodesByClass(Table)[0]
-    assert t.numcols == 1, 'Empty cells not removed'
-    cell = t.children[0].children[0]
-    showTree(t)
-    assert cell.colspan == 1
+
+    assert len(tree.getChildNodesByClass(Table)
+               ) == 0, 'single row/col Table not transformed to div'
+    assert len(tree.getChildNodesByClass(Div)
+               ) == 1, 'single row/col Table not transformed to div'
 
 
 def test_removeBrokenChildren():
