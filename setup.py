@@ -80,16 +80,25 @@ def main():
         modname = x[:-2].replace("/", ".")
         ext_modules.append(Extension(modname, [x]))
 
+    console_scripts = [
+        "nslave = mwlib.nslave:main",
+        "postman = mwlib.postman:main",
+        "nserve = mwlib.postman:main",
+        "mw-zip = mwlib.apps.buildzip:main",
+        "mw-version = mwlib._version:main",
+        "mw-render = mwlib.apps.render:main",
+        "mw-qserve = qs.qserve:main",
+        "mw-serve-ctl = mwlib.apps.serve:main"]
+
     setup(
         name="mwlib",
         version=get_version(),
-        entry_points={'mwlib.writers': ['odf = mwlib.odfwriter:writer']},
+        entry_points={'mwlib.writers': ['odf = mwlib.odfwriter:writer'],
+                      "console_scripts": console_scripts},
         install_requires=install_requires,
         ext_modules=ext_modules,
         packages=["mwlib", "mwlib.templ"],
         namespace_packages=['mwlib'],
-        scripts=("sandbox/nslave.py", "sandbox/nserve.py", "sandbox/postman.py",
-                 "mw-zip", "mw-version", "mw-render", "mw-qserve", "mw-serve-ctl"),
         include_package_data=True,
         zip_safe=False,
         url="http://code.pediapress.com/",

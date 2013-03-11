@@ -15,11 +15,6 @@ include docs/metabook.rst
 include docs/renderserver.rst
 include docs/writers.rst
 include mw-post
-include mw-qserve
-include mw-render
-include mw-serve-ctl
-include mw-version
-include mw-zip
 include mwlib/EasyTimeline.pl
 include mwlib/__init__.py
 include mwlib/_conf.py
@@ -62,7 +57,9 @@ include mwlib/myjson.py
 include mwlib/net/__init__.py
 include mwlib/net/fetch.py
 include mwlib/net/sapi.py
+include mwlib/nserve.py
 include mwlib/nshandling.py
+include mwlib/nslave.py
 include mwlib/nuwiki.py
 include mwlib/odfconf.py
 include mwlib/odfstyles.py
@@ -74,6 +71,7 @@ include mwlib/parser/__init__.py
 include mwlib/parser/nodes.py
 include mwlib/parser/styleanalyzer.py
 include mwlib/podclient.py
+include mwlib/postman.py
 include mwlib/refine/__init__.py
 include mwlib/refine/_core.pyx
 include mwlib/refine/compat.py
@@ -140,9 +138,6 @@ include sandbox/citeweb.py
 include sandbox/expr.txt
 include sandbox/multicoll.py
 include sandbox/mw-serve-stresser.py
-include sandbox/nserve.py
-include sandbox/nslave.py
-include sandbox/postman.py
 include sandbox/rclient
 include sandbox/test_nserve.py
 include sandbox/time-expr.py
