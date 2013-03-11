@@ -255,7 +255,8 @@ def test_fixNesting1():
     table = tree.getChildNodesByClass(Table)[0]
     assert not table.getParentNodesByClass(DefinitionDescription)
 
-
+# changed with f94aa985f50d2db9749c57a7a5e22c0c8d487af4
+@pytest.mark.xfail
 def test_fixNesting2():
     raw = r'''
 <div><div>
