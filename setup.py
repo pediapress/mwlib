@@ -81,7 +81,7 @@ def main():
         "mw-version = mwlib._version:main",
         "mw-render = mwlib.apps.render:main",
         "mw-qserve = qs.qserve:main",
-        "mw-serve-ctl = mwlib.apps.serve:main"]
+        "mw-serve-ctl = mwlib.apps.serve:serve_ctl"]
 
     setup(
         name="mwlib",
