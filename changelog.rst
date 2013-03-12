@@ -6,6 +6,10 @@ mwlib
 ==========================
 2013-03-12 mwlib 0.15.0
 -------------------------
+- fix mw-serve-ctl
+
+2013-03-12 mwlib 0.15.0
+-------------------------
 .. NOTE::
   you'll have to adapt your start scripts, some programs have been renamed!
 
