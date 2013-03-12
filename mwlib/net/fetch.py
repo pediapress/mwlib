@@ -325,6 +325,7 @@ class fetcher(object):
         txt = res.get("*")
         if txt:
             self.fsout.write_expanded_page(title, page["ns"], txt, revid=revid)
+            self.get_edits(title, revid)
 
     def expand_templates_from_title(self, title):
         nsnum, suffix, fqname = self.nshandler.splitname(title)
@@ -338,6 +339,7 @@ class fetcher(object):
         txt = res.get("*")
         if txt:
             self.fsout.write_expanded_page(title, nsnum, txt)
+            self.get_edits(title, None)
 
     def run(self):
         self.report()
