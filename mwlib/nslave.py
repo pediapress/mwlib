@@ -229,7 +229,7 @@ def main():
             http_port = int(a)
 
     if cachedir is None:
-        sys.exit("nslave.py: missing --cachedir argument")
+        sys.exit("nslave: missing --cachedir argument")
 
     if serve_files:
         wsgi_server = start_serving_files(cachedir, http_port)

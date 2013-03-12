@@ -11,14 +11,14 @@ Running a renderserver consists in running multiple programs [#mw-serve]_.
 Unless you have some special requirements, you should be able to start
 a working renderserver by running the following commands::
 
-  $ nserve.py
+  $ nserve
   $ mw-qserve
-  $ nslave.py --cachedir ~/cache/
-  $ postman.py
+  $ nslave --cachedir ~/cache/
+  $ postman
 
 These programs have the following purposes:
 
-nserve.py
+nserve
   nserve is a HTTP server. The Collection extension is talking to that
   program directly. nserve uses at least one mw-qserve instance in
   order to distribute and manage jobs.
@@ -29,7 +29,7 @@ mw-qserve
   is supposed to render pdf files. Unless you're operating the
   Wikipedia installation, one machine should suffice.
 
-nslave.py
+nslave
   nslave pulls new jobs from exactly one mw-qserve instance and calls
   the mw-zip and mw-render programs in order to download article
   collections and convert them to different output formats.  nslave
@@ -37,7 +37,7 @@ nslave.py
   also starts an internal http server serving the content of the cache
   directory.
 
-postman.py
+postman
   postman uploads zip collections to pediapress in case someone likes
   to order printed books. You should start one instance for each
   mw-qserve instance.
@@ -56,7 +56,7 @@ Another alternative is to use `supervisor <http://supervisord.org/>`_.
    been removed in favor of the new tools, which provide the ability
    to scale an installation.
 
-nserve.py usage
+nserve usage
 ----------------
 nserve understands the following options:
 
@@ -74,7 +74,7 @@ instances to register.
 The following command starts nserve listening on port 8000 using two
 qserve instances::
 
-  nserve.py --port 8000 example1:14311 example2
+  nserve --port 8000 example1:14311 example2
 
 
 
@@ -91,13 +91,13 @@ mw-qserve understands the following options:
 
 
 
-nslave.py usage
+nslave usage
 ------------------
 nslave understands the following options:
 
 ``--cachedir=CACHEDIR``
 
-  specify cachedir to use. this is where nslave.py will store
+  specify cachedir to use. this is where nslave will store
   generated documents.
 
 ``--serve-files-port``
@@ -111,10 +111,10 @@ nslave understands the following options:
   allow up to NUMPROCS parallel jobs to be executed
 
 
-postman.py usage
+postman usage
 -------------------
 postman understands the following options:
 
 ``--cachedir=CACHDIR``
   specify cachedir to use. use the same value as specified when
-  calling nslave.py
+  calling nslave

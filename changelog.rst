@@ -4,6 +4,25 @@ Changelog
 
 mwlib
 ==========================
+2013-03-12 mwlib 0.15.0
+-------------------------
+.. NOTE::
+  you'll have to adapt your start scripts, some programs have been renamed!
+
+- nslave.py, nserve.py, postman.py have been renamed to nslave, nserve
+  and postman
+- require python 2.6, python 2.5 isn't supported anymore
+- fetch expanded articles
+- force pyparsing < 2
+- remove open street maps used in wikivoyage - they can't be rendered currently
+- fix for missing revid attribute
+- fix and improve wikivoyage tagextensions
+- allow item lists in div
+- transform single-col, single-row table into div, even if it is an "infobox"
+- tweak region lists for wikivoyage
+- fix bug for article http://en.wikivoyage.org/wiki/Africa (and possibly more from wikivoyage)
+- quick hack to expand the {{REVISIONID}}
+
 2012-12-04 mwlib 0.14.3
 -------------------------
 - prefer UTF-8 locales for use in formatnum
