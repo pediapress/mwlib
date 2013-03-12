@@ -13,8 +13,8 @@ Basic Prerequisites
 ====================
 
 You need to have a C compiler, a C++ compiler, make and the python
-development headers installed.  mwlib will work with python 2.5, 2.6
-and 2.7. It will *not* work with python versions >= 3 or < 2.5. mwlib
+development headers installed.  mwlib will work with python 2.6 and
+2.7. It will *not* work with python versions >= 3 or < 2.6. mwlib
 requires a recent UNIX-like operating system.
 
 mwlib requires the python imaging library (pil) and the python lxml
