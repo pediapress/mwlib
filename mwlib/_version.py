@@ -1,5 +1,5 @@
-__version_info__ = (0, 15, 2)
-version = __version__ = "0.15.2"
+__version_info__ = (0, 15, 3)
+version = __version__ = "0.15.3"
 
 try:
     from mwlib._gitversion import gitid, gitversion
