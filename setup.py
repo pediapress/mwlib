@@ -74,9 +74,9 @@ def main():
         ext_modules.append(Extension(modname, [x]))
 
     console_scripts = [
-        "nslave = mwlib.nslave:main",
-        "postman = mwlib.postman:main",
-        "nserve = mwlib.nserve:main",
+        "nslave = mwlib.main_trampoline:nslave_main",
+        "postman = mwlib.main_trampoline:postman_main",
+        "nserve = mwlib.main_trampoline:nserve_main",
         "mw-zip = mwlib.apps.buildzip:main",
         "mw-version = mwlib._version:main",
         "mw-render = mwlib.apps.render:main",

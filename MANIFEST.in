@@ -50,6 +50,7 @@ include mwlib/l10n.py
 include mwlib/linuxmem.py
 include mwlib/log.py
 include mwlib/lrucache.py
+include mwlib/main_trampoline.py
 include mwlib/mathml.py
 include mwlib/mathutils.py
 include mwlib/metabook.py
