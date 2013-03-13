@@ -76,7 +76,7 @@ def main():
     console_scripts = [
         "nslave = mwlib.nslave:main",
         "postman = mwlib.postman:main",
-        "nserve = mwlib.postman:main",
+        "nserve = mwlib.nserve:main",
         "mw-zip = mwlib.apps.buildzip:main",
         "mw-version = mwlib._version:main",
         "mw-render = mwlib.apps.render:main",
