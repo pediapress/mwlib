@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2013-03-12 mwlib 0.15.2
+-------------------------
+- use post request when posting text to action=expandtemplates
+
 2013-03-12 mwlib 0.15.1
 -------------------------
 - fix mw-serve-ctl
