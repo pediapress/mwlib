@@ -106,13 +106,16 @@ class mwapi(object):
         res = loads(self._fetch(req))
         return res
 
-    def do_request(self, **kwargs):
+    def do_request(self, use_post=False, **kwargs):
         sem = self.limit_fetch_semaphore
         if sem is not None:
             sem.acquire()
 
         try:
-            return self._do_request(**kwargs)
+            if use_post:
+                return  self._post(**kwargs)
+            else:
+                return self._do_request(**kwargs)
         finally:
             if sem is not None:
                 sem.release()

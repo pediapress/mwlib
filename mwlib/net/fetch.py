@@ -321,7 +321,8 @@ class fetcher(object):
 
         title = page["title"]
         text = page["revisions"][0]["*"]
-        res = self.api.do_request(action="expandtemplates", title=title, text=text)
+        res = self.api.do_request(use_post=True, action="expandtemplates", title=title, text=text).get("expandtemplates", {})
+
         txt = res.get("*")
         if txt:
             self.fsout.write_expanded_page(title, page["ns"], txt, revid=revid)
