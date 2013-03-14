@@ -207,6 +207,7 @@ class TreeCleaner(object):
                                  'sisterproject',
                                  'NavFrame',
                                  'geo-multi-punct',
+                                 'geo-nondefault',
                                  'coordinates_3_ObenRechts',
                                  'microformat',
                                  'navbox',
