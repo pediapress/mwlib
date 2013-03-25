@@ -27,24 +27,26 @@ def parseString(
             raw = page.rawtext
         else:
             raw = None
-        
-        assert raw is not None, "cannot get article %r" % (title,)
-    if wikidb and expandTemplates:
-        te = expander.Expander(raw, pagename=title, wikidb=wikidb)
-        input = te.expandTemplates(True)
-        uniquifier = te.uniquifier
 
+        assert raw is not None, "cannot get article %r" % (title,)
+    input = raw
+    te = None
+    if wikidb:
+        if expandTemplates:
+            te = expander.Expander(raw, pagename=title, wikidb=wikidb)
+            input = te.expandTemplates(True)
+            uniquifier = te.uniquifier
         if hasattr(wikidb, 'get_siteinfo'):
             siteinfo = wikidb.get_siteinfo()
 
-        src = None 
+        src = None
         if hasattr(wikidb, 'getSource'):
             src = wikidb.getSource(title, revision=revision)
             assert not isinstance(src, dict)
-            
+
         if not src:
             src=metabook.source()
-            
+
         if lang is None:
             lang = src.language
         if magicwords is None:
@@ -52,27 +54,24 @@ def parseString(
                 magicwords = siteinfo['magicwords']
             else:
                 magicwords = src.get('magicwords')
-    else:
-        input = raw
-        te = None
-        
+
     if siteinfo is None:
         nshandler = nshandling.get_nshandler_for_lang(lang)
     else:
         nshandler = nshandling.nshandler(siteinfo)
     a = compat.parse_txt(input, title=title, wikidb=wikidb, nshandler=nshandler, lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
-    
+
     a.caption = title
     if te and te.magic_displaytitle:
         a.caption = te.magic_displaytitle
-        
+
     from mwlib.old_uparser import postprocessors
     for x in postprocessors:
         x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)
-    
+
     return a
 
 def simpleparse(raw,lang=None):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
     a=compat.parse_txt(raw,lang=lang)
-    core.show(a)    
+    core.show(a)
     return a
