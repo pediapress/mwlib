@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2013-03-26 mwlib 0.15.4
+-------------------------
+- fix missing img attribute translation
+- remove duplicate coordinates
+
 2013-03-12 mwlib 0.15.3
 -------------------------
 - fix nserve, nslave, postman
