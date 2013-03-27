@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2013-03-26 mwlib 0.15.5
+-------------------------
+- fix redirect handling
+
 2013-03-26 mwlib 0.15.4
 -------------------------
 - fix missing img attribute translation
