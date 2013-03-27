@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2013-03-26 mwlib 0.15.6
+-------------------------
+- fix redirect handling when fetching by articles by revision
+
 2013-03-26 mwlib 0.15.5
 -------------------------
 - fix redirect handling
