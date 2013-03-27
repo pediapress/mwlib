@@ -1,40 +1,12 @@
 __version_info__ = (0, 15, 5)
-version = __version__ = "0.15.5"
-
-try:
-    from mwlib._gitversion import gitid, gitversion
-except ImportError:
-    gitid = gitversion = ""
-
-display_version = gitversion or version
-
-
+display_version = version = __version__ = "0.15.5"
+gitid = gitversion = ""
 
 def main():
-    msg = "mwlib: %s" % (version or gitversion,)
-    if gitid:
-        msg += "(%s)" % gitid
-    print msg
-
-    try:
-        from mwlib.rl import _gitversion
-        print "mwlib.rl", _gitversion.gitversion
-    except ImportError:
+    import pkg_resources
+    for r in ("mwlib", "mwlib.rl", "mwlib.ext", "mwlib.hiq"):
         try:
-            from mwlib.rl._version import version as rlversion
-            print "mwlib.rl:", rlversion
-        except ImportError:
-            pass
-
-    try:
-        from mwlib._extversion import version as extversion
-        print "mwlib.ext:", extversion
-    except ImportError:
-        pass
-
-    try:
-        from mwlib.hiq import _gitversion
-    except ImportError:
-        pass
-    else:
-        print "mwlib.hiq", _gitversion.gitversion
+            v = pkg_resources.require(r)[0].version
+            print r, v
+        except:
+            continue
