@@ -742,9 +742,7 @@ class fetcher(object):
                     continue
 
             n = self.nshandler.get_fqname(title)
-            n = self.redirects.get(n, n)
-
-            if n in seen:
+            if n in seen or self.redirects.get(n, n) in seen:
                 continue
             print "WARNING: %r could not be fetched" % ((title, revid),)
             # raise RuntimeError("%r could not be fetched" % ((title, revid), ))

@@ -185,7 +185,8 @@ class nuwiki(object):
                     if redirect:
                         return self.get_page(self.nshandler.get_fqname(redirect))
                 return page
-        
+
+        oldname = name
         name = self.redirects.get(name, name)
         
         if self.make_print_template is not None:
@@ -196,7 +197,7 @@ class nuwiki(object):
                 # r.title = name # XXX not so sure about that one???
                 return r
             
-        return self.revisions.get(name)
+        return self.revisions.get(name) or self.revisions.get(oldname)
 
     def get_page(self, name, revision=None):
         retval = self._get_page(name,revision=revision)
@@ -364,8 +365,14 @@ class adapt(object):
 
     def getAuthors(self, title, revision=None):
         fqname = self.nshandler.get_fqname(title)
-        fqname = self.redirects.get(fqname, fqname)
+        if fqname in self.redirects:
+            res = self._getAuthors(title, self.redirects.get(fqname, fqname), revision=revision)
+        else:
+            res = None
 
+        return res if res is not None else self._getAuthors(title, fqname, revision=revision)
+
+    def _getAuthors(self, title, fqname, revision=None):
         if getattr(self.nuwiki, 'authors', None) is not None:
             authors = self.nuwiki.authors[fqname]
             return authors
