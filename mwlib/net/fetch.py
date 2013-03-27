@@ -325,6 +325,11 @@ class fetcher(object):
 
         txt = res.get("*")
         if txt:
+            redirect = self.nshandler.redirect_matcher(txt)
+            if redirect:
+                self.redirects[title] = redirect
+                self._refcall(self.expand_templates_from_title, redirect)
+
             self.fsout.write_expanded_page(title, page["ns"], txt, revid=revid)
             self.get_edits(title, revid)
 
