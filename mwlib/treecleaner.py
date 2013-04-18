@@ -791,8 +791,9 @@ class TreeCleaner(object):
                 if h > self.cell_splitter_params['maxCellHeight'] and len(cell.children) > 1:
                     rows = splitRow(node, self.cell_splitter_params)
                     self.report('replacing child', node, rows)
-                    node.parent.replaceChild(node, rows)                   
+                    node.parent.replaceChild(node, rows)
                     return
+
             return
 
         for c in node.children[:]:
@@ -1330,14 +1331,14 @@ class TreeCleaner(object):
         def pos(n):
             return n.style.get('position', '').lower().strip()
 
-        if pos(node) == 'relative':
-            if all([pos(c) == 'absolute' for c in node.children]):
-                if node.parent:
+        if pos(node) in ['absolute', 'relative']:
+            for p in node.getParents():
+                if pos(p) in ['absolute', 'relative']:
                     node.parent.removeChild(node)
                     self.report('removed absolute positioned node', node)
                     return
 
-        for c in node.children:
+        for c in node.children[:]:
             self.removeAbsolutePositionedNode(c)
 
 
