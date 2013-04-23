@@ -4,6 +4,12 @@ Changelog
 
 mwlib
 ==========================
+
+2013-04-23 mwlib 0.15.7
+-------------------------
+- remove explicitly positioned nodes regardless of nesting level. fix
+  bug where children were skipped and not removed
+
 2013-03-26 mwlib 0.15.6
 -------------------------
 - fix redirect handling when fetching by articles by revision
