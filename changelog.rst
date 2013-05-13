@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2013-04-23 mwlib 0.15.8
+-------------------------
+- do not install pil in tox testenv
+- install Pillow
+- also fetch used images when fetching 'redirected revisions'
 
 2013-04-23 mwlib 0.15.7
 -------------------------
