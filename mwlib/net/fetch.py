@@ -329,6 +329,7 @@ class fetcher(object):
             if redirect:
                 self.redirects[title] = redirect
                 self._refcall(self.expand_templates_from_title, redirect)
+                self._refcall(self.fetch_used, "titles", [redirect], True)
 
             self.fsout.write_expanded_page(title, page["ns"], txt, revid=revid)
             self.get_edits(title, revid)
