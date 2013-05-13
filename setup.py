@@ -23,25 +23,6 @@ def get_version():
     return str(d["version"])
 
 
-def checkpil():
-    try:
-        from PIL import Image
-        return
-    except ImportError:
-        pass
-
-    sys.stdout.write("""
-
-    *****************************************************
-    * please install the python imaging library (PIL)
-    * from http://www.pythonware.com/products/pil/
-    *****************************************************
-
-    """)
-    # give them some time to read it, we really need it and can't install with setuptools
-    time.sleep(5)
-
-
 def mtime(fn):
     if os.path.exists(fn):
         return os.stat(fn).st_mtime
@@ -64,7 +45,7 @@ def main():
         "pyparsing>=1.4.11,<1.6", "timelib>=0.2", "bottle>=0.10",
         "pyPdf>=1.12", "apipkg>=1.2", "qserve>=0.2.7", "lxml",
         "py>=1.4", "sqlite3dbm", "simplejson>=2.3", "roman", "gevent",
-        "odfpy>=0.9, <0.10", "setuptools"]
+        "odfpy>=0.9, <0.10", "Pillow", "setuptools"]
 
     ext_modules = []
     ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
@@ -100,9 +81,6 @@ def main():
         maintainer="pediapress.com",
         maintainer_email="info@pediapress.com",
         long_description=open("README.rst").read())
-
-    if "install" in sys.argv or "develop" in sys.argv:
-        checkpil()
 
 
 if __name__ == '__main__':
