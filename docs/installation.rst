@@ -43,10 +43,10 @@ We recommend that you use a virtualenv for installation. If you don't
 use a virtualenv for installation, the commands below must probably be
 run as root.
 
-The python imaging module must be installed. We host a patched version
-that is compatible with pip/easy_install. You can install that with::
 
-   pip install -i http://pypi.pediapress.com/simple/ pil
+Installation of mwlib can be done with::
+
+   $ pip install -i http://pypi.pediapress.com/simple/ mwlib
 
 Make sure the output of the last command contains::
 
@@ -56,9 +56,6 @@ Make sure the output of the last command contains::
   --- FREETYPE2 support available
   ...
 
-Installation of mwlib can then be done with::
-
-   $ pip install -i http://pypi.pediapress.com/simple/ mwlib
 
 This will install mwlib and it's dependencies. The
 "-i http://pypi.pediapress.com/simple/" command line arguments
@@ -123,7 +120,6 @@ After that switch to a user account and run::
   export PATH=~/pp/bin:$PATH
   hash -r
   export PIP_INDEX_URL=http://pypi.pediapress.com/simple/
-  pip install pil
   pip install pyfribidi mwlib mwlib.rl
 
 Install texvc::
