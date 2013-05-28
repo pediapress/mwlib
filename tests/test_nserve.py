@@ -1,7 +1,9 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-import pytest, gevent, nserve, urllib, urllib2, bottle
+import pytest, gevent, urllib, urllib2, bottle
+from mwlib import nserve
+
 import wsgi_intercept.urllib2_intercept
 
 try:
