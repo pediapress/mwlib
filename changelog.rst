@@ -45,6 +45,12 @@ mwlib
 .. NOTE::
   you'll have to adapt your start scripts, some programs have been renamed!
 
+.. NOTE::
+  Unfortunately the 'template blacklisting' and 'print templates'
+  functionality had to be removed in order to support the scribunto
+  extension. The documentation has not been updated and may still
+  mention those features.
+
 - nslave.py, nserve.py, postman.py have been renamed to nslave, nserve
   and postman
 - require python 2.6, python 2.5 isn't supported anymore
