@@ -78,15 +78,6 @@ def _get_args(writer_options=None,
 
     args = []
 
-    if template_blacklist:
-        args.extend(['--template-blacklist', template_blacklist])
-    if template_exclusion_category:
-        args.extend(['--template-exclusion-category', template_exclusion_category])
-    if print_template_prefix:
-        args.extend(['--print-template-prefix', print_template_prefix])
-    if print_template_pattern:
-        args.extend(['--print-template-pattern', print_template_pattern])
-
     if login_credentials:
         username, password, domain = (login_credentials.split(":", 3) + [None] * 3)[:3]
         assert username and password, "bad login_credentials"

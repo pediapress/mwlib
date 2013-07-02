@@ -26,16 +26,6 @@ def _get_args(writer_options=None,
               **kw):
     
     args = []
-    
-        
-    if template_blacklist:
-        args.extend(['--template-blacklist', template_blacklist])
-    if template_exclusion_category:
-        args.extend(['--template-exclusion-category', template_exclusion_category])
-    if print_template_prefix:
-        args.extend(['--print-template-prefix', print_template_prefix])
-    if print_template_pattern:
-        args.extend(['--print-template-pattern', print_template_pattern])
 
     if zip_only:
         return args
