@@ -137,7 +137,7 @@ class commands(object):
             g=gevent.spawn_later(0.2, report_mwzip_status, post_url, jobid, self.proxy._rpcclient.host, self.proxy._rpcclient.port)
 
             try:
-                self.qaddw(channel="makezip", payload=dict(params=params), jobid=jobid)
+                self.qaddw(channel="makezip", payload=dict(params=params), jobid=jobid, timeout=20 * 60)
             finally:
                 g.kill()
                 del g
