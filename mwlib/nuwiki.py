@@ -118,11 +118,7 @@ class nuwiki(object):
         self.set_make_print_template()
 
     def set_make_print_template(self):
-        p = self.nfo.get("print_template_pattern")
-        if p and "$1" in p:
-            self.make_print_template = utils.get_print_template_maker(p)
-        else:
-            self.make_print_template = None
+        self.make_print_template = None
 
     def _loadjson(self, path, default=None):
         path = self._pathjoin(path)
@@ -189,14 +185,6 @@ class nuwiki(object):
         oldname = name
         name = self.redirects.get(name, name)
         
-        if self.make_print_template is not None:
-            pname = self.make_print_template(name)
-            r=self.revisions.get(pname)
-            # print "returning print template", repr(pname)
-            if r is not None:
-                # r.title = name # XXX not so sure about that one???
-                return r
-            
         return self.revisions.get(name) or self.revisions.get(oldname)
 
     def get_page(self, name, revision=None):

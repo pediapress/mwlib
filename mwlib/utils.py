@@ -26,20 +26,6 @@ all = all
 log = Log('mwlib.utils')
 
 
-def get_print_template_maker(pattern):
-    assert "$1" in pattern, 'pattern %r does not contain "$1"' % pattern
-
-    def make_print_template(title):
-        if ':' in title:
-            p, s = title.split(":", 1)
-            s = pattern.replace("$1", s)
-            return '%s:%s' % (p, s)
-        else:
-            return pattern.replace("$1", title)
-
-    return make_print_template
-
-
 def fsescape(s):
     """Escape string to be safely used in path names
 

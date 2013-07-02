@@ -19,10 +19,6 @@ def make_collection_id(data):
         _version.version,
         'base_url',
         'script_extension',
-        'template_blacklist',
-        'template_exclusion_category',
-        'print_template_prefix',
-        'print_template_pattern',
         'login_credentials',
     ):
         sio.write(repr(data.get(key)))

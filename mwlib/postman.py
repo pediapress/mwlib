@@ -17,10 +17,6 @@ def get_collection_dir(collection_id):
     
 
 def _get_args(writer_options=None,
-              template_blacklist=None,
-              template_exclusion_category=None,
-              print_template_prefix=None,
-              print_template_pattern=None,
               language=None,
               zip_only=False, 
               **kw):

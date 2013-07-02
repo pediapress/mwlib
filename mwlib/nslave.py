@@ -67,10 +67,6 @@ def system(args, timeout=None):
 
 
 def _get_args(writer_options=None,
-              template_blacklist=None,
-              template_exclusion_category=None,
-              print_template_prefix=None,
-              print_template_pattern=None,
               language=None,
               zip_only=False,
               login_credentials=None,

@@ -229,17 +229,12 @@ class fetcher(object):
     def __init__(self, api, fsout, pages, licenses,
                  status=None,
                  progress=None,
-                 print_template_pattern=None,
-                 template_exclusion_category=None,
                  cover_image=None,
                  imagesize=800, fetch_images=True):
 
         self.dispatch_event = gevent.event.Event()
         self.api_semaphore = gevent.coros.Semaphore(20)
 
-        self.print_template_pattern = None
-        self.template_exclusion_category = None
-        self.template_blacklist = None
         self.cover_image = cover_image
 
         self.pages = pages
@@ -280,23 +275,11 @@ class fetcher(object):
         siteinfo = self.get_siteinfo_for(self.api)
         self.fsout.write_siteinfo(siteinfo)
         self.nshandler = nshandling.nshandler(siteinfo)
-        if self.template_exclusion_category:
-            ns, partial, fqname = self.nshandler.splitname(self.template_exclusion_category, 14)
-            if ns != 14:
-                print "bad category name:", repr(self.template_exclusion_category)
 
         params = mwapi.get_collection_params(api)
         self.__dict__.update(params)
-        if template_exclusion_category:
-            self.template_exclusion_category = template_exclusion_category
 
-        if print_template_pattern:
-            self.print_template_pattern = print_template_pattern
-
-        if self.print_template_pattern:
-            self.make_print_template = utils.get_print_template_maker(self.print_template_pattern)
-        else:
-            self.make_print_template = None
+        self.make_print_template = None
 
         titles, revids = self._split_titles_revids(pages)
 
@@ -458,11 +441,6 @@ class fetcher(object):
                 self.pages_todo.append(t)
                 self.scheduled.add(t)
 
-            if self.print_template_pattern is not None and ":" in t:
-                t = self.make_print_template(t)
-                if t not in self.scheduled:
-                    self.pages_todo.append(t)
-                    self.scheduled.add(t)
 
     def get_siteinfo_for(self, m):
         return m.get_siteinfo()
@@ -733,12 +711,6 @@ class fetcher(object):
 
         self.report()
 
-    def _compute_excluded(self):
-        if self.template_exclusion_category:
-            ns, partial, fqname = self.nshandler.splitname(self.template_exclusion_category, 14)
-            excluded = self.cat2members.get(fqname)
-            if excluded:
-                self.fsout.write_excluded(excluded)
 
     def _sanity_check(self):
         seen = self.fsout.seen
@@ -757,11 +729,8 @@ class fetcher(object):
 
     def finish(self):
         self._sanity_check()
-        self._compute_excluded()
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
-        if self.fsout.nfo and self.print_template_pattern:
-            self.fsout.nfo["print_template_pattern"] = self.print_template_pattern
         self.fsout.close()
 
     def _refcall(self, fun, *args, **kw):

@@ -68,10 +68,6 @@ def make_collection_id(data):
     for key in (
         'base_url',
         'script_extension',
-        'template_blacklist',
-        'template_exclusion_category',
-        'print_template_prefix',
-        'print_template_pattern',
         'login_credentials',
     ):
         sio.write(repr(data.get(key)))
@@ -281,10 +277,6 @@ class Application(object):
             writer=g('writer', self.default_writer),
             base_url=g('base_url'),
             writer_options=g('writer_options', ''),
-            template_blacklist=g('template_blacklist', ''),
-            template_exclusion_category=g('template_exclusion_category', ''),
-            print_template_prefix=g('print_template_prefix', ''),
-            print_template_pattern=g('print_template_pattern', ''),
             login_credentials=g('login_credentials', ''),
             force_render=bool(g('force_render')),
             script_extension=g('script_extension', ''),

@@ -36,18 +36,6 @@ class OptionParser(optparse.OptionParser):
           help="exclude images")
         
         a("-l", "--logfile", help="log to logfile")
-        
-        a("--template-exclusion-category", metavar="CATEGORY", 
-          help="Name of category for templates to be excluded")
-        
-        a("--print-template-prefix", metavar="PREFIX",
-          help="Prefix for print templates (deprecated: use --print-template-pattern)")
-        
-        a("--print-template-pattern", metavar="SUBPAGE",
-          help="Prefix for print templates, '$1' is replaced by original template name")
-        
-        a("--template-blacklist", metavar="ARTICLE",
-          help="Title of article containing blacklisted templates")
 
         a("--username", help="username for login")
         a("--password", help="password for login")
@@ -117,17 +105,6 @@ class OptionParser(optparse.OptionParser):
             
             self.metabook.append_article(title)
 
-        if self.options.print_template_pattern and "$1" not in self.options.print_template_pattern:
-            self.error("bad --print-template-pattern argument [must contain $1, but %r does not]" % (self.options.print_template_pattern,))
-
-        
-        if self.options.print_template_prefix and self.options.print_template_pattern:
-            log.warn('Both --print-template-pattern and --print-template-prefix (deprecated) specified. Using --print-template-pattern only.')
-        elif self.options.print_template_prefix:
-            self.options.print_template_pattern = '%s$1' % self.options.print_template_prefix
-
-        del self.options.print_template_prefix
-        
         return self.options, self.args
     
     def makewiki(self):

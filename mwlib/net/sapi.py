@@ -345,30 +345,7 @@ def guess_api_urls(url):
 
 
 def get_collection_params(api):
-    r = api._post(action="expandtemplates",
-                         format="json",
-                         text="""
-template_blacklist={{Mediawiki:coll-template_blacklist_title}}
-template_exclusion_category={{Mediawiki:coll-exclusion_category_title}}
-print_template_pattern={{Mediawiki:coll-print_template_pattern}}
-""")
-
-    allowed = "template_blacklist template_exclusion_category print_template_pattern".split()
-    res = dict()
-    try:
-        txt = r["expandtemplates"]["*"]
-    except KeyError:
-        return res
-
-    for k, v in re.findall("([a-z_]+)=(.*)", txt):
-        v = v.strip()
-
-        if v.startswith("[[") or not v:
-            continue
-
-        if k in allowed:
-            res[str(k)] = v
-    return res
+    return dict()
 
 
 def main():

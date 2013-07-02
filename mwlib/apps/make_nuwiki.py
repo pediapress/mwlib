@@ -41,9 +41,7 @@ class start_fetcher(object):
                 'script_extension': self.options.script_extension})
 
 
-        if self.options.print_template_pattern:
-            nfo["print_template_pattern"] = self.options.print_template_pattern
-            
+
         fsout.nfo = nfo
 
         # fsout.dump_json(nfo=nfo)
@@ -53,8 +51,6 @@ class start_fetcher(object):
                                      licenses=self.licenses,
                                      status=self.status,
                                      progress=self.progress, 
-                                     print_template_pattern=self.options.print_template_pattern,
-                                     template_exclusion_category=self.options.template_exclusion_category,
                                      imagesize=self.options.imagesize,
                                      cover_image=metabook.cover_image,
                                      fetch_images=not self.options.noimages)

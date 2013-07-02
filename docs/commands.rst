@@ -69,26 +69,6 @@ one command.
   Maximum size (which can be either width or height, whichever is greater) of
   images. If images exceed this maximum size, they're scaled down.  
 
-``--template-blacklist=ARTICLE``
-
-  A name of an article containing a list of "blacklisted templates", i.e.
-  MediaWiki templates that should be discarded during rendering.
-  Example for such a template blacklist page::
-
-    * [[Template:SkipMe]]
-    * [[Template:MeToo]]
-
-``--template-exclusion-category=CATEGORY``
-
-  A name of a category: Templates in this cateogry are excluded during rendering.
-  
-``--print-template-prefix=PREFIX``
-
-  Prefix for "print templates", i.e. templates that are tried to fetch before
-  regular templates. The default value is 'Print' resultint in print template
-  names of the form 'Template:PrintNAME' (with NAME being the name of the original
-  template).
-
 ``-o, --output=OUTPUT``
 
   Write output to given file.
