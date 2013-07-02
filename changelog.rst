@@ -4,6 +4,15 @@ Changelog
 
 mwlib
 ==========================
+2013-07-02 mwlib 0.15.9
+-------------------------
+- set timeout for makezip in postman
+- remove more template blacklisting/template exclusion handling code
+- get rid of template blacklisting/print templates in nslave and postman
+- mention that template blacklisting and print templates do not work anymore.
+- use tox 1.5's whitelist_externals in order to suppress warnings
+- fix imports in test_nserve.py and move it to tests directory
+
 2013-04-23 mwlib 0.15.8
 -------------------------
 - do not install pil in tox testenv
