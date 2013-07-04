@@ -43,6 +43,13 @@ def get_collection_dirs(cache_dir):
                 yield os.path.join(dirpath, d)
 
 
+def _path_contains_entry_older_than(path, ts):
+    for fn in os.listdir(path):
+        if os.stat(os.path.join(path, fn)).st_mtime < ts:
+            return True
+    return False
+
+
 def purge_cache(max_age, cache_dir):
     """Remove all subdirectories of cache_dir whose mtime is before now-max_age
 
@@ -55,11 +62,14 @@ def purge_cache(max_age, cache_dir):
 
     now = time.time()
     for path in get_collection_dirs(cache_dir):
-        for fn in os.listdir(path):
-            if now - os.stat(os.path.join(path, fn)).st_mtime > max_age:
-                break
-        else:
+        try:
+            if not _path_contains_entry_older_than(path, now - max_age):
+                continue
+        except OSError, err:
+            if err.errno != errno.ENOENT:
+                log.ERROR("error while examining %r: %s" % (path, err))
             continue
+
         try:
             shutil.rmtree(path)
         except OSError, exc:
