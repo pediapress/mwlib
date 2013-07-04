@@ -2,7 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-import sys, os, time, re, shutil, StringIO
+import sys, os, time, re, shutil, StringIO, errno
 from hashlib import md5
 
 from mwlib import myjson as json
@@ -62,5 +62,6 @@ def purge_cache(max_age, cache_dir):
             continue
         try:
             shutil.rmtree(path)
-        except Exception, exc:
-            log.ERROR('could not remove directory %r: %s' % (path, exc))
+        except OSError, exc:
+            if exc.errno != errno.ENOENT:
+                log.ERROR('could not remove directory %r: %s' % (path, exc))
