@@ -173,6 +173,7 @@ include tests/test_nuwiki.py
 include tests/test_odfwriter.py
 include tests/test_parse_params.py
 include tests/test_parser.py
+include tests/test_purge_cache.py
 include tests/test_redirect.py
 include tests/test_refine.py
 include tests/test_render.py

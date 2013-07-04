@@ -38,10 +38,13 @@ def get_collection_dirs(cache_dir):
     """Generator yielding full paths of collection directories"""
 
     for dirpath, dirnames, filenames in os.walk(cache_dir):
+        new_dirnames = []
         for d in dirnames:
             if collection_id_rex.match(d):
                 yield os.path.join(dirpath, d)
-
+            else:
+                new_dirnames.append(d)
+        dirnames[:] = new_dirnames
 
 def _path_contains_entry_older_than(path, ts):
     for fn in os.listdir(path):
