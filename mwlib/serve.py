@@ -46,11 +46,30 @@ def get_collection_dirs(cache_dir):
                 new_dirnames.append(d)
         dirnames[:] = new_dirnames
 
+
 def _path_contains_entry_older_than(path, ts):
     for fn in os.listdir(path):
         if os.stat(os.path.join(path, fn)).st_mtime < ts:
             return True
     return False
+
+
+def _find_collection_dirs_to_purge(collection_dirs, ts):
+    for path in collection_dirs:
+        try:
+            if _path_contains_entry_older_than(path, ts):
+                yield path
+        except OSError, err:
+            if err.errno != errno.ENOENT:
+                log.ERROR("error while examining %r: %s" % (path, err))
+
+
+def _rmtree(path):
+    try:
+        shutil.rmtree(path)
+    except OSError, exc:
+        if exc.errno != errno.ENOENT:
+            log.ERROR('could not remove directory %r: %s' % (path, exc))
 
 
 def purge_cache(max_age, cache_dir):
@@ -63,18 +82,5 @@ def purge_cache(max_age, cache_dir):
     @type cache_dir: basestring
     """
 
-    now = time.time()
-    for path in get_collection_dirs(cache_dir):
-        try:
-            if not _path_contains_entry_older_than(path, now - max_age):
-                continue
-        except OSError, err:
-            if err.errno != errno.ENOENT:
-                log.ERROR("error while examining %r: %s" % (path, err))
-            continue
-
-        try:
-            shutil.rmtree(path)
-        except OSError, exc:
-            if exc.errno != errno.ENOENT:
-                log.ERROR('could not remove directory %r: %s' % (path, exc))
+    for path in _find_collection_dirs_to_purge(get_collection_dirs(cache_dir), time.time() - max_age):
+        _rmtree(path)
