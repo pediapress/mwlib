@@ -4,6 +4,16 @@ Changelog
 
 mwlib
 ==========================
+2013-07-04 mwlib 0.15.10
+-------------------------
+- add some tests for purge_cache
+- don't step into nested directories in purge_cache
+- catch errors while examining directory in purge_cache
+- only log error if it's not ENOENT in purge_cache
+- Add --serve-files-address parameter to nslave.
+- make make-manifest useable as pre-commit hook
+- is_good_baseurl(): eliminate some false positives
+
 2013-07-02 mwlib 0.15.9
 -------------------------
 - set timeout for makezip in postman
