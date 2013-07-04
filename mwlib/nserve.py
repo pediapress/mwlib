@@ -264,8 +264,8 @@ class Application(object):
         return collection_id
 
     def is_good_baseurl(self, url):
-        netloc = urlparse.urlparse(url)[1].lower()
-        if netloc.startswith("localhost") or netloc.startswith("127.0") or netloc.startswith("192.168"):
+        netloc = urlparse.urlparse(url)[1].split(':')[0].lower()
+        if netloc == "localhost" or netloc.startswith("127.0.") or netloc.startswith("192.168."):
             return False
         return True
 
