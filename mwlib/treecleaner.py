@@ -1068,6 +1068,13 @@ class TreeCleaner(object):
 
     def fixReferenceNodes(self, node):
         ref_nodes = node.getChildNodesByClass(Reference)
+
+        for ref_node in ref_nodes:
+            txt = ref_node.getAllDisplayText().strip()
+            if len(txt) <= 1:
+                ref_node.parent.removeChild(ref_node)
+                self.report('removed empty ref node')
+
         name2children = {}
         for ref_node in ref_nodes:
             ref_name = ref_node.attributes.get('name')
@@ -1087,7 +1094,7 @@ class TreeCleaner(object):
                     ref_node.children = []
                 else:
                     ref_defined[ref_name] = True
-            else:                
+            else:
                 if not ref_defined.get(ref_name): # move ref here
                     children = name2children[ref_name]
                     for child in children:
