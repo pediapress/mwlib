@@ -216,12 +216,8 @@ def uid(max_length=10):
     @rtype: str
     """
 
-    f = StringIO.StringIO()
-    print >>f, "%.20f" % time.time()
-    print >>f, os.times()
-    print >>f, os.getpid()
-    m = md5(f.getvalue())
-    return m.hexdigest()[:max_length]
+    some_bytes = os.urandom((max_length + 1) // 2)
+    return "".join(hex(ord(x))[2:] for x in some_bytes)[:max_length]
 
 
 def ensure_dir(d):
