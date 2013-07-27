@@ -42,10 +42,6 @@ class Test_xnet_zipwiki(object):
         url = self.wikidb.getURL(u'The Living Sea')
         assert url == 'http://en.wikipedia.org/w/index.php?title=The_Living_Sea'
 
-    def test_getTemplate(self):
-        page = self.wikidb.normalize_and_get_page(u'Infobox Film', 10)
-        assert isinstance(page.rawtext, unicode)
-
     def test_ImageDB(self):
         p = self.imagedb.getDiskPath(u'Thelivingseaimax.jpg')
         assert isinstance(p, basestring)

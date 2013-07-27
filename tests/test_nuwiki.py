@@ -17,8 +17,6 @@ class Test_nuwiki_xnet(object):
         err = subprocess.call(['mw-zip',
             '-o', cls.zipfn,
             '-c', ':de',
-            '--print-template-pattern', '$1/Druck',
-            '--template-exclusion-category', 'Vom Druck ausschließen',
             'Monty Python',
         ])
         assert os.path.isfile(cls.zipfn)
@@ -32,7 +30,6 @@ class Test_nuwiki_xnet(object):
         self.nuwiki = adapt(zipfile.ZipFile(self.zipfn, 'r')).nuwiki
 
     def test_init(self):
-        assert 'Vorlage:Navigationsleiste' in self.nuwiki.excluded
         assert 'Monty Python' in self.nuwiki.revisions
         assert self.nuwiki.siteinfo['general']['base'] == 'http://de.wikipedia.org/wiki/Wikipedia:Hauptseite'
         assert self.nuwiki.siteinfo['general']['lang'] == 'de'
