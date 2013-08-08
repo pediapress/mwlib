@@ -18,6 +18,7 @@ def init_tmp_cleaner():
     import tempfile, shutil, time
     tempfile.tempdir = tempfile.mkdtemp(prefix="tmp-%s" % os.path.basename(sys.argv[0]))
     os.environ["TMP"] = os.environ["TEMP"] = os.environ["TMPDIR"] = tempfile.tempdir
+    ppid = os.getpid()
     try:
         pid = os.fork()
     except:
@@ -28,7 +29,7 @@ def init_tmp_cleaner():
         os.closerange(0, 3)
         os.setpgrp()
         while 1:
-            if os.getppid() == 1:
+            if os.getppid() != ppid:
                 try:
                     shutil.rmtree(tempfile.tempdir)
                 finally:
