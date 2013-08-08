@@ -25,6 +25,7 @@ def init_tmp_cleaner():
         raise
 
     if pid == 0:
+        os.closerange(0, 3)
         os.setpgrp()
         while 1:
             if os.getppid() == 1:
