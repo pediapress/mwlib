@@ -4,6 +4,15 @@ Changelog
 
 mwlib
 ==========================
+2013-08-09 mwlib 0.15.11
+-------------------------
+- fix possible problems on solaris containers in init_tmp_cleaner
+- don't waste people's lifetime in init_tmp_cleaner
+- fix xnet tests
+- use os.urandom in utils.uid
+- generate junitxml files
+- remove empty reference nodes
+
 2013-07-04 mwlib 0.15.10
 -------------------------
 - add some tests for purge_cache
