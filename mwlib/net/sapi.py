@@ -40,10 +40,18 @@ def merge_data(dst, src):
 
 
 class mwapi(object):
-    def __init__(self, apiurl):
+    def __init__(self, apiurl, username=None, password=None):
         self.apiurl = apiurl
         self.baseurl = apiurl  # XXX
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+
+        if username:
+            passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            passman.add_password(None, apiurl, username, password)
+            auth_handler = urllib2.HTTPBasicAuthHandler(passman)
+            self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()), auth_handler)
+        else:
+            self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+
         self.edittoken = None
         self.qccount = 0
         self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)

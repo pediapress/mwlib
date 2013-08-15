@@ -21,7 +21,10 @@ class start_fetcher(object):
         self.nfo = {}
 
     def get_api(self):
-        api = mwapi.mwapi(self.api_url)
+        if self.username:
+            api = mwapi.mwapi(self.api_url, self.username, self.password)
+        else:
+            api = mwapi.mwapi(self.api_url)
         api.set_limit()
 
         if self.username:
