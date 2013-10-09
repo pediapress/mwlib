@@ -1239,6 +1239,12 @@ def test_magicwords():
     print txt
     assert 'NOINDEX' not in txt
 
+    txt = parse('__NOGLOSSARY__').asText()
+    print txt
+    assert 'NOGLOSSARY' not in txt
+
+
+
 
 def test_vlist_newline():
     def check(txt):
