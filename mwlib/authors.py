@@ -8,7 +8,6 @@ import re
 
 class inspect_authors(object):
     ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
-    bot_rex = re.compile(r'bot', re.IGNORECASE)
     ANON = "ANONIPEDITS"
 
     def __init__(self):
@@ -24,8 +23,6 @@ class inspect_authors(object):
                 self.num_anon += 1
             elif not user:
                 continue
-            elif self.bot_rex.search(user) or self.bot_rex.search(r.get('comment', '')):
-                continue  # filter bots
             else:
                 authors.add(user)
 
