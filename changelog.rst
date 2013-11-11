@@ -4,6 +4,14 @@ Changelog
 
 mwlib
 ==========================
+2013-11-11 mwlib 0.15.12
+------------------------
+- workaround 'first run' tox issue
+- fix tests with new wsgi_intercept 0.6 and require that version
+- Match IPv6 addresses as anonymous users
+- handle __NOGLOSSARY__ magicword
+- Fix #37
+
 2013-08-09 mwlib 0.15.11
 -------------------------
 - fix possible problems on solaris containers in init_tmp_cleaner
