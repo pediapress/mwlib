@@ -25,3 +25,29 @@ browse the `mwlib mailing list
 
 The developers can also be found on IRC in the `#pediapress channel
 <irc://irc.freenode.net/pediapress>`_
+
+Dev Support
+~~~~~~~~~~~~~~~~~~~
+Need help with architectural advice or design validation?  Get
+development help from our core team!
+
+Want more information about our Development Support? Let us know how
+to get a hold of you and we’ll be in touch soon.
+
+.. admonition:: contact us
+    :class: note
+
+    contact@brainbot.com / +49 (0) 6131 2116391
+
+Production Support
+~~~~~~~~~~~~~~~~~~~~
+Have mwlib live in production and looking for SLA-based support?  In
+production? Get reliable support from team that built mwlib.
+
+We’d love to talk to you about our Production Support. Let us know how
+to get a hold of you and we’ll be in touch soon.
+
+.. admonition:: contact us
+    :class: note
+
+    contact@brainbot.com / +49 (0) 6131 2116391
