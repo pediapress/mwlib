@@ -4,6 +4,13 @@ Changelog
 
 mwlib
 ==========================
+
+2014-01-09 mwlib 0.15.13
+------------------------
+- add --disable-all-writers argument to nserve
+- add note about professional support
+- adapt bot filtering a bit
+
 2013-11-11 mwlib 0.15.12
 ------------------------
 - workaround 'first run' tox issue
