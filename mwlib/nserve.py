@@ -456,7 +456,7 @@ def main():
     # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     from mwlib import argv
-    opts,  args = argv.parse(sys.argv[1:], "--qserve= --port= -i= --interface=")
+    opts,  args = argv.parse(sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface=")
     qs = []
     port = 8899
     interface = "0.0.0.0"
@@ -465,9 +465,12 @@ def main():
             port = int(a)
         elif o == "--qserve":
             qs.append(a)
+        elif o == "--disable-all-writers":
+            name2writer.clear()
         elif o in ("-i", "--interface"):
             interface = a
 
+    print "using the following writers", sorted(name2writer.keys())
 
     qs += args
 
