@@ -51,7 +51,7 @@ class mwapi(object):
             self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()), auth_handler)
         else:
             self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
-
+        self.opener.addheaders = [('User-Agent', conf.user_agent)]
         self.edittoken = None
         self.qccount = 0
         self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)

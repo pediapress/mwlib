@@ -38,6 +38,11 @@ class confbase(object):
     def noedits(self):
         return self.get("fetch", "noedits", False, as_bool)
 
+    @property
+    def user_agent(self):
+        from mwlib._version import version
+        return self.get("mwlib", "user_agent", "") or ("mwlib %s" % version)
+
 
 class confmod(confbase, types.ModuleType):
     def __init__(self, *args, **kwargs):

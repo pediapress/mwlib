@@ -9,6 +9,7 @@ except ImportError:
 
 from mwlib.log import Log
 from mwlib.utils import get_multipart
+from mwlib import conf
 
 log = Log("mwapidb")
 
@@ -77,7 +78,7 @@ class PODClient(object):
         h.putrequest("POST", path)
         h.putheader("Host", pr.netloc)
         h.putheader("Content-Length", str(clen))
-        h.putheader("User-Agent", "Python-urllib/2.6")
+        h.putheader("User-Agent", conf.user_agent)
         h.putheader("Content-Type", "multipart/form-data; boundary=%s" % boundary)
         h.endheaders()
         

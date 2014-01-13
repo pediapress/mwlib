@@ -200,7 +200,7 @@ def callwhen(event, fun):
 
 def download_to_file(url, path, temp_path):
     opener = urllib2.build_opener()
-    opener.addheaders = [('User-agent', 'mwlib')]
+    opener.addheaders = [('User-Agent', conf.user_agent)]
 
     try:
         out = None
