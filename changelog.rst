@@ -5,6 +5,10 @@ Changelog
 mwlib
 ==========================
 
+2014-01-13 mwlib 0.15.14
+------------------------
+- set user agent from environment variable MWLIB_USER_AGENT
+
 2014-01-09 mwlib 0.15.13
 ------------------------
 - add --disable-all-writers argument to nserve
