@@ -36,7 +36,10 @@ class ImageUtils(object):
         max_w = getattr(img_node, 'width', None)
         max_h = getattr(img_node, 'height', None)
         if img_path:
-            img = Image.open(img_path)
+            try:
+                img = Image.open(img_path)
+            except IOError:  # img either missing or corrupt
+                return (0, 0)
             px_w, px_h = img.size
         else:
             px_w,  px_h = img_size
