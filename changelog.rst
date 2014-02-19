@@ -4,6 +4,10 @@ Changelog
 
 mwlib
 ==========================
+2014-02-19 mwlib 0.15.15
+------------------------
+- catch IOError when reading image sizes
+- prevent race conditions in rlwriter.toc by using a tmp directory
 
 2014-01-13 mwlib 0.15.14
 ------------------------
