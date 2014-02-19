@@ -142,6 +142,7 @@ include sandbox/mw-serve-stresser.py
 include sandbox/rclient
 include sandbox/time-expr.py
 include sandbox/time-parse.py
+include setup.cfg
 include setup.py
 include tests/canthus.mb.json
 include tests/fribidi-unicode-decode-error.zip
