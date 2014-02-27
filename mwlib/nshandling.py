@@ -189,7 +189,13 @@ def get_nshandler_for_lang(lang):
     return nshandler(si)
 
 def get_redirect_matcher(siteinfo, handler=None):
-    redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+    redirect_str = "#REDIRECT"
+    magicwords = siteinfo.get("magicwords")
+    if magicwords:
+        for m in magicwords:            
+            if m['name'] == 'redirect':
+                redirect_str = "(?:" + "|".join([re.escape(x) for x in m['aliases']]) + ")"
+    redirect_rex = re.compile(r'^%s:?\s*?\[\[(?P<redirect>.*?)\]\]' % redirect_str, re.IGNORECASE)
 
     if handler is None:
         handler =  nshandler(siteinfo)
