@@ -41,3 +41,9 @@ def test_fqname_defaultns():
 def test_redirect_matcher():
     m = nshandling.get_nshandler_for_lang("en").redirect_matcher
     assert m("#REDIRECT [[Data structure#Active data structures]]") == "Data structure",  "bad redirect"
+
+
+def test_localized_redirect_matcher():
+    m = nshandling.get_nshandler_for_lang("de").redirect_matcher
+    assert m("#REDIRECT [[Data structure]]") == "Data structure",  "bad redirect"
+    assert m("#WEITERLEITUNG [[Data structure]]") == "Data structure",  "bad redirect"
