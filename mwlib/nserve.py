@@ -303,7 +303,7 @@ class Application(object):
 
         if base_url and not self.is_good_baseurl(base_url):
             log.bad("bad base_url: %r" % (base_url, ))
-            return self.error_response("bad base_url %r. check your $wgServer and $wgScriptPath variables" % (base_url, ))
+            return self.error_response("bad base_url %r. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed." % (base_url, ))
 
         log.info('render %s %s' % (collection_id, writer))
 
