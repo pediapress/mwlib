@@ -43,7 +43,7 @@ def _any(list):
 
 class TreeCleaner(object):
 
-    """The TreeCleaner object cleans the parse tree to optimize writer ouput.
+    """The TreeCleaner object cleans the parse tree to optimize writer output.
 
     All transformations should be lossless.
 
