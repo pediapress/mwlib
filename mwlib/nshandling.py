@@ -195,7 +195,7 @@ def get_redirect_matcher(siteinfo, handler=None):
         for m in magicwords:            
             if m['name'] == 'redirect':
                 redirect_str = "(?:" + "|".join([re.escape(x) for x in m['aliases']]) + ")"
-    redirect_rex = re.compile(r'^%s:?\s*?\[\[(?P<redirect>.*?)\]\]' % redirect_str, re.IGNORECASE)
+    redirect_rex = re.compile(r'^[ \t\n\r\0\x0B]*%s\s*:?\s*?\[\[(?P<redirect>.*?)\]\]' % redirect_str, re.IGNORECASE)
 
     if handler is None:
         handler =  nshandler(siteinfo)
