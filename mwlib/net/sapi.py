@@ -70,8 +70,8 @@ class mwapi(object):
         if limit is None:
             limit = self.api_request_limit
 
-        from gevent import coros
-        self.limit_fetch_semaphore = coros.Semaphore(limit)
+        from gevent import lock
+        self.limit_fetch_semaphore = lock.Semaphore(limit)
 
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.apiurl, hex(id(self)))
