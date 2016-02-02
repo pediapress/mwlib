@@ -15,7 +15,7 @@ Examples for Sites and their supported tags:
 http://wikitravel.org/en/Special:Version
 http://www.mediawiki.org/wiki/Special:Version
 http://en.wikipedia.org/wiki/Special:Version
-http://wiki.services.openoffice.org/wiki/Special:Version 
+http://wiki.services.openoffice.org/wiki/Special:Version
 http://www.wikia.com/wiki/Special:Version
 http://en.wikibooks.org/wiki/Special:Version
 
@@ -33,7 +33,7 @@ class ExtensionRegistry(object):
         assert name not in self.name2ext, 'tag extension for %r already registered' % (name, )
         self.name2ext[name] = k()
         return k
-        
+
     def names(self):
         return self.name2ext.keys()
 
@@ -42,7 +42,7 @@ class ExtensionRegistry(object):
 
     def __contains__(self, n):
         return n in self.name2ext
-        
+
 default_registry = ExtensionRegistry()
 register = default_registry.registerExtension
 
@@ -50,17 +50,17 @@ def _parse(txt):
     """parse text....and try to return a 'better' (some inner) node"""
     from mwlib.refine.compat import parse_txt
     from mwlib import parser
-    
-    res = parse_txt(txt)
-    
 
-    # res is an parser.Article. 
+    res = parse_txt(txt)
+
+
+    # res is an parser.Article.
     if len(res.children)!=1:
         res.__class__ = parser.Node
         return res
 
     res = res.children[0]
-    
+
     if res.__class__==parser.Paragraph:
         res.__class__ = parser.Node
 
@@ -86,7 +86,7 @@ class IgnoreTagBase(TagExtension):
 # --- what follows are some implementations of TagExtensions
 # ---
 
-# list of tags than can not easily be re implemented in PDFs 
+# list of tags than can not easily be re implemented in PDFs
 tags_to_ignore = """chem chess choose dpl dynamicpagelist feyn forum
 go googlemapkml graph greek ling plot ppch
 randomimage schem staff teng tipa verbatim
@@ -141,7 +141,7 @@ class IDLExtension(TagExtension):
     # http://wiki.services.openoffice.org/wiki/Special:Version
     name = "idl"
     def __call__(self, source, attributes):
-        return self.parse('<source lang="idl">%s</source>' % source)        
+        return self.parse('<source lang="idl">%s</source>' % source)
 register(IDLExtension)
 
 class Syntaxhighlight(TagExtension):
@@ -163,13 +163,22 @@ class RDFExtension(TagExtension):
 
 register(RDFExtension)
 
+
+class TimeExtension(TagExtension):
+    name = "time"
+    def __call__(self, source, attributes):
+        from mwlib import parser
+        return self.parse(source)
+
+register(TimeExtension)
+
 class HieroExtension(TagExtension):
     name = "hiero"
     def __call__(self, source, attributes):
         from mwlib import parser
         tn = parser.TagNode("hiero")
         tn.children.append(parser.Text(source))
-        return tn   
+        return tn
 register(HieroExtension)
 
 class LabledSectionTransclusionExtensionHotFix(IgnoreTagBase):
