@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2016-02-18 mwlib 0.15.16
+------------------------
+- ignore hatnote
+- implement TIME Tag extension for wp.fr
+
 2014-02-19 mwlib 0.15.15
 ------------------------
 - catch IOError when reading image sizes
