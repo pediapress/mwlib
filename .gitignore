@@ -28,3 +28,4 @@ __pycache__/
 /docs/_static/
 /docs/_templates/
 /junit-*.xml
+/.python-version
