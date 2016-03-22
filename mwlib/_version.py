@@ -1,5 +1,5 @@
-__version_info__ = (0, 15, 16)
-display_version = version = __version__ = "0.15.16"
+__version_info__ = (0, 15, 17)
+display_version = version = __version__ = "0.15.17"
 gitid = gitversion = ""
 
 def main():
