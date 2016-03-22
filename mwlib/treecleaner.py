@@ -66,6 +66,7 @@ class TreeCleaner(object):
                       'removeScrollElements',
                       'galleryFix',
                       'fixRegionListTables',
+                      'removeTrainTemplates',
                       'fixNesting',
                       'removeChildlessNodes',
                       'unNestEndingCellContent',
@@ -1511,3 +1512,15 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
             node.appendChild(t)
         for c in node:
             self.fixRegionListTables(c)
+
+    def removeTrainTemplates(self, node):
+        if (node.__class__ == ImageLink and
+            node.target.startswith('File:BSicon') and
+            node.target.endswith('.svg')
+        ):
+            parent_tables = node.getParentNodesByClass(Table)
+            if parent_tables:
+                tryRemoveNode(parent_tables[0])
+                return
+        for c in node:
+            self.removeTrainTemplates(c)
