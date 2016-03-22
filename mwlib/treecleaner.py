@@ -215,6 +215,9 @@ class TreeCleaner(object):
                                  'Vorlage_Gesundheitshinweis',
                                  'hatnote'
                                  ]
+        self.noDisplayClassMatches = [
+            'infobox collapsible collapsed',
+        ]
 
         # keys are nodes which can only have child nodes of types inside the valuelist.
         # children of different classes are deleted
@@ -822,7 +825,9 @@ class TreeCleaner(object):
         node.parent.removeChild(node)
 
     def removeNoPrintNodes(self, node):
-        if (node.hasClassID(self.noDisplayClasses) or not node.visible) and node.parent:
+        if (node.hasClassID(self.noDisplayClasses) or
+            not node.visible
+            or node.attributes.get('class', '') in self.noDisplayClassMatches) and node.parent:
             named_refs = self._getNamedRefs(node)
             if named_refs:
                 self.report('removing child - keeping named reference', node)
