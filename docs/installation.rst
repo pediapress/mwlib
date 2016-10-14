@@ -48,6 +48,7 @@ Installation of mwlib can be done with::
 
    $ pip install -i http://pypi.pediapress.com/simple/ mwlib
 
+This requires the python-devel header file being installed.
 Make sure the output of the last command contains::
 
   ...
