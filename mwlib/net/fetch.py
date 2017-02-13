@@ -4,7 +4,11 @@
 # See README.rst for additional licensing information.
 
 import os, sys, urlparse, urllib2, time, traceback
-import gevent, gevent.pool, gevent.lock, gevent.event
+import gevent, gevent.pool, gevent.event
+try:
+    import gevent.lock
+except:
+    import gevent.coros
 
 import sqlite3dbm
 from lxml import etree
@@ -45,11 +49,10 @@ class shared_progress(object):
         self.last_percent = percent
 
         if isatty and isatty():
-            #msg = "%s/%s %.2f %.2fs" % (done, total, percent, needed)
-            msg = "%s of %s, %.2f%%, %.2f seconds," % (done, total, percent, needed)
+            msg = "%s/%s %.2f %.2fs" % (done, total, percent, needed)
             if sys.platform in ("linux2", "linux3"):
                 from mwlib import linuxmem
-                msg += " %.1f MB mem used" % linuxmem.resident()
+                msg += " %.1fMB" % linuxmem.resident()
             sys.stdout.write("\x1b[K" + msg + "\r")
             sys.stdout.flush()
 
@@ -234,7 +237,10 @@ class fetcher(object):
                  imagesize=800, fetch_images=True):
 
         self.dispatch_event = gevent.event.Event()
-        self.api_semaphore = gevent.lock.Semaphore(20)
+	try:
+            self.api_semaphore = gevent.lock.Semaphore(20)
+	except:
+            self.api_semaphore = gevent.coros.Semaphore(20)
 
         self.cover_image = cover_image
 
