@@ -9,7 +9,7 @@ if __name__ == "__main__":
     gevent.monkey.patch_all()
 
 import sys, re, StringIO, urllib2, urlparse, traceback, urllib, unicodedata
-from hashlib import md5
+from hashlib import sha1
 
 from gevent import pool, pywsgi
 
@@ -80,7 +80,7 @@ def make_collection_id(data):
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
 
-    return md5(sio.getvalue()).hexdigest()[:16]
+    return sha1(sio.getvalue()).hexdigest()[:16]
 
 from mwlib import lrucache
 busy = dict()

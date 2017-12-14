@@ -1,25 +1,20 @@
 from email.mime.text import MIMEText
 from email.utils import make_msgid, formatdate
 
-import errno
 import os
 import pprint
 import re
 import smtplib
 import socket
-import StringIO
 import sys
-import tempfile
 import time
 import traceback
 import urllib
 import urllib2
 import urlparse
-import UserDict
 
 from mwlib.log import Log
 
-from hashlib import md5
 
 # provide all() for python 2.4
 all = all

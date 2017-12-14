@@ -3,7 +3,7 @@
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
 import sys, os, time, re, shutil, StringIO, errno
-from hashlib import md5
+from hashlib import sha1
 
 from mwlib import myjson as json
 from mwlib import log, _version
@@ -31,7 +31,7 @@ def make_collection_id(data):
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
 
-    return md5(sio.getvalue()).hexdigest()[:16]
+    return sha1(sio.getvalue()).hexdigest()[:16]
 
 
 def get_collection_dirs(cache_dir):

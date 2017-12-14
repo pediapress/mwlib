@@ -5,7 +5,7 @@
 
 import warnings
 from collections import deque
-from hashlib import md5
+from hashlib import sha1
 
 import copy
 
@@ -208,8 +208,8 @@ def get_item_list(metabook, filter_type=None):
     return metabook.walk(filter_type=filter_type)
 
 def calc_checksum(metabook):
-    return md5(metabook.dumps()).hexdigest() 
-    
+    return sha1(metabook.dumps()).hexdigest()
+
 def get_licenses(metabook):
     """Return list of licenses
     

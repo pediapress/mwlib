@@ -8,6 +8,7 @@ import shutil
 import tempfile
 import urllib
 import sqlite3dbm
+from hashlib import sha1
 from mwlib import myjson as json
 
 from mwlib import nshandling, utils
@@ -218,9 +219,8 @@ class nuwiki(object):
                 return None
 
         if 1:
-            from hashlib import md5
-            
-            hd = md5(fqname.encode("utf-8")).hexdigest()
+
+            hd = sha1(fqname.encode("utf-8")).hexdigest()
             ext = os.path.splitext(p)[-1]
             ext = ext.replace(' ', '')
             # mediawiki gives us png's for these extensions. let's change them here.
