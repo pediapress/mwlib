@@ -11,6 +11,10 @@ try:
     import simplejson as json
 except ImportError:
     import json
+try:
+    from gevent.lock import Semaphore
+except:
+    from gevent.coros import Semaphore
 
 from mwlib import conf, authors
 
@@ -70,8 +74,7 @@ class mwapi(object):
         if limit is None:
             limit = self.api_request_limit
 
-        from gevent import lock
-        self.limit_fetch_semaphore = lock.Semaphore(limit)
+        self.limit_fetch_semaphore = Semaphore(limit)
 
     def __repr__(self):
         return "<mwapi %s at %s>" % (self.apiurl, hex(id(self)))

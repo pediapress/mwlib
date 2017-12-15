@@ -4,7 +4,13 @@
 # See README.rst for additional licensing information.
 
 import os, sys, urlparse, urllib2, time, traceback
-import gevent, gevent.pool, gevent.lock, gevent.event
+import gevent, gevent.pool,  gevent.event
+
+try:
+    from gevent.lock import Semaphore
+except:
+    from gevent.coros import Semaphore
+
 
 import sqlite3dbm
 from lxml import etree
@@ -234,7 +240,7 @@ class fetcher(object):
                  imagesize=800, fetch_images=True):
 
         self.dispatch_event = gevent.event.Event()
-        self.api_semaphore = gevent.lock.Semaphore(20)
+        self.api_semaphore = Semaphore(20)
 
         self.cover_image = cover_image
 
