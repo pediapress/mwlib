@@ -31,7 +31,7 @@ class Test_nuwiki_xnet(object):
 
     def test_init(self):
         assert 'Monty Python' in self.nuwiki.revisions
-        assert self.nuwiki.siteinfo['general']['base'] == 'http://de.wikipedia.org/wiki/Wikipedia:Hauptseite'
+        assert self.nuwiki.siteinfo['general']['base'] == 'https://de.wikipedia.org/wiki/Wikipedia:Hauptseite'
         assert self.nuwiki.siteinfo['general']['lang'] == 'de'
         assert self.nuwiki.nshandler is not None
         assert self.nuwiki.nfo['base_url'] == 'http://de.wikipedia.org/w/'
