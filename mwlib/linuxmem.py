@@ -11,7 +11,7 @@ def _readproc(key):
     '''
     try:
         v = open("/proc/self/status").read()
-         # get key line e.g. 'VmRSS:  9999  kB\n ...'
+        # get key line e.g. 'VmRSS:  9999  kB\n ...'
         i = v.index(key)
         v = v[i:].split(None, 3)  # whitespace
         if len(v) < 3:

@@ -4,7 +4,11 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
-import os, sys, tempfile, shutil, zipfile
+import os
+import sys
+import tempfile
+import shutil
+import zipfile
 
 
 def _walk(root):
@@ -16,7 +20,7 @@ def _walk(root):
     retval.sort()
     return retval
 
-                     
+
 def zipdir(dirname, output=None, skip_ext=None):
     """recursively zip directory and write output to zipfile.
     @param dirname: directory to zip
@@ -35,14 +39,12 @@ def zipdir(dirname, output=None, skip_ext=None):
     zf.close()
 
 
-
-        
 def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
     if output:
         tmpdir = tempfile.mkdtemp(dir=os.path.dirname(output))
     else:
         tmpdir = tempfile.mkdtemp()
-        
+
     try:
         fsdir = os.path.join(tmpdir, 'nuwiki')
         print 'creating nuwiki in %r' % fsdir
@@ -59,7 +61,7 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
             os.rename(filename, output)
             filename = output
 
-        if podclient:                
+        if podclient:
             status(status='uploading', progress=0)
             podclient.post_zipfile(filename)
 
@@ -88,23 +90,22 @@ def main():
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
     parser.add_option("-g", "--getposturl",
-        help='get POST URL from PediaPress.com, open upload page in webbrowser',
-        action='count',
-    )
-    parser.add_option('--keep-tmpfiles',                  
-        action='store_true',
-        default=False,
-        help="don't remove  temporary files like images",
-    )
-    
+                      help='get POST URL from PediaPress.com, open upload page in webbrowser',
+                      action='count',
+                      )
+    parser.add_option('--keep-tmpfiles',
+                      action='store_true',
+                      default=False,
+                      help="don't remove  temporary files like images",
+                      )
+
     parser.add_option("-s", "--status-file",
                       help='write status/progress info to this file')
 
     options, args = parser.parse_args()
     conf.readrc()
     use_help = 'Use --help for usage information.'
-        
-                        
+
     if parser.metabook is None and options.collectionpage is None:
         parser.error('Neither --metabook nor, --collectionpage or arguments specified.\n' + use_help)
     if options.posturl and options.getposturl:
@@ -115,7 +116,7 @@ def main():
         from mwlib.podclient import PODClient
         podclient = PODClient(options.posturl)
     elif options.getposturl:
-        if options.getposturl>1:
+        if options.getposturl > 1:
             serviceurl = 'http://test.pediapress.com/api/collections/'
         else:
             serviceurl = 'http://pediapress.com/api/collections/'
@@ -134,26 +135,25 @@ def main():
             os.kill(pid, 9)
         except:
             pass
-              
+
     else:
         podclient = None
-    
+
     from mwlib import utils,  wiki
-    
 
     filename = None
     status = None
     try:
         env = parser.makewiki()
         assert env.metabook, "no metabook"
-            
+
         from mwlib.status import Status
         status = Status(options.status_file, podclient=podclient, progress_range=(1, 90))
         status(progress=0)
         output = options.output
-            
+
         make_zip(output, options, env.metabook, podclient=podclient, status=status)
-            
+
     except Exception, e:
         if status:
             status(status='error')

@@ -13,12 +13,12 @@ def show():
     parser.add_option("-e", "--expand", action="store_true", help="expand templates")
     parser.add_option("-t", "--template", action="store_true", help="show template")
     parser.add_option("-f", help='read input from file. implies -e')
-    
+
     options, args = parser.parse_args()
-    
+
     if not args and not options.f:
         parser.error("missing ARTICLE argument")
-        
+
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.config
@@ -26,21 +26,21 @@ def show():
         parser.error("missing --config argument")
 
     from mwlib import wiki, expander
-    
+
     db = wiki.makewiki(conf).wiki
-    
+
     for a in articles:
         if options.template:
-            defaultns=10
+            defaultns = 10
         else:
-            defaultns=0
-            
+            defaultns = 0
+
         page = db.normalize_and_get_page(a, defaultns)
         if page:
             raw = page.rawtext
         else:
             raw = None
-            
+
         if raw:
             if options.expand:
                 te = expander.Expander(raw, pagename=a, wikidb=db)
@@ -53,22 +53,23 @@ def show():
         raw = te.expandTemplates()
         print raw.encode("utf-8")
 
+
 def post():
     parser = optparse.OptionParser(usage="%prog OPTIONS")
     parser.add_option("-i", "--input", help="ZIP file to POST")
     parser.add_option('-l', '--logfile',
-        help='log output to LOGFILE')
+                      help='log output to LOGFILE')
     parser.add_option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
     parser.add_option("-g", "--getposturl",
-        help='get POST URL from PediaPress.com, open upload page in webbrowser',
-        action='store_true')
+                      help='get POST URL from PediaPress.com, open upload page in webbrowser',
+                      action='store_true')
     options, args = parser.parse_args()
-    
+
     use_help = 'Use --help for usage information.'
     if not options.input:
         parser.error('Specify --input.\n' + use_help)
     if (options.posturl and options.getposturl)\
-        or (not options.posturl and not options.getposturl):
+            or (not options.posturl and not options.getposturl):
         parser.error('Specify either --posturl or --getposturl.\n' + use_help)
     if options.posturl:
         from mwlib.podclient import PODClient
@@ -78,15 +79,15 @@ def post():
         from mwlib.podclient import podclient_from_serviceurl
         podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
         webbrowser.open(podclient.redirecturl)
-    
+
     from mwlib import utils
     from mwlib.status import Status
-    
+
     if options.logfile:
         utils.start_logging(options.logfile)
 
     status = Status(podclient=podclient)
-    
+
     try:
         status(status='uploading', progress=0)
         podclient.post_zipfile(options.input)
@@ -104,29 +105,28 @@ def parse():
     parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
 
     options, args = parser.parse_args()
-                                   
+
     if not args and not options.all:
         parser.error("missing option.")
-        
+
     if not options.config:
         parser.error("missing --config argument")
 
     articles = [unicode(x, 'utf-8') for x in args]
 
     conf = options.config
-    
+
     import traceback
     from mwlib import wiki, uparser
-    
+
     w = wiki.makewiki(conf)
-    
+
     db = w.wiki
 
     if options.all:
         if not hasattr(db, "articles"):
             raise RuntimeError("%s does not support iterating over all articles" % (db, ))
         articles = db.articles()
-
 
     import time
     for x in articles:
@@ -136,12 +136,12 @@ def parse():
                 raw = page.rawtext
             else:
                 raw = None
-                
+
             # yes, raw can be None, when we have a redirect to a non-existing article.
-            if raw is None: 
+            if raw is None:
                 continue
-            stime=time.time()
-            a=uparser.parseString(x, raw=raw, wikidb=db)
+            stime = time.time()
+            a = uparser.parseString(x, raw=raw, wikidb=db)
         except Exception, err:
             print "F", repr(x), err
             if options.tb:

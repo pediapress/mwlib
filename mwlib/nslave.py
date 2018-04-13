@@ -4,7 +4,10 @@ if __name__ == "__main__":
     from gevent import monkey
     monkey.patch_all()
 
-import os, sys, time, socket
+import os
+import sys
+import time
+import socket
 
 cachedir = None
 cacheurl = None
@@ -53,7 +56,7 @@ def system(args, timeout=None):
     a = msg.append
     a("%s %s %r\n" % (retcode, d, pub_args))
 
-    writemsg = lambda: sys.stderr.write("".join(msg))
+    def writemsg(): return sys.stderr.write("".join(msg))
 
     if retcode != 0:
         a(stdout)
@@ -61,7 +64,8 @@ def system(args, timeout=None):
 
         writemsg()
         lines = ["    " + x for x in stdout[-4096:].split("\n")]
-        raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" % (retcode, pub_args,  "\n".join(lines)))
+        raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" %
+                           (retcode, pub_args,  "\n".join(lines)))
 
     writemsg()
 
@@ -155,9 +159,11 @@ class commands(object):
             def getpath(p):
                 return os.path.join(dir, p)
 
-            self.qaddw(channel="makezip", payload=dict(params=params), jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
+            self.qaddw(channel="makezip", payload=dict(params=params),
+                       jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
             outfile = getpath("output.%s" % writer)
-            args = ["mw-render",  "-w",  writer, "-c", getpath("collection.zip"), "-o", outfile,  "--status", self.statusfile()]
+            args = ["mw-render",  "-w",  writer, "-c",
+                    getpath("collection.zip"), "-o", outfile,  "--status", self.statusfile()]
 
             args.extend(_get_args(**params))
 
@@ -203,7 +209,8 @@ def main():
     http_port = 8898
     serve_files = True
     from mwlib import argv
-    opts, args = argv.parse(sys.argv[1:], "--no-serve-files --serve-files-port= --serve-files-address= --serve-files --cachedir= --url= --numprocs=")
+    opts, args = argv.parse(
+        sys.argv[1:], "--no-serve-files --serve-files-port= --serve-files-address= --serve-files --cachedir= --url= --numprocs=")
     for o, a in opts:
         if o == "--cachedir":
             cachedir = a
@@ -234,6 +241,7 @@ def main():
     make_cachedir(cachedir)
     from mwlib.async import slave
     slave.main(commands, numgreenlets=numgreenlets, argv=args)
+
 
 if __name__ == "__main__":
     main()

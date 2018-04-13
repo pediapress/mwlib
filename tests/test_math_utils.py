@@ -1,7 +1,10 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-import os, shutil, tempfile, pytest
+import os
+import shutil
+import tempfile
+import pytest
 from mwlib.mathutils import renderMath
 
 
@@ -40,7 +43,8 @@ class TestMathUtils(object):
             if self.blahtexml_present():
                 res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='blahtexml')
                 assert res
-                res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
+                res = renderMath(latex, self.tmpdir, output_mode='mathml',
+                                 render_engine='blahtexml')
                 assert res
             if self.texvc_present():
                 res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='texvc')

@@ -24,15 +24,16 @@ if len(sys.argv) > 2:
     port = int(sys.argv[2])
 
 
-mwzip_cmd = 'mw-zip' # (Path to) mw-zip executable.
+mwzip_cmd = 'mw-zip'  # (Path to) mw-zip executable.
 default_baseurl = "en.wikipedia.org/w"
 serviceurl = "http://pediapress.com/api/collections/"
-thisservice = "http://%s:%d/"% (host, port)
+thisservice = "http://%s:%d/" % (host, port)
+
 
 class State(object):
     articles = []
     baseurl = default_baseurl
-    bookmarklet ="javascript:location.href='%s?addarticle='+location.href" % thisservice
+    bookmarklet = "javascript:location.href='%s?addarticle='+location.href" % thisservice
 
 
 class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -67,13 +68,13 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         Click order to send your collection to pediapress
         </body>
         </html>
-        """ %(self.state.baseurl, 
-              thisservice,
-              ("\n".join(self.state.articles)),
-              self.state.bookmarklet,
-              )
+        """ % (self.state.baseurl,
+               thisservice,
+               ("\n".join(self.state.articles)),
+               self.state.bookmarklet,
+               )
         return response
-    
+
     def do_GET(self):
         path, query = urllib.splitquery(self.path)
         path = [urllib.unquote_plus(x) for x in path.split("/")]
@@ -83,24 +84,25 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         args = path[2:]
         print args, query
         redir = False
-        
+
         print self.state.articles
 
         if "articles" in query:
-            self.state.articles = [x.strip() for x in query["articles"][0].split("\n") if x.strip()]
+            self.state.articles = [x.strip() for x in query["articles"]
+                                   [0].split("\n") if x.strip()]
             redir = True
 
         if "baseurl" in query:
-            self.state.baseurl = query["baseurl"][0].strip() 
+            self.state.baseurl = query["baseurl"][0].strip()
             redir = True
 
         if "addarticle" in query:
             url = query["addarticle"][0]
-            self.state.articles.append( url )
+            self.state.articles.append(url)
             self.send_response(301)
             self.send_header("Location", url)
             self.end_headers()
-            return 
+            return
 
         if "order" in query and self.state.articles and self.state.baseurl:
             return self.do_zip_post()
@@ -114,19 +116,19 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_response(301)
             self.send_header("Location", thisservice)
             self.end_headers()
-            return 
+            return
 
         print self.state.articles
-        
+
         response = self.renderpage()
         #self.send_header("Content-type", "text/html")
         #self.send_header("Content-length", str(len(response)))
         self.end_headers()
         self.wfile.write(response)
-        
+
     def do_zip_post(self):
 
-        # automatically acquires a post url 
+        # automatically acquires a post url
         u = urllib2.urlopen(serviceurl, data="any")
         h = json.loads(u.read())
         posturl = h["post_url"]
@@ -134,14 +136,13 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         print "acquired post url", posturl
         print "redirected browser to", redirect_url
 
-        
         args = [
             mwzip_cmd,
             '--daemonize',
-            '--conf', "http://" +self.state.baseurl,
+            '--conf', "http://" + self.state.baseurl,
             '--posturl', posturl,
         ]
-        
+
         for a in self.state.articles:
             a = a.split("/")[-1]
             if a:
@@ -158,7 +159,6 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_response(301)
             self.send_header("Location", redirect_url)
             self.end_headers()
-
 
 
 def run():

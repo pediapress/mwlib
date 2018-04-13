@@ -7,6 +7,7 @@ try:
 except ImportError:
     import json
 
+
 def fetch(lang):
     url = 'http://%s.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|magicwords|interwikimap&format=json' % lang
     print 'fetching %r' % url
@@ -16,6 +17,7 @@ def fetch(lang):
     data = json.loads(data)['query']
     json.dump(data, open(fn, 'wb'), indent=4, sort_keys=True)
 
+
 def main(argv):
     languages = argv[1:]
     if not languages:
@@ -23,6 +25,7 @@ def main(argv):
 
     for lang in languages:
         fetch(lang.lower())
+
 
 if __name__ == '__main__':
     main(sys.argv)

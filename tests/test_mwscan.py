@@ -21,7 +21,8 @@ def test_resolve_entity_out_of_range():
 
 
 def test_url():
-    s = mwscan.scan("http://tools.wikimedia.de/~magnus/geo/geohack.php?language=de&params=50_0_0_N_8_16_16_E_type:city(190934)_region:DE-RP")
+    s = mwscan.scan(
+        "http://tools.wikimedia.de/~magnus/geo/geohack.php?language=de&params=50_0_0_N_8_16_16_E_type:city(190934)_region:DE-RP")
     print s
     assert len(s) == 1, "expected one url"
 

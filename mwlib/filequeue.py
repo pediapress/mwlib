@@ -10,17 +10,17 @@ from mwlib import utils
 
 class FileJobQueuer(object):
     """Write a file for each new job request"""
-    
+
     def __init__(self, queue_dir):
         self.queue_dir = utils.ensure_dir(queue_dir)
         self.log = Log('FileJobQueuer')
-    
+
     def __call__(self, job_type, job_id, args):
         job_file = '%s.job' % os.path.join(self.queue_dir, job_id)
         if os.path.exists(job_file):
             self.log.warn('Job file %r already exists' % job_file)
             return
-        
+
         open(job_file + '.tmp', 'wb').write(cPickle.dumps(args))
         os.rename(job_file + '.tmp', job_file)
 
@@ -33,11 +33,11 @@ class FileJobPoller(object):
         self.num_jobs = 0
         self.log = Log('FileJobPoller')
         self.files = []
-        
+
     def _reap_children(self):
-        while self.num_jobs>0:
+        while self.num_jobs > 0:
             try:
-                if self.num_jobs==self.max_num_jobs:
+                if self.num_jobs == self.max_num_jobs:
                     flags = 0
                 else:
                     flags = os.WNOHANG
@@ -49,7 +49,7 @@ class FileJobPoller(object):
                 break
             self.num_jobs -= 1
             self.log.info('child %s exited: %s. have %d jobs' % (pid, rc, self.num_jobs))
-            
+
     def run_forever(self):
         self.log.info('running with a max. of %d jobs' % self.max_num_jobs)
         while True:
@@ -57,7 +57,7 @@ class FileJobPoller(object):
                 self.poll()
                 if not self.files:
                     time.sleep(self.sleep_time)
-                
+
                 while self.num_jobs < self.max_num_jobs and self.files:
                     self.start_job(self.files.pop())
 
@@ -70,18 +70,18 @@ class FileJobPoller(object):
             except Exception, err:
                 self.log.error("caught exception: %r" % (err, ))
                 traceback.print_exc()
-                    
+
         self.log.info('exit')
-    
+
     def poll(self):
         if self.files:
             return
-        
+
         files = []
         for filename in os.listdir(self.queue_dir):
             if filename.endswith(".tmp"):
                 continue
-            
+
             path = os.path.join(self.queue_dir, filename)
             if not os.path.isfile(path):
                 continue
@@ -94,10 +94,10 @@ class FileJobPoller(object):
 
         files.sort(reverse=True)
         self.files = [x[1] for x in files]
-    
+
     def start_job(self, filename):
         """Fork, and execute job from given file
-        
+
         @returns: whether a new job as been started
         @rtype: bool
         """
@@ -107,12 +107,12 @@ class FileJobPoller(object):
             args = cPickle.loads(open(src, 'rb').read())
         finally:
             os.unlink(src)
-        
+
         self.log.info('starting job %r' % filename)
-        
+
         pid = os.fork()
-        self.num_jobs+=1
-        
+        self.num_jobs += 1
+
         if pid != 0:
             return True
 

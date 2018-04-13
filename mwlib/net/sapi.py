@@ -5,7 +5,11 @@
 
 """api.php client"""
 
-import urllib, urllib2, urlparse, cookielib, re
+import urllib
+import urllib2
+import urlparse
+import cookielib
+import re
 
 try:
     import simplejson as json
@@ -52,7 +56,8 @@ class mwapi(object):
             passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
             passman.add_password(None, apiurl, username, password)
             auth_handler = urllib2.HTTPBasicAuthHandler(passman)
-            self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()), auth_handler)
+            self.opener = urllib2.build_opener(
+                urllib2.HTTPCookieProcessor(cookielib.CookieJar()), auth_handler)
         else:
             self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
         self.opener.addheaders = [('User-Agent', conf.user_agent)]
@@ -124,7 +129,7 @@ class mwapi(object):
 
         try:
             if use_post:
-                return  self._post(**kwargs)
+                return self._post(**kwargs)
             else:
                 return self._do_request(**kwargs)
         finally:
@@ -143,7 +148,8 @@ class mwapi(object):
             data = loads(self._request(**kwargs))
             error = data.get("error")
             if error:
-                raise RuntimeError("%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs)))
+                raise RuntimeError("%s: [fetching %s]" %
+                                   (error.get("info", ""), self._build_url(**kwargs)))
             merge_data(retval, data[action])
 
             qc = data.get("query-continue", {}).values()
@@ -236,10 +242,12 @@ class mwapi(object):
 
     def upload(self, title, txt, summary):
         if self.edittoken is None:
-            res = self.do_request(action="query", prop="info|revisions",  intoken="edit",  titles=title)
+            res = self.do_request(action="query", prop="info|revisions",
+                                  intoken="edit",  titles=title)
             self.edittoken = res["pages"].values()[0]["edittoken"]
 
-        self._post(action="edit", title=title, text=txt, token=self.edittoken, summary=summary,  format="json", bot=True)
+        self._post(action="edit", title=title, text=txt, token=self.edittoken,
+                   summary=summary,  format="json", bot=True)
 
     def idle(self):
         sem = self.limit_fetch_semaphore
@@ -362,6 +370,7 @@ def get_collection_params(api):
 def main():
     s = mwapi("http://en.wikipedia.org/w/api.php")
     print s.get_categorymembers("Category:Mainz")
+
 
 if __name__ == "__main__":
     main()

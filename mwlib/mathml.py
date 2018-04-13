@@ -25,7 +25,7 @@ def log(err):
 
 def latex2mathml(latex):
 
-    data = "\\displaystyle\n%s\n" %  latex.strip()  
+    data = "\\displaystyle\n%s\n" % latex.strip()
     r, w, e = popen2.popen3('blahtexml --mathml')
     w.write(data)
     w.close()
@@ -43,35 +43,33 @@ def latex2mathml(latex):
 
         outmsg = '<?xml version="1.0" encoding="UTF-8"?>\n' + outmsg
         #print repr(outmsg)
-    
+
         try:
-            p =  ET.fromstring(outmsg)
+            p = ET.fromstring(outmsg)
         except ExpatError:
-            log("\n\nparsing failed\n\n" )
-            log(latex +"\n\n")
-            log(data +"\n\n")
-            log(errormsg +"\n")
-            log(outmsg +"\n")
-            return 
-            
+            log("\n\nparsing failed\n\n")
+            log(latex + "\n\n")
+            log(data + "\n\n")
+            log(errormsg + "\n")
+            log(outmsg + "\n")
+            return
 
         tag = "mathml"
         mathml = p.getiterator(tag)
-        
+
         if mathml:
-            mathml=mathml[0]
-            mathml.set("xmlns","http://www.w3.org/1998/Math/MathML")
+            mathml = mathml[0]
+            mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
             # add annotation with original TeX
             #a = ET.Element("annotation", encoding="TeX")
-            #a.text=latex
-            #mathml.append(a)
+            # a.text=latex
+            # mathml.append(a)
             return mathml
         else:
-            log ("an error occured, \n%s\n" % outmsg)
-        
+            log("an error occured, \n%s\n" % outmsg)
+
 
 if __name__ == '__main__':
     test = "\exp(-\gamma x)"
     print
     print ET.tostring(latex2mathml(test))
-    

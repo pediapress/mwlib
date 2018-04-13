@@ -1,4 +1,6 @@
-import types, os, py
+import types
+import os
+import py
 
 
 def as_bool(val):

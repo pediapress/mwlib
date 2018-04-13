@@ -9,7 +9,7 @@ try:
     import simplejson as json
 except ImportError:
     import json
-    from json import loads # protect us against http://pypi.python.org/pypi/python-json/
+    from json import loads  # protect us against http://pypi.python.org/pypi/python-json/
 
 
 def object_hook(dct):
@@ -17,7 +17,7 @@ def object_hook(dct):
         type = dct["type"]
     except KeyError:
         type = None
-        
+
     if type in ["collection", "article", "chapter", "source", "interwiki",  "license",  "wikiconf", "custom"]:
         klass = getattr(metabook, type)
         d = {}
@@ -25,8 +25,9 @@ def object_hook(dct):
             d[str(k)] = v
         d["type"] = type
         return klass(**d)
-        
+
     return dct
+
 
 class mbencoder(json.JSONEncoder):
     def default(self, obj):
@@ -34,17 +35,21 @@ class mbencoder(json.JSONEncoder):
             m = obj._json
         except AttributeError:
             return json.JSONEncoder.default(self, obj)
-        
+
         return m()
+
 
 def loads(data):
     return json.loads(data, object_hook=object_hook)
 
+
 def dump(obj, fp, **kw):
     return json.dump(obj, fp, cls=mbencoder, **kw)
 
+
 def dumps(obj, **kw):
     return json.dumps(obj, cls=mbencoder, **kw)
+
 
 def load(fp):
     return json.load(fp, object_hook=object_hook)

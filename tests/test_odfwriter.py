@@ -3,7 +3,10 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import os, sys, re, tempfile
+import os
+import sys
+import re
+import tempfile
 from StringIO import StringIO
 import py
 
@@ -20,6 +23,8 @@ ODFWriter.ignoreUnknownNodes = False
 
 def removefile(fn):
     os.remove(fn)
+
+
 odtfile_cb = removefile
 
 # read the odflint script as module.
@@ -45,6 +50,7 @@ def _get_odflint_module():
     finally:
         sys.argv[:] = argv
         sys.stderr = stderr
+
 
 odflint = _get_odflint_module()
 
@@ -89,7 +95,7 @@ def getXML(wikitext):
     odfw.writeTest(r)
     validate(odfw)
     xml = odfw.asstring()
-    #print xml # usefull to inspect generateded xml
+    # print xml # usefull to inspect generateded xml
     return xml
 
 
@@ -213,7 +219,8 @@ text
 
     reg = re.compile(r'text:outline-level="(\d)"', re.MULTILINE)
     res = list(reg.findall(xml))
-    goal = ['1', '2', '3', '4', '5', '6', '6', '6', '6']  # article title is on the first level, therefore we have "6"*4
+    # article title is on the first level, therefore we have "6"*4
+    goal = ['1', '2', '3', '4', '5', '6', '6', '6', '6']
     print res, "should be", goal
     if not res == goal:
         print xml

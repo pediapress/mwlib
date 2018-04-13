@@ -26,6 +26,7 @@ def test_idl():
         assert isinstance(c, parser.Text)
     assert stuff == u"".join(c.caption for c in tn.children)
 
+
 def test_syntaxhightlight():
     raw = '''<syntaxhighlight lang="php">
 <?php
@@ -41,6 +42,7 @@ html text
     p = parse(raw)
     src = p.find(parser.TagNode)[0]
     assert src and src.tagname == 'source', 'Syntaxhighight node not treated as source'
+
 
 def test_listing():
     raw = u'''

@@ -162,6 +162,7 @@ def formatnum(val):
     else:
         return res
 
+
 class Formatnum(nodes.Node):
     def flatten(self, expander, variables, res):
         arg0 = []
@@ -185,6 +186,7 @@ class Formatnum(nodes.Node):
 
 def make_switchnode(args):
     return nodes.SwitchNode((args[0], args[1:]))
+
 
 registry = {'#time': Time,
             'subst': Subst,

@@ -2,7 +2,13 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-import sys, os, time, re, shutil, StringIO, errno
+import sys
+import os
+import time
+import re
+import shutil
+import StringIO
+import errno
 from hashlib import sha1
 
 from mwlib import myjson as json
@@ -29,7 +35,8 @@ def make_collection_id(data):
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
+        sys.stdout.write("new-collection %s\t%r\t%r\n" %
+                         (num_articles, data.get("base_url"), data.get("writer")))
 
     return sha1(sio.getvalue()).hexdigest()[:16]
 

@@ -78,7 +78,7 @@ test_metabook = json.loads(json.dumps(test_metabook))
 
 
 def test_parse_collection_page():
-    #first parsestring
+    # first parsestring
     mb = metabook.parse_collection_page(test_wikitext1)
     print mb
 
@@ -108,7 +108,7 @@ def test_parse_collection_page():
     assert arts[1]['revision'] == '4'
     assert arts[1]['displaytitle'] == 'Display Title 2'
 
-    #second parsestring
+    # second parsestring
     mb = metabook.parse_collection_page(test_wikitext2)
     assert mb['type'] == 'collection'
     assert mb['version'] == metabook.collection.version

@@ -1,7 +1,11 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-import pytest, gevent, urllib, urllib2, bottle
+import pytest
+import gevent
+import urllib
+import urllib2
+import bottle
 from mwlib import nserve
 
 import wsgi_intercept.urllib_intercept
@@ -26,6 +30,7 @@ def get_exception_raiser(msg, exception_class=RuntimeError):
     def raise_exc(*args, **kwargs):
         raise exception_class(msg)
     return raise_exc
+
 
 raise_greenletexit = get_exception_raiser("killed", gevent.GreenletExit)
 
@@ -144,11 +149,11 @@ def test_app_dispatch_bad_collid(app, busy):
 
 
 @pytest.mark.parametrize(("filename", "ext", "expected"), [
-        (u"Motörhead", "pdf", "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf"),
-        (None, "pdf", "inline; filename=collection.pdf"),
-        ("  ;;;", "pdf", "inline; filename=collection.pdf;filename*=UTF-8''%3B%3B%3B.pdf"),
-        ("Peter Hartz", "pdf", "inline; filename=Peter-Hartz.pdf;filename*=UTF-8''Peter%20Hartz.pdf"),
-        ("foo", "pdf", "inline; filename=foo.pdf")])
+    (u"Motörhead", "pdf", "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf"),
+    (None, "pdf", "inline; filename=collection.pdf"),
+    ("  ;;;", "pdf", "inline; filename=collection.pdf;filename*=UTF-8''%3B%3B%3B.pdf"),
+    ("Peter Hartz", "pdf", "inline; filename=Peter-Hartz.pdf;filename*=UTF-8''Peter%20Hartz.pdf"),
+    ("foo", "pdf", "inline; filename=foo.pdf")])
 def test_get_content_disposition(filename, ext, expected):
     res = nserve.get_content_disposition(filename, ext)
     assert res == expected
@@ -158,7 +163,7 @@ def test_content_disposition_comma():
     a, u = nserve.get_content_disposition_values("foo,bar", "pdf")
     assert a == "foo-bar"
 
+
 def test_content_disposition_merge():
     a, u = nserve.get_content_disposition_values("foo ,\"bar", "pdf")
     assert a == "foo-bar"
-

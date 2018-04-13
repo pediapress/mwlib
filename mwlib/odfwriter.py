@@ -28,23 +28,26 @@ from mwlib.treecleaner import TreeCleaner
 log = Log("odfwriter")
 
 # check for ODF version
-e = element.Element(qname = ("a","n"))
+e = element.Element(qname=("a", "n"))
 assert hasattr(e, "appendChild")
 assert hasattr(e, "lastChild")
 assert hasattr(e, "setAttribute")
 del e
 
+
 def showNode(obj):
     attrs = obj.__dict__.keys()
-    log(obj.__class__.__name__ )
-    stuff =  ["%s => %r" %(k,getattr(obj,k)) for k in attrs if
-              (not k == "children") and getattr(obj,k)
-              ]
+    log(obj.__class__.__name__)
+    stuff = ["%s => %r" % (k, getattr(obj, k)) for k in attrs if
+             (not k == "children") and getattr(obj, k)
+             ]
     if stuff:
         log(repr(stuff))
 
+
 class SkipChildren(object):
     "if returned by the writer no children are processed"
+
     def __init__(self, element=None):
         self.element = element
 
@@ -56,6 +59,7 @@ class ParagraphProxy(text.Element):
     """
 
     qname = (text.TEXTNS, 'p')
+
     def addElement(self, e):
         assert not hasattr(self, "writeto")
         assert e.parentNode is None
@@ -64,8 +68,8 @@ class ParagraphProxy(text.Element):
         if isinstance(e, ParagraphProxy):
             assert self.parentNode is not None
             #log("relinking paragraph %s" % e.type)
-            self.parentNode.addElement(e) # add at the same level
-            np = ParagraphProxy() # add copy at the same level
+            self.parentNode.addElement(e)  # add at the same level
+            np = ParagraphProxy()  # add copy at the same level
             np.attributes = self.attributes.copy()
             self.parentNode.addElement(np)
             self.writeto = np
@@ -82,7 +86,8 @@ class ParagraphProxy(text.Element):
                 p = p.parentNode
             if e.qname not in p.allowed_children:
                 assert p.parentNode is None
-                log("ParagraphProxy:addElement() ", e.type, "not allowed in any parents, failed, should have been added to", self.type)
+                log("ParagraphProxy:addElement() ", e.type,
+                    "not allowed in any parents, failed, should have been added to", self.type)
                 return
             assert p is not self
             #log("addElement: moving", e.type, "to ", p.type)
@@ -96,13 +101,13 @@ class ParagraphProxy(text.Element):
         else:
             text.Element.addElement(self, e)
 
+
 """
 we generate odf.text.Elements and
 patch them with two specialities:
 1) Element.writeto
 2) ParagraphProxy(text.Element)
 """
-
 
 
 class ODFWriter(object):
@@ -115,7 +120,7 @@ class ODFWriter(object):
         self.language = language
         self.namespace = namespace
         self.references = []
-        self.doc =  OpenDocumentText()
+        self.doc = OpenDocumentText()
         style.applyStylesToDoc(self.doc)
         self.text = self.doc.text
         self.namedLinkCount = 0
@@ -129,7 +134,6 @@ class ODFWriter(object):
         if license is not None:
             self.doc.meta.addElement(meta.UserDefined(name="Rights", text=license))
 
-
     def writeTest(self, root):
         self.write(root, self.doc.text)
 
@@ -140,28 +144,30 @@ class ODFWriter(object):
 
         if self.env and self.env.metabook:
             self.doc.meta.addElement(dc.Title(text=self.env.metabook.get("title", "")))
-        #licenseArticle = self.env.metabook['source'].get('defaultarticlelicense','') # FIXME
+        # licenseArticle = self.env.metabook['source'].get('defaultarticlelicense','') # FIXME
 
         for e in book.children:
             self.write(e, self.doc.text)
         doc = self.getDoc()
-        #doc.toXml("%s.odf.xml"%fn)
+        # doc.toXml("%s.odf.xml"%fn)
         doc.save(output, addsuffix=False)
-        log( "writing to %r" % output )
+        log("writing to %r" % output)
 
     def getDoc(self, debuginfo=""):
         return self.doc
 
-    def asstring(self, element = None):
+    def asstring(self, element=None):
 
         class Writer(object):
             def __init__(self):
                 self.res = []
+
             def write(self, txt):
                 if isinstance(txt, unicode):
                     self.res.append(str(txt))
                 else:
                     self.res.append(txt)
+
             def getvalue(self):
                 return "".join(self.res)
 
@@ -186,25 +192,24 @@ class ODFWriter(object):
     def write(self, obj, parent=None):
         assert parent is not None
 
-        def saveAddChild(p,c):
+        def saveAddChild(p, c):
             try:
                 p.addElement(c)
                 #print "save add child %r to %r" % (c, p)
-                assert c.parentNode is not None # this check fails if the child could not be added
+                assert c.parentNode is not None  # this check fails if the child could not be added
                 return True
             except odf.element.IllegalChild:
                 # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed in ' u'text:span' ', dumping'
-                try: # maybe c has no attribute type
+                try:  # maybe c has no attribute type
                     art = obj.getParentNodesByClass(advtree.Article)[0]
                     log("in article ", art.caption)
                     log("write:", c.type, "not allowed in ", p.type, ", dumping")
                 except AttributeError:
-                    log("missing .type attribute %r %r " %(c, p))
+                    log("missing .type attribute %r %r " % (c, p))
                 return False
 
-
         while hasattr(parent, "writeto"):
-            parent = parent.writeto # SPECIAL HANDLING
+            parent = parent.writeto  # SPECIAL HANDLING
 
         # if its text, append to last node
         if isinstance(obj, parser.Text):
@@ -212,43 +217,41 @@ class ODFWriter(object):
         else:
             # check for method
             m = "owrite" + obj.__class__.__name__
-            m=getattr(self, m, None)
+            m = getattr(self, m, None)
 
-            if m: # find handler
+            if m:  # find handler
                 e = m(obj)
 
             elif self.ignoreUnknownNodes:
-                log("Handler for node %s not found! SKIPPED" %obj.__class__.__name__)
+                log("Handler for node %s not found! SKIPPED" % obj.__class__.__name__)
                 showNode(obj)
                 e = None
             else:
                 raise Exception("unknown node:%r" % obj)
 
-            if isinstance(e, SkipChildren): # do not process children of this node
+            if isinstance(e, SkipChildren):  # do not process children of this node
                 if e.element is not None:
                     saveAddChild(parent, e.element)
-                return # skip
+                return  # skip
             elif e is None:
                 e = parent
             else:
                 if not saveAddChild(parent, e):
-                    return #
+                    return
 
             for c in obj.children[:]:
-                self.write(c,e)
+                self.write(c, e)
 
-
-    def writeChildren(self, obj, parent): # use this to avoid bugs!
+    def writeChildren(self, obj, parent):  # use this to avoid bugs!
         "writes only the children of a node"
         for c in obj:
             self.write(c, parent)
 
-
     def owriteArticle(self, a):
-        self.references = [] # collect references
+        self.references = []  # collect references
         title = a.caption
         log(u"processing article %s" % title)
-        r = text.Section(stylename=style.sect, name=title) #, display="none")
+        r = text.Section(stylename=style.sect, name=title)  # , display="none")
         r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
         return r
 
@@ -259,11 +262,11 @@ class ODFWriter(object):
         return item
 
     def owriteSection(self, obj):
-        hXstyles = (style.h0,style.h1,style.h2,style.h3,style.h4,style.h5)
+        hXstyles = (style.h0, style.h1, style.h2, style.h3, style.h4, style.h5)
 
         # skip empty sections (as for eg References)
-        hasDisplayContent = u"".join(x.getAllDisplayText().strip() for x in obj.children [1:]) \
-            or obj.getChildNodesByClass(advtree.ImageLink) # FIXME, add AdvancedNode.hasContent property
+        hasDisplayContent = u"".join(x.getAllDisplayText().strip() for x in obj.children[1:]) \
+            or obj.getChildNodesByClass(advtree.ImageLink)  # FIXME, add AdvancedNode.hasContent property
         enabled = False
         if enabled and not hasDisplayContent:  # FIXME
             return SkipChildren()
@@ -273,7 +276,7 @@ class ODFWriter(object):
         # = is level 0 as in article title =
         # == is level 1 as in mediawiki top level section ==
         # getSectionLevel() == 1 for most outer section level
-        level = 1 + obj.getSectionLevel() # min: 1+0 = 1
+        level = 1 + obj.getSectionLevel()  # min: 1+0 = 1
         level = min(level, len(hXstyles))
         hX = hXstyles[level-1]
 
@@ -284,7 +287,8 @@ class ODFWriter(object):
 
     def owriteParagraph(self, obj):
         if obj.children:
-            imgAsOnlyChild = bool(len(obj.children) == 1 and isinstance(obj.getFirstChild(), advtree.ImageLink))
+            imgAsOnlyChild = bool(len(obj.children) == 1 and isinstance(
+                obj.getFirstChild(), advtree.ImageLink))
             # handle special case nothing but an image in a paragraph
             if imgAsOnlyChild and isinstance(obj.next, advtree.Paragraph):
                 img = obj.getFirstChild()
@@ -293,7 +297,7 @@ class ODFWriter(object):
             return ParagraphProxy(stylename=style.textbody)
 
     def owriteItem(self, item):
-        li =text.ListItem()
+        li = text.ListItem()
         p = ParagraphProxy(stylename=style.textbody)
         li.addElement(p)
         li.writeto = p
@@ -309,7 +313,7 @@ class ODFWriter(object):
         return text.List(stylename=style.definitionlist)
 
     def owriteDefinitionTerm(self, obj):
-        li =text.ListItem()
+        li = text.ListItem()
         p = ParagraphProxy(stylename=style.definitionterm)
         li.addElement(p)
         li.writeto = p
@@ -329,29 +333,28 @@ class ODFWriter(object):
 
         return li
 
-
     def owriteBreakingReturn(self, obj):
         return text.LineBreak()
 
     def owriteCell(self, cell):
-        t =  table.TableCell()
+        t = table.TableCell()
         p = ParagraphProxy(stylename=style.textbody)
         t.addElement(p)
         t.writeto = p
         # handle rowspan FIXME
         #
         #rs = cell.rowspan
-        #if rs:
+        # if rs:
         #    t.setAttribute(":numberrowsspanned",str(rs))
         return t
 
-    def owriteRow(self, row): # COLSPAN FIXME
+    def owriteRow(self, row):  # COLSPAN FIXME
         tr = table.TableRow()
         for c in row.children:
-            cs =  c.colspan
-            self.write(c,tr)
+            cs = c.colspan
+            self.write(c, tr)
             if cs:
-                tr.lastChild.setAttribute("numbercolumnsspanned",str(cs))
+                tr.lastChild.setAttribute("numbercolumnsspanned", str(cs))
                 for i in range(cs):
                     tr.addElement(table.CoveredTableCell())
         return SkipChildren(tr)
@@ -360,34 +363,35 @@ class ODFWriter(object):
         # are there caption not in tables ???? FIXME
         if isinstance(obj.parent, advtree.Table):
             return SkipChildren()
-        pass # FIXME
+        pass  # FIXME
 
-    def owriteTable(self, obj): # FIXME ADD FORMATTING
+    def owriteTable(self, obj):  # FIXME ADD FORMATTING
         # http://books.evc-cit.info/odbook/ch04.html#text-table-section
 
         t = table.Table()
         tc = table.TableColumn(stylename=style.dumbcolumn,
-                               numbercolumnsrepeated=str(obj.numcols)) # FIXME FIXME
+                               numbercolumnsrepeated=str(obj.numcols))  # FIXME FIXME
         t.addElement(tc)
 
         captions = [c for c in obj.children if isinstance(c, advtree.Caption)]
-        if not captions : # handle table w/o caption:
+        if not captions:  # handle table w/o caption:
             return t
-        else: # a section groups table-caption & table:
+        else:  # a section groups table-caption & table:
             if not len(captions) == 1:
                 log("owriteTable: more than one Table Caption not handeled. Using only first Caption!")
             # group using a section
             sec = text.Section(stylename=style.sectTable, name="table section")
-            p =  ParagraphProxy(stylename=style.tableCaption)
+            p = ParagraphProxy(stylename=style.tableCaption)
             sec.addElement(p)
-            self.writeChildren(captions[0], p)# only one caption expected and allowed
+            self.writeChildren(captions[0], p)  # only one caption expected and allowed
             sec.addElement(t)
-            sec.writeto=t
+            sec.writeto = t
             return sec
 
 
 # ---- inline formattings -------------------
 # use span
+
 
     def owriteEmphasized(self, obj):
         return text.Span(stylename=style.emphasis)
@@ -426,7 +430,7 @@ class ODFWriter(object):
         return text.RubyBase()
 
     def owriteRubyParentheses(self, obj):
-        pass # FIXME
+        pass  # FIXME
 
     def owriteSub(self, obj):
         return text.Span(stylename=style.sub)
@@ -456,6 +460,7 @@ class ODFWriter(object):
 # ------- block formattings -------------------
 # use paragraph
 
+
     def owriteCenter(self, s):
         return ParagraphProxy(stylename=style.center)
 
@@ -469,12 +474,12 @@ class ODFWriter(object):
         # (monospaced) or code, newlines ignored, spaces collapsed
         return text.Span(stylename=style.teletyped)
 
-    def _replaceWhitespaces(self,obj, p):
+    def _replaceWhitespaces(self, obj, p):
         # replaces \n, \t and " " given from parser to ODF-valid tags
         # works on (styled) ParagraphProxy p
         rmap = {
-            "\n":text.LineBreak,
-            " ":text.S}
+            "\n": text.LineBreak,
+            " ": text.S}
         col = []
         for c in obj.getAllDisplayText().replace("\t", " "*8).strip():
             if c in rmap:
@@ -483,7 +488,7 @@ class ODFWriter(object):
                 p.addElement(rmap[c]())
             else:
                 col.append(c)
-        p.addText(u"".join(col)) # add remaining
+        p.addText(u"".join(col))  # add remaining
         obj.children = []  # remove the children
         return p
 
@@ -495,30 +500,27 @@ class ODFWriter(object):
         p = ParagraphProxy(stylename=style.source)
         return self._replaceWhitespaces(obj, p)
 
-
     def owriteCode(self, obj):
         return text.Span(stylename=style.code)
-
 
     def owriteBlockquote(self, s):
         "margin to the left & right"
         indentlevel = len(s.caption)-1
         return ParagraphProxy(stylename=style.blockquote)
 
-
     def owriteIndented(self, s):
         "Writes a indented Paragraph. Margin to the left.\n Need a lenght of Indented.caption of 1,2 or 3."
-        indentStyles = (style.indentedSingle, style.indentedDouble, style.indentedTriple)  # 0, 1, 2
+        indentStyles = (style.indentedSingle, style.indentedDouble,
+                        style.indentedTriple)  # 0, 1, 2
         indentLevel = min(len(s.caption)-1, len(indentStyles)-1)
         return ParagraphProxy(stylename=indentStyles[indentLevel])
-
 
     def owriteMath(self, obj):
         """
         get a MATHML from Latex
         translate element tree to odf.Elements
         """
-        #log("math")
+        # log("math")
         r = writerbase.renderMath(obj.caption, output_mode='mathml', render_engine='blahtexml')
         if r is None:
             log("writerbase.renderMath failed!")
@@ -533,7 +535,7 @@ class ODFWriter(object):
                 if c.text:
                     text = c.text
                     #if not isinstance(text, unicode):  text = text.decode("utf8")
-                    n.appendChild(odf.element.Text(text)) # n.addText(c.text)
+                    n.appendChild(odf.element.Text(text))  # n.addText(c.text)
                     # rffixme: odfpy0.8 errors:"AttributeError: Element instance has no attribute 'elements'" -> this is a lie!
                 _withETElement(c, n)
 
@@ -546,7 +548,7 @@ class ODFWriter(object):
         return mathframe
 
     def owriteLink(self, obj):
-        a = text.A(href= obj.url or "#")
+        a = text.A(href=obj.url or "#")
         if not obj.children:
             a.addText(obj.target)
         return a
@@ -557,14 +559,11 @@ class ODFWriter(object):
     owriteInterwikiLink = owriteLink
     owriteSpecialLink = owriteLink
 
-
-
     def owriteURL(self, obj):
         a = text.A(href=obj.caption)
         if not obj.children:
             a.addText(obj.caption)
         return a
-
 
     def owriteNamedURL(self, obj):
         # FIXME handle references
@@ -575,15 +574,14 @@ class ODFWriter(object):
             a.addText(name)
         return a
 
-
-    def owriteSpecialLink(self, obj): # whats that?
+    def owriteSpecialLink(self, obj):  # whats that?
         a = text.A(href=obj.target)
         if not obj.children:
             a.addText(obj.target)
         return a
 
     def owriteCategoryLink(self, obj):
-        if True: # FIXME, collect and add to the end of the page
+        if True:  # FIXME, collect and add to the end of the page
             return SkipChildren()
         if not obj.colon and not obj.children:
             a = text.A(href=obj.target)
@@ -591,16 +589,16 @@ class ODFWriter(object):
             return a
 
     def owriteLangLink(self, obj):
-        return SkipChildren() # dont want them
+        return SkipChildren()  # dont want them
 
     def owriteReference(self, t):
         self.references.append(t)
-        n =  text.Note(noteclass="footnote")
+        n = text.Note(noteclass="footnote")
         nc = text.NoteCitation()
-        n.addElement(nc )
+        n.addElement(nc)
         nc.addText(str(len(self.references)))
         nb = text.NoteBody()
-        n.addElement( nb )
+        n.addElement(nb)
         p = ParagraphProxy(stylename=style.footnote)
         nb.addElement(p)
         n.writeto = p
@@ -611,68 +609,67 @@ class ODFWriter(object):
         pass
 
     def owriteImageMap(self, obj):
-        pass # write children # fixme
+        pass  # write children # fixme
 
-    def owriteImageLink(self,obj,isImageMap=False):
+    def owriteImageLink(self, obj, isImageMap=False):
         # see http://books.evc-cit.info/odbook/ch04.html
         # see rl.writer for more advanced image integration, including inline, floating, etc.
         # http://code.pediapress.com/hg/mwlib.rl rlwriter.py
 
         from PIL import Image as PilImage
 
-        def sizeImage(w,h):
-
+        def sizeImage(w, h):
             """ calculate the target image size in inch.
             @param: (w,h): w(idth), h(eight) of image in px
             @type int
             @return: (w,h): w(idth), h(eight) of target image in inch (!)
             @rtype float"""
 
-
             if obj.isInline:
                 scale = 1 / self.conf.paper['IMG_DPI_STANDARD']
             else:
                 scale = 1 / self.conf.paper['IMG_DPI_INLINE']
 
-            wTarget = scale * w # wTarget is in inch now
-            hTarget = scale * h # hTarget is in inch now
+            wTarget = scale * w  # wTarget is in inch now
+            hTarget = scale * h  # hTarget is in inch now
 
-            ##2do: obey the value of thumpnail
+            # 2do: obey the value of thumpnail
             if wTarget > self.conf.paper['IMG_MAX_WIDTH'] or hTarget > self.conf.paper['IMG_MAX_HEIGHT']:
                 # image still to large, re-resize to max possible:
-                scale = min(self.conf.paper['IMG_MAX_WIDTH']/w, self.conf.paper['IMG_MAX_HEIGHT']/h)
+                scale = min(self.conf.paper['IMG_MAX_WIDTH']/w,
+                            self.conf.paper['IMG_MAX_HEIGHT']/h)
 
                 return (w*scale, h*scale, scale)
             else:
                 return (wTarget, hTarget, scale)
 
         if obj.colon == True:
-            return # writes children
-            #fixme: handle isImageMap
+            return  # writes children
+            # fixme: handle isImageMap
 
         if not self.env or not self.env.images:
             return
-            #fixme: handle isImageMap
+            # fixme: handle isImageMap
 
-        imgPath = self.env.images.getDiskPath(obj.target)#, size=targetWidth) ????
+        imgPath = self.env.images.getDiskPath(obj.target)  # , size=targetWidth) ????
         if not imgPath:
             log.warning('invalid image url')
             return
         imgPath = imgPath.encode('utf-8')
 
-        (wObj,hObj) = (obj.width or 0, obj.height or 0)
+        (wObj, hObj) = (obj.width or 0, obj.height or 0)
         # sometimes the parser delivers only one value, w or h, so set the other = 0
 
         try:
             img = PilImage.open(imgPath)
-            if img.info.get('interlace',0) == 1:
+            if img.info.get('interlace', 0) == 1:
                 log.warning("got interlaced PNG which can't be handeled by PIL")
                 return
         except IOError:
             log.warning('img can not be opened by PIL')
             return
 
-        (wImg,hImg) = img.size
+        (wImg, hImg) = img.size
 
         if wImg == 0 or wImg == 0:
             return
@@ -680,48 +677,46 @@ class ODFWriter(object):
         # sometimes the parser delivers only one value, w or h, so set the other "by hand"
         aspectRatio = wImg/hImg
 
-        if wObj>0 and not hObj>0:
+        if wObj > 0 and not hObj > 0:
             hObj = wObj / aspectRatio
-        elif hObj>0 and not wObj>0:
+        elif hObj > 0 and not wObj > 0:
             wObj = aspectRatio / hObj
-        elif wObj==0 and hObj==0:
+        elif wObj == 0 and hObj == 0:
             wObj, hObj = wImg, hImg
-        #hint: wObj/hObj are the values of the Thumbnail
+        # hint: wObj/hObj are the values of the Thumbnail
         #      wImg/hImg are the real values of the image
 
-        (width, height, scale) = sizeImage( wObj, hObj)
-
+        (width, height, scale) = sizeImage(wObj, hObj)
 
         widthIn = "%.2fin" % (width)
-        heightIn= "%.2fin" % (height)
+        heightIn = "%.2fin" % (height)
 
         innerframe = draw.Frame(stylename=style.frmInner, width=widthIn, height=heightIn)
 
         if isImageMap:
             innerframe.wImg = wImg
             innerframe.hImg = hImg
-            innerframe.rescaleFactor = scale # needed cuz image map coordinates needs the same rescaled
-            log ("wObj ,wImg: %s,%s" %(wObj,wImg))
+            innerframe.rescaleFactor = scale  # needed cuz image map coordinates needs the same rescaled
+            log("wObj ,wImg: %s,%s" % (wObj, wImg))
 
         href = self.doc.addPicture(imgPath)
         innerframe.addElement(draw.Image(href=href))
 
         if obj.isInline():
-                return SkipChildren(innerframe) # FIXME something else formatting?
+            return SkipChildren(innerframe)  # FIXME something else formatting?
         else:
-            innerframe.setAttribute( "anchortype", "paragraph")
-
+            innerframe.setAttribute("anchortype", "paragraph")
 
         widthIn = "%.2fin" % (width + style.frmOuter.internSpacing)
-        heightIn= "%.2fin" % (height)
+        heightIn = "%.2fin" % (height)
 
         # set image alignment
         attrs = dict(width=widthIn, anchortype="paragraph")
-        floats = dict(right  = style.frmOuterRight,
-                      center = style.frmOuterCenter,
-                      left   = style.frmOuterLeft)
+        floats = dict(right=style.frmOuterRight,
+                      center=style.frmOuterCenter,
+                      left=style.frmOuterLeft)
         attrs["stylename"] = floats.get(obj.align, style.frmOuterLeft)
-        stylename=style.frmOuterLeft,
+        stylename = style.frmOuterLeft,
         frame = draw.Frame(**attrs)
 
         tb = draw.TextBox()
@@ -735,13 +730,13 @@ class ODFWriter(object):
         return frame
 
     def owriteFont(self, n):
-        pass # simply write children
+        pass  # simply write children
 
     def owriteNode(self, n):
-        pass # simply write children
+        pass  # simply write children
 
     def owriteGallery(self, obj):
-        pass # simply write children FIXME
+        pass  # simply write children FIXME
 
     def owriteHorizontalRule(self, obj):
         p = ParagraphProxy(stylename=style.hr)
@@ -750,14 +745,14 @@ class ODFWriter(object):
 
 # UNIMPLEMENTED  -----------------------------------------------
 
+
     def writeTimeline(self, obj):
         data = obj.caption
-        pass # FIXME
+        pass  # FIXME
 
-    def writeHiero(self, obj): # FIXME parser support
+    def writeHiero(self, obj):  # FIXME parser support
         data = obj.caption
-        pass # FIXME
-
+        pass  # FIXME
 
 
 # - func  ---------------------------------------------------
@@ -769,12 +764,15 @@ def writer(env, output, status_callback):
     else:
         buildbook_status = None
     book = writerbase.build_book(env, status_callback=buildbook_status)
-    scb = lambda status, progress :  status_callback is not None and status_callback(status=status, progress=progress)
+
+    def scb(status, progress): return status_callback is not None and status_callback(
+        status=status, progress=progress)
     scb(status='preprocessing', progress=50)
     preprocess(book)
     scb(status='rendering', progress=60)
     w = ODFWriter(env, status_callback=scb)
     w.writeBook(book, output=output)
+
 
 writer.description = 'OpenDocument Text'
 writer.content_type = 'application/vnd.oasis.opendocument.text'
@@ -784,11 +782,11 @@ writer.file_extension = 'odt'
 # - helper funcs   r ---------------------------------------------------
 
 def preprocess(root):
-    #advtree.buildAdvancedTree(root)
-    #xmltreecleaner.removeChildlessNodes(root)
-    #xmltreecleaner.fixLists(root)
-    #xmltreecleaner.fixParagraphs(root)
-    #xmltreecleaner.fixBlockElements(root)
+    # advtree.buildAdvancedTree(root)
+    # xmltreecleaner.removeChildlessNodes(root)
+    # xmltreecleaner.fixLists(root)
+    # xmltreecleaner.fixParagraphs(root)
+    # xmltreecleaner.fixBlockElements(root)
     #print"*** parser raw "*5
     #parser.show(sys.stdout, root)
     #print"*** new TreeCleaner "*5
@@ -799,6 +797,7 @@ def preprocess(root):
 
 # ==============================================================================
 
+
 def main():
     for fn in sys.argv[1:]:
 
@@ -808,19 +807,18 @@ def main():
         input = unicode(open(fn).read(), 'utf8')
         r = parseString(title=fn, raw=input, wikidb=db)
         #parser.show(sys.stdout, r)
-        #advtree.buildAdvancedTree(r)
+        # advtree.buildAdvancedTree(r)
         #tc = TreeCleaner(r)
-        #tc.cleanAll()
-
+        # tc.cleanAll()
 
         preprocess(r)
         parser.show(sys.stdout, r)
         odf = ODFWriter()
         odf.writeTest(r)
         doc = odf.getDoc()
-        #doc.toXml("%s.xml"%fn)
+        # doc.toXml("%s.xml"%fn)
         doc.save(fn, True)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

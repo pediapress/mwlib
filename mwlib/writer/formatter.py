@@ -9,20 +9,22 @@ from __future__ import division
 from mwlib.writer import styleutils
 from mwlib import advtree
 
+
 class Formatter(object):
     """store the current formatting state"""
-
 
     css_style_map = {'font-style': {'italic': [('emphasized_style', 'change')],
                                     'oblique': [('emphasized_style', 'change')],
                                     'normal': [('emphasized_style', 'reset')]
                                     },
-                     'font-family': {'Courier':[('teletype_style', 'change')],
+                     'font-family': {'Courier': [('teletype_style', 'change')],
                                      },
                      'font-weight': {'bold': [('strong_style', 'change')],
-                                     'bolder': [('strong_style', 'change')], # bolder and bold are treated the same
+                                     # bolder and bold are treated the same
+                                     'bolder': [('strong_style', 'change')],
                                      'normal': [('strong_style', 'reset')],
-                                     'lighter': [('strong_style', 'reset')], # treat lighter as normal
+                                     # treat lighter as normal
+                                     'lighter': [('strong_style', 'reset')],
                                      },
                      'text-decoration': {'overline': [('overline_style', 'change'),
                                                       ('underline_style', 'reset'),
@@ -37,10 +39,9 @@ class Formatter(object):
                                                           ('overline_style', 'reset'),
                                                           ],
                                          },
-                     'color': {'*':('color_style', styleutils.rgbColorFromNode)
+                     'color': {'*': ('color_style', styleutils.rgbColorFromNode)
                                },
                      }
-
 
     def __init__(self, font_switcher=None, output_encoding=None, word_split_len=20):
 
@@ -53,17 +54,17 @@ class Formatter(object):
 
         self.render_styles = self.registerRenderStyles()
         self.node_styles = self.registerNodeStyles()
-        
+
         for style, start_style, end_style, start_attr in self.render_styles:
             setattr(self, style, 0)
-       
-        self.source_mode = 0 
+
+        self.source_mode = 0
         self.pre_mode = 0
         self.index_mode = 0
         self.gallery_mode = 0
         self.footnote_mode = 0
-        self.minimize_space_mode = 0 # used for tables if we try to safe space
-        
+        self.minimize_space_mode = 0  # used for tables if we try to safe space
+
         self.sectiontitle_mode = False
         self.attribution_mode = True
         self.last_font = None
@@ -81,16 +82,16 @@ class Formatter(object):
             ('small_style', '<small>', '</small>'),
             ('big_style', '<big>', '</big>'),
             ('sub_style', '<sub>', '</sub>'),
-            ('sup_style', '<sup>','</sup>'),
+            ('sup_style', '<sup>', '</sup>'),
             ('teletype_style', '<tt>', '</tt>'),
             ('strike_style', '<strike>', '</strike>'),
             ('underline_style', '<u>', '</u>'),
             ('overline_style', '', '')
-            ]
+        ]
 
     def registerNodeStyles(self):
         return {
-            advtree.Emphasized:'emphasized_style',
+            advtree.Emphasized: 'emphasized_style',
             advtree.Strong: 'strong_style',
             advtree.Small: 'small_style',
             advtree.Big: 'big_style',
@@ -102,7 +103,7 @@ class Formatter(object):
             advtree.Strike: 'strike_style',
             advtree.Underline: 'underline_style',
             advtree.Overline: 'overline_style',
-            }
+        }
 
     def startStyle(self):
         start = []
@@ -118,13 +119,13 @@ class Formatter(object):
 
     def endStyle(self):
         end = []
-        for style, style_start, style_end, start_arg in self.render_styles[::-1]: # reverse style list
+        # reverse style list
+        for style, style_start, style_end, start_arg in self.render_styles[::-1]:
             if getattr(self, style, 0) > 0:
                 end.append(style_end)
         if end:
             end.append(self.grouping_chars[1])
         return ''.join(end)
-
 
     def setRelativeFontSize(self, rel_font_size):
         # ignore anything too large. see search engine optimized article
@@ -134,21 +135,21 @@ class Formatter(object):
         rel_font_size = min(rel_font_size, 5)
         self.fontsize_style += 1
         self.rel_font_size = rel_font_size
-    
+
     def checkFontSize(self, node_style):
         font_style = node_style.get('font-size')
         if not font_style:
             return
-                
+
         size, unit = styleutils.parseLength(font_style)
         if size and unit in ['%', 'pt', 'px', 'em']:
             if unit == '%':
                 self.setRelativeFontSize(size/100)
-            elif unit ==  'pt':
+            elif unit == 'pt':
                 self.setRelativeFontSize(size/10)
-            elif unit ==  'px':
+            elif unit == 'px':
                 self.setRelativeFontSize(size/12)
-            elif unit ==  'em':
+            elif unit == 'em':
                 self.setRelativeFontSize(size)
             return
 
@@ -164,9 +165,8 @@ class Formatter(object):
             self.setRelativeFontSize(1.5)
         elif font_style in ['x-large', 'xx-large']:
             self.setRelativeFontSize(1.75)
-                           
-    
-    def changeCssStyle(self, node, mode=None):        
+
+    def changeCssStyle(self, node, mode=None):
         css = self.css_style_map
         for node_style, style_value in node.style.items():
             if node_style in css:
@@ -194,13 +194,13 @@ class Formatter(object):
             styles.append((style, getattr(self, style)))
         styles.append(('rel_font_size', self.rel_font_size))
         return styles
-    
+
     def setStyle(self, node):
         current_styles = self.getCurrentStyles()
         self.changeNodeStyle(node)
         self.changeCssStyle(node, mode='set')
         return current_styles
-            
+
     def resetStyle(self, styles):
         for attr, val in styles:
             setattr(self, attr, val)
@@ -233,9 +233,9 @@ class Formatter(object):
         if self.sectiontitle_mode:
             txt = txt.lstrip()
             self.sectiontitle_mode = False
-            
+
         if self.table_nesting > 0 and not self.source_mode and not self.pre_mode:
-            txt = self.table_mode_hook(txt)        
+            txt = self.table_mode_hook(txt)
 
         if self.output_encoding:
             txt = txt.encode(self.output_encoding)
@@ -252,7 +252,6 @@ class Formatter(object):
         styled.append(self.endStyle())
         return ''.join(styled)
 
-
     def switchFont(self, font):
         self.last_font = self.default_font
         self.default_font = font
@@ -260,8 +259,7 @@ class Formatter(object):
     def restoreFont(self):
         self.default_font = self.last_font
 
-
-    ### the methods below are the ones that should probably be overriden when subclassing the formatter
+    # the methods below are the ones that should probably be overriden when subclassing the formatter
 
     def pre_mode_hook(self, txt):
         return txt
@@ -269,7 +267,7 @@ class Formatter(object):
     def table_mode_hook(self, txt):
         return txt
 
-    def escapeText(self, txt): 
+    def escapeText(self, txt):
         return txt
 
     def escapeAndHyphenateText(self, txt):

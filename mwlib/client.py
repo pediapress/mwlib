@@ -3,8 +3,10 @@ import urllib
 import mwlib.myjson as json
 
 
-class Error(Exception): pass
-    
+class Error(Exception):
+    pass
+
+
 class Client(object):
     "HTTP client to mw-serve"
 
@@ -20,11 +22,11 @@ class Client(object):
         self.response_code = f.getcode()
         if self.response_code != 200:
             raise Error(self.response)
-        
+
         if is_json:
             self.response = json.loads(self.response)
             if 'error' in self.response:
                 self.error = self.response['error']
                 raise Error(self.error)
-            
+
         return self.response

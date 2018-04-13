@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 
-import commands, os, sys, subprocess
+import commands
+import os
+import sys
+import subprocess
 
 
 def system(cmd, dry_run=False):
@@ -52,6 +55,7 @@ def main():
     else:
         print "WARNING: build was dirty. did not upload or tag a release"
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

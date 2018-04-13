@@ -13,6 +13,7 @@ from hashlib import sha1
 
 font = None
 
+
 def _setupenv():
     global font
 
@@ -29,9 +30,12 @@ def _setupenv():
             os.environ["GDFONTPATH"] = p
             font = "FreeSans"
 
+
 _setupenv()
 
 _basedir = None
+
+
 def _get_global_basedir():
     global _basedir
     if not _basedir:
@@ -41,26 +45,28 @@ def _get_global_basedir():
         atexit.register(shutil.rmtree, _basedir)
     return _basedir
 
+
 def drawTimeline(script, basedir=None):
     if isinstance(script, unicode):
         script = script.encode('utf8')
     if basedir is None:
         basedir = _get_global_basedir()
 
-    m=sha1()
+    m = sha1()
     m.update(script)
     ident = m.hexdigest()
 
     pngfile = os.path.join(basedir, ident+'.png')
-    
+
     if os.path.exists(pngfile):
         return pngfile
 
     scriptfile = os.path.join(basedir, ident+'.txt')
     open(scriptfile, 'w').write(script)
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
-    
-    err = os.system("perl %s -P /usr/bin/ploticus -f %s -T %s -i %s" % (et, font or "ascii", basedir, scriptfile))
+
+    err = os.system("perl %s -P /usr/bin/ploticus -f %s -T %s -i %s" %
+                    (et, font or "ascii", basedir, scriptfile))
     if err != 0:
         return None
 
@@ -68,5 +74,3 @@ def drawTimeline(script, basedir=None):
         return pngfile
 
     return None
-
-    

@@ -7,6 +7,7 @@
 import re
 import os
 
+
 class Scripts(object):
 
     def __init__(self):
@@ -21,7 +22,7 @@ class Scripts(object):
         except IOError:
             raise Exception('scripts.txt file not found at: %r' % fn)
         for line in f.readlines():
-            res = re.search('([A-Z0-9]+)\.\.([A-Z0-9]+); (.*)' , line.strip())
+            res = re.search('([A-Z0-9]+)\.\.([A-Z0-9]+); (.*)', line.strip())
             if res:
                 start_block, end_block, script = res.groups()
                 self.script2code_block[script.lower()] = (int(start_block, 16), int(end_block, 16))
@@ -62,6 +63,7 @@ class Scripts(object):
                     idx += 1
         return list(scripts)
 
+
 class FontSwitcher(object):
 
     def __init__(self, char_blacklist_file=None):
@@ -70,15 +72,15 @@ class FontSwitcher(object):
         self.code_points2font = []
 
         self.space_like_chars = [i for i in range(33) if not i in [9, 10, 13]] + [127]
-        self.remove_chars = [173] # 173 = softhyphen
-        self.ignore_chars = [8206, # left to right mark
-                           8207, # right to left mark
-                           ]
+        self.remove_chars = [173]  # 173 = softhyphen
+        self.ignore_chars = [8206,  # left to right mark
+                             8207,  # right to left mark
+                             ]
         self.no_switch_chars = self.space_like_chars + self.ignore_chars + self.remove_chars
         self.char_blacklist = self.readCharBlacklist(char_blacklist_file)
 
-        self.cjk_fonts = [] # list of font names for cjk scripts
-        self.space_cjk = False # when switching fonts, indicate that cjk text is present
+        self.cjk_fonts = []  # list of font names for cjk scripts
+        self.space_cjk = False  # when switching fonts, indicate that cjk text is present
 
     def readCharBlacklist(self, char_blacklist_file):
         if not char_blacklist_file:
@@ -87,7 +89,7 @@ class FontSwitcher(object):
         for char in open(char_blacklist_file).readlines():
             if char:
                 char = int(char.strip())
-                char_blacklist[char]=True
+                char_blacklist[char] = True
         return char_blacklist
 
     def unregisterFont(self, unreg_font_name):
@@ -100,7 +102,6 @@ class FontSwitcher(object):
         registered_entries.reverse()
         for entry in registered_entries:
             self.code_points2font.pop(entry)
-
 
     def registerFont(self, font_name, code_points=[]):
         """ Register a font to certain scripts or a range of code point blocks"""
@@ -134,7 +135,7 @@ class FontSwitcher(object):
                 if ord_c in self.space_like_chars:
                     c = ' '
                 if blacklisted:
-                    c = unichr(9633) # U+25A1 WHITE SQUARE
+                    c = unichr(9633)  # U+25A1 WHITE SQUARE
                 if last_font:
                     font = last_font
                 else:
@@ -149,11 +150,10 @@ class FontSwitcher(object):
         if last_txt:
             txt_list.append((''.join(last_txt), last_font))
 
-
         if spaces_to_default:
             new_txt_list = []
             for txt, font in txt_list:
-                if font!= self.default_font:
+                if font != self.default_font:
                     if txt.startswith(' '):
                         new_txt_list.append((' ', self.default_font))
                         new_txt_list.append((txt[1:], font))
@@ -181,7 +181,7 @@ if __name__ == '__main__':
         (9472, 9580),
         #(4352, 4607),
         #(12592, 12687),
-        ]
+    ]
 
     scripts = _scripts.getScriptsForCodeBlocks(blocks)
     print scripts

@@ -20,7 +20,8 @@ def test_headings():
 = 3 =
 """)
 
-    sections = [x.children[0].asText().strip() for x in r.children if isinstance(x, parser.Section)]
+    sections = [x.children[0].asText().strip()
+                for x in r.children if isinstance(x, parser.Section)]
     assert sections == [u"1", u"3"]
 
 
@@ -81,7 +82,8 @@ def test_parse_image_inline():
     #img = [x for x in r.allchildren() if isinstance(x, parser.ImageLink)][0]
     #print "IMAGE:", img, img.isInline()
 
-    r = parse(u'{| cellspacing="2" border="0" cellpadding="3" bgcolor="#EFEFFF" width="100%"\n|-\n| width="12%" bgcolor="#EEEEEE"| 9. Juli 2006\n| width="13%" bgcolor="#EEEEEE"| Berlin\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of Italy.svg|30px]] \'\'\'Italien\'\'\'\n| width="3%" bgcolor="#EEEEEE"| \u2013\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of France.svg|30px]] Frankreich\n| width="3%" bgcolor="#EEEEEE"|\n| width="25%" bgcolor="#EEEEEE"| [[Fu\xdfball-Weltmeisterschaft 2006/Finalrunde#Finale: Italien .E2.80.93 Frankreich 6:4 n. E..2C 1:1 n. V. .281:1.2C 1:1.29|6:4 n. E., (1:1, 1:1, 1:1)]]\n|}\n', lang='de')
+    r = parse(
+        u'{| cellspacing="2" border="0" cellpadding="3" bgcolor="#EFEFFF" width="100%"\n|-\n| width="12%" bgcolor="#EEEEEE"| 9. Juli 2006\n| width="13%" bgcolor="#EEEEEE"| Berlin\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of Italy.svg|30px]] \'\'\'Italien\'\'\'\n| width="3%" bgcolor="#EEEEEE"| \u2013\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of France.svg|30px]] Frankreich\n| width="3%" bgcolor="#EEEEEE"|\n| width="25%" bgcolor="#EEEEEE"| [[Fu\xdfball-Weltmeisterschaft 2006/Finalrunde#Finale: Italien .E2.80.93 Frankreich 6:4 n. E..2C 1:1 n. V. .281:1.2C 1:1.29|6:4 n. E., (1:1, 1:1, 1:1)]]\n|}\n', lang='de')
     images = r.find(parser.ImageLink)
 
     assert len(images) == 2
@@ -119,7 +121,8 @@ def test_switch_default():
 }}
 """)
 
-    te = expander.Expander(db.normalize_and_get_page("Bonn", 0).rawtext, pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page(
+        "Bonn", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
 
     print "EXPANDED:", repr(res)
@@ -129,7 +132,7 @@ def test_switch_default():
 def test_tag_expand_vs_uniq():
     db = DictDB(
         Foo="""{{#tag:pre|inside pre}}"""
-        )
+    )
     r = uparser.parseString(title="Foo", wikidb=db)
     core.show(r)
     pre = r.find(parser.PreFormatted)
@@ -143,9 +146,10 @@ bla
 {{{ {{Pipe}}}
 blubb
 """,
-                   Pipe="|")
+                Pipe="|")
 
-    te = expander.Expander(db.normalize_and_get_page("Foo", 0).rawtext, pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page(
+        "Foo", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
 
     print "EXPANDED:", repr(res)
@@ -160,9 +164,10 @@ bla
 {{{Pipe}} |}
 blubb
 """,
-              Pipe="|")
+                Pipe="|")
 
-    te = expander.Expander(db.normalize_and_get_page("Foo", 0).rawtext, pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page(
+        "Foo", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
 
     print "EXPANDED:", repr(res)
@@ -452,7 +457,8 @@ Image:Zeeland-Position.png
     print "VLIST:", res.vlist
     print "RES:", res
 
-    assert res.vlist == {'caption': 'Sample gallery', 'heights': '100px', 'perrow': 6, 'widths': '100px'}
+    assert res.vlist == {'caption': 'Sample gallery',
+                         'heights': '100px', 'perrow': 6, 'widths': '100px'}
     assert len(res.children) == 12, 'expected 12 children'
     assert isinstance(res.children[10], parser.Text), "expected text for the 'lakes' line"
 
@@ -547,7 +553,8 @@ def test_parse_preformatted_math():
 def test_parse_preformatted_blockquote():
     r = parse(' <blockquote>blub</blockquote>')
     stylenode = r.find(parser.Style)
-    assert not r.find(parser.PreFormatted) and stylenode and stylenode[0].caption == '-', 'expected blockquote w/o preformatted node'
+    assert not r.find(
+        parser.PreFormatted) and stylenode and stylenode[0].caption == '-', 'expected blockquote w/o preformatted node'
 
 
 def test_no_preformatted_with_source():
@@ -717,12 +724,14 @@ def test_http_url():
     yield checkurl, "http://pediapress.com/foo|bar"
     yield checkurl, "http://pediapress.com/{curly_braces}"
 
+
 def test_schemeless_url():
 
     url = '[//toolserver.org/~geohack/geohack.php?pagename=Benutzer%3AVolker.haas/Test&language=de&params=51.4213888889_N_9.64805555556_E_dim:100_region:DE-NI_type:waterbody&title=Namentlicher+Beginn+Weser]'
 
     caption = parse(url).find(parser.NamedURL)[0].caption
     assert caption == url[1:-1]
+
 
 def test_source_vlist():
     r = parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
@@ -761,7 +770,8 @@ def test_text_caption_none_bug():
 
 
 def test_link_inside_gallery():
-    links = parse("<gallery>Bild:Guanosinmonophosphat protoniert.svg|[[Guanosinmonophosphat]] <br /> (GMP)</gallery>", lang='de').find(parser.Link)
+    links = parse(
+        "<gallery>Bild:Guanosinmonophosphat protoniert.svg|[[Guanosinmonophosphat]] <br /> (GMP)</gallery>", lang='de').find(parser.Link)
     print links
     assert len(links) == 2, "expected 2 links"
 
@@ -1193,7 +1203,7 @@ def test_imagemod_upright():
 def test_imagemod_localised_magicwords():
     magicwords = [
         {u'aliases': [u'center', u'foobar'], u'case-sensitive': u'', u'name': u'img_center'},
-        ]
+    ]
 
     def parsei(s, magicwords):
         res = uparser.parseString(title='test',  raw=s, magicwords=magicwords)
@@ -1242,8 +1252,6 @@ def test_magicwords():
     txt = parse('__NOGLOSSARY__').asText()
     print txt
     assert 'NOGLOSSARY' not in txt
-
-
 
 
 def test_vlist_newline():

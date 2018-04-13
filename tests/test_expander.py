@@ -22,7 +22,8 @@ def test_undefined_variable():
     db = DictDB(Art="{{Pipe}}",
                 Pipe="{{{undefined_variable}}}")
 
-    te = expander.Expander(db.normalize_and_get_page("Art", 0).rawtext, pagename="thispage", wikidb=db)
+    te = expander.Expander(db.normalize_and_get_page(
+        "Art", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
     assert u"{{{undefined_variable}}}" in res, "wrong expansion for undefined variable"
@@ -30,10 +31,10 @@ def test_undefined_variable():
 
 def test_birth_date_and_age():
     db = DictDB({
-            "birth date and age": '[[ {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
+        "birth date and age": '[[ {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
 
-            "age": '<includeonly>{{#expr:({{{4|{{CURRENTYEAR}}}}})-({{{1}}})-(({{{5|{{CURRENTMONTH}}}}})<({{{2}}})or({{{5|{{CURRENTMONTH}}}}})=({{{2}}})and({{{6|{{CURRENTDAY}}}}})<({{{3}}}))}}</includeonly>',
-            })
+        "age": '<includeonly>{{#expr:({{{4|{{CURRENTYEAR}}}}})-({{{1}}})-(({{{5|{{CURRENTMONTH}}}}})<({{{2}}})or({{{5|{{CURRENTMONTH}}}}})=({{{2}}})and({{{6|{{CURRENTDAY}}}}})<({{{3}}}))}}</includeonly>',
+    })
     res = expandstr('{{birth date and age|1960|02|8}}', wikidb=db)
 
     print "EXPANDED:", repr(res)
@@ -76,8 +77,9 @@ def test_alfred():
     db = DictDB(
         a="{{ibox2|birth_date=1960}}",
         ibox2="{{{birth{{#if:{{{birthdate|}}}||_}}date}}}"
-        )
-    te = expander.Expander(db.normalize_and_get_page("a", 0).rawtext, pagename="thispage", wikidb=db)
+    )
+    te = expander.Expander(db.normalize_and_get_page(
+        "a", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
     print "EXPANDED:", repr(res)
     assert "1960" in res
@@ -572,11 +574,11 @@ def test_link_vs_expander():
 def test_pagemagic():
     def expand_page(tpl, expected):
         return expandstr('{{%s}}' % tpl, expected,
-                pagename='Benutzer:Anonymous user!/sandbox/my page')
+                         pagename='Benutzer:Anonymous user!/sandbox/my page')
 
     def expand_talk(tpl, expected):
         return expandstr('{{%s}}' % tpl, expected,
-                pagename='Benutzer Diskussion:Anonymous user!/sandbox/my page')
+                         pagename='Benutzer Diskussion:Anonymous user!/sandbox/my page')
 
     yield expand_page, 'PAGENAME', 'Anonymous user!/sandbox/my page'
     yield expand_page, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
@@ -627,11 +629,11 @@ def test_pagemagic():
 def test_pagemagic_with_arg():
     def expand_page(tpl, expected):
         return expandstr('{{%s:%s}}' % (tpl, 'Benutzer:Anonymous user!/sandbox/my page'),
-                expected, pagename='Help:Irrelevant')
+                         expected, pagename='Help:Irrelevant')
 
     def expand_talk(tpl, expected):
         return expandstr('{{%s:%s}}' % (tpl, 'Benutzer Diskussion:Anonymous user!/sandbox/my page'),
-                expected, pagename='Help:Irrelevant')
+                         expected, pagename='Help:Irrelevant')
 
     yield expand_page, 'PAGENAME', 'Anonymous user!/sandbox/my page'
     yield expand_page, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'

@@ -3,16 +3,16 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import sys, pytest
+import sys
+import pytest
 from mwlib.advtree import buildAdvancedTree
 from mwlib import parser
 from mwlib.treecleaner import TreeCleaner, _all, _any
 from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                     Cite, Code, DefinitionList, DefinitionDescription, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
-                     ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
-                     Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
-                     URL)
-
+                           Cite, Code, DefinitionList, DefinitionDescription, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
+                           ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
+                           Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
+                           URL)
 
 
 def _treesanity(r):
@@ -198,6 +198,8 @@ def test_fixTableColspans2():
     assert cell.colspan == 1
 
 # test changed after 3258e2f7978fc4592567bb64977ba5404ee949da
+
+
 def test_fixTableColspans3():
     '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
     raw = ur'''
@@ -256,6 +258,8 @@ def test_fixNesting1():
     assert not table.getParentNodesByClass(DefinitionDescription)
 
 # changed with f94aa985f50d2db9749c57a7a5e22c0c8d487af4
+
+
 @pytest.mark.xfail
 def test_fixNesting2():
     raw = r'''
@@ -271,40 +275,40 @@ def test_fixNesting2():
 # the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
 # but maybe they are interesting in the future - therefore I did not delete them
 
-## def test_fixNesting3():
-##     raw = r'''
-## <strike>
-## para 1
+# def test_fixNesting3():
+# raw = r'''
+# <strike>
+# para 1
 
-## para 2
-## </strike>
-##     '''
+# para 2
+# </strike>
+# '''
 
 ##     tree, reports = cleanMarkup(raw)
 ##     paras = tree.getChildNodesByClass(Paragraph)
-##     for para in paras:
+# for para in paras:
 ##         assert not para.getChildNodesByClass(Paragraph)
 
-## def test_fixNesting4():
-##     raw = """
-## <strike>
+# def test_fixNesting4():
+# raw = """
+# <strike>
 
-## <div>
-##  indented para 1
+# <div>
+# indented para 1
 
-## regular para
+# regular para
 
-##  indented para 2
+# indented para 2
 
-## </div>
+# </div>
 
-## </strike>
-## """
+# </strike>
+# """
 
 ##     tree = getTreeFromMarkup(raw)
 ##     tree, reports = cleanMarkup(raw)
 ##     paras = tree.getChildNodesByClass(Paragraph)
-##     for para in paras:
+# for para in paras:
 ##         assert not para.getChildNodesByClass(Paragraph)
 
 

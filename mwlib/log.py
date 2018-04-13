@@ -6,26 +6,31 @@
 import sys
 import time
 
+
 class Stdout(object):
     """late-bound sys.stdout"""
+
     def write(self, msg):
         sys.stdout.write(msg)
 
     def flush(self):
         sys.stdout.flush()
 
+
 class Stderr(object):
     """late-bound sys.stderr"""
+
     def write(self, msg):
         sys.stderr.write(msg)
 
     def flush(self):
         sys.stderr.flush()
 
+
 class Log(object):
     logfile = Stderr()
     timestamp_fmt = '%Y-%m-%dT%H:%M:%S'
-    
+
     def __init__(self, prefix=None, timestamps=True):
         self.timestamps = timestamps
         if prefix is None:
@@ -41,20 +46,20 @@ class Log(object):
 
     def __nonzero__(self):
         return bool(self._prefix)
-    
+
     def __str__(self):
         return ".".join(str(x) for x in self._prefix if x)
-                 
+
     def __call__(self, msg, *args):
         if not self.logfile:
             return
-        
+
         if not isinstance(msg, str):
             msg = repr(msg)
-        
+
         if args:
             msg = " ".join(([msg] + [repr(x) for x in args]))
-        
+
         s = ''
         if self.timestamps:
             s = '%s ' % time.strftime(self.timestamp_fmt)

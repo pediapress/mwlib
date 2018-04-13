@@ -11,7 +11,7 @@ def preprocess(s, expected, included=True):
 
 
 def test_includeonly_included():
-    d = lambda s, e: preprocess(s, e, included=False)
+    def d(s, e): return preprocess(s, e, included=False)
     yield d, "foo<includeonly>bar baz\n\n\nbla</includeonly>123<includeonly>foo bar</includeonly>456", "foo123456"
     yield d, "foo<includeonly>bar baz\n\n\nbla", "foo"
     yield d, "foo<ONLYINCLUDE>123</onlyinclude>456", "foo123456"

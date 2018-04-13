@@ -15,10 +15,10 @@ class Test_nuwiki_xnet(object):
         cls.tmpdir = tempfile.mkdtemp()
         cls.zipfn = os.path.join(cls.tmpdir, 'test.zip')
         err = subprocess.call(['mw-zip',
-            '-o', cls.zipfn,
-            '-c', ':de',
-            'Monty Python',
-        ])
+                               '-o', cls.zipfn,
+                               '-c', ':de',
+                               'Monty Python',
+                               ])
         assert os.path.isfile(cls.zipfn)
         assert err == 0,  "command failed"
 

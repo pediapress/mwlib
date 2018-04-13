@@ -1,7 +1,8 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-import pytest, os
+import pytest
+import os
 if not os.path.isfile('/usr/bin/ploticus'):
     pytest.skip("no ploticus")
 

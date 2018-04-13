@@ -3,8 +3,15 @@
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import os, sys, urlparse, urllib2, time, traceback
-import gevent, gevent.pool,  gevent.event
+import os
+import sys
+import urlparse
+import urllib2
+import time
+import traceback
+import gevent
+import gevent.pool
+import gevent.event
 
 try:
     from gevent.lock import Semaphore
@@ -136,7 +143,6 @@ class fsoutput(object):
         self.revfile.write(txt.encode("utf-8"))
         self.seen[title] = rev
 
-
     def write_pages(self, data):
         pages = data.get("pages", {}).values()
         for p in pages:
@@ -252,7 +258,7 @@ class fetcher(object):
 
         self.api = api
         self.api.report = self.report
-        self.api_cache = {self.api.apiurl: self.api,}
+        self.api_cache = {self.api.apiurl: self.api, }
 
         self.fsout = fsout
         self.licenses = licenses
@@ -306,12 +312,14 @@ class fetcher(object):
             self._refcall(self.expand_templates_from_revid, int(r))
 
     def expand_templates_from_revid(self, revid):
-        res = self.api.do_request(action="query", prop="revisions", rvprop="content", revids=str(revid))
+        res = self.api.do_request(action="query", prop="revisions",
+                                  rvprop="content", revids=str(revid))
         page = res["pages"].values()[0]
 
         title = page["title"]
         text = page["revisions"][0]["*"]
-        res = self.api.do_request(use_post=True, action="expandtemplates", title=title, text=text).get("expandtemplates", {})
+        res = self.api.do_request(use_post=True, action="expandtemplates",
+                                  title=title, text=text).get("expandtemplates", {})
 
         txt = res.get("*")
         if txt:
@@ -363,7 +371,7 @@ class fetcher(object):
             if len(frags):
                 fullurl = urlparse.urljoin(self.api.baseurl, src)
                 if img_node.get('class') != 'thumbimage' and \
-                       ('extensions' in src or 'math' in src):
+                        ('extensions' in src or 'math' in src):
 
                     img_urls.add(fullurl)
         return img_urls
@@ -447,7 +455,6 @@ class fetcher(object):
             if t not in self.scheduled:
                 self.pages_todo.append(t)
                 self.scheduled.add(t)
-
 
     def get_siteinfo_for(self, m):
         return m.get_siteinfo()
@@ -717,7 +724,6 @@ class fetcher(object):
         doit("titles", self.pages_todo)
 
         self.report()
-
 
     def _sanity_check(self):
         seen = self.fsout.seen

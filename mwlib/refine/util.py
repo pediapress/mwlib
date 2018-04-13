@@ -5,7 +5,10 @@
 import re
 import htmlentitydefs
 
-paramrx = re.compile(r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:#])+)))", re.DOTALL)
+paramrx = re.compile(
+    r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:#])+)))", re.DOTALL)
+
+
 def parseParams(s):
     def style2dict(s):
         res = {}
@@ -17,18 +20,18 @@ def parseParams(s):
                 res[var] = value
 
         return res
-    
+
     def maybeInt(v):
         try:
             return int(v)
         except:
             return v
-    
+
     r = {}
     for name, value in paramrx.findall(s):
         if value.startswith('"') or value.startswith("'"):
             value = value[1:-1]
-            
+
         if name.lower() == 'style':
             value = style2dict(value)
             r['style'] = value
@@ -37,20 +40,22 @@ def parseParams(s):
     return r
 
 
-
 class ImageMod(object):
     default_magicwords = [
         {u'aliases': [u'thumbnail', u'thumb'], u'case-sensitive': u'', u'name': u'img_thumbnail'},
-        {u'aliases': [u'thumbnail=$1', u'thumb=$1'], u'case-sensitive': u'', u'name': u'img_manualthumb'},
+        {u'aliases': [u'thumbnail=$1', u'thumb=$1'],
+            u'case-sensitive': u'', u'name': u'img_manualthumb'},
         {u'aliases': [u'right'], u'case-sensitive': u'', u'name': u'img_right'},
         {u'aliases': [u'left'], u'case-sensitive': u'', u'name': u'img_left'},
         {u'aliases': [u'none'], u'case-sensitive': u'', u'name': u'img_none'},
         {u'aliases': [u'$1px'], u'case-sensitive': u'', u'name': u'img_width'},
         {u'aliases': [u'center', u'centre'], u'case-sensitive': u'', u'name': u'img_center'},
-        {u'aliases': [u'framed', u'enframed', u'frame'], u'case-sensitive': u'', u'name': u'img_framed'},
+        {u'aliases': [u'framed', u'enframed', u'frame'],
+            u'case-sensitive': u'', u'name': u'img_framed'},
         {u'aliases': [u'frameless'], u'case-sensitive': u'', u'name': u'img_frameless'},
         {u'aliases': [u'page=$1', u'page $1'], u'case-sensitive': u'', u'name': u'img_page'},
-        {u'aliases': [u'upright', u'upright=$1', u'upright $1'], u'case-sensitive': u'', u'name': u'img_upright'},
+        {u'aliases': [u'upright', u'upright=$1', u'upright $1'],
+            u'case-sensitive': u'', u'name': u'img_upright'},
         {u'aliases': [u'border'], u'case-sensitive': u'', u'name': u'img_border'},
         {u'aliases': [u'baseline'], u'case-sensitive': u'', u'name': u'img_baseline'},
         {u'aliases': [u'sub'], u'case-sensitive': u'', u'name': u'img_sub'},
@@ -62,16 +67,16 @@ class ImageMod(object):
         {u'aliases': [u'text-bottom'], u'case-sensitive': u'', u'name': u'img_text_bottom'},
         {u'aliases': [u'link=$1'], u'case-sensitive': u'', u'name': u'img_link'},
         {u'aliases': [u'alt=$1'], u'case-sensitive': u'', u'name': u'img_alt'},
-        ]
+    ]
 
-    def __init__(self, magicwords=None):        
+    def __init__(self, magicwords=None):
         self.alias_map = {}
         self.initAliasMap(self.default_magicwords)
         if magicwords is not None:
             self.initAliasMap(magicwords)
 
     def initAliasMap(self, magicwords):
-        for m in magicwords:            
+        for m in magicwords:
             if not m['name'].startswith('img_'):
                 continue
             name = m['name']
@@ -91,11 +96,10 @@ class ImageMod(object):
             rx = re.compile(mod_reg, re.IGNORECASE)
             mo = rx.match(mod)
             if mo:
-                for match in  mo.groups()[::-1]:
+                for match in mo.groups()[::-1]:
                     if match:
                         return (mod_type, match)
         return (None, None)
-
 
 
 def handle_imagemod(self, mod_type, match):
@@ -131,7 +135,7 @@ def handle_imagemod(self, mod_type, match):
             scale = 0.75
         self.upright = scale
 
-    if mod_type == 'img_width':                
+    if mod_type == 'img_width':
         # x200px or 100x200px or 200px
         width, height = (match.split('x')+['0'])[:2]
         try:
@@ -147,24 +151,26 @@ def handle_imagemod(self, mod_type, match):
         self.width = width
         self.height = height
 
-        
+
 def resolve_entity(e):
-    if e[1]=='#':
+    if e[1] == '#':
         try:
-            if e[2]=='x' or e[2]=='X':
+            if e[2] == 'x' or e[2] == 'X':
                 return unichr(int(e[3:-1], 16))
             else:
                 return unichr(int(e[2:-1]))
         except ValueError:
-            return e        
+            return e
     else:
         try:
             return unichr(htmlentitydefs.name2codepoint[e[1:-1]])
         except KeyError:
             return e
 
+
 def replace_html_entities(txt):
     return re.sub("&.*?;", lambda mo: resolve_entity(mo.group(0)), txt)
+
 
 def remove_nowiki_tags(txt, _rx=re.compile("<nowiki>(.*?)</nowiki>",  re.IGNORECASE | re.DOTALL)):
     return _rx.sub(lambda mo: mo.group(1), txt)

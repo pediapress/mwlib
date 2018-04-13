@@ -8,7 +8,7 @@ from mwlib.log import Log
 
 log = Log("parser")
 
-        
+
 def show(out, node, indent=0, verbose=False):
     if verbose:
         print >>out, "    "*indent, node, repr(getattr(node, 'vlist', ''))
@@ -17,7 +17,8 @@ def show(out, node, indent=0, verbose=False):
     for x in node:
         show(out, x, indent+1, verbose=verbose)
 
-from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style, 
+
+from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style,
                                 Book, Chapter, Article, Paragraph, Section,
                                 Timeline, TagNode, PreFormatted, URL, NamedURL,
                                 Table, Row, Cell, Caption, Link, ArticleLink, SpecialLink,

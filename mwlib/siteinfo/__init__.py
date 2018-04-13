@@ -11,9 +11,11 @@ except ImportError:
 
 _cache = {}
 
+
 def _get_path(lang):
     return os.path.join(os.path.dirname(__file__), "siteinfo-%s.json" % lang)
-    
+
+
 def get_siteinfo(lang):
     try:
         return _cache[lang]

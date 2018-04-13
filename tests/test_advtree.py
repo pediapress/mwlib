@@ -3,7 +3,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import sys, pytest
+import sys
+import pytest
 
 from mwlib.advtree import (
     PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
@@ -113,16 +114,16 @@ def test_identity():
 
 
 # FIXME isNavBox removed from advtree. could be implemented in general treecleaner - move test there
-## def test_isnavbox():
-##     raw = """
-## == test ==
-## <div class="noprint">
-## some text
-## </div>
-## """.decode("utf8")
+# def test_isnavbox():
+# raw = """
+# == test ==
+# <div class="noprint">
+# some text
+# </div>
+# """.decode("utf8")
 ##     db = DummyDB()
 ##     r = parseString(title="X33", raw=raw, wikidb=db)
-##     buildAdvancedTree(r)
+# buildAdvancedTree(r)
 ##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
 def test_definitiondescription():
     raw = u"""

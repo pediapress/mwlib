@@ -9,5 +9,3 @@ c.wikis.append(metabook.wikiconf(ident="de", baseurl="http://de.wikipedia.org/w/
 c.wikis.append(metabook.wikiconf(ident="en", baseurl="http://en.wikipedia.org/w/"))
 
 print c.dumps()
-
-                                 

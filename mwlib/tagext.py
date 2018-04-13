@@ -24,6 +24,7 @@ List of tags used by Wikia:
 http://code.pediapress.com/wiki/wiki/ParserExtensionTags
 """
 
+
 class ExtensionRegistry(object):
     def __init__(self):
         self.name2ext = {}
@@ -43,8 +44,10 @@ class ExtensionRegistry(object):
     def __contains__(self, n):
         return n in self.name2ext
 
+
 default_registry = ExtensionRegistry()
 register = default_registry.registerExtension
+
 
 def _parse(txt):
     """parse text....and try to return a 'better' (some inner) node"""
@@ -53,15 +56,14 @@ def _parse(txt):
 
     res = parse_txt(txt)
 
-
     # res is an parser.Article.
-    if len(res.children)!=1:
+    if len(res.children) != 1:
         res.__class__ = parser.Node
         return res
 
     res = res.children[0]
 
-    if res.__class__==parser.Paragraph:
+    if res.__class__ == parser.Paragraph:
         res.__class__ = parser.Node
 
     return res
@@ -70,16 +72,20 @@ def _parse(txt):
     #     return res
     # return res.children[0]
 
+
 class TagExtension(object):
-    name=None
+    name = None
+
     def __call__(self, source, attributes):
         return None
+
     def parse(self, txt):
         return _parse(txt)
 
+
 class IgnoreTagBase(TagExtension):
     def __call__(self, source, attributes):
-        return # simply skip for now
+        return  # simply skip for now
 
 
 # ---
@@ -106,11 +112,13 @@ for name in tags_to_ignore:
         register(I)
     _f(name)
 
+
 class Rot13Extension(TagExtension):
     """
     example extension
     """
-    name = 'rot13' # must equal the tag-name
+    name = 'rot13'  # must equal the tag-name
+
     def __call__(self, source, attributes):
         """
         @source : unparse wikimarkup from the elements text
@@ -119,82 +127,111 @@ class Rot13Extension(TagExtension):
         this functions builds wikimarkup and returns a parse tree for this
         """
         return self.parse("rot13(%s) is %s" % (source, source.encode('rot13')))
+
+
 register(Rot13Extension)
 
 
 class TimelineExtension(TagExtension):
     name = "timeline"
+
     def __call__(self, source, attributes):
         from mwlib.parser import Timeline
         return Timeline(source)
+
+
 register(TimelineExtension)
 
 
 class MathExtension(TagExtension):
     name = "math"
+
     def __call__(self, source, attributes):
         from mwlib.parser import Math
         return Math(source)
+
+
 register(MathExtension)
+
 
 class IDLExtension(TagExtension):
     # http://wiki.services.openoffice.org/wiki/Special:Version
     name = "idl"
+
     def __call__(self, source, attributes):
         return self.parse('<source lang="idl">%s</source>' % source)
+
+
 register(IDLExtension)
+
 
 class Syntaxhighlight(TagExtension):
     '''http://www.mediawiki.org/wiki/Syntaxhighlight'''
     name = "syntaxhighlight"
+
     def __call__(self, source, attributes):
         return self.parse('<source%s>%s</source>' % (''.join(' %s=%s' % (k, v)
-                                                               for k, v in attributes.items()),
-                                                      source))
+                                                             for k, v in attributes.items()),
+                                                     source))
+
+
 register(Syntaxhighlight)
+
 
 class RDFExtension(TagExtension):
     # http://www.mediawiki.org/wiki/Extension:RDF
     # uses turtle notation :(
     name = "rdf"
+
     def __call__(self, source, attributes):
-        #return self.parse("<!--\n%s\n -->" % source)
-        return # simply skip for now, since comments are not parsed correctly
+        # return self.parse("<!--\n%s\n -->" % source)
+        return  # simply skip for now, since comments are not parsed correctly
+
 
 register(RDFExtension)
 
 
 class TimeExtension(TagExtension):
     name = "time"
+
     def __call__(self, source, attributes):
         from mwlib import parser
         return self.parse(source)
 
+
 register(TimeExtension)
+
 
 class HieroExtension(TagExtension):
     name = "hiero"
+
     def __call__(self, source, attributes):
         from mwlib import parser
         tn = parser.TagNode("hiero")
         tn.children.append(parser.Text(source))
         return tn
+
+
 register(HieroExtension)
 
+
 class LabledSectionTransclusionExtensionHotFix(IgnoreTagBase):
-    #http://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion
+    # http://www.mediawiki.org/wiki/Extension:Labeled_Section_Transclusion
     name = "section"
+
+
 register(LabledSectionTransclusionExtensionHotFix)
 
 # --- wiki travel extensions ----
 
+
 class ListingExtension(TagExtension):
     " http://wikitravel.org/en/Wikitravel:Listings "
     name = "listing"
-    attrs = [(u"name",u"'''%s'''"),
-             ("alt",u"(''%s'')"),
-             ("address",u", %s"),
-             ("directions",u" (''%s'')"),
+    attrs = [(u"name", u"'''%s'''"),
+             ("alt", u"(''%s'')"),
+             ("address", u", %s"),
+             ("directions", u" (''%s'')"),
              ("phone", u", ☎ %s"),
              ("fax", u", fax: %s"),
              ("email", u", e-mail: %s"),
@@ -204,36 +241,56 @@ class ListingExtension(TagExtension):
              # ("lat", u", Latitude: %s"), # disable in print as it is disabled in WP as well
              # ("long", u", Longitude: %s"),
              ("tags", u", Tags: %s")]
+
     def __call__(self, source, attributes):
-        t = u"".join(v%attributes[k] for k,v in self.attrs if attributes.get(k,None))
+        t = u"".join(v % attributes[k] for k, v in self.attrs if attributes.get(k, None))
         if source:
             t += u", %s" % source
         return self.parse(t)
 
+
 register(ListingExtension)
+
 
 class SeeExtension(ListingExtension):
     name = "see"
+
+
 register(SeeExtension)
+
 
 class BuyExtension(ListingExtension):
     name = "buy"
+
+
 register(BuyExtension)
+
 
 class DoExtension(ListingExtension):
     name = "do"
+
+
 register(DoExtension)
+
 
 class EatExtension(ListingExtension):
     name = "eat"
+
+
 register(EatExtension)
+
 
 class DrinkExtension(ListingExtension):
     name = "drink"
+
+
 register(DrinkExtension)
+
 
 class SleepExtension(ListingExtension):
     name = "sleep"
+
+
 register(SleepExtension)
 
 

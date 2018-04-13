@@ -6,25 +6,25 @@ import time
 from mwlib import client
 from pprint import pprint
 
+
 def main():
     mb = sys.argv[1]
-    
+
     url = "http://localhost:8899/"
     c = client.Client(url)
-    
+
     data = dict(metabook=open(mb).read())
-    
+
     c.request("render", data)
-    
+
     pprint(c.response)
     # >>> {u'collection_id': u'dfaa0d9a8bff06bb', u'is_cached': False, u'writer': u'rl'}
-    assert c.response["writer"]=="rl",  "expected rl"
+    assert c.response["writer"] == "rl",  "expected rl"
     assert c.response["collection_id"], "expected collection_id"
     assert c.response["is_cached"] in (True, False), "expected boolean is_cached"
-    
+
     cid = c.response["collection_id"]
 
-    
     while 1:
         c.request("render_status", dict(collection_id=cid))
 
@@ -35,17 +35,18 @@ def main():
         #      u'status': {u'progress': 1, u'status': u'fetching'},
         #      u'writer': u'rl'}
 
-        assert c.response["state"] in ("progress", "finished",  "unknown"),  "bad state: %r" % (c.response, )
-        assert c.response["writer"]=="rl"
+        assert c.response["state"] in ("progress", "finished",
+                                       "unknown"),  "bad state: %r" % (c.response, )
+        assert c.response["writer"] == "rl"
         assert isinstance(c.response.get("status", dict()),  dict),  "expected dict"
-        
+
         print "done"
         state = c.response["state"]
-        if state=="finished":
+        if state == "finished":
             print "==> rendering finished"
             pprint(c.response)
             break
-        
+
         status = c.response["status"]
         print status
         time.sleep(1)
@@ -53,16 +54,15 @@ def main():
     print "downloading..."
     c.request("download", dict(collection_id=cid), is_json=False)
     print "got %s bytes" % (len(c.response), )
-    
+
     open("tmp.pdf", "w").write(c.response)
 
     c.request("zip_post", dict(
-            metabook=open(mb).read(), 
-            collection_id=cid,
-            pod_api_url="http://pediapress.com/api/collections/"))
+        metabook=open(mb).read(),
+        collection_id=cid,
+        pod_api_url="http://pediapress.com/api/collections/"))
     print c.response
-    
-              
-    
-if __name__=="__main__":
+
+
+if __name__ == "__main__":
     main()

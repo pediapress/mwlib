@@ -24,6 +24,7 @@ splitpattern = """
 
 splitrx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
+
 class symbols:
     bra_open = 1
     bra_close = 2
@@ -31,16 +32,17 @@ class symbols:
     noi = 4
     txt = 5
 
+
 def tokenize(txt, included=True, replace_tags=None):
     txt = pp.preprocess(txt, included=included)
 
-    if replace_tags is not None:        
+    if replace_tags is not None:
         txt = replace_tags(txt)
-    
+
     tokens = []
     for (v1, v2, v3, v4, v5) in splitrx.findall(txt):
         if v5:
-            tokens.append((5, v5))        
+            tokens.append((5, v5))
         elif v4:
             tokens.append((4, v4))
         elif v3:
@@ -51,5 +53,5 @@ def tokenize(txt, included=True, replace_tags=None):
             tokens.append((1, v1))
 
     tokens.append((None, ''))
-    
+
     return tokens

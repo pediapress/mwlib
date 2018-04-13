@@ -85,7 +85,8 @@ and more centering
     texts = center[0].getChildNodesByClass(advtree.Text)
     correct_align = ['center', 'left', 'center']
     for (i, txt) in enumerate(texts):
-        assert styleutils.getTextAlign(txt) == correct_align[i], 'styleutils.getCelTextAlign return false alignment'
+        assert styleutils.getTextAlign(
+            txt) == correct_align[i], 'styleutils.getCelTextAlign return false alignment'
 
 
 def test_textalign3():

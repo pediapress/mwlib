@@ -17,5 +17,6 @@ def main():
     f.close()
     os.system("git add MANIFEST.in; git diff --cached MANIFEST.in | cat")
 
+
 if __name__ == '__main__':
     main()

@@ -7,6 +7,8 @@ except ImportError:
     import cElementTree
 
 ns = '{http://www.mediawiki.org/xml/export-0.3/}'
+
+
 class Tags:
 
     # <namespaces><namespace> inside <siteinfo>
@@ -47,7 +49,6 @@ class Page(object):
         'minor', 'comment', 'text'
     ]
 
-
     redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
 
     @property
@@ -80,7 +81,7 @@ class DumpParser(object):
         elif self.xmlfilename.lower().endswith(".7z"):
             f = os.popen("7z -so x %s" % self.xmlfilename, "r")
         else:
-            f = open(self.xmlfilename, "r")        
+            f = open(self.xmlfilename, "r")
 
         return f
 
@@ -91,17 +92,17 @@ class DumpParser(object):
 
     def handleSiteinfo(self, siteinfo):
         pass
-    
+
         # for nsElem in siteinfo.findall(self.tags.namespace):
         #     try:
         #         self.namespaces[nsElem.text.lower()] = int(nsElem.get('key'))
         #     except AttributeError:
         #         # text is probably None
         #         pass
-        
+
     def __iter__(self):
-        f = self.openInputStream()    
-        
+        f = self.openInputStream()
+
         elemIter = (el for evt, el in cElementTree.iterparse(f))
         for elem in elemIter:
             if self.getTag(elem) == 'page':
@@ -112,9 +113,9 @@ class DumpParser(object):
             elif self.getTag(elem) == 'siteinfo':
                 self.handleSiteinfo(elem)
                 elem.clear()
-        
+
         f.close()
-    
+
     def handlePageElement(self, pageElem):
         res = Page()
         lastRevision = None

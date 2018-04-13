@@ -9,6 +9,7 @@ from __future__ import division
 
 from PIL import Image
 
+
 class ImageUtils(object):
 
     def __init__(self, print_width,
@@ -20,16 +21,16 @@ class ImageUtils(object):
                  img_inline_scale_factor,
                  print_width_px
                  ):
-        
+
         self.print_width = print_width
-        self.print_height = print_height        
+        self.print_height = print_height
         self.default_thumb_width = default_thumb_width
         self.img_min_res = img_min_res
         self.img_max_thumb_width = img_max_thumb_width
         self.img_max_thumb_height = img_max_thumb_height
         self.img_inline_scale_factor = img_inline_scale_factor
         self.print_width_px = print_width_px
-        
+
     def getImageSize(self, img_node, img_path=None,
                      max_print_width=None, max_print_height=None,
                      fullsize_thumbs=False, img_size=None):
@@ -43,7 +44,7 @@ class ImageUtils(object):
             px_w, px_h = img.size
         else:
             px_w,  px_h = img_size
-            
+
         ar = px_w/px_h
         if max_h and max_w:
             if max_h*ar > max_w:
@@ -81,12 +82,13 @@ class ImageUtils(object):
 
         # check size limits for floating images
         if getattr(img_node, 'floating', False):
-            img_print_width = min(img_print_width, self.print_width*self.img_max_thumb_width, self.print_height*self.img_max_thumb_height*ar)
+            img_print_width = min(img_print_width, self.print_width *
+                                  self.img_max_thumb_width, self.print_height*self.img_max_thumb_height*ar)
 
         if img_node.isInline():
-            if img_print_width < self.print_width/2: # scale "small" inline images
+            if img_print_width < self.print_width/2:  # scale "small" inline images
                 img_print_width *= self.img_inline_scale_factor
-            else: # FIXME: full width images are 12pt too wide - we need to check why
+            else:  # FIXME: full width images are 12pt too wide - we need to check why
                 img_print_width -= 12
 
         img_print_width = min(img_print_width, self.print_width, self.print_height*ar*0.9)

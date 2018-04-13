@@ -8,7 +8,14 @@ import gevent.monkey
 if __name__ == "__main__":
     gevent.monkey.patch_all()
 
-import sys, re, StringIO, urllib2, urlparse, traceback, urllib, unicodedata
+import sys
+import re
+import StringIO
+import urllib2
+import urlparse
+import traceback
+import urllib
+import unicodedata
 from hashlib import sha1
 
 from gevent import pool, pywsgi
@@ -57,6 +64,7 @@ def get_writers(name2writer):
 
     return name2writer
 
+
 get_writers(name2writer)
 
 collection_id_rex = re.compile(r'^[a-f0-9]{16}$')
@@ -78,9 +86,11 @@ def make_collection_id(data):
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        sys.stdout.write("new-collection %s\t%r\t%r\n" % (num_articles, data.get("base_url"), data.get("writer")))
+        sys.stdout.write("new-collection %s\t%r\t%r\n" %
+                         (num_articles, data.get("base_url"), data.get("writer")))
 
     return sha1(sio.getvalue()).hexdigest()[:16]
+
 
 from mwlib import lrucache
 busy = dict()
@@ -237,13 +247,14 @@ class Application(object):
         try:
             return method(collection_id, request.params, is_new)
         except Exception, exc:
-            print "ERROR while dispatching %r: %s" % (command, dict(collection_id=collection_id, is_new=is_new, qserve=qserve))
+            print "ERROR while dispatching %r: %s" % (command, dict(
+                collection_id=collection_id, is_new=is_new, qserve=qserve))
             traceback.print_exc()
             if command == "download":
                 raise exc
 
             return self.error_response('error executing command %r: %s' % (
-                    command, exc,))
+                command, exc,))
 
     def error_response(self, error, **kw):
         if isinstance(error, str):
@@ -313,7 +324,8 @@ class Application(object):
             'is_cached': False,
         }
 
-        self.qserve.qadd(channel="makezip", payload=dict(params=params.__dict__), jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
+        self.qserve.qadd(channel="makezip", payload=dict(params=params.__dict__),
+                         jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
 
         self.qserve.qadd(channel="render", payload=dict(params=params.__dict__),
                          jobid="%s:render-%s" % (collection_id, writer),  timeout=20 * 60)
@@ -399,7 +411,8 @@ class Application(object):
             header["Content-Type"] = w.content_type
 
         if w.file_extension:
-            header['Content-Disposition'] = 'inline; filename=collection.%s' % (w.file_extension.encode('utf-8', 'ignore'))
+            header['Content-Disposition'] = 'inline; filename=collection.%s' % (
+                w.file_extension.encode('utf-8', 'ignore'))
 
         def readdata():
             while 1:
@@ -456,7 +469,8 @@ def main():
     # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     from mwlib import argv
-    opts,  args = argv.parse(sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface=")
+    opts,  args = argv.parse(
+        sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface=")
     qs = []
     port = 8899
     interface = "0.0.0.0"
@@ -492,6 +506,7 @@ def main():
     except KeyboardInterrupt:
         server.stop()
         print "bye."
+
 
 if __name__ == "__main__":
     main()

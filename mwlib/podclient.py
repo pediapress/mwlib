@@ -1,6 +1,11 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
-import os, time, urlparse, urllib, urllib2, httplib
+import os
+import time
+import urlparse
+import urllib
+import urllib2
+import httplib
 
 try:
     import simplejson as json
@@ -13,18 +18,19 @@ from mwlib import conf
 
 log = Log("mwapidb")
 
+
 class PODClient(object):
     def __init__(self, posturl, redirecturl=None):
         self.posturl = posturl.encode('utf-8')
         self.redirecturl = redirecturl
-    
+
     def _post(self, data, content_type=None):
         if content_type is not None:
             headers = {'Content-Type': content_type}
         else:
             headers = {}
         return urllib2.urlopen(urllib2.Request(self.posturl, data, headers=headers)).read()
-    
+
     def post_status(self, status=None, progress=None, article=None, error=None):
         post_data = {}
 
@@ -47,9 +53,9 @@ class PODClient(object):
     def streaming_post_zipfile(self, filename, fh=None):
         if fh is None:
             fh = open(filename, "rb")
-            
+
         boundary = "-"*20 + ("%f" % time.time()) + "-"*20
-        
+
         items = []
         items.append("--" + boundary)
         items.append('Content-Disposition: form-data; name="collection"; filename="collection.zip"')
@@ -64,16 +70,16 @@ class PODClient(object):
         items.append('--' + boundary + '--')
         items.append('')
         after = "\r\n".join(items)
-        
+
         clen = len(before)+len(after)+os.path.getsize(filename)
-        
+
         print "POSTING TO:", self.posturl
-            
+
         pr = urlparse.urlparse(self.posturl)
         path = pr.path
         if pr.query:
             path += "?"+pr.query
-            
+
         h = httplib.HTTP(pr.hostname, pr.port)
         h.putrequest("POST", path)
         h.putheader("Host", pr.netloc)
@@ -81,7 +87,7 @@ class PODClient(object):
         h.putheader("User-Agent", conf.user_agent)
         h.putheader("Content-Type", "multipart/form-data; boundary=%s" % boundary)
         h.endheaders()
-        
+
         h.send(before)
 
         while 1:
@@ -89,23 +95,23 @@ class PODClient(object):
             if not data:
                 break
             h.send(data)
-        
+
         h.send(after)
-        
+
         errcode, errmsg, headers = h.getreply()
         # h.file.read()
         print "ERRCODE:", (errcode, errmsg, headers)
-        
-        if errcode!=200:
+
+        if errcode != 200:
             raise RuntimeError("upload failed: %r" % (errmsg,))
-        
-        
+
     def post_zipfile(self, filename):
         f = open(filename, "rb")
         content_type, data = get_multipart('collection.zip', f.read(), 'collection')
         f.close()
         log.info('POSTing zipfile %r to %s (%d Bytes)' % (filename, self.posturl, len(data)))
         self._post(data, content_type=content_type)
+
 
 def podclient_from_serviceurl(serviceurl):
     result = json.loads(unicode(urllib2.urlopen(serviceurl, data="any").read(), 'utf-8'))

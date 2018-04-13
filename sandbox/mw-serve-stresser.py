@@ -20,25 +20,30 @@ from mwlib import mwapidb, utils, log, bookshelf
 import mwlib.metabook
 
 
-RENDER_TIMEOUT_DEFAULT = 60*60 # 60 minutes
+RENDER_TIMEOUT_DEFAULT = 60*60  # 60 minutes
 LICENSE_URL = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
 
 system = 'mw-serve-stresser'
 log = log.Log('mw-serve-stresser')
 
 # disable fetch cache
-utils.fetch_url_orig = utils.fetch_url 
+utils.fetch_url_orig = utils.fetch_url
+
+
 def fetch_url(*args, **kargs):
-    kargs["fetch_cache"] = {} 
-    return utils.fetch_url_orig(*args, **kargs) 
+    kargs["fetch_cache"] = {}
+    return utils.fetch_url_orig(*args, **kargs)
+
+
 utils.fetch_url = fetch_url
 
 writer_options = {
     'rl': 'strict',
 }
 
+
 def getRandomArticles(api, min=1, max=100):
-    #"http://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=10"
+    # "http://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=10"
     num = random.randint(min, max)
     articles = set()
     steps = (1+num/10)
@@ -73,7 +78,7 @@ def getRandomMetabook(api, min=1, max=100):
     mbook = None
     tries = 100
     while tries and num_articles > max or num_articles < min:
-        tries -=1
+        tries -= 1
         if tries == 0:
             return None
         bn = random.choice(booknames)
@@ -88,17 +93,19 @@ def getRandomMetabook(api, min=1, max=100):
     addLicense(mbook)
     return mbook
 
+
 def addLicense(mbook):
     license_text = utils.fetch_url(
         LICENSE_URL,
         ignore_errors=False,
         expected_content_type='text/x-wiki',
-        )
+    )
     license_text = unicode(license_text, 'utf-8')
-    license = { 'mw_rights_text': license_text,
-                'name': 'GNU Free Documentation License',
-                }
+    license = {'mw_rights_text': license_text,
+               'name': 'GNU Free Documentation License',
+               }
     mbook['licenses'] = [license]
+
 
 def postRenderCommand(metabook, baseurl, serviceurl, writer):
     log.info('POSTing render command %s %s' % (baseurl, writer))
@@ -107,22 +114,24 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer):
         "writer": writer,
         "writer_options": writer_options.get(writer, ''),
         "base_url": baseurl.encode('utf-8'),
-        "command":"render",
+        "command": "render",
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return json.loads(unicode(res, 'utf-8'))
+
 
 def postRenderKillCommand(collection_id, serviceurl, writer):
     log.info('POSTing render_kill command %r' % collection_id)
     data = {
         "collection_id": collection_id,
         "writer": writer,
-        "command":"render_kill",
+        "command": "render_kill",
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return json.loads(unicode(res, 'utf-8'))
+
 
 def getRenderStatus(colid, serviceurl, writer):
     #log.info('get render status')
@@ -130,15 +139,17 @@ def getRenderStatus(colid, serviceurl, writer):
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
     return json.loads(unicode(res, 'utf-8'))
 
+
 def download(colid, serviceurl, writer):
     log.info('download')
     data = urllib.urlencode({"command": "download", "collection_id": colid, 'writer': writer})
-    return urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)) # fh
+    return urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data))  # fh
+
 
 def reportError(command, metabook, res, baseurl, writer,
-    from_email=None,
-    mail_recipients=None,
-):
+                from_email=None,
+                mail_recipients=None,
+                ):
     utils.report(
         system=system,
         subject='Error %r with command %r' % (res.get('reason', '?'), command),
@@ -151,6 +162,7 @@ def reportError(command, metabook, res, baseurl, writer,
         mail_recipients=mail_recipients,
     )
     sys.exc_clear()
+
 
 def checkDoc(data, writer):
     log.info('checkDoc %s' % writer)
@@ -175,21 +187,22 @@ def checkDoc(data, writer):
         finally:
             os.unlink(filename)
 
+
 def checkservice(api, serviceurl, baseurl, writer, maxarticles,
                  from_email=None,
                  mail_recipients=None,
-                 render_timeout = RENDER_TIMEOUT_DEFAULT # seconds or None
+                 render_timeout=RENDER_TIMEOUT_DEFAULT  # seconds or None
                  ):
-#    arts = getRandomArticles(api, min=1, max=maxarticles)
-#    log.info('random articles: %r' % arts)
-#    metabook = getMetabook(arts)
+    #    arts = getRandomArticles(api, min=1, max=maxarticles)
+    #    log.info('random articles: %r' % arts)
+    #    metabook = getMetabook(arts)
     metabook = getRandomMetabook(api, min=5, max=maxarticles)
     if not metabook:
         reportError('render', metabook, dict(reason="getRandomMetabook Failed"), baseurl, writer,
                     from_email=from_email,
                     mail_recipients=mail_recipients)
         time.sleep(60)
-                    
+
     res = postRenderCommand(metabook, baseurl, serviceurl, writer)
     collection_id = res['collection_id']
     st = time.time()
@@ -210,17 +223,16 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
             break
     if res["state"] == "finished":
         d = download(res["collection_id"], serviceurl, writer).read()
-        log.info("received %s document with %d bytes" % (writer, len(d)))        
+        log.info("received %s document with %d bytes" % (writer, len(d)))
         checkDoc(d, writer)
         return True
     else:
         reportError('render', metabook, res, baseurl, writer,
-            from_email=from_email,
-            mail_recipients=mail_recipients,
-        )
+                    from_email=from_email,
+                    mail_recipients=mail_recipients,
+                    )
     return False
 
-    
 
 def main():
     parser = OptionParser(usage="%prog [OPTIONS]")
@@ -228,23 +240,23 @@ def main():
     parser.add_option("-w", "--writer", help="writer to use")
     parser.add_option('-l', '--logfile', help='log output to LOGFILE')
     parser.add_option('-f', '--from-email',
-        help='From: email address for error mails',
-    )
+                      help='From: email address for error mails',
+                      )
     parser.add_option('-r', '--mail-recipients',
-        help='To: email addresses ("," separated) for error mails',
-    )
+                      help='To: email addresses ("," separated) for error mails',
+                      )
     parser.add_option('-m', '--max-narticles',
-        help='maximum number of articles for random collections (min is 1)',
-        default=10,
-    )
+                      help='maximum number of articles for random collections (min is 1)',
+                      default=10,
+                      )
     parser.add_option('-s', '--serviceurl',
-        help="location of the mw-serve server to test",
-        default='http://tools.pediapress.com/mw-serve/',
-        #default='http://localhost:8899/mw-serve/',
-    )
+                      help="location of the mw-serve server to test",
+                      default='http://tools.pediapress.com/mw-serve/',
+                      # default='http://localhost:8899/mw-serve/',
+                      )
     use_help = 'Use --help for usage information.'
-    options, args = parser.parse_args()   
-    
+    options, args = parser.parse_args()
+
     assert options.from_email
 
     if options.logfile:
@@ -254,7 +266,7 @@ def main():
     baseurls = options.baseurl.split()
     for baseurl in baseurls:
         baseurl2api[baseurl] = mwapidb.APIHelper(baseurl)
-    
+
     maxarts = int(options.max_narticles)
     mail_recipients = None
     if options.mail_recipients:
@@ -265,13 +277,13 @@ def main():
         baseurl = random.choice(baseurls)
         try:
             ok = checkservice(baseurl2api[baseurl],
-                options.serviceurl,
-                baseurl,
-                options.writer,
-                maxarts,
-                from_email=options.from_email,
-                mail_recipients=mail_recipients,
-            )
+                              options.serviceurl,
+                              baseurl,
+                              options.writer,
+                              maxarts,
+                              from_email=options.from_email,
+                              mail_recipients=mail_recipients,
+                              )
             if ok:
                 ok_count += 1
                 log.check('OK')
@@ -299,4 +311,3 @@ def main():
 if __name__ == '__main__':
     #print getRandomMetabook(mwapidb.APIHelper("http://en.wikipedia.org/w"), min=10, max=20)
     main()
-    

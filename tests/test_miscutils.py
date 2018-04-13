@@ -33,6 +33,6 @@ Some text in a paragraph [[http://ysfine.com]]
 Some more text
 '''
     tree = getTreeFromMarkup(raw)
-    #show(tree)
+    # show(tree)
     assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=100) == True
     assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=10) == False

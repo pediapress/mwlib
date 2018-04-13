@@ -1,6 +1,8 @@
 #! /usr/bin/env py.test
 
-import os, glob, pytest
+import os
+import glob
+import pytest
 
 
 def zipfiles():

@@ -6,6 +6,7 @@ ext2lang = {
     '.py': 'Python',
 }
 
+
 def execute(*args):
     popen = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, errors = popen.communicate()
@@ -21,31 +22,32 @@ def execute(*args):
         ))
     return output
 
+
 def make_messages(locale, domain, version, inputdir,
-    localedir='locale',
-    extensions=('.py',),
-):
+                  localedir='locale',
+                  extensions=('.py',),
+                  ):
     assert os.path.isdir(localedir), 'no directory %s found' % (localedir,)
     assert os.path.isdir(inputdir), 'no directory %s found' % (inputdir,)
-    
+
     languages = []
     if locale == 'all':
         languages = [lang for lang in os.listdir(localedir) if not lang.startswith('.')]
     else:
         languages.append(locale)
-    
+
     for locale in languages:
         print "processing language", locale
         basedir = os.path.join(localedir, locale, 'LC_MESSAGES')
         if not os.path.isdir(basedir):
             os.makedirs(basedir)
-        
+
         pofile = os.path.join(basedir, '%s.po' % domain)
         potfile = os.path.join(basedir, '%s.pot' % domain)
-        
+
         if os.path.exists(potfile):
             os.unlink(potfile)
-        
+
         all_files = []
         for (dirpath, dirnames, filenames) in os.walk(inputdir):
             all_files.extend([(dirpath, f) for f in filenames])
@@ -69,7 +71,7 @@ def make_messages(locale, domain, version, inputdir,
                 msgs = msgs.replace('charset=CHARSET', 'charset=UTF-8')
             if msgs:
                 open(potfile, 'ab').write(msgs)
-        
+
         if os.path.exists(potfile):
             msgs = execute('msguniq', '--to-code', 'UTF-8', potfile)
             open(potfile, 'wb').write(msgs)

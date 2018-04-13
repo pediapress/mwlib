@@ -8,7 +8,9 @@
 # '1850/00/02 was a Friday'
 # >>>
 
-import re, datetime, time
+import re
+import datetime
+import time
 
 # remove the unsupposed "%s" command.  But don't
 # do it if there's an even number of %s before the s
@@ -19,21 +21,23 @@ import re, datetime, time
 # 4 digit year.
 _illegal_s = re.compile(r"((^|[^%])(%%)*%s)")
 
+
 def _findall(text, substr):
-     # Also finds overlaps
-     sites = []
-     i = 0
-     while 1:
-         j = text.find(substr, i)
-         if j == -1:
-             break
-         sites.append(j)
-         i=j+1
-     return sites
+    # Also finds overlaps
+    sites = []
+    i = 0
+    while 1:
+        j = text.find(substr, i)
+        if j == -1:
+            break
+        sites.append(j)
+        i = j+1
+    return sites
 
 # Every 28 years the calendar repeats, except through century leap
 # years where it's 6 years.  But only if you're using the Gregorian
 # calendar.  ;)
+
 
 def strftime(dt, fmt):
     if _illegal_s.search(fmt):
@@ -53,7 +57,7 @@ def strftime(dt, fmt):
     timetuple = dt.timetuple()
     s1 = time.strftime(fmt, (year,) + timetuple[1:])
     sites1 = _findall(s1, str(year))
-    
+
     s2 = time.strftime(fmt, (year+28,) + timetuple[1:])
     sites2 = _findall(s2, str(year+28))
 
@@ -61,7 +65,7 @@ def strftime(dt, fmt):
     for site in sites1:
         if site in sites2:
             sites.append(site)
-            
+
     s = s1
     syear = "%4d" % (dt.year,)
     for site in sites:
@@ -70,6 +74,8 @@ def strftime(dt, fmt):
 
 # Make sure that the day names are in order
 # from 1/1/1 until August 2000
+
+
 def test():
     s = strftime(datetime.date(1800, 9, 23),
                  "%Y has the same days as 1980 and 2008")
@@ -94,13 +100,14 @@ def test():
     testdate = startdate + one_day
     while testdate < enddate:
         if (testdate.day == 1 and testdate.month == 1 and
-            (testdate.year % 100 == 0)):
+                (testdate.year % 100 == 0)):
             print "Testing century", testdate.year
         day = strftime(testdate, "%A")
         if nextday[prevday] != day:
             raise AssertionError(str(testdate))
         prevday = day
         testdate = testdate + one_day
+
 
 if __name__ == "__main__":
     test()

@@ -5,6 +5,7 @@
 import threading
 from collections import deque
 
+
 class lrucache(object):
     def __init__(self, maxsize):
         self.maxsize = maxsize
@@ -13,7 +14,7 @@ class lrucache(object):
         self.refcount = {}           # number of times each key is in the access queue
         self.hits = 0
         self.misses = 0
-        
+
     def __getitem__(self, key):
         # get cache entry or compute if not found
         try:
@@ -28,17 +29,17 @@ class lrucache(object):
     def __setitem__(self, key, value):
         self.cache[key] = value
         self._record_key(key)
-        
+
     def _record_key(self, key):
         # localize variable access (ugly but fast)
-        queue=self.queue
-        cache=self.cache
-        _len=len
-        refcount=self.refcount
-        _maxsize=self.maxsize
-        queue_append=self.queue.append
+        queue = self.queue
+        cache = self.cache
+        _len = len
+        refcount = self.refcount
+        _maxsize = self.maxsize
+        queue_append = self.queue.append
         queue_popleft = self.queue.popleft
-        
+
         # record that this key was recently accessed
         self.queue.append(key)
         self.refcount[key] = self.refcount.get(key, 0) + 1
@@ -60,11 +61,12 @@ class lrucache(object):
                 else:
                     refcount[k] -= 1
 
+
 class mt_lrucache(lrucache):
     def __init__(self, maxsize):
         lrucache.__init__(self, maxsize)
         self.lock = threading.Lock()
-        
+
     def __getitem__(self, key):
         try:
             self.lock.acquire()
@@ -77,4 +79,4 @@ class mt_lrucache(lrucache):
             self.lock.acquire()
             lrucache.__setitem__(self, key, val)
         finally:
-            self.lock.release()            
+            self.lock.release()

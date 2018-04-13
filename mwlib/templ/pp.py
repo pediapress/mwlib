@@ -4,16 +4,19 @@
 
 import re
 
-rxc = lambda s: re.compile(s, re.DOTALL | re.IGNORECASE)
 
-onlyincluderx   = rxc("<onlyinclude>(.*?)</onlyinclude>")
-noincluderx     = rxc("<noinclude(?:\s[^<>]*)?>.*?(</noinclude>|$)")
-includeonlyrx   = rxc("<includeonly(?:\s[^<>]*)?>.*?(?:</includeonly>|$)")
+def rxc(s): return re.compile(s, re.DOTALL | re.IGNORECASE)
+
+
+onlyincluderx = rxc("<onlyinclude>(.*?)</onlyinclude>")
+noincluderx = rxc("<noinclude(?:\s[^<>]*)?>.*?(</noinclude>|$)")
+includeonlyrx = rxc("<includeonly(?:\s[^<>]*)?>.*?(?:</includeonly>|$)")
 
 
 def get_remove_tags(tags):
     r = rxc("</?(%s)(?:\s[^<>]*)?>" % ("|".join(tags)))
     return lambda s: r.sub(u'', s)
+
 
 remove_not_included = get_remove_tags(["onlyinclude", "noinclude"])
 

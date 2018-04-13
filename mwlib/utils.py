@@ -95,7 +95,7 @@ def get_multipart(filename, data, name):
 
     items = []
     items.append("--" + boundary)
-    items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'\
+    items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'
                  % {'name': name, 'filename': filename})
     items.append('Content-Type: application/octet-stream')
     items.append('')
@@ -122,8 +122,8 @@ fetch_cache = {}
 
 
 def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
-    max_cacheable_size=1024, expected_content_type=None, opener=None,
-    output_filename=None, post_data=None, timeout=10.0):
+              max_cacheable_size=1024, expected_content_type=None, opener=None,
+              output_filename=None, post_data=None, timeout=10.0):
     """Fetch given URL via HTTP
 
     @param ignore_errors: if True, log but otherwise ignore errors, return None

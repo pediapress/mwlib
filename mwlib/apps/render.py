@@ -15,7 +15,9 @@ from mwlib import utils, wiki, conf, _locale
 
 
 def init_tmp_cleaner():
-    import tempfile, shutil, time
+    import tempfile
+    import shutil
+    import time
     tempfile.tempdir = tempfile.mkdtemp(prefix="tmp-%s" % os.path.basename(sys.argv[0]))
     os.environ["TMP"] = os.environ["TEMP"] = os.environ["TMPDIR"] = tempfile.tempdir
     ppid = os.getpid()
@@ -39,41 +41,41 @@ def init_tmp_cleaner():
 
 class Main(object):
     zip_filename = None
-    
+
     def parse_options(self):
         parser = OptionParser()
         a = parser.add_option
-        
+
         a("-o", "--output", help="write output to OUTPUT")
-        
+
         a("-w", "--writer", help='use writer backend WRITER')
-        
+
         a("-W", "--writer-options",
           help='";"-separated list of additional writer-specific options')
-        
+
         a("-e", "--error-file", help='write errors to this file')
-        
+
         a("-s", "--status-file",
           help='write status/progress info to this file')
-        
+
         a("--list-writers", action='store_true',
           help='list available writers and exit')
-        
+
         a("--writer-info", metavar='WRITER',
           help='list information about given WRITER and exit')
-        
+
         a('--keep-zip', metavar='FILENAME',
             help='write ZIP file to FILENAME')
-        
+
         a('--keep-tmpfiles', action='store_true', default=False,
             help="don't remove  temporary files like images")
-        
+
         a('-L', '--language',
             help='use translated strings in LANGUAGE')
-        
+
         options, args = parser.parse_args()
         return options, args, parser
-    
+
     def load_writer(self, name):
         try:
             entry_point = pkg_resources.iter_entry_points('mwlib.writers', name).next()
@@ -116,41 +118,40 @@ class Main(object):
     def get_environment(self):
         from mwlib.status import Status
         from mwlib import nuwiki
-        
-        env = self.parser.makewiki()        
+
+        env = self.parser.makewiki()
         if (isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt))
-            or isinstance(env, wiki.MultiEnvironment)):
+                or isinstance(env, wiki.MultiEnvironment)):
             self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
 
         from mwlib.apps.buildzip import make_zip
-        self.zip_filename = make_zip(output=self.options.keep_zip, options=self.options, metabook=env.metabook, status=self.status)
+        self.zip_filename = make_zip(output=self.options.keep_zip,
+                                     options=self.options, metabook=env.metabook, status=self.status)
 
         if env.images:
             try:
                 env.images.clear()
             except OSError, err:
-                if err.errno!=errno.ENOENT:
+                if err.errno != errno.ENOENT:
                     raise
-                
+
         env = wiki.makewiki(self.zip_filename)
         self.status = Status(self.options.status_file, progress_range=(34, 100))
         return env
-            
-        
-    def __call__(self):    
+
+    def __call__(self):
         options, args, parser = self.parse_options()
         conf.readrc()
 
         self.parser = parser
         self.options = options
-        
+
         import tempfile
         from mwlib.writerbase import WriterError
         from mwlib.status import Status
 
         use_help = 'Use --help for usage information.'
-
 
         if options.list_writers:
             self.list_writers()
@@ -159,14 +160,14 @@ class Main(object):
         if options.writer_info:
             self.show_writer_info(options.writer_info)
             return
-        
+
         if options.output is None:
             parser.error('Please specify an output file with --output.\n' + use_help)
 
         options.output = os.path.abspath(options.output)
 
         if options.writer is None:
-            parser.error('Please specify a writer with --writer.\n' + use_help)    
+            parser.error('Please specify a writer with --writer.\n' + use_help)
 
         writer = self.load_writer(options.writer)
         writer_options = {}
@@ -225,7 +226,7 @@ class Main(object):
                     f.write(str(e))
                 else:
                     f.write('traceback\n')
-                    traceback.print_exc(file=f) 
+                    traceback.print_exc(file=f)
                 f.write("sys.argv=%r\n" % (utils.garble_password(sys.argv),))
                 f.close()
                 os.rename(tmpfile, options.error_file)
@@ -236,8 +237,9 @@ class Main(object):
                     if not options.keep_tmpfiles:
                         env.images.clear()
                 except OSError, e:
-                    if e.errno!=errno.ENOENT:
+                    if e.errno != errno.ENOENT:
                         print 'ERROR: Could not remove temporary images: %s' % e, e.errno
+
 
 def main():
     return Main()()

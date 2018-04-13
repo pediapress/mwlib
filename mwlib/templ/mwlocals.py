@@ -7,6 +7,7 @@ NUMBEROFARTICLES NUMBEROFPAGES NUMBEROFFILES NUMBEROFUSERS CURRENTVERSION
 
     return "\n----\n".join(["%s={{%s}}" % (x, x) for x in names]+["{{LOCALVARS}}\n"])
 
+
 def parse_locals(localstr):
     if isinstance(localstr, str):
         localstr = unicode(localstr)

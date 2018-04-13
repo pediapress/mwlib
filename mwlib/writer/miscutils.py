@@ -8,16 +8,19 @@ from __future__ import division
 
 from mwlib import advtree
 
+
 def hasInfoboxAttrs(node):
     infobox_classIDs = ['infobox', 'taxobox']
     if node.hasClassID(infobox_classIDs):
         return True
     if node.attributes.get('summary', '').lower() in infobox_classIDs:
-        return True    
+        return True
     return False
 
+
 def textInNode(node):
-    amap = {advtree.Text:"caption", advtree.Link:"target", advtree.URL:"caption", advtree.Math:"caption", advtree.ImageLink:"caption" }
+    amap = {advtree.Text: "caption", advtree.Link: "target", advtree.URL: "caption",
+            advtree.Math: "caption", advtree.ImageLink: "caption"}
     access = amap.get(node.__class__, "")
     if access:
         txt = getattr(node, access)
@@ -28,16 +31,18 @@ def textInNode(node):
     else:
         return 0
 
+
 def textBeforeInfoBox(node, infobox, txt_list=[]):
-    txt_list.append((textInNode(node), node==infobox))        
+    txt_list.append((textInNode(node), node == infobox))
     for c in node:
         textBeforeInfoBox(c, infobox, txt_list)
-    sum_txt = 0    
+    sum_txt = 0
     for len_txt, is_infobox in txt_list:
         sum_txt += len_txt
         if is_infobox:
             return sum_txt
     return sum_txt
+
 
 def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
     assert article_node.__class__ == advtree.Article, 'articleStartsWithInfobox needs to be called with Article node'
@@ -56,5 +61,3 @@ def articleStartsWithTable(article_node, max_text_until_infobox=0):
     if not tables:
         return False
     return textBeforeInfoBox(article_node, tables[0], []) <= max_text_until_infobox
-
-    

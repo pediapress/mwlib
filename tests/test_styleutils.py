@@ -72,4 +72,5 @@ left
         if txt != align:
             show(cell)
 
-        assert txt == align, 'alignment not correctly parsed. expected:|%s|, got |%s|' % (txt, align)
+        assert txt == align, 'alignment not correctly parsed. expected:|%s|, got |%s|' % (
+            txt, align)

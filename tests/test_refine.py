@@ -373,7 +373,7 @@ def test_dd_dt_tags_inside_table():
 <dl> bla <dt>foobazbar</dt>
 """)
     show(r)
-    #assert 0 # FIXME
+    # assert 0 # FIXME
 
 
 def test_left_to_right_mark():
@@ -490,7 +490,8 @@ def test_ul_inside_star():
 
 
 def test_div_vs_link():
-    r = core.parse_txt("""[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]""")
+    r = core.parse_txt(
+        """[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]""")
     core.show(r)
     assert r[0].type == T.t_complex_link,  "expected an image link"
 
@@ -516,7 +517,7 @@ Image:ACDC_logo.gif|capshun<!--comment-->
 </gallery>
 """)
     core.show(r)
-    txt = T.join_as_text(core.walknodel(r[0].children,  lambda x: True))
+    txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
     print "TXT:",  repr(txt)
     assert "capshun" in txt, "bad text??"
     assert "comment" not in txt,  "comment not stripped"
@@ -529,7 +530,7 @@ Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
 </gallery>
 """)
     core.show(r)
-    txt = T.join_as_text(core.walknodel(r[0].children,  lambda x: True))
+    txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
     print "TXT:",  repr(txt)
     assert "capshun" in txt, "bad text??"
     assert "capshun yes" in txt,  "#if failed to expand"

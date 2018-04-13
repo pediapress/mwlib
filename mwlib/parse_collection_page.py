@@ -1,15 +1,18 @@
-import os, re, binascii
+import os
+import re
+import binascii
 from collections import defaultdict
 from mwlib import metabook, expander
 
 uniq = "--%s--" % binascii.hexlify(os.urandom(16))
+
 
 def extract_metadata(raw, fields, template_name="saved_book"):
     fields = list(fields)
     fields.append("")
 
     templ = "".join(u"%s%s\n{{{%s|}}}\n" % (uniq, f, f) for f in fields)
-    db = expander.DictDB({template_name:templ})
+    db = expander.DictDB({template_name: templ})
 
     te = expander.Expander(raw, pagename="", wikidb=db)
     res = te.expandTemplates()
@@ -21,7 +24,6 @@ def extract_metadata(raw, fields, template_name="saved_book"):
         d[name] = val
 
     return d
-
 
 
 def _buildrex():
@@ -43,19 +45,19 @@ def _buildrex():
 
 alltogether_rex = _buildrex()
 
+
 def parse_collection_page(wikitext):
     """Parse wikitext of a MediaWiki collection page created by the Collection
     extension for MediaWiki.
-    
+
     @param wikitext: wikitext of a MediaWiki collection page
     @type mwcollection: unicode
-    
+
     @returns: metabook.collection
     @rtype: metabook.collection
     """
     mb = metabook.collection()
 
-    
     summary = False
     noTemplate = True
     for line in wikitext.splitlines():
@@ -65,9 +67,9 @@ def parse_collection_page(wikitext):
         res = alltogether_rex.search(line)
         if not res:
             continue
-        
-        #look for initial templates and summaries
-        #multilinetemplates need different handling to those that fit into one line
+
+        # look for initial templates and summaries
+        # multilinetemplates need different handling to those that fit into one line
         if res.group('template_end') or res.group('template'):
             summary = True
             noTemplate = False
@@ -88,7 +90,8 @@ def parse_collection_page(wikitext):
         elif res.group('article'):
             mb.append_article(res.group('article'), res.group('displaytitle'))
         elif res.group('oldarticle'):
-            mb.append_article(title=res.group('oldarticle'), displaytitle=res.group('olddisplaytitle'), revision=res.group('oldid'))
+            mb.append_article(title=res.group('oldarticle'), displaytitle=res.group(
+                'olddisplaytitle'), revision=res.group('oldid'))
         elif res.group('summary') and (noTemplate or summary):
             mb.summary += res.group('summary') + " "
 

@@ -3,7 +3,10 @@
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import sys, os, time, glob
+import sys
+import os
+import time
+import glob
 
 if not (2, 5) < sys.version_info[:2] < (3, 0):
     sys.exit("""

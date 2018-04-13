@@ -8,14 +8,15 @@ from mwlib.refine import core, compat
 
 log = Log('refine.uparser')
 
+
 def parseString(
-    title=None,
-    raw=None,
-    wikidb=None,
-    revision=None,
-    lang=None,
-    magicwords=None,
-    expandTemplates=True):
+        title=None,
+        raw=None,
+        wikidb=None,
+        revision=None,
+        lang=None,
+        magicwords=None,
+        expandTemplates=True):
     """parse article with title from raw mediawiki text"""
 
     uniquifier = None
@@ -45,7 +46,7 @@ def parseString(
             assert not isinstance(src, dict)
 
         if not src:
-            src=metabook.source()
+            src = metabook.source()
 
         if lang is None:
             lang = src.language
@@ -59,7 +60,8 @@ def parseString(
         nshandler = nshandling.get_nshandler_for_lang(lang)
     else:
         nshandler = nshandling.nshandler(siteinfo)
-    a = compat.parse_txt(input, title=title, wikidb=wikidb, nshandler=nshandler, lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
+    a = compat.parse_txt(input, title=title, wikidb=wikidb, nshandler=nshandler,
+                         lang=lang, magicwords=magicwords, uniquifier=uniquifier, expander=te)
 
     a.caption = title
     if te and te.magic_displaytitle:
@@ -71,7 +73,8 @@ def parseString(
 
     return a
 
-def simpleparse(raw,lang=None):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
-    a=compat.parse_txt(raw,lang=lang)
+
+def simpleparse(raw, lang=None):    # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
+    a = compat.parse_txt(raw, lang=lang)
     core.show(a)
     return a

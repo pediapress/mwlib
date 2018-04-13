@@ -21,7 +21,7 @@ class License(object):
     def __init__(self, name='', display_name='', license_type=None, description=''):
         self.name = name
         self.display_name = display_name
-        self.license_type = license_type # free|nonfree|unrelated|unknown
+        self.license_type = license_type  # free|nonfree|unrelated|unknown
         self.description = description
 
     def __str__(self):
@@ -29,10 +29,10 @@ class License(object):
             display_name = ' - text: %s' % self.display_name
         else:
             display_name = ''
-        return "<License:%(name)r - type:%(type)r%(displayname)r>" % { 'name': self.name,
-                                                                       'type': self.license_type,
-                                                                       'displayname': display_name,
-                                                                       }
+        return "<License:%(name)r - type:%(type)r%(displayname)r>" % {'name': self.name,
+                                                                      'type': self.license_type,
+                                                                      'displayname': display_name,
+                                                                      }
     __repr__ = __str__
 
     def __cmp__(self, other):
@@ -42,6 +42,7 @@ class License(object):
             return 0
         else:
             return 1
+
 
 class LicenseChecker(object):
 
@@ -67,11 +68,11 @@ class LicenseChecker(object):
             lic.display_name = unicode(display_name, 'utf-8')
             if license_description.startswith('-'):
                 license_description = license_description[1:]
-            lic.description = unicode(license_description.strip(), 'utf-8') 
+            lic.description = unicode(license_description.strip(), 'utf-8')
             if license_type in ['free-display', 'nonfree-display']:
                 lic.license_type = 'free'
             elif license_type in ['nonfree']:
-                lic.license_type = 'nonfree'                
+                lic.license_type = 'nonfree'
             else:
                 lic.license_type = 'unrelated'
             self.licenses[name] = lic
@@ -99,7 +100,6 @@ class LicenseChecker(object):
             licenses.append(lic)
         return licenses
 
-
     def _checkLicenses(self, licenses, imgname, stats=True):
         assert self.image_db, 'No image_db passed when initializing LicenseChecker'
         for lic in licenses:
@@ -112,7 +112,8 @@ class LicenseChecker(object):
         for lic in licenses:
             if lic.license_type == 'unknown' and stats:
                 urls = self.unknown_licenses.get(lic.name, set())
-                urls.add(self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname)
+                urls.add(self.image_db.getDescriptionURL(imgname)
+                         or self.image_db.getURL(imgname) or imgname)
                 self.unknown_licenses[lic.name] = urls
 
         self.license_display_name[imgname] = ''
@@ -120,7 +121,6 @@ class LicenseChecker(object):
             return False
         elif self.filter_type in ['blacklist', 'nofilter']:
             return True
-
 
     def displayImage(self, imgname):
         if imgname in self.display_cache:
@@ -137,7 +137,6 @@ class LicenseChecker(object):
             self.rejected_images.add(url)
         self.display_cache[imgname] = display_img
         return display_img
-
 
     def getLicenseDisplayName(self, imgname):
         text = self.license_display_name.get(imgname, None)
@@ -159,12 +158,13 @@ class LicenseChecker(object):
 
     def dumpStats(self):
         stats = []
-        stats.append('IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f' % (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio))
+        stats.append('IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f' %
+                     (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio))
 
         images = set()
         for urls in self.unknown_licenses.values():
             for url in urls:
-                images.add(repr(url))        
+                images.add(repr(url))
         stats.append('Images without license information: %s' % (' '.join(list(images))))
         stats.append('##############################')
         stats.append('Rejected Images: %s' % ' '.join(list(self.rejected_images)))
@@ -180,7 +180,6 @@ class LicenseChecker(object):
             unknown_licenses[license] = list(urls)
         f.write(json.dumps(unknown_licenses))
         f.close()
-
 
     def analyseUnknownLicenses(self, _dir):
         files = os.listdir(_dir)
@@ -200,15 +199,15 @@ class LicenseChecker(object):
                     seen_urls = unknown_licenses.get(license, set())
                     seen_urls.update(set(urls))
                     unknown_licenses[license] = seen_urls
-        sorted_licenses = [ (len(urls), license, urls) for license, urls in unknown_licenses.items()]
+        sorted_licenses = [(len(urls), license, urls)
+                           for license, urls in unknown_licenses.items()]
         sorted_licenses.sort(reverse=True)
         for num_urls, license, urls in sorted_licenses:
-            args = { 'template': license.encode('utf-8'),
-                     'num_images': num_urls,
-                     'img_str': '\n'.join([i.encode('utf-8') for i in list(urls)[:5]])
-                     }
+            args = {'template': license.encode('utf-8'),
+                    'num_images': num_urls,
+                    'img_str': '\n'.join([i.encode('utf-8') for i in list(urls)[:5]])
+                    }
             print "\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n" % args
-
 
     def dumpLicenseInfoContent(self):
 
@@ -223,27 +222,26 @@ class LicenseChecker(object):
 |license_text_url=
 |full_text_required=
 |description=%(description)s
-}}"""        
-        
-        #for templ, lic in self.licenses.items():
+}}"""
+
+        # for templ, lic in self.licenses.items():
         for lic in licenses:
             if lic.license_type in ['free', 'nonfree']:
-                #print "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}" % {
-                if lic.license_type=='free':
+                # print "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}" % {
+                if lic.license_type == 'free':
                     allowedstr = "yes"
                 else:
                     allowedstr = "no"
-                    
+
                 print tmpl_txt % {
                     'lic_name': lic.name.encode('utf-8'),
                     'display_name': lic.display_name.encode('utf-8'),
                     'allowed': allowedstr,
-                    'description': lic.description.encode('utf-8'), 
-                    }
+                    'description': lic.description.encode('utf-8'),
+                }
                 #print lic.name, lic.display_name, lic.license_type
-        
 
-                    
+
 if __name__ == '__main__':
 
     lc = LicenseChecker()
@@ -251,7 +249,6 @@ if __name__ == '__main__':
 
     # lc.dumpLicenseInfoContent()
     # sys.exit(1)
-
 
     if len(sys.argv) > 1:
         stats_dir = sys.argv[1]
@@ -261,5 +258,4 @@ if __name__ == '__main__':
         print 'specify stats_dir as first arg, or set environment var HIQ_STATSIDR'
         sys.exit(1)
 
-    
     lc.analyseUnknownLicenses(stats_dir)

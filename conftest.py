@@ -1,6 +1,7 @@
-import os, sys
+import os
+import sys
 
-xnet = os.environ.get("XNET", "") # eXclude NETwork tests
+xnet = os.environ.get("XNET", "")  # eXclude NETwork tests
 try:
     xnet = int(xnet)
 except ValueError:
@@ -10,7 +11,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
 def pytest_funcarg__alarm(request):
-    import signal, time, math
+    import signal
+    import time
+    import math
 
     def sighandler(signum, frame):
         __tracebackhide__ = True
@@ -29,7 +32,6 @@ def pytest_funcarg__alarm(request):
         else:
             signal.alarm(math.ceil(secs))
 
-
     request.addfinalizer(cleanup)
     stime = time.time()
     old_handler = signal.signal(signal.SIGALRM, sighandler)
@@ -41,11 +43,11 @@ def pytest_configure(config):
     kw = config.getvalue("keyword")
     if "xnet" in kw:
         return
-    
+
     if xnet:
         print "conftest.py: disabling tests marked with keyword xnet."
         print "conftest.py: set environment variable XNET=0 to enable them."
-        
+
         if kw:
             kw = kw+" -xnet"
         else:

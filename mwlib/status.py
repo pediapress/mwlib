@@ -13,16 +13,17 @@ from mwlib.log import Log
 
 log = Log('mwlib.status')
 
+
 class Status(object):
     qproxy = None
     stdout = sys.stdout
-    
+
     def __init__(self,
-        filename=None,
-        podclient=None,
-        progress_range=(0, 100),
-        status=None,         
-    ):
+                 filename=None,
+                 podclient=None,
+                 progress_range=(0, 100),
+                 status=None,
+                 ):
         self.filename = filename
         self.podclient = podclient
         if status is not None:
@@ -31,36 +32,32 @@ class Status(object):
             self.status = {}
         self.progress_range = progress_range
 
-    
     def getSubRange(self, start, end):
         progress_range = (self.scaleProgress(start), self.scaleProgress(end))
         return Status(filename=self.filename, podclient=self.podclient, status=self.status, progress_range=progress_range)
-    
+
     def scaleProgress(self, progress):
         return (
             self.progress_range[0]
             + progress*(self.progress_range[1] - self.progress_range[0])/100
-            )
-
+        )
 
     def __call__(self, status=None, progress=None, article=None, auto_dump=True,
-        **kwargs):
+                 **kwargs):
         if status is not None and status != self.status.get('status'):
             self.status['status'] = status
-        
+
         if progress is not None:
             progress = min(max(0, progress), 100)
             progress = self.scaleProgress(progress)
             if progress > self.status.get('progress', -1):
                 self.status['progress'] = progress
-        
+
         if article is not None and article != self.status.get('article'):
-            if 'article' in self.status and not article: # allow explicitly deleting the article from the status
+            if 'article' in self.status and not article:  # allow explicitly deleting the article from the status
                 del self.status['article']
             else:
                 self.status['article'] = article
-            
-
 
         if self.podclient is not None:
             self.podclient.post_status(**self.status)
@@ -78,24 +75,24 @@ class Status(object):
             else:
                 self.stdout.write(msg)
             self.stdout.flush()
-        
+
         self.status.update(kwargs)
-        
+
         if auto_dump:
             self.dump()
-    
+
     def dump(self):
         if not self.filename:
             return
 
         if not self.qproxy and self.filename.startswith("qserve://"):
             fn = self.filename[len("qserve://"):]
-            host, jobid=fn.split("/")
+            host, jobid = fn.split("/")
             try:
                 jobid = int(jobid)
             except ValueError:
                 jobid = jobid.strip('"')
-                
+
             if ":" in host:
                 host, port = host.split(":")
                 port = int(port)
@@ -109,8 +106,8 @@ class Status(object):
         if self.qproxy:
             self.qproxy.qsetinfo(jobid=self.jobid, info=self.status)
             return
-            
-        try:    
+
+        try:
             open(self.filename + '.tmp', 'wb').write(
                 json.dumps(self.status).encode('utf-8')
             )
@@ -119,4 +116,3 @@ class Status(object):
             log.ERROR('Could not write status file %r: %s' % (
                 self.filename, exc
             ))
-    

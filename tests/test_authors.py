@@ -85,4 +85,5 @@ def test_empty():
 def test_example_1():
     a = authors.get_authors(example_1)
     print a
-    assert a == [u'CosmicPenguin', u'Denelson83', u'Kwanesum', u'Nationalparks', u'Palaeozoic99', u'Qyd', u'Skookum1', u'The Tom', 'ANONIPEDITS:0']
+    assert a == [u'CosmicPenguin', u'Denelson83', u'Kwanesum', u'Nationalparks',
+                 u'Palaeozoic99', u'Qyd', u'Skookum1', u'The Tom', 'ANONIPEDITS:0']
