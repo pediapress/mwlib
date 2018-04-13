@@ -3,9 +3,12 @@
 
 RST2HTML ?= rst2html.py
 
-default:: 
+default::
 
-all:: mwlib/_uscan.cc cython MANIFEST.in
+requirements::
+	pip install -r requirements.txt
+
+all:: requirements mwlib/_uscan.cc cython MANIFEST.in
 
 cython:: mwlib/templ/nodes.c mwlib/templ/evaluate.c
 
@@ -28,12 +31,15 @@ README.html: README.rst
 	$(RST2HTML) README.rst >README.html
 
 develop:: all
-	python setup.py develop
+	pip install -e .
 
 clean::
 	rm -rf build dist
 	rm -f mwlib/templ/evaluate.c mwlib/templ/nodes.c mwlib/_uscan.cc
 	rm -f mwlib/_gitversion.py*
+	rm **/*.pyc || true
+	pip uninstall -y mwlib || true
+	pip uninstall -y `pip freeze` || true
 
 sdist:: all
 	echo gitversion=\"$(shell git describe --tags)\" >mwlib/_gitversion.py

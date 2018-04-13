@@ -29,3 +29,4 @@ __pycache__/
 /docs/_templates/
 /junit-*.xml
 /.python-version
+.pytest_cache
