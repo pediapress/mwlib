@@ -133,6 +133,8 @@ include mwlib/writer/scripts.txt
 include mwlib/writer/styleutils.py
 include mwlib/writer/wplicenses.csv
 include mwlib/writerbase.py
+include requirements-test.txt
+include requirements.txt
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
