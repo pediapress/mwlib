@@ -43,7 +43,7 @@ sdist:: all
 	rm -f mwlib/_gitversion.py mwlib/_gitversion.pyc
 
 sdist-upload:: sdist
-	python setup.py build sdist upload
+	python setup.py build sdist upload -r pypi
 
 pip-install:: clean sdist
 	pip uninstall -y mwlib || true
