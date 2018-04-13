@@ -19,7 +19,7 @@ def test_fsescape():
     )
     for s_in, s_out in test_set:
         assert utils.fsescape(s_in) == s_out
-        assert type(utils.fsescape(s_in)) is str
+        assert isinstance(utils.fsescape(s_in), str)
 
 
 def test_uid():

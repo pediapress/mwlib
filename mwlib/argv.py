@@ -16,7 +16,7 @@ def parse(args, spec):
 
     i = 0
     while i < len(args):
-        a, v = (args[i].split("=", 1)+[None])[:2]
+        a, v = (args[i].split("=", 1) + [None])[:2]
         if a in needarg:
             if v is None and needarg[a]:
                 i += 1

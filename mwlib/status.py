@@ -34,12 +34,13 @@ class Status(object):
 
     def getSubRange(self, start, end):
         progress_range = (self.scaleProgress(start), self.scaleProgress(end))
-        return Status(filename=self.filename, podclient=self.podclient, status=self.status, progress_range=progress_range)
+        return Status(filename=self.filename, podclient=self.podclient,
+                      status=self.status, progress_range=progress_range)
 
     def scaleProgress(self, progress):
         return (
             self.progress_range[0]
-            + progress*(self.progress_range[1] - self.progress_range[0])/100
+            + progress * (self.progress_range[1] - self.progress_range[0]) / 100
         )
 
     def __call__(self, status=None, progress=None, article=None, auto_dump=True,
@@ -71,7 +72,7 @@ class Status(object):
         if self.stdout:
             isatty = getattr(self.stdout, "isatty", None)
             if isatty and isatty():
-                self.stdout.write("\x1b[K"+msg+"\r")
+                self.stdout.write("\x1b[K" + msg + "\r")
             else:
                 self.stdout.write(msg)
             self.stdout.flush()
@@ -112,7 +113,7 @@ class Status(object):
                 json.dumps(self.status).encode('utf-8')
             )
             os.rename(self.filename + '.tmp', self.filename)
-        except Exception, exc:
+        except Exception as exc:
             log.ERROR('Could not write status file %r: %s' % (
                 self.filename, exc
             ))

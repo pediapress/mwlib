@@ -24,7 +24,7 @@ def serve_ctl():
             parser.error('--purge-cache value must be a positive number')
 
         from mwlib.serve import purge_cache
-        purge_cache(options.purge_cache*60*60, cache_dir=options.cache_dir)
+        purge_cache(options.purge_cache * 60 * 60, cache_dir=options.cache_dir)
 
 
 def check_service():
@@ -99,7 +99,7 @@ def check_service():
     def check_req(command, **kwargs):
         try:
             success = client.request(command, kwargs, is_json=(command != 'download'))
-        except Exception, exc:
+        except Exception as exc:
             report('request failed: %s' % exc)
             sys.exit(1)
 

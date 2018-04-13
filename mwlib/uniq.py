@@ -40,9 +40,9 @@ class Uniquifier(object):
         tagname = mo.group("tagname")
         if tagname is None:
             # comment =  mo.group("comment")
-            if self.txt[mo.start()] == '\n' and self.txt[mo.end()-1] == '\n':
+            if self.txt[mo.start()] == '\n' and self.txt[mo.end() - 1] == '\n':
                 return '\n'
-            return (mo.group(2) or "")+(mo.group(3) or "")
+            return (mo.group(2) or "") + (mo.group(3) or "")
 
         else:
             tagname = tagname.lower()

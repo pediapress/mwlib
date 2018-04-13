@@ -9,5 +9,5 @@ def main():
         try:
             v = pkg_resources.require(r)[0].version
             print r, v
-        except:
+        except BaseException:
             continue

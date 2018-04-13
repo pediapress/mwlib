@@ -53,7 +53,7 @@ def uploadfile(ipath, posturl, fh=None):
         status(status='uploading', progress=0)
         podclient.streaming_post_zipfile(ipath, fh)
         status(status='finished', progress=100)
-    except Exception, err:
+    except Exception as err:
         status(status='error')
         raise err
 
@@ -69,13 +69,13 @@ def report_upload_status(posturl, fh):
     numdots = 0
 
     last = None
-    while 1:
+    while True:
         cur = fh.tell()
         if cur != last:
             if cur == size:
                 break
             numdots = (numdots + 1) % 10
-            status("uploading"+"."*numdots,  progress=100.0*cur/size)
+            status("uploading" + "." * numdots, progress=100.0 * cur / size)
             last = cur
 
         else:
@@ -90,7 +90,7 @@ def report_mwzip_status(posturl, jobid, host, port):
     sp = rpcclient.serverproxy(host, port)
 
     last = {}
-    while 1:
+    while True:
         res = sp.qinfo(jobid=jobid) or {}
 
         done = res.get("done", False)

@@ -13,7 +13,7 @@ def system(cmd, dry_run=False):
 
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     nl = True
-    while 1:
+    while True:
         char = popen.stdout.read(1)
         if not char:
             break

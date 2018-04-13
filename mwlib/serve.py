@@ -66,7 +66,7 @@ def _find_collection_dirs_to_purge(collection_dirs, ts):
         try:
             if _path_contains_entry_older_than(path, ts):
                 yield path
-        except OSError, err:
+        except OSError as err:
             if err.errno != errno.ENOENT:
                 log.ERROR("error while examining %r: %s" % (path, err))
 
@@ -74,7 +74,7 @@ def _find_collection_dirs_to_purge(collection_dirs, ts):
 def _rmtree(path):
     try:
         shutil.rmtree(path)
-    except OSError, exc:
+    except OSError as exc:
         if exc.errno != errno.ENOENT:
             log.ERROR('could not remove directory %r: %s' % (path, exc))
 
@@ -89,5 +89,6 @@ def purge_cache(max_age, cache_dir):
     @type cache_dir: basestring
     """
 
-    for path in _find_collection_dirs_to_purge(get_collection_dirs(cache_dir), time.time() - max_age):
+    for path in _find_collection_dirs_to_purge(
+            get_collection_dirs(cache_dir), time.time() - max_age):
         _rmtree(path)

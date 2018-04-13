@@ -26,11 +26,12 @@ def getNodeHeight(node, params):
             txt = getattr(node, access)
         if txt:
             # 40 chars per line --> number of lines --> 20pt height per line
-            addHeight = math.ceil(len(txt)/charsPerLine) * lineHeight
+            addHeight = math.ceil(len(txt) / charsPerLine) * lineHeight
             if node.isblocknode:
                 addHeight += paragraphMargin
             else:
-                # for inline nodes we reduce the height guess. below that is compensated for blocknode-heights w/o text
+                # for inline nodes we reduce the height guess. below that is compensated
+                # for blocknode-heights w/o text
                 addHeight = addHeight / 2
             height += addHeight
     elif node.__class__ == ImageLink:
@@ -78,7 +79,7 @@ def splitRow(row, params):
             cell = Cell()
             try:
                 cell.vlist = row.children[colindex].vlist
-            except:
+            except BaseException:
                 pass
             for c in cellchildren:
                 cell.appendChild(c)

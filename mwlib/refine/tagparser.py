@@ -9,7 +9,7 @@ from mwlib.utoken import token as T
 
 
 class taginfo(object):
-    def __init__(self, tagname=None, prio=None, blocknode=False,  nested=True):
+    def __init__(self, tagname=None, prio=None, blocknode=False, nested=True):
         assert None not in (tagname, prio, nested, blocknode)
         self.tagname = tagname
         self.prio = prio
@@ -23,14 +23,14 @@ class tagparser(object):
         for t in tags:
             name2tag[t.tagname] = t
 
-        self.guard = (None, taginfo(tagname="", prio=sys.maxint, nested=True, blocknode=False))
+        self.guard = (None, taginfo(tagname="", prio=sys.maxsize, nested=True, blocknode=False))
 
-    def add(self, tagname=None,  prio=None, blocknode=False, nested=True):
+    def add(self, tagname=None, prio=None, blocknode=False, nested=True):
         t = taginfo(tagname=tagname, prio=prio, blocknode=blocknode, nested=nested)
         self.name2tag[t.tagname] = t
 
     def find_in_stack(self, tag):
-        pos = len(self.stack)-1
+        pos = len(self.stack) - 1
         while pos > 0:
             _, t = self.stack[pos]
             if t.tagname == tag.tagname:
@@ -58,14 +58,14 @@ class tagparser(object):
             else:
                 blocknode = t.blocknode
 
-            sub = tokens[i+1:pos]
-            tokens[i:pos] = [T(type=T.t_complex_tag,  children=sub,
-                               tagname=t.tagname, blocknode=blocknode,  vlist=tokens[i].vlist)]
-            pos = i+1
+            sub = tokens[i + 1:pos]
+            tokens[i:pos] = [T(type=T.t_complex_tag, children=sub,
+                               tagname=t.tagname, blocknode=blocknode, vlist=tokens[i].vlist)]
+            pos = i + 1
 
         return pos
 
-    def __call__(self, tokens,  xopts):
+    def __call__(self, tokens, xopts):
         pos = 0
         self.stack = stack = [self.guard]
         get = self.name2tag.get
@@ -85,10 +85,10 @@ class tagparser(object):
                     pos += 1
                 else:
                     if stack[-1][1].prio == tag.prio and not tag.nested:
-                        pos = self.close_stack(len(stack)-1, tokens, pos)
+                        pos = self.close_stack(len(stack) - 1, tokens, pos)
                         assert tokens[pos] is t
 
-                    stack.append((pos,  tag))
+                    stack.append((pos, tag))
                     pos += 1
             else:
                 assert t.type == T.t_html_tag_end

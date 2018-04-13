@@ -7,7 +7,7 @@ from mwlib import serve
 
 def mkcolldir(tmpdir, name):
     cid = serve.make_collection_id(
-        {'metabook': json.dumps({'title': name,  "type": "collection"})})
+        {'metabook': json.dumps({'title': name, "type": "collection"})})
     d = tmpdir.join(cid[0], cid[:2], cid).ensure(dir=1)
     d.join("output.rl").write("bla")
     return d

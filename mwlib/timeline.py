@@ -56,12 +56,12 @@ def drawTimeline(script, basedir=None):
     m.update(script)
     ident = m.hexdigest()
 
-    pngfile = os.path.join(basedir, ident+'.png')
+    pngfile = os.path.join(basedir, ident + '.png')
 
     if os.path.exists(pngfile):
         return pngfile
 
-    scriptfile = os.path.join(basedir, ident+'.txt')
+    scriptfile = os.path.join(basedir, ident + '.txt')
     open(scriptfile, 'w').write(script)
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
 

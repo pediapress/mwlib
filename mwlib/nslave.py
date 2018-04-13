@@ -65,7 +65,7 @@ def system(args, timeout=None):
         writemsg()
         lines = ["    " + x for x in stdout[-4096:].split("\n")]
         raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" %
-                           (retcode, pub_args,  "\n".join(lines)))
+                           (retcode, pub_args, "\n".join(lines)))
 
     writemsg()
 
@@ -162,13 +162,13 @@ class commands(object):
             self.qaddw(channel="makezip", payload=dict(params=params),
                        jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
             outfile = getpath("output.%s" % writer)
-            args = ["mw-render",  "-w",  writer, "-c",
-                    getpath("collection.zip"), "-o", outfile,  "--status", self.statusfile()]
+            args = ["mw-render", "-w", writer, "-c",
+                    getpath("collection.zip"), "-o", outfile, "--status", self.statusfile()]
 
             args.extend(_get_args(**params))
 
             system(args, timeout=15 * 60.0)
-            os.chmod(outfile, 0644)
+            os.chmod(outfile, 0o644)
             size = os.path.getsize(outfile)
             url = cacheurl + "/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
             return dict(url=url, size=size,

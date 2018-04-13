@@ -267,14 +267,14 @@ def test_link_in_table_caption():
     with_vlist = core.walknodel(r, lambda x: bool(x.vlist))
     print with_vlist
 
-    assert not with_vlist,  "no node should contain a vlist"
+    assert not with_vlist, "no node should contain a vlist"
 
 
 def test_html_entity_in_pre():
     r = parse_txt("<pre>&gt;</pre>")
     txt = r[0].children[0].text
     print txt
-    assert txt == ">",  "wrong text"
+    assert txt == ">", "wrong text"
 
 
 def test_nowiki_in_pre():
@@ -282,7 +282,7 @@ def test_nowiki_in_pre():
     r = parse_txt("<pre><nowiki>foo</nowiki></pre>")
     txt = r[0].children[0].text
     print txt
-    assert txt == "foo",  "wrong text"
+    assert txt == "foo", "wrong text"
 
 
 def test_s_tag():
@@ -326,7 +326,7 @@ def test_urllink_in_link():
     """http://code.pediapress.com/wiki/ticket/602"""
     r = parse_txt("[[foo|[http://baz.com baz]]]")
     li = core.walknodel(r, lambda x: x.type == T.t_complex_link)
-    assert len(li) == 1,  "expected one link"
+    assert len(li) == 1, "expected one link"
     nu = core.walknodel(r, lambda x: x.type == T.t_complex_named_url)
     show(r)
     assert len(nu) == 1, "expected exactly one named url"
@@ -338,7 +338,7 @@ def test_urllink_in_brackets():
     show(r)
     nu = core.walknodel(r, lambda x: x.type == T.t_complex_named_url)
     print nu
-    assert len(nu) == 1,  "expected exactly one named url"
+    assert len(nu) == 1, "expected exactly one named url"
 
 
 def test_lines_with_table_space():
@@ -416,7 +416,7 @@ def test_no_preformatted_inside_li():
 """)
     core.show(r)
     pre = core.walknodel(r, lambda x: x.type == T.t_complex_preformatted)
-    assert not pre,  "should not contain preformatted"
+    assert not pre, "should not contain preformatted"
 
 
 def test_preformatted_empty_line():
@@ -461,11 +461,11 @@ def test_tr_inside_caption():
     core.show(cap)
 
     rows = core.walknodel(r, lambda x: x.type == T.t_complex_table_row)
-    print "ROWS:",  rows
-    assert len(rows) == 1,  "no rows found"
+    print "ROWS:", rows
+    assert len(rows) == 1, "no rows found"
 
     rows = core.walknodel(cap, lambda x: x.type == T.t_complex_table_row)
-    print "ROWS:",  rows
+    print "ROWS:", rows
     assert len(rows) == 0, "row in table caption found"
 
 
@@ -486,14 +486,14 @@ def test_ul_inside_star():
     b2 = core.walknodel(r, baz)
 
     assert not b1, "baz should not be inside ul"
-    assert b2,  "baz missing"
+    assert b2, "baz missing"
 
 
 def test_div_vs_link():
     r = core.parse_txt(
         """[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]""")
     core.show(r)
-    assert r[0].type == T.t_complex_link,  "expected an image link"
+    assert r[0].type == T.t_complex_link, "expected an image link"
 
 
 def test_link_vs_section():
@@ -507,7 +507,7 @@ def test_div_vs_section():
 baz
 """)
     core.show(r)
-    assert r[0].level == 2,  "expected a section"
+    assert r[0].level == 2, "expected a section"
 
 
 def test_comment_in_gallery():
@@ -518,9 +518,9 @@ Image:ACDC_logo.gif|capshun<!--comment-->
 """)
     core.show(r)
     txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
-    print "TXT:",  repr(txt)
+    print "TXT:", repr(txt)
     assert "capshun" in txt, "bad text??"
-    assert "comment" not in txt,  "comment not stripped"
+    assert "comment" not in txt, "comment not stripped"
 
 
 def test_parserfun_in_gallery():
@@ -531,9 +531,9 @@ Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
 """)
     core.show(r)
     txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
-    print "TXT:",  repr(txt)
+    print "TXT:", repr(txt)
     assert "capshun" in txt, "bad text??"
-    assert "capshun yes" in txt,  "#if failed to expand"
+    assert "capshun yes" in txt, "#if failed to expand"
 
 
 def test_span_vs_lines():
@@ -543,7 +543,7 @@ def test_span_vs_lines():
     core.show(r)
 
     ul = core.walknodel(r, lambda x: x.tagname == "ul")
-    assert len(ul) == 1,  "expected one list"
+    assert len(ul) == 1, "expected one list"
 
 
 def test_named_url_in_double_brackets():
@@ -553,7 +553,7 @@ def test_named_url_in_double_brackets():
     named = core.walknodel(r, lambda x: x.type == T.t_complex_named_url)
     assert len(named) == 1, "expected a named url"
     txt = T.join_as_text(r)
-    print "TXT:",  repr(txt)
+    print "TXT:", repr(txt)
     assert "[" in txt, "missing ["
     assert "]" in txt, "missing ]"
     assert "[[" not in txt, "bad text"
@@ -564,7 +564,7 @@ def test_link_vs_namedurl():
     r = core.parse_txt("[[acdc [http://web.de bla]]")
     core.show(r)
     txt = T.join_as_text(r)
-    print "TXT:",  repr(txt)
+    print "TXT:", repr(txt)
 
     assert "[[acdc " in txt, "wrong text"
     assert txt.endswith("]"), "wrong text"
@@ -580,8 +580,8 @@ def test_span_vs_paragraph():
     r = core.parse_txt("foo<span>\n\nbar</span>\n\n")
     core.show(r)
     p = [x for x in r if x.tagname == "p"]
-    print "PARAS:",  p
-    assert len(p) == 2,  "expected two paragraphs"
+    print "PARAS:", p
+    assert len(p) == 2, "expected two paragraphs"
 
     txts = [T.join_as_text(x.children) for x in p]
     print txts

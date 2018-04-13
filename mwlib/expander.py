@@ -26,7 +26,7 @@ def get_templates(raw, title=u""):
         if isinstance(n, Template) and isinstance(n[0], basestring):
             name = n[0]
             if name.startswith("/"):
-                name = title+name
+                name = title + name
             used.add(name)
 
         todo.extend(n)

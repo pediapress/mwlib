@@ -33,7 +33,7 @@ class TrustedRevisions(object):
         p = self.site.Pages[title]
         for rev in p.revisions():
             # add basic info
-            rev['age'] = (now - time.mktime(rev['timestamp']))/(24*3600)  # days
+            rev['age'] = (now - time.mktime(rev['timestamp'])) / (24 * 3600)  # days
             rev['title'] = title
 
             # don't use bot revs

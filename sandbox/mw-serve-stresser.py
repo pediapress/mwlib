@@ -20,7 +20,7 @@ from mwlib import mwapidb, utils, log, bookshelf
 import mwlib.metabook
 
 
-RENDER_TIMEOUT_DEFAULT = 60*60  # 60 minutes
+RENDER_TIMEOUT_DEFAULT = 60 * 60  # 60 minutes
 LICENSE_URL = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
 
 system = 'mw-serve-stresser'
@@ -46,7 +46,7 @@ def getRandomArticles(api, min=1, max=100):
     # "http://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=10"
     num = random.randint(min, max)
     articles = set()
-    steps = (1+num/10)
+    steps = (1 + num / 10)
     print num, steps
     for i in range(steps):
         res = api.query(list="random", rnnamespace=0, rnlimit=10)
@@ -211,7 +211,7 @@ def checkservice(api, serviceurl, baseurl, writer, maxarticles,
         res = getRenderStatus(res["collection_id"], serviceurl, writer)
         if res["state"] != "progress":
             break
-        if render_timeout and (time.time()-st) > render_timeout:
+        if render_timeout and (time.time() - st) > render_timeout:
             log.timeout('Killing render proc for collection ID %r' % collection_id)
             r = postRenderKillCommand(collection_id, serviceurl, writer)
             if r['killed']:
@@ -292,7 +292,7 @@ def main():
                 log.check('FAIL!')
         except KeyboardInterrupt:
             break
-        except:
+        except BaseException:
             fail_count += 1
             log.check('EPIC FAIL!!!')
             utils.report(

@@ -49,7 +49,7 @@ def pytest_configure(config):
         print "conftest.py: set environment variable XNET=0 to enable them."
 
         if kw:
-            kw = kw+" -xnet"
+            kw = kw + " -xnet"
         else:
             kw = "-xnet"
         config.option.keyword = kw

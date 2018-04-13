@@ -18,7 +18,7 @@ def mwzip(metabook):
 def render_get_text(metabook):
     z = mwzip(metabook)
     os.environ["S"] = z
-    dst = os.environ["D"] = z.replace(".zip",  ".pdf")
+    dst = os.environ["D"] = z.replace(".zip", ".pdf")
     err = os.system("mw-render -c $S -o $D -w rl")
     assert err == 0, "mw-render failed"
     txt = utils.pdf2txt(dst)
@@ -28,7 +28,7 @@ def render_get_text(metabook):
 def no_redirect(mb):
     mb = os.path.join(here, mb)
     txt = render_get_text(mb)
-    print "txt:",  repr(txt)
+    print "txt:", repr(txt)
     assert "redirect" not in txt.lower(), "redirect not resolved"
 
 

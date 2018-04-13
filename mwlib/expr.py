@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 # based on pyparsing example code (SimpleCalc.py)
 
-"""Implementation of mediawiki's #expr template. 
+"""Implementation of mediawiki's #expr template.
 http://meta.wikimedia.org/wiki/ParserFunctions#.23expr:
 """
 
@@ -102,14 +102,14 @@ a("trunc", 9, long, 1)
 a("e", 11, lambda x, y: x * 10 ** y)
 a("E", 11, lambda x, y: x * 10 ** y)
 
-a("*", 8, lambda x, y: x*y)
-a("/", 8, lambda x, y: x/y)
-a("div", 8, lambda x, y: x/y)
+a("*", 8, lambda x, y: x * y)
+a("/", 8, lambda x, y: x / y)
+a("div", 8, lambda x, y: x / y)
 a("mod", 8, lambda x, y: int(x) % int(y))
 
 
-a("+", 6, lambda x, y: x+y)
-a("-", 6, lambda x, y: x-y)
+a("+", 6, lambda x, y: x + y)
+a("-", 6, lambda x, y: x - y)
 
 a("round", 5, _myround)
 
@@ -168,7 +168,7 @@ class Expr(object):
             elif operator == "(":
                 operator_stack.append("(")
             elif operator == ")":
-                while 1:
+                while True:
                     if not operator_stack:
                         raise ExprError("unbalanced parenthesis")
                     t = operator_stack.pop()
@@ -227,7 +227,7 @@ def main():
     except ImportError:
         pass
 
-    while 1:
+    while True:
         input_string = raw_input("> ")
         if not input_string:
             continue
@@ -235,14 +235,14 @@ def main():
         stime = time.time()
         try:
             res = expr(input_string)
-        except Exception, err:
+        except Exception as err:
             print "ERROR:", err
             import traceback
             traceback.print_exc()
 
             continue
         print res
-        print time.time()-stime, "s"
+        print time.time() - stime, "s"
 
 
 if __name__ == '__main__':

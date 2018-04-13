@@ -20,7 +20,7 @@ class Test_xnet_zipwiki(object):
             os.unlink(cls.zip_filename)
 
     def setup_method(self, method):
-        print "reading",  self.zip_filename
+        print "reading", self.zip_filename
         self.env = wiki.makewiki(self.zip_filename)
         self.wikidb = self.env.wiki
         self.imagedb = self.env.images

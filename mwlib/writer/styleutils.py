@@ -22,9 +22,9 @@ def _colorFromStr(colorStr):
 
     def hexshort2rgb(r, g, b):
         try:
-            def conv(c): return max(0, min(1.0, int(2*c, 16) / 255))
+            def conv(c): return max(0, min(1.0, int(2 * c, 16) / 255))
             return (conv(r), conv(g), conv(b))
-        except:
+        except BaseException:
             return None
 
     def rgb2rgb(r, g, b):
@@ -37,13 +37,13 @@ def _colorFromStr(colorStr):
     def colorname2rgb(colorStr):
         rgb = colorname2rgb_map.get(colorStr.lower(), None)
         if rgb:
-            return tuple(max(0, min(1, channel/255)) for channel in rgb)
+            return tuple(max(0, min(1, channel / 255)) for channel in rgb)
         else:
             return None
 
     try:
         colorStr = str(colorStr)
-    except:
+    except BaseException:
         return None
     rgbval = re.search('rgb\( *(\d{1,}) *, *(\d{1,3}) *, *(\d{1,3}) *\)', colorStr)
     hexval = re.search('#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})', colorStr)
@@ -60,7 +60,12 @@ def _colorFromStr(colorStr):
 
 
 def _rgb2GreyScale(rgb_triple, darknessLimit=1):
-    grey = min(1, max(darknessLimit, 0.3*rgb_triple[0] + 0.59*rgb_triple[1] + 0.11*rgb_triple[2]))
+    grey = min(1, max(darknessLimit, 0.3 *
+                      rgb_triple[0] +
+                      0.59 *
+                      rgb_triple[1] +
+                      0.11 *
+                      rgb_triple[2]))
     return (grey, grey, grey)
 
 
@@ -199,7 +204,7 @@ def parseLength(txt):
     return (length, unit)
 
 
-mw_px2pt = 12/16
+mw_px2pt = 12 / 16
 mw_em2pt = 9.6
 
 
@@ -214,5 +219,5 @@ def scaleLength(length_str, reference=None):
     elif unit == 'em':
         return length * mw_em2pt
     elif unit == '%' and reference:
-        return length/100 * reference
+        return length / 100 * reference
     return 0

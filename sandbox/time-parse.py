@@ -10,13 +10,13 @@ from mwlib.refine import compat
 
 stime = time.time()
 r = compat.parse_txt(s)
-print "parse:", time.time()-stime
+print "parse:", time.time() - stime
 
 stime = time.time()
 advtree.buildAdvancedTree(r)
-print "tree", time.time()-stime
+print "tree", time.time() - stime
 
 stime = time.time()
 tc = treecleaner.TreeCleaner(r)
 tc.cleanAll()
-print "clean:", time.time()-stime
+print "clean:", time.time() - stime

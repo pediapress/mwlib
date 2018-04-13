@@ -175,7 +175,7 @@ class SanityChecker(object):
         self.rules.append((rule, actioncb))
 
     def check(self, tree):
-        """ 
+        """
         check each node with each rule
         on failure call callback
         """

@@ -24,7 +24,7 @@ def simplify(node, **kwargs):
             last = None
 
     for i, ii in enumerate(toremove):
-        del node.children[ii-i]
+        del node.children[ii - i]
 
 
 def removeBoilerplate(node, **kwargs):

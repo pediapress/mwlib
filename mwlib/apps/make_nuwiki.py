@@ -32,7 +32,7 @@ class start_fetcher(object):
             api.login(self.username, self.password, self.domain)
         return api
 
-    def fetch_pages_from_metabook(self,  api):
+    def fetch_pages_from_metabook(self, api):
         fsout = self.fsout
         metabook = self.metabook
 
@@ -65,7 +65,7 @@ class start_fetcher(object):
         if not base_url.endswith("/"):
             base_url += "/"
         api_url = "".join([base_url, "api", options.script_extension])
-        if isinstance(api_url,  unicode):
+        if isinstance(api_url, unicode):
             api_url = api_url.encode("utf-8")
         self.api_url = api_url
 
@@ -138,8 +138,8 @@ def wikitrust(baseurl, metabook):
 
             print "chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r" % (
                 r["title"], r["age"], r["revid"], r["user"])
-        except Exception, err:
-            print "error choosing trusted revision for", repr(x.title),  repr(err)
+        except Exception as err:
+            print "error choosing trusted revision for", repr(x.title), repr(err)
 
 
 def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
@@ -148,7 +148,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         id2wiki[x.ident] = (x, [])
 
     for x in metabook.articles():
-        assert x.wikiident in id2wiki, "no wikiconf for %r (%s)" % (x.wikiident,  x)
+        assert x.wikiident in id2wiki, "no wikiconf for %r (%s)" % (x.wikiident, x)
         id2wiki[x.wikiident][1].append(x)
 
     is_multiwiki = len(id2wiki) > 1
@@ -184,7 +184,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     if is_multiwiki:
         if not os.path.exists(fsdir):
             os.makedirs(fsdir)
-        open(os.path.join(fsdir, "metabook.json"),  "wb").write(metabook.dumps())
+        open(os.path.join(fsdir, "metabook.json"), "wb").write(metabook.dumps())
         myjson.dump(dict(format="multi-nuwiki"), open(os.path.join(fsdir, "nfo.json"), "wb"))
 
     pool = gevent.pool.Pool()
@@ -193,5 +193,5 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     pool.join(raise_error=True)
 
     import signal
-    signal.signal(signal.SIGINT,  signal.SIG_DFL)
-    signal.signal(signal.SIGTERM,  signal.SIG_DFL)
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)

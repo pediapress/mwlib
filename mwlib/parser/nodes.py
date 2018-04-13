@@ -21,8 +21,9 @@ class Node(utoken.token):
     def __repr__(self):
         try:
             return utoken.token.__repr__(self)
-        except:
-            return "%s %r: %s children" % (self.__class__.__name__, self.caption, len(self.children))
+        except BaseException:
+            return "%s %r: %s children" % (self.__class__.__name__,
+                                           self.caption, len(self.children))
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)

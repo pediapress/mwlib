@@ -10,7 +10,7 @@ from subprocess import Popen, PIPE
 
 try:
     import xml.etree.ElementTree as ET
-except:
+except BaseException:
     from elementtree import ElementTree as ET
 
 from mwlib import log
@@ -42,7 +42,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     if output_path:
         try:  # for some reason os.getcwd failed at some point. this should be investigated...
             curdir = os.getcwd()
-        except:
+        except BaseException:
             curdir = None
         os.chdir(output_path)
     latex = latex.lstrip()
@@ -106,7 +106,8 @@ def _renderMathTexvc(latex, output_path, output_mode='png', resolution_in_dpi=12
     return None
 
 
-def renderMath(latex, output_path=None, output_mode='png', render_engine='blahtexml', resolution_in_dpi=120):
+def renderMath(latex, output_path=None, output_mode='png',
+               render_engine='blahtexml', resolution_in_dpi=120):
     """
     @param latex: LaTeX code
     @type latex: unicode
@@ -168,6 +169,6 @@ if __name__ == "__main__":
 # """,
 # ]
 
-    print renderMath(latex,  output_mode='mathml')
-    print renderMath(latex,  output_path="/tmp/", output_mode='png')
-    print renderMath(latex,  output_path="/tmp/", output_mode='png', render_engine='texvc')
+    print renderMath(latex, output_mode='mathml')
+    print renderMath(latex, output_path="/tmp/", output_mode='png')
+    print renderMath(latex, output_path="/tmp/", output_mode='png', render_engine='texvc')

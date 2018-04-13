@@ -54,7 +54,7 @@ class PODClient(object):
         if fh is None:
             fh = open(filename, "rb")
 
-        boundary = "-"*20 + ("%f" % time.time()) + "-"*20
+        boundary = "-" * 20 + ("%f" % time.time()) + "-" * 20
 
         items = []
         items.append("--" + boundary)
@@ -71,14 +71,14 @@ class PODClient(object):
         items.append('')
         after = "\r\n".join(items)
 
-        clen = len(before)+len(after)+os.path.getsize(filename)
+        clen = len(before) + len(after) + os.path.getsize(filename)
 
         print "POSTING TO:", self.posturl
 
         pr = urlparse.urlparse(self.posturl)
         path = pr.path
         if pr.query:
-            path += "?"+pr.query
+            path += "?" + pr.query
 
         h = httplib.HTTP(pr.hostname, pr.port)
         h.putrequest("POST", path)
@@ -90,7 +90,7 @@ class PODClient(object):
 
         h.send(before)
 
-        while 1:
+        while True:
             data = fh.read(4096)
             if not data:
                 break

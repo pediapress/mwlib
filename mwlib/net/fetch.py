@@ -15,7 +15,7 @@ import gevent.event
 
 try:
     from gevent.lock import Semaphore
-except:
+except BaseException:
     from gevent.coros import Semaphore
 
 
@@ -199,7 +199,7 @@ def getblock(lst, limit):
 
 
 def callwhen(event, fun):
-    while 1:
+    while True:
         try:
             event.wait()
             event.clear()
@@ -219,7 +219,7 @@ def download_to_file(url, path, temp_path):
         out = None
         size_read = 0
         f = opener.open(url)
-        while 1:
+        while True:
             data = f.read(16384)
             if not data:
                 break
@@ -233,7 +233,7 @@ def download_to_file(url, path, temp_path):
             os.rename(temp_path, path)
         # print "GOT", url, size_read
 
-    except Exception, err:
+    except Exception as err:
         print "ERROR DOWNLOADING", url, err
         raise
 
@@ -469,8 +469,7 @@ class fetcher(object):
             else:
                 titles.add(p[0])
 
-        titles = list(titles)
-        titles.sort()
+        titles = sorted(titles)
 
         revids = list(revids)
         revids.sort()
@@ -489,7 +488,7 @@ class fetcher(object):
         jt = self.count_total + len(self.pages_todo) // limit + len(self.revids_todo) // limit
         jt += len(self.title2latest)
 
-        self.progress.set_count(self, self.count_done + qc,  jt + qc)
+        self.progress.set_count(self, self.count_done + qc, jt + qc)
 
     def _add_catmember(self, title, entry):
         try:
@@ -511,7 +510,7 @@ class fetcher(object):
                 if cattitle:
                     self._add_catmember(cattitle, e)
 
-    def _find_redirect(self,  data):
+    def _find_redirect(self, data):
         pages = data.get("pages", {}).values()
         targets = []
         for p in pages:

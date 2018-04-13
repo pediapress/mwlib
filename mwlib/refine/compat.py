@@ -64,7 +64,8 @@ def _change_classes(node):
 
         node.__class__ = klass
 
-        if node.type == T.t_hrule or (node.type in (T.t_html_tag, T.t_html_tag_end) and node.rawtagname == 'hr'):
+        if node.type == T.t_hrule or (node.type in (
+                T.t_html_tag, T.t_html_tag_end) and node.rawtagname == 'hr'):
             node.__class__ = N.TagNode
             node.caption = "hr"
 

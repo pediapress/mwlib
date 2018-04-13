@@ -45,12 +45,12 @@ def show(node, out=None, indent=0, verbose=False):
             show(x, out=out, indent=indent, verbose=verbose)
         return
 
-    out.write("%s%r\n" % ("    "*indent, node))
+    out.write("%s%r\n" % ("    " * indent, node))
 
     children = node.children
     if children:
         for x in children:
-            show(x, out=out, indent=indent+1, verbose=verbose)
+            show(x, out=out, indent=indent + 1, verbose=verbose)
 
 
 class _show(object):
@@ -122,7 +122,7 @@ class token(object):
 
     def _get_text(self):
         if self._text is None and self.source is not None:
-            self._text = self.source[self.start:self.start+self.len]
+            self._text = self.source[self.start:self.start + self.len]
         return self._text
 
     def _set_text(self, t):
@@ -141,7 +141,7 @@ class token(object):
         self.__dict__.update(kw)
 
     def __repr__(self):
-        if type(self) is token:
+        if isinstance(self, token):
             r = [self.token2name.get(self.type, self.type)]
         else:
             r = [self.__class__.__name__]
@@ -231,11 +231,11 @@ def _analyze_html_tag(t):
 
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
-        print type, repr(text[start:start+len])
+        print type, repr(text[start:start + len])
 
 
 def scan(text):
-    text += u"\0"*32
+    text += u"\0" * 32
     return _mwscan.scan(text)
 
 
@@ -261,9 +261,9 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
         res = []
 
         def g():
-            return text[start:start+tlen]
+            return text[start:start + tlen]
 
-        for type,  start, tlen in tokens:
+        for type, start, tlen in tokens:
 
             if type == token.t_begintable:
                 txt = g()

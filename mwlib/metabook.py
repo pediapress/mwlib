@@ -47,7 +47,7 @@ class mbobj(object):
 
         self.__dict__[key] = val
 
-    def __contains__(self,  key):
+    def __contains__(self, key):
         warnings.warn("deprecated __contains__ %r in " % (key, ), DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
@@ -70,7 +70,7 @@ class mbobj(object):
         return d
 
     def __repr__(self):
-        return "<%s %r>" % (self.__class__.__name__,  self.__dict__)
+        return "<%s %r>" % (self.__class__.__name__, self.__dict__)
 
 
 class wikiconf(mbobj):
@@ -102,7 +102,7 @@ class collection(mbobj):
         title = title.strip()
         if displaytitle is not None:
             displaytitle = displaytitle.strip()
-        art = article(title=title, displaytitle=displaytitle,  **kw)
+        art = article(title=title, displaytitle=displaytitle, **kw)
 
         if self.items and isinstance(self.items[-1], chapter):
             self.items[-1].items.append(art)
@@ -113,7 +113,7 @@ class collection(mbobj):
         from mwlib import myjson
         return myjson.dumps(self, sort_keys=True, indent=4)
 
-    def walk(self,  filter_type=None):
+    def walk(self, filter_type=None):
         todo = deque(self.items)
         res = []
         while todo:

@@ -2,7 +2,7 @@
 converts LaTex to Mathml using blahtexml
 
 FIXME: Robustness, error handling, ....
-# see integration in MW: 
+# see integration in MW:
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/blahtex/blahtex/includes/Math.php?rev=HEAD&content-type=text/vnd.viewcvs-markup
 
 FIXME: replace with texvc which is deistributed with MediaWiki
@@ -13,7 +13,7 @@ import sys
 import popen2
 try:
     import xml.etree.ElementTree as ET
-except:
+except BaseException:
     from elementtree import ElementTree as ET
 from xml.parsers.expat import ExpatError
 

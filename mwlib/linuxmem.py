@@ -1,4 +1,4 @@
-_scale = dict(kB=1024.0,  KB=1024.0,
+_scale = dict(kB=1024.0, KB=1024.0,
               mB=1024.0 * 1024.0, MB=1024.0 * 1024.0)
 
 # convert byte o MB
@@ -18,7 +18,7 @@ def _readproc(key):
             return 0.0  # invalid format?
          # convert Vm value to bytes
         return float(v[1]) * _scale[v[2]]
-    except:
+    except BaseException:
         return 0.0  # non-Linux?
 
 

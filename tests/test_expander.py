@@ -344,7 +344,7 @@ def test_expand_after_named():
     db = DictDB(
         show="{{{1}}}",
         a="a=bc")
-    expandstr("{{show|{{a}}}}", "a=bc",  wikidb=db)
+    expandstr("{{show|{{a}}}}", "a=bc", wikidb=db)
 
 
 def test_padleft():
@@ -399,7 +399,8 @@ def test_servername():
 
 
 def test_1x_newline_and_spaces():
-    # see http://en.wikipedia.org/wiki/Help:Newlines_and_spaces#Spaces_and.2For_newlines_as_value_of_an_unnamed_parameter
+    # see
+    # http://en.wikipedia.org/wiki/Help:Newlines_and_spaces#Spaces_and.2For_newlines_as_value_of_an_unnamed_parameter
     wikidb = DictDB()
     wikidb.d['1x'] = '{{{1}}}'
 
@@ -538,7 +539,7 @@ foo was missing<ref>bar</ref> <!-- some comment--> baz
 
 <references />
 """
-    e = expander.Expander(s,  pagename="test",  wikidb=DictDB())
+    e = expander.Expander(s, pagename="test", wikidb=DictDB())
     raw = e.expandTemplates()
     print repr(raw)
     assert u"foo was missing" in raw, "text is missing"

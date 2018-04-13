@@ -10,7 +10,7 @@ citeweb = u"""
   ||You must specify  '''''title = ''''' and '''''url = ''''' when using {{[[Template:cite web|cite web]]}}.
 {{#if: {{NAMESPACE}}|| [[Category:Articles with broken citations]]}}
 }}{{
-#if: {{{archiveurl|}}}{{{archivedate|}}} 
+#if: {{{archiveurl|}}}{{{archivedate|}}}
   | {{#if: {{#if: {{{archiveurl|}}}| {{#if: {{{archivedate|}}} |1}}}}
     ||You must specify '''''archiveurl = ''''' and '''''archivedate = ''''' when using {{[[Template:cite web|cite web]]}}.
 {{#if: {{NAMESPACE}}|| [[Category:Articles with broken citations]]}}
@@ -41,19 +41,19 @@ citeweb = u"""
 }}{{#if: {{{last|}}}{{{author|}}}
   | .&#32;}}{{
   #if: {{{editor|}}}
-  | &#32;{{{editor}}}: 
+  | &#32;{{{editor}}}:
 }}{{#if: {{{archiveurl|}}}
     | {{#if: {{{archiveurl|}}} | {{#if: {{{title|}}} | [{{{archiveurl}}} {{{title}}}] }}}}
     | {{#if: {{{url|}}} | {{#if: {{{title|}}} | [{{{url}}} {{{title}}}] }}}}
 }}{{#if: {{{format|}}} | &#32;({{{format|}}})
-}}{{#if: {{{language|}}} | &#32;<span style="color:#555;">({{{language}}})</span> 
+}}{{#if: {{{language|}}} | &#32;<span style="color:#555;">({{{language}}})</span>
 }}{{#if: {{{work|}}}
   | .&#32;''{{{work}}}''
 }}{{#if: {{{pages|}}}
   | &#32;{{{pages}}}
 }}{{#if: {{{publisher|}}}
   | .&#32;{{{publisher}}}{{#if: {{{author|}}}{{{last|}}}
-    | 
+    |
     | {{#if: {{{date|}}}{{{year|}}}{{{month|}}} || }}
   }}
 }}{{#if: {{{author|}}}{{{last|}}}
@@ -68,7 +68,7 @@ citeweb = u"""
   }}
 }}.{{#if: {{{archivedate|}}}
   | &#32;Archived from [{{{url}}} the original] on [[{{{archivedate}}}]].
-}}{{#if: {{{doi|}}} 
+}}{{#if: {{{doi|}}}
   | &#32;[[Digital object identifier|DOI]]:[http://dx.doi.org/{{{doi|{{{doilabel|}}}}}} {{{doi}}}].
 }}{{#if: {{{accessdate|}}}
   | &#32;Retrieved on [[{{{accessdate}}}]]{{#if: {{{accessyear|}}} | , [[{{{accessyear}}}]] }}.
@@ -76,7 +76,7 @@ citeweb = u"""
   | &#32;Retrieved on {{{accessmonthday}}}{{#if: {{{accessyear|}}} | , {{{accessyear}}} }}.
 }}{{#if: {{{accessdaymonth|}}}
   | &#32;Retrieved on {{{accessdaymonth}}}{{#if: {{{accessyear|}}} | &#32;{{{accessyear}}} }}.
-}}{{#if: {{{quote|}}} 
+}}{{#if: {{{quote|}}}
   | &nbsp;“{{{quote}}}”
 }}</includeonly><noinclude>
 
@@ -95,7 +95,7 @@ snippet = """
 """
 
 db = expander.DictDB(citeweb=citeweb)
-e = expander.Expander(snippet*1000, pagename='test', wikidb=db)
+e = expander.Expander(snippet * 1000, pagename='test', wikidb=db)
 stime = time.time()
 e.expandTemplates()
-print time.time()-stime
+print time.time() - stime

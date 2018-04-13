@@ -1206,7 +1206,7 @@ def test_imagemod_localised_magicwords():
     ]
 
     def parsei(s, magicwords):
-        res = uparser.parseString(title='test',  raw=s, magicwords=magicwords)
+        res = uparser.parseString(title='test', raw=s, magicwords=magicwords)
         img = res.find(parser.ImageLink)[0]
         return img
 

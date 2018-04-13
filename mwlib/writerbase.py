@@ -25,7 +25,7 @@ def build_book(env, status_callback=None):
 
     num_articles = float(len(env.metabook.articles()))
     if num_articles > 0:
-        progress_step = 100/num_articles
+        progress_step = 100 / num_articles
 
     lastChapter = None
     for item in env.metabook.walk():

@@ -26,12 +26,12 @@ def _findall(text, substr):
     # Also finds overlaps
     sites = []
     i = 0
-    while 1:
+    while True:
         j = text.find(substr, i)
         if j == -1:
             break
         sites.append(j)
-        i = j+1
+        i = j + 1
     return sites
 
 # Every 28 years the calendar repeats, except through century leap
@@ -49,17 +49,17 @@ def strftime(dt, fmt):
     # For every non-leap year century, advance by
     # 6 years to get into the 28-year repeat cycle
     delta = 2000 - year
-    off = 6*(delta // 100 + delta // 400)
+    off = 6 * (delta // 100 + delta // 400)
     year = year + off
 
     # Move to around the year 2000
-    year = year + ((2000 - year)//28)*28
+    year = year + ((2000 - year) // 28) * 28
     timetuple = dt.timetuple()
     s1 = time.strftime(fmt, (year,) + timetuple[1:])
     sites1 = _findall(s1, str(year))
 
-    s2 = time.strftime(fmt, (year+28,) + timetuple[1:])
-    sites2 = _findall(s2, str(year+28))
+    s2 = time.strftime(fmt, (year + 28,) + timetuple[1:])
+    sites2 = _findall(s2, str(year + 28))
 
     sites = []
     for site in sites1:
@@ -69,7 +69,7 @@ def strftime(dt, fmt):
     s = s1
     syear = "%4d" % (dt.year,)
     for site in sites:
-        s = s[:site] + syear + s[site+4:]
+        s = s[:site] + syear + s[site + 4:]
     return s
 
 # Make sure that the day names are in order
@@ -90,7 +90,7 @@ def test():
         days.append(datetime.date(2000, 1, i).strftime("%A"))
     nextday = {}
     for i in range(8):
-        nextday[days[i]] = days[i+1]
+        nextday[days[i]] = days[i + 1]
 
     startdate = datetime.date(1, 1, 1)
     enddate = datetime.date(2000, 8, 1)

@@ -11,8 +11,8 @@ from mwlib.serve import \
 
 @pytest.fixture
 def tree(tmpdir):
-    tmpdir.join("a"*16).ensure(dir=1)
-    tmpdir.join("b"*16, "collection.zip").ensure()
+    tmpdir.join("a" * 16).ensure(dir=1)
+    tmpdir.join("b" * 16, "collection.zip").ensure()
     return sorted(get_collection_dirs(tmpdir.strpath))
 
 

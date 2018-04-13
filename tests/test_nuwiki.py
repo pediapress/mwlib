@@ -20,7 +20,7 @@ class Test_nuwiki_xnet(object):
                                'Monty Python',
                                ])
         assert os.path.isfile(cls.zipfn)
-        assert err == 0,  "command failed"
+        assert err == 0, "command failed"
 
     def teardown_class(cls):
         if os.path.exists(cls.tmpdir):

@@ -20,7 +20,7 @@ def setup():
     def rec(elements, parent):
         last = None
         for c in elements:
-            if type(c) == type([]):
+            if isinstance(c, type([])):
                 assert last
                 rec(c, last)
             else:

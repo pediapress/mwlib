@@ -43,7 +43,8 @@ def fix_wikipedia_siteinfo(siteinfo):
 
     # --- http://code.pediapress.com/wiki/ticket/754
 
-    if u'\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [x.get("prefix", u"")[2:] for x in siteinfo.get("interwikimap", [])]:
+    if u'\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [
+            x.get("prefix", u"")[2:] for x in siteinfo.get("interwikimap", [])]:
         print "WARNING: interwikimap contains garbage"
         from mwlib import siteinfo as simod
         en = simod.get_siteinfo("en")
@@ -68,7 +69,8 @@ class nshandler(object):
     def __init__(self, siteinfo):
         assert siteinfo is not None
 
-        if 'general' in siteinfo and siteinfo['general'].get('server', '').endswith(".wikipedia.org") and 'interwikimap' in siteinfo:
+        if 'general' in siteinfo and siteinfo['general'].get('server', '').endswith(
+                ".wikipedia.org") and 'interwikimap' in siteinfo:
             fix_wikipedia_siteinfo(siteinfo)
 
         self.siteinfo = siteinfo
@@ -154,7 +156,7 @@ class nshandler(object):
         if prefix:
             prefix += ":"
 
-        return (nsnum, suffix, "%s%s" % (prefix,  suffix))
+        return (nsnum, suffix, "%s%s" % (prefix, suffix))
 
     def get_nsname_by_number(self, ns):
         return self.siteinfo["namespaces"][str(ns)]["*"]

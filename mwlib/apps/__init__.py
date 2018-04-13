@@ -92,7 +92,7 @@ def post():
         status(status='uploading', progress=0)
         podclient.post_zipfile(options.input)
         status(status='finished', progress=100)
-    except Exception, e:
+    except Exception as e:
         status(status='error')
         raise
 
@@ -142,9 +142,9 @@ def parse():
                 continue
             stime = time.time()
             a = uparser.parseString(x, raw=raw, wikidb=db)
-        except Exception, err:
+        except Exception as err:
             print "F", repr(x), err
             if options.tb:
                 traceback.print_exc()
         else:
-            print "G", time.time()-stime, repr(x)
+            print "G", time.time() - stime, repr(x)

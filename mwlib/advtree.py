@@ -23,7 +23,7 @@ import time
 from mwlib.parser import Math, Ref, Link, URL, NamedURL  # not used but imported
 from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink  # not used but imported
 from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
-from mwlib.parser import Item, ItemList,  Node, Table, Row, Cell, Paragraph, PreFormatted
+from mwlib.parser import Item, ItemList, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, Timeline
 from mwlib.parser import ImageLink, Article, Book, Chapter
 import copy
@@ -56,7 +56,7 @@ def debug(method):  # use as decorator
 class AdvancedNode:
     """Mixin Class that extends Nodes so they become easier accessible.
 
-    Allows to traverse the tree in any direction and 
+    Allows to traverse the tree in any direction and
     build derived convinience functions
    """
 
@@ -109,7 +109,7 @@ class AdvancedNode:
         """Remove child node c and replace with newchildren if given."""
 
         idx = _idIndex(self.children, c)
-        self.children[idx:idx+1] = newchildren
+        self.children[idx:idx + 1] = newchildren
 
         c.parent = None
         assert not self.hasChild(c)
@@ -173,7 +173,7 @@ class AdvancedNode:
         if idx - 1 < 0:
             return None
         else:
-            return s[idx-1]
+            return s[idx - 1]
 
     def getNext(self):
         """Return next sibling"""
@@ -182,10 +182,10 @@ class AdvancedNode:
             idx = _idIndex(s, self)
         except ValueError:
             return None
-        if idx+1 >= len(s):
+        if idx + 1 >= len(s):
             return None
         else:
-            return s[idx+1]
+            return s[idx + 1]
 
     def getLast(self):  # FIXME might return self. is this intended?
         """Return last sibling"""
@@ -281,7 +281,7 @@ class AdvancedNode:
             else:
                 try:
                     return unicode(val)
-                except:
+                except BaseException:
                     return u''
 
         def ensureDict(val):
@@ -433,7 +433,8 @@ class Blockquote(Style, AdvancedNode):
     _tag = "blockquote"
 
 
-class Indented(Style, AdvancedNode):  # fixme: node is deprecated, now style node ':' always becomes a DefinitionDescription
+class Indented(
+        Style, AdvancedNode):  # fixme: node is deprecated, now style node ':' always becomes a DefinitionDescription
     "margin to the left"
 
     def getIndentLevel(self):
@@ -599,7 +600,7 @@ AdvancedNode.isblocknode
 
 Image depends on result of Image.isInline() see above
 
-Open Issues: Math, Magic, (unknown) TagNode 
+Open Issues: Math, Magic, (unknown) TagNode
 
 """
 _blockNodes = (Blockquote, Book, Chapter, Article, Section, Paragraph, Div, Center,
@@ -709,12 +710,12 @@ def fixStyleNodes(node):
 
 def removeNodes(node):
     """
-    the parser generates empty Node elements that do 
+    the parser generates empty Node elements that do
     nothing but group other nodes. we remove them here
     """
     if node.__class__ == Node:
         # first child of section groups heading text - grouping Node must not be removed
-        if not (node.previous == None and node.parent.__class__ == Section):
+        if not (node.previous is None and node.parent.__class__ == Section):
             node.parent.replaceChild(node, node.children)
 
     for c in node.children[:]:
@@ -749,7 +750,7 @@ def removeNewlines(node):
 def buildAdvancedTree(root):  # USE WITH CARE
     """
     extends and cleans parse trees
-    do not use this funcs without knowing whether these 
+    do not use this funcs without knowing whether these
     Node modifications fit your problem
     """
     funs = [extendClasses, fixTagNodes, removeNodes, removeNewlines,

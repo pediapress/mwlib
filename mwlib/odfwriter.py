@@ -114,7 +114,8 @@ class ODFWriter(object):
     ignoreUnknownNodes = True
     namedLinkCount = 1
 
-    def __init__(self, env=None, status_callback=None, language="en", namespace="en.wikipedia.org", creator="", license="GFDL"):
+    def __init__(self, env=None, status_callback=None, language="en",
+                 namespace="en.wikipedia.org", creator="", license="GFDL"):
         self.env = env
         self.status_callback = status_callback
         self.language = language
@@ -199,7 +200,8 @@ class ODFWriter(object):
                 assert c.parentNode is not None  # this check fails if the child could not be added
                 return True
             except odf.element.IllegalChild:
-                # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed in ' u'text:span' ', dumping'
+                # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed
+                # in ' u'text:span' ', dumping'
                 try:  # maybe c has no attribute type
                     art = obj.getParentNodesByClass(advtree.Article)[0]
                     log("in article ", art.caption)
@@ -278,7 +280,7 @@ class ODFWriter(object):
         # getSectionLevel() == 1 for most outer section level
         level = 1 + obj.getSectionLevel()  # min: 1+0 = 1
         level = min(level, len(hXstyles))
-        hX = hXstyles[level-1]
+        hX = hXstyles[level - 1]
 
         r = text.Section(stylename=style.sect, name=title)
         r.addElement(text.H(outlinelevel=level, stylename=hX, text=title))
@@ -481,7 +483,7 @@ class ODFWriter(object):
             "\n": text.LineBreak,
             " ": text.S}
         col = []
-        for c in obj.getAllDisplayText().replace("\t", " "*8).strip():
+        for c in obj.getAllDisplayText().replace("\t", " " * 8).strip():
             if c in rmap:
                 p.addText(u"".join(col))
                 col = []
@@ -505,14 +507,14 @@ class ODFWriter(object):
 
     def owriteBlockquote(self, s):
         "margin to the left & right"
-        indentlevel = len(s.caption)-1
+        indentlevel = len(s.caption) - 1
         return ParagraphProxy(stylename=style.blockquote)
 
     def owriteIndented(self, s):
         "Writes a indented Paragraph. Margin to the left.\n Need a lenght of Indented.caption of 1,2 or 3."
         indentStyles = (style.indentedSingle, style.indentedDouble,
                         style.indentedTriple)  # 0, 1, 2
-        indentLevel = min(len(s.caption)-1, len(indentStyles)-1)
+        indentLevel = min(len(s.caption) - 1, len(indentStyles) - 1)
         return ParagraphProxy(stylename=indentStyles[indentLevel])
 
     def owriteMath(self, obj):
@@ -536,7 +538,8 @@ class ODFWriter(object):
                     text = c.text
                     #if not isinstance(text, unicode):  text = text.decode("utf8")
                     n.appendChild(odf.element.Text(text))  # n.addText(c.text)
-                    # rffixme: odfpy0.8 errors:"AttributeError: Element instance has no attribute 'elements'" -> this is a lie!
+                    # rffixme: odfpy0.8 errors:"AttributeError: Element instance has no
+                    # attribute 'elements'" -> this is a lie!
                 _withETElement(c, n)
 
         mathframe = draw.Frame(stylename=style.formula, zindex=0, anchortype="as-char")
@@ -636,10 +639,10 @@ class ODFWriter(object):
             # 2do: obey the value of thumpnail
             if wTarget > self.conf.paper['IMG_MAX_WIDTH'] or hTarget > self.conf.paper['IMG_MAX_HEIGHT']:
                 # image still to large, re-resize to max possible:
-                scale = min(self.conf.paper['IMG_MAX_WIDTH']/w,
-                            self.conf.paper['IMG_MAX_HEIGHT']/h)
+                scale = min(self.conf.paper['IMG_MAX_WIDTH'] / w,
+                            self.conf.paper['IMG_MAX_HEIGHT'] / h)
 
-                return (w*scale, h*scale, scale)
+                return (w * scale, h * scale, scale)
             else:
                 return (wTarget, hTarget, scale)
 
@@ -675,7 +678,7 @@ class ODFWriter(object):
             return
 
         # sometimes the parser delivers only one value, w or h, so set the other "by hand"
-        aspectRatio = wImg/hImg
+        aspectRatio = wImg / hImg
 
         if wObj > 0 and not hObj > 0:
             hObj = wObj / aspectRatio

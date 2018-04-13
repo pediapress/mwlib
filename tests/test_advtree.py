@@ -7,7 +7,7 @@ import sys
 import pytest
 
 from mwlib.advtree import (
-    PreFormatted, Text,  buildAdvancedTree, Section, BreakingReturn,  _idIndex,
+    PreFormatted, Text, buildAdvancedTree, Section, BreakingReturn, _idIndex,
     Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell, Span, Row, ImageLink
 )
 from mwlib.dummydb import DummyDB

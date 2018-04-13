@@ -17,7 +17,7 @@ except ImportError:
     import json
 try:
     from gevent.lock import Semaphore
-except:
+except BaseException:
     from gevent.coros import Semaphore
 
 from mwlib import conf, authors
@@ -35,7 +35,7 @@ def merge_data(dst, src):
     todo = [(dst, src)]
     while todo:
         dst, src = todo.pop()
-        assert type(dst) == type(src), "cannot merge %r with %r" % (type(dst), type(src))
+        assert isinstance(dst, type(src)), "cannot merge %r with %r" % (type(dst), type(src))
 
         if isinstance(dst, list):
             dst.extend(src)
@@ -163,7 +163,7 @@ class mwapi(object):
                         kw[str(k)] = v
 
                 if qc == last_qc:
-                    print "warning: cannot continue this query:",  self._build_url(**kw)
+                    print "warning: cannot continue this query:", self._build_url(**kw)
                     return retval
 
                 last_qc = qc
@@ -172,10 +172,11 @@ class mwapi(object):
         return retval
 
     def ping(self):
-        return self.do_request(action="query", meta="siteinfo",  siprop="general")
+        return self.do_request(action="query", meta="siteinfo", siprop="general")
 
     def get_categorymembers(self, cmtitle):
-        return self.do_request(action="query", list="categorymembers", cmtitle=cmtitle,  cmlimit=200)
+        return self.do_request(action="query", list="categorymembers",
+                               cmtitle=cmtitle, cmlimit=200)
 
     def get_siteinfo(self):
         siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
@@ -183,7 +184,7 @@ class mwapi(object):
             try:
                 r = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
                 return r
-            except Exception, err:
+            except Exception as err:
                 print "ERR:", err
                 siprop.pop()
         raise RuntimeError("could not get siteinfo")
@@ -243,11 +244,11 @@ class mwapi(object):
     def upload(self, title, txt, summary):
         if self.edittoken is None:
             res = self.do_request(action="query", prop="info|revisions",
-                                  intoken="edit",  titles=title)
+                                  intoken="edit", titles=title)
             self.edittoken = res["pages"].values()[0]["edittoken"]
 
         self._post(action="edit", title=title, text=txt, token=self.edittoken,
-                   summary=summary,  format="json", bot=True)
+                   summary=summary, format="json", bot=True)
 
     def idle(self):
         sem = self.limit_fetch_semaphore

@@ -140,7 +140,7 @@ class LicenseChecker(object):
 
     def getLicenseDisplayName(self, imgname):
         text = self.license_display_name.get(imgname, None)
-        if not text == None:
+        if not text is None:
             return text
         else:
             self.displayImage(imgname)
@@ -151,7 +151,7 @@ class LicenseChecker(object):
         r = len(self.rejected_images)
         a = len(self.accepted_images)
         if a + r > 0:
-            ratio = a/(a+r)
+            ratio = a / (a + r)
         else:
             ratio = 1
         return ratio
@@ -173,7 +173,7 @@ class LicenseChecker(object):
     def dumpUnknownLicenses(self, _dir):
         if not self.unknown_licenses:
             return
-        fn = tempfile.mktemp(dir=_dir, prefix='licensestats_',  suffix='.json')
+        fn = tempfile.mktemp(dir=_dir, prefix='licensestats_', suffix='.json')
         f = open(fn, 'w')
         unknown_licenses = {}
         for (license, urls) in self.unknown_licenses.items():
@@ -211,8 +211,7 @@ class LicenseChecker(object):
 
     def dumpLicenseInfoContent(self):
 
-        licenses = [v for v in self.licenses.values()]
-        licenses.sort()
+        licenses = sorted([v for v in self.licenses.values()])
 
         tmpl_txt = """
 {{/ImageLicenseItem
@@ -227,7 +226,9 @@ class LicenseChecker(object):
         # for templ, lic in self.licenses.items():
         for lic in licenses:
             if lic.license_type in ['free', 'nonfree']:
-                # print "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}" % {
+                # print
+                # "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}"
+                # % {
                 if lic.license_type == 'free':
                     allowedstr = "yes"
                 else:

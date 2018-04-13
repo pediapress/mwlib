@@ -14,7 +14,7 @@ from mwlib.metabook import wikiconf
 log = Log('mwlib.utils')
 
 
-def wiki_obsolete_cdb(path=None,  **kwargs):
+def wiki_obsolete_cdb(path=None, **kwargs):
     raise RuntimeError("cdb file format is not supported anymore.")
 
 

@@ -12,4 +12,4 @@ print "have %s expressions" % len(e)
 stime = time.time()
 for x in e:
     expr.expr(u"1+2")
-print "needed", time.time()-stime
+print "needed", time.time() - stime

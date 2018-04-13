@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-from mwlib import metabook,  myjson as json
+from mwlib import metabook, myjson as json
 
 test_wikitext1 = '''== Title ==
 === Subtitle ===

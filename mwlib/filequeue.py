@@ -42,7 +42,7 @@ class FileJobPoller(object):
                 else:
                     flags = os.WNOHANG
                 pid, rc = os.waitpid(-1, flags)
-            except OSError, exc:
+            except OSError as exc:
                 self.log.ERROR('waitpid(-1) failed: %s' % exc)
                 break
             if (pid, rc) == (0, 0):
@@ -67,7 +67,7 @@ class FileJobPoller(object):
                     os.waitpid(-1, 0)
                     self.num_jobs -= 1
                 break
-            except Exception, err:
+            except Exception as err:
                 self.log.error("caught exception: %r" % (err, ))
                 traceback.print_exc()
 
@@ -87,7 +87,7 @@ class FileJobPoller(object):
                 continue
             try:
                 mtime = os.stat(path).st_mtime
-            except Exception, exc:
+            except Exception as exc:
                 self.log.ERROR('Could not stat %r: %s' % (path, exc))
                 continue
             files.append((mtime, filename))
@@ -119,7 +119,7 @@ class FileJobPoller(object):
         # child process:
         try:
             os.execvp(args[0], args)
-        except:
+        except BaseException:
             traceback.print_exc()
         finally:
             self.log.warn('error running %r' % (args,))

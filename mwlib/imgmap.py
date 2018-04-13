@@ -49,7 +49,8 @@ def _makepoly(tokens):
 
 
 def _makerect(tokens):
-    return Rect(caption=tokens[-1].strip(), top_left=tuple(tokens[1]), bottom_right=tuple(tokens[2]))
+    return Rect(caption=tokens[-1].strip(), top_left=tuple(tokens[1]),
+                bottom_right=tuple(tokens[2]))
 
 
 def _makecomment(tokens):
@@ -73,18 +74,18 @@ def _makeimagemap(tokens):
     return ImageMap(entries=list(tokens), image=image)
 
 
-comment = (Literal('#')+restOfLine).setParseAction(_makecomment)
+comment = (Literal('#') + restOfLine).setParseAction(_makecomment)
 
 integer = Word(nums).setParseAction(lambda s: int(s[0]))
-integer_pair = (integer+integer).setParseAction(lambda x: tuple(x))
+integer_pair = (integer + integer).setParseAction(lambda x: tuple(x))
 
-poly = Literal("poly")+Group(ZeroOrMore(integer_pair))+restOfLine
+poly = Literal("poly") + Group(ZeroOrMore(integer_pair)) + restOfLine
 poly = poly.setParseAction(_makepoly)
 
-rect = Literal("rect")+integer_pair+integer_pair+restOfLine
+rect = Literal("rect") + integer_pair + integer_pair + restOfLine
 rect = rect.setParseAction(_makerect)
 
-circle = Literal("circle")+integer_pair+integer+restOfLine
+circle = Literal("circle") + integer_pair + integer + restOfLine
 circle = circle.setParseAction(_makecircle)
 
 desc = Literal("desc") + (Literal("top-right")
@@ -93,7 +94,7 @@ desc = Literal("desc") + (Literal("top-right")
                           | Literal("top-left")
                           | Literal("none"))
 desc = desc.setParseAction(_makedesc)
-default = Literal("default")+restOfLine
+default = Literal("default") + restOfLine
 default.setParseAction(lambda t: Default(caption=t[1].strip()))
 
 
@@ -126,7 +127,7 @@ def ImageMapFromString(s):
 
     try:
         return imagemap.parseString(s)[0]
-    except ParseException, err:
+    except ParseException as err:
         return ImageMap(entries=[], image=None)
 
 

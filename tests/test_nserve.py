@@ -22,7 +22,7 @@ def post(**kw):
         data = r.read()
         data = json.loads(data)
         return (r.code, data)
-    except urllib2.HTTPError, e:
+    except urllib2.HTTPError as e:
         return (e.code, e.read())
 
 

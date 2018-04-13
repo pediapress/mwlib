@@ -23,14 +23,14 @@ def init_tmp_cleaner():
     ppid = os.getpid()
     try:
         pid = os.fork()
-    except:
+    except BaseException:
         shutil.rmtree(tempfile.tempdir)
         raise
 
     if pid == 0:
         os.closerange(0, 3)
         os.setpgrp()
-        while 1:
+        while True:
             if os.getppid() != ppid:
                 try:
                     shutil.rmtree(tempfile.tempdir)
@@ -83,7 +83,7 @@ class Main(object):
             sys.exit('No such writer: %r (use --list-writers to list available writers)' % name)
         try:
             return entry_point.load()
-        except Exception, e:
+        except Exception as e:
             sys.exit('Could not load writer %r: %s' % (name, e))
 
     def list_writers(self):
@@ -94,7 +94,7 @@ class Main(object):
                     description = writer.description
                 else:
                     description = '<no description>'
-            except Exception, e:
+            except Exception as e:
                 description = '<NOT LOADABLE: %s>' % e
             print '%s\t%s' % (entry_point.name, description)
 
@@ -132,7 +132,7 @@ class Main(object):
         if env.images:
             try:
                 env.images.clear()
-            except OSError, err:
+            except OSError as err:
                 if err.errno != errno.ENOENT:
                     raise
 
@@ -196,7 +196,7 @@ class Main(object):
 
             try:
                 _locale.set_locale_from_lang(env.wiki.siteinfo["general"]["lang"])
-            except BaseException, err:
+            except BaseException as err:
                 print "Error: could not set locale", err
 
             basename = os.path.basename(options.output)
@@ -216,7 +216,7 @@ class Main(object):
             self.status(status='finished', progress=100, **kwargs)
             if options.keep_zip is None and self.zip_filename is not None:
                 utils.safe_unlink(self.zip_filename)
-        except Exception, e:
+        except Exception as e:
             import traceback
             self.status(status='error')
             if options.error_file:
@@ -236,7 +236,7 @@ class Main(object):
                 try:
                     if not options.keep_tmpfiles:
                         env.images.clear()
-                except OSError, e:
+                except OSError as e:
                     if e.errno != errno.ENOENT:
                         print 'ERROR: Could not remove temporary images: %s' % e, e.errno
 

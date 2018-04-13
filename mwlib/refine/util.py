@@ -24,7 +24,7 @@ def parseParams(s):
     def maybeInt(v):
         try:
             return int(v)
-        except:
+        except BaseException:
             return v
 
     r = {}
@@ -137,7 +137,7 @@ def handle_imagemod(self, mod_type, match):
 
     if mod_type == 'img_width':
         # x200px or 100x200px or 200px
-        width, height = (match.split('x')+['0'])[:2]
+        width, height = (match.split('x') + ['0'])[:2]
         try:
             width = int(width)
         except ValueError:
@@ -172,5 +172,5 @@ def replace_html_entities(txt):
     return re.sub("&.*?;", lambda mo: resolve_entity(mo.group(0)), txt)
 
 
-def remove_nowiki_tags(txt, _rx=re.compile("<nowiki>(.*?)</nowiki>",  re.IGNORECASE | re.DOTALL)):
+def remove_nowiki_tags(txt, _rx=re.compile("<nowiki>(.*?)</nowiki>", re.IGNORECASE | re.DOTALL)):
     return _rx.sub(lambda mo: mo.group(1), txt)

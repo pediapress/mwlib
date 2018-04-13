@@ -38,7 +38,7 @@ class OptionParser(optparse.OptionParser):
 
         a("--username", help="username for login")
         a("--password", help="password for login")
-        a("--domain",  help="domain for login")
+        a("--domain", help="domain for login")
 
         a("--title",
           help="title for article collection")

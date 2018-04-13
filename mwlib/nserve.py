@@ -143,20 +143,20 @@ class watch_qserve(object):
     def _iterate(self):
         try:
             stats = self._getstats()
-            numrender = stats.get("busy",  {}).get("render", 0)
+            numrender = stats.get("busy", {}).get("render", 0)
             if numrender > 10:
                 self._mark_busy("system overloaded")
             else:
                 self._mark_busy(False)
         except gevent.GreenletExit:
             raise
-        except Exception, err:
+        except Exception as err:
             self._mark_busy("system down")
             self.log("error in watch_qserve: %s" % (err,))
 
     def __call__(self):
         self.busy[self.ident] = True
-        while 1:
+        while True:
             try:
                 self._iterate()
             except gevent.GreenletExit:
@@ -239,14 +239,15 @@ class Application(object):
         except KeyError:
             qserve = choose_idle_qserve()
             if qserve is None:
-                return self.error_response("system overloaded. please try again later.", queue_full=1)
+                return self.error_response(
+                    "system overloaded. please try again later.", queue_full=1)
             collid2qserve[collection_id] = qserve
 
         self.qserve = rpcclient.serverproxy(host=qserve[0], port=qserve[1])
 
         try:
             return method(collection_id, request.params, is_new)
-        except Exception, exc:
+        except Exception as exc:
             print "ERROR while dispatching %r: %s" % (command, dict(
                 collection_id=collection_id, is_new=is_new, qserve=qserve))
             traceback.print_exc()
@@ -280,7 +281,7 @@ class Application(object):
             return False
         return True
 
-    def _get_params(self, post_data,  collection_id):
+    def _get_params(self, post_data, collection_id):
         g = post_data.get
         params = bunch()
         params.__dict__ = dict(
@@ -299,7 +300,7 @@ class Application(object):
         return params
 
     def do_render(self, collection_id, post_data, is_new=False):
-        params = self._get_params(post_data,  collection_id=collection_id)
+        params = self._get_params(post_data, collection_id=collection_id)
         metabook_data = params.metabook_data
         base_url = params.base_url
         writer = params.writer
@@ -314,7 +315,8 @@ class Application(object):
 
         if base_url and not self.is_good_baseurl(base_url):
             log.bad("bad base_url: %r" % (base_url, ))
-            return self.error_response("bad base_url %r. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed." % (base_url, ))
+            return self.error_response(
+                "bad base_url %r. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed." % (base_url, ))
 
         log.info('render %s %s' % (collection_id, writer))
 
@@ -328,7 +330,7 @@ class Application(object):
                          jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
 
         self.qserve.qadd(channel="render", payload=dict(params=params.__dict__),
-                         jobid="%s:render-%s" % (collection_id, writer),  timeout=20 * 60)
+                         jobid="%s:render-%s" % (collection_id, writer), timeout=20 * 60)
 
         return response
 
@@ -415,7 +417,7 @@ class Application(object):
                 w.file_extension.encode('utf-8', 'ignore'))
 
         def readdata():
-            while 1:
+            while True:
                 d = f.read(4096)
                 if not d:
                     break
@@ -428,7 +430,7 @@ class Application(object):
 
         try:
             post_data['metabook']
-        except KeyError, exc:
+        except KeyError as exc:
             return self.error_response('POST argument required: %s' % exc)
 
         pod_api_url = params.pod_api_url
@@ -469,7 +471,7 @@ def main():
     # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     from mwlib import argv
-    opts,  args = argv.parse(
+    opts, args = argv.parse(
         sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface=")
     qs = []
     port = 8899

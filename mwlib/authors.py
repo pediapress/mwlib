@@ -22,7 +22,8 @@ class inspect_authors(object):
 
         for r in revs:
             user = r.get('user', u'')
-            if 'anon' in r and (not user or self.ip_rex.match(user) or self.ip6_rex.match(user)):  # anon
+            if 'anon' in r and (not user or self.ip_rex.match(user)
+                                or self.ip6_rex.match(user)):  # anon
                 self.num_anon += 1
             elif not user:
                 continue
@@ -44,8 +45,7 @@ class inspect_authors(object):
         @rtype: list([unicode])
         """
 
-        authors = list(self.authors)
-        authors.sort()
+        authors = sorted(self.authors)
         if authors or self.num_anon:
             authors.append("%s:%d" % (self.ANON, self.num_anon))  # append anon
         return authors

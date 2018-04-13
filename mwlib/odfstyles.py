@@ -472,12 +472,14 @@ imgCaption.addElement(
 #graphic.addElement(style.GraphicProperties(wrap="dynamic", verticalrel="paragraph", horizontalrel="paragraph"))
 # graphic.addElement(
 #    style.GraphicProperties(padding="0.15in",borderleft="none",borderright="0.0154in double #FFFFFF",
-#                            bordertop="0.0154in double #FFFFFF",borderbottom="0.0154in double #FFFFFF"))
+# bordertop="0.0154in double #FFFFFF",borderbottom="0.0154in double
+# #FFFFFF"))
 
 # graphic.addElement(style.GraphicProperties(padding="0.15in", border="0.01in single #ff00ff"))
 #graphic = style.Style(name="Graphic", family="graphic")
 # graphic.addElement(style.GraphicProperties(runthrough="foreground", wrap="dynamic", numberwrappedparagraphs="no-limit",
-#                                           verticalpos="top", verticalrel="page",horizontalpos="center", horizontalrel="page"))
+# verticalpos="top", verticalrel="page",horizontalpos="center",
+# horizontalrel="page"))
 
 
 # define a outer frame:
@@ -495,7 +497,8 @@ frmStyGraPropDef = style.GraphicProperties(
 )
 frmOuter.addElement(frmStyGraPropDef)
 frmOuter.internSpacing = 0.2
-# if frmOuter has marginleft/marginright set this float-value to the sum: internSpacing = marginleft + marginright
+# if frmOuter has marginleft/marginright set this float-value to the sum:
+# internSpacing = marginleft + marginright
 
 # frmOuterRight, frmOuterLeft and frmOuterCenter are like frmOuter, but need other alignment
 frmOuterRight = style.Style(name="mwlibfrmOuterRight", family="graphic",

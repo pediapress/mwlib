@@ -19,13 +19,13 @@ def main():
 
     pprint(c.response)
     # >>> {u'collection_id': u'dfaa0d9a8bff06bb', u'is_cached': False, u'writer': u'rl'}
-    assert c.response["writer"] == "rl",  "expected rl"
+    assert c.response["writer"] == "rl", "expected rl"
     assert c.response["collection_id"], "expected collection_id"
     assert c.response["is_cached"] in (True, False), "expected boolean is_cached"
 
     cid = c.response["collection_id"]
 
-    while 1:
+    while True:
         c.request("render_status", dict(collection_id=cid))
 
         print "here"
@@ -36,9 +36,9 @@ def main():
         #      u'writer': u'rl'}
 
         assert c.response["state"] in ("progress", "finished",
-                                       "unknown"),  "bad state: %r" % (c.response, )
+                                       "unknown"), "bad state: %r" % (c.response, )
         assert c.response["writer"] == "rl"
-        assert isinstance(c.response.get("status", dict()),  dict),  "expected dict"
+        assert isinstance(c.response.get("status", dict()), dict), "expected dict"
 
         print "done"
         state = c.response["state"]

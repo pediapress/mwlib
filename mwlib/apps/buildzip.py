@@ -16,8 +16,7 @@ def _walk(root):
     for dirpath, dirnames, files in os.walk(root):
         # retval.extend([os.path.normpath(os.path.join(dirpath, x))+"/" for x in dirnames])
         retval.extend([os.path.normpath(os.path.join(dirpath, x)) for x in files])
-    retval = [x.replace("\\", "/") for x in retval]
-    retval.sort()
+    retval = sorted([x.replace("\\", "/") for x in retval])
     return retval
 
 
@@ -28,14 +27,14 @@ def zipdir(dirname, output=None, skip_ext=None):
     @para skip_ext: skip files with the specified extension
     """
     if not output:
-        output = dirname+".zip"
+        output = dirname + ".zip"
 
     output = os.path.abspath(output)
     zf = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zf.write(i, i[len(dirname)+1:])
+        zf.write(i, i[len(dirname) + 1:])
     zf.close()
 
 
@@ -107,7 +106,9 @@ def main():
     use_help = 'Use --help for usage information.'
 
     if parser.metabook is None and options.collectionpage is None:
-        parser.error('Neither --metabook nor, --collectionpage or arguments specified.\n' + use_help)
+        parser.error(
+            'Neither --metabook nor, --collectionpage or arguments specified.\n' +
+            use_help)
     if options.posturl and options.getposturl:
         parser.error('Specify either --posturl or --getposturl.\n' + use_help)
     if not options.posturl and not options.getposturl and not options.output:
@@ -133,13 +134,13 @@ def main():
         time.sleep(1)
         try:
             os.kill(pid, 9)
-        except:
+        except BaseException:
             pass
 
     else:
         podclient = None
 
-    from mwlib import utils,  wiki
+    from mwlib import utils, wiki
 
     filename = None
     status = None
@@ -154,7 +155,7 @@ def main():
 
         make_zip(output, options, env.metabook, podclient=podclient, status=status)
 
-    except Exception, e:
+    except Exception as e:
         if status:
             status(status='error')
         raise

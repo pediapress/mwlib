@@ -114,7 +114,7 @@ def safe_unlink(filename):
 
     try:
         os.unlink(filename)
-    except Exception, exc:
+    except Exception as exc:
         log.warn('Could not remove file %r: %s' % (filename, exc))
 
 
@@ -182,7 +182,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
                 else:
                     raise RuntimeError(msg)
                 return None
-    except urllib2.URLError, err:
+    except urllib2.URLError as err:
         if ignore_errors:
             log.error("%s - while fetching %r" % (err, url))
             return None
@@ -279,8 +279,7 @@ def asunicode(x):
 
 
 def ppdict(dct):
-    items = dct.items()
-    items.sort()
+    items = sorted(dct.items())
     tmp = []
     write = tmp.append
 
@@ -303,7 +302,7 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
     text.append('%s\n' % traceback.format_exc())
     try:
         fqdn = socket.getfqdn()
-    except:
+    except BaseException:
         fqdn = 'not available'
     text.append('CWD: %r\n' % os.getcwd())
 
@@ -327,7 +326,7 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
             headers=mail_headers,
         )
         log.info('sent mail to %r' % mail_recipients)
-    except Exception, e:
+    except Exception as e:
         log.ERROR('Could not send mail: %s' % e)
     return text
 
@@ -340,7 +339,7 @@ def get_safe_url(url):
     try:
         result = urlparse.urlsplit(url)
         scheme, netloc, path, query, fragment = result
-    except Exception, exc:
+    except Exception as exc:
         log.warn('urlparse(%r) failed: %s' % (url, exc))
         return None
 
@@ -355,12 +354,12 @@ def get_safe_url(url):
     try:
         # catches things like path='bla " target="_blank'
         path = urllib.quote(urllib.unquote(path))
-    except Exception, exc:
+    except Exception as exc:
         log.warn('quote(unquote(%r)) failed: %s' % (path, exc))
         return None
     try:
         return urlparse.urlunsplit((scheme, netloc, path, query, fragment))
-    except Exception, exc:
+    except Exception as exc:
         log.warn('urlunparse() failed: %s' % exc)
 
 

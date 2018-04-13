@@ -44,7 +44,7 @@ class DumbJsonDB(object):
 
     def get(self, key, default=None):
         res = self[key]
-        if res == None:
+        if res is None:
             return default
         else:
             return res
@@ -72,7 +72,7 @@ class nuwiki(object):
         if not os.path.exists(d):
             try:
                 os.makedirs(d)
-            except OSError, exc:
+            except OSError as exc:
                 if exc.errno != 17:  # file exists
                     raise
 
@@ -130,7 +130,7 @@ class nuwiki(object):
 
     def _read_revisions(self):
         count = 1
-        while 1:
+        while True:
             fn = self._pathjoin("revisions-%s.txt" % count)
             if not os.path.exists(fn):
                 break
@@ -231,18 +231,17 @@ class nuwiki(object):
             if not os.path.exists(safe_path):
                 try:
                     os.symlink(os.path.join("..", utils.fsescape(fqname)), safe_path)
-                except OSError, exc:
+                except OSError as exc:
                     if exc.errno != 17:  # File exists
                         raise
             return safe_path
         return p
 
     def get_data(self, name):
-        return self._loadjson(name+".json")
+        return self._loadjson(name + ".json")
 
     def articles(self):
-        res = list(set([p.title for p in self.revisions.values() if p.ns == 0]))
-        res.sort()
+        res = sorted(set([p.title for p in self.revisions.values() if p.ns == 0]))
         return res
 
     def select(self, start, end):
@@ -250,8 +249,7 @@ class nuwiki(object):
         for p in self.revisions.values():
             if start <= p.title <= end:
                 res.add(p.title)
-        res = list(res)
-        res.sort()
+        res = sorted(res)
         return res
 
     def extractHTML(self, parsed_html):
@@ -297,7 +295,7 @@ def extract_member(zipfile, member, dstdir):
 
 
 def extractall(zf, dst):
-    dst = os.path.normpath(os.path.abspath(dst))+os.path.sep
+    dst = os.path.normpath(os.path.abspath(dst)) + os.path.sep
 
     for zipinfo in zf.infolist():
         extract_member(zf, zipinfo, dst)
@@ -346,7 +344,8 @@ class adapt(object):
             return p + 'oldid=%s' % revision
         else:
             fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
-            return p + 'title=%s' % urllib.quote(fqtitle.replace(' ', '_').encode('utf-8'), safe=':/@')
+            return p + \
+                'title=%s' % urllib.quote(fqtitle.replace(' ', '_').encode('utf-8'), safe=':/@')
 
     def getDescriptionURL(self, name):
         return self.getURL(name, defaultns=nshandling.NS_FILE)
@@ -415,7 +414,8 @@ class adapt(object):
 
         from mwlib import uparser
 
-        return uparser.parseString(title=title, raw=raw, wikidb=self, lang=self.siteinfo["general"]["lang"], expandTemplates=expandTemplates)
+        return uparser.parseString(title=title, raw=raw, wikidb=self,
+                                   lang=self.siteinfo["general"]["lang"], expandTemplates=expandTemplates)
 
     def getLicenses(self):
         from mwlib import metabook
@@ -423,7 +423,7 @@ class adapt(object):
         res = []
         for x in licenses:
             if isinstance(x, dict):
-                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"],  _wiki=self))
+                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"], _wiki=self))
             elif isinstance(x, metabook.license):
                 res.append(x)
                 x._wiki = self
@@ -505,14 +505,13 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
         def isUserLink(node):
             return isinstance(node, parser.NamespaceLink) and node.namespace == 2  # NS_USER
 
-        result = list(set([
+        result = sorted(set([
             u.target
             for u in uparser.parseString(title,
                                          raw=raw,
                                          wikidb=wikidb,
                                          ).filter(isUserLink)
         ]))
-        result.sort()
         return result
 
     def get_authors_from_template_args(template):

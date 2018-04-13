@@ -144,11 +144,11 @@ class Formatter(object):
         size, unit = styleutils.parseLength(font_style)
         if size and unit in ['%', 'pt', 'px', 'em']:
             if unit == '%':
-                self.setRelativeFontSize(size/100)
+                self.setRelativeFontSize(size / 100)
             elif unit == 'pt':
-                self.setRelativeFontSize(size/10)
+                self.setRelativeFontSize(size / 10)
             elif unit == 'px':
-                self.setRelativeFontSize(size/12)
+                self.setRelativeFontSize(size / 12)
             elif unit == 'em':
                 self.setRelativeFontSize(size)
             return
@@ -224,7 +224,8 @@ class Formatter(object):
             pass
         else:
             if escape:
-                if self.minimize_space_mode > 0 or (break_long and max(len(w) for w in txt.split(' ')) > self.word_split_len):
+                if self.minimize_space_mode > 0 or (break_long and max(
+                        len(w) for w in txt.split(' ')) > self.word_split_len):
                     txt = self.escapeAndHyphenateText(txt)
                 else:
                     txt = self.escapeText(txt)
@@ -259,7 +260,8 @@ class Formatter(object):
     def restoreFont(self):
         self.default_font = self.last_font
 
-    # the methods below are the ones that should probably be overriden when subclassing the formatter
+    # the methods below are the ones that should probably be overriden when
+    # subclassing the formatter
 
     def pre_mode_hook(self, txt):
         return txt

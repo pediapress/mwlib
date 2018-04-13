@@ -11,11 +11,11 @@ log = Log("parser")
 
 def show(out, node, indent=0, verbose=False):
     if verbose:
-        print >>out, "    "*indent, node, repr(getattr(node, 'vlist', ''))
+        print >>out, "    " * indent, node, repr(getattr(node, 'vlist', ''))
     else:
-        print >>out, "    "*indent, node
+        print >>out, "    " * indent, node
     for x in node:
-        show(out, x, indent+1, verbose=verbose)
+        show(out, x, indent + 1, verbose=verbose)
 
 
 from mwlib.parser.nodes import (Node, Math, Ref, Item, ItemList, Style,

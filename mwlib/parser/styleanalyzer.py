@@ -45,12 +45,12 @@ class state(object):
         if count == 3:
             nextstate(is_bold=not self.is_bold)
 
-            s = self.clone(apocount=self.apocount+1, previous=previous)
+            s = self.clone(apocount=self.apocount + 1, previous=previous)
 
             s.get_next(2, res, previous=previous)
 
         if count == 4:
-            s = self.clone(apocount=self.apocount+1)
+            s = self.clone(apocount=self.apocount + 1)
             s.get_next(3, res, previous=previous)
 
         if count == 5:
@@ -63,15 +63,14 @@ class state(object):
             s.get_next(4, res, previous=previous)
 
         if count > 5:
-            s = self.clone(apocount=self.apocount+(count-5))
+            s = self.clone(apocount=self.apocount + (count - 5))
             s.get_next(5, res, previous=previous)
 
         return res
 
 
 def sort_states(states):
-    tmp = [((x.apocount+x.is_bold+x.is_italic), x) for x in states]
-    tmp.sort()
+    tmp = sorted([((x.apocount + x.is_bold + x.is_italic), x) for x in states])
     return [x[1] for x in tmp]
 
 
