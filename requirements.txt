@@ -14,3 +14,4 @@ roman==1.4.0
 simplejson==3.3.1
 sqlite3dbm==0.1.4
 timelib==0.2.4
+wsgi_intercept==1.6.0
