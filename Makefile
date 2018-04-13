@@ -58,3 +58,9 @@ pip-install:: clean sdist
 update::
 	git pull
 	make pip-install
+
+
+test::
+	pip install -r requirements-test.txt
+	py.test tests || true
+	pip uninstall -y -r requirements-test.txt &> /dev/null
