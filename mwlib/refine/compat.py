@@ -105,7 +105,7 @@ def _change_classes(node):
                 node.__class__ = N.Timeline
                 node.caption = node.timeline
             elif node.tagname == "imagemap":
-                if node.imagemap.imagelink:
+                if hasattr(node.imagemap, 'imagelink') and node.imagemap.imagelink:
                     _change_classes(node.imagemap.imagelink)
             elif node.tagname == "math":
                 node.__class__ = N.Math
