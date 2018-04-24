@@ -1,5 +1,5 @@
-__version_info__ = (0, 15, 19)
-display_version = version = __version__ = "0.15.19"
+__version_info__ = (0, 16, 0)
+display_version = version = __version__ = "0.16.0"
 gitid = gitversion = ""
 
 
