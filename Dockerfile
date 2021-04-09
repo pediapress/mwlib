@@ -4,6 +4,12 @@ RUN apt-get \
   -o Acquire::BrokenProxy="true" \
   -o Acquire::http::No-Cache="true" \
   -o Acquire::http::Pipeline-Depth="0" \
+  install -y sudo
+
+RUN apt-get \
+  -o Acquire::BrokenProxy="true" \
+  -o Acquire::http::No-Cache="true" \
+  -o Acquire::http::Pipeline-Depth="0" \
   install -y \
   gcc g++ make python python-dev python-virtualenv                    \
   libjpeg-dev libz-dev libfreetype6-dev liblcms-dev                   \
@@ -14,7 +20,7 @@ RUN apt-get \
   pdftk
 
 RUN pip install -i http://pypi.pediapress.com/simple/ mwlib mwlib.rl
-RUN useradd --create-home --no-log-init --shell /bin/bash mwuser
+RUN useradd -m mwuser && echo "mwuser:mwuser" | chpasswd && adduser mwuser sudo
 RUN mkdir -p /data/mwcache && chown -R mwuser:mwuser /data/
 USER mwuser
 WORKDIR /home/mwuser
