@@ -137,9 +137,9 @@ def test_unary_pow_plus():
 
 
 def test_expr_repr():
-    yield expandstr, "{{#expr:99999999999999}}", "99999999999999"
-    yield expandstr, "{{#expr:99999999999999+1}}", "1.0E+14"
-    yield expandstr, "{{#expr:0.1+0.9}}", "1"
+    expandstr("{{#expr:99999999999999}}", "99999999999999")
+    expandstr("{{#expr:99999999999999+1}}", "1.0E+14")
+    expandstr("{{#expr:0.1+0.9}}", "1")
 
 
 def test_unary_minus_sin():
@@ -154,12 +154,12 @@ def test_unary_minus_sin():
 
 
 def test_empty_expr():
-    yield expandstr, "{{#expr:   }}", ""
-    yield expandstr, "{{#ifexpr:    |yes|no}}", "no"
+    expandstr("{{#expr:   }}", "")
+    expandstr("{{#ifexpr:    |yes|no}}", "no")
 
 
 def test_braindamaged_scientific():
-    yield ee, "{{#expr: (-1)e(-0.5)}}", -0.31622776601684
-    yield expandstr, "{{#expr:1e2e3}}", "100000"
-    yield ee, "{{#expr:2*e}}", 2 * math.e
-    yield ee, "{{#expr: e E E}}", 1420.9418661882
+    ee("{{#expr: (-1)e(-0.5)}}", -0.31622776601684)
+    expandstr("{{#expr:1e2e3}}", "100000")
+    ee("{{#expr:2*e}}", 2 * math.e)
+    ee("{{#expr: e E E}}", 1420.9418661882)

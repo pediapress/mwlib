@@ -1,4 +1,5 @@
 from apipkg import initpkg
+
 initpkg(
     __name__,
     dict(
@@ -7,4 +8,6 @@ initpkg(
         qserve="qs.qserve",
         rpcclient="qs.rpcclient",
         rpcserver="qs.rpcserver",
-        slave="qs.slave"))
+        slave="qs.slave",
+    ),
+)

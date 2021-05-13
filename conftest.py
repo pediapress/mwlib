@@ -1,5 +1,6 @@
 import os
 import sys
+import pytest
 
 xnet = os.environ.get("XNET", "")  # eXclude NETwork tests
 try:
@@ -10,7 +11,8 @@ except ValueError:
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
-def pytest_funcarg__alarm(request):
+@pytest.fixture(scope="session")
+def alarm(request):
     import signal
     import time
     import math
@@ -35,7 +37,6 @@ def pytest_funcarg__alarm(request):
     request.addfinalizer(cleanup)
     stime = time.time()
     old_handler = signal.signal(signal.SIGALRM, sighandler)
-
     return alarm
 
 
@@ -45,8 +46,8 @@ def pytest_configure(config):
         return
 
     if xnet:
-        print "conftest.py: disabling tests marked with keyword xnet."
-        print "conftest.py: set environment variable XNET=0 to enable them."
+        print("conftest.py: disabling tests marked with keyword xnet.")
+        print("conftest.py: set environment variable XNET=0 to enable them.")
 
         if kw:
             kw = kw + " -xnet"

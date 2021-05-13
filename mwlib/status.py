@@ -100,7 +100,7 @@ class Status(object):
             else:
                 port = 14311
 
-            from mwlib.async import rpcclient
+            from mwlib.asynchronous import rpcclient
             self.qproxy = rpcclient.serverproxy(host=host, port=port)
             self.jobid = jobid
 

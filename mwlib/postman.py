@@ -86,7 +86,7 @@ def report_mwzip_status(posturl, jobid, host, port):
     podclient = PODClient(posturl)
     status = Status(podclient=podclient)
 
-    from mwlib.async import rpcclient
+    from mwlib.asynchronous import rpcclient
     sp = rpcclient.serverproxy(host, port)
 
     last = {}
@@ -186,7 +186,7 @@ def main():
         if o == "--cachedir":
             cachedir = a
 
-    from mwlib.async import slave
+    from mwlib.asynchronous import slave
 
     slave.main(commands, numgreenlets=32, argv=args)
 

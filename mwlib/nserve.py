@@ -5,6 +5,7 @@
 from __future__ import with_statement
 
 import gevent.monkey
+
 if __name__ == "__main__":
     gevent.monkey.patch_all()
 
@@ -20,12 +21,12 @@ from hashlib import sha1
 
 from gevent import pool, pywsgi
 
-from qs.misc import call_in_loop
+from qs.misc import CallInLoop
 from mwlib import myjson as json, log, _version
 from mwlib.metabook import calc_checksum
-from mwlib.async import rpcclient
+from mwlib.asynchronous import rpcclient
 
-log = log.Log('mwlib.serve')
+log = log.Log("mwlib.serve")
 
 
 class bunch(object):
@@ -33,32 +34,38 @@ class bunch(object):
         self.__dict__.update(kw)
 
     def __repr__(self):
-        return "bunch(%s)" % (", ".join(["%s=%r" % (k, v) for k, v in self.__dict__.items()]), )
+        return "bunch(%s)" % (", ".join(["%s=%r" % (k, v) for k, v in self.__dict__.items()]),)
 
 
 # -- we try to load all writers here but also keep a list of known writers
 # -- these writers do not have to be installed on the machine that's running the server
 # -- and we also like to speedup the get_writers method
 
-name2writer = {'odf': bunch(file_extension='odt', name='odf', content_type='application/vnd.oasis.opendocument.text'),
-               'rl': bunch(file_extension='pdf', name='rl', content_type='application/pdf'),
-               'xhtml': bunch(file_extension='html', name='xhtml', content_type='text/xml'),
-               'xl': bunch(file_extension='pdf', name='xl', content_type='application/pdf'),
-               'zim': bunch(file_extension='zim', name='zim', content_type='application/zim')}
+name2writer = {
+    "odf": bunch(
+        file_extension="odt", name="odf", content_type="application/vnd.oasis.opendocument.text"
+    ),
+    "rl": bunch(file_extension="pdf", name="rl", content_type="application/pdf"),
+    "xhtml": bunch(file_extension="html", name="xhtml", content_type="text/xml"),
+    "xl": bunch(file_extension="pdf", name="xl", content_type="application/pdf"),
+    "zim": bunch(file_extension="zim", name="zim", content_type="application/zim"),
+}
 
 
 def get_writers(name2writer):
     import pkg_resources
 
-    for entry_point in pkg_resources.iter_entry_points('mwlib.writers'):
+    for entry_point in pkg_resources.iter_entry_points("mwlib.writers"):
         if entry_point.name in name2writer:
             continue
 
         try:
             writer = entry_point.load()
-            name2writer[entry_point.name] = bunch(name=entry_point.name,
-                                                  file_extension=writer.file_extension,
-                                                  content_type=writer.content_type)
+            name2writer[entry_point.name] = bunch(
+                name=entry_point.name,
+                file_extension=writer.file_extension,
+                content_type=writer.content_type,
+            )
         except Exception:
             continue
 
@@ -67,32 +74,35 @@ def get_writers(name2writer):
 
 get_writers(name2writer)
 
-collection_id_rex = re.compile(r'^[a-f0-9]{16}$')
+collection_id_rex = re.compile(r"^[a-f0-9]{16}$")
 
 
 def make_collection_id(data):
     sio = StringIO.StringIO()
     sio.write(str(_version.version))
     for key in (
-        'base_url',
-        'script_extension',
-        'login_credentials',
+        "base_url",
+        "script_extension",
+        "login_credentials",
     ):
         sio.write(repr(data.get(key)))
-    mb = data.get('metabook')
+    mb = data.get("metabook")
     if mb:
         if isinstance(mb, str):
-            mb = unicode(mb, 'utf-8')
+            mb = unicode(mb, "utf-8")
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        sys.stdout.write("new-collection %s\t%r\t%r\n" %
-                         (num_articles, data.get("base_url"), data.get("writer")))
+        sys.stdout.write(
+            "new-collection %s\t%r\t%r\n"
+            % (num_articles, data.get("base_url"), data.get("writer"))
+        )
 
     return sha1(sio.getvalue()).hexdigest()[:16]
 
 
 from mwlib import lrucache
+
 busy = dict()
 collid2qserve = lrucache.lrucache(4000)
 
@@ -166,6 +176,7 @@ class watch_qserve(object):
 
 def choose_idle_qserve():
     import random
+
     idle = [k for k, v in busy.items() if not v]
     if not idle:
         return None
@@ -175,8 +186,8 @@ def choose_idle_qserve():
 from bottle import request, default_app, post, get, HTTPResponse
 
 
-@get('<path:re:.*>')
-@post('<path:re:.*>')
+@get("<path:re:.*>")
+@post("<path:re:.*>")
 def dispatch_command(path):
     return Application().dispatch(request)
 
@@ -209,23 +220,23 @@ def get_content_disposition(filename, ext):
 
 
 class Application(object):
-    def __init__(self, default_writer='rl'):
+    def __init__(self, default_writer="rl"):
         self.default_writer = default_writer
 
     def dispatch(self, request):
         try:
-            command = request.params['command']
+            command = request.params["command"]
         except KeyError:
             log.error("no command given")
             raise HTTPResponse("no command given", status=400)
 
         try:
-            method = getattr(self, 'do_%s' % command)
+            method = getattr(self, "do_%s" % command)
         except AttributeError:
-            log.error("no such command: %r" % (command, ))
-            raise HTTPResponse("no such command: %r" % (command, ), status=400)
+            log.error("no such command: %r" % (command,))
+            raise HTTPResponse("no such command: %r" % (command,), status=400)
 
-        collection_id = request.params.get('collection_id')
+        collection_id = request.params.get("collection_id")
         if not collection_id:
             collection_id = self.new_collection(request.params)
             is_new = True
@@ -240,28 +251,39 @@ class Application(object):
             qserve = choose_idle_qserve()
             if qserve is None:
                 return self.error_response(
-                    "system overloaded. please try again later.", queue_full=1)
+                    "system overloaded. please try again later.", queue_full=1
+                )
             collid2qserve[collection_id] = qserve
 
-        self.qserve = rpcclient.serverproxy(host=qserve[0], port=qserve[1])
+        self.qserve = rpcclient.ServerProxy(host=qserve[0], port=qserve[1])
 
         try:
             return method(collection_id, request.params, is_new)
         except Exception as exc:
-            print "ERROR while dispatching %r: %s" % (command, dict(
-                collection_id=collection_id, is_new=is_new, qserve=qserve))
+            print (
+                "ERROR while dispatching %r: %s"
+                % (
+                    command,
+                    dict(collection_id=collection_id, is_new=is_new, qserve=qserve),
+                )
+            )
             traceback.print_exc()
             if command == "download":
                 raise exc
 
-            return self.error_response('error executing command %r: %s' % (
-                command, exc,))
+            return self.error_response(
+                "error executing command %r: %s"
+                % (
+                    command,
+                    exc,
+                )
+            )
 
     def error_response(self, error, **kw):
         if isinstance(error, str):
-            error = unicode(error, 'utf-8', 'ignore')
+            error = unicode(error, "utf-8", "ignore")
         elif not isinstance(error, unicode):
-            error = unicode(repr(error), 'ascii')
+            error = unicode(repr(error), "ascii")
         return dict(error=error, **kw)
 
     def check_collection_id(self, collection_id):
@@ -276,7 +298,7 @@ class Application(object):
         return collection_id
 
     def is_good_baseurl(self, url):
-        netloc = urlparse.urlparse(url)[1].split(':')[0].lower()
+        netloc = urlparse.urlparse(url)[1].split(":")[0].lower()
         if netloc == "localhost" or netloc.startswith("127.0.") or netloc.startswith("192.168."):
             return False
         return True
@@ -285,15 +307,16 @@ class Application(object):
         g = post_data.get
         params = bunch()
         params.__dict__ = dict(
-            metabook_data=g('metabook'),
-            writer=g('writer', self.default_writer),
-            base_url=g('base_url'),
-            writer_options=g('writer_options', ''),
-            login_credentials=g('login_credentials', ''),
-            force_render=bool(g('force_render')),
-            script_extension=g('script_extension', ''),
-            pod_api_url=post_data.get('pod_api_url', ''),
-            language=g('language', ''))
+            metabook_data=g("metabook"),
+            writer=g("writer", self.default_writer),
+            base_url=g("base_url"),
+            writer_options=g("writer_options", ""),
+            login_credentials=g("login_credentials", ""),
+            force_render=bool(g("force_render")),
+            script_extension=g("script_extension", ""),
+            pod_api_url=post_data.get("pod_api_url", ""),
+            language=g("language", ""),
+        )
 
         params.collection_id = collection_id
 
@@ -309,39 +332,49 @@ class Application(object):
             return self.error_response("unknown writer %r" % writer)
 
         if is_new and not metabook_data:
-            return self.error_response('POST argument metabook or collection_id required')
+            return self.error_response("POST argument metabook or collection_id required")
         if not is_new and metabook_data:
-            return self.error_response('Specify either metabook or collection_id, not both')
+            return self.error_response("Specify either metabook or collection_id, not both")
 
         if base_url and not self.is_good_baseurl(base_url):
-            log.bad("bad base_url: %r" % (base_url, ))
+            log.bad("bad base_url: %r" % (base_url,))
             return self.error_response(
-                "bad base_url %r. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed." % (base_url, ))
+                "bad base_url %r. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed."
+                % (base_url,)
+            )
 
-        log.info('render %s %s' % (collection_id, writer))
+        log.info("render %s %s" % (collection_id, writer))
 
         response = {
-            'collection_id': collection_id,
-            'writer': writer,
-            'is_cached': False,
+            "collection_id": collection_id,
+            "writer": writer,
+            "is_cached": False,
         }
 
-        self.qserve.qadd(channel="makezip", payload=dict(params=params.__dict__),
-                         jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
+        self.qserve.qadd(
+            channel="makezip",
+            payload=dict(params=params.__dict__),
+            jobid="%s:makezip" % (collection_id,),
+            timeout=20 * 60,
+        )
 
-        self.qserve.qadd(channel="render", payload=dict(params=params.__dict__),
-                         jobid="%s:render-%s" % (collection_id, writer), timeout=20 * 60)
+        self.qserve.qadd(
+            channel="render",
+            payload=dict(params=params.__dict__),
+            jobid="%s:render-%s" % (collection_id, writer),
+            timeout=20 * 60,
+        )
 
         return response
 
     def do_render_status(self, collection_id, post_data, is_new=False):
         if is_new:
-            return self.error_response('POST argument required: collection_id')
+            return self.error_response("POST argument required: collection_id")
 
         def retval(**kw):
             return dict(collection_id=collection_id, writer=writer, **kw)
 
-        writer = post_data.get('writer', self.default_writer)
+        writer = post_data.get("writer", self.default_writer)
         w = name2writer[writer]
 
         jobid = "%s:render-%s" % (collection_id, writer)
@@ -369,8 +402,9 @@ class Application(object):
                 more["content_type"] = w.content_type
 
             if w.file_extension:
-                more["content_disposition"] = get_content_disposition(more.get("suggested_filename", None),
-                                                                      w.file_extension)
+                more["content_disposition"] = get_content_disposition(
+                    more.get("suggested_filename", None), w.file_extension
+                )
 
             return retval(state="finished", **more)
 
@@ -388,9 +422,9 @@ class Application(object):
 
     def do_download(self, collection_id, post_data, is_new=False):
         if is_new:
-            return self.error_response('POST argument required: collection_id')
+            return self.error_response("POST argument required: collection_id")
 
-        writer = post_data.get('writer', self.default_writer)
+        writer = post_data.get("writer", self.default_writer)
         w = name2writer[writer]
 
         jobid = "%s:render-%s" % (collection_id, writer)
@@ -413,8 +447,9 @@ class Application(object):
             header["Content-Type"] = w.content_type
 
         if w.file_extension:
-            header['Content-Disposition'] = 'inline; filename=collection.%s' % (
-                w.file_extension.encode('utf-8', 'ignore'))
+            header["Content-Disposition"] = "inline; filename=collection.%s" % (
+                w.file_extension.encode("utf-8", "ignore")
+            )
 
         def readdata():
             while True:
@@ -429,31 +464,33 @@ class Application(object):
         params = self._get_params(post_data, collection_id=collection_id)
 
         try:
-            post_data['metabook']
+            post_data["metabook"]
         except KeyError as exc:
-            return self.error_response('POST argument required: %s' % exc)
+            return self.error_response("POST argument required: %s" % exc)
 
         pod_api_url = params.pod_api_url
         if pod_api_url:
-            result = json.loads(unicode(urllib2.urlopen(pod_api_url, data="any").read(), 'utf-8'))
-            post_url = result['post_url'].encode('utf-8')
+            result = json.loads(unicode(urllib2.urlopen(pod_api_url, data="any").read(), "utf-8"))
+            post_url = result["post_url"].encode("utf-8")
             response = {
-                'state': 'ok',
-                'redirect_url': result['redirect_url'].encode('utf-8'),
+                "state": "ok",
+                "redirect_url": result["redirect_url"].encode("utf-8"),
             }
         else:
             try:
-                post_url = post_data['post_url']
+                post_url = post_data["post_url"]
             except KeyError:
-                return self.error_response('POST argument required: post_url')
-            response = {'state': 'ok'}
+                return self.error_response("POST argument required: post_url")
+            response = {"state": "ok"}
 
-        log.info('zip_post %s %s' % (collection_id, pod_api_url))
+        log.info("zip_post %s %s" % (collection_id, pod_api_url))
         params.post_url = post_url
 
-        self.qserve.qadd(channel="post",  # jobid="%s:post" % collection_id,
-                         payload=dict(params=params.__dict__),
-                         timeout=20 * 60)
+        self.qserve.qadd(
+            channel="post",  # jobid="%s:post" % collection_id,
+            payload=dict(params=params.__dict__),
+            timeout=20 * 60,
+        )
         return response
 
 
@@ -471,8 +508,10 @@ def main():
     # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     from mwlib import argv
+
     opts, args = argv.parse(
-        sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface=")
+        sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface="
+    )
     qs = []
     port = 8899
     interface = "0.0.0.0"
@@ -500,7 +539,7 @@ def main():
 
     watchers = pool.Pool()
     for x in qs:
-        watchers.spawn(call_in_loop(5.0, watch_qserve(x, busy)))
+        watchers.spawn(CallInLoop(5.0, watch_qserve(x, busy)))
 
     try:
         print "listening on %s:%d" % address

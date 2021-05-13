@@ -35,13 +35,13 @@ def check_style(s, counts):
 
 
 def test_style():
-    yield check_style, u"''frankfurt''", (2,)
-    yield check_style, u"'''mainz'''", (3,)
-    yield check_style, u"'''''hamburg'''''", (3, 2)
-    yield check_style, u"'''''foo'' bla'''", (3, 2, 3)
-    yield check_style, u"'''''mainz''' bla''", (3, 2, 2)
-    yield check_style, u"'''''''''''''''''''pp'''''", (3, 2)
-    yield check_style, u"'''test''bla", (2,)
+    check_style(u"''frankfurt''", (2,))
+    check_style(u"'''mainz'''", (3,))
+    check_style(u"'''''hamburg'''''", (3, 2))
+    check_style(u"'''''foo'' bla'''", (3, 2, 3))
+    check_style(u"'''''mainz''' bla''", (3, 2, 2))
+    check_style(u"'''''''''''''''''''pp'''''", (3, 2))
+    check_style(u"'''test''bla", (2,))
 
 
 def test_style_fails():
@@ -706,8 +706,8 @@ def test_ftp_url():
         assert urls, "expected a named url"
         assert urls[0].caption == url, "bad url"
 
-    yield checkurl, "ftp://bla.com:8888/asdfasdf+ad'fdsf$fasd{}/~ralf?=blubb/@#&*(),blubb"
-    yield checkurl, "ftp://bla.com:8888/$blubb/"
+    checkurl("ftp://bla.com:8888/asdfasdf+ad'fdsf$fasd{}/~ralf?=blubb/@#&*(),blubb")
+    checkurl("ftp://bla.com:8888/$blubb/")
 
 
 def test_http_url():
@@ -718,11 +718,11 @@ def test_http_url():
         caption = parse(url).find(parser.URL)[0].caption
         assert caption == url, "bad url"
 
-    yield checkurl, "http://pediapress.com/'bla"
-    yield checkurl, "http://pediapress.com/bla/$/blubb"
-    yield checkurl, "http://pediapress.com/foo*bar"
-    yield checkurl, "http://pediapress.com/foo|bar"
-    yield checkurl, "http://pediapress.com/{curly_braces}"
+    checkurl("http://pediapress.com/'bla")
+    checkurl("http://pediapress.com/bla/$/blubb")
+    checkurl("http://pediapress.com/foo*bar")
+    checkurl("http://pediapress.com/foo|bar")
+    checkurl("http://pediapress.com/{curly_braces}")
 
 
 def test_schemeless_url():
@@ -1068,21 +1068,21 @@ def test_table_whitespace_before_begintable():
         assert len(tables) == 1, "expected exactly one table"
         assert tables[0].vlist == dict(bgcolor="#aacccc")
 
-    yield check, '''
+    check('''
  {| bgcolor="#aacccc"
 |-
 | cell1
 | cell2
 |}
-'''
+''')
 
-    yield check, '''
+    check('''
 :::{| bgcolor="#aacccc"
 |-
 | cell1
 | cell2
 |}
-'''
+''')
 
 
 def test_closing_td_in_cell():
@@ -1196,8 +1196,8 @@ def test_imagemod_upright():
         up = parse(s, lang='de').find(parser.ImageLink)[0].upright
         assert up == expected, 'expected %s got %s' % (expected, up)
 
-    yield doit, "[[Datei:bla.jpg|upright|thumb|foobar]]", 0.75
-    yield doit, "[[Datei:bla.jpg|upright=0.5|thumb|foobar]]", 0.5
+    doit("[[Datei:bla.jpg|upright|thumb|foobar]]", 0.75)
+    doit("[[Datei:bla.jpg|upright=0.5|thumb|foobar]]", 0.5)
 
 
 def test_imagemod_localised_magicwords():
@@ -1259,9 +1259,9 @@ def test_vlist_newline():
         tag = parse(txt).find(parser.TagNode)[0]
         assert tag.vlist, "vlist should not be empty"
 
-    yield check, '<ref\n\nname="bla">bla</ref>'
-    yield check, '<ref\n\nname\n\n=\n\n"bla">bla</ref>'
-    yield check, '<ref\n\nname\n\n=\n\n"bla\n">bla</ref>'
+    check('<ref\n\nname="bla">bla</ref>')
+    check('<ref\n\nname\n\n=\n\n"bla">bla</ref>')
+    check('<ref\n\nname\n\n=\n\n"bla\n">bla</ref>')
 
 
 def test_span_vs_ref():

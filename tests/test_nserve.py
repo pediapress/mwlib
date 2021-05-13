@@ -18,7 +18,7 @@ except ImportError:
 
 def post(**kw):
     try:
-        r = urllib2.urlopen('http://app.de/', urllib.urlencode(kw))
+        r = urllib2.urlopen("http://app.de/", urllib.urlencode(kw))
         data = r.read()
         data = json.loads(data)
         return (r.code, data)
@@ -29,29 +29,33 @@ def post(**kw):
 def get_exception_raiser(msg, exception_class=RuntimeError):
     def raise_exc(*args, **kwargs):
         raise exception_class(msg)
+
     return raise_exc
 
 
 raise_greenletexit = get_exception_raiser("killed", gevent.GreenletExit)
 
 
-def pytest_funcarg__app(request):
+@pytest.fixture()
+def app(request):
     wsgi_intercept.urllib_intercept.install_opener()
     request.addfinalizer(wsgi_intercept.urllib_intercept.uninstall_opener)
-    wsgi_intercept.add_wsgi_intercept('app.de', 80, bottle.default_app)
+    wsgi_intercept.add_wsgi_intercept("app.de", 80, bottle.default_app)
     request.addfinalizer(lambda: wsgi_intercept.remove_wsgi_intercept("app.de", 80))
     return None
 
 
-def pytest_funcarg__busy(request):
+@pytest.fixture()
+def busy(request):
     busy = {}
-    monkeypatch = request.getfuncargvalue("monkeypatch")
+    monkeypatch = request.getfixturevalue("monkeypatch")
     monkeypatch.setattr(nserve, "busy", busy)
     return busy
 
 
-def pytest_funcarg__wq(request):
-    busy = request.getfuncargvalue("busy")
+@pytest.fixture()
+def wq(request):
+    busy = request.getfixturevalue("busy")
     wq = nserve.watch_qserve(("localhost", 8888), busy)
     wq.getstats_timeout = 0.01
     wq.sleep_time = 0.01
@@ -61,10 +65,12 @@ def pytest_funcarg__wq(request):
 
 # -- tests
 
+
 def test_make_collection_id_version(monkeypatch):
     data = {}
     id1 = nserve.make_collection_id(data)
     from mwlib import _version
+
     monkeypatch.setattr(_version, "version", (0, 1, 0))
     id2 = nserve.make_collection_id(data)
     assert id1 != id2
@@ -136,7 +142,7 @@ def test_app_do_render_missing_metabook(app, busy):
     busy[("host1", 8000)] = False
 
     code, data = post(command="render", writer="odf")
-    print code, data
+    print(code, data)
 
     assert code == 200
     assert "metabook or collection_id required" in data["error"]
@@ -148,12 +154,24 @@ def test_app_dispatch_bad_collid(app, busy):
     assert code == 404
 
 
-@pytest.mark.parametrize(("filename", "ext", "expected"), [
-    (u"Motörhead", "pdf", "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf"),
-    (None, "pdf", "inline; filename=collection.pdf"),
-    ("  ;;;", "pdf", "inline; filename=collection.pdf;filename*=UTF-8''%3B%3B%3B.pdf"),
-    ("Peter Hartz", "pdf", "inline; filename=Peter-Hartz.pdf;filename*=UTF-8''Peter%20Hartz.pdf"),
-    ("foo", "pdf", "inline; filename=foo.pdf")])
+@pytest.mark.parametrize(
+    ("filename", "ext", "expected"),
+    [
+        (
+            u"Motörhead",
+            "pdf",
+            "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf",
+        ),
+        (None, "pdf", "inline; filename=collection.pdf"),
+        ("  ;;;", "pdf", "inline; filename=collection.pdf;filename*=UTF-8''%3B%3B%3B.pdf"),
+        (
+            "Peter Hartz",
+            "pdf",
+            "inline; filename=Peter-Hartz.pdf;filename*=UTF-8''Peter%20Hartz.pdf",
+        ),
+        ("foo", "pdf", "inline; filename=foo.pdf"),
+    ],
+)
 def test_get_content_disposition(filename, ext, expected):
     res = nserve.get_content_disposition(filename, ext)
     assert res == expected
@@ -165,5 +183,5 @@ def test_content_disposition_comma():
 
 
 def test_content_disposition_merge():
-    a, u = nserve.get_content_disposition_values("foo ,\"bar", "pdf")
+    a, u = nserve.get_content_disposition_values('foo ,"bar', "pdf")
     assert a == "foo-bar"

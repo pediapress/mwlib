@@ -12,7 +12,7 @@ import socket
 cachedir = None
 cacheurl = None
 
-from mwlib.async import proc
+from mwlib.asynchronous import proc
 from mwlib.utils import garble_password
 
 
@@ -239,7 +239,7 @@ def main():
         sys.exit("--url option missing")
 
     make_cachedir(cachedir)
-    from mwlib.async import slave
+    from mwlib.asynchronous import slave
     slave.main(commands, numgreenlets=numgreenlets, argv=args)
 
 

@@ -16,7 +16,7 @@ from mwlib import parser
 
 
 def _treesanity(r):
-    "check that parents match their children"
+    """check that parents match their children"""
     for c in r.allchildren():
         if c.parent:
             assert c in c.parent.children
@@ -148,7 +148,7 @@ def test_definitiondescription():
 
 
 @pytest.mark.xfail
-def test_defintion_list():
+def test_definition_list():
     """http://code.pediapress.com/wiki/ticket/221"""
     raw = u''';termA
 :descr1

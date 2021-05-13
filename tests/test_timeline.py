@@ -3,8 +3,7 @@
 
 import pytest
 import os
-if not os.path.isfile('/usr/bin/ploticus'):
-    pytest.skip("no ploticus")
+
 
 from mwlib import timeline
 
@@ -114,6 +113,7 @@ PlotData=
 """
 
 
+@pytest.mark.skipif(not os.path.isfile("/usr/bin/ploticus"), reason="no ploticus")
 def test_draw_timeline():
     fp = timeline.drawTimeline(example_script)
     print "result in", fp

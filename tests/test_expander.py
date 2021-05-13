@@ -1,5 +1,6 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
+import pytest
 
 from mwlib import expander
 from mwlib.expander import expandstr, DictDB
@@ -265,20 +266,25 @@ def test_titleparts_negative():
 def test_titleparts_nonint():
     expandstr("{{#titleparts:Help:Link/a/b|bla}}", "Help:Link/a/b")
 
+cases = [
+("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression"),
+("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input"),
+("{{#iferror:{{#expr:1+1}}|bad input}}", "2"),
+("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input"),
+("{{#iferror:{{#expr:1+1}}}}", "2"),
+("{{#iferror:{{#expr:1+Z}}}}", ""),
+("{{#iferror:good|bad input|}}", ""),
+]
 
-def test_iferror():
-    yield expandstr, "{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression"
-    yield expandstr, "{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input"
-    yield expandstr, "{{#iferror:{{#expr:1+1}}|bad input}}", "2"
-    yield expandstr, "{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input"
-    yield expandstr, "{{#iferror:{{#expr:1+1}}}}", "2"
-    yield expandstr, "{{#iferror:{{#expr:1+Z}}}}", ""
-    yield expandstr, "{{#iferror:good|bad input|}}", ""
+
+@pytest.mark.parametrize("case", cases)
+def test_iferror(case):
+    expandstr(case[0], case[1])
 
 
 def test_no_implicit_newline():
-    yield expandstr, "foo\n{{#if: 1|#bar}}", "foo\n#bar"
-    yield expandstr, "{{#if: 1|#bar}}", "#bar"
+    expandstr("foo\n{{#if: 1|#bar}}", "foo\n#bar")
+    expandstr("{{#if: 1|#bar}}", "#bar")
 
 
 def test_implicit_newline_noinclude():
@@ -321,9 +327,9 @@ def test_implicit_newline_switch():
 
 
 def test_implicit_newline_inner():
-    yield expandstr, "ab {{#if: 1| cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef"
-    yield expandstr, "ab {{#switch: 1| 1=cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef"
-    yield expandstr, "ab{{#tag:imagemap|{{#if:1|#abc}} }}ef", "ab<imagemap>\n#abc </imagemap>ef"
+    expandstr("ab {{#if: 1| cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef")
+    expandstr("ab {{#switch: 1| 1=cd {{#if:||#f9f9f9}}}} ef", "ab cd \n#f9f9f9 ef")
+    expandstr("ab{{#tag:imagemap|{{#if:1|#abc}} }}ef", "ab<imagemap>\n#abc </imagemap>ef")
 
 
 def test_implicit_newline_param():
@@ -333,11 +339,11 @@ def test_implicit_newline_param():
     def doit(a, b):
         expandstr(a, b, wikidb=wikidb)
 
-    yield doit, "{{foo|{{bar}}}}", "foo\n{|"
-    yield doit, "{{foo|1={{bar}}}}", "foo{|"
-    yield doit, "{{foo|{{{baz}} }}", "foo{| "
-    yield doit, "{{foo|\nbar\n}}baz", "foo\nbar\nbaz"
-    yield doit, "{{foo| bar }}baz", "foo bar baz"
+    doit("{{foo|{{bar}}}}", "foo\n{|")
+    doit("{{foo|1={{bar}}}}", "foo{|")
+    doit("{{foo|{{{baz}} }}", "foo{| ")
+    doit("{{foo|\nbar\n}}baz", "foo\nbar\nbaz")
+    doit("{{foo| bar }}baz", "foo bar baz")
 
 
 def test_expand_after_named():
@@ -348,21 +354,21 @@ def test_expand_after_named():
 
 
 def test_padleft():
-    yield expandstr, "{{padleft:7|3|0}}", "007"
-    yield expandstr, "{{padleft:0|3|0}}", "000"
-    yield expandstr, "{{padleft:bcd|6|a}}", "aaabcd"
-    yield expandstr, "{{padleft:|3|abcde}}", "abc"
-    yield expandstr, "{{padleft:bla|5|xyz}}", "xybla"
-    yield expandstr, "{{padleft:longstring|3|abcde}}", "longstring"
+    expandstr("{{padleft:7|3|0}}", "007")
+    expandstr("{{padleft:0|3|0}}", "000")
+    expandstr("{{padleft:bcd|6|a}}", "aaabcd")
+    expandstr("{{padleft:|3|abcde}}", "abc")
+    expandstr("{{padleft:bla|5|xyz}}", "xybla")
+    expandstr("{{padleft:longstring|3|abcde}}", "longstring")
     # {{padleft:cafe|8|-}} = ----cafe
 
 
 def test_padright():
-    yield expandstr, "{{padright:bcd|6|a}}", "bcdaaa"
-    yield expandstr, "{{padright:0|6|a}}", "0aaaaa"
-    yield expandstr, "{{padright:|3|abcde}}", "abc"
-    yield expandstr, "{{padright:bla|5|xyz}}", "blaxy"
-    yield expandstr, "{{padright:longstring|3|abcde}}", "longstring"
+    expandstr("{{padright:bcd|6|a}}", "bcdaaa")
+    expandstr("{{padright:0|6|a}}", "0aaaaa")
+    expandstr("{{padright:|3|abcde}}", "abc")
+    expandstr("{{padright:bla|5|xyz}}", "blaxy")
+    expandstr("{{padright:longstring|3|abcde}}", "longstring")
 
 
 def test_urlencode():
@@ -407,18 +413,18 @@ def test_1x_newline_and_spaces():
     def e(a, b):
         return expandstr(a, b, wikidb=wikidb)
 
-    yield e, 'a{{#if:1|\n}}b', 'ab'
-    yield e, 'a{{#if:1|b\n}}c', 'abc'
-    yield e, 'a{{#if:1|\nb}}c', 'abc'
+    e('a{{#if:1|\n}}b', 'ab')
+    e('a{{#if:1|b\n}}c', 'abc')
+    e('a{{#if:1|\nb}}c', 'abc')
 
-    yield e, 'a{{1x|\n}}b', 'a\nb'
-    yield e, 'a{{1x|b\n}}c', 'ab\nc'
-    yield e, 'a{{1x|\nb}}c', 'a\nbc'
+    e('a{{1x|\n}}b', 'a\nb')
+    e('a{{1x|b\n}}c', 'ab\nc')
+    e('a{{1x|\nb}}c', 'a\nbc')
 
-    yield e, 'a{{1x|1=\n}}b', 'ab'
+    e('a{{1x|1=\n}}b', 'ab')
 
-    yield e, 'a{{1x|1=b\n}}c', 'abc'
-    yield e, 'a{{1x|1=\nb}}c', 'abc'
+    e('a{{1x|1=b\n}}c', 'abc')
+    e('a{{1x|1=\nb}}c', 'abc')
 
 
 def test_variable_alternative():
@@ -434,17 +440,17 @@ def test_implicit_newline_after_expand():
 def test_pagename_non_ascii():
     def e(a, b):
         return expandstr(a, b, pagename=u'L\xe9onie s')
-    yield e, '{{PAGENAME}}', u'L\xe9onie s'
-    yield e, '{{PAGENAMEE}}', 'L%C3%A9onie_s'
+    e('{{PAGENAME}}', u'L\xe9onie s')
+    e('{{PAGENAMEE}}', 'L%C3%A9onie_s')
 
-    yield e, '{{BASEPAGENAME}}', u'L\xe9onie s'
-    yield e, '{{BASEPAGENAMEE}}', 'L%C3%A9onie_s'
+    e('{{BASEPAGENAME}}', u'L\xe9onie s')
+    e('{{BASEPAGENAMEE}}', 'L%C3%A9onie_s')
 
-    yield e, '{{FULLPAGENAME}}', u'L\xe9onie s'
-    yield e, '{{FULLPAGENAMEE}}', 'L%C3%A9onie_s'
+    e('{{FULLPAGENAME}}', u'L\xe9onie s')
+    e('{{FULLPAGENAMEE}}', 'L%C3%A9onie_s')
 
-    yield e, '{{SUBPAGENAME}}', u'L\xe9onie s'
-    yield e, '{{SUBPAGENAMEE}}', 'L%C3%A9onie_s'
+    e('{{SUBPAGENAME}}', u'L\xe9onie s')
+    e('{{SUBPAGENAMEE}}', 'L%C3%A9onie_s')
 
 
 def test_get_templates():
@@ -452,10 +458,10 @@ def test_get_templates():
         r = expander.get_templates(source, u'')
         assert r == expected, "expected %r, got %r" % (expected, r)
 
-    yield doit, "{{foo| {{ bar }} }}", set("foo bar".split())
-    yield doit, "{{foo{{{1}}} }}", set()
-    yield doit, "{{{ {{foo}} }}}", set(['foo'])
-    yield doit, "{{ #if: {{{1}}} |yes|no}}", set()
+    doit("{{foo| {{ bar }} }}", set("foo bar".split()))
+    doit("{{foo{{{1}}} }}", set())
+    doit("{{{ {{foo}} }}}", set(['foo']))
+    doit("{{ #if: {{{1}}} |yes|no}}", set())
 
 
 def test_noinclude_end():
@@ -488,44 +494,44 @@ def test_equal_inside_link():
 
 
 def test_tag_parametrs():
-    yield expandstr, '{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>'
-    yield expandstr, "{{#tag:div|contents|a}}"
+    expandstr('{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>')
+    expandstr("{{#tag:div|contents|a}}")
 
 
 def test_rel2abs():
-    yield expandstr, "{{#rel2abs: ./quok | Help:Foo/bar/baz }}", "Help:Foo/bar/baz/quok"
-    yield expandstr, "{{#rel2abs: ../quok | Help:Foo/bar/baz }}", "Help:Foo/bar/quok"
-    yield expandstr, "{{#rel2abs: ../. | Help:Foo/bar/baz }}", "Help:Foo/bar"
+    expandstr("{{#rel2abs: ./quok | Help:Foo/bar/baz }}", "Help:Foo/bar/baz/quok")
+    expandstr("{{#rel2abs: ../quok | Help:Foo/bar/baz }}", "Help:Foo/bar/quok")
+    expandstr("{{#rel2abs: ../. | Help:Foo/bar/baz }}", "Help:Foo/bar")
 
-    yield expandstr, "{{#rel2abs: ../quok/. | Help:Foo/bar/baz }}", "Help:Foo/bar/quok"
-    yield expandstr, "{{#rel2abs: ../../quok | Help:Foo/bar/baz }}", "Help:Foo/quok"
-    yield expandstr, "{{#rel2abs: ../../../quok | Help:Foo/bar/baz }}", "quok"
-    yield expandstr, "{{#rel2abs: abc | foo}}", "abc"
-    yield expandstr, "{{#rel2abs: /abc | foo}}", "foo/abc"
+    expandstr("{{#rel2abs: ../quok/. | Help:Foo/bar/baz }}", "Help:Foo/bar/quok")
+    expandstr("{{#rel2abs: ../../quok | Help:Foo/bar/baz }}", "Help:Foo/quok")
+    expandstr("{{#rel2abs: ../../../quok | Help:Foo/bar/baz }}", "quok")
+    expandstr("{{#rel2abs: abc | foo}}", "abc")
+    expandstr("{{#rel2abs: /abc | foo}}", "foo/abc")
 
 
 def test_namespace():
-    yield expandstr, "{{NAMESPACE}}", "Benutzer", None, "User:Schmir"
-    yield expandstr, "{{NAMESPACE}}", ""
-    yield expandstr, "{{NAMESPACE:Mainz}}", ""
-    yield expandstr, "{{NAMESPACE:User_talk:Schmir}}", "Benutzer Diskussion"
-    yield expandstr, "{{NAMESPACE:User talk:Schmir}}", "Benutzer Diskussion"
-    yield expandstr, "{{NAMESPACE:  benutzer diskussion:Schmir}}", "Benutzer Diskussion"
+    expandstr("{{NAMESPACE}}", "Benutzer", None, "User:Schmir")
+    expandstr("{{NAMESPACE}}", "")
+    expandstr("{{NAMESPACE:Mainz}}", "")
+    expandstr("{{NAMESPACE:User_talk:Schmir}}", "Benutzer Diskussion")
+    expandstr("{{NAMESPACE:User talk:Schmir}}", "Benutzer Diskussion")
+    expandstr("{{NAMESPACE:  benutzer diskussion:Schmir}}", "Benutzer Diskussion")
 
 
 def test_pagename():
-    yield expandstr, "{{PAGENAME}}", "Thispage"
-    yield expandstr, "{{PAGENAME|Mainz}}", "Mainz"
-    yield expandstr, "{{PAGENAME:User:Schmir}}", "Schmir"
-    yield expandstr, "{{PAGENAME:acdc}}", "Acdc"
+    expandstr("{{PAGENAME}}", "Thispage")
+    expandstr("{{PAGENAME|Mainz}}", "Mainz")
+    expandstr("{{PAGENAME:User:Schmir}}", "Schmir")
+    expandstr("{{PAGENAME:acdc}}", "Acdc")
 
 
 def test_namespace_as_template_type_error():
     """https://github.com/pediapress/mwlib/issues/3"""
-    yield expandstr, "{{NAMESPACE|}}"
-    yield expandstr, "{{NAMESPACE|foo}}"
-    yield expandstr, "{{NAMESPACE|foo|bla}}"
-    yield expandstr, "{{NAMESPACE||bla}}"
+    expandstr("{{NAMESPACE|}}")
+    expandstr("{{NAMESPACE|foo}}")
+    expandstr("{{NAMESPACE|foo|bla}}")
+    expandstr("{{NAMESPACE||bla}}")
 
 
 def test_preprocess_uniq_after_comment():
@@ -546,30 +552,30 @@ foo was missing<ref>bar</ref> <!-- some comment--> baz
 
 
 def test_dynamic_parserfun():
-    yield expandstr, "{{{{#if: 1|}}#time: Y-m-d | 2009-1-2}}", "2009-01-02"
+    expandstr("{{{{#if: 1|}}#time: Y-m-d | 2009-1-2}}", "2009-01-02")
 
-    yield expandstr, "{{{{#if: 1|}}#switch: A | a=lower | A=UPPER }}", "UPPER"
+    expandstr("{{{{#if: 1|}}#switch: A | a=lower | A=UPPER }}", "UPPER")
 
-    yield expandstr, "{{{{#if: 1|}}#if: 1 | yes}}", "yes"
+    expandstr("{{{{#if: 1|}}#if: 1 | yes}}", "yes")
 
 
 def test_iferror_switch_default():
     """http://code.pediapress.com/wiki/ticket/648"""
-    yield expandstr, "{{#iferror: [[foo {{bar}}]] | yes|no}}", "no"
-    yield expandstr, u"""{{#switch: bla
+    expandstr("{{#iferror: [[foo {{bar}}]] | yes|no}}", "no")
+    expandstr(u"""{{#switch: bla
 | #default = {{#iferror: [[foo {{bar}}]] | yes|no}}
-}}""", "no"
+}}""", "no")
 
 
 def test_variable_subst():
-    yield expandstr, "{{{{{subst|}}}#if: 1| yes| no}}", "yes"
-    yield expandstr, "{{{{{subst|}}}#expr: 1+1}}", "2"
-    yield expandstr, "{{{{{susbst|}}}#ifexpr: 1+1|yes|no}}", "yes"
+    expandstr("{{{{{subst|}}}#if: 1| yes| no}}", "yes")
+    expandstr("{{{{{subst|}}}#expr: 1+1}}", "2")
+    expandstr("{{{{{susbst|}}}#ifexpr: 1+1|yes|no}}", "yes")
 
 
 def test_link_vs_expander():
     """http://code.pediapress.com/wiki/ticket/752"""
-    yield expandstr, "{{#if: 1|  [[foo|bar}}123", "{{#if: 1|  [[foo|bar}}123"
+    expandstr("{{#if: 1|  [[foo|bar}}123", "{{#if: 1|  [[foo|bar}}123")
 
 
 def test_pagemagic():
@@ -581,50 +587,50 @@ def test_pagemagic():
         return expandstr('{{%s}}' % tpl, expected,
                          pagename='Benutzer Diskussion:Anonymous user!/sandbox/my page')
 
-    yield expand_page, 'PAGENAME', 'Anonymous user!/sandbox/my page'
-    yield expand_page, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'PAGENAME', 'Anonymous user!/sandbox/my page'
-    yield expand_talk, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
-    yield expand_page, 'BASEPAGENAME', 'Anonymous user!/sandbox'
-    yield expand_page, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
-    yield expand_talk, 'BASEPAGENAME', 'Anonymous user!/sandbox'
-    yield expand_talk, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
-    yield expand_page, 'SUBPAGENAME', 'my page'
-    yield expand_page, 'SUBPAGENAMEE', 'my_page'
-    yield expand_talk, 'SUBPAGENAME', 'my page'
-    yield expand_talk, 'SUBPAGENAMEE', 'my_page'
-    yield expand_page, 'NAMESPACE', 'Benutzer'
-    yield expand_page, 'NAMESPACEE', 'Benutzer'
-    yield expand_talk, 'NAMESPACE', 'Benutzer Diskussion'
-    yield expand_talk, 'NAMESPACEE', 'Benutzer_Diskussion'
-    yield expand_page, 'FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_page, 'FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_page, 'TALKSPACE', 'Benutzer Diskussion'
-    yield expand_page, 'TALKSPACEE', 'Benutzer_Diskussion'
-    yield expand_talk, 'TALKSPACE', 'Benutzer Diskussion'
-    yield expand_talk, 'TALKSPACEE', 'Benutzer_Diskussion'
-    yield expand_page, 'SUBJECTSPACE', 'Benutzer'
-    yield expand_page, 'SUBJECTSPACEE', 'Benutzer'
-    yield expand_talk, 'SUBJECTSPACE', 'Benutzer'
-    yield expand_talk, 'SUBJECTSPACEE', 'Benutzer'
-    yield expand_page, 'ARTICLESPACE', 'Benutzer'
-    yield expand_page, 'ARTICLESPACEE', 'Benutzer'
-    yield expand_talk, 'ARTICLESPACE', 'Benutzer'
-    yield expand_talk, 'ARTICLESPACEE', 'Benutzer'
-    yield expand_page, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
-    yield expand_page, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_page, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_page, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_page, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_page, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    expand_page('PAGENAME', 'Anonymous user!/sandbox/my page')
+    expand_page('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
+    expand_talk('PAGENAME', 'Anonymous user!/sandbox/my page')
+    expand_talk('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
+    expand_page('BASEPAGENAME', 'Anonymous user!/sandbox')
+    expand_page('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
+    expand_talk('BASEPAGENAME', 'Anonymous user!/sandbox')
+    expand_talk('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
+    expand_page('SUBPAGENAME', 'my page')
+    expand_page('SUBPAGENAMEE', 'my_page')
+    expand_talk('SUBPAGENAME', 'my page')
+    expand_talk('SUBPAGENAMEE', 'my_page')
+    expand_page('NAMESPACE', 'Benutzer')
+    expand_page('NAMESPACEE', 'Benutzer')
+    expand_talk('NAMESPACE', 'Benutzer Diskussion')
+    expand_talk('NAMESPACEE', 'Benutzer_Diskussion')
+    expand_page('FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_page('FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
+    expand_talk('FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
+    expand_page('TALKSPACE', 'Benutzer Diskussion')
+    expand_page('TALKSPACEE', 'Benutzer_Diskussion')
+    expand_talk('TALKSPACE', 'Benutzer Diskussion')
+    expand_talk('TALKSPACEE', 'Benutzer_Diskussion')
+    expand_page('SUBJECTSPACE', 'Benutzer')
+    expand_page('SUBJECTSPACEE', 'Benutzer')
+    expand_talk('SUBJECTSPACE', 'Benutzer')
+    expand_talk('SUBJECTSPACEE', 'Benutzer')
+    expand_page('ARTICLESPACE', 'Benutzer')
+    expand_page('ARTICLESPACEE', 'Benutzer')
+    expand_talk('ARTICLESPACE', 'Benutzer')
+    expand_talk('ARTICLESPACEE', 'Benutzer')
+    expand_page('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
+    expand_page('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
+    expand_talk('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
+    expand_page('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_page('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_talk('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_page('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_page('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_talk('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
 
 
 def test_pagemagic_with_arg():
@@ -636,55 +642,55 @@ def test_pagemagic_with_arg():
         return expandstr('{{%s:%s}}' % (tpl, 'Benutzer Diskussion:Anonymous user!/sandbox/my page'),
                          expected, pagename='Help:Irrelevant')
 
-    yield expand_page, 'PAGENAME', 'Anonymous user!/sandbox/my page'
-    yield expand_page, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'PAGENAME', 'Anonymous user!/sandbox/my page'
-    yield expand_talk, 'PAGENAMEE', 'Anonymous_user%21/sandbox/my_page'
-    yield expand_page, 'BASEPAGENAME', 'Anonymous user!/sandbox'
-    yield expand_page, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
-    yield expand_talk, 'BASEPAGENAME', 'Anonymous user!/sandbox'
-    yield expand_talk, 'BASEPAGENAMEE', 'Anonymous_user%21/sandbox'
-    yield expand_page, 'SUBPAGENAME', 'my page'
-    yield expand_page, 'SUBPAGENAMEE', 'my_page'
-    yield expand_talk, 'SUBPAGENAME', 'my page'
-    yield expand_talk, 'SUBPAGENAMEE', 'my_page'
-    yield expand_page, 'NAMESPACE', 'Benutzer'
-    yield expand_page, 'NAMESPACEE', 'Benutzer'
-    yield expand_talk, 'NAMESPACE', 'Benutzer Diskussion'
-    yield expand_talk, 'NAMESPACEE', 'Benutzer_Diskussion'
-    yield expand_page, 'FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_page, 'FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_page, 'TALKSPACE', 'Benutzer Diskussion'
-    yield expand_page, 'TALKSPACEE', 'Benutzer_Diskussion'
-    yield expand_talk, 'TALKSPACE', 'Benutzer Diskussion'
-    yield expand_talk, 'TALKSPACEE', 'Benutzer_Diskussion'
-    yield expand_page, 'SUBJECTSPACE', 'Benutzer'
-    yield expand_page, 'SUBJECTSPACEE', 'Benutzer'
-    yield expand_talk, 'SUBJECTSPACE', 'Benutzer'
-    yield expand_talk, 'SUBJECTSPACEE', 'Benutzer'
-    yield expand_page, 'ARTICLESPACE', 'Benutzer'
-    yield expand_page, 'ARTICLESPACEE', 'Benutzer'
-    yield expand_talk, 'ARTICLESPACE', 'Benutzer'
-    yield expand_talk, 'ARTICLESPACEE', 'Benutzer'
-    yield expand_page, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
-    yield expand_page, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_page, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_page, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_page, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_page, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
-    yield expand_talk, 'ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page'
-    yield expand_talk, 'ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page'
+    expand_page('PAGENAME', 'Anonymous user!/sandbox/my page')
+    expand_page('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
+    expand_talk('PAGENAME', 'Anonymous user!/sandbox/my page')
+    expand_talk('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
+    expand_page('BASEPAGENAME', 'Anonymous user!/sandbox')
+    expand_page('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
+    expand_talk('BASEPAGENAME', 'Anonymous user!/sandbox')
+    expand_talk('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
+    expand_page('SUBPAGENAME', 'my page')
+    expand_page('SUBPAGENAMEE', 'my_page')
+    expand_talk('SUBPAGENAME', 'my page')
+    expand_talk('SUBPAGENAMEE', 'my_page')
+    expand_page('NAMESPACE', 'Benutzer')
+    expand_page('NAMESPACEE', 'Benutzer')
+    expand_talk('NAMESPACE', 'Benutzer Diskussion')
+    expand_talk('NAMESPACEE', 'Benutzer_Diskussion')
+    expand_page('FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_page('FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
+    expand_talk('FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
+    expand_page('TALKSPACE', 'Benutzer Diskussion')
+    expand_page('TALKSPACEE', 'Benutzer_Diskussion')
+    expand_talk('TALKSPACE', 'Benutzer Diskussion')
+    expand_talk('TALKSPACEE', 'Benutzer_Diskussion')
+    expand_page('SUBJECTSPACE', 'Benutzer')
+    expand_page('SUBJECTSPACEE', 'Benutzer')
+    expand_talk('SUBJECTSPACE', 'Benutzer')
+    expand_talk('SUBJECTSPACEE', 'Benutzer')
+    expand_page('ARTICLESPACE', 'Benutzer')
+    expand_page('ARTICLESPACEE', 'Benutzer')
+    expand_talk('ARTICLESPACE', 'Benutzer')
+    expand_talk('ARTICLESPACEE', 'Benutzer')
+    expand_page('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
+    expand_page('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
+    expand_talk('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
+    expand_page('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_page('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_talk('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_page('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_page('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_talk('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
+    expand_talk('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
 
 
 def test_ns():
     """http://code.pediapress.com/wiki/ticket/902"""
-    yield expandstr, "{{NS:2}}", "Benutzer"
+    expandstr("{{NS:2}}", "Benutzer")
 
 
 def test_localized_expander():
@@ -716,6 +722,6 @@ def test_resolve_magic_alias():
 
 
 def test_safesubst():
-    yield expandstr, "{{safesubst:#expr:1+2}}", "3"
-    yield expandstr, "{{{{{|safesubst:}}}#expr:1+3}}", "4"
-    yield expandstr, "{{safesubst:#if: 1| yes | no}}", "yes"
+    expandstr("{{safesubst:#expr:1+2}}", "3")
+    expandstr("{{{{{|safesubst:}}}#expr:1+3}}", "4")
+    expandstr("{{safesubst:#if: 1| yes | no}}", "yes")

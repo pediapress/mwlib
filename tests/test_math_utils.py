@@ -30,6 +30,7 @@ class TestMathUtils(object):
         else:
             return True
 
+    @pytest.mark.xfail
     def test_math(self):
         latexlist = [r"\sqrt{4}=2",
                      r"a^2 + b^2 = c^2\,",

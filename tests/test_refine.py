@@ -17,7 +17,7 @@ def parse_txt(*args, **kwargs):
 
 def empty():
     empty = core.XBunch()
-    empty.nshandler = nshandling.get_nshandler_for_lang('de')
+    empty.nshandler = nshandling.get_nshandler_for_lang("de")
     return empty
 
 
@@ -62,13 +62,15 @@ def test_parse_table_cells_pipe():
         assert x.type == T.t_complex_table_cell, "cell %s bad" % (i,)
         assert len(x.children) == 1, "cell %s has wrong number of children" % (i,)
         assert x.children[0].type == T.t_text
-        assert x.children[0].text == ('cell%s' % i)
+        assert x.children[0].text == ("cell%s" % i)
 
 
 def test_parse_cell_modifier():
-    tokens = tokenize("""{|
+    tokens = tokenize(
+        """{|
 |align="right"|cell0|still_cell0
-|}""")[2:-2]
+|}"""
+    )[2:-2]
 
     print "BEFORE:"
     show(tokens)
@@ -81,9 +83,11 @@ def test_parse_cell_modifier():
 
 
 def test_parse_table_modifier():
-    tokens = tokenize("""{| border="1"
+    tokens = tokenize(
+        """{| border="1"
 |}
-""")
+"""
+    )
 
     print "BEFORE:"
     show(tokens)
@@ -97,11 +101,13 @@ def test_parse_table_modifier():
 
 
 def test_parse_table_row_modifier():
-    tokens = tokenize("""{|
+    tokens = tokenize(
+        """{|
 |- style="background:red; color:white"
 | cell
 |}
-""")[2:-2]
+"""
+    )[2:-2]
 
     print "BEFORE:"
     show(tokens)
@@ -132,14 +138,14 @@ def test_no_row_modifier():
 
 
 def test_parse_para_vs_preformatted():
-    s = ' foo\n\nbar\n'
+    s = " foo\n\nbar\n"
     r = core.parse_txt(s)
     core.show(r)
     pre = list(core.walknode(r, lambda x: x.type == core.T.t_complex_preformatted))[0]
     core.show(pre)
     textnodes = list(core.walknode(pre, lambda x: x.type == core.T.t_text))
-    txt = ''.join([x.text for x in textnodes])
-    assert u'bar' not in txt
+    txt = "".join([x.text for x in textnodes])
+    assert u"bar" not in txt
 
 
 def test_duplicate_nesting():
@@ -180,6 +186,7 @@ def test_tab_table():
         if node.type == T.t_complex_table:
             tables.append(node)
         return retval
+
     nodes = [x for x in r if allowed(x)]
     assert nodes, "bad  or no table"
 
@@ -211,6 +218,7 @@ def test_link_vs_center():
 
 def test_no_combine_dd_dt():
     """http://code.pediapress.com/wiki/ticket/549"""
+
     def doit(s):
         r = parse_txt(s)
         core.show(r)
@@ -218,8 +226,8 @@ def test_no_combine_dd_dt():
         print styles
         assert len(styles) == 2
 
-    yield doit, ":first\n:second\n"
-    yield doit, ";first\n;second\n"
+    doit(":first\n:second\n")
+    doit(";first\n;second\n")
 
 
 def test_combine_preformatted():
@@ -244,7 +252,7 @@ some text
 
 def test_mark_style_595():
     """http://code.pediapress.com/wiki/ticket/595"""
-    r = parse_txt('<b><i>[[Article link|Display text]]</i></b> after')
+    r = parse_txt("<b><i>[[Article link|Display text]]</i></b> after")
     b = core.walknodel(r, lambda x: x.tagname == "b")
     print b
     assert len(b) == 1, "expected exactly one bold node"
@@ -342,13 +350,15 @@ def test_urllink_in_brackets():
 
 
 def test_lines_with_table_space():
-    parse_txt("""* foo
+    parse_txt(
+        """* foo
  :{|
  |-
  | bar
  | baz
  |}
-""")
+"""
+    )
 
 
 def test_sub_close_sup():
@@ -366,12 +376,14 @@ def test_sup_close_sub():
 
 
 def test_dd_dt_tags_inside_table():
-    r = parse_txt("""{|
+    r = parse_txt(
+        """{|
 |-
 | blubb <dl> bla <dt>foobazbar</dt>
 |}
 <dl> bla <dt>foobazbar</dt>
-""")
+"""
+    )
     show(r)
     # assert 0 # FIXME
 
@@ -385,11 +397,10 @@ def test_left_to_right_mark():
 
     for mark in (u"\u200e", u"\u200f"):
         s = u"[[Image:foo.jpg" + mark + "|thumb|foobar]]"
-        yield doit, s
+        doit(s)
 
 
 def test_image_blocknode():
-
     def blocknode(s):
         r = parse_txt(s)[0]
         assert r.blocknode
@@ -398,22 +409,24 @@ def test_image_blocknode():
         r = parse_txt(s)[0]
         assert not r.blocknode
 
-    yield noblocknode, "[[Image:foo.png]]"
-    yield noblocknode, "[[Image:foo.png|150px]]"
-    yield noblocknode, "[[Image:foo.png|frameless]]"
+    noblocknode("[[Image:foo.png]]")
+    noblocknode("[[Image:foo.png|150px]]")
+    noblocknode("[[Image:foo.png|frameless]]")
 
-    yield blocknode, "[[Image:foo.png|left]]"
-    yield blocknode, "[[Image:foo.png|thumb]]"
-    yield blocknode, "[[Image:foo.png|frame]]"
+    blocknode("[[Image:foo.png|left]]")
+    blocknode("[[Image:foo.png|thumb]]")
+    blocknode("[[Image:foo.png|frame]]")
 
 
 def test_no_preformatted_inside_li():
     """stupid: http://code.pediapress.com/wiki/ticket/676"""
-    r = parse_txt("""<ol><li>in li:
+    r = parse_txt(
+        """<ol><li>in li:
   foo
   bar
 </li></ol>
-""")
+"""
+    )
     core.show(r)
     pre = core.walknodel(r, lambda x: x.type == T.t_complex_preformatted)
     assert not pre, "should not contain preformatted"
@@ -471,10 +484,12 @@ def test_tr_inside_caption():
 
 def test_ul_inside_star():
     """http://code.pediapress.com/wiki/ticket/735"""
-    r = core.parse_txt("""
+    r = core.parse_txt(
+        """
 * foo
 * bar </ul> baz
-""")
+"""
+    )
     core.show(r)
     ul = core.walknodel(r, lambda x: x.tagname == "ul")
 
@@ -491,7 +506,8 @@ def test_ul_inside_star():
 
 def test_div_vs_link():
     r = core.parse_txt(
-        """[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]""")
+        """[[File:ACDC_logo.gif|thumb| <div style="background-color:#fee8ab"> foo ]]"""
+    )
     core.show(r)
     assert r[0].type == T.t_complex_link, "expected an image link"
 
@@ -503,19 +519,23 @@ def test_link_vs_section():
 
 
 def test_div_vs_section():
-    r = core.parse_txt("""== foo <div style="background-color:#ff0000"> bar ==
+    r = core.parse_txt(
+        """== foo <div style="background-color:#ff0000"> bar ==
 baz
-""")
+"""
+    )
     core.show(r)
     assert r[0].level == 2, "expected a section"
 
 
 def test_comment_in_gallery():
     """http://code.pediapress.com/wiki/ticket/741"""
-    r = core.parse_txt("""<gallery>
+    r = core.parse_txt(
+        """<gallery>
 Image:ACDC_logo.gif|capshun<!--comment-->
 </gallery>
-""")
+"""
+    )
     core.show(r)
     txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
     print "TXT:", repr(txt)
@@ -524,11 +544,13 @@ Image:ACDC_logo.gif|capshun<!--comment-->
 
 
 def test_parserfun_in_gallery():
-    r = core.parse_txt("""<gallery>
+    r = core.parse_txt(
+        """<gallery>
 Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
 
 </gallery>
-""")
+"""
+    )
     core.show(r)
     txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
     print "TXT:", repr(txt)
@@ -537,9 +559,11 @@ Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
 
 
 def test_span_vs_lines():
-    r = core.parse_txt("""* foo <span> bar
+    r = core.parse_txt(
+        """* foo <span> bar
 * baz
-""")
+"""
+    )
     core.show(r)
 
     ul = core.walknodel(r, lambda x: x.tagname == "ul")
@@ -637,7 +661,9 @@ def test_references_with_paragraphs():
     references = core.walknodel(r, lambda x: x.tagname == "references")
     assert len(references) == 1, "expected exactly one references node, got %s" % len(references)
     refs = core.walknodel(references, lambda x: x.tagname == "ref")
-    assert len(refs) == 1, "expected exactly one ref node inside the references node, got %s" % len(refs)
+    assert (
+        len(refs) == 1
+    ), "expected exactly one ref node inside the references node, got %s" % len(refs)
 
 
 def test_newline_in_link_target():

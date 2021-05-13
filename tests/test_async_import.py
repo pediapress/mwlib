@@ -2,5 +2,5 @@
 
 
 def test_async_import():
-    from mwlib.async import jobs
+    from mwlib.asynchronous import jobs
     jobs.workq
