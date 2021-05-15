@@ -107,13 +107,13 @@
   { &Abort ("$CntErrors errors found") ; }
   else
   {
-    if (defined @Info)
+    if (@Info)
     {
       print "\nINFO\n" ;
       print @Info ;
       print "\n" ;
     }
-    if (defined @Warnings)
+    if (@Warnings)
     {
       print "\nWARNING(S)\n" ;
       print @Warnings ;
@@ -1322,7 +1322,7 @@ sub ParsePlotArea
 #          |       | err            |
 sub ParsePlotData
 {
-  if (defined (@Bars))
+  if (@Bars)
   { $BarsCommandFound = $true ; }
   else
   { $BarsCommandFound = $false ; }
@@ -2353,10 +2353,10 @@ sub RemoveSpaces
 
 sub DetectMissingCommands
 {
-  if (! defined (%Image))          { &Error2 ("Command ImageSize missing or invalid") ; }
-  if (! defined (%PlotArea))       { &Error2 ("Command PlotArea missing or invalid") ; }
-  if (! defined ($DateFormat))     { &Error2 ("Command DateFormat missing or invalid") ; }
-  if (! defined (@Axis {"time"}))  { &Error2 ("Command TimeAxis missing or invalid") ; }
+  if (! (%Image))          { &Error2 ("Command ImageSize missing or invalid") ; }
+  if (! (%PlotArea))       { &Error2 ("Command PlotArea missing or invalid") ; }
+  if (! ($DateFormat))     { &Error2 ("Command DateFormat missing or invalid") ; }
+  if (! (@Axis {"time"}))  { &Error2 ("Command TimeAxis missing or invalid") ; }
 
   if ((@Image {"width"} =~ /auto/i) && (@Axis {"time"} =~ /x/i))
   { &Error2 ("ImageSize value 'width:auto' only allowed with TimeAxis value 'orientation:vertical'") ; }
