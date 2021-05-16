@@ -1,8 +1,8 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
 import os
 
 try:
@@ -30,7 +30,3 @@ def get_siteinfo(lang):
 
     _cache[lang] = si
     return si
-
-# def get_available_languages():
-#     import glob
-#     glob.glob(_get_path("*"))
