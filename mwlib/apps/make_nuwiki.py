@@ -1,22 +1,25 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
 from __future__ import print_function
-import os
-from mwlib.net import fetch, sapi as mwapi
 
-from mwlib.parse_collection_page import extract_metadata
-from mwlib.metabook import get_licenses, parse_collection_page, collection
-from mwlib import myjson
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import os
+
 import gevent
 import gevent.pool
 import six
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.request
+
+from mwlib import myjson
+from mwlib.metabook import get_licenses, parse_collection_page, collection
+from mwlib.net import fetch, sapi as mwapi
+from mwlib.parse_collection_page import extract_metadata
 
 
-class start_fetcher(object):
+class StartFetcher(object):
     progress = None
 
     def __init__(self, **kw):
@@ -42,23 +45,30 @@ class start_fetcher(object):
         fsout.dump_json(metabook=metabook)
         nfo = self.nfo.copy()
 
-        nfo.update({
-            'format': 'nuwiki',
-            'base_url': self.base_url,
-            'script_extension': self.options.script_extension})
+        nfo.update(
+            {
+                "format": "nuwiki",
+                "base_url": self.base_url,
+                "script_extension": self.options.script_extension,
+            }
+        )
 
         fsout.nfo = nfo
 
         # fsout.dump_json(nfo=nfo)
 
         pages = fetch.pages_from_metabook(metabook)
-        self.fetcher = fetch.fetcher(api, fsout, pages,
-                                     licenses=self.licenses,
-                                     status=self.status,
-                                     progress=self.progress,
-                                     imagesize=self.options.imagesize,
-                                     cover_image=metabook.cover_image,
-                                     fetch_images=not self.options.noimages)
+        self.fetcher = fetch.fetcher(
+            api,
+            fsout,
+            pages,
+            licenses=self.licenses,
+            status=self.status,
+            progress=self.progress,
+            imagesize=self.options.imagesize,
+            cover_image=metabook.cover_image,
+            fetch_images=not self.options.noimages,
+        )
         self.fetcher.run()
 
     def init_variables(self):
@@ -96,8 +106,10 @@ class start_fetcher(object):
         wikitrust(api.baseurl, mb)
 
         # XXX: localised template parameter names???
-        meta = extract_metadata(rawtext, ("cover-image", "cover-color",
-                                          "text-color", "editor", "description", "sort_as"))
+        meta = extract_metadata(
+            rawtext,
+            ("cover-image", "cover-color", "text-color", "editor", "description", "sort_as"),
+        )
         mb.editor = meta["editor"]
         mb.cover_image = meta["cover-image"]
         mb.cover_color = meta["cover-color"]
@@ -129,6 +141,7 @@ def wikitrust(baseurl, metabook):
         return
 
     from mwlib import trustedrevs
+
     tr = trustedrevs.TrustedRevisions()
 
     for x in metabook.articles():
@@ -139,8 +152,10 @@ def wikitrust(baseurl, metabook):
             r = tr.getTrustedRevision(x.title)
             x.revision = r["revid"]
 
-            print("chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r" % (
-                r["title"], r["age"], r["revid"], r["user"]))
+            print(
+                "chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r"
+                % (r["title"], r["age"], r["revid"], r["user"])
+            )
         except Exception as err:
             print("error choosing trusted revision for", repr(x.title), repr(err))
 
@@ -162,16 +177,16 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         progress = None
 
     fetchers = []
-    for id, (wikiconf, articles) in id2wiki.items():
-        if id is None:
-            id = ""
+    for _id, (wikiconf, articles) in id2wiki.items():
+        if _id is None:
+            _id = ""
             assert not is_multiwiki, "id must be set in multiwiki"
 
         if not is_multiwiki:
-            id = ""
+            _id = ""
 
-        assert "/" not in id, "bad id: %r" % (id,)
-        my_fsdir = os.path.join(fsdir, id)
+        assert "/" not in _id, "bad id: %r" % (_id,)
+        my_fsdir = os.path.join(fsdir, _id)
 
         if is_multiwiki:
             my_mb = collection()
@@ -181,8 +196,17 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
 
         wikitrust(wikiconf.baseurl, my_mb)
 
-        fetchers.append(start_fetcher(fsdir=my_fsdir, progress=progress, base_url=wikiconf.baseurl,
-                                      metabook=my_mb, options=options, podclient=podclient, status=status))
+        fetchers.append(
+            StartFetcher(
+                fsdir=my_fsdir,
+                progress=progress,
+                base_url=wikiconf.baseurl,
+                metabook=my_mb,
+                options=options,
+                podclient=podclient,
+                status=status,
+            )
+        )
 
     if is_multiwiki:
         if not os.path.exists(fsdir):
@@ -196,5 +220,6 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     pool.join(raise_error=True)
 
     import signal
+
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     signal.signal(signal.SIGTERM, signal.SIG_DFL)

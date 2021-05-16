@@ -1,4 +1,3 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
@@ -6,10 +5,11 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 import os
+import shutil
 import sys
 import tempfile
-import shutil
 import zipfile
 
 
@@ -22,7 +22,7 @@ def _walk(root):
     return retval
 
 
-def zipdir(dirname, output=None, skip_ext=None):
+def zip_dir(dirname, output=None, skip_ext=None):
     """recursively zip directory and write output to zipfile.
     @param dirname: directory to zip
     @param output: name of zip file that get's written
@@ -36,7 +36,7 @@ def zipdir(dirname, output=None, skip_ext=None):
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zf.write(i, i[len(dirname) + 1:])
+        zf.write(i, i[len(dirname) + 1 :])
     zf.close()
 
 
@@ -47,41 +47,44 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
         tmpdir = tempfile.mkdtemp()
 
     try:
-        fsdir = os.path.join(tmpdir, 'nuwiki')
-        print('creating nuwiki in %r' % fsdir)
+        fsdir = os.path.join(tmpdir, "nuwiki")
+        print("creating nuwiki in %r" % fsdir)
         from mwlib.apps.make_nuwiki import make_nuwiki
+
         make_nuwiki(fsdir, metabook=metabook, options=options, podclient=podclient, status=status)
 
         if output:
-            fd, filename = tempfile.mkstemp(suffix='.zip', dir=os.path.dirname(output))
+            fd, filename = tempfile.mkstemp(suffix=".zip", dir=os.path.dirname(output))
         else:
-            fd, filename = tempfile.mkstemp(suffix='.zip')
+            fd, filename = tempfile.mkstemp(suffix=".zip")
         os.close(fd)
-        zipdir(fsdir, filename)
+        zip_dir(fsdir, filename)
         if output:
             os.rename(filename, output)
             filename = output
 
         if podclient:
-            status(status='uploading', progress=0)
+            status(status="uploading", progress=0)
             podclient.post_zipfile(filename)
 
         return filename
 
     finally:
         if not options.keep_tmpfiles:
-            print('removing tmpdir %r' % tmpdir)
+            print("removing tmpdir %r" % tmpdir)
             shutil.rmtree(tmpdir, ignore_errors=True)
         else:
-            print('keeping tmpdir %r' % tmpdir)
+            print("keeping tmpdir %r" % tmpdir)
 
         if sys.platform in ("linux2", "linux3"):
             from mwlib import linuxmem
+
             linuxmem.report()
 
 
 def main():
     from gevent import monkey
+
     monkey.patch_all(thread=False)
 
     from mwlib.options import OptionParser
@@ -90,41 +93,45 @@ def main():
     parser = OptionParser()
     parser.add_option("-o", "--output", help="write output to OUTPUT")
     parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
-    parser.add_option("-g", "--getposturl",
-                      help='get POST URL from PediaPress.com, open upload page in webbrowser',
-                      action='count',
-                      )
-    parser.add_option('--keep-tmpfiles',
-                      action='store_true',
-                      default=False,
-                      help="don't remove  temporary files like images",
-                      )
+    parser.add_option(
+        "-g",
+        "--getposturl",
+        help="get POST URL from PediaPress.com, open upload page in webbrowser",
+        action="count",
+    )
+    parser.add_option(
+        "--keep-tmpfiles",
+        action="store_true",
+        default=False,
+        help="don't remove  temporary files like images",
+    )
 
-    parser.add_option("-s", "--status-file",
-                      help='write status/progress info to this file')
+    parser.add_option("-s", "--status-file", help="write status/progress info to this file")
 
     options, args = parser.parse_args()
     conf.readrc()
-    use_help = 'Use --help for usage information.'
+    use_help = "Use --help for usage information."
 
     if parser.metabook is None and options.collectionpage is None:
         parser.error(
-            'Neither --metabook nor, --collectionpage or arguments specified.\n' +
-            use_help)
+            "Neither --metabook nor, --collectionpage or arguments specified.\n" + use_help
+        )
     if options.posturl and options.getposturl:
-        parser.error('Specify either --posturl or --getposturl.\n' + use_help)
+        parser.error("Specify either --posturl or --getposturl.\n" + use_help)
     if not options.posturl and not options.getposturl and not options.output:
-        parser.error('Neither --output, nor --posturl or --getposturl specified.\n' + use_help)
+        parser.error("Neither --output, nor --posturl or --getposturl specified.\n" + use_help)
     if options.posturl:
         from mwlib.podclient import PODClient
+
         podclient = PODClient(options.posturl)
     elif options.getposturl:
         if options.getposturl > 1:
-            serviceurl = 'http://test.pediapress.com/api/collections/'
+            serviceurl = "http://test.pediapress.com/api/collections/"
         else:
-            serviceurl = 'http://pediapress.com/api/collections/'
+            serviceurl = "http://pediapress.com/api/collections/"
         import webbrowser
         from mwlib.podclient import podclient_from_serviceurl
+
         podclient = podclient_from_serviceurl(serviceurl)
         pid = os.fork()
         if not pid:
@@ -133,6 +140,7 @@ def main():
             finally:
                 os._exit(0)
         import time
+
         time.sleep(1)
         try:
             os.kill(pid, 9)
@@ -142,7 +150,7 @@ def main():
     else:
         podclient = None
 
-    from mwlib import utils, wiki
+    from mwlib import utils
 
     filename = None
     status = None
@@ -151,17 +159,18 @@ def main():
         assert env.metabook, "no metabook"
 
         from mwlib.status import Status
+
         status = Status(options.status_file, podclient=podclient, progress_range=(1, 90))
         status(progress=0)
         output = options.output
 
         make_zip(output, options, env.metabook, podclient=podclient, status=status)
 
-    except Exception as e:
+    except Exception:
         if status:
-            status(status='error')
+            status(status="error")
         raise
     finally:
-        if options.output is None and filename is not None:
-            print('removing %r' % filename)
+        if options.output is None and filename:
+            print("removing %r" % filename)
             utils.safe_unlink(filename)

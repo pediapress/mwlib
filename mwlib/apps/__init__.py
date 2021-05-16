@@ -1,4 +1,3 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
@@ -6,8 +5,20 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 import optparse
+import time
+import traceback
+import webbrowser
+
 import six
+
+from mwlib import expander
+from mwlib import utils
+from mwlib import wiki, uparser
+from mwlib.podclient import PODClient
+from mwlib.podclient import podclient_from_serviceurl
+from mwlib.status import Status
 
 
 def show():
@@ -15,20 +26,18 @@ def show():
     parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
     parser.add_option("-e", "--expand", action="store_true", help="expand templates")
     parser.add_option("-t", "--template", action="store_true", help="show template")
-    parser.add_option("-f", help='read input from file. implies -e')
+    parser.add_option("-f", help="read input from file. implies -e")
 
     options, args = parser.parse_args()
 
     if not args and not options.f:
         parser.error("missing ARTICLE argument")
 
-    articles = [six.text_type(x, 'utf-8') for x in args]
+    articles = [six.text_type(x, "utf-8") for x in args]
 
     conf = options.config
     if not conf:
         parser.error("missing --config argument")
-
-    from mwlib import wiki, expander
 
     db = wiki.makewiki(conf).wiki
 
@@ -51,8 +60,8 @@ def show():
 
             print(raw.encode("utf-8"))
     if options.f:
-        raw = six.text_type(open(options.f).read(), 'utf-8')
-        te = expander.Expander(raw, pagename='test', wikidb=db)
+        raw = six.text_type(open(options.f).read(), "utf-8")
+        te = expander.Expander(raw, pagename="test", wikidb=db)
         raw = te.expandTemplates()
         print(raw.encode("utf-8"))
 
@@ -60,31 +69,28 @@ def show():
 def post():
     parser = optparse.OptionParser(usage="%prog OPTIONS")
     parser.add_option("-i", "--input", help="ZIP file to POST")
-    parser.add_option('-l', '--logfile',
-                      help='log output to LOGFILE')
+    parser.add_option("-l", "--logfile", help="log output to LOGFILE")
     parser.add_option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
-    parser.add_option("-g", "--getposturl",
-                      help='get POST URL from PediaPress.com, open upload page in webbrowser',
-                      action='store_true')
+    parser.add_option(
+        "-g",
+        "--getposturl",
+        help="get POST URL from PediaPress.com, open upload page in webbrowser",
+        action="store_true",
+    )
     options, args = parser.parse_args()
 
-    use_help = 'Use --help for usage information.'
+    use_help = "Use --help for usage information."
     if not options.input:
-        parser.error('Specify --input.\n' + use_help)
-    if (options.posturl and options.getposturl)\
-            or (not options.posturl and not options.getposturl):
-        parser.error('Specify either --posturl or --getposturl.\n' + use_help)
+        parser.error("Specify --input.\n" + use_help)
+    if (options.posturl and options.getposturl) or (
+        not options.posturl and not options.getposturl
+    ):
+        parser.error("Specify either --posturl or --getposturl.\n" + use_help)
     if options.posturl:
-        from mwlib.podclient import PODClient
         podclient = PODClient(options.posturl)
     elif options.getposturl:
-        import webbrowser
-        from mwlib.podclient import podclient_from_serviceurl
-        podclient = podclient_from_serviceurl('http://pediapress.com/api/collections/')
+        podclient = podclient_from_serviceurl("http://pediapress.com/api/collections/")
         webbrowser.open(podclient.redirecturl)
-
-    from mwlib import utils
-    from mwlib.status import Status
 
     if options.logfile:
         utils.start_logging(options.logfile)
@@ -92,11 +98,11 @@ def post():
     status = Status(podclient=podclient)
 
     try:
-        status(status='uploading', progress=0)
+        status(status="uploading", progress=0)
         podclient.post_zipfile(options.input)
-        status(status='finished', progress=100)
-    except Exception as e:
-        status(status='error')
+        status(status="finished", progress=100)
+    except Exception:
+        status(status="error")
         raise
 
 
@@ -115,12 +121,9 @@ def parse():
     if not options.config:
         parser.error("missing --config argument")
 
-    articles = [six.text_type(x, 'utf-8') for x in args]
+    articles = [six.text_type(x, "utf-8") for x in args]
 
     conf = options.config
-
-    import traceback
-    from mwlib import wiki, uparser
 
     w = wiki.makewiki(conf)
 
@@ -128,10 +131,9 @@ def parse():
 
     if options.all:
         if not hasattr(db, "articles"):
-            raise RuntimeError("%s does not support iterating over all articles" % (db, ))
+            raise RuntimeError("%s does not support iterating over all articles" % (db,))
         articles = db.articles()
 
-    import time
     for x in articles:
         try:
             page = db.normalize_and_get_page(x, 0)
@@ -144,7 +146,7 @@ def parse():
             if raw is None:
                 continue
             stime = time.time()
-            a = uparser.parseString(x, raw=raw, wikidb=db)
+            uparser.parseString(x, raw=raw, wikidb=db)
         except Exception as err:
             print("F", repr(x), err)
             if options.tb:
