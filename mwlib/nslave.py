@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 if __name__ == "__main__":
     from gevent import monkey
     monkey.patch_all()
@@ -233,7 +236,7 @@ def main():
         port = wsgi_server.socket.getsockname()[1]
         if not cacheurl:
             cacheurl = "http://%s:%s/cache" % (find_ip(), port)
-        print "serving files from %r at url %s" % (cachedir, cacheurl)
+        print("serving files from %r at url %s" % (cachedir, cacheurl))
 
     if not cacheurl:
         sys.exit("--url option missing")

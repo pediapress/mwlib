@@ -2,7 +2,11 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mwlib.templ import magics
+import six
+from six import unichr
 
 
 class Node(tuple):
@@ -20,7 +24,7 @@ class Node(tuple):
 
     def flatten(self, expander, variables, res):
         for x in self:
-            if isinstance(x, basestring):
+            if isinstance(x, six.string_types):
                 res.append(x)
             else:
                 flatten(x, expander, variables, res)
@@ -95,7 +99,7 @@ class SwitchNode(Node):
     unresolved = None
 
     def _store_key(self, key, value, fast, unresolved):
-        if isinstance(key, basestring):
+        if isinstance(key, six.string_types):
             key = key.strip()
             if key in fast:
                 return
@@ -207,7 +211,7 @@ class Template(Node):
     def flatten(self, expander, variables, res):
         try:
             return self._flatten(expander, variables, res)
-        except RuntimeError, err:
+        except RuntimeError as err:
             # we expect a "RuntimeError: maximum recursion depth exceeded" here.
             # logging this error is rather hard...
             try:
@@ -292,7 +296,7 @@ class Template(Node):
 
                 if DEBUG:
                     msg += repr("".join(res[oldidx:]))
-                    print msg
+                    print(msg)
 
 
 def show(node, indent=0, out=None):

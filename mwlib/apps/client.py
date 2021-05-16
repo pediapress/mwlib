@@ -1,6 +1,8 @@
 "Client to mw-serve"
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 def main():
     import optparse
     import sys
@@ -43,6 +45,6 @@ def main():
     if command == "download":
         fn = 'output'
         open(fn, 'w').write(client.response)
-        print 'wrote %d bytes to %r' % (len(client.response), fn)
+        print('wrote %d bytes to %r' % (len(client.response), fn))
     else:
-        print json.dumps(client.response, indent=4)
+        print(json.dumps(client.response, indent=4))

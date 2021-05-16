@@ -15,6 +15,7 @@ More Info:
 
 from __future__ import division
 
+from __future__ import absolute_import
 import sys
 import odf
 
@@ -24,6 +25,8 @@ from mwlib.log import Log
 from mwlib import advtree, writerbase, odfconf, parser
 from mwlib import odfstyles as style
 from mwlib.treecleaner import TreeCleaner
+import six
+from six.moves import range
 
 log = Log("odfwriter")
 
@@ -36,7 +39,7 @@ del e
 
 
 def showNode(obj):
-    attrs = obj.__dict__.keys()
+    attrs = list(obj.__dict__.keys())
     log(obj.__class__.__name__)
     stuff = ["%s => %r" % (k, getattr(obj, k)) for k in attrs if
              (not k == "children") and getattr(obj, k)
@@ -164,7 +167,7 @@ class ODFWriter(object):
                 self.res = []
 
             def write(self, txt):
-                if isinstance(txt, unicode):
+                if isinstance(txt, six.text_type):
                     self.res.append(str(txt))
                 else:
                     self.res.append(txt)
@@ -807,7 +810,7 @@ def main():
         from mwlib.dummydb import DummyDB
         from mwlib.uparser import parseString
         db = DummyDB()
-        input = unicode(open(fn).read(), 'utf8')
+        input = six.text_type(open(fn).read(), 'utf8')
         r = parseString(title=fn, raw=input, wikidb=db)
         #parser.show(sys.stdout, r)
         # advtree.buildAdvancedTree(r)

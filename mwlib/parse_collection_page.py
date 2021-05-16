@@ -1,8 +1,10 @@
+from __future__ import absolute_import
 import os
 import re
 import binascii
 from collections import defaultdict
 from mwlib import metabook, expander
+import six
 
 uniq = "--%s--" % binascii.hexlify(os.urandom(16))
 
@@ -17,7 +19,7 @@ def extract_metadata(raw, fields, template_name="saved_book"):
     te = expander.Expander(raw, pagename="", wikidb=db)
     res = te.expandTemplates()
 
-    d = defaultdict(unicode)
+    d = defaultdict(six.text_type)
     for x in res.split(uniq)[1:-1]:
         name, val = x.split("\n", 1)
         val = val.strip()

@@ -3,6 +3,7 @@
 
 """custom json encoder/decoder, which can handle metabook objects"""
 
+from __future__ import absolute_import
 from mwlib import metabook
 
 try:

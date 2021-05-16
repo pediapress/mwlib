@@ -1,3 +1,4 @@
+import six
 def get_locals_txt():
     names = """LOCALDAY LOCALDAY2 LOCALDAYNAME LOCALDOW LOCALMONTH
 LOCALMONTHABBREV LOCALMONTHNAME LOCALTIME LOCALYEAR LOCALTIMESTAMP
@@ -10,7 +11,7 @@ NUMBEROFARTICLES NUMBEROFPAGES NUMBEROFFILES NUMBEROFUSERS CURRENTVERSION
 
 def parse_locals(localstr):
     if isinstance(localstr, str):
-        localstr = unicode(localstr)
+        localstr = six.text_type(localstr)
     res = {}
     for x in localstr.split("\n----\n"):
         try:

@@ -4,12 +4,14 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 from mwlib.utoken import tokenize, show, token as T, walknode, walknodel
 from mwlib.refine import util
 from mwlib import tagext, uniq, nshandling
 
 from mwlib.refine.parse_table import parse_tables, parse_table_cells, parse_table_rows, fix_tables, remove_table_garbage
 from mwlib.refine.tagparser import tagparser
+from six.moves import range
 
 try:
     from mwlib.refine import _core

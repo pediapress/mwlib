@@ -2,6 +2,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 from mwlib import expander, nshandling, metabook
 from mwlib.log import Log
 from mwlib.refine import core, compat

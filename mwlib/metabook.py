@@ -3,11 +3,13 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 import warnings
 from collections import deque
 from hashlib import sha1
 
 import copy
+import six
 
 
 def parse_collection_page(txt):
@@ -244,7 +246,7 @@ def get_licenses(metabook):
                                        )
             if wikitext:
                 try:
-                    wikitext = unicode(wikitext, 'utf-8')
+                    wikitext = six.text_type(wikitext, 'utf-8')
                 except UnicodeError:
                     wikitext = None
         else:

@@ -9,6 +9,8 @@ FIXME: replace with texvc which is deistributed with MediaWiki
 
 
 """
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import popen2
 try:
@@ -71,5 +73,5 @@ def latex2mathml(latex):
 
 if __name__ == '__main__':
     test = "\exp(-\gamma x)"
-    print
-    print ET.tostring(latex2mathml(test))
+    print()
+    print(ET.tostring(latex2mathml(test)))

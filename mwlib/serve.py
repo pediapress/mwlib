@@ -2,6 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
+from __future__ import absolute_import
 import sys
 import os
 import time
@@ -14,6 +15,7 @@ from hashlib import sha1
 from mwlib import myjson as json
 from mwlib import log, _version
 from mwlib.metabook import calc_checksum
+import six
 
 log = log.Log('mwlib.serve')
 collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
@@ -31,7 +33,7 @@ def make_collection_id(data):
     mb = data.get('metabook')
     if mb:
         if isinstance(mb, str):
-            mb = unicode(mb, 'utf-8')
+            mb = six.text_type(mb, 'utf-8')
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))

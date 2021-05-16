@@ -25,6 +25,7 @@ http://code.pediapress.com/wiki/wiki/ParserExtensionTags
 """
 
 
+from __future__ import absolute_import
 class ExtensionRegistry(object):
     def __init__(self):
         self.name2ext = {}
@@ -36,7 +37,7 @@ class ExtensionRegistry(object):
         return k
 
     def names(self):
-        return self.name2ext.keys()
+        return list(self.name2ext.keys())
 
     def __getitem__(self, n):
         return self.name2ext[n]

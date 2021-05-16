@@ -5,6 +5,8 @@ Helper to list and retrieve all stored books from a wiki
 """
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 class Bookshelf(object):
     def __init__(self, api):
         self.api = api
@@ -36,4 +38,4 @@ class Bookshelf(object):
 if __name__ == '__main__':
     from mwlib.mwapidb import get_api_helper
     b = Bookshelf(get_api_helper("http://en.wikipedia.org/w/"))
-    print 'have %d books' % len(b.booknames())
+    print('have %d books' % len(b.booknames()))

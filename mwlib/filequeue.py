@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 import os
 import subprocess
 import time
 import traceback
-import cPickle
+import six.moves.cPickle
 
 from mwlib.log import Log
 from mwlib import utils
@@ -21,7 +22,7 @@ class FileJobQueuer(object):
             self.log.warn('Job file %r already exists' % job_file)
             return
 
-        open(job_file + '.tmp', 'wb').write(cPickle.dumps(args))
+        open(job_file + '.tmp', 'wb').write(six.moves.cPickle.dumps(args))
         os.rename(job_file + '.tmp', job_file)
 
 
@@ -104,7 +105,7 @@ class FileJobPoller(object):
 
         src = os.path.join(self.queue_dir, filename)
         try:
-            args = cPickle.loads(open(src, 'rb').read())
+            args = six.moves.cPickle.loads(open(src, 'rb').read())
         finally:
             os.unlink(src)
 

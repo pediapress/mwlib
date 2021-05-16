@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import mwlib.parser
 import mwlib.advtree
 
@@ -12,7 +13,7 @@ def allnodes():
             if x in names:
                 continue
             k = getattr(m, x)
-            if isinstance(k, types.TypeType):
+            if isinstance(k, type):
                 if issubclass(k, mwlib.parser.Node):
                     all.add(k)
                     names.add(x)

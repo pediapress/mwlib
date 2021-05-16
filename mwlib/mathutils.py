@@ -3,10 +3,13 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import tempfile
 import shutil
 from subprocess import Popen, PIPE
+import six
 
 try:
     import xml.etree.ElementTree as ET
@@ -126,7 +129,7 @@ def renderMath(latex, output_path=None, output_mode='png',
         return
     assert output_mode in ("png", "mathml")
     assert render_engine in ("texvc", "blahtexml")
-    assert isinstance(latex, unicode), 'latex must be of type unicode'
+    assert isinstance(latex, six.text_type), 'latex must be of type unicode'
 
     if output_mode == 'png' and not output_path:
         log.error('math rendering with output_mode png requires an output_path')
@@ -169,6 +172,6 @@ if __name__ == "__main__":
 # """,
 # ]
 
-    print renderMath(latex, output_mode='mathml')
-    print renderMath(latex, output_path="/tmp/", output_mode='png')
-    print renderMath(latex, output_path="/tmp/", output_mode='png', render_engine='texvc')
+    print(renderMath(latex, output_mode='mathml'))
+    print(renderMath(latex, output_path="/tmp/", output_mode='png'))
+    print(renderMath(latex, output_path="/tmp/", output_mode='png', render_engine='texvc'))

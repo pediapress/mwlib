@@ -4,6 +4,8 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import unicodedata
 
@@ -18,6 +20,8 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
 from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib import parser
 from mwlib.writer import styleutils, miscutils
+import six
+from six.moves import range
 
 
 def show(n):
@@ -273,8 +277,8 @@ class TreeCleaner(object):
                     cleaner(child)
                 except Exception as e:
                     self.report('ERROR:', e)
-                    print 'TREECLEANER ERROR in %s: %r' % (getattr(child, 'caption', u'').encode('utf-8'),
-                                                           repr(e))
+                    print('TREECLEANER ERROR in %s: %r' % (getattr(child, 'caption', u'').encode('utf-8'),
+                                                           repr(e)))
                     import traceback
                     traceback.print_exc()
             if self.status_cb:
@@ -329,9 +333,9 @@ class TreeCleaner(object):
     def removeChildlessNodes(self, node):
         """Remove nodes that have no children except for nodes in childlessOk list."""
         is_exception = False
-        if node.__class__ in self.childless_exceptions.keys() and node.style:
+        if node.__class__ in list(self.childless_exceptions.keys()) and node.style:
             for style_type in self.childless_exceptions[node.__class__]:
-                if style_type in node.style.keys():
+                if style_type in list(node.style.keys()):
                     is_exception = True
 
         if not node.children and node.__class__ not in self.childlessOK and not is_exception:
@@ -421,7 +425,7 @@ class TreeCleaner(object):
 
     def removeBrokenChildren(self, node):
         """Remove Nodes (while keeping their children) which can't be nested with their parents."""
-        if node.__class__ in self.removeNodes.keys():
+        if node.__class__ in list(self.removeNodes.keys()):
             if _any([parent.__class__ in self.removeNodes[node.__class__]
                      for parent in node.parents]):
                 if node.children and not _any([parent.__class__ in self.removeNodesAllChildren.get(
@@ -886,7 +890,7 @@ class TreeCleaner(object):
 
     def restrictChildren(self, node):
 
-        if node.__class__ in self.allowedChildren.keys():
+        if node.__class__ in list(self.allowedChildren.keys()):
             for c in node.children[:]:
                 if c.__class__ not in self.allowedChildren[node.__class__]:
                     node.removeChild(c)
@@ -1441,7 +1445,7 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
                 section_title = node.children[0].children[0].caption
             except IndexError:
                 section_title = ''
-            if isinstance(section_title, basestring) and section_title.strip() == seealso_section:
+            if isinstance(section_title, six.string_types) and section_title.strip() == seealso_section:
                 self.report('removed see also section', node)
                 node.parent.removeChild(node)
 

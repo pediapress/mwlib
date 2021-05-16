@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import sys
 import datetime
 import re
@@ -6,6 +7,7 @@ import roman
 from timelib import strtodatetime as parsedate
 
 from mwlib.strftime import strftime
+import six
 
 
 def ampm(date):
@@ -67,7 +69,7 @@ def formatdate(format, date):
                 process_next = f[1]
                 continue
 
-            if isinstance(f, basestring):
+            if isinstance(f, six.string_types):
                 res = strftime(date, f)
             else:
                 res = f(date)
@@ -99,7 +101,7 @@ def time(format, datestring=None):
                 date = parsedate(datestring)
             except ValueError:
                 pass
-            except Exception, err:
+            except Exception as err:
                 sys.stderr.write("ERROR in parsedate: %r while parsing %r" % (err, datestring))
                 pass
 

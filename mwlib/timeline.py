@@ -6,10 +6,12 @@
 """implement http://meta.wikimedia.org/wiki/EasyTimeline
 """
 
+from __future__ import absolute_import
 import os
 import tempfile
 import subprocess
 from hashlib import sha1
+import six
 
 font = None
 
@@ -47,7 +49,7 @@ def _get_global_basedir():
 
 
 def drawTimeline(script, basedir=None):
-    if isinstance(script, unicode):
+    if isinstance(script, six.text_type):
         script = script.encode('utf8')
     if basedir is None:
         basedir = _get_global_basedir()

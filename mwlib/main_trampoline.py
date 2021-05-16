@@ -2,6 +2,7 @@
 # monkeypatch here and then call into the respective main function
 
 
+from __future__ import absolute_import
 from gevent import monkey
 monkey.patch_all()
 

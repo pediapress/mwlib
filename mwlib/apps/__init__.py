@@ -4,7 +4,10 @@
 
 """main programs - installed via setuptools' entry_points"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import optparse
+import six
 
 
 def show():
@@ -19,7 +22,7 @@ def show():
     if not args and not options.f:
         parser.error("missing ARTICLE argument")
 
-    articles = [unicode(x, 'utf-8') for x in args]
+    articles = [six.text_type(x, 'utf-8') for x in args]
 
     conf = options.config
     if not conf:
@@ -46,12 +49,12 @@ def show():
                 te = expander.Expander(raw, pagename=a, wikidb=db)
                 raw = te.expandTemplates()
 
-            print raw.encode("utf-8")
+            print(raw.encode("utf-8"))
     if options.f:
-        raw = unicode(open(options.f).read(), 'utf-8')
+        raw = six.text_type(open(options.f).read(), 'utf-8')
         te = expander.Expander(raw, pagename='test', wikidb=db)
         raw = te.expandTemplates()
-        print raw.encode("utf-8")
+        print(raw.encode("utf-8"))
 
 
 def post():
@@ -112,7 +115,7 @@ def parse():
     if not options.config:
         parser.error("missing --config argument")
 
-    articles = [unicode(x, 'utf-8') for x in args]
+    articles = [six.text_type(x, 'utf-8') for x in args]
 
     conf = options.config
 
@@ -143,8 +146,8 @@ def parse():
             stime = time.time()
             a = uparser.parseString(x, raw=raw, wikidb=db)
         except Exception as err:
-            print "F", repr(x), err
+            print("F", repr(x), err)
             if options.tb:
                 traceback.print_exc()
         else:
-            print "G", time.time() - stime, repr(x)
+            print("G", time.time() - stime, repr(x))

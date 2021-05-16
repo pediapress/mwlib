@@ -1,5 +1,7 @@
+from __future__ import absolute_import
 import os
 import re
+import six
 
 try:
     from xml.etree import cElementTree
@@ -122,7 +124,7 @@ class DumpParser(object):
         for el in pageElem:
             tag = self.getTag(el)
             if tag == 'title':
-                title = unicode(el.text)
+                title = six.text_type(el.text)
                 res.title = title
             elif tag == 'id':
                 res.pageid = int(el.text)
@@ -150,9 +152,9 @@ class DumpParser(object):
             elif tag == 'minor':
                 res.minor = True
             elif tag == 'comment':
-                res.comment = unicode(el.text)
+                res.comment = six.text_type(el.text)
             elif tag == 'text':
-                res.text = unicode(el.text)
+                res.text = six.text_type(el.text)
                 el.clear()
 
         return res
@@ -162,7 +164,7 @@ class DumpParser(object):
         userid = None
         for el in conElem:
             if self.getTag(el) == 'username':
-                username = unicode(el.text)
+                username = six.text_type(el.text)
             elif self.getTag(el) == 'id':
                 userid = int(el.text)
         return (username, userid)

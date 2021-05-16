@@ -2,15 +2,18 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 from mwlib.net import fetch, sapi as mwapi
 
 from mwlib.parse_collection_page import extract_metadata
 from mwlib.metabook import get_licenses, parse_collection_page, collection
 from mwlib import myjson
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import gevent
 import gevent.pool
+import six
 
 
 class start_fetcher(object):
@@ -65,7 +68,7 @@ class start_fetcher(object):
         if not base_url.endswith("/"):
             base_url += "/"
         api_url = "".join([base_url, "api", options.script_extension])
-        if isinstance(api_url, unicode):
+        if isinstance(api_url, six.text_type):
             api_url = api_url.encode("utf-8")
         self.api_url = api_url
 
@@ -81,14 +84,14 @@ class start_fetcher(object):
             return api
 
         try:
-            cp = unicode(urllib.unquote(str(cp)), "utf-8")
+            cp = six.text_type(six.moves.urllib.parse.unquote(str(cp)), "utf-8")
         except Exception:
             pass
 
         self.nfo["collectionpage"] = cp
 
         val = api.fetch_pages([cp])
-        rawtext = val["pages"].values()[0]["revisions"][0]["*"]
+        rawtext = list(val["pages"].values())[0]["revisions"][0]["*"]
         mb = self.metabook = parse_collection_page(rawtext)
         wikitrust(api.baseurl, mb)
 
@@ -103,7 +106,7 @@ class start_fetcher(object):
         mb.sort_as = meta["sort_as"]
 
         p = os.path.join(self.fsout.path, "collectionpage.txt")
-        if isinstance(rawtext, unicode):
+        if isinstance(rawtext, six.text_type):
             rawtext = rawtext.encode("utf-8")
         open(p, "wb").write(rawtext)
         return api
@@ -136,10 +139,10 @@ def wikitrust(baseurl, metabook):
             r = tr.getTrustedRevision(x.title)
             x.revision = r["revid"]
 
-            print "chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r" % (
-                r["title"], r["age"], r["revid"], r["user"])
+            print("chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r" % (
+                r["title"], r["age"], r["revid"], r["user"]))
         except Exception as err:
-            print "error choosing trusted revision for", repr(x.title), repr(err)
+            print("error choosing trusted revision for", repr(x.title), repr(err))
 
 
 def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):

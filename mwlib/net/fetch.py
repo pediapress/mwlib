@@ -3,10 +3,12 @@
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
-import urlparse
-import urllib2
+import six.moves.urllib.parse
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import time
 import traceback
 import gevent
@@ -144,7 +146,7 @@ class fsoutput(object):
         self.seen[title] = rev
 
     def write_pages(self, data):
-        pages = data.get("pages", {}).values()
+        pages = list(data.get("pages", {}).values())
         for p in pages:
 
             title = p.get("title")
@@ -212,7 +214,7 @@ def callwhen(event, fun):
 
 
 def download_to_file(url, path, temp_path):
-    opener = urllib2.build_opener()
+    opener = six.moves.urllib.request.build_opener()
     opener.addheaders = [('User-Agent', conf.user_agent)]
 
     try:
@@ -234,7 +236,7 @@ def download_to_file(url, path, temp_path):
         # print "GOT", url, size_read
 
     except Exception as err:
-        print "ERROR DOWNLOADING", url, err
+        print("ERROR DOWNLOADING", url, err)
         raise
 
 
@@ -314,7 +316,7 @@ class fetcher(object):
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(action="query", prop="revisions",
                                   rvprop="content", revids=str(revid))
-        page = res["pages"].values()[0]
+        page = list(res["pages"].values())[0]
 
         title = page["title"]
         text = page["revisions"][0]["*"]
@@ -369,7 +371,7 @@ class fetcher(object):
             src = img_node.get('src')
             frags = src.split('/')
             if len(frags):
-                fullurl = urlparse.urljoin(self.api.baseurl, src)
+                fullurl = six.moves.urllib.parse.urljoin(self.api.baseurl, src)
                 if img_node.get('class') != 'thumbimage' and \
                         ('extensions' in src or 'math' in src):
 
@@ -406,7 +408,7 @@ class fetcher(object):
         if conf.noedits:
             return
 
-        items = self.title2latest.items()
+        items = list(self.title2latest.items())
         self.title2latest = {}
         self.count_total += len(items)
         for title, rev in items:
@@ -418,7 +420,7 @@ class fetcher(object):
 
         self._update_redirects(used.get("redirects", []))
 
-        pages = used.get("pages", {}).values()
+        pages = list(used.get("pages", {}).values())
 
         revids = set()
         for p in pages:
@@ -497,7 +499,7 @@ class fetcher(object):
             self.cat2members[title] = [entry]
 
     def _handle_categories(self, data):
-        pages = data.get("pages", {}).values()
+        pages = list(data.get("pages", {}).values())
         for p in pages:
             categories = p.get("categories")
             if not categories:
@@ -511,7 +513,7 @@ class fetcher(object):
                     self._add_catmember(cattitle, e)
 
     def _find_redirect(self, data):
-        pages = data.get("pages", {}).values()
+        pages = list(data.get("pages", {}).values())
         targets = []
         for p in pages:
 
@@ -568,7 +570,7 @@ class fetcher(object):
 
     def fetch_imageinfo(self, titles):
         data = self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize)
-        infos = data.get("pages", {}).values()
+        infos = list(data.get("pages", {}).values())
         # print infos[0]
         new_basepaths = set()
 
@@ -589,7 +591,7 @@ class fetcher(object):
             if thumburl:
                 # FIXME: add Callback that checks correct file size
                 if thumburl.startswith('/'):
-                    thumburl = urlparse.urljoin(self.api.baseurl, thumburl)
+                    thumburl = six.moves.urllib.parse.urljoin(self.api.baseurl, thumburl)
                 self.schedule_download_image(thumburl, title)
 
                 descriptionurl = ii.get("descriptionurl", "")
@@ -623,7 +625,7 @@ class fetcher(object):
 
         local_nsname = self.nshandler.get_nsname_by_number(6)
 
-        pages = data.get("pages", {}).values()
+        pages = list(data.get("pages", {}).values())
         # change title prefix to make them look like local pages
         for p in pages:
             title = p.get("title")
@@ -734,7 +736,7 @@ class fetcher(object):
             n = self.nshandler.get_fqname(title)
             if n in seen or self.redirects.get(n, n) in seen:
                 continue
-            print "WARNING: %r could not be fetched" % ((title, revid),)
+            print("WARNING: %r could not be fetched" % ((title, revid),))
             # raise RuntimeError("%r could not be fetched" % ((title, revid), ))
 
         seen = self.fsout.seen

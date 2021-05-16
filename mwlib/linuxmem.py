@@ -1,3 +1,4 @@
+from __future__ import print_function
 _scale = dict(kB=1024.0, KB=1024.0,
               mB=1024.0 * 1024.0, MB=1024.0 * 1024.0)
 
@@ -41,7 +42,7 @@ def stacksize():
 
 
 def report():
-    print "memory used: res=%.1f virt=%.1f" % (resident(), memory())
+    print("memory used: res=%.1f virt=%.1f" % (resident(), memory()))
 
 
 if __name__ == "__main__":

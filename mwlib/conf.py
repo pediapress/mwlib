@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import sys
 from mwlib._conf import confmod
 

@@ -3,6 +3,7 @@
 # See README.rst for additional licensing information.
 
 
+from __future__ import absolute_import
 class DummyDB(object):
     def __init__(self, lang="en"):
         from mwlib import siteinfo

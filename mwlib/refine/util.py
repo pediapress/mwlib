@@ -2,8 +2,10 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 import re
-import htmlentitydefs
+import six.moves.html_entities
+from six import unichr
 
 paramrx = re.compile(
     r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:#])+)))", re.DOTALL)
@@ -163,7 +165,7 @@ def resolve_entity(e):
             return e
     else:
         try:
-            return unichr(htmlentitydefs.name2codepoint[e[1:-1]])
+            return unichr(six.moves.html_entities.name2codepoint[e[1:-1]])
         except KeyError:
             return e
 

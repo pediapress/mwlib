@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from email.mime.text import MIMEText
 from email.utils import make_msgid, formatdate
 
@@ -9,11 +10,13 @@ import socket
 import sys
 import time
 import traceback
-import urllib
-import urllib2
-import urlparse
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
+import six.moves.urllib.parse
 
 from mwlib.log import Log
+import six
+from six.moves import range
 
 
 # provide all() for python 2.4
@@ -86,9 +89,9 @@ def get_multipart(filename, data, name):
     @rtype: (str, str)
     """
 
-    if isinstance(filename, unicode):
+    if isinstance(filename, six.text_type):
         filename = filename.encode('utf-8', 'ignore')
-    if isinstance(name, unicode):
+    if isinstance(name, six.text_type):
         name = name.encode('utf-8', 'ignore')
 
     boundary = "-" * 20 + ("%f" % time.time()) + "-" * 20
@@ -163,11 +166,11 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
     if not hasattr(socket, "_delegate_methods"):  # not using gevent?
         socket.setdefaulttimeout(timeout)
     if opener is None:
-        opener = urllib2.build_opener()
+        opener = six.moves.urllib.request.build_opener()
         opener.addheaders = [('User-agent', 'mwlib')]
     try:
         if post_data:
-            post_data = urllib.urlencode(post_data)
+            post_data = six.moves.urllib.parse.urlencode(post_data)
         result = opener.open(url, post_data)
         data = result.read()
         if expected_content_type:
@@ -182,7 +185,7 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
                 else:
                     raise RuntimeError(msg)
                 return None
-    except urllib2.URLError as err:
+    except six.moves.urllib.error.URLError as err:
         if ignore_errors:
             log.error("%s - while fetching %r" % (err, url))
             return None
@@ -269,11 +272,11 @@ def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', p
 
 
 def asunicode(x):
-    if not isinstance(x, basestring):
+    if not isinstance(x, six.string_types):
         x = repr(x)
 
     if isinstance(x, str):
-        x = unicode(x, "utf-8", "replace")
+        x = six.text_type(x, "utf-8", "replace")
 
     return x
 
@@ -337,7 +340,7 @@ def get_safe_url(url):
 
     nonwhitespace_rex = re.compile(r'^\S+$')
     try:
-        result = urlparse.urlsplit(url)
+        result = six.moves.urllib.parse.urlsplit(url)
         scheme, netloc, path, query, fragment = result
     except Exception as exc:
         log.warn('urlparse(%r) failed: %s' % (url, exc))
@@ -353,12 +356,12 @@ def get_safe_url(url):
 
     try:
         # catches things like path='bla " target="_blank'
-        path = urllib.quote(urllib.unquote(path))
+        path = six.moves.urllib.parse.quote(six.moves.urllib.parse.unquote(path))
     except Exception as exc:
         log.warn('quote(unquote(%r)) failed: %s' % (path, exc))
         return None
     try:
-        return urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+        return six.moves.urllib.parse.urlunsplit((scheme, netloc, path, query, fragment))
     except Exception as exc:
         log.warn('urlunparse() failed: %s' % exc)
 
@@ -385,7 +388,7 @@ def pdf2txt(path):
     import pyPdf
 
     content = []
-    pdf = pyPdf.PdfFileReader(file(path, "rb"))
+    pdf = pyPdf.PdfFileReader(open(path, "rb"))
 
     numpages = pdf.getNumPages()
     for i in range(0, numpages):

@@ -3,9 +3,12 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 from pyparsing import (Literal, restOfLine, Word, nums, Group,
                        ZeroOrMore, OneOrMore, And, Suppress, LineStart,
                        LineEnd, StringEnd, ParseException, Optional, White)
+import six
 
 
 class gob(object):
@@ -68,7 +71,7 @@ def _makedesc(tokens):
 def _makeimagemap(tokens):
     image = None
     for x in tokens:
-        if isinstance(x, basestring):
+        if isinstance(x, six.string_types):
             image = x
             break
     return ImageMap(entries=list(tokens), image=image)
@@ -148,7 +151,7 @@ blubb
 """
     res = ImageMapFromString(ex)
     for x in res.entries:
-        print x
+        print(x)
 
 
 if __name__ == '__main__':

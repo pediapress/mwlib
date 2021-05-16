@@ -18,6 +18,7 @@ http://en.wikipedia.org/wiki/Wikipedia:Don%27t_use_line_breaks
 http://meta.wikimedia.org/wiki/Help:Advanced_editing
 http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 """
+from __future__ import absolute_import
 import re
 import time
 from mwlib.parser import Math, Ref, Link, URL, NamedURL  # not used but imported
@@ -28,6 +29,7 @@ from mwlib.parser import Section, Style, TagNode, Text, Timeline
 from mwlib.parser import ImageLink, Article, Book, Chapter
 import copy
 from mwlib.log import Log
+import six
 
 log = Log("advtree")
 
@@ -274,13 +276,13 @@ class AdvancedNode:
                 return min_val
 
         def ensureUnicode(val):
-            if isinstance(val, unicode):
+            if isinstance(val, six.text_type):
                 return val
             elif isinstance(val, str):
-                return unicode(val, 'utf-8')
+                return six.text_type(val, 'utf-8')
             else:
                 try:
-                    return unicode(val)
+                    return six.text_type(val)
                 except BaseException:
                     return u''
 
@@ -784,7 +786,7 @@ def getAdvTree(fn):
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parseString
     db = DummyDB()
-    input = unicode(open(fn).read(), 'utf8')
+    input = six.text_type(open(fn).read(), 'utf8')
     r = parseString(title=fn, raw=input, wikidb=db)
     buildAdvancedTree(r)
     return r

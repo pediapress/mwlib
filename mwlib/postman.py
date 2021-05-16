@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import gevent
 import gevent.monkey
 gevent.monkey.patch_all()
@@ -105,8 +107,9 @@ def report_mwzip_status(posturl, jobid, host, port):
             gevent.sleep(0.5)
 
 
-def report_exception(posturl, (tp, err, tb)):
-    print "reporting error to", posturl, repr(str(err)[:50])
+def report_exception(posturl, xxx_todo_changeme):
+    (tp, err, tb) = xxx_todo_changeme
+    print("reporting error to", posturl, repr(str(err)[:50]))
 
     podclient = PODClient(posturl)
     podclient.post_status(error=str(err))
@@ -118,10 +121,10 @@ mailfrom = "%s@%s" % (getpass.getuser(), socket.gethostname())
 def report_exception_mail(subject, exc_info):
     mailto = os.environ.get("MAILTO")
     if not mailto:
-        print "MAILTO not set. not sending email."
+        print("MAILTO not set. not sending email.")
         return
 
-    print "sending mail to", mailto
+    print("sending mail to", mailto)
 
     f = StringIO.StringIO()
     traceback.print_exception(*exc_info, file=f)

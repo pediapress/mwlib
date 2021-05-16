@@ -1,11 +1,14 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import time
-import urlparse
-import urllib
-import urllib2
-import httplib
+import six.moves.urllib.parse
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
+import six.moves.http_client
+import six
 
 try:
     import simplejson as json
@@ -29,7 +32,7 @@ class PODClient(object):
             headers = {'Content-Type': content_type}
         else:
             headers = {}
-        return urllib2.urlopen(urllib2.Request(self.posturl, data, headers=headers)).read()
+        return six.moves.urllib.request.urlopen(six.moves.urllib.request.Request(self.posturl, data, headers=headers)).read()
 
     def post_status(self, status=None, progress=None, article=None, error=None):
         post_data = {}
@@ -48,7 +51,7 @@ class PODClient(object):
         if progress is not None:
             post_data['progress'] = '%d' % progress
 
-        self._post(urllib.urlencode(post_data))
+        self._post(six.moves.urllib.parse.urlencode(post_data))
 
     def streaming_post_zipfile(self, filename, fh=None):
         if fh is None:
@@ -73,14 +76,14 @@ class PODClient(object):
 
         clen = len(before) + len(after) + os.path.getsize(filename)
 
-        print "POSTING TO:", self.posturl
+        print("POSTING TO:", self.posturl)
 
-        pr = urlparse.urlparse(self.posturl)
+        pr = six.moves.urllib.parse.urlparse(self.posturl)
         path = pr.path
         if pr.query:
             path += "?" + pr.query
 
-        h = httplib.HTTP(pr.hostname, pr.port)
+        h = six.moves.http_client.HTTP(pr.hostname, pr.port)
         h.putrequest("POST", path)
         h.putheader("Host", pr.netloc)
         h.putheader("Content-Length", str(clen))
@@ -100,7 +103,7 @@ class PODClient(object):
 
         errcode, errmsg, headers = h.getreply()
         # h.file.read()
-        print "ERRCODE:", (errcode, errmsg, headers)
+        print("ERRCODE:", (errcode, errmsg, headers))
 
         if errcode != 200:
             raise RuntimeError("upload failed: %r" % (errmsg,))
@@ -114,5 +117,5 @@ class PODClient(object):
 
 
 def podclient_from_serviceurl(serviceurl):
-    result = json.loads(unicode(urllib2.urlopen(serviceurl, data="any").read(), 'utf-8'))
+    result = json.loads(six.text_type(six.moves.urllib.request.urlopen(serviceurl, data="any").read(), 'utf-8'))
     return PODClient(result["post_url"], redirecturl=result["redirect_url"])

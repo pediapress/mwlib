@@ -3,8 +3,9 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 import os
-from ConfigParser import ConfigParser
+from six.moves.configparser import ConfigParser
 import StringIO
 
 from mwlib.log import Log

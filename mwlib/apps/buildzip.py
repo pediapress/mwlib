@@ -4,6 +4,8 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 import tempfile
@@ -46,7 +48,7 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
 
     try:
         fsdir = os.path.join(tmpdir, 'nuwiki')
-        print 'creating nuwiki in %r' % fsdir
+        print('creating nuwiki in %r' % fsdir)
         from mwlib.apps.make_nuwiki import make_nuwiki
         make_nuwiki(fsdir, metabook=metabook, options=options, podclient=podclient, status=status)
 
@@ -68,10 +70,10 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
 
     finally:
         if not options.keep_tmpfiles:
-            print 'removing tmpdir %r' % tmpdir
+            print('removing tmpdir %r' % tmpdir)
             shutil.rmtree(tmpdir, ignore_errors=True)
         else:
-            print 'keeping tmpdir %r' % tmpdir
+            print('keeping tmpdir %r' % tmpdir)
 
         if sys.platform in ("linux2", "linux3"):
             from mwlib import linuxmem
@@ -161,5 +163,5 @@ def main():
         raise
     finally:
         if options.output is None and filename is not None:
-            print 'removing %r' % filename
+            print('removing %r' % filename)
             utils.safe_unlink(filename)

@@ -5,6 +5,7 @@
 # See README.rst for additional licensing information.
 
 from __future__ import division
+from __future__ import absolute_import
 import re
 
 from mwlib import advtree

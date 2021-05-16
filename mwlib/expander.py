@@ -3,6 +3,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 
 from mwlib.templ import log
@@ -12,6 +14,7 @@ from mwlib.templ.scanner import tokenize
 from mwlib.templ.parser import parse, Parser
 from mwlib.templ.evaluate import flatten, Expander, ArgumentList
 from mwlib.templ.misc import DictDB, expandstr
+import six
 
 
 def get_templates(raw, title=u""):
@@ -20,10 +23,10 @@ def get_templates(raw, title=u""):
     todo = [parse(raw, replace_tags=e.replace_tags)]
     while todo:
         n = todo.pop()
-        if isinstance(n, basestring):
+        if isinstance(n, six.string_types):
             continue
 
-        if isinstance(n, Template) and isinstance(n[0], basestring):
+        if isinstance(n, Template) and isinstance(n[0], six.string_types):
             name = n[0]
             if name.startswith("/"):
                 name = title + name
@@ -44,9 +47,9 @@ def find_template(raw, name, parsed_raw=None):
         todo = parsed_raw
     while todo:
         n = todo.pop()
-        if isinstance(n, basestring):
+        if isinstance(n, six.string_types):
             continue
-        if isinstance(n, Template) and isinstance(n[0], basestring):
+        if isinstance(n, Template) and isinstance(n[0], six.string_types):
             if n[0] == name:
                 return n
         todo.extend(n)
@@ -62,6 +65,6 @@ def get_template_args(template, expander):
 
 
 if __name__ == "__main__":
-    d = unicode(open(sys.argv[1]).read(), 'utf8')
+    d = six.text_type(open(sys.argv[1]).read(), 'utf8')
     e = Expander(d)
-    print e.expandTemplates()
+    print(e.expandTemplates())

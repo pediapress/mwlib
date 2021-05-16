@@ -3,8 +3,10 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 import sys
 import time
+import six
 
 
 class Stdout(object):
@@ -36,7 +38,7 @@ class Log(object):
         if prefix is None:
             self._prefix = []
         else:
-            if isinstance(prefix, basestring):
+            if isinstance(prefix, six.string_types):
                 self._prefix = [prefix]
             else:
                 self._prefix = prefix

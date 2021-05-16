@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import locale
 
 _supported = ['aa_DJ', 'aa_DJ.UTF-8', 'aa_ER', 'aa_ER@saaho', 'aa_ET',
@@ -104,9 +106,9 @@ def set_locale_from_lang(lang):
         try:
             locale.setlocale(locale.LC_NUMERIC, x)
             current_lang = lang
-            print "set locale to %r based on the language %r" % (x, current_lang)
+            print("set locale to %r based on the language %r" % (x, current_lang))
             return
         except locale.Error:
             pass
 
-    print "failed to set locale for language %r, tried %r" % (lang, candidates)
+    print("failed to set locale for language %r, tried %r" % (lang, candidates))

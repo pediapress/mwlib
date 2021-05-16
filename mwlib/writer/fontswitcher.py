@@ -4,8 +4,13 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import os
+import six
+from six import unichr
+from six.moves import range
 
 
 class Scripts(object):
@@ -108,7 +113,7 @@ class FontSwitcher(object):
         if not code_points:
             return
         for block in code_points:
-            if isinstance(block, basestring):
+            if isinstance(block, six.string_types):
                 block = self.scripts.getCodePoints(block)
             block_start, block_end = block
             self.code_points2font.insert(0, (block_start, block_end, font_name))
@@ -184,6 +189,6 @@ if __name__ == '__main__':
     ]
 
     scripts = _scripts.getScriptsForCodeBlocks(blocks)
-    print scripts
+    print(scripts)
     for script in scripts:
-        print _scripts.getCodePoints(script)
+        print(_scripts.getCodePoints(script))

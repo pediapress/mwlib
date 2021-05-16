@@ -2,12 +2,14 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 import re
 from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import symbols, tokenize
 from mwlib.templ.marks import eqmark
 
 from hashlib import sha1 as digest
+import six
 
 
 class aliasmap(object):
@@ -43,7 +45,7 @@ def optimize(node):
     if type(node) is tuple:
         return tuple(optimize(x) for x in node)
 
-    if isinstance(node, basestring):
+    if isinstance(node, six.string_types):
         return node
 
     if len(node) == 1 and type(node) in (list, Node):
@@ -56,7 +58,7 @@ def optimize(node):
         res = []
         tmp = []
         for x in (optimize(x) for x in node):
-            if isinstance(x, basestring) and x is not eqmark:
+            if isinstance(x, six.string_types) and x is not eqmark:
                 tmp.append(x)
             else:
                 if tmp:
@@ -86,7 +88,7 @@ class Parser(object):
 
     def __init__(self, txt, included=True, replace_tags=None, siteinfo=None):
         if isinstance(txt, str):
-            txt = unicode(txt)
+            txt = six.text_type(txt)
 
         self.txt = txt
         self.included = included
@@ -144,15 +146,15 @@ class Parser(object):
         self.setToken((ty, txt))
 
     def _strip_ws(self, cond):
-        if isinstance(cond, unicode):
+        if isinstance(cond, six.text_type):
             return cond.strip()
 
         cond = list(cond)
-        if cond and isinstance(cond[0], unicode):
+        if cond and isinstance(cond[0], six.text_type):
             if not cond[0].strip():
                 del cond[0]
 
-        if cond and isinstance(cond[-1], unicode):
+        if cond and isinstance(cond[-1], six.text_type):
             if not cond[-1].strip():
                 del cond[-1]
         cond = tuple(cond)
@@ -211,11 +213,11 @@ class Parser(object):
         # we stop here on the first colon. this is wrong but we don't have
         # the list of allowed magic functions here...
         done = False
-        if isinstance(node, basestring):
+        if isinstance(node, six.string_types):
             node = [node]
 
         for x in node:
-            if not isinstance(x, basestring):
+            if not isinstance(x, six.string_types):
                 continue
             if ":" in x:
                 x = x.split(":")[0]
@@ -228,7 +230,7 @@ class Parser(object):
         return True
 
     def templateFromChildren(self, children):
-        if children and isinstance(children[0], unicode):
+        if children and isinstance(children[0], six.text_type):
             s = children[0].strip().lower()
             if self.name2rx["if"].match(s):
                 return self.ifnodeFromChildren(children)
@@ -253,7 +255,7 @@ class Parser(object):
             name.append(c)
 
         name = optimize(name)
-        if isinstance(name, unicode):
+        if isinstance(name, six.text_type):
             name = name.strip()
 
         if not self._is_good_name(name):

@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 
+from __future__ import absolute_import
+from __future__ import print_function
 import mwclient
-import urllib2
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import time
 
 
@@ -20,8 +22,8 @@ class TrustedRevisions(object):
     def getWikiTrustScore(self, title, revid):
         # http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=quality&title=Buster_Keaton&pageid=43055&revid=364710354
         url = '%s?method=quality&title=%s&revid=%d' % \
-            (self.wikitrust_api, urllib2.quote(title), revid)
-        r = urllib2.urlopen(url).read()
+            (self.wikitrust_api, six.moves.urllib.parse.quote(title), revid)
+        r = six.moves.urllib.request.urlopen(url).read()
         if r == WikiTrustServerError.msg_identifier:
             raise WikiTrustServerError
         return 1 - float(r)  # r is the likelyhood of being spam
@@ -64,5 +66,5 @@ if __name__ == '__main__':
     import sys
     tr = TrustedRevisions()
     trev = tr.getTrustedRevision(sys.argv[1])
-    print 'Found revision:', trev
-    print 'title:%s revid:%d age:%.2f days' % (trev['title'], trev['revid'], trev['age'])
+    print('Found revision:', trev)
+    print('title:%s revid:%d age:%.2f days' % (trev['title'], trev['revid'], trev['age']))

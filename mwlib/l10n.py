@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from itertools import dropwhile
 import os
 import subprocess
@@ -37,7 +39,7 @@ def make_messages(locale, domain, version, inputdir,
         languages.append(locale)
 
     for locale in languages:
-        print "processing language", locale
+        print("processing language", locale)
         basedir = os.path.join(localedir, locale, 'LC_MESSAGES')
         if not os.path.isdir(basedir):
             os.makedirs(basedir)
@@ -90,4 +92,4 @@ def compile_messages(localedir='locale'):
                 try:
                     execute('msgfmt', '--check-format', '--output-file', mo_filename, path)
                 except RuntimeError as exc:
-                    print 'Could not compile %r: %s' % (path, exc)
+                    print('Could not compile %r: %s' % (path, exc))

@@ -5,10 +5,13 @@
 
 # unified/universal token
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import re
-import _uscan as _mwscan
+from . import _uscan as _mwscan
 from mwlib.refine.util import resolve_entity, parseParams
+import six
 
 
 def walknode(node, filt=lambda x: True):
@@ -231,7 +234,7 @@ def _analyze_html_tag(t):
 
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
-        print type, repr(text[start:start + len])
+        print(type, repr(text[start:start + len]))
 
 
 def scan(text):
@@ -254,7 +257,7 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
             self._init_allowed_tags()
 
         if isinstance(text, str):
-            text = unicode(text)
+            text = six.text_type(text)
 
         tokens = scan(text)
 

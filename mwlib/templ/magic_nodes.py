@@ -1,6 +1,8 @@
+from __future__ import absolute_import
 import locale
 from xml.sax.saxutils import quoteattr
 from mwlib.templ import nodes, evaluate
+import six
 
 
 class Subst(nodes.Node):
@@ -43,8 +45,8 @@ class Anchorencode(nodes.Node):
         # Note: mediawiki has a bug. It tries not to touch colons by replacing '.3A' with
         # with the colon. However, if the original string contains the substring '.3A',
         # it will also replace it with a colon. We do *not* reproduce that bug here...
-        import urllib
-        e = urllib.quote_plus(arg.encode('utf-8'), ':').replace('%', '.').replace('+', '_')
+        import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+        e = six.moves.urllib.parse.quote_plus(arg.encode('utf-8'), ':').replace('%', '.').replace('+', '_')
         res.append(e)
 
 
@@ -141,7 +143,7 @@ def reverse_formatnum(val):
 
 def _formatnum(val):
     try:
-        val = long(val)
+        val = int(val)
     except ValueError:
         pass
     else:
@@ -158,7 +160,7 @@ def _formatnum(val):
 def formatnum(val):
     res = _formatnum(val)
     if isinstance(res, str):
-        return unicode(res, "utf-8", "replace")
+        return six.text_type(res, "utf-8", "replace")
     else:
         return res
 

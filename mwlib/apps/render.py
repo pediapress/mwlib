@@ -3,6 +3,8 @@
 
 """mw-render -- installed via setuptools' entry_points"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 from gevent import monkey
 monkey.patch_all(thread=False)
 
@@ -78,7 +80,7 @@ class Main(object):
 
     def load_writer(self, name):
         try:
-            entry_point = pkg_resources.iter_entry_points('mwlib.writers', name).next()
+            entry_point = next(pkg_resources.iter_entry_points('mwlib.writers', name))
         except StopIteration:
             sys.exit('No such writer: %r (use --list-writers to list available writers)' % name)
         try:
@@ -96,24 +98,24 @@ class Main(object):
                     description = '<no description>'
             except Exception as e:
                 description = '<NOT LOADABLE: %s>' % e
-            print '%s\t%s' % (entry_point.name, description)
+            print('%s\t%s' % (entry_point.name, description))
 
     def show_writer_info(self, name):
         writer = self.load_writer(name)
         if hasattr(writer, 'description'):
-            print 'Description:\t%s' % writer.description
+            print('Description:\t%s' % writer.description)
         if hasattr(writer, 'content_type'):
-            print 'Content-Type:\t%s' % writer.content_type
+            print('Content-Type:\t%s' % writer.content_type)
         if hasattr(writer, 'file_extension'):
-            print 'File extension:\t%s' % writer.file_extension
+            print('File extension:\t%s' % writer.file_extension)
         if hasattr(writer, 'options') and writer.options:
-            print 'Options (usable in a ";"-separated list for --writer-options):'
+            print('Options (usable in a ";"-separated list for --writer-options):')
             for name, info in writer.options.items():
                 param = info.get('param')
                 if param:
-                    print ' %s=%s:\t%s' % (name, param, info['help'])
+                    print(' %s=%s:\t%s' % (name, param, info['help']))
                 else:
-                    print ' %s:\t%s' % (name, info['help'])
+                    print(' %s:\t%s' % (name, info['help']))
 
     def get_environment(self):
         from mwlib.status import Status
@@ -182,7 +184,7 @@ class Main(object):
             writer_options['lang'] = options.language
         for option in writer_options.keys():
             if option not in getattr(writer, 'options', {}):
-                print 'Warning: unknown writer option %r' % option
+                print('Warning: unknown writer option %r' % option)
                 del writer_options[option]
 
         init_tmp_cleaner()
@@ -197,7 +199,7 @@ class Main(object):
             try:
                 _locale.set_locale_from_lang(env.wiki.siteinfo["general"]["lang"])
             except BaseException as err:
-                print "Error: could not set locale", err
+                print("Error: could not set locale", err)
 
             basename = os.path.basename(options.output)
             if '.' in basename:
@@ -238,7 +240,7 @@ class Main(object):
                         env.images.clear()
                 except OSError as e:
                     if e.errno != errno.ENOENT:
-                        print 'ERROR: Could not remove temporary images: %s' % e, e.errno
+                        print('ERROR: Could not remove temporary images: %s' % e, e.errno)
 
 
 def main():

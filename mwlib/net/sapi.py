@@ -5,11 +5,14 @@
 
 """api.php client"""
 
-import urllib
-import urllib2
-import urlparse
-import cookielib
+from __future__ import absolute_import
+from __future__ import print_function
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
+import six.moves.urllib.parse
+import six.moves.http_cookiejar
 import re
+import six
 
 try:
     import simplejson as json
@@ -53,13 +56,13 @@ class mwapi(object):
         self.baseurl = apiurl  # XXX
 
         if username:
-            passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            passman = six.moves.urllib.request.HTTPPasswordMgrWithDefaultRealm()
             passman.add_password(None, apiurl, username, password)
-            auth_handler = urllib2.HTTPBasicAuthHandler(passman)
-            self.opener = urllib2.build_opener(
-                urllib2.HTTPCookieProcessor(cookielib.CookieJar()), auth_handler)
+            auth_handler = six.moves.urllib.request.HTTPBasicAuthHandler(passman)
+            self.opener = six.moves.urllib.request.build_opener(
+                six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar()), auth_handler)
         else:
-            self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+            self.opener = six.moves.urllib.request.build_opener(six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar()))
         self.opener.addheaders = [('User-Agent', conf.user_agent)]
         self.edittoken = None
         self.qccount = 0
@@ -94,9 +97,9 @@ class mwapi(object):
         args = {'format': 'json'}
         args.update(**kwargs)
         for k, v in args.items():
-            if isinstance(v, unicode):
+            if isinstance(v, six.text_type):
                 args[k] = v.encode('utf-8')
-        q = urllib.urlencode(args)
+        q = six.moves.urllib.parse.urlencode(args)
         q = q.replace('%3A', ':')  # fix for wrong quoting of url for images
         q = q.replace('%7C', '|')  # fix for wrong quoting of API queries (relevant for redirects)
 
@@ -111,13 +114,13 @@ class mwapi(object):
         args = {'format': 'json'}
         args.update(**kwargs)
         for k, v in args.items():
-            if isinstance(v, unicode):
+            if isinstance(v, six.text_type):
                 args[k] = v.encode('utf-8')
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        postdata = urllib.urlencode(args)
+        postdata = six.moves.urllib.parse.urlencode(args)
 
-        req = urllib2.Request(self.apiurl, postdata, headers)
+        req = six.moves.urllib.request.Request(self.apiurl, postdata, headers)
 
         res = loads(self._fetch(req))
         return res
@@ -152,7 +155,7 @@ class mwapi(object):
                                    (error.get("info", ""), self._build_url(**kwargs)))
             merge_data(retval, data[action])
 
-            qc = data.get("query-continue", {}).values()
+            qc = list(data.get("query-continue", {}).values())
 
             if qc and query_continue:
                 self.qccount += 1
@@ -163,7 +166,7 @@ class mwapi(object):
                         kw[str(k)] = v
 
                 if qc == last_qc:
-                    print "warning: cannot continue this query:", self._build_url(**kw)
+                    print("warning: cannot continue this query:", self._build_url(**kw))
                     return retval
 
                 last_qc = qc
@@ -185,7 +188,7 @@ class mwapi(object):
                 r = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
                 return r
             except Exception as err:
-                print "ERR:", err
+                print("ERR:", err)
                 siprop.pop()
         raise RuntimeError("could not get siteinfo")
 
@@ -245,7 +248,7 @@ class mwapi(object):
         if self.edittoken is None:
             res = self.do_request(action="query", prop="info|revisions",
                                   intoken="edit", titles=title)
-            self.edittoken = res["pages"].values()[0]["edittoken"]
+            self.edittoken = list(res["pages"].values())[0]["edittoken"]
 
         self._post(action="edit", title=title, text=txt, token=self.edittoken,
                    summary=summary, format="json", bot=True)
@@ -318,7 +321,7 @@ class mwapi(object):
         get_authors = authors.inspect_authors()
 
         def merge_data(retval, newdata):
-            edits = newdata["pages"].values()
+            edits = list(newdata["pages"].values())
             for e in edits:
                 revs = e["revisions"]
                 get_authors.scan_edits(revs)
@@ -336,11 +339,11 @@ def guess_api_urls(url):
     @rtype: list
     """
     retval = []
-    if isinstance(url, unicode):
+    if isinstance(url, six.text_type):
         url = url.encode("utf-8")
 
     try:
-        scheme, netloc, path, params, query, fragment = urlparse.urlparse(url)
+        scheme, netloc, path, params, query, fragment = six.moves.urllib.parse.urlparse(url)
     except ValueError:
         return retval
 
@@ -370,7 +373,7 @@ def get_collection_params(api):
 
 def main():
     s = mwapi("http://en.wikipedia.org/w/api.php")
-    print s.get_categorymembers("Category:Mainz")
+    print(s.get_categorymembers("Category:Mainz"))
 
 
 if __name__ == "__main__":

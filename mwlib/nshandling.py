@@ -7,7 +7,10 @@ namespace handling based on data extracted from the siteinfo as
 returned by api.php
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
 import re
+import six
 
 
 NS_MEDIA = -2
@@ -45,7 +48,7 @@ def fix_wikipedia_siteinfo(siteinfo):
 
     if u'\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [
             x.get("prefix", u"")[2:] for x in siteinfo.get("interwikimap", [])]:
-        print "WARNING: interwikimap contains garbage"
+        print("WARNING: interwikimap contains garbage")
         from mwlib import siteinfo as simod
         en = simod.get_siteinfo("en")
         siteinfo['interwikimap'] = list(en["interwikimap"])
@@ -105,7 +108,7 @@ class nshandler(object):
 
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
-        namespaces = self.siteinfo["namespaces"].values()
+        namespaces = list(self.siteinfo["namespaces"].values())
         for ns in namespaces:
             star = ns["*"]
             if star.lower() == name or ns.get("canonical", u"").lower() == name:
@@ -128,8 +131,8 @@ class nshandler(object):
         return t
 
     def splitname(self, title, defaultns=0):
-        if not isinstance(title, unicode):
-            title = unicode(title, 'utf-8')
+        if not isinstance(title, six.text_type):
+            title = six.text_type(title, 'utf-8')
 
         # if "#" in title:
         #     title = title.split("#")[0]

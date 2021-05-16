@@ -4,7 +4,10 @@
 
 from __future__ import with_statement
 
+from __future__ import absolute_import
+from __future__ import print_function
 import gevent.monkey
+import six
 
 if __name__ == "__main__":
     gevent.monkey.patch_all()
@@ -12,10 +15,10 @@ if __name__ == "__main__":
 import sys
 import re
 import StringIO
-import urllib2
-import urlparse
+import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
+import six.moves.urllib.parse
 import traceback
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import unicodedata
 from hashlib import sha1
 
@@ -89,7 +92,7 @@ def make_collection_id(data):
     mb = data.get("metabook")
     if mb:
         if isinstance(mb, str):
-            mb = unicode(mb, "utf-8")
+            mb = six.text_type(mb, "utf-8")
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
@@ -111,7 +114,8 @@ class watch_qserve(object):
     getstats_timeout = 3.0
     sleeptime = 2.0
 
-    def __init__(self, (host, port), busy):
+    def __init__(self, xxx_todo_changeme, busy):
+        (host, port) = xxx_todo_changeme
         self.host = host
         self.port = port
         self.busy = busy
@@ -120,7 +124,7 @@ class watch_qserve(object):
         self.qserve = None
 
     def log(self, msg):
-        print self.prefix, msg
+        print(self.prefix, msg)
 
     def _serverproxy(self):
         return rpcclient.serverproxy(host=self.host, port=self.port)
@@ -194,7 +198,7 @@ def dispatch_command(path):
 
 def get_content_disposition_values(filename, ext):
     if isinstance(filename, str):
-        filename = unicode(filename)
+        filename = six.text_type(filename)
 
     if filename:
         filename = filename.strip()
@@ -215,7 +219,7 @@ def get_content_disposition(filename, ext):
 
     r = "inline; filename=%s.%s" % (asciifn, ext)
     if utf8fn and utf8fn != asciifn:
-        r += ";filename*=UTF-8''%s.%s" % (urllib.quote(utf8fn), ext)
+        r += ";filename*=UTF-8''%s.%s" % (six.moves.urllib.parse.quote(utf8fn), ext)
     return r
 
 
@@ -260,13 +264,13 @@ class Application(object):
         try:
             return method(collection_id, request.params, is_new)
         except Exception as exc:
-            print (
+            print((
                 "ERROR while dispatching %r: %s"
                 % (
                     command,
                     dict(collection_id=collection_id, is_new=is_new, qserve=qserve),
                 )
-            )
+            ))
             traceback.print_exc()
             if command == "download":
                 raise exc
@@ -281,9 +285,9 @@ class Application(object):
 
     def error_response(self, error, **kw):
         if isinstance(error, str):
-            error = unicode(error, "utf-8", "ignore")
-        elif not isinstance(error, unicode):
-            error = unicode(repr(error), "ascii")
+            error = six.text_type(error, "utf-8", "ignore")
+        elif not isinstance(error, six.text_type):
+            error = six.text_type(repr(error), "ascii")
         return dict(error=error, **kw)
 
     def check_collection_id(self, collection_id):
@@ -298,7 +302,7 @@ class Application(object):
         return collection_id
 
     def is_good_baseurl(self, url):
-        netloc = urlparse.urlparse(url)[1].split(":")[0].lower()
+        netloc = six.moves.urllib.parse.urlparse(url)[1].split(":")[0].lower()
         if netloc == "localhost" or netloc.startswith("127.0.") or netloc.startswith("192.168."):
             return False
         return True
@@ -431,8 +435,8 @@ class Application(object):
         res = self.qserve.qinfo(jobid=jobid) or {}
         download_url = res["result"]["url"]
 
-        print "fetching", download_url
-        f = urllib2.urlopen(download_url)
+        print("fetching", download_url)
+        f = six.moves.urllib.request.urlopen(download_url)
         info = f.info()
 
         header = {}
@@ -440,7 +444,7 @@ class Application(object):
         for h in ("Content-Length",):
             v = info.getheader(h)
             if v:
-                print "copy header:", h, v
+                print("copy header:", h, v)
                 header[h] = v
 
         if w.content_type:
@@ -470,7 +474,7 @@ class Application(object):
 
         pod_api_url = params.pod_api_url
         if pod_api_url:
-            result = json.loads(unicode(urllib2.urlopen(pod_api_url, data="any").read(), "utf-8"))
+            result = json.loads(six.text_type(six.moves.urllib.request.urlopen(pod_api_url, data="any").read(), "utf-8"))
             post_url = result["post_url"].encode("utf-8")
             response = {
                 "state": "ok",
@@ -525,7 +529,7 @@ def main():
         elif o in ("-i", "--interface"):
             interface = a
 
-    print "using the following writers", sorted(name2writer.keys())
+    print("using the following writers", sorted(name2writer.keys()))
 
     qs += args
 
@@ -542,11 +546,11 @@ def main():
         watchers.spawn(CallInLoop(5.0, watch_qserve(x, busy)))
 
     try:
-        print "listening on %s:%d" % address
+        print("listening on %s:%d" % address)
         server.serve_forever()
     except KeyboardInterrupt:
         server.stop()
-        print "bye."
+        print("bye.")
 
 
 if __name__ == "__main__":

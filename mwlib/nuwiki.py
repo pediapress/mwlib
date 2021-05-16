@@ -2,17 +2,22 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import zipfile
 import shutil
 import tempfile
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import sqlite3dbm
 from hashlib import sha1
 from mwlib import myjson as json
 
 from mwlib import nshandling, utils
 from mwlib.log import Log
+import six
+from six import unichr
+from six.moves import range
 
 log = Log('nuwiki')
 
@@ -50,7 +55,7 @@ class DumbJsonDB(object):
             return res
 
     def items(self):
-        return self.db.items()
+        return list(self.db.items())
 
     def __getstate__(self):
         # FIXME: pickling zip based containers not supported and currently not needed.
@@ -135,8 +140,8 @@ class nuwiki(object):
             if not os.path.exists(fn):
                 break
             count += 1
-            print "reading", fn
-            d = unicode(open(self._pathjoin(fn), "rb").read(), "utf-8")
+            print("reading", fn)
+            d = six.text_type(open(self._pathjoin(fn), "rb").read(), "utf-8")
             pages = d.split("\n --page-- ")
 
             for p in pages[1:]:
@@ -155,7 +160,7 @@ class nuwiki(object):
                 # else:
                 #     print "excluding:", repr(pg.title)
 
-        tmp = self.revisions.items()
+        tmp = list(self.revisions.items())
         tmp.sort(reverse=True)
         for revid, p in tmp:
             title = p.title
@@ -176,7 +181,7 @@ class nuwiki(object):
             try:
                 page = self.revisions.get(int(revision))
             except TypeError:
-                print "Warning: non-integer revision %r" % revision
+                print("Warning: non-integer revision %r" % revision)
             else:
                 if page and page.rawtext:
                     redirect = self.nshandler.redirect_matcher(page.rawtext)
@@ -200,8 +205,8 @@ class nuwiki(object):
         return self.get_page(fqname)
 
     def normalize_and_get_image_path(self, name):
-        assert isinstance(name, basestring)
-        name = unicode(name)
+        assert isinstance(name, six.string_types)
+        name = six.text_type(name)
         ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if ns != 6:
             return
@@ -275,7 +280,7 @@ def extract_member(zipfile, member, dstdir):
 
     fn = member.filename
     if isinstance(fn, str):
-        fn = unicode(fn, 'utf-8')
+        fn = six.text_type(fn, 'utf-8')
     targetpath = os.path.normpath(os.path.join(dstdir, fn))
 
     if not targetpath.startswith(dstdir):
@@ -314,7 +319,7 @@ class adapt(object):
             path_or_instance = tmpdir
             self.was_tmpdir = True
 
-        if isinstance(path_or_instance, basestring):
+        if isinstance(path_or_instance, six.string_types):
             self.nuwiki = NuWiki(path_or_instance, allow_pickle=not self.was_tmpdir)
         else:
             self.nuwiki = path_or_instance
@@ -345,7 +350,7 @@ class adapt(object):
         else:
             fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
             return p + \
-                'title=%s' % urllib.quote(fqtitle.replace(' ', '_').encode('utf-8'), safe=':/@')
+                'title=%s' % six.moves.urllib.parse.quote(fqtitle.replace(' ', '_').encode('utf-8'), safe=':/@')
 
     def getDescriptionURL(self, name):
         return self.getURL(name, defaultns=nshandling.NS_FILE)
@@ -431,7 +436,7 @@ class adapt(object):
 
     def clear(self):
         if self.was_tmpdir and os.path.exists(self.nuwiki.path):
-            print 'removing %r' % self.nuwiki.path
+            print('removing %r' % self.nuwiki.path)
             shutil.rmtree(self.nuwiki.path, ignore_errors=True)
 
     def getDiskPath(self, name, size=None):
@@ -451,7 +456,7 @@ class adapt(object):
         page = self.get_image_description_page(name)
         if page is not None:
             return get_templates(page.rawtext)
-        print 'no such image: %r' % name
+        print('no such image: %r' % name)
         return []
 
     def getImageTemplatesAndArgs(self, name, wikidb=None):
@@ -471,7 +476,7 @@ class adapt(object):
                 tmpl = find_template(None, t, parsed_raw[:])
                 arg_list = tmpl[1]
                 for arg in arg_list:
-                    if isinstance(arg, basestring) and len(arg) > 3 and ' ' not in arg:
+                    if isinstance(arg, six.string_types) and len(arg) > 3 and ' ' not in arg:
                         args.add(arg)
             templates.update(args)
             return templates
@@ -483,7 +488,7 @@ class adapt(object):
         if page is not None:
             words = re.split('\{|\}|\[|\]| |\,|\|', page.rawtext)
             return list(set([w.lower() for w in words if w]))
-        print 'no such image: %r' % name
+        print('no such image: %r' % name)
         return []
 
     def getContributors(self, name, wikidb=None):

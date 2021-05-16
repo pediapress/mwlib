@@ -4,6 +4,8 @@
 # See README.rst for additional licensing information.
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mwlib.log import Log
 
 log = Log("parser")
@@ -11,9 +13,9 @@ log = Log("parser")
 
 def show(out, node, indent=0, verbose=False):
     if verbose:
-        print >>out, "    " * indent, node, repr(getattr(node, 'vlist', ''))
+        print("    " * indent, node, repr(getattr(node, 'vlist', '')), file=out)
     else:
-        print >>out, "    " * indent, node
+        print("    " * indent, node, file=out)
     for x in node:
         show(out, x, indent + 1, verbose=verbose)
 

@@ -2,6 +2,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import evaluate
 
@@ -45,7 +47,7 @@ def expandstr(s, expected=None, wikidb=None, pagename='thispage'):
 
     te = evaluate.Expander(s, pagename=pagename, wikidb=db)
     res = te.expandTemplates()
-    print "EXPAND: %r -> %r" % (s, res)
+    print("EXPAND: %r -> %r" % (s, res))
     if expected is not None:
         assert res == expected, "expected %r, got %r" % (expected, res)
     return res

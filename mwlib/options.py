@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import sys
 import optparse
 
@@ -5,6 +6,7 @@ from mwlib import myjson as json
 
 from mwlib.utils import start_logging
 from mwlib import wiki, metabook, log
+import six
 
 log = log.Log('mwlib.options')
 
@@ -78,7 +80,7 @@ class OptionParser(optparse.OptionParser):
 
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(
-            self, args=[unicode(x, "utf-8") for x in sys.argv[1:]])
+            self, args=[six.text_type(x, "utf-8") for x in sys.argv[1:]])
         for c in self.config_values:
             if not hasattr(c, "pages"):
                 c.pages = []
@@ -87,7 +89,7 @@ class OptionParser(optparse.OptionParser):
             start_logging(self.options.logfile)
 
         if self.options.metabook:
-            self.metabook = json.loads(unicode(open(self.options.metabook, 'rb').read(), 'utf-8'))
+            self.metabook = json.loads(six.text_type(open(self.options.metabook, 'rb').read(), 'utf-8'))
 
         try:
             self.options.imagesize = int(self.options.imagesize)

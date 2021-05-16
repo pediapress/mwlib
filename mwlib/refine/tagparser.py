@@ -4,6 +4,7 @@
 
 """parse tags in parallel"""
 
+from __future__ import absolute_import
 import sys
 from mwlib.utoken import token as T
 

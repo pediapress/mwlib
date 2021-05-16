@@ -10,9 +10,12 @@ http://meta.wikimedia.org/wiki/ParserFunctions#.23expr:
 
 from __future__ import division
 
+from __future__ import absolute_import
+from __future__ import print_function
 import re
 import inspect
 import math
+from six.moves import input
 
 
 class ExprError(Exception):
@@ -97,7 +100,7 @@ a("exp", 9, math.exp, 1)
 a("ln", 9, math.log, 1)
 a("ceil", 9, lambda x: int(math.ceil(x)))
 a("floor", 9, lambda x: int(math.floor(x)))
-a("trunc", 9, long, 1)
+a("trunc", 9, int, 1)
 
 a("e", 11, lambda x, y: x * 10 ** y)
 a("E", 11, lambda x, y: x * 10 ** y)
@@ -139,7 +142,7 @@ class Expr(object):
 
         if "." in s:
             return float(s)
-        return long(s)
+        return int(s)
 
     def output_operator(self, op):
         return functions[op](self.operand_stack)
@@ -228,7 +231,7 @@ def main():
         pass
 
     while True:
-        input_string = raw_input("> ")
+        input_string = input("> ")
         if not input_string:
             continue
 
@@ -236,13 +239,13 @@ def main():
         try:
             res = expr(input_string)
         except Exception as err:
-            print "ERROR:", err
+            print("ERROR:", err)
             import traceback
             traceback.print_exc()
 
             continue
-        print res
-        print time.time() - stime, "s"
+        print(res)
+        print(time.time() - stime, "s")
 
 
 if __name__ == '__main__':

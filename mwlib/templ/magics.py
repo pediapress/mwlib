@@ -9,12 +9,15 @@ http://meta.wikimedia.org/wiki/Help:Magic_words
 http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
+from __future__ import absolute_import
 import re
 import datetime
-import urllib
-import urlparse
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import six.moves.urllib.parse
 from mwlib.log import Log
 from mwlib import expr
+import six
+from six.moves import range
 
 iferror_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
 
@@ -67,9 +70,9 @@ def maybe_numeric_compare(a, b):
 
 
 def urlquote(u):
-    if isinstance(u, unicode):
+    if isinstance(u, six.text_type):
         u = u.encode('utf-8')
-    return urllib.quote(u)
+    return six.moves.urllib.parse.quote(u)
 
 
 class OtherMagic(object):
@@ -207,7 +210,7 @@ class PageMagic(object):
         self.server = server
         self.revisionid = revisionid
 
-        self.niceurl = urlparse.urljoin(self.server, 'wiki')
+        self.niceurl = six.moves.urllib.parse.urljoin(self.server, 'wiki')
 
     def _wrap_pagename(f):
         @wraps(f)
@@ -341,7 +344,7 @@ class PageMagic(object):
 
     def URLENCODE(self, args):
         """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
-        url = urllib.quote_plus(args[0].encode('utf-8'))
+        url = six.moves.urllib.parse.quote_plus(args[0].encode('utf-8'))
         return url
 
     @noarg
@@ -351,7 +354,7 @@ class PageMagic(object):
 
     def FULLURL(self, args):
         a = args[0].capitalize().replace(' ', '_')
-        a = urllib.quote_plus(a.encode('utf-8'))
+        a = six.moves.urllib.parse.quote_plus(a.encode('utf-8'))
         if len(args) >= 2:
             q = "?%s" % args[1]
         else:
@@ -466,7 +469,7 @@ class ParserFunctions(object):
                 if int(val) == val and math.fabs(val) < 1e14:
                     return str(int(val))
                 r = str(float(val))
-            except Exception, err:
+            except Exception as err:
                 # log("ERROR: error while evaluating #expr:%r\n" % (ex,))
                 return self._error(err)
 
@@ -489,7 +492,7 @@ class ParserFunctions(object):
                 r = expr.expr(rl[0])
             else:
                 r = False
-        except Exception, err:
+        except Exception as err:
             # log("ERROR: error while evaluating #ifexpr:%r\n" % (rl[0],))
             return self._error(err)
 
@@ -563,11 +566,11 @@ class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMag
         if m is None:
             return None
 
-        if isinstance(m, basestring):
+        if isinstance(m, six.string_types):
             return m
 
         res = m(args) or ''  # FIXME: catch TypeErros
-        assert isinstance(res, basestring), "MAGIC %r returned %r" % (name, res)
+        assert isinstance(res, six.string_types), "MAGIC %r returned %r" % (name, res)
         return res
 
     def has_magic(self, name):

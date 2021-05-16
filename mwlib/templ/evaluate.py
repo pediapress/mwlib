@@ -2,9 +2,13 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mwlib.templ import magics, log, DEBUG, parser, mwlocals
 from mwlib.uniq import Uniquifier
 from mwlib import nshandling, siteinfo, metabook
+import six
+from six.moves import range
 
 
 class TemplateRecursion(Exception):
@@ -13,7 +17,7 @@ class TemplateRecursion(Exception):
 
 def flatten(node, expander, variables, res):
     t = type(node)
-    if isinstance(node, (unicode, str)):
+    if isinstance(node, (six.text_type, str)):
         res.append(node)
         return True
 
@@ -46,7 +50,7 @@ class MemoryLimitError(Exception):
 
 
 def equalsplit(node):
-    if isinstance(node, basestring):
+    if isinstance(node, six.string_types):
         return None, node
 
     try:
@@ -58,7 +62,7 @@ def equalsplit(node):
 
 
 def equalsplit_25(node):
-    if isinstance(node, basestring):
+    if isinstance(node, six.string_types):
         return None, node
 
     try:
@@ -102,12 +106,12 @@ class ArgumentList(object):
 
     def get(self, n, default):
         self.count += 1
-        if isinstance(n, (int, long)):
+        if isinstance(n, six.integer_types):
             try:
                 a = self.args[n]
             except IndexError:
                 return default
-            if isinstance(a, unicode):
+            if isinstance(a, six.text_type):
                 return a.strip()
             tmp = []
             flatten(a, self.expander, self.variables, tmp)
@@ -118,7 +122,7 @@ class ArgumentList(object):
             # FIXME: cache value ???
             return tmp
 
-        assert isinstance(n, basestring), "expected int or string"
+        assert isinstance(n, six.string_types), "expected int or string"
 
         if n not in self.namedargs:
             while self.varnum < len(self.args):
@@ -137,7 +141,7 @@ class ArgumentList(object):
                     self.varcount += 1
                     do_strip = False
 
-                if do_strip and isinstance(val, unicode):
+                if do_strip and isinstance(val, six.text_type):
                     val = val.strip()
                 self.namedargs[name] = (do_strip, val)
 
@@ -146,7 +150,7 @@ class ArgumentList(object):
 
         try:
             do_strip, val = self.namedargs[n]
-            if isinstance(val, unicode):
+            if isinstance(val, six.text_type):
                 return val
         except KeyError:
             return default
@@ -211,11 +215,11 @@ class Expander(object):
         si = None
         try:
             si = self.db.get_siteinfo()
-        except Exception, err:
-            print 'Caught: %s' % err
+        except Exception as err:
+            print('Caught: %s' % err)
 
         if si is None:
-            print "WARNING: failed to get siteinfo from %r" % (self.db,)
+            print("WARNING: failed to get siteinfo from %r" % (self.db,))
             si = siteinfo.get_siteinfo("de")
 
         self.nshandler = nshandler = nshandling.nshandler(si)

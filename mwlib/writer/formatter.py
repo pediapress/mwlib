@@ -6,6 +6,7 @@
 
 from __future__ import division
 
+from __future__ import absolute_import
 from mwlib.writer import styleutils
 from mwlib import advtree
 
@@ -175,7 +176,7 @@ class Formatter(object):
                         setattr(self, render_style, getattr(self, render_style) + 1)
                     elif action == 'reset':
                         setattr(self, render_style, 0)
-                if css[node_style].keys() == ['*']:
+                if list(css[node_style].keys()) == ['*']:
                     attr_name, method = css[node_style]['*']
                     val = method(node)
                     if val:

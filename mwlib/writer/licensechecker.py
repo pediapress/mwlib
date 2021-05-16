@@ -6,10 +6,13 @@
 
 from __future__ import division
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import csv
 import sys
 import tempfile
+import six
 try:
     import simplejson as json
 except ImportError:
@@ -63,12 +66,12 @@ class LicenseChecker(object):
                 continue
             if not name:
                 continue
-            name = unicode(name, 'utf-8').lower()
+            name = six.text_type(name, 'utf-8').lower()
             lic = License(name=name)
-            lic.display_name = unicode(display_name, 'utf-8')
+            lic.display_name = six.text_type(display_name, 'utf-8')
             if license_description.startswith('-'):
                 license_description = license_description[1:]
-            lic.description = unicode(license_description.strip(), 'utf-8')
+            lic.description = six.text_type(license_description.strip(), 'utf-8')
             if license_type in ['free-display', 'nonfree-display']:
                 lic.license_type = 'free'
             elif license_type in ['nonfree']:
@@ -92,7 +95,7 @@ class LicenseChecker(object):
     def _getLicenses(self, templates, imgname):
         licenses = []
         for template in templates:
-            assert isinstance(template, unicode)
+            assert isinstance(template, six.text_type)
             lic = self.licenses.get(template, None)
             if not lic:
                 lic = License(name=template)
@@ -188,11 +191,11 @@ class LicenseChecker(object):
             fn = os.path.join(_dir, fn)
             if not fn.endswith('json'):
                 continue
-            content = unicode(open(fn).read(), 'utf-8')
+            content = six.text_type(open(fn).read(), 'utf-8')
             try:
                 licenses = json.loads(content)
             except ValueError:
-                print 'no json object found in file', fn
+                print('no json object found in file', fn)
                 continue
             for (license, urls) in licenses.items():
                 if not self.licenses.get(license, False):
@@ -207,7 +210,7 @@ class LicenseChecker(object):
                     'num_images': num_urls,
                     'img_str': '\n'.join([i.encode('utf-8') for i in list(urls)[:5]])
                     }
-            print "\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n" % args
+            print("\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n" % args)
 
     def dumpLicenseInfoContent(self):
 
@@ -234,12 +237,12 @@ class LicenseChecker(object):
                 else:
                     allowedstr = "no"
 
-                print tmpl_txt % {
+                print(tmpl_txt % {
                     'lic_name': lic.name.encode('utf-8'),
                     'display_name': lic.display_name.encode('utf-8'),
                     'allowed': allowedstr,
                     'description': lic.description.encode('utf-8'),
-                }
+                })
                 #print lic.name, lic.display_name, lic.license_type
 
 
@@ -256,7 +259,7 @@ if __name__ == '__main__':
     else:
         stats_dir = os.environ.get('HIQ_STATSDIR')
     if not stats_dir:
-        print 'specify stats_dir as first arg, or set environment var HIQ_STATSIDR'
+        print('specify stats_dir as first arg, or set environment var HIQ_STATSIDR')
         sys.exit(1)
 
     lc.analyseUnknownLicenses(stats_dir)
