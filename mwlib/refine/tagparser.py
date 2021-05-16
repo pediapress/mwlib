@@ -1,15 +1,16 @@
-
 # Copyright (c) 2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 """parse tags in parallel"""
 
 from __future__ import absolute_import
+
 import sys
-from mwlib.utoken import token as T
+
+from mwlib.utoken import Token as T
 
 
-class taginfo(object):
+class TagInfo(object):
     def __init__(self, tagname=None, prio=None, blocknode=False, nested=True):
         assert None not in (tagname, prio, nested, blocknode)
         self.tagname = tagname
@@ -18,16 +19,16 @@ class taginfo(object):
         self.blocknode = blocknode
 
 
-class tagparser(object):
+class TagParser(object):
     def __init__(self, tags=[]):
         self.name2tag = name2tag = {}
         for t in tags:
             name2tag[t.tagname] = t
 
-        self.guard = (None, taginfo(tagname="", prio=sys.maxsize, nested=True, blocknode=False))
+        self.guard = (None, TagInfo(tagname="", prio=sys.maxsize, nested=True, blocknode=False))
 
     def add(self, tagname=None, prio=None, blocknode=False, nested=True):
-        t = taginfo(tagname=tagname, prio=prio, blocknode=blocknode, nested=nested)
+        t = TagInfo(tagname=tagname, prio=prio, blocknode=blocknode, nested=nested)
         self.name2tag[t.tagname] = t
 
     def find_in_stack(self, tag):
@@ -59,9 +60,16 @@ class tagparser(object):
             else:
                 blocknode = t.blocknode
 
-            sub = tokens[i + 1:pos]
-            tokens[i:pos] = [T(type=T.t_complex_tag, children=sub,
-                               tagname=t.tagname, blocknode=blocknode, vlist=tokens[i].vlist)]
+            sub = tokens[i + 1 : pos]
+            tokens[i:pos] = [
+                T(
+                    type=T.t_complex_tag,
+                    children=sub,
+                    tagname=t.tagname,
+                    blocknode=blocknode,
+                    vlist=tokens[i].vlist,
+                )
+            ]
             pos = i + 1
 
         return pos

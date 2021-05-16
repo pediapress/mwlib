@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from mwlib import utoken
 
 
-class Node(utoken.token):
+class Node(utoken.Token):
     """Base class for all nodes"""
 
     caption = ""
@@ -21,7 +21,7 @@ class Node(utoken.token):
 
     def __repr__(self):
         try:
-            return utoken.token.__repr__(self)
+            return utoken.Token.__repr__(self)
         except BaseException:
             return "%s %r: %s children" % (
                 self.__class__.__name__,

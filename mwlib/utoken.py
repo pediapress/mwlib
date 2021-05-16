@@ -15,7 +15,7 @@ import six
 
 
 def walknode(node, filt=lambda x: True):
-    if not isinstance(node, token):
+    if not isinstance(node, Token):
         for x in node:
             for k in walknode(x):
                 if filt(k):
@@ -43,7 +43,7 @@ def show(node, out=None, indent=0, verbose=False):
     if out is None:
         out = sys.stdout
 
-    if not isinstance(node, token):
+    if not isinstance(node, Token):
         for x in node:
             show(x, out=out, indent=indent, verbose=verbose)
         return
@@ -64,7 +64,7 @@ class _show(object):
             return lambda out=None: show(obj, out=out)
 
 
-class token(object):
+class Token(object):
     caption = ''
     vlist = None
     target = None
@@ -144,7 +144,7 @@ class token(object):
         self.__dict__.update(kw)
 
     def __repr__(self):
-        if isinstance(self, token):
+        if isinstance(self, Token):
             r = [self.token2name.get(self.type, self.type)]
         else:
             r = [self.__class__.__name__]
@@ -189,10 +189,10 @@ class token(object):
     show = _show()
 
 
-token2name = token.token2name
-for d in dir(token):
+token2name = Token.token2name
+for d in dir(Token):
     if d.startswith("t_"):
-        token2name[getattr(token, d)] = d
+        token2name[getattr(Token, d)] = d
 del d, token2name
 
 
@@ -268,21 +268,21 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
 
         for type, start, tlen in tokens:
 
-            if type == token.t_begintable:
+            if type == Token.t_begintable:
                 txt = g()
                 count = txt.count(":")
                 if count:
-                    res.append(token(type=token.t_colon, start=start, len=count, source=text))
+                    res.append(Token(type=Token.t_colon, start=start, len=count, source=text))
                 tlen -= count
                 start += count
 
-            t = token(type=type, start=start, len=tlen, source=text)
+            t = Token(type=type, start=start, len=tlen, source=text)
 
-            if type == token.t_entity:
+            if type == Token.t_entity:
                 t.text = resolve_entity(g())
-                t.type = token.t_text
+                t.type = Token.t_text
                 res.append(t)
-            elif type == token.t_html_tag:
+            elif type == Token.t_html_tag:
                 s = g()
                 if uniquifier:
                     s = uniquifier.replace_uniq(s)
@@ -293,7 +293,7 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
                 if tagname in self.allowed_tags:
                     res.append(t)
                 else:
-                    res.append(token(type=token.t_text, start=start, len=tlen, source=text))
+                    res.append(Token(type=Token.t_text, start=start, len=tlen, source=text))
             else:
                 res.append(t)
 

@@ -121,7 +121,7 @@ def test_parse_table_row_modifier():
 
 def test_parse_link():
     tokens = tokenize("[[link0]][[link2]]")
-    core.parse_links(tokens, empty())
+    core.ParseLinks(tokens, empty())
     show(tokens)
     assert len(tokens) == 2
     assert tokens[0].type == T.t_complex_link

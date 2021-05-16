@@ -3,6 +3,7 @@
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
 from mwlib import expander, nshandling, metabook
 from mwlib.log import Log
 from mwlib.refine import core, compat
@@ -19,6 +20,7 @@ def parseString(
         magicwords=None,
         expandTemplates=True):
     """parse article with title from raw mediawiki text"""
+    # FIXME: refactor method name to parse_string (requires changes in downstream mwlib.rl etc)
 
     uniquifier = None
     siteinfo = None

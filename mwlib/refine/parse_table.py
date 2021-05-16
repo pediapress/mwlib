@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
-from mwlib.utoken import show, token as T
+from mwlib.utoken import show, Token as T
 from mwlib.refine import util
 
 
@@ -278,7 +278,7 @@ class parse_tables(object):
             starttoken = tokens[start]
             sub = tokens[start + 1:i]
             from mwlib.refine import core
-            tp = core.tagparser()
+            tp = core.TagParser()
             tp.add("caption", 5)
             tp(sub, self.xopts)
             tokens[start:i + 1] = [T(type=T.t_complex_table,
