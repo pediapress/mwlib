@@ -29,9 +29,9 @@ class StartFetcher(object):
 
     def get_api(self):
         if self.username:
-            api = mwapi.mwapi(self.api_url, self.username, self.password)
+            api = mwapi.MwApi(self.api_url, self.username, self.password)
         else:
-            api = mwapi.mwapi(self.api_url)
+            api = mwapi.MwApi(self.api_url)
         api.set_limit()
 
         if self.username:
@@ -58,7 +58,7 @@ class StartFetcher(object):
         # fsout.dump_json(nfo=nfo)
 
         pages = fetch.pages_from_metabook(metabook)
-        self.fetcher = fetch.fetcher(
+        self.fetcher = fetch.Fetcher(
             api,
             fsout,
             pages,
@@ -86,7 +86,7 @@ class StartFetcher(object):
         self.password = options.password
         self.domain = options.domain
 
-        self.fsout = fetch.fsoutput(self.fsdir)
+        self.fsout = fetch.FsOutput(self.fsdir)
 
     def fetch_collectionpage(self, api):
         cp = self.options.collectionpage
@@ -172,7 +172,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     is_multiwiki = len(id2wiki) > 1
 
     if is_multiwiki:
-        progress = fetch.shared_progress(status=status)
+        progress = fetch.SharedProgress(status=status)
     else:
         progress = None
 

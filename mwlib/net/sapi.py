@@ -7,12 +7,16 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
-import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
-import six.moves.urllib.parse
-import six.moves.http_cookiejar
-import re
+
 import six
+import six.moves.http_cookiejar
+import six.moves.urllib.error
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.parse
+import six.moves.urllib.parse
+import six.moves.urllib.request
+import six.moves.urllib.request
 
 try:
     import simplejson as json
@@ -29,7 +33,7 @@ from mwlib import conf, authors
 def loads(s):
     """Potentially remove UTF-8 BOM and call json.loads()"""
 
-    if s and isinstance(s, str) and s[:3] == '\xef\xbb\xbf':
+    if s and isinstance(s, str) and s[:3] == "\xef\xbb\xbf":
         s = s[3:]
     return json.loads(s)
 
@@ -50,7 +54,7 @@ def merge_data(dst, src):
                     dst[k] = v
 
 
-class mwapi(object):
+class MwApi(object):
     def __init__(self, apiurl, username=None, password=None):
         self.apiurl = apiurl
         self.baseurl = apiurl  # XXX
@@ -60,10 +64,14 @@ class mwapi(object):
             passman.add_password(None, apiurl, username, password)
             auth_handler = six.moves.urllib.request.HTTPBasicAuthHandler(passman)
             self.opener = six.moves.urllib.request.build_opener(
-                six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar()), auth_handler)
+                six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar()),
+                auth_handler,
+            )
         else:
-            self.opener = six.moves.urllib.request.build_opener(six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar()))
-        self.opener.addheaders = [('User-Agent', conf.user_agent)]
+            self.opener = six.moves.urllib.request.build_opener(
+                six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar())
+            )
+        self.opener.addheaders = [("User-Agent", conf.user_agent)]
         self.edittoken = None
         self.qccount = 0
         self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)
@@ -94,14 +102,14 @@ class mwapi(object):
         return data
 
     def _build_url(self, **kwargs):
-        args = {'format': 'json'}
+        args = {"format": "json"}
         args.update(**kwargs)
         for k, v in args.items():
             if isinstance(v, six.text_type):
-                args[k] = v.encode('utf-8')
+                args[k] = v.encode("utf-8")
         q = six.moves.urllib.parse.urlencode(args)
-        q = q.replace('%3A', ':')  # fix for wrong quoting of url for images
-        q = q.replace('%7C', '|')  # fix for wrong quoting of API queries (relevant for redirects)
+        q = q.replace("%3A", ":")  # fix for wrong quoting of url for images
+        q = q.replace("%7C", "|")  # fix for wrong quoting of API queries (relevant for redirects)
 
         url = "%s?%s" % (self.apiurl, q)
         return url
@@ -111,11 +119,11 @@ class mwapi(object):
         return self._fetch(url)
 
     def _post(self, **kwargs):
-        args = {'format': 'json'}
+        args = {"format": "json"}
         args.update(**kwargs)
         for k, v in args.items():
             if isinstance(v, six.text_type):
-                args[k] = v.encode('utf-8')
+                args[k] = v.encode("utf-8")
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         postdata = six.moves.urllib.parse.urlencode(args)
@@ -151,8 +159,9 @@ class mwapi(object):
             data = loads(self._request(**kwargs))
             error = data.get("error")
             if error:
-                raise RuntimeError("%s: [fetching %s]" %
-                                   (error.get("info", ""), self._build_url(**kwargs)))
+                raise RuntimeError(
+                    "%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs))
+                )
             merge_data(retval, data[action])
 
             qc = list(data.get("query-continue", {}).values())
@@ -178,8 +187,9 @@ class mwapi(object):
         return self.do_request(action="query", meta="siteinfo", siprop="general")
 
     def get_categorymembers(self, cmtitle):
-        return self.do_request(action="query", list="categorymembers",
-                               cmtitle=cmtitle, cmlimit=200)
+        return self.do_request(
+            action="query", list="categorymembers", cmtitle=cmtitle, cmlimit=200
+        )
 
     def get_siteinfo(self):
         siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
@@ -193,13 +203,15 @@ class mwapi(object):
         raise RuntimeError("could not get siteinfo")
 
     def login(self, username, password, domain=None, lgtoken=None):
-        args = dict(action="login",
-                    lgname=username.encode("utf-8"),
-                    lgpassword=password.encode("utf-8"),
-                    format="json")
+        args = dict(
+            action="login",
+            lgname=username.encode("utf-8"),
+            lgpassword=password.encode("utf-8"),
+            format="json",
+        )
 
         if domain is not None:
-            args['lgdomain'] = domain.encode('utf-8')
+            args["lgdomain"] = domain.encode("utf-8")
 
         if lgtoken is not None:
             args["lgtoken"] = lgtoken.encode("utf-8")
@@ -226,18 +238,17 @@ class mwapi(object):
             else:
                 prop = "revisions|templates"
 
-        kwargs = dict(prop=prop,
-                      rvprop='ids',
-                      imlimit=self.api_result_limit,
-                      tllimit=self.api_result_limit)
+        kwargs = dict(
+            prop=prop, rvprop="ids", imlimit=self.api_result_limit, tllimit=self.api_result_limit
+        )
         if titles:
-            kwargs['redirects'] = 1
+            kwargs["redirects"] = 1
 
         self._update_kwargs(kwargs, titles, revids)
         return self.do_request(action="query", **kwargs)
 
     def _update_kwargs(self, kwargs, titles, revids):
-        assert titles or revids and not (titles and revids), 'either titles or revids must be set'
+        assert titles or revids and not (titles and revids), "either titles or revids must be set"
 
         if titles:
             kwargs["titles"] = "|".join(titles)
@@ -246,12 +257,20 @@ class mwapi(object):
 
     def upload(self, title, txt, summary):
         if self.edittoken is None:
-            res = self.do_request(action="query", prop="info|revisions",
-                                  intoken="edit", titles=title)
+            res = self.do_request(
+                action="query", prop="info|revisions", intoken="edit", titles=title
+            )
             self.edittoken = list(res["pages"].values())[0]["edittoken"]
 
-        self._post(action="edit", title=title, text=txt, token=self.edittoken,
-                   summary=summary, format="json", bot=True)
+        self._post(
+            action="edit",
+            title=title,
+            text=txt,
+            token=self.edittoken,
+            summary=summary,
+            format="json",
+            bot=True,
+        )
 
     def idle(self):
         sem = self.limit_fetch_semaphore
@@ -260,21 +279,22 @@ class mwapi(object):
         return not sem.locked()
 
     def fetch_pages(self, titles=None, revids=None):
-        kwargs = dict(prop="revisions",
-                      rvprop='ids|content|timestamp|user',
-                      imlimit=self.api_result_limit,
-                      tllimit=self.api_result_limit)
+        kwargs = dict(
+            prop="revisions",
+            rvprop="ids|content|timestamp|user",
+            imlimit=self.api_result_limit,
+            tllimit=self.api_result_limit,
+        )
         if titles:
-            kwargs['redirects'] = 1
+            kwargs["redirects"] = 1
 
         self._update_kwargs(kwargs, titles, revids)
 
         rev_result = self.do_request(action="query", **kwargs)
 
-        kwargs = dict(prop="categories",
-                      cllimit=self.api_result_limit)
+        kwargs = dict(prop="categories", cllimit=self.api_result_limit)
         if titles:
-            kwargs['redirects'] = 1
+            kwargs["redirects"] = 1
 
         self._update_kwargs(kwargs, titles, revids)
         cat_result = self.do_request(action="query", **kwargs)
@@ -282,11 +302,12 @@ class mwapi(object):
         return rev_result
 
     def fetch_imageinfo(self, titles, iiurlwidth=800):
-        kwargs = dict(prop="imageinfo|info",
-                      iiprop="url|user|comment|url|sha1|size",
-                      iiurlwidth=iiurlwidth,
-                      inprop='url'
-                      )
+        kwargs = dict(
+            prop="imageinfo|info",
+            iiprop="url|user|comment|url|sha1|size",
+            iiurlwidth=iiurlwidth,
+            inprop="url",
+        )
 
         self._update_kwargs(kwargs, titles, [])
         return self.do_request(action="query", **kwargs)
@@ -294,28 +315,25 @@ class mwapi(object):
     def get_edits(self, title, revision, rvlimit=None):
         rvlimit = rvlimit or self.rvlimit
         kwargs = {
-            'titles': title,
-            'redirects': 1,
-            'prop': 'revisions',
-            'rvprop': 'ids|user|flags|comment|size',
-            'rvlimit': rvlimit,
-            'rvdir': 'older',
+            "titles": title,
+            "redirects": 1,
+            "prop": "revisions",
+            "rvprop": "ids|user|flags|comment|size",
+            "rvlimit": rvlimit,
+            "rvdir": "older",
         }
         if revision is not None:
-            kwargs['rvstartid'] = revision
+            kwargs["rvstartid"] = revision
 
         # def setrvlimit(res):
         #     print "setting rvlimit to 50 for %s" % (self.baseurl, )
         #     self.rvlimit=50
         #     return res
-
         # # XXX
         # def retry(err):
         #     if rvlimit <= 50:
         #         return err
-
         #     kwargs["rvlimit"] = 50
-
         #     return self.do_request(action="query", **kwargs).addCallback(setrvlimit)
 
         get_authors = authors.inspect_authors()
@@ -350,20 +368,20 @@ def guess_api_urls(url):
     if not (scheme and netloc):
         return retval
 
-    path_prefix = ''
-    if '/wiki/' in path:
-        path_prefix = path[:path.find('/wiki/')]
-    elif '/w/' in path:
-        path_prefix = path[:path.find('/w/')]
+    path_prefix = ""
+    if "/wiki/" in path:
+        path_prefix = path[: path.find("/wiki/")]
+    elif "/w/" in path:
+        path_prefix = path[: path.find("/w/")]
 
-    prefix = '%s://%s%s' % (scheme, netloc, path_prefix)
+    prefix = "%s://%s%s" % (scheme, netloc, path_prefix)
 
-    for _path in (path + "/", '/w/', '/wiki/', '/'):
-        base_url = '%s%sapi.php' % (prefix, _path)
+    for _path in (path + "/", "/w/", "/wiki/", "/"):
+        base_url = "%s%sapi.php" % (prefix, _path)
         if base_url not in retval:
             retval.append(base_url)
-    if url.endswith('/index.php'):
-        retval.append(url[:-len('index.php')] + 'api.php')
+    if url.endswith("/index.php"):
+        retval.append(url[: -len("index.php")] + "api.php")
     return retval
 
 
@@ -372,7 +390,7 @@ def get_collection_params(api):
 
 
 def main():
-    s = mwapi("http://en.wikipedia.org/w/api.php")
+    s = MwApi("http://en.wikipedia.org/w/api.php")
     print(s.get_categorymembers("Category:Mainz"))
 
 

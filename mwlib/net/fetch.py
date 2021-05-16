@@ -5,15 +5,19 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 import os
 import sys
-import six.moves.urllib.parse
-import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import time
 import traceback
+
 import gevent
-import gevent.pool
 import gevent.event
+import gevent.pool
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.parse
+import six.moves.urllib.request
 
 try:
     from gevent.lock import Semaphore
@@ -28,7 +32,7 @@ from mwlib import utils, nshandling, conf, myjson as json
 from mwlib.net import sapi as mwapi
 
 
-class shared_progress(object):
+class SharedProgress(object):
     status = None
     last_percent = 0.0
 
@@ -60,10 +64,10 @@ class shared_progress(object):
         self.last_percent = percent
 
         if isatty and isatty():
-            #msg = "%s/%s %.2f %.2fs" % (done, total, percent, needed)
             msg = "%s of %s, %.2f%%, %.2f seconds," % (done, total, percent, needed)
             if sys.platform in ("linux2", "linux3"):
                 from mwlib import linuxmem
+
                 msg += " %.1f MB mem used" % linuxmem.resident()
             sys.stdout.write("\x1b[K" + msg + "\r")
             sys.stdout.flush()
@@ -89,7 +93,7 @@ class shared_progress(object):
         return done, total
 
 
-class fsoutput(object):
+class FsOutput(object):
     def __init__(self, path):
         self.path = os.path.abspath(path)
         assert not os.path.exists(self.path)
@@ -99,15 +103,15 @@ class fsoutput(object):
         self.imgcount = 0
         self.nfo = None
 
-        for storage in ['authors', 'html', 'imageinfo']:
-            fn = os.path.join(self.path, storage + '.db')
-            db = sqlite3dbm.open(fn, 'n')
+        for storage in ["authors", "html", "imageinfo"]:
+            fn = os.path.join(self.path, storage + ".db")
+            db = sqlite3dbm.open(fn, "n")
             db.conn.execute("PRAGMA synchronous = 0")
             setattr(self, storage, db)
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
-        assert storage is not None, 'storage not existant %s' % name
+        assert storage is not None, "storage not existant %s" % name
         storage[key] = json.dumps(value)
 
     def close(self):
@@ -182,17 +186,17 @@ class fsoutput(object):
         self.dump_json(redirects=redirects)
 
 
-def splitblocks(lst, limit):
+def split_blocks(lst, limit):
     """Split list lst in blocks of max. limit entries. Return list of blocks."""
     res = []
     start = 0
     while start < len(lst):
-        res.append(lst[start:start + limit])
+        res.append(lst[start : start + limit])
         start += limit
     return res
 
 
-def getblock(lst, limit):
+def get_block(lst, limit):
     """Return first limit entries from list lst and remove them from the list"""
 
     r = lst[-limit:]
@@ -200,7 +204,7 @@ def getblock(lst, limit):
     return r
 
 
-def callwhen(event, fun):
+def call_when(event, fun):
     while True:
         try:
             event.wait()
@@ -210,12 +214,11 @@ def callwhen(event, fun):
             raise
         except Exception:
             traceback.print_exc()
-            pass
 
 
 def download_to_file(url, path, temp_path):
     opener = six.moves.urllib.request.build_opener()
-    opener.addheaders = [('User-Agent', conf.user_agent)]
+    opener.addheaders = [("User-Agent", conf.user_agent)]
 
     try:
         out = None
@@ -240,12 +243,19 @@ def download_to_file(url, path, temp_path):
         raise
 
 
-class fetcher(object):
-    def __init__(self, api, fsout, pages, licenses,
-                 status=None,
-                 progress=None,
-                 cover_image=None,
-                 imagesize=800, fetch_images=True):
+class Fetcher(object):
+    def __init__(
+        self,
+        api,
+        fsout,
+        pages,
+        licenses,
+        status=None,
+        progress=None,
+        cover_image=None,
+        imagesize=800,
+        fetch_images=True,
+    ):
 
         self.dispatch_event = gevent.event.Event()
         self.api_semaphore = Semaphore(20)
@@ -260,12 +270,14 @@ class fetcher(object):
 
         self.api = api
         self.api.report = self.report
-        self.api_cache = {self.api.apiurl: self.api, }
+        self.api_cache = {
+            self.api.apiurl: self.api,
+        }
 
         self.fsout = fsout
         self.licenses = licenses
         self.status = status
-        self.progress = progress or shared_progress(status=status)
+        self.progress = progress or SharedProgress(status=status)
 
         self.imagesize = imagesize
         self.fetch_images = fetch_images
@@ -314,14 +326,16 @@ class fetcher(object):
             self._refcall(self.expand_templates_from_revid, int(r))
 
     def expand_templates_from_revid(self, revid):
-        res = self.api.do_request(action="query", prop="revisions",
-                                  rvprop="content", revids=str(revid))
+        res = self.api.do_request(
+            action="query", prop="revisions", rvprop="content", revids=str(revid)
+        )
         page = list(res["pages"].values())[0]
 
         title = page["title"]
         text = page["revisions"][0]["*"]
-        res = self.api.do_request(use_post=True, action="expandtemplates",
-                                  title=title, text=text).get("expandtemplates", {})
+        res = self.api.do_request(
+            use_post=True, action="expandtemplates", title=title, text=text
+        ).get("expandtemplates", {})
 
         txt = res.get("*")
         if txt:
@@ -350,7 +364,7 @@ class fetcher(object):
 
     def run(self):
         self.report()
-        dispatch_gr = gevent.spawn(callwhen, self.dispatch_event, self.dispatch)
+        dispatch_gr = gevent.spawn(call_when, self.dispatch_event, self.dispatch)
         try:
             self.pool.join()
         finally:
@@ -363,17 +377,18 @@ class fetcher(object):
         assert not self.pages_todo
 
     def extension_img_urls(self, data):
-        html = data['text']['*']
+        html = data["text"]["*"]
         root = etree.HTML(html)
 
         img_urls = set()
-        for img_node in root.xpath('.//img'):
-            src = img_node.get('src')
-            frags = src.split('/')
+        for img_node in root.xpath(".//img"):
+            src = img_node.get("src")
+            frags = src.split("/")
             if len(frags):
                 fullurl = six.moves.urllib.parse.urljoin(self.api.baseurl, src)
-                if img_node.get('class') != 'thumbimage' and \
-                        ('extensions' in src or 'math' in src):
+                if img_node.get("class") != "thumbimage" and (
+                    "extensions" in src or "math" in src
+                ):
 
                     img_urls.add(fullurl)
         return img_urls
@@ -385,10 +400,10 @@ class fetcher(object):
                 res = self.api.do_request(action="parse", redirects="1", **kw)
                 res[name] = c
 
-            self.fsout.set_db_key('html', c, res)
+            self.fsout.set_db_key("html", c, res)
             img_urls = self.extension_img_urls(res)
             for url in img_urls:
-                fn = url.rsplit('/', 1)[1]
+                fn = url.rsplit("/", 1)[1]
                 title = self.nshandler.splitname(fn, defaultns=6)[2]
                 self.schedule_download_image(str(url), title)
 
@@ -399,7 +414,7 @@ class fetcher(object):
     def fetch_used(self, name, lst, expanded=False):
         limit = self.api.api_request_limit
         pool = gevent.pool.Pool()
-        blocks = splitblocks(lst, limit)
+        blocks = split_blocks(lst, limit)
         self.count_total += len(blocks)
         for bl in blocks:
             pool.add(self._refcall_noinc(self.fetch_used_block, name, bl, expanded))
@@ -481,7 +496,7 @@ class fetcher(object):
         inspect_authors = self.api.get_edits(title, rev)
         authors = inspect_authors.get_authors()
         # print "GOT_EDITS:", title, authors
-        self.fsout.set_db_key('authors', title, authors)
+        self.fsout.set_db_key("authors", title, authors)
 
     def report(self):
         qc = self.api.qccount
@@ -564,7 +579,7 @@ class fetcher(object):
 
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
-        temp_path = (path + u'\xb7').encode("utf-8")
+        temp_path = (path + u"\xb7").encode("utf-8")
         gr = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
         self.pool.add(gr)
 
@@ -581,7 +596,7 @@ class fetcher(object):
             if not ii:
                 continue
             ii = ii[0]
-            self.fsout.set_db_key('imageinfo', title, ii)
+            self.fsout.set_db_key("imageinfo", title, ii)
             thumburl = ii.get("thumburl", None)
 
             if thumburl is None:  # fallback for old mediawikis
@@ -590,13 +605,13 @@ class fetcher(object):
             # FIXME limit number of parallel downloads
             if thumburl:
                 # FIXME: add Callback that checks correct file size
-                if thumburl.startswith('/'):
+                if thumburl.startswith("/"):
                     thumburl = six.moves.urllib.parse.urljoin(self.api.baseurl, thumburl)
                 self.schedule_download_image(thumburl, title)
 
                 descriptionurl = ii.get("descriptionurl", "")
                 if not descriptionurl:
-                    descriptionurl = i.get('fullurl', '')
+                    descriptionurl = i.get("fullurl", "")
 
                 if descriptionurl and "/" in descriptionurl:
                     path, localname = descriptionurl.rsplit("/", 1)
@@ -613,7 +628,7 @@ class fetcher(object):
     def _get_nshandler(self):
         if self._nshandler is not None:
             return self._nshandler
-        return nshandling.get_nshandler_for_lang('en')  # FIXME
+        return nshandling.get_nshandler_for_lang("en")  # FIXME
 
     def _set_nshandler(self, nshandler):
         self._nshandler = nshandler
@@ -665,7 +680,7 @@ class fetcher(object):
             partial = x.split(":", 1)[1]
             local_names.append("%s:%s" % (nsname, partial))
 
-        for bl in splitblocks(local_names, api.api_request_limit):
+        for bl in split_blocks(local_names, api.api_request_limit):
             self._refcall(self.fetch_image_page, bl, api)
 
         for title in local_names:
@@ -676,9 +691,9 @@ class fetcher(object):
         local_nsname = self.nshandler.get_nsname_by_number(6)
         # change title prefix to make them look like local pages
         prefix, partial = title.split(":", 1)
-        title = '%s:%s' % (local_nsname, partial)
+        title = "%s:%s" % (local_nsname, partial)
         authors = get_authors.get_authors()
-        self.fsout.set_db_key('authors', title, authors)
+        self.fsout.set_db_key("authors", title, authors)
 
     def _get_mwapi_for_path(self, path):
         urls = mwapi.guess_api_urls(path)
@@ -687,7 +702,7 @@ class fetcher(object):
                 return self.api_cache[url]
         for url in urls:
             try:
-                api = mwapi.mwapi(url)
+                api = mwapi.MwApi(url)
                 api.ping()
                 api.set_limit()
                 self.api_cache[url] = api
@@ -711,13 +726,13 @@ class fetcher(object):
 
         def doit(name, lst):
             while lst and self.api.idle():
-                bl = getblock(lst, limit)
+                bl = get_block(lst, limit)
                 self.scheduled.update(bl)
                 kw = {name: bl}
                 self._refcall(fetch_pages, **kw)
 
         while self.imageinfo_todo and self.api.idle():
-            bl = getblock(self.imageinfo_todo, limit)
+            bl = get_block(self.imageinfo_todo, limit)
             self.scheduled.update(bl)
             self._refcall(self.fetch_imageinfo, bl)
 
@@ -729,9 +744,8 @@ class fetcher(object):
     def _sanity_check(self):
         seen = self.fsout.seen
         for title, revid in self.pages:
-            if revid is not None:
-                if revid in seen:
-                    continue
+            if revid is not None and revid in seen:
+                continue
 
             n = self.nshandler.get_fqname(title)
             if n in seen or self.redirects.get(n, n) in seen:
