@@ -336,7 +336,7 @@ class MwApi(object):
         #     kwargs["rvlimit"] = 50
         #     return self.do_request(action="query", **kwargs).addCallback(setrvlimit)
 
-        get_authors = authors.inspect_authors()
+        get_authors = authors.InspectAuthors()
 
         def merge_data(retval, newdata):
             edits = list(newdata["pages"].values())

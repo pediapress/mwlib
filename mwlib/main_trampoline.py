@@ -3,20 +3,25 @@
 
 
 from __future__ import absolute_import
+
 from gevent import monkey
+
 monkey.patch_all()
 
 
 def nserve_main():
     from mwlib.nserve import main
+
     return main()
 
 
 def nslave_main():
     from mwlib.nslave import main
+
     return main()
 
 
 def postman_main():
     from mwlib.postman import main
+
     return main()

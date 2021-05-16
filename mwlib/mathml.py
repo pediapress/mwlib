@@ -11,8 +11,11 @@ FIXME: replace with texvc which is deistributed with MediaWiki
 """
 from __future__ import absolute_import
 from __future__ import print_function
-import sys
+
 import popen2
+import subprocess
+import sys
+
 try:
     import xml.etree.ElementTree as ET
 except BaseException:
@@ -28,50 +31,47 @@ def log(err):
 def latex2mathml(latex):
 
     data = "\\displaystyle\n%s\n" % latex.strip()
-    r, w, e = popen2.popen3('blahtexml --mathml')
-    w.write(data)
-    w.close()
-    errormsg = e.read()
-    outmsg = r.read()
-    r.close()
-    e.close()
+    popen = subprocess.Popen(["blahtexml", "--mathml"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    popen.stdin.write(data)
+    output, errors = popen.communicate()
+    popen.wait()
 
-    if outmsg:
+    if output:
         # ET has unreadable namespace handling
         # http://effbot.org/zone/element.htm#xml-namespaces
-        #ET._namespace_map["http://www.w3.org/1998/Math/MathML"] = 'mathml'
+        # ET._namespace_map["http://www.w3.org/1998/Math/MathML"] = 'mathml'
         # remove xmlns declaration
-        #outmsg = outmsg.replace('xmlns="http://www.w3.org/1998/Math/MathML"', '')
+        # outmsg = outmsg.replace('xmlns="http://www.w3.org/1998/Math/MathML"', '')
 
-        outmsg = '<?xml version="1.0" encoding="UTF-8"?>\n' + outmsg
-        #print repr(outmsg)
+        output = '<?xml version="1.0" encoding="UTF-8"?>\n' + output
+        # print repr(outmsg)
 
         try:
-            p = ET.fromstring(outmsg)
+            p = ET.fromstring(output)
         except ExpatError:
             log("\n\nparsing failed\n\n")
             log(latex + "\n\n")
             log(data + "\n\n")
-            log(errormsg + "\n")
-            log(outmsg + "\n")
+            log(errors + "\n")
+            log(output + "\n")
             return
 
         tag = "mathml"
-        mathml = p.getiterator(tag)
+        mathml = p.iter(tag)
 
         if mathml:
-            mathml = mathml[0]
+            mathml = mathml.next()
             mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
             # add annotation with original TeX
-            #a = ET.Element("annotation", encoding="TeX")
+            # a = ET.Element("annotation", encoding="TeX")
             # a.text=latex
             # mathml.append(a)
             return mathml
         else:
-            log("an error occured, \n%s\n" % outmsg)
+            log("an error occured, \n%s\n" % output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test = "\exp(-\gamma x)"
     print()
     print(ET.tostring(latex2mathml(test)))

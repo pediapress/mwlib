@@ -4,8 +4,9 @@
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
-import sys
+
 import os
+import sys
 
 
 def caller(n=2):

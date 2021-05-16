@@ -1,8 +1,8 @@
-
 # based on code by Raymond Hettinger
 # see http://code.activestate.com/recipes/498245/
 
 from __future__ import absolute_import
+
 import threading
 from collections import deque
 
@@ -11,8 +11,8 @@ class lrucache(object):
     def __init__(self, maxsize):
         self.maxsize = maxsize
         self.cache = {}
-        self.queue = deque()         # order that keys have been accessed
-        self.refcount = {}           # number of times each key is in the access queue
+        self.queue = deque()  # order that keys have been accessed
+        self.refcount = {}  # number of times each key is in the access queue
         self.hits = 0
         self.misses = 0
 

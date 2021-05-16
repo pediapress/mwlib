@@ -5,10 +5,12 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 import os
-import tempfile
 import shutil
+import tempfile
 from subprocess import Popen, PIPE
+
 import six
 
 try:
@@ -18,7 +20,7 @@ except BaseException:
 
 from mwlib import log
 
-log = log.Log('mwlib.mathutils')
+log = log.Log("mwlib.mathutils")
 
 
 def try_system(cmd):
@@ -34,11 +36,11 @@ blahtexml_available = not try_system("blahtexml")
 def _renderMathBlahtex(latex, output_path, output_mode):
     if not blahtexml_available:
         return None
-    cmd = ['blahtexml', '--texvc-compatible-commands']
-    if output_mode == 'mathml':
-        cmd.append('--mathml')
-    elif output_mode == 'png':
-        cmd.append('--png')
+    cmd = ["blahtexml", "--texvc-compatible-commands"]
+    if output_mode == "mathml":
+        cmd.append("--mathml")
+    elif output_mode == "png":
+        cmd.append("--png")
     else:
         return None
 
@@ -55,62 +57,69 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     try:
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
-        log.error('error with blahtexml. cmd:', repr(' '.join(cmd)))
+        log.error("error with blahtexml. cmd:", repr(" ".join(cmd)))
         if curdir:
             os.chdir(curdir)
         return None
 
-    (result, error) = sub.communicate(latex.encode('utf-8'))
+    (result, error) = sub.communicate(latex.encode("utf-8"))
     del sub
 
     if curdir is not None:
         os.chdir(curdir)
     if result:
         p = ET.fromstring(result)
-        if output_mode == 'png':
-            r = p.getiterator('png')
+        if output_mode == "png":
+            r = p.iter("png")
             if r:
-                png_fn = r[0].findtext('md5')
+                png_fn = r.next().findtext("md5")
                 if png_fn:
-                    png_fn = os.path.join(output_path, png_fn + '.png')
+                    png_fn = os.path.join(output_path, png_fn + ".png")
                     if os.path.exists(png_fn):
                         return png_fn
-        elif output_mode == 'mathml':
-            mathml = p.getiterator('mathml')
+        elif output_mode == "mathml":
+            mathml = p.iter("mathml")
             if mathml:
-                mathml = mathml[0]
+                mathml = mathml.next()
                 mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
                 return mathml
-    log.error('error converting math (blahtexml). source: %r \nerror: %r' % (latex, result))
+    log.error("error converting math (blahtexml). source: %r \nerror: %r" % (latex, result))
     return None
 
 
-def _renderMathTexvc(latex, output_path, output_mode='png', resolution_in_dpi=120):
+def _renderMathTexvc(latex, output_path, output_mode="png", resolution_in_dpi=120):
     """only render mode is png"""
     if not texvc_available:
         return None
-    cmd = ['texvc', output_path, output_path, latex.encode(
-        'utf-8'), "UTF-8", str(resolution_in_dpi)]
+    cmd = [
+        "texvc",
+        output_path,
+        output_path,
+        latex.encode("utf-8"),
+        "UTF-8",
+        str(resolution_in_dpi),
+    ]
     try:
         sub = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     except OSError:
-        log.error('error with texvc. cmd:', repr(' '.join(cmd)))
+        log.error("error with texvc. cmd:", repr(" ".join(cmd)))
         return None
     (result, error) = sub.communicate()
     del sub
 
-    if output_mode == 'png':
+    if output_mode == "png":
         if len(result) >= 32:
-            png_fn = os.path.join(output_path, result[1:33] + '.png')
+            png_fn = os.path.join(output_path, result[1:33] + ".png")
             if os.path.exists(png_fn):
                 return png_fn
 
-    log.error('error converting math (texvc). source: %r \nerror: %r' % (latex, result))
+    log.error("error converting math (texvc). source: %r \nerror: %r" % (latex, result))
     return None
 
 
-def renderMath(latex, output_path=None, output_mode='png',
-               render_engine='blahtexml', resolution_in_dpi=120):
+def renderMath(
+    latex, output_path=None, output_mode="png", render_engine="blahtexml", resolution_in_dpi=120
+):
     """
     @param latex: LaTeX code
     @type latex: unicode
@@ -129,24 +138,28 @@ def renderMath(latex, output_path=None, output_mode='png',
         return
     assert output_mode in ("png", "mathml")
     assert render_engine in ("texvc", "blahtexml")
-    assert isinstance(latex, six.text_type), 'latex must be of type unicode'
+    assert isinstance(latex, six.text_type), "latex must be of type unicode"
 
-    if output_mode == 'png' and not output_path:
-        log.error('math rendering with output_mode png requires an output_path')
+    if output_mode == "png" and not output_path:
+        log.error("math rendering with output_mode png requires an output_path")
         raise Exception("output path required")
 
     removeTmpDir = False
-    if output_mode == 'mathml' and not output_path:
+    if output_mode == "mathml" and not output_path:
         output_path = tempfile.mkdtemp()
         removeTmpDir = True
     output_path = os.path.abspath(output_path)
     result = None
 
-    if render_engine == 'blahtexml':
+    if render_engine == "blahtexml":
         result = _renderMathBlahtex(latex, output_path=output_path, output_mode=output_mode)
-    if result is None and output_mode == 'png':
-        result = _renderMathTexvc(latex, output_path=output_path,
-                                  output_mode=output_mode, resolution_in_dpi=resolution_in_dpi)
+    if result is None and output_mode == "png":
+        result = _renderMathTexvc(
+            latex,
+            output_path=output_path,
+            output_mode=output_mode,
+            resolution_in_dpi=resolution_in_dpi,
+        )
 
     if removeTmpDir:
         shutil.rmtree(output_path)
@@ -157,21 +170,21 @@ if __name__ == "__main__":
 
     latex = u"\\sqrt{4}=2"
 
-# latexlist = ["\\sqrt{4}=2",
-##                  r"a^2 + b^2 = c^2\,",
-##                  r"E = m c^2",
-# r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
-##                  r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
-# r"""\begin{array}{ccc}
-# F^2\sim W&\Leftrightarrow&\frac{F_1^2}{F_2^2}=\frac{W_1}{W_2}\\
-# \ln\frac{F_1}{F_2}\,\mathrm{Np}&=&
-# \frac{1}{2}\ln\frac{W_1}{W_2}\,\mathrm{Np}\\
-# 20\,\lg\frac{F_1}{F_2}\,\mathrm{dB}&=&
-# 10\,\lg\frac{W_1}{W_2}\,\mathrm{dB}
-# \end{array}
-# """,
-# ]
+    # latexlist = ["\\sqrt{4}=2",
+    ##                  r"a^2 + b^2 = c^2\,",
+    ##                  r"E = m c^2",
+    # r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
+    ##                  r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
+    # r"""\begin{array}{ccc}
+    # F^2\sim W&\Leftrightarrow&\frac{F_1^2}{F_2^2}=\frac{W_1}{W_2}\\
+    # \ln\frac{F_1}{F_2}\,\mathrm{Np}&=&
+    # \frac{1}{2}\ln\frac{W_1}{W_2}\,\mathrm{Np}\\
+    # 20\,\lg\frac{F_1}{F_2}\,\mathrm{dB}&=&
+    # 10\,\lg\frac{W_1}{W_2}\,\mathrm{dB}
+    # \end{array}
+    # """,
+    # ]
 
-    print(renderMath(latex, output_mode='mathml'))
-    print(renderMath(latex, output_path="/tmp/", output_mode='png'))
-    print(renderMath(latex, output_path="/tmp/", output_mode='png', render_engine='texvc'))
+    print(renderMath(latex, output_mode="mathml"))
+    print(renderMath(latex, output_path="/tmp/", output_mode="png"))
+    print(renderMath(latex, output_path="/tmp/", output_mode="png", render_engine="texvc"))

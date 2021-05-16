@@ -8,13 +8,14 @@
 http://meta.wikimedia.org/wiki/ParserFunctions#.23expr:
 """
 
-from __future__ import division
-
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
-import re
+
 import inspect
 import math
+import re
+
 from six.moves import input
 
 
@@ -36,12 +37,12 @@ pattern = """
 |(\+|-|\*|/|>=|<=|<>|!=|[a-zA-Z]+|.)
 """
 
-rxpattern = re.compile(pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+rx_pattern = re.compile(pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
 
 def tokenize(s):
     res = []
-    for (v1, v2) in rxpattern.findall(s):
+    for (v1, v2) in rx_pattern.findall(s):
         if not (v1 or v2):
             continue
         v2 = v2.lower()
@@ -51,7 +52,7 @@ def tokenize(s):
             res.append((v1, v2))
     return res
 
-    return [(v1, v2.lower()) for (v1, v2) in rxpattern.findall(s) if v1 or v2]
+    return [(v1, v2.lower()) for (v1, v2) in rx_pattern.findall(s) if v1 or v2]
 
 
 class uminus:
@@ -88,7 +89,7 @@ a = addop
 a(uminus, 10, lambda x: -x)
 a(uplus, 10, lambda x: x)
 a("^", 10, math.pow, 2)
-a("not", 9, lambda x: int(not(bool(x))))
+a("not", 9, lambda x: int(not (bool(x))))
 a("abs", 9, abs, 1)
 a("sin", 9, math.sin, 1)
 a("cos", 9, math.cos, 1)
@@ -130,9 +131,7 @@ del a
 
 
 class Expr(object):
-    constants = dict(
-        e=math.e,
-        pi=math.pi)
+    constants = dict(e=math.e, pi=math.pi)
 
     def as_float_or_int(self, s):
         try:
@@ -180,9 +179,9 @@ class Expr(object):
                     self.output_operator(t)
             elif operator in precedence:
                 if last_operator and last_operator != ")":
-                    if operator == '-':
+                    if operator == "-":
                         operator = uminus
-                    elif operator == '+':
+                    elif operator == "+":
                         operator = uplus
 
                 is_unary = operator in unary_ops
@@ -224,8 +223,10 @@ def expr(s):
 
 def main():
     import time
+
     try:
         import readline  # do not remove. makes raw_input use readline
+
         readline
     except ImportError:
         pass
@@ -241,6 +242,7 @@ def main():
         except Exception as err:
             print("ERROR:", err)
             import traceback
+
             traceback.print_exc()
 
             continue
@@ -248,5 +250,5 @@ def main():
         print(time.time() - stime, "s")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

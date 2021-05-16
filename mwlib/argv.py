@@ -23,7 +23,7 @@ def parse(args, spec):
                 try:
                     v = args[i]
                 except IndexError:
-                    raise error("option %s needs an argument" % (a, ))
+                    raise error("option %s needs an argument" % (a,))
 
             opts.append((a, v))
         else:

@@ -5,13 +5,25 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from pyparsing import (Literal, restOfLine, Word, nums, Group,
-                       ZeroOrMore, OneOrMore, And, Suppress, LineStart,
-                       LineEnd, StringEnd, ParseException, Optional, White)
+
 import six
+from pyparsing import (
+    Literal,
+    restOfLine,
+    Word,
+    nums,
+    Group,
+    ZeroOrMore,
+    And,
+    Suppress,
+    LineStart,
+    LineEnd,
+    StringEnd,
+    ParseException,
+)
 
 
-class gob(object):
+class Gob(object):
     def __init__(self, **kw):
         self.__dict__.update(kw)
 
@@ -19,31 +31,31 @@ class gob(object):
         return "<%s %r>" % (self.__class__.__name__, self.__dict__)
 
 
-class Poly(gob):
+class Poly(Gob):
     pass
 
 
-class Rect(gob):
+class Rect(Gob):
     pass
 
 
-class Circle(gob):
+class Circle(Gob):
     pass
 
 
-class Comment(gob):
+class Comment(Gob):
     pass
 
 
-class Desc(gob):
+class Desc(Gob):
     pass
 
 
-class Default(gob):
+class Default(Gob):
     pass
 
 
-class ImageMap(gob):
+class ImageMap(Gob):
     pass
 
 
@@ -52,8 +64,9 @@ def _makepoly(tokens):
 
 
 def _makerect(tokens):
-    return Rect(caption=tokens[-1].strip(), top_left=tuple(tokens[1]),
-                bottom_right=tuple(tokens[2]))
+    return Rect(
+        caption=tokens[-1].strip(), top_left=tuple(tokens[1]), bottom_right=tuple(tokens[2])
+    )
 
 
 def _makecomment(tokens):
@@ -77,7 +90,7 @@ def _makeimagemap(tokens):
     return ImageMap(entries=list(tokens), image=image)
 
 
-comment = (Literal('#') + restOfLine).setParseAction(_makecomment)
+comment = (Literal("#") + restOfLine).setParseAction(_makecomment)
 
 integer = Word(nums).setParseAction(lambda s: int(s[0]))
 integer_pair = (integer + integer).setParseAction(lambda x: tuple(x))
@@ -91,11 +104,13 @@ rect = rect.setParseAction(_makerect)
 circle = Literal("circle") + integer_pair + integer + restOfLine
 circle = circle.setParseAction(_makecircle)
 
-desc = Literal("desc") + (Literal("top-right")
-                          | Literal("bottom-right")
-                          | Literal("bottom-left")
-                          | Literal("top-left")
-                          | Literal("none"))
+desc = Literal("desc") + (
+    Literal("top-right")
+    | Literal("bottom-right")
+    | Literal("bottom-left")
+    | Literal("top-left")
+    | Literal("none")
+)
 desc = desc.setParseAction(_makedesc)
 default = Literal("default") + restOfLine
 default.setParseAction(lambda t: Default(caption=t[1].strip()))
@@ -106,13 +121,17 @@ def _makeother(tokens):
         return [None]
     return tokens
 
+
 # we can't use restOfLine.setParseAction(_makeother) as that sets the
 # parse action for any occurence of restOfLine
 
 
 other = And([restOfLine]).setParseAction(_makeother)
-line = Suppress(LineStart()) + (comment | poly | rect | circle |
-                                desc | default | other) + Suppress(LineEnd())
+line = (
+    Suppress(LineStart())
+    + (comment | poly | rect | circle | desc | default | other)
+    + Suppress(LineEnd())
+)
 imagemap = ZeroOrMore(line) + StringEnd()
 imagemap.setParseAction(_makeimagemap)
 
@@ -154,5 +173,5 @@ blubb
         print(x)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

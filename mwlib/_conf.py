@@ -1,6 +1,8 @@
 from __future__ import absolute_import
-import types
+
 import os
+import types
+
 import py
 
 
@@ -14,7 +16,7 @@ def as_bool(val):
     return False
 
 
-class confbase(object):
+class ConfBase(object):
     def __init__(self):
         self._inicfg = None
 
@@ -44,11 +46,12 @@ class confbase(object):
     @property
     def user_agent(self):
         from mwlib._version import version
+
         return self.get("mwlib", "user_agent", "") or ("mwlib %s" % version)
 
 
-class confmod(confbase, types.ModuleType):
+class ConfMod(ConfBase, types.ModuleType):
     def __init__(self, *args, **kwargs):
-        confbase.__init__(self)
+        ConfBase.__init__(self)
         types.ModuleType.__init__(self, *args, **kwargs)
         self.__file__ = __file__

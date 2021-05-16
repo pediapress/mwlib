@@ -1,8 +1,9 @@
 from __future__ import absolute_import
-import mwlib.parser
-import mwlib.advtree
 
 import types
+
+import mwlib.advtree
+import mwlib.parser
 
 
 def allnodes():
@@ -20,10 +21,11 @@ def allnodes():
     return all
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # EXAMPLE THAT SHOWS HOW TO IDENTIFY MISSING NODES
     from mwlib.parser import Control, Chapter
+
     my = set((Control, Chapter))
     missing = allnodes() - my
     assert len(missing) == len(allnodes()) - 2
-    #print missing
+    # print missing

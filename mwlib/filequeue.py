@@ -1,12 +1,13 @@
 from __future__ import absolute_import
+
 import os
-import subprocess
 import time
 import traceback
+
 import six.moves.cPickle
 
-from mwlib.log import Log
 from mwlib import utils
+from mwlib.log import Log
 
 
 class FileJobQueuer(object):
@@ -14,16 +15,16 @@ class FileJobQueuer(object):
 
     def __init__(self, queue_dir):
         self.queue_dir = utils.ensure_dir(queue_dir)
-        self.log = Log('FileJobQueuer')
+        self.log = Log("FileJobQueuer")
 
     def __call__(self, job_type, job_id, args):
-        job_file = '%s.job' % os.path.join(self.queue_dir, job_id)
+        job_file = "%s.job" % os.path.join(self.queue_dir, job_id)
         if os.path.exists(job_file):
-            self.log.warn('Job file %r already exists' % job_file)
+            self.log.warn("Job file %r already exists" % job_file)
             return
 
-        open(job_file + '.tmp', 'wb').write(six.moves.cPickle.dumps(args))
-        os.rename(job_file + '.tmp', job_file)
+        open(job_file + ".tmp", "wb").write(six.moves.cPickle.dumps(args))
+        os.rename(job_file + ".tmp", job_file)
 
 
 class FileJobPoller(object):
@@ -32,7 +33,7 @@ class FileJobPoller(object):
         self.sleep_time = sleep_time
         self.max_num_jobs = max_num_jobs
         self.num_jobs = 0
-        self.log = Log('FileJobPoller')
+        self.log = Log("FileJobPoller")
         self.files = []
 
     def _reap_children(self):
@@ -44,15 +45,15 @@ class FileJobPoller(object):
                     flags = os.WNOHANG
                 pid, rc = os.waitpid(-1, flags)
             except OSError as exc:
-                self.log.ERROR('waitpid(-1) failed: %s' % exc)
+                self.log.ERROR("waitpid(-1) failed: %s" % exc)
                 break
             if (pid, rc) == (0, 0):
                 break
             self.num_jobs -= 1
-            self.log.info('child %s exited: %s. have %d jobs' % (pid, rc, self.num_jobs))
+            self.log.info("child %s exited: %s. have %d jobs" % (pid, rc, self.num_jobs))
 
     def run_forever(self):
-        self.log.info('running with a max. of %d jobs' % self.max_num_jobs)
+        self.log.info("running with a max. of %d jobs" % self.max_num_jobs)
         while True:
             try:
                 self.poll()
@@ -69,10 +70,10 @@ class FileJobPoller(object):
                     self.num_jobs -= 1
                 break
             except Exception as err:
-                self.log.error("caught exception: %r" % (err, ))
+                self.log.error("caught exception: %r" % (err,))
                 traceback.print_exc()
 
-        self.log.info('exit')
+        self.log.info("exit")
 
     def poll(self):
         if self.files:
@@ -89,7 +90,7 @@ class FileJobPoller(object):
             try:
                 mtime = os.stat(path).st_mtime
             except Exception as exc:
-                self.log.ERROR('Could not stat %r: %s' % (path, exc))
+                self.log.ERROR("Could not stat %r: %s" % (path, exc))
                 continue
             files.append((mtime, filename))
 
@@ -105,11 +106,11 @@ class FileJobPoller(object):
 
         src = os.path.join(self.queue_dir, filename)
         try:
-            args = six.moves.cPickle.loads(open(src, 'rb').read())
+            args = six.moves.cPickle.loads(open(src, "rb").read())
         finally:
             os.unlink(src)
 
-        self.log.info('starting job %r' % filename)
+        self.log.info("starting job %r" % filename)
 
         pid = os.fork()
         self.num_jobs += 1
@@ -123,5 +124,5 @@ class FileJobPoller(object):
         except BaseException:
             traceback.print_exc()
         finally:
-            self.log.warn('error running %r' % (args,))
+            self.log.warn("error running %r" % (args,))
             os._exit(10)

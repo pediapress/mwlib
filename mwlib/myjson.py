@@ -4,6 +4,7 @@
 """custom json encoder/decoder, which can handle metabook objects"""
 
 from __future__ import absolute_import
+
 from mwlib import metabook
 
 try:
@@ -15,17 +16,25 @@ except ImportError:
 
 def object_hook(dct):
     try:
-        type = dct["type"]
+        document_type = dct["type"]
     except KeyError:
-        type = None
+        document_type = None
 
-    if type in ["collection", "article", "chapter", "source",
-                "interwiki", "license", "wikiconf", "custom"]:
-        klass = getattr(metabook, type)
+    if document_type in [
+        "collection",
+        "article",
+        "chapter",
+        "source",
+        "interwiki",
+        "license",
+        "wikiconf",
+        "custom",
+    ]:
+        klass = getattr(metabook, document_type)
         d = {}
         for k, v in dct.items():
             d[str(k)] = v
-        d["type"] = type
+        d["type"] = document_type
         return klass(**d)
 
     return dct

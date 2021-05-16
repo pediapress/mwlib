@@ -1,6 +1,8 @@
 from __future__ import absolute_import
+
 import os
 import re
+
 import six
 
 try:
@@ -8,56 +10,62 @@ try:
 except ImportError:
     import cElementTree
 
-ns = '{http://www.mediawiki.org/xml/export-0.3/}'
+ns = "{http://www.mediawiki.org/xml/export-0.3/}"
 
 
 class Tags:
 
     # <namespaces><namespace> inside <siteinfo>
-    namespace = ns + 'namespaces/' + ns + 'namespace'
+    namespace = ns + "namespaces/" + ns + "namespace"
 
-    page = ns + 'page'
+    page = ns + "page"
 
     # <title> inside <page>
-    title = ns + 'title'
+    title = ns + "title"
 
     # <revision> inside <page>
-    revision = ns + 'revision'
+    revision = ns + "revision"
 
     # <id> inside <revision>
-    revid = ns + 'id'
+    revid = ns + "id"
 
     # <contributor><username> inside <revision>
-    username = ns + 'contributor/' + ns + 'username'
+    username = ns + "contributor/" + ns + "username"
 
     # <text> inside <revision>
-    text = ns + 'text'
+    text = ns + "text"
 
     # <timestamp> inside <revision>
-    timestamp = ns + 'timestamp'
+    timestamp = ns + "timestamp"
 
     # <revision><text> inside <page>
-    revision_text = ns + 'revision/' + ns + 'text'
+    revision_text = ns + "revision/" + ns + "text"
 
     siteinfo = ns + "siteinfo"
 
 
 class Page(object):
     __slots__ = [
-        'title', 'pageid', 'namespace_text',
-        'namespace',
-        'revid', 'timestamp',
-        'username', 'userid',
-        'minor', 'comment', 'text'
+        "title",
+        "pageid",
+        "namespace_text",
+        "namespace",
+        "revid",
+        "timestamp",
+        "username",
+        "userid",
+        "minor",
+        "comment",
+        "text",
     ]
 
-    redirect_rex = re.compile(r'^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]', re.IGNORECASE)
+    redirect_rex = re.compile(r"^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]", re.IGNORECASE)
 
     @property
     def redirect(self):
         mo = self.redirect_rex.search(self.text)
         if mo:
-            return mo.group('redirect').split("|", 1)[0]
+            return mo.group("redirect").split("|", 1)[0]
         return None
 
     def __repr__(self):
@@ -65,15 +73,14 @@ class Page(object):
         redir = self.redirect
         if redir:
             text = "Redirect to %s" % repr(redir)
-        return 'Page(%s (@%s): %s)' % (repr(self.title), self.timestamp, text)
+        return "Page(%s (@%s): %s)" % (repr(self.title), self.timestamp, text)
 
 
 class DumpParser(object):
 
     tags = Tags()
 
-    def __init__(self, xmlfilename,
-                 ignore_redirects=False):
+    def __init__(self, xmlfilename, ignore_redirects=False):
         self.xmlfilename = xmlfilename
         self.ignore_redirects = ignore_redirects
 
@@ -90,7 +97,7 @@ class DumpParser(object):
     @staticmethod
     def getTag(elem):
         # rough is good enough
-        return elem.tag[elem.tag.rindex('}') + 1:]
+        return elem.tag[elem.tag.rindex("}") + 1 :]
 
     def handleSiteinfo(self, siteinfo):
         pass
@@ -107,12 +114,12 @@ class DumpParser(object):
 
         elemIter = (el for evt, el in cElementTree.iterparse(f))
         for elem in elemIter:
-            if self.getTag(elem) == 'page':
+            if self.getTag(elem) == "page":
                 page = self.handlePageElement(elem)
                 if page:
                     yield page
                 elem.clear()
-            elif self.getTag(elem) == 'siteinfo':
+            elif self.getTag(elem) == "siteinfo":
                 self.handleSiteinfo(elem)
                 elem.clear()
 
@@ -123,12 +130,12 @@ class DumpParser(object):
         lastRevision = None
         for el in pageElem:
             tag = self.getTag(el)
-            if tag == 'title':
+            if tag == "title":
                 title = six.text_type(el.text)
                 res.title = title
-            elif tag == 'id':
+            elif tag == "id":
                 res.pageid = int(el.text)
-            elif tag == 'revision':
+            elif tag == "revision":
                 lastRevision = el
 
         if lastRevision:
@@ -142,18 +149,18 @@ class DumpParser(object):
     def handleRevisionElement(self, revElem, res):
         for el in revElem:
             tag = self.getTag(el)
-            if tag == 'id':
+            if tag == "id":
                 res.revid = int(el.text)
-            elif tag == 'timestamp':
+            elif tag == "timestamp":
                 res.timestamp = el.text
-            elif tag == 'contributor':
+            elif tag == "contributor":
                 pass
-                #res.username, res.userid = self.handleContributorElement(el)
-            elif tag == 'minor':
+                # res.username, res.userid = self.handleContributorElement(el)
+            elif tag == "minor":
                 res.minor = True
-            elif tag == 'comment':
+            elif tag == "comment":
                 res.comment = six.text_type(el.text)
-            elif tag == 'text':
+            elif tag == "text":
                 res.text = six.text_type(el.text)
                 el.clear()
 
@@ -163,8 +170,8 @@ class DumpParser(object):
         username = None
         userid = None
         for el in conElem:
-            if self.getTag(el) == 'username':
+            if self.getTag(el) == "username":
                 username = six.text_type(el.text)
-            elif self.getTag(el) == 'id':
+            elif self.getTag(el) == "id":
                 userid = int(el.text)
         return (username, userid)

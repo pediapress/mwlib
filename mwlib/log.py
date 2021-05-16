@@ -4,8 +4,10 @@
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
 import sys
 import time
+
 import six
 
 
@@ -31,7 +33,7 @@ class Stderr(object):
 
 class Log(object):
     logfile = Stderr()
-    timestamp_fmt = '%Y-%m-%dT%H:%M:%S'
+    timestamp_fmt = "%Y-%m-%dT%H:%M:%S"
 
     def __init__(self, prefix=None, timestamps=True):
         self.timestamps = timestamps
@@ -62,8 +64,8 @@ class Log(object):
         if args:
             msg = " ".join(([msg] + [repr(x) for x in args]))
 
-        s = ''
+        s = ""
         if self.timestamps:
-            s = '%s ' % time.strftime(self.timestamp_fmt)
+            s = "%s " % time.strftime(self.timestamp_fmt)
         s += "%s >> %s\n" % (".".join(str(x) for x in self._prefix if x), msg)
         self.logfile.write(s)

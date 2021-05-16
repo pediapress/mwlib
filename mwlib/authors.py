@@ -4,14 +4,17 @@
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
 import re
 
 
-class inspect_authors(object):
-    ip_rex = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
+class InspectAuthors(object):
+    ip_rex = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
     ip6_rex = re.compile(
-        r'^(((?=.*(::))(?!.*\3.+\3))\3?|[\dA-F]{1,4}:)([\dA-F]{1,4}(\3|:\b)|\2){5}(([\dA-F]{1,4}(\3|:\b|$)|\2){2}|(((2[0-4]|1\d|[1-9])?\d|25[0-5])\.?\b){4})\Z', re.I)
-    bot_rex = re.compile(r'bot$', re.IGNORECASE)
+        r"^(((?=.*(::))(?!.*\3.+\3))\3?|[\dA-F]{1,4}:)([\dA-F]{1,4}(\3|:\b)|\2){5}(([\dA-F]{1,4}(\3|:\b|$)|\2){2}|(((2[0-4]|1\d|[1-9])?\d|25[0-5])\.?\b){4})\Z",
+        re.I,
+    )
+    bot_rex = re.compile(r"bot$", re.IGNORECASE)
     ANON = "ANONIPEDITS"
 
     def __init__(self):
@@ -22,13 +25,14 @@ class inspect_authors(object):
         authors = self.authors
 
         for r in revs:
-            user = r.get('user', u'')
-            if 'anon' in r and (not user or self.ip_rex.match(user)
-                                or self.ip6_rex.match(user)):  # anon
+            user = r.get("user", u"")
+            if "anon" in r and (
+                not user or self.ip_rex.match(user) or self.ip6_rex.match(user)
+            ):  # anon
                 self.num_anon += 1
             elif not user:
                 continue
-            elif self.bot_rex.search(user) or self.bot_rex.search(r.get('comment', '')):
+            elif self.bot_rex.search(user) or self.bot_rex.search(r.get("comment", "")):
                 continue  # filter bots
             else:
                 authors.add(user)
@@ -53,6 +57,6 @@ class inspect_authors(object):
 
 
 def get_authors(revs):
-    i = inspect_authors()
+    i = InspectAuthors()
     i.scan_edits(revs)
     return i.get_authors()

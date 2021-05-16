@@ -4,16 +4,18 @@
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
+import copy
 import warnings
 from collections import deque
 from hashlib import sha1
 
-import copy
 import six
 
 
 def parse_collection_page(txt):
     from mwlib.parse_collection_page import parse_collection_page
+
     return parse_collection_page(txt)
 
 
@@ -27,7 +29,7 @@ class mbobj(object):
             v = getattr(self.__class__, k)
             if callable(v) or v is None:
                 continue
-            if isinstance(v, (property, )):
+            if isinstance(v, (property,)):
                 continue
 
             d[k] = v
@@ -45,17 +47,17 @@ class mbobj(object):
             raise KeyError(repr(key))
 
     def __setitem__(self, key, val):
-        warnings.warn("deprecated __setitem__ [%r]=" % (key, ), DeprecationWarning, 2)
+        warnings.warn("deprecated __setitem__ [%r]=" % (key,), DeprecationWarning, 2)
 
         self.__dict__[key] = val
 
     def __contains__(self, key):
-        warnings.warn("deprecated __contains__ %r in " % (key, ), DeprecationWarning, 2)
+        warnings.warn("deprecated __contains__ %r in " % (key,), DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
 
     def get(self, key, default=None):
-        warnings.warn("deprecated call get(%r)" % (key, ), DeprecationWarning, 2)
+        warnings.warn("deprecated call get(%r)" % (key,), DeprecationWarning, 2)
         try:
             val = getattr(self, str(key))
             if val is None:
@@ -113,6 +115,7 @@ class collection(mbobj):
 
     def dumps(self):
         from mwlib import myjson
+
         return myjson.dumps(self, sort_keys=True, indent=4)
 
     def walk(self, filter_type=None):
@@ -161,14 +164,14 @@ class source(mbobj):
     namespaces = None
 
 
-class interwiki(mbobj):
+class Interwiki(mbobj):
     local = False
 
 
 class custom(mbobj):
     title = None
     content = None
-    content_type = 'text/x-wiki'
+    content_type = "text/x-wiki"
 
 
 class article(mbobj):
@@ -195,7 +198,7 @@ class license(mbobj):
 
 class chapter(mbobj):
     items = []
-    title = u''
+    title = u""
 
 
 # ==============================================================================
@@ -232,37 +235,38 @@ def get_licenses(metabook):
     """
     import re
     from mwlib import utils
+
     retval = []
     for l in metabook.licenses:
-        wikitext = ''
+        wikitext = ""
 
-        if l.get('mw_license_url'):
-            url = l['mw_license_url']
-            if re.match(r'^.*/index\.php.*action=raw', url) and 'templates=expand' not in url:
-                url += '&templates=expand'
-            wikitext = utils.fetch_url(url,
-                                       ignore_errors=True,
-                                       expected_content_type='text/x-wiki',
-                                       )
+        if l.get("mw_license_url"):
+            url = l["mw_license_url"]
+            if re.match(r"^.*/index\.php.*action=raw", url) and "templates=expand" not in url:
+                url += "&templates=expand"
+            wikitext = utils.fetch_url(
+                url,
+                ignore_errors=True,
+                expected_content_type="text/x-wiki",
+            )
             if wikitext:
                 try:
-                    wikitext = six.text_type(wikitext, 'utf-8')
+                    wikitext = six.text_type(wikitext, "utf-8")
                 except UnicodeError:
                     wikitext = None
         else:
-            wikitext = ''
-            if l.get('mw_rights_text'):
-                wikitext = l['mw_rights_text']
-            if l.get('mw_rights_page'):
-                wikitext += '\n\n[[%s]]' % l['mw_rights_page']
-            if l.get('mw_rights_url'):
-                wikitext += '\n\n' + l['mw_rights_url']
+            wikitext = ""
+            if l.get("mw_rights_text"):
+                wikitext = l["mw_rights_text"]
+            if l.get("mw_rights_page"):
+                wikitext += "\n\n[[%s]]" % l["mw_rights_page"]
+            if l.get("mw_rights_url"):
+                wikitext += "\n\n" + l["mw_rights_url"]
 
         if not wikitext:
             continue
 
-        retval.append(license(title=l.get('name', u'License'),
-                              wikitext=wikitext))
+        retval.append(license(title=l.get("name", u"License"), wikitext=wikitext))
 
     return retval
 
@@ -272,7 +276,7 @@ def make_interwiki(api_entry=None):
     d = {}
     for k, v in api_entry.items():
         d[str(k)] = v
-    return interwiki(**d)
+    return Interwiki(**d)
 
 
 make_metabook = collection
