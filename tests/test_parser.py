@@ -215,7 +215,7 @@ def test_parse_comment():
     ex = """foo
 <!-- comment --->
 bar"""
-    expanded = expander.expandstr(ex)
+    expanded = expander.expand_str(ex)
     print "EXPANDED:", expanded
     assert "\n\n" not in expanded
 
@@ -1174,7 +1174,7 @@ def test_broken_link_whitespace():
 
 def test_comment_inside_nowiki():
     comment = 'this is a comment'
-    s = expander.expandstr('<pre><!-- this is a comment --></pre>')
+    s = expander.expand_str('<pre><!-- this is a comment --></pre>')
     assert comment in s
     r = parse(s)
     txt = r.asText()

@@ -1,14 +1,15 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
 from __future__ import print_function
-from mwlib.templ import magics, log, DEBUG, parser, mwlocals
-from mwlib.uniq import Uniquifier
-from mwlib import nshandling, siteinfo, metabook
+
 import six
 from six.moves import range
+
+from mwlib import nshandling, siteinfo, metabook
+from mwlib.templ import magics, log, parser, mwlocals
+from mwlib.uniq import Uniquifier
 
 
 class TemplateRecursion(Exception):
@@ -49,7 +50,7 @@ class MemoryLimitError(Exception):
     pass
 
 
-def equalsplit(node):
+def equal_split(node):
     if isinstance(node, six.string_types):
         return None, node
 
@@ -58,10 +59,10 @@ def equalsplit(node):
     except ValueError:
         return None, node
 
-    return node[:idx], node[idx+1:]
+    return node[:idx], node[idx + 1 :]
 
 
-def equalsplit_25(node):
+def equal_split_25(node):
     if isinstance(node, six.string_types):
         return None, node
 
@@ -70,11 +71,11 @@ def equalsplit_25(node):
     except ValueError:
         return None, node
 
-    return node[:idx], node[idx+1:]
+    return node[:idx], node[idx + 1 :]
 
 
-if not hasattr(tuple, 'index'):
-    equalsplit = equalsplit_25
+if not hasattr(tuple, "index"):
+    equal_split = equal_split_25
 
 
 class ArgumentList(object):
@@ -82,7 +83,7 @@ class ArgumentList(object):
         self.args = tuple(args)
 
         assert expander is not None
-        #assert variables is not None
+        # assert variables is not None
 
         self.expander = expander
         self.variables = variables
@@ -101,8 +102,8 @@ class ArgumentList(object):
         if isinstance(n, slice):
             start = n.start or 0
             stop = n.stop or len(self)
-            return [self.get(x,  None) or u"" for x in range(start, stop)]
-        return self.get(n, None) or u''
+            return [self.get(x, None) or u"" for x in range(start, stop)]
+        return self.get(n, None) or u""
 
     def get(self, n, default):
         self.count += 1
@@ -117,7 +118,7 @@ class ArgumentList(object):
             flatten(a, self.expander, self.variables, tmp)
             _insert_implicit_newlines(tmp)
             tmp = u"".join(tmp).strip()
-            if len(tmp) > 256*1024:
+            if len(tmp) > 256 * 1024:
                 raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))
             # FIXME: cache value ???
             return tmp
@@ -129,7 +130,7 @@ class ArgumentList(object):
                 arg = self.args[self.varnum]
                 self.varnum += 1
 
-                name, val = equalsplit(arg)
+                name, val = equal_split(arg)
                 if name is not None:
                     tmp = []
                     flatten(name, self.expander, self.variables, tmp)
@@ -171,13 +172,13 @@ def is_implicit_newline(raw):
     see: http://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
     """
     sw = raw.startswith
-    for x in ('*', '#', ':', ';', '{|'):
+    for x in ("*", "#", ":", ";", "{|"):
         if sw(x):
             return True
     return False
 
 
-from mwlib.templ.marks import mark, mark_start, mark_end, mark_maybe_newline, maybe_newline, dummy_mark, eqmark
+from mwlib.templ.marks import mark, maybe_newline, dummy_mark, eqmark
 
 
 def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
@@ -187,24 +188,24 @@ def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
 
     for i, p in enumerate(res):
         if p is maybe_newline:
-            s1 = res[i+1]
-            s2 = res[i+2]
-            if i and res[i-1].endswith("\n"):
+            s1 = res[i + 1]
+            s2 = res[i + 2]
+            if i and res[i - 1].endswith("\n"):
                 continue
 
             if isinstance(s1, mark):
                 continue
             if len(s1) >= 2:
                 if is_implicit_newline(s1):
-                    res[i] = '\n'
+                    res[i] = "\n"
             else:
-                if is_implicit_newline(''.join([s1, s2])):
-                    res[i] = '\n'
+                if is_implicit_newline("".join([s1, s2])):
+                    res[i] = "\n"
     del res[-2:]
 
 
 class Expander(object):
-    magic_displaytitle = None   # set via {{DISPLAYTITLE:...}}
+    magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
 
     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
@@ -216,7 +217,7 @@ class Expander(object):
         try:
             si = self.db.get_siteinfo()
         except Exception as err:
-            print('Caught: %s' % err)
+            print("Caught: %s" % err)
 
         if si is None:
             print("WARNING: failed to get siteinfo from %r" % (self.db,))
@@ -238,7 +239,7 @@ class Expander(object):
         if self.db and hasattr(self.db, "nuwiki") and pagename:
             page = self.db.nuwiki.get_page(self.pagename)
             if page is not None:
-                revisionid = getattr(page, 'revid', 0) or 0
+                revisionid = getattr(page, "revid", 0) or 0
 
         self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revisionid)
         self.resolver.siteinfo = si
@@ -253,7 +254,8 @@ class Expander(object):
         self.aliasmap = parser.aliasmap(self.siteinfo)
 
         self.parsed = parser.parse(
-            txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo)
+            txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo
+        )
         # show(self.parsed)
         self.parsedTemplateCache = {}
 
@@ -263,12 +265,12 @@ class Expander(object):
     def replace_tags(self, txt):
         return self.uniquifier.replace_tags(txt)
 
-    def getParsedTemplate(self, name):
+    def get_parsed_template(self, name):
         if not name or name.startswith("[[") or "|" in name:
             return None
 
         if name.startswith("/"):
-            name = self.pagename+name
+            name = self.pagename + name
             ns = 0
         else:
             ns = 10
@@ -299,7 +301,7 @@ class Expander(object):
         res = ["\n"]  # guard, against implicit newlines at the beginning
         flatten(parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
-        res[0] = u''
+        res[0] = u""
         res = u"".join(res)
         if not keep_uniq:
             res = self.uniquifier.replace_uniq(res)

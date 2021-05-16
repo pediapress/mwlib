@@ -1,8 +1,11 @@
 from __future__ import absolute_import
+
 import locale
 from xml.sax.saxutils import quoteattr
-from mwlib.templ import nodes, evaluate
+
 import six
+
+from mwlib.templ import nodes, evaluate
 
 
 class Subst(nodes.Node):
@@ -14,7 +17,7 @@ class Subst(nodes.Node):
         res.append("{{subst:%s}}" % (name,))
 
 
-class Safesubst(nodes.Template):
+class SafeSubst(nodes.Template):
     def _get_args(self):
         return self[1:]
 
@@ -33,10 +36,11 @@ class Time(nodes.Node):
             d = None
 
         from mwlib.templ import magic_time
+
         res.append(magic_time.time(format, d))
 
 
-class Anchorencode(nodes.Node):
+class AnchorEncode(nodes.Node):
     def flatten(self, expander, variables, res):
         arg = []
         evaluate.flatten(self[0], expander, variables, arg)
@@ -45,8 +49,13 @@ class Anchorencode(nodes.Node):
         # Note: mediawiki has a bug. It tries not to touch colons by replacing '.3A' with
         # with the colon. However, if the original string contains the substring '.3A',
         # it will also replace it with a colon. We do *not* reproduce that bug here...
-        import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
-        e = six.moves.urllib.parse.quote_plus(arg.encode('utf-8'), ':').replace('%', '.').replace('+', '_')
+        import six.moves.urllib.request, six.moves.urllib.error
+
+        e = (
+            six.moves.urllib.parse.quote_plus(arg.encode("utf-8"), ":")
+            .replace("%", ".")
+            .replace("+", "_")
+        )
         res.append(e)
 
 
@@ -58,6 +67,7 @@ def _rel2abs(rel, base):
         base = u""
 
     import posixpath
+
     p = posixpath.normpath("/%s/%s/" % (base, rel)).strip("/")
     return p
 
@@ -83,7 +93,7 @@ class Tag(nodes.Node):
         name = []
         evaluate.flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
-        parameters = u''
+        parameters = u""
 
         for parm in self[2:]:
             tmp = []
@@ -119,7 +129,7 @@ class Defaultsort(NoOutput):
     pass
 
 
-class Displaytitle(nodes.Node):
+class DisplayTitle(nodes.Node):
     def flatten(self, expander, variables, res):
         name = []
         evaluate.flatten(self[0], expander, variables, name)
@@ -127,7 +137,7 @@ class Displaytitle(nodes.Node):
         expander.magic_displaytitle = name
 
 
-def reverse_formatnum(val):
+def reverse_format_num(val):
     try:
         return str(locale.atoi(val))
     except ValueError:
@@ -141,7 +151,7 @@ def reverse_formatnum(val):
     return val
 
 
-def _formatnum(val):
+def _format_num(val):
     try:
         val = int(val)
     except ValueError:
@@ -157,15 +167,15 @@ def _formatnum(val):
     return locale.format("%g", val, True)
 
 
-def formatnum(val):
-    res = _formatnum(val)
+def format_num(val):
+    res = _format_num(val)
     if isinstance(res, str):
         return six.text_type(res, "utf-8", "replace")
     else:
         return res
 
 
-class Formatnum(nodes.Node):
+class FormatNum(nodes.Node):
     def flatten(self, expander, variables, res):
         arg0 = []
         evaluate.flatten(self[0], expander, variables, arg0)
@@ -179,27 +189,28 @@ class Formatnum(nodes.Node):
             arg1 = u""
 
         if arg1.strip() in (u"r", u"R"):
-            res.append(reverse_formatnum(arg0))
+            res.append(reverse_format_num(arg0))
         else:
-            res.append(formatnum(arg0))
+            res.append(format_num(arg0))
 
         # print "FORMATNUM:", (arg0, arg1, res[-1])
 
 
-def make_switchnode(args):
+def make_switch_node(args):
     return nodes.SwitchNode((args[0], args[1:]))
 
 
-registry = {'#time': Time,
-            'subst': Subst,
-            'safesubst': Safesubst,
-            'anchorencode': Anchorencode,
-            '#tag': Tag,
-            'displaytitle': Displaytitle,
-            'defaultsort': Defaultsort,
-            '#rel2abs': rel2abs,
-            '#switch': make_switchnode,
-            '#if': nodes.IfNode,
-            '#ifeq': nodes.IfeqNode,
-            'formatnum': Formatnum
-            }
+registry = {
+    "#time": Time,
+    "subst": Subst,
+    "safesubst": SafeSubst,
+    "anchorencode": AnchorEncode,
+    "#tag": Tag,
+    "displaytitle": DisplayTitle,
+    "defaultsort": Defaultsort,
+    "#rel2abs": rel2abs,
+    "#switch": make_switch_node,
+    "#if": nodes.IfNode,
+    "#ifeq": nodes.IfeqNode,
+    "formatnum": FormatNum,
+}

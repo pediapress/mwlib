@@ -1,14 +1,14 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
 from __future__ import print_function
+
 from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import evaluate
 
 
-class page(object):
+class Page(object):
     def __init__(self, rawtext):
         self.rawtext = rawtext
 
@@ -18,7 +18,7 @@ class DictDB(object):
 
     def __init__(self, *args, **kw):
         if args:
-            self.d, = args
+            (self.d,) = args
         else:
             self.d = {}
 
@@ -26,19 +26,19 @@ class DictDB(object):
 
         normd = {}
         for k, v in self.d.items():
-            normd[k.lower().replace(" ",  "_")] = v
+            normd[k.lower().replace(" ", "_")] = v
         self.d = normd
 
-        self.siteinfo = get_siteinfo('de')
+        self.siteinfo = get_siteinfo("de")
 
     def normalize_and_get_page(self, title, defaultns=0):
-        return page(self.d.get(title.lower().replace(" ", "_"), u""))
+        return Page(self.d.get(title.lower().replace(" ", "_"), u""))
 
     def get_siteinfo(self):
         return self.siteinfo
 
 
-def expandstr(s, expected=None, wikidb=None, pagename='thispage'):
+def expand_str(s, expected=None, wikidb=None, pagename="thispage"):
     """debug function. expand templates in string s"""
     if wikidb:
         db = wikidb

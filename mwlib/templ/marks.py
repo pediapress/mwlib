@@ -1,5 +1,6 @@
 import six
 
+
 class mark(six.text_type):
     def __new__(klass, msg):
         r = six.text_type.__new__(klass)
@@ -7,7 +8,10 @@ class mark(six.text_type):
         return r
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.msg,)
+        return "<%s %r>" % (
+            self.__class__.__name__,
+            self.msg,
+        )
 
 
 class mark_start(mark):
@@ -22,8 +26,8 @@ class mark_maybe_newline(mark):
     pass
 
 
-maybe_newline = mark_maybe_newline('maybe_newline')
-dummy_mark = mark('dummy')
+maybe_newline = mark_maybe_newline("maybe_newline")
+dummy_mark = mark("dummy")
 
 
 class _eqmark(six.text_type):

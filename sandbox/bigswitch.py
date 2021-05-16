@@ -2162,9 +2162,11 @@ einwohnerzahlen = u"""
 """
 
 import time
+
 from mwlib import expander
+
 db = expander.DictDB(einwohnerzahlen=einwohnerzahlen)
 stime = time.time()
 for i in range(5):
-    expander.expandstr("{{einwohnerzahlen|68384}}", wikidb=db)
-print (time.time() - stime) / 5
+    expander.expand_str("{{einwohnerzahlen|68384}}", wikidb=db)
+print((time.time() - stime) / 5)

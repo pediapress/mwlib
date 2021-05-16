@@ -1,9 +1,10 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
 import re
+
 from mwlib.templ import pp
 
 splitpattern = """
@@ -23,10 +24,10 @@ splitpattern = """
 |(?:[^=\[\]\|{}<]*))                               # all others
 """
 
-splitrx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+split_rx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
 
-class symbols:
+class Symbols:
     bra_open = 1
     bra_close = 2
     link = 3
@@ -41,7 +42,7 @@ def tokenize(txt, included=True, replace_tags=None):
         txt = replace_tags(txt)
 
     tokens = []
-    for (v1, v2, v3, v4, v5) in splitrx.findall(txt):
+    for (v1, v2, v3, v4, v5) in split_rx.findall(txt):
         if v5:
             tokens.append((5, v5))
         elif v4:
@@ -53,6 +54,6 @@ def tokenize(txt, included=True, replace_tags=None):
         elif v1:
             tokens.append((1, v1))
 
-    tokens.append((None, ''))
+    tokens.append((None, ""))
 
     return tokens

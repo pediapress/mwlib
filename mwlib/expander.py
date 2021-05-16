@@ -13,7 +13,7 @@ from mwlib.templ.nodes import Node, Variable, Template, show
 from mwlib.templ.scanner import tokenize
 from mwlib.templ.parser import parse, Parser
 from mwlib.templ.evaluate import flatten, Expander, ArgumentList
-from mwlib.templ.misc import DictDB, expandstr
+from mwlib.templ.misc import DictDB, expand_str
 import six
 
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from mwlib.expander import expandstr
+from mwlib.expander import expand_str
 
 cases = [
     ("Y-m-d", "2008-02-09"),
@@ -58,38 +58,38 @@ def test_codes(case):
     date = "09 Feb 2008 10:55:17"
     if len(case) == 3:
         date = case[2]
-    expandstr(u"{{#time:%s|%s}}" % (case[0], date), case[1])
+    expand_str(u"{{#time:%s|%s}}" % (case[0], date), case[1])
 
 
 def test_examples():
-    expandstr(
+    expand_str(
         '{{ #time: l [[F j|"Fourth of" F]] [[Y]] | 4 March 2007 }}',
         "Sunday [[March 4|Fourth of March]] [[2007]]",
     )
 
 
 def test_backslash_quote():
-    expandstr("{{#time: \\Y|4 March 2007}}", "Y")
-    expandstr("{{#time: \\\\Y|4 March 2007}}", "\\2007")
+    expand_str("{{#time: \\Y|4 March 2007}}", "Y")
+    expand_str("{{#time: \\\\Y|4 March 2007}}", "\\2007")
 
 
 def test_time_vs_year():
     """http://code.pediapress.com/wiki/ticket/350"""
-    expandstr("{{#time:G:i|2008}}", "20:08")
+    expand_str("{{#time:G:i|2008}}", "20:08")
 
 
 def test_time_vs_year_illegal_time():
-    expandstr("{{#time:Y|1970}}", "1970")
+    expand_str("{{#time:Y|1970}}", "1970")
 
 
 def test_before_1900():
-    expandstr("{{#time:c|1883-1-1}}", "1883-01-01T00:00:00+00:00")
+    expand_str("{{#time:c|1883-1-1}}", "1883-01-01T00:00:00+00:00")
 
 
 def test_dateutil_raises_typeerror():
-    expandstr("{{#time:c|2007-09-27PM EDT}}")
-    expandstr("{{#iferror:{{#time:c|2007-09-27PM EDT}}|yes|no}}", "yes")
+    expand_str("{{#time:c|2007-09-27PM EDT}}")
+    expand_str("{{#iferror:{{#time:c|2007-09-27PM EDT}}|yes|no}}", "yes")
 
 
 def test_time_minus_days():
-    expandstr("{{#time:Y-m-d| 20070827000000 -12 day}}", "2007-08-15")
+    expand_str("{{#time:Y-m-d| 20070827000000 -12 day}}", "2007-08-15")

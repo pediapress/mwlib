@@ -1,13 +1,15 @@
 from __future__ import absolute_import
-import sys
+
+import calendar
 import datetime
 import re
-import calendar
+import sys
+
 import roman
+import six
 from timelib import strtodatetime as parsedate
 
 from mwlib.strftime import strftime
-import six
 
 
 def ampm(date):
@@ -19,28 +21,28 @@ def ampm(date):
 
 rx = re.compile('"[^"]*"|xr|\\\\.|.')
 codemap = dict(
-    y='%y',
-    Y='%Y',
+    y="%y",
+    Y="%Y",
     n=lambda d: str(d.month),
-    m='%m',
-    M='%b',
-    F='%B',
+    m="%m",
+    M="%b",
+    F="%B",
     W=lambda d: "%02d" % (d.isocalendar()[1],),
     j=lambda d: str(d.day),
-    d='%d',
-    z=lambda d: str(d.timetuple().tm_yday-1),
-    D='%a',
-    l='%A',
+    d="%d",
+    z=lambda d: str(d.timetuple().tm_yday - 1),
+    D="%a",
+    l="%A",
     N=lambda d: str(d.isoweekday()),
     w=lambda d: str(d.isoweekday() % 7),
     a=ampm,
     A=lambda d: ampm(d).upper(),
-    g=lambda d: str(((d.hour-1) % 12) + 1),
+    g=lambda d: str(((d.hour - 1) % 12) + 1),
     h="%I",
     G=lambda d: str(d.hour),
     H=lambda d: "%02d" % (d.hour,),
-    i='%M',
-    s='%S',
+    i="%M",
+    s="%S",
     U=lambda d: str(calendar.timegm(d.timetuple())),
     L=lambda d: str(int(calendar.isleap(d.year))),
     c="%Y-%m-%dT%H:%M:%S+00:00",
@@ -50,7 +52,7 @@ codemap = dict(
 )
 
 
-def formatdate(format, date):
+def format_date(format, date):
     split = rx.findall(format)
     process_next = None
 
@@ -92,7 +94,8 @@ def time(format, datestring=None):
         if re.match("\d\d\d\d$", datestring):
             try:
                 date = datetime.datetime.now().replace(
-                    hour=int(datestring[:2]), minute=int(datestring[2:]), second=0)
+                    hour=int(datestring[:2]), minute=int(datestring[2:]), second=0
+                )
             except ValueError:
                 pass
 
@@ -111,4 +114,4 @@ def time(format, datestring=None):
     if date is None:
         date = datetime.datetime.now()
 
-    return formatdate(format, date)
+    return format_date(format, date)

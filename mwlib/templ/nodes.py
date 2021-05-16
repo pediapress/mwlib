@@ -1,4 +1,3 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
@@ -38,7 +37,7 @@ class IfNode(Node):
 
         # template blacklisting results in 0xebad
         # see http://code.pediapress.com/wiki/ticket/700#comment:1
-        cond = cond.strip(unichr(0xebad))
+        cond = cond.strip(unichr(0xEBAD))
 
         res.append(maybe_newline)
         tmp = []
@@ -112,7 +111,7 @@ class SwitchNode(Node):
             unresolved.append((key, value))
 
     def _init(self):
-        args = [equalsplit(x) for x in self[1]]
+        args = [equal_split(x) for x in self[1]]
 
         unresolved = []
         fast = {}
@@ -135,11 +134,11 @@ class SwitchNode(Node):
             self._store_key(key, value, fast, unresolved)
 
         if nokey_seen:
-            self._store_key(u'#default', nokey_seen[-1], fast, unresolved)
+            self._store_key(u"#default", nokey_seen[-1], fast, unresolved)
 
         self.unresolved = tuple(unresolved)
         self.fast = fast
-        self.sentinel = (len(self.unresolved)+1, None)
+        self.sentinel = (len(self.unresolved) + 1, None)
 
     def flatten(self, expander, variables, res):
         if self.unresolved is None:
@@ -158,7 +157,7 @@ class SwitchNode(Node):
         pos, retval = min(t1, t2)
 
         if pos is None:
-            pos = len(self.unresolved)+1
+            pos = len(self.unresolved) + 1
 
         for k, v in self.unresolved[:pos]:
             tmp = []
@@ -192,7 +191,7 @@ class Variable(Node):
         name = []
         flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
-        if len(name) > 256*1024:
+        if len(name) > 256 * 1024:
             raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
 
         v = variables.get(name, None)
@@ -227,20 +226,21 @@ class Template(Node):
         name = []
         flatten(self[0], expander, variables, name)
         name = u"".join(name).strip()
-        if len(name) > 256*1024:
+        if len(name) > 256 * 1024:
             raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
 
         args = self._get_args()
 
         remainder = None
         if ":" in name:
-            try_name, try_remainder = name.split(':', 1)
+            try_name, try_remainder = name.split(":", 1)
             from mwlib.templ import magic_nodes
+
             try_name = expander.resolve_magic_alias(try_name) or try_name
 
             klass = magic_nodes.registry.get(try_name)
             if klass is not None:
-                children = (try_remainder, )+args
+                children = (try_remainder,) + args
                 # print "MAGIC:", klass,  children
                 klass(children).flatten(expander, variables, res)
                 return
@@ -249,7 +249,7 @@ class Template(Node):
                 name = try_name
                 remainder = try_remainder
 
-            if name == '#ifeq':
+            if name == "#ifeq":
                 res.append(maybe_newline)
                 tmp = []
                 if len(args) >= 1:
@@ -284,7 +284,7 @@ class Template(Node):
             res.append(rep)
             res.append(dummy_mark)
         else:
-            p = expander.getParsedTemplate(name)
+            p = expander.get_parsed_template(name)
             if p:
                 if DEBUG:
                     msg = "EXPANDING %r %r  ===> " % (name, var)
@@ -308,6 +308,16 @@ def show(node, indent=0, out=None):
     out.write("%s\n" % (node,))
 
 
-from mwlib.templ.evaluate import maybe_newline, mark_start, mark_end, dummy_mark, flatten, MemoryLimitError, ArgumentList, equalsplit, _insert_implicit_newlines
+from mwlib.templ.evaluate import (
+    maybe_newline,
+    mark_start,
+    mark_end,
+    dummy_mark,
+    flatten,
+    MemoryLimitError,
+    ArgumentList,
+    equal_split,
+    _insert_implicit_newlines,
+)
 from mwlib.templ import log, DEBUG
 from mwlib.templ.parser import optimize

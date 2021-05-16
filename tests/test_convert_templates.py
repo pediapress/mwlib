@@ -7,7 +7,7 @@ mediawiki installation.
 
 
 from mwlib import expander
-from mwlib.expander import expandstr, DictDB
+from mwlib.expander import expand_str, DictDB
 
 db = {
     "convert":
@@ -136,39 +136,39 @@ def getdb():
 
 
 def test_round():
-    expandstr("{{rnd|2.0004|3}}", "2.000", wikidb=getdb())
-    expandstr("{{rnd|0.000020004|8}}", "2.0E-5000", wikidb=getdb())
-    expandstr("{{rnd|0|8}}", "0.00000000", wikidb=getdb())
+    expand_str("{{rnd|2.0004|3}}", "2.000", wikidb=getdb())
+    expand_str("{{rnd|0.000020004|8}}", "2.0E-5000", wikidb=getdb())
+    expand_str("{{rnd|0|8}}", "0.00000000", wikidb=getdb())
 
 
 def test_max_2():
-    expandstr("{{max/2|-1|1}}", "1", wikidb=getdb())
-    expandstr("{{max/2|1|-1}}", "1", wikidb=getdb())
+    expand_str("{{max/2|-1|1}}", "1", wikidb=getdb())
+    expand_str("{{max/2|1|-1}}", "1", wikidb=getdb())
 
 
 def test_round_plus_1():
-    expandstr("{{rnd/+|1.056|2|5-1}}", "1.06", wikidb=getdb())
+    expand_str("{{rnd/+|1.056|2|5-1}}", "1.06", wikidb=getdb())
 
 
 def test_round_plus_2():
-    expandstr("{{rnd/+|1.056|2|5}}", "5", wikidb=getdb())
+    expand_str("{{rnd/+|1.056|2|5}}", "5", wikidb=getdb())
 
 
 def test_round_plus_3():
-    expandstr("{{rnd/+|1.056|2|abc}}", "1.06", wikidb=getdb())
+    expand_str("{{rnd/+|1.056|2|abc}}", "1.06", wikidb=getdb())
 
 
 def test_precision_plus_1():
-    expandstr("{{precision/+|0.77}}", "2", wikidb=getdb())
+    expand_str("{{precision/+|0.77}}", "2", wikidb=getdb())
 
 
 def test_convert_ft_in_m_float():
-    expandstr("{{convert|2.5|ft|m}}", "2.5&nbsp;feet (0.76&nbsp;m)\n", wikidb=getdb())
+    expand_str("{{convert|2.5|ft|m}}", "2.5&nbsp;feet (0.76&nbsp;m)\n", wikidb=getdb())
 
 
 def test_convert_ft_in_m_int():
-    expandstr("{{convert|12|ft|m}}", "12&nbsp;feet (3.7&nbsp;m)\n", wikidb=getdb())
+    expand_str("{{convert|12|ft|m}}", "12&nbsp;feet (3.7&nbsp;m)\n", wikidb=getdb())
 
 
 def test_round_minus():
-    expandstr("{{rnd/-|0.00002|8}}", "2.0E-5000", wikidb=getdb())
+    expand_str("{{rnd/-|0.00002|8}}", "2.0E-5000", wikidb=getdb())

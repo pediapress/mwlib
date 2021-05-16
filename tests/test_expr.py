@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import math
-from mwlib.expander import expandstr
+from mwlib.expander import expand_str
 from mwlib import expr
 
 
 def ee(s, expected=None):
-    s = expandstr("{{#expr:%s}}" % (s,))
+    s = expand_str("{{#expr:%s}}" % (s,))
     if isinstance(expected, (float, int, long)):
         assert math.fabs(float(s) - expected) < 1e-5
     elif expected is not None:
@@ -137,9 +137,9 @@ def test_unary_pow_plus():
 
 
 def test_expr_repr():
-    expandstr("{{#expr:99999999999999}}", "99999999999999")
-    expandstr("{{#expr:99999999999999+1}}", "1.0E+14")
-    expandstr("{{#expr:0.1+0.9}}", "1")
+    expand_str("{{#expr:99999999999999}}", "99999999999999")
+    expand_str("{{#expr:99999999999999+1}}", "1.0E+14")
+    expand_str("{{#expr:0.1+0.9}}", "1")
 
 
 def test_unary_minus_sin():
@@ -154,12 +154,12 @@ def test_unary_minus_sin():
 
 
 def test_empty_expr():
-    expandstr("{{#expr:   }}", "")
-    expandstr("{{#ifexpr:    |yes|no}}", "no")
+    expand_str("{{#expr:   }}", "")
+    expand_str("{{#ifexpr:    |yes|no}}", "no")
 
 
 def test_braindamaged_scientific():
     ee("{{#expr: (-1)e(-0.5)}}", -0.31622776601684)
-    expandstr("{{#expr:1e2e3}}", "100000")
+    expand_str("{{#expr:1e2e3}}", "100000")
     ee("{{#expr:2*e}}", 2 * math.e)
     ee("{{#expr: e E E}}", 1420.9418661882)

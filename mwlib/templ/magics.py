@@ -10,25 +10,30 @@ http://meta.wikimedia.org/wiki/ParserFunctions
 """
 
 from __future__ import absolute_import
-import re
+
 import datetime
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
-import six.moves.urllib.parse
-from mwlib.log import Log
-from mwlib import expr
+import re
+
 import six
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.parse
+import six.moves.urllib.request
 from six.moves import range
+
+from mwlib import expr
+from mwlib.log import Log
 
 iferror_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
 
 log = Log("expander")
 
 
-def singlearg(fun):
+def single_arg(fun):
     def wrap(self, args):
         rl = args
         if not rl:
-            a = u''
+            a = u""
         else:
             a = rl[0]
 
@@ -37,9 +42,10 @@ def singlearg(fun):
     return wrap
 
 
-def noarg(fun):
+def no_arg(fun):
     def wrap(self, *args):
         return fun(self)
+
     return wrap
 
 
@@ -71,7 +77,7 @@ def maybe_numeric_compare(a, b):
 
 def urlquote(u):
     if isinstance(u, six.text_type):
-        u = u.encode('utf-8')
+        u = u.encode("utf-8")
     return six.moves.urllib.parse.quote(u)
 
 
@@ -84,57 +90,57 @@ class OtherMagic(object):
 class TimeMagic(object):
     utcnow = datetime.datetime.utcnow()
 
-    @noarg
+    @no_arg
     def CURRENTDAY(self):
         """Displays the current day in numeric form."""
         return "%s" % self.utcnow.day
 
-    @noarg
+    @no_arg
     def CURRENTDAY2(self):
         """[MW1.5+] Ditto with leading zero 01 .. 31)."""
         return "%02d" % self.utcnow.day
 
-    @noarg
+    @no_arg
     def CURRENTDAYNAME(self):
         """Displays the current day in named form."""
         return self.utcnow.strftime("%A")
 
-    @noarg
+    @no_arg
     def CURRENTDOW(self):
         """current day as number (0=Sunday, 1=Monday...)."""
         return str((self.utcnow.weekday() + 1) % 7)
 
-    @noarg
+    @no_arg
     def CURRENTMONTH(self):
         """The number 01 .. 12 of the current month."""
         return "%02d" % self.utcnow.month
 
-    @noarg
+    @no_arg
     def CURRENTMONTHABBREV(self):
         """[MW1.5+] current month abbreviated Jan .. Dec."""
         return self.utcnow.strftime("%b")
 
-    @noarg
+    @no_arg
     def CURRENTMONTHNAME(self):
         """current month in named form January .. December.   """
         return self.utcnow.strftime("%B")
 
-    @noarg
+    @no_arg
     def CURRENTTIME(self):
         """The current time of day (00:00 .. 23:59)."""
         return self.utcnow.strftime("%H:%M")
 
-    @noarg
+    @no_arg
     def CURRENTWEEK(self):
         """Number of the current week (1-53) according to ISO 8601 with no leading zero."""
         return str(self.utcnow.isocalendar()[1])
 
-    @noarg
+    @no_arg
     def CURRENTYEAR(self):
         """Returns the current year."""
         return str(self.utcnow.year)
 
-    @noarg
+    @no_arg
     def CURRENTTIMESTAMP(self):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
         return self.utcnow.strftime("%Y%m%d%H%M%S")
@@ -143,57 +149,57 @@ class TimeMagic(object):
 class LocaltimeMagic(object):
     now = datetime.datetime.now()
 
-    @noarg
+    @no_arg
     def LOCALDAY(self):
         """Displays the current day in numeric form."""
         return "%s" % self.now.day
 
-    @noarg
+    @no_arg
     def LOCALDAY2(self):
         """[MW1.5+] Ditto with leading zero 01 .. 31)."""
         return "%02d" % self.now.day
 
-    @noarg
+    @no_arg
     def LOCALDAYNAME(self):
         """Displays the current day in named form."""
         return self.now.strftime("%A")
 
-    @noarg
+    @no_arg
     def LOCALDOW(self):
         """current day as number (0=Sunday, 1=Monday...)."""
         return str((self.now.weekday() + 1) % 7)
 
-    @noarg
+    @no_arg
     def LOCALMONTH(self):
         """The number 01 .. 12 of the current month."""
         return "%02d" % self.now.month
 
-    @noarg
+    @no_arg
     def LOCALMONTHABBREV(self):
         """[MW1.5+] current month abbreviated Jan .. Dec."""
         return self.now.strftime("%b")
 
-    @noarg
+    @no_arg
     def LOCALMONTHNAME(self):
         """current month in named form January .. December.   """
         return self.now.strftime("%B")
 
-    @noarg
+    @no_arg
     def LOCALTIME(self):
         """The current time of day (00:00 .. 23:59)."""
         return self.now.strftime("%H:%M")
 
-    @noarg
+    @no_arg
     def LOCALWEEK(self):
         """Number of the current week (1-53) according to ISO 8601 with no leading zero."""
         return str(self.now.isocalendar()[1])
 
-    @noarg
+    @no_arg
     def LOCALYEAR(self):
         """Returns the current year."""
         return str(self.now.year)
 
-    @noarg
+    @no_arg
     def LOCALTIMESTAMP(self):
         """[MW1.7+] Returns the current time stamp. e.g.: 20060528125203"""
         return self.now.strftime("%Y%m%d%H%M%S")
@@ -205,12 +211,12 @@ from functools import wraps
 class PageMagic(object):
     source = {}
 
-    def __init__(self, pagename='', server="http://en.wikipedia.org", revisionid=0):
+    def __init__(self, pagename="", server="http://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
         self.server = server
         self.revisionid = revisionid
 
-        self.niceurl = six.moves.urllib.parse.urljoin(self.server, 'wiki')
+        self.niceurl = six.moves.urllib.parse.urljoin(self.server, "wiki")
 
     def _wrap_pagename(f):
         @wraps(f)
@@ -219,12 +225,14 @@ class PageMagic(object):
             if args.args:
                 pagename = args[0]
             return f(self, pagename)
+
         return wrapper
 
     def _quoted(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            return urlquote(f(*args, **kwargs).replace(' ', '_'))
+            return urlquote(f(*args, **kwargs).replace(" ", "_"))
+
         return wrapper
 
     @_wrap_pagename
@@ -248,15 +256,14 @@ class PageMagic(object):
         """[MW1.6+] Returns the name of the current page, excluding parent
         pages ('Title/Subtitle' becomes 'Subtitle').
         """
-        return pagename.split('/')[-1]
+        return pagename.split("/")[-1]
 
     SUBPAGENAMEE = _quoted(SUBPAGENAME)
 
     @_wrap_pagename
     def BASEPAGENAME(self, pagename):
-        """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')
-        """
-        return self.nshandler.splitname(pagename)[1].rsplit('/', 1)[0]
+        """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')"""
+        return self.nshandler.splitname(pagename)[1].rsplit("/", 1)[0]
 
     BASEPAGENAMEE = _quoted(BASEPAGENAME)
 
@@ -264,7 +271,7 @@ class PageMagic(object):
     def NAMESPACE(self, pagename):
         """Returns the name of the namespace the current page resides in."""
         ns, partial, full = self.nshandler.splitname(pagename)
-        return full[:-len(partial) - 1]
+        return full[: -len(partial) - 1]
 
     NAMESPACEE = _quoted(NAMESPACE)
 
@@ -293,7 +300,7 @@ class PageMagic(object):
         ns, partial, fullname = self.nshandler.splitname(pagename)
         if not ns % 2:
             ns += 1
-        return self.nshandler.get_nsname_by_number(ns) + ':' + partial
+        return self.nshandler.get_nsname_by_number(ns) + ":" + partial
 
     TALKPAGENAMEE = _quoted(TALKPAGENAME)
 
@@ -302,7 +309,7 @@ class PageMagic(object):
         ns, partial, fullname = self.nshandler.splitname(pagename)
         if ns % 2:
             ns -= 1
-        return self.nshandler.get_nsname_by_number(ns) + ':' + partial
+        return self.nshandler.get_nsname_by_number(ns) + ":" + partial
 
     SUBJECTPAGENAMEE = _quoted(SUBJECTPAGENAME)
     ARTICLEPAGENAME = SUBJECTPAGENAME
@@ -312,7 +319,7 @@ class PageMagic(object):
         """[MW1.5+] The unique identifying number of a page, see Help:Diff."""
         return str(self.revisionid)
 
-    @noarg
+    @no_arg
     def SITENAME(self):
         """Value of $wgSitename."""
         return ""
@@ -323,13 +330,14 @@ class PageMagic(object):
             namespaces = self.siteinfo["namespaces"]
         except (AttributeError, KeyError):
             from mwlib import siteinfo
+
             namespaces = siteinfo.get_siteinfo("en")["namespaces"]
 
         ns = args[0]
         try:
-            retval = namespaces[ns]['*']
+            retval = namespaces[ns]["*"]
         except KeyError:
-            retval = ''
+            retval = ""
 
         return retval
 
@@ -344,26 +352,26 @@ class PageMagic(object):
 
     def URLENCODE(self, args):
         """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
-        url = six.moves.urllib.parse.quote_plus(args[0].encode('utf-8'))
+        url = six.moves.urllib.parse.quote_plus(args[0].encode("utf-8"))
         return url
 
-    @noarg
+    @no_arg
     def SERVER(self):
         """Value of $wgServer"""
         return self.server
 
     def FULLURL(self, args):
-        a = args[0].capitalize().replace(' ', '_')
-        a = six.moves.urllib.parse.quote_plus(a.encode('utf-8'))
+        a = args[0].capitalize().replace(" ", "_")
+        a = six.moves.urllib.parse.quote_plus(a.encode("utf-8"))
         if len(args) >= 2:
             q = "?%s" % args[1]
         else:
             q = ""
-        return '%s/%s%s' % (self.niceurl, a, q)
+        return "%s/%s%s" % (self.niceurl, a, q)
 
-    @noarg
+    @no_arg
     def SERVERNAME(self):
-        return self.server[len('http://'):]
+        return self.server[len("http://") :]
 
 
 class NumberMagic(object):
@@ -389,19 +397,19 @@ class NumberMagic(object):
 
 
 class StringMagic(object):
-    @singlearg
+    @single_arg
     def LC(self, a):
         return a.lower()
 
-    @singlearg
+    @single_arg
     def UC(self, a):
         return a.upper()
 
-    @singlearg
+    @single_arg
     def LCFIRST(self, a):
         return a[:1].lower() + a[1:]
 
-    @singlearg
+    @single_arg
     def UCFIRST(self, a):
         return a[:1].upper() + a[1:]
 
@@ -412,8 +420,8 @@ class StringMagic(object):
         except ValueError:
             return s
 
-        fillstr = args[2] or u'0'
-        return ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))]) + s
+        fillstr = args[2] or u"0"
+        return "".join([fillstr[i % len(fillstr)] for i in range(width - len(s))]) + s
 
     def PADRIGHT(self, args):
         s = args[0]
@@ -422,8 +430,8 @@ class StringMagic(object):
         except ValueError:
             return s
 
-        fillstr = args[2] or u'0'
-        return s + ''.join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
+        fillstr = args[2] or u"0"
+        return s + "".join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
 
 
 class ParserFunctions(object):
@@ -460,6 +468,7 @@ class ParserFunctions(object):
 
     def EXPR(self, rl):
         import math
+
         if rl:
             try:
                 ex = rl[0].strip()
@@ -477,9 +486,9 @@ class ParserFunctions(object):
                 f, i = r.split("e")
                 i = int(i)
                 if i < 0:
-                    sign = ''
+                    sign = ""
                 else:
-                    sign = '+'
+                    sign = "+"
                 fixed = str(float(f)) + "E" + sign + str(int(i))
                 return fixed
             return r
@@ -545,7 +554,16 @@ class DummyResolver(object):
     pass
 
 
-class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMagic, ParserFunctions, OtherMagic, DummyResolver):
+class MagicResolver(
+    TimeMagic,
+    LocaltimeMagic,
+    PageMagic,
+    NumberMagic,
+    StringMagic,
+    ParserFunctions,
+    OtherMagic,
+    DummyResolver,
+):
     local_values = None
 
     def __call__(self, name, args):
@@ -569,7 +587,7 @@ class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMag
         if isinstance(m, six.string_types):
             return m
 
-        res = m(args) or ''  # FIXME: catch TypeErros
+        res = m(args) or ""  # FIXME: catch TypeErros
         assert isinstance(res, six.string_types), "MAGIC %r returned %r" % (name, res)
         return res
 
@@ -583,8 +601,77 @@ class MagicResolver(TimeMagic, LocaltimeMagic, PageMagic, NumberMagic, StringMag
         return m is not None
 
 
-magic_words = ['basepagename', 'basepagenamee', 'contentlanguage', 'currentday', 'currentday2', 'currentdayname', 'currentdow', 'currenthour', 'currentmonth', 'currentmonthabbrev', 'currentmonthname', 'currentmonthnamegen', 'currenttime', 'currenttimestamp', 'currentversion', 'currentweek', 'currentyear', 'defaultsort', 'directionmark', 'displaytitle', 'fullpagename', 'fullpagenamee', 'language', 'localday', 'localday2', 'localdayname', 'localdow', 'localhour', 'localmonth', 'localmonthabbrev', 'localmonthname', 'localmonthnamegen', 'localtime',
-               'localtimestamp', 'localweek', 'localyear', 'namespace', 'namespacee', 'newsectionlink', 'numberofadmins', 'numberofarticles', 'numberofedits', 'numberoffiles', 'numberofpages', 'numberofusers', 'pagename', 'pagenamee', 'pagesinnamespace', 'revisionday', 'revisionday2', 'revisionid', 'revisionmonth', 'revisiontimestamp', 'revisionyear', 'scriptpath', 'server', 'servername', 'sitename', 'subjectpagename', 'subjectpagenamee', 'subjectspace', 'subjectspacee', 'subpagename', 'subpagenamee', 'talkpagename', 'talkpagenamee', 'talkspace', 'talkspacee', 'urlencode']
+magic_words = [
+    "basepagename",
+    "basepagenamee",
+    "contentlanguage",
+    "currentday",
+    "currentday2",
+    "currentdayname",
+    "currentdow",
+    "currenthour",
+    "currentmonth",
+    "currentmonthabbrev",
+    "currentmonthname",
+    "currentmonthnamegen",
+    "currenttime",
+    "currenttimestamp",
+    "currentversion",
+    "currentweek",
+    "currentyear",
+    "defaultsort",
+    "directionmark",
+    "displaytitle",
+    "fullpagename",
+    "fullpagenamee",
+    "language",
+    "localday",
+    "localday2",
+    "localdayname",
+    "localdow",
+    "localhour",
+    "localmonth",
+    "localmonthabbrev",
+    "localmonthname",
+    "localmonthnamegen",
+    "localtime",
+    "localtimestamp",
+    "localweek",
+    "localyear",
+    "namespace",
+    "namespacee",
+    "newsectionlink",
+    "numberofadmins",
+    "numberofarticles",
+    "numberofedits",
+    "numberoffiles",
+    "numberofpages",
+    "numberofusers",
+    "pagename",
+    "pagenamee",
+    "pagesinnamespace",
+    "revisionday",
+    "revisionday2",
+    "revisionid",
+    "revisionmonth",
+    "revisiontimestamp",
+    "revisionyear",
+    "scriptpath",
+    "server",
+    "servername",
+    "sitename",
+    "subjectpagename",
+    "subjectpagenamee",
+    "subjectspace",
+    "subjectspacee",
+    "subpagename",
+    "subpagenamee",
+    "talkpagename",
+    "talkpagenamee",
+    "talkspace",
+    "talkspacee",
+    "urlencode",
+]
 
 
 def _populate_dummy():
@@ -594,6 +681,7 @@ def _populate_dummy():
         def resolve(*args):
             log.warn("using dummy resolver for %s" % (name,))
             return u""
+
         return resolve
 
     missing = set()
@@ -605,7 +693,7 @@ def _populate_dummy():
     if missing:
         missing = list(missing)
         missing.sort()
-        #log.info("installed dummy resolvers for %s" % (", ".join(missing),))
+        # log.info("installed dummy resolvers for %s" % (", ".join(missing),))
 
 
 _populate_dummy()
