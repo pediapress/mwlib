@@ -1,17 +1,17 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 from __future__ import absolute_import
+
 from mwlib import utoken
 
 
 class Node(utoken.token):
     """Base class for all nodes"""
 
-    caption = ''
+    caption = ""
 
-    def __init__(self, caption=''):
+    def __init__(self, caption=""):
         self.children = []
         self.caption = caption
 
@@ -23,16 +23,21 @@ class Node(utoken.token):
         try:
             return utoken.token.__repr__(self)
         except BaseException:
-            return "%s %r: %s children" % (self.__class__.__name__,
-                                           self.caption, len(self.children))
+            return "%s %r: %s children" % (
+                self.__class__.__name__,
+                self.caption,
+                len(self.children),
+            )
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__)
-                and self.caption == other.caption
-                and self.children == other.children)
+        return (
+            isinstance(other, self.__class__)
+            and self.caption == other.caption
+            and self.children == other.children
+        )
 
     def __ne__(self, other):
-        return not(self == other)
+        return not (self == other)
 
     def allchildren(self):  # name is broken, returns self, which is not a child
         yield self
@@ -54,8 +59,11 @@ class Node(utoken.token):
         for x in self.children:
             x._asText(out)
 
-    def asText(self, ):
+    def asText(
+        self,
+    ):
         from StringIO import StringIO
+
         out = StringIO()
         self._asText(out)
         return out.getvalue()
@@ -238,6 +246,7 @@ class Link(Node):
 
 # Link forms:
 
+
 class ArticleLink(Link):
     """A link to an article
 
@@ -271,6 +280,7 @@ class InterwikiLink(SpecialLink):
 
        [[wikibooks:Some article in wikibook]]
     """
+
 
 # Non-links with same syntax:
 
@@ -317,7 +327,7 @@ class ImageLink(Link):
     target = None
     width = None
     height = None
-    align = ''
+    align = ""
     thumb = False
     printargs = None
     alt = None
