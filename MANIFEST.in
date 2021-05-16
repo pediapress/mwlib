@@ -1,3 +1,6 @@
+include .dockerignore
+include Dockerfile
+include Dockerfile-dev-py27
 include MANIFEST.in
 include README.rst
 include changelog.rst
@@ -32,7 +35,7 @@ include mwlib/apps/make_nuwiki.py
 include mwlib/apps/render.py
 include mwlib/apps/serve.py
 include mwlib/argv.py
-include mwlib/async/__init__.py
+include mwlib/asynchronous/__init__.py
 include mwlib/authors.py
 include mwlib/bookshelf.py
 include mwlib/caller.py
@@ -133,6 +136,7 @@ include mwlib/writer/scripts.txt
 include mwlib/writer/styleutils.py
 include mwlib/writer/wplicenses.csv
 include mwlib/writerbase.py
+include pytest.ini
 include requirements-test.txt
 include requirements.txt
 include sandbox/anywikisampler.py
@@ -194,5 +198,6 @@ include tests/test_uniq.py
 include tests/test_utils.py
 include tests/test_writerutils.py
 include tests/test_zipwiki.py
+include tools/99fixbadproxy
 include tools/set-interwiki.py
 include tox.ini

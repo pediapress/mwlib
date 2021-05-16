@@ -1,0 +1,26 @@
+FROM python:2.7-stretch
+COPY tools/99fixbadproxy /etc/apt/apt.conf.d/99fixbadproxy
+RUN apt-get clean && apt-get update && apt-get upgrade -y
+RUN apt-get install -y sudo
+RUN apt-get install -y \
+  gcc g++ make python python-dev python-virtualenv                    \
+  libjpeg-dev libz-dev libfreetype6-dev liblcms-dev                   \
+  libxml2-dev libxslt-dev                                             \
+  ocaml-nox git                                                  \
+  python-pil python-lxml                                          \
+  texlive-latex-recommended ploticus dvipng imagemagick               \
+  pdftk
+
+WORKDIR /opt/mwlib
+COPY requirements.txt /opt/mwlib/
+RUN pip install --upgrade pip
+RUN pip install flake8 pytest wheel
+RUN pip install -r requirements.txt
+COPY . /opt/mwlib
+RUN pip install -e .
+
+RUN useradd -m mwuser && echo "mwuser:mwuser" | chpasswd && adduser mwuser sudo
+RUN mkdir -p /data/mwcache && chown -R mwuser:mwuser /data/
+USER mwuser
+
+CMD nserve & mw-qserve & nslave --cachedir /data/mwcache

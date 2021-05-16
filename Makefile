@@ -1,5 +1,8 @@
-# Copyright (c) 2007-2008 PediaPress GmbH
-# See README.rst for additional licensing information.
+# Copyright (c) 2007-2021 PediaPress GmbH
+# See README.md for additional licensing information.
+
+IMAGE_LABEL ?= latest
+IMAGE_NAME=mwlib
 
 RST2HTML ?= rst2html.py
 
@@ -64,3 +67,12 @@ test::
 	pip install -r requirements-test.txt
 	py.test tests || true
 	pip uninstall -y -r requirements-test.txt &> /dev/null
+
+docker-py27-build::
+	docker build -t ${IMAGE_NAME}-py27:${IMAGE_LABEL} -f Dockerfile-dev-py27 .
+
+docker-py27-debug::
+	docker run -it --rm ${IMAGE_NAME}-py27:${IMAGE_LABEL} bash
+
+docker-py27-test::
+	docker run -it --rm ${IMAGE_NAME}-py27:${IMAGE_LABEL} pytest

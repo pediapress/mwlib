@@ -21,7 +21,7 @@ RUN apt-get \
 
 RUN pip install -i http://pypi.pediapress.com/simple/ mwlib mwlib.rl
 RUN useradd -m mwuser && echo "mwuser:mwuser" | chpasswd && adduser mwuser sudo
-RUN mkdir -p /data/mwcache && chown -R mwuser:mwuser /data/
+RUN mkdir -p /data/mwcache && chown -R mwuser:mwuser /data/ && chown -R mwuser:mwuser /opt/mwlib
 USER mwuser
 WORKDIR /home/mwuser
 
