@@ -4,15 +4,17 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import division
-
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
-import os
+
 import csv
+import os
 import sys
 import tempfile
+
 import six
+
 try:
     import simplejson as json
 except ImportError:
@@ -20,8 +22,7 @@ except ImportError:
 
 
 class License(object):
-
-    def __init__(self, name='', display_name='', license_type=None, description=''):
+    def __init__(self, name="", display_name="", license_type=None, description=""):
         self.name = name
         self.display_name = display_name
         self.license_type = license_type  # free|nonfree|unrelated|unknown
@@ -29,13 +30,15 @@ class License(object):
 
     def __str__(self):
         if self.display_name:
-            display_name = ' - text: %s' % self.display_name
+            display_name = " - text: %s" % self.display_name
         else:
-            display_name = ''
-        return "<License:%(name)r - type:%(type)r%(displayname)r>" % {'name': self.name,
-                                                                      'type': self.license_type,
-                                                                      'displayname': display_name,
-                                                                      }
+            display_name = ""
+        return "<License:%(name)r - type:%(type)r%(displayname)r>" % {
+            "name": self.name,
+            "type": self.license_type,
+            "displayname": display_name,
+        }
+
     __repr__ = __str__
 
     def __cmp__(self, other):
@@ -48,17 +51,16 @@ class License(object):
 
 
 class LicenseChecker(object):
-
     def __init__(self, image_db=None, filter_type=None):
         self.image_db = image_db
-        self.filter_type = self._checkFilterType(filter_type, default_filter='blacklist')
+        self.filter_type = self._checkFilterType(filter_type, default_filter="blacklist")
         self.licenses = {}
         self.initStats()
         self.display_cache = {}
 
     def readLicensesCSV(self, fn=None):
         if not fn:
-            fn = os.path.join(os.path.dirname(__file__), 'wplicenses.csv')
+            fn = os.path.join(os.path.dirname(__file__), "wplicenses.csv")
         for data in csv.reader(open(fn)):
             try:
                 (name, display_name, license_type, dummy, license_description) = data
@@ -66,18 +68,18 @@ class LicenseChecker(object):
                 continue
             if not name:
                 continue
-            name = six.text_type(name, 'utf-8').lower()
+            name = six.text_type(name, "utf-8").lower()
             lic = License(name=name)
-            lic.display_name = six.text_type(display_name, 'utf-8')
-            if license_description.startswith('-'):
+            lic.display_name = six.text_type(display_name, "utf-8")
+            if license_description.startswith("-"):
                 license_description = license_description[1:]
-            lic.description = six.text_type(license_description.strip(), 'utf-8')
-            if license_type in ['free-display', 'nonfree-display']:
-                lic.license_type = 'free'
-            elif license_type in ['nonfree']:
-                lic.license_type = 'nonfree'
+            lic.description = six.text_type(license_description.strip(), "utf-8")
+            if license_type in ["free-display", "nonfree-display"]:
+                lic.license_type = "free"
+            elif license_type in ["nonfree"]:
+                lic.license_type = "nonfree"
             else:
-                lic.license_type = 'unrelated'
+                lic.license_type = "unrelated"
             self.licenses[name] = lic
 
     def initStats(self):
@@ -86,8 +88,8 @@ class LicenseChecker(object):
         self.accepted_images = set()
         self.license_display_name = {}
 
-    def _checkFilterType(self, filter_type=None, default_filter='blacklist'):
-        if filter_type in ['blacklist', 'whitelist', 'nofilter']:
+    def _checkFilterType(self, filter_type=None, default_filter="blacklist"):
+        if filter_type in ["blacklist", "whitelist", "nofilter"]:
             return filter_type
         else:
             return default_filter
@@ -99,30 +101,33 @@ class LicenseChecker(object):
             lic = self.licenses.get(template, None)
             if not lic:
                 lic = License(name=template)
-                lic.license_type = 'unknown'
+                lic.license_type = "unknown"
             licenses.append(lic)
         return licenses
 
     def _checkLicenses(self, licenses, imgname, stats=True):
-        assert self.image_db, 'No image_db passed when initializing LicenseChecker'
+        assert self.image_db, "No image_db passed when initializing LicenseChecker"
         for lic in licenses:
-            if lic.license_type == 'free':
+            if lic.license_type == "free":
                 self.license_display_name[imgname] = lic.display_name
                 return True
-            elif lic.license_type == 'nonfree':
+            elif lic.license_type == "nonfree":
                 self.license_display_name[imgname] = lic.display_name
-                return True if self.filter_type == 'nofilter' else False
+                return True if self.filter_type == "nofilter" else False
         for lic in licenses:
-            if lic.license_type == 'unknown' and stats:
+            if lic.license_type == "unknown" and stats:
                 urls = self.unknown_licenses.get(lic.name, set())
-                urls.add(self.image_db.getDescriptionURL(imgname)
-                         or self.image_db.getURL(imgname) or imgname)
+                urls.add(
+                    self.image_db.getDescriptionURL(imgname)
+                    or self.image_db.getURL(imgname)
+                    or imgname
+                )
                 self.unknown_licenses[lic.name] = urls
 
-        self.license_display_name[imgname] = ''
-        if self.filter_type == 'whitelist':
+        self.license_display_name[imgname] = ""
+        if self.filter_type == "whitelist":
             return False
-        elif self.filter_type in ['blacklist', 'nofilter']:
+        elif self.filter_type in ["blacklist", "nofilter"]:
             return True
 
     def displayImage(self, imgname):
@@ -147,7 +152,7 @@ class LicenseChecker(object):
             return text
         else:
             self.displayImage(imgname)
-            return self.license_display_name.get(imgname, '')
+            return self.license_display_name.get(imgname, "")
 
     @property
     def free_img_ratio(self):
@@ -161,23 +166,24 @@ class LicenseChecker(object):
 
     def dumpStats(self):
         stats = []
-        stats.append('IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f' %
-                     (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio))
+        stats.append(
+            "IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f"
+            % (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio)
+        )
 
         images = set()
         for urls in self.unknown_licenses.values():
             for url in urls:
                 images.add(repr(url))
-        stats.append('Images without license information: %s' % (' '.join(list(images))))
-        stats.append('##############################')
-        stats.append('Rejected Images: %s' % ' '.join(list(self.rejected_images)))
-        return '\n'.join(stats)
+        stats.append("Images without license information: %s" % (" ".join(list(images))))
+        stats.append("##############################")
+        stats.append("Rejected Images: %s" % " ".join(list(self.rejected_images)))
+        return "\n".join(stats)
 
     def dumpUnknownLicenses(self, _dir):
         if not self.unknown_licenses:
             return
-        fn = tempfile.mktemp(dir=_dir, prefix='licensestats_', suffix='.json')
-        f = open(fn, 'w')
+        f = tempfile.NamedTemporaryFile(dir=_dir, prefix="licensestats_", suffix=".json")
         unknown_licenses = {}
         for (license, urls) in self.unknown_licenses.items():
             unknown_licenses[license] = list(urls)
@@ -189,28 +195,33 @@ class LicenseChecker(object):
         unknown_licenses = {}
         for fn in files:
             fn = os.path.join(_dir, fn)
-            if not fn.endswith('json'):
+            if not fn.endswith("json"):
                 continue
-            content = six.text_type(open(fn).read(), 'utf-8')
+            content = six.text_type(open(fn).read(), "utf-8")
             try:
                 licenses = json.loads(content)
             except ValueError:
-                print('no json object found in file', fn)
+                print("no json object found in file", fn)
                 continue
             for (license, urls) in licenses.items():
                 if not self.licenses.get(license, False):
                     seen_urls = unknown_licenses.get(license, set())
                     seen_urls.update(set(urls))
                     unknown_licenses[license] = seen_urls
-        sorted_licenses = [(len(urls), license, urls)
-                           for license, urls in unknown_licenses.items()]
+        sorted_licenses = [
+            (len(urls), license, urls) for license, urls in unknown_licenses.items()
+        ]
         sorted_licenses.sort(reverse=True)
         for num_urls, license, urls in sorted_licenses:
-            args = {'template': license.encode('utf-8'),
-                    'num_images': num_urls,
-                    'img_str': '\n'.join([i.encode('utf-8') for i in list(urls)[:5]])
-                    }
-            print("\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n" % args)
+            args = {
+                "template": license.encode("utf-8"),
+                "num_images": num_urls,
+                "img_str": "\n".join([i.encode("utf-8") for i in list(urls)[:5]]),
+            }
+            print(
+                "\nTEMPLATE: %(template)s (num rejected images: %(num_images)d)\nIMAGES:\n%(img_str)s\n"
+                % args
+            )
 
     def dumpLicenseInfoContent(self):
 
@@ -228,25 +239,28 @@ class LicenseChecker(object):
 
         # for templ, lic in self.licenses.items():
         for lic in licenses:
-            if lic.license_type in ['free', 'nonfree']:
+            if lic.license_type in ["free", "nonfree"]:
                 # print
                 # "{{/ImageLicenseItem|template_name=%(lic_name)s|license=%(display_name)s|display_allowed=%(allowed)s|description=%(description)s}}"
                 # % {
-                if lic.license_type == 'free':
+                if lic.license_type == "free":
                     allowedstr = "yes"
                 else:
                     allowedstr = "no"
 
-                print(tmpl_txt % {
-                    'lic_name': lic.name.encode('utf-8'),
-                    'display_name': lic.display_name.encode('utf-8'),
-                    'allowed': allowedstr,
-                    'description': lic.description.encode('utf-8'),
-                })
-                #print lic.name, lic.display_name, lic.license_type
+                print(
+                    tmpl_txt
+                    % {
+                        "lic_name": lic.name.encode("utf-8"),
+                        "display_name": lic.display_name.encode("utf-8"),
+                        "allowed": allowedstr,
+                        "description": lic.description.encode("utf-8"),
+                    }
+                )
+                # print lic.name, lic.display_name, lic.license_type
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     lc = LicenseChecker()
     lc.readLicensesCSV()
@@ -257,9 +271,9 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         stats_dir = sys.argv[1]
     else:
-        stats_dir = os.environ.get('HIQ_STATSDIR')
+        stats_dir = os.environ.get("HIQ_STATSDIR")
     if not stats_dir:
-        print('specify stats_dir as first arg, or set environment var HIQ_STATSIDR')
+        print("specify stats_dir as first arg, or set environment var HIQ_STATSIDR")
         sys.exit(1)
 
     lc.analyseUnknownLicenses(stats_dir)

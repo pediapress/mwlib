@@ -4,24 +4,29 @@
 # Copyright (c) 2007, 2008, 2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 from __future__ import division
 
-from __future__ import absolute_import
 from mwlib import advtree
 
 
 def hasInfoboxAttrs(node):
-    infobox_classIDs = ['infobox', 'taxobox']
+    infobox_classIDs = ["infobox", "taxobox"]
     if node.hasClassID(infobox_classIDs):
         return True
-    if node.attributes.get('summary', '').lower() in infobox_classIDs:
+    if node.attributes.get("summary", "").lower() in infobox_classIDs:
         return True
     return False
 
 
 def textInNode(node):
-    amap = {advtree.Text: "caption", advtree.Link: "target", advtree.URL: "caption",
-            advtree.Math: "caption", advtree.ImageLink: "caption"}
+    amap = {
+        advtree.Text: "caption",
+        advtree.Link: "target",
+        advtree.URL: "caption",
+        advtree.Math: "caption",
+        advtree.ImageLink: "caption",
+    }
     access = amap.get(node.__class__, "")
     if access:
         txt = getattr(node, access)
@@ -33,7 +38,9 @@ def textInNode(node):
         return 0
 
 
-def textBeforeInfoBox(node, infobox, txt_list=[]):
+def textBeforeInfoBox(node, infobox, txt_list=None):
+    if not txt_list:
+        txt_list = []
     txt_list.append((textInNode(node), node == infobox))
     for c in node:
         textBeforeInfoBox(c, infobox, txt_list)
@@ -46,7 +53,9 @@ def textBeforeInfoBox(node, infobox, txt_list=[]):
 
 
 def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
-    assert article_node.__class__ == advtree.Article, 'articleStartsWithInfobox needs to be called with Article node'
+    assert (
+        article_node.__class__ == advtree.Article
+    ), "articleStartsWithInfobox needs to be called with Article node"
     infobox = None
     for table in article_node.getChildNodesByClass(advtree.Table):
         if hasInfoboxAttrs(table):
@@ -57,7 +66,9 @@ def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
 
 
 def articleStartsWithTable(article_node, max_text_until_infobox=0):
-    assert article_node.__class__ == advtree.Article, 'articleStartsWithInfobox needs to be called with Article node'
+    assert (
+        article_node.__class__ == advtree.Article
+    ), "articleStartsWithInfobox needs to be called with Article node"
     tables = article_node.getChildNodesByClass(advtree.Table)
     if not tables:
         return False

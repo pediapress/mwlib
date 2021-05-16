@@ -4,24 +4,24 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
 from __future__ import division
 
-
-from __future__ import absolute_import
 from PIL import Image
 
 
 class ImageUtils(object):
-
-    def __init__(self, print_width,
-                 print_height,
-                 default_thumb_width,
-                 img_min_res,
-                 img_max_thumb_width,
-                 img_max_thumb_height,
-                 img_inline_scale_factor,
-                 print_width_px
-                 ):
+    def __init__(
+        self,
+        print_width,
+        print_height,
+        default_thumb_width,
+        img_min_res,
+        img_max_thumb_width,
+        img_max_thumb_height,
+        img_inline_scale_factor,
+        print_width_px,
+    ):
 
         self.print_width = print_width
         self.print_height = print_height
@@ -32,11 +32,17 @@ class ImageUtils(object):
         self.img_inline_scale_factor = img_inline_scale_factor
         self.print_width_px = print_width_px
 
-    def getImageSize(self, img_node, img_path=None,
-                     max_print_width=None, max_print_height=None,
-                     fullsize_thumbs=False, img_size=None):
-        max_w = getattr(img_node, 'width', None)
-        max_h = getattr(img_node, 'height', None)
+    def getImageSize(
+        self,
+        img_node,
+        img_path=None,
+        max_print_width=None,
+        max_print_height=None,
+        fullsize_thumbs=False,
+        img_size=None,
+    ):
+        max_w = getattr(img_node, "width", None)
+        max_h = getattr(img_node, "height", None)
         if img_path:
             try:
                 img = Image.open(img_path)
@@ -56,15 +62,19 @@ class ImageUtils(object):
             max_w = max_h * ar
 
         # check if thumb, then assign default width
-        if getattr(img_node, 'thumb', None) or getattr(img_node, 'frame', None) or getattr(
-                img_node, 'frameless', None) or getattr(img_node, 'align', None) in ['right', 'left']:
+        if (
+            getattr(img_node, "thumb", None)
+            or getattr(img_node, "frame", None)
+            or getattr(img_node, "frameless", None)
+            or getattr(img_node, "align", None) in ["right", "left"]
+        ):
             max_w = max_w or self.default_thumb_width
             if fullsize_thumbs:
                 max_w = self.print_width_px
-            if getattr(img_node, 'align', None) not in ['center', 'none']:
+            if getattr(img_node, "align", None) not in ["center", "none"]:
                 img_node.floating = True
-            if getattr(img_node, 'upright', 1):
-                max_w *= getattr(img_node, 'upright', 1)
+            if getattr(img_node, "upright", 1):
+                max_w *= getattr(img_node, "upright", 1)
         if not max_w:
             max_w = min(self.print_width_px, px_w)
         max_w = min(self.print_width_px, max_w)
@@ -83,9 +93,12 @@ class ImageUtils(object):
             img_print_width = (resulting_dpi / self.img_min_res) * img_print_width
 
         # check size limits for floating images
-        if getattr(img_node, 'floating', False):
-            img_print_width = min(img_print_width, self.print_width *
-                                  self.img_max_thumb_width, self.print_height * self.img_max_thumb_height * ar)
+        if getattr(img_node, "floating", False):
+            img_print_width = min(
+                img_print_width,
+                self.print_width * self.img_max_thumb_width,
+                self.print_height * self.img_max_thumb_height * ar,
+            )
 
         if img_node.isInline():
             if img_print_width < self.print_width / 2:  # scale "small" inline images

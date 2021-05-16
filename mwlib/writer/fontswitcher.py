@@ -6,17 +6,18 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-import re
+
 import os
+import re
+
 import six
 from six import unichr
 from six.moves import range
 
 
 class Scripts(object):
-
     def __init__(self):
-        scripts_filename = os.path.join(os.path.dirname(__file__), 'scripts.txt')
+        scripts_filename = os.path.join(os.path.dirname(__file__), "scripts.txt")
         self.script2code_block = {}
         self.code_block2scripts = []
         self.readScriptFile(scripts_filename)
@@ -25,9 +26,9 @@ class Scripts(object):
         try:
             f = open(fn)
         except IOError:
-            raise Exception('scripts.txt file not found at: %r' % fn)
+            raise Exception("scripts.txt file not found at: %r" % fn)
         for line in f.readlines():
-            res = re.search('([A-Z0-9]+)\.\.([A-Z0-9]+); (.*)', line.strip())
+            res = re.search("([A-Z0-9]+)\.\.([A-Z0-9]+); (.*)", line.strip())
             if res:
                 start_block, end_block, script = res.groups()
                 self.script2code_block[script.lower()] = (int(start_block, 16), int(end_block, 16))
@@ -63,14 +64,13 @@ class Scripts(object):
         while idx < txt_len:
             for block_start, block_end, script in self.code_block2scripts:
                 while idx < txt_len and block_start <= ord(txt[idx]) <= block_end:
-                    if txt[idx] != ' ':
+                    if txt[idx] != " ":
                         scripts.add(script)
                     idx += 1
         return list(scripts)
 
 
 class FontSwitcher(object):
-
     def __init__(self, char_blacklist_file=None):
         self.scripts = Scripts()
         self.default_font = None
@@ -78,9 +78,10 @@ class FontSwitcher(object):
 
         self.space_like_chars = [i for i in range(33) if not i in [9, 10, 13]] + [127]
         self.remove_chars = [173]  # 173 = softhyphen
-        self.ignore_chars = [8206,  # left to right mark
-                             8207,  # right to left mark
-                             ]
+        self.ignore_chars = [
+            8206,  # left to right mark
+            8207,  # right to left mark
+        ]
         self.no_switch_chars = self.space_like_chars + self.ignore_chars + self.remove_chars
         self.char_blacklist = self.readCharBlacklist(char_blacklist_file)
 
@@ -136,9 +137,9 @@ class FontSwitcher(object):
             blacklisted = self.char_blacklist.get(ord_c, False)
             if ord_c in self.no_switch_chars or blacklisted:
                 if ord_c in self.remove_chars:
-                    c = ''
+                    c = ""
                 if ord_c in self.space_like_chars:
-                    c = ' '
+                    c = " "
                 if blacklisted:
                     c = unichr(9633)  # U+25A1 WHITE SQUARE
                 if last_font:
@@ -148,23 +149,23 @@ class FontSwitcher(object):
             else:
                 font = self.getFont(ord_c)
             if font != last_font and last_txt:
-                txt_list.append((''.join(last_txt), last_font))
+                txt_list.append(("".join(last_txt), last_font))
                 last_txt = []
             last_txt.append(c)
             last_font = font
         if last_txt:
-            txt_list.append((''.join(last_txt), last_font))
+            txt_list.append(("".join(last_txt), last_font))
 
         if spaces_to_default:
             new_txt_list = []
             for txt, font in txt_list:
                 if font != self.default_font:
-                    if txt.startswith(' '):
-                        new_txt_list.append((' ', self.default_font))
+                    if txt.startswith(" "):
+                        new_txt_list.append((" ", self.default_font))
                         new_txt_list.append((txt[1:], font))
-                    elif txt.endswith(' '):
+                    elif txt.endswith(" "):
                         new_txt_list.append((txt[:-1], font))
-                        new_txt_list.append((' ', self.default_font))
+                        new_txt_list.append((" ", self.default_font))
                     else:
                         new_txt_list.append((txt, font))
                 else:
@@ -179,13 +180,13 @@ class FontSwitcher(object):
         return txt_list
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _scripts = Scripts()
 
     blocks = [
         (9472, 9580),
-        #(4352, 4607),
-        #(12592, 12687),
+        # (4352, 4607),
+        # (12592, 12687),
     ]
 
     scripts = _scripts.getScriptsForCodeBlocks(blocks)
