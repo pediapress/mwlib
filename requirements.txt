@@ -3,7 +3,7 @@ bottle==0.10.11
 cython==0.28.2
 gevent==1.2.2
 greenlet==0.4.13
-lxml==4.2.1
+lxml==4.6.5
 odfpy==0.9.6
 Pillow==6.2.1
 py==1.4.18
