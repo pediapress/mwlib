@@ -1,5 +1,5 @@
 apipkg==1.2
-bottle==0.10.11
+bottle==0.12.20
 cython==0.28.2
 gevent==1.2.2
 greenlet==0.4.13
