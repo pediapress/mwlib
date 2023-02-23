@@ -12,6 +12,31 @@ converting them to different output formats. mwlib is used by
 wikipedia's "Print/export" feature in order to generate PDF documents
 from wikipedia articles.
 
+
+
+Getting Started
+======================================================================
+To build mwlib, you need to have the following software installed:
+
+- Python 3.8 or later
+- ploticus
+- re2c
+- perl
+- pillow / pyimage
+- imageMagick
+
+Setup a virtual environment for Python 3.8 or later and activate it.
+
+mwlib uses `pip-compile-multi <https://pip-compile-multi.readthedocs.io/en/latest/index.html>`_ to
+manage dependencies. To install all dependencies, run the following commands:
+
+    $ make install
+
+To build mwlib, run the following commands:
+
+    $ python setup.py build
+    $ python setup.py install
+
 Documentation
 =================
 Please visit http://mwlib.readthedocs.org/en/latest/index.html for

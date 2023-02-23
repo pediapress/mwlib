@@ -9,7 +9,9 @@ RST2HTML ?= rst2html.py
 default::
 
 requirements::
-	pip install -r requirements.txt
+	pip-compile-multi
+	pip install -r requirements/base.txt
+	pip install -r requirements/test.txt
 
 all:: requirements mwlib/_uscan.cc cython MANIFEST.in
 

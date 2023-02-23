@@ -1,0 +1,16 @@
+Cython
+Pillow
+apipkg
+bottle
+gevent
+lxml
+odfpy
+py
+pyPdf
+pyparsing
+qserve
+roman
+setuptools
+simplejson
+sqlitedict
+timelib
