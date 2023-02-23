@@ -1,0 +1,224 @@
+# Translation of Mwlib.rl to Lithuanian (lietuvių)
+# Exported from translatewiki.net
+#
+# Author: Eitvys200
+# Author: Ignas693
+# Author: Mantak111
+# Author: Matasg
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:30+0000\n"
+"Language-Team: Lithuanian <https://translatewiki.net/wiki/Portal:lt>\n"
+"Language: lt\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: lt\n"
+"X-Message-Group: #out-mwlibrl\n"
+"Plural-Forms: nplurals=3; plural=(n%10 == 1 && n%100 != 11) ? 0 : ( (n%10 >= "
+"2 && (n%100 < 10 || n%100 >= 20)) ? 1 : 2 );\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Indeksas"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Šaltinis"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Licencija"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Aukojimai"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Straipsnio licencijos"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Kreipinys"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Poraštė"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Redaktorius"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Sukurta:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Kontekstas"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Straipsniai"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Gamintojas:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "PDF Writer versija:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib versija:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Turinys"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Pralaidos straipsnių!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Atkreipkite dėmesį: tai tik peržiūra, skirta suteikti idėja, kaip knyga, "
+"teksto."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Atkreipkite dėmesį: tai tik iš knygų, skirta suteikti idėja, kaip jūsų "
+"knygos atrodo dydis. Tik pirmas kelias dirbiniai, taip pat pirmųjų puslapių "
+"iš indekso, knygos rodomi iliustracijos. Visi reikmenys, net tuos, kurie "
+"liko iš peržiūros, bus įtraukiamos į galutinę spausdinta knyga."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Išnašos"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Priedėlis"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Tolesniuose skirsniuose išvardyti visų straipsnių ir nuotraukos naudojamos "
+"šios knygos šaltinių. Tokie šaltiniai pateikti išsamesnę licencijavimo "
+"informacija, įskaitant autoriaus teisių statusą, šio failo autorinių teisių "
+"savininkas, ir licencijos sąlygų."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Šaltinių sąrašus kiekvienam straipsnyje pateikti išsamesnę licencijavimo "
+"informacija, įskaitant autoriaus teisių statusą, šio failo autorinių teisių "
+"savininkas, ir licencijos sąlygų."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Šaltinių sąrašus kiekvienam vaizdas pateikti išsamesnę licencijavimo "
+"informacija, įskaitant autoriaus teisių statusą, šio failo autorinių teisių "
+"savininkas, ir licencijos sąlygų."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Straipsnis šaltiniai ir Prisidedančių"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Vaizdo šaltiniai, licencijos ir Prisidedančių"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Paveikslėlis:"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "anonimas keitimus"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Figūra"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Taip pat žiūrėkite"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF sukurta naudojant atviro šaltinio mwlib rinkinys. Žiūrėti http://code."
+"pediapress.com/ daugiau informacijos."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext versija:%(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib versija: %(mwlibversion)s, mwlib.rl versija: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Šaltinis:"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Autoriai"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "Nežinomas"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Licencija"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>Įspėjimas: Straipsnis negali atvaizduoti paprastojo teksto.</"
+"strong><br>Galimos problemos priežastys: (a) klaidos pdf writer programinėje "
+"įrangoje (b) problematiškoje Mediawiki žymėjimo (c) lentelėje yra per platus"

@@ -1,0 +1,207 @@
+# Translation of Mwlib.rl to Bengali (বাংলা)
+# Exported from translatewiki.net
+#
+# Author: Bellayet
+# Author: Nasir8891
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:05+0200\n"
+"PO-Revision-Date: 2013-10-07 20:04:44+0000\n"
+"Language-Team: Bengali <https://translatewiki.net/wiki/Portal:bn>\n"
+"Language: bn\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: bn\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "নির্ঘন্ট"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "উৎস:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "লাইসেন্স:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "অনুবাদক:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "নিবন্ধের লাইসেন্স"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "শিরোনাম"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "সাবটাইটেল:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "সম্পাদক:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "তৈরী হয়েছে:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "বিষয়বস্তু"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "নিবন্ধ"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "প্রস্তুতকারক:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "পিডিএফ লেখক সংস্করণ:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib সংস্করণ:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "বিষয়বস্তুর সূচী"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "নিবন্ধ উপেক্ষা!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"লক্ষ্য করুন: এটি একটি প্রাকদর্শন দেখনো হচ্ছে যেন বইটি তৈরী হওয়ার পর কেমন দেখাবে "
+"তার ধারণা পাওয়া যায়।"
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"লক্ষ্য করুন: বইটি তৈরী হওয়ার পর কেমন দেখাবে সে সম্পর্কে এখানে আপনাকে কেবলমাত্র "
+"একটি ধারণা দেয়া হচ্ছে। শুধুমাত্র প্রথম দিকের কিছু নিবন্ধ, সূচীপত্রের প্রথম পাতা ইত্যাদি "
+"দেখানো হচ্ছে। সকল নিবন্ধ যা নির্বাচন করা হয়েছে কিন্তু প্রাকদর্শনে দেখা যাচ্ছে না, তা "
+"বইটির চূড়ান্ত মুদ্রিত সংস্করণে থাকবে।"
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "তথ্যসূত্র"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "পরিশিষ্ট"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "নিবন্ধের উৎস এবং অবদানকারী"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "ছবির উৎস, লাইসেন্স এবং অবদানকারী"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "চিত্র"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "বেনামী সম্পাদনা"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "চিত্র"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "আরও দেখুন"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"পিডিএফ ফাইলটি তৈরী করা হয়েছে ওপেন সোর্স টুলকিট mwlib ব্যবহার করে। আরও তথ্যের জন্য "
+"http://code.pediapress.com/ দেখুন।"
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext সংস্করণ: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib সংস্করণ: %(mwlibversion)s, mwlib.rl সংস্করণ: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "উৎস"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "অবদানকারী"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "অজানা"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "লাইসেন্স"
+
+#: mwlib/rl/rlwriter.py:843
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""

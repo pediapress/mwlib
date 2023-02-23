@@ -1,0 +1,224 @@
+# Translation of Mwlib.rl to Hungarian (magyar)
+# Exported from translatewiki.net
+#
+# Author: Bdamokos
+# Author: Bennó
+# Author: Dj
+# Author: Glanthor Reviol
+# Author: Tgr
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:14+0000\n"
+"Language-Team: Hungarian <https://translatewiki.net/wiki/Portal:hu>\n"
+"Language: hu\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: hu\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Név- és tárgymutató"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Forrás:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Licenc:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Közreműködők:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Szócikk licencei"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Cím"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Felirat:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Szerkesztő:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Létrehozva:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Tartalom"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Szócikkek"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Készítette:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "PDF-író verziója:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib.ext verziója:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Tartalomjegyzék"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Szócikkek átugrása!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr "Ez csak előnézet, célja a könyv szedésének körülbelüli bemutatása!"
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Megjegyzés: Ez a könyv csak egy kivonata, amely csak bemutatja, hogy milyen "
+"is a könyv. Csak az első néhány rész, valamint az index első oldala látható. "
+"A végleges nyomtatott könyvben az itt kimaradt részek is megtalálhatók."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Hivatkozások"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Függelék"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Az alábbi szakaszok felsorolják az ebben a könyvben használt összes szócikk "
+"és kép forrását. Ezek a források sokkal részletesebb licencinformációkkal "
+"szolgálnak, beleértve a szerzői jogi státuszt, a szerzői jog tulajdonosát és "
+"a licencfeltételeket."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Az alábbi szakaszok felsorolják az ebben a könyvben használt összes szócikk "
+"forrását. Ezek a források sokkal részletesebb licencinformációkkal "
+"szolgálnak, beleértve a szerzői jogi státuszt, a szerzői jog tulajdonosát és "
+"a licencfeltételeket."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Az alábbi szakaszok felsorolják az ebben a könyvben használt összes kép "
+"forrását. Ezek a források sokkal részletesebb licencinformációkkal "
+"szolgálnak, beleértve a szerzői jogi státuszt, a szerzői jog tulajdonosát és "
+"a licencfeltételeket."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Szócikkek forrása és közreműködői"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Képek forrásai, licencei és közreműködői"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Kép"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "névtelen szerkesztés"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Ábra"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Lásd még"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"A PDF-et a nyílt forrású mwlib eszközkészlet generálta. Lásd a http://code."
+"pediapress.com/-ot további információkért."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext verziója: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib verziója: %(mwlibversion)s, mwlib.rl verziója: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Forrás"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Közreműködők:"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "ismeretlen"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Licenc"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>FIGYELEM: A cikket nem sikerült renderelni – egyszerű szöveges "
+"változat készült.</strong><br/>A hiba lehetséges okai: (a) hiba a PDF-writer "
+"szoftverben, (b) problematikus MediaWiki-kód, (c) túl széles valamelyik "
+"táblázat."

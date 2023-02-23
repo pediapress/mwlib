@@ -1,0 +1,223 @@
+# Translation of Mwlib.rl to Afrikaans (Afrikaans)
+# Exported from translatewiki.net
+#
+# Author: Naudefj
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:05+0200\n"
+"PO-Revision-Date: 2013-10-07 20:04:34+0000\n"
+"Language-Team: Afrikaans <https://translatewiki.net/wiki/Portal:af>\n"
+"Language: af\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: af\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Indeks"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Bron:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Lisensie:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Outeurs:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Bladsylisensies"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Titel"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Ondertitel:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Outeur:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Geskep op:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Inhoud"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Artikels"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Geskep deur:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "PDF-skryfweergawe:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib-weergawe:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Inhoudsopgawe"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Artikels word oorgeslaan!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr "Let op: die is slegs 'n voorskou om te wys hoe die boek sal lyk."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Let op: hierdie is slegs 'n voorskou van u boek. Die bedoeling is dat u 'n "
+"idee kry van hoe u boek gaan lyk. Slegs die eerste paar artikels en eerste "
+"paar bladsye van die indeks word in die voorskou gewys. Uiteraard sal al u "
+"artikels, ook die wat nie tans vertoon nie, in u finaal gedrukte boek "
+"opgeneem word."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Verwysings"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Bylae"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"In die volgende paragrawe word die bronne vir alle artikels en beelde wat in "
+"die boek gebruik word weergegee. Hierdie bronne wys gedetailleerde lisensie-"
+"inligting met onder andere die outeursreg, die reghebbende en die "
+"lisensievoorwaardes."
+
+#: mwlib/rl/pdfmessages.py:53
+#, fuzzy
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"In die volgende paragrawe word die bronne vir alle artikels en beelde wat in "
+"die boek gebruik word weergegee. Hierdie bronne wys gedetailleerde lisensie-"
+"inligting met onder andere die outeursreg, die reghebbende en die "
+"lisensievoorwaardes."
+
+#: mwlib/rl/pdfmessages.py:55
+#, fuzzy
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"In die volgende paragrawe word die bronne vir alle artikels en beelde wat in "
+"die boek gebruik word weergegee. Hierdie bronne wys gedetailleerde lisensie-"
+"inligting met onder andere die outeursreg, die reghebbende en die "
+"lisensievoorwaardes."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Artikelbronne en bydraers"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Beeldbronne, lisensies en bydraers"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Beeld"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "anonieme wysigings"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Figuur"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Sien ook"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"Die PDF is geskep met die oopbron program mwlib. Sien http://code.pediapress."
+"com/ vir meer inligting."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext-weergawe: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib-weergawe: %(mwlibversion)s, mwlib.rl-weergawe: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Bron"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Outeurs"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "onbekend"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Lisensie"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>Die bladsy kon nie verwerk word nie. Die afvoer is suiwer teks.</"
+"strong>Moontlike oorsake vir die probleem is: (a) 'n fout in die sagteware "
+"wat die PDF skep (b) problematiese wikikode (c) te breë tabelle"

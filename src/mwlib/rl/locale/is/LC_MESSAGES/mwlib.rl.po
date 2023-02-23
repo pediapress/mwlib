@@ -1,0 +1,216 @@
+# Translation of Mwlib.rl to Icelandic (íslenska)
+# Exported from translatewiki.net
+#
+# Author: Bjarki S
+# Author: Snævar
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:18+0000\n"
+"Language: is\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Atriðaskrá"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Heimild:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Afnotaleyfi:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Höfundar:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Afnotaleyfi greinanna"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Titill"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Undirtitill:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Ritstjóri:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Búið til:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Efnisyfirlit"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Greinar"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Búið til af:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "pdf writer-útgáfa:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib útgáfa:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Efnisyfirlit"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Sleppi greinum!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Vinsamlegast athugið: Þetta er einungis forskoðun, til þess að gefa hugmynd "
+"um hvernig bókin líti út."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Vinsamlegast athugið: Þetta er eingöngu forskoðun á bókinni þinni, ætluð til "
+"að gefa þér hugmynd um hvernig hún líti út. Eingöngu fyrstu greinarnar ásamt "
+"fyrstu síðum atriðaskráarinnar eru sýndar í þessari forskoðun. Allar "
+"greinar, jafnvel þær sem eru ekki í þessari forskoðun verða í prentuðu "
+"útgáfunni."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Heimildir"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Atriðaorðaskrá"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Eftirfarandi hluti skráir niður heimildir fyrir allar greinar og myndir sem "
+"eru notaðar í þessari bók. Þessar heimildir gefa nánari upplýsingar um leyfi "
+"og höfundaréttarstöðu, höfundaréttarhafa og skilyrði leyfisins."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Heimildirnar fyrir hverja grein gefa ítarlegri upplýsingar um afnotaleyfi, "
+"þar á meðal höfundaréttarstöðu, höfundaréttarhafa og leyfisskilyrði."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Heimildirnar fyrir hverja mynd gefa ítarlegri upplýsingar um afnotaleyfi, "
+"þar á meðal höfundaréttarstöðu, höfundaréttarhafa og leyfisskilyrði."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Heimildir greina og höfundar"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Uppruni mynda, afnotaleyfi og höfundar"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Mynd"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "nafnlausar breytingar"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Skýringarmynd"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Tengt efni"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF skjal búið til með opna hugbúnaðinum mwlib. Sjá http://code.pediapress."
+"com/ fyrir meiri upplýsingar."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext útgáfa: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib útgáfa: %(mwlibversion)s, mwlib.rl útgáfur: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Heimild"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Höfundar eða framleggjendur"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "óþekkt"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Leyfi"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>Viðvörun: Gat ekki gengið frá grein - skila einfölduðum texta.</"
+"strong><br/>Mögulegar orsakir vandamálsins eru: (a) villa í pdf-writer "
+"hugbúnaðinum (b) MediaWiki ívafsmál sem er til vandræða (c) tafla er of breið"

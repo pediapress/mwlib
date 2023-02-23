@@ -1,0 +1,223 @@
+# Translation of Mwlib.rl to Welsh (Cymraeg)
+# Exported from translatewiki.net
+#
+# Author: Lloffiwr
+# Author: Xxglennxx
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:04:52+0000\n"
+"Language-Team: Welsh <https://translatewiki.net/wiki/Portal:cy>\n"
+"Language: cy\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: cy\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=6; plural=(n == 0) ? 0 : ( (n == 1) ? 1 : ( (n == "
+"2) ? 2 : ( (n == 3) ? 3 : ( (n == 6) ? 4 : 5 ) ) ) );\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Mynegai"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Ffynhonnell:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Trwydded:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Cyfranwyr:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Trwyddedi'r Erthygl"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Teitl"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Isdeitl:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Golygydd:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Dechreuwyd ar:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Cynnwys"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Erthyglau"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Cynhyrchwyd gan:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "fersiwn y rhaglen ysgrifennu pdf:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "y fersiwn mwlib:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Cynnwys"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Erthyglau i'w hepgor!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Dalier sylw: Rhagolwg yn unig yw hwn, yn cynnig golwg ar ymddangosiad y "
+"llyfr."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Sylwer: Rhagolwg yn unig o'ch llyfr yw hwn, a fwriadwyd i roi syniad o olwg "
+"eich llyfr. Dim ond ychydig o'r erthyglau cyntaf, a rhai o dudalennau cyntaf "
+"y mynegai, a ddangosir yn y rhagolwg. Bydd yr holl erthyglau, gan gynnwys y "
+"rhai na chynhwyswyd yn y rhagolwg, yn cael eu cynnwys yn y llyfr argraffedig "
+"terfynol."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Cyfeiriadau"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Atodiad"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Mae ffynonellau'r lluniau a'r wybodaeth yn yr holl erthyglau a geir yn y "
+"llyfr hwn wedi eu rhestri isod. Ceir manylion pellach yn y ffynonellau hynny "
+"am eu trwyddedau, gan gynnwys statws hawlfraint, perchennog yr hawlfraint ac "
+"amodau'r drwydded."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Mae ffynonellau'r deunydd ym mhob erthygl wedi eu rhestru. Ceir manylion "
+"pellach yn y ffynonellau hynny am eu trwyddedau, gan gynnwys statws yr "
+"hawlfraint, ei pherchennog ac amodau'r drwydded."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Mae'r ffynonellau i bob llun wedi eu rhestru. Ceir manylion pellach yn y "
+"ffynonellau hynny am eu trwyddedau, gan gynnwys statws yr hawlfraint, ei "
+"pherchennog ac amodau'r drwydded."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Ffynonellau'r Erthygl a'i Chyfranwyr"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Ffynonellau'r Ddelwedd, ei Thrwyddedi a'i Chyfranwyr"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Delwedd"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "golygiad dienw"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Ffigur"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Gweler hefyd"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"Cynhyrchwyd y ddogfen PDF trwy ddefnyddio'r teclyn cod agored mwlib. Gweler "
+"http://code.pediapress.com/ am ragor o wybodaeth."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "y fersiwn mwlib.ext: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"fersiwn mwlib:  %(mwlibversion)s, fersiwn mwlib.rl: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Ffynhonnell"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Cyfranwyr"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "anhysbys"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Trwydded"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>RHYBUDD: Ni ellid llunio'r erthygl - gosodir y cynnyrch mewn testun "
+"plaen.<strong><br/>Dyma achosion posib y broblem: (a) byg ym meddalwedd yr "
+"ysgrifennwr pdf (b) cystrawen Mediawici amheus (c) y tabl yn rhy lydan"

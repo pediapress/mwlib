@@ -1,0 +1,214 @@
+# Translation of Mwlib.rl to Mizo (Mizo ţawng)
+# Exported from translatewiki.net
+#
+# Author: RMizo
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:31+0000\n"
+"Language: lus\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Zawnawlna"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Hnar:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Phalna:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Thawhtute:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Thu vohna"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Thupui"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Thupui chhäwng:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Siamţhatu:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Siam ni:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "A Chhung Thute"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Thu awmte"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Siamtu:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "pdf-a siamtu:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib-in:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "A chhunga thu awmte"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Thu ţhenkhat kalkan a ni!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Hriat tùr: Hei hi lehkhabuah engtiangin nge a inchhuah dawn tih en chhinna "
+"mai a ni."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Hriat tùr: Hei hi lehkhabuah engtiangin nge a inchhuah dawn tih enchhinna "
+"mai a ni. I lehkhabua a tir lam thu tlém te leh a zawnawlna hmasa lam chauh "
+"he enchhinnaah hian tihlan a ni. A lehkhabu chhutchhuah hunah chuan a chhung "
+"thu zawng zawng hi telh vek a ni thung ang, enchhinnaa hmaihte pawh."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Ràwnte"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Thubelh"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"A hnuai hlawmah khuan he lehkhabu-a thu leh thlalâk kan lakna hnar zawng "
+"zawng kan dah vek a. Khung a hnarahte khuan lakchhawn phalna dinhmun leh "
+"neitu te leh phalna dang dang chiang zawkin a lang."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Lakchhawn phalna dinhmun leh neitu te chu thu lakna hnar ziahah te khuan "
+"kimchang zawkin a en theih ang."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Lakchhawn theihna dinhmun leh neitu leh phalna dang chu thlalâk lakna hnarah "
+"khuan chiang zawka pek a ni."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Thu hnarte leh thawhtute"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Thlalâk hnar, phalna leh thawhtute"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Thlalâk"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "hriat loh siamţhat"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Lem"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Hengte hi en bawk la"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"Hnar zalen (open source) mwlib hmanrelh (toolkit) hmanga her chhuah pdf."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext chhuah: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib chhuah: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Hnar"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Thawhtute"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "hriat loh"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Phalna"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong> Vaukhanna: Thuziak a pumin a chhuahchhawn theih loh - thu mawlmang "
+"tawpa ziah tùrin. </strong><br/>A chhan ni thei thenkhat te chu: (a) pdf-"
+"ziaktu khawlthluaka hrik (aw) MediaWiki chhuah-chhoh (markup) felhlel (ch) "
+"dawhkan zau leh lutuk"

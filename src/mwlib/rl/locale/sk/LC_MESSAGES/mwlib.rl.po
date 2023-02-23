@@ -1,0 +1,221 @@
+# Translation of Mwlib.rl to Slovak (slovenčina)
+# Exported from translatewiki.net
+#
+# Author: Helix84
+# Author: Jaroslav.micek
+# Author: Wizzard
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2014-10-06 10:05:51+0000\n"
+"Language-Team: Slovak <https://translatewiki.net/wiki/Portal:sk>\n"
+"Language: sk\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.25alpha (d8e297c); Translate 2014-09-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: sk\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ( (n >= 2 && n <= 4) ? 1 : "
+"2 );\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Index"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Zdroj:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Licencia:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Autori:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Licencie článkov"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Názov"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Podnázov:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Redaktor:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Vytvorené:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Obsah"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Články"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Vytvoril:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "verzia nástroja na tvorbu pdf:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "verzia mwlib.ext:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Obsah"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Preskakujú sa články!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Pamätajte prosím, že toto je len náhľad, ktorého účelom je ukázať ako je "
+"kniha tlačená."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Upozornenie: Toto je iba náhľad vašej knihy vytvorený na získanie lepšej "
+"predstavy o jej vzhľade. V tomto náhľade sa zobrazuje iba niekoľko prvých "
+"článkov a niekoľko prvých stránok registra. V konečnej vytlačenej verzii "
+"knihy budú zahrnuté všetky články, vrátane tých, ktoré boli v tomto náhľade "
+"vynechané."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Referencie"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Príloha"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Nasledovné časti obsahujú zoznam zdrojov všetkých článkov a obrázkov, ktoré "
+"sú v knihe použité. Tieto zdroje poskytujú podrobnejšie informácie o "
+"licencovaní vrátane stavu a držiteľa autorských práv a licenčných podmienok."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Zdroje uvedené pri každom článku ponúkajú detailné informácie o licencii, "
+"vrátane stavu copyrightu, vlastníkovi copyrightu a licenčných podmienok."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Zdroje uvedené pri každom obrázku ponúkajú detailné informácie o licencii, "
+"vrátane stavu copyrightu, vlastníkovi copyrightu a licenčných podmienok."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Zdroje článkov a prispievatelia"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Zdroje obrázkov, licencie a prispievatelia"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Obrázok"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "anonymné úpravy"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Obrázok"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Pozri aj"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF vytvorené pomocou open source sady nástrojov mwlib. Ďalšie informácie "
+"nájdete na http://code.pediapress.com/"
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "verzia mwlib.ext: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"verzia mwlib: %(mwlibversion)s, verzia mwlib.rl: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Zdroj"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Prispievatelia"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "neznámi"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Licencia"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>UPOZORNENIE: Článok nebolo možné vykresliť - na výstup sa zapíše "
+"čistý text.</strong><br/>Možné príčiny problému sú: (a) chyba v softvéri pdf-"
+"writer (b) problematická MediaWiki syntax článku (c) príliš široká tabuľka"
