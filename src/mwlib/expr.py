@@ -8,10 +8,6 @@
 http://meta.wikimedia.org/wiki/ParserFunctions#.23expr:
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import inspect
 import math
 import re
@@ -71,7 +67,8 @@ unary_ops = set()
 def addop(op, prec, fun, numargs=None):
     precedence[op] = prec
     if numargs is None:
-        numargs = len(inspect.getargspec(fun)[0])
+        # numargs = len(inspect.getargspec(fun)[0])
+        numargs = len(inspect.getfullargspec(fun)[0])
 
     if numargs == 1:
         unary_ops.add(op)
@@ -103,8 +100,8 @@ a("ceil", 9, lambda x: int(math.ceil(x)))
 a("floor", 9, lambda x: int(math.floor(x)))
 a("trunc", 9, int, 1)
 
-a("e", 11, lambda x, y: x * 10 ** y)
-a("E", 11, lambda x, y: x * 10 ** y)
+a("e", 11, lambda x, y: x * 10**y)
+a("E", 11, lambda x, y: x * 10**y)
 
 a("*", 8, lambda x, y: x * y)
 a("/", 8, lambda x, y: x / y)

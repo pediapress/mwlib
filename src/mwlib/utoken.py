@@ -5,8 +5,6 @@
 
 # unified/universal token
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
 import re
 from . import _uscan as _mwscan

@@ -2,22 +2,21 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import print_function
 import os
 import zipfile
 import shutil
 import tempfile
 import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
-import sqlite3dbm
 from hashlib import sha1
 from mwlib import myjson as json
 
 from mwlib import nshandling, utils
 from mwlib.log import Log
+from mwlib.utils import python2sort
 import six
 from six import unichr
 from six.moves import range
+from sqlitedict import SqliteDict
 
 log = Log('nuwiki')
 
@@ -31,6 +30,7 @@ class page(object):
 
 
 class DumbJsonDB(object):
+    db = None
 
     def __init__(self, fn, allow_pickle=False):
         self.fn = fn
@@ -38,7 +38,7 @@ class DumbJsonDB(object):
         self.read_db()
 
     def read_db(self):
-        self.db = sqlite3dbm.open(self.fn)
+        self.db = SqliteDict(self.fn)
 
     def __getitem__(self, key):
         v = self.db.get(key, '')
@@ -161,7 +161,7 @@ class nuwiki(object):
                 #     print "excluding:", repr(pg.title)
 
         tmp = list(self.revisions.items())
-        tmp.sort(reverse=True)
+        python2sort(tmp, reverse=True)
         for revid, p in tmp:
             title = p.title
             if title not in self.revisions:
@@ -279,8 +279,8 @@ def extract_member(zipfile, member, dstdir):
     assert dstdir.endswith(os.path.sep), "/ missing at end"
 
     fn = member.filename
-    if isinstance(fn, str):
-        fn = six.text_type(fn, 'utf-8')
+    # if isinstance(fn, str):
+    #     fn = six.text_type(fn, 'utf-8')
     targetpath = os.path.normpath(os.path.join(dstdir, fn))
 
     if not targetpath.startswith(dstdir):
@@ -503,7 +503,8 @@ class adapt(object):
 
 def getContributorsFromInformationTemplate(raw, title, wikidb):
     from mwlib.expander import find_template, get_templates, get_template_args, Expander
-    from mwlib import uparser, parser, advtree
+    from mwlib import parser, advtree
+    from mwlib import uparser
     from mwlib.templ.parser import parse
 
     def getUserLinks(raw):

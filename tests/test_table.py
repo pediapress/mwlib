@@ -1,20 +1,21 @@
 #! /usr/bin/env py.test
 
-from mwlib import dummydb, parser, expander, uparser
-from mwlib.expander import DictDB
+from mwlib import parser, uparser
 
 parse = uparser.simpleparse
 
 
 def test_simple_table():
-    r = parse("""{|
+    r = parse(
+        """{|
 |-
 | A || B
 |-
 | C || D
-|}""")
+|}"""
+    )
     table = r.find(parser.Table)[0]
-    print "TABLE:", table
+    print("TABLE:", table)
 
     assert len(table.children) == 2, "expected two rows"
     for x in table.children:

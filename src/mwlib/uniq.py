@@ -16,7 +16,7 @@ class Uniquifier(object):
         if self.random_string is None:
             import binascii
             r = os.urandom(8)
-            self.__class__.random_string = binascii.hexlify(r)
+            self.__class__.random_string = binascii.hexlify(r).decode('utf8')
 
     def get_uniq(self, repl, name):
         r = self.random_string

@@ -9,52 +9,52 @@ from mwlib.dummydb import DummyDB
 
 def parse_and_show(s):
     res = expander.parse(s)
-    print "PARSE:", repr(s)
+    print("PARSE:", repr(s))
     expander.show(res)
     return res
 
 
 def test_noexpansion_inside_pre():
     res = expand_str("<pre>A{{Pipe}}B</pre>", "<pre>A{{Pipe}}B</pre>", wikidb=DictDB(Pipe="C"))
-    print res
+    print(res)
 
 
 def test_undefined_variable():
-    db = DictDB(Art="{{Pipe}}",
-                Pipe="{{{undefined_variable}}}")
+    db = DictDB(Art="{{Pipe}}", Pipe="{{{undefined_variable}}}")
 
-    te = expander.Expander(db.normalize_and_get_page(
-        "Art", 0).rawtext, pagename="thispage", wikidb=db)
+    te = expander.Expander(
+        db.normalize_and_get_page("Art", 0).rawtext, pagename="thispage", wikidb=db
+    )
     res = te.expandTemplates()
-    print "EXPANDED:", repr(res)
-    assert u"{{{undefined_variable}}}" in res, "wrong expansion for undefined variable"
+    print("EXPANDED:", repr(res))
+    assert "{{{undefined_variable}}}" in res, "wrong expansion for undefined variable"
 
 
 def test_birth_date_and_age():
-    db = DictDB({
-        "birth date and age": '[[ {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
+    db = DictDB(
+        {
+            "birth date and age": '[[ {{{3|{{{day|{{{3}}}}}}}}}]] [[{{{1|{{{year|{{{1}}}}}}}}}]]<font class="noprint"> (age&nbsp;{{age | {{{1|{{{year|{{{1}}}}}}}}} | {{{2|{{{month|{{{2}}}}}}}}} | {{{3|{{{day|{{{3}}}}}}}}} }})</font>',
+            "age": "<includeonly>{{#expr:({{{4|{{CURRENTYEAR}}}}})-({{{1}}})-(({{{5|{{CURRENTMONTH}}}}})<({{{2}}})or({{{5|{{CURRENTMONTH}}}}})=({{{2}}})and({{{6|{{CURRENTDAY}}}}})<({{{3}}}))}}</includeonly>",
+        }
+    )
+    res = expand_str("{{birth date and age|1960|02|8}}", wikidb=db)
 
-        "age": '<includeonly>{{#expr:({{{4|{{CURRENTYEAR}}}}})-({{{1}}})-(({{{5|{{CURRENTMONTH}}}}})<({{{2}}})or({{{5|{{CURRENTMONTH}}}}})=({{{2}}})and({{{6|{{CURRENTDAY}}}}})<({{{3}}}))}}</includeonly>',
-    })
-    res = expand_str('{{birth date and age|1960|02|8}}', wikidb=db)
-
-    print "EXPANDED:", repr(res)
+    print("EXPANDED:", repr(res))
     import datetime
+
     now = datetime.datetime.now()
     b = datetime.datetime(1960, 2, 8)
     age = now.year - b.year
     if now.month * 32 + now.day < b.month * 32 + b.day:
         age -= 1
 
-    expected = u"age&nbsp;%s" % age
+    expected = "age&nbsp;%s" % age
     assert expected in res
 
 
 def test_five():
     txt = "text of the tnext template"
-    db = DictDB(
-        t1="{{{{{1}}}}}",
-        tnext=txt)
+    db = DictDB(t1="{{{{{1}}}}}", tnext=txt)
     expand_str("{{t1|tnext}}", expected=txt, wikidb=db)
 
 
@@ -75,14 +75,12 @@ def test_five_three_two():
 
 def test_alfred():
     """I start to hate that Alfred_Gusenbauer"""
-    db = DictDB(
-        a="{{ibox2|birth_date=1960}}",
-        ibox2="{{{birth{{#if:{{{birthdate|}}}||_}}date}}}"
+    db = DictDB(a="{{ibox2|birth_date=1960}}", ibox2="{{{birth{{#if:{{{birthdate|}}}||_}}date}}}")
+    te = expander.Expander(
+        db.normalize_and_get_page("a", 0).rawtext, pagename="thispage", wikidb=db
     )
-    te = expander.Expander(db.normalize_and_get_page(
-        "a", 0).rawtext, pagename="thispage", wikidb=db)
     res = te.expandTemplates()
-    print "EXPANDED:", repr(res)
+    print("EXPANDED:", repr(res))
     assert "1960" in res
 
 
@@ -123,7 +121,7 @@ def test_ifeq_numeric_comparison():
 
 
 def test_ifeq_numeric_comparison2():
-    expand_str('{{ #ifeq: "+07" | "007" | 1 | 0 }}', '0')
+    expand_str('{{ #ifeq: "+07" | "007" | 1 | 0 }}', "0")
 
 
 def test_ifeq_case_sensitive():
@@ -159,9 +157,11 @@ def test_lc_named_arg():
 def test_named_variable_whitespace():
     """http://code.pediapress.com/wiki/ticket/23"""
 
-    expand_str("{{doit|notable roles=these are the notable roles}}",
-              "these are the notable roles",
-               wikidb=DictDB(doit="{{{notable roles}}}"))
+    expand_str(
+        "{{doit|notable roles=these are the notable roles}}",
+        "these are the notable roles",
+        wikidb=DictDB(doit="{{{notable roles}}}"),
+    )
 
 
 def test_pipe_inside_imagemap():
@@ -180,7 +180,8 @@ def test_pipe_inside_imagemap():
  </imagemap>
 |bla
 }}
-""")
+"""
+    )
     result = expand_str("{{sp|1}}", wikidb=db)
     assert "</imagemap>" in result
 
@@ -205,21 +206,19 @@ Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
 
 
 def test_template_name_colon():
-    """http://code.pediapress.com/wiki/ticket/36
-    """
+    """http://code.pediapress.com/wiki/ticket/36"""
     p = parse_and_show("{{Template:foobar}}")
-    assert isinstance(p, expander.Template), 'expected a template'
-    assert p[0] == u'Template:foobar'
+    assert isinstance(p, expander.Template), "expected a template"
+    assert p[0] == "Template:foobar"
 
 
 def test_expand_parser_func_name():
-    expand_str("{{ {{NZ}}expr: 1+1}}", "2",
-               wikidb=DictDB(NZ="#"))
+    expand_str("{{ {{NZ}}expr: 1+1}}", "2", wikidb=DictDB(NZ="#"))
 
 
 def test_expand_name_with_colon():
     wikidb = DictDB()
-    wikidb.d['bla:blubb'] = 'foo'
+    wikidb.d["bla:blubb"] = "foo"
     expand_str("{{bla:blubb}}", "foo", wikidb=wikidb)
 
 
@@ -229,7 +228,7 @@ def test_parser_func_from_template():
 
 def test_bad_expr_name():
     s = expand_str("{{expr:1+1}}")  # '#' missing
-    assert s != '2', "bad result"
+    assert s != "2", "bad result"
 
 
 def test_parmpart():
@@ -266,14 +265,15 @@ def test_titleparts_negative():
 def test_titleparts_nonint():
     expand_str("{{#titleparts:Help:Link/a/b|bla}}", "Help:Link/a/b")
 
+
 cases = [
-("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression"),
-("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input"),
-("{{#iferror:{{#expr:1+1}}|bad input}}", "2"),
-("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input"),
-("{{#iferror:{{#expr:1+1}}}}", "2"),
-("{{#iferror:{{#expr:1+Z}}}}", ""),
-("{{#iferror:good|bad input|}}", ""),
+    ("{{#iferror:{{#expr:1+1}}|bad input|valid expression}}", "valid expression"),
+    ("{{#iferror:{{#expr:1+Z}}|bad input|valid expression}}", "bad input"),
+    ("{{#iferror:{{#expr:1+1}}|bad input}}", "2"),
+    ("{{#iferror:{{#expr:1+Z}}|bad input}}", "bad input"),
+    ("{{#iferror:{{#expr:1+1}}}}", "2"),
+    ("{{#iferror:{{#expr:1+Z}}}}", ""),
+    ("{{#iferror:good|bad input|}}", ""),
 ]
 
 
@@ -308,7 +308,9 @@ def test_implicit_newline_semicolon():
 
 
 def test_implicit_newline_ifeq():
-    expand_str("{{#ifeq: 1 | 1 | foo {{#if: 1 | {{{!}} }}}}", "foo \n{|", wikidb=DictDB({"!": "|"}))
+    expand_str(
+        "{{#ifeq: 1 | 1 | foo {{#if: 1 | {{{!}} }}}}", "foo \n{|", wikidb=DictDB({"!": "|"})
+    )
 
 
 def test_empty_template():
@@ -347,9 +349,7 @@ def test_implicit_newline_param():
 
 
 def test_expand_after_named():
-    db = DictDB(
-        show="{{{1}}}",
-        a="a=bc")
+    db = DictDB(show="{{{1}}}", a="a=bc")
     expand_str("{{show|{{a}}}}", "a=bc", wikidb=db)
 
 
@@ -372,95 +372,96 @@ def test_padright():
 
 
 def test_urlencode():
-    expand_str('{{urlencode:x y @}}', 'x+y+%40')
+    expand_str("{{urlencode:x y @}}", "x+y+%40")
 
 
 def test_urlencode_non_ascii():
-    expand_str(u'{{urlencode:L\xe9onie}}', 'L%C3%A9onie')
+    expand_str("{{urlencode:L\xe9onie}}", "L%C3%A9onie")
 
 
 def test_anchorencode():
     """http://code.pediapress.com/wiki/ticket/213"""
-    expand_str('{{anchorencode:x #y @}}', 'x_.23y_.40')
+    expand_str("{{anchorencode:x #y @}}", "x_.23y_.40")
 
 
 def test_anchorencode_non_ascii():
-    expand_str(u"{{anchorencode:\u0107}}", ".C4.87")
+    expand_str("{{anchorencode:\u0107}}", ".C4.87")
 
 
 def test_fullurl():
-    expand_str('{{fullurl:x y @}}', 'http://en.wikipedia.org/wiki/X_y_%40')
+    expand_str("{{fullurl:x y @}}", "http://en.wikipedia.org/wiki/X_y_%40")
 
 
 def test_fullurl_nonascii():
-    expand_str(u'{{fullurl:L\xe9onie}}', 'http://en.wikipedia.org/wiki/L%C3%A9onie')
+    expand_str("{{fullurl:L\xe9onie}}", "http://en.wikipedia.org/wiki/L%C3%A9onie")
 
 
 def test_server():
-    expand_str('{{server}}', 'http://en.wikipedia.org')
+    expand_str("{{server}}", "http://en.wikipedia.org")
 
 
 def test_servername():
-    expand_str('{{servername}}', 'en.wikipedia.org')
+    expand_str("{{servername}}", "en.wikipedia.org")
 
 
 def test_1x_newline_and_spaces():
     # see
     # http://en.wikipedia.org/wiki/Help:Newlines_and_spaces#Spaces_and.2For_newlines_as_value_of_an_unnamed_parameter
     wikidb = DictDB()
-    wikidb.d['1x'] = '{{{1}}}'
+    wikidb.d["1x"] = "{{{1}}}"
 
     def e(a, b):
         return expand_str(a, b, wikidb=wikidb)
 
-    e('a{{#if:1|\n}}b', 'ab')
-    e('a{{#if:1|b\n}}c', 'abc')
-    e('a{{#if:1|\nb}}c', 'abc')
+    e("a{{#if:1|\n}}b", "ab")
+    e("a{{#if:1|b\n}}c", "abc")
+    e("a{{#if:1|\nb}}c", "abc")
 
-    e('a{{1x|\n}}b', 'a\nb')
-    e('a{{1x|b\n}}c', 'ab\nc')
-    e('a{{1x|\nb}}c', 'a\nbc')
+    e("a{{1x|\n}}b", "a\nb")
+    e("a{{1x|b\n}}c", "ab\nc")
+    e("a{{1x|\nb}}c", "a\nbc")
 
-    e('a{{1x|1=\n}}b', 'ab')
+    e("a{{1x|1=\n}}b", "ab")
 
-    e('a{{1x|1=b\n}}c', 'abc')
-    e('a{{1x|1=\nb}}c', 'abc')
+    e("a{{1x|1=b\n}}c", "abc")
+    e("a{{1x|1=\nb}}c", "abc")
 
 
 def test_variable_alternative():
-    wikidb = DictDB(t1='{{{var|undefined}}}')
-    expand_str('{{t1|var=}}', '', wikidb=wikidb)
+    wikidb = DictDB(t1="{{{var|undefined}}}")
+    expand_str("{{t1|var=}}", "", wikidb=wikidb)
 
 
 def test_implicit_newline_after_expand():
-    wikidb = DictDB(tone='{{{1}}}{{{2}}}')
-    expand_str('foo {{tone||:}} bar', 'foo \n: bar', wikidb=wikidb)
+    wikidb = DictDB(tone="{{{1}}}{{{2}}}")
+    expand_str("foo {{tone||:}} bar", "foo \n: bar", wikidb=wikidb)
 
 
 def test_pagename_non_ascii():
     def e(a, b):
-        return expand_str(a, b, pagename=u'L\xe9onie s')
-    e('{{PAGENAME}}', u'L\xe9onie s')
-    e('{{PAGENAMEE}}', 'L%C3%A9onie_s')
+        return expand_str(a, b, pagename="L\xe9onie s")
 
-    e('{{BASEPAGENAME}}', u'L\xe9onie s')
-    e('{{BASEPAGENAMEE}}', 'L%C3%A9onie_s')
+    e("{{PAGENAME}}", "L\xe9onie s")
+    e("{{PAGENAMEE}}", "L%C3%A9onie_s")
 
-    e('{{FULLPAGENAME}}', u'L\xe9onie s')
-    e('{{FULLPAGENAMEE}}', 'L%C3%A9onie_s')
+    e("{{BASEPAGENAME}}", "L\xe9onie s")
+    e("{{BASEPAGENAMEE}}", "L%C3%A9onie_s")
 
-    e('{{SUBPAGENAME}}', u'L\xe9onie s')
-    e('{{SUBPAGENAMEE}}', 'L%C3%A9onie_s')
+    e("{{FULLPAGENAME}}", "L\xe9onie s")
+    e("{{FULLPAGENAMEE}}", "L%C3%A9onie_s")
+
+    e("{{SUBPAGENAME}}", "L\xe9onie s")
+    e("{{SUBPAGENAMEE}}", "L%C3%A9onie_s")
 
 
 def test_get_templates():
     def doit(source, expected):
-        r = expander.get_templates(source, u'')
+        r = expander.get_templates(source, "")
         assert r == expected, "expected %r, got %r" % (expected, r)
 
     doit("{{foo| {{ bar }} }}", set("foo bar".split()))
     doit("{{foo{{{1}}} }}", set())
-    doit("{{{ {{foo}} }}}", set(['foo']))
+    doit("{{{ {{foo}} }}}", set(["foo"]))
     doit("{{ #if: {{{1}}} |yes|no}}", set())
 
 
@@ -469,9 +470,10 @@ def test_noinclude_end():
 
 
 def test_monthnumber():
-    wikidb = DictDB(MONTHNUMBER="{{#if:{{{1|}}}|{{#switch:{{lc:{{{1}}}}}|january|jan=1|february|feb=2|march|mar=3|apr|april=4|may=5|june|jun=6|july|jul=7|august|aug=8|september|sep=9|october|oct=10|november|nov=11|december|dec=12|{{#ifexpr:{{{1}}}<0|{{#ifexpr:(({{{1}}})round 0)!=({{{1}}})|{{#expr:12-(((0.5-({{{1}}}))round 0)mod 12)}}|{{#expr:12-(((11.5-({{{1}}}))round 0)mod 12)}}}}|{{#expr:(((10.5+{{{1}}})round 0)mod 12)+1}}}}}}|Missing required parameter 1=''month''!}}")
-
-    expand_str("{{MONTHNUMBER|12}}", "12", wikidb=wikidb)
+    wikidb = DictDB(
+        MONTHNUMBER="{{#if:{{{1|}}}|{{#switch:{{lc:{{{1}}}}}|january|jan=1|february|feb=2|march|mar=3|apr|april=4|may=5|june|jun=6|july|jul=7|august|aug=8|september|sep=9|october|oct=10|november|nov=11|december|dec=12|{{#ifexpr:{{{1}}}<0|{{#ifexpr:(({{{1}}})round 0)!=({{{1}}})|{{#expr:12-(((0.5-({{{1}}}))round 0)mod 12)}}|{{#expr:12-(((11.5-({{{1}}}))round 0)mod 12)}}}}|{{#expr:(((10.5+{{{1}}})round 0)mod 12)+1}}}}}}|Missing required parameter 1=''month''!}}"
+    )
+    expand_str("{{MONTHNUMBER|12}}", "12", wikidb=wikidb) # FIXME: expected '12', got '11'
 
 
 def test_switch_default_template():
@@ -484,8 +486,8 @@ def test_preserve_space_in_tag():
 
 def test_localurle_umlaut():
     """http://code.pediapress.com/wiki/ticket/473"""
-    r = expand_str(u"{{LOCALURLE:F\xfcbar}}")
-    assert r.endswith('/F%C3%BCbar')
+    r = expand_str("{{LOCALURLE:F\xfcbar}}")
+    assert r.endswith("/F%C3%BCbar")
 
 
 def test_equal_inside_link():
@@ -494,7 +496,7 @@ def test_equal_inside_link():
 
 
 def test_tag_parametrs():
-    expand_str('{{#tag:test|contents|a=b|c=d}}', '<test a="b" c="d">contents</test>')
+    expand_str("{{#tag:test|contents|a=b|c=d}}", '<test a="b" c="d">contents</test>')
     expand_str("{{#tag:div|contents|a}}")
 
 
@@ -535,7 +537,7 @@ def test_namespace_as_template_type_error():
 
 
 def test_preprocess_uniq_after_comment():
-    s = u"""
+    s = """
 <!--
 these <ref> tags should be ignored: <ref>
 -->
@@ -547,24 +549,25 @@ foo was missing<ref>bar</ref> <!-- some comment--> baz
 """
     e = expander.Expander(s, pagename="test", wikidb=DictDB())
     raw = e.expandTemplates()
-    print repr(raw)
-    assert u"foo was missing" in raw, "text is missing"
+    print(repr(raw))
+    assert "foo was missing" in raw, "text is missing"
 
 
 def test_dynamic_parserfun():
-    expand_str("{{{{#if: 1|}}#time: Y-m-d | 2009-1-2}}", "2009-01-02")
-
     expand_str("{{{{#if: 1|}}#switch: A | a=lower | A=UPPER }}", "UPPER")
-
     expand_str("{{{{#if: 1|}}#if: 1 | yes}}", "yes")
+    expand_str("{{{{#if: 1|}}#time: Y-m-d | 2009-1-2}}", "2009-01-02")
 
 
 def test_iferror_switch_default():
     """http://code.pediapress.com/wiki/ticket/648"""
     expand_str("{{#iferror: [[foo {{bar}}]] | yes|no}}", "no")
-    expand_str(u"""{{#switch: bla
+    expand_str(
+        """{{#switch: bla
 | #default = {{#iferror: [[foo {{bar}}]] | yes|no}}
-}}""", "no")
+}}""",
+        "no",
+    )
 
 
 def test_variable_subst():
@@ -580,112 +583,122 @@ def test_link_vs_expander():
 
 def test_pagemagic():
     def expand_page(tpl, expected):
-        return expand_str('{{%s}}' % tpl, expected,
-                          pagename='Benutzer:Anonymous user!/sandbox/my page')
+        return expand_str(
+            "{{%s}}" % tpl, expected, pagename="Benutzer:Anonymous user!/sandbox/my page"
+        )
 
     def expand_talk(tpl, expected):
-        return expand_str('{{%s}}' % tpl, expected,
-                          pagename='Benutzer Diskussion:Anonymous user!/sandbox/my page')
+        return expand_str(
+            "{{%s}}" % tpl,
+            expected,
+            pagename="Benutzer Diskussion:Anonymous user!/sandbox/my page",
+        )
 
-    expand_page('PAGENAME', 'Anonymous user!/sandbox/my page')
-    expand_page('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
-    expand_talk('PAGENAME', 'Anonymous user!/sandbox/my page')
-    expand_talk('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
-    expand_page('BASEPAGENAME', 'Anonymous user!/sandbox')
-    expand_page('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
-    expand_talk('BASEPAGENAME', 'Anonymous user!/sandbox')
-    expand_talk('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
-    expand_page('SUBPAGENAME', 'my page')
-    expand_page('SUBPAGENAMEE', 'my_page')
-    expand_talk('SUBPAGENAME', 'my page')
-    expand_talk('SUBPAGENAMEE', 'my_page')
-    expand_page('NAMESPACE', 'Benutzer')
-    expand_page('NAMESPACEE', 'Benutzer')
-    expand_talk('NAMESPACE', 'Benutzer Diskussion')
-    expand_talk('NAMESPACEE', 'Benutzer_Diskussion')
-    expand_page('FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_page('FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
-    expand_talk('FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
-    expand_page('TALKSPACE', 'Benutzer Diskussion')
-    expand_page('TALKSPACEE', 'Benutzer_Diskussion')
-    expand_talk('TALKSPACE', 'Benutzer Diskussion')
-    expand_talk('TALKSPACEE', 'Benutzer_Diskussion')
-    expand_page('SUBJECTSPACE', 'Benutzer')
-    expand_page('SUBJECTSPACEE', 'Benutzer')
-    expand_talk('SUBJECTSPACE', 'Benutzer')
-    expand_talk('SUBJECTSPACEE', 'Benutzer')
-    expand_page('ARTICLESPACE', 'Benutzer')
-    expand_page('ARTICLESPACEE', 'Benutzer')
-    expand_talk('ARTICLESPACE', 'Benutzer')
-    expand_talk('ARTICLESPACEE', 'Benutzer')
-    expand_page('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
-    expand_page('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
-    expand_talk('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
-    expand_page('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_page('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_talk('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_page('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_page('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_talk('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_page("PAGENAME", "Anonymous user!/sandbox/my page")
+    expand_page("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
+    expand_talk("PAGENAME", "Anonymous user!/sandbox/my page")
+    expand_talk("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
+    expand_page("BASEPAGENAME", "Anonymous user!/sandbox")
+    expand_page("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
+    expand_talk("BASEPAGENAME", "Anonymous user!/sandbox")
+    expand_talk("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
+    expand_page("SUBPAGENAME", "my page")
+    expand_page("SUBPAGENAMEE", "my_page")
+    expand_talk("SUBPAGENAME", "my page")
+    expand_talk("SUBPAGENAMEE", "my_page")
+    expand_page("NAMESPACE", "Benutzer")
+    expand_page("NAMESPACEE", "Benutzer")
+    expand_talk("NAMESPACE", "Benutzer Diskussion")
+    expand_talk("NAMESPACEE", "Benutzer_Diskussion")
+    expand_page("FULLPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_page("FULLPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("FULLPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
+    expand_talk("FULLPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("TALKSPACE", "Benutzer Diskussion")
+    expand_page("TALKSPACEE", "Benutzer_Diskussion")
+    expand_talk("TALKSPACE", "Benutzer Diskussion")
+    expand_talk("TALKSPACEE", "Benutzer_Diskussion")
+    expand_page("SUBJECTSPACE", "Benutzer")
+    expand_page("SUBJECTSPACEE", "Benutzer")
+    expand_talk("SUBJECTSPACE", "Benutzer")
+    expand_talk("SUBJECTSPACEE", "Benutzer")
+    expand_page("ARTICLESPACE", "Benutzer")
+    expand_page("ARTICLESPACEE", "Benutzer")
+    expand_talk("ARTICLESPACE", "Benutzer")
+    expand_talk("ARTICLESPACEE", "Benutzer")
+    expand_page("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
+    expand_page("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
+    expand_talk("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_page("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_talk("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_page("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_talk("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
 
 
 def test_pagemagic_with_arg():
     def expand_page(tpl, expected):
-        return expand_str('{{%s:%s}}' % (tpl, 'Benutzer:Anonymous user!/sandbox/my page'),
-                          expected, pagename='Help:Irrelevant')
+        return expand_str(
+            "{{%s:%s}}" % (tpl, "Benutzer:Anonymous user!/sandbox/my page"),
+            expected,
+            pagename="Help:Irrelevant",
+        )
 
     def expand_talk(tpl, expected):
-        return expand_str('{{%s:%s}}' % (tpl, 'Benutzer Diskussion:Anonymous user!/sandbox/my page'),
-                          expected, pagename='Help:Irrelevant')
+        return expand_str(
+            "{{%s:%s}}" % (tpl, "Benutzer Diskussion:Anonymous user!/sandbox/my page"),
+            expected,
+            pagename="Help:Irrelevant",
+        )
 
-    expand_page('PAGENAME', 'Anonymous user!/sandbox/my page')
-    expand_page('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
-    expand_talk('PAGENAME', 'Anonymous user!/sandbox/my page')
-    expand_talk('PAGENAMEE', 'Anonymous_user%21/sandbox/my_page')
-    expand_page('BASEPAGENAME', 'Anonymous user!/sandbox')
-    expand_page('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
-    expand_talk('BASEPAGENAME', 'Anonymous user!/sandbox')
-    expand_talk('BASEPAGENAMEE', 'Anonymous_user%21/sandbox')
-    expand_page('SUBPAGENAME', 'my page')
-    expand_page('SUBPAGENAMEE', 'my_page')
-    expand_talk('SUBPAGENAME', 'my page')
-    expand_talk('SUBPAGENAMEE', 'my_page')
-    expand_page('NAMESPACE', 'Benutzer')
-    expand_page('NAMESPACEE', 'Benutzer')
-    expand_talk('NAMESPACE', 'Benutzer Diskussion')
-    expand_talk('NAMESPACEE', 'Benutzer_Diskussion')
-    expand_page('FULLPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_page('FULLPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('FULLPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
-    expand_talk('FULLPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
-    expand_page('TALKSPACE', 'Benutzer Diskussion')
-    expand_page('TALKSPACEE', 'Benutzer_Diskussion')
-    expand_talk('TALKSPACE', 'Benutzer Diskussion')
-    expand_talk('TALKSPACEE', 'Benutzer_Diskussion')
-    expand_page('SUBJECTSPACE', 'Benutzer')
-    expand_page('SUBJECTSPACEE', 'Benutzer')
-    expand_talk('SUBJECTSPACE', 'Benutzer')
-    expand_talk('SUBJECTSPACEE', 'Benutzer')
-    expand_page('ARTICLESPACE', 'Benutzer')
-    expand_page('ARTICLESPACEE', 'Benutzer')
-    expand_talk('ARTICLESPACE', 'Benutzer')
-    expand_talk('ARTICLESPACEE', 'Benutzer')
-    expand_page('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
-    expand_page('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('TALKPAGENAME', 'Benutzer Diskussion:Anonymous user!/sandbox/my page')
-    expand_talk('TALKPAGENAMEE', 'Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page')
-    expand_page('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_page('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('SUBJECTPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_talk('SUBJECTPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_page('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_page('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
-    expand_talk('ARTICLEPAGENAME', 'Benutzer:Anonymous user!/sandbox/my page')
-    expand_talk('ARTICLEPAGENAMEE', 'Benutzer%3AAnonymous_user%21/sandbox/my_page')
+    expand_page("PAGENAME", "Anonymous user!/sandbox/my page")
+    expand_page("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
+    expand_talk("PAGENAME", "Anonymous user!/sandbox/my page")
+    expand_talk("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
+    expand_page("BASEPAGENAME", "Anonymous user!/sandbox")
+    expand_page("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
+    expand_talk("BASEPAGENAME", "Anonymous user!/sandbox")
+    expand_talk("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
+    expand_page("SUBPAGENAME", "my page")
+    expand_page("SUBPAGENAMEE", "my_page")
+    expand_talk("SUBPAGENAME", "my page")
+    expand_talk("SUBPAGENAMEE", "my_page")
+    expand_page("NAMESPACE", "Benutzer")
+    expand_page("NAMESPACEE", "Benutzer")
+    expand_talk("NAMESPACE", "Benutzer Diskussion")
+    expand_talk("NAMESPACEE", "Benutzer_Diskussion")
+    expand_page("FULLPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_page("FULLPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("FULLPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
+    expand_talk("FULLPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("TALKSPACE", "Benutzer Diskussion")
+    expand_page("TALKSPACEE", "Benutzer_Diskussion")
+    expand_talk("TALKSPACE", "Benutzer Diskussion")
+    expand_talk("TALKSPACEE", "Benutzer_Diskussion")
+    expand_page("SUBJECTSPACE", "Benutzer")
+    expand_page("SUBJECTSPACEE", "Benutzer")
+    expand_talk("SUBJECTSPACE", "Benutzer")
+    expand_talk("SUBJECTSPACEE", "Benutzer")
+    expand_page("ARTICLESPACE", "Benutzer")
+    expand_page("ARTICLESPACEE", "Benutzer")
+    expand_talk("ARTICLESPACE", "Benutzer")
+    expand_talk("ARTICLESPACEE", "Benutzer")
+    expand_page("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
+    expand_page("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
+    expand_talk("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_page("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_talk("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_page("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_talk("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
+    expand_talk("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
 
 
 def test_ns():
@@ -695,30 +708,30 @@ def test_ns():
 
 def test_localized_expander():
     db = DummyDB("nl")
-    e = expander.Expander(u"{{#als: 1 | yes | no}}", wikidb=db)
+    e = expander.Expander("{{#als: 1 | yes | no}}", wikidb=db)
     res = e.expandTemplates()
     assert res == "yes"
 
 
 def test_localized_switch_default():
     db = DummyDB("nl")
-    e = expander.Expander(u"{{#switch: 1 | #standaard=foobar}}", wikidb=db)
+    e = expander.Expander("{{#switch: 1 | #standaard=foobar}}", wikidb=db)
     res = e.expandTemplates()
     assert res == "foobar"
 
 
 def test_localized_expr():
     db = DummyDB("nl")
-    e = expander.Expander(u"{{#expressie: 1+2*3}}", wikidb=db)
+    e = expander.Expander("{{#expressie: 1+2*3}}", wikidb=db)
     res = e.expandTemplates()
     assert res == "7"
 
 
 def test_resolve_magic_alias():
     db = DummyDB("nl")
-    e = expander.Expander(u"{{#als: 1 | yes | no}}", wikidb=db)
-    assert e.resolve_magic_alias(u"#als") == u"#if"
-    assert e.resolve_magic_alias(u"#foobar") is None
+    e = expander.Expander("{{#als: 1 | yes | no}}", wikidb=db)
+    assert e.resolve_magic_alias("#als") == "#if"
+    assert e.resolve_magic_alias("#foobar") is None
 
 
 def test_safesubst():

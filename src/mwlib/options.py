@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import sys
 import optparse
 
@@ -6,35 +5,39 @@ from mwlib import myjson as json
 
 from mwlib.utils import start_logging
 from mwlib import wiki, metabook, log
-import six
 
-log = log.Log('mwlib.options')
+log = log.Log("mwlib.options")
 
 
 class OptionParser(optparse.OptionParser):
-    def __init__(self, usage='%prog [OPTIONS] [ARTICLETITLE...]'):
+    def __init__(self, usage="%prog [OPTIONS] [ARTICLETITLE...]"):
         self.config_values = []
-
         optparse.OptionParser.__init__(self, usage=usage)
-
         self.metabook = None
-
         a = self.add_option
 
-        a("-c", "--config", action="callback", nargs=1, type="string", callback=self._cb_config,
-          help="configuration file, ZIP file or base URL")
+        a(
+            "-c",
+            "--config",
+            action="callback",
+            nargs=1,
+            type="string",
+            callback=self._cb_config,
+            help="configuration file, ZIP file or base URL",
+        )
 
-        a("-i", "--imagesize",
-          default=1200,
-          help="max. pixel size (width or height) for images (default: 1200)")
+        a(
+            "-i",
+            "--imagesize",
+            default=1200,
+            help="max. pixel size (width or height) for images (default: 1200)",
+        )
 
-        a("-m", "--metabook",
-          help="JSON encoded text file with article collection")
+        a("-m", "--metabook", help="JSON encoded text file with article collection")
 
         a("--collectionpage", help="Title of a collection page")
 
-        a("-x", "--noimages", action="store_true",
-          help="exclude images")
+        a("-x", "--noimages", action="store_true", help="exclude images")
 
         a("-l", "--logfile", help="log to logfile")
 
@@ -42,18 +45,17 @@ class OptionParser(optparse.OptionParser):
         a("--password", help="password for login")
         a("--domain", help="domain for login")
 
-        a("--title",
-          help="title for article collection")
+        a("--title", help="title for article collection")
 
-        a("--subtitle",
-          help="subtitle for article collection")
+        a("--subtitle", help="subtitle for article collection")
 
-        a("--editor",
-          help="editor for article collection")
+        a("--editor", help="editor for article collection")
 
-        a("--script-extension",
-          default=".php",
-          help="script extension for PHP scripts (default: .php)")
+        a(
+            "--script-extension",
+            default=".php",
+            help="script extension for PHP scripts (default: .php)",
+        )
 
     def _cb_config(self, option, opt, value, parser):
         """handle multiple --config arguments by resetting parser.values and storing
@@ -80,7 +82,8 @@ class OptionParser(optparse.OptionParser):
 
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(
-            self, args=[six.text_type(x, "utf-8") for x in sys.argv[1:]])
+            self, args=[x for x in sys.argv[1:]]
+        )
         for c in self.config_values:
             if not hasattr(c, "pages"):
                 c.pages = []
@@ -89,13 +92,17 @@ class OptionParser(optparse.OptionParser):
             start_logging(self.options.logfile)
 
         if self.options.metabook:
-            self.metabook = json.loads(six.text_type(open(self.options.metabook, 'rb').read(), 'utf-8'))
+            if "{" in self.options.metabook and "}" in self.options.metabook:
+                self.metabook = json.loads(self.options.metabook)
+            else:
+                with open(self.options.metabook) as fp:
+                    self.metabook = json.load(fp)
 
         try:
             self.options.imagesize = int(self.options.imagesize)
             assert self.options.imagesize > 0
         except (ValueError, AssertionError):
-            self.error('Argument for --imagesize must be an integer > 0.')
+            self.error("Argument for --imagesize must be an integer > 0.")
 
         for title in self.args:
             if self.metabook is None:
@@ -131,8 +138,7 @@ class OptionParser(optparse.OptionParser):
         cfg = self.options.config or ""
 
         if cfg.startswith(":") and not env.metabook.licenses:
-            mw_license_url = wiki.wpwikis.get(cfg[1:])['mw_license_url']
-            env.metabook.licenses.append(dict(mw_license_url=mw_license_url,
-                                              type="license"))
+            mw_license_url = wiki.wpwikis.get(cfg[1:])["mw_license_url"]
+            env.metabook.licenses.append(dict(mw_license_url=mw_license_url, type="license"))
 
         return env

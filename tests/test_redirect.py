@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 
 import os
-
+import pytest
 from mwlib import utils
 
 here = os.path.dirname(__file__)
@@ -28,7 +28,7 @@ def render_get_text(metabook):
 def no_redirect(mb):
     mb = os.path.join(here, mb)
     txt = render_get_text(mb)
-    print "txt:", repr(txt)
+    print("txt:", repr(txt))
     assert "redirect" not in txt.lower(), "redirect not resolved"
 
 

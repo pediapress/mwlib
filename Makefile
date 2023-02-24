@@ -13,18 +13,18 @@ requirements::
 	pip install -r requirements/base.txt
 	pip install -r requirements/test.txt
 
-all:: requirements mwlib/_uscan.cc cython MANIFEST.in
+all:: requirements src/mwlib/_uscan.cc cython MANIFEST.in
 
-cython:: mwlib/templ/nodes.c mwlib/templ/evaluate.c
+cython:: src/mwlib/templ/nodes.c src/mwlib/templ/evaluate.c
 
-mwlib/templ/nodes.c: mwlib/templ/nodes.py
-	cython mwlib/templ/nodes.py
+src/mwlib/templ/nodes.c: src/mwlib/templ/nodes.py
+	cython src/mwlib/templ/nodes.py
 
-mwlib/templ/evaluate.c: mwlib/templ/evaluate.py
-	cython mwlib/templ/evaluate.py
+src/mwlib/templ/evaluate.c: src/mwlib/templ/evaluate.py
+	cython src.mwlib/templ/evaluate.py
 
-mwlib/_uscan.cc: mwlib/_uscan.re
-	re2c -w --no-generation-date -o mwlib/_uscan.cc mwlib/_uscan.re
+src/mwlib/_uscan.cc: src/mwlib/_uscan.re
+	re2c -w --no-generation-date -o src/mwlib/_uscan.cc src/mwlib/_uscan.re
 
 documentation:: README.html
 	cd docs; make html

@@ -4,8 +4,6 @@
 # See README.rst for additional licensing information.
 
 
-from __future__ import absolute_import
-from __future__ import print_function
 
 from mwlib.log import Log
 from mwlib.parser.nodes import (

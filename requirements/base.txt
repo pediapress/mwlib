@@ -7,7 +7,7 @@
 #
 apipkg==3.0.1
     # via -r requirements/base.in
-bottle==0.12.23
+bottle==0.12.24
     # via -r requirements/base.in
 cython==0.29.33
     # via -r requirements/base.in

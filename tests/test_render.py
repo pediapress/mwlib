@@ -1,5 +1,7 @@
 #! /usr/bin/env py.test
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import glob
 import pytest
@@ -41,6 +43,6 @@ def skip_by_invalid_writer_zipfile_combination(request, writer, zipfile):
 @pytest.mark.skip_writer_zipfile('rl', 'lambda.zip')
 def test_render(writer, zipfile, tmpdir):
     cmd = "mw-render -w %s -c %s -o %s" % (writer, zipfile, tmpdir.join("output"))
-    print("running", cmd)
+    print(("running", cmd))
     err = os.system(cmd)
     assert err == 0

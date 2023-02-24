@@ -49,13 +49,11 @@ def _get_global_basedir():
 
 
 def drawTimeline(script, basedir=None):
-    if isinstance(script, six.text_type):
-        script = script.encode('utf8')
     if basedir is None:
         basedir = _get_global_basedir()
 
     m = sha1()
-    m.update(script)
+    m.update(script.encode('utf8'))
     ident = m.hexdigest()
 
     pngfile = os.path.join(basedir, ident + '.png')
@@ -64,11 +62,13 @@ def drawTimeline(script, basedir=None):
         return pngfile
 
     scriptfile = os.path.join(basedir, ident + '.txt')
-    open(scriptfile, 'w').write(script)
+    with open(scriptfile, 'w') as f:
+        f.write(script)
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
 
-    err = os.system("perl %s -P /usr/bin/ploticus -f %s -T %s -i %s" %
-                    (et, font or "ascii", basedir, scriptfile))
+    ploticus = os.popen('which ploticus').read().strip()
+    command = f"perl {et} -P {ploticus} -f {font or 'ascii'} -T {basedir} -i {scriptfile}"
+    err = os.system(command)
     if err != 0:
         return None
 

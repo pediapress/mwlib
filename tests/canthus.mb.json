@@ -14,10 +14,10 @@
     ], 
     "licenses": [
         {
-            "mw_rights_icon": "http://creativecommons.org/images/public/somerights20.png", 
+            "mw_rights_icon": "https://creativecommons.org/images/public/somerights20.png",
             "mw_rights_page": null, 
             "mw_rights_text": "Creative Commons Attribution-Share Alike 3.0 Unported", 
-            "mw_rights_url": "http://creativecommons.org/licenses/by-sa/3.0/", 
+            "mw_rights_url": "https://creativecommons.org/licenses/by-sa/3.0/",
             "name": "License", 
             "type": "license"
         }
@@ -27,7 +27,7 @@
     "type": "collection", 
     "wikis": [
         {
-            "baseurl": "http://en.wikipedia.org/w/", 
+            "baseurl": "https://en.wikipedia.org/w/",
             "ident": "en", 
             "type": "wikiconf"
         }

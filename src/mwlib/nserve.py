@@ -14,7 +14,8 @@ if __name__ == "__main__":
 
 import sys
 import re
-import StringIO
+from io import StringIO
+import urllib
 import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import six.moves.urllib.parse
 import traceback
@@ -81,7 +82,7 @@ collection_id_rex = re.compile(r"^[a-f0-9]{16}$")
 
 
 def make_collection_id(data):
-    sio = StringIO.StringIO()
+    sio = StringIO()
     sio.write(str(_version.version))
     for key in (
         "base_url",
@@ -101,7 +102,7 @@ def make_collection_id(data):
             % (num_articles, data.get("base_url"), data.get("writer"))
         )
 
-    return sha1(sio.getvalue()).hexdigest()[:16]
+    return sha1(sio.getvalue().encode('utf-8')).hexdigest()[:16]
 
 
 from mwlib import lrucache
@@ -207,19 +208,19 @@ def get_content_disposition_values(filename, ext):
         filename = u"collection"
 
     # see http://code.activestate.com/recipes/251871-latin1-to-ascii-the-unicode-hammer/
-    asciifn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore")
-    asciifn = re.sub("[ ;:\"',]+", " ", asciifn).strip() or "collection"
-    asciifn = asciifn.replace(" ", "-")
+    ascii_fn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore").decode()
+    ascii_fn = re.sub("[ ;:\"',]+", " ", ascii_fn).strip() or "collection"
+    ascii_fn = ascii_fn.replace(" ", "-")
 
-    return (asciifn, filename.encode("utf-8"))
+    return ascii_fn, filename
 
 
 def get_content_disposition(filename, ext):
-    asciifn, utf8fn = get_content_disposition_values(filename, ext)
+    ascii_fn, utf8_fn = get_content_disposition_values(filename, ext)
 
-    r = "inline; filename=%s.%s" % (asciifn, ext)
-    if utf8fn and utf8fn != asciifn:
-        r += ";filename*=UTF-8''%s.%s" % (six.moves.urllib.parse.quote(utf8fn), ext)
+    r = f"inline; filename={ascii_fn}.{ext}"
+    if utf8_fn and utf8_fn != ascii_fn:
+        r += f";filename*=UTF-8''{urllib.parse.quote(utf8_fn)}.{ext}"
     return r
 
 
@@ -284,10 +285,10 @@ class Application(object):
             )
 
     def error_response(self, error, **kw):
-        if isinstance(error, str):
-            error = six.text_type(error, "utf-8", "ignore")
-        elif not isinstance(error, six.text_type):
-            error = six.text_type(repr(error), "ascii")
+        # if isinstance(error, str):
+        #     error = six.text_type(error, "utf-8", "ignore")
+        # elif not isinstance(error, six.text_type):
+        #     error = six.text_type(repr(error), "ascii")
         return dict(error=error, **kw)
 
     def check_collection_id(self, collection_id):

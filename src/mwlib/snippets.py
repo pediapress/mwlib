@@ -1,11 +1,7 @@
 #! /usr/bin/env python
-
 """provide some mediawiki markup example snippets"""
 
-from __future__ import absolute_import
 import os
-from six import unichr
-import six
 
 
 class snippet(object):
@@ -18,9 +14,10 @@ class snippet(object):
 
 
 def get_all():
-    fp = os.path.join(os.path.dirname(__file__), 'snippets.txt')
-
-    examples = six.text_type(open(fp).read(), 'utf-8').split(unichr(12) + '\n')[1:]
+    # FIXME: turn this into a py.text fixture
+    fn = os.path.join(os.path.dirname(__file__), "snippets.txt")
+    with open(fn, "r") as f:
+        examples = f.read().split("\x0c\n")[1:]
     res = []
     for i, x in enumerate(examples):
         res.append(snippet(x, i))

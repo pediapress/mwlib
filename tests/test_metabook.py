@@ -1,6 +1,9 @@
 #! /usr/bin/env py.test
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mwlib import metabook, myjson as json
+from six.moves import zip
 
 ARTICLE1 = "Article 1"
 ARTICLE2 = "Article 2"

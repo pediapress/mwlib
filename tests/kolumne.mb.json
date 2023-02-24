@@ -14,10 +14,9 @@
     "version": 1,
     "wikis": [
         {
-            "baseurl": "http://de.wikipedia.org/w/",
+            "baseurl": "https://de.wikipedia.org/w/",
             "ident": "de",
             "type": "wikiconf"
         }
     ]
 }
-

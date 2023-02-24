@@ -3,12 +3,12 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-
 import sys
+
+from mwlib import advtree
+from mwlib import parser
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
-from mwlib import parser
-from mwlib import advtree
 from mwlib.writer import styleutils
 
 
@@ -23,7 +23,7 @@ def show(tree):
 
 
 def test_getTextAlign():
-    raw = '''
+    raw = """
 {|
 |-
 ! center
@@ -32,16 +32,16 @@ def test_getTextAlign():
 ! left
 ! style="text-align:right;"|right
 |}
-    '''
+    """
     tree = getTreeFromMarkup(raw)
     for cell in tree.getChildNodesByClass(advtree.Cell):
         txt = cell.getAllDisplayText().strip()
         align = styleutils.getTextAlign(cell)
-        assert txt == align, 'alignment not correctly parsed'
+        assert txt == align, "alignment not correctly parsed"
 
 
 def test_getTextAlign2():
-    raw = '''
+    raw = """
 left
 
 <div style="text-align:right;">
@@ -62,7 +62,7 @@ left
 | style="text-align:center;" | center
 |}
 </div>
-</div>'''
+</div>"""
 
     tree = getTreeFromMarkup(raw)
     for cell in tree.getChildNodesByClass(advtree.Cell):
@@ -72,5 +72,7 @@ left
         if txt != align:
             show(cell)
 
-        assert txt == align, 'alignment not correctly parsed. expected:|%s|, got |%s|' % (
-            txt, align)
+        assert txt == align, "alignment not correctly parsed. expected:|%s|, got |%s|" % (
+            txt,
+            align,
+        )

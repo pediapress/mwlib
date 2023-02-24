@@ -5,9 +5,10 @@ class for defining DTD-Like Rules for the tree
 """
 from __future__ import absolute_import
 from __future__ import print_function
-from .advtree import Article
+from mwlib.advtree import Article
 
 from mwlib.log import Log
+
 log = Log("sanitychecker")
 
 # -----------------------------------------------------------
@@ -72,6 +73,7 @@ class Equal(ConstraintBase):
 # Rules regarding [Children, AllChildren, Parents, ...]
 # -----------------------------------------------------------
 
+
 class RuleBase:
     def __init__(self, klass, constraint):
         self.klass = klass
@@ -118,8 +120,8 @@ class SiblingsOf(RuleBase):
 
 # example custom rules
 
-class RequireChild(RuleBase):
 
+class RequireChild(RuleBase):
     def __init__(self, klass):
         self.klass = klass
 
@@ -131,7 +133,6 @@ class RequireChild(RuleBase):
             if not len(node.children):
                 return False, node
         return True, None
-
 
 
 # -----------------------------------------------------------
@@ -168,8 +169,8 @@ def removecb(rule, node=None, parentnode=None):
 # Container for sanity rules
 # -----------------------------------------------------------
 
-class SanityChecker(object):
 
+class SanityChecker(object):
     def __init__(self):
         self.rules = []
 
@@ -202,12 +203,13 @@ def demo(tree):
     from mwlib.advtree import Table, Row, Cell, Text, ImageLink, PreFormatted
 
     sc = SanityChecker()
-    rules = [ChildrenOf(Table, Allow(Row)),
-             ChildrenOf(Row, Allow(Cell)),
-             AllChildrenOf(Cell, Require(Text, ImageLink)),
-             AllChildrenOf(Cell, Forbid(PreFormatted)),
-             ChildrenOf(PreFormatted, Equal(Text)),
-             ]
+    rules = [
+        ChildrenOf(Table, Allow(Row)),
+        ChildrenOf(Row, Allow(Cell)),
+        AllChildrenOf(Cell, Require(Text, ImageLink)),
+        AllChildrenOf(Cell, Forbid(PreFormatted)),
+        ChildrenOf(PreFormatted, Equal(Text)),
+    ]
 
     def mycb(rule, node=None, parentnode=None):
         print("failed", rule, node or parentnode)

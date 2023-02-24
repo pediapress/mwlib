@@ -5,7 +5,7 @@ from mwlib.templ import pp
 
 def preprocess(s, expected, included=True):
     res = pp.preprocess(s, included=included)
-    print "preprocess(%r) -> %r" % (s, res)
+    print("preprocess(%r) -> %r" % (s, res))
     if expected is not None:
         assert res == expected, "bad preprocess result"
 

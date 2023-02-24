@@ -5,8 +5,7 @@
 
 """api.php client"""
 
-from __future__ import absolute_import
-from __future__ import print_function
+from urllib.parse import urlparse
 
 import six
 import six.moves.http_cookiejar
@@ -126,7 +125,7 @@ class MwApi(object):
                 args[k] = v.encode("utf-8")
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        postdata = six.moves.urllib.parse.urlencode(args)
+        postdata = six.moves.urllib.parse.urlencode(args).encode()
 
         req = six.moves.urllib.request.Request(self.apiurl, postdata, headers)
 
@@ -357,27 +356,36 @@ def guess_api_urls(url):
     @rtype: list
     """
     retval = []
-    if isinstance(url, six.text_type):
-        url = url.encode("utf-8")
+    if isinstance(url, bytes):
+        url = url.decode("utf-8")
 
     try:
-        scheme, netloc, path, params, query, fragment = six.moves.urllib.parse.urlparse(url)
+        scheme, netloc, path, params, query, fragment = urlparse(url)
     except ValueError:
         return retval
 
     if not (scheme and netloc):
         return retval
 
+    if isinstance(path, bytes):
+        path = path.decode("utf-8")
+
+    if path.endswith("/wiki"):
+        retval.append(f"{scheme}://{netloc}/w/api.php")
+
     path_prefix = ""
-    if "/wiki/" in path:
+    if "/wiki/" in str(path):
         path_prefix = path[: path.find("/wiki/")]
     elif "/w/" in path:
         path_prefix = path[: path.find("/w/")]
 
-    prefix = "%s://%s%s" % (scheme, netloc, path_prefix)
+    prefix = f"{scheme}://{netloc}{path_prefix}"
+
+    if not url.endswith("/"):
+        url += "/"
 
     for _path in (path + "/", "/w/", "/wiki/", "/"):
-        base_url = "%s%sapi.php" % (prefix, _path)
+        base_url = f"{prefix}{_path}sapi.php"
         if base_url not in retval:
             retval.append(base_url)
     if url.endswith("/index.php"):

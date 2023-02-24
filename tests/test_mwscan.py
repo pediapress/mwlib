@@ -23,13 +23,13 @@ def test_resolve_entity_out_of_range():
 def test_url():
     s = mwscan.scan(
         "http://tools.wikimedia.de/~magnus/geo/geohack.php?language=de&params=50_0_0_N_8_16_16_E_type:city(190934)_region:DE-RP")
-    print s
+    print(s)
     assert len(s) == 1, "expected one url"
 
 
 def _check_table_markup(s):
     toks = [t[0] for t in mwscan.scan(s)]
-    print "TOKENS:", toks
+    print("TOKENS:", toks)
     assert mwscan.Token.t_begin_table not in toks, "should not contain table markup"
     assert mwscan.Token.t_end_table not in toks, "should not contain table markup"
 

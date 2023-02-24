@@ -47,7 +47,7 @@ def showNode(obj):
     stuff = [
         "%s => %r" % (k, getattr(obj, k))
         for k in attrs
-        if (not k == "children") and getattr(obj, k)
+        if (k != "children") and getattr(obj, k)
     ]
     if stuff:
         log(repr(stuff))

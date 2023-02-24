@@ -198,7 +198,7 @@ class license(mbobj):
 
 class chapter(mbobj):
     items = []
-    title = u""
+    title = ""
 
 
 # ==============================================================================
@@ -224,7 +224,7 @@ def get_item_list(metabook, filter_type=None):
 
 
 def calc_checksum(metabook):
-    return sha1(metabook.dumps()).hexdigest()
+    return sha1(metabook.dumps().encode("utf-8")).hexdigest()
 
 
 def get_licenses(metabook):
@@ -266,7 +266,7 @@ def get_licenses(metabook):
         if not wikitext:
             continue
 
-        retval.append(license(title=l.get("name", u"License"), wikitext=wikitext))
+        retval.append(license(title=l.get("name", "License"), wikitext=wikitext))
 
     return retval
 

@@ -3,16 +3,32 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import pytest
 
 from mwlib.advtree import (
-    PreFormatted, Text, buildAdvancedTree, Section, BreakingReturn, _idIndex,
-    Indented, DefinitionList, DefinitionTerm, DefinitionDescription, Item, Cell, Span, Row, ImageLink
+    PreFormatted,
+    Text,
+    buildAdvancedTree,
+    Section,
+    BreakingReturn,
+    _idIndex,
+    Indented,
+    DefinitionList,
+    DefinitionTerm,
+    DefinitionDescription,
+    Item,
+    Cell,
+    Span,
+    Row,
+    ImageLink,
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib import parser
+from six.moves import range
 
 
 def _treesanity(r):
@@ -34,7 +50,7 @@ def test_copy():
 *[[Leuchtturm Strukkamphuk]] spitze
 *[[Leuchtturm Staberhuk]] supi
 *[[Leuchtturm Westermarkelsdorf]]
-""".decode("utf8")
+"""
 
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
@@ -56,7 +72,7 @@ def test_removeNewlines():
 
     # test no action within preformattet
     t = PreFormatted()
-    text = u"\t \n\t\n\n  \n\n"
+    text = "\t \n\t\n\n  \n\n"
     tn = Text(text)
     t.children.append(tn)
     buildAdvancedTree(t)
@@ -69,11 +85,11 @@ def test_removeNewlines():
     t.children.append(tn)
     buildAdvancedTree(t)
     _treesanity(t)
-    #assert tn.caption == u""
+    # assert tn.caption == u""
     assert not t.children
 
     # test remove newlines
-    text = u"\t \n\t\n\n KEEP  \n\n"
+    text = "\t \n\t\n\n KEEP  \n\n"
     t = Section()
     tn = Text(text)
     t.children.append(tn)
@@ -94,7 +110,7 @@ def test_identity():
 <br/>
 <br/>
 <br/>
-""".decode("utf8")
+"""
 
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
@@ -126,7 +142,7 @@ def test_identity():
 # buildAdvancedTree(r)
 ##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
 def test_definitiondescription():
-    raw = u"""
+    raw = """
 == test ==
 
 :One
@@ -141,7 +157,7 @@ def test_definitiondescription():
 
     buildAdvancedTree(r)
     dd = r.getChildNodesByClass(DefinitionDescription)
-    print "DD:", dd
+    print("DD:", dd)
     for c in dd:
         assert c.indentlevel == 1
     assert len(dd) == 4
@@ -150,73 +166,73 @@ def test_definitiondescription():
 @pytest.mark.xfail
 def test_definition_list():
     """http://code.pediapress.com/wiki/ticket/221"""
-    raw = u''';termA
+    raw = """;termA
 :descr1
-'''
+"""
 
     for i in range(2):
-        r = parseString(title='t', raw=raw)
+        r = parseString(title="t", raw=raw)
         buildAdvancedTree(r)
         dls = r.getChildNodesByClass(DefinitionList)
         assert len(dls) == 1
         assert dls[0].getChildNodesByClass(DefinitionTerm)
         assert dls[0].getChildNodesByClass(DefinitionDescription)
-        raw = raw.replace('\n', '')
+        raw = raw.replace("\n", "")
 
 
 def test_ulist():
     """http://code.pediapress.com/wiki/ticket/222"""
-    raw = u"""
+    raw = """
 * A item
 *: B Previous item continues.
 """
-    r = parseString(title='t', raw=raw)
+    r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
-#    parser.show(sys.stdout, r)
+    #    parser.show(sys.stdout, r)
     assert len(r.getChildNodesByClass(Item)) == 1
 
 
 def test_colspan():
-    raw = '''<table><tr><td colspan="bogus">no colspan </td></tr></table>'''
-    r = parseString(title='t', raw=raw)
+    raw = """<table><tr><td colspan="bogus">no colspan </td></tr></table>"""
+    r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 1
 
-    raw = '''<table><tr><td colspan="-1">no colspan </td></tr></table>'''
-    r = parseString(title='t', raw=raw)
+    raw = """<table><tr><td colspan="-1">no colspan </td></tr></table>"""
+    r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 1
 
-    raw = '''<table><tr><td colspan="2">colspan1</td></tr></table>'''
-    r = parseString(title='t', raw=raw)
+    raw = """<table><tr><td colspan="2">colspan1</td></tr></table>"""
+    r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
     assert r.getChildNodesByClass(Cell)[0].colspan is 2
 
 
 def test_attributes():
-    t1 = '''
+    t1 = """
 {|
 |- STYLE="BACKGROUND:#FFDEAD;"
 |stuff
 |}
-'''
-    r = parseString(title='t', raw=t1)
+"""
+    r = parseString(title="t", raw=t1)
     buildAdvancedTree(r)
     n = r.getChildNodesByClass(Row)[0]
-    print n.attributes, n.style
+    print(n.attributes, n.style)
     assert isinstance(n.style, dict)
     assert isinstance(n.attributes, dict)
     assert n.style["background"] == "#FFDEAD"
 
 
 def getAdvTree(raw):
-    tree = parseString(title='test', raw=raw)
+    tree = parseString(title="test", raw=raw)
     buildAdvancedTree(tree)
     return tree
 
 
 def test_img_no_caption():
-    raw = u'''[[Image:Chicken.jpg|image caption]]
+    raw = """[[Image:Chicken.jpg|image caption]]
 
 [[Image:Chicken.jpg|none|image caption: align none]]
 
@@ -232,7 +248,7 @@ Image:Lunokhod 1.jpg
 Image:Voyager.jpg
 Image:Cassini Saturn Orbit Insertion.jpg|
 </gallery>
-'''
+"""
 
     tree = getAdvTree(raw)
     images = tree.getChildNodesByClass(ImageLink)
@@ -242,7 +258,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|
 
 
 def test_img_has_caption():
-    raw = u'''[[Image:Chicken.jpg|thumb|image caption thumb]]
+    raw = """[[Image:Chicken.jpg|thumb|image caption thumb]]
 
 [[Image:Chicken.jpg|framed|image caption framed]]
 
@@ -258,7 +274,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|''[[Cassini–Huygens]]''<br>First Satu
 [[Image:Horton Erythromelalgia 1939.png|center|600px|<div align="center">"Erythromelalgia of the head", Horton&nbsp;1939<ref name="BTH39"/></div>|frame]]
 
 [[Image:Anatomie1.jpg|thumb|none|500px|Bild der anatomischen Verhältnisse. In Rot die Hauptschlagader (Carotis).]]
-'''
+"""
 
     tree = getAdvTree(raw)
     images = tree.getChildNodesByClass(ImageLink)

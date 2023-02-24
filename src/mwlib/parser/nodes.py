@@ -1,9 +1,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-
 from mwlib import utoken
+from io import StringIO
 
 
 class Node(utoken.Token):
@@ -62,7 +61,6 @@ class Node(utoken.Token):
     def asText(
         self,
     ):
-        from StringIO import StringIO
 
         out = StringIO()
         self._asText(out)

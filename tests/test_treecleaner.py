@@ -4,15 +4,33 @@
 # See README.rst for additional licensing information.
 
 import sys
+
 import pytest
-from mwlib.advtree import buildAdvancedTree
+
 from mwlib import parser
+from mwlib.advtree import (
+    BreakingReturn,
+    Center,
+    DefinitionDescription,
+    Div,
+    Emphasized,
+    Gallery,
+    ItemList,
+    LangLink,
+    Paragraph,
+    PreFormatted,
+    Reference,
+    Row,
+    Section,
+    Strong,
+    Table,
+    Text,
+    Underline,
+)
+from mwlib.advtree import buildAdvancedTree
+from mwlib.dummydb import DummyDB
+from mwlib.uparser import parseString
 from mwlib.treecleaner import TreeCleaner, _all, _any
-from mwlib.advtree import (Article, ArticleLink, Blockquote, BreakingReturn, CategoryLink, Cell, Center, Chapter,
-                           Cite, Code, DefinitionList, DefinitionDescription, Div, Emphasized, Gallery, HorizontalRule, ImageLink, InterwikiLink, Item,
-                           ItemList, LangLink, Link, Math, NamedURL, NamespaceLink, Paragraph, PreFormatted,
-                           Reference, ReferenceList, Row, Section, Source, SpecialLink, Strong, Table, Text, Underline,
-                           URL)
 
 
 def _treesanity(r):
@@ -27,28 +45,27 @@ def _treesanity(r):
 
 
 def getTreeFromMarkup(raw):
-    from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parseString
+
     return parseString(title="Test", raw=raw, wikidb=DummyDB())
 
 
 def cleanMarkup(raw):
-    print "Parsing %r" % (raw,)
+    print("Parsing %r" % (raw,))
 
     tree = getTreeFromMarkup(raw)
 
-    print "before treecleaner: >>>"
+    print("before treecleaner: >>>")
     showTree(tree)
-    print "<<<"
+    print("<<<")
 
-    print '=' * 20
+    print("=" * 20)
     buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
     reports = tc.getReports()
-    print "after treecleaner: >>>"
+    print("after treecleaner: >>>")
     showTree(tree)
-    print "<<<"
+    print("<<<")
     return (tree, reports)
 
 
@@ -84,7 +101,7 @@ para
     tree, reports = cleanMarkup(raw)
     lists = tree.getChildNodesByClass(ItemList)
     for li in lists:
-        print li, li.getParents()
+        print(li, li.getParents())
         assert _all([p.__class__ != Paragraph for p in li.getParents()])
     _treesanity(tree)
 
@@ -102,9 +119,9 @@ another paragraph
     lists = tree.getChildNodesByClass(ItemList)
     li = lists[0]
     assert li.parent.__class__ == Paragraph
-    txt = ''.join([x.asText() for x in li.siblings])
-    assert u'some text in the same paragraph' in txt
-    assert u'another' not in txt
+    txt = "".join([x.asText() for x in li.siblings])
+    assert "some text in the same paragraph" in txt
+    assert "another" not in txt
 
 
 def test_fixLists3():
@@ -147,11 +164,11 @@ blub
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     langlinks = tree.find(LangLink)
-    assert not langlinks, 'expected no LangLink instances'
+    assert not langlinks, "expected no LangLink instances"
 
 
 def test_removeCriticalTables():
-    raw = r'''
+    raw = r"""
 {| class="navbox"
 |-
 | bla
@@ -159,13 +176,13 @@ def test_removeCriticalTables():
 |}
 
 blub
-'''
+"""
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(Table)) == 0
 
 
 def test_fixTableColspans():
-    raw = r'''
+    raw = r"""
 {|
 |-
 | colspan="5" | bla
@@ -173,7 +190,7 @@ def test_fixTableColspans():
 | bla
 | blub
 |}
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     t = tree.getChildNodesByClass(Table)[0]
     cell = t.children[0].children[0]
@@ -181,8 +198,8 @@ def test_fixTableColspans():
 
 
 def test_fixTableColspans2():
-    '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
-    raw = r'''
+    """http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218"""
+    raw = r"""
 {|
 |-
 | colspan="2" | bla1
@@ -190,19 +207,20 @@ def test_fixTableColspans2():
 | colspan="3" | bla2
 
 |}
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     t = tree.getChildNodesByClass(Table)[0]
     cell = t.children[0].children[0]
     showTree(t)
     assert cell.colspan == 1
 
+
 # test changed after 3258e2f7978fc4592567bb64977ba5404ee949da
 
 
 def test_fixTableColspans3():
-    '''http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218'''
-    raw = ur'''
+    """http://es.wikipedia.org/w/index.php?title=Rep%C3%BAblica_Dominicana&oldid=36394218"""
+    raw = r"""
 {| cellpadding="0" cellspacing="0" border="0" style="margin:0px; padding:0px; border:0px; background-color:transparent; vertical-align:middle;"
 |-
 | style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" | Ägyptische Hieroglyphen können die Funktion von [[Schriftzeichen|Phonogrammen, Ideogrammen]] oder [[Determinativ]]en übernehmen. Die meisten Hieroglyphen können eine oder maximal zwei dieser Funktionen übernehmen, einzelne auch alle drei. Welche Funktion ein Zeichen hat, zeigt der Kontext, in vielen Fällen lassen sich die Verwendungen kaum abgrenzen. So ist das Zeichen <hiero>ra</hiero> Ideogramm in <hiero>ra:Z1</hiero> ''r<span class="Unicode">ˁ(w)</span>'' (Sonnengott) „Re“, in der vollständigeren Schreibung des gleichen Wortes als <hiero>r:a-ra:Z1</hiero> dient es nur als Determinativ; das Zeichen <hiero>pr</hiero> wird im Wort <hiero>pr:r-D54</hiero> ''pr(j)'' „herausgehen“ als Phonogramm ''pr'' aufgefasst, während es in <hiero>pr:Z1</hiero> ''pr(w)'' „Haus“ als Logogramm fungiert. Aufschluss darüber, ob und wie ein Zeichen gelesen werden kann, gibt im Allgemeinen die Zeichenliste der ''Egyptian Grammar'' von [[Alan Gardiner]],<ref>Gardiner 1927</ref> die jedoch nicht vollständig und in Einzelfällen überholt ist.
@@ -226,51 +244,53 @@ def test_fixTableColspans3():
 | style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
 | style="vertical-align:bottom; padding:0px; margin:0px; border:0px;" |
 |}
-    '''
+    """
     tree, reports = cleanMarkup(raw)
 
-    assert len(tree.getChildNodesByClass(Table)
-               ) == 0, 'single row/col Table not transformed to div'
-    assert len(tree.getChildNodesByClass(Div)
-               ) == 1, 'single row/col Table not transformed to div'
+    assert (
+        len(tree.getChildNodesByClass(Table)) == 0
+    ), "single row/col Table not transformed to div"
+    assert len(tree.getChildNodesByClass(Div)) == 1, "single row/col Table not transformed to div"
 
 
 def test_removeBrokenChildren():
-    raw = r'''
+    raw = r"""
 <ref>
  preformatted text
 </ref>
-    '''
+    """
 
     tree, reports = cleanMarkup(raw)
     assert len(tree.getChildNodesByClass(PreFormatted)) == 0
 
 
 def test_fixNesting1():
-    raw = '''
+    raw = """
 :{|
 |-
 ||bla||blub
 |}
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     table = tree.getChildNodesByClass(Table)[0]
     assert not table.getParentNodesByClass(DefinitionDescription)
+
 
 # changed with f94aa985f50d2db9749c57a7a5e22c0c8d487af4
 
 
 @pytest.mark.xfail
 def test_fixNesting2():
-    raw = r'''
+    raw = r"""
 <div><div>
 * bla
 * blub
 </div></div>
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     list_node = tree.getChildNodesByClass(ItemList)[0]
     assert not _any([p.__class__ == Div for p in list_node.getParents()])
+
 
 # the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
 # but maybe they are interesting in the future - therefore I did not delete them
@@ -341,7 +361,7 @@ para 2
 
 
 def test_fixNesting6():
-    raw = u"""''„Drei Affen, zehn Minuten.“'' <ref>Dilbert writes a poem and presents it to Dogbert:<poem style>
+    raw = """''„Drei Affen, zehn Minuten.“'' <ref>Dilbert writes a poem and presents it to Dogbert:<poem style>
 ''DOGBERT: I once read that given infinite time, a thousand monkeys with typewriters would eventually write the complete works of Shakespeare.''
 ''DILBERT: But what about my poem?''
 ''DOGBERT: Three monkeys, ten minutes.“''</poem></ref>
@@ -352,15 +372,16 @@ def test_fixNesting6():
     tree, reports = cleanMarkup(raw)
     showTree(tree)
     from pprint import pprint
+
     pprint(reports)
 
     assert len(tree.getChildNodesByClass(Reference)) == 1
 
 
 def test_swapNodes():
-    raw = r'''
+    raw = r"""
 <u><center>Text</center></u>
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     center_node = tree.getChildNodesByClass(Center)[0]
     assert not _any([p.__class__ == Underline for p in center_node.getParents()])
@@ -368,26 +389,26 @@ def test_swapNodes():
 
 @pytest.mark.xfail
 def test_splitBigTableCells():
-    '''
+    """
     Splitting big table cells can not properly be tested here.
     Testing needs to be done in the writers, since this test is writer
     specific and the output has to be verfied
-    '''
+    """
     assert False
 
 
 @pytest.mark.xfail
 def test_fixParagraphs():
-    raw = r'''  '''  # FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
+    raw = r"""  """  # FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
     tree, reports = cleanMarkup(raw)
     assert False
 
 
 def test_cleanSectionCaptions():
-    raw = r'''
+    raw = r"""
 ==<center>centered heading</center>==
 bla
-    '''
+    """
 
     tree, reports = cleanMarkup(raw)
     section_node = tree.getChildNodesByClass(Section)[0]
@@ -409,7 +430,7 @@ def numBR(tree):
 
 def test_removebreakingreturnsInside():
     # remove BRs at the inside 'borders' of block nodes
-    raw = '''
+    raw = """
 {|
 |-
 |<br/>blub<br/>
@@ -421,14 +442,14 @@ def test_removebreakingreturnsInside():
 |<br/><source></source><br/><br/>text
 | text
 |}
-'''
+"""
     tree, reports = cleanMarkup(raw)  # 1 & 2
     assert numBR(tree) == 0
 
 
 def test_removebreakingreturnsOutside():
     # remove BRs at the outside 'borders' of block nodes
-    raw = '''
+    raw = """
 <br/>
 
 == section heading ==
@@ -447,7 +468,7 @@ text
 
 == section heading 3 ==
 <br/>bla</br/>
-'''
+"""
 
     tree, reports = cleanMarkup(raw)
     showTree(tree)
@@ -456,7 +477,7 @@ text
 
 def test_removebreakingreturnsMultiple():
     # remove BRs at the outside 'borders' of block nodes
-    raw = '''
+    raw = """
 paragraph
 
 <br/>
@@ -464,10 +485,11 @@ paragraph
 <br/>
 
 paragraph
-'''
+"""
 
     tree, reports = cleanMarkup(raw)
     assert numBR(tree) == 0
+
 
 # mwlib.refine creates a whitespace only paragraph containing the first
 # br tag. in the old parser this first paragraph also contained the source node.
@@ -495,8 +517,8 @@ ordinary paragraph. inside <br/> tags should not be removed
 def test_preserveEmptyTextNodes():
     raw = """[[blub]] ''bla''"""
     tree, reports = cleanMarkup(raw)
-    p = [x for x in tree.find(Text) if x.caption == u' ']
-    assert len(p) == 1, 'expected one space node'
+    p = [x for x in tree.find(Text) if x.caption == " "]
+    assert len(p) == 1, "expected one space node"
 
 
 def test_gallery():
@@ -532,7 +554,7 @@ def test_removeTextlessStyles():
 
 
 def test_splitTableLists1():
-    raw = '''
+    raw = """
 {|
 |-
 |
@@ -547,14 +569,14 @@ def test_splitTableLists1():
 * item 7
 * item 8
 |}
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     numrows = len(tree.getChildNodesByClass(Row))
-    assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
+    assert numrows == 6, "ItemList should have been splitted to 6 rows, numrows was: %d" % numrows
 
 
 def test_splitTableLists2():
-    raw = '''
+    raw = """
 {|
 |-
 |
@@ -575,25 +597,25 @@ def test_splitTableLists2():
 * item 7
 * item 8
 |}
-    '''
+    """
     tree, reports = cleanMarkup(raw)
     numrows = len(tree.getChildNodesByClass(Row))
-    assert numrows == 6, 'ItemList should have been splitted to 6 rows, numrows was: %d' % numrows
+    assert numrows == 6, "ItemList should have been splitted to 6 rows, numrows was: %d" % numrows
 
 
 def test_removeEmptySection():
-    raw = '''
+    raw = """
 == section 1 ==
 
 == section 2 ==
 
-'''
+"""
     tree, reports = cleanMarkup(raw)
-    assert len(tree.getChildNodesByClass(Section)) == 0, 'section not removed'
+    assert len(tree.getChildNodesByClass(Section)) == 0, "section not removed"
 
 
 def test_noRemoveEmptySection():
-    raw = '''
+    raw = """
 == section 1 ==
 [[Image:bla.png]]
 
@@ -611,7 +633,7 @@ Image:bla.png
 <div>
 [[Image:bla.png]]
 </div>
-'''
+"""
 
     tree, reports = cleanMarkup(raw)
-    assert len(tree.getChildNodesByClass(Section)) == 4, 'section falsly removed'
+    assert len(tree.getChildNodesByClass(Section)) == 4, "section falsly removed"

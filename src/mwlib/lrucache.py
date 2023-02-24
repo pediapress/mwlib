@@ -1,7 +1,6 @@
 # based on code by Raymond Hettinger
 # see http://code.activestate.com/recipes/498245/
 
-from __future__ import absolute_import
 
 import threading
 from collections import deque

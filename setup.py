@@ -62,7 +62,7 @@ def main():
         name="mwlib",
         version=get_version(),
         entry_points={
-            "mwlib.writers": ["odf = mwlib.odfwriter:writer"],
+            "mwlib.writers": ["odf = mwlib.odfwriter:writer", "rl = mwlib.rl.rlwriter:writer"],
             "console_scripts": console_scripts,
         },
         install_requires=install_requires,
@@ -74,10 +74,10 @@ def main():
         zip_safe=False,
         url="http://code.pediapress.com/",
         description="mediawiki parser and utility library",
-        license="BSD Licenprse",
+        license="BSD License",
         maintainer="pediapress.com",
         maintainer_email="info@pediapress.com",
-        long_description=open("README.md").read(),
+        long_description=open("README.rst").read(),
     )
 
 

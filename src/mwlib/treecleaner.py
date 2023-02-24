@@ -15,7 +15,7 @@ from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, Breaking
                            HorizontalRule, ImageLink, ImageMap, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
                            Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
                            Row, Section, Small, Source, Span, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
-                           Underline, URL, Var)
+                           Underline, URL, Var, Node)
 
 from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib import parser
@@ -558,7 +558,7 @@ class TreeCleaner(object):
         for c in node.children:
             self.removeBreakingReturns(c)
 
-    def _fixParagraphs(self, node):
+    def _fixParagraphs(self, node: Node):
         """Move paragraphs to the child list of the last section (if existent)"""
 
         if isinstance(node, Paragraph) and isinstance(node.previous, Section) \
@@ -573,6 +573,7 @@ class TreeCleaner(object):
             for c in node.children[:]:
                 if self._fixParagraphs(c):
                     return True
+        return False
 
     def fixParagraphs(self, node):
         while self._fixParagraphs(node):

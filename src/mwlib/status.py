@@ -68,7 +68,7 @@ class Status(object):
         msg.append("%s%%" % (self.status.get("progress", self.progress_range[0]),))
         msg.append(self.status.get("status", ""))
         msg.append(self.status.get("article", ""))
-        msg = u" ".join(msg).encode("utf-8")
+        msg = " ".join(msg)
 
         if self.stdout:
             isatty = getattr(self.stdout, "isatty", None)

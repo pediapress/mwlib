@@ -27,5 +27,5 @@ def main():
     expand_str(d4, wikidb=db)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

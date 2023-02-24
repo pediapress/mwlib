@@ -3,12 +3,12 @@
 
 import pytest
 import gevent
-import urllib
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import bottle
 from mwlib import nserve
 
 import wsgi_intercept.urllib_intercept
+from six.moves import range
 
 try:
     import simplejson as json
@@ -18,12 +18,14 @@ except ImportError:
 
 def post(**kw):
     try:
-        r = urllib2.urlopen("http://app.de/", urllib.urlencode(kw))
-        data = r.read()
+        # encode kw with form-encoding
+        kw = urllib.parse.urlencode(kw).encode()
+        r = urllib.request.urlopen("http://app.de", kw)
+        data = r.read().decode()
         data = json.loads(data)
         return (r.code, data)
-    except urllib2.HTTPError as e:
-        return (e.code, e.read())
+    except urllib.error.HTTPError as e:
+        return e.code, e.read()
 
 
 def get_exception_raiser(msg, exception_class=RuntimeError):
@@ -121,18 +123,18 @@ def test_watch_qserve_call_killable(wq):
 
 def test_app_no_command(app):
     code, data = post()
-    assert (code, data) == (400, "no command given")
+    assert (code, data) == (400, b"no command given")
 
 
 def test_app_unknown_command(app):
     code, data = post(command="gohome")
     assert code == 400
-    assert "no such command" in data
+    assert b"no such command" in data
 
 
 def test_app_do_render_overloaded(app):
     code, data = post(command="render")
-    print code, data
+    print(code, data)
 
     assert code == 200
     assert "overloaded" in data["error"]
@@ -142,7 +144,7 @@ def test_app_do_render_missing_metabook(app, busy):
     busy[("host1", 8000)] = False
 
     code, data = post(command="render", writer="odf")
-    print(code, data)
+    print((code, data))
 
     assert code == 200
     assert "metabook or collection_id required" in data["error"]
@@ -150,7 +152,7 @@ def test_app_do_render_missing_metabook(app, busy):
 
 def test_app_dispatch_bad_collid(app, busy):
     code, data = post(command="render", collection_id="a" * 15)
-    print code, data
+    print(code, data)
     assert code == 404
 
 
@@ -158,7 +160,7 @@ def test_app_dispatch_bad_collid(app, busy):
     ("filename", "ext", "expected"),
     [
         (
-            u"Motörhead",
+            "Motörhead",
             "pdf",
             "inline; filename=Motorhead.pdf;filename*=UTF-8''Mot%C3%B6rhead.pdf",
         ),

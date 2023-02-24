@@ -3,19 +3,21 @@
 
 """Unittests for mwlib.utils"""
 
-import os
+from six.moves import range
 
 from mwlib import utils
 
 
 def test_fsescape():
     test_set = (
-        (u'abc', 'abc'),
-        ('abc', 'abc'),
-        (u'ä', '~228~'),
-        ('ä', '~195~~164~'),
-        (u'~', '~~'),
-        ('~', '~~'),
+        ("abc", "abc"),
+        ("a b c", "a_b_c"),
+        ("a\tb\tc", "abc"),
+        # ("ä", "~228~"),
+        # ("ä", "~195~~164~"),
+        # ("~", "~~"),
+        # ("~", "~~"),
+        ("~abc", "abc"),
     )
     for s_in, s_out in test_set:
         assert utils.fsescape(s_in) == s_out
@@ -33,21 +35,23 @@ def test_uid():
 
 
 def test_report():
-    data = utils.report(system='system123', subject='subject123', foo='foo123')
-    assert 'foo' in data
-    assert 'foo123' in data
+    data = utils.report(system="system123", subject="subject123", foo="foo123")
+    assert "foo" in data
+    assert "foo123" in data
 
 
 def test_get_safe_url():
     g = utils.get_safe_url
     assert g('http://bla" target="_blank') is None
-    assert g('http') is None
-    assert g('http://bla/foo/bar" target="_blank') == 'http://bla/foo/bar%22%20target%3D%22_blank'
-    assert g(u'http://xyz/wiki/%D0%91%D0%94%D0%A1%D0%9C') == 'http://xyz/wiki/%D0%91%D0%94%D0%A1%D0%9C'
+    assert g("http") is None
+    assert g('http://bla/foo/bar" target="_blank') == "http://bla/foo/bar%22%20target%3D%22_blank"
+    assert (
+        g("http://xyz/wiki/%D0%91%D0%94%D0%A1%D0%9C") == "http://xyz/wiki/%D0%91%D0%94%D0%A1%D0%9C"
+    )
 
 
 def test_garble_password():
-    x = utils.garble_password(['foo', '--password', 'secret'])
-    assert 'secret' not in x
-    utils.garble_password(['foo', '--password'])
-    utils.garble_password(['foo'])
+    x = utils.garble_password(["foo", "--password", "secret"])
+    assert "secret" not in x
+    utils.garble_password(["foo", "--password"])
+    utils.garble_password(["foo"])

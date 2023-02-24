@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import math
-from mwlib.expander import expand_str
+
 from mwlib import expr
+from mwlib.expander import expand_str
 
 
 def ee(s, expected=None):
     s = expand_str("{{#expr:%s}}" % (s,))
-    if isinstance(expected, (float, int, long)):
+    if isinstance(expected, (float, int, int)):
         assert math.fabs(float(s) - expected) < 1e-5
     elif expected is not None:
         assert s == expected, "expected %r, got %r" % (expected, s)
@@ -17,15 +18,15 @@ def ee(s, expected=None):
 
 
 def test_pi():
-    ee('pI', math.pi)
-    ee('PI', math.pi)
-    ee('pi*2', math.pi * 2)
-    ee('pi+1', math.pi + 1)
+    ee("pI", math.pi)
+    ee("PI", math.pi)
+    ee("pi*2", math.pi * 2)
+    ee("pi+1", math.pi + 1)
 
 
 def test_e():
-    ee('e', math.e)
-    ee('E', math.e)
+    ee("e", math.e)
+    ee("E", math.e)
     ee("e+1", math.e + 1)
     ee("2*e", math.e * 2)
 
@@ -138,18 +139,18 @@ def test_unary_pow_plus():
 
 def test_expr_repr():
     expand_str("{{#expr:99999999999999}}", "99999999999999")
-    expand_str("{{#expr:99999999999999+1}}", "1.0E+14")
+    expand_str("{{#expr:999999999999999999999999+1}}", "1.0E+24")
     expand_str("{{#expr:0.1+0.9}}", "1")
 
 
 def test_unary_minus_sin():
     """http://code.pediapress.com/wiki/ticket/450"""
     val = expr.expr("-sin(1.5707963267948966)")
-    print val
+    print(val)
     assert math.fabs(-1 - val) < 0.0001
 
     val = expr.expr("-sin ((90--82)*3.14159265358979/180)*(90+-80.0833333)*1.55*1.30522+49.3")
-    print val
+    print(val)
     assert math.fabs(46.507864831337 - val) < 0.0001
 
 

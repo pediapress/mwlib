@@ -25,7 +25,7 @@ except BaseException:
     from gevent.coros import Semaphore
 
 
-import sqlite3dbm
+from sqlitedict import SqliteDict
 from lxml import etree
 
 from mwlib import utils, nshandling, conf, myjson as json
@@ -98,20 +98,21 @@ class FsOutput(object):
         self.path = os.path.abspath(path)
         assert not os.path.exists(self.path)
         os.makedirs(os.path.join(self.path, "images"))
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "wb")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")
         self.seen = dict()
         self.imgcount = 0
         self.nfo = None
 
         for storage in ["authors", "html", "imageinfo"]:
             fn = os.path.join(self.path, storage + ".db")
-            db = sqlite3dbm.open(fn, "n")
-            db.conn.execute("PRAGMA synchronous = 0")
+            if os.path.exists(fn):
+                os.remove(fn)
+            db = SqliteDict(fn, autocommit=True)
             setattr(self, storage, db)
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
-        assert storage is not None, "storage not existant %s" % name
+        assert storage is not None, f"storage does not exist {name}"
         storage[key] = json.dumps(value)
 
     def close(self):
@@ -128,7 +129,9 @@ class FsOutput(object):
     def dump_json(self, **kw):
         for k, v in kw.items():
             p = os.path.join(self.path, k + ".json")
-            json.dump(v, open(p, "wb"), indent=4, sort_keys=True)
+            # json.dump(v, open(p, "wb"), indent=4, sort_keys=True)
+            with open(p, "w", encoding="utf8") as f:
+                json.dump(v, f, indent=4, sort_keys=True)
 
     def write_siteinfo(self, siteinfo):
         self.dump_json(siteinfo=siteinfo)
@@ -146,7 +149,7 @@ class FsOutput(object):
 
         header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
         self.revfile.write(header)
-        self.revfile.write(txt.encode("utf-8"))
+        self.revfile.write(txt)
         self.seen[title] = rev
 
     def write_pages(self, data):
@@ -172,7 +175,7 @@ class FsOutput(object):
 
                     header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
                     self.revfile.write(header)
-                    self.revfile.write(txt.encode("utf-8"))
+                    self.revfile.write(txt)
                 # else:
                 #     print "fsoutput: skipping duplicate:", dict(revid=revid, title=title)
 
@@ -352,9 +355,9 @@ class Fetcher(object):
         nsnum, suffix, fqname = self.nshandler.splitname(title)
 
         if nsnum == 0:
-            text = u"{{:%s}}" % title
+            text = "{{:%s}}" % title
         else:
-            text = u"{{%s}}" % title
+            text = "{{%s}}" % title
 
         res = self.api.do_request(action="expandtemplates", title=title, text=text)
         txt = res.get("*")
@@ -579,7 +582,7 @@ class Fetcher(object):
 
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
-        temp_path = (path + u"\xb7").encode("utf-8")
+        temp_path = (path + "\xb7").encode("utf-8")
         gr = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
         self.pool.add(gr)
 

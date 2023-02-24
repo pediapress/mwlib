@@ -1,10 +1,6 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
 
-import pytest
-import os
-
-
 from mwlib import timeline
 
 example_script = """ImageSize  = width:800 height:100
@@ -113,8 +109,8 @@ PlotData=
 """
 
 
-@pytest.mark.skipif(not os.path.isfile("/usr/bin/ploticus"), reason="no ploticus")
+# @pytest.mark.skipif(not os.path.isfile("/usr/bin/ploticus"), reason="no ploticus")
 def test_draw_timeline():
     fp = timeline.drawTimeline(example_script)
-    print "result in", fp
+    print("result in", fp)
     assert fp, "no image file created"

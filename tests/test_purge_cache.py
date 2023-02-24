@@ -5,8 +5,7 @@ import shutil
 import errno
 import time
 import pytest
-from mwlib.serve import \
-    get_collection_dirs, _rmtree, _find_collection_dirs_to_purge, purge_cache
+from mwlib.serve import get_collection_dirs, _rmtree, _find_collection_dirs_to_purge, purge_cache
 
 
 @pytest.fixture
@@ -19,7 +18,7 @@ def tree(tmpdir):
 def test_nested_collection_dirs(tmpdir, monkeypatch):
     tmpdir.join("a" * 16, "b" * 16).ensure(dir=1)
     res = list(get_collection_dirs(tmpdir.strpath))
-    print "found", res
+    print("found", res)
     assert res == [tmpdir.join("a" * 16).strpath]
 
 
@@ -30,6 +29,7 @@ def test_rmtree_nonexistent(tmpdir):
 def test_rmtree_other_error(tmpdir, monkeypatch):
     def permdenied(_):
         raise OSError(errno.EPERM, "permission denied")
+
     monkeypatch.setattr(shutil, "rmtree", permdenied)
     _rmtree(tmpdir.strpath)
 

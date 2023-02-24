@@ -4,7 +4,10 @@
 import os
 import shutil
 import tempfile
+
 import pytest
+import six
+
 from mwlib.mathutils import renderMath
 
 
@@ -17,7 +20,7 @@ class TestMathUtils(object):
 
     def blahtexml_present(self):
         ret = os.system('blahtexml')
-        print "BLAHTEX:", ret
+        print("BLAHTEX:", ret)
         if ret != 0:
             return False
         else:
@@ -40,7 +43,6 @@ class TestMathUtils(object):
                      r'\text{björn}',
                      ]
         for latex in latexlist:
-            latex = unicode(latex, 'utf-8')
             if self.blahtexml_present():
                 res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='blahtexml')
                 assert res
@@ -61,7 +63,7 @@ class TestMathUtils(object):
     20\,\lg\frac{F_1}{F_2}\,\mathrm{dB}&=&
     10\,\lg\frac{W_1}{W_2}\,\mathrm{dB}
     \end{array}"""
-        latex = unicode(latex)
+        latex = six.text_type(latex)
         if self.blahtexml_present():
             res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
             assert res

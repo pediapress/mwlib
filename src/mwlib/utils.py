@@ -1,7 +1,6 @@
 from __future__ import absolute_import
-from email.mime.text import MIMEText
-from email.utils import make_msgid, formatdate
 
+import itertools
 import os
 import pprint
 import re
@@ -10,18 +9,19 @@ import socket
 import sys
 import time
 import traceback
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
-import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
-import six.moves.urllib.parse
+from email.mime.text import MIMEText
+from email.utils import make_msgid, formatdate
 
-from mwlib.log import Log
 import six
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.request
 from six.moves import range
 
+from mwlib.log import Log
 
-# provide all() for python 2.4
-all = all
-log = Log('mwlib.utils')
+log = Log("mwlib.utils")
+non_word = re.compile(r"(?u)[^-\w.]")
 
 
 def fsescape(s):
@@ -33,17 +33,9 @@ def fsescape(s):
     @returns: escaped string
     @rtype: str
     """
-
-    res = []
-    for x in s:
-        c = ord(x)
-        if c > 127 or c == 47 or c == 92:  # 47==slash, 92==backslash
-            res.append("~%s~" % c)
-        elif c == 126:  # ord("~")==126
-            res.append("~~")
-        else:
-            res.append(x.encode('ascii'))
-    return "".join(res)
+    s = str(s).strip().replace(" ", "_")
+    result = non_word.sub("", s)
+    return result
 
 
 def start_logging(path, stderr_only=False):
@@ -90,24 +82,26 @@ def get_multipart(filename, data, name):
     """
 
     if isinstance(filename, six.text_type):
-        filename = filename.encode('utf-8', 'ignore')
+        filename = filename.encode("utf-8", "ignore")
     if isinstance(name, six.text_type):
-        name = name.encode('utf-8', 'ignore')
+        name = name.encode("utf-8", "ignore")
 
     boundary = "-" * 20 + ("%f" % time.time()) + "-" * 20
 
     items = []
     items.append("--" + boundary)
-    items.append('Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'
-                 % {'name': name, 'filename': filename})
-    items.append('Content-Type: application/octet-stream')
-    items.append('')
+    items.append(
+        'Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'
+        % {"name": name, "filename": filename}
+    )
+    items.append("Content-Type: application/octet-stream")
+    items.append("")
     items.append(data)
-    items.append('--' + boundary + '--')
-    items.append('')
+    items.append("--" + boundary + "--")
+    items.append("")
 
     body = "\r\n".join(items)
-    content_type = 'multipart/form-data; boundary=%s' % boundary
+    content_type = "multipart/form-data; boundary=%s" % boundary
 
     return content_type, body
 
@@ -118,15 +112,23 @@ def safe_unlink(filename):
     try:
         os.unlink(filename)
     except Exception as exc:
-        log.warn('Could not remove file %r: %s' % (filename, exc))
+        log.warn("Could not remove file %r: %s" % (filename, exc))
 
 
 fetch_cache = {}
 
 
-def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
-              max_cacheable_size=1024, expected_content_type=None, opener=None,
-              output_filename=None, post_data=None, timeout=10.0):
+def fetch_url(
+    url,
+    ignore_errors=False,
+    fetch_cache=fetch_cache,
+    max_cacheable_size=1024,
+    expected_content_type=None,
+    opener=None,
+    output_filename=None,
+    post_data=None,
+    timeout=10.0,
+):
     """Fetch given URL via HTTP
 
     @param ignore_errors: if True, log but otherwise ignore errors, return None
@@ -167,16 +169,16 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         socket.setdefaulttimeout(timeout)
     if opener is None:
         opener = six.moves.urllib.request.build_opener()
-        opener.addheaders = [('User-agent', 'mwlib')]
+        opener.addheaders = [("User-agent", "mwlib")]
     try:
         if post_data:
             post_data = six.moves.urllib.parse.urlencode(post_data)
         result = opener.open(url, post_data)
         data = result.read()
         if expected_content_type:
-            content_type = result.info().gettype()
+            content_type = result.headers.get_content_type()
             if content_type != expected_content_type:
-                msg = 'Got content-type %r, expected %r' % (
+                msg = "Got content-type %r, expected %r" % (
                     content_type,
                     expected_content_type,
                 )
@@ -189,16 +191,16 @@ def fetch_url(url, ignore_errors=False, fetch_cache=fetch_cache,
         if ignore_errors:
             log.error("%s - while fetching %r" % (err, url))
             return None
-        raise RuntimeError('Could not fetch %r: %s' % (url, err))
-    #log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
+        raise RuntimeError("Could not fetch %r: %s" % (url, err))
+    # log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
 
-    if hasattr(fetch_cache, 'max_cacheable_size'):
+    if hasattr(fetch_cache, "max_cacheable_size"):
         max_cacheable_size = max(fetch_cache.max_cacheable_size, max_cacheable_size)
     if len(data) <= max_cacheable_size:
         fetch_cache[url] = data
 
     if output_filename:
-        open(output_filename, 'wb').write(data)
+        open(output_filename, "wb").write(data)
         return True
     else:
         return data
@@ -215,7 +217,7 @@ def uid(max_length=10):
     """
 
     some_bytes = os.urandom((max_length + 1) // 2)
-    return "".join(hex(ord(x))[2:] for x in some_bytes)[:max_length]
+    return "".join(hex(x)[2:] for x in some_bytes)[:max_length]
 
 
 def ensure_dir(d):
@@ -233,7 +235,7 @@ def ensure_dir(d):
     return d
 
 
-def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', port=25):
+def send_mail(from_email, to_emails, subject, body, headers=None, host="mail", port=25):
     """Send an email via SMTP
 
     @param from_email: email address for From: header
@@ -256,12 +258,12 @@ def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', p
     """
 
     connection = smtplib.SMTP(host, port)
-    msg = MIMEText(body.encode('utf-8'), 'plain', 'utf-8')
-    msg['Subject'] = subject.encode('utf-8')
-    msg['From'] = from_email
-    msg['To'] = ', '.join(to_emails)
-    msg['Date'] = formatdate()
-    msg['Message-ID'] = make_msgid()
+    msg = MIMEText(body.encode("utf-8"), "plain", "utf-8")
+    msg["Subject"] = subject.encode("utf-8")
+    msg["From"] = from_email
+    msg["To"] = ", ".join(to_emails)
+    msg["Date"] = formatdate()
+    msg["Message-ID"] = make_msgid()
     if headers is not None:
         for k, v in headers.items():
             if not isinstance(v, str):
@@ -272,13 +274,13 @@ def send_mail(from_email, to_emails, subject, body, headers=None, host='mail', p
 
 
 def asunicode(x):
-    if not isinstance(x, six.string_types):
-        x = repr(x)
+    # if not isinstance(x, six.string_types):
+    #     x = repr(x)
+    #
+    # if isinstance(x, str):
+    #     x = six.text_type(x, "utf-8", "replace")
 
-    if isinstance(x, str):
-        x = six.text_type(x, "utf-8", "replace")
-
-    return x
+    return str(x)
 
 
 def ppdict(dct):
@@ -287,33 +289,33 @@ def ppdict(dct):
     write = tmp.append
 
     for k, v in items:
-        write(u"*" + asunicode(k) + u"*")
+        write("*" + asunicode(k) + "*")
         v = asunicode(v)
         lines = v.split("\n")
         for x in lines:
             write(" " * 4 + x)
         write("")
 
-    return u"\n".join(tmp)
+    return "\n".join(tmp)
 
 
-def report(system='', subject='', from_email=None, mail_recipients=None, mail_headers=None, **kw):
-    log.report('system=%r subject=%r' % (system, subject))
+def report(system="", subject="", from_email=None, mail_recipients=None, mail_headers=None, **kw):
+    log.report("system=%r subject=%r" % (system, subject))
 
     text = []
-    text.append('SYSTEM: %r\n' % system)
-    text.append('%s\n' % traceback.format_exc())
+    text.append("SYSTEM: %r\n" % system)
+    text.append("%s\n" % traceback.format_exc())
     try:
         fqdn = socket.getfqdn()
     except BaseException:
-        fqdn = 'not available'
-    text.append('CWD: %r\n' % os.getcwd())
+        fqdn = "not available"
+    text.append("CWD: %r\n" % os.getcwd())
 
-    text.append(ppdict(kw).encode("utf-8"))
+    text.append(ppdict(kw))
     # text.append('KEYWORDS:\n%s\n' % pprint.pformat(kw, indent=4))
-    text.append('ENV:\n%s\n' % pprint.pformat(dict(os.environ), indent=4))
+    text.append("ENV:\n%s\n" % pprint.pformat(dict(os.environ), indent=4))
 
-    text = '\n'.join(text)
+    text = "\n".join(text)
 
     if not (from_email and mail_recipients):
         return text
@@ -324,46 +326,46 @@ def report(system='', subject='', from_email=None, mail_recipients=None, mail_he
         send_mail(
             from_email,
             mail_recipients,
-            'REPORT [%s]: %s' % (fqdn, subject),
+            "REPORT [%s]: %s" % (fqdn, subject),
             text,
             headers=mail_headers,
         )
-        log.info('sent mail to %r' % mail_recipients)
+        log.info("sent mail to %r" % mail_recipients)
     except Exception as e:
-        log.ERROR('Could not send mail: %s' % e)
+        log.ERROR("Could not send mail: %s" % e)
     return text
 
 
 def get_safe_url(url):
     if not isinstance(url, str):
-        url = url.encode('utf-8')
+        url = url.encode("utf-8")
 
-    nonwhitespace_rex = re.compile(r'^\S+$')
+    nonwhitespace_rex = re.compile(r"^\S+$")
     try:
         result = six.moves.urllib.parse.urlsplit(url)
         scheme, netloc, path, query, fragment = result
     except Exception as exc:
-        log.warn('urlparse(%r) failed: %s' % (url, exc))
+        log.warn("urlparse(%r) failed: %s" % (url, exc))
         return None
 
     if not (scheme and netloc):
-        log.warn('Empty scheme or netloc: %r %r' % (scheme, netloc))
+        log.warn("Empty scheme or netloc: %r %r" % (scheme, netloc))
         return None
 
     if not (nonwhitespace_rex.match(scheme) and nonwhitespace_rex.match(netloc)):
-        log.warn('Found whitespace in scheme or netloc: %r %r' % (scheme, netloc))
+        log.warn("Found whitespace in scheme or netloc: %r %r" % (scheme, netloc))
         return None
 
     try:
         # catches things like path='bla " target="_blank'
         path = six.moves.urllib.parse.quote(six.moves.urllib.parse.unquote(path))
     except Exception as exc:
-        log.warn('quote(unquote(%r)) failed: %s' % (path, exc))
+        log.warn("quote(unquote(%r)) failed: %s" % (path, exc))
         return None
     try:
         return six.moves.urllib.parse.urlunsplit((scheme, netloc, path, query, fragment))
     except Exception as exc:
-        log.warn('urlunparse() failed: %s' % exc)
+        log.warn("urlunparse() failed: %s" % exc)
 
 
 def get_nodeweight(obj):
@@ -374,10 +376,10 @@ def get_nodeweight(obj):
     to get some stats when NO Advanced Nodes are available
     """
     k = obj.__class__.__name__
-    if k in ('Text',):
+    if k in ("Text",):
         return k, len(obj.caption)
-    elif k == 'ImageLink' and obj.isInline():
-        return 'InlineImageLink', 1
+    elif k == "ImageLink" and obj.isInline():
+        return "InlineImageLink", 1
     return k, 1
 
 
@@ -385,15 +387,15 @@ def get_nodeweight(obj):
 def pdf2txt(path):
     """extract text from pdf file"""
     # based on http://code.activestate.com/recipes/511465/
-    import pyPdf
+    import pypdf
 
     content = []
-    pdf = pyPdf.PdfFileReader(open(path, "rb"))
+    reader = pypdf.PdfReader(path)
 
-    numpages = pdf.getNumPages()
-    for i in range(0, numpages):
+    num_pages = len(reader.pages)
+    for i in range(0, num_pages):
         # Extract text from page and add to content
-        content.append(pdf.getPage(i).extractText())
+        content.append(reader.pages[i].extract_text())
 
     return "\n".join(content)
 
@@ -403,10 +405,32 @@ def garble_password(argv):
     idx = 0
     while True:
         try:
-            idx = argv[idx:].index('--password') + 1
+            idx = argv[idx:].index("--password") + 1
         except ValueError:
             break
         if idx >= len(argv):
             break
-        argv[idx] = '{OMITTED}'
+        argv[idx] = "{OMITTED}"
     return argv
+
+
+def python2sort(x, reverse=False):
+    if not x:
+        return x
+    it = iter(x)
+    groups = [[next(it)]]
+    for item in it:
+        for group in groups:
+            try:
+                item < group[0]  # exception if not comparable
+                group.append(item)
+                break
+            except TypeError:
+                continue
+        else:  # did not break, make new group
+            groups.append([item])
+    print(groups)  # for debugging
+    result = itertools.chain.from_iterable(sorted(group) for group in groups)
+    if reverse:
+        result = reversed(list(result))
+    return result

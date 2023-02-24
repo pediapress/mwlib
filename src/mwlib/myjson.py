@@ -3,8 +3,6 @@
 
 """custom json encoder/decoder, which can handle metabook objects"""
 
-from __future__ import absolute_import
-
 from mwlib import metabook
 
 try:
@@ -55,7 +53,7 @@ def loads(data):
 
 
 def dump(obj, fp, **kw):
-    return json.dump(obj, fp, cls=mbencoder, **kw)
+    return json.dump(obj, fp, ensure_ascii=False, cls=mbencoder, **kw)
 
 
 def dumps(obj, **kw):

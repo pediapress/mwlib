@@ -1,5 +1,7 @@
 #! /usr/bin/env py.test
 
+from __future__ import absolute_import
+from __future__ import print_function
 from mwlib import utoken, uniq
 
 
@@ -35,7 +37,7 @@ def test_comment():
 
     def repl(txt, expected):
         res = u.replace_tags(txt)
-        print(repr(txt), "->", repr(res))
+        print((repr(txt), "->", repr(res)))
         assert res == expected
 
     repl("foo<!-- bla -->bar", "foobar")

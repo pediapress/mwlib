@@ -7,8 +7,6 @@ namespace handling based on data extracted from the siteinfo as
 returned by api.php
 """
 
-from __future__ import absolute_import
-from __future__ import print_function
 import re
 import six
 

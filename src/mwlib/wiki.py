@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 import os
 from six.moves.configparser import ConfigParser
-import StringIO
+from io import StringIO
 
 from mwlib.log import Log
 from mwlib import myjson
@@ -23,16 +23,16 @@ dispatch = dict(
     wiki=dict(cdb=wiki_obsolete_cdb, nucdb=wiki_obsolete_cdb)
 )
 
-_en_license_url = 'http://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'
+_en_license_url = 'https://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'
 wpwikis = dict(
-    de=dict(baseurl='http://de.wikipedia.org/w/',
-            mw_license_url='http://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'),
-    en=dict(baseurl='http://en.wikipedia.org/w/', mw_license_url=_en_license_url),
-    fr=dict(baseurl='http://fr.wikipedia.org/w/', mw_license_url=None),
-    es=dict(baseurl='http://es.wikipedia.org/w/', mw_license_url=None),
-    pt=dict(baseurl='http://pt.wikipedia.org/w/', mw_license_url=None),
-    enwb=dict(baseurl='http://en.wikibooks.org/w', mw_license_url=_en_license_url),
-    commons=dict(baseurl='http://commons.wikimedia.org/w/', mw_license_url=_en_license_url)
+    de=dict(baseurl='https://de.wikipedia.org/w/',
+            mw_license_url='https://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'),
+    en=dict(baseurl='https://en.wikipedia.org/w/', mw_license_url=_en_license_url),
+    fr=dict(baseurl='https://fr.wikipedia.org/w/', mw_license_url=None),
+    es=dict(baseurl='https://es.wikipedia.org/w/', mw_license_url=None),
+    pt=dict(baseurl='https://pt.wikipedia.org/w/', mw_license_url=None),
+    enwb=dict(baseurl='https://en.wikibooks.org/w', mw_license_url=_en_license_url),
+    commons=dict(baseurl='https://commons.wikimedia.org/w/', mw_license_url=_en_license_url)
 )
 
 
@@ -44,12 +44,12 @@ class Environment(object):
         self.images = None
         self.wiki = None
         self.configparser = ConfigParser()
-        defaults = StringIO.StringIO("""
+        defaults = StringIO("""
 [wiki]
 name=
 url=
 """)
-        self.configparser.readfp(defaults)
+        self.configparser.read_file(defaults)
 
     def init_metabook(self):
         if self.metabook:
@@ -102,11 +102,9 @@ class MultiEnvironment(Environment):
         return res
 
 
-def ndict(**kw):
-    for k, v in kw.items():
-        if v is None:
-            del kw[k]
-    return kw
+def ndict(**original):
+    """Delete all keys with value None from dict."""
+    return {k: v for k, v in original.items() if v is not None}
 
 
 def _makewiki(conf, metabook=None, **kw):

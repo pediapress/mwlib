@@ -1,8 +1,7 @@
 #! /usr/bin/env py.test
 
-import pytest
-from mwlib.refine import core
 from mwlib import nshandling
+from mwlib.refine import core
 
 tokenize = core.tokenize
 show = core.show
@@ -50,15 +49,15 @@ def test_parse_table_cells_closed_by_next_cell():
 
 def test_parse_table_cells_pipe():
     tokens = tokenize("{|\n|cell0||cell1||cell2\n|}")[2:-2]
-    print "BEFORE:"
+    print("BEFORE:")
     show(tokens)
     core.parse_table_cells(tokens, empty())
-    print "AFTER"
+    print("AFTER")
     show(tokens)
     assert len(tokens) == 3
 
     for i, x in enumerate(tokens):
-        print "cell", i
+        print("cell", i)
         assert x.type == T.t_complex_table_cell, "cell %s bad" % (i,)
         assert len(x.children) == 1, "cell %s has wrong number of children" % (i,)
         assert x.children[0].type == T.t_text
@@ -72,10 +71,10 @@ def test_parse_cell_modifier():
 |}"""
     )[2:-2]
 
-    print "BEFORE:"
+    print("BEFORE:")
     show(tokens)
     core.parse_table_cells(tokens, empty())
-    print "AFTER"
+    print("AFTER")
     show(tokens)
     assert tokens[0].type == T.t_complex_table_cell
     assert tokens[0].vlist == dict(align="right")
@@ -89,11 +88,11 @@ def test_parse_table_modifier():
 """
     )
 
-    print "BEFORE:"
+    print("BEFORE:")
     show(tokens)
     core.parse_tables(tokens, empty())
 
-    print "AFTER:"
+    print("AFTER:")
     show(tokens)
 
     assert tokens[0].type == T.t_complex_table
@@ -109,11 +108,11 @@ def test_parse_table_row_modifier():
 """
     )[2:-2]
 
-    print "BEFORE:"
+    print("BEFORE:")
     show(tokens)
     core.parse_table_rows(tokens, empty())
 
-    print "AFTER:"
+    print("AFTER:")
     show(tokens)
 
     assert tokens[0].vlist
@@ -133,7 +132,7 @@ def test_no_row_modifier():
     r = core.parse_txt(s)
     core.show(r)
     cells = list(core.walknode(r, lambda x: x.type == core.T.t_complex_table_cell))
-    print "CELLS:", cells
+    print("CELLS:", cells)
     assert len(cells) == 2, "expected 2 cells"
 
 
@@ -145,11 +144,11 @@ def test_parse_para_vs_preformatted():
     core.show(pre)
     textnodes = list(core.walknode(pre, lambda x: x.type == core.T.t_text))
     txt = "".join([x.text for x in textnodes])
-    assert u"bar" not in txt
+    assert "bar" not in txt
 
 
 def test_duplicate_nesting():
-    s = u"""<b>
+    s = """<b>
 [[foo|bar]] between
 </b>"""
     r = core.parse_txt(s)
@@ -162,7 +161,7 @@ def test_duplicate_nesting():
 
 
 def test_ref_no_newline():
-    s = u"""<ref>* no item</ref>"""
+    s = """<ref>* no item</ref>"""
     r = core.parse_txt(s)
     core.show(r)
     linodes = list(core.walknode(r, lambda x: x.tagname == "li"))
@@ -223,7 +222,7 @@ def test_no_combine_dd_dt():
         r = parse_txt(s)
         core.show(r)
         styles = core.walknodel(r, lambda x: x.type == T.t_complex_style)
-        print styles
+        print(styles)
         assert len(styles) == 2
 
     doit(":first\n:second\n")
@@ -254,7 +253,7 @@ def test_mark_style_595():
     """http://code.pediapress.com/wiki/ticket/595"""
     r = parse_txt("<b><i>[[Article link|Display text]]</i></b> after")
     b = core.walknodel(r, lambda x: x.tagname == "b")
-    print b
+    print(b)
     assert len(b) == 1, "expected exactly one bold node"
 
 
@@ -273,7 +272,7 @@ def test_link_in_table_caption():
 """
     r = parse_txt(s)
     with_vlist = core.walknodel(r, lambda x: bool(x.vlist))
-    print with_vlist
+    print(with_vlist)
 
     assert not with_vlist, "no node should contain a vlist"
 
@@ -281,7 +280,7 @@ def test_link_in_table_caption():
 def test_html_entity_in_pre():
     r = parse_txt("<pre>&gt;</pre>")
     txt = r[0].children[0].text
-    print txt
+    print(txt)
     assert txt == ">", "wrong text"
 
 
@@ -289,7 +288,7 @@ def test_nowiki_in_pre():
     """http://code.pediapress.com/wiki/ticket/617"""
     r = parse_txt("<pre><nowiki>foo</nowiki></pre>")
     txt = r[0].children[0].text
-    print txt
+    print(txt)
     assert txt == "foo", "wrong text"
 
 
@@ -308,7 +307,7 @@ def test_var_tag():
 def test_empty_link():
     """http://code.pediapress.com/wiki/ticket/621"""
     r = parse_txt("[[de:]]")
-    print r
+    print(r)
     assert r[0].type == T.t_complex_link
 
 
@@ -345,7 +344,7 @@ def test_urllink_in_brackets():
     r = parse_txt("[[http://example.com bla]]")
     show(r)
     nu = core.walknodel(r, lambda x: x.type == T.t_complex_named_url)
-    print nu
+    print(nu)
     assert len(nu) == 1, "expected exactly one named url"
 
 
@@ -395,8 +394,8 @@ def test_left_to_right_mark():
         target = r[0].target
         assert target == "Image:foo.jpg", "wrong target"
 
-    for mark in (u"\u200e", u"\u200f"):
-        s = u"[[Image:foo.jpg" + mark + "|thumb|foobar]]"
+    for mark in ("\u200e", "\u200f"):
+        s = "[[Image:foo.jpg" + mark + "|thumb|foobar]]"
         doit(s)
 
 
@@ -455,7 +454,7 @@ def test_ref_inside_caption():
     r = core.parse_txt(s)
     core.show(r)
     cap = core.walknodel(r, lambda x: x.type == T.t_complex_caption)[0]
-    print "caption:"
+    print("caption:")
     core.show(cap)
     refs = core.walknodel(cap, lambda x: x.tagname == "ref")
     assert refs
@@ -470,15 +469,15 @@ def test_tr_inside_caption():
     r = core.parse_txt(s)
     core.show(r)
     cap = core.walknodel(r, lambda x: x.type == T.t_complex_caption)[0]
-    print "caption:"
+    print("caption:")
     core.show(cap)
 
     rows = core.walknodel(r, lambda x: x.type == T.t_complex_table_row)
-    print "ROWS:", rows
+    print("ROWS:", rows)
     assert len(rows) == 1, "no rows found"
 
     rows = core.walknodel(cap, lambda x: x.type == T.t_complex_table_row)
-    print "ROWS:", rows
+    print("ROWS:", rows)
     assert len(rows) == 0, "row in table caption found"
 
 
@@ -538,7 +537,7 @@ Image:ACDC_logo.gif|capshun<!--comment-->
     )
     core.show(r)
     txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
-    print "TXT:", repr(txt)
+    print("TXT:", repr(txt))
     assert "capshun" in txt, "bad text??"
     assert "comment" not in txt, "comment not stripped"
 
@@ -553,7 +552,7 @@ Image:ACDC_logo.gif| capshun {{#if: 1|yes}}
     )
     core.show(r)
     txt = T.join_as_text(core.walknodel(r[0].children, lambda x: True))
-    print "TXT:", repr(txt)
+    print("TXT:", repr(txt))
     assert "capshun" in txt, "bad text??"
     assert "capshun yes" in txt, "#if failed to expand"
 
@@ -577,7 +576,7 @@ def test_named_url_in_double_brackets():
     named = core.walknodel(r, lambda x: x.type == T.t_complex_named_url)
     assert len(named) == 1, "expected a named url"
     txt = T.join_as_text(r)
-    print "TXT:", repr(txt)
+    print("TXT:", repr(txt))
     assert "[" in txt, "missing ["
     assert "]" in txt, "missing ]"
     assert "[[" not in txt, "bad text"
@@ -588,7 +587,7 @@ def test_link_vs_namedurl():
     r = core.parse_txt("[[acdc [http://web.de bla]]")
     core.show(r)
     txt = T.join_as_text(r)
-    print "TXT:", repr(txt)
+    print("TXT:", repr(txt))
 
     assert "[[acdc " in txt, "wrong text"
     assert txt.endswith("]"), "wrong text"
@@ -604,11 +603,11 @@ def test_span_vs_paragraph():
     r = core.parse_txt("foo<span>\n\nbar</span>\n\n")
     core.show(r)
     p = [x for x in r if x.tagname == "p"]
-    print "PARAS:", p
+    print("PARAS:", p)
     assert len(p) == 2, "expected two paragraphs"
 
     txts = [T.join_as_text(x.children) for x in p]
-    print txts
+    print(txts)
     assert "foo" in txts[0]
     assert "bar" in txts[1]
 
@@ -623,10 +622,10 @@ def test_style_tag_closes_same():
     core.show(r)
     utags = core.walknodel(r, lambda x: x.tagname == "u")
 
-    print "utags:", utags
+    print("utags:", utags)
     txt = "".join([T.join_as_text(x.children) for x in utags])
-    print "txt:", txt
-    assert txt == u"bar"
+    print("txt:", txt)
+    assert txt == "bar"
 
 
 def test_hashmark_link():

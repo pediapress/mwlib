@@ -87,7 +87,7 @@ from .pagetemplates import WikiPage, TitlePage
 from mwlib.writer.imageutils import ImageUtils
 from mwlib.writer import miscutils, styleutils
 from mwlib import parser, log, timeline
-from mwlib.parser import uparser
+from mwlib import uparser
 from mwlib.writer.licensechecker import LicenseChecker
 from mwlib.rl.customnodetransformer import CustomNodeTransformer
 from mwlib.rl.formatter import RLFormatter

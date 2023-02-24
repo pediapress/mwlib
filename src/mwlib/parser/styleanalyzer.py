@@ -24,6 +24,12 @@ class State(object):
         res.append(">")
         return "".join(res)
 
+    def __lt__(self, other):
+        # default_3way_compare from Python 2 as Python code
+        # same type but no ordering defined, go by id
+        if type(self) is type(other):
+            return id(self) < id(other)
+
     def get_next(self, count, res=None, previous=None):
         if previous is None:
             previous = self

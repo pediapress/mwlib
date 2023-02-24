@@ -23,9 +23,11 @@ http://en.wikibooks.org/wiki/Special:Version
 List of tags used by Wikia:
 http://code.pediapress.com/wiki/wiki/ParserExtensionTags
 """
+import codecs
+
+rot13_encode = codecs.getencoder('rot-13')
 
 
-from __future__ import absolute_import
 class ExtensionRegistry(object):
     def __init__(self):
         self.name2ext = {}
@@ -103,7 +105,7 @@ wegame youtube imagelink badge comments createform
 fan featuredimage gallerypopulate linkfilter listpages
 loggedin loggedout newusers pagequality pollembed randomfeatureduser
 randomgameunit randomimagebycategory randomuserswithavatars
-rss siteactivity userpoll videogallerypopulate vote
+rss siteactivity templatestyles userpoll videogallerypopulate vote
 welcomeuser xsound pageby uml graphviz categorytree summary slippymap""".split()
 
 for name in tags_to_ignore:
@@ -127,7 +129,7 @@ class Rot13Extension(TagExtension):
 
         this functions builds wikimarkup and returns a parse tree for this
         """
-        return self.parse("rot13(%s) is %s" % (source, source.encode('rot13')))
+        return self.parse("rot13(%s) is %s" % (source, rot13_encode(source)[0]))
 
 
 register(Rot13Extension)
