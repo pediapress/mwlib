@@ -20,25 +20,30 @@ class ExprError(Exception):
 
 
 def _myround(a, b):
+    if int(b) == 0 and round(a + 1) - round(a) != 1:
+        return a + abs(a) / a * 0.5  # simulate Python 2 rounding
+        # via https://stackoverflow.com/questions/21839140/python-3-rounding-behavior-in-python-2
     r = round(a, int(b))
     if int(r) == r:
         return int(r)
     return r
 
 
-pattern = """
-(?:\s+)
-|((?:(?:\d+)(?:\.\d+)?
- |(?:\.\d+)))
-|(\+|-|\*|/|>=|<=|<>|!=|[a-zA-Z]+|.)
-"""
+pattern = "\n".join(
+    [
+        r"(?:\s+)",
+        r"|((?:(?:\d+)(?:\.\d+)?",
+        r" |(?:\.\d+)))",
+        r"|(\+|-|\*|/|>=|<=|<>|!=|[a-zA-Z]+|.)",
+    ]
+)
 
 rx_pattern = re.compile(pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
 
 def tokenize(s):
     res = []
-    for (v1, v2) in rx_pattern.findall(s):
+    for v1, v2 in rx_pattern.findall(s):
         if not (v1 or v2):
             continue
         v2 = v2.lower()
