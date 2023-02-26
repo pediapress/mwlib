@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 
 import os
-import pytest
+
 from mwlib import utils
 
 here = os.path.dirname(__file__)

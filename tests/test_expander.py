@@ -7,6 +7,21 @@ from mwlib.expander import expand_str, DictDB
 from mwlib.dummydb import DummyDB
 
 
+HELP_LINK = "Help:Link/a/b"
+FOO_TEMPLATE_1 = "foo {{tt}}"
+FOO_TEMPLATE_2 = "foo \n{|"
+USER_DISCUSSION = "Benutzer Diskussion"
+USER_DISCUSSION_PAGE_PLAIN = "Benutzer Diskussion:Anonymous user!/sandbox/my page"
+USER_DISCUSSION_PAGE_ESCAPED = "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page"
+USER_PAGE_PLAIN = "Benutzer:Anonymous user!/sandbox/my page"
+USER_PAGE_ESCAPED = "Benutzer%3AAnonymous_user%21/sandbox/my_page"
+USER_PAGE_SUB_SUBPAGE_PATH_PLAIN = "Anonymous user!/sandbox/my page"
+USER_PAGE_SUB_SUBPAGE_PATH_ESCAPED = "Anonymous_user%21/sandbox/my_page"
+USER_PAGE_SUBPAGE_PLAIN = "Anonymous user!/sandbox"
+USER_PAGE_SUBPAGE_ESCAPED = "Anonymous_user%21/sandbox"
+MY_PAGE = "my page"
+
+
 def parse_and_show(s):
     res = expander.parse(s)
     print("PARSE:", repr(s))
@@ -244,11 +259,11 @@ def test_parmpart():
 
 
 def test_titleparts():
-    expand_str("{{#titleparts:Help:Link/a/b|0|}}", "Help:Link/a/b")
+    expand_str("{{#titleparts:Help:Link/a/b|0|}}", HELP_LINK)
     expand_str("{{#titleparts:Help:Link/a/b|1|}}", "Help:Link")
     expand_str("{{#titleparts:Help:Link/a/b|2|}}", "Help:Link/a")
-    expand_str("{{#titleparts:Help:Link/a/b|3|}}", "Help:Link/a/b")
-    expand_str("{{#titleparts:Help:Link/a/b|4|}}", "Help:Link/a/b")
+    expand_str("{{#titleparts:Help:Link/a/b|3|}}", HELP_LINK)
+    expand_str("{{#titleparts:Help:Link/a/b|4|}}", HELP_LINK)
 
 
 def test_titleparts_2params():
@@ -288,28 +303,28 @@ def test_no_implicit_newline():
 
 
 def test_implicit_newline_noinclude():
-    expand_str("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<noinclude></noinclude>{|"))
+    expand_str(FOO_TEMPLATE_1, FOO_TEMPLATE_2, wikidb=DictDB(tt="<noinclude></noinclude>{|"))
 
 
 def test_implicit_newline_includeonly():
-    expand_str("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="<includeonly>{|</includeonly>"))
+    expand_str(FOO_TEMPLATE_1, FOO_TEMPLATE_2, wikidb=DictDB(tt="<includeonly>{|</includeonly>"))
 
 
 def test_implicit_newline_begintable():
-    expand_str("foo {{tt}}", "foo \n{|", wikidb=DictDB(tt="{|"))
+    expand_str(FOO_TEMPLATE_1, FOO_TEMPLATE_2, wikidb=DictDB(tt="{|"))
 
 
 def test_implicit_newline_colon():
-    expand_str("foo {{tt}}", "foo \n:", wikidb=DictDB(tt=":"))
+    expand_str(FOO_TEMPLATE_1, "foo \n:", wikidb=DictDB(tt=":"))
 
 
 def test_implicit_newline_semicolon():
-    expand_str("foo {{tt}}", "foo \n;", wikidb=DictDB(tt=";"))
+    expand_str(FOO_TEMPLATE_1, "foo \n;", wikidb=DictDB(tt=";"))
 
 
 def test_implicit_newline_ifeq():
     expand_str(
-        "{{#ifeq: 1 | 1 | foo {{#if: 1 | {{{!}} }}}}", "foo \n{|", wikidb=DictDB({"!": "|"})
+        "{{#ifeq: 1 | 1 | foo {{#if: 1 | {{{!}} }}}}", FOO_TEMPLATE_2, wikidb=DictDB({"!": "|"})
     )
 
 
@@ -438,20 +453,22 @@ def test_implicit_newline_after_expand():
 
 
 def test_pagename_non_ascii():
+    leonie_x = "L\xe9onie s"
+    leonie_s = "L%C3%A9onie_s"
     def e(a, b):
-        return expand_str(a, b, pagename="L\xe9onie s")
+        return expand_str(a, b, pagename=leonie_x)
 
-    e("{{PAGENAME}}", "L\xe9onie s")
-    e("{{PAGENAMEE}}", "L%C3%A9onie_s")
+    e("{{PAGENAME}}", leonie_x)
+    e("{{PAGENAMEE}}", leonie_s)
 
-    e("{{BASEPAGENAME}}", "L\xe9onie s")
-    e("{{BASEPAGENAMEE}}", "L%C3%A9onie_s")
+    e("{{BASEPAGENAME}}", leonie_x)
+    e("{{BASEPAGENAMEE}}", leonie_s)
 
-    e("{{FULLPAGENAME}}", "L\xe9onie s")
-    e("{{FULLPAGENAMEE}}", "L%C3%A9onie_s")
+    e("{{FULLPAGENAME}}", leonie_x)
+    e("{{FULLPAGENAMEE}}", leonie_s)
 
-    e("{{SUBPAGENAME}}", "L\xe9onie s")
-    e("{{SUBPAGENAMEE}}", "L%C3%A9onie_s")
+    e("{{SUBPAGENAME}}", leonie_x)
+    e("{{SUBPAGENAMEE}}", leonie_s)
 
 
 def test_get_templates():
@@ -469,11 +486,13 @@ def test_noinclude_end():
     expand_str("{{foo}}", "foo", wikidb=DictDB(foo="foo<noinclude>bar should not be in expansion"))
 
 
-def test_monthnumber():
+def test_month_number():
     wikidb = DictDB(
         MONTHNUMBER="{{#if:{{{1|}}}|{{#switch:{{lc:{{{1}}}}}|january|jan=1|february|feb=2|march|mar=3|apr|april=4|may=5|june|jun=6|july|jul=7|august|aug=8|september|sep=9|october|oct=10|november|nov=11|december|dec=12|{{#ifexpr:{{{1}}}<0|{{#ifexpr:(({{{1}}})round 0)!=({{{1}}})|{{#expr:12-(((0.5-({{{1}}}))round 0)mod 12)}}|{{#expr:12-(((11.5-({{{1}}}))round 0)mod 12)}}}}|{{#expr:(((10.5+{{{1}}})round 0)mod 12)+1}}}}}}|Missing required parameter 1=''month''!}}"
     )
     expand_str("{{MONTHNUMBER|12}}", "12", wikidb=wikidb) # FIXME: expected '12', got '11'
+    # maybe related to "true division" change between Python 2 and 3
+    # https://www.informit.com/articles/article.aspx?p=1439189
 
 
 def test_switch_default_template():
@@ -495,7 +514,7 @@ def test_equal_inside_link():
     expand_str("{{t1|[[abc|foo=5]]}}", "[[abc|foo=5]]", wikidb=db)
 
 
-def test_tag_parametrs():
+def test_tag_parameters():
     expand_str("{{#tag:test|contents|a=b|c=d}}", '<test a="b" c="d">contents</test>')
     expand_str("{{#tag:div|contents|a}}")
 
@@ -516,9 +535,9 @@ def test_namespace():
     expand_str("{{NAMESPACE}}", "Benutzer", None, "User:Schmir")
     expand_str("{{NAMESPACE}}", "")
     expand_str("{{NAMESPACE:Mainz}}", "")
-    expand_str("{{NAMESPACE:User_talk:Schmir}}", "Benutzer Diskussion")
-    expand_str("{{NAMESPACE:User talk:Schmir}}", "Benutzer Diskussion")
-    expand_str("{{NAMESPACE:  benutzer diskussion:Schmir}}", "Benutzer Diskussion")
+    expand_str("{{NAMESPACE:User_talk:Schmir}}", USER_DISCUSSION)
+    expand_str("{{NAMESPACE:User talk:Schmir}}", USER_DISCUSSION)
+    expand_str("{{NAMESPACE:  benutzer diskussion:Schmir}}", USER_DISCUSSION)
 
 
 def test_pagename():
@@ -553,7 +572,7 @@ foo was missing<ref>bar</ref> <!-- some comment--> baz
     assert "foo was missing" in raw, "text is missing"
 
 
-def test_dynamic_parserfun():
+def test_dynamic_parser_function():
     expand_str("{{{{#if: 1|}}#switch: A | a=lower | A=UPPER }}", "UPPER")
     expand_str("{{{{#if: 1|}}#if: 1 | yes}}", "yes")
     expand_str("{{{{#if: 1|}}#time: Y-m-d | 2009-1-2}}", "2009-01-02")
@@ -581,42 +600,42 @@ def test_link_vs_expander():
     expand_str("{{#if: 1|  [[foo|bar}}123", "{{#if: 1|  [[foo|bar}}123")
 
 
-def test_pagemagic():
+def test_page_magic():
     def expand_page(tpl, expected):
         return expand_str(
-            "{{%s}}" % tpl, expected, pagename="Benutzer:Anonymous user!/sandbox/my page"
+            "{{%s}}" % tpl, expected, pagename=USER_PAGE_PLAIN
         )
 
     def expand_talk(tpl, expected):
         return expand_str(
             "{{%s}}" % tpl,
             expected,
-            pagename="Benutzer Diskussion:Anonymous user!/sandbox/my page",
+            pagename=USER_DISCUSSION_PAGE_PLAIN,
         )
 
-    expand_page("PAGENAME", "Anonymous user!/sandbox/my page")
-    expand_page("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
-    expand_talk("PAGENAME", "Anonymous user!/sandbox/my page")
-    expand_talk("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
-    expand_page("BASEPAGENAME", "Anonymous user!/sandbox")
-    expand_page("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
-    expand_talk("BASEPAGENAME", "Anonymous user!/sandbox")
-    expand_talk("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
-    expand_page("SUBPAGENAME", "my page")
+    expand_page("PAGENAME", USER_PAGE_SUB_SUBPAGE_PATH_PLAIN)
+    expand_page("PAGENAMEE", USER_PAGE_SUB_SUBPAGE_PATH_ESCAPED)
+    expand_talk("PAGENAME", USER_PAGE_SUB_SUBPAGE_PATH_PLAIN)
+    expand_talk("PAGENAMEE", USER_PAGE_SUB_SUBPAGE_PATH_ESCAPED)
+    expand_page("BASEPAGENAME", USER_PAGE_SUBPAGE_PLAIN)
+    expand_page("BASEPAGENAMEE", USER_PAGE_SUBPAGE_ESCAPED)
+    expand_talk("BASEPAGENAME", USER_PAGE_SUBPAGE_PLAIN)
+    expand_talk("BASEPAGENAMEE", USER_PAGE_SUBPAGE_ESCAPED)
+    expand_page("SUBPAGENAME", MY_PAGE)
     expand_page("SUBPAGENAMEE", "my_page")
-    expand_talk("SUBPAGENAME", "my page")
+    expand_talk("SUBPAGENAME", MY_PAGE)
     expand_talk("SUBPAGENAMEE", "my_page")
     expand_page("NAMESPACE", "Benutzer")
     expand_page("NAMESPACEE", "Benutzer")
-    expand_talk("NAMESPACE", "Benutzer Diskussion")
+    expand_talk("NAMESPACE", USER_DISCUSSION)
     expand_talk("NAMESPACEE", "Benutzer_Diskussion")
-    expand_page("FULLPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_page("FULLPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("FULLPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
-    expand_talk("FULLPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
-    expand_page("TALKSPACE", "Benutzer Diskussion")
+    expand_page("FULLPAGENAME", USER_PAGE_PLAIN)
+    expand_page("FULLPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_talk("FULLPAGENAME", USER_DISCUSSION_PAGE_PLAIN)
+    expand_talk("FULLPAGENAMEE", USER_DISCUSSION_PAGE_ESCAPED)
+    expand_page("TALKSPACE", USER_DISCUSSION)
     expand_page("TALKSPACEE", "Benutzer_Diskussion")
-    expand_talk("TALKSPACE", "Benutzer Diskussion")
+    expand_talk("TALKSPACE", USER_DISCUSSION)
     expand_talk("TALKSPACEE", "Benutzer_Diskussion")
     expand_page("SUBJECTSPACE", "Benutzer")
     expand_page("SUBJECTSPACEE", "Benutzer")
@@ -626,58 +645,58 @@ def test_pagemagic():
     expand_page("ARTICLESPACEE", "Benutzer")
     expand_talk("ARTICLESPACE", "Benutzer")
     expand_talk("ARTICLESPACEE", "Benutzer")
-    expand_page("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
-    expand_page("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
-    expand_talk("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
-    expand_page("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_page("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_talk("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_page("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_page("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_talk("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("TALKPAGENAME", USER_DISCUSSION_PAGE_PLAIN)
+    expand_page("TALKPAGENAMEE", USER_DISCUSSION_PAGE_ESCAPED)
+    expand_talk("TALKPAGENAME", USER_DISCUSSION_PAGE_PLAIN)
+    expand_talk("TALKPAGENAMEE", USER_DISCUSSION_PAGE_ESCAPED)
+    expand_page("SUBJECTPAGENAME", USER_PAGE_PLAIN)
+    expand_page("SUBJECTPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_talk("SUBJECTPAGENAME", USER_PAGE_PLAIN)
+    expand_talk("SUBJECTPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_page("ARTICLEPAGENAME", USER_PAGE_PLAIN)
+    expand_page("ARTICLEPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_talk("ARTICLEPAGENAME", USER_PAGE_PLAIN)
+    expand_talk("ARTICLEPAGENAMEE", USER_PAGE_ESCAPED)
 
 
 def test_pagemagic_with_arg():
     def expand_page(tpl, expected):
         return expand_str(
-            "{{%s:%s}}" % (tpl, "Benutzer:Anonymous user!/sandbox/my page"),
+            "{{%s:%s}}" % (tpl, USER_PAGE_PLAIN),
             expected,
             pagename="Help:Irrelevant",
         )
 
     def expand_talk(tpl, expected):
         return expand_str(
-            "{{%s:%s}}" % (tpl, "Benutzer Diskussion:Anonymous user!/sandbox/my page"),
+            "{{%s:%s}}" % (tpl, USER_DISCUSSION_PAGE_PLAIN),
             expected,
             pagename="Help:Irrelevant",
         )
 
-    expand_page("PAGENAME", "Anonymous user!/sandbox/my page")
-    expand_page("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
-    expand_talk("PAGENAME", "Anonymous user!/sandbox/my page")
-    expand_talk("PAGENAMEE", "Anonymous_user%21/sandbox/my_page")
-    expand_page("BASEPAGENAME", "Anonymous user!/sandbox")
-    expand_page("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
-    expand_talk("BASEPAGENAME", "Anonymous user!/sandbox")
-    expand_talk("BASEPAGENAMEE", "Anonymous_user%21/sandbox")
-    expand_page("SUBPAGENAME", "my page")
+    expand_page("PAGENAME", USER_PAGE_SUB_SUBPAGE_PATH_PLAIN)
+    expand_page("PAGENAMEE", USER_PAGE_SUB_SUBPAGE_PATH_ESCAPED)
+    expand_talk("PAGENAME", USER_PAGE_SUB_SUBPAGE_PATH_PLAIN)
+    expand_talk("PAGENAMEE", USER_PAGE_SUB_SUBPAGE_PATH_ESCAPED)
+    expand_page("BASEPAGENAME", USER_PAGE_SUBPAGE_PLAIN)
+    expand_page("BASEPAGENAMEE", USER_PAGE_SUBPAGE_ESCAPED)
+    expand_talk("BASEPAGENAME", USER_PAGE_SUBPAGE_PLAIN)
+    expand_talk("BASEPAGENAMEE", USER_PAGE_SUBPAGE_ESCAPED)
+    expand_page("SUBPAGENAME", MY_PAGE)
     expand_page("SUBPAGENAMEE", "my_page")
-    expand_talk("SUBPAGENAME", "my page")
+    expand_talk("SUBPAGENAME", MY_PAGE)
     expand_talk("SUBPAGENAMEE", "my_page")
     expand_page("NAMESPACE", "Benutzer")
     expand_page("NAMESPACEE", "Benutzer")
-    expand_talk("NAMESPACE", "Benutzer Diskussion")
+    expand_talk("NAMESPACE", USER_DISCUSSION)
     expand_talk("NAMESPACEE", "Benutzer_Diskussion")
-    expand_page("FULLPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_page("FULLPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("FULLPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
-    expand_talk("FULLPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
-    expand_page("TALKSPACE", "Benutzer Diskussion")
+    expand_page("FULLPAGENAME", USER_PAGE_PLAIN)
+    expand_page("FULLPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_talk("FULLPAGENAME", USER_DISCUSSION_PAGE_PLAIN)
+    expand_talk("FULLPAGENAMEE", USER_DISCUSSION_PAGE_ESCAPED)
+    expand_page("TALKSPACE", USER_DISCUSSION)
     expand_page("TALKSPACEE", "Benutzer_Diskussion")
-    expand_talk("TALKSPACE", "Benutzer Diskussion")
+    expand_talk("TALKSPACE", USER_DISCUSSION)
     expand_talk("TALKSPACEE", "Benutzer_Diskussion")
     expand_page("SUBJECTSPACE", "Benutzer")
     expand_page("SUBJECTSPACEE", "Benutzer")
@@ -687,18 +706,18 @@ def test_pagemagic_with_arg():
     expand_page("ARTICLESPACEE", "Benutzer")
     expand_talk("ARTICLESPACE", "Benutzer")
     expand_talk("ARTICLESPACEE", "Benutzer")
-    expand_page("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
-    expand_page("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("TALKPAGENAME", "Benutzer Diskussion:Anonymous user!/sandbox/my page")
-    expand_talk("TALKPAGENAMEE", "Benutzer_Diskussion%3AAnonymous_user%21/sandbox/my_page")
-    expand_page("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_page("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("SUBJECTPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_talk("SUBJECTPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_page("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_page("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
-    expand_talk("ARTICLEPAGENAME", "Benutzer:Anonymous user!/sandbox/my page")
-    expand_talk("ARTICLEPAGENAMEE", "Benutzer%3AAnonymous_user%21/sandbox/my_page")
+    expand_page("TALKPAGENAME", USER_DISCUSSION_PAGE_PLAIN)
+    expand_page("TALKPAGENAMEE", USER_DISCUSSION_PAGE_ESCAPED)
+    expand_talk("TALKPAGENAME", USER_DISCUSSION_PAGE_PLAIN)
+    expand_talk("TALKPAGENAMEE", USER_DISCUSSION_PAGE_ESCAPED)
+    expand_page("SUBJECTPAGENAME", USER_PAGE_PLAIN)
+    expand_page("SUBJECTPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_talk("SUBJECTPAGENAME", USER_PAGE_PLAIN)
+    expand_talk("SUBJECTPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_page("ARTICLEPAGENAME", USER_PAGE_PLAIN)
+    expand_page("ARTICLEPAGENAMEE", USER_PAGE_ESCAPED)
+    expand_talk("ARTICLEPAGENAME", USER_PAGE_PLAIN)
+    expand_talk("ARTICLEPAGENAMEE", USER_PAGE_ESCAPED)
 
 
 def test_ns():

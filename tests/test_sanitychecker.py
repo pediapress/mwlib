@@ -29,7 +29,6 @@ from mwlib.sanitychecker import (
 
 
 def setup():
-
     # WARNING, ALTERING THIS'll PROPABLY BREAK ALL TESTS! EDIT WITH CARE
     t = [
         Article(),
@@ -55,8 +54,6 @@ def setup():
     t = t[0]
     buildAdvancedTree(t)
 
-    # import mwlib.parser, sys;  mwlib.parser.show(sys.stderr, t, 0)
-
     return t
 
 
@@ -81,27 +78,27 @@ def checkfail(*rules):
     assert failed
 
 
-def test_Allow():
+def test_allow():
     checkfail(ChildrenOf(Table, Allow(Row)))
     checkpass(ChildrenOf(Article, Allow(Section, Text, Table)))
 
 
-def test_Require():
+def test_require():
     checkfail(ChildrenOf(PreFormatted, Require(Section)))
     checkpass(ChildrenOf(PreFormatted, Require(Text)))
 
 
-def test_Forbid():
+def test_forbid():
     checkfail(ChildrenOf(Section, Forbid(Section)))
     checkpass(ChildrenOf(Table, Forbid(Section)))
 
 
-def test_Equal():
+def test_equal():
     checkfail(ChildrenOf(Table, Equal(Row, Row)))
     checkpass(ChildrenOf(Article, Equal(Section, Table, Section, Text)))
 
 
-def test_removeCB():
+def test_remove_cb():
     checkfail(RequireChild(Strong))
     tree = setup()
     sc = SanityChecker()

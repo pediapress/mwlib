@@ -1,8 +1,6 @@
 #! /usr/bin/env py.test
 
-from __future__ import absolute_import
-from __future__ import print_function
-from mwlib import utoken, uniq
+from mwlib import uniq
 
 
 def test_self_closing():
@@ -41,6 +39,7 @@ def test_comment():
         assert res == expected
 
     repl("foo<!-- bla -->bar", "foobar")
-    repl("foo\n<!-- bla -->\nbar", "foo\nbar")
-    repl("foo\n<!-- bla -->bar", "foo\nbar")
-    repl("foo<!-- bla -->\nbar", "foo\nbar")
+    foo_bar = "foo\nbar"
+    repl("foo\n<!-- bla -->\nbar", foo_bar)
+    repl("foo\n<!-- bla -->bar", foo_bar)
+    repl("foo<!-- bla -->\nbar", foo_bar)

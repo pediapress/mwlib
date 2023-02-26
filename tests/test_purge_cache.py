@@ -1,10 +1,12 @@
 #! /usr/bin/env py.test
 
+import errno
 import os
 import shutil
-import errno
 import time
+
 import pytest
+
 from mwlib.serve import get_collection_dirs, _rmtree, _find_collection_dirs_to_purge, purge_cache
 
 

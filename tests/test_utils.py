@@ -3,12 +3,10 @@
 
 """Unittests for mwlib.utils"""
 
-from six.moves import range
-
 from mwlib import utils
 
 
-def test_fsescape():
+def test_fs_escape():
     test_set = (
         ("abc", "abc"),
         ("a b c", "a_b_c"),
@@ -26,7 +24,7 @@ def test_fsescape():
 
 def test_uid():
     uids = set()
-    for i in range(100):
+    for _ in range(100):
         uid = utils.uid()
         assert uid not in uids
         uids.add(uid)

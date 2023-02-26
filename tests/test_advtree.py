@@ -68,8 +68,7 @@ def test_copy():
     _check(r, c)
 
 
-def test_removeNewlines():
-
+def test_remove_newlines():
     # test no action within preformattet
     t = PreFormatted()
     text = "\t \n\t\n\n  \n\n"
@@ -85,7 +84,6 @@ def test_removeNewlines():
     t.children.append(tn)
     buildAdvancedTree(t)
     _treesanity(t)
-    # assert tn.caption == u""
     assert not t.children
 
     # test remove newlines
@@ -129,18 +127,6 @@ def test_identity():
             assert br is not bbr
 
 
-# FIXME isNavBox removed from advtree. could be implemented in general treecleaner - move test there
-# def test_isnavbox():
-# raw = """
-# == test ==
-# <div class="noprint">
-# some text
-# </div>
-# """.decode("utf8")
-##     db = DummyDB()
-##     r = parseString(title="X33", raw=raw, wikidb=db)
-# buildAdvancedTree(r)
-##     assert 1 == len([c for c in r.getAllChildren() if c.isNavBox()])
 def test_definitiondescription():
     raw = """
 == test ==
@@ -166,18 +152,17 @@ def test_definitiondescription():
 @pytest.mark.xfail
 def test_definition_list():
     """http://code.pediapress.com/wiki/ticket/221"""
-    raw = """;termA
+    raw = """
+;termA
 :descr1
 """
-
-    for i in range(2):
-        r = parseString(title="t", raw=raw)
-        buildAdvancedTree(r)
-        dls = r.getChildNodesByClass(DefinitionList)
-        assert len(dls) == 1
-        assert dls[0].getChildNodesByClass(DefinitionTerm)
-        assert dls[0].getChildNodesByClass(DefinitionDescription)
-        raw = raw.replace("\n", "")
+    r = parseString(title="t", raw=raw)
+    buildAdvancedTree(r)
+    dls = r.getChildNodesByClass(DefinitionList)
+    assert len(dls) == 1
+    assert dls[0].getChildNodesByClass(DefinitionTerm)
+    assert dls[0].getChildNodesByClass(DefinitionDescription)
+    raw = raw.replace("\n", "")
 
 
 def test_ulist():
@@ -196,17 +181,17 @@ def test_colspan():
     raw = """<table><tr><td colspan="bogus">no colspan </td></tr></table>"""
     r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
-    assert r.getChildNodesByClass(Cell)[0].colspan is 1
+    assert r.getChildNodesByClass(Cell)[0].colspan == 1
 
     raw = """<table><tr><td colspan="-1">no colspan </td></tr></table>"""
     r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
-    assert r.getChildNodesByClass(Cell)[0].colspan is 1
+    assert r.getChildNodesByClass(Cell)[0].colspan == 1
 
     raw = """<table><tr><td colspan="2">colspan1</td></tr></table>"""
     r = parseString(title="t", raw=raw)
     buildAdvancedTree(r)
-    assert r.getChildNodesByClass(Cell)[0].colspan is 2
+    assert r.getChildNodesByClass(Cell)[0].colspan == 2
 
 
 def test_attributes():
@@ -225,7 +210,7 @@ def test_attributes():
     assert n.style["background"] == "#FFDEAD"
 
 
-def getAdvTree(raw):
+def get_adv_tree(raw):
     tree = parseString(title="test", raw=raw)
     buildAdvancedTree(tree)
     return tree
@@ -250,7 +235,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|
 </gallery>
 """
 
-    tree = getAdvTree(raw)
+    tree = get_adv_tree(raw)
     images = tree.getChildNodesByClass(ImageLink)
     assert len(images) == 9
     for image in images:
@@ -276,7 +261,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|''[[Cassini–Huygens]]''<br>First Satu
 [[Image:Anatomie1.jpg|thumb|none|500px|Bild der anatomischen Verhältnisse. In Rot die Hauptschlagader (Carotis).]]
 """
 
-    tree = getAdvTree(raw)
+    tree = get_adv_tree(raw)
     images = tree.getChildNodesByClass(ImageLink)
     assert len(images) == 9
     for image in images:

@@ -4,29 +4,30 @@
 # See README.rst for additional licensing information.
 
 import os
-import sys
 import re
+import sys
 import tempfile
 from io import StringIO
+
 import py
 import pytest
 
-from mwlib.dummydb import DummyDB
-from mwlib.uparser import parseString
-from mwlib import advtree
 import mwlib.parser
+from mwlib import advtree
+from mwlib.dummydb import DummyDB
 from mwlib.odfwriter import ODFWriter, preprocess
+from mwlib.uparser import parseString
 
 ODFWriter.ignoreUnknownNodes = False
 
 # hook for reuse of generated files
 
 
-def removefile(fn):
+def remove_file(fn):
     os.remove(fn)
 
 
-odtfile_cb = removefile
+odtfile_cb = remove_file
 
 # read the odflint script as module.
 # calling this in process speeds up the tests considerably.
@@ -56,7 +57,7 @@ def _get_odflint_module():
 odflint = _get_odflint_module()
 
 
-def lintfile(path):
+def lint_file(path):
     stdout, stderr = sys.stdout, sys.stderr
     try:
         sys.stdout = sys.stderr = StringIO()
@@ -80,15 +81,15 @@ def validate(odfw):
     fh, tfn = tempfile.mkstemp()
     odfw.getDoc().save(tfn, True)
     tfn += ".odt"
-    r = lintfile(tfn)
+    r = lint_file(tfn)
     # FIXME: odflint currently raises an error for mimetype - maybe a bug? This is the error:
     # "Error: The 'mimetype' member must not have extra header info\n"
-    if len(r) and not "mimetype" in r:
+    if len(r) and "mimetype" not in r:
         raise ValidationError(r)
     odtfile_cb(tfn)
 
 
-def getXML(wikitext):
+def get_xml(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
     advtree.buildAdvancedTree(r)
@@ -107,16 +108,19 @@ def test_pass():
 == Hello World ==
 kthxybye
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "Hello World" in xml
 
 
-def test_fixparagraphs():
+def test_fix_paragraphs():
     raw = """
 <p>
 <ul><li>a</li></ul>
 </p>
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "<text:list-item>" in xml
+    assert '<text:p text:style-name="TextBody">a</text:p>' in xml
 
 
 def test_gallery():
@@ -131,7 +135,8 @@ Image:Wikipedesketch1.png|One logo for Wikipedia
 Image:Wikipedesketch1.png|Wikipedia has bugs
 Image:Wikipedesketch1.png|The mascot of Wikipedia
 </gallery>"""
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "Wikipedia" in xml
 
 
 raw = r"""<b class="test">bold</b>
@@ -176,7 +181,7 @@ def test_validate_tags(x):
     """
     this test checks only basic XHTML validation
     """
-    res = getXML(x)
+    res = get_xml(x)
     assert "<office:text" in res
 
 
@@ -196,15 +201,15 @@ unless this bug is fixed subsections are not working
 this test will validate, but sections will be broken.
 
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
 
     reg = re.compile(r'text:outline-level="(\d)"', re.MULTILINE)
     res = list(reg.findall(xml))
     goal = ["1", "2", "3", "4"]
-    print((res, "should be", goal))
     if res != goal:
+        print(f"{res} should be {goal}")
         print(xml)
-        assert res == goal
+    assert res == goal
 
 
 def test_invalid_level_sections():
@@ -220,16 +225,16 @@ def test_invalid_level_sections():
 ======== 8 ========
 text
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
 
     reg = re.compile(r'text:outline-level="(\d)"', re.MULTILINE)
     res = list(reg.findall(xml))
     # article title is on the first level, therefore we have "6"*4
     goal = ["1", "2", "3", "4", "5", "6", "6", "6", "6"]
-    print(res, "should be", goal)
     if res != goal:
+        print(f"{res} should be {goal}")
         print(xml)
-        assert res == goal
+    assert res == goal
 
 
 def disabled_test_empty_sections():
@@ -239,14 +244,14 @@ def disabled_test_empty_sections():
 == with title no children ==""".decode(
         "utf8"
     )
-    xml = getXML(raw)
+    xml = get_xml(raw)
     reg = re.compile(r'text:name="(.*?)"', re.MULTILINE)
     res = list(reg.findall(xml))
     goal = ["test", "correct "]  # article title is on the first level,
-    print(res, "should be", goal)
     if res != goal:
+        print(f"{res} should be {goal}")
         print(xml)
-        assert res == goal
+    assert res == goal
 
 
 def test_newlines():
@@ -266,7 +271,7 @@ starts a new paragraph.
 You can break lines<br />
 without starting a new paragraph.
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "Rest of the page" in xml
 
 
@@ -277,7 +282,7 @@ is this '''bold'''
 another '''bold''
 
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "bold" in xml
 
 
@@ -294,7 +299,7 @@ marks the end of the list.
 * you can
 * start again.
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "Unordered Lists" in xml
 
 
@@ -312,11 +317,11 @@ marks the end of the list.
 # with 1.
 
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "very organized" in xml
 
 
-def test_mixedlists():
+def test_mixed_lists():
     raw = """== Rest of the page ==
 
 * You can even do mixed lists
@@ -324,11 +329,11 @@ def test_mixedlists():
 *#* or break lines<br />in lists
 
 """
-    xml = getXML(raw)
-    assert 'mixed lists' in xml
+    xml = get_xml(raw)
+    assert "mixed lists" in xml
 
 
-def test_definitionlists():
+def test_definition_lists():
     raw = """== Rest of the page ==
 ; word : definition of the word
 ; longer phrase
@@ -336,7 +341,7 @@ def test_definitionlists():
 
 
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "definition of the word" in xml
 
 
@@ -382,11 +387,11 @@ marks the end of the list.
 *#* or break lines<br />in lists
 
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "very organized" in xml
 
 
-def test_paragraphsinsections():
+def test_paragraphs_in_sections():
     raw = """== section 1 ==
 s1 paragraph 1
 
@@ -403,20 +408,22 @@ s2 paragraph 1
 s2 paragraph 2
 
 """
-    xml = getXML(raw)
-    assert 'section 2' in xml
+    xml = get_xml(raw)
+    assert "section 2" in xml
 
 
 def test_math():
     raw = r"""
 <math> Q = \begin{bmatrix} 1 & 0 & 0 \\ 0 & \frac{\sqrt{3}}{2} & \frac12 \\ 0 & -\frac12 & \frac{\sqrt{3}}{2} \end{bmatrix} </math>
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "test" in xml
 
 
 def test_math2():
     raw = r"""<math>\exp(-\gamma x)</math>"""
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "test" in xml
 
 
 @pytest.mark.xfail
@@ -425,12 +432,13 @@ def test_snippets():
 
     for s in snippets.get_all():
         print("testing", repr(s.txt))
-        xml = getXML(s.txt)
+        xml = get_xml(s.txt)
+        assert "test" in xml
 
 
-def test_horizontalrule():
+def test_horizontal_rule():
     raw = r"""before_hr<hr/>after_hr"""
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "before_hr" in xml
 
 
@@ -445,7 +453,7 @@ def test_tables():
 |-
 |}
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     assert "cheese" in xml
 
 
@@ -456,16 +464,19 @@ def test_colspan():
 <tr><td colspan="2">ab</td></tr>
 </table>
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "ab" in xml
 
 
-def test_definitiondescription():
+def test_definition_description():
     # works with a hack
     raw = r"""
 : a
 :* b
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
+    assert "a" in xml
+    assert "b" in xml
 
 
 def test_italic():
@@ -476,6 +487,6 @@ B (''Molothrus ater'') are
 
 
 """
-    xml = getXML(raw)
+    xml = get_xml(raw)
     print(xml)
     assert "Molothrus" in xml

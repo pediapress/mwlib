@@ -1,6 +1,7 @@
 #! /usr/bin/env py.test
 
 import signal
+
 from mwlib.parser import styleanalyzer
 
 

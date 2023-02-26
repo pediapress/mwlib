@@ -89,44 +89,44 @@ Used by {{tiw|rnd}}:
 }
 
 
-def getdb():
+def get_db():
     return DictDB(**db)
 
 
 def test_round():
-    expand_str("{{rnd|2.0004|3}}", "2.000", wikidb=getdb())
-    expand_str("{{rnd|0.000020004|8}}", "2.0E-5000", wikidb=getdb())
-    expand_str("{{rnd|0|8}}", "0.00000000", wikidb=getdb())
+    expand_str("{{rnd|2.0004|3}}", "2.000", wikidb=get_db())
+    expand_str("{{rnd|0.000020004|8}}", "2.0E-5000", wikidb=get_db())
+    expand_str("{{rnd|0|8}}", "0.00000000", wikidb=get_db())
 
 
 def test_max_2():
-    expand_str("{{max/2|-1|1}}", "1", wikidb=getdb())
-    expand_str("{{max/2|1|-1}}", "1", wikidb=getdb())
+    expand_str("{{max/2|-1|1}}", "1", wikidb=get_db())
+    expand_str("{{max/2|1|-1}}", "1", wikidb=get_db())
 
 
 def test_round_plus_1():
-    expand_str("{{rnd/+|1.056|2|5-1}}", "1.06", wikidb=getdb())
+    expand_str("{{rnd/+|1.056|2|5-1}}", "1.06", wikidb=get_db())
 
 
 def test_round_plus_2():
-    expand_str("{{rnd/+|1.056|2|5}}", "5", wikidb=getdb())
+    expand_str("{{rnd/+|1.056|2|5}}", "5", wikidb=get_db())
 
 
 def test_round_plus_3():
-    expand_str("{{rnd/+|1.056|2|abc}}", "1.06", wikidb=getdb())
+    expand_str("{{rnd/+|1.056|2|abc}}", "1.06", wikidb=get_db())
 
 
 def test_precision_plus_1():
-    expand_str("{{precision/+|0.77}}", "2", wikidb=getdb())
+    expand_str("{{precision/+|0.77}}", "2", wikidb=get_db())
 
 
 def test_convert_ft_in_m_float():
-    expand_str("{{convert|2.5|ft|m}}", "2.5&nbsp;feet (0.76&nbsp;m)\n", wikidb=getdb())
+    expand_str("{{convert|2.5|ft|m}}", "2.5&nbsp;feet (0.76&nbsp;m)\n", wikidb=get_db())
 
 
 def test_convert_ft_in_m_int():
-    expand_str("{{convert|12|ft|m}}", "12&nbsp;feet (3.7&nbsp;m)\n", wikidb=getdb())
+    expand_str("{{convert|12|ft|m}}", "12&nbsp;feet (3.7&nbsp;m)\n", wikidb=get_db())
 
 
 def test_round_minus():
-    expand_str("{{rnd/-|0.00002|8}}", "2.0E-5000", wikidb=getdb())
+    expand_str("{{rnd/-|0.00002|8}}", "2.0E-5000", wikidb=get_db())

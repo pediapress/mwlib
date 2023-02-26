@@ -19,7 +19,7 @@ class TestMathUtils(object):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def blahtexml_present(self):
-        ret = os.system('blahtexml')
+        ret = os.system("blahtexml")
         print("BLAHTEX:", ret)
         if ret != 0:
             return False
@@ -27,7 +27,7 @@ class TestMathUtils(object):
             return True
 
     def texvc_present(self):
-        ret = os.system('texvc')
+        ret = os.system("texvc")
         if ret != 0:
             return False
         else:
@@ -35,27 +35,28 @@ class TestMathUtils(object):
 
     @pytest.mark.xfail
     def test_math(self):
-        latexlist = [r"\sqrt{4}=2",
-                     r"a^2 + b^2 = c^2\,",
-                     r"E = m c^2",
-                     r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
-                     r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
-                     r'\text{björn}',
-                     ]
+        latexlist = [
+            r"\sqrt{4}=2",
+            r"a^2 + b^2 = c^2\,",
+            r"E = m c^2",
+            r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
+            r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
+            r"\text{björn}",
+        ]
         for latex in latexlist:
             if self.blahtexml_present():
-                res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='blahtexml')
+                res = renderMath(latex, self.tmpdir, output_mode="png", render_engine="blahtexml")
                 assert res
-                res = renderMath(latex, self.tmpdir, output_mode='mathml',
-                                 render_engine='blahtexml')
+                res = renderMath(
+                    latex, self.tmpdir, output_mode="mathml", render_engine="blahtexml"
+                )
                 assert res
             if self.texvc_present():
-                res = renderMath(latex, self.tmpdir, output_mode='png', render_engine='texvc')
+                res = renderMath(latex, self.tmpdir, output_mode="png", render_engine="texvc")
                 assert res
 
     @pytest.mark.xfail
     def test_math_complex(self):
-
         latex = r"""\begin{array}{ccc}
     F^2\sim W&\Leftrightarrow&\frac{F_1^2}{F_2^2}=\frac{W_1}{W_2}\\
     \ln\frac{F_1}{F_2}\,\mathrm{Np}&=&
@@ -65,7 +66,7 @@ class TestMathUtils(object):
     \end{array}"""
         latex = six.text_type(latex)
         if self.blahtexml_present():
-            res = renderMath(latex, self.tmpdir, output_mode='mathml', render_engine='blahtexml')
+            res = renderMath(latex, self.tmpdir, output_mode="mathml", render_engine="blahtexml")
             assert res
         else:
             assert False
@@ -74,5 +75,5 @@ class TestMathUtils(object):
         """http://code.pediapress.com/wiki/ticket/241"""
 
         if self.texvc_present():
-            res = renderMath(u"f'(x) = x", self.tmpdir, output_mode='png', render_engine='texvc')
+            res = renderMath("f'(x) = x", self.tmpdir, output_mode="png", render_engine="texvc")
             assert res

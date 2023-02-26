@@ -6,13 +6,13 @@ from mwlib import nshandling, siteinfo
 siteinfo_de = siteinfo.get_siteinfo("de")
 assert siteinfo_de, "cannot find german siteinfo"
 
-
+benutzer_schmir = "Benutzer:Schmir"
 cases = [
-    ("User:Schmir", "Benutzer:Schmir"),
-    ("user:Schmir", "Benutzer:Schmir"),
-    ("benutzer:schmir", "Benutzer:Schmir"),
-    (" user: schmir ", "Benutzer:Schmir"),
-    ("___user___:___schmir  __", "Benutzer:Schmir"),
+    ("User:Schmir", benutzer_schmir),
+    ("user:Schmir", benutzer_schmir),
+    ("benutzer:schmir", benutzer_schmir),
+    (" user: schmir ", benutzer_schmir),
+    ("___user___:___schmir  __", benutzer_schmir),
     ("User:SchmiR", "Benutzer:SchmiR"),
 ]
 nshandler = nshandling.nshandler(siteinfo_de)
@@ -26,7 +26,7 @@ def test_fqname(case):
 
 
 cases = [
-    ("user:schmir", "Benutzer:Schmir"),
+    ("user:schmir", benutzer_schmir),
     ("schmir", "Vorlage:Schmir"),
     (":schmir", "Schmir"),
 ]
@@ -48,5 +48,7 @@ def test_redirect_matcher():
 
 def test_localized_redirect_matcher():
     m = nshandling.get_nshandler_for_lang("de").redirect_matcher
-    assert m("#REDIRECT [[Data structure]]") == "Data structure", "bad redirect"
-    assert m("#WEITERLEITUNG [[Data structure]]") == "Data structure", "bad redirect"
+    data_structure = "Data structure"
+    bad_redirect = "bad redirect"
+    assert m("#REDIRECT [[Data structure]]") == data_structure, bad_redirect
+    assert m("#WEITERLEITUNG [[Data structure]]") == data_structure, bad_redirect

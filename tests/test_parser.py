@@ -7,10 +7,19 @@
 import pytest
 
 from mwlib import parser, expander
+from mwlib import uparser
 from mwlib.dummydb import DummyDB
 from mwlib.expander import DictDB
-from mwlib import uparser
 from mwlib.refine import util, core
+
+BAD_URL = "bad url"
+BAD_VLIST = "bad vlist"
+EXPECTED_EXACTLY_ONE_CELL = "expected exactly one cell"
+EXPECTED_A_LINK = "expected a link"
+EXPECTED_A_NAMED_LINK = "expected a NamedLink"
+EXPECTED_A_PREFORMATTED_NODE = "expected a preformatted node"
+WRONG_NAMESPACE = "wrong namespace"
+WRONG_TARGET = "wrong target"
 
 parse = uparser.simpleparse
 
@@ -83,10 +92,6 @@ def test_links_in_style():
 
 
 def test_parse_image_inline():
-    # r=parse("[[Bild:flag of Italy.svg|30px]]")
-    # img = [x for x in r.allchildren() if isinstance(x, parser.ImageLink)][0]
-    # print "IMAGE:", img, img.isInline()
-
     r = parse(
         '{| cellspacing="2" border="0" cellpadding="3" bgcolor="#EFEFFF" width="100%"\n|-\n| width="12%" bgcolor="#EEEEEE"| 9. Juli 2006\n| width="13%" bgcolor="#EEEEEE"| Berlin\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of Italy.svg|30px]] \'\'\'Italien\'\'\'\n| width="3%" bgcolor="#EEEEEE"| \u2013\n| width="20%" bgcolor="#EEEEEE"| [[Bild:flag of France.svg|30px]] Frankreich\n| width="3%" bgcolor="#EEEEEE"|\n| width="25%" bgcolor="#EEEEEE"| [[Fu\xdfball-Weltmeisterschaft 2006/Finalrunde#Finale: Italien .E2.80.93 Frankreich 6:4 n. E..2C 1:1 n. V. .281:1.2C 1:1.29|6:4 n. E., (1:1, 1:1, 1:1)]]\n|}\n',
         lang="de",
@@ -96,6 +101,7 @@ def test_parse_image_inline():
     assert len(images) == 2
 
     for i in images:
+        assert i.isInline() is True
         print("-->Image:", i, i.isInline())
 
 
@@ -143,11 +149,10 @@ def test_tag_expand_vs_uniq():
     r = uparser.parseString(title="Foo", wikidb=db)
     core.show(r)
     pre = r.find(parser.PreFormatted)
-    assert len(pre) == 1, "expected a preformatted node"
+    assert len(pre) == 1, EXPECTED_A_PREFORMATTED_NODE
 
 
 def test_pipe_table():
-
     db = DictDB(
         Foo="""
 bla
@@ -168,7 +173,6 @@ blubb
 
 
 def test_pipe_begin_table():
-
     db = DictDB(
         Foo="""
 bla
@@ -293,7 +297,7 @@ def test_percent_table_style():
     )
 
 
-def test_parseParams():
+def test_parse_params():
     def check(s, expected):
         res = util.parseParams(s)
         print(repr(s), "-->", res, "expected:", expected)
@@ -421,7 +425,7 @@ def test_table_extra_cells_and_rows():
 </table>"""
     r = parse(s)
     cells = r.find(parser.Cell)
-    assert len(cells) == 1, "expected exactly one cell"
+    assert len(cells) == 1, EXPECTED_EXACTLY_ONE_CELL
 
     rows = r.find(parser.Row)
     assert len(rows) == 1, "expected exactly one row"
@@ -437,7 +441,7 @@ def test_table_rowspan():
 </table>"""
     r = parse(s)
     cells = r.find(parser.Cell)
-    assert len(cells) == 1, "expected exactly one cell"
+    assert len(cells) == 1, EXPECTED_EXACTLY_ONE_CELL
     cell = cells[0]
     print("VLIST:", cell.vlist)
     assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist in cell"
@@ -459,7 +463,7 @@ def test_extra_cell_stray_tag():
 | bla bla </sub> dfg sdfg
 |}"""
     ).find(parser.Cell)
-    assert len(cells) == 1, "expected exactly one cell"
+    assert len(cells) == 1, EXPECTED_EXACTLY_ONE_CELL
 
 
 def test_gallery_complex():
@@ -499,16 +503,17 @@ def test_colon_nobr():
 
 def test_nonascii_in_tags():
     r = parse("<dfg\u0147>")
+    assert r.children[0].source == "<dfg\u0147>", "Non-ASCII in tag doesn't work"
 
 
 def test_mailto_named():
     r = parse("[mailto:ralf@brainbot.com me]")
-    assert r.find(parser.NamedURL), "expected a NamedLink"
+    assert r.find(parser.NamedURL), EXPECTED_A_NAMED_LINK
 
 
 def test_irc_named():
     r = parse("[irc://freenode.net/pediapress #pediapress]")
-    assert r.find(parser.NamedURL), "expected a NamedLink"
+    assert r.find(parser.NamedURL), EXPECTED_A_NAMED_LINK
 
 
 def test_irc():
@@ -518,7 +523,7 @@ def test_irc():
 
 def test_news_named():
     r = parse("[news:alt.foo.bar #pediapress]")
-    assert r.find(parser.NamedURL), "expected a NamedLink"
+    assert r.find(parser.NamedURL), EXPECTED_A_NAMED_LINK
 
 
 def test_news():
@@ -571,12 +576,12 @@ def test_pre_tag_link():
 def test_parse_preformatted_pipe():
     """http://code.pediapress.com/wiki/ticket/92"""
     r = parse(" |foobar\n")
-    assert r.find(parser.PreFormatted), "expected a preformatted node"
+    assert r.find(parser.PreFormatted), EXPECTED_A_PREFORMATTED_NODE
 
 
 def test_parse_preformatted_math():
     r = parse(" <math>1+2=3</math>\n")
-    assert r.find(parser.PreFormatted), "expected a preformatted node"
+    assert r.find(parser.PreFormatted), EXPECTED_A_PREFORMATTED_NODE
 
 
 def test_parse_preformatted_blockquote():
@@ -636,19 +641,19 @@ def test_url_parsing_umlauts():
 def test_table_markup_in_link_pipe_plus():
     """http://code.pediapress.com/wiki/ticket/54"""
     r = parse("[[bla|+blubb]]").find(parser.Link)[0]
-    assert r.target == "bla", "wrong target"
+    assert r.target == "bla", WRONG_TARGET
 
 
 def test_table_markup_in_link_pipe_pipe():
     """http://code.pediapress.com/wiki/ticket/54"""
     r = parse("[[bla||blubb]]").find(parser.Link)[0]
-    assert r.target == "bla", "wrong target"
+    assert r.target == "bla", WRONG_TARGET
 
 
 def test_table_markup_in_link_table_pipe_plus():
     """http://code.pediapress.com/wiki/ticket/11"""
     r = parse("{|\n|+\n|[[bla|+blubb]]\n|}").find(parser.Link)[0]
-    assert r.target == "bla", "wrong target"
+    assert r.target == "bla", WRONG_TARGET
 
 
 def test_table_markup_in_link_table_pipe_pipe():
@@ -659,7 +664,7 @@ def test_table_markup_in_link_table_pipe_pipe():
 
 
 #     r=parse("{|\n|+\n|[[bla||blubb]]\n|}").find(parser.Link)[0]
-#     assert r.target=='bla', "wrong target"
+#     assert r.target=='bla', WRONG_TARGET
 
 
 def test_source_tag():
@@ -693,22 +698,22 @@ def test_timeline():
 def test_nowiki_self_closing():
     """http://code.pediapress.com/wiki/ticket/102"""
     links = parse("<nowiki />[[foobar]]").find(parser.Link)
-    assert links, "expected a link"
+    assert links, EXPECTED_A_LINK
 
 
 def test_nowiki_closing():
     """http://code.pediapress.com/wiki/ticket/102"""
     links = parse("</nowiki>[[foobar]]").find(parser.Link)
-    assert links, "expected a link"
+    assert links, EXPECTED_A_LINK
 
 
 def test_math_stray():
     """http://code.pediapress.com/wiki/ticket/102"""
     links = parse("</math>[[foobar]]").find(parser.Link)
-    assert links, "expected a link"
+    assert links, EXPECTED_A_LINK
 
     links = parse("<math />[[foobar]]").find(parser.Link)
-    assert links, "expected a link"
+    assert links, EXPECTED_A_LINK
 
 
 def test_math_basic():
@@ -719,10 +724,10 @@ def test_math_basic():
 def test_timeline_stray():
     """http://code.pediapress.com/wiki/ticket/102"""
     links = parse("</timeline>[[foobar]]").find(parser.Link)
-    assert links, "expected a link"
+    assert links, EXPECTED_A_LINK
 
     links = parse("<timeline />[[foobar]]").find(parser.Link)
-    assert links, "expected a link"
+    assert links, EXPECTED_A_LINK
 
 
 def test_ftp_url():
@@ -731,11 +736,11 @@ def test_ftp_url():
     def checkurl(url):
         urls = parse("foo %s bar" % url).find(parser.URL)
         assert urls, "expected a url"
-        assert urls[0].caption == url, "bad url"
+        assert urls[0].caption == url, BAD_URL
 
         urls = parse("[%s bar]" % url).find(parser.NamedURL)
         assert urls, "expected a named url"
-        assert urls[0].caption == url, "bad url"
+        assert urls[0].caption == url, BAD_URL
 
     checkurl("ftp://bla.com:8888/asdfasdf+ad'fdsf$fasd{}/~ralf?=blubb/@#&*(),blubb")
     checkurl("ftp://bla.com:8888/$blubb/")
@@ -747,7 +752,7 @@ def test_http_url():
         assert caption == url, "bad named url"
 
         caption = parse(url).find(parser.URL)[0].caption
-        assert caption == url, "bad url"
+        assert caption == url, BAD_URL
 
     checkurl("http://pediapress.com/'bla")
     checkurl("http://pediapress.com/bla/$/blubb")
@@ -757,7 +762,6 @@ def test_http_url():
 
 
 def test_schemeless_url():
-
     url = "[//toolserver.org/~geohack/geohack.php?pagename=Benutzer%3AVolker.haas/Test&language=de&params=51.4213888889_N_9.64805555556_E_dim:100_region:DE-NI_type:waterbody&title=Namentlicher+Beginn+Weser]"
 
     caption = parse(url).find(parser.NamedURL)[0].caption
@@ -863,14 +867,14 @@ def test_piped_link():
 
 def test_category_link():
     r = parse("[[category:bla]]").find(parser.CategoryLink)[0]
-    assert r.target == "category:bla", "wrong target"
-    assert r.namespace == 14, "wrong namespace"
+    assert r.target == "category:bla", WRONG_TARGET
+    assert r.namespace == 14, WRONG_NAMESPACE
 
 
 def test_category_colon_link():
     r = parse("[[:category:bla]]").find(parser.SpecialLink)[0]
-    assert r.target == "category:bla", "wrong target"
-    assert r.namespace == 14, "wrong namespace"
+    assert r.target == "category:bla", WRONG_TARGET
+    assert r.namespace == 14, WRONG_NAMESPACE
     assert not isinstance(r, parser.CategoryLink)
 
 
@@ -878,40 +882,40 @@ def test_image_link():
     t = uparser.parseString("", "[[画像:Tajima mihonoura03s3200.jpg]]", lang="ja")
     r = t.find(parser.ImageLink)[0]
     assert r.target == "画像:Tajima mihonoura03s3200.jpg"
-    assert r.namespace == 6, "wrong namespace"
+    assert r.namespace == 6, WRONG_NAMESPACE
 
 
 def test_image_colon_link():
     r = parse("[[:image:bla.jpg]]").find(parser.SpecialLink)[0]
     assert r.target == "image:bla.jpg"
-    assert r.namespace == 6, "wrong namespace"
+    assert r.namespace == 6, WRONG_NAMESPACE
     assert not isinstance(r, parser.ImageLink), "should not be an image link"
 
 
 def test_interwiki_link():
     r = parse("[[wikt:bla]]").find(parser.InterwikiLink)[0]
-    assert r.target == "wikt:bla", "wrong target"
-    assert r.namespace == "wikt", "wrong namespace"
+    assert r.target == "wikt:bla", WRONG_TARGET
+    assert r.namespace == "wikt", WRONG_NAMESPACE
     r = parse("[[mw:bla]]").find(parser.InterwikiLink)[0]
-    assert r.target == "mw:bla", "wrong target"
-    assert r.namespace == "mw", "wrong namespace"
+    assert r.target == "mw:bla", WRONG_TARGET
+    assert r.namespace == "mw", WRONG_NAMESPACE
 
 
 def test_language_link():
     r = parse("[[es:bla]]").find(parser.LangLink)[0]
-    assert r.target == "es:bla", "wrong target"
-    assert r.namespace == "es", "wrong namespace"
+    assert r.target == "es:bla", WRONG_TARGET
+    assert r.namespace == "es", WRONG_NAMESPACE
 
 
 def test_long_language_link():
     r = parse("[[csb:bla]]").find(parser.LangLink)[0]
-    assert r.target == "csb:bla", "wrong target"
-    assert r.namespace == "csb", "wrong namespace"
+    assert r.target == "csb:bla", WRONG_TARGET
+    assert r.namespace == "csb", WRONG_NAMESPACE
 
 
 def test_subpage_link():
     r = parse("[[/SomeSubPage]]").find(parser.ArticleLink)[0]
-    assert r.target == "/SomeSubPage", "wrong target"
+    assert r.target == "/SomeSubPage", WRONG_TARGET
 
 
 @pytest.mark.xfail
@@ -925,11 +929,11 @@ def test_quotes_in_tags():
     """http://code.pediapress.com/wiki/ticket/199"""
     vlist = parse("""<source attr="value"/>""").find(parser.TagNode)[0].vlist
     print("VLIST:", vlist)
-    assert vlist == dict(attr="value"), "bad vlist"
+    assert vlist == dict(attr="value"), BAD_VLIST
 
     vlist = parse("""<source attr='value'/>""").find(parser.TagNode)[0].vlist
     print("VLIST:", vlist)
-    assert vlist == dict(attr="value"), "bad vlist"
+    assert vlist == dict(attr="value"), BAD_VLIST
 
 
 def test_imagemap():
@@ -947,6 +951,7 @@ def test_imagemap():
     </imagemap>
 """
     )
+    assert r.children[0].tagname == "imagemap"
 
 
 def test_bad_imagemap():
@@ -957,6 +962,8 @@ def test_bad_imagemap():
 foo bar baz
 </imagemap>"""
     )
+    assert r.children[0].tagname == "imagemap"
+    assert "foo bar baz" in r.children[0].imagemap.image
 
 
 def test_link_with_quotes():
@@ -982,7 +989,7 @@ def test_nowiki_inside_tags():
     assert tags, "no tag node found"
     tag = tags[0]
     print("vlist:", tag.vlist)
-    assert tag.vlist == {"style": {"color": "#DF6108"}}, "bad vlist"
+    assert tag.vlist == {"style": {"color": "#DF6108"}}, BAD_VLIST
 
 
 def test_misformed_tag():
@@ -1004,7 +1011,7 @@ def test_table_style_parsing_1():
     r = parse(s)
     cells = r.find(parser.Cell)
     print("VLIST:", cells[1].vlist)
-    assert cells[1].vlist == dict(align="center"), "bad vlist"
+    assert cells[1].vlist == dict(align="center"), BAD_VLIST
 
 
 def test_table_style_parsing_jtalbot():
@@ -1015,7 +1022,7 @@ def test_table_style_parsing_jtalbot():
     s = "{| \n|-\n| cell 1 <ref>this|| not cell2</ref>\n|}\n"
     r = parse(s)
     cells = r.find(parser.Cell)
-    assert len(cells) == 1, "expected exactly one cell"
+    assert len(cells) == 1, EXPECTED_EXACTLY_ONE_CELL
 
 
 def test_force_close_1():

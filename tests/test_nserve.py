@@ -1,14 +1,16 @@
 #! /usr/bin/env py.test
 # -*- coding: utf-8 -*-
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
 
-import pytest
-import gevent
-import urllib.request, urllib.error, urllib.parse
 import bottle
-from mwlib import nserve
-
+import gevent
+import pytest
 import wsgi_intercept.urllib_intercept
-from six.moves import range
+
+from mwlib import nserve
 
 try:
     import simplejson as json
@@ -95,7 +97,10 @@ def test_choose_idle_qserve(monkeypatch, busy):
     busy["host2"] = False
     assert nserve.choose_idle_qserve() == "host2"
     busy["host1"] = False
-    assert set(nserve.choose_idle_qserve() for i in range(20)) == set(["host1", "host2"])
+    hosts = set()
+    for _ in range(20):
+        hosts.add(nserve.choose_idle_qserve())
+    assert hosts == {"host1", "host2"}
 
 
 def test_watch_qserve_iterate_overloaded(busy, wq):

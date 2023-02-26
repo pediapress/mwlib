@@ -10,20 +10,22 @@ from mwlib import parser
 from mwlib.treecleaner import TreeCleaner
 from mwlib.writer import styleutils
 
+RETURN_FALSE_ALIGNMENT = "styleutils.getCelTextAlign() returns false alignment"
 
-def showTree(tree):
+
+def show_tree(tree):
     parser.show(sys.stdout, tree, 0)
 
 
-def getTreeFromMarkup(raw):
+def get_tree_from_markup(raw):
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parseString
 
     return parseString(title="Test", raw=raw, wikidb=DummyDB())
 
 
-def buildAdvTree(raw):
-    tree = getTreeFromMarkup(raw)
+def build_advanced_tree(raw):
+    tree = get_tree_from_markup(raw)
     advtree.buildAdvancedTree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
@@ -41,12 +43,12 @@ def test_textalign1():
 | style="text-align:bogus;" | bogus align --> left
 |}
 """
-    tree = buildAdvTree(raw)
+    tree = build_advanced_tree(raw)
     cells = tree.getChildNodesByClass(advtree.Cell)
     correct_align = ["right", "left", "center", "left"]
-    for (i, cell) in enumerate(cells):
+    for i, cell in enumerate(cells):
         align = styleutils.getTextAlign(cell)
-        assert align == correct_align[i], "styleutils.getCelTextAlign return false alignment"
+        assert align == correct_align[i], RETURN_FALSE_ALIGNMENT
 
 
 def test_textalign2():
@@ -74,21 +76,19 @@ left aligned div in the middle
 and more centering
 </center>
 """
-    tree = buildAdvTree(raw)
+    tree = build_advanced_tree(raw)
     tree.show()
     cells = tree.getChildNodesByClass(advtree.Cell)
     correct_align = ["left", "center", "right", "center", "center", "left"]
-    for (i, cell) in enumerate(cells):
+    for i, cell in enumerate(cells):
         align = styleutils.getTextAlign(cell)
-        assert align == correct_align[i], "styleutils.getCelTextAlign return false alignment"
+        assert align == correct_align[i], RETURN_FALSE_ALIGNMENT
 
     center = tree.getChildNodesByClass(advtree.Center)
     texts = center[0].getChildNodesByClass(advtree.Text)
     correct_align = ["center", "left", "center"]
-    for (i, txt) in enumerate(texts):
-        assert (
-            styleutils.getTextAlign(txt) == correct_align[i]
-        ), "styleutils.getCelTextAlign return false alignment"
+    for i, txt in enumerate(texts):
+        assert styleutils.getTextAlign(txt) == correct_align[i], RETURN_FALSE_ALIGNMENT
 
 
 def test_textalign3():
@@ -102,9 +102,9 @@ def test_textalign3():
 | centered
 |}
 """
-    tree = buildAdvTree(raw)
+    tree = build_advanced_tree(raw)
     cells = tree.getChildNodesByClass(advtree.Cell)
     correct_align = ["right", "right", "left", "center"]
-    for (i, cell) in enumerate(cells):
+    for i, cell in enumerate(cells):
         align = styleutils.getTextAlign(cell)
-        assert align == correct_align[i], "styleutils.getCelTextAlign return false alignment"
+        assert align == correct_align[i], RETURN_FALSE_ALIGNMENT

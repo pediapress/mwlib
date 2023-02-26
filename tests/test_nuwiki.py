@@ -10,29 +10,31 @@ import zipfile
 from mwlib.nuwiki import adapt
 
 
-class Test_nuwiki_xnet(object):
+class TestNuwikiXnet(object):
+    @classmethod
     def setup_class(cls):
         cls.tmpdir = tempfile.mkdtemp()
-        cls.zipfn = os.path.join(cls.tmpdir, "test.zip")
+        cls.zip_fn = os.path.join(cls.tmpdir, "test.zip")
         err = subprocess.call(
             [
                 "mw-zip",
                 "-o",
-                cls.zipfn,
+                cls.zip_fn,
                 "-c",
                 ":de",
                 "Monty Python",
             ]
         )
-        assert os.path.isfile(cls.zipfn)
+        assert os.path.isfile(cls.zip_fn)
         assert err == 0, "command failed"
 
+    @classmethod
     def teardown_class(cls):
         if os.path.exists(cls.tmpdir):
             shutil.rmtree(cls.tmpdir)
 
     def setup_method(self, method):
-        self.nuwiki = adapt(zipfile.ZipFile(self.zipfn, "r")).nuwiki
+        self.nuwiki = adapt(zipfile.ZipFile(self.zip_fn, "r")).nuwiki
 
     def test_init(self):
         assert "Monty Python" in self.nuwiki.revisions

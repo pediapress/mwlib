@@ -3,6 +3,8 @@
 from mwlib import nshandling
 from mwlib.refine import core
 
+WRONG_TEXT = "wrong text"
+
 tokenize = core.tokenize
 show = core.show
 T = core.T
@@ -281,7 +283,7 @@ def test_html_entity_in_pre():
     r = parse_txt("<pre>&gt;</pre>")
     txt = r[0].children[0].text
     print(txt)
-    assert txt == ">", "wrong text"
+    assert txt == ">", WRONG_TEXT
 
 
 def test_nowiki_in_pre():
@@ -289,7 +291,7 @@ def test_nowiki_in_pre():
     r = parse_txt("<pre><nowiki>foo</nowiki></pre>")
     txt = r[0].children[0].text
     print(txt)
-    assert txt == "foo", "wrong text"
+    assert txt == "foo", WRONG_TEXT
 
 
 def test_s_tag():
@@ -384,7 +386,8 @@ def test_dd_dt_tags_inside_table():
 """
     )
     show(r)
-    # assert 0 # FIXME
+    assert len(r) == 2, "expected exactly two nodes"
+    assert "foobazbar" in r[0].children[1].children[1].children[1].children[1].children[0].text
 
 
 def test_left_to_right_mark():
@@ -589,8 +592,8 @@ def test_link_vs_namedurl():
     txt = T.join_as_text(r)
     print("TXT:", repr(txt))
 
-    assert "[[acdc " in txt, "wrong text"
-    assert txt.endswith("]"), "wrong text"
+    assert "[[acdc " in txt, WRONG_TEXT
+    assert txt.endswith("]"), WRONG_TEXT
 
     assert r[0].type != T.t_complex_link, "should not be an article link"
 

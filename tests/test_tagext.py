@@ -48,6 +48,9 @@ def test_listing():
     raw = """
 * <listing name="Attraction name" alt="local or alternative name" address="Address" directions="directions" phone="+91-22-2222-1234" email="fakeemail@fakehost.com" fax="+91-22-2222-1235" url="http://www.example.com" hours="9 pm -5:30 pm" price="Rs. 50 for entrance" lat="latitude" long="longitude" tags="comma,separated,tag_labels">Stuff about the attraction.</listing>"""
     r = parse(raw)
+    all_children = list(r.allchildren())
+    assert len(all_children) == 29
+    assert "Stuff" in str(all_children[-1])
 
 
 def test_rdf():
@@ -76,6 +79,9 @@ def test_poem():
 </poem>
 """
     r = parse(raw)
+    all_children = [str(x) for x in r.allchildren()]
+    assert len(all_children) == 28
+    assert "'1bla bla'" in all_children
 
 
 def test_section():
@@ -83,3 +89,6 @@ def test_section():
 a <section begin=chapter1/> 1bla bla <section end=chapter1/> bla
 """
     r = parse(raw)
+    all_children = [str(x) for x in r.allchildren()]
+    assert len(all_children) == 6
+    assert "' 1bla bla '" in all_children

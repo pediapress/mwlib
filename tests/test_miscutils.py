@@ -9,7 +9,7 @@ from mwlib import parser
 from mwlib.writer import miscutils
 
 
-def getTreeFromMarkup(raw):
+def get_tree_from_markup(raw):
     return parseString(title="Test", raw=raw, wikidb=DummyDB())
 
 
@@ -17,8 +17,7 @@ def show(tree):
     parser.show(sys.stdout, tree)
 
 
-def test_articleStartsWithInfobox1():
-
+def test_article_starts_with_infobox_1():
     raw = """
 Some text in a paragraph
 
@@ -31,7 +30,7 @@ Some text in a paragraph [[http://ysfine.com]]
 
 Some more text
 """
-    tree = getTreeFromMarkup(raw)
+    tree = get_tree_from_markup(raw)
     # show(tree)
     assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=100) == True
     assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=10) == False
