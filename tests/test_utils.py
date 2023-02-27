@@ -4,22 +4,25 @@
 """Unittests for mwlib.utils"""
 
 from mwlib import utils
+import pytest
 
 
-def test_fs_escape():
-    test_set = (
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
         ("abc", "abc"),
         ("a b c", "a_b_c"),
         ("a\tb\tc", "abc"),
-        # ("ä", "~228~"),
-        # ("ä", "~195~~164~"),
-        # ("~", "~~"),
-        # ("~", "~~"),
-        ("~abc", "abc"),
-    )
-    for s_in, s_out in test_set:
-        assert utils.fsescape(s_in) == s_out
-        assert isinstance(utils.fsescape(s_in), str)
+        ("ä", "~228~"),
+        ("ł", "~322~"),
+        ("~", "~~"),
+        (b"~", "~~"),
+        ("~abc", "~~abc"),
+    ],
+)
+def test_fs_escape(test_input, expected):
+    assert utils.fs_escape(test_input) == expected
+    assert isinstance(utils.fs_escape(test_input), str)
 
 
 def test_uid():

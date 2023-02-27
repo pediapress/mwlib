@@ -122,7 +122,7 @@ class FsOutput(object):
         self.revfile = None
 
     def get_imagepath(self, title):
-        p = os.path.join(self.path, "images", "%s" % (utils.fsescape(title),))
+        p = os.path.join(self.path, "images", "%s" % (utils.fs_escape(title),))
         self.imgcount += 1
         return p
 

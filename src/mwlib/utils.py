@@ -11,31 +11,36 @@ import time
 import traceback
 from email.mime.text import MIMEText
 from email.utils import make_msgid, formatdate
+from typing import Union
 
 import six
 import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
-from six.moves import range
 
 from mwlib.log import Log
 
 log = Log("mwlib.utils")
-non_word = re.compile(r"(?u)[^-\w.]")
+non_word = re.compile(r"(?u)[^-\w.~]")
 
 
-def fsescape(s):
-    """Escape string to be safely used in path names
-
-    @param s: some string
-    @type s: basestring
-
-    @returns: escaped string
-    @rtype: str
-    """
-    s = str(s).strip().replace(" ", "_")
-    result = non_word.sub("", s)
-    return result
+def fs_escape(s: Union[bytes, str]) -> str:
+    """Escape string to be safely used in path names."""
+    if isinstance(s, bytes):
+        s = s.decode("utf-8")
+    if not s.isascii() or any(x in s for x in "~/\\"):
+        result = []
+        for x in s:
+            if x.isascii() and x not in "~/\\":
+                result.append(x)
+            elif x == "~":
+                result.append("~~")
+            else:
+                result.append(f"~{ord(x)}~")
+        s = "".join(result)
+    s = s.strip().replace(" ", "_")
+    s = non_word.sub("", s)
+    return s
 
 
 def start_logging(path, stderr_only=False):

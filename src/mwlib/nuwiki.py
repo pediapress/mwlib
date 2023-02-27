@@ -214,10 +214,10 @@ class nuwiki(object):
         if "/" in fqname:
             return None
 
-        p = self._pathjoin("images", utils.fsescape(fqname))
+        p = self._pathjoin("images", utils.fs_escape(fqname))
         if not self._exists(p):
             fqname = 'File:' + partial  # Fallback to default language english
-            p = self._pathjoin("images", utils.fsescape(fqname))
+            p = self._pathjoin("images", utils.fs_escape(fqname))
             if not self._exists(p):
                 return None
 
@@ -235,7 +235,7 @@ class nuwiki(object):
             safe_path = self._pathjoin("images", "safe", hd)
             if not os.path.exists(safe_path):
                 try:
-                    os.symlink(os.path.join("..", utils.fsescape(fqname)), safe_path)
+                    os.symlink(os.path.join("..", utils.fs_escape(fqname)), safe_path)
                 except OSError as exc:
                     if exc.errno != 17:  # File exists
                         raise
