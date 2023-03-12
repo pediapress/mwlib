@@ -1,30 +1,18 @@
 #! /usr/bin/env python
 
 # Copyright (c) PediaPress GmbH
-# See README.rst for additional licensing information.
 
 """api.php client"""
 
-from urllib.parse import urlparse
-
-import six
-import six.moves.http_cookiejar
-import six.moves.urllib.error
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.parse
-import six.moves.urllib.parse
-import six.moves.urllib.request
-import six.moves.urllib.request
+from http import cookiejar
+from urllib import request, parse
 
 try:
     import simplejson as json
 except ImportError:
     import json
-try:
-    from gevent.lock import Semaphore
-except BaseException:
-    from gevent.coros import Semaphore
+
+from gevent.lock import Semaphore
 
 from mwlib import conf, authors
 
@@ -53,23 +41,21 @@ def merge_data(dst, src):
                     dst[k] = v
 
 
-class MwApi(object):
+class MwApi:
     def __init__(self, apiurl, username=None, password=None):
         self.apiurl = apiurl
         self.baseurl = apiurl  # XXX
 
         if username:
-            passman = six.moves.urllib.request.HTTPPasswordMgrWithDefaultRealm()
+            passman = request.HTTPPasswordMgrWithDefaultRealm()
             passman.add_password(None, apiurl, username, password)
-            auth_handler = six.moves.urllib.request.HTTPBasicAuthHandler(passman)
-            self.opener = six.moves.urllib.request.build_opener(
-                six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar()),
+            auth_handler = request.HTTPBasicAuthHandler(passman)
+            self.opener = request.build_opener(
+                request.HTTPCookieProcessor(cookiejar.CookieJar()),
                 auth_handler,
             )
         else:
-            self.opener = six.moves.urllib.request.build_opener(
-                six.moves.urllib.request.HTTPCookieProcessor(six.moves.http_cookiejar.CookieJar())
-            )
+            self.opener = request.build_opener(request.HTTPCookieProcessor(cookiejar.CookieJar()))
         self.opener.addheaders = [("User-Agent", conf.user_agent)]
         self.edittoken = None
         self.qccount = 0
@@ -81,6 +67,7 @@ class MwApi(object):
         self.limit_fetch_semaphore = None
 
     def report(self):
+        """dummy method for compatibility with sapi"""
         pass
 
     def set_limit(self, limit=None):
@@ -104,9 +91,9 @@ class MwApi(object):
         args = {"format": "json"}
         args.update(**kwargs)
         for k, v in args.items():
-            if isinstance(v, six.text_type):
+            if isinstance(v, str):
                 args[k] = v.encode("utf-8")
-        q = six.moves.urllib.parse.urlencode(args)
+        q = parse.urlencode(args)
         q = q.replace("%3A", ":")  # fix for wrong quoting of url for images
         q = q.replace("%7C", "|")  # fix for wrong quoting of API queries (relevant for redirects)
 
@@ -121,13 +108,13 @@ class MwApi(object):
         args = {"format": "json"}
         args.update(**kwargs)
         for k, v in args.items():
-            if isinstance(v, six.text_type):
+            if isinstance(v, str):
                 args[k] = v.encode("utf-8")
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        postdata = six.moves.urllib.parse.urlencode(args).encode()
+        postdata = parse.urlencode(args).encode()
 
-        req = six.moves.urllib.request.Request(self.apiurl, postdata, headers)
+        req = request.Request(self.apiurl, postdata, headers)
 
         res = loads(self._fetch(req))
         return res
@@ -324,17 +311,6 @@ class MwApi(object):
         if revision is not None:
             kwargs["rvstartid"] = revision
 
-        # def setrvlimit(res):
-        #     print "setting rvlimit to 50 for %s" % (self.baseurl, )
-        #     self.rvlimit=50
-        #     return res
-        # # XXX
-        # def retry(err):
-        #     if rvlimit <= 50:
-        #         return err
-        #     kwargs["rvlimit"] = 50
-        #     return self.do_request(action="query", **kwargs).addCallback(setrvlimit)
-
         get_authors = authors.InspectAuthors()
 
         def merge_data(retval, newdata):
@@ -360,7 +336,7 @@ def guess_api_urls(url):
         url = url.decode("utf-8")
 
     try:
-        scheme, netloc, path, params, query, fragment = urlparse(url)
+        scheme, netloc, path, params, query, fragment = parse.urlparse(url)
     except ValueError:
         return retval
 
@@ -393,12 +369,8 @@ def guess_api_urls(url):
     return retval
 
 
-def get_collection_params(api):
-    return dict()
-
-
 def main():
-    s = MwApi("http://en.wikipedia.org/w/api.php")
+    s = MwApi("https://en.wikipedia.org/w/api.php")
     print(s.get_categorymembers("Category:Mainz"))
 
 

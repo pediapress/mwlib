@@ -3,36 +3,24 @@
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import os
 import sys
 import time
 import traceback
+from urllib import request, parse
 
 import gevent
 import gevent.event
 import gevent.pool
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.parse
-import six.moves.urllib.request
-
-try:
-    from gevent.lock import Semaphore
-except BaseException:
-    from gevent.coros import Semaphore
-
-
-from sqlitedict import SqliteDict
+from gevent.lock import Semaphore
 from lxml import etree
+from sqlitedict import SqliteDict
 
 from mwlib import utils, nshandling, conf, myjson as json
 from mwlib.net import sapi as mwapi
 
 
-class SharedProgress(object):
+class SharedProgress:
     status = None
     last_percent = 0.0
 
@@ -73,6 +61,7 @@ class SharedProgress(object):
             sys.stdout.flush()
 
         if self.status:
+            s = ""
             try:
                 s = self.status.stdout
                 self.status.stdout = None
@@ -87,13 +76,13 @@ class SharedProgress(object):
     def get_count(self):
         done = 0
         total = 0
-        for (d, t) in self.key2count.values():
+        for d, t in self.key2count.values():
             done += d
             total += t
         return done, total
 
 
-class FsOutput(object):
+class FsOutput:
     def __init__(self, path):
         self.path = os.path.abspath(path)
         assert not os.path.exists(self.path)
@@ -155,7 +144,6 @@ class FsOutput(object):
     def write_pages(self, data):
         pages = list(data.get("pages", {}).values())
         for p in pages:
-
             title = p.get("title")
             ns = p.get("ns")
             revisions = p.get("revisions")
@@ -180,10 +168,12 @@ class FsOutput(object):
                 #     print "fsoutput: skipping duplicate:", dict(revid=revid, title=title)
 
     def write_authors(self):
-        self.authors.close()
+        if hasattr(self, "authors"):
+            self.authors.close()
 
     def write_html(self):
-        self.html.close()
+        if hasattr(self, "html"):
+            self.html.close()
 
     def write_redirects(self, redirects):
         self.dump_json(redirects=redirects)
@@ -194,7 +184,7 @@ def split_blocks(lst, limit):
     res = []
     start = 0
     while start < len(lst):
-        res.append(lst[start : start + limit])
+        res.append(lst[start: start + limit])
         start += limit
     return res
 
@@ -215,12 +205,13 @@ def call_when(event, fun):
             fun()
         except gevent.GreenletExit:
             raise
-        except Exception:
+        except Exception as e:
+            print("call_when", e)
             traceback.print_exc()
 
 
 def download_to_file(url, path, temp_path):
-    opener = six.moves.urllib.request.build_opener()
+    opener = request.build_opener()
     opener.addheaders = [("User-Agent", conf.user_agent)]
 
     try:
@@ -239,27 +230,26 @@ def download_to_file(url, path, temp_path):
         if out is not None:
             out.close()
             os.rename(temp_path, path)
-        # print "GOT", url, size_read
+        print(f"read {size_read} bytes from {url}")
 
     except Exception as err:
         print("ERROR DOWNLOADING", url, err)
         raise
 
 
-class Fetcher(object):
+class Fetcher:
     def __init__(
-        self,
-        api,
-        fsout,
-        pages,
-        licenses,
-        status=None,
-        progress=None,
-        cover_image=None,
-        imagesize=800,
-        fetch_images=True,
+            self,
+            api,
+            fsout,
+            pages,
+            licenses,
+            status=None,
+            progress=None,
+            cover_image=None,
+            imagesize=800,
+            fetch_images=True,
     ):
-
         self.dispatch_event = gevent.event.Event()
         self.api_semaphore = Semaphore(20)
 
@@ -305,9 +295,6 @@ class Fetcher(object):
         siteinfo = self.get_siteinfo_for(self.api)
         self.fsout.write_siteinfo(siteinfo)
         self.nshandler = nshandling.nshandler(siteinfo)
-
-        params = mwapi.get_collection_params(api)
-        self.__dict__.update(params)
 
         self.make_print_template = None
 
@@ -388,12 +375,11 @@ class Fetcher(object):
             src = img_node.get("src")
             frags = src.split("/")
             if len(frags):
-                fullurl = six.moves.urllib.parse.urljoin(self.api.baseurl, src)
+                full_url = parse.urljoin(self.api.baseurl, src)
                 if img_node.get("class") != "thumbimage" and (
-                    "extensions" in src or "math" in src
+                        "extensions" in src or "math" in src
                 ):
-
-                    img_urls.add(fullurl)
+                    img_urls.add(full_url)
         return img_urls
 
     def fetch_html(self, name, lst):
@@ -411,8 +397,8 @@ class Fetcher(object):
                 self.schedule_download_image(str(url), title)
 
         self.count_total += len(lst)
-        for c in lst:
-            self._refcall_noinc(fetch, c)
+        for item in lst:
+            self._refcall_noinc(fetch, item)
 
     def fetch_used(self, name, lst, expanded=False):
         limit = self.api.api_request_limit
@@ -498,7 +484,6 @@ class Fetcher(object):
     def get_edits(self, title, rev):
         inspect_authors = self.api.get_edits(title, rev)
         authors = inspect_authors.get_authors()
-        # print "GOT_EDITS:", title, authors
         self.fsout.set_db_key("authors", title, authors)
 
     def report(self):
@@ -534,7 +519,6 @@ class Fetcher(object):
         pages = list(data.get("pages", {}).values())
         targets = []
         for p in pages:
-
             title = p.get("title")
             revisions = p.get("revisions")
 
@@ -589,8 +573,7 @@ class Fetcher(object):
     def fetch_imageinfo(self, titles):
         data = self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize)
         infos = list(data.get("pages", {}).values())
-        # print infos[0]
-        new_basepaths = set()
+        new_base_paths = set()
 
         for i in infos:
             title = i.get("title")
@@ -599,34 +582,35 @@ class Fetcher(object):
             if not ii:
                 continue
             ii = ii[0]
-            self.fsout.set_db_key("imageinfo", title, ii)
-            thumburl = ii.get("thumburl", None)
+            self._extract_info_from_image(i, ii, new_base_paths, title)
 
-            if thumburl is None:  # fallback for old mediawikis
-                thumburl = ii.get("url", None)
-
-            # FIXME limit number of parallel downloads
-            if thumburl:
-                # FIXME: add Callback that checks correct file size
-                if thumburl.startswith("/"):
-                    thumburl = six.moves.urllib.parse.urljoin(self.api.baseurl, thumburl)
-                self.schedule_download_image(thumburl, title)
-
-                descriptionurl = ii.get("descriptionurl", "")
-                if not descriptionurl:
-                    descriptionurl = i.get("fullurl", "")
-
-                if descriptionurl and "/" in descriptionurl:
-                    path, localname = descriptionurl.rsplit("/", 1)
-                    t = (title, descriptionurl)
-                    if path in self.imagedescription_todo:
-                        self.imagedescription_todo[path].append(t)
-                    else:
-                        new_basepaths.add(path)
-                        self.imagedescription_todo[path] = [t]
-
-        for path in new_basepaths:
+        for path in new_base_paths:
             self._refcall(self.handle_new_basepath, path)
+
+    def _extract_info_from_image(self, image, imageinfo, new_base_paths, title):
+        self.fsout.set_db_key("imageinfo", title, imageinfo)
+        thumb_url = imageinfo.get("thumburl", None)
+        if thumb_url is None:  # fallback for old mediawikis
+            thumb_url = imageinfo.get("url", None)
+        # FIXME limit number of parallel downloads
+        if thumb_url:
+            # FIXME: add Callback that checks correct file size
+            if thumb_url.startswith("/"):
+                thumb_url = parse.urljoin(self.api.baseurl, thumb_url)
+            self.schedule_download_image(thumb_url, title)
+
+            description_url = imageinfo.get("descriptionurl", "")
+            if not description_url:
+                description_url = image.get("fullurl", "")
+
+            if description_url and "/" in description_url:
+                path, local_name = description_url.rsplit("/", 1)
+                t = (title, description_url)
+                if path in self.imagedescription_todo:
+                    self.imagedescription_todo[path].append(t)
+                else:
+                    new_base_paths.add(path)
+                    self.imagedescription_todo[path] = [t]
 
     def _get_nshandler(self):
         if self._nshandler is not None:
@@ -754,9 +738,6 @@ class Fetcher(object):
             if n in seen or self.redirects.get(n, n) in seen:
                 continue
             print("WARNING: %r could not be fetched" % ((title, revid),))
-            # raise RuntimeError("%r could not be fetched" % ((title, revid), ))
-
-        seen = self.fsout.seen
 
     def finish(self):
         self._sanity_check()
