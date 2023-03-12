@@ -1,4 +1,4 @@
-# Copyright (c) 2007-2009 PediaPress GmbH
+# Copyright (c) 2007-2023 PediaPress GmbH
 # See README.md for additional licensing information.
 
 """mz-zip - installed via setuptools' entry_points"""
@@ -7,7 +7,18 @@ import os
 import shutil
 import sys
 import tempfile
+import time
+import webbrowser
 import zipfile
+
+from gevent import monkey
+
+from mwlib import conf
+from mwlib import utils
+from mwlib.options import OptionParser
+from mwlib.podclient import PODClient
+from mwlib.podclient import podclient_from_serviceurl
+from mwlib.status import Status
 
 
 def _walk(root):
@@ -22,8 +33,8 @@ def _walk(root):
 def zip_dir(dirname, output=None, skip_ext=None):
     """recursively zip directory and write output to zipfile.
     @param dirname: directory to zip
-    @param output: name of zip file that get's written
-    @para skip_ext: skip files with the specified extension
+    @param output: name of zip file that gets written
+    @param skip_ext: skip files with the specified extension
     """
     if not output:
         output = dirname + ".zip"
@@ -33,7 +44,7 @@ def zip_dir(dirname, output=None, skip_ext=None):
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zf.write(i, i[len(dirname) + 1 :])
+        zf.write(i, i[len(dirname) + 1:])
     zf.close()
 
 
@@ -80,12 +91,7 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
 
 
 def main():
-    from gevent import monkey
-
     monkey.patch_all(thread=False)
-
-    from mwlib.options import OptionParser
-    from mwlib import conf
 
     parser = OptionParser()
     parser.add_option("-o", "--output", help="write output to OUTPUT")
@@ -113,41 +119,7 @@ def main():
         parser.error(
             "Neither --metabook nor, --collectionpage or arguments specified.\n" + use_help
         )
-    if options.posturl and options.getposturl:
-        parser.error("Specify either --posturl or --getposturl.\n" + use_help)
-    if not options.posturl and not options.getposturl and not options.output:
-        parser.error("Neither --output, nor --posturl or --getposturl specified.\n" + use_help)
-    if options.posturl:
-        from mwlib.podclient import PODClient
-
-        podclient = PODClient(options.posturl)
-    elif options.getposturl:
-        if options.getposturl > 1:
-            serviceurl = "http://test.pediapress.com/api/collections/"
-        else:
-            serviceurl = "http://pediapress.com/api/collections/"
-        import webbrowser
-        from mwlib.podclient import podclient_from_serviceurl
-
-        podclient = podclient_from_serviceurl(serviceurl)
-        pid = os.fork()
-        if not pid:
-            try:
-                webbrowser.open(podclient.redirecturl)
-            finally:
-                os._exit(0)
-        import time
-
-        time.sleep(1)
-        try:
-            os.kill(pid, 9)
-        except BaseException:
-            pass
-
-    else:
-        podclient = None
-
-    from mwlib import utils
+    pod_client = _init_pod_client(options, parser, use_help)
 
     filename = None
     status = None
@@ -155,13 +127,11 @@ def main():
         env = parser.makewiki()
         assert env.metabook, "no metabook"
 
-        from mwlib.status import Status
-
-        status = Status(options.status_file, podclient=podclient, progress_range=(1, 90))
+        status = Status(options.status_file, podclient=pod_client, progress_range=(1, 90))
         status(progress=0)
         output = options.output
 
-        make_zip(output, options, env.metabook, podclient=podclient, status=status)
+        make_zip(output, options, env.metabook, podclient=pod_client, status=status)
 
     except Exception:
         if status:
@@ -171,6 +141,38 @@ def main():
         if options.output is None and filename:
             print("removing %r" % filename)
             utils.safe_unlink(filename)
+
+
+def _init_pod_client(options, parser, use_help):
+    if options.posturl and options.getposturl:
+        parser.error("Specify either --posturl or --getposturl.\n" + use_help)
+    if not options.posturl and not options.getposturl and not options.output:
+        parser.error("Neither --output, nor --posturl or --getposturl specified.\n" + use_help)
+    if options.posturl:
+        pod_client = PODClient(options.posturl)
+    elif options.getposturl:
+        if options.getposturl > 1:
+            service_url = "https://test.pediapress.com/api/collections/"
+        else:
+            service_url = "https://pediapress.com/api/collections/"
+
+        pod_client = podclient_from_serviceurl(service_url)
+        pid = os.fork()
+        if not pid:
+            try:
+                webbrowser.open(pod_client.redirecturl)
+            finally:
+                os._exit(os.EX_OK)  # pylint: disable=W0212
+
+        time.sleep(1)
+        try:
+            os.kill(pid, 9)
+        except OSError:
+            pass
+
+    else:
+        pod_client = None
+    return pod_client
 
 
 if __name__ == "__main__":
