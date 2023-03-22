@@ -1,44 +1,41 @@
 #! /usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
+import getpass
+import os
+import socket
+import sys
+import traceback
+from io import StringIO
+
 import gevent
 import gevent.monkey
-gevent.monkey.patch_all()
+from qs.rpcclient import ServerProxy
 
-import os
-import sys
-import getpass
-import socket
-import traceback
-import StringIO
-
+from mwlib import argv
+from mwlib.asynchronous import slave
 from mwlib.podclient import PODClient
 from mwlib.status import Status
 from mwlib.utils import send_mail
 
 cachedir = "cache"
+gevent.monkey.patch_all()
 
 
 def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
 
 
-def _get_args(writer_options=None,
-              language=None,
-              zip_only=False,
-              **kw):
-
+def _get_args(writer_options=None, language=None, zip_only=False, **kw):
     args = []
 
     if zip_only:
         return args
 
     if writer_options:
-        args.extend(['--writer-options', writer_options])
+        args.extend(["--writer-options", writer_options])
 
     if language:
-        args.extend(['--language', language])
+        args.extend(["--language", language])
 
     return args
 
@@ -52,11 +49,11 @@ def uploadfile(ipath, posturl, fh=None):
     status = Status(podclient=podclient)
 
     try:
-        status(status='uploading', progress=0)
+        status(status="uploading", progress=0)
         podclient.streaming_post_zipfile(ipath, fh)
-        status(status='finished', progress=100)
+        status(status="finished", progress=100)
     except Exception as err:
-        status(status='error')
+        status(status="error")
         raise err
 
 
@@ -88,8 +85,7 @@ def report_mwzip_status(posturl, jobid, host, port):
     podclient = PODClient(posturl)
     status = Status(podclient=podclient)
 
-    from mwlib.asynchronous import rpcclient
-    sp = rpcclient.serverproxy(host, port)
+    sp = ServerProxy(host, port)
 
     last = {}
     while True:
@@ -100,8 +96,7 @@ def report_mwzip_status(posturl, jobid, host, port):
             break
         info = res.get("info", {})
         if info != last:
-            status(status=info.get("status", "fetching"),
-                   progress=info.get("progress", 0.0))
+            status(status=info.get("status", "fetching"), progress=info.get("progress", 0.0))
             last = info
         else:
             gevent.sleep(0.5)
@@ -136,24 +131,31 @@ class commands(object):
     def statusfile(self):
         host = self.proxy._rpcclient.host
         port = self.proxy._rpcclient.port
-        return 'qserve://%s:%s/%s' % (host, port, self.jobid)
+        return "qserve://%s:%s/%s" % (host, port, self.jobid)
 
     def rpc_post(self, params):
         post_url = params["post_url"]
 
         def _doit(metabook_data=None, collection_id=None, base_url=None, post_url=None, **kw):
-            dir = get_collection_dir(collection_id)
+            directory = get_collection_dir(collection_id)
 
             def getpath(p):
-                return os.path.join(dir, p)
+                return os.path.join(directory, p)
 
-            jobid = "%s:makezip" % (collection_id, )
-            g = gevent.spawn_later(0.2, report_mwzip_status, post_url, jobid,
-                                   self.proxy._rpcclient.host, self.proxy._rpcclient.port)
+            jobid = "%s:makezip" % (collection_id,)
+            g = gevent.spawn_later(
+                0.2,
+                report_mwzip_status,
+                post_url,
+                jobid,
+                self.proxy._rpcclient.host,
+                self.proxy._rpcclient.port,
+            )
 
             try:
-                self.qaddw(channel="makezip", payload=dict(
-                    params=params), jobid=jobid, timeout=20 * 60)
+                self.qaddw(
+                    channel="makezip", payload=dict(params=params), jobid=jobid, timeout=20 * 60
+                )
             finally:
                 g.kill()
                 del g
@@ -183,13 +185,11 @@ class commands(object):
 
 def main():
     global cachedir
-    from mwlib import argv
+
     opts, args = argv.parse(sys.argv[1:], "--cachedir=")
     for o, a in opts:
         if o == "--cachedir":
             cachedir = a
-
-    from mwlib.asynchronous import slave
 
     slave.main(commands, numgreenlets=32, argv=args)
 
