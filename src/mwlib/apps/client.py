@@ -1,32 +1,29 @@
 """Client to mw-serve"""
 
-from __future__ import absolute_import
-from __future__ import print_function
+import argparse
+import sys
+
+import mwlib.myjson as json
+from mwlib.client import Client
 
 
 def main():
-    import optparse
-    import sys
-
-    from mwlib.client import Client
-    import mwlib.myjson as json
-
-    parser = optparse.OptionParser(usage="%prog [OPTIONS] COMMAND [ARGS]")
+    parser = argparse.ArgumentParser()
     default_url = "http://localhost:8899/"
-    parser.add_option(
+    parser.add_argument(
         "-u",
         "--url",
-        help="URL of HTTP interface to mw-serve (default: %r)" % default_url,
+        help=f"URL of HTTP interface to mw-serve (default: {default_url})",
         default=default_url,
     )
-    options, args = parser.parse_args()
+    parser.add_argument("command", help="Command to execute")
+    parser.add_argument("args", nargs="*", help="Arguments for the command")
 
-    if not args:
-        parser.error("argument required")
+    options = parser.parse_args()
 
-    command = args[0]
+    command = options.command
     data = {}
-    for arg in args[1:]:
+    for arg in options.args:
         if "=" in arg:
             key, value = [x.strip() for x in arg.split("=", 1)]
         else:
@@ -35,21 +32,26 @@ def main():
         data[key] = value
 
     if "metabook" in data:
-        data["metabook"] = open(data["metabook"], "rb").read()
+        with open(data["metabook"], "rb") as f:
+            data["metabook"] = f.read()
 
     client = Client(options.url)
     if not client.request(command, data, is_json=(command != "download")):
         if client.error is not None:
-            sys.exit("request failed: %s" % client.error)
+            sys.exit(f"request failed: {client.error}")
         else:
             sys.exit(
-                "request failed: got response code %d\n%r"
-                % (client.response_code, client.response)
+                f"request failed: got response code {client.response_code}\n{client.response!r}"
             )
 
     if command == "download":
         fn = "output"
-        open(fn, "w").write(client.response)
-        print("wrote %d bytes to %r" % (len(client.response), fn))
+        with open(fn, "w") as f:
+            f.write(client.response)
+        print(f"wrote {len(client.response)} bytes to {fn!r}")
     else:
         print(json.dumps(client.response, indent=4))
+
+
+if __name__ == "__main__":
+    main()

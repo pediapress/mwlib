@@ -1,117 +1,52 @@
-from __future__ import absolute_import
+import argparse
+import sys
+import time
 
-import optparse
+from mwlib import utils
+from mwlib.client import Client
+from mwlib.log import Log
+from mwlib.serve import purge_cache
 
 
-def serve_ctl():
-    parser = optparse.OptionParser(usage="%prog [OPTIONS]")
-    parser.add_option(
-        "--cache-dir",
-        help="cache directory (default: /var/cache/mw-serve/)",
-        default="/var/cache/mw-serve/",
-    )
-    parser.add_option(
-        "--purge-cache",
-        help="remove cache files that have not been touched for at least HOURS hours",
-        metavar="HOURS",
-    )
-
-    options, args = parser.parse_args()
-
-    if args:
-        parser.error("no arguments supported")
-
-    if options.purge_cache:
+def serve_ctl(args):
+    if args.purge_cache:
         try:
-            options.purge_cache = float(options.purge_cache)
+            args.purge_cache = int(args.purge_cache)
         except ValueError:
-            parser.error("--purge-cache value must be a positive number")
+            raise ValueError("--purge-cache value must be a positive number")
 
-        from mwlib.serve import purge_cache
-
-        purge_cache(options.purge_cache * 60 * 60, cache_dir=options.cache_dir)
+        purge_cache(args.purge_cache * 60 * 60, cache_dir=args.cache_dir)
 
 
-def check_service():
-    import sys
-    import time
-
-    from mwlib.client import Client
-    from mwlib.log import Log
-    from mwlib import utils
-
+def check_service(args):
     log = Log("mw-check-service")
 
-    parser = optparse.OptionParser(usage="%prog [OPTIONS] BASEURL METABOOK")
-    default_url = "http://localhost:8899/"
-    parser.add_option(
-        "-u",
-        "--url",
-        help="URL of HTTP interface to mw-serve (default: %r)" % default_url,
-        default=default_url,
-    )
-    parser.add_option(
-        "-w",
-        "--writer",
-        help="writer to use for rendering (default: rl)",
-        default="rl",
-    )
-    parser.add_option(
-        "--max-render-time",
-        help="maximum number of seconds rendering may take (default: 120)",
-        default="120",
-        metavar="SECONDS",
-    )
-    parser.add_option(
-        "--save-output",
-        help="if specified, save rendered file with given filename",
-        metavar="FILENAME",
-    )
-    parser.add_option(
-        "-l",
-        "--logfile",
-        help="log output to LOGFILE",
-    )
-    parser.add_option(
-        "--report-from-mail",
-        help="sender of error mails (--report-recipient also needed)",
-        metavar="EMAIL",
-    )
-    parser.add_option(
-        "--report-recipient",
-        help="recipient of error mails (--report-from-mail also needed)",
-        metavar="EMAIL",
-    )
-    options, args = parser.parse_args()
+    base_url = args.base_url
+    with open(args.metabook, "rb") as f:
+        metabook = f.read()
 
-    if len(args) != 2:
-        parser.error("exactly 2 arguments required")
+    max_render_time = int(args.max_render_time)
 
-    base_url = args[0]
-    metabook = open(args[1], "rb").read()
-
-    max_render_time = int(options.max_render_time)
-
-    if options.report_recipient and options.report_from_mail:
+    if args.report_recipient and args.report_from_mail:
 
         def report(msg):
             utils.report(
                 system="mw-check-service",
                 subject="mw-check-service error",
-                from_email=options.report_from_mail.encode("utf-8"),
-                mail_recipients=[options.report_recipient.encode("utf-8")],
+                from_email=args.report_from_mail.encode("utf-8"),
+                mail_recipients=[args.report_recipient.encode("utf-8")],
                 msg=msg,
             )
 
     else:
         report = log.ERROR
 
-    writer = options.writer
+    writer = args.writer
 
-    if options.logfile:
-        utils.start_logging(options.logfile)
+    if args.logfile:
+        utils.start_logging(args.logfile)
 
-    client = Client(options.url)
+    client = Client(args.url)
 
     def check_req(command, **kwargs):
         try:
@@ -169,9 +104,90 @@ def check_service():
         sys.exit(3)
     log.info("resulting file is %d Bytes" % len(response))
 
-    if options.save_output:
-        log.info("saving to %r" % options.save_output)
-        open(options.save_output, "wb").write(response)
+    if args.save_output:
+        log.info("saving to %r" % args.save_output)
+        with open(args.save_output, "wb") as f:
+            f.write(response)
 
     render_time = time.time() - start_time
     log.info("rendering ok, took %fs" % render_time)
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
+
+    serve_ctl_parser = subparsers.add_parser("serve_ctl")
+    serve_ctl_parser.add_argument(
+        "--cache-dir",
+        help="cache directory (default: /var/cache/mw-serve/)",
+        default="/var/cache/mw-serve/",
+    )
+    serve_ctl_parser.add_argument(
+        "--purge-cache",
+        help="remove cache files that have not been touched for at least HOURS hours",
+        metavar="HOURS",
+    )
+    serve_ctl_parser.set_defaults(func=serve_ctl)
+
+    check_service_parser = subparsers.add_parser("check_service")
+    default_url = "http://localhost:8899/"
+    check_service_parser.add_argument(
+        "-u",
+        "--url",
+        help="URL of HTTP interface to mw-serve (default: %r)" % default_url,
+        default=default_url,
+    )
+    check_service_parser.add_argument(
+        "-w",
+        "--writer",
+        help="writer to use for rendering (default: rl)",
+        default="rl",
+    )
+    check_service_parser.add_argument(
+        "--max-render-time",
+        help="maximum number of seconds rendering may take (default: 120)",
+        default="120",
+        metavar="SECONDS",
+    )
+    check_service_parser.add_argument(
+        "--save-output",
+        help="if specified, save rendered file with given filename",
+        metavar="FILENAME",
+    )
+    check_service_parser.add_argument(
+        "-l",
+        "--logfile",
+        help="log output to LOGFILE",
+    )
+    check_service_parser.add_argument(
+        "--report-from-mail",
+        help="sender of error mails (--report-recipient also needed)",
+        metavar="EMAIL",
+    )
+    check_service_parser.add_argument(
+        "--report-recipient",
+        help="recipient of error mails (--report-from-mail also needed)",
+        metavar="EMAIL",
+    )
+    check_service_parser.add_argument(
+        "base_url",
+        help="Base URL of the MediaWiki instance",
+    )
+    check_service_parser.add_argument(
+        "metabook",
+        help="Path to the metabook file",
+        type=argparse.FileType("rb"),
+    )
+    check_service_parser.set_defaults(func=check_service)
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_arguments()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
