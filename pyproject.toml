@@ -59,7 +59,7 @@ ignore = [
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F", "..."]
+fixable = ["A", "B", "C", "D", "E", "F", "I", "SIM", "TCH", "UP"]
 unfixable = []
 
 # Exclude a variety of commonly ignored directories.
