@@ -78,7 +78,7 @@ class dummyImageDB(object):
         img.save(name)
 
     def getDiskPath(self, name, size=None):
-        res = re.findall("(\d+)", name)
+        res = re.findall(r"(\d+)", name)
         if res:
             num = int(res[0])
         else:

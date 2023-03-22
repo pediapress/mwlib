@@ -8,20 +8,20 @@ RST2HTML ?= rst2html.py
 
 default::
 
-requirements::
+install::
 	pip-compile-multi
 	pip install -r requirements/base.txt
 	pip install -r requirements/test.txt
 
-all:: requirements src/mwlib/_uscan.cc cython MANIFEST.in
+build:: src/mwlib/_uscan.cc cython MANIFEST.in
 
 cython:: src/mwlib/templ/nodes.c src/mwlib/templ/evaluate.c
 
-src/mwlib/templ/nodes.c: src/mwlib/templ/nodes.py
-	cython src/mwlib/templ/nodes.py
+src/mwlib/templ/nodes.c: src/mwlib/templ/nodes.pyx
+	cython -3 src/mwlib/templ/nodes.pyx
 
-src/mwlib/templ/evaluate.c: src/mwlib/templ/evaluate.py
-	cython src.mwlib/templ/evaluate.py
+src/mwlib/templ/evaluate.c: src/mwlib/templ/evaluate.pyx
+	cython -3 src/mwlib/templ/evaluate.pyx
 
 src/mwlib/_uscan.cc: src/mwlib/_uscan.re
 	re2c -w --no-generation-date -o src/mwlib/_uscan.cc src/mwlib/_uscan.re
@@ -35,18 +35,18 @@ MANIFEST.in::
 README.html: README.rst
 	$(RST2HTML) README.rst >README.html
 
-develop:: all
+develop:: build
 	pip install -e .
 
 clean::
 	rm -rf build dist
-	rm -f mwlib/templ/evaluate.c mwlib/templ/nodes.c mwlib/_uscan.cc
+	rm -f src/mwlib/templ/evaluate.c src/mwlib/templ/nodes.c src/mwlib/_uscan.cc
 	rm -f mwlib/_gitversion.py*
 	rm **/*.pyc || true
 	pip uninstall -y mwlib || true
-	pip uninstall -y `pip freeze` || true
+	pip freeze | xargs pip uninstall -y
 
-sdist:: all
+sdist:: build
 	echo gitversion=\"$(shell git describe --tags)\" >mwlib/_gitversion.py
 	echo gitid=\"$(shell git rev-parse HEAD)\" >>mwlib/_gitversion.py
 
@@ -66,9 +66,8 @@ update::
 
 
 test::
-	pip install -r requirements-test.txt
-	py.test tests || true
-	pip uninstall -y -r requirements-test.txt &> /dev/null
+	pip install -r requirements/test.txt
+	py.test tests
 
 docker-py27-build::
 	docker build -t ${IMAGE_NAME}-py27:${IMAGE_LABEL} -f Dockerfile-dev-py27 .

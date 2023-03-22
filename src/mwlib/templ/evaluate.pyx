@@ -1,9 +1,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import six
 from six.moves import range
 
@@ -102,8 +99,8 @@ class ArgumentList(object):
         if isinstance(n, slice):
             start = n.start or 0
             stop = n.stop or len(self)
-            return [self.get(x, None) or u"" for x in range(start, stop)]
-        return self.get(n, None) or u""
+            return [self.get(x, None) or "" for x in range(start, stop)]
+        return self.get(n, None) or ""
 
     def get(self, n, default):
         self.count += 1
@@ -117,7 +114,7 @@ class ArgumentList(object):
             tmp = []
             flatten(a, self.expander, self.variables, tmp)
             _insert_implicit_newlines(tmp)
-            tmp = u"".join(tmp).strip()
+            tmp = "".join(tmp).strip()
             if len(tmp) > 256 * 1024:
                 raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))
             # FIXME: cache value ???
@@ -135,7 +132,7 @@ class ArgumentList(object):
                     tmp = []
                     flatten(name, self.expander, self.variables, tmp)
                     _insert_implicit_newlines(tmp)
-                    name = u"".join(tmp).strip()
+                    name = "".join(tmp).strip()
                     do_strip = True
                 else:
                     name = str(self.varcount)
@@ -159,7 +156,7 @@ class ArgumentList(object):
         tmp = []
         flatten(val, self.expander, self.variables, tmp)
         _insert_implicit_newlines(tmp)
-        tmp = u"".join(tmp)
+        tmp = "".join(tmp)
         if do_strip:
             tmp = tmp.strip()
 
@@ -228,7 +225,7 @@ class Expander(object):
 
         if self.db and hasattr(self.db, "getSource"):
             source = self.db.getSource(pagename) or metabook.source()
-            local_values = source.locals or u""
+            local_values = source.locals or ""
             local_values = mwlocals.parse_locals(local_values)
         else:
             local_values = None
@@ -301,8 +298,8 @@ class Expander(object):
         res = ["\n"]  # guard, against implicit newlines at the beginning
         flatten(parsed, self, ArgumentList(expander=self), res)
         _insert_implicit_newlines(res)
-        res[0] = u""
-        res = u"".join(res)
+        res[0] = ""
+        res = "".join(res)
         if not keep_uniq:
             res = self.uniquifier.replace_uniq(res)
         return res

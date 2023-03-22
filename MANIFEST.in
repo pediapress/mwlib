@@ -19,6 +19,7 @@ include docs/renderserver.rst
 include docs/writers.rst
 include mw-post
 include mwlib/_uscan.cc
+include pyproject.toml
 include pytest.ini
 include requirements/base.in
 include requirements/base.txt
@@ -95,9 +96,6 @@ include src/mwlib/metabook.py
 include src/mwlib/myjson.py
 include src/mwlib/net/__init__.py
 include src/mwlib/net/fetch.py
-include src/mwlib/net/net/__init__.py
-include src/mwlib/net/net/fetch.py
-include src/mwlib/net/net/sapi.py
 include src/mwlib/net/sapi.py
 include src/mwlib/nserve.py
 include src/mwlib/nshandling.py
@@ -446,14 +444,14 @@ include src/mwlib/status.py
 include src/mwlib/strftime.py
 include src/mwlib/tagext.py
 include src/mwlib/templ/__init__.py
-include src/mwlib/templ/evaluate.py
+include src/mwlib/templ/evaluate.pyx
 include src/mwlib/templ/magic_nodes.py
 include src/mwlib/templ/magic_time.py
 include src/mwlib/templ/magics.py
 include src/mwlib/templ/marks.py
 include src/mwlib/templ/misc.py
 include src/mwlib/templ/mwlocals.py
-include src/mwlib/templ/nodes.py
+include src/mwlib/templ/nodes.pyx
 include src/mwlib/templ/parser.py
 include src/mwlib/templ/pp.py
 include src/mwlib/templ/scanner.py
@@ -518,6 +516,7 @@ include tests/test_refine.py
 include tests/test_render.py
 include tests/test_sanitychecker.py
 include tests/test_serve.py
+include tests/test_setup.py
 include tests/test_styleanalyzer.py
 include tests/test_styleutils.py
 include tests/test_table.py
