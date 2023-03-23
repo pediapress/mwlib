@@ -1,15 +1,15 @@
-from __future__ import absolute_import
-
 from apipkg import initpkg
+
+__all__ = ["jobs", "proc", "qserve", "rpcclient", "rpcserver", "slave"]
 
 initpkg(
     __name__,
-    dict(
-        jobs="qs.jobs",
-        proc="qs.proc",
-        qserve="qs.qserve",
-        rpcclient="qs.rpcclient",
-        rpcserver="qs.rpcserver",
-        slave="qs.slave",
-    ),
+    {
+        "jobs": "qs.jobs",
+        "proc": "qs.proc",
+        "qserve": "qs.qserve",
+        "rpcclient": "qs.rpcclient",
+        "rpcserver": "qs.rpcserver",
+        "slave": "qs.slave",
+    },
 )
