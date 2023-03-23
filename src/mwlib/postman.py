@@ -25,7 +25,7 @@ def get_collection_dir(collection_id):
     return os.path.join(cachedir, collection_id[:2], collection_id)
 
 
-def _get_args(writer_options=None, language=None, zip_only=False, **kw):
+def _get_args(writer_options=None, language=None, zip_only=False):
     args = []
 
     if zip_only:
@@ -110,7 +110,7 @@ def report_exception(posturl, xxx_todo_changeme):
     podclient.post_status(error=str(err))
 
 
-mailfrom = "%s@%s" % (getpass.getuser(), socket.gethostname())
+mailfrom = f"{getpass.getuser()}@{socket.gethostname()}"
 
 
 def report_exception_mail(subject, exc_info):
@@ -127,11 +127,11 @@ def report_exception_mail(subject, exc_info):
     send_mail(mailfrom, [mailto], subject, f.getvalue())
 
 
-class commands(object):
+class Commands:
     def statusfile(self):
         host = self.proxy._rpcclient.host
         port = self.proxy._rpcclient.port
-        return "qserve://%s:%s/%s" % (host, port, self.jobid)
+        return f"qserve://{host}:{port}/{self.jobid}"
 
     def rpc_post(self, params):
         post_url = params["post_url"]
@@ -142,7 +142,7 @@ class commands(object):
             def getpath(p):
                 return os.path.join(directory, p)
 
-            jobid = "%s:makezip" % (collection_id,)
+            jobid = f"{collection_id}:makezip"
             g = gevent.spawn_later(
                 0.2,
                 report_mwzip_status,
@@ -154,7 +154,7 @@ class commands(object):
 
             try:
                 self.qaddw(
-                    channel="makezip", payload=dict(params=params), jobid=jobid, timeout=20 * 60
+                    channel="makezip", payload={"params": params}, jobid=jobid, timeout=20 * 60
                 )
             finally:
                 g.kill()
@@ -191,7 +191,7 @@ def main():
         if o == "--cachedir":
             cachedir = a
 
-    slave.main(commands, numgreenlets=32, argv=args)
+    slave.main(Commands, numgreenlets=32, argv=args)
 
 
 if __name__ == "__main__":
