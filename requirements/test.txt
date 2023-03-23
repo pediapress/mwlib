@@ -8,8 +8,6 @@
 -r base.txt
 attrs==22.2.0
     # via pytest
-exceptiongroup==1.1.0
-    # via pytest
 execnet==1.9.0
     # via pytest-xdist
 iniconfig==2.0.0
@@ -18,16 +16,12 @@ packaging==23.0
     # via pytest
 pluggy==1.0.0
     # via pytest
-pytest==7.2.1
+pytest==7.2.2
     # via
     #   -r requirements/test.in
     #   pytest-xdist
-pytest-xdist==3.2.0
+pytest-xdist==3.2.1
     # via -r requirements/test.in
-six==1.16.0
-    # via wsgi-intercept
-tomli==2.0.1
-    # via pytest
 wsgi-intercept==1.11.0
     # via -r requirements/test.in
 
