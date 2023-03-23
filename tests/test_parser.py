@@ -1,16 +1,13 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 import pytest
-
-from mwlib import parser, expander
-from mwlib import uparser
+from mwlib import expander, parser, uparser
 from mwlib.dummydb import DummyDB
 from mwlib.expander import DictDB
-from mwlib.refine import util, core
+from mwlib.refine import core, util
 
 BAD_URL = "bad url"
 BAD_VLIST = "bad vlist"
@@ -280,7 +277,7 @@ def test_percent_table_style():
         r = parse(s)
         t = r.find(parser.Table)[0]
         print(t)
-        assert t.vlist["width"] == "80%", "got wrong value %r" % (t.vlist["width"],)
+        assert t.vlist["width"] == "80%", "got wrong value {!r}".format(t.vlist["width"])
 
     check(
         """{| class="toccolours" width="80%"
@@ -304,8 +301,8 @@ def test_parse_params():
 
         assert res == expected, "bad result"
 
-    check("width=80pt", dict(width="80pt"))
-    check("width=80ex", dict(width="80ex"))
+    check("width=80pt", {"width": "80pt"})
+    check("width=80ex", {"width": "80ex"})
 
 
 def test_ol_ul():
@@ -346,7 +343,7 @@ def test_nested_list_listitem():
 
 
 def checktag(tagname):
-    source = "<%s>foobar</%s>" % (tagname, tagname)
+    source = f"<{tagname}>foobar</{tagname}>"
     r = parse(source)
     print("R:", r)
     nodes = r.find(parser.TagNode)
@@ -444,15 +441,15 @@ def test_table_rowspan():
     assert len(cells) == 1, EXPECTED_EXACTLY_ONE_CELL
     cell = cells[0]
     print("VLIST:", cell.vlist)
-    assert cell.vlist == dict(rowspan=3, colspan=18), "bad vlist in cell"
+    assert cell.vlist == {"rowspan": 3, "colspan": 18}, "bad vlist in cell"
 
     row = r.find(parser.Row)[0]
     print("ROW:", row)
-    assert row.vlist == dict(align="right"), "bad vlist in row"
+    assert row.vlist == {"align": "right"}, "bad vlist in row"
 
     table = r.find(parser.Table)[0]
     print("TABLE.VLIST:", table.vlist)
-    assert table.vlist == dict(align="left"), "bad vlist in table"
+    assert table.vlist == {"align": "left"}, "bad vlist in table"
 
 
 def test_extra_cell_stray_tag():
@@ -748,7 +745,7 @@ def test_ftp_url():
 
 def test_http_url():
     def checkurl(url):
-        caption = parse("foo [%s]" % (url,)).find(parser.NamedURL)[0].caption
+        caption = parse(f"foo [{url}]").find(parser.NamedURL)[0].caption
         assert caption == url, "bad named url"
 
         caption = parse(url).find(parser.URL)[0].caption
@@ -770,7 +767,7 @@ def test_schemeless_url():
 
 def test_source_vlist():
     r = parse("<source lang=c>int main()</source>").find(parser.TagNode)[0]
-    assert r.vlist == dict(lang="c"), "bad value: %r" % (r.vlist,)
+    assert r.vlist == {"lang": "c"}, f"bad value: {r.vlist!r}"
 
 
 def test_not_pull_in_alpha_image():
@@ -929,11 +926,11 @@ def test_quotes_in_tags():
     """http://code.pediapress.com/wiki/ticket/199"""
     vlist = parse("""<source attr="value"/>""").find(parser.TagNode)[0].vlist
     print("VLIST:", vlist)
-    assert vlist == dict(attr="value"), BAD_VLIST
+    assert vlist == {"attr": "value"}, BAD_VLIST
 
     vlist = parse("""<source attr='value'/>""").find(parser.TagNode)[0].vlist
     print("VLIST:", vlist)
-    assert vlist == dict(attr="value"), BAD_VLIST
+    assert vlist == {"attr": "value"}, BAD_VLIST
 
 
 def test_imagemap():
@@ -1011,7 +1008,7 @@ def test_table_style_parsing_1():
     r = parse(s)
     cells = r.find(parser.Cell)
     print("VLIST:", cells[1].vlist)
-    assert cells[1].vlist == dict(align="center"), BAD_VLIST
+    assert cells[1].vlist == {"align": "center"}, BAD_VLIST
 
 
 def test_table_style_parsing_jtalbot():
@@ -1092,7 +1089,7 @@ def test_table_whitespace_before_cell():
     print("CELLS:", cells)
     assert len(cells) == 2, "expected exactly 3 cells"
     print("VLIST:", cells[0].vlist)
-    assert cells[0].vlist == dict(bgcolor="#aacccc")
+    assert cells[0].vlist == {"bgcolor": "#aacccc"}
 
 
 def test_table_whitespace_before_row():
@@ -1109,7 +1106,7 @@ def test_table_whitespace_before_row():
     print("ROWS:", rows)
     assert len(rows) == 1, "expected exactly one row"
     print("VLIST:", rows[0].vlist)
-    assert rows[0].vlist == dict(bgcolor="#aacccc")
+    assert rows[0].vlist == {"bgcolor": "#aacccc"}
 
 
 def test_table_whitespace_before_begintable():
@@ -1117,7 +1114,7 @@ def test_table_whitespace_before_begintable():
         r = parse(s)
         tables = r.find(parser.Table)
         assert len(tables) == 1, "expected exactly one table"
-        assert tables[0].vlist == dict(bgcolor="#aacccc")
+        assert tables[0].vlist == {"bgcolor": "#aacccc"}
 
     check(
         """
@@ -1251,7 +1248,7 @@ def test_imagemod_upright():
 
     def doit(s, expected):
         up = parse(s, lang="de").find(parser.ImageLink)[0].upright
-        assert up == expected, "expected %s got %s" % (expected, up)
+        assert up == expected, f"expected {expected} got {up}"
 
     doit("[[Datei:bla.jpg|upright|thumb|foobar]]", 0.75)
     doit("[[Datei:bla.jpg|upright=0.5|thumb|foobar]]", 0.5)

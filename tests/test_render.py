@@ -41,7 +41,7 @@ def skip_by_invalid_writer_zipfile_combination(request, writer, zip_file):
 
 @pytest.mark.skip_writer_zipfile("rl", "lambda.zip")
 def test_render(writer, zip_file, tmpdir):
-    cmd = "mw-render -w %s -c %s -o %s" % (writer, zip_file, tmpdir.join("output"))
+    cmd = "mw-render -w {} -c {} -o {}".format(writer, zip_file, tmpdir.join("output"))
     print(("running", cmd))
     err = os.system(cmd)
     assert err == 0

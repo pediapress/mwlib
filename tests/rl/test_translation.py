@@ -2,8 +2,8 @@
 
 import gettext
 import os
-import pytest
 
+import pytest
 from mwlib import rl as mwlib_rl
 
 

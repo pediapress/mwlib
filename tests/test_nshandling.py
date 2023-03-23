@@ -1,6 +1,5 @@
 #! /usr/bin/env py.test
 import pytest
-
 from mwlib import nshandling, siteinfo
 
 siteinfo_de = siteinfo.get_siteinfo("de")
@@ -21,7 +20,7 @@ nshandler = nshandling.nshandler(siteinfo_de)
 @pytest.mark.parametrize("case", cases)
 def test_fqname(case):
     fqname = nshandler.get_fqname(case[0])
-    print(("%r -> %r" % (case[0], fqname)))
+    print(f"{case[0]!r} -> {fqname!r}")
     assert fqname == case[1]
 
 
@@ -35,7 +34,7 @@ cases = [
 @pytest.mark.parametrize("case", cases)
 def test_fqname_defaultns(case):
     fqname = nshandler.get_fqname(case[0], 10)  # Vorlage
-    print(("%r -> %r" % (case[0], fqname)))
+    print(f"{case[0]!r} -> {fqname!r}")
     assert fqname == case[1]
 
 

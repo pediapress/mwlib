@@ -1,10 +1,9 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 """Unittests for mwlib.utils"""
 
-from mwlib import utils
 import pytest
+from mwlib import utils
 
 
 @pytest.mark.parametrize(

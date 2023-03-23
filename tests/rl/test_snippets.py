@@ -1,12 +1,11 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from renderhelper import renderMW
-from mwlib import snippets
 import pytest
+from mwlib import snippets
+from renderhelper import renderMW
 
 
 def doit(ex):

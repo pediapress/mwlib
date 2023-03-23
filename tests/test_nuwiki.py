@@ -1,5 +1,4 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 import os
 import shutil
@@ -10,7 +9,7 @@ import zipfile
 from mwlib.nuwiki import adapt
 
 
-class TestNuwikiXnet(object):
+class TestNuwikiXnet:
     @classmethod
     def setup_class(cls):
         cls.tmpdir = tempfile.mkdtemp()

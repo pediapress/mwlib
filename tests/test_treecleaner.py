@@ -1,12 +1,10 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 import sys
 
 import pytest
-
 from mwlib import parser
 from mwlib.advtree import (
     BreakingReturn,
@@ -26,8 +24,8 @@ from mwlib.advtree import (
     Table,
     Text,
     Underline,
+    buildAdvancedTree,
 )
-from mwlib.advtree import buildAdvancedTree
 from mwlib.dummydb import DummyDB
 from mwlib.treecleaner import TreeCleaner, _all, _any
 from mwlib.uparser import parseString
@@ -49,7 +47,7 @@ def get_tree_from_markup(raw):
 
 
 def clean_markup(raw):
-    print("Parsing %r" % (raw,))
+    print(f"Parsing {raw!r}")
 
     tree = get_tree_from_markup(raw)
 

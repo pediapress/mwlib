@@ -1,6 +1,5 @@
 #! /usr/bin/env py.test
 import pytest
-
 from mwlib.expander import expand_str
 
 cases = [
@@ -57,7 +56,7 @@ def test_codes(case):
     date = "09 Feb 2008 10:55:17"
     if len(case) == 3:
         date = case[2]
-    expand_str("{{#time:%s|%s}}" % (case[0], date), case[1])
+    expand_str(f"{{{{#time:{case[0]}|{date}}}}}", case[1])
 
 
 def test_examples():

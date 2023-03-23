@@ -2,29 +2,27 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 from mwlib.advtree import (
-    buildAdvancedTree,
-    PreFormatted,
-    Text,
-    Section,
-    ImageLink,
-    Row,
-    Cell,
-    Table,
     Article,
+    Cell,
+    ImageLink,
+    PreFormatted,
+    Row,
+    Section,
     Strong,
+    Table,
+    Text,
+    buildAdvancedTree,
 )
 from mwlib.sanitychecker import (
-    Forbid,
     Allow,
-    Require,
-    Equal,
     ChildrenOf,
-    SanityException,
-)
-from mwlib.sanitychecker import (
-    SanityChecker,
-    removecb,
+    Equal,
+    Forbid,
+    Require,
     RequireChild,
+    SanityChecker,
+    SanityException,
+    removecb,
 )
 
 

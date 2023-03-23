@@ -6,8 +6,7 @@ import shutil
 import time
 
 import pytest
-
-from mwlib.serve import get_collection_dirs, _rmtree, _find_collection_dirs_to_purge, purge_cache
+from mwlib.serve import _find_collection_dirs_to_purge, _rmtree, get_collection_dirs, purge_cache
 
 
 @pytest.fixture

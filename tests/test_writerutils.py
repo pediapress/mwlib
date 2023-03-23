@@ -1,12 +1,10 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 import sys
 
-from mwlib import advtree
-from mwlib import parser
+from mwlib import advtree, parser
 from mwlib.treecleaner import TreeCleaner
 from mwlib.writer import styleutils
 

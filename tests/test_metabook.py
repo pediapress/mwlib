@@ -1,6 +1,7 @@
 #! /usr/bin/env py.test
 
-from mwlib import metabook, myjson as json
+from mwlib import metabook
+from mwlib import myjson as json
 
 ARTICLE1 = "Article 1"
 ARTICLE2 = "Article 2"

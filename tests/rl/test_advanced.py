@@ -1,5 +1,4 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
@@ -22,10 +21,7 @@ links = (
 def get_styled_text(txt):
     txt_list = []
     for style in ["", "''", "'''", "<u>"]:
-        if style.find("<") == -1:
-            styleend = style
-        else:
-            styleend = style[0] + "/" + style[1:]
+        styleend = style if style.find("<") == -1 else style[0] + "/" + style[1:]
         t = txt % {"stylestart": style, "styleend": styleend}
         txt_list.append(t)
     return txt_list
@@ -34,20 +30,20 @@ def get_styled_text(txt):
 def test_list_and_tables_3():
     # oversized table -> nested table is rendered in plain-text
     txt = """
-{| class="prettytable"
+{{| class="prettytable"
 |-
 |
-* lvl 1 %(links)s
+* lvl 1 {links}
 * lvl 1
-** lvl 2 %(links)s
+** lvl 2 {links}
 ** lvl 2
-*** <math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math>
-*** %(links)s
+*** <math>-2=\\sqrt[3]{{-8}}\ne\\sqrt[6]{{(-8)^2}}=\\sqrt[6]{{64}}=+2.</math>
+*** {links}
 ** lvl 2
 ** lvl 2
 * lvl 1
 |
-{| class="prettytable"
+{{| class="prettytable"
 |-
 |
 # lvl 1 
@@ -61,55 +57,55 @@ def test_list_and_tables_3():
 # lvl 1
 | text
 |-
-| text || <math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math>
-|}
+| text || <math>-2=\\sqrt[3]{{-8}}\ne\\sqrt[6]{{(-8)^2}}=\\sqrt[6]{{64}}=+2.</math>
+|}}
 |-
-|text after nesting || %(links)s
-|}
-""" % {
-        "links": links
-    }
+|text after nesting || {links}
+|}}
+""".format(
+        links=links,
+    )
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_3")
 
 
 def test_list_and_tables_2():
     # oversized table -> nested table is rendered in plain-text
     txt = """
-{| class="prettytable"
+{{| class="prettytable"
 |-
 |
-* lvl 1 %(links)s
+* lvl 1 {links}
 * lvl 1
-** lvl 2 %(links)s
+** lvl 2 {links}
 ** lvl 2
-*** <math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math>
-*** %(links)s
+*** <math>-2=\\sqrt[3]{{-8}}\ne\\sqrt[6]{{(-8)^2}}=\\sqrt[6]{{64}}=+2.</math>
+*** {links}
 ** lvl 2
 ** lvl 2
 * lvl 1
 |
-{| class="prettytable"
+{{| class="prettytable"
 |-
 |
-# lvl 1 %(links)s
+# lvl 1 {links}
 # lvl 1
 ## lvl 2
-## lvl 2 %(links)s
+## lvl 2 {links}
 ### <tt>teletyped text</tt>
-### %(links)s
+### {links}
 ## lvl 2
 ## lvl 2
 # lvl 1
 | text
 |-
-| text || <math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math>
-|}
+| text || <math>-2=\\sqrt[3]{{-8}}\ne\\sqrt[6]{{(-8)^2}}=\\sqrt[6]{{64}}=+2.</math>
+|}}
 |-
-|text after nesting || %(links)s
-|}
-""" % {
-        "links": links
-    }
+|text after nesting || {links}
+|}}
+""".format(
+        links=links,
+    )
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_2")
 
 
@@ -117,32 +113,32 @@ def test_list_and_tables_1():
     txt = """
 some text outside a table
    
-{| class="prettytable"
+{{| class="prettytable"
 |-
 |
-* lvl 1 %(nasty)s
+* lvl 1 {nasty}
 * lvl 1
-** lvl 2 %(nasty)s
+** lvl 2 {nasty}
 ** lvl 2
 *** lvl 3
-*** %(nasty)s
+*** {nasty}
 ** lvl 2
 ** lvl 2
 * lvl 1
 |
-# lvl 1 %(nasty)s
+# lvl 1 {nasty}
 # lvl 1
 ## lvl 2
-## lvl 2 %(nasty)s
+## lvl 2 {nasty}
 ### lvl 3
-### %(nasty)s
+### {nasty}
 ## lvl 2
 ## lvl 2
 # lvl 1
-|}
-""" % {
-        "nasty": nastyChars
-    }
+|}}
+""".format(
+        nasty=nastyChars,
+    )
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_1")
 
 
@@ -150,18 +146,18 @@ def test_link_and_lists():
     txt = """
 == Lists ==
 
-# %(links)s
+# {links}
 # plain text
-## lvl2: %(links)s
+## lvl2: {links}
 ## lvl 2: plain text
 
-* %(links)s
+* {links}
 * plain text
-** lvl2: %(links)s
+** lvl2: {links}
 ** lvl 2: plain text
-""" % {
-        "links": links
-    }
+""".format(
+        links=links,
+    )
 
     renderMW("\n\n".join(get_styled_text(txt)), "links_and_lists")
 
@@ -170,31 +166,31 @@ def test_link_in_table():
     txt = """
 == Table ==
 
-{| class="prettytable"
+{{| class="prettytable"
 |-
-| 1.1 || %(links)s
+| 1.1 || {links}
 |-
-| %(links)s || 2.2
-|}
+| {links} || 2.2
+|}}
 
-{| class="prettytable"
+{{| class="prettytable"
 |-
 | colspan="2" | colspanned cell
 |-
 | 2.1 || 2.2
 |-
 | colspan="2" |
-{| class="prettytable"
+{{| class="prettytable"
 |-
-| %(links)s || nested
+| {links} || nested
 |-
 | bla || blub
-|}
+|}}
 
-|}
-""" % {
-        "links": links
-    }
+|}}
+""".format(
+        links=links,
+    )
 
     renderMW("\n\n".join(get_styled_text(txt)), "links_and_tables")
 
@@ -202,16 +198,16 @@ def test_link_in_table():
 def test_math_advanced():
 
     txt = """
-inline math follows <math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math> and now text.
+inline math follows <math>-2=\\sqrt[3]{-8}\ne\\sqrt[6]{(-8)^2}=\\sqrt[6]{64}=+2.</math> and now text.
 
 ;indented math in definition list
-:<math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math>
+:<math>-2=\\sqrt[3]{-8}\ne\\sqrt[6]{(-8)^2}=\\sqrt[6]{64}=+2.</math>
 
 math in table (test down-scaling of formula):
 
 {| class="prettytable"
 |-
-|<math>-2=\sqrt[3]{-8}\ne\sqrt[6]{(-8)^2}=\sqrt[6]{64}=+2.</math>
+|<math>-2=\\sqrt[3]{-8}\ne\\sqrt[6]{(-8)^2}=\\sqrt[6]{64}=+2.</math>
 |text
 |-
 | text
@@ -311,8 +307,9 @@ while True:
   print 'this is python'
 
 """
-    from src.mwlib.rl.rlsourceformatter import ReportlabFormatter
     from pygments import highlight, lexers
+
+    from src.mwlib.rl.rlsourceformatter import ReportlabFormatter
 
     formatter = ReportlabFormatter(
         font_size=10,

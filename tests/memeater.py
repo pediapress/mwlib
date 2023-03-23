@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from mwlib.expander import DictDB, expand_str
 
@@ -22,7 +21,6 @@ default [[{{{Ziel|{{{2}}}}}}|{{{Titel|{{{Ziel|{{{2}}}}}}}}}]]
 
 
 def main():
-
     db = DictDB(d4=d4)
     expand_str(d4, wikidb=db)
 

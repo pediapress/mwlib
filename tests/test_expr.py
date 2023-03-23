@@ -1,5 +1,4 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 import math
 
@@ -8,11 +7,11 @@ from mwlib.expander import expand_str
 
 
 def ee(s, expected=None):
-    s = expand_str("{{#expr:%s}}" % (s,))
+    s = expand_str(f"{{{{#expr:{s}}}}}")
     if isinstance(expected, (float, int, int)):
         assert math.fabs(float(s) - expected) < 1e-5
     elif expected is not None:
-        assert s == expected, "expected %r, got %r" % (expected, s)
+        assert s == expected, f"expected {expected!r}, got {s!r}"
 
     return s
 

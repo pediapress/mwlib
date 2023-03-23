@@ -1,11 +1,8 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 import pytest
-
 from mwlib import expander
-from mwlib.expander import expand_str, DictDB
 from mwlib.dummydb import DummyDB
-
+from mwlib.expander import DictDB, expand_str
 
 HELP_LINK = "Help:Link/a/b"
 FOO_TEMPLATE_1 = "foo {{tt}}"
@@ -351,7 +348,7 @@ def test_implicit_newline_inner():
 
 def test_implicit_newline_param():
     """http://code.pediapress.com/wiki/ticket/877"""
-    wikidb = DictDB(dict(foo="foo{{{1}}}", bar="{|", baz="|"))
+    wikidb = DictDB({"foo": "foo{{{1}}}", "bar": "{|", "baz": "|"})
 
     def doit(a, b):
         expand_str(a, b, wikidb=wikidb)
@@ -474,11 +471,11 @@ def test_pagename_non_ascii():
 def test_get_templates():
     def doit(source, expected):
         r = expander.get_templates(source, "")
-        assert r == expected, "expected %r, got %r" % (expected, r)
+        assert r == expected, f"expected {expected!r}, got {r!r}"
 
     doit("{{foo| {{ bar }} }}", set("foo bar".split()))
     doit("{{foo{{{1}}} }}", set())
-    doit("{{{ {{foo}} }}}", set(["foo"]))
+    doit("{{{ {{foo}} }}}", {"foo"})
     doit("{{ #if: {{{1}}} |yes|no}}", set())
 
 
@@ -662,14 +659,14 @@ def test_page_magic():
 def test_pagemagic_with_arg():
     def expand_page(tpl, expected):
         return expand_str(
-            "{{%s:%s}}" % (tpl, USER_PAGE_PLAIN),
+            f"{{{{{tpl}:{USER_PAGE_PLAIN}}}}}",
             expected,
             pagename="Help:Irrelevant",
         )
 
     def expand_talk(tpl, expected):
         return expand_str(
-            "{{%s:%s}}" % (tpl, USER_DISCUSSION_PAGE_PLAIN),
+            f"{{{{{tpl}:{USER_DISCUSSION_PAGE_PLAIN}}}}}",
             expected,
             pagename="Help:Irrelevant",
         )

@@ -1,39 +1,25 @@
 # ! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from builtins import object
-from builtins import range
-
-
-try:
-    from src import mwlib
-except ImportError:
-    pass
 
 import os
-import tempfile
 import re
+import tempfile
 
-from PIL import Image, ImageDraw
-
-from reportlab.lib.units import cm
-from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate
+from mwlib import advtree, uparser
 from mwlib.rl.pagetemplates import WikiPage
-from mwlib import uparser
 from mwlib.rl.rlwriter import RlWriter
 from mwlib.treecleaner import TreeCleaner
-from mwlib import advtree
+from PIL import Image, ImageDraw
+from reportlab.lib.units import cm
+from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate
 
 
 def renderElements(elements, filesuffix=None, tmpdir=None):
     """takes a list of reportlab flowables and renders them to a test.pdf file"""
     margin = 2 * cm
-    if filesuffix:
-        fn = "test_" + filesuffix + ".pdf"
-    else:
-        fn = "test.pdf"
+    fn = "test_" + filesuffix + ".pdf" if filesuffix else "test.pdf"
     fn = os.path.join(tmpdir, fn)
     doc = BaseDocTemplate(
         fn, topMargin=margin, leftMargin=margin, rightMargin=margin, bottomMargin=margin
@@ -60,7 +46,7 @@ def renderMW(txt, filesuffix=None):
     renderElements(elements, filesuffix, tmpdir)
 
 
-class dummyImageDB(object):
+class dummyImageDB:
     def __init__(self, basedir=None):
         self.basedir = basedir
         self.imgnum = 1
@@ -79,10 +65,7 @@ class dummyImageDB(object):
 
     def getDiskPath(self, name, size=None):
         res = re.findall(r"(\d+)", name)
-        if res:
-            num = int(res[0])
-        else:
-            num = 0
+        num = int(res[0]) if res else 0
         name = os.path.join(self.basedir, name)
         self._generateImg(name=name, num=num, size=size)
         self.imgnum += 1

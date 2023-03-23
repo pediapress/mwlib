@@ -1,5 +1,4 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
@@ -7,12 +6,12 @@ import os
 import re
 import sys
 import tempfile
+from contextlib import suppress
 from io import StringIO
 
+import mwlib.parser
 import py
 import pytest
-
-import mwlib.parser
 from mwlib import advtree
 from mwlib.dummydb import DummyDB
 from mwlib.odfwriter import ODFWriter, preprocess
@@ -44,10 +43,8 @@ def _get_odflint_module():
     try:
         sys.stderr = StringIO()
         del sys.argv[1:]
-        try:
-            exec(compile(open(exe.strpath, "rb").read(), exe.strpath, "exec"), odflint.__dict__)
-        except SystemExit:
-            pass
+        with suppress(SystemExit), open(exe.strpath, "rb") as file:
+            exec(compile(file.read(), exe.strpath, "exec"), odflint.__dict__)
         return odflint
     finally:
         sys.argv[:] = argv

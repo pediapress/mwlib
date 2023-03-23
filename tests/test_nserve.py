@@ -1,6 +1,4 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
-import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -9,7 +7,6 @@ import bottle
 import gevent
 import pytest
 import wsgi_intercept.urllib_intercept
-
 from mwlib import nserve
 
 try:
@@ -104,7 +101,7 @@ def test_choose_idle_qserve(monkeypatch, busy):
 
 
 def test_watch_qserve_iterate_overloaded(busy, wq):
-    wq._getstats = lambda *args: dict(busy=dict(render=11))
+    wq._getstats = lambda *args: {"busy": {"render": 11}}
     wq._iterate()
     assert busy[wq.ident] == "system overloaded"
 

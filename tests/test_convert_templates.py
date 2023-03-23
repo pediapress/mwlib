@@ -1,10 +1,9 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 """tests for the convert macros, I can't get them to work inside our
 mediawiki installation.
 """
-from mwlib.expander import expand_str, DictDB
+from mwlib.expander import DictDB, expand_str
 
 db = {
     "convert": """<includeonly>{{convert/{{{2}}}|{{{1}}}|{{#ifeq:{{#expr:{{{3|0}}}*0}}|0|0}}|{{{3|}}}|{{{4|}}}|{{{5|}}}|{{{6|}}}|r={{#ifeq:{{{sp}}}|us|er|re}}|d=L{{{lk|off}}}A{{{abbr|off}}}D{{{disp|b}}}S{{{adj|{{{sing|off}}}}}}|s={{{sigfig|}}}}}</includeonly><noinclude>{{pp-template|small=yes}}{{esoteric}}

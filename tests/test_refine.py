@@ -60,8 +60,8 @@ def test_parse_table_cells_pipe():
 
     for i, x in enumerate(tokens):
         print("cell", i)
-        assert x.type == T.t_complex_table_cell, "cell %s bad" % (i,)
-        assert len(x.children) == 1, "cell %s has wrong number of children" % (i,)
+        assert x.type == T.t_complex_table_cell, f"cell {i} bad"
+        assert len(x.children) == 1, f"cell {i} has wrong number of children"
         assert x.children[0].type == T.t_text
         assert x.children[0].text == ("cell%s" % i)
 
@@ -79,7 +79,7 @@ def test_parse_cell_modifier():
     print("AFTER")
     show(tokens)
     assert tokens[0].type == T.t_complex_table_cell
-    assert tokens[0].vlist == dict(align="right")
+    assert tokens[0].vlist == {"align": "right"}
     assert T.join_as_text(tokens[0].children) == "cell0|still_cell0"
 
 
@@ -98,7 +98,7 @@ def test_parse_table_modifier():
     show(tokens)
 
     assert tokens[0].type == T.t_complex_table
-    assert tokens[0].vlist == dict(border=1)
+    assert tokens[0].vlist == {"border": 1}
 
 
 def test_parse_table_row_modifier():
@@ -318,7 +318,7 @@ def test_source():
     show(r)
     assert r[0].tagname == "p"
     assert r[1].tagname == "source"
-    assert r[1].blocknode == True
+    assert r[1].blocknode is True
     assert r[2].tagname == "p"
 
 
@@ -327,7 +327,7 @@ def test_source_enclose():
     show(r)
     assert r[0].type == T.t_text
     assert r[1].tagname == "source"
-    assert r[1].blocknode == False
+    assert r[1].blocknode is False
     assert r[2].type == T.t_text
 
 

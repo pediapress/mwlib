@@ -29,7 +29,7 @@ classifiers = [
 #license = "License: BSD License"
 
 [project.urls]
-homepage = "http://code.pediapress.com/"
+homepage = "https://code.pediapress.com/"
 
 [project.entry-points."mwlib.writers"]
 odf = "mwlib.odfwriter:writer"
@@ -50,16 +50,16 @@ mw-serve-ctl = "mwlib.apps.serve:main"
 [tool.ruff]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
 select = ["E", "F"]
-extend-select = ["C4", "I", "SIM", "TCH", "UP"]
+extend-select = ["C4", "I", "SIM", "TCH", "UP", "W"]
 ignore = [
- #   "E501",  # Line length
+    "E501",  # Line length
 #    "W503",  # Line break before binary operator
 #    "F403",  # Import * used
 #    "F405"   # Name may be undefined, or defined from star imports
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F", "I", "SIM", "TCH", "UP"]
+fixable = ["A", "B", "C", "D", "E", "F", "I", "SIM", "TCH", "UP", "W"]
 unfixable = []
 
 # Exclude a variety of commonly ignored directories.

@@ -1,34 +1,28 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import print_function
 import sys
-import pytest
 
+import pytest
+from mwlib import parser
 from mwlib.advtree import (
-    PreFormatted,
-    Text,
-    buildAdvancedTree,
-    Section,
     BreakingReturn,
-    _idIndex,
-    Indented,
+    Cell,
+    DefinitionDescription,
     DefinitionList,
     DefinitionTerm,
-    DefinitionDescription,
-    Item,
-    Cell,
-    Span,
-    Row,
     ImageLink,
+    Item,
+    PreFormatted,
+    Row,
+    Section,
+    Text,
+    _idIndex,
+    buildAdvancedTree,
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
-from mwlib import parser
-from six.moves import range
 
 
 def _treesanity(r):
@@ -239,7 +233,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|
     images = tree.getChildNodesByClass(ImageLink)
     assert len(images) == 9
     for image in images:
-        assert image.render_caption == False
+        assert image.render_caption is False
 
 
 def test_img_has_caption():
@@ -265,4 +259,4 @@ Image:Cassini Saturn Orbit Insertion.jpg|''[[Cassini–Huygens]]''<br>First Satu
     images = tree.getChildNodesByClass(ImageLink)
     assert len(images) == 9
     for image in images:
-        assert image.render_caption == True
+        assert image.render_caption is True

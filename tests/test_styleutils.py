@@ -1,12 +1,10 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 import sys
 
-from mwlib import advtree
-from mwlib import parser
+from mwlib import advtree, parser
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
 from mwlib.writer import styleutils
@@ -72,7 +70,7 @@ left
         if txt != align:
             show(cell)
 
-        assert txt == align, "alignment not correctly parsed. expected:|%s|, got |%s|" % (
+        assert txt == align, "alignment not correctly parsed. expected:|{}|, got |{}|".format(
             txt,
             align,
         )
