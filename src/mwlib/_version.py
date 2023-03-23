@@ -3,11 +3,22 @@ from pathlib import Path
 
 import toml
 
-root_dir = Path(__file__).resolve().parent.parent.parent
+
+def find_pyproject_toml():
+    current_dir = Path(__file__).resolve().parent
+
+    while current_dir != current_dir.parent:  # Check until we reach the root folder
+        candidate = current_dir / "pyproject.toml"
+        if candidate.exists():
+            return candidate
+
+        current_dir = current_dir.parent
+
+    return None
 
 
 def get_version_from_pyproject():
-    with open(root_dir / "pyproject.toml", encoding="utf-8") as file:
+    with open(find_pyproject_toml(), encoding="utf-8") as file:
         pyproject_data = toml.load(file)
         v = pyproject_data["project"]["version"]
         return v
