@@ -66,7 +66,7 @@ class AdvancedNode:
     """
 
     parent = None  # parent element
-    isblocknode = False
+    is_block_node = False
 
     def copy(self):
         "return a copy of this node and all its children"
@@ -78,7 +78,7 @@ class AdvancedNode:
             self.parent = p
         return n
 
-    def moveto(
+    def move_to(
         self, targetnode, prefix=False
     ):  # FIXME: bad name. rename to moveBehind, and create method moveBefore
         """Move this node behind the target node.
@@ -87,7 +87,7 @@ class AdvancedNode:
         """
 
         if self.parent:
-            self.parent.removeChild(self)
+            self.parent.remove_child(self)
         tp = targetnode.parent
         idx = _idIndex(tp.children, targetnode)
         if not prefix:
@@ -95,7 +95,7 @@ class AdvancedNode:
         tp.children.insert(idx, self)
         self.parent = tp
 
-    def hasChild(self, c):
+    def has_child(self, c):
         """Check if node c is child of self"""
         try:
             _idIndex(self.children, c)
@@ -104,26 +104,26 @@ class AdvancedNode:
         except ValueError:
             return False
 
-    def appendChild(self, c):
+    def append_child(self, c):
         self.children.append(c)
         c.parent = self
 
-    def removeChild(self, c):
-        self.replaceChild(c, [])
+    def remove_child(self, c):
+        self.replace_child(c, [])
         assert c.parent is None
 
-    def replaceChild(self, c, newchildren=[]):
+    def replace_child(self, c, newchildren=[]):
         """Remove child node c and replace with newchildren if given."""
 
         idx = _idIndex(self.children, c)
         self.children[idx : idx + 1] = newchildren
 
         c.parent = None
-        assert not self.hasChild(c)
+        assert not self.has_child(c)
         for nc in newchildren:
             nc.parent = self
 
-    def getParents(self):
+    def get_parents(self):
         """Return list of parent nodes up to the root node.
 
         The returned list starts with the root node.
@@ -137,42 +137,42 @@ class AdvancedNode:
         parents.reverse()
         return parents
 
-    def getParent(self):
+    def get_parent(self):
         """Return the parent node"""
         return self.parent
 
-    def getLevel(self):
+    def get_level(self):
         """Returns the number of nodes of same class in parents"""
-        return [p.__class__ for p in self.getParents()].count(self.__class__)
+        return [p.__class__ for p in self.get_parents()].count(self.__class__)
 
-    def getParentNodesByClass(self, klass):  # FIXME: rename to getParentsByClass
+    def get_parent_nodes_by_class(self, klass):  # FIXME: rename to getParentsByClass
         """returns parents w/ klass"""
         return [p for p in self.parents if p.__class__ == klass]
 
-    def getChildNodesByClass(self, klass):  # FIXME: rename to getChildrenByClass
+    def get_child_nodes_by_class(self, klass):  # FIXME: rename to getChildrenByClass
         """returns all children  w/ klass"""
-        return [p for p in self.getAllChildren() if p.__class__ == klass]
+        return [p for p in self.get_all_children() if p.__class__ == klass]
 
-    def getAllChildren(self):
+    def get_all_children(self):
         """don't confuse w/ Node.allchildren() which returns allchildren + self"""
         for c in self.children:
             yield c
-            for x in c.getAllChildren():
+            for x in c.get_all_children():
                 yield x
 
-    def getSiblings(self):
+    def get_siblings(self):
         """Return all siblings WITHOUT self"""
-        return [c for c in self.getAllSiblings() if c is not self]
+        return [c for c in self.get_all_siblings() if c is not self]
 
-    def getAllSiblings(self):
+    def get_all_siblings(self):
         """Return all siblings plus self"""
         if self.parent:
             return self.parent.children
         return []
 
-    def getPrevious(self):
+    def get_previous(self):
         """Return previous sibling"""
-        s = self.getAllSiblings()
+        s = self.get_all_siblings()
         try:
             idx = _idIndex(s, self)
         except ValueError:
@@ -182,9 +182,9 @@ class AdvancedNode:
         else:
             return s[idx - 1]
 
-    def getNext(self):
+    def get_next(self):
         """Return next sibling"""
-        s = self.getAllSiblings()
+        s = self.get_all_siblings()
         try:
             idx = _idIndex(s, self)
         except ValueError:
@@ -194,55 +194,55 @@ class AdvancedNode:
         else:
             return s[idx + 1]
 
-    def getLast(self):  # FIXME might return self. is this intended?
+    def get_last(self):  # FIXME might return self. is this intended?
         """Return last sibling"""
-        s = self.getAllSiblings()
+        s = self.get_all_siblings()
         if s:
             return s[-1]
 
-    def getFirst(self):  # FIXME might return self. is this intended?
+    def get_first(self):  # FIXME might return self. is this intended?
         """Return first sibling"""
-        s = self.getAllSiblings()
+        s = self.get_all_siblings()
         if s:
             return s[0]
 
-    def getLastChild(self):
+    def get_last_child(self):
         """Return last child of this node"""
         if self.children:
             return self.children[-1]
 
-    def getFirstChild(self):
+    def get_first_child(self):
         "Return first child of this node"
         if self.children:
             return self.children[0]
 
-    def getFirstLeaf(self, callerIsSelf=True):
+    def get_first_leaf(self, callerIsSelf=True):
         """Return 'first' child that has no children itself"""
         if self.children:
             if self.__class__ == Section:  # first kid of a section is its caption
                 if len(self.children) == 1:
                     return None
                 else:
-                    return self.children[1].getFirstLeaf(callerIsSelf=False)
+                    return self.children[1].get_first_leaf(callerIsSelf=False)
             else:
-                return self.children[0].getFirstLeaf(callerIsSelf=False)
+                return self.children[0].get_first_leaf(callerIsSelf=False)
         else:
             if callerIsSelf:
                 return None
             else:
                 return self
 
-    def getLastLeaf(self, callerIsSelf=True):
+    def get_last_leaf(self, callerIsSelf=True):
         """Return 'last' child that has no children itself"""
         if self.children:
-            return self.children[-1].getFirstLeaf(callerIsSelf=False)
+            return self.children[-1].get_first_leaf(callerIsSelf=False)
         else:
             if callerIsSelf:
                 return None
             else:
                 return self
 
-    def getAllDisplayText(self, amap=None):
+    def get_all_display_text(self, amap=None):
         "Return all text that is intended for display"
         text = []
         if not amap:
@@ -268,13 +268,13 @@ class AdvancedNode:
         else:
             return ""
 
-    def getStyle(self):
+    def get_style(self):
         if not self.attributes:
             return {}
         else:
             return self.attributes.get("style", {})
 
-    def _cleanAttrs(self, attrs):
+    def _clean_attrs(self, attrs):
         def ensureInt(val, min_val=1):
             try:
                 return max(min_val, int(val))
@@ -302,21 +302,21 @@ class AdvancedNode:
             if key in ["colspan", "rowspan"]:
                 attrs[key] = ensureInt(value, min_val=1)
             elif key == "style":
-                attrs[key] = self._cleanAttrs(ensureDict(value))
+                attrs[key] = self._clean_attrs(ensureDict(value))
             else:
                 attrs[key] = ensureUnicode(value)
         return attrs
 
-    def getAttributes(self):
+    def get_attributes(self):
         """ Return dict with node attributes (e.g. class, style, colspan etc.)"""
         vlist = getattr(self, "vlist", None)
         if vlist is None:
             self.vlist = vlist = {}
 
-        attrs = self._cleanAttrs(vlist)
+        attrs = self._clean_attrs(vlist)
         return attrs
 
-    def hasClassID(self, classIDs):
+    def has_class_id(self, classIDs):
         _class = self.attributes.get("class", "").split(" ")
         _id = self.attributes.get("id", "")
         for classID in classIDs:
@@ -324,7 +324,7 @@ class AdvancedNode:
                 return True
         return False
 
-    def isVisible(self):
+    def is_visible(self):
         """Return True if node is visble. Used to detect hidden elements."""
         if self.style.get("display", "").lower() == "none":
             return False
@@ -332,18 +332,18 @@ class AdvancedNode:
             return False
         return True
 
-    style = property(getStyle)
-    attributes = property(getAttributes)
-    visible = property(isVisible)
+    style = property(get_style)
+    attributes = property(get_attributes)
+    visible = property(is_visible)
 
-    parents = property(getParents)
-    next = property(getNext)
-    previous = property(getPrevious)
-    siblings = property(getSiblings)
-    last = property(getLast)
-    first = property(getFirst)
-    lastchild = property(getLastChild)
-    firstchild = property(getFirstChild)
+    parents = property(get_parents)
+    next = property(get_next)
+    previous = property(get_previous)
+    siblings = property(get_siblings)
+    last = property(get_last)
+    first = property(get_first)
+    lastchild = property(get_last_child)
+    firstchild = property(get_first_child)
 
 
 # --------------------------------------------------------------------------
@@ -391,23 +391,23 @@ class AdvancedCell(AdvancedNode):
 
 class AdvancedSection(AdvancedNode):
     def getSectionLevel(self):
-        return 1 + self.getLevel()
+        return 1 + self.get_level()
 
 
 class AdvancedImageLink(AdvancedNode):
-    isblocknode = property(lambda s: not s.isInline())
+    is_block_node = property(lambda s: not s.isInline())
 
     @property
     def render_caption(self):
         explicit_caption = bool(getattr(self, "thumb") or getattr(self, "frame", "") == "frame")
-        is_gallery = len(self.getParentNodesByClass(Gallery)) > 0
+        is_gallery = len(self.get_parent_nodes_by_class(Gallery)) > 0
         has_children = len(self.children) > 0
         return (explicit_caption or is_gallery) and has_children
 
 
 class AdvancedMath(AdvancedNode):
     @property
-    def isblocknode(self):
+    def is_block_node(self):
         if self.caption.strip().startswith("\\begin{align}") or self.caption.strip().startswith(
             "\\begin{alignat}"
         ):
@@ -636,14 +636,14 @@ _styleNodeMap["s"] = Strike  # Special Handling for deprecated s style
 _tagNodeMap["kbd"] = Teletyped
 
 # --------------------------------------------------------------------------
-# BlockNode separation for AdvancedNode.isblocknode
+# BlockNode separation for AdvancedNode.is_block_node
 # -------------------------------------------------------------------------
 
 """
-For writers it is usefull to know whether elements are inline (within a paragraph) or not.
+For writers it is useful to know whether elements are inline (within a paragraph) or not.
 We define list for blocknodes, which are used in AdvancedNode as:
 
-AdvancedNode.isblocknode
+AdvancedNode.is_block_node
 
 Image depends on result of Image.isInline() see above
 
@@ -679,7 +679,7 @@ _blockNodes = (
 )
 
 for k in _blockNodes:
-    k.isblocknode = True
+    k.is_block_node = True
 
 
 # --------------------------------------------------------------------------
@@ -687,7 +687,7 @@ for k in _blockNodes:
 # -------------------------------------------------------------------------
 
 
-def mixIn(pyClass, mixInClass, makeFirst=False):
+def mix_in_class(pyClass, mixInClass, makeFirst=False):
     if mixInClass not in pyClass.__bases__:
         if makeFirst:
             pyClass.__bases__ = (mixInClass,) + pyClass.__bases__
@@ -695,9 +695,9 @@ def mixIn(pyClass, mixInClass, makeFirst=False):
             pyClass.__bases__ += (mixInClass,)
 
 
-def extendClasses(node):
+def extend_classes(node):
     for c in node.children[:]:
-        extendClasses(c)
+        extend_classes(c)
         c.parent = node
 
 
@@ -710,16 +710,16 @@ _advancedNodesMap = {
     Row: AdvancedRow,
     Table: AdvancedTable,
 }
-mixIn(Node, AdvancedNode)
+mix_in_class(Node, AdvancedNode)
 for k, v in _advancedNodesMap.items():
-    mixIn(k, v)
+    mix_in_class(k, v)
 
 # --------------------------------------------------------------------------
 # Functions for fixing the parse tree
 # -------------------------------------------------------------------------
 
 
-def fixTagNodes(node):
+def fix_tag_nodes(node):
     """Detect known TagNodes and and transfrom to appropriate Nodes"""
     for c in node.children:
         if c.__class__ == TagNode:
@@ -728,15 +728,15 @@ def fixTagNodes(node):
             elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"):  # FIXME
                 # NEED TO MOVE NODE IF IT REALLY STARTS A SECTION
                 c.__class__ = Section
-                mixIn(c.__class__, AdvancedSection)
+                mix_in_class(c.__class__, AdvancedSection)
                 c.level = int(c.caption[1])
                 c.caption = ""
             else:
                 log.warn("fixTagNodes, unknowntagnode %r" % c)
-        fixTagNodes(c)
+        fix_tag_nodes(c)
 
 
-def fixStyleNode(node):
+def fix_style_node(node):
     """
     parser.Style Nodes are mapped to logical markup
     detection of DefinitionList depends on removeNodes
@@ -752,9 +752,9 @@ def fixStyleNode(node):
         node.caption = ""
         em = Emphasized("''")
         for c in node.children:
-            em.appendChild(c)
+            em.append_child(c)
         node.children = []
-        node.appendChild(em)
+        node.append_child(em)
     elif node.caption == "'''":
         node.__class__ = Strong
         node.caption = ""
@@ -778,14 +778,14 @@ def fixStyleNode(node):
     return node
 
 
-def fixStyleNodes(node):
+def fix_style_nodes(node):
     if node.__class__ == Style:
-        fixStyleNode(node)
+        fix_style_node(node)
     for c in node.children[:]:
-        fixStyleNodes(c)
+        fix_style_nodes(c)
 
 
-def removeNodes(node):
+def remove_nodes(node):
     """
     the parser generates empty Node elements that do
     nothing but group other nodes. we remove them here
@@ -793,13 +793,13 @@ def removeNodes(node):
     if node.__class__ == Node:
         # first child of section groups heading text - grouping Node must not be removed
         if not (node.previous is None and node.parent.__class__ == Section):
-            node.parent.replaceChild(node, node.children)
+            node.parent.replace_child(node, node.children)
 
     for c in node.children[:]:
-        removeNodes(c)
+        remove_nodes(c)
 
 
-def removeNewlines(node):
+def remove_newlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
     """
@@ -813,9 +813,9 @@ def removeNewlines(node):
             if not node.caption.strip():
                 prev = node.previous or node.parent  # previous sibling node or parentnode
                 next = node.next or node.parent.next
-                if not next or next.isblocknode or not prev or prev.isblocknode:
+                if not next or next.is_block_node or not prev or prev.is_block_node:
                     np = node.parent
-                    node.parent.removeChild(node)
+                    node.parent.remove_child(node)
             node.caption = node.caption.replace("\n", " ")
 
         for c in node.children:
@@ -824,18 +824,18 @@ def removeNewlines(node):
             todo.append(c)
 
 
-def buildAdvancedTree(root):  # USE WITH CARE
+def build_advanced_tree(root):  # USE WITH CARE
     """
     extends and cleans parse trees
     do not use this funcs without knowing whether these
     Node modifications fit your problem
     """
     funs = [
-        extendClasses,
-        fixTagNodes,
-        removeNodes,
-        removeNewlines,
-        fixStyleNodes,
+        extend_classes,
+        fix_tag_nodes,
+        remove_nodes,
+        remove_newlines,
+        fix_style_nodes,
     ]
     for f in funs:
         f(root)
@@ -854,22 +854,22 @@ def _validateParserTree(node, parent=None):
 def _validateParents(node, parent=None):
     # helper to assert tree parent link consistency
     if parent is not None:
-        assert parent.hasChild(node)
+        assert parent.has_child(node)
     else:
         assert node.parent is None
     for c in node:
-        assert node.hasChild(c)
+        assert node.has_child(c)
         _validateParents(c, node)
 
 
-def getAdvTree(fn):
+def get_advanced_tree(fn):
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parseString
 
     db = DummyDB()
     input = six.text_type(open(fn).read(), "utf8")
     r = parseString(title=fn, raw=input, wikidb=db)
-    buildAdvancedTree(r)
+    build_advanced_tree(r)
     return r
 
 
@@ -880,6 +880,6 @@ def simpleparse(raw):  # !!! USE FOR DEBUGGING ONLY !!!
 
     input = raw.decode("utf8")
     r = parseString(title="title", raw=input, wikidb=dummydb.DummyDB())
-    buildAdvancedTree(r)
+    build_advanced_tree(r)
     parser.show(sys.stdout, r, 0)
     return r

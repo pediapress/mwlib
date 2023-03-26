@@ -221,7 +221,7 @@ class ODFWriter(object):
                 # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed
                 # in ' u'text:span' ', dumping'
                 try:  # maybe c has no attribute type
-                    art = obj.getParentNodesByClass(advtree.Article)[0]
+                    art = obj.get_parent_nodes_by_class(advtree.Article)[0]
                     log("in article ", art.caption)
                     log("write:", c.type, "not allowed in ", p.type, ", dumping")
                 except AttributeError:
@@ -286,15 +286,15 @@ class ODFWriter(object):
 
         # skip empty sections (as for eg References)
         hasDisplayContent = u"".join(
-            x.getAllDisplayText().strip() for x in obj.children[1:]
-        ) or obj.getChildNodesByClass(
+            x.get_all_display_text().strip() for x in obj.children[1:]
+        ) or obj.get_child_nodes_by_class(
             advtree.ImageLink
         )  # FIXME, add AdvancedNode.hasContent property
         enabled = False
         if enabled and not hasDisplayContent:  # FIXME
             return SkipChildren()
 
-        title = obj.children[0].getAllDisplayText()
+        title = obj.children[0].get_all_display_text()
 
         # = is level 0 as in article title =
         # == is level 1 as in mediawiki top level section ==
@@ -311,12 +311,12 @@ class ODFWriter(object):
     def owriteParagraph(self, obj):
         if obj.children:
             imgAsOnlyChild = bool(
-                len(obj.children) == 1 and isinstance(obj.getFirstChild(), advtree.ImageLink)
+                len(obj.children) == 1 and isinstance(obj.get_first_child(), advtree.ImageLink)
             )
             # handle special case nothing but an image in a paragraph
             if imgAsOnlyChild and isinstance(obj.next, advtree.Paragraph):
-                img = obj.getFirstChild()
-                img.moveto(obj.next.getFirstChild(), prefix=True)
+                img = obj.get_first_child()
+                img.move_to(obj.next.getFirstChild(), prefix=True)
                 return SkipChildren()
             return ParagraphProxy(stylename=style.textbody)
 
@@ -502,7 +502,7 @@ class ODFWriter(object):
         # works on (styled) ParagraphProxy p
         rmap = {"\n": text.LineBreak, " ": text.S}
         col = []
-        for c in obj.getAllDisplayText().replace("\t", " " * 8).strip():
+        for c in obj.get_all_display_text().replace("\t", " " * 8).strip():
             if c in rmap:
                 p.addText(u"".join(col))
                 col = []
@@ -821,7 +821,7 @@ def preprocess(root):
     # print"*** parser raw "*5
     # parser.show(sys.stdout, root)
     # print"*** new TreeCleaner "*5
-    advtree.buildAdvancedTree(root)
+    advtree.build_advanced_tree(root)
     tc = TreeCleaner(root)
     tc.cleanAll()
     # parser.show(sys.stdout, root)

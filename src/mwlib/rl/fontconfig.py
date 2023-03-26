@@ -273,7 +273,7 @@ class RLFontSwitcher(FontSwitcher):
             if not self.fontInstalled(font):
                 missing_fonts.append(repr(font["name"]))
                 continue
-            self.registerFont(font["name"], code_points=font.get("code_points"))
+            self.register_font(font["name"], code_points=font.get("code_points"))
             if font.get("cjk", False):
                 self.cjk_fonts.append(font["name"])
         if RLFontSwitcher.warn_on_missing_fonts and missing_fonts:
@@ -302,7 +302,7 @@ class RLFontSwitcher(FontSwitcher):
     def fontifyText(self, txt, break_long=False):
         if self.force_font:
             return '<font name="%s">%s</font>' % (self.force_font, txt)
-        font_list = self.getFontList(txt)
+        font_list = self.get_font_list(txt)
         if self.space_cjk:
             font_list, cjk = font_list
             if cjk:

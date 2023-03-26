@@ -36,7 +36,7 @@ from . import locale, fontconfig
 
 font_switcher = fontconfig.RLFontSwitcher()
 font_switcher.font_paths = fontconfig.font_paths
-font_switcher.registerDefaultFont(pdfstyles.default_font)
+font_switcher.register_default_font(pdfstyles.default_font)
 font_switcher.registerFontDefinitionList(fontconfig.fonts)
 
 formatter = RLFormatter(font_switcher=font_switcher)
@@ -131,7 +131,7 @@ class WikiPage(PageTemplate):
             footer_margin_vert,
         )
         if pdfstyles.show_page_footer:
-            p = Paragraph(formatter.cleanText(pagefooter, escape=False), text_style())
+            p = Paragraph(formatter.clean_text(pagefooter, escape=False), text_style())
             p.canv = canvas
             w, h = p.wrap(page_width - header_margin_hor * 2.5, page_height)
             p.drawOn(canvas, footer_margin_hor, footer_margin_vert - 10 - h)
@@ -191,7 +191,7 @@ class TitlePage(PageTemplate):
                     pdfstyles.creation_date_txt
                     % time.strftime(pdfstyles.creation_date_format, time.localtime())
                 )
-            lines = [formatter.cleanText(line, escape=False) for line in footertext]
+            lines = [formatter.clean_text(line, escape=False) for line in footertext]
             txt = "<br/>".join(
                 line if isinstance(line, str) else str(line, "utf-8") for line in lines
             )

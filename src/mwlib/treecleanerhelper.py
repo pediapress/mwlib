@@ -29,7 +29,7 @@ def getNodeHeight(node, params):
         if txt:
             # 40 chars per line --> number of lines --> 20pt height per line
             addHeight = math.ceil(len(txt) / charsPerLine) * lineHeight
-            if node.isblocknode:
+            if node.is_block_node:
                 addHeight += paragraphMargin
             else:
                 # for inline nodes we reduce the height guess. below that is compensated
@@ -41,7 +41,7 @@ def getNodeHeight(node, params):
             height += 0  # lineHeight
         else:
             height += lineHeight * imgHeight
-    elif node.isblocknode:  # compensation for e.g. listItems which contain text.
+    elif node.is_block_node:  # compensation for e.g. listItems which contain text.
         height += 0.5 * lineHeight
 
     for n in node.children[:]:
@@ -85,7 +85,7 @@ def splitRow(row, params):
                 pass
             for c in cellchildren:
                 cell.appendChild(c)
-            newrow.appendChild(cell)
+            newrow.append_child(cell)
             newrow.suppress_bottom_border = True
         newrows.append(newrow)
 

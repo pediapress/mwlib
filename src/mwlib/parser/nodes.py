@@ -1,8 +1,9 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from mwlib import utoken
 from io import StringIO
+
+from mwlib import utoken
 
 
 class Node(utoken.Token):
@@ -36,7 +37,7 @@ class Node(utoken.Token):
         )
 
     def __ne__(self, other):
-        return not (self == other)
+        return self != other
 
     def allchildren(self):  # name is broken, returns self, which is not a child
         yield self
@@ -61,7 +62,6 @@ class Node(utoken.Token):
     def asText(
         self,
     ):
-
         out = StringIO()
         self._asText(out)
         return out.getvalue()

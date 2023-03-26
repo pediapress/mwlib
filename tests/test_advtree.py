@@ -19,7 +19,7 @@ from mwlib.advtree import (
     Section,
     Text,
     _idIndex,
-    buildAdvancedTree,
+    build_advanced_tree,
 )
 from mwlib.dummydb import DummyDB
 from mwlib.uparser import parseString
@@ -48,7 +48,7 @@ def test_copy():
 
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
-    buildAdvancedTree(r)
+    build_advanced_tree(r)
     c = r.copy()
     _treesanity(c)
 
@@ -68,7 +68,7 @@ def test_remove_newlines():
     text = "\t \n\t\n\n  \n\n"
     tn = Text(text)
     t.children.append(tn)
-    buildAdvancedTree(t)
+    build_advanced_tree(t)
     _treesanity(t)
     assert tn.caption == text
 
@@ -76,7 +76,7 @@ def test_remove_newlines():
     t = Section()
     tn = Text(text)
     t.children.append(tn)
-    buildAdvancedTree(t)
+    build_advanced_tree(t)
     _treesanity(t)
     assert not t.children
 
@@ -85,7 +85,7 @@ def test_remove_newlines():
     t = Section()
     tn = Text(text)
     t.children.append(tn)
-    buildAdvancedTree(t)
+    build_advanced_tree(t)
     _treesanity(t)
     assert tn.caption.count("\n") == 0
     assert len(tn.caption) == len(text)
@@ -106,10 +106,10 @@ def test_identity():
 
     db = DummyDB()
     r = parseString(title="X33", raw=raw, wikidb=db)
-    buildAdvancedTree(r)
+    build_advanced_tree(r)
     _treesanity(r)
 
-    brs = r.getChildNodesByClass(BreakingReturn)
+    brs = r.get_child_nodes_by_class(BreakingReturn)
     for i, br in enumerate(brs):
         assert br in br.siblings
         assert i == _idIndex(br.parent.children, br)
@@ -135,8 +135,8 @@ def test_definitiondescription():
     r = parseString(title="t", raw=raw, wikidb=db)
     parser.show(sys.stdout, r)
 
-    buildAdvancedTree(r)
-    dd = r.getChildNodesByClass(DefinitionDescription)
+    build_advanced_tree(r)
+    dd = r.get_child_nodes_by_class(DefinitionDescription)
     print("DD:", dd)
     for c in dd:
         assert c.indentlevel == 1
@@ -151,11 +151,11 @@ def test_definition_list():
 :descr1
 """
     r = parseString(title="t", raw=raw)
-    buildAdvancedTree(r)
-    dls = r.getChildNodesByClass(DefinitionList)
+    build_advanced_tree(r)
+    dls = r.get_child_nodes_by_class(DefinitionList)
     assert len(dls) == 1
-    assert dls[0].getChildNodesByClass(DefinitionTerm)
-    assert dls[0].getChildNodesByClass(DefinitionDescription)
+    assert dls[0].get_child_nodes_by_class(DefinitionTerm)
+    assert dls[0].get_child_nodes_by_class(DefinitionDescription)
     raw = raw.replace("\n", "")
 
 
@@ -166,26 +166,26 @@ def test_ulist():
 *: B Previous item continues.
 """
     r = parseString(title="t", raw=raw)
-    buildAdvancedTree(r)
+    build_advanced_tree(r)
     #    parser.show(sys.stdout, r)
-    assert len(r.getChildNodesByClass(Item)) == 1
+    assert len(r.get_child_nodes_by_class(Item)) == 1
 
 
 def test_colspan():
     raw = """<table><tr><td colspan="bogus">no colspan </td></tr></table>"""
     r = parseString(title="t", raw=raw)
-    buildAdvancedTree(r)
-    assert r.getChildNodesByClass(Cell)[0].colspan == 1
+    build_advanced_tree(r)
+    assert r.get_child_nodes_by_class(Cell)[0].colspan == 1
 
     raw = """<table><tr><td colspan="-1">no colspan </td></tr></table>"""
     r = parseString(title="t", raw=raw)
-    buildAdvancedTree(r)
-    assert r.getChildNodesByClass(Cell)[0].colspan == 1
+    build_advanced_tree(r)
+    assert r.get_child_nodes_by_class(Cell)[0].colspan == 1
 
     raw = """<table><tr><td colspan="2">colspan1</td></tr></table>"""
     r = parseString(title="t", raw=raw)
-    buildAdvancedTree(r)
-    assert r.getChildNodesByClass(Cell)[0].colspan == 2
+    build_advanced_tree(r)
+    assert r.get_child_nodes_by_class(Cell)[0].colspan == 2
 
 
 def test_attributes():
@@ -196,8 +196,8 @@ def test_attributes():
 |}
 """
     r = parseString(title="t", raw=t1)
-    buildAdvancedTree(r)
-    n = r.getChildNodesByClass(Row)[0]
+    build_advanced_tree(r)
+    n = r.get_child_nodes_by_class(Row)[0]
     print(n.attributes, n.style)
     assert isinstance(n.style, dict)
     assert isinstance(n.attributes, dict)
@@ -206,7 +206,7 @@ def test_attributes():
 
 def get_adv_tree(raw):
     tree = parseString(title="test", raw=raw)
-    buildAdvancedTree(tree)
+    build_advanced_tree(tree)
     return tree
 
 
@@ -230,7 +230,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|
 """
 
     tree = get_adv_tree(raw)
-    images = tree.getChildNodesByClass(ImageLink)
+    images = tree.get_child_nodes_by_class(ImageLink)
     assert len(images) == 9
     for image in images:
         assert image.render_caption is False
@@ -256,7 +256,7 @@ Image:Cassini Saturn Orbit Insertion.jpg|''[[Cassini–Huygens]]''<br>First Satu
 """
 
     tree = get_adv_tree(raw)
-    images = tree.getChildNodesByClass(ImageLink)
+    images = tree.get_child_nodes_by_class(ImageLink)
     assert len(images) == 9
     for image in images:
         assert image.render_caption is True

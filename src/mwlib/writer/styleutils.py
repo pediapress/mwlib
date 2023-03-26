@@ -1,63 +1,59 @@
-#! /usr/bin/env python
-#! -*- coding:utf-8 -*-
+#!/usr/bin/env python
 
-# Copyright (c) 2007, PediaPress GmbH
+# Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import division
-
 import re
+from typing import Optional
 
 from mwlib import advtree
 from mwlib.htmlcolornames import colorname2rgb_map
 
 
-def _colorFromStr(colorStr):
-    def hex2rgb(r, g, b):
+def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
+    def hex2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
         try:
 
-            def conv(c):
-                return max(0, min(1.0, int(c, 16) / 255))
+            def conv(c: str) -> float:
+                return max(0.0, min(1.0, int(c, 16) / 255))
 
-            return (conv(r), conv(g), conv(b))
+            return conv(r), conv(g), conv(b)
         except ValueError:
             return None
 
-    def hexshort2rgb(r, g, b):
+    def hexshort2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
         try:
+            def conv(c: str) -> float:
+                return float(max(0.0, min(1.0, int(2 * c, 16) / 255)))
 
-            def conv(c):
-                return max(0, min(1.0, int(2 * c, 16) / 255))
-
-            return (conv(r), conv(g), conv(b))
-        except BaseException:
-            return None
-
-    def rgb2rgb(r, g, b):
-        try:
-
-            def conv(c):
-                return max(0, min(1.0, int(c) / 255))
-
-            return (conv(r), conv(g), conv(b))
+            return conv(r), conv(g), conv(b)
         except ValueError:
             return None
 
-    def colorname2rgb(colorStr):
-        rgb = colorname2rgb_map.get(colorStr.lower(), None)
+    def rgb2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
+        try:
+
+            def conv(c: str) -> float:
+                return max(0.0, min(1.0, int(c) / 255))
+
+            return conv(r), conv(g), conv(b)
+        except ValueError:
+            return None
+
+    def colorname2rgb(color_str_param: str) -> Optional[tuple[float, ...]]:
+        rgb = colorname2rgb_map.get(color_str_param.lower(), None)
         if rgb:
-            return tuple(max(0, min(1, channel / 255)) for channel in rgb)
+            return tuple(max(0.0, min(1, channel / 255)) for channel in rgb)
         else:
             return None
 
     try:
-        colorStr = str(colorStr)
-    except BaseException:
+        color_str = str(color_str)
+    except ValueError:
         return None
-    rgbval = re.search("rgb\( *(\d{1,}) *, *(\d{1,3}) *, *(\d{1,3}) *\)", colorStr)
-    hexval = re.search("#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})", colorStr)
-    hexvalshort = re.search("#([0-9a-f])([0-9a-f])([0-9a-f])", colorStr)
+    rgbval = re.search("rgb\\( *(\\d+) *, *(\\d{1,3}) *, *(\\d{1,3}) *\\)", color_str)
+    hexval = re.search("#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})", color_str)
+    hexvalshort = re.search("#([0-9a-f])([0-9a-f])([0-9a-f])", color_str)
     if rgbval:
         return rgb2rgb(rgbval.group(1), rgbval.group(2), rgbval.group(3))
     elif hexval:
@@ -65,86 +61,95 @@ def _colorFromStr(colorStr):
     elif hexvalshort:
         return hexshort2rgb(hexvalshort.group(1), hexvalshort.group(2), hexvalshort.group(3))
     else:
-        return colorname2rgb(colorStr)
-    return None
+        return colorname2rgb(color_str)
 
 
-def _rgb2GreyScale(rgb_triple, darknessLimit=1):
+def _rgb_to_greyscale(
+    rgb_triple: tuple[float, float, float], darkness_limit: float = 1.0
+) -> tuple[float, float, float]:
     grey = min(
-        1, max(darknessLimit, 0.3 * rgb_triple[0] + 0.59 * rgb_triple[1] + 0.11 * rgb_triple[2])
+        1.0,
+        max(
+            darkness_limit,
+            0.3 * rgb_triple[0] + 0.59 * rgb_triple[1] + 0.11 * rgb_triple[2],
+        ),
     )
-    return (grey, grey, grey)
+    return grey, grey, grey
 
 
-def rgbBgColorFromNode(node, greyScale=False, darknessLimit=0, follow=True):
-    """Extract background color from node attributes/style. Result is a rgb triple w/ individual values between [0...1]
-
-    The darknessLimit parameter is only used when greyScale is requested. This is for b/w output formats that do not
-    switch text-color.
-    """
-
-    colorStr = (
+def rgb_bg_color_from_node(
+    node: advtree.Node,
+    grey_scale: bool = False,
+    darkness_limit: float = 0,
+    follow: bool = True,
+) -> Optional[tuple[float, float, float]]:
+    color_str = (
         node.attributes.get("bgcolor", None)
         or node.style.get("background")
         or node.style.get("background-color")
     )
 
     color = None
-    if colorStr:
-        color = _colorFromStr(colorStr.lower())
-        if greyScale and color:
-            return _rgb2GreyScale(color, darknessLimit)
+    if color_str:
+        color = _color_from_str(color_str.lower())
+        if grey_scale and color:
+            return _rgb_to_greyscale(color, darkness_limit)
     elif node.parent and follow:
-        return rgbBgColorFromNode(node.parent, greyScale=greyScale, darknessLimit=darknessLimit)
+        return rgb_bg_color_from_node(
+            node.parent, grey_scale=grey_scale, darkness_limit=darkness_limit
+        )
     return color
 
 
-def rgbColorFromNode(node, greyScale=False, darknessLimit=0):
-    """Extract text color from node attributes/style. Result is a rgb triple w/ individual values between [0...1]"""
-
-    colorStr = node.style.get("color", None) or node.attributes.get("color", None)
+def rgb_color_from_node(
+    node: advtree.Node,
+    grey_scale: bool = False,
+    darkness_limit: float = 0,
+) -> Optional[tuple[float, float, float]]:
+    color_str = node.style.get("color", None) or node.attributes.get("color", None)
     color = None
-    if colorStr:
-        color = _colorFromStr(colorStr.lower())
-        if greyScale and color:
-            return _rgb2GreyScale(color, darknessLimit)
+    if color_str:
+        color = _color_from_str(color_str.lower())
+        if grey_scale and color:
+            return _rgb_to_greyscale(color, darkness_limit)
     elif node.parent:
-        return rgbColorFromNode(node.parent, greyScale=greyScale, darknessLimit=darknessLimit)
+        return rgb_color_from_node(
+            node.parent, grey_scale=grey_scale, darkness_limit=darkness_limit
+        )
     return color
 
 
-def getBaseAlign(node):
-    if node.__class__ == advtree.Cell and getattr(node, "is_header", False):
+def get_base_alignment(node: advtree.Node) -> str:
+    if isinstance(node, advtree.Cell) and getattr(node, "is_header", False):
         return "center"
     return "none"
 
 
-def _getTextAlign(node):
+def _get_text_alignment(node: advtree.Node) -> str:
     align = node.style.get("text-align", "none").lower()
-    if align == "none" and node.__class__ in [advtree.Div, advtree.Cell, advtree.Row]:
+    if align == "none" and isinstance(node, (advtree.Div, advtree.Cell, advtree.Row)):
         align = node.attributes.get("align", "none").lower()
     if align not in ["left", "center", "right", "justify", "none"]:
         return "left"
-    if node.__class__ == advtree.Center:
+    if isinstance(node, advtree.Center):
         align = "center"
     if align == "none" and node.parent:
-        return _getTextAlign(node.parent)
+        return _get_text_alignment(node.parent)
     return align
 
 
-def getTextAlign(node):
-    """ return the text alignment of a node. possible return values are left|right|center|none"""
-    nodes = node.getParents()
+def get_text_alignment(node: advtree.Node) -> str:
+    nodes = node.get_parents()
     nodes.append(node)
-    align = getBaseAlign(node)
+    align = get_base_alignment(node)
     for n in nodes:
-        parent_align = _getTextAlign(n)
+        parent_align = _get_text_alignment(n)
         if parent_align != "none":
             align = parent_align
     return align
 
 
-def getVerticalAlign(node):
+def get_vertical_alignment(node: advtree.Node) -> str:
     align = None
     for n in node.parents + [node]:
         _align = n.style.get("vertical-align", None) or n.vlist.get("valign", None)
@@ -153,14 +158,14 @@ def getVerticalAlign(node):
     return align or "top"
 
 
-def tableBorder(node):
-    borderBoxes = [
+def table_border(node: advtree.Node) -> bool:
+    border_boxes = [
         "prettytable",
         "metadata",
         "wikitable",
         "infobox",
-        "ujinfobox",  # used in hu.wikipedia
-        "infobox_v2",  # used in fr.wikipedia
+        "ujinfobox",
+        "infobox_v2",
         "infoboks",
         "toccolours",
         "navbox",
@@ -170,16 +175,16 @@ def tableBorder(node):
         "collapsibleTable0",
         "palaeobox",
     ]
-    noBorderBoxes = [
+    no_border_boxes = [
         "cquote",
     ]
     attributes = node.attributes
     style = attributes.get("style", {})
 
-    classes = set([c.strip() for c in attributes.get("class", "").split()])
-    if set(borderBoxes).intersection(classes):
+    classes = {c.strip() for c in attributes.get("class", "").split()}
+    if set(border_boxes).intersection(classes):
         return True
-    if set(noBorderBoxes).intersection(classes):
+    if set(no_border_boxes).intersection(classes):
         return False
     if style.get("border-style", None) == "none":
         return False
@@ -191,20 +196,20 @@ def tableBorder(node):
     ):
         return True
 
-    bgColor = attributes.get("background-color") or style.get("background-color")
-    if bgColor and bgColor != "transparent":
-        return True  # FIXME this is probably not very accurate
+    bg_color = attributes.get("background-color") or style.get("background-color")
+    if bg_color and bg_color != "transparent":
+        return True
 
     bs = attributes.get("border-spacing", None)
     if bs:
-        bs_val = re.match("(?P<bs>\d)", bs)
-        if bs_val and int(bs_val.groups("bs")[0]) > 0:
+        bs_val = re.match(r"(?P<bs>\d)", bs)
+        if bs_val and int(bs_val.group("bs")) > 0:
             return True
 
     return False
 
 
-def parseLength(txt):
+def parse_length(txt: str) -> tuple[Optional[float], Optional[str]]:
     length_res = re.search(r"(?P<val>.*?)(?P<unit>(pt|px|em|%))", txt)
     length = unit = None
     if length_res:
@@ -213,23 +218,4 @@ def parseLength(txt):
             length = float(length_res.group("val"))
         except ValueError:
             length = None
-    return (length, unit)
-
-
-mw_px2pt = 12 / 16
-mw_em2pt = 9.6
-
-
-def scaleLength(length_str, reference=None):
-    length, unit = parseLength(length_str)
-    if not length:
-        return 0
-    if unit == "pt":
-        return length
-    elif unit == "px":
-        return length * mw_px2pt
-    elif unit == "em":
-        return length * mw_em2pt
-    elif unit == "%" and reference:
-        return length / 100 * reference
-    return 0
+    return length, unit

@@ -20,7 +20,7 @@ class TocRenderer(object):
     def __init__(self):
         font_switcher = fontconfig.RLFontSwitcher()
         font_switcher.font_paths = fontconfig.font_paths
-        font_switcher.registerDefaultFont(pdfstyles.default_font)
+        font_switcher.register_default_font(pdfstyles.default_font)
         font_switcher.registerFontDefinitionList(fontconfig.fonts)
         font_switcher.registerReportlabFonts(fontconfig.fonts)
 

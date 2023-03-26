@@ -1,25 +1,18 @@
-#! /usr/bin/env python
-#! -*- coding:utf-8 -*-
-
-# Copyright (c) 2007, 2008, 2009 PediaPress GmbH
+# Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
-
-from __future__ import absolute_import
-from __future__ import division
-
 from mwlib import advtree
 
 
-def hasInfoboxAttrs(node):
-    infobox_classIDs = ["infobox", "taxobox"]
-    if node.hasClassID(infobox_classIDs):
+def has_infobox_attrs(node: advtree.Node) -> bool:
+    infobox_class_ids = ["infobox", "taxobox"]
+    if node.has_class_id(infobox_class_ids):
         return True
-    if node.attributes.get("summary", "").lower() in infobox_classIDs:
+    if node.attributes.get("summary", "").lower() in infobox_class_ids:
         return True
     return False
 
 
-def textInNode(node):
+def text_in_node(node: advtree.Node) -> int:
     amap = {
         advtree.Text: "caption",
         advtree.Link: "target",
@@ -38,12 +31,14 @@ def textInNode(node):
         return 0
 
 
-def textBeforeInfoBox(node, infobox, txt_list=None):
+def text_before_infobox(
+    node: advtree.Node, infobox: advtree.Node, txt_list: list[tuple[int, bool]] = None
+) -> int:
     if not txt_list:
         txt_list = []
-    txt_list.append((textInNode(node), node == infobox))
+    txt_list.append((text_in_node(node), node == infobox))
     for c in node:
-        textBeforeInfoBox(c, infobox, txt_list)
+        text_before_infobox(c, infobox, txt_list)
     sum_txt = 0
     for len_txt, is_infobox in txt_list:
         sum_txt += len_txt
@@ -52,24 +47,28 @@ def textBeforeInfoBox(node, infobox, txt_list=None):
     return sum_txt
 
 
-def articleStartsWithInfobox(article_node, max_text_until_infobox=0):
+def article_starts_with_infobox(
+    article_node: advtree.Article, max_text_until_infobox: int = 0
+) -> bool:
     assert (
         article_node.__class__ == advtree.Article
-    ), "articleStartsWithInfobox needs to be called with Article node"
+    ), "article_starts_with_infobox needs to be called with Article node"
     infobox = None
-    for table in article_node.getChildNodesByClass(advtree.Table):
-        if hasInfoboxAttrs(table):
+    for table in article_node.get_child_nodes_by_class(advtree.Table):
+        if has_infobox_attrs(table):
             infobox = table
     if not infobox:
         return False
-    return textBeforeInfoBox(article_node, infobox, []) <= max_text_until_infobox
+    return text_before_infobox(article_node, infobox, []) <= max_text_until_infobox
 
 
-def articleStartsWithTable(article_node, max_text_until_infobox=0):
+def article_starts_with_table(
+    article_node: advtree.Article, max_text_until_infobox: int = 0
+) -> bool:
     assert (
         article_node.__class__ == advtree.Article
-    ), "articleStartsWithInfobox needs to be called with Article node"
-    tables = article_node.getChildNodesByClass(advtree.Table)
+    ), "article_starts_with_table needs to be called with Article node"
+    tables = article_node.get_child_nodes_by_class(advtree.Table)
     if not tables:
         return False
-    return textBeforeInfoBox(article_node, tables[0], []) <= max_text_until_infobox
+    return text_before_infobox(article_node, tables[0], []) <= max_text_until_infobox

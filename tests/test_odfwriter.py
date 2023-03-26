@@ -89,7 +89,7 @@ def validate(odfw):
 def get_xml(wikitext):
     db = DummyDB()
     r = parseString(title="test", raw=wikitext, wikidb=db)
-    advtree.buildAdvancedTree(r)
+    advtree.build_advanced_tree(r)
     preprocess(r)
     mwlib.parser.show(sys.stdout, r)
     odfw = ODFWriter()

@@ -24,7 +24,7 @@ def get_tree_from_markup(raw):
 
 def build_advanced_tree(raw):
     tree = get_tree_from_markup(raw)
-    advtree.buildAdvancedTree(tree)
+    advtree.build_advanced_tree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
     return tree
@@ -42,10 +42,10 @@ def test_textalign1():
 |}
 """
     tree = build_advanced_tree(raw)
-    cells = tree.getChildNodesByClass(advtree.Cell)
+    cells = tree.get_child_nodes_by_class(advtree.Cell)
     correct_align = ["right", "left", "center", "left"]
     for i, cell in enumerate(cells):
-        align = styleutils.getTextAlign(cell)
+        align = styleutils.get_text_alignment(cell)
         assert align == correct_align[i], RETURN_FALSE_ALIGNMENT
 
 
@@ -76,17 +76,17 @@ and more centering
 """
     tree = build_advanced_tree(raw)
     tree.show()
-    cells = tree.getChildNodesByClass(advtree.Cell)
+    cells = tree.get_child_nodes_by_class(advtree.Cell)
     correct_align = ["left", "center", "right", "center", "center", "left"]
     for i, cell in enumerate(cells):
-        align = styleutils.getTextAlign(cell)
+        align = styleutils.get_text_alignment(cell)
         assert align == correct_align[i], RETURN_FALSE_ALIGNMENT
 
-    center = tree.getChildNodesByClass(advtree.Center)
-    texts = center[0].getChildNodesByClass(advtree.Text)
+    center = tree.get_child_nodes_by_class(advtree.Center)
+    texts = center[0].get_child_nodes_by_class(advtree.Text)
     correct_align = ["center", "left", "center"]
     for i, txt in enumerate(texts):
-        assert styleutils.getTextAlign(txt) == correct_align[i], RETURN_FALSE_ALIGNMENT
+        assert styleutils.get_text_alignment(txt) == correct_align[i], RETURN_FALSE_ALIGNMENT
 
 
 def test_textalign3():
@@ -101,8 +101,8 @@ def test_textalign3():
 |}
 """
     tree = build_advanced_tree(raw)
-    cells = tree.getChildNodesByClass(advtree.Cell)
+    cells = tree.get_child_nodes_by_class(advtree.Cell)
     correct_align = ["right", "right", "left", "center"]
     for i, cell in enumerate(cells):
-        align = styleutils.getTextAlign(cell)
+        align = styleutils.get_text_alignment(cell)
         assert align == correct_align[i], RETURN_FALSE_ALIGNMENT

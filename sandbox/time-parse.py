@@ -13,7 +13,7 @@ r = compat.parse_txt(s)
 print "parse:", time.time() - stime
 
 stime = time.time()
-advtree.buildAdvancedTree(r)
+advtree.build_advanced_tree(r)
 print "tree", time.time() - stime
 
 stime = time.time()

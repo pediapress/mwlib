@@ -79,8 +79,8 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
                     maxbreaks[j] = max(rows, maxbreaks[j])
             summedwidths[j] = max(cellwidth, summedwidths[j])
 
-    parent_cells = table.getParentNodesByClass(Cell)
-    parent_tables = table.getParentNodesByClass(Table)
+    parent_cells = table.get_parent_nodes_by_class(Cell)
+    parent_tables = table.get_parent_nodes_by_class(Table)
     # nested tables in colspanned cell are expanded to full page width
     if (
         nestingLevel == 2
@@ -150,12 +150,12 @@ def getContentType(t):
             cellTextLen = 0
             for item in cell.children:
                 if (
-                    not item.isblocknode
+                    not item.is_block_node
                 ):  # any inline node is treated as a regular TextNode for simplicity
                     cellNodeTypes.append(Text)
                 else:
                     cellNodeTypes.append(item.__class__)
-                cellTextLen += len(item.getAllDisplayText())
+                cellTextLen += len(item.get_all_display_text())
             if cell.children:
                 rowNodeInfo.append((cellNodeTypes, cellTextLen))
         if rowNodeInfo:
@@ -213,13 +213,13 @@ def splitListItems(t):
                 try:
                     item = cols[j][i]
                     il = ItemList()
-                    il.appendChild(item)
+                    il.append_child(item)
                     nc = Cell()
-                    nc.appendChild(il)
-                    nr.appendChild(nc)
+                    nc.append_child(il)
+                    nr.append_child(nc)
                 except IndexError:
-                    nr.appendChild(Cell())
-            nt.appendChild(nr)
+                    nr.append_child(Cell())
+            nt.append_child(nr)
             nr = Row()
     return nt
 
@@ -232,13 +232,13 @@ def reduceCols(t, colnum=2):
         for c in r:
             nc = c.copy()
             if len(nr.children) == colnum:
-                nt.appendChild(nr)
+                nt.append_child(nr)
                 nr = Row()
-            nr.appendChild(nc)
+            nr.append_child(nc)
         if len(nr.children) > 0:
             while len(nr.children) < colnum:
-                nr.appendChild(Cell())
-            nt.appendChild(nr)
+                nr.append_child(Cell())
+            nt.append_child(nr)
     return nt
 
 
@@ -258,7 +258,7 @@ def removeContainerTable(containertable):
 
 
 def customCalcWidths(table, avail_width):
-    from mwlib.writer.styleutils import scaleLength
+    from mwlib.writer.styleutils import scale_length
 
     first_row = None
     for c in table.children:
@@ -269,7 +269,7 @@ def customCalcWidths(table, avail_width):
         return None
     col_widths = []
     for cell in first_row.children:
-        width = scaleLength(getattr(cell, "vlist", {}).get("style", {}).get("width", ""))
+        width = scale_length(getattr(cell, "vlist", {}).get("style", {}).get("width", ""))
         col_widths.append(width)
     if any(not isinstance(w, float) for w in col_widths):
         return None
@@ -310,7 +310,7 @@ def optimizeWidths(min_widths, max_widths, avail_width, stretch=False, table=Non
 
 def getEmptyCell(color, colspan=1, rowspan=1):
     emptyCell = advtree.Cell()
-    # emptyCell.appendChild(emptyNode)
+    # emptyCell.append_child(emptyNode)
     emptyCell.color = color
     emptyCell.attributes["colspan"] = max(1, colspan)
     emptyCell.attributes["rowspan"] = max(1, rowspan)
@@ -329,7 +329,7 @@ def checkSpans(t):
         for cell in row.children:
             if cell.colspan > 1:
                 emptycell = getEmptyCell(None, cell.colspan - 1, cell.rowspan)
-                emptycell.moveto(cell)  # move behind orignal cell
+                emptycell.move_to(cell)  # move behind orignal cell
                 emptycell.colspanned = True
             if row_idx + cell.rowspan > num_rows:  # fix broken rowspans
                 cell.attributes["rowspan"] = num_rows - row_idx
@@ -401,7 +401,7 @@ def checkSpans(t):
     numcols = max(len(row.children) for row in t.children)
     for row in t.children:
         while len(row.children) < numcols:
-            row.appendChild(getEmptyCell(None, colspan=1, rowspan=1))
+            row.append_child(getEmptyCell(None, colspan=1, rowspan=1))
 
     t.checked_spans = True
     t.span_styles = styles
@@ -438,7 +438,7 @@ def valign_styles(table):
     styles = []
     for row_idx, row in enumerate(table):
         for col_idx, cell in enumerate(row):
-            valign = styleutils.getVerticalAlign(cell)
+            valign = styleutils.get_vertical_alignment(cell)
             if valign in ["middle", "bottom"]:
                 styles.append(("VALIGN", (col_idx, row_idx), (col_idx, row_idx), valign.upper()))
     return styles
@@ -447,7 +447,7 @@ def valign_styles(table):
 def border_styles(table):
     styles = []
 
-    if styleutils.tableBorder(table):
+    if styleutils.table_border(table):
         styles.append(("BOX", (0, 0), (-1, -1), 0.25, colors.black))
         for idx, row in enumerate(table):
             if not getattr(row, "suppress_bottom_border", False):
@@ -459,13 +459,13 @@ def border_styles(table):
 
 def background_styles(table):
     styles = []
-    table_bg = styleutils.rgbBgColorFromNode(table, follow=False)
+    table_bg = styleutils.rgb_bg_color_from_node(table, follow=False)
     if table_bg:
         styles.append(
             ("BACKGROUND", (0, 0), (-1, -1), colors.Color(table_bg[0], table_bg[1], table_bg[2]))
         )
     for (row_idx, row) in enumerate(table.children):
-        rgb = styleutils.rgbBgColorFromNode(row, follow=False)
+        rgb = styleutils.rgb_bg_color_from_node(row, follow=False)
         if rgb:
             styles.append(
                 ("BACKGROUND", (0, row_idx), (-1, row_idx), colors.Color(rgb[0], rgb[1], rgb[2]))
@@ -473,7 +473,7 @@ def background_styles(table):
         for (col_idx, cell) in enumerate(row.children):
             if cell.__class__ != Cell:
                 continue
-            rgb = styleutils.rgbBgColorFromNode(cell, follow=False)
+            rgb = styleutils.rgb_bg_color_from_node(cell, follow=False)
             if rgb:
                 styles.append(
                     (

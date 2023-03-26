@@ -98,7 +98,7 @@ class ChildrenOf(RuleBase):
 
 class AllChildrenOf(RuleBase):
     def _tocheck(self, node):
-        return node.getAllChildren()
+        return node.get_all_children()
 
 
 class ParentsOf(RuleBase):
@@ -161,7 +161,7 @@ def warncb(rule, node=None, parentnode=None):
 
 def removecb(rule, node=None, parentnode=None):
     assert node and node.parent
-    node.parent.removeChild(node)
+    node.parent.remove_child(node)
     return True
 
 

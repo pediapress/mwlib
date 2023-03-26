@@ -24,7 +24,7 @@ from mwlib.advtree import (
     Table,
     Text,
     Underline,
-    buildAdvancedTree,
+    build_advanced_tree,
 )
 from mwlib.dummydb import DummyDB
 from mwlib.treecleaner import TreeCleaner, _all, _any
@@ -56,7 +56,7 @@ def clean_markup(raw):
     print("<<<")
 
     print("=" * 20)
-    buildAdvancedTree(tree)
+    build_advanced_tree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.cleanAll(skipMethods=[])
     reports = tc.getReports()
@@ -68,7 +68,7 @@ def clean_markup(raw):
 
 def clean_markup_single(raw, cleaner_method):
     tree = get_tree_from_markup(raw)
-    buildAdvancedTree(tree)
+    build_advanced_tree(tree)
     tc = TreeCleaner(tree, save_reports=True)
     tc.clean([cleaner_method])
     reports = tc.getReports()
@@ -96,10 +96,10 @@ para
 * list 3
 """
     tree, reports = clean_markup(raw)
-    lists = tree.getChildNodesByClass(ItemList)
+    lists = tree.get_child_nodes_by_class(ItemList)
     for li in lists:
-        print(li, li.getParents())
-        assert _all([p.__class__ != Paragraph for p in li.getParents()])
+        print(li, li.get_parents())
+        assert _all([p.__class__ != Paragraph for p in li.get_parents()])
     _treesanity(tree)
 
 
@@ -113,7 +113,7 @@ another paragraph
     """
     # cleaner should do nothing
     tree, reports = clean_markup(raw)
-    lists = tree.getChildNodesByClass(ItemList)
+    lists = tree.get_child_nodes_by_class(ItemList)
     li = lists[0]
     assert li.parent.__class__ == Paragraph
     txt = "".join([x.asText() for x in li.siblings])
@@ -175,7 +175,7 @@ def test_remove_critical_tables():
 blub
 """
     tree, reports = clean_markup(raw)
-    assert len(tree.getChildNodesByClass(Table)) == 0
+    assert len(tree.get_child_nodes_by_class(Table)) == 0
 
 
 def test_fix_table_colspans():
@@ -189,7 +189,7 @@ def test_fix_table_colspans():
 |}
     """
     tree, reports = clean_markup(raw)
-    t = tree.getChildNodesByClass(Table)[0]
+    t = tree.get_child_nodes_by_class(Table)[0]
     cell = t.children[0].children[0]
     assert cell.colspan == 2
 
@@ -206,7 +206,7 @@ def test_fix_table_colspans2():
 |}
     """
     tree, reports = clean_markup(raw)
-    t = tree.getChildNodesByClass(Table)[0]
+    t = tree.get_child_nodes_by_class(Table)[0]
     cell = t.children[0].children[0]
     show_tree(t)
     assert cell.colspan == 1
@@ -245,9 +245,9 @@ def test_fix_table_colspans3():
     tree, reports = clean_markup(raw)
 
     assert (
-        len(tree.getChildNodesByClass(Table)) == 0
+            len(tree.get_child_nodes_by_class(Table)) == 0
     ), "single row/col Table not transformed to div"
-    assert len(tree.getChildNodesByClass(Div)) == 1, "single row/col Table not transformed to div"
+    assert len(tree.get_child_nodes_by_class(Div)) == 1, "single row/col Table not transformed to div"
 
 
 def test_remove_broken_children():
@@ -258,7 +258,7 @@ def test_remove_broken_children():
     """
 
     tree, reports = clean_markup(raw)
-    assert len(tree.getChildNodesByClass(PreFormatted)) == 0
+    assert len(tree.get_child_nodes_by_class(PreFormatted)) == 0
 
 
 def test_fix_nesting1():
@@ -269,8 +269,8 @@ def test_fix_nesting1():
 |}
     """
     tree, reports = clean_markup(raw)
-    table = tree.getChildNodesByClass(Table)[0]
-    assert not table.getParentNodesByClass(DefinitionDescription)
+    table = tree.get_child_nodes_by_class(Table)[0]
+    assert not table.get_parent_nodes_by_class(DefinitionDescription)
 
 
 # changed with f94aa985f50d2db9749c57a7a5e22c0c8d487af4
@@ -285,8 +285,8 @@ def test_fix_nesting2():
 </div></div>
     """
     tree, reports = clean_markup(raw)
-    list_node = tree.getChildNodesByClass(ItemList)[0]
-    assert not _any([p.__class__ == Div for p in list_node.getParents()])
+    list_node = tree.get_child_nodes_by_class(ItemList)[0]
+    assert not _any([p.__class__ == Div for p in list_node.get_parents()])
 
 
 # the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
@@ -352,9 +352,9 @@ para 2
     """
 
     tree, reports = clean_markup(raw)
-    paras = tree.getChildNodesByClass(Paragraph)
+    paras = tree.get_child_nodes_by_class(Paragraph)
     for para in paras:
-        assert not para.getChildNodesByClass(Paragraph)
+        assert not para.get_child_nodes_by_class(Paragraph)
 
 
 def test_fix_nesting6():
@@ -372,7 +372,7 @@ def test_fix_nesting6():
 
     pprint(reports)
 
-    assert len(tree.getChildNodesByClass(Reference)) == 1
+    assert len(tree.get_child_nodes_by_class(Reference)) == 1
 
 
 def test_swap_nodes():
@@ -380,8 +380,8 @@ def test_swap_nodes():
 <u><center>Text</center></u>
     """
     tree, reports = clean_markup(raw)
-    center_node = tree.getChildNodesByClass(Center)[0]
-    assert not _any([p.__class__ == Underline for p in center_node.getParents()])
+    center_node = tree.get_child_nodes_by_class(Center)[0]
+    assert not _any([p.__class__ == Underline for p in center_node.get_parents()])
 
 
 @pytest.mark.xfail
@@ -408,8 +408,8 @@ bla
     """
 
     tree, reports = clean_markup(raw)
-    section_node = tree.getChildNodesByClass(Section)[0]
-    assert _all([p.__class__ != Center for p in section_node.children[0].getAllChildren()])
+    section_node = tree.get_child_nodes_by_class(Section)[0]
+    assert _all([p.__class__ != Center for p in section_node.children[0].get_all_children()])
 
 
 def test_clean_section_captions2():
@@ -418,11 +418,11 @@ def test_clean_section_captions2():
     """
 
     tree, reports = clean_markup(raw)
-    assert len(tree.getChildNodesByClass(Section)) == 0
+    assert len(tree.get_child_nodes_by_class(Section)) == 0
 
 
 def num_br(tree):
-    return len(tree.getChildNodesByClass(BreakingReturn))
+    return len(tree.get_child_nodes_by_class(BreakingReturn))
 
 
 def test_remove_breaking_returns_inside():
@@ -567,7 +567,7 @@ def test_split_table_lists1():
 |}
     """
     tree, reports = clean_markup(raw)
-    numrows = len(tree.getChildNodesByClass(Row))
+    numrows = len(tree.get_child_nodes_by_class(Row))
     assert numrows == 6, "ItemList should have been splitted to 6 rows, numrows was: %d" % numrows
 
 
@@ -595,7 +595,7 @@ def test_split_table_lists2():
 |}
     """
     tree, reports = clean_markup(raw)
-    numrows = len(tree.getChildNodesByClass(Row))
+    numrows = len(tree.get_child_nodes_by_class(Row))
     assert numrows == 6, "ItemList should have been splitted to 6 rows, numrows was: %d" % numrows
 
 
@@ -607,7 +607,7 @@ def test_remove_empty_section():
 
 """
     tree, reports = clean_markup(raw)
-    assert len(tree.getChildNodesByClass(Section)) == 0, "section not removed"
+    assert len(tree.get_child_nodes_by_class(Section)) == 0, "section not removed"
 
 
 def test_no_remove_empty_section():
@@ -632,4 +632,4 @@ Image:bla.png
 """
 
     tree, reports = clean_markup(raw)
-    assert len(tree.getChildNodesByClass(Section)) == 4, "section falsly removed"
+    assert len(tree.get_child_nodes_by_class(Section)) == 4, "section falsly removed"

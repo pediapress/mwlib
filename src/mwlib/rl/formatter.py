@@ -14,7 +14,7 @@ class RLFormatter(Formatter):
     def __init__(self, font_switcher=None, output_encoding=None):
         Formatter.__init__(self, font_switcher=font_switcher, output_encoding=output_encoding)
 
-    def registerRenderStyles(self):
+    def register_render_styles(self):
         return [
             ("emphasized_style", "<i>", "</i>", None),
             ("strong_style", "<b>", "</b>", None),
@@ -30,10 +30,10 @@ class RLFormatter(Formatter):
             ("color_style", '<font color="%s">', "</font>", "color_str"),
         ]
 
-    def escapeText(self, txt):
+    def escape_text(self, txt):
         return xmlescape(txt)
 
-    def escapeAndHyphenateText(self, txt):  # FIXME: is that what we want?
+    def escape_and_hyphenate_text(self, txt):  # FIXME: is that what we want?
         return xmlescape(txt)
 
     @property

@@ -32,7 +32,7 @@ def build_book(env, status_callback=None):
     for item in env.metabook.walk():
         if item.type == 'chapter':
             chapter = parser.Chapter(item.title.strip())
-            book.appendChild(chapter)
+            book.append_child(chapter)
             lastChapter = chapter
         elif item.type == 'article':
             status_callback(status='parsing', progress=progress, article=item.title)
@@ -61,9 +61,9 @@ def build_book(env, status_callback=None):
 
                 a.authors = wiki.getAuthors(item.title, revision=item.revision)
                 if lastChapter:
-                    lastChapter.appendChild(a)
+                    lastChapter.append_child(a)
                 else:
-                    book.appendChild(a)
+                    book.append_child(a)
             else:
                 log.warn('No such article: %r' % item.title)
 

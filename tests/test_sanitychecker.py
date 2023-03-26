@@ -11,7 +11,7 @@ from mwlib.advtree import (
     Strong,
     Table,
     Text,
-    buildAdvancedTree,
+    build_advanced_tree,
 )
 from mwlib.sanitychecker import (
     Allow,
@@ -50,7 +50,7 @@ def setup():
 
     rec(t, None)
     t = t[0]
-    buildAdvancedTree(t)
+    build_advanced_tree(t)
 
     return t
 

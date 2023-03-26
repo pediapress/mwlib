@@ -12,7 +12,7 @@ from mwlib.writer import styleutils
 
 def get_tree_from_markup(raw):
     tree = parseString(title="Test", raw=raw, wikidb=DummyDB())
-    advtree.buildAdvancedTree(tree)
+    advtree.build_advanced_tree(tree)
     return tree
 
 
@@ -32,9 +32,9 @@ def test_get_text_align():
 |}
     """
     tree = get_tree_from_markup(raw)
-    for cell in tree.getChildNodesByClass(advtree.Cell):
-        txt = cell.getAllDisplayText().strip()
-        align = styleutils.getTextAlign(cell)
+    for cell in tree.get_child_nodes_by_class(advtree.Cell):
+        txt = cell.get_all_display_text().strip()
+        align = styleutils.get_text_alignment(cell)
         assert txt == align, "alignment not correctly parsed"
 
 
@@ -63,9 +63,9 @@ left
 </div>"""
 
     tree = get_tree_from_markup(raw)
-    for cell in tree.getChildNodesByClass(advtree.Cell):
-        txt = cell.getAllDisplayText().strip()
-        align = styleutils.getTextAlign(cell)
+    for cell in tree.get_child_nodes_by_class(advtree.Cell):
+        txt = cell.get_all_display_text().strip()
+        align = styleutils.get_text_alignment(cell)
 
         if txt != align:
             show(cell)

@@ -229,13 +229,13 @@ class RlWriter(object):
             self.license_checker = LicenseChecker(image_db=self.imgDB, filter_type="whitelist")
         else:
             self.license_checker = LicenseChecker(image_db=self.imgDB, filter_type="blacklist")
-        self.license_checker.readLicensesCSV()
+        self.license_checker.read_licenses_csv()
 
         self.img_meta_info = {}
         self.img_count = 0
 
         self.font_switcher.font_paths = fontconfig.font_paths
-        self.font_switcher.registerDefaultFont(pdfstyles.default_font)
+        self.font_switcher.register_default_font(pdfstyles.default_font)
         self.font_switcher.registerFontDefinitionList(fontconfig.fonts)
         self.font_switcher.registerReportlabFonts(fontconfig.fonts)
 
@@ -390,11 +390,11 @@ class RlWriter(object):
                 raise writerbase.WriterError("Unkown Node: %s " % obj.__class__.__name__)
             return []
         m = getattr(self, m)
-        styles = self.formatter.setStyle(obj)
+        styles = self.formatter.set_style(obj)
         original = self.check_direction(obj)
         res = m(obj)
         self.set_rtl(original)
-        self.formatter.resetStyle(styles)
+        self.formatter.reset_style(styles)
         pb_before = self.handle_page_break(obj, "before")
         pb_after = self.handle_page_break(obj, "after")
         if pb_before:
@@ -443,7 +443,7 @@ class RlWriter(object):
         else:
             art.wikiurl = None
         art.authors = mywiki.getAuthors(item.title, revision=item.revision)
-        advtree.buildAdvancedTree(art)
+        advtree.build_advanced_tree(art)
         if self.debug:
             parser.show(sys.stdout, art)
             pass
@@ -618,9 +618,9 @@ class RlWriter(object):
 
         license_stats_dir = os.environ.get("MWLIBLICENSESTATS")
         if license_stats_dir and os.path.exists(license_stats_dir):
-            self.license_checker.dumpUnknownLicenses(license_stats_dir)
+            self.license_checker.dump_unknown_licenses(license_stats_dir)
             if self.debug:
-                print(self.license_checker.dumpStats())
+                print(self.license_checker.dump_stats())
 
     def renderLicense(self):
         self.license_mode = True
@@ -634,7 +634,7 @@ class RlWriter(object):
             license_node = uparser.parseString(
                 title=_(license.title), raw=license.wikitext, wikidb=license._wiki
             )
-            advtree.buildAdvancedTree(license_node)
+            advtree.build_advanced_tree(license_node)
             self.tc.tree = license_node
             self.tc.cleanAll()
             elements.extend(self.writeArticle(license_node))
@@ -675,10 +675,10 @@ class RlWriter(object):
                 break
         self.doc.addPageTemplates(TitlePage(cover=coverimage))
         elements = []
-        elements.append(Paragraph(self.formatter.cleanText(title), text_style(mode="booktitle")))
+        elements.append(Paragraph(self.formatter.clean_text(title), text_style(mode="booktitle")))
         if subtitle:
             elements.append(
-                Paragraph(self.formatter.cleanText(subtitle), text_style(mode="booksubtitle"))
+                Paragraph(self.formatter.clean_text(subtitle), text_style(mode="booksubtitle"))
             )
         if not first_article_title:
             return elements
@@ -727,17 +727,17 @@ class RlWriter(object):
             headingStyle = heading_style("section", lvl=lvl + 1)
         if not obj.children:
             return ""
-        self.formatter.sectiontitle_mode = True
+        self.formatter.section_title_mode = True
         try:
             heading_txt = "".join(self.renderInline(obj.children[0])).strip()
         except TypeError:
             heading_txt = ""
-        self.formatter.sectiontitle_mode = False
+        self.formatter.section_title_mode = False
 
         if 1 <= lvl <= 4 and self.inline_mode == 0 and self.table_nesting == 0:
             anchor = '<a name="%d"/>' % len(self.bookmarks)
             bm_type = "article" if lvl == 1 else "heading%s" % lvl
-            self.bookmarks.append((obj.children[0].getAllDisplayText(), bm_type))
+            self.bookmarks.append((obj.children[0].get_all_display_text(), bm_type))
         else:
             anchor = ""
         elements = [
@@ -749,13 +749,13 @@ class RlWriter(object):
         ]
 
         if self.table_size_calc == 0:
-            obj.removeChild(obj.children[0])
+            obj.remove_child(obj.children[0])
         elements.extend(self.renderMixed(obj))
 
         return elements
 
     def renderFailedNode(self, node, infoText):
-        txt = node.getAllDisplayText()
+        txt = node.get_all_display_text()
         txt = xmlescape(txt)
         elements = []
         elements.extend(
@@ -786,14 +786,14 @@ class RlWriter(object):
             authors_text = re.sub(
                 "ANONIPEDITS:(?P<num>\d+)", "\g<num> %s" % _("anonymous edits"), authors_text
             )
-            authors_text = self.formatter.cleanText(authors_text)
+            authors_text = self.formatter.clean_text(authors_text)
         else:
             authors_text = "-"
         return authors_text
 
     def writeArticleMetainfo(self):
         elements = []
-        title = self.formatter.cleanText(_("Article Sources and Contributors"))
+        title = self.formatter.clean_text(_("Article Sources and Contributors"))
         elements.append(Paragraph("<b>%s</b>" % title, heading_style(mode="article")))
         elements.append(TocEntry(txt=title, lvl="article"))
         for title, url, authors in self.article_meta_info:
@@ -802,9 +802,9 @@ class RlWriter(object):
                 "<b>%(title)s</b> &nbsp;<i>%(source_label)s</i>: %(source)s &nbsp;<i>%(contribs_label)s</i>: %(contribs)s "
                 % {
                     "title": title,
-                    "source_label": self.formatter.cleanText(_("Source")),
-                    "source": self.formatter.cleanText(url),
-                    "contribs_label": self.formatter.cleanText(_("Contributors")),
+                    "source_label": self.formatter.clean_text(_("Source")),
+                    "source": self.formatter.clean_text(url),
+                    "contribs_label": self.formatter.clean_text(_("Contributors")),
                     "contribs": authors_text,
                 }
             )
@@ -815,7 +815,7 @@ class RlWriter(object):
         if not self.img_meta_info:
             return []
         elements = []
-        title = self.formatter.cleanText(_("Image Sources, Licenses and Contributors"))
+        title = self.formatter.clean_text(_("Image Sources, Licenses and Contributors"))
         elements.append(Paragraph("<b>%s</b>" % title, heading_style(mode="article")))
         elements.append(TocEntry(txt=title, lvl="article"))
         for _id, title, url, license, authors in sorted(self.img_meta_info.values()):
@@ -823,17 +823,17 @@ class RlWriter(object):
             if not license:
                 license = _("unknown")
             license_txt = "<i>%(license_label)s</i>: %(license)s &nbsp;" % {
-                "license_label": self.formatter.cleanText(_("License")),
-                "license": self.formatter.cleanText(license),
+                "license_label": self.formatter.clean_text(_("License")),
+                "license": self.formatter.clean_text(license),
             }
             txt = (
                 "<b>%(title)s</b> &nbsp;<i>%(source_label)s</i>: %(source)s &nbsp;%(license_txt)s<i>%(contribs_label)s</i>: %(contribs)s "
                 % {
-                    "title": self.formatter.cleanText(title),
-                    "source_label": self.formatter.cleanText(_("Source")),
-                    "source": self.formatter.cleanText(url),
+                    "title": self.formatter.clean_text(title),
+                    "source_label": self.formatter.clean_text(_("Source")),
+                    "source": self.formatter.clean_text(url),
                     "license_txt": license_txt,
-                    "contribs_label": self.formatter.cleanText(_("Contributors")),
+                    "contribs_label": self.formatter.clean_text(_("Contributors")),
                     "contribs": authors_text,
                 }
             )
@@ -850,14 +850,14 @@ class RlWriter(object):
             advtree.Node,
             advtree.Strike,
         ]:
-            node.parent.removeChild(node)
+            node.parent.remove_child(node)
         else:
             for c in node.children:
                 self.cleanTitle(c)
 
     def renderArticleTitle(self, raw):
         title_node = uparser.parseString(title="", raw=raw, expandTemplates=False)
-        advtree.buildAdvancedTree(title_node)
+        advtree.build_advanced_tree(title_node)
         title_node.__class__ = advtree.Node
         self.cleanTitle(title_node)
         res = self.renderInline(title_node)
@@ -881,11 +881,11 @@ class RlWriter(object):
                 if self.numarticles > 1:
                     elements.append(NotAtTopPageBreak())
             elif not getattr(article, "has_preceeding_chapter", False) or isinstance(
-                article.getPrevious(), advtree.Article
+                article.get_previous(), advtree.Article
             ):
                 if pdfstyles.page_break_after_article:  # if configured and preceded by an article
                     elements.append(NotAtTopPageBreak())
-                elif miscutils.articleStartsWithInfobox(article, max_text_until_infobox=100):
+                elif miscutils.article_starts_with_infobox(article, max_text_until_infobox=100):
                     elements.append(CondPageBreak(pdfstyles.article_start_min_space_infobox))
                 else:
                     elements.append(CondPageBreak(pdfstyles.article_start_min_space))
@@ -960,7 +960,7 @@ class RlWriter(object):
         return elements
 
     def writeParagraph(self, obj):
-        first_leaf = obj.getFirstLeaf()
+        first_leaf = obj.get_first_leaf()
         if hasattr(first_leaf, "caption"):
             first_leaf.caption = first_leaf.caption.lstrip()
         if getattr(obj, "is_header", False):
@@ -1182,7 +1182,7 @@ class RlWriter(object):
         return self.renderMixed(obj)
 
     def renderText(self, txt, **kwargs):
-        return self.formatter.styleText(txt, kwargs)
+        return self.formatter.style_text(txt, kwargs)
 
     def writeText(self, obj):
         return [self.renderText(obj.caption)]
@@ -1198,10 +1198,10 @@ class RlWriter(object):
                 log.warning(
                     node.__class__.__name__, " contained block element: ", child.__class__.__name__
                 )
-                txt.append(self.renderText(child.getAllDisplayText()))
+                txt.append(self.renderText(child.get_all_display_text()))
         self.inline_mode -= 1
 
-        text_color = styleutils.rgbColorFromNode(node)
+        text_color = styleutils.rgb_color_from_node(node)
         if text_color:
             hex_col = "".join("%02x" % int(c * 255) for c in text_color)
             txt.insert(0, '<font color="#%s">' % hex_col)
@@ -1220,7 +1220,7 @@ class RlWriter(object):
             para_style.fontSize = max(text_style("license").fontSize, para_style.fontSize - 4)
             para_style.leading = 1
 
-        math_nodes = node.getChildNodesByClass(advtree.Math)
+        math_nodes = node.get_child_nodes_by_class(advtree.Math)
         if math_nodes:
             max_source_len = max([len(math.caption) for math in math_nodes])
             if max_source_len > pdfstyles.no_float_math_len:
@@ -1232,13 +1232,13 @@ class RlWriter(object):
         items = []
 
         if isinstance(node, advtree.Node):  # set node styles like text/bg colors, alignment
-            text_color = styleutils.rgbColorFromNode(node)
-            background_color = styleutils.rgbBgColorFromNode(node)
+            text_color = styleutils.rgb_color_from_node(node)
+            background_color = styleutils.rgb_bg_color_from_node(node)
             if text_color:
                 para_style.textColor = text_color
             if background_color:
                 para_style.backColor = background_color
-            align = styleutils.getTextAlign(node)
+            align = styleutils.get_text_alignment(node)
             if align in ["right", "center", "justify"]:
                 align_map = {
                     "right": TA_RIGHT,
@@ -1346,7 +1346,7 @@ class RlWriter(object):
         # looking for internal links
         internallink = False
         if isinstance(obj, advtree.ArticleLink) and obj.url:
-            a = obj.getParentNodesByClass(advtree.Article)
+            a = obj.get_parent_nodes_by_class(advtree.Article)
             wikiurl = ""
             if a:
                 wikiurl = getattr(a[0], "wikiurl", "")
@@ -1369,7 +1369,7 @@ class RlWriter(object):
                 return [t]
         else:
             txt = urllib.parse.unquote(obj.target.encode("utf-8"))
-            t = self.formatter.styleText(txt)
+            t = self.formatter.style_text(txt)
 
         if not internallink:
             if not obj.target.startswith("#"):  # intrapage links are filtered
@@ -1494,12 +1494,12 @@ class RlWriter(object):
             if imgPath:
                 imgPath = imgPath.encode("utf-8")
                 self.tmpImages.add(imgPath)
-            if not self.license_checker.displayImage(target):
+            if not self.license_checker.display_image(target):
                 if self.debug:
                     print(
                         "filtering image",
                         target,
-                        self.license_checker.getLicenseDisplayName(target),
+                        self.license_checker.get_license_display_name(target),
                     )
                 return None
         else:
@@ -1634,9 +1634,9 @@ class RlWriter(object):
 
         max_width = self.colwidth
         if self.table_nesting > 0 and not max_width:
-            cell = img_node.getParentNodesByClass(advtree.Cell)
+            cell = img_node.get_parent_nodes_by_class(advtree.Cell)
             if cell:
-                max_width = print_width / len(cell[0].getAllSiblings()) - 10
+                max_width = print_width / len(cell[0].get_all_siblings()) - 10
         max_height = pdfstyles.img_max_thumb_height * pdfstyles.print_height
         if self.table_nesting > 0:
             max_height = print_height / 4  # fixme this needs to be read from config
@@ -1645,14 +1645,14 @@ class RlWriter(object):
 
         self.set_svg_default_size(img_node)
 
-        w, h = self.image_utils.getImageSize(
+        w, h = self.image_utils.get_image_size(
             img_node, img_path, max_print_width=max_width, max_print_height=max_height
         )
 
         align = img_node.align
         if align in [None, "none"]:
-            align = styleutils.getTextAlign(img_node)
-        if advtree.Center in [p.__class__ for p in img_node.getParents()]:
+            align = styleutils.get_text_alignment(img_node)
+        if advtree.Center in [p.__class__ for p in img_node.get_parents()]:
             align = "center"
         txt = []
         if img_node.render_caption:
@@ -1685,7 +1685,7 @@ class RlWriter(object):
             else:
                 url = ""
             if not self.test_mode:
-                license_name = self.license_checker.getLicenseDisplayName(img_name)
+                license_name = self.license_checker.get_license_display_name(img_name)
                 contributors = self.imgDB.getContributors(img_node.target)
             else:
                 license_name = ""
@@ -1733,7 +1733,7 @@ class RlWriter(object):
             perrow = int(obj.attributes.get("perrow", ""))
         except ValueError:
             perrow = None
-        num_images = len(obj.getChildNodesByClass(advtree.ImageLink))
+        num_images = len(obj.get_child_nodes_by_class(advtree.ImageLink))
         if num_images == 0:
             return []
         if not perrow:
@@ -1796,7 +1796,7 @@ class RlWriter(object):
         caption = obj.attributes.get("caption", None)
         self.colwidth = None
         if caption:
-            txt = self.formatter.styleText(caption)
+            txt = self.formatter.style_text(caption)
             elements = buildPara(txt, heading_style(mode="tablecaption"))
             elements.append(table)
             return elements
@@ -1880,9 +1880,9 @@ class RlWriter(object):
         txt = ""
         try:
             txt = str(highlight(source, lexer, sourceFormatter), "utf-8")
-            self.font_switcher.registerDefaultFont(pdfstyles.default_latin_font)
+            self.font_switcher.register_default_font(pdfstyles.default_latin_font)
             txt = self.font_switcher.fontifyText(txt)
-            self.font_switcher.registerDefaultFont(pdfstyles.default_font)
+            self.font_switcher.register_default_font(pdfstyles.default_font)
             if n.vlist.get("enclose", False) == "none":
                 txt = re.sub("<para.*?>", "", txt).replace("</para>", "")
                 return txt
@@ -1958,7 +1958,7 @@ class RlWriter(object):
             else:
                 i = parser.Item()
                 for c in n.children:
-                    i.appendChild(c)
+                    i.append_child(c)
                 self.references.append(i)
                 ref_num = len(self.references)
                 self.ref_name_map[ref_name] = ref_num
@@ -1989,14 +1989,14 @@ class RlWriter(object):
         if not n.children:
             div_height = n.style.get("height")
             if div_height:
-                height = min(styleutils.scaleLength(div_height), pdfstyles.print_height - 20)
+                height = min(styleutils.scale_length(div_height), pdfstyles.print_height - 20)
                 if height:
                     return [Spacer(0, height)]
             return []
         if (
             getattr(n, "border", False)
-            and not n.getParentNodesByClass(Table)
-            and not n.getChildNodesByClass(advtree.PreFormatted)
+            and not n.get_parent_nodes_by_class(Table)
+            and not n.get_child_nodes_by_class(advtree.PreFormatted)
         ):
             return self.renderMixed(
                 n,
@@ -2066,7 +2066,7 @@ class RlWriter(object):
         if resetCounter:  # first list item gets extra spaceBefore
             para_style.spaceBefore = text_style().spaceBefore
 
-        leaf = item.getFirstLeaf()  # strip leading spaces from list items
+        leaf = item.get_first_leaf()  # strip leading spaces from list items
         if leaf and hasattr(leaf, "caption"):
             leaf.caption = leaf.caption.lstrip()
         items = self.renderMixed(item, para_style=para_style, textPrefix=itemPrefix)
@@ -2130,11 +2130,11 @@ class RlWriter(object):
         for row in table.children[:]:
             if row.__class__ == advtree.Caption:
                 res = self.writeCaption(row)
-                table.removeChild(
+                table.remove_child(
                     row
                 )  # this is slight a hack. we do this in order not to simplify cell-coloring code
             elif row.__class__ != advtree.Row:
-                table.removeChild(row)
+                table.remove_child(row)
         return res
 
     def writeCell(self, cell):
@@ -2144,13 +2144,13 @@ class RlWriter(object):
 
     def _extraCellPadding(self, cell):
         return (
-            cell.getChildNodesByClass(advtree.NamedURL)
-            or cell.getChildNodesByClass(advtree.Reference)
-            or cell.getChildNodesByClass(advtree.Sup)
+            cell.get_child_nodes_by_class(advtree.NamedURL)
+            or cell.get_child_nodes_by_class(advtree.Reference)
+            or cell.get_child_nodes_by_class(advtree.Sup)
         )
 
     def renderCell(self, cell):
-        align = styleutils.getTextAlign(cell)
+        align = styleutils.get_text_alignment(cell)
         if (
             not align
             and getattr(cell, "is_header", False)
@@ -2304,7 +2304,7 @@ class RlWriter(object):
             scale = (pdfstyles.print_width - total_padding) / (sum(t.min_widths) - total_padding)
             log.info("scaling down text in wide table by factor of %.2f" % scale)
             t.rel_font_size = self.formatter.rel_font_size
-            self.formatter.setRelativeFontSize(scale)
+            self.formatter.set_relative_font_size(scale)
             t.small_table = True
             t.min_widths, t.max_widths = self._getTableSize(t)
 
@@ -2358,7 +2358,7 @@ class RlWriter(object):
             self.colwidth = 0
         if getattr(t, "small_table", False):
             pdfstyles.cell_padding = 3
-            self.formatter.setRelativeFontSize(t.rel_font_size)
+            self.formatter.set_relative_font_size(t.rel_font_size)
         return elements
 
     def addAnchors(self, table):
@@ -2462,7 +2462,7 @@ class RlWriter(object):
             node.width = 180
             node.thumb = True
             node.isInline = lambda: False
-            w, h = self.image_utils.getImageSize(node, img_path)
+            w, h = self.image_utils.get_image_size(node, img_path)
             return [Figure(img_path, "", text_style(), imgWidth=w, imgHeight=h)]
         return []
 

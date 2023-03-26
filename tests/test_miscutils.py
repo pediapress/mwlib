@@ -32,5 +32,5 @@ Some more text
 """
     tree = get_tree_from_markup(raw)
     # show(tree)
-    assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=100) is True
-    assert miscutils.articleStartsWithInfobox(tree, max_text_until_infobox=10) is False
+    assert miscutils.article_starts_with_infobox(tree, max_text_until_infobox=100) is True
+    assert miscutils.article_starts_with_infobox(tree, max_text_until_infobox=10) is False
