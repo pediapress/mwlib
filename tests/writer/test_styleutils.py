@@ -1,8 +1,9 @@
-#! /usr/bin/env py.test
-# Copyright (c) 2007-2009 PediaPress GmbH
+# Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
 
 import sys
+
+import pytest
 
 from mwlib import advtree, parser
 from mwlib.dummydb import DummyDB
@@ -74,3 +75,21 @@ left
             txt,
             align,
         )
+
+
+@pytest.mark.parametrize(
+    "rgb_triple, darkness_limit, expected_output",
+    [
+        ((0.0, 0.0, 0.0), 0.0, (0.0, 0.0, 0.0)),
+        ((0.0, 0.0, 0.0), 1.0, (1.0, 1.0, 1.0)),
+        ((1.0, 1.0, 1.0), 0.0, (1.0, 1.0, 1.0)),
+        ((1.0, 0.0, 0.0), 0.0, (0.3, 0.3, 0.3)),
+        ((0.0, 1.0, 0.0), 0.0, (0.59, 0.59, 0.59)),
+        ((0.0, 0.0, 1.0), 0.0, (0.11, 0.11, 0.11)),
+        ((0.1, 0.5, 0.8), 0.0, (0.413, 0.413, 0.413)),
+    ],
+)
+def test_greyscale_conversion(rgb_triple, darkness_limit, expected_output):
+    result = styleutils._rgb_to_greyscale(rgb_triple, darkness_limit)  # pylint: disable=W0212
+    for result, expected in zip([*result], [*expected_output]):
+        assert result == pytest.approx(expected, 0.00001)
