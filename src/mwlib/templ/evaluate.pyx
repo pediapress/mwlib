@@ -68,10 +68,10 @@ class ArgumentList:
 
         self.expander = expander
         self.variables = variables
-        self.varcount = 1
-        self.varnum = 0
+        self.var_count = 1
+        self.var_num = 0
 
-        self.namedargs = {}
+        self.named_args = {}
         self.count = 0
 
     def __len__(self):
@@ -106,10 +106,10 @@ class ArgumentList:
 
         assert isinstance(n, (str, int)), "expected int or string"
 
-        if n not in self.namedargs:
-            while self.varnum < len(self.args):
-                arg = self.args[self.varnum]
-                self.varnum += 1
+        if n not in self.named_args:
+            while self.var_num < len(self.args):
+                arg = self.args[self.var_num]
+                self.var_num += 1
 
                 name, val = equal_split(arg)
                 if name is not None:
@@ -119,19 +119,19 @@ class ArgumentList:
                     name = "".join(tmp).strip()
                     do_strip = True
                 else:
-                    name = str(self.varcount)
-                    self.varcount += 1
+                    name = str(self.var_count)
+                    self.var_count += 1
                     do_strip = False
 
                 if do_strip and isinstance(val, str):
                     val = val.strip()
-                self.namedargs[name] = (do_strip, val)
+                self.named_args[name] = (do_strip, val)
 
                 if n == name:
                     break
 
         try:
-            do_strip, val = self.namedargs[n]
+            do_strip, val = self.named_args[n]
             if isinstance(val, str):
                 return val
         except KeyError:
@@ -144,7 +144,7 @@ class ArgumentList:
         if do_strip:
             tmp = tmp.strip()
 
-        self.namedargs[n] = (do_strip, tmp)
+        self.named_args[n] = (do_strip, tmp)
         return tmp
 
 
@@ -210,13 +210,13 @@ class Expander:
             source = {}
 
         # XXX we really should call Expander with a nuwiki.page object.
-        revisionid = 0
+        revision_id = 0
         if self.db and hasattr(self.db, "nuwiki") and pagename:
             page = self.db.nuwiki.get_page(self.pagename)
             if page is not None:
-                revisionid = getattr(page, "revid", 0) or 0
+                revision_id = getattr(page, "revid", 0) or 0
 
-        self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revisionid)
+        self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revision_id)
         self.resolver.siteinfo = si
         self.resolver.nshandler = nshandler
 
