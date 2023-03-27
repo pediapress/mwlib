@@ -502,7 +502,6 @@ include tests/test_iferror_rx.py
 include tests/test_imgmap.py
 include tests/test_math_utils.py
 include tests/test_metabook.py
-include tests/test_miscutils.py
 include tests/test_mwscan.py
 include tests/test_nserve.py
 include tests/test_nshandling.py
@@ -518,7 +517,6 @@ include tests/test_sanitychecker.py
 include tests/test_serve.py
 include tests/test_setup.py
 include tests/test_styleanalyzer.py
-include tests/test_styleutils.py
 include tests/test_table.py
 include tests/test_tagext.py
 include tests/test_templ_parser.py
@@ -529,5 +527,7 @@ include tests/test_uniq.py
 include tests/test_utils.py
 include tests/test_writerutils.py
 include tests/test_zipwiki.py
+include tests/writer/test_miscutils.py
+include tests/writer/test_styleutils.py
 include tools/set-interwiki.py
 include tox.ini

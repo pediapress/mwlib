@@ -43,7 +43,7 @@ pygments==2.14.0
     # via -r requirements/base.in
 pyparsing==3.0.9
     # via -r requirements/base.in
-pypdf==3.6.0
+pypdf==3.7.0
     # via -r requirements/base.in
 qserve==0.3.0
     # via -r requirements/base.in

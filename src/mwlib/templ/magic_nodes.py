@@ -1,20 +1,16 @@
-from __future__ import absolute_import
-
 import locale
 from xml.sax.saxutils import quoteattr
 
-import six
-
-from mwlib.templ import nodes, evaluate
+from mwlib.templ import evaluate, magic_time, nodes
 
 
 class Subst(nodes.Node):
     def flatten(self, expander, variables, res):
         name = []
         evaluate.flatten(self[0], expander, variables, name)
-        name = u"".join(name).strip()
+        name = "".join(name).strip()
 
-        res.append("{{subst:%s}}" % (name,))
+        res.append(f"{{{{subst:{name}}}}}")
 
 
 class SafeSubst(nodes.Template):
@@ -24,32 +20,30 @@ class SafeSubst(nodes.Template):
 
 class Time(nodes.Node):
     def flatten(self, expander, variables, res):
-        format = []
-        evaluate.flatten(self[0], expander, variables, format)
-        format = u"".join(format).strip()
+        formats = []
+        evaluate.flatten(self[0], expander, variables, formats)
+        formats = "".join(formats).strip()
 
         if len(self) > 1:
             d = []
             evaluate.flatten(self[1], expander, variables, d)
-            d = u"".join(d).strip()
+            d = "".join(d).strip()
         else:
             d = None
 
-        from mwlib.templ import magic_time
-
-        res.append(magic_time.time(format, d))
+        res.append(magic_time.time(formats, d))
 
 
 class AnchorEncode(nodes.Node):
     def flatten(self, expander, variables, res):
         arg = []
         evaluate.flatten(self[0], expander, variables, arg)
-        arg = u"".join(arg)
+        arg = "".join(arg)
 
-        # Note: mediawiki has a bug. It tries not to touch colons by replacing '.3A' with
+        # Note: mediawiki has a bug. It tries not to touch colons by replacing '.3A'
         # with the colon. However, if the original string contains the substring '.3A',
         # it will also replace it with a colon. We do *not* reproduce that bug here...
-        import six.moves.urllib.request, six.moves.urllib.error
+        import six.moves.urllib.request
 
         e = (
             six.moves.urllib.parse.quote_plus(arg.encode("utf-8"), ":")
@@ -61,27 +55,27 @@ class AnchorEncode(nodes.Node):
 
 def _rel2abs(rel, base):
     rel = rel.rstrip("/")
-    if rel in (u"", "."):
+    if rel in ("", "."):
         return base
     if not (rel.startswith("/") or rel.startswith("./") or rel.startswith("../")):
-        base = u""
+        base = ""
 
     import posixpath
 
-    p = posixpath.normpath("/%s/%s/" % (base, rel)).strip("/")
+    p = posixpath.normpath(f"/{base}/{rel}/").strip("/")
     return p
 
 
-class rel2abs(nodes.Node):
+class RelativeToAbsolute(nodes.Node):
     def flatten(self, expander, variables, res):
         arg = []
         evaluate.flatten(self[0], expander, variables, arg)
-        arg = u"".join(arg).strip()
+        arg = "".join(arg).strip()
 
         arg2 = []
         if len(self) > 1:
             evaluate.flatten(self[1], expander, variables, arg2)
-        arg2 = u"".join(arg2).strip()
+        arg2 = "".join(arg2).strip()
         if not arg2:
             arg2 = expander.pagename
 
@@ -92,40 +86,39 @@ class Tag(nodes.Node):
     def flatten(self, expander, variables, res):
         name = []
         evaluate.flatten(self[0], expander, variables, name)
-        name = u"".join(name).strip()
-        parameters = u""
+        name = "".join(name).strip()
+        parameters = ""
 
         for parm in self[2:]:
             tmp = []
             evaluate.flatten(parm, expander, variables, tmp)
-            evaluate._insert_implicit_newlines(tmp)
-            tmp = u"".join(tmp)
+            evaluate.insert_implicit_newlines(tmp)
+            tmp = "".join(tmp)
             if "=" in tmp:
                 key, value = tmp.split("=", 1)
-                parameters += " %s=%s" % (key, quoteattr(value))
+                parameters += f" {key}={quoteattr(value)}"
 
-        tmpres = []
-        tmpres.append("<%s%s>" % (name, parameters))
+        tmp_res = [f"<{name}{parameters}>"]
 
         if len(self) > 1:
             tmp = []
             evaluate.flatten(self[1], expander, variables, tmp)
-            evaluate._insert_implicit_newlines(tmp)
-            tmp = u"".join(tmp)
-            tmpres.append(tmp)
+            evaluate.insert_implicit_newlines(tmp)
+            tmp = "".join(tmp)
+            tmp_res.append(tmp)
 
-        tmpres.append("</%s>" % (name,))
-        tmpres = u"".join(tmpres)
-        tmpres = expander.uniquifier.replace_tags(tmpres)
-        res.append(tmpres)
+        tmp_res.append(f"</{name}>")
+        tmp_res = "".join(tmp_res)
+        tmp_res = expander.uniquifier.replace_tags(tmp_res)
+        res.append(tmp_res)
 
 
 class NoOutput(nodes.Node):
     def flatten(self, expander, variables, res):
-        pass
+        pass  # do nothing
 
 
-class Defaultsort(NoOutput):
+class DefaultSort(NoOutput):
     pass
 
 
@@ -133,7 +126,7 @@ class DisplayTitle(nodes.Node):
     def flatten(self, expander, variables, res):
         name = []
         evaluate.flatten(self[0], expander, variables, name)
-        name = u"".join(name).strip()
+        name = "".join(name).strip()
         expander.magic_displaytitle = name
 
 
@@ -176,21 +169,19 @@ class FormatNum(nodes.Node):
     def flatten(self, expander, variables, res):
         arg0 = []
         evaluate.flatten(self[0], expander, variables, arg0)
-        arg0 = u"".join(arg0)
+        arg0 = "".join(arg0)
 
         if len(self) > 1:
             arg1 = []
             evaluate.flatten(self[1], expander, variables, arg1)
-            arg1 = u"".join(arg1)
+            arg1 = "".join(arg1)
         else:
-            arg1 = u""
+            arg1 = ""
 
-        if arg1.strip() in (u"r", u"R"):
+        if arg1.strip() in ("r", "R"):
             res.append(reverse_format_num(arg0))
         else:
             res.append(format_num(arg0))
-
-        # print "FORMATNUM:", (arg0, arg1, res[-1])
 
 
 def make_switch_node(args):
@@ -204,8 +195,8 @@ registry = {
     "anchorencode": AnchorEncode,
     "#tag": Tag,
     "displaytitle": DisplayTitle,
-    "defaultsort": Defaultsort,
-    "#rel2abs": rel2abs,
+    "defaultsort": DefaultSort,
+    "#rel2abs": RelativeToAbsolute,
     "#switch": make_switch_node,
     "#if": nodes.IfNode,
     "#ifeq": nodes.IfeqNode,

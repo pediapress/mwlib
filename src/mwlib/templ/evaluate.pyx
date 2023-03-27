@@ -113,7 +113,7 @@ class ArgumentList(object):
                 return a.strip()
             tmp = []
             flatten(a, self.expander, self.variables, tmp)
-            _insert_implicit_newlines(tmp)
+            insert_implicit_newlines(tmp)
             tmp = "".join(tmp).strip()
             if len(tmp) > 256 * 1024:
                 raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))
@@ -131,7 +131,7 @@ class ArgumentList(object):
                 if name is not None:
                     tmp = []
                     flatten(name, self.expander, self.variables, tmp)
-                    _insert_implicit_newlines(tmp)
+                    insert_implicit_newlines(tmp)
                     name = "".join(tmp).strip()
                     do_strip = True
                 else:
@@ -155,7 +155,7 @@ class ArgumentList(object):
 
         tmp = []
         flatten(val, self.expander, self.variables, tmp)
-        _insert_implicit_newlines(tmp)
+        insert_implicit_newlines(tmp)
         tmp = "".join(tmp)
         if do_strip:
             tmp = tmp.strip()
@@ -178,7 +178,7 @@ def is_implicit_newline(raw):
 from mwlib.templ.marks import mark, maybe_newline, dummy_mark, eqmark
 
 
-def _insert_implicit_newlines(res, maybe_newline=maybe_newline):
+def insert_implicit_newlines(res, maybe_newline=maybe_newline):
     # do not pass the second argument
     res.append(dummy_mark)
     res.append(dummy_mark)
@@ -297,7 +297,7 @@ class Expander(object):
     def _expand(self, parsed, keep_uniq=False):
         res = ["\n"]  # guard, against implicit newlines at the beginning
         flatten(parsed, self, ArgumentList(expander=self), res)
-        _insert_implicit_newlines(res)
+        insert_implicit_newlines(res)
         res[0] = ""
         res = "".join(res)
         if not keep_uniq:

@@ -47,7 +47,7 @@ class IfNode(Node):
         else:
             if len(self) > 2:
                 flatten(self[2], expander, variables, tmp)
-        _insert_implicit_newlines(tmp)
+        insert_implicit_newlines(tmp)
         res.append(u"".join(tmp).strip())
         res.append(dummy_mark)
 
@@ -75,7 +75,7 @@ class IfeqNode(Node):
             if len(self) > 3:
                 flatten(self[3], expander, variables, tmp)
 
-        _insert_implicit_newlines(tmp)
+        insert_implicit_newlines(tmp)
         res.append(u"".join(tmp).strip())
         res.append(dummy_mark)
 
@@ -180,7 +180,7 @@ class SwitchNode(Node):
 
         tmp = []
         flatten(retval, expander, variables, tmp)
-        _insert_implicit_newlines(tmp)
+        insert_implicit_newlines(tmp)
         tmp = u"".join(tmp).strip()
         res.append(tmp)
         res.append(dummy_mark)
@@ -315,7 +315,7 @@ from mwlib.templ.evaluate import (
     MemoryLimitError,
     ArgumentList,
     equal_split,
-    _insert_implicit_newlines,
+    insert_implicit_newlines,
 )
 from mwlib.templ.marks import mark_start, mark_end
 from mwlib.templ import log, DEBUG

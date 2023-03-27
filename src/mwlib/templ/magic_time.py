@@ -2,9 +2,9 @@ import calendar
 import datetime
 import re
 import sys
+from contextlib import suppress
 
 import roman
-import six
 from timelib import strtodatetime as parsedate
 
 from mwlib.strftime import strftime
@@ -18,45 +18,45 @@ def ampm(date):
 
 
 rx = re.compile('"[^"]*"|xr|\\\\.|.')
-codemap = dict(
-    y="%y",
-    Y="%Y",
-    n=lambda d: str(d.month),
-    m="%m",
-    M="%b",
-    F="%B",
-    W=lambda d: "%02d" % (d.isocalendar()[1],),
-    j=lambda d: str(d.day),
-    d="%d",
-    z=lambda d: str(d.timetuple().tm_yday - 1),
-    D="%a",
-    l="%A",
-    N=lambda d: str(d.isoweekday()),
-    w=lambda d: str(d.isoweekday() % 7),
-    a=ampm,
-    A=lambda d: ampm(d).upper(),
-    g=lambda d: str(((d.hour - 1) % 12) + 1),
-    h="%I",
-    G=lambda d: str(d.hour),
-    H=lambda d: "%02d" % (d.hour,),
-    i="%M",
-    s="%S",
-    U=lambda d: str(calendar.timegm(d.timetuple())),
-    L=lambda d: str(int(calendar.isleap(d.year))),
-    c="%Y-%m-%dT%H:%M:%S+00:00",
-    r="%a, %d %b %Y %H:%M:%S +0000",
-    t=lambda d: str(calendar.monthrange(d.year, d.month)[1]),
-    xr=("process_next", lambda n: roman.toRoman(int(n))),
-)
+CODENAMES = {
+    "y": "%y",
+    "Y": "%Y",
+    "n": lambda d: str(d.month),
+    "m": "%m",
+    "M": "%b",
+    "F": "%B",
+    "W": lambda d: "%02d" % (d.isocalendar()[1],),
+    "j": lambda d: str(d.day),
+    "d": "%d",
+    "z": lambda d: str(d.timetuple().tm_yday - 1),
+    "D": "%a",
+    "l": "%A",
+    "N": lambda d: str(d.isoweekday()),
+    "w": lambda d: str(d.isoweekday() % 7),
+    "a": lambda d: d.strftime("%p").lower(),
+    "A": lambda d: d.strftime("%p"),
+    "g": lambda d: str(((d.hour - 1) % 12) + 1),
+    "h": "%I",
+    "G": lambda d: str(d.hour),
+    "H": lambda d: "%02d" % (d.hour,),
+    "i": "%M",
+    "s": "%S",
+    "U": lambda d: str(calendar.timegm(d.timetuple())),
+    "L": lambda d: str(int(calendar.isleap(d.year))),
+    "c": "%Y-%m-%dT%H:%M:%S+00:00",
+    "r": "%a, %d %b %Y %H:%M:%S +0000",
+    "t": lambda d: str(calendar.monthrange(d.year, d.month)[1]),
+    "xr": ("process_next", lambda n: roman.toRoman(int(n))),
+}
 
 
-def format_date(format, date):
-    split = rx.findall(format)
+def format_date(format_str, date):
+    split = rx.findall(format_str)
     process_next = None
 
     tmp = []
     for x in split:
-        f = codemap.get(x, None)
+        f = CODENAMES.get(x, None)
         if f is None:
             if len(x) == 2 and x.startswith("\\"):
                 tmp.append(x[1])
@@ -69,16 +69,11 @@ def format_date(format, date):
                 process_next = f[1]
                 continue
 
-            if isinstance(f, six.string_types):
-                res = strftime(date, f)
-            else:
-                res = f(date)
+            res = strftime(date, f) if isinstance(f, str) else f(date)
 
             if process_next:
-                try:
+                with suppress(ValueError):
                     res = process_next(res)
-                except ValueError:
-                    pass
                 process_next = None
             tmp.append(res)
 
@@ -89,13 +84,11 @@ def format_date(format, date):
 def time(date_format, date_string=None):
     date = None
     if date_string:
-        if re.match("\d\d\d\d$", date_string):
-            try:
+        if re.match(r"\d\d\d\d$", date_string):
+            with suppress(ValueError):
                 date = datetime.datetime.now().replace(
                     hour=int(date_string[:2]), minute=int(date_string[2:]), second=0
                 )
-            except ValueError:
-                pass
 
         if date is None:
             if isinstance(date_string, str):
@@ -106,8 +99,7 @@ def time(date_format, date_string=None):
             except ValueError:
                 pass
             except Exception as err:
-                sys.stderr.write("ERROR in parsedate: %r while parsing %r" % (err, date_string))
-                pass
+                sys.stderr.write(f"ERROR in parsedate: {err!r} while parsing {date_string!r}")
 
         if date is None:
             return '<strong class="error">Error: invalid time</strong>'
