@@ -1,11 +1,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
+from contextlib import suppress
 
-from __future__ import absolute_import
-from __future__ import print_function
-from mwlib.templ import magics
-import six
-from six import unichr
+from mwlib.templ import DEBUG, log, magics
 
 
 class Node(tuple):
@@ -16,14 +13,14 @@ class Node(tuple):
         return type(self) != type(other) or tuple.__ne__(self, other)
 
     def __repr__(self):
-        return "%s%s" % (self.__class__.__name__, tuple.__repr__(self))
+        return f"{self.__class__.__name__}{tuple.__repr__(self)}"
 
     def show(self, out=None):
         show(self, out=out)
 
     def flatten(self, expander, variables, res):
         for x in self:
-            if isinstance(x, six.string_types):
+            if isinstance(x, str):
                 res.append(x)
             else:
                 flatten(x, expander, variables, res)
@@ -33,11 +30,11 @@ class IfNode(Node):
     def flatten(self, expander, variables, res):
         cond = []
         flatten(self[0], expander, variables, cond)
-        cond = u"".join(cond).strip()
+        cond = "".join(cond).strip()
 
         # template blacklisting results in 0xebad
         # see http://code.pediapress.com/wiki/ticket/700#comment:1
-        cond = cond.strip(unichr(0xEBAD))
+        cond = cond.strip(chr(0xEBAD))
 
         res.append(maybe_newline)
         tmp = []
@@ -48,7 +45,7 @@ class IfNode(Node):
             if len(self) > 2:
                 flatten(self[2], expander, variables, tmp)
         insert_implicit_newlines(tmp)
-        res.append(u"".join(tmp).strip())
+        res.append("".join(tmp).strip())
         res.append(dummy_mark)
 
 
@@ -56,12 +53,12 @@ class IfeqNode(Node):
     def flatten(self, expander, variables, res):
         v1 = []
         flatten(self[0], expander, variables, v1)
-        v1 = u"".join(v1).strip()
+        v1 = "".join(v1).strip()
 
         v2 = []
         if len(self) > 1:
             flatten(self[1], expander, variables, v2)
-        v2 = u"".join(v2).strip()
+        v2 = "".join(v2).strip()
 
         from mwlib.templ.magics import maybe_numeric_compare
 
@@ -76,7 +73,7 @@ class IfeqNode(Node):
                 flatten(self[3], expander, variables, tmp)
 
         insert_implicit_newlines(tmp)
-        res.append(u"".join(tmp).strip())
+        res.append("".join(tmp).strip())
         res.append(dummy_mark)
 
 
@@ -98,7 +95,7 @@ class SwitchNode(Node):
     unresolved = None
 
     def _store_key(self, key, value, fast, unresolved):
-        if isinstance(key, six.string_types):
+        if isinstance(key, str):
             key = key.strip()
             if key in fast:
                 return
@@ -134,7 +131,7 @@ class SwitchNode(Node):
             self._store_key(key, value, fast, unresolved)
 
         if nokey_seen:
-            self._store_key(u"#default", nokey_seen[-1], fast, unresolved)
+            self._store_key("#default", nokey_seen[-1], fast, unresolved)
 
         self.unresolved = tuple(unresolved)
         self.fast = fast
@@ -147,7 +144,7 @@ class SwitchNode(Node):
         res.append(maybe_newline)
         val = []
         flatten(self[0], expander, variables, val)
-        val = u"".join(val).strip()
+        val = "".join(val).strip()
 
         num_val = maybe_numeric(val)
 
@@ -162,7 +159,7 @@ class SwitchNode(Node):
         for k, v in self.unresolved[:pos]:
             tmp = []
             flatten(k, expander, variables, tmp)
-            tmp = u"".join(tmp).strip()
+            tmp = "".join(tmp).strip()
             if tmp == val:
                 retval = v
                 break
@@ -176,12 +173,12 @@ class SwitchNode(Node):
                 if retval is not None:
                     retval = retval[1]
                     break
-            retval = retval or u""
+            retval = retval or ""
 
         tmp = []
         flatten(retval, expander, variables, tmp)
         insert_implicit_newlines(tmp)
-        tmp = u"".join(tmp).strip()
+        tmp = "".join(tmp).strip()
         res.append(tmp)
         res.append(dummy_mark)
 
@@ -190,9 +187,9 @@ class Variable(Node):
     def flatten(self, expander, variables, res):
         name = []
         flatten(self[0], expander, variables, name)
-        name = u"".join(name).strip()
+        name = "".join(name).strip()
         if len(name) > 256 * 1024:
-            raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
+            raise MemoryLimitError(f"template name too long: {len(name)} bytes")
 
         v = variables.get(name, None)
 
@@ -201,7 +198,7 @@ class Variable(Node):
                 flatten(self[1], expander, variables, res)
             else:
                 # FIXME. breaks If ???
-                res.append(u"{{{%s}}}" % (name,))
+                res.append(f"{{{{{{{name}}}}}}}")
         else:
             res.append(v)
 
@@ -213,21 +210,18 @@ class Template(Node):
         except RuntimeError as err:
             # we expect a "RuntimeError: maximum recursion depth exceeded" here.
             # logging this error is rather hard...
-            try:
-                log.warn("error %s ignored" % (err,))
-            except:
-                pass
+            with suppress(Exception):
+                log.warn(f"error {err} ignored")
 
     def _get_args(self):
         return self[1]
 
     def _flatten(self, expander, variables, res):
-
         name = []
         flatten(self[0], expander, variables, name)
-        name = u"".join(name).strip()
+        name = "".join(name).strip()
         if len(name) > 256 * 1024:
-            raise MemoryLimitError("template name too long: %s bytes" % (len(name),))
+            raise MemoryLimitError(f"template name too long: {len(name)} bytes")
 
         args = self._get_args()
 
@@ -254,17 +248,17 @@ class Template(Node):
                 tmp = []
                 if len(args) >= 1:
                     flatten(args[0], expander, variables, tmp)
-                other = u"".join(tmp).strip()
+                other = "".join(tmp).strip()
                 remainder = remainder.strip()
                 tmp = []
                 if magics.maybe_numeric_compare(remainder, other):
                     if len(args) >= 2:
                         flatten(args[1], expander, variables, tmp)
-                        res.append(u"".join(tmp).strip())
+                        res.append("".join(tmp).strip())
                 else:
                     if len(args) >= 3:
                         flatten(args[2], expander, variables, tmp)
-                        res.append(u"".join(tmp).strip())
+                        res.append("".join(tmp).strip())
                 res.append(dummy_mark)
                 return
 
@@ -287,7 +281,7 @@ class Template(Node):
             p = expander.get_parsed_template(name)
             if p:
                 if DEBUG:
-                    msg = "EXPANDING %r %r  ===> " % (name, var)
+                    msg = f"EXPANDING {name!r} {var!r}  ===> "
                     oldidx = len(res)
                 res.append(mark_start(repr(name)))
                 res.append(maybe_newline)
@@ -305,18 +299,20 @@ def show(node, indent=0, out=None):
     if out is None:
         out = sys.stdout
 
-    out.write("%s\n" % (node,))
+    out.write(f"{node}\n")
 
 
-from mwlib.templ.evaluate import (
-    maybe_newline,
-    dummy_mark,
-    flatten,
-    MemoryLimitError,
-    ArgumentList,
-    equal_split,
-    insert_implicit_newlines,
-)
-from mwlib.templ.marks import mark_start, mark_end
-from mwlib.templ import log, DEBUG
-from mwlib.templ.parser import optimize
+if True:
+    # avoid circular import issues by placing the imports at the bottom of the file
+    # avoid pylint warnings by wrapping the imports in an `if True` block
+    from mwlib.templ.evaluate import (
+        ArgumentList,
+        MemoryLimitError,
+        dummy_mark,
+        equal_split,
+        flatten,
+        insert_implicit_newlines,
+        maybe_newline,
+    )
+    from mwlib.templ.marks import mark_end, mark_start
+    from mwlib.templ.parser import optimize
