@@ -1,11 +1,11 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-import six
-from six.moves import range
+from typing import Any
 
-from mwlib import nshandling, siteinfo, metabook
-from mwlib.templ import magics, log, parser, mwlocals
+from mwlib import metabook, nshandling, siteinfo
+from mwlib.templ import log, magics, mwlocals, parser
+from mwlib.templ.marks import dummy_mark, eqmark, mark, maybe_newline
 from mwlib.uniq import Uniquifier
 
 
@@ -13,9 +13,9 @@ class TemplateRecursion(Exception):
     pass
 
 
-def flatten(node, expander, variables, res):
+def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:
     t = type(node)
-    if isinstance(node, (six.text_type, str)):
+    if isinstance(node, str):
         res.append(node)
         return True
 
@@ -25,9 +25,9 @@ def flatten(node, expander, variables, res):
     expander.recursion_count += 1
     try:
         before = variables.count
-        oldlen = len(res)
+        old_len = len(res)
         try:
-            if t is list or t is tuple:
+            if t is list or t is tuple:  # noqa
                 for x in node:
                     flatten(x, expander, variables, res)
             else:
@@ -35,8 +35,8 @@ def flatten(node, expander, variables, res):
         except TemplateRecursion:
             if expander.recursion_count > 2:
                 raise
-            del res[oldlen:]
-            log.warn("template recursion error ignored")
+            del res[old_len:]
+            log.warning("template recursion error ignored")
         after = variables.count
         return before == after
     finally:
@@ -48,7 +48,7 @@ class MemoryLimitError(Exception):
 
 
 def equal_split(node):
-    if isinstance(node, six.string_types):
+    if isinstance(node, str):
         return None, node
 
     try:
@@ -59,24 +59,8 @@ def equal_split(node):
     return node[:idx], node[idx + 1 :]
 
 
-def equal_split_25(node):
-    if isinstance(node, six.string_types):
-        return None, node
-
-    try:
-        idx = list(node).index(eqmark)
-    except ValueError:
-        return None, node
-
-    return node[:idx], node[idx + 1 :]
-
-
-if not hasattr(tuple, "index"):
-    equal_split = equal_split_25
-
-
-class ArgumentList(object):
-    def __init__(self, args=tuple(), expander=None, variables=None):
+class ArgumentList:
+    def __init__(self, args=(), expander=None, variables=None):
         self.args = tuple(args)
 
         assert expander is not None
@@ -104,12 +88,12 @@ class ArgumentList(object):
 
     def get(self, n, default):
         self.count += 1
-        if isinstance(n, six.integer_types):
+        if isinstance(n, int):
             try:
                 a = self.args[n]
             except IndexError:
                 return default
-            if isinstance(a, six.text_type):
+            if isinstance(a, str):
                 return a.strip()
             tmp = []
             flatten(a, self.expander, self.variables, tmp)
@@ -120,7 +104,7 @@ class ArgumentList(object):
             # FIXME: cache value ???
             return tmp
 
-        assert isinstance(n, six.string_types), "expected int or string"
+        assert isinstance(n, (str, int)), "expected int or string"
 
         if n not in self.namedargs:
             while self.varnum < len(self.args):
@@ -139,7 +123,7 @@ class ArgumentList(object):
                     self.varcount += 1
                     do_strip = False
 
-                if do_strip and isinstance(val, six.text_type):
+                if do_strip and isinstance(val, str):
                     val = val.strip()
                 self.namedargs[name] = (do_strip, val)
 
@@ -148,7 +132,7 @@ class ArgumentList(object):
 
         try:
             do_strip, val = self.namedargs[n]
-            if isinstance(val, six.text_type):
+            if isinstance(val, str):
                 return val
         except KeyError:
             return default
@@ -166,16 +150,10 @@ class ArgumentList(object):
 
 def is_implicit_newline(raw):
     """should we add a newline to templates starting with *, #, :, ;, {|
-    see: http://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
+    see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
     """
     sw = raw.startswith
-    for x in ("*", "#", ":", ";", "{|"):
-        if sw(x):
-            return True
-    return False
-
-
-from mwlib.templ.marks import mark, maybe_newline, dummy_mark, eqmark
+    return any(sw(x) for x in ("*", "#", ":", ";", "{|"))
 
 
 def insert_implicit_newlines(res, maybe_newline=maybe_newline):
@@ -201,7 +179,7 @@ def insert_implicit_newlines(res, maybe_newline=maybe_newline):
     del res[-2:]
 
 
-class Expander(object):
+class Expander:
     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
 
     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
@@ -217,7 +195,7 @@ class Expander(object):
             print("Caught: %s" % err)
 
         if si is None:
-            print("WARNING: failed to get siteinfo from %r" % (self.db,))
+            print(f"WARNING: failed to get siteinfo from {self.db!r}")
             si = siteinfo.get_siteinfo("de")
 
         self.nshandler = nshandler = nshandling.nshandler(si)
@@ -278,15 +256,9 @@ class Expander(object):
             pass
 
         page = self.db.normalize_and_get_page(name, ns)
-        if page:
-            raw = page.rawtext
-        else:
-            raw = None
+        raw = page.rawtext if page else None
 
-        if raw is None:
-            res = None
-        else:
-            res = self._parse_raw_template(name=name, raw=raw)
+        res = None if raw is None else self._parse_raw_template(name=name, raw=raw)
 
         self.parsedTemplateCache[name] = res
         return res
