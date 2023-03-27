@@ -1,4 +1,6 @@
 #! /usr/bin/env python
+# pylint: disable=snake-case-naming-style
+
 
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
@@ -12,13 +14,13 @@ https://meta.wikimedia.org/wiki/ParserFunctions
 import datetime
 import re
 from functools import wraps
-from typing import Any, Union
+from typing import Any, Callable, TypeVar, Union
 from urllib.parse import quote, quote_plus, urljoin, urlparse
 
 from mwlib import expr
 from mwlib.log import Log
 
-iferror_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
+if_error_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
 
 log = Log("expander")
 
@@ -66,7 +68,7 @@ def urlquote(url: str) -> str:
 
 
 class OtherMagic:
-    def DEFAULTSORT(self) -> str:  # noqa: S100
+    def DEFAULTSORT(self) -> str:
         """see https://en.wikipedia.org/wiki/Template:DEFAULTSORT"""
         return ""
 
@@ -189,21 +191,25 @@ class LocaltimeMagic:
         return self.now.strftime("%Y%m%d%H%M%S")
 
 
+T = TypeVar("T", bound=Callable[..., Any])
+
+
 class PageMagic:
     source = {}
+    nshandler = None
 
     def __init__(self, pagename="", server="https://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
         self.server = server
-        self.revisionid = revisionid
+        self.the_revisionid = revisionid
 
         self.niceurl = urljoin(self.server, "wiki")
 
-    def _wrap_pagename(f):
+    def _wrap_pagename(f: T) -> T:
         @wraps(f)
-        def wrapper(self, args):
+        def wrapper(self: Any, args: list[Any]) -> Any:
             pagename = self.pagename
-            if args.args:
+            if args:
                 pagename = args[0]
             return f(self, pagename)
 
@@ -298,7 +304,7 @@ class PageMagic:
 
     def REVISIONID(self):
         """[MW1.5+] The unique identifying number of a page, see Help:Diff."""
-        return str(self.revisionid)
+        return str(self.the_revisionid)
 
     @no_arg
     def SITENAME(self):
@@ -510,7 +516,7 @@ class ParserFunctions:
         if good is None:
             good = val
 
-        if iferror_rx.search(val):
+        if if_error_rx.search(val):
             return bad
         else:
             return good
@@ -651,7 +657,7 @@ def _populate_dummy():
     m = MagicResolver()
 
     def get_dummy(name):
-        def resolve(*args):
+        def resolve():
             log.warn(f"using dummy resolver for {name}")
             return ""
 
