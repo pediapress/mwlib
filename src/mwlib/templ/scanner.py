@@ -1,8 +1,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-from __future__ import absolute_import
-
 import re
 
 from mwlib.templ import pp
@@ -42,7 +40,7 @@ def tokenize(txt, included=True, replace_tags=None):
         txt = replace_tags(txt)
 
     tokens = []
-    for (v1, v2, v3, v4, v5) in split_rx.findall(txt):
+    for v1, v2, v3, v4, v5 in split_rx.findall(txt):
         if v5:
             tokens.append((5, v5))
         elif v4:
