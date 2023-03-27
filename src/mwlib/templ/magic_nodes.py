@@ -199,6 +199,6 @@ registry = {
     "#rel2abs": RelativeToAbsolute,
     "#switch": make_switch_node,
     "#if": nodes.IfNode,
-    "#ifeq": nodes.IfeqNode,
+    "#ifeq": nodes.IfEqNode,
     "formatnum": FormatNum,
 }

@@ -49,7 +49,7 @@ class IfNode(Node):
         res.append(dummy_mark)
 
 
-class IfeqNode(Node):
+class IfEqNode(Node):
     def flatten(self, expander, variables, res):
         v1 = []
         flatten(self[0], expander, variables, v1)
@@ -113,7 +113,7 @@ class SwitchNode(Node):
         unresolved = []
         fast = {}
 
-        nokey_seen = []
+        no_key_seen = []
 
         for key, value in args:
             if key is not None:
@@ -122,16 +122,16 @@ class SwitchNode(Node):
                 value = optimize(list(value))
 
             if key is None:
-                nokey_seen.append(value)
+                no_key_seen.append(value)
                 continue
 
-            for k in nokey_seen:
+            for k in no_key_seen:
                 self._store_key(k, value, fast, unresolved)
-            del nokey_seen[:]
+            del no_key_seen[:]
             self._store_key(key, value, fast, unresolved)
 
-        if nokey_seen:
-            self._store_key("#default", nokey_seen[-1], fast, unresolved)
+        if no_key_seen:
+            self._store_key("#default", no_key_seen[-1], fast, unresolved)
 
         self.unresolved = tuple(unresolved)
         self.fast = fast
@@ -282,14 +282,14 @@ class Template(Node):
             if p:
                 if DEBUG:
                     msg = f"EXPANDING {name!r} {var!r}  ===> "
-                    oldidx = len(res)
+                    old_idx = len(res)
                 res.append(mark_start(repr(name)))
                 res.append(maybe_newline)
                 flatten(p, expander, var, res)
                 res.append(mark_end(repr(name)))
 
                 if DEBUG:
-                    msg += repr("".join(res[oldidx:]))
+                    msg += repr("".join(res[old_idx:]))
                     print(msg)
 
 
