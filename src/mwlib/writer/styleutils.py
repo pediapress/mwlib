@@ -9,6 +9,9 @@ from typing import Optional
 from mwlib import advtree
 from mwlib.htmlcolornames import colorname2rgb_map
 
+mw_px2pt = 12 / 16
+mw_em2pt = 9.6
+
 
 def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
     def hex2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
@@ -23,6 +26,7 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
 
     def hexshort2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
         try:
+
             def conv(c: str) -> float:
                 return float(max(0.0, min(1.0, int(2 * c, 16) / 255)))
 
@@ -219,3 +223,18 @@ def parse_length(txt: str) -> tuple[Optional[float], Optional[str]]:
         except ValueError:
             length = None
     return length, unit
+
+
+def scale_length(length_str, reference=None):
+    length, unit = parse_length(length_str)
+    if not length:
+        return 0
+    if unit == "pt":
+        return length
+    elif unit == "px":
+        return length * mw_px2pt
+    elif unit == "em":
+        return length * mw_em2pt
+    elif unit == "%" and reference:
+        return length / 100 * reference
+    return 0
