@@ -1,20 +1,14 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-
-import os
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
+from pathlib import Path
 
 _cache = {}
 
 
 def _get_path(lang):
-    return os.path.join(os.path.dirname(__file__), "siteinfo-%s.json" % lang)
+    return Path(__file__).parent / f"siteinfo-{lang}.json"
 
 
 def get_siteinfo(lang):
@@ -25,8 +19,9 @@ def get_siteinfo(lang):
 
     si = None
     p = _get_path(lang)
-    if os.path.exists(p):
-        si = json.load(open(p, "rb"))
+    if p.exists():
+        with p.open("r", encoding="utf-8") as f:
+            si = json.load(f)
 
     _cache[lang] = si
     return si

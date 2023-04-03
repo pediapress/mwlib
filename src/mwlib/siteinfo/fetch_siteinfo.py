@@ -1,31 +1,28 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
-from __future__ import print_function
-
+import json
 import sys
-
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from urllib.error import URLError
+from urllib.request import urlopen
 
 
 def fetch(lang):
     url = (
-        "http://%s.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases|magicwords|interwikimap&format=json"
-        % lang
+        f"https://{lang}.wikipedia.org/w/api.php?action=query&meta=siteinfo&"
+        f"siprop=general|namespaces|namespacealiases|magicwords|interwikimap&format=json"
     )
-    print("fetching %r" % url)
-    data = six.moves.urllib.request.urlopen(url).read()
-    fn = "siteinfo-%s.json" % lang
-    print("writing %r" % fn)
+
+    print(f"fetching {url}")
+    try:
+        data = urlopen(url).read()
+    except URLError as e:
+        print(f"error fetching {url}: {e}")
+        return
+    fn = f"siteinfo-{lang}.json"
+    print(f"writing {fn}")
     data = json.loads(data)["query"]
-    json.dump(data, open(fn, "wb"), indent=4, sort_keys=True)
+    with open(fn, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, sort_keys=True)
 
 
 def main(argv):
