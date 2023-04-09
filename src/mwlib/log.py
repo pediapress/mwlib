@@ -3,12 +3,21 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-
+import logging
 import sys
 import time
 
 import six
+
+from mwlib import conf
+
+logging.basicConfig(format="%(asctime)-15s %(levelname)s %(name)s: %(message)s")
+root_logger = logging.getLogger()
+root_logger.setLevel(conf.get("logging", "log_level", "INFO", str))
+
+# silence some loggers
+logging.getLogger("PIL").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 class Stdout(object):

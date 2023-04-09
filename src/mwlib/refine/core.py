@@ -1,12 +1,8 @@
 #! /usr/bin/env python
 # -*- compile-command: "../../tests/test_refine.py" -*-
 
-# Copyright (c) 2007-2009 PediaPress GmbH
+# Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
-
-from __future__ import absolute_import
-
-from six.moves import range
 
 from mwlib import tagext, uniq, nshandling
 from mwlib.refine import util
@@ -19,11 +15,14 @@ from mwlib.refine.parse_table import (
 )
 from mwlib.refine.tagparser import TagParser
 from mwlib.utoken import show, tokenize, Token as T, walknode, walknodel
+from mwlib.log import root_logger
 
 try:
     from mwlib.refine import _core
 except ImportError:
     _core = None
+
+log = root_logger.getChild("refine")
 
 T.t_complex_table = "complex_table"
 T.t_complex_caption = "complex_caption"
@@ -723,7 +722,7 @@ class CombinedParser(object):
 
             need_walker = getattr(p, "need_walker", True)
             if need_walker:
-                # print "using default token walker for", p
+                log.info(f"using default token walker for {p}")
                 walker = default_walker
                 for x in walker(tokens):
                     p(x, xopts)
