@@ -631,7 +631,7 @@ class RlWriter(object):
             elements.append(TocEntry(txt=_("Article Licenses"), lvl="group"))
 
         for license in self.env.getLicenses():
-            license_node = uparser.parseString(
+            license_node = uparser.parse_string(
                 title=_(license.title), raw=license.wikitext, wikidb=license._wiki
             )
             advtree.build_advanced_tree(license_node)
@@ -856,7 +856,7 @@ class RlWriter(object):
                 self.cleanTitle(c)
 
     def renderArticleTitle(self, raw):
-        title_node = uparser.parseString(title="", raw=raw, expandTemplates=False)
+        title_node = uparser.parse_string(title="", raw=raw, expand_templates=False)
         advtree.build_advanced_tree(title_node)
         title_node.__class__ = advtree.Node
         self.cleanTitle(title_node)

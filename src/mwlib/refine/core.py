@@ -64,7 +64,7 @@ def get_token_walker(skip_tags=set()):
 
 
 if _core is not None:
-    get_token_walker = _core.token_walker
+    get_token_walker = _core.TokenWalker
 
 
 def get_recursive_tag_parser(tagname, blocknode=False):
@@ -833,7 +833,7 @@ class ParseUniq(object):
 
             vlist = match["vlist"]
             if vlist:
-                vlist = util.parseParams(vlist)
+                vlist = util.parse_params(vlist)
             else:
                 vlist = None
 

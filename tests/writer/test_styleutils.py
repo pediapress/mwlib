@@ -7,12 +7,12 @@ import pytest
 
 from mwlib import advtree, parser
 from mwlib.dummydb import DummyDB
-from mwlib.uparser import parseString
+from mwlib.uparser import parse_string
 from mwlib.writer import styleutils
 
 
 def get_tree_from_markup(raw):
-    tree = parseString(title="Test", raw=raw, wikidb=DummyDB())
+    tree = parse_string(title="Test", raw=raw, wikidb=DummyDB())
     advtree.build_advanced_tree(tree)
     return tree
 

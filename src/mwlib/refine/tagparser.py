@@ -3,14 +3,12 @@
 
 """parse tags in parallel"""
 
-from __future__ import absolute_import
-
 import sys
 
-from mwlib.utoken import Token as T
+from mwlib.utoken import Token
 
 
-class TagInfo(object):
+class TagInfo:
     def __init__(self, tagname=None, prio=None, blocknode=False, nested=True):
         assert None not in (tagname, prio, nested, blocknode)
         self.tagname = tagname
@@ -19,8 +17,10 @@ class TagInfo(object):
         self.blocknode = blocknode
 
 
-class TagParser(object):
-    def __init__(self, tags=[]):
+class TagParser:
+    def __init__(self, tags=None):
+        if tags is None:
+            tags = []
         self.name2tag = name2tag = {}
         for t in tags:
             name2tag[t.tagname] = t
@@ -50,6 +50,7 @@ class TagParser(object):
         del self.stack[spos:]
         close.reverse()
 
+        i: int
         for i, t in close:
             vlist = tokens[i].vlist
             display = vlist.get("style", {}).get("display", "").lower()
@@ -60,10 +61,10 @@ class TagParser(object):
             else:
                 blocknode = t.blocknode
 
-            sub = tokens[i + 1 : pos]
+            sub = tokens[i + 1: pos]
             tokens[i:pos] = [
-                T(
-                    type=T.t_complex_tag,
+                Token(
+                    type=Token.t_complex_tag,
                     children=sub,
                     tagname=t.tagname,
                     blocknode=blocknode,
@@ -81,14 +82,13 @@ class TagParser(object):
 
         while pos < len(tokens):
             t = tokens[pos]
-            # print t
             tag = get(t.rawtagname)
             if tag is None:
                 pos += 1
                 continue
-            if t.type == T.t_html_tag:
+            if t.type == Token.t_html_tag:
                 if t.tag_selfClosing:
-                    tokens[pos].type = T.t_complex_tag
+                    tokens[pos].type = Token.t_complex_tag
                     tokens[pos].tagname = tokens[pos].rawtagname
                     tokens[pos].rawtagname = None
                     pos += 1
@@ -100,7 +100,7 @@ class TagParser(object):
                     stack.append((pos, tag))
                     pos += 1
             else:
-                assert t.type == T.t_html_tag_end
+                assert t.type == Token.t_html_tag_end
                 # find a matching tag in the stack
                 spos = self.find_in_stack(tag)
                 if spos:

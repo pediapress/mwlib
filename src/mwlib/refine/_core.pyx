@@ -1,9 +1,11 @@
 # -*- mode: cython -*-
 
-cdef class token_walker(object):
+cdef class TokenWalker(object):
     cdef object skip_tags
 
-    def __init__(self, skip_tags=set()):
+    def __init__(self, skip_tags=None):
+        if skip_tags is None:
+            skip_tags = set()
         self.skip_tags = skip_tags
         
     def __call__(self, list tokens):

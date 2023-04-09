@@ -31,7 +31,7 @@ def renderElements(elements, filesuffix=None, tmpdir=None):
 
 
 def renderMW(txt, filesuffix=None):
-    parseTree = uparser.parseString(title="Test", raw=txt)
+    parseTree = uparser.parse_string(title="Test", raw=txt)
 
     advtree.build_advanced_tree(parseTree)
     tc = TreeCleaner(parseTree)

@@ -146,7 +146,7 @@ def parse():
             if raw is None:
                 continue
             stime = time.time()
-            uparser.parseString(x, raw=raw, wikidb=db)
+            uparser.parse_string(x, raw=raw, wikidb=db)
         except Exception as err:
             print("F", repr(x), err)
             if options.tb:

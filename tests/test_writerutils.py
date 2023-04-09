@@ -17,9 +17,9 @@ def show_tree(tree):
 
 def get_tree_from_markup(raw):
     from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parseString
+    from mwlib.uparser import parse_string
 
-    return parseString(title="Test", raw=raw, wikidb=DummyDB())
+    return parse_string(title="Test", raw=raw, wikidb=DummyDB())
 
 
 def build_advanced_tree(raw):

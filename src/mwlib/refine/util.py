@@ -8,31 +8,29 @@ import re
 import six.moves.html_entities
 from six import unichr
 
-paramrx = re.compile(
-    r"(?P<name>\w+)\s*=\s*(?P<value>(?:(?:\".*?\")|(?:\'.*?\')|(?:(?:\w|[%:#])+)))", re.DOTALL
-)
+param_rx = re.compile(r"(?P<name>\w+)\s*=\s*(?P<value>\"[^\"]*\"|\'[^\']*\'|[\w%:#]+)", re.DOTALL)
 
 
-def parseParams(s):
-    def style2dict(s):
+def parse_params(s):
+    def style2dict(s_val):
         res = {}
-        for x in s.split(";"):
+        for x in s_val.split(";"):
             if ":" in x:
-                var, value = x.split(":", 1)
+                var, val = x.split(":", 1)
                 var = var.strip().lower()
-                value = value.strip()
-                res[var] = value
+                val = val.strip()
+                res[var] = val
 
         return res
 
-    def maybeInt(v):
+    def maybe_int(v):
         try:
             return int(v)
-        except BaseException:
+        except ValueError:
             return v
 
     r = {}
-    for name, value in paramrx.findall(s):
+    for name, value in param_rx.findall(s):
         if value.startswith('"') or value.startswith("'"):
             value = value[1:-1]
 
@@ -40,46 +38,46 @@ def parseParams(s):
             value = style2dict(value)
             r["style"] = value
         else:
-            r[name] = maybeInt(value)
+            r[name] = maybe_int(value)
     return r
 
 
 class ImageMod(object):
     default_magicwords = [
-        {u"aliases": [u"thumbnail", u"thumb"], u"case-sensitive": u"", u"name": u"img_thumbnail"},
+        {"aliases": ["thumbnail", "thumb"], "case-sensitive": "", "name": "img_thumbnail"},
         {
-            u"aliases": [u"thumbnail=$1", u"thumb=$1"],
-            u"case-sensitive": u"",
-            u"name": u"img_manualthumb",
+            "aliases": ["thumbnail=$1", "thumb=$1"],
+            "case-sensitive": "",
+            "name": "img_manualthumb",
         },
-        {u"aliases": [u"right"], u"case-sensitive": u"", u"name": u"img_right"},
-        {u"aliases": [u"left"], u"case-sensitive": u"", u"name": u"img_left"},
-        {u"aliases": [u"none"], u"case-sensitive": u"", u"name": u"img_none"},
-        {u"aliases": [u"$1px"], u"case-sensitive": u"", u"name": u"img_width"},
-        {u"aliases": [u"center", u"centre"], u"case-sensitive": u"", u"name": u"img_center"},
+        {"aliases": ["right"], "case-sensitive": "", "name": "img_right"},
+        {"aliases": ["left"], "case-sensitive": "", "name": "img_left"},
+        {"aliases": ["none"], "case-sensitive": "", "name": "img_none"},
+        {"aliases": ["$1px"], "case-sensitive": "", "name": "img_width"},
+        {"aliases": ["center", "centre"], "case-sensitive": "", "name": "img_center"},
         {
-            u"aliases": [u"framed", u"enframed", u"frame"],
-            u"case-sensitive": u"",
-            u"name": u"img_framed",
+            "aliases": ["framed", "enframed", "frame"],
+            "case-sensitive": "",
+            "name": "img_framed",
         },
-        {u"aliases": [u"frameless"], u"case-sensitive": u"", u"name": u"img_frameless"},
-        {u"aliases": [u"page=$1", u"page $1"], u"case-sensitive": u"", u"name": u"img_page"},
+        {"aliases": ["frameless"], "case-sensitive": "", "name": "img_frameless"},
+        {"aliases": ["page=$1", "page $1"], "case-sensitive": "", "name": "img_page"},
         {
-            u"aliases": [u"upright", u"upright=$1", u"upright $1"],
-            u"case-sensitive": u"",
-            u"name": u"img_upright",
+            "aliases": ["upright", "upright=$1", "upright $1"],
+            "case-sensitive": "",
+            "name": "img_upright",
         },
-        {u"aliases": [u"border"], u"case-sensitive": u"", u"name": u"img_border"},
-        {u"aliases": [u"baseline"], u"case-sensitive": u"", u"name": u"img_baseline"},
-        {u"aliases": [u"sub"], u"case-sensitive": u"", u"name": u"img_sub"},
-        {u"aliases": [u"super", u"sup"], u"case-sensitive": u"", u"name": u"img_super"},
-        {u"aliases": [u"top"], u"case-sensitive": u"", u"name": u"img_top"},
-        {u"aliases": [u"text-top"], u"case-sensitive": u"", u"name": u"img_text_top"},
-        {u"aliases": [u"middle"], u"case-sensitive": u"", u"name": u"img_middle"},
-        {u"aliases": [u"bottom"], u"case-sensitive": u"", u"name": u"img_bottom"},
-        {u"aliases": [u"text-bottom"], u"case-sensitive": u"", u"name": u"img_text_bottom"},
-        {u"aliases": [u"link=$1"], u"case-sensitive": u"", u"name": u"img_link"},
-        {u"aliases": [u"alt=$1"], u"case-sensitive": u"", u"name": u"img_alt"},
+        {"aliases": ["border"], "case-sensitive": "", "name": "img_border"},
+        {"aliases": ["baseline"], "case-sensitive": "", "name": "img_baseline"},
+        {"aliases": ["sub"], "case-sensitive": "", "name": "img_sub"},
+        {"aliases": ["super", "sup"], "case-sensitive": "", "name": "img_super"},
+        {"aliases": ["top"], "case-sensitive": "", "name": "img_top"},
+        {"aliases": ["text-top"], "case-sensitive": "", "name": "img_text_top"},
+        {"aliases": ["middle"], "case-sensitive": "", "name": "img_middle"},
+        {"aliases": ["bottom"], "case-sensitive": "", "name": "img_bottom"},
+        {"aliases": ["text-bottom"], "case-sensitive": "", "name": "img_text_bottom"},
+        {"aliases": ["link=$1"], "case-sensitive": "", "name": "img_link"},
+        {"aliases": ["alt=$1"], "case-sensitive": "", "name": "img_alt"},
     ]
 
     def __init__(self, magicwords=None):
@@ -111,8 +109,8 @@ class ImageMod(object):
             if mo:
                 for match in mo.groups()[::-1]:
                     if match:
-                        return (mod_type, match)
-        return (None, None)
+                        return mod_type, match
+        return None, None
 
 
 def handle_imagemod(self, mod_type, match):
@@ -182,7 +180,7 @@ def resolve_entity(e):
 
 
 def replace_html_entities(txt):
-    return re.sub("&.*?;", lambda mo: resolve_entity(mo.group(0)), txt)
+    return re.sub(r"&[^;]*;", lambda mo: resolve_entity(mo.group(0)), txt)
 
 
 def remove_nowiki_tags(txt, _rx=re.compile("<nowiki>(.*?)</nowiki>", re.IGNORECASE | re.DOTALL)):

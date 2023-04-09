@@ -143,7 +143,7 @@ def test_switch_default():
 
 def test_tag_expand_vs_uniq():
     db = DictDB(Foo="""{{#tag:pre|inside pre}}""")
-    r = uparser.parseString(title="Foo", wikidb=db)
+    r = uparser.parse_string(title="Foo", wikidb=db)
     core.show(r)
     pre = r.find(parser.PreFormatted)
     assert len(pre) == 1, EXPECTED_A_PREFORMATTED_NODE
@@ -296,7 +296,7 @@ def test_percent_table_style():
 
 def test_parse_params():
     def check(s, expected):
-        res = util.parseParams(s)
+        res = util.parse_params(s)
         print(repr(s), "-->", res, "expected:", expected)
 
         assert res == expected, "bad result"
@@ -876,7 +876,7 @@ def test_category_colon_link():
 
 
 def test_image_link():
-    t = uparser.parseString("", "[[画像:Tajima mihonoura03s3200.jpg]]", lang="ja")
+    t = uparser.parse_string("", "[[画像:Tajima mihonoura03s3200.jpg]]", lang="ja")
     r = t.find(parser.ImageLink)[0]
     assert r.target == "画像:Tajima mihonoura03s3200.jpg"
     assert r.namespace == 6, WRONG_NAMESPACE
@@ -972,7 +972,7 @@ def test_link_with_quotes():
 
 def test_no_tab_removal():
     d = DummyDB()
-    r = uparser.parseString(title="", raw="\ttext", wikidb=d)
+    r = uparser.parse_string(title="", raw="\ttext", wikidb=d)
     assert not r.find(parser.PreFormatted), "unexpected PreFormatted node"
 
 
@@ -1260,7 +1260,7 @@ def test_imagemod_localised_magicwords():
     ]
 
     def parsei(s, magicwords):
-        res = uparser.parseString(title="test", raw=s, magicwords=magicwords)
+        res = uparser.parse_string(title="test", raw=s, magicwords=magicwords)
         img = res.find(parser.ImageLink)[0]
         return img
 

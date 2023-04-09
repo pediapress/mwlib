@@ -1,48 +1,52 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
 
-from mwlib import expander, nshandling, metabook
+from mwlib import expander, metabook, nshandling
 from mwlib.log import Log
 from mwlib.parser.old_uparser import postprocessors
-from mwlib.refine import core, compat
+from mwlib.refine import compat, core
 
 log = Log("refine.uparser")
 
 
-def parseString(
+def get_article_raw_text(wikidb, title: str):
+    page = wikidb.normalize_and_get_page(title, 0)
+    return page.rawtext if page else None
+
+
+def process_expander_and_siteinfo(wikidb, title, raw, expand_templates):
+    te = uniquifier = siteinfo = None
+    _input = raw
+    if expand_templates:
+        te = expander.Expander(raw, pagename=title, wikidb=wikidb)
+        uniquifier = te.uniquifier
+        _input = te.expandTemplates(True)
+    if hasattr(wikidb, "get_siteinfo"):
+        siteinfo = wikidb.get_siteinfo()
+    return te, uniquifier, siteinfo, _input
+
+
+def parse_string(
     title=None,
     raw=None,
     wikidb=None,
     revision=None,
     lang=None,
     magicwords=None,
-    expandTemplates=True,
+    expand_templates=True,
 ):
     """parse article with title from raw mediawiki text"""
-    # FIXME: refactor method name to parse_string (requires changes in downstream mwlib.rl etc)
-
-    uniquifier = None
-    siteinfo = None
+    te = uniquifier = siteinfo = None
     assert title is not None, "no title given"
-    if raw is None:
-        page = wikidb.normalize_and_get_page(title, 0)
-        if page:
-            raw = page.rawtext
-        else:
-            raw = None
+    raw = get_article_raw_text(wikidb, title) if raw is None else raw
+    assert raw is not None, f"cannot get article {title!r}"
+    _input = raw
 
-        assert raw is not None, "cannot get article %r" % (title,)
-    input = raw
-    te = None
     if wikidb:
-        if expandTemplates:
-            te = expander.Expander(raw, pagename=title, wikidb=wikidb)
-            input = te.expandTemplates(True)
-            uniquifier = te.uniquifier
-        if hasattr(wikidb, "get_siteinfo"):
-            siteinfo = wikidb.get_siteinfo()
+        te, uniquifier, siteinfo, _input = process_expander_and_siteinfo(
+            wikidb, title, raw, expand_templates
+        )
 
         src = None
         if hasattr(wikidb, "getSource"):
@@ -65,7 +69,7 @@ def parseString(
     else:
         nshandler = nshandling.nshandler(siteinfo)
     a = compat.parse_txt(
-        input,
+        _input,
         title=title,
         wikidb=wikidb,
         nshandler=nshandler,

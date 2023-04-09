@@ -864,11 +864,11 @@ def _validateParents(node, parent=None):
 
 def get_advanced_tree(fn):
     from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parseString
+    from mwlib.uparser import parse_string
 
     db = DummyDB()
     input = six.text_type(open(fn).read(), "utf8")
-    r = parseString(title=fn, raw=input, wikidb=db)
+    r = parse_string(title=fn, raw=input, wikidb=db)
     build_advanced_tree(r)
     return r
 
@@ -876,10 +876,10 @@ def get_advanced_tree(fn):
 def simpleparse(raw):  # !!! USE FOR DEBUGGING ONLY !!!
     import sys
     from mwlib import dummydb, parser
-    from mwlib.uparser import parseString
+    from mwlib.uparser import parse_string
 
     input = raw.decode("utf8")
-    r = parseString(title="title", raw=input, wikidb=dummydb.DummyDB())
+    r = parse_string(title="title", raw=input, wikidb=dummydb.DummyDB())
     build_advanced_tree(r)
     parser.show(sys.stdout, r, 0)
     return r

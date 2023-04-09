@@ -15,7 +15,7 @@ import pytest
 from mwlib import advtree
 from mwlib.dummydb import DummyDB
 from mwlib.odfwriter import ODFWriter, preprocess
-from mwlib.uparser import parseString
+from mwlib.uparser import parse_string
 
 ODFWriter.ignoreUnknownNodes = False
 
@@ -88,7 +88,7 @@ def validate(odfw):
 
 def get_xml(wikitext):
     db = DummyDB()
-    r = parseString(title="test", raw=wikitext, wikidb=db)
+    r = parse_string(title="test", raw=wikitext, wikidb=db)
     advtree.build_advanced_tree(r)
     preprocess(r)
     mwlib.parser.show(sys.stdout, r)

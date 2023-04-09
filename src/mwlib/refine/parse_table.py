@@ -30,7 +30,7 @@ class parse_table_cells(object):
                 break
             if t.type == T.t_special and t.text == "|":
                 mod = T.join_as_text(children[:i])
-                cell.vlist = util.parseParams(mod)
+                cell.vlist = util.parse_params(mod)
 
                 del children[:i + 1]
                 return
@@ -120,7 +120,7 @@ class parse_table_rows(object):
             if x.type in (T.t_newline, T.t_break):
                 mod = T.join_as_text(children[:i])
                 #print "MODIFIER:", repr(mod)
-                row.vlist = util.parseParams(mod)
+                row.vlist = util.parse_params(mod)
                 del children[:i]
                 return
 
@@ -220,7 +220,7 @@ class parse_tables(object):
         def compute_mod():
             mod = T.join_as_text(children[:i])
             #print "MODIFIER:", repr(mod)
-            table.vlist = util.parseParams(mod)
+            table.vlist = util.parse_params(mod)
             del children[:i]
 
         i = 0
@@ -252,7 +252,7 @@ class parse_tables(object):
             if t.tagname not in ("ref",) and (t.text is None or t.text.startswith("\n")):
                 if modifier:
                     mod = T.join_as_text(children[start:modifier])
-                    vlist = util.parseParams(mod)
+                    vlist = util.parse_params(mod)
                     sub = children[modifier + 1:i]
                 else:
                     sub = children[start + 1:i]

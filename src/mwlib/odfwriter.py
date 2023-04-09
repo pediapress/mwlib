@@ -834,11 +834,11 @@ def main():
     for fn in sys.argv[1:]:
 
         from mwlib.dummydb import DummyDB
-        from mwlib.uparser import parseString
+        from mwlib.uparser import parse_string
 
         db = DummyDB()
         input = six.text_type(open(fn).read(), "utf8")
-        r = parseString(title=fn, raw=input, wikidb=db)
+        r = parse_string(title=fn, raw=input, wikidb=db)
         # parser.show(sys.stdout, r)
         # advtree.buildAdvancedTree(r)
         # tc = TreeCleaner(r)

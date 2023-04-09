@@ -10,7 +10,7 @@ import sys
 
 import six
 
-from mwlib.refine.util import parseParams, resolve_entity
+from mwlib.refine.util import parse_params, resolve_entity
 from . import _uscan as _mwscan
 
 
@@ -219,7 +219,7 @@ def _analyze_html_tag(t):
         is_end_token = False
 
     name, values = _split_tag(name)
-    t.vlist = parseParams(values)
+    t.vlist = parse_params(values)
     name = name.lower()
 
     if name == "br":

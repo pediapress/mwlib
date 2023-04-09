@@ -419,8 +419,8 @@ class adapt(object):
 
         from mwlib import uparser
 
-        return uparser.parseString(title=title, raw=raw, wikidb=self,
-                                   lang=self.siteinfo["general"]["lang"], expandTemplates=expandTemplates)
+        return uparser.parse_string(title=title, raw=raw, wikidb=self,
+                                    lang=self.siteinfo["general"]["lang"], expand_templates=expandTemplates)
 
     def getLicenses(self):
         from mwlib import metabook
@@ -513,10 +513,10 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
 
         result = sorted(set([
             u.target
-            for u in uparser.parseString(title,
-                                         raw=raw,
-                                         wikidb=wikidb,
-                                         ).filter(isUserLink)
+            for u in uparser.parse_string(title,
+                                          raw=raw,
+                                          wikidb=wikidb,
+                                          ).filter(isUserLink)
         ]))
         return result
 
@@ -528,7 +528,7 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
             # userlinks = getUserLinks(author_arg)
             # if userlinks:
             #     return userlinks
-            node = uparser.parseString('', raw=args['Author'], wikidb=wikidb)
+            node = uparser.parse_string('', raw=args['Author'], wikidb=wikidb)
             advtree.extend_classes(node)
             txt = node.get_all_display_text().strip()
             if txt:

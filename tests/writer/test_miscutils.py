@@ -5,12 +5,12 @@ import sys
 
 from mwlib import parser
 from mwlib.dummydb import DummyDB
-from mwlib.uparser import parseString
+from mwlib.uparser import parse_string
 from mwlib.writer import miscutils
 
 
 def get_tree_from_markup(raw):
-    return parseString(title="Test", raw=raw, wikidb=DummyDB())
+    return parse_string(title="Test", raw=raw, wikidb=DummyDB())
 
 
 def show(tree):

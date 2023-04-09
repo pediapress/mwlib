@@ -22,7 +22,7 @@ from mwlib.advtree import (
     build_advanced_tree,
 )
 from mwlib.dummydb import DummyDB
-from mwlib.uparser import parseString
+from mwlib.uparser import parse_string
 
 
 def _treesanity(r):
@@ -47,7 +47,7 @@ def test_copy():
 """
 
     db = DummyDB()
-    r = parseString(title="X33", raw=raw, wikidb=db)
+    r = parse_string(title="X33", raw=raw, wikidb=db)
     build_advanced_tree(r)
     c = r.copy()
     _treesanity(c)
@@ -105,7 +105,7 @@ def test_identity():
 """
 
     db = DummyDB()
-    r = parseString(title="X33", raw=raw, wikidb=db)
+    r = parse_string(title="X33", raw=raw, wikidb=db)
     build_advanced_tree(r)
     _treesanity(r)
 
@@ -132,7 +132,7 @@ def test_definitiondescription():
 
 """
     db = DummyDB()
-    r = parseString(title="t", raw=raw, wikidb=db)
+    r = parse_string(title="t", raw=raw, wikidb=db)
     parser.show(sys.stdout, r)
 
     build_advanced_tree(r)
@@ -150,7 +150,7 @@ def test_definition_list():
 ;termA
 :descr1
 """
-    r = parseString(title="t", raw=raw)
+    r = parse_string(title="t", raw=raw)
     build_advanced_tree(r)
     dls = r.get_child_nodes_by_class(DefinitionList)
     assert len(dls) == 1
@@ -165,7 +165,7 @@ def test_ulist():
 * A item
 *: B Previous item continues.
 """
-    r = parseString(title="t", raw=raw)
+    r = parse_string(title="t", raw=raw)
     build_advanced_tree(r)
     #    parser.show(sys.stdout, r)
     assert len(r.get_child_nodes_by_class(Item)) == 1
@@ -173,17 +173,17 @@ def test_ulist():
 
 def test_colspan():
     raw = """<table><tr><td colspan="bogus">no colspan </td></tr></table>"""
-    r = parseString(title="t", raw=raw)
+    r = parse_string(title="t", raw=raw)
     build_advanced_tree(r)
     assert r.get_child_nodes_by_class(Cell)[0].colspan == 1
 
     raw = """<table><tr><td colspan="-1">no colspan </td></tr></table>"""
-    r = parseString(title="t", raw=raw)
+    r = parse_string(title="t", raw=raw)
     build_advanced_tree(r)
     assert r.get_child_nodes_by_class(Cell)[0].colspan == 1
 
     raw = """<table><tr><td colspan="2">colspan1</td></tr></table>"""
-    r = parseString(title="t", raw=raw)
+    r = parse_string(title="t", raw=raw)
     build_advanced_tree(r)
     assert r.get_child_nodes_by_class(Cell)[0].colspan == 2
 
@@ -195,7 +195,7 @@ def test_attributes():
 |stuff
 |}
 """
-    r = parseString(title="t", raw=t1)
+    r = parse_string(title="t", raw=t1)
     build_advanced_tree(r)
     n = r.get_child_nodes_by_class(Row)[0]
     print(n.attributes, n.style)
@@ -205,7 +205,7 @@ def test_attributes():
 
 
 def get_adv_tree(raw):
-    tree = parseString(title="test", raw=raw)
+    tree = parse_string(title="test", raw=raw)
     build_advanced_tree(tree)
     return tree
 

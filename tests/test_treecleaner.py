@@ -28,7 +28,7 @@ from mwlib.advtree import (
 )
 from mwlib.dummydb import DummyDB
 from mwlib.treecleaner import TreeCleaner, _all, _any
-from mwlib.uparser import parseString
+from mwlib.uparser import parse_string
 
 
 def _treesanity(r):
@@ -43,7 +43,7 @@ def _treesanity(r):
 
 
 def get_tree_from_markup(raw):
-    return parseString(title="Test", raw=raw, wikidb=DummyDB())
+    return parse_string(title="Test", raw=raw, wikidb=DummyDB())
 
 
 def clean_markup(raw):

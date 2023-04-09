@@ -1,8 +1,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-
 from mwlib import nshandling
 from mwlib.parser import nodes as n
 from mwlib.refine import core
@@ -47,13 +45,13 @@ def _change_classes(node):
             return
 
         if node.type == T.t_magicword:
-            node.caption = u""
+            node.caption = ""
             node.children = []
             node.__class__ = n.Text
             return
 
         if node.type == T.t_html_tag_end:
-            node.caption = u""
+            node.caption = ""
             node.children = []
             node.__class__ = n.Text
             return
@@ -61,13 +59,13 @@ def _change_classes(node):
         klass = tok2class.get(node.type, n.Text)
 
         if klass == n.Text:
-            node.caption = node.text or u""
-            assert not node.children, "%r has children" % (node,)
+            node.caption = node.text or ""
+            assert not node.children, f"{node!r} has children"
 
         node.__class__ = klass
 
         if node.type == T.t_hrule or (
-            node.type in (T.t_html_tag, T.t_html_tag_end) and node.rawtagname == "hr"
+                node.type in (T.t_html_tag, T.t_html_tag_end) and node.rawtagname == "hr"
         ):
             node.__class__ = n.TagNode
             node.caption = "hr"
@@ -80,8 +78,8 @@ def _change_classes(node):
             node.__class__ = n.Style
 
         if node.__class__ == n.Text:
-            node.caption = node.text or u""
-            assert not node.children, "%r has children" % (node,)
+            node.caption = node.text or ""
+            assert not node.children, f"{node!r} has children"
 
         if node.children is None:
             node.children = []
@@ -95,8 +93,8 @@ def _change_classes(node):
             elif node.tagname == "caption":
                 node.__class__ = n.Caption
             elif node.tagname == "ref":
+                # don't do anything here, we will handle this later
                 pass
-                # node.__class__=N.Ref
             elif node.tagname == "ul":
                 node.__class__ = n.ItemList
             elif node.tagname == "ol":
@@ -113,7 +111,7 @@ def _change_classes(node):
             elif node.tagname == "math":
                 node.__class__ = n.Math
                 node.caption = node.math
-            elif node.tagname == "b":
+            elif node.tagname == "b" or node.tagname == "strong":
                 node.__class__ = n.Style
                 node.caption = "'''"
             elif node.tagname == "pre":
@@ -121,9 +119,6 @@ def _change_classes(node):
             elif node.tagname == "blockquote":
                 node.__class__ = n.Style
                 node.caption = "-"
-            elif node.tagname == "strong":
-                node.__class__ = n.Style
-                node.caption = "'''"
             elif node.tagname == "cite":
                 node.__class__ = n.Style
                 node.caption = "cite"
@@ -139,10 +134,7 @@ def _change_classes(node):
             elif node.tagname == "var":
                 node.__class__ = n.Style
                 node.caption = "var"
-            elif node.tagname == "i":
-                node.__class__ = n.Style
-                node.caption = "''"
-            elif node.tagname == "em":
+            elif node.tagname == "i" or node.tagname == "em":
                 node.__class__ = n.Style
                 node.caption = "''"
             elif node.tagname == "sup":
@@ -153,7 +145,7 @@ def _change_classes(node):
                 node.caption = "sub"
             elif node.tagname == "u":
                 node.__class__ = n.Style
-                node.caption == "u"
+                node.caption = "u"
 
         if node.__class__ == n.Link:
             ns = node.ns
