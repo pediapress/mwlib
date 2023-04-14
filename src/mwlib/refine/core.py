@@ -16,6 +16,7 @@ from mwlib.refine.parse_table import (
 from mwlib.refine.tagparser import TagParser
 from mwlib.utoken import show, tokenize, Token as T, walknode, walknodel
 from mwlib.log import root_logger
+from mwlib.parser import styleanalyzer
 
 try:
     from mwlib.refine import _core
@@ -94,7 +95,7 @@ def _parse_gallery_txt(txt, xopts):
         assert xopts.expander is not None, "no expander in _parse_gallery_txt"
         xnew = xopts.expander.parseAndExpand(x, keep_uniq=True)
 
-        linode = parse_txt(u"[[" + xnew + "]]", xopts)
+        linode = parse_txt("[[" + xnew + "]]", xopts)
 
         if linode:
             n = linode[0]
@@ -135,9 +136,9 @@ class ParseSections(object):
                 type=T.t_complex_node, children=tokens[current.start + 1 : current.endtitle]
             )
             if l2 > l1:
-                caption.children.append(T(type=T.t_text, text=u"=" * (l2 - l1)))
+                caption.children.append(T(type=T.t_text, text="=" * (l2 - l1)))
             elif l1 > l2:
-                caption.children.insert(0, T(type=T.t_text, text=u"=" * (l1 - l2)))
+                caption.children.insert(0, T(type=T.t_text, text="=" * (l1 - l2)))
 
             body = T(type=T.t_complex_node, children=tokens[current.endtitle + 1 : i])
 
@@ -221,55 +222,55 @@ class ParseUrls(object):
                 i += 1
 
 
-class ParseSingleQuote(object):
+class ParseSingleQuote:
     def __init__(self, tokens, xopts):
         self.tokens = tokens
+        self.styles = []
+        self.counts = []
         self.run()
 
+    def finish(self):
+        assert len(self.counts) == len(self.styles)
+
+        states = styleanalyzer.compute_path(self.counts)
+
+        last_apocount = 0
+        for i, s in enumerate(states):
+            apos = "'" * (s.apocount - last_apocount)
+            if apos:
+                self.styles[i].children.insert(0, T(type=T.t_text, text=apos))
+            last_apocount = s.apocount
+
+            if s.is_bold and s.is_italic:
+                self.styles[i].caption = "'''"
+                inner = T(type=T.t_complex_style, caption="''", children=self.styles[i].children)
+                self.styles[i].children = [inner]
+            elif s.is_bold:
+                self.styles[i].caption = "'''"
+            elif s.is_italic:
+                self.styles[i].caption = "''"
+            else:
+                self.styles[i].type = T.t_complex_node
+
     def run(self):
-        def finish():
-            assert len(counts) == len(styles)
-
-            from mwlib.parser import styleanalyzer
-
-            states = styleanalyzer.compute_path(counts)
-
-            last_apocount = 0
-            for i, s in enumerate(states):
-                apos = "'" * (s.apocount - last_apocount)
-                if apos:
-                    styles[i].children.insert(0, T(type=T.t_text, text=apos))
-                last_apocount = s.apocount
-
-                if s.is_bold and s.is_italic:
-                    styles[i].caption = "'''"
-                    inner = T(type=T.t_complex_style, caption="''", children=styles[i].children)
-                    styles[i].children = [inner]
-                elif s.is_bold:
-                    styles[i].caption = "'''"
-                elif s.is_italic:
-                    styles[i].caption = "''"
-                else:
-                    styles[i].type = T.t_complex_node
-
         tokens = self.tokens
         pos = 0
         start = None
-        counts = []
-        styles = []
+        self.counts = []
+        self.styles = []
 
         while pos < len(tokens):
             t = tokens[pos]
             if t.type == T.t_singlequote:
                 if start is None:
-                    counts.append(len(t.text))
+                    self.counts.append(len(t.text))
                     start = pos
                     pos += 1
                 else:
                     tokens[start:pos] = [
                         T(type=T.t_complex_style, children=tokens[start + 1 : pos])
                     ]
-                    styles.append(tokens[start])
+                    self.styles.append(tokens[start])
                     pos = start + 1
                     start = None
             elif t.type == T.t_newline:
@@ -277,24 +278,24 @@ class ParseSingleQuote(object):
                     tokens[start:pos] = [
                         T(type=T.t_complex_style, children=tokens[start + 1 : pos])
                     ]
-                    styles.append(tokens[start])
+                    self.styles.append(tokens[start])
                     pos = start
                     start = None
                 pos += 1
 
-                if counts:
-                    finish()
-                    counts = []
-                    styles = []
+                if self.counts:
+                    self.finish()
+                    self.counts = []
+                    self.styles = []
             else:
                 pos += 1
 
         if start is not None:
             tokens[start:pos] = [T(type=T.t_complex_style, children=tokens[start + 1 : pos])]
-            styles.append(tokens[start])
+            self.styles.append(tokens[start])
 
-        if counts:
-            finish()
+        if self.counts:
+            self.finish()
 
 
 class ParsePreformatted(object):
@@ -338,7 +339,7 @@ class ParsePreformatted(object):
                 i += 1
 
 
-class ParseLines(object):
+class ParseLines:
     def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
@@ -403,7 +404,7 @@ class ParseLines(object):
             node.children = []
             dd = None
 
-            def appendline():
+            def append_line():
                 line = lines[startpos]
                 if endtag:
                     for i, x in enumerate(line.children):
@@ -423,14 +424,14 @@ class ParseLines(object):
                 # collect items
                 item = newitem()
                 item.children = []
-                appendline()
+                append_line()
 
                 while (
                     startpos < len(lines) - 1
                     and prefix == getchar(lines[startpos])
                     and len(lines[startpos].lineprefix) > 1
                 ):
-                    appendline()
+                    append_line()
 
                 for x in item.children:
                     x.lineprefix = x.lineprefix[1:]
@@ -450,85 +451,97 @@ class ParseLines(object):
                 startpos += 1
         del lines[-1]  # remove guard
 
+    def get_line_prefix(self, start_line):
+        return (self.tokens[start_line].text or "").strip()
+
     def run(self):
-        tokens = self.tokens
         i = 0
         lines = []
-        startline = None
-        firsttoken = None
-
-        def getlineprefix():
-            return (tokens[startline].text or "").strip()
+        start_line = None
+        first_token = None
 
         while i < len(self.tokens):
-            t = tokens[i]
+            t = self.tokens[i]
             if t.type in (T.t_item, T.t_colon):
-                if firsttoken is None:
-                    firsttoken = i
-                startline = i
-                i += 1
-            elif t.type == T.t_newline and startline is not None:
-                sub = self.tokens[startline + 1 : i + 1]
-                lines.append(
-                    T(
-                        type=T.t_complex_line,
-                        start=tokens[startline].start,
-                        len=0,
-                        children=sub,
-                        lineprefix=getlineprefix(),
-                    )
-                )
-                startline = None
-                i += 1
+                i, start_line, first_token = self.process_item_and_colon(i, first_token)
+            elif t.type == T.t_newline and start_line is not None:
+                i, start_line = self.process_newline_when_start_line_exists(i, start_line, lines)
             elif t.type == T.t_break:
-                if startline is not None:
-                    sub = self.tokens[startline + 1 : i]
-                    lines.append(
-                        T(
-                            type=T.t_complex_line,
-                            start=tokens[startline].start,
-                            len=0,
-                            children=sub,
-                            lineprefix=getlineprefix(),
-                        )
-                    )
-                    startline = None
-                if lines:
-                    self.analyze(lines)
-                    self.tokens[firsttoken:i] = lines
-                    i = firsttoken
-                    firsttoken = None
-                    lines = []
-                    continue
-
-                firsttoken = None
-
-                lines = []
-                i += 1
+                i, start_line, first_token, lines = self.process_break(
+                    i, start_line, first_token, lines
+                )
             else:
-                if startline is None and lines:
+                if start_line is None and lines:
                     self.analyze(lines)
-                    self.tokens[firsttoken:i] = lines
-                    i = firsttoken
+                    self.tokens[first_token:i] = lines
+                    i = first_token
                     lines = []
-                    firsttoken = None
+                    first_token = None
                 else:
                     i += 1
 
-        if startline is not None:
-            sub = self.tokens[startline + 1 :]
+        if start_line is not None:
+            sub = self.tokens[start_line + 1 :]
             lines.append(
                 T(
                     type=T.t_complex_line,
-                    start=tokens[startline].start,
+                    start=self.tokens[start_line].start,
                     children=sub,
-                    lineprefix=getlineprefix(),
+                    lineprefix=self.get_line_prefix(start_line),
                 )
             )
 
         if lines:
             self.analyze(lines)
-            self.tokens[firsttoken:] = lines
+            self.tokens[first_token:] = lines
+
+    def process_break(self, i, start_line, first_token, lines):
+        if start_line is not None:
+            sub = self.tokens[start_line + 1 : i]
+            lines.append(
+                T(
+                    type=T.t_complex_line,
+                    start=self.tokens[start_line].start,
+                    len=0,
+                    children=sub,
+                    lineprefix=self.get_line_prefix(start_line),
+                )
+            )
+            start_line = None
+        if lines:
+            self.analyze(lines)
+            self.tokens[first_token:i] = lines
+            i = first_token
+            first_token = None
+            lines = []
+            return i, start_line, first_token, lines
+        first_token = None
+        lines = []
+        i += 1
+        return i, start_line, first_token, lines
+
+    def process_newline_when_start_line_exists(self, i, start_line, lines):
+        sub = self.tokens[start_line + 1 : i + 1]
+        lines.append(
+            T(
+                type=T.t_complex_line,
+                start=self.tokens[start_line].start,
+                len=0,
+                children=sub,
+                lineprefix=self.get_line_prefix(start_line),
+            )
+        )
+        start_line = None
+        i += 1
+        return i, start_line
+
+    @staticmethod
+    def process_item_and_colon(i, first_token):
+        if first_token is None:
+            first_token = i
+        start_line = i
+        i += 1
+        return i, start_line, first_token
 
 
 class ParseLinks(object):
@@ -577,104 +590,124 @@ class ParseLinks(object):
         while i < len(self.tokens):
             t = tokens[i]
             if t.type == T.t_2box_open:
-                if len(marks) > 1:
-                    stack.append(marks)
-                marks = [i]
-                i += 1
+                i, marks = self.process_2box_open(i, marks, stack)
             elif t.type == T.t_newline and len(marks) < 2:
-                if stack:
-                    marks = stack.pop()
-                else:
-                    marks = []
-                i += 1
+                i, marks = self.process_newline(i, stack)
             elif t.type == T.t_special and t.text == "|":
-                marks.append(i)
-                i += 1
+                i = self.process_special(i, marks)
             elif t.type == T.t_2box_close and marks:
-                marks.append(i)
-                start = marks[0]
-
-                target = T.join_as_text(tokens[start + 1 : marks[1]]).strip()
-                target = target.strip(u"\u200e\u200f")
-                if target.startswith(":"):
-                    target = target[1:]
-                    colon = True
-                else:
-                    colon = False
-
-                ilink = self.nshandler.resolve_interwiki(target)
-                if ilink:
-                    url = ilink.url
-                    ns = None
-                    partial = ilink.partial
-                    langlink = ilink.language
-                    interwiki = ilink.prefix
-                    full = None
-                else:
-                    if target.startswith("/") and self.xopts.title:
-                        ns, partial, full = self.nshandler.splitname(self.xopts.title + target)
-                        if full.endswith("/"):
-                            full = full[:-1]
-                            target = target[1:-1]
-                    else:
-                        ns, partial, full = self.nshandler.splitname(target)
-
-                    if self.xopts.wikidb is not None:
-                        url = self.xopts.wikidb.getURL(full)
-                    else:
-                        url = None
-                    langlink = None
-                    interwiki = None
-
-                if not ilink and not partial:
-                    i += 1
-                    if stack:
-                        marks = stack.pop()
-                    else:
-                        marks = []
-                    continue
-
-                node = T(
-                    type=T.t_complex_link,
-                    children=[],
-                    ns=ns,
-                    colon=colon,
-                    lang=self.lang,
-                    nshandler=self.nshandler,
-                    url=url,
-                )
-                if langlink:
-                    node.langlink = langlink
-                if interwiki:
-                    node.interwiki = interwiki
-
-                sub = None
-                if ns == nshandling.NS_IMAGE:
-                    sub = self.extract_image_modifiers(marks, node)
-                elif len(marks) > 2:
-                    sub = tokens[marks[1] + 1 : marks[-1]]
-
-                if sub is None:
-                    sub = []
-
-                node.children = sub
-                tokens[start : i + 1] = [node]
-                node.target = target
-                node.full_target = full
-                if stack:
-                    marks = stack.pop()
-                else:
-                    marks = []
-                i = start + 1
+                i, marks = self.process_2box_close(i, marks, stack, tokens)
             else:
                 i += 1
+
+    def process_2box_close(self, i, marks, stack, tokens):
+        marks.append(i)
+        start = marks[0]
+        colon, target = self.process_colon_and_target(marks, start, tokens)
+        ilink = self.nshandler.resolve_interwiki(target)
+        if ilink:
+            url = ilink.url
+            ns = None
+            partial = ilink.partial
+            langlink = ilink.language
+            interwiki = ilink.prefix
+            full = None
+        else:
+            url, ns, partial, target, full = self.process_non_ilink_target(target)
+            langlink = None
+            interwiki = None
+        if not ilink and not partial:
+            i += 1
+            if stack:
+                marks = stack.pop()
+            else:
+                marks = []
+            return i, marks
+        node = T(
+            type=T.t_complex_link,
+            children=[],
+            ns=ns,
+            colon=colon,
+            lang=self.lang,
+            nshandler=self.nshandler,
+            url=url,
+        )
+        if langlink:
+            node.langlink = langlink
+        if interwiki:
+            node.interwiki = interwiki
+        sub = self.process_sub(marks, node, ns, tokens)
+        node.children = sub
+        tokens[start : i + 1] = [node]
+        node.target = target
+        node.full_target = full
+        if stack:
+            marks = stack.pop()
+        else:
+            marks = []
+        i = start + 1
+        return i, marks
+
+    def process_non_ilink_target(self, target):
+        if target.startswith("/") and self.xopts.title:
+            ns, partial, full = self.nshandler.splitname(self.xopts.title + target)
+            if full.endswith("/"):
+                full = full[:-1]
+                target = target[1:-1]
+        else:
+            ns, partial, full = self.nshandler.splitname(target)
+        if self.xopts.wikidb is not None:
+            url = self.xopts.wikidb.getURL(full)
+        else:
+            url = None
+        return url, ns, partial, target, full
+
+    def process_colon_and_target(self, marks, start, tokens):
+        target = T.join_as_text(tokens[start + 1 : marks[1]]).strip()
+        target = target.strip("\u200e\u200f")
+        if target.startswith(":"):
+            target = target[1:]
+            colon = True
+        else:
+            colon = False
+        return colon, target
+
+    def process_sub(self, marks, node, ns, tokens):
+        sub = None
+        if ns == nshandling.NS_IMAGE:
+            sub = self.extract_image_modifiers(marks, node)
+        elif len(marks) > 2:
+            sub = tokens[marks[1] + 1 : marks[-1]]
+        if sub is None:
+            sub = []
+        return sub
+
+    def process_special(self, i, marks):
+        marks.append(i)
+        i += 1
+        return i
+
+    def process_newline(self, i, stack):
+        if stack:
+            marks = stack.pop()
+        else:
+            marks = []
+        i += 1
+        return i, marks
+
+    def process_2box_open(self, i, marks, stack):
+        if len(marks) > 1:
+            stack.append(marks)
+        marks = [i]
+        i += 1
+        return i, marks
 
 
 class ParseParagraphs(object):
     need_walker = False
 
     def __init__(self, tokens, xopts):
-        walker = get_token_walker(skip_tags=set(["p", "ol", "ul", "table", "tr", "@section"]))
+        walker = get_token_walker(skip_tags={"p", "ol", "ul", "table", "tr", "@section"})
         for t in walker(tokens):
             self.tokens = t
             self.run()
@@ -844,7 +877,7 @@ class ParseUniq(object):
             except AttributeError:
                 m = self._create_generic
 
-            tokens[i] = m(name, vlist, inner or u"", xopts)
+            tokens[i] = m(name, vlist, inner or "", xopts)
             if tokens[i] is None:
                 del tokens[i]
             else:
@@ -916,16 +949,16 @@ class ParseUniq(object):
             inner = expander.parseAndExpand(inner, True)
 
         res = []
-        res.append(u"\n")
+        res.append("\n")
         for line in inner.split("\n"):
             if line.strip():
                 res.append(":")
             if line.startswith(" "):
-                res.append(u"&nbsp;")
+                res.append("&nbsp;")
             res.append(line.strip())
-            res.append(u"\n")
-        res.append(u"\n")
-        res = u"".join(res)
+            res.append("\n")
+        res.append("\n")
+        res = "".join(res)
         children = parse_txt(res, xopts)
         return T(type=T.t_complex_tag, tagname="poem", vlist=vlist, children=children)
 
@@ -937,7 +970,7 @@ class ParseUniq(object):
         t.imagemap = imgmap.ImageMapFromString(txt)
         if t.imagemap.image:
             t.imagemap.imagelink = None
-            s = u"[[" + t.imagemap.image + u"]]"
+            s = "[[" + t.imagemap.image + "]]"
             res = parse_txt(s, xopts)
             if res and res[0].type == T.t_complex_link and res[0].ns == 6:
                 t.imagemap.imagelink = res[0]
@@ -971,9 +1004,9 @@ class ParseUniq(object):
             else:
                 base = vlist.get("index", "")
                 base = nshandler.get_fqname(base, page_ns)
-                pages = [u"%s/%s" % (base, i) for i in range(si, ei + 1)]
+                pages = ["%s/%s" % (base, i) for i in range(si, ei + 1)]
 
-            rawtext = u"".join(u"{{%s}}\n" % x for x in pages)
+            rawtext = "".join("{{%s}}\n" % x for x in pages)
             te = expander.__class__(rawtext, pagename=expander.pagename, wikidb=expander.db)
             children = parse_txt(
                 te.expandTemplates(True),
@@ -1002,13 +1035,13 @@ def fix_urllink_inside_link(tokens, xopt):
             last = T.t_2box_open
         elif t.type == T.t_urllink:
             last = T.t_urllink
-        elif t.type == T.t_2box_close:
-            if (
-                tokens[idx + 1].type == T.t_special
-                and tokens[idx + 1].text == "]"
-                and last == T.t_urllink
-            ):
-                tokens[idx], tokens[idx + 1] = tokens[idx + 1], tokens[idx]
+        elif (
+            t.type == T.t_2box_close
+            and tokens[idx + 1].type == T.t_special
+            and tokens[idx + 1].text == "]"
+            and last == T.t_urllink
+        ):
+            tokens[idx], tokens[idx + 1] = tokens[idx + 1], tokens[idx]
 
         idx += 1
 
@@ -1031,7 +1064,7 @@ def fix_break_between_pre(tokens, xopt):
     while idx < len(tokens) - 1:
         t = tokens[idx]
         if t.type == T.t_break and t.text.startswith(" ") and tokens[idx + 1].type == T.t_pre:
-            tokens[idx : idx + 1] = [T(type=T.t_pre, text=" "), T(type=T.t_newline, text=u"\n")]
+            tokens[idx : idx + 1] = [T(type=T.t_pre, text=" "), T(type=T.t_newline, text="\n")]
             idx += 2
         else:
             idx += 1
@@ -1043,22 +1076,26 @@ def fix_li_tags(tokens, xopts):
     while todo:
         parent, tokens = todo.pop()
         if parent.tagname not in ("ol", "ul"):
-            idx = 0
-            while idx < len(tokens):
-                start = idx
-                while idx < len(tokens) and tokens[idx].tagname == "li":
-                    idx += 1
-
-                if idx > start:
-                    lst = T(type=T.t_complex_tag, tagname="ul", children=tokens[start:idx])
-                    tokens[start : idx + 1] = [lst]
-                    idx = start + 1
-                else:
-                    idx += 1
+            process_li_tokens(tokens)
 
         for t in tokens:
             if t.children:
                 todo.append((t, t.children))
+
+
+def process_li_tokens(tokens):
+    idx = 0
+    while idx < len(tokens):
+        start = idx
+        while idx < len(tokens) and tokens[idx].tagname == "li":
+            idx += 1
+
+        if idx > start:
+            lst = T(type=T.t_complex_tag, tagname="ul", children=tokens[start:idx])
+            tokens[start : idx + 1] = [lst]
+            idx = start + 1
+        else:
+            idx += 1
 
 
 fix_li_tags.need_walker = False
