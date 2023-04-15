@@ -347,7 +347,7 @@ class ParseLines:
     def splitdl(self, item):
         for i, x in enumerate(item.children):
             if x.type == T.t_special and x.text == ":":
-                s = T(type=T.t_complex_style, caption=":", children=item.children[i + 1:])
+                s = T(type=T.t_complex_style, caption=":", children=item.children[i + 1 :])
                 del item.children[i:]
                 return s
 
@@ -426,27 +426,28 @@ class ParseLines:
 
         return node, newitem, endtag
 
+    @staticmethod
+    def append_line(lines, startpos, item, endtag=None):
+        line = lines[startpos]
+        if endtag:
+            for i, x in enumerate(line.children):
+                if x.rawtagname == endtag and x.type == T.t_html_tag_end:
+                    after = line.children[i + 1 :]
+                    del line.children[i:]
+                    item.children.append(line)
+                    lines[startpos] = T(
+                        type=T.t_complex_line, tagname="p", lineprefix=None, children=after
+                    )
+                    return
+
+        item.children.append(lines[startpos])
+        del lines[startpos]
+
     def collect_items(self, lines, startpos, prefix, node, newitem, endtag, dd):
-        def append_line():
-            line = lines[startpos]
-            if endtag:
-                for i, x in enumerate(line.children):
-                    if x.rawtagname == endtag and x.type == T.t_html_tag_end:
-                        after = line.children[i + 1 :]
-                        del line.children[i:]
-                        item.children.append(line)
-                        lines[startpos] = T(
-                            type=T.t_complex_line, tagname="p", lineprefix=None, children=after
-                        )
-                        return
-
-            item.children.append(lines[startpos])
-            del lines[startpos]
-
         while startpos < len(lines) - 1 and self.getchar(lines[startpos]) == prefix:
             item = newitem()
             item.children = []
-            append_line()
+            self.append_line(lines, startpos, item, endtag)
             broke_loop = False
 
             while (
@@ -454,7 +455,7 @@ class ParseLines:
                 and prefix == self.getchar(lines[startpos])
                 and len(lines[startpos].lineprefix) > 1
             ):
-                append_line()
+                self.append_line(lines, startpos, item, endtag)
 
             for x in item.children:
                 x.lineprefix = x.lineprefix[1:]
