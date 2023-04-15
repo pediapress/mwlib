@@ -347,101 +347,30 @@ class ParseLines:
     def splitdl(self, item):
         for i, x in enumerate(item.children):
             if x.type == T.t_special and x.text == ":":
-                s = T(type=T.t_complex_style, caption=":", children=item.children[i + 1 :])
+                s = T(type=T.t_complex_style, caption=":", children=item.children[i + 1:])
                 del item.children[i:]
                 return s
 
     def analyze(self, lines):
-        def getchar(node):
-            assert node.type == T.t_complex_line
-            if node.lineprefix:
-                return node.lineprefix[0]
-            return None
-
         lines.append(T(type=T.t_complex_line, lineprefix="<guard>"))  # guard
 
         startpos = 0
         while startpos < len(lines) - 1:
-            prefix = getchar(lines[startpos])
+            prefix = self.getchar(lines[startpos])
             if prefix is None:
-                if lines[startpos].tagname:
-                    lines[startpos].type = T.t_complex_tag
-                else:
-                    lines[startpos].type = T.t_complex_node
+                self.handle_no_prefix(lines, startpos)
                 startpos += 1
                 continue
 
-            endtag = None
-            if prefix == ":":
-                node = T(type=T.t_complex_style, caption=":")
-
-                def newitem():
-                    return T(type=T.t_complex_node, blocknode=True)
-
-            elif prefix == "*":
-                node = T(type=T.t_complex_tag, tagname="ul")
-
-                def newitem():
-                    return T(type=T.t_complex_tag, tagname="li", blocknode=True)
-
-                endtag = "ul"
-            elif prefix == "#":
-                node = T(type=T.t_complex_tag, tagname="ol")
-
-                def newitem():
-                    return T(type=T.t_complex_tag, tagname="li", blocknode=True)
-
-                endtag = "ol"
-            elif prefix == ";":
-                node = T(type=T.t_complex_style, caption=";")
-
-                def newitem():
-                    return T(type=T.t_complex_node, blocknode=True)
-
-            else:
-                assert 0
-
+            node, newitem, endtag = self.get_node_and_newitem(prefix)
             node.children = []
             dd = None
 
-            def append_line():
-                line = lines[startpos]
-                if endtag:
-                    for i, x in enumerate(line.children):
-                        if x.rawtagname == endtag and x.type == T.t_html_tag_end:
-                            after = line.children[i + 1 :]
-                            del line.children[i:]
-                            item.children.append(line)
-                            lines[startpos] = T(
-                                type=T.t_complex_line, tagname="p", lineprefix=None, children=after
-                            )
-                            return
-
-                item.children.append(lines[startpos])
-                del lines[startpos]
-
-            while startpos < len(lines) - 1 and getchar(lines[startpos]) == prefix:
-                # collect items
-                item = newitem()
-                item.children = []
-                append_line()
-
-                while (
-                    startpos < len(lines) - 1
-                    and prefix == getchar(lines[startpos])
-                    and len(lines[startpos].lineprefix) > 1
-                ):
-                    append_line()
-
-                for x in item.children:
-                    x.lineprefix = x.lineprefix[1:]
-                self.analyze(item.children)
-                node.children.append(item)
-                if prefix == ";" and item.children and item.children[0].type == T.t_complex_node:
-                    dd = self.splitdl(item.children[0])
-                    if dd is not None:
-                        break
-                if prefix in ":;":
+            while startpos < len(lines) - 1 and self.getchar(lines[startpos]) == prefix:
+                dd, startpos, broke_loop = self.collect_items(
+                    lines, startpos, prefix, node, newitem, endtag, dd
+                )
+                if broke_loop:
                     break
 
             lines.insert(startpos, node)
@@ -450,6 +379,97 @@ class ParseLines:
                 lines.insert(startpos, dd)
                 startpos += 1
         del lines[-1]  # remove guard
+
+    def getchar(self, node):
+        assert node.type == T.t_complex_line
+        if node.lineprefix:
+            return node.lineprefix[0]
+        return None
+
+    def handle_no_prefix(self, lines, startpos):
+        if lines[startpos].tagname:
+            lines[startpos].type = T.t_complex_tag
+        else:
+            lines[startpos].type = T.t_complex_node
+
+    def get_node_and_newitem(self, prefix):
+        if prefix == ":":
+            node = T(type=T.t_complex_style, caption=":")
+
+            def newitem():
+                return T(type=T.t_complex_node, blocknode=True)
+
+            endtag = None
+        elif prefix == "*":
+            node = T(type=T.t_complex_tag, tagname="ul")
+
+            def newitem():
+                return T(type=T.t_complex_tag, tagname="li", blocknode=True)
+
+            endtag = "ul"
+        elif prefix == "#":
+            node = T(type=T.t_complex_tag, tagname="ol")
+
+            def newitem():
+                return T(type=T.t_complex_tag, tagname="li", blocknode=True)
+
+            endtag = "ol"
+        elif prefix == ";":
+            node = T(type=T.t_complex_style, caption=";")
+
+            def newitem():
+                return T(type=T.t_complex_node, blocknode=True)
+
+            endtag = None
+        else:
+            assert 0
+
+        return node, newitem, endtag
+
+    def collect_items(self, lines, startpos, prefix, node, newitem, endtag, dd):
+        def append_line():
+            line = lines[startpos]
+            if endtag:
+                for i, x in enumerate(line.children):
+                    if x.rawtagname == endtag and x.type == T.t_html_tag_end:
+                        after = line.children[i + 1 :]
+                        del line.children[i:]
+                        item.children.append(line)
+                        lines[startpos] = T(
+                            type=T.t_complex_line, tagname="p", lineprefix=None, children=after
+                        )
+                        return
+
+            item.children.append(lines[startpos])
+            del lines[startpos]
+
+        while startpos < len(lines) - 1 and self.getchar(lines[startpos]) == prefix:
+            item = newitem()
+            item.children = []
+            append_line()
+            broke_loop = False
+
+            while (
+                startpos < len(lines) - 1
+                and prefix == self.getchar(lines[startpos])
+                and len(lines[startpos].lineprefix) > 1
+            ):
+                append_line()
+
+            for x in item.children:
+                x.lineprefix = x.lineprefix[1:]
+            self.analyze(item.children)
+            node.children.append(item)
+            if prefix == ";" and item.children and item.children[0].type == T.t_complex_node:
+                dd = self.splitdl(item.children[0])
+                if dd is not None:
+                    broke_loop = True
+                    break
+            if prefix in ":;":
+                broke_loop = True
+                break
+
+        return dd, startpos, broke_loop
 
     def get_line_prefix(self, start_line):
         return (self.tokens[start_line].text or "").strip()
