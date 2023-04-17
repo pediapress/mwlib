@@ -8,6 +8,7 @@ from mwlib import expander, parser, uparser
 from mwlib.dummydb import DummyDB
 from mwlib.expander import DictDB
 from mwlib.refine import core, util
+from mwlib.utoken import show
 
 BAD_URL = "bad url"
 BAD_VLIST = "bad vlist"
@@ -144,7 +145,7 @@ def test_switch_default():
 def test_tag_expand_vs_uniq():
     db = DictDB(Foo="""{{#tag:pre|inside pre}}""")
     r = uparser.parse_string(title="Foo", wikidb=db)
-    core.show(r)
+    show(r)
     pre = r.find(parser.PreFormatted)
     assert len(pre) == 1, EXPECTED_A_PREFORMATTED_NODE
 

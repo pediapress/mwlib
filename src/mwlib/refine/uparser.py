@@ -5,7 +5,8 @@
 from mwlib import expander, metabook, nshandling
 from mwlib.log import Log
 from mwlib.parser.old_uparser import postprocessors
-from mwlib.refine import compat, core
+from mwlib.refine import compat
+from mwlib.utoken import show, walknode, walknodel
 
 log = Log("refine.uparser")
 
@@ -91,5 +92,5 @@ def parse_string(
 
 def simpleparse(raw, lang=None):  # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
     a = compat.parse_txt(raw, lang=lang)
-    core.show(a)
+    show(a)
     return a

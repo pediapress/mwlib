@@ -4,6 +4,7 @@
 # See README.rst for additional licensing information.
 
 from mwlib import parser, uparser
+from mwlib.utoken import show
 
 parse = uparser.simpleparse
 
