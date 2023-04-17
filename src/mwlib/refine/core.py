@@ -784,78 +784,97 @@ class CombinedParser(object):
                 p(tokens, xopts)
 
 
-def mark_style_tags(tokens, xopts):
+def _create(tokens, i, start, state):
+    if not state or i <= start:
+        return False
+    outer = None
+    children = tokens[start:i]
+    for tag, tok in state.items():
+        outer = T(type=T.t_complex_tag, tagname=tag, children=children, vlist=tok.vlist)
+        children = [outer]
+    tokens[start:i] = [outer]
+    return True
+
+
+def mark_style_tags(tokens, xopts):  # pylint: disable=unused-argument
     tags = set(
         "abbr tt strike ins del small sup sub b strong cite i u em big font s var kbd".split()
     )
 
     todo = [(0, dict(), tokens)]
 
-    def create():
-        if not state or i <= start:
-            return False
-
-        children = tokens[start:i]
-        for tag, tok in state.items():
-            outer = T(type=T.t_complex_tag, tagname=tag, children=children, vlist=tok.vlist)
-            children = [outer]
-        tokens[start:i] = [outer]
-        return True
-
     while todo:
         i, state, tokens = todo.pop()
         start = i
         while i < len(tokens):
-            t = tokens[i]
-            if t.type == T.t_html_tag and t.rawtagname in tags:
-                del tokens[i]
-                if t.tag_selfClosing:
+            current_token = tokens[i]
+            if current_token.type == T.t_html_tag and current_token.rawtagname in tags:
+                i, start, continue_loop = _process_html_tag(current_token, i, start, state, tokens)
+                if continue_loop:
                     continue
-
-                if t.rawtagname in state:
-                    if create():
-                        start += 1
-                        i = start
-                    start = i
-
-                    del state[t.rawtagname]
-                    continue
-
-                if create():
-                    start += 1
-                    i = start
-                start = i
-                state[t.rawtagname] = t
-            elif t.type == T.t_html_tag_end and t.rawtagname in tags:
-                del tokens[i]
-                rawtagname = t.rawtagname
-
-                if rawtagname not in state:
-                    if rawtagname == "sup":
-                        rawtagname = "sub"
-                    elif rawtagname == "sub":
-                        rawtagname = "sup"
-
-                if rawtagname in state:
-                    if create():
-                        start += 1
-                        i = start
-                    del state[rawtagname]
-            elif t.children:
-                if create():
-                    start += 1
-                    i = start
-                assert tokens[i] is t
-                if t.type in (T.t_complex_table, T.t_complex_table_row, T.t_complex_table_cell):
-                    todo.append((i + 1, state, tokens))
-                    todo.append((0, dict(), t.children))
-                else:
-                    todo.append((i + 1, state, tokens))
-                    todo.append((0, state, t.children))
+            elif current_token.type == T.t_html_tag_end and current_token.rawtagname in tags:
+                i, start = _process_html_tag_end(current_token, i, start, state, tokens)
+            elif current_token.children:
+                i, start = _process_current_token_children(
+                    current_token, i, start, state, todo, tokens
+                )
                 break
             else:
                 i += 1
-        create()
+        _create(tokens, i, start, state)
+
+
+def _process_current_token_children(current_token, i, start, state, todo, tokens):
+    if _create(tokens, i, start, state):
+        start += 1
+        i = start
+    assert tokens[i] is current_token
+    if current_token.type in (T.t_complex_table, T.t_complex_table_row, T.t_complex_table_cell):
+        todo.append((i + 1, state, tokens))
+        todo.append((0, dict(), current_token.children))
+    else:
+        todo.append((i + 1, state, tokens))
+        todo.append((0, state, current_token.children))
+    return i, start
+
+
+def _process_html_tag_end(current_token, i, start, state, tokens):
+    del tokens[i]
+    raw_tag_name = current_token.rawtagname
+    if raw_tag_name not in state:
+        if raw_tag_name == "sup":
+            raw_tag_name = "sub"
+        elif raw_tag_name == "sub":
+            raw_tag_name = "sup"
+    if raw_tag_name in state:
+        if _create(tokens, i, start, state):
+            start += 1
+            i = start
+        del state[raw_tag_name]
+    return i, start
+
+
+def _process_html_tag(current_token, i, start, state, tokens):
+    del tokens[i]
+    continue_loop = False
+    if current_token.tag_selfClosing:
+        continue_loop = True
+        return i, start, continue_loop
+    if current_token.rawtagname in state:
+        if _create(tokens, i, start, state):
+            start += 1
+            i = start
+        start = i
+
+        del state[current_token.rawtagname]
+        continue_loop = True
+        return i, start, continue_loop
+    if _create(tokens, i, start, state):
+        start += 1
+        i = start
+    start = i
+    state[current_token.rawtagname] = current_token
+    return i, start, continue_loop
 
 
 mark_style_tags.need_walker = False
