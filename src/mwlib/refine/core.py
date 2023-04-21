@@ -128,16 +128,16 @@ class ParseSections(object):
             l2 = tokens[current.endtitle].text.count("=")
             level = min(l1, l2)
 
-            # FIXME: make this a caption
+            # KLUDGE: make this a caption
             caption = Token(
-                type=Token.t_complex_node, children=tokens[current.start + 1 : current.endtitle]
+                type=Token.t_complex_node, children=tokens[current.start + 1: current.endtitle]
             )
             if l2 > l1:
                 caption.children.append(Token(type=Token.t_text, text="=" * (l2 - l1)))
             elif l1 > l2:
                 caption.children.insert(0, Token(type=Token.t_text, text="=" * (l1 - l2)))
 
-            body = Token(type=Token.t_complex_node, children=tokens[current.endtitle + 1 : i])
+            body = Token(type=Token.t_complex_node, children=tokens[current.endtitle + 1: i])
 
             sect = Token(
                 type=Token.t_complex_section,
@@ -146,7 +146,7 @@ class ParseSections(object):
                 level=level,
                 blocknode=True,
             )
-            tokens[current.start : i] = [sect]
+            tokens[current.start: i] = [sect]
 
             while sections and level <= sections[-1].level:
                 sections.pop()
@@ -192,8 +192,8 @@ class ParseUrls(object):
                 start = i
                 i += 1
             elif t.type == Token.t_special and t.text == "]" and start is not None:
-                sub = self.tokens[start + 1 : i]
-                self.tokens[start : i + 1] = [
+                sub = self.tokens[start + 1: i]
+                self.tokens[start: i + 1] = [
                     Token(
                         type=Token.t_complex_named_url,
                         children=sub,
@@ -205,7 +205,7 @@ class ParseUrls(object):
             elif t.type == Token.t_2box_close and start is not None:
                 self.tokens[i].type = Token.t_special
                 self.tokens[i].text = "]"
-                sub = self.tokens[start + 1 : i]
+                sub = self.tokens[start + 1: i]
                 self.tokens[start:i] = [
                     Token(
                         type=Token.t_complex_named_url,
@@ -267,7 +267,7 @@ class ParseSingleQuote:
                     pos += 1
                 else:
                     tokens[start:pos] = [
-                        Token(type=Token.t_complex_style, children=tokens[start + 1 : pos])
+                        Token(type=Token.t_complex_style, children=tokens[start + 1: pos])
                     ]
                     self.styles.append(tokens[start])
                     pos = start + 1
@@ -275,7 +275,7 @@ class ParseSingleQuote:
             elif t.type == Token.t_newline:
                 if start is not None:
                     tokens[start:pos] = [
-                        Token(type=Token.t_complex_style, children=tokens[start + 1 : pos])
+                        Token(type=Token.t_complex_style, children=tokens[start + 1: pos])
                     ]
                     self.styles.append(tokens[start])
                     pos = start
@@ -291,7 +291,7 @@ class ParseSingleQuote:
 
         if start is not None:
             tokens[start:pos] = [
-                Token(type=Token.t_complex_style, children=tokens[start + 1 : pos])
+                Token(type=Token.t_complex_style, children=tokens[start + 1: pos])
             ]
             self.styles.append(tokens[start])
 
@@ -319,13 +319,13 @@ class ParsePreformatted(object):
                 start = i
                 i += 1
             elif t.type == Token.t_newline and start is not None:
-                sub = tokens[start + 1 : i + 1]
+                sub = tokens[start + 1: i + 1]
                 if start > 0 and tokens[start - 1].type == Token.t_complex_preformatted:
-                    del tokens[start : i + 1]
+                    del tokens[start: i + 1]
                     tokens[start - 1].children.extend(sub)
                     i = start
                 else:
-                    tokens[start : i + 1] = [
+                    tokens[start: i + 1] = [
                         Token(type=Token.t_complex_preformatted, children=sub, blocknode=True)
                     ]
                     i = start + 1
@@ -348,7 +348,7 @@ class ParseLines:
     def splitdl(self, item):
         for i, x in enumerate(item.children):
             if x.type == Token.t_special and x.text == ":":
-                s = Token(type=Token.t_complex_style, caption=":", children=item.children[i + 1 :])
+                s = Token(type=Token.t_complex_style, caption=":", children=item.children[i + 1:])
                 del item.children[i:]
                 return s
 
@@ -433,7 +433,7 @@ class ParseLines:
         if endtag:
             for i, x in enumerate(line.children):
                 if x.rawtagname == endtag and x.type == Token.t_html_tag_end:
-                    after = line.children[i + 1 :]
+                    after = line.children[i + 1:]
                     del line.children[i:]
                     item.children.append(line)
                     lines[startpos] = Token(
@@ -503,7 +503,7 @@ class ParseLines:
                     i += 1
 
         if start_line is not None:
-            sub = self.tokens[start_line + 1 :]
+            sub = self.tokens[start_line + 1:]
             lines.append(
                 Token(
                     type=Token.t_complex_line,
@@ -895,16 +895,16 @@ class ParseUniq(object):
 
         i = 0
         while i < len(tokens):
-            t = tokens[i]
-            if t.type != Token.t_uniq:
+            current_token = tokens[i]
+            if current_token.type != Token.t_uniq:
                 i += 1
                 continue
 
-            text = t.text
+            text = current_token.text
             try:
                 match = uniquifier.uniq2repl[text]
             except KeyError:
-                t.type == Token.t_text
+                assert current_token.type == Token.t_text
                 i += 1
                 continue
 
@@ -947,7 +947,7 @@ class ParseUniq(object):
         inner = util.replace_html_entities(util.remove_nowiki_tags(inner))
         return self._create_generic(name, vlist, inner, xopts)
 
-    def create_source(self, name, vlist, inner, xopts):  # pylint: disable=unused-argument
+    def create_source(self, name, vlist, inner, _xopts):
         children = [Token(type=Token.t_text, text=inner)]
         blocknode = True
         if vlist and vlist.get("enclose", "") == "none":
@@ -961,7 +961,7 @@ class ParseUniq(object):
             blocknode=blocknode,
         )
 
-    def create_ref(self, name, vlist, inner, xopts):
+    def create_ref(self, _name, vlist, inner, xopts):
         expander = xopts.expander
         if expander is not None and inner:
             inner = expander.parseAndExpand(inner, True)
@@ -978,7 +978,7 @@ class ParseUniq(object):
 
         return Token(type=Token.t_complex_tag, tagname="ref", vlist=vlist, children=children)
 
-    def create_timeline(self, name, vlist, inner, xopts):
+    def create_timeline(self, _name, vlist, inner, _xopts):
         return Token(
             type=Token.t_complex_tag,
             tagname="timeline",
@@ -987,16 +987,16 @@ class ParseUniq(object):
             blocknode=True,
         )
 
-    def create_math(self, name, vlist, inner, xopts):
+    def create_math(self, _name, vlist, inner, _xopts):
         return Token(type=Token.t_complex_tag, tagname="math", vlist=vlist, math=inner)
 
-    def create_gallery(self, name, vlist, inner, xopts):
+    def create_gallery(self, _name, vlist, inner, xopts):
         sub = _parse_gallery_txt(inner, xopts)
         return Token(
             type=Token.t_complex_tag, tagname="gallery", vlist=vlist, children=sub, blocknode=True
         )
 
-    def create_poem(self, name, vlist, inner, xopts):
+    def create_poem(self, _name, vlist, inner, xopts):
         expander = xopts.expander
         if expander is not None and inner:
             inner = expander.parseAndExpand(inner, True)
@@ -1015,7 +1015,7 @@ class ParseUniq(object):
         children = parse_txt(res, xopts)
         return Token(type=Token.t_complex_tag, tagname="poem", vlist=vlist, children=children)
 
-    def create_imagemap(self, name, vlist, inner, xopts):
+    def create_imagemap(self, _name, vlist, inner, xopts):
         from mwlib import imgmap
 
         txt = inner
@@ -1030,12 +1030,12 @@ class ParseUniq(object):
 
         return t
 
-    def create_nowiki(self, name, vlist, inner, xopts):
+    def create_nowiki(self, _name, _vlist, inner, _xopts):
         txt = inner
         txt = util.replace_html_entities(txt)
         return Token(type=Token.t_text, text=txt)
 
-    def create_pages(self, name, vlist, inner, xopts):
+    def create_pages(self, name, vlist, _inner, xopts):
         expander = xopts.expander
 
         if not vlist:
@@ -1079,7 +1079,7 @@ class XBunch(object):
         return None
 
 
-def fix_urllink_inside_link(tokens, xopt):
+def fix_urllink_inside_link(tokens, _xopt):
     idx = 0
     last = None
     while idx < len(tokens) - 1:

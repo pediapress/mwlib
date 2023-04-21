@@ -116,6 +116,21 @@ class Token:
 
     t_html_tag_end = 100
 
+    t_complex_article = None
+    t_complex_caption = None
+    t_complex_compat = None
+    t_complex_line = None
+    t_complex_link = None
+    t_complex_named_url = None
+    t_complex_node = None
+    t_complex_preformatted = None
+    t_complex_section = None
+    t_complex_style = None
+    t_complex_table = None
+    t_complex_table_cell = None
+    t_complex_table_row = None
+    t_complex_tag = None
+
     token2name = {}
     _text = None
 

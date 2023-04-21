@@ -6,9 +6,12 @@ import subprocess
 import tempfile
 import zipfile
 
+import pytest
+
 from mwlib.nuwiki import adapt
 
 
+@pytest.mark.integration
 class TestNuwikiXnet:
     @classmethod
     def setup_class(cls):
