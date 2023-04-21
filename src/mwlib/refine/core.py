@@ -904,7 +904,6 @@ class ParseUniq(object):
             try:
                 match = uniquifier.uniq2repl[text]
             except KeyError:
-                assert current_token.type == Token.t_text
                 i += 1
                 continue
 
