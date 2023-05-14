@@ -3,12 +3,11 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
 from mwlib.utoken import show, Token as T
 from mwlib.refine import util
 
 
-class parse_table_cells(object):
+class TableCellParser(object):
     def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
@@ -63,10 +62,7 @@ class parse_table_cells(object):
             elif tokens[start].rawtagname == "td":
                 is_header = False
 
-            if is_header:
-                tagname = "th"
-            else:
-                tagname = "td"
+            tagname = "th" if is_header else "td"
 
             search_modifier = tokens[start].text.strip() in ("|", "!", "||", "!!")
             sub = tokens[start + 1:i - skip_end]
@@ -102,7 +98,7 @@ class parse_table_cells(object):
             makecell()
 
 
-class parse_table_rows(object):
+class TableRowParser(object):
     def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.xopts = xopts
@@ -134,23 +130,23 @@ class parse_table_rows(object):
 
         start = None
         remove_start = 1
-        rowbegintoken = None
+        row_begin_token = None
 
         def should_find_modifier():
-            if rowbegintoken is None:
+            if row_begin_token is None:
                 return False
-            if rowbegintoken.rawtagname:
+            if row_begin_token.rawtagname:
                 return False
             return True
 
         def args():
-            if rowbegintoken is None:
+            if row_begin_token is None:
                 return {}
-            return dict(vlist=rowbegintoken.vlist)
+            return dict(vlist=row_begin_token.vlist)
 
         while i < len(tokens):
             if start is None and self.is_table_cell_start(tokens[i]):
-                rowbegintoken = None
+                row_begin_token = None
                 start = i
                 remove_start = 0
                 i += 1
@@ -161,14 +157,14 @@ class parse_table_rows(object):
                                          start=tokens[start].start, children=children, **args())]
                     if should_find_modifier():
                         self.find_modifier(tokens[start])
-                    parse_table_cells(children, self.xopts)
+                    TableCellParser(children, self.xopts)
                     start += 1  # we didn't remove the start symbol above
-                    rowbegintoken = tokens[start]
+                    row_begin_token = tokens[start]
                     remove_start = 1
                     i = start + 1
 
                 else:
-                    rowbegintoken = tokens[i]
+                    row_begin_token = tokens[i]
                     remove_start = 1
                     start = i
                     i += 1
@@ -179,10 +175,10 @@ class parse_table_rows(object):
                                              start=tokens[start].start, children=sub, **args())]
                     if should_find_modifier():
                         self.find_modifier(tokens[start])
-                    parse_table_cells(sub, self.xopts)
+                    TableCellParser(sub, self.xopts)
                     i = start + 1
                     start = None
-                    rowbegintoken = None
+                    row_begin_token = None
                 else:
                     i += 1
             else:
@@ -194,10 +190,10 @@ class parse_table_rows(object):
                                 start=tokens[start].start, children=sub, **args())]
             if should_find_modifier():
                 self.find_modifier(tokens[start])
-            parse_table_cells(sub, self.xopts)
+            TableCellParser(sub, self.xopts)
 
 
-class parse_tables(object):
+class TableParser(object):
     def __init__(self, tokens, xopts):
         self.xopts = xopts
         self.tokens = tokens
@@ -212,7 +208,7 @@ class parse_tables(object):
             token.type == T.t_html_tag_end and token.rawtagname == "table")
 
     def handle_rows(self, sublist):
-        parse_table_rows(sublist, self.xopts)
+        TableRowParser(sublist, self.xopts)
 
     def find_modifier(self, table):
         children = table.children
@@ -306,7 +302,7 @@ class parse_tables(object):
             maketable()
 
 
-class fix_tables(object):
+class TableFixer:
     def __init__(self, tokens, xopts):
         self.xopts = xopts
         self.tokens = tokens
@@ -361,7 +357,7 @@ def extract_garbage(tokens, is_allowed, is_whitespace=None):
     return res
 
 
-class remove_table_garbage(object):
+class TableGarbageRemover(object):
     need_walker = False
 
     def __init__(self, tokens, xopts):

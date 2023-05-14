@@ -3,9 +3,9 @@
 from mwlib import nshandling
 from mwlib.refine import core
 from mwlib.refine.parse_table import (
-    parse_tables,
-    parse_table_rows,
-    parse_table_cells,
+    TableParser,
+    TableRowParser,
+    TableCellParser,
 )
 from mwlib.utoken import show, walknode, walknodel
 
@@ -30,7 +30,7 @@ def empty():
 
 def test_parse_row_missing_beginrow():
     tokens = tokenize("<td>implicit row starts here</td><td>cell2</td>")
-    parse_table_rows(tokens, empty())
+    TableRowParser(tokens, empty())
     show(tokens)
     assert len(tokens) == 1
     assert tokens[0].type == Token.t_complex_table_row
@@ -39,14 +39,14 @@ def test_parse_row_missing_beginrow():
 
 def test_parse_table_cells_missing_close():
     tokens = core.tokenize("<td>bla")
-    parse_table_cells(tokens, empty())
+    TableCellParser(tokens, empty())
     show(tokens)
     assert tokens[0].type == Token.t_complex_table_cell, "expected a complex table cell"
 
 
 def test_parse_table_cells_closed_by_next_cell():
     tokens = core.tokenize("<td>foo<td>bar")
-    parse_table_cells(tokens, empty())
+    TableCellParser(tokens, empty())
     show(tokens)
     assert tokens[0].type == Token.t_complex_table_cell
     assert tokens[1].type == Token.t_complex_table_cell
@@ -59,7 +59,7 @@ def test_parse_table_cells_pipe():
     tokens = tokenize("{|\n|cell0||cell1||cell2\n|}")[2:-2]
     print("BEFORE:")
     show(tokens)
-    parse_table_cells(tokens, empty())
+    TableCellParser(tokens, empty())
     print("AFTER")
     show(tokens)
     assert len(tokens) == 3
@@ -81,7 +81,7 @@ def test_parse_cell_modifier():
 
     print("BEFORE:")
     show(tokens)
-    parse_table_cells(tokens, empty())
+    TableCellParser(tokens, empty())
     print("AFTER")
     show(tokens)
     assert tokens[0].type == Token.t_complex_table_cell
@@ -98,7 +98,7 @@ def test_parse_table_modifier():
 
     print("BEFORE:")
     show(tokens)
-    parse_tables(tokens, empty())
+    TableParser(tokens, empty())
 
     print("AFTER:")
     show(tokens)
@@ -118,7 +118,7 @@ def test_parse_table_row_modifier():
 
     print("BEFORE:")
     show(tokens)
-    parse_table_rows(tokens, empty())
+    TableRowParser(tokens, empty())
 
     print("AFTER:")
     show(tokens)

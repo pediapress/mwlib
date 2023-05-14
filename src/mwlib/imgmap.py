@@ -23,7 +23,7 @@ from pyparsing import (
 )
 
 
-class Gob(object):
+class Gob:
     def __init__(self, **kw):
         self.__dict__.update(kw)
 
@@ -59,29 +59,29 @@ class ImageMap(Gob):
     pass
 
 
-def _makepoly(tokens):
+def _make_poly(tokens):
     return Poly(caption=tokens[2].strip(), vertices=list(tokens[1]))
 
 
-def _makerect(tokens):
+def _make_rect(tokens):
     return Rect(
         caption=tokens[-1].strip(), top_left=tuple(tokens[1]), bottom_right=tuple(tokens[2])
     )
 
 
-def _makecomment(tokens):
+def _make_comment(tokens):
     return Comment(comment=tokens[1])
 
 
-def _makecircle(tokens):
+def _make_circle(tokens):
     return Circle(caption=tokens[3].strip(), center=tokens[1], radius=tokens[2])
 
 
-def _makedesc(tokens):
+def _make_desc(tokens):
     return Desc(location=tokens[1])
 
 
-def _makeimagemap(tokens):
+def _make_imagemap(tokens):
     image = None
     for x in tokens:
         if isinstance(x, six.string_types):
@@ -90,19 +90,19 @@ def _makeimagemap(tokens):
     return ImageMap(entries=list(tokens), image=image)
 
 
-comment = (Literal("#") + restOfLine).setParseAction(_makecomment)
+comment = (Literal("#") + restOfLine).setParseAction(_make_comment)
 
 integer = Word(nums).setParseAction(lambda s: int(s[0]))
 integer_pair = (integer + integer).setParseAction(lambda x: tuple(x))
 
 poly = Literal("poly") + Group(ZeroOrMore(integer_pair)) + restOfLine
-poly = poly.setParseAction(_makepoly)
+poly = poly.setParseAction(_make_poly)
 
 rect = Literal("rect") + integer_pair + integer_pair + restOfLine
-rect = rect.setParseAction(_makerect)
+rect = rect.setParseAction(_make_rect)
 
 circle = Literal("circle") + integer_pair + integer + restOfLine
-circle = circle.setParseAction(_makecircle)
+circle = circle.setParseAction(_make_circle)
 
 desc = Literal("desc") + (
     Literal("top-right")
@@ -111,12 +111,12 @@ desc = Literal("desc") + (
     | Literal("top-left")
     | Literal("none")
 )
-desc = desc.setParseAction(_makedesc)
+desc = desc.setParseAction(_make_desc)
 default = Literal("default") + restOfLine
 default.setParseAction(lambda t: Default(caption=t[1].strip()))
 
 
-def _makeother(tokens):
+def _make_other(tokens):
     if not tokens[0]:
         return [None]
     return tokens
@@ -126,17 +126,17 @@ def _makeother(tokens):
 # parse action for any occurence of restOfLine
 
 
-other = And([restOfLine]).setParseAction(_makeother)
+other = And([restOfLine]).setParseAction(_make_other)
 line = (
     Suppress(LineStart())
     + (comment | poly | rect | circle | desc | default | other)
     + Suppress(LineEnd())
 )
 imagemap = ZeroOrMore(line) + StringEnd()
-imagemap.setParseAction(_makeimagemap)
+imagemap.setParseAction(_make_imagemap)
 
 
-def ImageMapFromString(s):
+def image_map_from_string(s):
     # uhh. damn. can't get pyparsing to parse
     # commands, other lines (i.e. syntax errors strictly speaking)
     # and lines containing only whitespace...
@@ -168,7 +168,7 @@ default [[Mainz]]
 ---dfg-sdfg--sdfg
 blubb
 """
-    res = ImageMapFromString(ex)
+    res = image_map_from_string(ex)
     for x in res.entries:
         print(x)
 

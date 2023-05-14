@@ -31,6 +31,7 @@ def test_get_ext_modules():
         Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
         Extension("mwlib.templ.nodes", sources=[f"{MWLIB_SRC_DIR}/templ/nodes.c"]),
         Extension("mwlib.templ.evaluate", sources=[f"{MWLIB_SRC_DIR}/templ/evaluate.c"]),
+        Extension("mwlib.refine._core", sources=[f"{MWLIB_SRC_DIR}/refine/_core.c"]),
     ]
 
     extensions = get_ext_modules()

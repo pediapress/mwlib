@@ -7,10 +7,12 @@
 
 import re
 import sys
+from typing import Optional
 
 import six
 
 from mwlib.refine.util import parse_params, resolve_entity
+
 from . import _uscan as _mwscan
 
 
@@ -69,7 +71,9 @@ class Token:
     vlist = None
     target = None
     level = None
-    children = None
+    children: Optional[list] = None
+    target: Optional[str] = None
+    full_target = None
 
     rawtagname = None
     tagname = None
