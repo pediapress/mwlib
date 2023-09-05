@@ -12,7 +12,7 @@ def mark_infobox(self, name, raw):
     if not name.lower().startswith("infobox"):
         return res
     print("marking infobox %r" % name)
-    return (u"<div templatename=%s>\n" % quoteattr(name), res, u"</div>")
+    return ("<div templatename=%s>\n" % quoteattr(name), res, "</div>")
 
 
 def install():

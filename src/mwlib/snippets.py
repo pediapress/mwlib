@@ -10,13 +10,13 @@ class snippet:
         self.id = id
 
     def __repr__(self):
-        return "<%s %r %r...>" % (self.__class__.__name__, self.id, self.txt[:10])
+        return f"<{self.__class__.__name__} {self.id!r} {self.txt[:10]!r}...>"
 
 
 def get_all():
     # FIXME: turn this into a py.text fixture
     fn = os.path.join(os.path.dirname(__file__), "snippets.txt")
-    with open(fn, "r") as f:
+    with open(fn) as f:
         examples = f.read().split("\x0c\n")[1:]
     res = []
     for i, x in enumerate(examples):

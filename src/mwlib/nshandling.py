@@ -44,8 +44,8 @@ def fix_wikipedia_siteinfo(siteinfo):
 
     # --- http://code.pediapress.com/wiki/ticket/754
 
-    if u'\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [
-            x.get("prefix", u"")[2:] for x in siteinfo.get("interwikimap", [])]:
+    if '\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [
+            x.get("prefix", "")[2:] for x in siteinfo.get("interwikimap", [])]:
         print("WARNING: interwikimap contains garbage")
         from mwlib import siteinfo as simod
         en = simod.get_siteinfo("en")
@@ -109,7 +109,7 @@ class nshandler:
         namespaces = list(self.siteinfo["namespaces"].values())
         for ns in namespaces:
             star = ns["*"]
-            if star.lower() == name or ns.get("canonical", u"").lower() == name:
+            if star.lower() == name or ns.get("canonical", "").lower() == name:
                 return True, ns["id"], star
 
         aliases = self.siteinfo.get("namespacealiases", [])
@@ -143,16 +143,13 @@ class nshandler:
         if ":" in name:
             ns, partial_name = name.split(":", 1)
             was_namespace, nsnum, prefix = self._find_namespace(ns, defaultns=defaultns)
-            if was_namespace:
-                suffix = partial_name.strip()
-            else:
-                suffix = name
+            suffix = partial_name.strip() if was_namespace else name
         else:
             prefix = self.siteinfo["namespaces"][str(defaultns)]["*"]
             suffix = name
             nsnum = defaultns
 
-        suffix = suffix.strip(u"\u200e\u200f")
+        suffix = suffix.strip("\u200e\u200f")
         suffix = self.maybe_capitalize(suffix)
         if prefix:
             prefix += ":"

@@ -1,9 +1,6 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-
-
-
 from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import evaluate
 
@@ -32,7 +29,7 @@ class DictDB:
         self.siteinfo = get_siteinfo("de")
 
     def normalize_and_get_page(self, title, defaultns=0):
-        return Page(self.d.get(title.lower().replace(" ", "_"), u""))
+        return Page(self.d.get(title.lower().replace(" ", "_"), ""))
 
     def get_siteinfo(self):
         return self.siteinfo
@@ -40,7 +37,7 @@ class DictDB:
 
 def expand_str(s, expected=None, wikidb=None, pagename="thispage"):
     """debug function. expand templates in string s"""
-    db = wikidb if wikidb else DictDB(dict(a=s))
+    db = wikidb if wikidb else DictDB({"a": s})
 
     te = evaluate.Expander(s, pagename=pagename, wikidb=db)
     res = te.expandTemplates()

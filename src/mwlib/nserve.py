@@ -2,33 +2,30 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-from __future__ import with_statement
-
-
-
 import gevent.monkey
 import six
 
 if __name__ == "__main__":
     gevent.monkey.patch_all()
 
-import sys
 import re
-from io import StringIO
-import urllib
-import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
-import six.moves.urllib.parse
+import sys
 import traceback
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import unicodedata
+import urllib
 from hashlib import sha1
+from io import StringIO
 
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.request
 from gevent import pool, pywsgi
-
 from qs.misc import CallInLoop
-from mwlib import myjson as json, log, _version
-from mwlib.metabook import calc_checksum
+
+from mwlib import _version, log
+from mwlib import myjson as json
 from mwlib.asynchronous import rpcclient
+from mwlib.metabook import calc_checksum
 
 log = log.Log("mwlib.serve")
 
@@ -38,7 +35,7 @@ class bunch:
         self.__dict__.update(kw)
 
     def __repr__(self):
-        return "bunch(%s)" % (", ".join(["%s=%r" % (k, v) for k, v in self.__dict__.items()]),)
+        return "bunch({})".format(", ".join([f"{k}={v!r}" for k, v in self.__dict__.items()]))
 
 
 # -- we try to load all writers here but also keep a list of known writers
@@ -98,8 +95,7 @@ def make_collection_id(data):
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write(
-            "new-collection %s\t%r\t%r\n"
-            % (num_articles, data.get("base_url"), data.get("writer"))
+            "new-collection {}\t{!r}\t{!r}\n".format(num_articles, data.get("base_url"), data.get("writer"))
         )
 
     return sha1(sio.getvalue().encode('utf-8')).hexdigest()[:16]
@@ -107,7 +103,7 @@ def make_collection_id(data):
 
 from mwlib import lrucache
 
-busy = dict()
+busy = {}
 collid2qserve = lrucache.lrucache(4000)
 
 
@@ -121,7 +117,7 @@ class watch_qserve:
         self.port = port
         self.busy = busy
         self.ident = (host, port)
-        self.prefix = "watch: %s:%s:" % (host, port)
+        self.prefix = f"watch: {host}:{port}:"
         self.qserve = None
 
     def log(self, msg):
@@ -167,7 +163,7 @@ class watch_qserve:
             raise
         except Exception as err:
             self._mark_busy("system down")
-            self.log("error in watch_qserve: %s" % (err,))
+            self.log(f"error in watch_qserve: {err}")
 
     def __call__(self):
         self.busy[self.ident] = True
@@ -188,7 +184,7 @@ def choose_idle_qserve():
     return random.choice(idle)  # XXX probably store number of render jobs in busy
 
 
-from bottle import request, default_app, post, get, HTTPResponse
+from bottle import HTTPResponse, default_app, get, post, request
 
 
 @get("<path:re:.*>")
@@ -205,7 +201,7 @@ def get_content_disposition_values(filename, ext):
         filename = filename.strip()
 
     if not filename:
-        filename = u"collection"
+        filename = "collection"
 
     # see http://code.activestate.com/recipes/251871-latin1-to-ascii-the-unicode-hammer/
     ascii_fn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore").decode()
@@ -238,8 +234,8 @@ class Application:
         try:
             method = getattr(self, "do_%s" % command)
         except AttributeError:
-            log.error("no such command: %r" % (command,))
-            raise HTTPResponse("no such command: %r" % (command,), status=400)
+            log.error(f"no such command: {command!r}")
+            raise HTTPResponse(f"no such command: {command!r}", status=400)
 
         collection_id = request.params.get("collection_id")
         if not collection_id:
@@ -265,23 +261,18 @@ class Application:
         try:
             return method(collection_id, request.params, is_new)
         except Exception as exc:
-            print((
-                "ERROR while dispatching %r: %s"
-                % (
+            print(
+                "ERROR while dispatching {!r}: {}".format(
                     command,
-                    dict(collection_id=collection_id, is_new=is_new, qserve=qserve),
+                    {"collection_id": collection_id, "is_new": is_new, "qserve": qserve},
                 )
-            ))
+            )
             traceback.print_exc()
             if command == "download":
                 raise exc
 
             return self.error_response(
-                "error executing command %r: %s"
-                % (
-                    command,
-                    exc,
-                )
+                f"error executing command {command!r}: {exc}"
             )
 
     def error_response(self, error, **kw):
@@ -311,17 +302,17 @@ class Application:
     def _get_params(self, post_data, collection_id):
         g = post_data.get
         params = bunch()
-        params.__dict__ = dict(
-            metabook_data=g("metabook"),
-            writer=g("writer", self.default_writer),
-            base_url=g("base_url"),
-            writer_options=g("writer_options", ""),
-            login_credentials=g("login_credentials", ""),
-            force_render=bool(g("force_render")),
-            script_extension=g("script_extension", ""),
-            pod_api_url=post_data.get("pod_api_url", ""),
-            language=g("language", ""),
-        )
+        params.__dict__ = {
+            "metabook_data": g("metabook"),
+            "writer": g("writer", self.default_writer),
+            "base_url": g("base_url"),
+            "writer_options": g("writer_options", ""),
+            "login_credentials": g("login_credentials", ""),
+            "force_render": bool(g("force_render")),
+            "script_extension": g("script_extension", ""),
+            "pod_api_url": post_data.get("pod_api_url", ""),
+            "language": g("language", ""),
+        }
 
         params.collection_id = collection_id
 
@@ -342,13 +333,12 @@ class Application:
             return self.error_response("Specify either metabook or collection_id, not both")
 
         if base_url and not self.is_good_baseurl(base_url):
-            log.bad("bad base_url: %r" % (base_url,))
+            log.bad(f"bad base_url: {base_url!r}")
             return self.error_response(
-                "bad base_url %r. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed."
-                % (base_url,)
+                "bad base_url {!r}. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed.".format(base_url)
             )
 
-        log.info("render %s %s" % (collection_id, writer))
+        log.info(f"render {collection_id} {writer}")
 
         response = {
             "collection_id": collection_id,
@@ -358,15 +348,15 @@ class Application:
 
         self.qserve.qadd(
             channel="makezip",
-            payload=dict(params=params.__dict__),
-            jobid="%s:makezip" % (collection_id,),
+            payload={"params": params.__dict__},
+            jobid=f"{collection_id}:makezip",
             timeout=20 * 60,
         )
 
         self.qserve.qadd(
             channel="render",
-            payload=dict(params=params.__dict__),
-            jobid="%s:render-%s" % (collection_id, writer),
+            payload={"params": params.__dict__},
+            jobid=f"{collection_id}:render-{writer}",
             timeout=20 * 60,
         )
 
@@ -382,7 +372,7 @@ class Application:
         writer = post_data.get("writer", self.default_writer)
         w = name2writer[writer]
 
-        jobid = "%s:render-%s" % (collection_id, writer)
+        jobid = f"{collection_id}:render-{writer}"
 
         res = self.qserve.qinfo(jobid=jobid) or {}
         info = res.get("info", {})
@@ -393,7 +383,7 @@ class Application:
             return retval(state="failed", error=error)
 
         if done:
-            more = dict()
+            more = {}
 
             try:
                 if res["result"]:
@@ -414,14 +404,14 @@ class Application:
             return retval(state="finished", **more)
 
         if not info:
-            jobid = "%s:makezip" % (collection_id,)
+            jobid = f"{collection_id}:makezip"
             res = self.qserve.qinfo(jobid=jobid) or {}
 
             done = res.get("done", False)
             if not done:
                 info = res.get("info", {})
             else:
-                info = dict(status="data fetched. waiting for render process..")
+                info = {"status": "data fetched. waiting for render process.."}
 
         return retval(state="progress", status=info)
 
@@ -432,7 +422,7 @@ class Application:
         writer = post_data.get("writer", self.default_writer)
         w = name2writer[writer]
 
-        jobid = "%s:render-%s" % (collection_id, writer)
+        jobid = f"{collection_id}:render-{writer}"
         res = self.qserve.qinfo(jobid=jobid) or {}
         download_url = res["result"]["url"]
 
@@ -488,12 +478,12 @@ class Application:
                 return self.error_response("POST argument required: post_url")
             response = {"state": "ok"}
 
-        log.info("zip_post %s %s" % (collection_id, pod_api_url))
+        log.info(f"zip_post {collection_id} {pod_api_url}")
         params.post_url = post_url
 
         self.qserve.qadd(
             channel="post",  # jobid="%s:post" % collection_id,
-            payload=dict(params=params.__dict__),
+            payload={"params": params.__dict__},
             timeout=20 * 60,
         )
         return response

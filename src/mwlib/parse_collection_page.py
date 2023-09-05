@@ -1,10 +1,12 @@
 
+import binascii
 import os
 import re
-import binascii
 from collections import defaultdict
-from mwlib import metabook, expander
+
 import six
+
+from mwlib import expander, metabook
 
 uniq = "--%s--" % binascii.hexlify(os.urandom(16))
 
@@ -13,7 +15,7 @@ def extract_metadata(raw, fields, template_name="saved_book"):
     fields = list(fields)
     fields.append("")
 
-    templ = "".join(u"%s%s\n{{{%s|}}}\n" % (uniq, f, f) for f in fields)
+    templ = "".join("%s%s\n{{{%s|}}}\n" % (uniq, f, f) for f in fields)
     db = expander.DictDB({template_name: templ})
 
     te = expander.Expander(raw, pagename="", wikidb=db)
@@ -38,7 +40,7 @@ def _buildrex():
     template_start_rex = '^(?P<template_start>\{\{)$'
     template_end_rex = '.*?(?P<template_end>\}\})$'
     summary_rex = '(?P<summary>.*)'
-    alltogether_rex = re.compile("(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)|(%s)" % (
+    alltogether_rex = re.compile("({})|({})|({})|({})|({})|({})|({})|({})|({})".format(
         title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex,
         template_rex, template_start_rex, template_end_rex, summary_rex,
     ))
@@ -88,7 +90,7 @@ def parse_collection_page(wikitext):
         elif res.group('subtitle'):
             mb.subtitle = res.group('subtitle').strip()
         elif res.group('chapter'):
-            mb.items.append(metabook.chapter(title=res.group('chapter').strip()))
+            mb.items.append(metabook.Chapter(title=res.group('chapter').strip()))
         elif res.group('article'):
             mb.append_article(res.group('article'), res.group('displaytitle'))
         elif res.group('oldarticle'):

@@ -24,7 +24,7 @@ class ConstraintBase:
         return True, None  # passed
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, ", ".join(k.__name__ for k in self.klasses))
+        return "{}({})".format(self.__class__.__name__, ", ".join(k.__name__ for k in self.klasses))
 
 
 class Forbid(ConstraintBase):
@@ -42,7 +42,7 @@ class Allow(ConstraintBase):
 
     def test(self, nodes):
         for n in nodes:
-            if not n.__class__ in self.klasses:
+            if n.__class__ not in self.klasses:
                 return False, n
         return True, None
 

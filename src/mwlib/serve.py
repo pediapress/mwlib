@@ -3,19 +3,20 @@
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
 
-import sys
+import errno
 import os
-import time
 import re
 import shutil
-from io import StringIO
-import errno
+import sys
+import time
 from hashlib import sha1
+from io import StringIO
 
-from mwlib import myjson as json
-from mwlib import log, _version
-from mwlib.metabook import calc_checksum
 import six
+
+from mwlib import _version, log
+from mwlib import myjson as json
+from mwlib.metabook import calc_checksum
 
 log = log.Log('mwlib.serve')
 collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
@@ -37,8 +38,7 @@ def make_collection_id(data):
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        sys.stdout.write("new-collection %s\t%r\t%r\n" %
-                         (num_articles, data.get("base_url"), data.get("writer")))
+        sys.stdout.write("new-collection {}\t{!r}\t{!r}\n".format(num_articles, data.get("base_url"), data.get("writer")))
 
     return sha1(sio.getvalue().encode()).hexdigest()[:16]
 
@@ -57,10 +57,7 @@ def get_collection_dirs(cache_dir):
 
 
 def _path_contains_entry_older_than(path, ts):
-    for fn in os.listdir(path):
-        if os.stat(os.path.join(path, fn)).st_mtime < ts:
-            return True
-    return False
+    return any(os.stat(os.path.join(path, fn)).st_mtime < ts for fn in os.listdir(path))
 
 
 def _find_collection_dirs_to_purge(collection_dirs, ts):
@@ -70,7 +67,7 @@ def _find_collection_dirs_to_purge(collection_dirs, ts):
                 yield path
         except OSError as err:
             if err.errno != errno.ENOENT:
-                log.ERROR("error while examining %r: %s" % (path, err))
+                log.ERROR(f"error while examining {path!r}: {err}")
 
 
 def _rmtree(path):
@@ -78,7 +75,7 @@ def _rmtree(path):
         shutil.rmtree(path)
     except OSError as exc:
         if exc.errno != errno.ENOENT:
-            log.ERROR('could not remove directory %r: %s' % (path, exc))
+            log.ERROR(f'could not remove directory {path!r}: {exc}')
 
 
 def purge_cache(max_age, cache_dir):

@@ -16,7 +16,7 @@ from mwlib.templ.evaluate import flatten, Expander, ArgumentList
 from mwlib.templ.misc import DictDB, expand_str
 
 
-def get_templates(raw, title=u""):
+def get_templates(raw, title=""):
     used = set()
     e = Expander('', wikidb=DictDB())
     todo = [parse(raw, replace_tags=e.replace_tags)]
@@ -48,9 +48,8 @@ def find_template(raw, name, parsed_raw=None):
         n = todo.pop()
         if isinstance(n, six.string_types):
             continue
-        if isinstance(n, Template) and isinstance(n[0], six.string_types):
-            if n[0] == name:
-                return n
+        if isinstance(n, Template) and isinstance(n[0], six.string_types) and n[0] == name:
+            return n
         todo.extend(n)
 
 
@@ -64,6 +63,8 @@ def get_template_args(template, expander):
 
 
 if __name__ == "__main__":
+    with open(sys.argv[1], 'rb') as f:
+        d = f.read()
     d = six.text_type(open(sys.argv[1]).read(), 'utf8')
     e = Expander(d)
     print(e.expandTemplates())

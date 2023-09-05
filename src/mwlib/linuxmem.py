@@ -1,6 +1,6 @@
 
 
-_scale = dict(kB=1024.0, KB=1024.0, mB=1024.0 * 1024.0, MB=1024.0 * 1024.0)
+_scale = {"kB": 1024.0, "KB": 1024.0, "mB": 1024.0 * 1024.0, "MB": 1024.0 * 1024.0}
 
 # convert byte o MB
 for k, v in _scale.items():
@@ -10,7 +10,8 @@ for k, v in _scale.items():
 def _readproc(key):
     """Private."""
     try:
-        v = open("/proc/self/status").read()
+        with open("/proc/self/status") as f:
+            v = f.read()
         # get key line e.g. 'VmRSS:  9999  kB\n ...'
         i = v.index(key)
         v = v[i:].split(None, 3)  # whitespace
@@ -38,7 +39,7 @@ def stacksize():
 
 
 def report():
-    print("memory used: res=%.1f virt=%.1f" % (resident(), memory()))
+    print(f"memory used: res={resident():.1f} virt={memory():.1f}")
 
 
 if __name__ == "__main__":

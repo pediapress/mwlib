@@ -73,7 +73,7 @@ class Page:
         redir = self.redirect
         if redir:
             text = "Redirect to %s" % repr(redir)
-        return "Page(%s (@%s): %s)" % (repr(self.title), self.timestamp, text)
+        return f"Page({repr(self.title)} (@{self.timestamp}): {text})"
 
 
 class DumpParser:
@@ -90,7 +90,7 @@ class DumpParser:
         elif self.xmlfilename.lower().endswith(".7z"):
             f = os.popen("7z -so x %s" % self.xmlfilename, "r")
         else:
-            f = open(self.xmlfilename, "r")
+            f = open(self.xmlfilename)
 
         return f
 

@@ -509,7 +509,7 @@ class RlWriter:
         if not self.fail_safe_rendering:
             elements.append(TocEntry(txt=_("Articles"), lvl="group"))
         for i, item in enumerate(item_list):
-            if item.type == "chapter":
+            if item.type == "Chapter":
                 chapter = parser.Chapter(item.title.strip())
                 if len(item_list) > i + 1 and item_list[i + 1].type == "article":
                     chapter.next_article_title = item_list[i + 1].title
@@ -628,10 +628,7 @@ class RlWriter:
             title = item.displaytitle or item.title
 
             source = item.wiki.getSource(item.title, item.revision)
-            if source:
-                wikiurl = source.url
-            else:
-                wikiurl = item.title
+            wikiurl = source.url if source else item.title
             article_id = self.buildArticleID(wikiurl, title)
             self.articleids.append(article_id)
 
@@ -647,7 +644,7 @@ class RlWriter:
             return []
         first_article_title = None
         for item in self.book.walk():
-            if item.type == "chapter":  # dont set page header if pdf starts with a chapter
+            if item.type == "Chapter":  # dont set page header if pdf starts with a chapter
                 break
             if item.type == "article":
                 first_article_title = self.renderArticleTitle(item.displaytitle or item.title)
@@ -684,15 +681,15 @@ class RlWriter:
         title = self.renderArticleTitle(chapter.caption)
         if self.inline_mode == 0 and self.table_nesting == 0:
             chapter_anchor = '<a name="%s" />' % len(self.bookmarks)
-            self.bookmarks.append((title, "chapter"))
+            self.bookmarks.append((title, "Chapter"))
         else:
             chapter_anchor = ""
-        chapter_para = Paragraph("%s%s" % (title, chapter_anchor), heading_style("chapter"))
+        chapter_para = Paragraph(f"{title}{chapter_anchor}", heading_style("Chapter"))
         elements = []
 
         elements.append(self._getPageTemplate(""))
         elements.extend([NotAtTopPageBreak(), hr, chapter_para, hr])
-        elements.append(TocEntry(txt=title, lvl="chapter"))
+        elements.append(TocEntry(txt=title, lvl="Chapter"))
         elements.append(self._getPageTemplate(chapter.next_article_title))
         elements.extend(self.renderChildren(chapter))
 
@@ -701,7 +698,7 @@ class RlWriter:
     def writeSection(self, obj):
         lvl = getattr(obj, "level", 4)
         if self.license_mode:
-            headingStyle = heading_style("license")
+            headingStyle = heading_style("License")
         else:
             headingStyle = heading_style("section", lvl=lvl + 1)
         if not obj.children:
@@ -1184,13 +1181,13 @@ class RlWriter:
     def renderMixed(self, node, para_style=None, textPrefix=None):
         if not para_style:
             if self.license_mode:
-                para_style = text_style("license")
+                para_style = text_style("License")
             else:
                 para_style = text_style(
                     indent_lvl=self.paraIndentLevel, in_table=self.table_nesting
                 )
         elif self.license_mode:
-            para_style.fontSize = max(text_style("license").fontSize, para_style.fontSize - 4)
+            para_style.fontSize = max(text_style("License").fontSize, para_style.fontSize - 4)
             para_style.leading = 1
 
         math_nodes = node.get_child_nodes_by_class(advtree.Math)

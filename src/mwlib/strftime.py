@@ -10,9 +10,10 @@
 
 
 
-import re
 import datetime
+import re
 import time
+
 from six.moves import range
 
 # remove the unsupposed "%s" command.  But don't

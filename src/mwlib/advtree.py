@@ -47,8 +47,8 @@ def _idIndex(lst, el):
 
 def debug(method):  # use as decorator
     def f(self, *args, **kargs):
-        log("\n%s called with %r %r" % (method.__name__, args, kargs))
-        log("on %r attrs:%r style:%r" % (self, self.attributes, self.style))
+        log(f"\n{method.__name__} called with {args!r} {kargs!r}")
+        log(f"on {self!r} attrs:{self.attributes!r} style:{self.style!r}")
         p = self
         while p.parent:
             p = p.parent
@@ -264,7 +264,7 @@ class AdvancedNode:
                 text.append(getattr(n, access))
         alltext = [t for t in text if t]
         if alltext:
-            return u"".join(alltext)
+            return "".join(alltext)
         else:
             return ""
 
@@ -290,7 +290,7 @@ class AdvancedNode:
                 try:
                     return six.text_type(val)
                 except BaseException:
-                    return u""
+                    return ""
 
         def ensureDict(val):
             if isinstance(val, dict):
@@ -319,10 +319,7 @@ class AdvancedNode:
     def has_class_id(self, classIDs):
         _class = self.attributes.get("class", "").split(" ")
         _id = self.attributes.get("id", "")
-        for classID in classIDs:
-            if classID in _class or classID == _id:
-                return True
-        return False
+        return any(classID in _class or classID == _id for classID in classIDs)
 
     def is_visible(self):
         """Return True if node is visble. Used to detect hidden elements."""
@@ -498,7 +495,7 @@ class Var(Style, AdvancedNode):
     _style = "var"
 
 
-_styleNodeMap = dict((k._style, k) for k in [Overline, Underline, Sub, Sup, Small, Big, Cite, Var])
+_styleNodeMap = {k._style: k for k in [Overline, Underline, Sub, Sup, Small, Big, Cite, Var]}
 
 # --------------------------------------------------------------------------
 # Missing as Classes derived from parser.TagNode
@@ -602,8 +599,8 @@ class Abbreviation(TagNode, AdvancedNode):
     _tag = "abbr"
 
 
-_tagNodeMap = dict(
-    (k._tag, k)
+_tagNodeMap = {
+    k._tag: k
     for k in [
         Abbreviation,
         BreakingReturn,
@@ -631,7 +628,7 @@ _tagNodeMap = dict(
         TableCaption,
         Teletyped,
     ]
-)
+}
 _styleNodeMap["s"] = Strike  # Special Handling for deprecated s style
 _tagNodeMap["kbd"] = Teletyped
 
@@ -742,7 +739,7 @@ def fix_style_node(node):
     detection of DefinitionList depends on removeNodes
     and removeNewlines
     """
-    if not node.__class__ == Style:
+    if node.__class__ != Style:
         return
     if node.caption == "''":
         node.__class__ = Emphasized
@@ -790,9 +787,8 @@ def remove_nodes(node):
     the parser generates empty Node elements that do
     nothing but group other nodes. we remove them here
     """
-    if node.__class__ == Node:
+    if node.__class__ == Node and not (node.previous is None and node.parent.__class__ == Section):
         # first child of section groups heading text - grouping Node must not be removed
-        if not (node.previous is None and node.parent.__class__ == Section):
             node.parent.replace_child(node, node.children)
 
     for c in node.children[:]:
@@ -875,6 +871,7 @@ def get_advanced_tree(fn):
 
 def simpleparse(raw):  # !!! USE FOR DEBUGGING ONLY !!!
     import sys
+
     from mwlib import dummydb, parser
     from mwlib.uparser import parse_string
 

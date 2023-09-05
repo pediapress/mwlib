@@ -21,10 +21,10 @@ def object_hook(dct):
     if document_type in [
         "collection",
         "article",
-        "chapter",
+        "Chapter",
         "source",
         "interwiki",
-        "license",
+        "License",
         "wikiconf",
         "custom",
     ]:

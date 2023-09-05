@@ -4,20 +4,21 @@
 
 import os
 import time
-import six.moves.urllib.parse
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
-import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
-import six.moves.http_client
+
 import six
+import six.moves.http_client
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.request
 
 try:
     import simplejson as json
 except ImportError:
     import json
 
+from mwlib import conf
 from mwlib.log import Log
 from mwlib.utils import get_multipart
-from mwlib import conf
 
 log = Log("mwapidb")
 
@@ -28,10 +29,7 @@ class PODClient:
         self.redirecturl = redirecturl
 
     def _post(self, data, content_type=None):
-        if content_type is not None:
-            headers = {'Content-Type': content_type}
-        else:
-            headers = {}
+        headers = {"Content-Type": content_type} if content_type is not None else {}
         return six.moves.urllib.request.urlopen(six.moves.urllib.request.Request(self.posturl, data, headers=headers)).read()
 
     def post_status(self, status=None, progress=None, article=None, error=None):
@@ -106,12 +104,11 @@ class PODClient:
         print("ERRCODE:", (errcode, errmsg, headers))
 
         if errcode != 200:
-            raise RuntimeError("upload failed: %r" % (errmsg,))
+            raise RuntimeError(f"upload failed: {errmsg!r}")
 
     def post_zipfile(self, filename):
-        f = open(filename, "rb")
-        content_type, data = get_multipart('collection.zip', f.read(), 'collection')
-        f.close()
+        with open(filename, "rb") as f:
+            content_type, data = get_multipart('collection.zip', f.read(), 'collection')
         log.info('POSTing zipfile %r to %s (%d Bytes)' % (filename, self.posturl, len(data)))
         self._post(data, content_type=content_type)
 

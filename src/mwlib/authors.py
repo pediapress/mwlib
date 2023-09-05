@@ -23,7 +23,7 @@ class InspectAuthors:
         authors = self.authors
 
         for r in revs:
-            user = r.get("user", u"")
+            user = r.get("user", "")
             if "anon" in r and (
                 not user or self.ip_rex.match(user) or self.ip6_rex.match(user)
             ):  # anon

@@ -16,7 +16,7 @@ def execute(*args):
     popen.wait()
     if errors:
         raise RuntimeError(
-            "Errors while executing %r: %s" % (" ".join(args), errors),
+            "Errors while executing {!r}: {}".format(" ".join(args), errors),
         )
     elif popen.returncode != 0:
         raise RuntimeError(
@@ -37,8 +37,8 @@ def make_messages(
     localedir="locale",
     extensions=(".py",),
 ):
-    assert os.path.isdir(localedir), "no directory %s found" % (localedir,)
-    assert os.path.isdir(inputdir), "no directory %s found" % (inputdir,)
+    assert os.path.isdir(localedir), f"no directory {localedir} found"
+    assert os.path.isdir(inputdir), f"no directory {inputdir} found"
 
     languages = []
     if locale == "all":
@@ -84,19 +84,22 @@ def make_messages(
             else:
                 msgs = msgs.replace("charset=CHARSET", "charset=UTF-8")
             if msgs:
-                open(potfile, "ab").write(msgs)
+                with open(potfile, "ab") as f:
+                    f.write(msgs)
 
         if os.path.exists(potfile):
             msgs = execute("msguniq", "--to-code", "UTF-8", potfile)
-            open(potfile, "wb").write(msgs)
+            with open(potfile, "wb") as f:
+                f.write(msgs)
             if os.path.exists(pofile):
                 msgs = execute("msgmerge", "--quiet", pofile, potfile)
-            open(pofile, "wb").write(msgs)
+            with open(pofile, "wb") as f:
+                f.write(msgs)
             os.unlink(potfile)
 
 
 def compile_messages(localedir="locale"):
-    for dirpath, dirnames, filenames in os.walk(localedir):
+    for dirpath, _, filenames in os.walk(localedir):
         for f in filenames:
             if f.endswith(".po"):
                 path = os.path.join(dirpath, f)
@@ -104,4 +107,4 @@ def compile_messages(localedir="locale"):
                 try:
                     execute("msgfmt", "--check-format", "--output-file", mo_filename, path)
                 except RuntimeError as exc:
-                    print("Could not compile %r: %s" % (path, exc))
+                    print(f"Could not compile {path!r}: {exc}")

@@ -21,7 +21,7 @@ def parse_collection_page(txt):
 
 class mbobj:
     def __init__(self, **kw):
-        d = dict(type=self.__class__.__name__)
+        d = {"type": self.__class__.__name__}
 
         for k in dir(self.__class__):
             if k.startswith("__"):
@@ -39,7 +39,7 @@ class mbobj:
         self.type = self.__class__.__name__
 
     def __getitem__(self, key):
-        warnings.warn("deprecated __getitem__ [%r]" % (key,), DeprecationWarning, 2)
+        warnings.warn(f"deprecated __getitem__ [{key!r}]", DeprecationWarning, 2)
 
         try:
             return getattr(self, str(key))
@@ -47,17 +47,17 @@ class mbobj:
             raise KeyError(repr(key))
 
     def __setitem__(self, key, val):
-        warnings.warn("deprecated __setitem__ [%r]=" % (key,), DeprecationWarning, 2)
+        warnings.warn(f"deprecated __setitem__ [{key!r}]=", DeprecationWarning, 2)
 
         self.__dict__[key] = val
 
     def __contains__(self, key):
-        warnings.warn("deprecated __contains__ %r in " % (key,), DeprecationWarning, 2)
+        warnings.warn(f"deprecated __contains__ {key!r} in ", DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
 
     def get(self, key, default=None):
-        warnings.warn("deprecated call get(%r)" % (key,), DeprecationWarning, 2)
+        warnings.warn(f"deprecated call get({key!r})", DeprecationWarning, 2)
         try:
             val = getattr(self, str(key))
             if val is None:
@@ -67,14 +67,14 @@ class mbobj:
             return default
 
     def _json(self):
-        d = dict(type=self.__class__.__name__)
+        d = {"type": self.__class__.__name__}
         for k, v in self.__dict__.items():
             if v is not None and not k.startswith("_"):
                 d[k] = v
         return d
 
     def __repr__(self):
-        return "<%s %r>" % (self.__class__.__name__, self.__dict__)
+        return f"<{self.__class__.__name__} {self.__dict__!r}>"
 
 
 class wikiconf(mbobj):
@@ -108,7 +108,7 @@ class collection(mbobj):
             displaytitle = displaytitle.strip()
         art = article(title=title, displaytitle=displaytitle, **kw)
 
-        if self.items and isinstance(self.items[-1], chapter):
+        if self.items and isinstance(self.items[-1], Chapter):
             self.items[-1].items.append(art)
         else:
             self.items.append(art)
@@ -191,12 +191,12 @@ class article(mbobj):
         return self._env.images
 
 
-class license(mbobj):
+class License(mbobj):
     title = None
     wikitext = None
 
 
-class chapter(mbobj):
+class Chapter(mbobj):
     items = []
     title = ""
 
@@ -234,14 +234,15 @@ def get_licenses(metabook):
     @rtype: [dict]
     """
     import re
+
     from mwlib import utils
 
     retval = []
-    for l in metabook.licenses:
+    for license in metabook.licenses:
         wikitext = ""
 
-        if l.get("mw_license_url"):
-            url = l["mw_license_url"]
+        if license.get("mw_license_url"):
+            url = license["mw_license_url"]
             if re.match(r"^.*/index\.php.*action=raw", url) and "templates=expand" not in url:
                 url += "&templates=expand"
             wikitext = utils.fetch_url(
@@ -256,17 +257,17 @@ def get_licenses(metabook):
                     wikitext = None
         else:
             wikitext = ""
-            if l.get("mw_rights_text"):
-                wikitext = l["mw_rights_text"]
-            if l.get("mw_rights_page"):
-                wikitext += "\n\n[[%s]]" % l["mw_rights_page"]
-            if l.get("mw_rights_url"):
-                wikitext += "\n\n" + l["mw_rights_url"]
+            if license.get("mw_rights_text"):
+                wikitext = license["mw_rights_text"]
+            if license.get("mw_rights_page"):
+                wikitext += "\n\n[[%s]]" % license["mw_rights_page"]
+            if license.get("mw_rights_url"):
+                wikitext += "\n\n" + license["mw_rights_url"]
 
         if not wikitext:
             continue
 
-        retval.append(license(title=l.get("name", "License"), wikitext=wikitext))
+        retval.append(License(title=license.get("name", "License"), wikitext=wikitext))
 
     return retval
 
@@ -280,7 +281,7 @@ def make_interwiki(api_entry=None):
 
 
 make_metabook = collection
-make_chapter = chapter
+make_chapter = Chapter
 make_source = source
 make_article = article
 make_custom = custom

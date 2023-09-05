@@ -8,18 +8,18 @@
 
 import six
 from pyparsing import (
-    Literal,
-    restOfLine,
-    Word,
-    nums,
-    Group,
-    ZeroOrMore,
     And,
-    Suppress,
-    LineStart,
+    Group,
     LineEnd,
-    StringEnd,
+    LineStart,
+    Literal,
     ParseException,
+    StringEnd,
+    Suppress,
+    Word,
+    ZeroOrMore,
+    nums,
+    restOfLine,
 )
 
 
@@ -28,7 +28,7 @@ class Gob:
         self.__dict__.update(kw)
 
     def __repr__(self):
-        return "<%s %r>" % (self.__class__.__name__, self.__dict__)
+        return f"<{self.__class__.__name__} {self.__dict__!r}>"
 
 
 class Poly(Gob):
@@ -149,7 +149,7 @@ def image_map_from_string(s):
 
     try:
         return imagemap.parseString(s)[0]
-    except ParseException as err:
+    except ParseException:
         return ImageMap(entries=[], image=None)
 
 

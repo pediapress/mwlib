@@ -12,7 +12,6 @@ FIXME: replace with texvc which is deistributed with MediaWiki
 
 
 
-import popen2
 import subprocess
 import sys
 

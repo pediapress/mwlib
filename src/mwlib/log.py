@@ -71,10 +71,10 @@ class Log:
             msg = repr(msg)
 
         if args:
-            msg = " ".join(([msg] + [repr(x) for x in args]))
+            msg = " ".join([msg] + [repr(x) for x in args])
 
         s = ""
         if self.timestamps:
             s = "%s " % time.strftime(self.timestamp_fmt)
-        s += "%s >> %s\n" % (".".join(str(x) for x in self._prefix if x), msg)
+        s += "{} >> {}\n".format(".".join(str(x) for x in self._prefix if x), msg)
         self.logfile.write(s)

@@ -53,8 +53,6 @@ def tokenize(s):
             res.append((v1, v2))
     return res
 
-    return [(v1, v2.lower()) for (v1, v2) in rx_pattern.findall(s) if v1 or v2]
-
 
 class uminus:
     pass
@@ -133,7 +131,7 @@ del a
 
 
 class Expr:
-    constants = dict(e=math.e, pi=math.pi)
+    constants = {"e": math.e, "pi": math.pi}
 
     def as_float_or_int(self, s):
         try:
@@ -193,7 +191,7 @@ class Expr:
                     self.output_operator(p)
                 operator_stack.append(operator)
             else:
-                raise ExprError("unknown operator: %r" % (operator,))
+                raise ExprError(f"unknown operator: {operator!r}")
 
             last_operand, last_operator = operand, operator
 
@@ -204,7 +202,7 @@ class Expr:
             self.output_operator(p)
 
         if len(self.operand_stack) != 1:
-            raise ExprError("bad stack: %s" % (self.operand_stack,))
+            raise ExprError(f"bad stack: {self.operand_stack}")
 
         return self.operand_stack[-1]
 

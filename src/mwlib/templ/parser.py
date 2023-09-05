@@ -9,7 +9,7 @@ from hashlib import sha1 as digest
 import six
 
 from mwlib.templ.marks import eqmark
-from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
+from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
 from mwlib.templ.scanner import Symbols, tokenize
 
 
@@ -63,18 +63,18 @@ def optimize(node):
                 tmp.append(x)
             else:
                 if tmp:
-                    res.append(u"".join(tmp))
+                    res.append("".join(tmp))
                     tmp = []
                 res.append(x)
         if tmp:
-            res.append(u"".join(tmp))
+            res.append("".join(tmp))
 
         node[:] = res
 
     if len(node) == 1 and type(node) in (list, Node):
         return optimize(node[0])
 
-    if type(node) is list:
+    if isinstance(node, list):
         return tuple(node)
 
     return node
@@ -106,7 +106,7 @@ class Parser:
             name = d["name"]
             if name in ("if", "switch"):
                 aliases = [re.escape(x) for x in d["aliases"]]
-                rx = "^#(%s):" % ("|".join(aliases),)
+                rx = "^#({}):".format("|".join(aliases))
                 self.name2rx[name] = re.compile(rx)
                 # print name, rx
 
@@ -122,7 +122,7 @@ class Parser:
         v = []
 
         try:
-            idx = children.index(u"|")
+            idx = children.index("|")
         except ValueError:
             v.append(children)
         else:
@@ -151,13 +151,11 @@ class Parser:
             return cond.strip()
 
         cond = list(cond)
-        if cond and isinstance(cond[0], six.text_type):
-            if not cond[0].strip():
-                del cond[0]
+        if cond and isinstance(cond[0], six.text_type) and not cond[0].strip():
+            del cond[0]
 
-        if cond and isinstance(cond[-1], six.text_type):
-            if not cond[-1].strip():
-                del cond[-1]
+        if cond and isinstance(cond[-1], six.text_type) and not cond[-1].strip():
+            del cond[-1]
         cond = tuple(cond)
         return cond
 
@@ -189,17 +187,17 @@ class Parser:
 
         linkcount = 0
         for c in children:
-            if c == u"[[":
+            if c == "[[":
                 linkcount += 1
             elif c == "]]":
                 if linkcount:
                     linkcount -= 1
-            elif c == u"|" and linkcount == 0:
+            elif c == "|" and linkcount == 0:
                 args.append(arg)
                 arg = []
                 append_arg = True
                 continue
-            elif c == u"=" and linkcount == 0:
+            elif c == "=" and linkcount == 0:
                 arg.append(eqmark)
                 continue
             arg.append(c)
@@ -238,7 +236,7 @@ class Parser:
             if self.name2rx["switch"].match(s):
                 return self.switchnodeFromChildren(children)
 
-            if u":" in s:
+            if ":" in s:
                 from mwlib.templ import magic_nodes
 
                 name, first = s.split(":", 1)
@@ -251,7 +249,7 @@ class Parser:
         append_arg = False
         idx = 0
         for idx, c in enumerate(children):
-            if c == u"|":
+            if c == "|":
                 append_arg = True
                 break
             name.append(c)
@@ -261,7 +259,7 @@ class Parser:
             name = name.strip()
 
         if not self._is_good_name(name):
-            return Node([u"{{"] + children + [u"}}"])
+            return Node(["{{"] + children + ["}}"])
 
         args = self._parse_args(children[idx + 1 :], append_arg=append_arg)
 

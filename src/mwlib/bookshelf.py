@@ -4,11 +4,6 @@
 Helper to list and retrieve all stored books from a wiki
 """
 
-
-
-
-
-
 class Bookshelf:
     def __init__(self, api):
         self.api = api

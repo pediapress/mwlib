@@ -13,20 +13,16 @@ More Info:
 * http://testsuite.opendocumentfellowship.com/ sample documents
 """
 
-
-from __future__ import division
-from __future__ import unicode_literals
-
 import sys
+from builtins import str
 
 import odf
 import six
-from builtins import str
-from odf import text, dc, meta, table, draw, math, element
+from odf import dc, draw, element, math, meta, table, text
 from odf.opendocument import OpenDocumentText
 from six.moves import range
 
-from mwlib import advtree, writerbase, odfconf, parser
+from mwlib import advtree, odfconf, parser, writerbase
 from mwlib import odfstyles as style
 from mwlib.log import Log
 from mwlib.treecleaner import TreeCleaner
@@ -45,7 +41,7 @@ def showNode(obj):
     attrs = list(obj.__dict__.keys())
     log(obj.__class__.__name__)
     stuff = [
-        "%s => %r" % (k, getattr(obj, k))
+        f"{k} => {getattr(obj, k)!r}"
         for k in attrs
         if (k != "children") and getattr(obj, k)
     ]
@@ -270,7 +266,7 @@ class ODFWriter:
     def owriteArticle(self, a):
         self.references = []  # collect references
         title = a.caption
-        log(u"processing article %s" % title)
+        log("processing article %s" % title)
         r = text.Section(stylename=style.sect, name=title)  # , display="none")
         r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
         return r
@@ -285,7 +281,7 @@ class ODFWriter:
         hXstyles = (style.h0, style.h1, style.h2, style.h3, style.h4, style.h5)
 
         # skip empty sections (as for eg References)
-        hasDisplayContent = u"".join(
+        hasDisplayContent = "".join(
             x.get_all_display_text().strip() for x in obj.children[1:]
         ) or obj.get_child_nodes_by_class(
             advtree.ImageLink
@@ -504,12 +500,12 @@ class ODFWriter:
         col = []
         for c in obj.get_all_display_text().replace("\t", " " * 8).strip():
             if c in rmap:
-                p.addText(u"".join(col))
+                p.addText("".join(col))
                 col = []
                 p.addElement(rmap[c]())
             else:
                 col.append(c)
-        p.addText(u"".join(col))  # add remaining
+        p.addText("".join(col))  # add remaining
         obj.children = []  # remove the children
         return p
 

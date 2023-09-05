@@ -312,7 +312,7 @@ def text_style(mode="p", indent_lvl=0, in_table=0, relsize="normal", text_align=
 
         style.leftIndent, style.rightIndent = style.rightIndent, style.leftIndent
 
-    if mode == "license":
+    if mode == "License":
         style.fontSize = 5
         style.leading = 1
         style.spaceBefore = 0
@@ -368,7 +368,7 @@ class BaseHeadingStyle(ParagraphStyle):
         # self.allowOrphans = 0
 
 
-def heading_style(mode="chapter", lvl=1, text_align=None):
+def heading_style(mode="Chapter", lvl=1, text_align=None):
 
     style = BaseHeadingStyle(name="heading_style_%s_%d" % (mode, lvl))
 
@@ -377,7 +377,7 @@ def heading_style(mode="chapter", lvl=1, text_align=None):
         if not text_align:
             style.alignment = TA_RIGHT
 
-    if mode == "chapter":
+    if mode == "Chapter":
         style.fontSize = 26
         style.leading = 30
         style.alignment = TA_CENTER
@@ -401,7 +401,7 @@ def heading_style(mode="chapter", lvl=1, text_align=None):
         style.alignment = TA_CENTER
         style.flowable = False
         style.spaceAfter = 0
-    elif mode == "license":
+    elif mode == "License":
         style.fontSize = 7
         style.leading = 5
         style.spaceAfter = 0

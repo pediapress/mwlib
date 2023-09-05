@@ -52,7 +52,7 @@ test_metabook = {
     "title": "bla",
     "items": [
         {
-            "type": "chapter",
+            "type": "Chapter",
             "title": CHAPTER1,
             "items": [
                 {
@@ -68,7 +68,7 @@ test_metabook = {
             ],
         },
         {
-            "type": "chapter",
+            "type": "Chapter",
             "title": CHAPTER2,
             "items": [
                 {
@@ -88,7 +88,7 @@ test_metabook = json.loads(json.dumps(test_metabook))
 def test_parse_collection_page():
     def verify_items(items):
         assert len(items) == 2
-        assert items[0].type == "chapter"
+        assert items[0].type == "Chapter"
         assert items[0].title == CHAPTER1
         arts = items[0].items
         assert len(arts) == 2
@@ -96,7 +96,7 @@ def test_parse_collection_page():
         assert arts[0].title == ARTICLE1
         assert arts[1].type == "article"
         assert arts[1].title == ARTICLE2
-        assert items[1].type == "chapter"
+        assert items[1].type == "Chapter"
         assert items[1].title == CHAPTER2
         arts = items[1].items
         assert len(arts) == 2
@@ -131,7 +131,7 @@ def test_parse_collection_page():
 def test_get_item_list():
     expected = [
         {
-            "type": "chapter",
+            "type": "Chapter",
             "title": CHAPTER1,
         },
         {
@@ -143,7 +143,7 @@ def test_get_item_list():
             "title": ARTICLE2,
         },
         {
-            "type": "chapter",
+            "type": "Chapter",
             "title": CHAPTER2,
         },
         {

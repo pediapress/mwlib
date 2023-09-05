@@ -65,7 +65,7 @@ class Status:
             self.podclient.post_status(**self.status)
 
         msg = []
-        msg.append("%s%%" % (self.status.get("progress", self.progress_range[0]),))
+        msg.append("{}%".format(self.status.get("progress", self.progress_range[0])))
         msg.append(self.status.get("status", ""))
         msg.append(self.status.get("article", ""))
         msg = " ".join(msg)
@@ -110,11 +110,10 @@ class Status:
             return
 
         try:
-            open(self.filename + '.tmp', 'wb').write(
-                json.dumps(self.status).encode('utf-8')
-            )
+            with open(self.filename + '.tmp', 'wb') as f:
+                f.write(
+                    json.dumps(self.status).encode('utf-8')
+                )
             os.rename(self.filename + '.tmp', self.filename)
         except Exception as exc:
-            log.ERROR('Could not write status file %r: %s' % (
-                self.filename, exc
-            ))
+            log.ERROR(f'Could not write status file {self.filename!r}: {exc}')

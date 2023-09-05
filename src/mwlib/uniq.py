@@ -48,13 +48,13 @@ class Uniquifier:
         else:
             tagname = tagname.lower()
 
-        r = dict(
-            tagname=tagname,
-            inner=mo.group("inner") or u"",
-            vlist=mo.group("vlist") or u"",
-            complete=mo.group(0))
+        r = {
+            'tagname': tagname,
+            'inner': mo.group("inner") or "",
+            'vlist': mo.group("vlist") or "",
+            'complete': mo.group(0)}
 
-        if tagname == u"nowiki":
+        if tagname == "nowiki":
             r["complete"] = r["inner"]
 
         return self.get_uniq(r, tagname)

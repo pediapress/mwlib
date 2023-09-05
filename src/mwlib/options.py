@@ -139,6 +139,6 @@ class OptionParser(optparse.OptionParser):
 
         if cfg.startswith(":") and not env.metabook.licenses:
             mw_license_url = wiki.wpwikis.get(cfg[1:])["mw_license_url"]
-            env.metabook.licenses.append(dict(mw_license_url=mw_license_url, type="license"))
+            env.metabook.licenses.append({"mw_license_url": mw_license_url, "type": "License"})
 
         return env

@@ -39,10 +39,7 @@ class FileJobPoller:
     def _reap_children(self):
         while self.num_jobs > 0:
             try:
-                if self.num_jobs == self.max_num_jobs:
-                    flags = 0
-                else:
-                    flags = os.WNOHANG
+                flags = 0 if self.num_jobs == self.max_num_jobs else os.WNOHANG
                 pid, rc = os.waitpid(-1, flags)
             except OSError as exc:
                 self.log.ERROR("waitpid(-1) failed: %s" % exc)
@@ -70,7 +67,7 @@ class FileJobPoller:
                     self.num_jobs -= 1
                 break
             except Exception as err:
-                self.log.error("caught exception: %r" % (err,))
+                self.log.error(f"caught exception: {err!r}")
                 traceback.print_exc()
 
         self.log.info("exit")
@@ -90,7 +87,7 @@ class FileJobPoller:
             try:
                 mtime = os.stat(path).st_mtime
             except Exception as exc:
-                self.log.ERROR("Could not stat %r: %s" % (path, exc))
+                self.log.ERROR(f"Could not stat {path!r}: {exc}")
                 continue
             files.append((mtime, filename))
 
@@ -106,7 +103,8 @@ class FileJobPoller:
 
         src = os.path.join(self.queue_dir, filename)
         try:
-            args = six.moves.cPickle.loads(open(src, "rb").read())
+            with open(src, "rb") as f:
+                args = six.moves.cPickle.loads(f.read())
         finally:
             os.unlink(src)
 
@@ -124,5 +122,5 @@ class FileJobPoller:
         except BaseException:
             traceback.print_exc()
         finally:
-            self.log.warn("error running %r" % (args,))
+            self.log.warn(f"error running {args!r}")
             os._exit(10)

@@ -247,7 +247,7 @@ class PPDocTemplate(BaseDocTemplate):
         BaseDocTemplate._startBuild(self, filename=filename, canvasmaker=canvasmaker)
 
         type2lvl = {
-            "chapter": 0,
+            "Chapter": 0,
             "article": 1,
             "heading2": 2,
             "heading3": 3,
@@ -257,7 +257,7 @@ class PPDocTemplate(BaseDocTemplate):
         last_lvl = 0
         for (bm_id, (bm_title, bm_type)) in enumerate(self.bookmarks):
             lvl = type2lvl[bm_type]
-            if bm_type == "chapter":
+            if bm_type == "Chapter":
                 got_chapter = True
             elif not got_chapter:  # outline-lvls can't start above zero
                 lvl -= 1

@@ -3,7 +3,7 @@ class error(Exception):
 
 
 def parse(args, spec):
-    needarg = dict()
+    needarg = {}
 
     for x in spec.split():
         if x.endswith("="):
@@ -23,7 +23,7 @@ def parse(args, spec):
                 try:
                     v = args[i]
                 except IndexError:
-                    raise error("option %s needs an argument" % (a,))
+                    raise error(f"option {a} needs an argument")
 
             opts.append((a, v))
         else:

@@ -456,7 +456,7 @@ def set_locale_from_lang(lang):
     prefix = lang + u"_"
     canonical = "%s_%s" % (lang, lang.upper())
     candidates = sorted(
-        set([x for x in [canonical, canonical + ".UTF-8"] + _supported if x.startswith(prefix)]),
+        {x for x in [canonical, canonical + ".UTF-8"] + _supported if x.startswith(prefix)},
         key=lambda x: (x.endswith("UTF-8"), x.startswith(canonical)),
         reverse=True,
     )
@@ -465,9 +465,9 @@ def set_locale_from_lang(lang):
         try:
             locale.setlocale(locale.LC_NUMERIC, x)
             current_lang = lang
-            print("set locale to %r based on the language %r" % (x, current_lang))
+            print(f"set locale to {x!r} based on the language {current_lang!r}")
             return
         except locale.Error:
             pass
 
-    print("failed to set locale for language %r, tried %r" % (lang, candidates))
+    print(f"failed to set locale for language {lang!r}, tried {candidates!r}")

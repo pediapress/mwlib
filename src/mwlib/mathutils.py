@@ -9,7 +9,7 @@
 import os
 import shutil
 import tempfile
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 import six
 
@@ -25,7 +25,7 @@ log = log.Log("mwlib.mathutils")
 
 def try_system(cmd):
     n = os.path.devnull
-    cmd += " >%s 2>%s" % (n, n)
+    cmd += f" >{n} 2>{n}"
     return os.system(cmd)
 
 
@@ -83,7 +83,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
                 mathml = mathml.next()
                 mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
                 return mathml
-    log.error("error converting math (blahtexml). source: %r \nerror: %r" % (latex, result))
+    log.error(f"error converting math (blahtexml). source: {latex!r} \nerror: {result!r}")
     return None
 
 
@@ -107,13 +107,12 @@ def _renderMathTexvc(latex, output_path, output_mode="png", resolution_in_dpi=12
     (result, error) = sub.communicate()
     del sub
 
-    if output_mode == "png":
-        if len(result) >= 32:
-            png_fn = os.path.join(output_path, result[1:33] + ".png")
-            if os.path.exists(png_fn):
-                return png_fn
+    if output_mode == "png" and len(result) >= 32:
+        png_fn = os.path.join(output_path, result[1:33] + ".png")
+        if os.path.exists(png_fn):
+            return png_fn
 
-    log.error("error converting math (texvc). source: %r \nerror: %r" % (latex, result))
+    log.error(f"error converting math (texvc). source: {latex!r} \nerror: {result!r}")
     return None
 
 
@@ -168,7 +167,7 @@ def renderMath(
 
 if __name__ == "__main__":
 
-    latex = u"\\sqrt{4}=2"
+    latex = "\\sqrt{4}=2"
 
     # latexlist = ["\\sqrt{4}=2",
     ##                  r"a^2 + b^2 = c^2\,",

@@ -44,7 +44,7 @@ class TocRenderer:
         elements.append(
             Paragraph(
                 _("Contents"),
-                pdfstyles.heading_style(mode="chapter", text_align="left" if not rtl else "right"),
+                pdfstyles.heading_style(mode="Chapter", text_align="left" if not rtl else "right"),
             )
         )
         toc_table = []
@@ -53,7 +53,7 @@ class TocRenderer:
         for row_idx, (lvl, txt, page_num) in enumerate(toc_entries):
             if lvl == "article":
                 page_num = str(page_num)
-            elif lvl == "chapter":
+            elif lvl == "Chapter":
                 page_num = "<b>%d</b>" % page_num
                 styles.append(("TOPPADDING", (0, row_idx), (-1, row_idx), 10))
             elif lvl == "group":

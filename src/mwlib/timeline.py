@@ -6,7 +6,6 @@
 """implement http://meta.wikimedia.org/wiki/EasyTimeline
 """
 
-
 import os
 import tempfile
 import subprocess

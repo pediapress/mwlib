@@ -29,7 +29,7 @@ class ConfBase:
         if section == "mwlib":
             varname = "MWLIB_%s" % name.upper()
         else:
-            varname = "MWLIB_%s_%s" % (section.upper(), name.upper())
+            varname = f"MWLIB_{section.upper()}_{name.upper()}"
 
         if varname in os.environ:
             return convert(os.environ[varname])

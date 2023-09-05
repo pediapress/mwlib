@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-einwohnerzahlen = u"""
+einwohnerzahlen = """
 {{#switch: {{{1}}}
 | 64001 = 190 | 64001 (Jahr) = 1999 | 64001 (Name) = Aast
 | 64002 = 144 | 64002 (Jahr) = 2006 | 64002 (Name) = Abère

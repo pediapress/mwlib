@@ -287,10 +287,7 @@ def extract_member(zipfile, member, dstdir):
         raise RuntimeError("bad filename in zipfile %r" % (targetpath, ))
 
     # Create all upper directories if necessary.
-    if member.filename.endswith("/"):
-        upperdirs = targetpath
-    else:
-        upperdirs = os.path.dirname(targetpath)
+    upperdirs = targetpath if member.filename.endswith('/') else os.path.dirname(targetpath)
 
     if not os.path.isdir(upperdirs):
         os.makedirs(upperdirs)
@@ -428,8 +425,8 @@ class adapt:
         res = []
         for x in licenses:
             if isinstance(x, dict):
-                res.append(metabook.license(title=x["title"], wikitext=x["wikitext"], _wiki=self))
-            elif isinstance(x, metabook.license):
+                res.append(metabook.License(title=x["title"], wikitext=x["wikitext"], _wiki=self))
+            elif isinstance(x, metabook.License):
                 res.append(x)
                 x._wiki = self
         return res
