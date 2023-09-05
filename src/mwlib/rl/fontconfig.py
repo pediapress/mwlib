@@ -5,18 +5,18 @@
 # See README.txt for additional licensing information.
 
 
-from __future__ import print_function
+
 
 import os
 import re
 
-from mwlib import fonts
-from mwlib.writer.fontswitcher import FontSwitcher
-from past.builtins import basestring
 from reportlab.lib.fonts import addMapping
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase.ttfonts import TTFont
+
+from mwlib import fonts
+from mwlib.writer.fontswitcher import FontSwitcher
 
 font_paths = [os.path.dirname(fonts.__file__), os.path.expanduser("~/mwlibfonts/")]
 
@@ -292,16 +292,13 @@ class RLFontSwitcher(FontSwitcher):
         zws = '<font fontSize="1"> </font>'
         lst = []
         for txt, font in font_list:
-            if font in self.cjk_fonts:
-                new_txt = zws.join(c for c in txt)
-            else:
-                new_txt = txt
+            new_txt = zws.join(c for c in txt) if font in self.cjk_fonts else txt
             lst.append((new_txt, font))
         return lst
 
     def fontifyText(self, txt, break_long=False):
         if self.force_font:
-            return '<font name="%s">%s</font>' % (self.force_font, txt)
+            return f'<font name="{self.force_font}">{txt}</font>'
         font_list = self.get_font_list(txt)
         if self.space_cjk:
             font_list, cjk = font_list
@@ -313,7 +310,7 @@ class RLFontSwitcher(FontSwitcher):
         res = []
         for txt, font in font_list:
             if font != self.default_font:
-                res.append('<font name="%s">%s</font>' % (font, txt))
+                res.append(f'<font name="{font}">{txt}</font>')
             else:
                 res.append(txt)
 
@@ -321,18 +318,14 @@ class RLFontSwitcher(FontSwitcher):
 
     def getfont_for_script(self, script):
         for font_def in fonts:
-            if script in (s.lower() for s in font_def["code_points"] if isinstance(s, basestring)):
-                if self.fontInstalled(font_def):
-                    return font_def["name"]
+            if script in (s.lower() for s in font_def["code_points"] if isinstance(s, str)) and self.fontInstalled(font_def):
+                return font_def["name"]
         return None
 
     def fontInstalled(self, font_def):
         if font_def.get("type") == "cid":
             return True
-        for file_name in font_def.get("file_names"):
-            if not self.getAbsFontPath(file_name):
-                return False
-        return True
+        return all(self.getAbsFontPath(file_name) for file_name in font_def.get("file_names"))
 
     def getAbsFontPath(self, file_name):
         for base_dir in self.font_paths:

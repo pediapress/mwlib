@@ -16,18 +16,13 @@ class Node(utoken.Token):
         self.caption = caption
 
     def __iter__(self):
-        for x in self.children:
-            yield x
+        yield from self.children
 
     def __repr__(self):
         try:
             return utoken.Token.__repr__(self)
         except BaseException:
-            return "%s %r: %s children" % (
-                self.__class__.__name__,
-                self.caption,
-                len(self.children),
-            )
+            return f"{self.__class__.__name__} {self.caption!r}: {len(self.children)} children"
 
     def __eq__(self, other):
         return (

@@ -25,7 +25,7 @@ def main():
     data = {}
     for arg in options.args:
         if "=" in arg:
-            key, value = [x.strip() for x in arg.split("=", 1)]
+            key, value = (x.strip() for x in arg.split("=", 1))
         else:
             key = arg.strip()
             value = True

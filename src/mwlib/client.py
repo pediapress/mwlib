@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import six.moves.urllib.error
 import six.moves.urllib.parse
@@ -11,7 +11,7 @@ class Error(Exception):
     pass
 
 
-class Client(object):
+class Client:
     """HTTP client to mw-serve"""
 
     def __init__(self, url):

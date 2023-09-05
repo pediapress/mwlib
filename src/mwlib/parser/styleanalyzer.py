@@ -5,7 +5,7 @@
 # ''italic''
 
 
-class State(object):
+class State:
     def __init__(self, **kw):
         self.__dict__.update(kw)
 

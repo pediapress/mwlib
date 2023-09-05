@@ -18,7 +18,7 @@ http://en.wikipedia.org/wiki/Wikipedia:Don%27t_use_line_breaks
 http://meta.wikimedia.org/wiki/Help:Advanced_editing
 http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 """
-from __future__ import absolute_import
+
 
 import copy
 import re

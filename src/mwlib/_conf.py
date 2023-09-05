@@ -14,7 +14,7 @@ def as_bool(val):
     return False
 
 
-class ConfBase(object):
+class ConfBase:
     def __init__(self):
         self._inicfg = None
 

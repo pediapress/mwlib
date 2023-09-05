@@ -5,7 +5,7 @@
 """api.php client"""
 
 from http import cookiejar
-from urllib import request, parse
+from urllib import parse, request
 
 try:
     import simplejson as json
@@ -14,7 +14,7 @@ except ImportError:
 
 from gevent.lock import Semaphore
 
-from mwlib import conf, authors
+from mwlib import authors, conf
 
 
 def loads(s):
@@ -29,7 +29,7 @@ def merge_data(dst, src):
     todo = [(dst, src)]
     while todo:
         dst, src = todo.pop()
-        assert isinstance(dst, type(src)), "cannot merge %r with %r" % (type(dst), type(src))
+        assert isinstance(dst, type(src)), f"cannot merge {type(dst)!r} with {type(src)!r}"
 
         if isinstance(dst, list):
             dst.extend(src)
@@ -79,7 +79,7 @@ class MwApi:
         self.limit_fetch_semaphore = Semaphore(limit)
 
     def __repr__(self):
-        return "<mwapi %s at %s>" % (self.apiurl, hex(id(self)))
+        return f"<mwapi {self.apiurl} at {hex(id(self))}>"
 
     def _fetch(self, url):
         f = self.opener.open(url)
@@ -97,7 +97,7 @@ class MwApi:
         q = q.replace("%3A", ":")  # fix for wrong quoting of url for images
         q = q.replace("%7C", "|")  # fix for wrong quoting of API queries (relevant for redirects)
 
-        url = "%s?%s" % (self.apiurl, q)
+        url = f"{self.apiurl}?{q}"
         return url
 
     def _request(self, **kwargs):
@@ -146,7 +146,7 @@ class MwApi:
             error = data.get("error")
             if error:
                 raise RuntimeError(
-                    "%s: [fetching %s]" % (error.get("info", ""), self._build_url(**kwargs))
+                    "{}: [fetching {}]".format(error.get("info", ""), self._build_url(**kwargs))
                 )
             merge_data(retval, data[action])
 
@@ -189,12 +189,12 @@ class MwApi:
         raise RuntimeError("could not get siteinfo")
 
     def login(self, username, password, domain=None, lgtoken=None):
-        args = dict(
-            action="login",
-            lgname=username.encode("utf-8"),
-            lgpassword=password.encode("utf-8"),
-            format="json",
-        )
+        args = {
+            "action": "login",
+            "lgname": username.encode("utf-8"),
+            "lgpassword": password.encode("utf-8"),
+            "format": "json",
+        }
 
         if domain is not None:
             args["lgdomain"] = domain.encode("utf-8")
@@ -214,19 +214,13 @@ class MwApi:
 
     def fetch_used(self, titles=None, revids=None, fetch_images=True, expanded=False):
         if fetch_images:
-            if expanded:
-                prop = "images"
-            else:
-                prop = "revisions|templates|images"
+            prop = "images" if expanded else "revisions|templates|images"
         else:
-            if expanded:
-                prop = ""
-            else:
-                prop = "revisions|templates"
+            prop = "" if expanded else "revisions|templates"
 
-        kwargs = dict(
-            prop=prop, rvprop="ids", imlimit=self.api_result_limit, tllimit=self.api_result_limit
-        )
+        kwargs = {
+            "prop": prop, "rvprop": "ids", "imlimit": self.api_result_limit, "tllimit": self.api_result_limit
+        }
         if titles:
             kwargs["redirects"] = 1
 
@@ -265,12 +259,12 @@ class MwApi:
         return not sem.locked()
 
     def fetch_pages(self, titles=None, revids=None):
-        kwargs = dict(
-            prop="revisions",
-            rvprop="ids|content|timestamp|user",
-            imlimit=self.api_result_limit,
-            tllimit=self.api_result_limit,
-        )
+        kwargs = {
+            "prop": "revisions",
+            "rvprop": "ids|content|timestamp|user",
+            "imlimit": self.api_result_limit,
+            "tllimit": self.api_result_limit,
+        }
         if titles:
             kwargs["redirects"] = 1
 
@@ -278,7 +272,7 @@ class MwApi:
 
         rev_result = self.do_request(action="query", **kwargs)
 
-        kwargs = dict(prop="categories", cllimit=self.api_result_limit)
+        kwargs = {"prop": "categories", "cllimit": self.api_result_limit}
         if titles:
             kwargs["redirects"] = 1
 
@@ -288,12 +282,12 @@ class MwApi:
         return rev_result
 
     def fetch_imageinfo(self, titles, iiurlwidth=800):
-        kwargs = dict(
-            prop="imageinfo|info",
-            iiprop="url|user|comment|url|sha1|size",
-            iiurlwidth=iiurlwidth,
-            inprop="url",
-        )
+        kwargs = {
+            "prop": "imageinfo|info",
+            "iiprop": "url|user|comment|url|sha1|size",
+            "iiurlwidth": iiurlwidth,
+            "inprop": "url",
+        }
 
         self._update_kwargs(kwargs, titles, [])
         return self.do_request(action="query", **kwargs)

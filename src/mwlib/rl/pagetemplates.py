@@ -8,31 +8,36 @@ import time
 from builtins import str
 
 from PIL import Image
+from reportlab.lib.pagesizes import A3
+from reportlab.lib.units import cm
+from reportlab.pdfgen import canvas
+from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
+from reportlab.platypus.frames import Frame
+from reportlab.platypus.paragraph import Paragraph
+
 from mwlib.rl import pdfstyles
 from mwlib.rl.customflowables import TocEntry
 from mwlib.rl.formatter import RLFormatter
 from mwlib.rl.pdfstyles import (
-    header_margin_hor,
-    header_margin_vert,
     footer_margin_hor,
     footer_margin_vert,
-)
-from mwlib.rl.pdfstyles import (
+    header_margin_hor,
+    header_margin_vert,
+    page_height,
+    page_margin_bottom,
     page_margin_left,
     page_margin_right,
     page_margin_top,
-    page_margin_bottom,
+    page_width,
+    pagefooter,
+    print_height,
+    print_width,
+    serif_font,
+    text_style,
+    titlepagefooter,
 )
-from mwlib.rl.pdfstyles import page_width, page_height, print_height, print_width
-from mwlib.rl.pdfstyles import pagefooter, titlepagefooter, serif_font
-from mwlib.rl.pdfstyles import text_style
-from reportlab.lib.pagesizes import A3
-from reportlab.lib.units import cm
-from reportlab.platypus.doctemplate import PageTemplate
-from reportlab.platypus.frames import Frame
-from reportlab.platypus.paragraph import Paragraph
 
-from . import locale, fontconfig
+from . import fontconfig, locale
 
 font_switcher = fontconfig.RLFontSwitcher()
 font_switcher.font_paths = fontconfig.font_paths
@@ -100,10 +105,7 @@ class WikiPage(PageTemplate):
         if pdfstyles.show_page_header:
             canvas.saveState()
             canvas.resetTransforms()
-            if not self.rtl:
-                h_offset = header_margin_hor
-            else:
-                h_offset = 1.5 * header_margin_hor
+            h_offset = header_margin_hor if not self.rtl else 1.5 * header_margin_hor
             canvas.translate(h_offset, page_height - header_margin_vert - 0.1 * cm)
             p = Paragraph(self.title, text_style())
             p.canv = canvas
@@ -203,19 +205,18 @@ class TitlePage(PageTemplate):
         canvas.restoreState()
         if self.cover:
             width, height = self._scale_img(pdfstyles.title_page_image_size, self.cover)
-            if pdfstyles.title_page_image_pos[0] == None:
+            if pdfstyles.title_page_image_pos[0] is None:
                 x = (page_width - width) / 2.0
             else:
                 x = max(0, min(page_width - width, pdfstyles.title_page_image_pos[0]))
-            if pdfstyles.title_page_image_pos[1] == None:
+            if pdfstyles.title_page_image_pos[1] is None:
                 y = (page_height - height) / 2.0
             else:
                 y = max(0, min(page_height - height, pdfstyles.title_page_image_pos[1]))
             canvas.drawImage(self.cover, x, y, width, height)
 
 
-from reportlab.platypus.doctemplate import BaseDocTemplate
-from reportlab.pdfgen import canvas
+
 
 
 class PPDocTemplate(BaseDocTemplate):

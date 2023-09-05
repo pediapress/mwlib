@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import mwclient
 import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import time
@@ -12,7 +12,7 @@ class WikiTrustServerError(Exception):
     msg_identifier = 'EERROR detected.  Try again in a moment, or report an error on the WikiTrust bug tracker.'
 
 
-class TrustedRevisions(object):
+class TrustedRevisions:
     min_trust = 0.80
     wikitrust_api = 'http://en.collaborativetrust.com/WikiTrust/RemoteAPI'
 

@@ -6,7 +6,7 @@ import threading
 from collections import deque
 
 
-class lrucache(object):
+class lrucache:
     def __init__(self, maxsize):
         self.maxsize = maxsize
         self.cache = {}

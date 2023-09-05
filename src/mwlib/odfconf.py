@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 
-class OdfConf(object):
+class OdfConf:
     paper = {
         'PAPER_WIDTH': 8.3,
         'PAPER_HEIGHT': 11.7,

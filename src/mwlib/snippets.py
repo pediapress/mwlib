@@ -4,7 +4,7 @@
 import os
 
 
-class snippet(object):
+class snippet:
     def __init__(self, txt, id):
         self.txt = txt
         self.id = id

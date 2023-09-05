@@ -1,7 +1,7 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import os
 import time
 import six.moves.urllib.parse
@@ -22,7 +22,7 @@ from mwlib import conf
 log = Log("mwapidb")
 
 
-class PODClient(object):
+class PODClient:
     def __init__(self, posturl, redirecturl=None):
         self.posturl = posturl.encode('utf-8')
         self.redirecturl = redirecturl

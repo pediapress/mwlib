@@ -8,17 +8,14 @@ import os
 import sys
 
 import pkg_resources
-from gevent import monkey
 
-from mwlib import utils, wiki, conf, _locale
+from mwlib import _locale, conf, utils, wiki
 from mwlib.options import OptionParser
-
-# monkey.patch_all(thread=False)
 
 
 def init_tmp_cleaner():
-    import tempfile
     import shutil
+    import tempfile
     import time
 
     tempfile.tempdir = tempfile.mkdtemp(prefix="tmp-%s" % os.path.basename(sys.argv[0]))
@@ -42,7 +39,7 @@ def init_tmp_cleaner():
             time.sleep(1)
 
 
-class Main(object):
+class Main:
     zip_filename = None
 
     def parse_options(self):
@@ -80,7 +77,7 @@ class Main(object):
         try:
             return entry_point.load()
         except Exception as e:
-            sys.exit("Could not load writer %r: %s" % (name, e))
+            sys.exit(f"Could not load writer {name!r}: {e}")
 
     def list_writers(self):
         for entry_point in pkg_resources.iter_entry_points("mwlib.writers"):
@@ -92,7 +89,7 @@ class Main(object):
                     description = "<no description>"
             except Exception as e:
                 description = "<NOT LOADABLE: %s>" % e
-            print("%s\t%s" % (entry_point.name, description))
+            print(f"{entry_point.name}\t{description}")
 
     def show_writer_info(self, name):
         writer = self.load_writer(name)
@@ -107,13 +104,13 @@ class Main(object):
             for name, info in writer.options.items():
                 param = info.get("param")
                 if param:
-                    print(" %s=%s:\t%s" % (name, param, info["help"]))
+                    print(" {}={}:\t{}".format(name, param, info["help"]))
                 else:
-                    print(" %s:\t%s" % (name, info["help"]))
+                    print(" {}:\t{}".format(name, info["help"]))
 
     def get_environment(self):
-        from mwlib.status import Status
         from mwlib import nuwiki
+        from mwlib.status import Status
 
         env = self.parser.makewiki()
         if isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt)) or isinstance(
@@ -150,8 +147,9 @@ class Main(object):
         self.options = options
 
         import tempfile
-        from mwlib.writerbase import WriterError
+
         from mwlib.status import Status
+        from mwlib.writerbase import WriterError
 
         use_help = "Use --help for usage information."
 
@@ -182,7 +180,7 @@ class Main(object):
                 writer_options[str(key)] = value
         if options.language:
             writer_options["lang"] = options.language
-        for option in writer_options.keys():
+        for option in writer_options:
             if option not in getattr(writer, "options", {}):
                 print("Warning: unknown writer option %r" % option)
                 del writer_options[option]
@@ -202,10 +200,7 @@ class Main(object):
                 print("Error: could not set locale", err)
 
             basename = os.path.basename(options.output)
-            if "." in basename:
-                ext = "." + basename.rsplit(".", 1)[-1]
-            else:
-                ext = ""
+            ext = "." + basename.rsplit(".", 1)[-1] if "." in basename else ""
             fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output), suffix=ext)
             os.close(fd)
             writer(env, output=tmpout, status_callback=self.status, **writer_options)
@@ -230,7 +225,7 @@ class Main(object):
                 else:
                     f.write("traceback\n")
                     traceback.print_exc(file=f)
-                f.write("sys.argv=%r\n" % (utils.garble_password(sys.argv),))
+                f.write(f"sys.argv={utils.garble_password(sys.argv)!r}\n")
                 f.close()
                 os.rename(tmpfile, options.error_file)
             raise

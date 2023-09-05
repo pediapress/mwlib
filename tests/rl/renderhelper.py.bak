@@ -53,7 +53,7 @@ def renderMW(txt, filesuffix=None):
     elements = rw.write(parseTree)
     renderElements(elements, filesuffix, tmpdir)
 
-class dummyImageDB(object):
+class dummyImageDB:
     def __init__(self, basedir=None):
         self.basedir = basedir
         self.imgnum = 1

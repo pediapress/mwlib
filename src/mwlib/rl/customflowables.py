@@ -4,28 +4,25 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from __future__ import division
-from future import standard_library
-
-standard_library.install_aliases()
-import string
 import re
-import urllib.request, urllib.parse, urllib.error
+import string
+import urllib.error
 import urllib.parse
-
-from reportlab.platypus.flowables import (
-    Flowable,
-    Image,
-    HRFlowable,
-    Preformatted,
-    PageBreak,
-    _listWrapOn,
-    _ContainerSpace,
-    _flowableSublist,
-)
-from reportlab.platypus.paragraph import Paragraph, deepcopy, cleanBlockQuotedText
+import urllib.request
 
 from reportlab.lib.colors import Color
+from reportlab.platypus.flowables import (
+    Flowable,
+    HRFlowable,
+    Image,
+    PageBreak,
+    Preformatted,
+    _ContainerSpace,
+    _flowableSublist,
+    _listWrapOn,
+)
+from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, deepcopy
+
 from mwlib.rl import pdfstyles
 
 
@@ -194,10 +191,7 @@ class FiguresAndParagraphs(Flowable):
                 p.blPara = p.breakLines(nfloatLines * [floatWidth] + [fullWidth])
             if self.figAlign == "left":
                 self._offsets.append([maxWf] * (nfloatLines) + [0])
-            if hasattr(p, "style"):
-                autoLeading = getattr(p.style, "autoLeading")
-            else:
-                autoLeading = ""
+            autoLeading = getattr(p.style, "autoLeading") if hasattr(p, "style") else ""
             if hasattr(p, "style") and autoLeading == "max" and p.blPara.kind == 1:
                 pHeight = 0
                 for l in p.blPara.lines:
@@ -327,10 +321,7 @@ class FiguresAndParagraphs(Flowable):
             else:
                 nextElements = nextFigures
         else:
-            if nextParas:
-                nextElements = nextParas
-            else:
-                nextElements = []
+            nextElements = nextParas if nextParas else []
         return [
             FiguresAndParagraphs(fittingFigures, fittingParas, figure_margin=self.figure_margin)
         ] + nextElements

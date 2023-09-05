@@ -9,8 +9,8 @@ FIXME: replace with texvc which is deistributed with MediaWiki
 
 
 """
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 import popen2
 import subprocess

@@ -23,7 +23,7 @@ except ImportError:
 #     }
 
 
-class CustomNodeTransformer(object):
+class CustomNodeTransformer:
     def __init__(self):
         pass
 

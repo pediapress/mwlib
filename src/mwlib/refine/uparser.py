@@ -6,7 +6,7 @@ from mwlib import expander, metabook, nshandling
 from mwlib.log import Log
 from mwlib.parser.old_uparser import postprocessors
 from mwlib.refine import compat
-from mwlib.utoken import show, walknode, walknodel
+from mwlib.utoken import show
 
 log = Log("refine.uparser")
 

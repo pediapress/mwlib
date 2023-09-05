@@ -3,8 +3,8 @@
 """
 class for defining DTD-Like Rules for the tree
 """
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 from mwlib.advtree import Article
 
 from mwlib.log import Log
@@ -16,7 +16,7 @@ log = Log("sanitychecker")
 # -----------------------------------------------------------
 
 
-class ConstraintBase(object):
+class ConstraintBase:
     def __init__(self, *klasses):
         self.klasses = klasses
 
@@ -170,7 +170,7 @@ def removecb(rule, node=None, parentnode=None):
 # -----------------------------------------------------------
 
 
-class SanityChecker(object):
+class SanityChecker:
     def __init__(self):
         self.rules = []
 

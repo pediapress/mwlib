@@ -28,7 +28,7 @@ import codecs
 rot13_encode = codecs.getencoder('rot-13')
 
 
-class ExtensionRegistry(object):
+class ExtensionRegistry:
     def __init__(self):
         self.name2ext = {}
 
@@ -76,7 +76,7 @@ def _parse(txt):
     # return res.children[0]
 
 
-class TagExtension(object):
+class TagExtension:
     name = None
 
     def __call__(self, source, attributes):

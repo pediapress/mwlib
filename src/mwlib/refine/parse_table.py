@@ -3,11 +3,11 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from mwlib.utoken import show, Token as T
 from mwlib.refine import util
+from mwlib.utoken import Token as T
 
 
-class TableCellParser(object):
+class TableCellParser:
     def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.run()
@@ -39,7 +39,7 @@ class TableCellParser(object):
         while i < len(children):
             if children[i].type == T.t_tablecaption:
                 children[i].type = T.t_special
-                children[i].text = u"|"
+                children[i].text = "|"
                 children.insert(i + 1, T(type=T.t_text, text="+"))
             i += 1
 
@@ -98,7 +98,7 @@ class TableCellParser(object):
             makecell()
 
 
-class TableRowParser(object):
+class TableRowParser:
     def __init__(self, tokens, xopts):
         self.tokens = tokens
         self.xopts = xopts
@@ -142,7 +142,7 @@ class TableRowParser(object):
         def args():
             if row_begin_token is None:
                 return {}
-            return dict(vlist=row_begin_token.vlist)
+            return {"vlist": row_begin_token.vlist}
 
         while i < len(tokens):
             if start is None and self.is_table_cell_start(tokens[i]):
@@ -193,7 +193,7 @@ class TableRowParser(object):
             TableCellParser(sub, self.xopts)
 
 
-class TableParser(object):
+class TableParser:
     def __init__(self, tokens, xopts):
         self.xopts = xopts
         self.tokens = tokens
@@ -357,7 +357,7 @@ def extract_garbage(tokens, is_allowed, is_whitespace=None):
     return res
 
 
-class TableGarbageRemover(object):
+class TableGarbageRemover:
     need_walker = False
 
     def __init__(self, tokens, xopts):

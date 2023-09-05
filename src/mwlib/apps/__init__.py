@@ -3,9 +3,6 @@
 
 """main programs - installed via setuptools' entry_points"""
 
-from __future__ import absolute_import
-from __future__ import print_function
-
 import optparse
 import time
 import traceback
@@ -13,11 +10,8 @@ import webbrowser
 
 import six
 
-from mwlib import expander
-from mwlib import utils
-from mwlib import wiki, uparser
-from mwlib.podclient import PODClient
-from mwlib.podclient import podclient_from_serviceurl
+from mwlib import expander, uparser, utils, wiki
+from mwlib.podclient import PODClient, podclient_from_serviceurl
 from mwlib.status import Status
 
 
@@ -42,16 +36,10 @@ def show():
     db = wiki.makewiki(conf).wiki
 
     for a in articles:
-        if options.template:
-            defaultns = 10
-        else:
-            defaultns = 0
+        defaultns = 10 if options.template else 0
 
         page = db.normalize_and_get_page(a, defaultns)
-        if page:
-            raw = page.rawtext
-        else:
-            raw = None
+        raw = page.rawtext if page else None
 
         if raw:
             if options.expand:
@@ -60,7 +48,8 @@ def show():
 
             print(raw.encode("utf-8"))
     if options.f:
-        raw = six.text_type(open(options.f).read(), "utf-8")
+        with open(options.f) as f:
+            six.text_type(f.read(), "utf-8")
         te = expander.Expander(raw, pagename="test", wikidb=db)
         raw = te.expandTemplates()
         print(raw.encode("utf-8"))
@@ -77,7 +66,7 @@ def post():
         help="get POST URL from PediaPress.com, open upload page in webbrowser",
         action="store_true",
     )
-    options, args = parser.parse_args()
+    options, _ = parser.parse_args()
 
     use_help = "Use --help for usage information."
     if not options.input:
@@ -131,16 +120,13 @@ def parse():
 
     if options.all:
         if not hasattr(db, "articles"):
-            raise RuntimeError("%s does not support iterating over all articles" % (db,))
+            raise RuntimeError(f"{db} does not support iterating over all articles")
         articles = db.articles()
 
     for x in articles:
         try:
             page = db.normalize_and_get_page(x, 0)
-            if page:
-                raw = page.rawtext
-            else:
-                raw = None
+            raw = page.rawtext if page else None
 
             # yes, raw can be None, when we have a redirect to a non-existing article.
             if raw is None:

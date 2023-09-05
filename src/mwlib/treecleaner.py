@@ -4,8 +4,8 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import sys
 import unicodedata
 
@@ -48,7 +48,7 @@ def _any(list):
     return False
 
 
-class TreeCleaner(object):
+class TreeCleaner:
 
     """The TreeCleaner object cleans the parse tree to optimize writer output.
 

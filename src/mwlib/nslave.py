@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 from six.moves import range
 if __name__ == "__main__":
     from gevent import monkey
@@ -117,7 +117,7 @@ def suggest_filename(metabook_data):
             return x.strip()
 
 
-class commands(object):
+class commands:
     def statusfile(self):
         host = self.proxy._rpcclient.host
         port = self.proxy._rpcclient.port

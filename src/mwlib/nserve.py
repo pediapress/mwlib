@@ -4,8 +4,8 @@
 
 from __future__ import with_statement
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import gevent.monkey
 import six
 
@@ -33,7 +33,7 @@ from mwlib.asynchronous import rpcclient
 log = log.Log("mwlib.serve")
 
 
-class bunch(object):
+class bunch:
     def __init__(self, **kw):
         self.__dict__.update(kw)
 
@@ -111,7 +111,7 @@ busy = dict()
 collid2qserve = lrucache.lrucache(4000)
 
 
-class watch_qserve(object):
+class watch_qserve:
     getstats_timeout = 3.0
     sleeptime = 2.0
 
@@ -224,7 +224,7 @@ def get_content_disposition(filename, ext):
     return r
 
 
-class Application(object):
+class Application:
     def __init__(self, default_writer="rl"):
         self.default_writer = default_writer
 

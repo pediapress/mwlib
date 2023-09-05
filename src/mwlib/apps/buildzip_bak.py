@@ -3,6 +3,7 @@
 
 """mz-zip - create nuwiki zip files"""
 
+import contextlib
 import os
 import shutil
 import sys
@@ -136,10 +137,9 @@ def _init_pod_client(options, parser, use_help):
                 os._exit(os.EX_OK)  # pylint: disable=W0212
 
         time.sleep(1)
-        try:
+        with contextlib.suppress(OSError):
             os.kill(pid, 9)
-        except OSError:
-            pass
+
 
     else:
         pod_client = None

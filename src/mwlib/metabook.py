@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
+
 
 import copy
 import warnings
@@ -19,7 +19,7 @@ def parse_collection_page(txt):
     return parse_collection_page(txt)
 
 
-class mbobj(object):
+class mbobj:
     def __init__(self, **kw):
         d = dict(type=self.__class__.__name__)
 

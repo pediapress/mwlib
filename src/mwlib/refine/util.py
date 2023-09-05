@@ -1,7 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
+
 
 import re
 
@@ -42,7 +42,7 @@ def parse_params(s):
     return r
 
 
-class ImageMod(object):
+class ImageMod:
     default_magicwords = [
         {"aliases": ["thumbnail", "thumb"], "case-sensitive": "", "name": "img_thumbnail"},
         {

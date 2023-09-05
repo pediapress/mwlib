@@ -12,11 +12,10 @@ from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tables import Table
 
-from mwlib.rl import fontconfig
-from mwlib.rl import pdfstyles
+from mwlib.rl import fontconfig, pdfstyles
 
 
-class TocRenderer(object):
+class TocRenderer:
     def __init__(self):
         font_switcher = fontconfig.RLFontSwitcher()
         font_switcher.font_paths = fontconfig.font_paths

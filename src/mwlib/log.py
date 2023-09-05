@@ -20,7 +20,7 @@ logging.getLogger("PIL").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
-class Stdout(object):
+class Stdout:
     """late-bound sys.stdout"""
 
     def write(self, msg):
@@ -30,7 +30,7 @@ class Stdout(object):
         sys.stdout.flush()
 
 
-class Stderr(object):
+class Stderr:
     """late-bound sys.stderr"""
 
     def write(self, msg):
@@ -40,7 +40,7 @@ class Stderr(object):
         sys.stderr.flush()
 
 
-class Log(object):
+class Log:
     logfile = Stderr()
     timestamp_fmt = "%Y-%m-%dT%H:%M:%S"
 

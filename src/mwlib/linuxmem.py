@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 _scale = dict(kB=1024.0, KB=1024.0, mB=1024.0 * 1024.0, MB=1024.0 * 1024.0)
 

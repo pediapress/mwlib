@@ -5,11 +5,11 @@ Helper to list and retrieve all stored books from a wiki
 """
 
 
-from __future__ import absolute_import
-from __future__ import print_function
 
 
-class Bookshelf(object):
+
+
+class Bookshelf:
     def __init__(self, api):
         self.api = api
         self.coll_bookscategory = "Category:%s" % self.api.content_query(

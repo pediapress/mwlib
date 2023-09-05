@@ -1,4 +1,5 @@
 include .dockerignore
+include .vscode/settings.json
 include Dockerfile
 include Dockerfile-dev-py27
 include MANIFEST.in
@@ -18,6 +19,7 @@ include docs/metabook.rst
 include docs/renderserver.rst
 include docs/writers.rst
 include mw-post
+include mwlib.svg
 include mwlib/_uscan.cc
 include pyproject.toml
 include pytest.ini
@@ -41,12 +43,14 @@ include src/mwlib/__init__.py
 include src/mwlib/_conf.py
 include src/mwlib/_expander.re
 include src/mwlib/_locale.py
+include src/mwlib/_uscan.cc
 include src/mwlib/_uscan.re
 include src/mwlib/_version.py
 include src/mwlib/advtree.py
 include src/mwlib/allnodes.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
+include src/mwlib/apps/buildzip_bak.py
 include src/mwlib/apps/client.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
@@ -107,12 +111,14 @@ include src/mwlib/odfwriter.py
 include src/mwlib/options.py
 include src/mwlib/parse_collection_page.py
 include src/mwlib/parser/__init__.py
+include src/mwlib/parser/mwscan.py
 include src/mwlib/parser/nodes.py
 include src/mwlib/parser/old_uparser.py
 include src/mwlib/parser/styleanalyzer.py
 include src/mwlib/podclient.py
 include src/mwlib/postman.py
 include src/mwlib/refine/__init__.py
+include src/mwlib/refine/_core.c
 include src/mwlib/refine/_core.pyx
 include src/mwlib/refine/compat.py
 include src/mwlib/refine/core.py
@@ -444,6 +450,7 @@ include src/mwlib/status.py
 include src/mwlib/strftime.py
 include src/mwlib/tagext.py
 include src/mwlib/templ/__init__.py
+include src/mwlib/templ/evaluate.c
 include src/mwlib/templ/evaluate.pyx
 include src/mwlib/templ/magic_nodes.py
 include src/mwlib/templ/magic_time.py
@@ -451,6 +458,7 @@ include src/mwlib/templ/magics.py
 include src/mwlib/templ/marks.py
 include src/mwlib/templ/misc.py
 include src/mwlib/templ/mwlocals.py
+include src/mwlib/templ/nodes.c
 include src/mwlib/templ/nodes.pyx
 include src/mwlib/templ/parser.py
 include src/mwlib/templ/pp.py
@@ -482,11 +490,15 @@ include tests/memeater.py
 include tests/pages-tag-numeric.zip
 include tests/pages-tag.zip
 include tests/rl/renderhelper.py
+include tests/rl/renderhelper.py.bak
 include tests/rl/test_advanced.py
 include tests/rl/test_basicnodes.py
+include tests/rl/test_basicnodes.py.bak
 include tests/rl/test_misc.py
 include tests/rl/test_snippets.py
+include tests/rl/test_snippets.py.bak
 include tests/rl/test_translation.py
+include tests/rl/test_translation.py.bak
 include tests/small-object-has-no-attribute-colspan.zip
 include tests/speisesalz-nuwiki.zip
 include tests/test_advtree.py

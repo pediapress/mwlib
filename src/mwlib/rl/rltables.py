@@ -7,12 +7,12 @@
 import math
 from builtins import range
 
-from mwlib.parser.nodes import Text, ItemList, Table, Row, Cell
-from mwlib import advtree
-from mwlib import log
-from mwlib.writer import styleutils
-from mwlib.rl import pdfstyles
 from reportlab.lib import colors
+
+from mwlib import advtree, log
+from mwlib.parser.nodes import Cell, ItemList, Row, Table, Text
+from mwlib.rl import pdfstyles
+from mwlib.writer import styleutils
 
 from .customflowables import Figure
 
@@ -63,13 +63,10 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
                 colspan = 1
             for e in cell:
                 minw, minh = e.wrap(0, pdfstyles.print_height)
-                maxw, maxh = e.wrap(availWidth, pdfstyles.print_height)
+                _, maxh = e.wrap(availWidth, pdfstyles.print_height)
                 minw += 6  # FIXME +6 is the cell padding we are using
                 cellwidth += minw
-                if maxh > 0:
-                    rows = minh / maxh - 0.5  # approx. #linebreaks - smooted out -
-                else:
-                    rows = 0
+                rows = minh / maxh - 0.5 if maxh > 0 else 0 # approx. #linebreaks - smooted out
                 if colspan > 1:
                     for offset in range(colspan):
                         minwidths[j + offset] = max(minw / colspan, minwidths[j + offset])
@@ -166,7 +163,6 @@ def getContentType(t):
 def reformatTable(t, maxCols):
     nodeInfo = getContentType(t)
     numCols = maxCols
-    numRows = len(t.rows)
 
     onlyTables = len(t.children) > 0  # if table is empty onlyTables and onlyLists are False
     onlyLists = len(t.children) > 0
@@ -282,7 +278,7 @@ def customCalcWidths(table, avail_width):
 def optimizeWidths(min_widths, max_widths, avail_width, stretch=False, table=None):
     if pdfstyles.table_widths_from_markup:
         col_widths = customCalcWidths(table, avail_width)
-        if col_widths != None:
+        if col_widths is not None:
             return col_widths
     remaining_space = avail_width - sum(min_widths)
 

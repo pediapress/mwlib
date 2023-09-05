@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import os
 import time
@@ -10,7 +10,7 @@ from mwlib import utils
 from mwlib.log import Log
 
 
-class FileJobQueuer(object):
+class FileJobQueuer:
     """Write a file for each new job request"""
 
     def __init__(self, queue_dir):
@@ -27,7 +27,7 @@ class FileJobQueuer(object):
         os.rename(job_file + ".tmp", job_file)
 
 
-class FileJobPoller(object):
+class FileJobPoller:
     def __init__(self, queue_dir, processing_dir=None, sleep_time=1, max_num_jobs=5):
         self.queue_dir = utils.ensure_dir(queue_dir)
         self.sleep_time = sleep_time

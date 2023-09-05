@@ -14,20 +14,17 @@
 #################################################################
 
 
-from __future__ import division
-import os
-
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY, TA_RIGHT
-from reportlab.lib.units import cm
 
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
-
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import cm
 
 # used to mark translateable strings:
 if "_" not in globals():
-    _ = lambda x: x
+    def _(x):
+        return x
 
 
 serif_font = "FreeSerif"
@@ -37,6 +34,7 @@ default_font = "FreeSerif"
 
 
 from reportlab import rl_config
+import contextlib
 
 rl_config.canvas_basefontname = default_font
 
@@ -424,10 +422,9 @@ def heading_style(mode="chapter", lvl=1, text_align=None):
 
 # import custom configuration to override configuration values
 # if doing so, you need to be careful not to break things...
-try:
+with contextlib.suppress(ImportError):
     from customconfig import *
-except ImportError:
-    pass
+
 
 
 print_width = page_width - page_margin_left - page_margin_right

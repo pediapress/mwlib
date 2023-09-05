@@ -33,7 +33,7 @@ NS_CATEGORY = 14
 NS_CATEGORY_TALK = 15
 
 
-class ilink(object):
+class ilink:
     url = ""
     prefix = ""
     local = ""
@@ -66,7 +66,7 @@ def fix_wikipedia_siteinfo(siteinfo):
 # TODO: build fast lookup table for use in nshandler.splitname
 
 
-class nshandler(object):
+class nshandler:
     def __init__(self, siteinfo):
         assert siteinfo is not None
 

@@ -30,7 +30,7 @@ serviceurl = "http://pediapress.com/api/collections/"
 thisservice = "http://%s:%d/" % (host, port)
 
 
-class State(object):
+class State:
     articles = []
     baseurl = default_baseurl
     bookmarklet = "javascript:location.href='%s?addarticle='+location.href" % thisservice

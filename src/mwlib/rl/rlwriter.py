@@ -4,10 +4,6 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from builtins import str
-from builtins import range
-from past.builtins import basestring
-from builtins import object
 import gettext
 import sys
 import os
@@ -26,11 +22,48 @@ except ImportError:
     from md5 import md5
 
 from xml.sax.saxutils import escape as xmlescape
-from PIL import Image as PilImage
 
-from pygments import highlight
-from pygments import lexers
+from PIL import Image as PilImage
+from pygments import highlight, lexers
+from reportlab import rl_config
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_RIGHT
+from reportlab.lib.units import cm
+from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, NotAtTopPageBreak
+from reportlab.platypus.flowables import CondPageBreak, HRFlowable, PageBreak, Spacer
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.tables import Table
+from reportlab.platypus.xpreformatted import XPreformatted
+
+from mwlib import log, parser, timeline, uparser
+from mwlib._version import version as mwlibversion
+from mwlib.rl._version import version as rlwriterversion
+from mwlib.rl.customflowables import (
+    DummyTable,
+    Figure,
+    FiguresAndParagraphs,
+    SmartKeepTogether,
+    TocEntry,
+)
+from mwlib.rl.customnodetransformer import CustomNodeTransformer
+from mwlib.rl.formatter import RLFormatter
+from mwlib.rl.toc import TocRenderer
+from mwlib.writer import miscutils, styleutils
+from mwlib.writer.imageutils import ImageUtils
+from mwlib.writer.licensechecker import LicenseChecker
+
+from . import fontconfig, pdfstyles, rltables
+from .pagetemplates import PPDocTemplate, TitlePage, WikiPage
+from .pdfstyles import heading_style, print_height, print_width, table_style, text_style
 from .rlsourceformatter import ReportlabFormatter
+
+try:
+    from mwlib import _extversion
+except ImportError:
+    pass
+
+from mwlib import advtree, writerbase
+from mwlib.treecleaner import TreeCleaner
 
 try:
     from mwlib import linuxmem
@@ -53,64 +86,17 @@ _check_reportlab()
 # import reportlab
 # reportlab.rl_config.platypus_link_underline = 1
 
-from reportlab import rl_config
-
-from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.doctemplate import BaseDocTemplate
-
-from .pagetemplates import PPDocTemplate
-
-from reportlab.platypus.doctemplate import NextPageTemplate, NotAtTopPageBreak
-from reportlab.platypus.tables import Table
-from reportlab.platypus.flowables import Spacer, HRFlowable, PageBreak, CondPageBreak
-from reportlab.platypus.xpreformatted import XPreformatted
-from reportlab.lib.units import cm
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_RIGHT
-
-from mwlib.rl.customflowables import (
-    Figure,
-    FiguresAndParagraphs,
-    SmartKeepTogether,
-    TocEntry,
-    DummyTable,
-)
-
-from .pdfstyles import text_style, heading_style, table_style
-
-from .pdfstyles import print_width, print_height
-from . import pdfstyles, fontconfig
-
-from . import rltables
-from .pagetemplates import WikiPage, TitlePage
-
-from mwlib.writer.imageutils import ImageUtils
-from mwlib.writer import miscutils, styleutils
-from mwlib import parser, log, timeline
-from mwlib import uparser
-from mwlib.writer.licensechecker import LicenseChecker
-from mwlib.rl.customnodetransformer import CustomNodeTransformer
-from mwlib.rl.formatter import RLFormatter
-from mwlib.rl.toc import TocRenderer
-from mwlib.rl._version import version as rlwriterversion
-from mwlib._version import version as mwlibversion
 
 log = log.Log("rlwriter")
 
 
-try:
-    from mwlib import _extversion
-except ImportError:
-    pass
 
-from mwlib import advtree, writerbase
-from mwlib.treecleaner import TreeCleaner
 
 
 def flatten(x):
     result = []
     for el in x:
-        if hasattr(el, "__iter__") and not isinstance(el, basestring):
+        if hasattr(el, "__iter__") and not isinstance(el, str):
             result.extend(flatten(el))
         else:
             result.append(el)
@@ -118,21 +104,18 @@ def flatten(x):
 
 
 def isInline(objs):
-    for obj in flatten(objs):
-        if not (isinstance(obj, str) or isinstance(obj, str)):
-            return False
-    return True
+    return all(isinstance(obj, str) for obj in flatten(objs))
 
 
 def buildPara(txtList, style=text_style(), txt_style=None):
     _txt = "".join(txtList)
     _txt = _txt.strip()
     if txt_style:
-        _txt = "%(start)s%(txt)s%(end)s" % {
-            "start": "".join(txt_style["start"]),
-            "end": "".join(txt_style["end"]),
-            "txt": _txt,
-        }
+        _txt = "{start}{txt}{end}".format(
+            start="".join(txt_style["start"]),
+            end="".join(txt_style["end"]),
+            txt=_txt,
+        )
     if len(_txt) > 0:
         try:
             return [Paragraph(_txt, style)]
@@ -152,7 +135,7 @@ class ReportlabError(Exception):
         return repr(self.value)
 
 
-class RlWriter(object):
+class RlWriter:
     def __init__(
         self, env=None, strict=False, debug=False, mathcache=None, lang=None, test_mode=False
     ):
@@ -161,7 +144,7 @@ class RlWriter(object):
         if lang:
             try:
                 translation = gettext.translation("mwlib.rl", localedir, [lang])
-            except IOError as exc:
+            except OSError as exc:
                 log.warn(str(exc))
         translation.install()
 
@@ -457,10 +440,7 @@ class RlWriter(object):
 
     def initReportlabDoc(self, output):
         version = self.getVersion()
-        if pdfstyles.render_toc:
-            tocCallback = self.tocCallback
-        else:
-            tocCallback = None
+        tocCallback = self.tocCallback if pdfstyles.render_toc else None
         self.doc = PPDocTemplate(
             output,
             topMargin=pdfstyles.page_margin_top,
@@ -546,8 +526,7 @@ class RlWriter(object):
                 if got_chapter:
                     art.has_preceeding_chapter = True
                     got_chapter = False
-                if self.fail_safe_rendering:
-                    if not self.articleRenderingOK(copy.deepcopy(art), output):
+                if self.fail_safe_rendering and not self.articleRenderingOK(copy.deepcopy(art), output):
                         art.renderFailed = True
                 art_elements = self.writeArticle(art)
                 del art
@@ -742,8 +721,7 @@ class RlWriter(object):
             anchor = ""
         elements = [
             Paragraph(
-                '<font name="%s"><b>%s</b></font>%s'
-                % (headingStyle.fontName, heading_txt, anchor),
+                f'<font name="{headingStyle.fontName}"><b>{heading_txt}</b></font>{anchor}',
                 headingStyle,
             )
         ]
@@ -776,7 +754,7 @@ class RlWriter(object):
             True  # this is a hack, this info should pulled out of the environment if available
         )
         # tmplink._normalizeTarget() # FIXME: this is currently removed from mwlib. we need to check URL handling in mwlib
-        idstr = "%s%s" % (wikiurl, tmplink.target)
+        idstr = f"{wikiurl}{tmplink.target}"
         m = md5(idstr.encode("utf-8"))
         return m.hexdigest()
 
@@ -799,14 +777,13 @@ class RlWriter(object):
         for title, url, authors in self.article_meta_info:
             authors_text = self._filterAnonIpEdits(authors)
             txt = (
-                "<b>%(title)s</b> &nbsp;<i>%(source_label)s</i>: %(source)s &nbsp;<i>%(contribs_label)s</i>: %(contribs)s "
-                % {
-                    "title": title,
-                    "source_label": self.formatter.clean_text(_("Source")),
-                    "source": self.formatter.clean_text(url),
-                    "contribs_label": self.formatter.clean_text(_("Contributors")),
-                    "contribs": authors_text,
-                }
+                "<b>{title}</b> &nbsp;<i>{source_label}</i>: {source} &nbsp;<i>{contribs_label}</i>: {contribs} ".format(
+                    title=title,
+                    source_label=self.formatter.clean_text(_("Source")),
+                    source=self.formatter.clean_text(url),
+                    contribs_label=self.formatter.clean_text(_("Contributors")),
+                    contribs=authors_text,
+                )
             )
             elements.append(Paragraph(txt, text_style("attribution")))
         return elements
@@ -822,20 +799,19 @@ class RlWriter(object):
             authors_text = self._filterAnonIpEdits(authors)
             if not license:
                 license = _("unknown")
-            license_txt = "<i>%(license_label)s</i>: %(license)s &nbsp;" % {
-                "license_label": self.formatter.clean_text(_("License")),
-                "license": self.formatter.clean_text(license),
-            }
+            license_txt = "<i>{license_label}</i>: {license} &nbsp;".format(
+                license_label=self.formatter.clean_text(_("License")),
+                license=self.formatter.clean_text(license),
+            )
             txt = (
-                "<b>%(title)s</b> &nbsp;<i>%(source_label)s</i>: %(source)s &nbsp;%(license_txt)s<i>%(contribs_label)s</i>: %(contribs)s "
-                % {
-                    "title": self.formatter.clean_text(title),
-                    "source_label": self.formatter.clean_text(_("Source")),
-                    "source": self.formatter.clean_text(url),
-                    "license_txt": license_txt,
-                    "contribs_label": self.formatter.clean_text(_("Contributors")),
-                    "contribs": authors_text,
-                }
+                "<b>{title}</b> &nbsp;<i>{source_label}</i>: {source} &nbsp;{license_txt}<i>{contribs_label}</i>: {contribs} ".format(
+                    title=self.formatter.clean_text(title),
+                    source_label=self.formatter.clean_text(_("Source")),
+                    source=self.formatter.clean_text(url),
+                    license_txt=license_txt,
+                    contribs_label=self.formatter.clean_text(_("Contributors")),
+                    contribs=authors_text,
+                )
             )
             elements.append(Paragraph(txt, text_style("img_attribution")))
         return elements
@@ -904,7 +880,7 @@ class RlWriter(object):
         else:
             article_id = None
 
-        heading_para = Paragraph("<b>%s</b>%s" % (title, heading_anchor), heading_style("article"))
+        heading_para = Paragraph(f"<b>{title}</b>{heading_anchor}", heading_style("article"))
         elements.append(heading_para)
         elements.append(TocEntry(txt=title, lvl="article"))
 
@@ -933,7 +909,7 @@ class RlWriter(object):
             elements.extend(self.renderFailedNode(article, articleFailText))
 
         # check for non-flowables
-        elements = [e for e in elements if not isinstance(e, basestring)]
+        elements = [e for e in elements if not isinstance(e, str)]
         elements = self.floatImages(elements)
         elements = self.tabularizeImages(elements)
 
@@ -1010,10 +986,7 @@ class RlWriter(object):
                     w, h = p.wrap(print_width - maxImgWidth, print_height)
                     h += p.style.spaceBefore + p.style.spaceAfter
                     hp += h
-            if hp > hf - 10:
-                return True
-            else:
-                return False
+            return hp > hf - 10
 
         for n in nodes:  # FIXME: somebody should clean up this mess
             if isinstance(lastNode, Figure) and isinstance(n, Figure):
@@ -1032,7 +1005,7 @@ class RlWriter(object):
                 else:
                     if (
                         hasattr(n, "style")
-                        and n.style.flowable == True
+                        and n.style.flowable is True
                         and not gotSufficientFloats(figures, floatingNodes)
                     ):  # newpara
                         floatingNodes.append(n)
@@ -1166,7 +1139,7 @@ class RlWriter(object):
         style = text_style(mode="preformatted", in_table=self.table_nesting)
         while not width or width > avail_width:
             pre = XPreformatted(t, style)
-            width, height = pre.wrap(avail_width, pdfstyles.page_height)
+            width, _ = pre.wrap(avail_width, pdfstyles.page_height)
             style.fontSize -= 0.5
             if style.fontSize < pdfstyles.min_preformatted_size:
                 style = text_style(mode="preformatted", in_table=self.table_nesting)
@@ -1373,9 +1346,9 @@ class RlWriter(object):
 
         if not internallink:
             if not obj.target.startswith("#"):  # intrapage links are filtered
-                t = '<link href="%s">%s</link>' % (xmlescape(href), t)
+                t = f'<link href="{xmlescape(href)}">{t}</link>'
         else:
-            t = '<link href="#%s">%s</link>' % (article_id, t)
+            t = f'<link href="#{article_id}">{t}</link>'
 
         return [t]
 
@@ -1415,9 +1388,9 @@ class RlWriter(object):
         ) and not self.ref_mode:
             return self.writeNamedURL(obj)
         if self.rtl:
-            txt = '<link href="%s">\u202a%s\u202c</link>' % (href, display_text)
+            txt = f'<link href="{href}">\u202a{display_text}\u202c</link>'
         else:
-            txt = '<link href="%s">%s</link>' % (href, display_text)
+            txt = f'<link href="{href}">{display_text}</link>'
         return [txt]
 
     def writeNamedURL(self, obj):
@@ -1435,18 +1408,16 @@ class RlWriter(object):
             if any([href.startswith(url) for url in pdfstyles.url_blacklist]):
                 return ["".join(txt)]
             txt.append(
-                ' <link href="%s">(%s)</link>'
-                % (xmlescape(href), self.renderURL(urllib.parse.unquote(href)))
+                ' <link href="{}">({})</link>'.format(xmlescape(href), self.renderURL(urllib.parse.unquote(href)))
             )
             return ["".join(txt)]
 
         if not obj.children:
-            linktext = '<link href="%s">[%s]</link>' % (xmlescape(href), self.url_map[href])
+            linktext = f'<link href="{xmlescape(href)}">[{self.url_map[href]}]</link>'
         else:
             linktext = self.renderInline(obj)
             linktext.append(
-                ' <super><link href="%s"><font size="10">[%s]</font></link></super> '
-                % (xmlescape(href), self.url_map[href])
+                ' <super><link href="{}"><font size="10">[{}]</font></link></super> '.format(xmlescape(href), self.url_map[href])
             )
             linktext = "".join(linktext).strip()
         return linktext
@@ -1513,7 +1484,7 @@ class RlWriter(object):
 
         try:
             img = PilImage.open(img_path)
-        except IOError:
+        except OSError:
             log.warning("image can not be opened by PIL: %r" % img_path)
             return -1
         if not isinstance(img.info.get("transparency", 0), int):
@@ -1599,15 +1570,15 @@ class RlWriter(object):
             if (
                 w
                 and h
-                and img_node.width == None
-                and img_node.height == None
+                and img_node.width is None
+                and img_node.height is None
                 and img_node.isInline()
             ):
                 img_node.width = w
                 img_node.height = h
 
     def writeImageLink(self, img_node):
-        if img_node.colon == True:
+        if img_node.colon is True:
             items = []
             for node in img_node.children:
                 items.extend(self.write(node))
@@ -1616,7 +1587,7 @@ class RlWriter(object):
         img_path = self.getImgPath(img_node.target)
 
         if not img_path:
-            if img_node.target == None:
+            if img_node.target is None:
                 img_node.target = ""
             log.warning("invalid image url (obj.target: %r)" % img_node.target)
             return []
@@ -1700,15 +1671,14 @@ class RlWriter(object):
 
         if is_inline:
             txt = (
-                '%(linkstart)s<img src="%(src)s" width="%(width)fpt" height="%(height)fpt" valign="%(align)s"/>%(linkend)s'
-                % {
-                    "src": str(img_path, "utf-8"),
-                    "width": w,
-                    "height": h,
-                    "align": "bottom",
-                    "linkstart": linkstart,
-                    "linkend": linkend,
-                }
+                '{linkstart}<img src="{src}" width="{width:f}pt" height="{height:f}pt" valign="{align}"/>{linkend}'.format(
+                    src=str(img_path, "utf-8"),
+                    width=w,
+                    height=h,
+                    align="bottom",
+                    linkstart=linkstart,
+                    linkend=linkend,
+                )
             )
             return [txt]
         captionTxt = "".join(txt)
@@ -1724,7 +1694,7 @@ class RlWriter(object):
             align=align,
             url=url,
         )
-        figure.float_figure = not img_node.align in ["center", "none"]
+        figure.float_figure = img_node.align not in ["center", "none"]
         return [figure]
 
     def writeGallery(self, obj):
@@ -1736,12 +1706,7 @@ class RlWriter(object):
         num_images = len(obj.get_child_nodes_by_class(advtree.ImageLink))
         if num_images == 0:
             return []
-        if not perrow:
-            perrow = min(
-                4, num_images
-            )  # 4 is the default for the number of images per gallery row
-        else:
-            perrow = min(6, perrow, num_images)
+        perrow = min(6, perrow, num_images) if perrow else min(4, num_images)
         perrow = max(1, perrow)
         data = []
         row = []
@@ -1825,10 +1790,9 @@ class RlWriter(object):
             if c == "<":
                 in_tag = True
             if c in [" ", "\t"]:
-                if not in_tag:
-                    if not in_space:
-                        words.append("".join(word))
-                        word = []
+                if not in_tag and not in_space:
+                    words.append("".join(word))
+                    word = []
                 word.append(c)
                 in_space = True
             else:
@@ -1890,8 +1854,7 @@ class RlWriter(object):
         except:
             traceback.print_exc()
             log.error(
-                "unsuitable lexer for source code language: %s - Lexer: %s"
-                % (repr(src_lang), lexer.__class__.__name__)
+                "unsuitable lexer for source code language: {} - Lexer: {}".format(repr(src_lang), lexer.__class__.__name__)
             )
             return None
 
@@ -2034,10 +1997,7 @@ class RlWriter(object):
 
     def writeItem(self, item, style="itemize", counterID=None, resetCounter=False):
         items = []
-        if resetCounter:
-            seqReset = '<seqreset id="liCounter%d" base="0" />' % (counterID)
-        else:
-            seqReset = ""
+        seqReset = '<seqreset id="liCounter%d" base="0" />' % counterID if resetCounter else ""
 
         if style == "itemize":
             itemPrefix = "<bullet>%s</bullet>" % pdfstyles.list_item_style
@@ -2076,7 +2036,7 @@ class RlWriter(object):
     def writeItemList(self, lst, numbered=False, style="itemize"):
         self.listIndentation += 1
         items = []
-        if not style == "referencelist":
+        if style != "referencelist":
             if numbered or lst.numbered:
                 list_style = lst.style.get("list-style-type")
                 list_type = lst.vlist.get("type")
@@ -2154,7 +2114,7 @@ class RlWriter(object):
         if (
             not align
             and getattr(cell, "is_header", False)
-            or all([item.__class__ == advtree.ImageLink for item in cell.children])
+            or all(item.__class__ == advtree.ImageLink for item in cell.children)
         ):
             align = "center"
         elements = []
@@ -2169,7 +2129,7 @@ class RlWriter(object):
         )
 
         for i, e in enumerate(elements):
-            if isinstance(e, basestring):
+            if isinstance(e, str):
                 elements[i] = buildPara([e])[0]
 
         if getattr(cell, "is_header", False):
@@ -2211,10 +2171,7 @@ class RlWriter(object):
         total_width = 0
         current_width = 0
         for line in p.blPara.lines:
-            if kind == 0:
-                extraspace = line[0]
-            else:
-                extraspace = line.extraSpace
+            extraspace = line[0] if kind == 0 else line.extraSpace
             line_width = print_width - extraspace
             current_width += line_width
             if getattr(line, "lineBreak", False):
@@ -2232,10 +2189,7 @@ class RlWriter(object):
             width = self.getMaxParaWidth(element, pdfstyles.print_width)
             return width + pad, 0
         w_max, h_max = element.wrap(10 * pdfstyles.page_width, pdfstyles.page_height)
-        if h_max > 0:
-            rows = h_min / h_max
-        else:
-            rows = 1
+        rows = h_min / h_max if h_max > 0 else 1
         max_width = rows * w_min
         max_width += 2 * rows * pdfstyles.cell_padding
         return max_width, h_max
@@ -2311,7 +2265,7 @@ class RlWriter(object):
     def emptyTable(self, t):
         for row in t.children:
             if row.__class__ == advtree.Row:
-                for cell in row.children:
+                for _ in row.children:
                     return False
         return True
 
@@ -2365,7 +2319,7 @@ class RlWriter(object):
         anchors = ""
         for article_id in self.articleids:
             newAnchor = '<a name="%s" />' % article_id
-            anchors = "%s%s" % (anchors, newAnchor)
+            anchors = f"{anchors}{newAnchor}"
         p = Paragraph(anchors, text_style())
 
         c = table._cellvalues[0][0]
@@ -2395,14 +2349,15 @@ class RlWriter(object):
 
         imgpath = None
 
-        has_cache = lambda: self.math_cache_dir and os.path.isdir(self.math_cache_dir)
+        def has_cache():
+            return self.math_cache_dir and os.path.isdir(self.math_cache_dir)
 
         if has_cache():
             _md5 = md5()
             _md5.update(source.encode("utf-8"))
             math_id = _md5.hexdigest()
             cached_path = os.path.join(
-                self.math_cache_dir, "%s/%s/%s-%s.png" % (math_id[0], math_id[1], math_id, density)
+                self.math_cache_dir, f"{math_id[0]}/{math_id[1]}/{math_id}-{density}.png"
             )
             if os.path.exists(cached_path):
                 imgpath = cached_path
@@ -2446,13 +2401,12 @@ class RlWriter(object):
         imgAlign = "%fin" % (-(h - 15) / (2 * density))
         # the non-breaking-space is needed to force whitespace after the formula
         return [
-            '<img src="%(path)s" width="%(width)fpt" height="%(height)fpt" valign="%(valign)s" />'
-            % {
-                "path": imgpath.encode(sys.getfilesystemencoding()),
-                "width": w / density * 72,
-                "height": h / density * 72,
-                "valign": imgAlign,
-            }
+            '<img src="{path}" width="{width:f}pt" height="{height:f}pt" valign="{valign}" />'.format(
+                path=imgpath.encode(sys.getfilesystemencoding()),
+                width=w / density * 72,
+                height=h / density * 72,
+                valign=imgAlign,
+            )
         ]
 
     def writeTimeline(self, node):

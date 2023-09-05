@@ -21,7 +21,7 @@ from sqlitedict import SqliteDict
 log = Log('nuwiki')
 
 
-class page(object):
+class page:
     expanded = 0
 
     def __init__(self, meta, rawtext):
@@ -29,7 +29,7 @@ class page(object):
         self.rawtext = rawtext
 
 
-class DumbJsonDB(object):
+class DumbJsonDB:
     db = None
 
     def __init__(self, fn, allow_pickle=False):
@@ -70,7 +70,7 @@ class DumbJsonDB(object):
         self.read_db()
 
 
-class nuwiki(object):
+class nuwiki:
     def __init__(self, path, allow_pickle=False):
         self.path = os.path.abspath(path)
         d = os.path.join(self.path, "images", "safe")
@@ -306,7 +306,7 @@ def extractall(zf, dst):
         extract_member(zf, zipinfo, dst)
 
 
-class adapt(object):
+class adapt:
     edits = None
     interwikimap = None
     was_tmpdir = False

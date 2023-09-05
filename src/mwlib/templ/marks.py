@@ -8,10 +8,7 @@ class mark(six.text_type):
         return r
 
     def __repr__(self):
-        return "<%s %r>" % (
-            self.__class__.__name__,
-            self.msg,
-        )
+        return f"<{self.__class__.__name__} {self.msg!r}>"
 
 
 class mark_start(mark):

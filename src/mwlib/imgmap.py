@@ -3,8 +3,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 import six
 from pyparsing import (

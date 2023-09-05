@@ -4,12 +4,10 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from __future__ import print_function
-from __future__ import absolute_import
-from past.builtins import basestring
-from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables import KeepTogether
+from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tables import Table
+
 from .customflowables import Figure, FiguresAndParagraphs, SmartKeepTogether
 
 
@@ -31,7 +29,7 @@ def dumpText(obj):
         )
     elif isinstance(obj, Figure):
         print("F:  --", obj.__class__.__name__, obj.c.text)
-    elif isinstance(obj, basestring):
+    elif isinstance(obj, str):
         print("S:  --", obj.__class__.__name__, obj)
     else:
         print("U:  --", obj.__class__.__name__)

@@ -1,7 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-from __future__ import absolute_import
+
 
 import re
 from hashlib import sha1 as digest
@@ -13,7 +13,7 @@ from mwlib.templ.nodes import Node, Variable, Template, IfNode, SwitchNode
 from mwlib.templ.scanner import Symbols, tokenize
 
 
-class aliasmap(object):
+class aliasmap:
     def __init__(self, siteinfo):
         _map = {}
         _name2aliases = {}
@@ -83,7 +83,7 @@ def optimize(node):
 from mwlib import lrucache
 
 
-class Parser(object):
+class Parser:
     use_cache = False
     _cache = lrucache.mt_lrucache(2000)
 

@@ -6,8 +6,8 @@
 
 from xml.sax.saxutils import escape as xmlescape
 
-from mwlib.writer.formatter import Formatter
 from mwlib.rl import pdfstyles
+from mwlib.writer.formatter import Formatter
 
 
 class RLFormatter(Formatter):

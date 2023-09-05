@@ -2,7 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-from __future__ import absolute_import
+
 import sys
 import os
 import time

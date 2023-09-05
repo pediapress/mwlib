@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
+
 import os
 from six.moves.configparser import ConfigParser
 from io import StringIO
@@ -36,7 +36,7 @@ wpwikis = dict(
 )
 
 
-class Environment(object):
+class Environment:
     wikiconf = None
 
     def __init__(self, metabook=None):

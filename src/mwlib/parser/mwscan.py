@@ -3,13 +3,14 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import sys
 import re
+import sys
+
 import _mwscan
 import htmlentitydefs
 
 
-class token(object):
+class token:
     t_end = 0
     t_text = 1
     t_entity = 2
@@ -62,7 +63,7 @@ def dump_tokens(text, tokens):
 
 
 def scan(text):
-    text += u"\0" * 32
+    text += "\0" * 32
     tokens = _mwscan.scan(text)
     return scan_result(text, tokens)
 
@@ -71,19 +72,19 @@ def resolve_entity(e):
     if e[1] == '#':
         try:
             if e[2] == 'x' or e[2] == 'X':
-                return unichr(int(e[3:-1], 16))
+                return chr(int(e[3:-1], 16))
             else:
-                return unichr(int(e[2:-1]))
+                return chr(int(e[2:-1]))
         except ValueError:
             return e
     else:
         try:
-            return unichr(htmlentitydefs.name2codepoint[e[1:-1]])
+            return chr(htmlentitydefs.name2codepoint[e[1:-1]])
         except KeyError:
             return e
 
 
-class scan_result(object):
+class scan_result:
     def __init__(self, source, toks):
         self.source = source
         self.toks = toks
@@ -106,7 +107,7 @@ class scan_result(object):
             out.write("%s\n" % self.repr(x))
 
     def repr(self, t):
-        return "(%s, %r)" % (token.token2name.get(t[0]), self.rawtext(t))
+        return f"({token.token2name.get(t[0])}, {self.rawtext(t)!r})"
 
     def __len__(self):
         return len(self.toks)
@@ -118,7 +119,7 @@ class scan_result(object):
         return self.toks[idx]
 
 
-class _compat_scanner(object):
+class _compat_scanner:
     from mwlib.tagext import default_registry as tagextensions
     allowed_tags = None
 
@@ -159,9 +160,6 @@ class _compat_scanner(object):
         if self.allowed_tags is None:
             self._init_allowed_tags()
 
-        if isinstance(text, str):
-            text = unicode(text)
-
         tokens = scan(text)
         scanres = scan_result(text, tokens)
 
@@ -170,7 +168,8 @@ class _compat_scanner(object):
         def g():
             return text[start:start + tlen]
 
-        a = lambda x: res.append((x, g()))
+        def a(x):
+            return res.append((x, g()))
 
         ignore = self.ignore
         tok2compat = self.tok2compat
@@ -271,19 +270,16 @@ class _compat_scanner(object):
 
     def tagtoken(self, text):
         selfClosing = False
-        if text.startswith(u"</"):
+        if text.startswith("</"):
             name = text[2:-1]
             klass = EndTagToken
-            isEndToken = True
         elif text.endswith("/>"):
             name = text[1:-2]
             klass = TagToken
             selfClosing = True
-            isEndToken = False  # ???
         else:
             name = text[1:-1]
             klass = TagToken
-            isEndToken = False
 
         name, values = _split_tag(name)
         from mwlib.parser import paramrx
@@ -291,7 +287,6 @@ class _compat_scanner(object):
         name = name.lower()
 
         if name == 'br' or name == 'references':
-            isEndToken = False
             klass = TagToken
 
         r = klass(name, text)
@@ -303,9 +298,9 @@ class _compat_scanner(object):
 compat_scan = _compat_scanner()
 
 
-class _BaseTagToken(object):
+class _BaseTagToken:
     def __eq__(self, other):
-        if isinstance(other, basestring):
+        if isinstance(other, str):
             return self.t == other
         if isinstance(other, self.__class__):
             return self.t == other.t
@@ -327,7 +322,7 @@ class TagToken(_BaseTagToken):
         self.text = text
 
     def __repr__(self):
-        return "<Tag:%r %r>" % (self.t, self.text)
+        return f"<Tag:{self.t!r} {self.text!r}>"
 
 
 class EndTagToken(_BaseTagToken):
@@ -336,7 +331,7 @@ class EndTagToken(_BaseTagToken):
         self.text = text
 
     def __repr__(self):
-        return "<EndTag:%r>" % (self.t,)
+        return f"<EndTag:{self.t!r}>"
 
 
 def tokenize(input, name="unknown"):

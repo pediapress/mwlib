@@ -1,6 +1,6 @@
 # -*- mode: cython -*-
 
-cdef class TokenWalker(object):
+cdef class TokenWalker:
     cdef object skip_tags
 
     def __init__(self, skip_tags=None):

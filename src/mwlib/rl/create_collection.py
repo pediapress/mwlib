@@ -37,11 +37,11 @@ def main():
         mb["items"].append(metabook.make_article(title=str(title, "utf-8")))
 
     if options.output:
-        f = open(options.output, "w")
+        with open("test.json", "w") as f:
+            f.write(simplejson.dumps(mb))
     else:
         f = sys.stdout
-
-    f.write(simplejson.dumps(mb))
+        f.write(simplejson.dumps(mb))
 
 
 if __name__ == "__main__":

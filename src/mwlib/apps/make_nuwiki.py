@@ -1,6 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import contextlib
 import os
 
 import gevent
@@ -11,12 +12,13 @@ import six.moves.urllib.parse
 import six.moves.urllib.request
 
 from mwlib import myjson
-from mwlib.metabook import get_licenses, parse_collection_page, collection
-from mwlib.net import fetch, sapi as mwapi
+from mwlib.metabook import collection, get_licenses, parse_collection_page
+from mwlib.net import fetch
+from mwlib.net import sapi as mwapi
 from mwlib.parse_collection_page import extract_metadata
 
 
-class StartFetcher(object):
+class StartFetcher:
     progress = None
 
     def __init__(self, **kw):
@@ -88,10 +90,9 @@ class StartFetcher(object):
         if cp is None:
             return api
 
-        try:
+        with contextlib.suppress(Exception):
             cp = six.text_type(six.moves.urllib.parse.unquote(str(cp)), "utf-8")
-        except Exception:
-            pass
+
 
         self.nfo["collectionpage"] = cp
 
@@ -115,7 +116,8 @@ class StartFetcher(object):
         p = os.path.join(self.fsout.path, "collectionpage.txt")
         if isinstance(rawtext, six.text_type):
             rawtext = rawtext.encode("utf-8")
-        open(p, "wb").write(rawtext)
+        with open(p, "wb") as f:
+            f.write(rawtext)
         return api
 
     def run(self):
@@ -161,15 +163,12 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         id2wiki[x.ident] = (x, [])
 
     for x in metabook.articles():
-        assert x.wikiident in id2wiki, "no wikiconf for %r (%s)" % (x.wikiident, x)
+        assert x.wikiident in id2wiki, f"no wikiconf for {x.wikiident!r} ({x})"
         id2wiki[x.wikiident][1].append(x)
 
     is_multiwiki = len(id2wiki) > 1
 
-    if is_multiwiki:
-        progress = fetch.SharedProgress(status=status)
-    else:
-        progress = None
+    progress = fetch.SharedProgress(status=status) if is_multiwiki else None
 
     fetchers = []
     for _id, (wikiconf, articles) in id2wiki.items():
@@ -180,7 +179,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         if not is_multiwiki:
             _id = ""
 
-        assert "/" not in _id, "bad id: %r" % (_id,)
+        assert "/" not in _id, f"bad id: {_id!r}"
         my_fsdir = os.path.join(fsdir, _id)
 
         if is_multiwiki:
@@ -206,8 +205,10 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     if is_multiwiki:
         if not os.path.exists(fsdir):
             os.makedirs(fsdir)
-        open(os.path.join(fsdir, "metabook.json"), "wb").write(metabook.dumps())
-        myjson.dump(dict(format="multi-nuwiki"), open(os.path.join(fsdir, "nfo.json"), "wb"))
+        with open(os.path.join(fsdir, "metabook.json"), "wb") as f:
+            f.write(metabook.dumps())
+        with open(os.path.join(fsdir, "nfo.json"), "wb") as f:
+            myjson.dump({"format": "multi-nuwiki"}, f)
 
     pool = gevent.pool.Pool()
     for x in fetchers:

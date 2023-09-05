@@ -13,7 +13,7 @@ More Info:
 * http://testsuite.opendocumentfellowship.com/ sample documents
 """
 
-from __future__ import absolute_import
+
 from __future__ import division
 from __future__ import unicode_literals
 
@@ -53,7 +53,7 @@ def showNode(obj):
         log(repr(stuff))
 
 
-class SkipChildren(object):
+class SkipChildren:
     "if returned by the writer no children are processed"
 
     def __init__(self, element=None):
@@ -122,7 +122,7 @@ patch them with two specialities:
 """
 
 
-class ODFWriter(object):
+class ODFWriter:
     ignoreUnknownNodes = True
     namedLinkCount = 1
 
@@ -177,7 +177,7 @@ class ODFWriter(object):
         return self.doc
 
     def asstring(self, element=None):
-        class Writer(object):
+        class Writer:
             def __init__(self):
                 self.res = []
 

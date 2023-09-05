@@ -972,7 +972,7 @@ struct __pyx_obj_5mwlib_6refine_5_core_TokenWalker;
 /* "mwlib/refine/_core.pyx":3
  * # -*- mode: cython -*-
  * 
- * cdef class TokenWalker(object):             # <<<<<<<<<<<<<<
+ * cdef class TokenWalker:             # <<<<<<<<<<<<<<
  *     cdef object skip_tags
  * 
  */
@@ -3201,7 +3201,7 @@ if (!__Pyx_RefNanny) {
   /* "mwlib/refine/_core.pyx":1
  * # -*- mode: cython -*-             # <<<<<<<<<<<<<<
  * 
- * cdef class TokenWalker(object):
+ * cdef class TokenWalker:
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

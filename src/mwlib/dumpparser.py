@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import os
 import re
@@ -44,7 +44,7 @@ class Tags:
     siteinfo = ns + "siteinfo"
 
 
-class Page(object):
+class Page:
     __slots__ = [
         "title",
         "pageid",
@@ -76,7 +76,7 @@ class Page(object):
         return "Page(%s (@%s): %s)" % (repr(self.title), self.timestamp, text)
 
 
-class DumpParser(object):
+class DumpParser:
 
     tags = Tags()
 

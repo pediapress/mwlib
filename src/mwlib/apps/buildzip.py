@@ -3,6 +3,7 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
+import contextlib
 import os
 import shutil
 import sys
@@ -13,11 +14,9 @@ import zipfile
 
 from gevent import monkey
 
-from mwlib import conf
-from mwlib import utils
+from mwlib import conf, utils
 from mwlib.options import OptionParser
-from mwlib.podclient import PODClient
-from mwlib.podclient import podclient_from_serviceurl
+from mwlib.podclient import PODClient, podclient_from_serviceurl
 from mwlib.status import Status
 
 
@@ -49,10 +48,7 @@ def zip_dir(dirname, output=None, skip_ext=None):
 
 
 def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
-    if output:
-        tmpdir = tempfile.mkdtemp(dir=os.path.dirname(output))
-    else:
-        tmpdir = tempfile.mkdtemp()
+    tmpdir = tempfile.mkdtemp(dir=os.path.dirname(output)) if output else tempfile.mkdtemp()
 
     try:
         fsdir = os.path.join(tmpdir, "nuwiki")
@@ -165,10 +161,9 @@ def _init_pod_client(options, parser, use_help):
                 os._exit(os.EX_OK)  # pylint: disable=W0212
 
         time.sleep(1)
-        try:
+        with contextlib.suppress(OSError):
             os.kill(pid, 9)
-        except OSError:
-            pass
+
 
     else:
         pod_client = None

@@ -18,6 +18,7 @@ from sqlitedict import SqliteDict
 
 from mwlib import utils, nshandling, conf, myjson as json
 from mwlib.net import sapi as mwapi
+import contextlib
 
 
 class SharedProgress:
@@ -631,16 +632,15 @@ class Fetcher:
         # change title prefix to make them look like local pages
         for p in pages:
             title = p.get("title")
-            prefix, partial = title.split(":", 1)
+            _, partial = title.split(":", 1)
             p["title"] = "%s:%s" % (local_nsname, partial)
 
             revisions = p.get("revisions", [])
             # the revision id's could clash with some local ids. remove them.
             for r in revisions:
-                try:
+                with contextlib.suppress(KeyError):
                     del r["revid"]
-                except KeyError:
-                    pass
+
 
         # XXX do we also need to handle redirects here?
         self.fsout.write_pages(data)

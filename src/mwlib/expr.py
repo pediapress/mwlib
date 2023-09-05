@@ -132,7 +132,7 @@ a("or", 2, lambda x, y: int(bool(x) or bool(y)))
 del a
 
 
-class Expr(object):
+class Expr:
     constants = dict(e=math.e, pi=math.pi)
 
     def as_float_or_int(self, s):

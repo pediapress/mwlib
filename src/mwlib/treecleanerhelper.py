@@ -4,7 +4,7 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from __future__ import absolute_import
+
 import math
 
 from .advtree import Cell, ImageLink, Link, Math, NamedURL, Reference, Text, URL
