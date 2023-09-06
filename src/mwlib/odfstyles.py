@@ -321,7 +321,7 @@ numberedlist.addElement(
 )
 numberedlist.addElement(
     text.ListLevelStyleBullet(
-        level="3", numprefix="  ", numsuffix="   ", bulletchar=u'•'
+        level="3", numprefix="  ", numsuffix="   ", bulletchar='•'
     )
 )
 
@@ -330,7 +330,7 @@ numberedlist.addElement(
 unorderedlist = text.ListStyle(name="unorderedlist")
 unorderedlist.addElement(
     text.ListLevelStyleBullet(
-        level="1", numprefix="   ", bulletchar=u'•', numsuffix="   "
+        level="1", numprefix="   ", bulletchar='•', numsuffix="   "
     )
 )
 

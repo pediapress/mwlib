@@ -499,22 +499,19 @@ class adapt:
 
 
 def getContributorsFromInformationTemplate(raw, title, wikidb):
-    from mwlib.expander import find_template, get_templates, get_template_args, Expander
-    from mwlib import parser, advtree
-    from mwlib import uparser
+    from mwlib import advtree, parser, uparser
+    from mwlib.expander import Expander, find_template, get_template_args, get_templates
     from mwlib.templ.parser import parse
 
     def getUserLinks(raw):
         def isUserLink(node):
             return isinstance(node, parser.NamespaceLink) and node.namespace == 2  # NS_USER
 
-        result = sorted(set([
-            u.target
+        result = sorted({u.target
             for u in uparser.parse_string(title,
                                           raw=raw,
                                           wikidb=wikidb,
-                                          ).filter(isUserLink)
-        ]))
+                                          ).filter(isUserLink)})
         return result
 
     def get_authors_from_template_args(template):
@@ -532,11 +529,11 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
                 return [txt]
 
         if args.args:
-            return getUserLinks('\n'.join([args.get(i, u'') for i in range(len(args.args))]))
+            return getUserLinks('\n'.join([args.get(i, '') for i in range(len(args.args))]))
 
         return []
 
-    expander = Expander(u'', title, wikidb)
+    expander = Expander('', title, wikidb)
     parsed_raw = [parse(raw, replace_tags=expander.replace_tags)]
     template = find_template(None, 'Information', parsed_raw[:])
     if template is not None:

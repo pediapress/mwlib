@@ -9,19 +9,71 @@
 import sys
 import unicodedata
 
-from mwlib.advtree import remove_newlines
-from mwlib.advtree import (Article, ArticleLink, Big, Blockquote, Book, BreakingReturn, Caption, CategoryLink, Cell, Center, Chapter,
-                           Cite, Code, DefinitionDescription, DefinitionList, DefinitionTerm, Deleted, Div, Emphasized, Gallery,
-                           HorizontalRule, ImageLink, ImageMap, Inserted, InterwikiLink, Italic, Item, ItemList, LangLink, Link,
-                           Math, NamedURL, NamespaceLink, Overline, Paragraph, PreFormatted, Reference, ReferenceList,
-                           Row, Section, Small, Source, Span, SpecialLink, Strike, Strong, Sub, Sup, Table, Teletyped, Text, Timeline,
-                           Underline, URL, Var, Node)
-
-from mwlib.treecleanerhelper import getNodeHeight, splitRow
-from mwlib import parser
-from mwlib.writer import styleutils, miscutils
 import six
 from six.moves import range
+
+from mwlib import parser
+from mwlib.advtree import (
+    URL,
+    Article,
+    ArticleLink,
+    Big,
+    Blockquote,
+    Book,
+    BreakingReturn,
+    Caption,
+    CategoryLink,
+    Cell,
+    Center,
+    Chapter,
+    Cite,
+    Code,
+    DefinitionDescription,
+    DefinitionList,
+    DefinitionTerm,
+    Deleted,
+    Div,
+    Emphasized,
+    Gallery,
+    HorizontalRule,
+    ImageLink,
+    ImageMap,
+    Inserted,
+    InterwikiLink,
+    Italic,
+    Item,
+    ItemList,
+    LangLink,
+    Link,
+    Math,
+    NamedURL,
+    NamespaceLink,
+    Node,
+    Overline,
+    Paragraph,
+    PreFormatted,
+    Reference,
+    ReferenceList,
+    Row,
+    Section,
+    Small,
+    Source,
+    Span,
+    SpecialLink,
+    Strike,
+    Strong,
+    Sub,
+    Sup,
+    Table,
+    Teletyped,
+    Text,
+    Timeline,
+    Underline,
+    Var,
+    remove_newlines,
+)
+from mwlib.treecleanerhelper import getNodeHeight, splitRow
+from mwlib.writer import miscutils, styleutils
 
 
 def show(n):
@@ -32,20 +84,6 @@ def tryRemoveNode(node):
     if node.parent is not None:
         node.parent.remove_child(node)
         return True
-
-
-def _all(list):
-    for item in list:
-        if item == False:
-            return False
-    return True
-
-
-def _any(list):
-    for x in list:
-        if x:
-            return True
-    return False
 
 
 class TreeCleaner:
@@ -142,7 +180,7 @@ class TreeCleaner:
                             NamedURL, NamespaceLink, ReferenceList, Reference, SpecialLink, Text, Timeline, URL]
         # exceptions to the above. if any of the list items is explicitly set as a
         # css style the node is not removed
-        common_attrs = [u'width', u'height', u'page-break-before', u'page-break-after']
+        common_attrs = ['width', 'height', 'page-break-before', 'page-break-after']
         self.childless_exceptions = {Div: common_attrs,
                                      Span: common_attrs}
 
@@ -184,7 +222,6 @@ class TreeCleaner:
                             ImageLink: [Reference],
                             Div: [Reference, Item],
                             Center: [Reference],
-                            Teletyped: [Reference],
                             ReferenceList: [Reference],
                             Teletyped: [Source],
                             Table: [ImageLink],
@@ -265,10 +302,7 @@ class TreeCleaner:
         # the algorithm below splits on the first level, if a book is found
         # --> if chapters are used, whole chapters are cleaned which slows things down
 
-        if self.tree.__class__ == Book:
-            children = self.tree.children
-        else:
-            children = [self.tree]
+        children = self.tree.children if self.tree.__class__ == Book else [self.tree]
 
         total_children = len(children)
         for (i, child) in enumerate(children):
@@ -277,7 +311,7 @@ class TreeCleaner:
                     cleaner(child)
                 except Exception as e:
                     self.report('ERROR:', e)
-                    print('TREECLEANER ERROR in %s: %r' % (getattr(child, 'caption', u'').encode('utf-8'),
+                    print('TREECLEANER ERROR in {}: {!r}'.format(getattr(child, 'caption', u'').encode('utf-8'),
                                                            repr(e)))
                     import traceback
                     traceback.print_exc()
@@ -321,7 +355,7 @@ class TreeCleaner:
     def removeListOnlyParagraphs(self, node):
         """Removes paragraph nodes which only have lists as the only childen - keep the lists."""
         if node.__class__ == Paragraph:
-            list_only_children = _all([c.__class__ == ItemList for c in node.children])
+            list_only_children = all([c.__class__ == ItemList for c in node.children])
             if list_only_children and node.parent:
                 self.report('replaced children:', node, '-->',
                             node.children, 'for node:', node.parent)
@@ -409,10 +443,10 @@ class TreeCleaner:
             if not last_cell.children:
                 return last_cell
 
-        if node.__class__ == Table:
+        if node.__class__ == Table and len(node.children) == 1 and node.children[0].__class__ == Row:
             # FIX for:
             # http://de.wikipedia.org/w/index.php?title=Benutzer:Volker.haas/Test&oldid=73993014
-            if len(node.children) == 1 and node.children[0].__class__ == Row:
+            
                 row = node.children[0]
                 cell = emptyEndingCell(row)
                 while cell:
@@ -425,11 +459,10 @@ class TreeCleaner:
 
     def removeBrokenChildren(self, node):
         """Remove Nodes (while keeping their children) which can't be nested with their parents."""
-        if node.__class__ in list(self.removeNodes.keys()):
-            if _any([parent.__class__ in self.removeNodes[node.__class__]
-                     for parent in node.parents]):
-                if node.children and not _any([parent.__class__ in self.removeNodesAllChildren.get(
-                        node.__class__, []) for parent in node.parents]):
+        if node.__class__ in list(self.removeNodes.keys()) and any(parent.__class__ in self.removeNodes[node.__class__]
+                     for parent in node.parents):
+                if node.children and not any(parent.__class__ in self.removeNodesAllChildren.get(
+                        node.__class__, []) for parent in node.parents):
                     children = node.children
                     self.report('replaced child', node, children)
                     node.parent.replace_child(node, newchildren=children)
@@ -511,18 +544,16 @@ class TreeCleaner:
         if not (node.next or node.parent):
             return
         next = node.next or node.parent.next
-        if next and not next.is_block_node:
-            if not next.get_all_display_text().strip():
-                return self._getNext(next)
+        if next and not next.is_block_node and not next.get_all_display_text().strip():
+            return self._getNext(next)
         return next
 
     def _getPrev(self, node):  # FIXME: name collides with advtree.getPrev(ious)
         if not (node.previous or node.parent):
             return
         prev = node.previous or node.parent
-        if prev and not prev.is_block_node:
-            if not prev.get_all_display_text().strip():
-                return self._getPrev(prev)
+        if prev and not prev.is_block_node and not prev.get_all_display_text().strip():
+            return self._getPrev(prev)
         return prev
 
     def _nextAdjacentNode(self, node):
@@ -637,7 +668,7 @@ class TreeCleaner:
 
     def _isException(self, node):
         try:
-            has_direction = node.vlist['style']['direction']
+            node.vlist['style']['direction']
         except (KeyError, AttributeError, TypeError):
             return False
         else:
@@ -669,10 +700,7 @@ class TreeCleaner:
 
         bad_parent = self._nestingBroken(node)
         if not bad_parent:
-            for c in node.children:
-                if self._fixNesting(c):
-                    return True
-            return False
+            return any(self._fixNesting(c) for c in node.children)
 
         divide = node.get_parents()
         divide.append(node)
@@ -895,7 +923,7 @@ class TreeCleaner:
             for c in node.children[:]:
                 if c.__class__ not in self.allowedChildren[node.__class__]:
                     node.remove_child(c)
-                    self.report('removed restricted child %s from parent %s' % (c, node))
+                    self.report(f'removed restricted child {c} from parent {node}')
             return
 
         for c in node.children:
@@ -903,20 +931,17 @@ class TreeCleaner:
 
     def simplifyBlockNodes(self, node):
         """Remove paragraphs which have a single block node child - keep the child"""
-        if node.__class__ == Paragraph:
-            if len(node.children) == 1 and node.children[0].is_block_node:
-                if node.parent:
-                    node.parent.replace_child(node, [node.children[0]])
-                    self.report('remove superfluous wrapping paragraph from node:',
-                                node.children[0])
+        if node.__class__ == Paragraph and len(node.children) == 1 and node.children[0].is_block_node and node.parent:
+                node.parent.replace_child(node, [node.children[0]])
+                self.report('remove superfluous wrapping paragraph from node:',
+                            node.children[0])
 
         for c in node.children:
             self.simplifyBlockNodes(c)
 
     def removeTextlessStyles(self, node):
         """Remove style nodes that have no children with text"""
-        if node.__class__ in self.style_nodes:
-            if not node.get_all_display_text().strip() and node.parent:
+        if node.__class__ in self.style_nodes and not node.get_all_display_text().strip() and node.parent:
                 if node.children:
                     node.parent.replace_child(node, newchildren=node.children)
                     self.report('remove style', node, 'with text-less children', node.children)
@@ -1169,8 +1194,7 @@ class TreeCleaner:
 
     def removeLeadingParaInList(self, node):
 
-        if node.__class__ in [Item, Reference]:
-            if node.children and node.children[0].__class__ == Paragraph:
+        if node.__class__ in [Item, Reference] and node.children and node.children[0].__class__ == Paragraph:
                 node.replace_child(node.children[0], node.children[0].children)
                 self.report('remove leading Paragraph in Item')
         for c in node.children:
@@ -1190,10 +1214,7 @@ class TreeCleaner:
             self.fixItemLists(c)
 
     def _isEmptyRow(self, row):
-        for cell in row.children:
-            if cell.children:
-                return False
-        return True
+        return all(not cell.children for cell in row.children)
 
     def removeEmptyTrailingTableRows(self, node):
 
@@ -1289,7 +1310,7 @@ class TreeCleaner:
         if node.__class__ == Paragraph \
                 and len(node.get_all_display_text()) < 80 \
                 and not node.get_parent_nodes_by_class(Table) \
-                and not _any([c.is_block_node for c in node.children]):
+                and not any(c.is_block_node for c in node.children):
             node.short_paragraph = True
 
         for c in node.children:
@@ -1301,16 +1322,15 @@ class TreeCleaner:
         printonly nodes are used in citations for example to explicitly print out URLs.
         Since we handle URLs differently, we can ignore printonly nodes
         '''
-        if 'printonly' in node.attributes.get('class', ''):
-            if _any([c.__class__ in [URL,
-                                     NamedURL,
-                                     ArticleLink,
-                                     NamespaceLink,
-                                     InterwikiLink,
-                                     SpecialLink] for c in node.children]):
-                self.report('removed "printonly" node:', node)
-                node.parent.remove_child(node)
-                return
+        if 'printonly' in node.attributes.get('class', '') and any(c.__class__ in [URL,
+                                 NamedURL,
+                                 ArticleLink,
+                                 NamespaceLink,
+                                 InterwikiLink,
+                                 SpecialLink] for c in node.children):
+            self.report('removed "printonly" node:', node)
+            node.parent.remove_child(node)
+            return
         for c in node.children:
             self.handleOnlyInPrint(c)
 
@@ -1418,10 +1438,9 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
                 self.report('removed gallery from table')
 
     def fixSubSup(self, node):
-        if node.__class__ in [Sup, Sub] and node.parent:
-            if len(node.get_all_display_text()) > 200:
-                node.parent.replace_child(node, node.children)
-                self.report('removed long sup/sub')
+        if node.__class__ in [Sup, Sub] and node.parent and len(node.get_all_display_text()) > 200:
+            node.parent.replace_child(node, node.children)
+            self.report('removed long sup/sub')
         for c in node.children:
             self.fixSubSup(c)
 
@@ -1466,10 +1485,7 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
         if isinstance(node, Math):
             return True
         if isinstance(node, Text):
-            for c in node.caption:
-                if unicodedata.bidirectional(c) not in ['WS']:
-                    return False
-            return True
+            return all(unicodedata.bidirectional(c) in ['WS'] for c in node.caption)
         return False
 
     def fixMathDir(self, node):

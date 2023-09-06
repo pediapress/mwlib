@@ -5,6 +5,7 @@ include Dockerfile-dev-py27
 include MANIFEST.in
 include README.rst
 include changelog.rst
+include cmd.txt
 include conftest.py
 include docs/Makefile
 include docs/basics.rst

@@ -27,7 +27,7 @@ from mwlib.advtree import (
     build_advanced_tree,
 )
 from mwlib.dummydb import DummyDB
-from mwlib.treecleaner import TreeCleaner, _all, _any
+from mwlib.treecleaner import TreeCleaner
 from mwlib.uparser import parse_string
 
 
@@ -95,11 +95,11 @@ para
 
 * list 3
 """
-    tree, reports = clean_markup(raw)
+    tree, _ = clean_markup(raw)
     lists = tree.get_child_nodes_by_class(ItemList)
     for li in lists:
         print(li, li.get_parents())
-        assert _all([p.__class__ != Paragraph for p in li.get_parents()])
+        assert all(p.__class__ != Paragraph for p in li.get_parents())
     _treesanity(tree)
 
 
@@ -112,7 +112,7 @@ some text in the same paragraph
 another paragraph
     """
     # cleaner should do nothing
-    tree, reports = clean_markup(raw)
+    tree, _ = clean_markup(raw)
     lists = tree.get_child_nodes_by_class(ItemList)
     li = lists[0]
     assert li.parent.__class__ == Paragraph
@@ -130,7 +130,7 @@ def test_fix_lists3():
 """
     tree, reports = clean_markup(raw)
     assert len(tree.children) == 2  # 2 itemlists as only children of article
-    assert _all([c.__class__ == ItemList for c in tree.children])
+    assert all(c.__class__ == ItemList for c in tree.children)
 
 
 def test_childless_nodes():
@@ -284,9 +284,9 @@ def test_fix_nesting2():
 * blub
 </div></div>
     """
-    tree, reports = clean_markup(raw)
+    tree, _ = clean_markup(raw)
     list_node = tree.get_child_nodes_by_class(ItemList)[0]
-    assert not _any([p.__class__ == Div for p in list_node.get_parents()])
+    assert not any(p.__class__ == Div for p in list_node.get_parents())
 
 
 # the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
@@ -379,9 +379,9 @@ def test_swap_nodes():
     raw = r"""
 <u><center>Text</center></u>
     """
-    tree, reports = clean_markup(raw)
+    tree, _ = clean_markup(raw)
     center_node = tree.get_child_nodes_by_class(Center)[0]
-    assert not _any([p.__class__ == Underline for p in center_node.get_parents()])
+    assert not any(p.__class__ == Underline for p in center_node.get_parents())
 
 
 @pytest.mark.xfail
@@ -397,7 +397,7 @@ def test_split_big_table_cells():
 @pytest.mark.xfail
 def test_fix_paragraphs():
     raw = r"""  """  # FIXME: which markup results in paragraphs which are not properly nested with preceeding sections?
-    tree, reports = clean_markup(raw)
+    clean_markup(raw)
     assert False
 
 
@@ -407,9 +407,9 @@ def test_clean_section_captions():
 bla
     """
 
-    tree, reports = clean_markup(raw)
+    tree, _ = clean_markup(raw)
     section_node = tree.get_child_nodes_by_class(Section)[0]
-    assert _all([p.__class__ != Center for p in section_node.children[0].get_all_children()])
+    assert all(p.__class__ != Center for p in section_node.children[0].get_all_children())
 
 
 def test_clean_section_captions2():
@@ -417,7 +417,7 @@ def test_clean_section_captions2():
     bla
     """
 
-    tree, reports = clean_markup(raw)
+    tree, _ = clean_markup(raw)
     assert len(tree.get_child_nodes_by_class(Section)) == 0
 
 

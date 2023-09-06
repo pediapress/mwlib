@@ -10,7 +10,7 @@ import sys
 import time
 import traceback
 from email.mime.text import MIMEText
-from email.utils import make_msgid, formatdate
+from email.utils import formatdate, make_msgid
 from typing import Union
 
 import six
@@ -58,8 +58,9 @@ def start_logging(path, stderr_only=False):
         sys.stdout.flush()
     sys.stderr.flush()
 
-    f = open(path, "a")
-    fd = f.fileno()
+    with open(path, "a") as f:
+        fd = f.fileno()
+
     if not stderr_only:
         os.dup2(fd, 1)
     os.dup2(fd, 2)
@@ -96,8 +97,7 @@ def get_multipart(filename, data, name):
     items = []
     items.append("--" + boundary)
     items.append(
-        'Content-Disposition: form-data; name="%(name)s"; filename="%(filename)s"'
-        % {"name": name, "filename": filename}
+        f'Content-Disposition: form-data; name="{name}"; filename="{filename}"'
     )
     items.append("Content-Type: application/octet-stream")
     items.append("")
@@ -117,7 +117,7 @@ def safe_unlink(filename):
     try:
         os.unlink(filename)
     except Exception as exc:
-        log.warn("Could not remove file %r: %s" % (filename, exc))
+        log.warn(f"Could not remove file {filename!r}: {exc}")
 
 
 fetch_cache = {}
@@ -169,7 +169,7 @@ def fetch_url(
 
     if not post_data and url in fetch_cache:
         return fetch_cache[url]
-    log.info("fetching %r" % (url,))
+    log.info(f"fetching {url!r}")
     if not hasattr(socket, "_delegate_methods"):  # not using gevent?
         socket.setdefaulttimeout(timeout)
     if opener is None:
@@ -183,10 +183,7 @@ def fetch_url(
         if expected_content_type:
             content_type = result.headers.get_content_type()
             if content_type != expected_content_type:
-                msg = "Got content-type %r, expected %r" % (
-                    content_type,
-                    expected_content_type,
-                )
+                msg = f"Got content-type {content_type!r}, expected {expected_content_type!r}"
                 if ignore_errors:
                     log.warn(msg)
                 else:
@@ -194,9 +191,9 @@ def fetch_url(
                 return None
     except six.moves.urllib.error.URLError as err:
         if ignore_errors:
-            log.error("%s - while fetching %r" % (err, url))
+            log.error(f"{err} - while fetching {url!r}")
             return None
-        raise RuntimeError("Could not fetch %r: %s" % (url, err))
+        raise RuntimeError(f"Could not fetch {url!r}: {err}")
     # log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
 
     if hasattr(fetch_cache, "max_cacheable_size"):
@@ -205,7 +202,8 @@ def fetch_url(
         fetch_cache[url] = data
 
     if output_filename:
-        open(output_filename, "wb").write(data)
+        with open (output_filename, "wb") as f:
+            f.write(data)
         return True
     else:
         return data
@@ -305,7 +303,7 @@ def ppdict(dct):
 
 
 def report(system="", subject="", from_email=None, mail_recipients=None, mail_headers=None, **kw):
-    log.report("system=%r subject=%r" % (system, subject))
+    log.report(f"system={system!r} subject={subject!r}")
 
     text = []
     text.append("SYSTEM: %r\n" % system)
@@ -331,7 +329,7 @@ def report(system="", subject="", from_email=None, mail_recipients=None, mail_he
         send_mail(
             from_email,
             mail_recipients,
-            "REPORT [%s]: %s" % (fqdn, subject),
+            f"REPORT [{fqdn}]: {subject}",
             text,
             headers=mail_headers,
         )
@@ -350,22 +348,22 @@ def get_safe_url(url):
         result = six.moves.urllib.parse.urlsplit(url)
         scheme, netloc, path, query, fragment = result
     except Exception as exc:
-        log.warn("urlparse(%r) failed: %s" % (url, exc))
+        log.warn(f"urlparse({url!r}) failed: {exc}")
         return None
 
     if not (scheme and netloc):
-        log.warn("Empty scheme or netloc: %r %r" % (scheme, netloc))
+        log.warn(f"Empty scheme or netloc: {scheme!r} {netloc!r}")
         return None
 
     if not (nonwhitespace_rex.match(scheme) and nonwhitespace_rex.match(netloc)):
-        log.warn("Found whitespace in scheme or netloc: %r %r" % (scheme, netloc))
+        log.warn(f"Found whitespace in scheme or netloc: {scheme!r} {netloc!r}")
         return None
 
     try:
         # catches things like path='bla " target="_blank'
         path = six.moves.urllib.parse.quote(six.moves.urllib.parse.unquote(path))
     except Exception as exc:
-        log.warn("quote(unquote(%r)) failed: %s" % (path, exc))
+        log.warn(f"quote(unquote({path!r})) failed: {exc}")
         return None
     try:
         return six.moves.urllib.parse.urlunsplit((scheme, netloc, path, query, fragment))
