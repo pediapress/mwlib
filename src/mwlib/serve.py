@@ -85,7 +85,7 @@ def purge_cache(max_age, cache_dir):
     @type max_age: int
 
     @param cache_dir: cache directory
-    @type cache_dir: basestring
+    @type cache_dir: str
     """
 
     for path in _find_collection_dirs_to_purge(

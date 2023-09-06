@@ -48,7 +48,7 @@ def start_logging(path, stderr_only=False):
     redirect sys.stdin to /dev/null.
 
     @param path: filename of logfile
-    @type path: basestring
+    @type path: str
 
     @param stderr_only: if True, only redirect stderr, not stdout & stdin
     @type stderr_only: bool
@@ -75,13 +75,13 @@ def get_multipart(filename, data, name):
     """Build data in format multipart/form-data to be used to POST binary data
 
     @param filename: filename to be used in multipart request
-    @type filenaem: basestring
+    @type filenaem: str
 
     @param data: binary data to include
     @type data: str
 
     @param name: name to be used in multipart request
-    @type name: basestring
+    @type name: str
 
     @returns: tuple containing content-type and body for the request
     @rtype: (str, str)
@@ -154,7 +154,7 @@ def fetch_url(
     @type opener: L{urllib2.URLOpenerDirector}
 
     @param output_filename: write response to given file
-    @type output_filename: basestring
+    @type output_filename: str
 
     @param post_data: if given use POST request
     @type post_data: dict
@@ -227,10 +227,10 @@ def ensure_dir(d):
     """If directory d does not exist, create it
 
     @param d: name of an existing or not-yet-existing directory
-    @type d: basestring
+    @type d: str
 
     @returns: d
-    @rtype: basestring
+    @rtype: str
     """
 
     if not os.path.isdir(d):

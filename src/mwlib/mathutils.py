@@ -131,7 +131,7 @@ def renderMath(
     @type render_engine: str
 
     @returns: either path to generated png or mathml string
-    @rtype: basestring
+    @rtype: str
     """
     if not latex:
         return

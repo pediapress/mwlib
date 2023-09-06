@@ -15,7 +15,7 @@ def extract_metadata(raw, fields, template_name="saved_book"):
     fields = list(fields)
     fields.append("")
 
-    templ = "".join("%s%s\n{{{%s|}}}\n" % (uniq, f, f) for f in fields)
+    templ = "".join(f"{uniq}{f}\n{{{{{{{f}|}}}}}}\n" for f in fields)
     db = expander.DictDB({template_name: templ})
 
     te = expander.Expander(raw, pagename="", wikidb=db)
@@ -34,11 +34,11 @@ def _buildrex():
     title_rex = '^==(?P<title>[^=].*?[^=])==$'
     subtitle_rex = '^===(?P<subtitle>[^=].*?[^=])===$'
     chapter_rex = '^;(?P<chapter>.+?)$'
-    article_rex = '^:\[\[:?(?P<article>.+?)(?:\|(?P<displaytitle>.*?))?\]\]$'
-    oldarticle_rex = '^:\[\{\{fullurl:(?P<oldarticle>.+?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
-    template_rex = '^\{\{(?P<template>.*?)\}\}$'
-    template_start_rex = '^(?P<template_start>\{\{)$'
-    template_end_rex = '.*?(?P<template_end>\}\})$'
+    article_rex = r'^:\[\[:?(?P<article>.+?)(?:\|(?P<displaytitle>.*?))?\]\]$'
+    oldarticle_rex = r'^:\[\{\{fullurl:(?P<oldarticle>.+?)\|oldid=(?P<oldid>.*?)\}\}(?P<olddisplaytitle>.*?)\]$'
+    template_rex = r'^\{\{(?P<template>.*?)\}\}$'
+    template_start_rex = r'^(?P<template_start>\{\{)$'
+    template_end_rex = r'.*?(?P<template_end>\}\})$'
     summary_rex = '(?P<summary>.*)'
     alltogether_rex = re.compile("({})|({})|({})|({})|({})|({})|({})|({})|({})".format(
         title_rex, subtitle_rex, chapter_rex, article_rex, oldarticle_rex,

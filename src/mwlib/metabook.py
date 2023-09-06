@@ -215,7 +215,7 @@ def get_item_list(metabook, filter_type=None):
     @type metabook: dict
 
     @param filter_type: if set, return only items with this type
-    @type filter_type: basestring
+    @type filter_type: str
 
     @returns: flat list of items
     @rtype: [{}]
