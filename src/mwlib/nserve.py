@@ -104,7 +104,7 @@ def make_collection_id(data):
 from mwlib import lrucache
 
 busy = {}
-collid2qserve = lrucache.lrucache(4000)
+collid2qserve = lrucache.LRUCache(4000)
 
 
 class watch_qserve:

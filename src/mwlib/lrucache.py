@@ -6,7 +6,7 @@ import threading
 from collections import deque
 
 
-class lrucache:
+class LRUCache:
     def __init__(self, maxsize):
         self.maxsize = maxsize
         self.cache = {}
@@ -62,21 +62,21 @@ class lrucache:
                     refcount[k] -= 1
 
 
-class mt_lrucache(lrucache):
+class MTLRUCache(LRUCache):
     def __init__(self, maxsize):
-        lrucache.__init__(self, maxsize)
+        LRUCache.__init__(self, maxsize)
         self.lock = threading.Lock()
 
     def __getitem__(self, key):
         try:
             self.lock.acquire()
-            return lrucache.__getitem__(self, key)
+            return LRUCache.__getitem__(self, key)
         finally:
             self.lock.release()
 
     def __setitem__(self, key, val):
         try:
             self.lock.acquire()
-            lrucache.__setitem__(self, key, val)
+            LRUCache.__setitem__(self, key, val)
         finally:
             self.lock.release()

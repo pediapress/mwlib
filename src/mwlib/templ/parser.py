@@ -85,7 +85,7 @@ from mwlib import lrucache
 
 class Parser:
     use_cache = False
-    _cache = lrucache.mt_lrucache(2000)
+    _cache = lrucache.MTLRUCache(2000)
 
     def __init__(self, txt, included=True, replace_tags=None, siteinfo=None):
         if isinstance(txt, str):

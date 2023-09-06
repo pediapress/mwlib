@@ -16,7 +16,7 @@
         {
             "baseurl": "https://de.wikipedia.org/w/",
             "ident": "de",
-            "type": "wikiconf"
+            "type": "WikiConf"
         }
     ]
 }

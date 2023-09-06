@@ -11,7 +11,7 @@ from six.moves.configparser import ConfigParser
 
 from mwlib import myjson
 from mwlib.log import Log
-from mwlib.metabook import wikiconf
+from mwlib.metabook import WikiConf
 
 log = Log('mwlib.utils')
 
@@ -125,7 +125,7 @@ def _makewiki(conf, metabook=None, **kw):
 
     if url:
         res.wiki = None
-        res.wikiconf = wikiconf(baseurl=url, **kw)
+        res.wikiconf = WikiConf(baseurl=url, **kw)
         res.image = None
         return res
 

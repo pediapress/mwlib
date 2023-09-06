@@ -29,7 +29,7 @@
         {
             "baseurl": "https://en.wikipedia.org/w/",
             "ident": "en", 
-            "type": "wikiconf"
+            "type": "WikiConf"
         }
     ]
 }

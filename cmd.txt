@@ -1,1 +1,1 @@
-deactivate && rm -r ./venv/ && python3 -m venv venv && source venv/bin/activate && pip3 install pip-compile-multi && make install && python3 setup.py build && python3 setup.py install && pip install . && python3 -m pytest --cache-clear
+deactivate && rm -r ./venv/ && python3 -m venv venv && source venv/bin/activate && pip3 install pip-compile-multi && make install && python3 setup.py build && python3 setup.py install && pip install -e . && python3 -m pytest --cache-clear

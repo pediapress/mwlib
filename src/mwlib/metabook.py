@@ -19,7 +19,7 @@ def parse_collection_page(txt):
     return parse_collection_page(txt)
 
 
-class mbobj:
+class MbObj:
     def __init__(self, **kw):
         d = {"type": self.__class__.__name__}
 
@@ -77,15 +77,15 @@ class mbobj:
         return f"<{self.__class__.__name__} {self.__dict__!r}>"
 
 
-class wikiconf(mbobj):
+class WikiConf(MbObj):
     baseurl = None
     ident = None
 
     def __init__(self, env=None, pages=None, **kw):
-        mbobj.__init__(self, **kw)
+        MbObj.__init__(self, **kw)
 
 
-class collection(mbobj):
+class collection(MbObj):
     title = None
     subtitle = None
     editor = None
@@ -153,7 +153,7 @@ class collection(mbobj):
         return None
 
 
-class source(mbobj):
+class source(MbObj):
     name = None
     url = None
     language = None
@@ -164,17 +164,17 @@ class source(mbobj):
     namespaces = None
 
 
-class Interwiki(mbobj):
+class Interwiki(MbObj):
     local = False
 
 
-class custom(mbobj):
+class custom(MbObj):
     title = None
     content = None
     content_type = "text/x-wiki"
 
 
-class article(mbobj):
+class article(MbObj):
     title = None
     displaytitle = None
     revision = None
@@ -191,12 +191,12 @@ class article(mbobj):
         return self._env.images
 
 
-class License(mbobj):
+class License(MbObj):
     title = None
     wikitext = None
 
 
-class Chapter(mbobj):
+class Chapter(MbObj):
     items = []
     title = ""
 

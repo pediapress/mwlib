@@ -25,7 +25,7 @@ def object_hook(dct):
         "source",
         "interwiki",
         "License",
-        "wikiconf",
+        "WikiConf",
         "custom",
     ]:
         klass = getattr(metabook, document_type)
