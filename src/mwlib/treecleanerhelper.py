@@ -5,10 +5,12 @@
 # See README.rst for additional licensing information.
 
 
+import contextlib
 import math
 
-from .advtree import Cell, ImageLink, Link, Math, NamedURL, Reference, Text, URL
 from six.moves import range
+
+from .advtree import URL, Cell, ImageLink, Link, Math, NamedURL, Reference, Text
 
 
 def getNodeHeight(node, params):
@@ -22,10 +24,7 @@ def getNodeHeight(node, params):
     amap = {Text: "caption", Link: "target", URL: "caption", Math: "caption", NamedURL: 'caption'}
     access = amap.get(node.__class__, "")
     if access:
-        if node.__class__ == Link and node.children:
-            txt = ''
-        else:
-            txt = getattr(node, access)
+        txt = '' if node.__class__ == Link and node.children else getattr(node, access)
         if txt:
             # 40 chars per line --> number of lines --> 20pt height per line
             addHeight = math.ceil(len(txt) / charsPerLine) * lineHeight
@@ -79,10 +78,9 @@ def splitRow(row, params):
             except IndexError:
                 cellchildren = []  # fixme maybe some better empty child
             cell = Cell()
-            try:
+            with contextlib.suppress(BaseException):
                 cell.vlist = row.children[colindex].vlist
-            except BaseException:
-                pass
+
             for c in cellchildren:
                 cell.appendChild(c)
             newrow.append_child(cell)

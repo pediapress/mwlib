@@ -4,11 +4,8 @@
 # See README.rst for additional licensing information.
 
 from typing import Callable, Optional
-import urllib.request
-import urllib.parse
-import urllib.error
 
-from mwlib import parser, log, metabook, wiki
+from mwlib import log, parser
 
 # import functions needed by most writers that should be accessible through writerbase
 from mwlib.mathutils import renderMath
@@ -56,7 +53,8 @@ def build_book(env, status_callback: Optional[Callable[..., None]] = None):
     env.book = parser.Book()
     progress = 0
     if status_callback is None:
-        status_callback = lambda **kwargs: None
+        def status_callback(**kwargs):
+            return None
 
     num_articles = float(len(env.metabook.articles()))
     if num_articles > 0:

@@ -2,9 +2,12 @@
 
 
 
-import mwclient
-import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
 import time
+
+import mwclient
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.request
 
 
 class WikiTrustServerError(Exception):

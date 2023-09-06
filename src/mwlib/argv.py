@@ -1,4 +1,4 @@
-class error(Exception):
+class ArgumentError(Exception):
     pass
 
 
@@ -22,8 +22,8 @@ def parse(args, spec):
                 i += 1
                 try:
                     v = args[i]
-                except IndexError:
-                    raise error(f"option {a} needs an argument")
+                except IndexError as exc:
+                    raise ArgumentError(f"option {a} needs an argument") from exc
 
             opts.append((a, v))
         else:

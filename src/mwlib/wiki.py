@@ -5,11 +5,12 @@
 
 
 import os
-from six.moves.configparser import ConfigParser
 from io import StringIO
 
-from mwlib.log import Log
+from six.moves.configparser import ConfigParser
+
 from mwlib import myjson
+from mwlib.log import Log
 from mwlib.metabook import wikiconf
 
 log = Log('mwlib.utils')
@@ -19,21 +20,21 @@ def wiki_obsolete_cdb(path=None, **kwargs):
     raise RuntimeError("cdb file format is not supported anymore.")
 
 
-dispatch = dict(
-    wiki=dict(cdb=wiki_obsolete_cdb, nucdb=wiki_obsolete_cdb)
-)
+dispatch = {
+    'wiki': {'cdb': wiki_obsolete_cdb, 'nucdb': wiki_obsolete_cdb}
+}
 
 _en_license_url = 'https://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'
-wpwikis = dict(
-    de=dict(baseurl='https://de.wikipedia.org/w/',
-            mw_license_url='https://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'),
-    en=dict(baseurl='https://en.wikipedia.org/w/', mw_license_url=_en_license_url),
-    fr=dict(baseurl='https://fr.wikipedia.org/w/', mw_license_url=None),
-    es=dict(baseurl='https://es.wikipedia.org/w/', mw_license_url=None),
-    pt=dict(baseurl='https://pt.wikipedia.org/w/', mw_license_url=None),
-    enwb=dict(baseurl='https://en.wikibooks.org/w', mw_license_url=_en_license_url),
-    commons=dict(baseurl='https://commons.wikimedia.org/w/', mw_license_url=_en_license_url)
-)
+wpwikis = {
+    'de': {'baseurl': 'https://de.wikipedia.org/w/',
+            'mw_license_url': 'https://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'},
+    'en': {'baseurl': 'https://en.wikipedia.org/w/', 'mw_license_url': _en_license_url},
+    'fr': {'baseurl': 'https://fr.wikipedia.org/w/', 'mw_license_url': None},
+    'es': {'baseurl': 'https://es.wikipedia.org/w/', 'mw_license_url': None},
+    'pt': {'baseurl': 'https://pt.wikipedia.org/w/', 'mw_license_url': None},
+    'enwb': {'baseurl': 'https://en.wikibooks.org/w', 'mw_license_url': _en_license_url},
+    'commons': {'baseurl': 'https://commons.wikimedia.org/w/', 'mw_license_url': _en_license_url}
+}
 
 
 class Environment:
@@ -76,7 +77,7 @@ class MultiEnvironment(Environment):
 
         for x in self.metabook.articles():
             id = x.wikiident
-            assert id, "article has no wikiident: %r" % (x,)
+            assert id, f"article has no wikiident: {x!r}"
             assert "/" not in id
             assert ".." not in id
 
@@ -114,8 +115,8 @@ def _makewiki(conf, metabook=None, **kw):
     url = None
     if conf.startswith(':'):
         if conf[1:] not in wpwikis:
-            wpwikis[conf[1:]] = dict(baseurl="http://%s.wikipedia.org/w/" % conf[1:],
-                                     mw_license_url=None)
+            wpwikis[conf[1:]] = {'baseurl': "http://%s.wikipedia.org/w/" % conf[1:],
+                                     'mw_license_url': None}
 
         url = wpwikis.get(conf[1:])['baseurl']
 
@@ -130,8 +131,8 @@ def _makewiki(conf, metabook=None, **kw):
 
     nfo_fn = os.path.join(conf, 'nfo.json')
     if os.path.exists(nfo_fn):
-        from mwlib import nuwiki
         from mwlib import myjson as json
+        from mwlib import nuwiki
 
         try:
             format = json.load(open(nfo_fn, 'rb'))['format']
@@ -155,6 +156,7 @@ def _makewiki(conf, metabook=None, **kw):
 
     if conf.lower().endswith(".zip"):
         import zipfile
+
         from mwlib import myjson as json
         conf = os.path.abspath(conf)
 
@@ -170,20 +172,21 @@ def _makewiki(conf, metabook=None, **kw):
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res
-        elif format == u'multi-nuwiki':
-            from mwlib import nuwiki
+        elif format == 'multi-nuwiki':
             import tempfile
+
+            from mwlib import nuwiki
             tmpdir = tempfile.mkdtemp()
             nuwiki.extractall(zf, tmpdir)
             res = MultiEnvironment(tmpdir)
             return res
         else:
-            raise RuntimeError("unknown format %r" % (format,))
+            raise RuntimeError(f"unknown format {format!r}")
 
     cp = res.configparser
 
     if not cp.read(conf):
-        raise RuntimeError("could not read config file %r" % (conf,))
+        raise RuntimeError(f"could not read config file {conf!r}")
 
     for s in ['images', 'wiki']:
         if not cp.has_section(s):
@@ -197,7 +200,7 @@ def _makewiki(conf, metabook=None, **kw):
         try:
             m = dispatch[s][t]
         except KeyError:
-            raise RuntimeError("cannot handle type %r in section %r" % (t, s))
+            raise RuntimeError(f"cannot handle type {t!r} in section {s!r}")
 
         setattr(res, s, m(**args))
 
@@ -206,10 +209,7 @@ def _makewiki(conf, metabook=None, **kw):
 
 
 def makewiki(config, metabook=None, **kw):
-    if not config:
-        res = Environment(metabook)
-    else:
-        res = _makewiki(config, metabook=metabook, **kw)
+    res = Environment(metabook) if not config else _makewiki(config, metabook=metabook, **kw)
 
     if res.wiki:
         res.wiki.env = res
