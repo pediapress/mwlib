@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#! -*- coding:utf-8 -*-
 
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
@@ -7,8 +6,6 @@
 
 import contextlib
 import math
-
-from six.moves import range
 
 from .advtree import URL, Cell, ImageLink, Link, Math, NamedURL, Reference, Text
 

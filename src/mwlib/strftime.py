@@ -14,8 +14,6 @@ import datetime
 import re
 import time
 
-from six.moves import range
-
 # remove the unsupposed "%s" command.  But don't
 # do it if there's an even number of %s before the s
 # because those are all escaped.  Can't simply

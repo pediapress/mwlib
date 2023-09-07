@@ -161,14 +161,15 @@ class Commands:
                 del g
 
             ipath = getpath("collection.zip")
-            fh = open(ipath, "rb")
 
-            g = gevent.spawn(report_upload_status, post_url, fh)
-            try:
-                uploadfile(ipath, post_url, fh)
-            finally:
-                g.kill()
-                del g
+            with open(ipath, "wb") as fh:
+
+                g = gevent.spawn(report_upload_status, post_url, fh)
+                try:
+                    uploadfile(ipath, post_url, fh)
+                finally:
+                    g.kill()
+                    del g
 
         def doit(**params):
             try:

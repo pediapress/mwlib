@@ -263,7 +263,7 @@ class RLFontSwitcher(FontSwitcher):
         FontSwitcher.__init__(self)
         self.font_paths = font_paths
         self.force_font = None
-        self.hypenation_pattern = re.compile("(/|\.|\+|-|_|\?)(\S)")
+        self.hypenation_pattern = re.compile(r"(/|\.|\+|-|_|\?)(\S)")
 
     def registerFontDefinitionList(self, font_list):
         missing_fonts = []
@@ -284,7 +284,7 @@ class RLFontSwitcher(FontSwitcher):
         zws = '<font fontSize="1"> </font>'
         res = []
         for txt, font in font_list:
-            txt = re.sub(self.hypenation_pattern, "\g<1>%s\g<2>" % zws, txt)
+            txt = re.sub(self.hypenation_pattern, r"\g<1>%s\g<2>" % zws, txt)
             res.append((txt, font))
         return res
 

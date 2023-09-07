@@ -21,6 +21,7 @@ try:
 except ImportError:
     from md5 import md5
 
+import contextlib
 from xml.sax.saxutils import escape as xmlescape
 
 from PIL import Image as PilImage
@@ -57,10 +58,9 @@ from .pagetemplates import PPDocTemplate, TitlePage, WikiPage
 from .pdfstyles import heading_style, print_height, print_width, table_style, text_style
 from .rlsourceformatter import ReportlabFormatter
 
-try:
+with contextlib.suppress(ImportError):
     from mwlib import _extversion
-except ImportError:
-    pass
+
 
 from mwlib import advtree, writerbase
 from mwlib.treecleaner import TreeCleaner
@@ -342,7 +342,7 @@ class RlWriter:
 
     def set_rtl(self, rtl):
         self.rtl = rtl
-        if rtl == True:
+        if rtl is True:
             pdfstyles.word_wrap = "RTL"
         else:
             pdfstyles.word_wrap = self.word_wrap
@@ -359,7 +359,7 @@ class RlWriter:
         if css_style and page_break:
             if page_break in ["always", "100%"]:
                 return NotAtTopPageBreak()
-            res = re.search("(\d{1,2})\%", page_break)
+            res = re.search(r"(\d{1,2})\%", page_break)
             if res:
                 min_percent = int(res.groups()[0])
                 return CondPageBreak(min_percent / 100.0 * pdfstyles.print_height)
@@ -759,7 +759,7 @@ class RlWriter:
         if authors:
             authors_text = ", ".join([a for a in authors if a != "ANONIPEDITS:0"])
             authors_text = re.sub(
-                "ANONIPEDITS:(?P<num>\d+)", "\g<num> %s" % _("anonymous edits"), authors_text
+                r"ANONIPEDITS:(?P<num>\d+)", r"\g<num> %s" % _("anonymous edits"), authors_text
             )
             authors_text = self.formatter.clean_text(authors_text)
         else:
@@ -873,7 +873,7 @@ class RlWriter:
         url = getattr(article, "url", None)
         if url:
             article_id = self.buildArticleID(article.wikiurl, article.caption)
-            heading_anchor = "%s%s" % (heading_anchor, '<a name="%s" />' % article_id)
+            heading_anchor = "{}{}".format(heading_anchor, '<a name="%s" />' % article_id)
         else:
             article_id = None
 
@@ -1011,7 +1011,7 @@ class RlWriter:
                             if (
                                 hasattr(floatingNodes[-1], "style")
                                 and floatingNodes[-1].style.name.startswith("heading_style")
-                                and floatingNodes[-1].style.flowable == True
+                                and floatingNodes[-1].style.flowable is True
                             ):  # prevent floating headings before nonFloatables
                                 noFloatNode = floatingNodes[-1]
                                 floatingNodes = floatingNodes[:-1]
@@ -1402,7 +1402,7 @@ class RlWriter:
                 self.url_map[href] = len(self.references)
         else:  # we are writing a reference section. we therefore directly print URLs
             txt = self.renderInline(obj)
-            if any([href.startswith(url) for url in pdfstyles.url_blacklist]):
+            if any(href.startswith(url) for url in pdfstyles.url_blacklist):
                 return ["".join(txt)]
             txt.append(
                 ' <link href="{}">({})</link>'.format(xmlescape(href), self.renderURL(urllib.parse.unquote(href)))
@@ -1552,7 +1552,6 @@ class RlWriter:
         try:
             del img
             img = PilImage.open(img_path)
-            d = img.load()
         except:
             log.warning("image can not be opened by PIL: %r" % img_path)
             raise

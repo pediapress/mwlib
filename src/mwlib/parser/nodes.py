@@ -37,8 +37,7 @@ class Node(utoken.Token):
     def allchildren(self):  # name is broken, returns self, which is not a child
         yield self
         for c in self.children:
-            for x in c.allchildren():
-                yield x
+            yield from c.allchildren()
 
     def find(self, tp):
         """find instances of type tp in self.allchildren()"""

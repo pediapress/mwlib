@@ -5,7 +5,7 @@ import re
 
 from mwlib.templ import pp
 
-splitpattern = """
+splitpattern = r"""
 ({{+)                     # opening braces
 |(}}+)                    # closing braces
 |(\[\[|\]\])              # link

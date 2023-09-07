@@ -453,8 +453,8 @@ def set_locale_from_lang(lang):
     if lang == current_lang:
         return
 
-    prefix = lang + u"_"
-    canonical = "%s_%s" % (lang, lang.upper())
+    prefix = lang + "_"
+    canonical = f"{lang}_{lang.upper()}"
     candidates = sorted(
         {x for x in [canonical, canonical + ".UTF-8"] + _supported if x.startswith(prefix)},
         key=lambda x: (x.endswith("UTF-8"), x.startswith(canonical)),

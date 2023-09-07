@@ -67,7 +67,8 @@ class MultiEnvironment(Environment):
     def __init__(self, path):
         Environment.__init__(self)
         self.path = path
-        self.metabook = myjson.load(open(os.path.join(self.path, "metabook.json")))
+        with open(os.path.join(self.path, "metabook.json")) as fp:
+            self.metabook = myjson.load(fp)
         self.id2env = {}
 
     def init_metabook(self):
@@ -135,7 +136,8 @@ def _makewiki(conf, metabook=None, **kw):
         from mwlib import nuwiki
 
         try:
-            format = json.load(open(nfo_fn, 'rb'))['format']
+            with open(nfo_fn, 'rb') as fp:
+                format = json.load(fp)['format']
         except KeyError:
             pass
         else:

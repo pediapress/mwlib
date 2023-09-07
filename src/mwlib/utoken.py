@@ -216,7 +216,7 @@ del d, token2name
 
 
 def _split_tag(txt):
-    m = re.match(" *(\w+)(.*)", txt, re.DOTALL)
+    m = re.match(r" *(\w+)(.*)", txt, re.DOTALL)
     assert m is not None, "could not match tag name"
     name = m.group(1)
     values = m.group(2)

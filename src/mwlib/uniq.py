@@ -21,7 +21,7 @@ class Uniquifier:
     def get_uniq(self, repl, name):
         r = self.random_string
         count = len(self.uniq2repl)
-        retval = "\x7fUNIQ-%s-%s-%s-QINU\x7f" % (name, count, r)
+        retval = f"\x7fUNIQ-{name}-{count}-{r}-QINU\x7f"
         self.uniq2repl[retval] = repl
         return retval
 

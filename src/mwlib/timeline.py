@@ -8,9 +8,7 @@
 
 import os
 import tempfile
-import subprocess
 from hashlib import sha1
-import six
 
 font = None
 

@@ -157,8 +157,7 @@ class AdvancedNode:
         """don't confuse w/ Node.allchildren() which returns allchildren + self"""
         for c in self.children:
             yield c
-            for x in c.get_all_children():
-                yield x
+            yield from c.get_all_children()
 
     def get_siblings(self):
         """Return all siblings WITHOUT self"""
@@ -810,7 +809,6 @@ def remove_newlines(node):
                 prev = node.previous or node.parent  # previous sibling node or parentnode
                 next = node.next or node.parent.next
                 if not next or next.is_block_node or not prev or prev.is_block_node:
-                    np = node.parent
                     node.parent.remove_child(node)
             node.caption = node.caption.replace("\n", " ")
 
@@ -863,7 +861,8 @@ def get_advanced_tree(fn):
     from mwlib.uparser import parse_string
 
     db = DummyDB()
-    input = six.text_type(open(fn).read(), "utf8")
+    with open(fn) as f:
+        input = six.text_type(f.read(), "utf8")
     r = parse_string(title=fn, raw=input, wikidb=db)
     build_advanced_tree(r)
     return r

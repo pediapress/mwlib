@@ -49,7 +49,7 @@ del d
 
 
 def _split_tag(txt):
-    m = re.match(" *(\w+)(.*)", txt)
+    m = re.match(r" *(\w+)(.*)", txt)
     assert m is not None, "could not match tag name"
     name = m.group(1)
     values = m.group(2)

@@ -88,7 +88,7 @@ class RuleBase:
         return True, None
 
     def __repr__(self):
-        return "%s(%s, %r)" % (self.__class__.__name__, self.klass.__name__, self.constraint)
+        return f"{self.__class__.__name__}({self.klass.__name__}, {self.constraint!r})"
 
 
 class ChildrenOf(RuleBase):
@@ -126,12 +126,11 @@ class RequireChild(RuleBase):
         self.klass = klass
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.klass.__name__)
+        return f"{self.__class__.__name__}({self.klass.__name__})"
 
     def test(self, node):
-        if node.__class__ == self.klass:
-            if not len(node.children):
-                return False, node
+        if node.__class__ == self.klass and not len(node.children):
+            return False, node
         return True, None
 
 
@@ -151,11 +150,11 @@ class SanityException(Exception):
 
 
 def exceptioncb(rule, node=None, parentnode=None):
-    raise SanityException("%r  err:%r" % (rule, node or parentnode))
+    raise SanityException(f"{rule!r}  err:{node or parentnode!r}")
 
 
 def warncb(rule, node=None, parentnode=None):
-    log.warn("%r node:%r parent:%r" % (rule, node, parentnode))
+    log.warn(f"{rule!r} node:{node!r} parent:{parentnode!r}")
     return False
 
 
@@ -190,17 +189,16 @@ class SanityChecker:
                 #    log.info("checking article:", node.caption.encode('utf-8'))
                 for r, cb in self.rules:
                     passed, errnode = r.test(node)
-                    if not passed and cb:
-                        if cb(r, errnode or node):
-                            modified = True
-                            break
+                    if not passed and cb and cb(r, errnode or node):
+                        modified = True
+                        break
                 if modified:
                     break
 
 
 def demo(tree):
     "for documentation only, see tests for more demos"
-    from mwlib.advtree import Table, Row, Cell, Text, ImageLink, PreFormatted
+    from mwlib.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
 
     sc = SanityChecker()
     rules = [

@@ -71,6 +71,6 @@ def latex2mathml(latex):
 
 
 if __name__ == "__main__":
-    test = "\exp(-\gamma x)"
+    test = r"\exp(-\gamma x)"
     print()
     print(ET.tostring(latex2mathml(test)))

@@ -12,8 +12,6 @@ import time
 from hashlib import sha1
 from io import StringIO
 
-import six
-
 from mwlib import _version, log
 from mwlib import myjson as json
 from mwlib.metabook import calc_checksum
