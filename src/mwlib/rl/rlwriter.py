@@ -1,20 +1,21 @@
 #! /usr/bin/env python
-#! -*- coding:utf-8 -*-
 
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import gettext
-import sys
-import os
-import re
-import urllib.request, urllib.parse, urllib.error
-import traceback
-import tempfile
-import shutil
-import subprocess
 import copy
 import gc
+import gettext
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import traceback
+import urllib.error
+import urllib.parse
+import urllib.request
 
 try:
     from hashlib import md5
@@ -1551,7 +1552,6 @@ class RlWriter:
                 raise
         try:
             del img
-            img = PilImage.open(img_path)
         except:
             log.warning("image can not be opened by PIL: %r" % img_path)
             raise

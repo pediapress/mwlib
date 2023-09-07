@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#! -*- coding:utf-8 -*-
 
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
@@ -15,6 +14,9 @@
 
 
 
+import contextlib
+
+from reportlab import rl_config
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
@@ -31,10 +33,6 @@ serif_font = "FreeSerif"
 sans_font = "FreeSans"
 mono_font = "FreeMono"
 default_font = "FreeSerif"
-
-
-from reportlab import rl_config
-import contextlib
 
 rl_config.canvas_basefontname = default_font
 

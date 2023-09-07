@@ -1,5 +1,4 @@
 #! /usr/bin/env py.test
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
@@ -34,7 +33,7 @@ class ExtensionRegistry:
 
     def registerExtension(self, k):
         name = k.name
-        assert name not in self.name2ext, 'tag extension for {!r} already registered'.format(name )
+        assert name not in self.name2ext, f'tag extension for {name!r} already registered'
         self.name2ext[name] = k()
         return k
 
@@ -54,8 +53,8 @@ register = default_registry.registerExtension
 
 def _parse(txt):
     """parse text....and try to return a 'better' (some inner) node"""
-    from mwlib.refine.compat import parse_txt
     from mwlib import parser
+    from mwlib.refine.compat import parse_txt
 
     res = parse_txt(txt)
 
@@ -110,9 +109,9 @@ welcomeuser xsound pageby uml graphviz categorytree summary slippymap""".split()
 
 for name in tags_to_ignore:
     def _f(name):
-        class I(IgnoreTagBase):
+        class Ignore(IgnoreTagBase):
             name = name
-        register(I)
+        register(Ignore)
     _f(name)
 
 
@@ -129,7 +128,7 @@ class Rot13Extension(TagExtension):
 
         this functions builds wikimarkup and returns a parse tree for this
         """
-        return self.parse("rot13(%s) is %s" % (source, rot13_encode(source)[0]))
+        return self.parse(f"rot13({source}) is {rot13_encode(source)[0]}")
 
 
 register(Rot13Extension)
@@ -173,7 +172,7 @@ class Syntaxhighlight(TagExtension):
     name = "syntaxhighlight"
 
     def __call__(self, source, attributes):
-        return self.parse('<source%s>%s</source>' % (''.join(' %s=%s' % (k, v)
+        return self.parse('<source{}>{}</source>'.format(''.join(f' {k}={v}'
                                                              for k, v in attributes.items()),
                                                      source))
 
@@ -198,7 +197,6 @@ class TimeExtension(TagExtension):
     name = "time"
 
     def __call__(self, source, attributes):
-        from mwlib import parser
         return self.parse(source)
 
 

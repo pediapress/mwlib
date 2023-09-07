@@ -1,11 +1,9 @@
 #! /usr/bin/env python
-#! -*- coding:utf-8 -*-
 
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
 import time
-from builtins import str
 
 from PIL import Image
 from reportlab.lib.pagesizes import A3

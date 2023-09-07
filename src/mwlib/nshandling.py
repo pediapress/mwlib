@@ -8,8 +8,8 @@ returned by api.php
 """
 
 import re
-import six
 
+import six
 
 NS_MEDIA = -2
 NS_SPECIAL = -1
@@ -59,7 +59,7 @@ def fix_wikipedia_siteinfo(siteinfo):
         siteinfo['interwikimap'].append({
             'prefix': p,
             'language': p,
-            'url': 'http://%s.wikipedia.org/wiki/$1' % (p, ),
+            'url': f'http://{p}.wikipedia.org/wiki/$1',
             'local': '',
         })
 
@@ -154,7 +154,7 @@ class nshandler:
         if prefix:
             prefix += ":"
 
-        return (nsnum, suffix, "%s%s" % (prefix, suffix))
+        return (nsnum, suffix, f"{prefix}{suffix}")
 
     def get_nsname_by_number(self, ns):
         return self.siteinfo["namespaces"][str(ns)]["*"]

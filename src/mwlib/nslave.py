@@ -2,21 +2,21 @@
 
 
 
-from six.moves import range
 if __name__ == "__main__":
     from gevent import monkey
     monkey.patch_all()
 
 import os
+import socket
 import sys
 import time
-import socket
+
+from mwlib.asynchronous import proc
+from mwlib.utils import garble_password
 
 cachedir = None
 cacheurl = None
 
-from mwlib.asynchronous import proc
-from mwlib.utils import garble_password
 
 
 # -- find_ip is copied from woof sources
@@ -57,7 +57,7 @@ def system(args, timeout=None):
     pub_args = garble_password(args)
     msg = []
     a = msg.append
-    a("%s %s %r\n" % (retcode, d, pub_args))
+    a(f"{retcode} {d} {pub_args!r}\n")
 
     def writemsg(): return sys.stderr.write("".join(msg))
 
@@ -67,8 +67,7 @@ def system(args, timeout=None):
 
         writemsg()
         lines = ["    " + x for x in stdout[-4096:].split("\n")]
-        raise RuntimeError("command failed with returncode %s: %r\nLast Output:\n%s" %
-                           (retcode, pub_args, "\n".join(lines)))
+        raise RuntimeError("command failed with returncode {}: {!r}\nLast Output:\n{}".format(retcode, pub_args, "\n".join(lines)))
 
     writemsg()
 
@@ -121,7 +120,7 @@ class commands:
     def statusfile(self):
         host = self.proxy._rpcclient.host
         port = self.proxy._rpcclient.port
-        return 'qserve://%s:%s/%s' % (host, port, self.jobid)
+        return f'qserve://{host}:{port}/{self.jobid}'
 
     def rpc_makezip(self, params=None):
         def doit(metabook_data=None, collection_id=None, base_url=None, **kw):
@@ -162,8 +161,8 @@ class commands:
             def getpath(p):
                 return os.path.join(dir, p)
 
-            self.qaddw(channel="makezip", payload=dict(params=params),
-                       jobid="%s:makezip" % (collection_id, ), timeout=20 * 60)
+            self.qaddw(channel="makezip", payload={"params": params},
+                       jobid=f"{collection_id}:makezip", timeout=20 * 60)
             outfile = getpath("output.%s" % writer)
             args = ["mw-render", "-w", writer, "-c",
                     getpath("collection.zip"), "-o", outfile, "--status", self.statusfile()]
@@ -173,16 +172,16 @@ class commands:
             system(args, timeout=15 * 60.0)
             os.chmod(outfile, 0o644)
             size = os.path.getsize(outfile)
-            url = cacheurl + "/%s/%s/output.%s" % (collection_id[:2], collection_id, writer)
-            return dict(url=url, size=size,
-                        suggested_filename=suggest_filename(metabook_data) or "")
+            url = cacheurl + f"/{collection_id[:2]}/{collection_id}/output.{writer}"
+            return {"url": url, "size": size,
+                        "suggested_filename": suggest_filename(metabook_data) or ""}
 
         return doit(**params)
 
 
 def start_serving_files(cachedir, address, port):
+    from bottle import default_app, route, static_file
     from gevent.pywsgi import WSGIServer
-    from bottle import route, static_file, default_app
     cachedir = os.path.abspath(cachedir)
 
     @route('/cache/:filename#.*#')
@@ -235,8 +234,8 @@ def main():
         wsgi_server = start_serving_files(cachedir, http_address, http_port)
         port = wsgi_server.socket.getsockname()[1]
         if not cacheurl:
-            cacheurl = "http://%s:%s/cache" % (find_ip(), port)
-        print("serving files from %r at url %s" % (cachedir, cacheurl))
+            cacheurl = f"http://{find_ip()}:{port}/cache"
+        print(f"serving files from {cachedir!r} at url {cacheurl}")
 
     if not cacheurl:
         sys.exit("--url option missing")

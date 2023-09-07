@@ -1,10 +1,9 @@
-import sys
 import optparse
+import sys
 
+from mwlib import log, metabook, wiki
 from mwlib import myjson as json
-
 from mwlib.utils import start_logging
-from mwlib import wiki, metabook, log
 
 log = log.Log("mwlib.options")
 
@@ -82,7 +81,7 @@ class OptionParser(optparse.OptionParser):
 
     def parse_args(self):
         self.options, self.args = optparse.OptionParser.parse_args(
-            self, args=[x for x in sys.argv[1:]]
+            self, args=list(sys.argv[1:])
         )
         for c in self.config_values:
             if not hasattr(c, "pages"):

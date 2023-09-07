@@ -19,10 +19,11 @@ from io import StringIO
 import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
+from bottle import HTTPResponse, default_app, get, post, request
 from gevent import pool, pywsgi
 from qs.misc import CallInLoop
 
-from mwlib import _version, log
+from mwlib import _version, log, lrucache
 from mwlib import myjson as json
 from mwlib.asynchronous import rpcclient
 from mwlib.metabook import calc_checksum
@@ -101,7 +102,6 @@ def make_collection_id(data):
     return sha1(sio.getvalue().encode('utf-8')).hexdigest()[:16]
 
 
-from mwlib import lrucache
 
 busy = {}
 collid2qserve = lrucache.LRUCache(4000)
@@ -184,7 +184,6 @@ def choose_idle_qserve():
     return random.choice(idle)  # XXX probably store number of render jobs in busy
 
 
-from bottle import HTTPResponse, default_app, get, post, request
 
 
 @get("<path:re:.*>")

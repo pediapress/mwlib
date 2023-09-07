@@ -3,11 +3,12 @@
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import contextlib
 import os
 import sys
 import time
 import traceback
-from urllib import request, parse
+from urllib import parse, request
 
 import gevent
 import gevent.event
@@ -16,9 +17,9 @@ from gevent.lock import Semaphore
 from lxml import etree
 from sqlitedict import SqliteDict
 
-from mwlib import utils, nshandling, conf, myjson as json
+from mwlib import conf, nshandling, utils
+from mwlib import myjson as json
 from mwlib.net import sapi as mwapi
-import contextlib
 
 
 class SharedProgress:
@@ -36,10 +37,7 @@ class SharedProgress:
         if not total:
             total = 1
 
-        if total < 50:
-            percent = done / 5.0
-        else:
-            percent = 100.0 * done / total
+        percent = done / 5.0 if total < 50 else 100.0 * done / total
 
         percent = round(percent, 3)
 
@@ -53,7 +51,7 @@ class SharedProgress:
         self.last_percent = percent
 
         if isatty and isatty():
-            msg = "%s of %s, %.2f%%, %.2f seconds," % (done, total, percent, needed)
+            msg = f"{done} of {total}, {percent:.2f}%, {needed:.2f} seconds,"
             if sys.platform in ("linux2", "linux3"):
                 from mwlib import linuxmem
 
@@ -89,7 +87,7 @@ class FsOutput:
         assert not os.path.exists(self.path)
         os.makedirs(os.path.join(self.path, "images"))
         self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")
-        self.seen = dict()
+        self.seen = {}
         self.imgcount = 0
         self.nfo = None
 
@@ -112,7 +110,7 @@ class FsOutput:
         self.revfile = None
 
     def get_imagepath(self, title):
-        p = os.path.join(self.path, "images", "%s" % (utils.fs_escape(title),))
+        p = os.path.join(self.path, "images", f"{utils.fs_escape(title)}")
         self.imgcount += 1
         return p
 
@@ -133,7 +131,7 @@ class FsOutput:
         self.dump_json(licenses=licenses)
 
     def write_expanded_page(self, title, ns, txt, revid=None):
-        rev = dict(title=title, ns=ns, expanded=1)
+        rev = {"title": title, "ns": ns, "expanded": 1}
         if revid is not None:
             rev["revid"] = revid
 
@@ -156,7 +154,10 @@ class FsOutput:
                 revid = r.get("revid")
                 txt = r["*"]
                 if revid not in self.seen:
-                    rev = dict(title=title, ns=ns)
+                    rev = {
+                        "title": title,
+                        "ns": ns,
+                    }
                     if revid is not None:
                         self.seen[revid] = rev
                         rev["revid"] = revid
@@ -340,12 +341,9 @@ class Fetcher:
             self.get_edits(title, revid)
 
     def expand_templates_from_title(self, title):
-        nsnum, suffix, fqname = self.nshandler.splitname(title)
+        nsnum, _, _ = self.nshandler.splitname(title)
 
-        if nsnum == 0:
-            text = "{{:%s}}" % title
-        else:
-            text = "{{%s}}" % title
+        text = "{{:%s}}" % title if nsnum == 0 else "{{%s}}" % title
 
         res = self.api.do_request(action="expandtemplates", title=title, text=text)
         txt = res.get("*")
@@ -508,8 +506,11 @@ class Fetcher:
             categories = p.get("categories")
             if not categories:
                 continue
-
-            e = dict(title=p.get("title"), ns=p.get("ns"), pageid=p.get("pageid"))
+            e = {
+                "title": p.get("title"),
+                "ns": p.get("ns"),
+                "pageid": p.get("pageid"),
+            }
 
             for c in categories:
                 cattitle = c.get("title")
@@ -650,7 +651,7 @@ class Fetcher:
         todo = self.imagedescription_todo[path]
         del self.imagedescription_todo[path]
 
-        titles = set([x[0] for x in todo])
+        titles = {x[0] for x in todo}
         # "-d-" is just some prefix to make the names here not clash with local names
         titles = [t for t in titles if "-d-" + t not in self.scheduled]
         self.scheduled.update(["-d-" + x for x in titles])

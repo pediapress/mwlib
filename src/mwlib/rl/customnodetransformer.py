@@ -34,7 +34,7 @@ class CustomNodeTransformer:
         node.vlist["style"] = node_style
 
     def transformCSS(self, node):
-        if getattr(node, "vlist", None) == None:
+        if getattr(node, "vlist", None) is None:
             node_classes = []
         else:
             node_classes = node.vlist.get("class", "").split()

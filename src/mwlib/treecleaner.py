@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-#! -*- coding:utf-8 -*-
 
 # Copyright (c) 2007, PediaPress GmbH
 # See README.rst for additional licensing information.
@@ -10,7 +9,6 @@ import sys
 import unicodedata
 
 import six
-from six.moves import range
 
 from mwlib import parser
 from mwlib.advtree import (
@@ -311,7 +309,7 @@ class TreeCleaner:
                     cleaner(child)
                 except Exception as e:
                     self.report('ERROR:', e)
-                    print('TREECLEANER ERROR in {}: {!r}'.format(getattr(child, 'caption', u'').encode('utf-8'),
+                    print('TREECLEANER ERROR in {}: {!r}'.format(getattr(child, 'caption', '').encode('utf-8'),
                                                            repr(e)))
                     import traceback
                     traceback.print_exc()
@@ -343,9 +341,8 @@ class TreeCleaner:
 
         Text nodes which only contain whitespace are kept.
         """
-        if node.__class__ == Text and node.parent:
-            if (node.previous and node.previous.is_block_node and node.next and node.next.is_block_node and not node.caption.strip(
-            )) or not node.caption:
+        if node.__class__ == Text and node.parent and ((node.previous and node.previous.is_block_node and node.next and node.next.is_block_node and not node.caption.strip(
+            )) or not node.caption):
                 self.report('removed empty text node')
                 node.parent.remove_child(node)
                 return
@@ -355,7 +352,7 @@ class TreeCleaner:
     def removeListOnlyParagraphs(self, node):
         """Removes paragraph nodes which only have lists as the only childen - keep the lists."""
         if node.__class__ == Paragraph:
-            list_only_children = all([c.__class__ == ItemList for c in node.children])
+            list_only_children = all(c.__class__ == ItemList for c in node.children)
             if list_only_children and node.parent:
                 self.report('replaced children:', node, '-->',
                             node.children, 'for node:', node.parent)
@@ -446,7 +443,7 @@ class TreeCleaner:
         if node.__class__ == Table and len(node.children) == 1 and node.children[0].__class__ == Row:
             # FIX for:
             # http://de.wikipedia.org/w/index.php?title=Benutzer:Volker.haas/Test&oldid=73993014
-            
+
                 row = node.children[0]
                 cell = emptyEndingCell(row)
                 while cell:
@@ -595,7 +592,6 @@ class TreeCleaner:
         if isinstance(node, Paragraph) and isinstance(node.previous, Section) \
                 and node.previous is not node.parent:
             prev = node.previous
-            parent = node.parent
             target = prev.getLastChild()
             self.report('moving node', node, 'to', target)
             node.moveto(target)

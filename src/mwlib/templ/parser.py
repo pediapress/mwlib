@@ -8,6 +8,7 @@ from hashlib import sha1 as digest
 
 import six
 
+from mwlib import lrucache
 from mwlib.templ.marks import eqmark
 from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
 from mwlib.templ.scanner import Symbols, tokenize
@@ -78,9 +79,6 @@ def optimize(node):
         return tuple(node)
 
     return node
-
-
-from mwlib import lrucache
 
 
 class Parser:

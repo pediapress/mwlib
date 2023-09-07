@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 # See README.rst for additional licensing information.
 #
 #  This file defines the styles for odfwriter.py
@@ -11,8 +10,7 @@
 
 
 
-from odf import style
-from odf import text
+from odf import style, text
 
 # CONTENT:
 #
@@ -604,7 +602,7 @@ def applyStylesToDoc(doc):
 
     doc.automaticstyles.addElement(sect)
 
-    for style in [dumbcolumn,
+    for document_style in [dumbcolumn,
                   indentedSingle,
                   indentedDouble,
                   indentedTriple,
@@ -648,4 +646,4 @@ def applyStylesToDoc(doc):
                   imgCaption,
                   tableCaption,
                   sectTable, ]:
-        doc.styles.addElement(style)
+        doc.styles.addElement(document_style)

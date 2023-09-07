@@ -3,20 +3,22 @@
 # See README.rst for additional licensing information.
 
 import os
-import zipfile
 import shutil
 import tempfile
-import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
+import zipfile
 from hashlib import sha1
-from mwlib import myjson as json
 
+import six
+import six.moves.urllib.error
+import six.moves.urllib.parse
+import six.moves.urllib.request
+from six import unichr
+from sqlitedict import SqliteDict
+
+from mwlib import myjson as json
 from mwlib import nshandling, utils
 from mwlib.log import Log
 from mwlib.utils import python2sort
-import six
-from six import unichr
-from six.moves import range
-from sqlitedict import SqliteDict
 
 log = Log('nuwiki')
 
@@ -81,7 +83,7 @@ class nuwiki:
                 if exc.errno != 17:  # file exists
                     raise
 
-        self.excluded = set(x.get("title") for x in self._loadjson("excluded.json", []))
+        self.excluded = {x.get("title") for x in self._loadjson("excluded.json", [])}
 
         self.revisions = {}
         self._read_revisions()
@@ -246,7 +248,7 @@ class nuwiki:
         return self._loadjson(name + ".json")
 
     def articles(self):
-        res = sorted(set([p.title for p in self.revisions.values() if p.ns == 0]))
+        res = sorted({p.title for p in self.revisions.values() if p.ns == 0})
         return res
 
     def select(self, start, end):
@@ -457,14 +459,14 @@ class adapt:
         return []
 
     def getImageTemplatesAndArgs(self, name, wikidb=None):
-        from mwlib.expander import get_templates, get_template_args
+        from mwlib.expander import get_templates
         page = self.get_image_description_page(name)
         if page is not None:
             templates = get_templates(page.rawtext)
             from mwlib.expander import find_template
             from mwlib.templ.evaluate import Expander
-            from mwlib.templ.parser import parse
             from mwlib.templ.misc import DictDB
+            from mwlib.templ.parser import parse
             args = set()
             e = Expander('', wikidb=DictDB())
             # avoid parsing with every call to find_template
@@ -483,8 +485,8 @@ class adapt:
         import re
         page = self.get_image_description_page(name)
         if page is not None:
-            words = re.split('\{|\}|\[|\]| |\,|\|', page.rawtext)
-            return list(set([w.lower() for w in words if w]))
+            words = re.split(r'\{|\}|\[|\]| |\,|\|', page.rawtext)
+            return list({w.lower() for w in words if w})
         print('no such image: %r' % name)
         return []
 

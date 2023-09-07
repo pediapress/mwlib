@@ -5,8 +5,6 @@ class for defining DTD-Like Rules for the tree
 """
 
 
-from mwlib.advtree import Article
-
 from mwlib.log import Log
 
 log = Log("sanitychecker")

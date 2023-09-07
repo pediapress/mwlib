@@ -14,13 +14,11 @@ More Info:
 """
 
 import sys
-from builtins import str
 
 import odf
 import six
 from odf import dc, draw, element, math, meta, table, text
 from odf.opendocument import OpenDocumentText
-from six.moves import range
 
 from mwlib import advtree, odfconf, parser, writerbase
 from mwlib import odfstyles as style
@@ -221,7 +219,7 @@ class ODFWriter:
                     log("in article ", art.caption)
                     log("write:", c.type, "not allowed in ", p.type, ", dumping")
                 except AttributeError:
-                    log("missing .type attribute %r %r " % (c, p))
+                    log(f"missing .type attribute {c!r} {p!r} ")
                 return False
 
         while hasattr(parent, "writeto"):
@@ -398,7 +396,7 @@ class ODFWriter:
         if not captions:  # handle table w/o caption:
             return t
         else:  # a section groups table-caption & table:
-            if not len(captions) == 1:
+            if len(captions) != 1:
                 log(
                     "owriteTable: more than one Table Caption not handeled. Using only first Caption!"
                 )
@@ -522,7 +520,6 @@ class ODFWriter:
 
     def owriteBlockquote(self, s):
         "margin to the left & right"
-        indentlevel = len(s.caption) - 1
         return ParagraphProxy(stylename=style.blockquote)
 
     def owriteIndented(self, s):
@@ -668,7 +665,7 @@ class ODFWriter:
             else:
                 return (wTarget, hTarget, scale)
 
-        if obj.colon == True:
+        if obj.colon is True:
             return  # writes children
             # fixme: handle isImageMap
 
@@ -690,7 +687,7 @@ class ODFWriter:
             if img.info.get("interlace", 0) == 1:
                 log.warning("got interlaced PNG which can't be handeled by PIL")
                 return
-        except IOError:
+        except OSError:
             log.warning("img can not be opened by PIL")
             return
 
@@ -724,7 +721,7 @@ class ODFWriter:
             innerframe.rescaleFactor = (
                 scale  # needed cuz image map coordinates needs the same rescaled
             )
-            log("wObj ,wImg: %s,%s" % (wObj, wImg))
+            log(f"wObj ,wImg: {wObj},{wImg}")
 
         href = self.doc.addPicture(imgPath)
         innerframe.addElement(draw.Image(href=href))
@@ -738,12 +735,11 @@ class ODFWriter:
         heightIn = "%.2fin" % (height)
 
         # set image alignment
-        attrs = dict(width=widthIn, anchortype="paragraph")
-        floats = dict(
-            right=style.frmOuterRight, center=style.frmOuterCenter, left=style.frmOuterLeft
-        )
+        attrs = {"width": widthIn, "anchortype": "paragraph"}
+        floats = {
+            "right": style.frmOuterRight, "center": style.frmOuterCenter, "left": style.frmOuterLeft
+        }
         attrs["stylename"] = floats.get(obj.align, style.frmOuterLeft)
-        stylename = (style.frmOuterLeft,)
         frame = draw.Frame(**attrs)
 
         tb = draw.TextBox()
@@ -772,22 +768,17 @@ class ODFWriter:
     # UNIMPLEMENTED  -----------------------------------------------
 
     def writeTimeline(self, obj):
-        data = obj.caption
-        pass  # FIXME
+        raise NotImplementedError
 
     def writeHiero(self, obj):  # FIXME parser support
-        data = obj.caption
-        pass  # FIXME
+        raise NotImplementedError
 
 
 # - func  ---------------------------------------------------
 
 
 def writer(env, output, status_callback):
-    if status_callback:
-        buildbook_status = status_callback.getSubRange(0, 50)
-    else:
-        buildbook_status = None
+    buildbook_status = status_callback.getSubRange(0, 50) if status_callback else None
     book = writerbase.build_book(env, status_callback=buildbook_status)
 
     def scb(status, progress):

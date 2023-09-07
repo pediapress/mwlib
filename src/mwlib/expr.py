@@ -12,8 +12,6 @@ import inspect
 import math
 import re
 
-from six.moves import input
-
 
 class ExprError(Exception):
     pass

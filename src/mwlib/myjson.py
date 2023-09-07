@@ -9,7 +9,6 @@ try:
     import simplejson as json
 except ImportError:
     import json
-    from json import loads  # protect us against http://pypi.python.org/pypi/python-json/
 
 
 def object_hook(dct):

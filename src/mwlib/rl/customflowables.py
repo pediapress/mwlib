@@ -193,9 +193,9 @@ class FiguresAndParagraphs(Flowable):
             autoLeading = getattr(p.style, "autoLeading") if hasattr(p, "style") else ""
             if hasattr(p, "style") and autoLeading == "max" and p.blPara.kind == 1:
                 pHeight = 0
-                for l in p.blPara.lines:
+                for line in p.blPara.lines:
                     pHeight += (
-                        max(l.ascent - l.descent, p.style.leading) * 1.025
+                        max(line.ascent - line.descent, p.style.leading) * 1.025
                     )  # magic factor! autoLeading==max increases line-height
             else:
                 if autoLeading == "max":
