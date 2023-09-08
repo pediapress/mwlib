@@ -13,7 +13,7 @@ import sys
 import traceback
 import unicodedata
 import urllib
-from hashlib import sha1
+from hashlib import sha256
 from io import StringIO
 
 import six.moves.urllib.error
@@ -99,7 +99,7 @@ def make_collection_id(data):
             "new-collection {}\t{!r}\t{!r}\n".format(num_articles, data.get("base_url"), data.get("writer"))
         )
 
-    return sha1(sio.getvalue().encode('utf-8')).hexdigest()[:16]
+    return sha256(sio.getvalue().encode('utf-8')).hexdigest()[:16]
 
 
 

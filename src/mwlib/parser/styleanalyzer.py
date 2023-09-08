@@ -5,6 +5,9 @@
 # ''italic''
 
 
+from mwlib.exceptions.mwlib_exceptions import InconsistentPathLengthException
+
+
 class State:
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -88,9 +91,7 @@ def compute_path(counts):
         states = new_states
         states = sort_states(states)
         best = states[0]
-        # print "STATES:", states
         if best.apocount == 0 and not best.is_italic and not best.is_bold:
-            # print "CHOOSING PERFECT STATE"
             states = [best]
         else:
             states = states[:32]
@@ -103,5 +104,7 @@ def compute_path(counts):
         tmp = tmp.previous
 
     res.reverse()
-    assert len(res) == len(counts)
+
+    if len(res) != len(counts):
+        raise InconsistentPathLengthException(len(counts), len(res))
     return res

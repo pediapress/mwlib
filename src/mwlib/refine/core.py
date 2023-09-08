@@ -238,7 +238,8 @@ class ParseSingleQuote:
         self.run()
 
     def finish(self):
-        assert len(self.counts) == len(self.styles)
+        if len(self.counts) != len(self.styles):
+            raise ValueError("len(self.counts) != len(self.styles)")
 
         states = styleanalyzer.compute_path(self.counts)
 
@@ -332,7 +333,8 @@ class ParsePreformatted:
         while i < len(tokens):
             t = tokens[i]
             if t.type == Token.t_pre:
-                assert start is None
+                if t.type != Token.t_pre:
+                    raise ValueError("t.type != Token.t_pre")
                 start = i
                 i += 1
             elif t.type == Token.t_newline and start is not None:
@@ -415,7 +417,8 @@ class ParseLines:
         del lines[-1]  # remove guard
 
     def getchar(self, node):
-        assert node.type == Token.t_complex_line
+        if node.type != Token.t_complex_line:
+            raise ValueError("node.type != Token.t_complex_line")
         if node.lineprefix:
             return node.lineprefix[0]
         return None
@@ -622,7 +625,8 @@ class ParseLinks:
         self.lang = lang
 
         self.nshandler = xopts.nshandler
-        assert self.nshandler is not None, "nshandler not set"
+        if self.nshandler is None:
+            raise ValueError("nshandler not set")
 
         if imagemod is None:
             imagemod = util.ImageMod()
@@ -880,7 +884,8 @@ def _process_current_token_children(current_token, i, start, state, todo, tokens
     if _create(tokens, i, start, state):
         start += 1
         i = start
-    assert tokens[i] is current_token
+    if tokens[i] is not current_token:
+        raise ValueError("tokens[i] is not current_token")
     if current_token.type in (
         Token.t_complex_table,
         Token.t_complex_table_row,

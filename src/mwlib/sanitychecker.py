@@ -5,6 +5,7 @@ class for defining DTD-Like Rules for the tree
 """
 
 
+from mwlib.exceptions.mwlib_exceptions import SanityException
 from mwlib.log import Log
 
 log = Log("sanitychecker")
@@ -77,7 +78,7 @@ class RuleBase:
         self.klass = klass
         self.constraint = constraint
 
-    def _tocheck(self, node):
+    def _tocheck(self):
         return []
 
     def test(self, node):
@@ -143,10 +144,6 @@ callback return values should be:
 """
 
 
-class SanityException(Exception):
-    pass
-
-
 def exceptioncb(rule, node=None, parentnode=None):
     raise SanityException(f"{rule!r}  err:{node or parentnode!r}")
 
@@ -156,8 +153,9 @@ def warncb(rule, node=None, parentnode=None):
     return False
 
 
-def removecb(rule, node=None, parentnode=None):
-    assert node and node.parent
+def removecb(node=None, parentnode=None):
+    if not node or not node.parent:
+        raise SanityException(f"cannot remove {node!r} from {parentnode!r}")
     node.parent.remove_child(node)
     return True
 
@@ -183,18 +181,16 @@ class SanityChecker:
         while modified:
             modified = False
             for node in tree.allchildren():
-                # if node.__class__ == Article:
-                #    log.info("checking article:", node.caption.encode('utf-8'))
                 for r, cb in self.rules:
                     passed, errnode = r.test(node)
-                    if not passed and cb and cb(r, errnode or node):
+                    if not passed and cb and cb(errnode or node):
                         modified = True
                         break
                 if modified:
                     break
 
 
-def demo(tree):
+def demo():
     "for documentation only, see tests for more demos"
     from mwlib.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
 

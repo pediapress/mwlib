@@ -257,7 +257,7 @@ class PageMagic:
     @_wrap_pagename
     def NAMESPACE(self, pagename):
         """Returns the name of the namespace the current page resides in."""
-        ns, partial, full = self.nshandler.splitname(pagename)
+        _, partial, full = self.nshandler.splitname(pagename)
         return full[: -len(partial) - 1]
 
     NAMESPACEE = _quoted(NAMESPACE)
@@ -567,7 +567,8 @@ class MagicResolver(
             return m
 
         res = m(args) or ""  # FIXME: catch TypeErros
-        assert isinstance(res, str), f"MAGIC {name!r} returned {res!r}"
+        if not isinstance(res, str):
+            raise TypeError(f"MAGIC {name!r} returned {res!r}")
         return res
 
     def has_magic(self, name):

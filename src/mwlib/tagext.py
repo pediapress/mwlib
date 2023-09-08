@@ -33,7 +33,8 @@ class ExtensionRegistry:
 
     def registerExtension(self, k):
         name = k.name
-        assert name not in self.name2ext, f'tag extension for {name!r} already registered'
+        if name in self.name2ext:
+            raise ValueError(f'tag extension for {name!r} already registered')
         self.name2ext[name] = k()
         return k
 

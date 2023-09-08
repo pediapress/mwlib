@@ -140,7 +140,7 @@ class Main:
         return env
 
     def __call__(self):
-        options, args, parser = self.parse_options()
+        options, _, parser = self.parse_options()
         conf.readrc()
 
         self.parser = parser
@@ -196,7 +196,7 @@ class Main:
 
             try:
                 _locale.set_locale_from_lang(env.wiki.siteinfo["general"]["lang"])
-            except BaseException as err:
+            except Exception as err:
                 print("Error: could not set locale", err)
 
             basename = os.path.basename(options.output)

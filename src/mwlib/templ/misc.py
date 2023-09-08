@@ -42,6 +42,6 @@ def expand_str(s, expected=None, wikidb=None, pagename="thispage"):
     te = evaluate.Expander(s, pagename=pagename, wikidb=db)
     res = te.expandTemplates()
     print(f"EXPAND: {s!r} -> {res!r}")
-    if expected is not None:
-        assert res == expected, f"expected {expected!r}, got {res!r}"
+    if expected is not None and res != expected:
+        raise AssertionError(f"expected {expected!r}, got {res!r}")
     return res

@@ -39,9 +39,11 @@ def parse_string(
 ):
     """parse article with title from raw mediawiki text"""
     te = uniquifier = siteinfo = None
-    assert title is not None, "no title given"
+    if title is None:
+        raise ValueError("no title given")
     raw = get_article_raw_text(wikidb, title) if raw is None else raw
-    assert raw is not None, f"cannot get article {title!r}"
+    if raw is None:
+        raise ValueError(f"cannot get article {title!r}")
     _input = raw
 
     if wikidb:
@@ -52,7 +54,8 @@ def parse_string(
         src = None
         if hasattr(wikidb, "getSource"):
             src = wikidb.getSource(title, revision=revision)
-            assert not isinstance(src, dict)
+            if isinstance(src, dict):
+                raise ValueError("wikidb.getSource returned a dict. this is no longer supported")
 
         if not src:
             src = metabook.source()

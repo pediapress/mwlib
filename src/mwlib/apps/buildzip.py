@@ -121,7 +121,8 @@ def main():
     status = None
     try:
         env = parser.makewiki()
-        assert env.metabook, "no metabook"
+        if not env.metabook:
+            raise ValueError("no metabook")
 
         status = Status(options.status_file, podclient=pod_client, progress_range=(1, 90))
         status(progress=0)

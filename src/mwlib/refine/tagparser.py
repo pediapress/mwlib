@@ -10,7 +10,8 @@ from mwlib.utoken import Token
 
 class TagInfo:
     def __init__(self, tagname=None, prio=None, blocknode=False, nested=True):
-        assert None not in (tagname, prio, nested, blocknode)
+        if any(x is None for x in (tagname, prio, nested, blocknode)):
+            raise ValueError("None not allowed")
         self.tagname = tagname
         self.prio = prio
         self.nested = nested
@@ -95,12 +96,14 @@ class TagParser:
                 else:
                     if stack[-1][1].prio == tag.prio and not tag.nested:
                         pos = self.close_stack(len(stack) - 1, tokens, pos)
-                        assert tokens[pos] is t
+                        if tokens[pos] is not t:
+                            raise ValueError("tokens[pos] is not t")
 
                     stack.append((pos, tag))
                     pos += 1
             else:
-                assert t.type == Token.t_html_tag_end
+                if t.type != Token.t_html_tag_end:
+                    raise ValueError("Incorrect token type: %r" % t.type)
                 # find a matching tag in the stack
                 spos = self.find_in_stack(tag)
                 if spos:

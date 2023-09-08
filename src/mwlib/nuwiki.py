@@ -6,7 +6,7 @@ import os
 import shutil
 import tempfile
 import zipfile
-from hashlib import sha1
+from hashlib import sha256
 
 import six
 import six.moves.urllib.error
@@ -223,26 +223,22 @@ class nuwiki:
             if not self._exists(p):
                 return None
 
-        if 1:
 
-            hd = sha1(fqname.encode("utf-8")).hexdigest()
-            ext = os.path.splitext(p)[-1]
-            ext = ext.replace(' ', '')
-            # mediawiki gives us png's for these extensions. let's change them here.
-            if ext.lower() in (".gif", ".svg", '.tif', '.tiff'):
-                # print "change xt:", ext
-                ext = ".png"
-            hd += ext
-
-            safe_path = self._pathjoin("images", "safe", hd)
-            if not os.path.exists(safe_path):
-                try:
-                    os.symlink(os.path.join("..", utils.fs_escape(fqname)), safe_path)
-                except OSError as exc:
-                    if exc.errno != 17:  # File exists
-                        raise
-            return safe_path
-        return p
+        hd = sha256(fqname.encode("utf-8")).hexdigest()
+        ext = os.path.splitext(p)[-1]
+        ext = ext.replace(' ', '')
+        # mediawiki gives us png's for these extensions. let's change them here.
+        if ext.lower() in (".gif", ".svg", '.tif', '.tiff'):
+            ext = ".png"
+        hd += ext
+        safe_path = self._pathjoin("images", "safe", hd)
+        if not os.path.exists(safe_path):
+            try:
+                os.symlink(os.path.join("..", utils.fs_escape(fqname)), safe_path)
+            except OSError as exc:
+                if exc.errno != 17:  # File exists
+                    raise
+        return safe_path
 
     def get_data(self, name):
         return self._loadjson(name + ".json")
@@ -281,8 +277,6 @@ def extract_member(zipfile, member, dstdir):
     assert dstdir.endswith(os.path.sep), "/ missing at end"
 
     fn = member.filename
-    # if isinstance(fn, str):
-    #     fn = six.text_type(fn, 'utf-8')
     targetpath = os.path.normpath(os.path.join(dstdir, fn))
 
     if not targetpath.startswith(dstdir):
@@ -354,16 +348,16 @@ class adapt:
     def getDescriptionURL(self, name):
         return self.getURL(name, defaultns=nshandling.NS_FILE)
 
-    def getAuthors(self, title, revision=None):
+    def get_authors(self, title, revision=None):
         fqname = self.nshandler.get_fqname(title)
         if fqname in self.redirects:
-            res = self._getAuthors(title, self.redirects.get(fqname, fqname), revision=revision)
+            res = self._get_authors(self.redirects.get(fqname, fqname))
         else:
             res = None
 
-        return res if res is not None else self._getAuthors(title, fqname, revision=revision)
+        return res if res is not None else self._get_authors(fqname)
 
-    def _getAuthors(self, title, fqname, revision=None):
+    def _get_authors(self, fqname):
         if getattr(self.nuwiki, 'authors', None) is not None:
             authors = self.nuwiki.authors[fqname]
             return authors
@@ -497,7 +491,7 @@ class adapt:
         users = getContributorsFromInformationTemplate(page.rawtext, page.title, self)
         if users:
             return users
-        return self.getAuthors(page.title)
+        return self.get_authors(page.title)
 
 
 def getContributorsFromInformationTemplate(raw, title, wikidb):

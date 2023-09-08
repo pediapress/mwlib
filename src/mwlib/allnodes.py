@@ -18,9 +18,9 @@ def allnodes():
 
 if __name__ == "__main__":
     # EXAMPLE THAT SHOWS HOW TO IDENTIFY MISSING NODES
-    from mwlib.parser import Control, Chapter
+    from mwlib.parser import Chapter, Control
 
     my = {Control, Chapter}
     missing = allnodes() - my
-    assert len(missing) == len(allnodes()) - 2
-    # print missing
+    if len(missing) != len(allnodes()) - 2:
+        raise AssertionError(f"Missing nodes: {missing}")

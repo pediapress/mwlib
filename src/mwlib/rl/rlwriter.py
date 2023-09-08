@@ -426,7 +426,7 @@ class RlWriter:
             art.wikiurl = source.url or ""
         else:
             art.wikiurl = None
-        art.authors = mywiki.getAuthors(item.title, revision=item.revision)
+        art.authors = mywiki.get_authors(item.title, revision=item.revision)
         advtree.build_advanced_tree(art)
         if self.debug:
             parser.show(sys.stdout, art)
@@ -534,7 +534,7 @@ class RlWriter:
                 elements.extend(self.groupElements(art_elements))
 
         try:
-            self.renderBook(elements, output, coverimage=coverimage)
+            self.renderBook(elements, output)
             log.info("RENDERING OK")
             shutil.rmtree(self.tmpdir, ignore_errors=True)
             return
@@ -552,7 +552,7 @@ class RlWriter:
                 self.fail_safe_rendering = True
                 self.writeBook(output, coverimage=coverimage, status_callback=status_callback)
 
-    def renderBook(self, elements, output, coverimage=None):
+    def renderBook(self, elements, output):
         if pdfstyles.show_article_attribution:
             elements.append(TocEntry(txt=_("References"), lvl="group"))
             elements.append(self._getPageTemplate(_("Article Sources and Contributors")))
@@ -793,7 +793,7 @@ class RlWriter:
         title = self.formatter.clean_text(_("Image Sources, Licenses and Contributors"))
         elements.append(Paragraph("<b>%s</b>" % title, heading_style(mode="article")))
         elements.append(TocEntry(txt=title, lvl="article"))
-        for _id, title, url, license, authors in sorted(self.img_meta_info.values()):
+        for _, title, url, license, authors in sorted(self.img_meta_info.values()):
             authors_text = self._filterAnonIpEdits(authors)
             if not license:
                 license = _("unknown")

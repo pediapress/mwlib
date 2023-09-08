@@ -835,25 +835,27 @@ def build_advanced_tree(root):  # USE WITH CARE
         f(root)
 
 
-def _validateParserTree(node, parent=None):
+def _validate_parser_tree(node, parent=None):
     # helper to assert tree parent link consistency
     if parent is not None:
         _idIndex(parent.children, node)  # asserts it occures only once
     for c in node:
         _idIndex(node.children, c)  # asserts it occures only once
         assert c in node.children
-        _validateParserTree(c, node)
+        _validate_parser_tree(c, node)
 
 
-def _validateParents(node, parent=None):
+def _validate_parents(node, parent=None):
     # helper to assert tree parent link consistency
     if parent is not None:
-        assert parent.has_child(node)
+        if not parent.has_child(node):
+            raise ValueError(f"parent {parent!r} has no child {node!r}")
     else:
-        assert node.parent is None
+        if node.parent is not None:
+            raise ValueError(f"node {node!r} has parent {node.parent!r}")
     for c in node:
         assert node.has_child(c)
-        _validateParents(c, node)
+        _validate_parents(c, node)
 
 
 def get_advanced_tree(fn):
@@ -862,8 +864,8 @@ def get_advanced_tree(fn):
 
     db = DummyDB()
     with open(fn) as f:
-        input = six.text_type(f.read(), "utf8")
-    r = parse_string(title=fn, raw=input, wikidb=db)
+        tree_input = six.text_type(f.read(), "utf8")
+    r = parse_string(title=fn, raw=tree_input, wikidb=db)
     build_advanced_tree(r)
     return r
 

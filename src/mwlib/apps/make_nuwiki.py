@@ -163,7 +163,8 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         id2wiki[x.ident] = (x, [])
 
     for x in metabook.articles():
-        assert x.wikiident in id2wiki, f"no wikiconf for {x.wikiident!r} ({x})"
+        if x.wikiident not in id2wiki:
+            raise ValueError(f"no wikiconf for {x.wikiident!r} ({x})")
         id2wiki[x.wikiident][1].append(x)
 
     is_multiwiki = len(id2wiki) > 1
@@ -174,7 +175,8 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
     for _id, (wikiconf, articles) in id2wiki.items():
         if _id is None:
             _id = ""
-            assert not is_multiwiki, "id must be set in multiwiki"
+            if is_multiwiki:
+                raise ValueError("id must be set in multiwiki")
 
         if not is_multiwiki:
             _id = ""

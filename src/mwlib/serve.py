@@ -9,7 +9,7 @@ import re
 import shutil
 import sys
 import time
-from hashlib import sha1
+from hashlib import sha256
 from io import StringIO
 
 from mwlib import _version, log
@@ -38,7 +38,7 @@ def make_collection_id(data):
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write("new-collection {}\t{!r}\t{!r}\n".format(num_articles, data.get("base_url"), data.get("writer")))
 
-    return sha1(sio.getvalue().encode()).hexdigest()[:16]
+    return sha256(sio.getvalue().encode()).hexdigest()[:16]
 
 
 def get_collection_dirs(cache_dir):
