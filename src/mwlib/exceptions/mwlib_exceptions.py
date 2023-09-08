@@ -8,3 +8,6 @@ class ImageDbError(Exception):
 
 class WikiIdValidationError(Exception):
     pass
+
+class InvalidTreeNodesError(Exception):
+    pass

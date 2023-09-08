@@ -292,7 +292,7 @@ def test_fix_nesting2():
 # the two tests below only make sense if paragraph nesting is forbidden - this is not the case anymore
 # but maybe they are interesting in the future - therefore I did not delete them
 
-# def test_fixNesting3():
+# def test_fix_nesting3():
 # raw = r'''
 # <strike>
 # para 1
@@ -306,7 +306,7 @@ def test_fix_nesting2():
 # for para in paras:
 ##         assert not para.getChildNodesByClass(Paragraph)
 
-# def test_fixNesting4():
+# def test_fix_nesting4():
 # raw = """
 # <strike>
 

@@ -9,6 +9,8 @@ import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
 
+from mwlib.consts.urls import WIKITRUST_API
+
 
 class WikiTrustServerError(Exception):
     "For some reason the API often respons with an error"
@@ -17,12 +19,12 @@ class WikiTrustServerError(Exception):
 
 class TrustedRevisions:
     min_trust = 0.80
-    wikitrust_api = 'http://en.collaborativetrust.com/WikiTrust/RemoteAPI'
+    wikitrust_api = WIKITRUST_API
 
     def __init__(self, site_name='en.wikipedia.org'):
         self.site = mwclient.Site(site_name)
 
-    def getWikiTrustScore(self, title, revid):
+    def get_wiki_trust_score(self, title, revid):
         # http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=quality&title=Buster_Keaton&pageid=43055&revid=364710354
         url = '%s?method=quality&title=%s&revid=%d' % \
             (self.wikitrust_api, six.moves.urllib.parse.quote(title), revid)
@@ -31,7 +33,7 @@ class TrustedRevisions:
             raise WikiTrustServerError
         return 1 - float(r)  # r is the likelyhood of being spam
 
-    def getTrustedRevision(self, title, min_trust=None, max_age=None):
+    def get_trusted_revision(self, title, min_trust=None, max_age=None):
         min_trust = min_trust or self.min_trust
         best_rev = None
         now = time.time()
@@ -49,7 +51,7 @@ class TrustedRevisions:
                 continue
 
             try:
-                rev['score'] = self.getWikiTrustScore(title, rev['revid'])
+                rev['score'] = self.get_wiki_trust_score(title, rev['revid'])
             except WikiTrustServerError:
                 #print '%s\t%d\terror' %(title, rev['revid'])
                 continue
@@ -68,6 +70,6 @@ class TrustedRevisions:
 if __name__ == '__main__':
     import sys
     tr = TrustedRevisions()
-    trev = tr.getTrustedRevision(sys.argv[1])
+    trev = tr.get_trusted_revision(sys.argv[1])
     print('Found revision:', trev)
     print('title:%s revid:%d age:%.2f days' % (trev['title'], trev['revid'], trev['age']))

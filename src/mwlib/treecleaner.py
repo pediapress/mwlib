@@ -70,6 +70,7 @@ from mwlib.advtree import (
     Var,
     remove_newlines,
 )
+from mwlib.exceptions.mwlib_exceptions import InvalidTreeNodesError
 from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib.writer import miscutils, styleutils
 
@@ -109,7 +110,7 @@ class TreeCleaner:
                       'galleryFix',
                       'fixRegionListTables',
                       'removeTrainTemplates',
-                      'fixNesting',
+                      'fix_nesting',
                       'removeChildlessNodes',
                       'unNestEndingCellContent',
                       'removeCriticalTables',
@@ -123,7 +124,7 @@ class TreeCleaner:
                       'linearizeWideNestedTables',
                       'removeBreakingReturns',
                       'removeEmptyReferenceLists',
-                      'swapNodes',
+                      'swap_nodes',
                       'removeBigSectionsFromCells',
                       'transformNestedTables',
                       'splitBigTableCells',
@@ -141,7 +142,7 @@ class TreeCleaner:
                       'fixReferenceNodes',
                       'removeBrokenChildren',
                       'fixMathDir',
-                      'fixNesting',  # pull DefinitionLists out of Paragraphs
+                      'fix_nesting',  # pull DefinitionLists out of Paragraphs
                       'fixPreFormatted',
                       'fixListNesting',
                       'handleOnlyInPrint',
@@ -188,7 +189,7 @@ class TreeCleaner:
         self.inlineStyleNodes = [Big, Center, Cite, Code, Deleted, Emphasized, Inserted, Italic,
                                  Overline, Small, Strike, Strong, Sub, Sup, Teletyped, Underline, Var]
 
-        # USED IN fixNesting if nesting_strictness == 'loose'
+        # USED IN fix_nesting if nesting_strictness == 'loose'
         # keys are nodes, that are not allowed to be inside one of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
         # fixme rename to ancestors
@@ -233,7 +234,7 @@ class TreeCleaner:
         # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
         # e.g. but only if the center is a direct and only child
         # { ChildClass: [ParentClass, ParentClass2]}
-        self.swapNodesMap = {Center: [Underline, Emphasized]}
+        self.swap_nodesMap = {Center: [Underline, Emphasized]}
 
         # list of css classes OR id's which trigger the removal of the node from the tree
         # the following list is wikipedia specific
@@ -670,7 +671,7 @@ class TreeCleaner:
         else:
             return True
 
-    def _fixNesting(self, node):
+    def _fix_nesting(self, node):
         """Nesting of nodes is corrected.
 
         The strictness depends on nesting_strictness which can either be 'loose' or 'strict'.
@@ -696,7 +697,7 @@ class TreeCleaner:
 
         bad_parent = self._nestingBroken(node)
         if not bad_parent:
-            return any(self._fixNesting(c) for c in node.children)
+            return any(self._fix_nesting(c) for c in node.children)
 
         divide = node.get_parents()
         divide.append(node)
@@ -717,22 +718,22 @@ class TreeCleaner:
         self._cleanUpMarks(parent)
         return True
 
-    def fixNesting(self, node):
-        while self._fixNesting(node):
+    def fix_nesting(self, node):
+        while self._fix_nesting(node):
             pass
 
     # ex: some tags need to be swapped: center nodes have to be pulled out of underline nodes
     # e.g. but only if the center is a direct and only child
 
-    def swapNodes(self, node):
+    def swap_nodes(self, node):
         """Swaps two nodes if nesting is problematic.
 
         Some writers have problems with some node combinations
         ex. <u><center>Text</center></u> --> <center><u>Text</u></center>
         """
         def swap(a, b):
-            assert len(
-                a.children) == 1 and a.children[0] is b and b.parent is a and a.parent is not None
+            if len(a.children) != 1 or a.children[0] is not b or b.parent is not a or a.parent is None:
+                raise InvalidTreeNodesError('swap_nodes: invalid nodes')
             ap = a.parent
             ap.replace_child(a, [b])
             # a.removeChild(b) wouldn't work since check for b.parent which already is ap fails
@@ -742,15 +743,15 @@ class TreeCleaner:
             b.children = []
             b.append_child(a)
 
-        if node.__class__ in self.swapNodesMap:
+        if node.__class__ in self.swap_nodesMap:
             p = node.parent
-            if p and p.parent and p.__class__ in self.swapNodesMap[node.__class__] and len(
+            if p and p.parent and p.__class__ in self.swap_nodesMap[node.__class__] and len(
                     p.children) == 1:
                 self.report('swapping nodes:', node.parent, node)
                 swap(node.parent, node)
 
         for c in node.children[:]:
-            self.swapNodes(c)
+            self.swap_nodes(c)
 
     def removeBigSectionsFromCells(self, node):
         """Remove very big sections from tables. It can be assumed that they were not intentionally put inside the table"""

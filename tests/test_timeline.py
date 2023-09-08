@@ -110,6 +110,6 @@ PlotData=
 
 # @pytest.mark.skipif(not os.path.isfile("/usr/bin/ploticus"), reason="no ploticus")
 def test_draw_timeline():
-    fp = timeline.drawTimeline(example_script)
+    fp = timeline.draw_timeline(example_script)
     print("result in", fp)
     assert fp, "no image file created"

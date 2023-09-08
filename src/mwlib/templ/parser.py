@@ -129,10 +129,10 @@ class Parser:
 
         return Variable(v)
 
-    def _eatBrace(self, num):
+    def _consume_closing_braces(self, num):
         ty, txt = self.getToken()
-        assert ty == Symbols.bra_close
-        assert len(txt) >= num
+        if ty != Symbols.bra_close or len(txt) < num:
+            raise ValueError("expected closing braces")
         newlen = len(txt) - num
         if newlen == 0:
             self.pos += 1
@@ -285,13 +285,13 @@ class Parser:
                     t = self.templateFromChildren(n)
                     n = []
                     n.append(t)
-                    self._eatBrace(2)
+                    self._consume_closing_braces(2)
                     numbraces -= 2
                 else:
                     v = self.variableFromChildren(n)
                     n = []
                     n.append(v)
-                    self._eatBrace(3)
+                    self._consume_closing_braces(3)
                     numbraces -= 3
 
                 if numbraces < 2:

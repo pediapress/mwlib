@@ -8,7 +8,9 @@
 
 import os
 import tempfile
-from hashlib import sha1
+from hashlib import sha256
+
+from mwlib.command.executor import run_perl
 
 font = None
 
@@ -45,11 +47,11 @@ def _get_global_basedir():
     return _basedir
 
 
-def drawTimeline(script, basedir=None):
+def draw_timeline(script, basedir=None):
     if basedir is None:
         basedir = _get_global_basedir()
 
-    m = sha1()
+    m = sha256()
     m.update(script.encode('utf8'))
     ident = m.hexdigest()
 
@@ -63,13 +65,5 @@ def drawTimeline(script, basedir=None):
         f.write(script)
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
 
-    ploticus = os.popen('which ploticus').read().strip()
-    command = f"perl {et} -P {ploticus} -f {font or 'ascii'} -T {basedir} -i {scriptfile}"
-    err = os.system(command)
-    if err != 0:
-        return None
+    return run_perl(et, font, basedir, scriptfile, pngfile)
 
-    if os.path.exists(pngfile):
-        return pngfile
-
-    return None

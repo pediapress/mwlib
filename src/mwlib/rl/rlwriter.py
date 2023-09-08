@@ -2406,7 +2406,7 @@ class RlWriter:
         ]
 
     def writeTimeline(self, node):
-        img_path = timeline.drawTimeline(node.timeline, self.tmpdir)
+        img_path = timeline.draw_timeline(node.timeline, self.tmpdir)
         if img_path:
             # width and height should be parsed by the....parser and not guessed by the writer
             node.width = 180

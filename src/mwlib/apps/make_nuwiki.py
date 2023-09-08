@@ -146,7 +146,7 @@ def wikitrust(baseurl, metabook):
             continue
 
         try:
-            r = tr.getTrustedRevision(x.title)
+            r = tr.get_trusted_revision(x.title)
             x.revision = r["revid"]
 
             print(
