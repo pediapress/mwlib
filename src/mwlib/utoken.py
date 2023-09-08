@@ -217,7 +217,8 @@ del d, token2name
 
 def _split_tag(txt):
     m = re.match(r" *(\w+)(.*)", txt, re.DOTALL)
-    assert m is not None, "could not match tag name"
+    if m is None:
+        raise ValueError("could not match tag name")
     name = m.group(1)
     values = m.group(2)
     return name, values
@@ -324,5 +325,6 @@ compat_scan = CompatScanner()
 
 
 def tokenize(input_arg, uniquifier=None):
-    assert input_arg is not None, "must specify input argument in tokenize"
+    if not input_arg:
+        raise ValueError("must specify input argument in tokenize")
     return compat_scan(input_arg, uniquifier=uniquifier)

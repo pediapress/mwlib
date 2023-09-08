@@ -10,6 +10,7 @@ from io import StringIO
 from six.moves.configparser import ConfigParser
 
 from mwlib import myjson
+from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
 from mwlib.log import Log
 from mwlib.metabook import WikiConf
 
@@ -71,23 +72,29 @@ class MultiEnvironment(Environment):
             self.metabook = myjson.load(fp)
         self.id2env = {}
 
+    def _validate_wiki_id(self, wiki_id, x):
+        is_valid = wiki_id
+        if not is_valid:
+            raise WikiIdValidationError(f"article has no wikiident: {x!r}")
+        is_valid = "/" not in wiki_id and ".." not in wiki_id
+        if not is_valid:
+            raise WikiIdValidationError(f"article has invalid wikiident: {x!r}")
+
     def init_metabook(self):
         from mwlib import nuwiki
         if not self.metabook:
             return
 
         for x in self.metabook.articles():
-            id = x.wikiident
-            assert id, f"article has no wikiident: {x!r}"
-            assert "/" not in id
-            assert ".." not in id
+            wiki_id = x.wikiident
+            self._validate_wiki_id(wiki_id, x)
 
-            if id not in self.id2env:
+            if wiki_id not in self.id2env:
                 env = Environment()
-                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path, id))
-                self.id2env[id] = env
+                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path, wiki_id))
+                self.id2env[wiki_id] = env
             else:
-                env = self.id2env[id]
+                env = self.id2env[wiki_id]
             x._env = env
 
     def getLicenses(self):
@@ -206,7 +213,8 @@ def _makewiki(conf, metabook=None, **kw):
 
         setattr(res, s, m(**args))
 
-    assert res.wiki is not None, '_makewiki should have set wiki attribute'
+    if not res.wiki:
+        raise AttributeError("_makewiki should have set wiki attribute")
     return res
 
 

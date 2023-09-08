@@ -93,7 +93,7 @@ class TreeCleaner:
     """
 
     cleanerMethods = ['cleanVlist',
-                      'markInfoboxes',
+                      'mark_infoboxes',
                       'removeEditLinks',
                       'removeEmptyTextNodes',
                       'removeInvisibleLinks',
@@ -104,8 +104,8 @@ class TreeCleaner:
                       'removeInvalidFiletypes',
                       'fixParagraphs',
                       'simplifyBlockNodes',
-                      'removeAbsolutePositionedNode',
-                      'removeScrollElements',
+                      'remove_absolute_positioned_node',
+                      'remove_scroll_elements',
                       'galleryFix',
                       'fixRegionListTables',
                       'removeTrainTemplates',
@@ -1330,7 +1330,7 @@ class TreeCleaner:
         for c in node.children:
             self.handleOnlyInPrint(c)
 
-    def markInfoboxes(self, node):
+    def mark_infoboxes(self, node):
         if node.__class__ == Article:
             article_ns = getattr(node, 'ns', 0)
             tables = node.get_child_nodes_by_class(Table)
@@ -1346,9 +1346,9 @@ class TreeCleaner:
             return
 
         for c in node.children:
-            self.markInfoboxes(c)
+            self.mark_infoboxes(c)
 
-    def removeAbsolutePositionedNode(self, node):
+    def remove_absolute_positioned_node(self, node):
         def pos(n):
             return n.style.get('position', '').lower().strip()
 
@@ -1360,9 +1360,9 @@ class TreeCleaner:
                     return
 
         for c in node.children[:]:
-            self.removeAbsolutePositionedNode(c)
+            self.remove_absolute_positioned_node(c)
 
-    def _unNestCond(self, node):
+    def _should_unnest(self, node):
         tables = node.get_child_nodes_by_class(Table)
         if tables:
             for table in tables:
@@ -1381,7 +1381,7 @@ class TreeCleaner:
             last_cell = last_row.children[0]
             if last_cell.__class__ != Cell or last_cell.colspan != node.numcols:
                 return
-            if self._unNestCond(last_cell):
+            if self._should_unnest(last_cell):
                 d = Div()
                 d.border = 1
                 d.vlist = last_cell.vlist
@@ -1394,7 +1394,7 @@ class TreeCleaner:
         for c in node.children:
             self.unNestEndingCellContent(c)
 
-    def removeScrollElements(self, node):
+    def remove_scroll_elements(self, node):
         '''overflow:auto
 http://en.wikipedia.org/wiki/Pope_John_Paul_II
 http://de.wikipedia.org/wiki/Portal:Maschinenbau/Themenliste_Maschinenbau
@@ -1422,7 +1422,7 @@ http://de.wikipedia.org/wiki/Portal:Ethnologie
                     self.report('removed overflow:auto element')
 
         for c in node.children:
-            self.removeScrollElements(c)
+            self.remove_scroll_elements(c)
 
     def galleryFix(self, node):
         '''move gallery nodes out of tables.'''

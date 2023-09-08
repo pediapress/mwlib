@@ -8,6 +8,8 @@ import os
 import sys
 import tempfile
 
+from mwlib.exceptions.mwlib_exceptions import ImageDbError
+
 try:
     import simplejson as json
 except ImportError:
@@ -84,7 +86,8 @@ class LicenseChecker:
     def _get_licenses(self, templates):
         licenses = []
         for template in templates:
-            assert isinstance(template, str)
+            if not isinstance(template, str):
+                raise TypeError("template must be a string")
             lic = self.licenses.get(template, None)
             if not lic:
                 lic = License(name=template)
@@ -93,7 +96,8 @@ class LicenseChecker:
         return licenses
 
     def _check_licenses(self, licenses, imgname, stats=True):
-        assert self.image_db, "No image_db passed when initializing LicenseChecker"
+        if not self.image_db:
+            raise ImageDbError("No image_db passed when initializing LicenseChecker")
         for lic in licenses:
             if lic.license_type == "free":
                 self.license_display_name[imgname] = lic.display_name

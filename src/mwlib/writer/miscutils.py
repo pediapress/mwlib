@@ -1,6 +1,7 @@
 # Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
 from mwlib import advtree
+from mwlib.exceptions.mwlib_exceptions import InvalidArticleStructureError
 
 
 def has_infobox_attrs(node: advtree.Node) -> bool:
@@ -50,9 +51,8 @@ def text_before_infobox(
 def article_starts_with_infobox(
     article_node: advtree.Article, max_text_until_infobox: int = 0
 ) -> bool:
-    assert (
-        article_node.__class__ == advtree.Article
-    ), "article_starts_with_infobox needs to be called with Article node"
+    if article_node.__class__ != advtree.Article:
+        raise InvalidArticleStructureError("article_starts_with_infobox needs to be called with Article node")
     infobox = None
     for table in article_node.get_child_nodes_by_class(advtree.Table):
         if has_infobox_attrs(table):
@@ -65,9 +65,9 @@ def article_starts_with_infobox(
 def article_starts_with_table(
     article_node: advtree.Article, max_text_until_infobox: int = 0
 ) -> bool:
-    assert (
-        article_node.__class__ == advtree.Article
-    ), "article_starts_with_table needs to be called with Article node"
+    if article_node.__class__ != advtree.Article:
+        raise InvalidArticleStructureError("article_starts_with_table needs to be called with Article node")
+
     tables = article_node.get_child_nodes_by_class(advtree.Table)
     if not tables:
         return False

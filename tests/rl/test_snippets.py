@@ -15,6 +15,10 @@ def doit(ex):
 
 @pytest.mark.parametrize("ex", snippets.get_all())
 def test_examples(ex):
-    doit(ex)
+    if not ex.txt:
+        with pytest.raises(ValueError):
+            doit(ex)
+    else:
+        doit(ex)
 
     # FIXME: move snippets to test directory
