@@ -108,7 +108,8 @@ class TagParser:
                 spos = self.find_in_stack(tag)
                 if spos:
                     pos = self.close_stack(spos, tokens, pos)
-                    assert tokens[pos] is t
+                    if tokens[pos] is not t:
+                        raise ValueError("tokens[pos] is not t")
                     del tokens[pos]
                 else:
                     pos += 1

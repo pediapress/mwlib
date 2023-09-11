@@ -34,6 +34,7 @@ assert hasattr(e, "lastChild")
 assert hasattr(e, "setAttribute")
 del e
 
+PARENT_NONE_ERROR = "parent is None"
 
 def showNode(obj):
     attrs = list(obj.__dict__.keys())
@@ -63,12 +64,16 @@ class ParagraphProxy(text.Element):
     qname = (text.TEXTNS, "p")
 
     def addElement(self, e):
-        assert not hasattr(self, "writeto")
-        assert e.parentNode is None
-        assert e is not self
+        if hasattr(self, "writeto"):
+            raise ValueError("writeto is set")
+        if e.parentNode is not None:
+            raise ValueError("already has a parent")
+        if e is self:
+            raise ValueError("e is self")
 
         if isinstance(e, ParagraphProxy):
-            assert self.parentNode is not None
+            if self.parentNode is None:
+                raise ValueError(PARENT_NONE_ERROR)
             # log("relinking paragraph %s" % e.type)
             self.parentNode.addElement(e)  # add at the same level
             np = ParagraphProxy()  # add copy at the same level
@@ -77,14 +82,14 @@ class ParagraphProxy(text.Element):
             self.writeto = np
 
         elif e.qname not in self.allowed_children:
-            assert self.parentNode is not None
+            if self.parentNode is None:
+                raise ValueError(PARENT_NONE_ERROR)
             # log("addElement", e.type, "not allowed in ", self.type)
             # find a parent that accepts this type
             p = self
-            # print self, "looking for parent to accept", e
             while p.parentNode is not None and e.qname not in p.allowed_children:
-                # print "p:", p
-                assert p.parentNode is not p
+                if p.parentNode is p:
+                    raise ValueError("parent is self")
                 p = p.parentNode
             if e.qname not in p.allowed_children:
                 assert p.parentNode is None
@@ -95,8 +100,8 @@ class ParagraphProxy(text.Element):
                     self.type,
                 )
                 return
-            assert p is not self
-            # log("addElement: moving", e.type, "to ", p.type)
+            if p is self:
+                raise ValueError("p is self")
             # add this type to the parent
             p.addElement(e)
             # add a new paragraph to this parent and link my addElement and addText to this
@@ -151,14 +156,13 @@ class ODFWriter:
     def writeTest(self, root):
         self.write(root, self.doc.text)
 
-    def writeBook(self, book, output, removedArticlesFile=None, coverimage=None):
+    def writeBook(self, book, output):
         """
         bookParseTree must be advtree and sent through preprocess()
         """
 
         if self.env and self.env.metabook:
             self.doc.meta.addElement(dc.Title(text=self.env.metabook.get("title", "")))
-        # licenseArticle = self.env.metabook['source'].get('defaultarticlelicense','') # FIXME
 
         for e in book.children:
             self.write(e, self.doc.text)
@@ -203,13 +207,14 @@ class ODFWriter:
                 log("writeText:", obj, "not allowed in ", parent.type, "adding Paragraph failed")
 
     def write(self, obj, parent=None):
-        assert parent is not None
+        if parent is None:
+            raise ValueError("parent is None")
 
-        def saveAddChild(p, c):
+        def save_add_child(p, c):
             try:
                 p.addElement(c)
-                # print "save add child %r to %r" % (c, p)
-                assert c.parentNode is not None  # this check fails if the child could not be added
+                if c.parentNode is None:
+                    raise ValueError("could not add child") # this check fails if the child could not be added
                 return True
             except odf.element.IllegalChild:
                 # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed
@@ -241,16 +246,16 @@ class ODFWriter:
                 showNode(obj)
                 e = None
             else:
-                raise Exception("unknown node:%r" % obj)
+                raise ValueError("unknown node:%r" % obj)
 
             if isinstance(e, SkipChildren):  # do not process children of this node
                 if e.element is not None:
-                    saveAddChild(parent, e.element)
+                    save_add_child(parent, e.element)
                 return  # skip
             elif e is None:
                 e = parent
             else:
-                if not saveAddChild(parent, e):
+                if not save_add_child(parent, e):
                     return
 
             for c in obj.children[:]:

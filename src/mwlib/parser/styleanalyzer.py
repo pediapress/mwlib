@@ -43,8 +43,8 @@ class State:
         def nextstate(**kw):
             cl = self.clone(previous=previous, **kw)
             res.append(cl)
-
-        assert count >= 2, "internal error"
+        if count < 2:
+            raise ValueError("count must be >= 2")
 
         if count == 2:
             nextstate(is_italic=not self.is_italic)

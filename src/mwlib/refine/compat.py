@@ -104,7 +104,8 @@ def _set_nodex_class_and_caption(node):
             node.caption = caption if caption is not None else node.caption
     if node.__class__ == nodes.Text:
         node.caption = node.text or ""
-        assert not node.children, f"{node!r} has children"
+        if node.children:
+            raise ValueError(f"{node!r} has children")
     if node.children is None:
         node.children = []
     if node.vlist is None:
@@ -191,7 +192,8 @@ def _change_classes(node):
 
         if klass == nodes.Text:
             node.caption = node.text or ""
-            assert not node.children, f"{node!r} has children"
+            if node.children:
+                raise ValueError(f"{node!r} has children")
 
         node.__class__ = klass
 

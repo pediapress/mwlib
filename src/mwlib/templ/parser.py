@@ -4,7 +4,7 @@
 
 
 import re
-from hashlib import sha1 as digest
+from hashlib import sha256 as digest
 
 import six
 

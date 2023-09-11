@@ -50,7 +50,8 @@ del d
 
 def _split_tag(txt):
     m = re.match(r" *(\w+)(.*)", txt)
-    assert m is not None, "could not match tag name"
+    if m is None:
+        raise ValueError("could not match tag name")
     name = m.group(1)
     values = m.group(2)
     return name, values
@@ -58,8 +59,7 @@ def _split_tag(txt):
 
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
-        print
-        type, repr(text[start:start + len])
+        print(type, repr(text[start:start + len]))
 
 
 def scan(text):
@@ -334,6 +334,7 @@ class EndTagToken(_BaseTagToken):
         return f"<EndTag:{self.t!r}>"
 
 
-def tokenize(input, name="unknown"):
-    assert input is not None, "must specify input argument in tokenize"
+def tokenize(input):
+    if input is None:
+        raise ValueError("must specify input argument in tokenize")
     return compat_scan(input)

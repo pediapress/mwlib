@@ -99,8 +99,9 @@ class OptionParser(optparse.OptionParser):
 
         try:
             self.options.imagesize = int(self.options.imagesize)
-            assert self.options.imagesize > 0
-        except (ValueError, AssertionError):
+            if self.options.imagesize <= 0:
+                raise ValueError()
+        except (ValueError):
             self.error("Argument for --imagesize must be an integer > 0.")
 
         for title in self.args:

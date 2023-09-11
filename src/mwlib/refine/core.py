@@ -91,8 +91,8 @@ def _parse_gallery_txt(txt, xopts):
     for x in lines:
         if not x:
             continue
-
-        assert xopts.expander is not None, "no expander in _parse_gallery_txt"
+        if xopts.expander is None:
+            raise ValueError("no expander in _parse_gallery_txt")
         xnew = xopts.expander.parseAndExpand(x, keep_uniq=True)
 
         linode = parse_txt("[[" + xnew + "]]", xopts)
