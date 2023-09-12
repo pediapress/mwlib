@@ -180,8 +180,8 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
 
         if not is_multiwiki:
             _id = ""
-
-        assert "/" not in _id, f"bad id: {_id!r}"
+        if "/" in _id:
+            raise ValueError(f"bad id: {_id!r}")
         my_fsdir = os.path.join(fsdir, _id)
 
         if is_multiwiki:

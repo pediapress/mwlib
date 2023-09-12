@@ -99,7 +99,8 @@ class AdvancedNode:
         """Check if node c is child of self"""
         try:
             _idIndex(self.children, c)
-            assert c.parent is self
+            if not c.parent is self:
+                raise ValueError("child not found")
             return True
         except ValueError:
             return False
@@ -110,7 +111,8 @@ class AdvancedNode:
 
     def remove_child(self, c):
         self.replace_child(c, [])
-        assert c.parent is None
+        if c.parent is not None:
+            raise ValueError("child not removed")
 
     def replace_child(self, c, newchildren=[]):
         """Remove child node c and replace with newchildren if given."""
@@ -119,7 +121,8 @@ class AdvancedNode:
         self.children[idx : idx + 1] = newchildren
 
         c.parent = None
-        assert not self.has_child(c)
+        if self.has_child(c):
+            raise ValueError("child not removed")
         for nc in newchildren:
             nc.parent = self
 
@@ -841,7 +844,8 @@ def _validate_parser_tree(node, parent=None):
         _idIndex(parent.children, node)  # asserts it occures only once
     for c in node:
         _idIndex(node.children, c)  # asserts it occures only once
-        assert c in node.children
+        if c not in node.children:
+            raise ValueError(f"child {c!r} not in children of {node!r}")
         _validate_parser_tree(c, node)
 
 
@@ -854,7 +858,8 @@ def _validate_parents(node, parent=None):
         if node.parent is not None:
             raise ValueError(f"node {node!r} has parent {node.parent!r}")
     for c in node:
-        assert node.has_child(c)
+        if not node.has_child(c):
+            raise ValueError(f"node {node!r} has no child {c!r}")
         _validate_parents(c, node)
 
 
