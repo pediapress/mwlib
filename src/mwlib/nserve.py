@@ -36,7 +36,9 @@ class bunch:
         self.__dict__.update(kw)
 
     def __repr__(self):
-        return "bunch({})".format(", ".join([f"{k}={v!r}" for k, v in self.__dict__.items()]))
+        return "bunch({})".format(
+            ", ".join([f"{k}={v!r}" for k, v in self.__dict__.items()])
+        )
 
 
 # -- we try to load all writers here but also keep a list of known writers
@@ -45,7 +47,9 @@ class bunch:
 
 name2writer = {
     "odf": bunch(
-        file_extension="odt", name="odf", content_type="application/vnd.oasis.opendocument.text"
+        file_extension="odt",
+        name="odf",
+        content_type="application/vnd.oasis.opendocument.text",
     ),
     "rl": bunch(file_extension="pdf", name="rl", content_type="application/pdf"),
     "xhtml": bunch(file_extension="html", name="xhtml", content_type="text/xml"),
@@ -96,11 +100,12 @@ def make_collection_id(data):
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write(
-            "new-collection {}\t{!r}\t{!r}\n".format(num_articles, data.get("base_url"), data.get("writer"))
+            "new-collection {}\t{!r}\t{!r}\n".format(
+                num_articles, data.get("base_url"), data.get("writer")
+            )
         )
 
-    return sha256(sio.getvalue().encode('utf-8')).hexdigest()[:16]
-
+    return sha256(sio.getvalue().encode("utf-8")).hexdigest()[:16]
 
 
 busy = {}
@@ -184,8 +189,6 @@ def choose_idle_qserve():
     return random.choice(idle)  # XXX probably store number of render jobs in busy
 
 
-
-
 @get("<path:re:.*>")
 @post("<path:re:.*>")
 def dispatch_command(path):
@@ -203,7 +206,9 @@ def get_content_disposition_values(filename, ext):
         filename = "collection"
 
     # see http://code.activestate.com/recipes/251871-latin1-to-ascii-the-unicode-hammer/
-    ascii_fn = unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore").decode()
+    ascii_fn = (
+        unicodedata.normalize("NFKD", filename).encode("ASCII", "ignore").decode()
+    )
     ascii_fn = re.sub("[ ;:\"',]+", " ", ascii_fn).strip() or "collection"
     ascii_fn = ascii_fn.replace(" ", "-")
 
@@ -263,16 +268,18 @@ class Application:
             print(
                 "ERROR while dispatching {!r}: {}".format(
                     command,
-                    {"collection_id": collection_id, "is_new": is_new, "qserve": qserve},
+                    {
+                        "collection_id": collection_id,
+                        "is_new": is_new,
+                        "qserve": qserve,
+                    },
                 )
             )
             traceback.print_exc()
             if command == "download":
                 raise exc
 
-            return self.error_response(
-                f"error executing command {command!r}: {exc}"
-            )
+            return self.error_response(f"error executing command {command!r}: {exc}")
 
     def error_response(self, error, **kw):
         # if isinstance(error, str):
@@ -294,7 +301,11 @@ class Application:
 
     def is_good_baseurl(self, url):
         netloc = six.moves.urllib.parse.urlparse(url)[1].split(":")[0].lower()
-        if netloc == "localhost" or netloc.startswith("127.0.") or netloc.startswith("192.168."):
+        if (
+            netloc == "localhost"
+            or netloc.startswith("127.0.")
+            or netloc.startswith("192.168.")
+        ):
             return False
         return True
 
@@ -327,14 +338,20 @@ class Application:
             return self.error_response("unknown writer %r" % writer)
 
         if is_new and not metabook_data:
-            return self.error_response("POST argument metabook or collection_id required")
+            return self.error_response(
+                "POST argument metabook or collection_id required"
+            )
         if not is_new and metabook_data:
-            return self.error_response("Specify either metabook or collection_id, not both")
+            return self.error_response(
+                "Specify either metabook or collection_id, not both"
+            )
 
         if base_url and not self.is_good_baseurl(base_url):
             log.bad(f"bad base_url: {base_url!r}")
             return self.error_response(
-                "bad base_url {!r}. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed.".format(base_url)
+                "bad base_url {!r}. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed.".format(
+                    base_url
+                )
             )
 
         log.info(f"render {collection_id} {writer}")
@@ -388,7 +405,9 @@ class Application:
                 if res["result"]:
                     more["url"] = res["result"]["url"]
                     more["content_length"] = res["result"]["size"]
-                    more["suggested_filename"] = res["result"].get("suggested_filename", "")
+                    more["suggested_filename"] = res["result"].get(
+                        "suggested_filename", ""
+                    )
             except KeyError:
                 pass
 
@@ -464,7 +483,12 @@ class Application:
 
         pod_api_url = params.pod_api_url
         if pod_api_url:
-            result = json.loads(six.text_type(six.moves.urllib.request.urlopen(pod_api_url, data="any").read(), "utf-8"))
+            result = json.loads(
+                six.text_type(
+                    six.moves.urllib.request.urlopen(pod_api_url, data="any").read(),
+                    "utf-8",
+                )
+            )
             post_url = result["post_url"].encode("utf-8")
             response = {
                 "state": "ok",
@@ -499,7 +523,6 @@ def _parse_qs(qs):
 
 
 def main():
-
     from mwlib import argv
 
     opts, args = argv.parse(

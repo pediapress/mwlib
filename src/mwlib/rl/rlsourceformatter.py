@@ -11,7 +11,8 @@ from pygments.formatter import Formatter
 
 
 class ReportlabFormatter(Formatter):
-    def __init__(self, font_size=10, font_name=None, background_color=None, **options):
+    def __init__(self, font_size=10, font_name=None,
+                 background_color=None, **options):
         Formatter.__init__(self, **options)
         self.font_name = font_name
         self.font_size = font_size

@@ -4,7 +4,6 @@
 # See README.rst for additional licensing information.
 
 
-
 import copy
 import warnings
 from collections import deque
@@ -245,7 +244,10 @@ def get_licenses(metabook):
 
         if license.get("mw_license_url"):
             url = license["mw_license_url"]
-            if re.match(r"^.*/index\.php.*action=raw", url) and "templates=expand" not in url:
+            if (
+                re.match(r"^.*/index\.php.*action=raw", url)
+                and "templates=expand" not in url
+            ):
                 url += "&templates=expand"
             wikitext = utils.fetch_url(
                 url,

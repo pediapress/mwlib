@@ -7,9 +7,6 @@ from typing import Callable, Optional
 
 from mwlib import log, parser
 
-# import functions needed by most writers that should be accessible through writerbase
-from mwlib.mathutils import renderMath
-
 log = log.Log('mwlib.writerbase')
 
 

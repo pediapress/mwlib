@@ -45,7 +45,8 @@ class Figure(Flowable):
         # workaround for http://code.pediapress.com/wiki/ticket/324
         # see http://two.pairlist.net/pipermail/reportlab-users/2008-October/007526.html
         if no_mask:
-            self.i = Image(imgFile, width=imgWidth, height=imgHeight, mask=None)
+            self.i = Image(imgFile, width=imgWidth,
+                           height=imgHeight, mask=None)
         else:
             self.i = Image(imgFile, width=imgWidth, height=imgHeight)
         self.imgWidth = imgWidth
@@ -66,10 +67,13 @@ class Figure(Flowable):
         if self.align == "center":
             canv.translate((self.availWidth - self.width / 2), 0)
         canv.saveState()
-        canv.setStrokeColor(Color(self.borderColor[0], self.borderColor[1], self.borderColor[2]))
-        canv.rect(self.margin[3], self.margin[2], self.boxWidth, self.boxHeight)
+        canv.setStrokeColor(Color(self.borderColor[0], self.borderColor[1],
+                                  self.borderColor[2]))
+        canv.rect(self.margin[3], self.margin[2], self.boxWidth,
+                  self.boxHeight)
         canv.restoreState()
-        canv.translate(self.margin[3] + self.padding[3], self.margin[2] + self.padding[2] - 2)
+        canv.translate(self.margin[3] + self.padding[3],
+                       self.margin[2] + self.padding[2] - 2)
         self.c.canv = canv
         self.c.draw()
         canv.translate(
@@ -94,9 +98,11 @@ class Figure(Flowable):
     def wrap(self, availWidth, availHeight):
         self.availWidth = availWidth
         self.availHeight = availHeight
-        contentWidth = max(self.i.drawWidth, self.c.wrap(self.i.drawWidth, availHeight)[0])
+        contentWidth = max(self.i.drawWidth, self.c.wrap(self.i.drawWidth,
+                                                         availHeight)[0])
         self.boxWidth = contentWidth + self.padding[1] + self.padding[3]
-        (self.captionWidth, self.captionHeight) = self.c.wrap(contentWidth, availHeight)
+        (self.captionWidth, self.captionHeight) = self.c.wrap(contentWidth,
+                                                              availHeight)
         self.captionHeight += self.cs.spaceBefore + self.cs.spaceAfter
         self.boxHeight = self.i.drawHeight + self.captionHeight + self.padding[0] + self.padding[2]
         self.width = self.boxWidth + self.margin[1] + self.margin[3]
@@ -112,7 +118,8 @@ class FiguresAndParagraphs(Flowable):
      * the biggest figure-width is used as the text-margin
     """
 
-    def __init__(self, figures, paragraphs, figure_margin=(0, 0, 0, 0), rtl=False):
+    def __init__(self, figures, paragraphs,
+                 figure_margin=(0, 0, 0, 0), rtl=False):
         self.fs = figures
         self.figure_margin = figure_margin
         self.ps = paragraphs
@@ -150,9 +157,11 @@ class FiguresAndParagraphs(Flowable):
                 new_h = float(h) * floatWidth / float(w)
                 new_w = floatWidth
                 txt = txt.replace('width="%spt"' % w, 'width="%.2fpt"' % new_w)
-                txt = txt.replace('height="%spt"' % h, 'height="%.2fpt"' % new_h)
+                txt = txt.replace('height="%spt"' % h,
+                                  'height="%.2fpt"' % new_h)
             if changed:
-                p._setup(txt, p.style, p.bulletText, None, cleanBlockQuotedText)
+                p._setup(txt, p.style,
+                         p.bulletText, None, cleanBlockQuotedText)
 
     def wrap(self, availWidth, availHeight):
         maxWf = 0
@@ -180,7 +189,8 @@ class FiguresAndParagraphs(Flowable):
             fullWidth = availWidth - p.style.leftIndent - p.style.rightIndent
             floatWidth = fullWidth - maxWf
             self.resizeInlineImage(p, floatWidth)
-            nfloatLines = max(0, int((totalHf - (sum(self.paraHeights))) / p.style.leading))
+            nfloatLines = max(0,
+                              int((totalHf - (sum(self.paraHeights))) / p.style.leading))
             p.width = 0
             if hasattr(p, "blPara"):
                 del p.blPara
@@ -190,12 +200,14 @@ class FiguresAndParagraphs(Flowable):
                 p.blPara = p.breakLines(nfloatLines * [floatWidth] + [fullWidth])
             if self.figAlign == "left":
                 self._offsets.append([maxWf] * (nfloatLines) + [0])
-            autoLeading = getattr(p.style, "autoLeading") if hasattr(p, "style") else ""
+            autoLeading = getattr(p.style,
+                                  "autoLeading") if hasattr(p, "style") else ""
             if hasattr(p, "style") and autoLeading == "max" and p.blPara.kind == 1:
                 pHeight = 0
                 for line in p.blPara.lines:
                     pHeight += (
-                        max(line.ascent - line.descent, p.style.leading) * 1.025
+                        max(line.ascent - line.descent,
+                            p.style.leading) * 1.025
                     )  # magic factor! autoLeading==max increases line-height
             else:
                 if autoLeading == "max":
@@ -221,7 +233,8 @@ class FiguresAndParagraphs(Flowable):
 
         for (i, f) in enumerate(self.fs):
             vertical_offset += self.hfs[i]
-            f.drawOn(canv, horizontal_offsets[i], self.height - vertical_offset)
+            f.drawOn(canv, horizontal_offsets[i],
+                     self.height - vertical_offset)
 
         canv.translate(0, self.height)
 
@@ -244,17 +257,21 @@ class FiguresAndParagraphs(Flowable):
                 canv.translate(0, -p.style.spaceBefore)
                 p.canv = canv
                 p.draw()
-                canv.translate(0, -self.paraHeights[count] + p.style.spaceBefore)
+                canv.translate(0,
+                               -self.paraHeights[count] + p.style.spaceBefore)
 
         canv.restoreState()
 
     def split(self, availWidth, availheight):
-        if not hasattr(self, "hfs") or len(self.hfs) == 0 or hasattr(self, "keep_together_split"):
+        if not hasattr(self,
+                       "hfs") or len(self.hfs) == 0 or hasattr(self,
+                                                               "keep_together_split"):
             self.wrap(availWidth, availheight)
         height = self._getVOffset()
         if self.hfs[0] + height > availheight:
             return [PageBreak()] + [
-                FiguresAndParagraphs(self.fs, self.ps, figure_margin=self.figure_margin)
+                FiguresAndParagraphs(self.fs, self.ps,
+                                     figure_margin=self.figure_margin)
             ]
         fittingFigures = []
         nextFigures = []
@@ -270,7 +287,8 @@ class FiguresAndParagraphs(Flowable):
         splittedParagraph = False
         force_split = False
         for (i, p) in enumerate(self.ps):
-            # force pagebreak if less than pdfstyles.min_lines_after_heading*line_height available height
+            # force pagebreak if less than
+            # pdfstyles.min_lines_after_heading*line_height available height
             if hasattr(self.ps[i], "style") and getattr(
                 self.ps[i].style, "prevent_post_pagebreak", False
             ):
@@ -315,19 +333,22 @@ class FiguresAndParagraphs(Flowable):
         if nextFigures:
             if nextParas:
                 nextElements = [
-                    FiguresAndParagraphs(nextFigures, nextParas, figure_margin=self.figure_margin)
+                    FiguresAndParagraphs(nextFigures, nextParas,
+                                         figure_margin=self.figure_margin)
                 ]
             else:
                 nextElements = nextFigures
         else:
             nextElements = nextParas if nextParas else []
         return [
-            FiguresAndParagraphs(fittingFigures, fittingParas, figure_margin=self.figure_margin)
+            FiguresAndParagraphs(fittingFigures, fittingParas,
+                                 figure_margin=self.figure_margin)
         ] + nextElements
 
 
 class PreformattedBox(Preformatted):
-    def __init__(self, text, style, margin=4, padding=4, borderwidth=0.1, **kwargs):
+    def __init__(self, text, style, margin=4, padding=4,
+                 borderwidth=0.1, **kwargs):
         Preformatted.__init__(self, text, style, **kwargs)
         self.margin = margin
         self.padding = padding
@@ -405,14 +426,16 @@ class SmartKeepTogether(_ContainerSpace, Flowable):
         last.keep_together_split = True
         split_last = last.split(aW, remaining_space)
 
-        # if not split_last: last item could not be split and is too big for remaining page
+        # if not split_last: last item could not be
+        # split and is too big for remaining page
         if not split_last or (split_last and split_last[0].__class__ == PageBreak):
             self._content.insert(0, PageBreak())
         return self._content
 
 
 class TocEntry(Flowable):
-    """Invisible flowable used to build toc. FIXME: probably an ActionFlowable should be used."""
+    """Invisible flowable used to build toc.
+    FIXME: probably an ActionFlowable should be used."""
 
     def __init__(self, txt, lvl):
         Flowable.__init__(self)

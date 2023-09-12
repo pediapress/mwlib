@@ -4,7 +4,6 @@
 # See README.rst for additional licensing information.
 
 
-
 from mwlib.log import Log
 from mwlib.parser.nodes import (
     URL,

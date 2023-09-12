@@ -14,7 +14,8 @@ mw_em2pt = 9.6
 
 
 def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
-    def hex2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
+    def hex2rgb(r: str, g: str,
+                b: str) -> Optional[tuple[float, float, float]]:
         try:
 
             def conv(c: str) -> float:
@@ -24,7 +25,8 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
         except ValueError:
             return None
 
-    def hexshort2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
+    def hexshort2rgb(r: str, g: str,
+                     b: str) -> Optional[tuple[float, float, float]]:
         try:
 
             def conv(c: str) -> float:
@@ -34,7 +36,8 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
         except ValueError:
             return None
 
-    def rgb2rgb(r: str, g: str, b: str) -> Optional[tuple[float, float, float]]:
+    def rgb2rgb(r: str, g: str,
+                b: str) -> Optional[tuple[float, float, float]]:
         try:
 
             def conv(c: str) -> float:
@@ -51,11 +54,15 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
         else:
             return None
 
+    def get_rgbval(color_str: str):
+        search_str = "rgb\\( *(\\d+) *, *(\\d{1,3}) *, *(\\d{1,3}) *\\)"
+        return re.search(search_str, color_str)
+
     try:
         color_str = str(color_str)
     except ValueError:
         return None
-    rgbval = re.search("rgb\\( *(\\d+) *, *(\\d{1,3}) *, *(\\d{1,3}) *\\)", color_str)
+    rgbval = get_rgbval(color_str)
     hexval = re.search("#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})", color_str)
     hexvalshort = re.search("#([0-9a-f])([0-9a-f])([0-9a-f])", color_str)
     if rgbval:
@@ -63,7 +70,9 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
     elif hexval:
         return hex2rgb(hexval.group(1), hexval.group(2), hexval.group(3))
     elif hexvalshort:
-        return hexshort2rgb(hexvalshort.group(1), hexvalshort.group(2), hexvalshort.group(3))
+        return hexshort2rgb(
+            hexvalshort.group(1), hexvalshort.group(2), hexvalshort.group(3)
+        )
     else:
         return colorname2rgb(color_str)
 
@@ -105,12 +114,19 @@ def rgb_bg_color_from_node(
     return color
 
 
+def _get_color(node):
+    color_str = node.style.get("color", None)
+    if color_str:
+        return color_str
+    return node.attributes.get("color", None)
+
+
 def rgb_color_from_node(
     node: advtree.Node,
     grey_scale: bool = False,
     darkness_limit: float = 0,
 ) -> Optional[tuple[float, float, float]]:
-    color_str = node.style.get("color", None) or node.attributes.get("color", None)
+    color_str = _get_color(node)
     color = None
     if color_str:
         color = _color_from_str(color_str.lower())
@@ -131,7 +147,8 @@ def get_base_alignment(node: advtree.Node) -> str:
 
 def _get_text_alignment(node: advtree.Node) -> str:
     align = node.style.get("text-align", "none").lower()
-    if align == "none" and isinstance(node, (advtree.Div, advtree.Cell, advtree.Row)):
+    allowed_instances = (advtree.Div, advtree.Cell, advtree.Row)
+    if align == "none" and isinstance(node, allowed_instances):
         align = node.attributes.get("align", "none").lower()
     if align not in ["left", "center", "right", "justify", "none"]:
         return "left"
@@ -153,13 +170,24 @@ def get_text_alignment(node: advtree.Node) -> str:
     return align
 
 
+def _get_alignment_from_node(node: advtree.Node) -> str:
+    align = node.style.get("vertical-align", None)
+    if align:
+        return align
+    return node.vlist.get("valign", None)
+
+
 def get_vertical_alignment(node: advtree.Node) -> str:
     align = None
     for n in node.parents + [node]:
-        _align = n.style.get("vertical-align", None) or n.vlist.get("valign", None)
+        _align = _get_alignment_from_node(n)
         if _align in ["top", "middle", "bottom"]:
             align = _align
     return align or "top"
+
+
+def get_bg_color(attributes, style) -> Optional[str]:
+    return attributes.get("background-color") or style.get("background-color")
 
 
 def table_border(node: advtree.Node) -> bool:
@@ -200,7 +228,7 @@ def table_border(node: advtree.Node) -> bool:
     ):
         return True
 
-    bg_color = attributes.get("background-color") or style.get("background-color")
+    bg_color = get_bg_color(attributes, style)
     if bg_color and bg_color != "transparent":
         return True
 

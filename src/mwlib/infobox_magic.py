@@ -1,6 +1,3 @@
-
-
-
 from xml.sax.saxutils import quoteattr
 
 from mwlib import expander

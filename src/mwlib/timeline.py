@@ -66,4 +66,3 @@ def draw_timeline(script, basedir=None):
     et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
 
     return run_perl(et, font, basedir, scriptfile, pngfile)
-

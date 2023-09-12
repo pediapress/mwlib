@@ -31,14 +31,17 @@ class TocRenderer:
 
     def _getColWidths(self):
         p = Paragraph(
-            "<b>%d</b>" % 9999, pdfstyles.text_style(mode="toc_article", text_align="right")
+            "<b>%d</b>" % 9999, pdfstyles.text_style(mode="toc_article",
+                                                     text_align="right")
         )
         w, h = p.wrap(0, pdfstyles.print_height)
-        # subtracting 30pt below is *probably* necessary b/c of the table margins
+        # subtracting 30pt below is *probably* necessary b/c
+        # of the table margins
         return [pdfstyles.print_width - w - 30, w]
 
     def renderToc(self, tocpath, toc_entries, rtl):
-        doc = SimpleDocTemplate(tocpath, pagesize=(pdfstyles.page_width, pdfstyles.page_height))
+        doc = SimpleDocTemplate(tocpath, pagesize=(pdfstyles.page_width,
+                                                   pdfstyles.page_height))
         elements = []
         elements.append(
             Paragraph(
@@ -62,10 +65,12 @@ class TocRenderer:
             toc_table.append(
                 [
                     Paragraph(
-                        txt, pdfstyles.text_style(mode="toc_%s" % str(lvl), text_align="left")
+                        txt, pdfstyles.text_style(mode="toc_%s" % str(lvl),
+                                                  text_align="left")
                     ),
                     Paragraph(
-                        page_num, pdfstyles.text_style(mode="toc_article", text_align="right")
+                        page_num, pdfstyles.text_style(mode="toc_article",
+                                                       text_align="right")
                     ),
                 ]
             )
@@ -109,9 +114,11 @@ class TocRenderer:
         else:
             safe_pdfpath = pdfpath + ".pdf"
             shutil.move(pdfpath, safe_pdfpath)
-        retcode = self.pdfsam(safe_pdfpath, tocpath, finalpath, has_title_page=has_title_page)
+        retcode = self.pdfsam(safe_pdfpath, tocpath,
+                              finalpath, has_title_page=has_title_page)
         if retcode != 0:
-            retcode = self.pdftk(safe_pdfpath, tocpath, finalpath, has_title_page=has_title_page)
+            retcode = self.pdftk(safe_pdfpath, tocpath, finalpath,
+                                 has_title_page=has_title_page)
         if retcode == 0:
             shutil.move(finalpath, pdfpath)
         if os.path.exists(tocpath):

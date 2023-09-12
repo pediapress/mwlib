@@ -35,4 +35,3 @@ class OdfConf:
 # inline_img_dpi = 100 # scaling factor for inline images. 100 dpi should be the ideal size in relation to 10pt text size
 # ????
 # targetWidth = 800  # target image width
-#scale = 1./75

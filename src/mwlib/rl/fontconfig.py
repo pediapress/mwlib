@@ -4,8 +4,6 @@
 # See README.txt for additional licensing information.
 
 
-
-
 import os
 import re
 
@@ -317,14 +315,18 @@ class RLFontSwitcher(FontSwitcher):
 
     def getfont_for_script(self, script):
         for font_def in fonts:
-            if script in (s.lower() for s in font_def["code_points"] if isinstance(s, str)) and self.fontInstalled(font_def):
+            if script in (
+                s.lower() for s in font_def["code_points"] if isinstance(s, str)
+            ) and self.fontInstalled(font_def):
                 return font_def["name"]
         return None
 
     def fontInstalled(self, font_def):
         if font_def.get("type") == "cid":
             return True
-        return all(self.getAbsFontPath(file_name) for file_name in font_def.get("file_names"))
+        return all(
+            self.getAbsFontPath(file_name) for file_name in font_def.get("file_names")
+        )
 
     def getAbsFontPath(self, file_name):
         for base_dir in self.font_paths:
@@ -341,12 +343,15 @@ class RLFontSwitcher(FontSwitcher):
             if font.get("type") == "cid":
                 pdfmetrics.registerFont(UnicodeCIDFont(font["name"]))
             else:
-                for (i, font_variant) in enumerate(font_variants):
+                for i, font_variant in enumerate(font_variants):
                     if i == len(font.get("file_names")) or not self.fontInstalled(font):
                         break
                     full_font_name = font["name"] + font_variant
                     pdfmetrics.registerFont(
-                        TTFont(full_font_name, self.getAbsFontPath(font.get("file_names")[i]))
+                        TTFont(
+                            full_font_name,
+                            self.getAbsFontPath(font.get("file_names")[i]),
+                        )
                     )
                     italic = font_variant in ["italic", "bolditalic"]
                     bold = font_variant in ["bold", "bolditalic"]

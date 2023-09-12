@@ -1,6 +1,3 @@
-
-
-
 import os
 import subprocess
 from itertools import dropwhile
@@ -61,7 +58,7 @@ def make_messages(
             os.unlink(potfile)
 
         all_files = []
-        for (dirpath, dirnames, filenames) in os.walk(inputdir):
+        for dirpath, dirnames, filenames in os.walk(inputdir):
             all_files.extend([(dirpath, f) for f in filenames])
         all_files.sort()
         for dirpath, filename in all_files:
@@ -107,6 +104,8 @@ def compile_messages(localedir="locale"):
                 path = os.path.join(dirpath, f)
                 mo_filename = os.path.splitext(path)[0] + ".mo"
                 try:
-                    execute("msgfmt", "--check-format", "--output-file", mo_filename, path)
+                    execute(
+                        "msgfmt", "--check-format", "--output-file", mo_filename, path
+                    )
                 except RuntimeError as exc:
                     print(f"Could not compile {path!r}: {exc}")

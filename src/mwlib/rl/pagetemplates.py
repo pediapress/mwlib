@@ -52,8 +52,7 @@ def _doNothing(canvas, doc):
 
 class SimplePage(PageTemplate):
     def __init__(self, pageSize=A3):
-        id = "simplepage"
-        # frames = Frame(0, 0, pageSize[0], pageSize[1])
+        page_id = "simplepage"
         pw = pageSize[0]
         ph = pageSize[1]
         frames = Frame(
@@ -63,7 +62,7 @@ class SimplePage(PageTemplate):
             ph - page_margin_top - page_margin_bottom,
         )
 
-        PageTemplate.__init__(self, id=id, frames=frames, pagesize=pageSize)
+        PageTemplate.__init__(self, id=page_id, frames=frames, pagesize=pageSize)
 
 
 class WikiPage(PageTemplate):
@@ -81,10 +80,16 @@ class WikiPage(PageTemplate):
         """
 
         id = title
-        frames = Frame(page_margin_left, page_margin_bottom, print_width, print_height)
+        frames = Frame(page_margin_left, page_margin_bottom,
+                       print_width, print_height)
 
         PageTemplate.__init__(
-            self, id=id, frames=frames, onPage=onPage, onPageEnd=onPageEnd, pagesize=pagesize
+            self,
+            id=id,
+            frames=frames,
+            onPage=onPage,
+            onPageEnd=onPageEnd,
+            pagesize=pagesize,
         )
 
         self.title = title
@@ -131,7 +136,8 @@ class WikiPage(PageTemplate):
             footer_margin_vert,
         )
         if pdfstyles.show_page_footer:
-            p = Paragraph(formatter.clean_text(pagefooter, escape=False), text_style())
+            p = Paragraph(formatter.clean_text(pagefooter,
+                                               escape=False), text_style())
             p.canv = canvas
             w, h = p.wrap(page_width - header_margin_hor * 2.5, page_height)
             p.drawOn(canvas, footer_margin_hor, footer_margin_vert - 10 - h)
@@ -147,7 +153,6 @@ class TitlePage(PageTemplate):
         onPageEnd=_doNothing,
         pagesize=(page_width, page_height),
     ):
-
         id = "TitlePage"
         p = pdfstyles
         frames = Frame(
@@ -158,7 +163,12 @@ class TitlePage(PageTemplate):
         )
 
         PageTemplate.__init__(
-            self, id=id, frames=frames, onPage=onPage, onPageEnd=onPageEnd, pagesize=pagesize
+            self,
+            id=id,
+            frames=frames,
+            onPage=onPage,
+            onPageEnd=onPageEnd,
+            pagesize=pagesize,
         )
         self.cover = cover
 
@@ -197,28 +207,30 @@ class TitlePage(PageTemplate):
             )
             p = Paragraph(txt, text_style(mode="footer"))
             w, h = p.wrap(print_width, print_height)
-            canvas.translate((page_width - w) / 2.0, footer_margin_vert - h - 0.25 * cm)
+            canvas.translate((page_width - w) / 2.0,
+                             footer_margin_vert - h - 0.25 * cm)
             p.canv = canvas
             p.draw()
         canvas.restoreState()
         if self.cover:
-            width, height = self._scale_img(pdfstyles.title_page_image_size, self.cover)
+            width, height = self._scale_img(pdfstyles.title_page_image_size,
+                                            self.cover)
             if pdfstyles.title_page_image_pos[0] is None:
                 x = (page_width - width) / 2.0
             else:
-                x = max(0, min(page_width - width, pdfstyles.title_page_image_pos[0]))
+                x = max(0, min(page_width - width,
+                               pdfstyles.title_page_image_pos[0]))
             if pdfstyles.title_page_image_pos[1] is None:
                 y = (page_height - height) / 2.0
             else:
-                y = max(0, min(page_height - height, pdfstyles.title_page_image_pos[1]))
+                y = max(0, min(page_height - height,
+                               pdfstyles.title_page_image_pos[1]))
             canvas.drawImage(self.cover, x, y, width, height)
 
 
-
-
-
 class PPDocTemplate(BaseDocTemplate):
-    def __init__(self, output, status_callback=None, tocCallback=None, **kwargs):
+    def __init__(self, output, status_callback=None,
+                 tocCallback=None, **kwargs):
         self.bookmarks = []
         BaseDocTemplate.__init__(self, output, **kwargs)
         if status_callback:
@@ -242,7 +254,8 @@ class PPDocTemplate(BaseDocTemplate):
             self.page = -1
 
     def _startBuild(self, filename=None, canvasmaker=canvas.Canvas):
-        BaseDocTemplate._startBuild(self, filename=filename, canvasmaker=canvasmaker)
+        BaseDocTemplate._startBuild(self,
+                                    filename=filename, canvasmaker=canvasmaker)
 
         type2lvl = {
             "Chapter": 0,
@@ -253,7 +266,7 @@ class PPDocTemplate(BaseDocTemplate):
         }
         got_chapter = False
         last_lvl = 0
-        for (bm_id, (bm_title, bm_type)) in enumerate(self.bookmarks):
+        for bm_id, (bm_title, bm_type) in enumerate(self.bookmarks):
             lvl = type2lvl[bm_type]
             if bm_type == "Chapter":
                 got_chapter = True
@@ -261,7 +274,8 @@ class PPDocTemplate(BaseDocTemplate):
                 lvl -= 1
             lvl = min(lvl, last_lvl + 1)
             last_lvl = lvl
-            self.canv.addOutlineEntry(bm_title, str(bm_id), lvl, bm_type == "article")
+            self.canv.addOutlineEntry(bm_title,
+                                      str(bm_id), lvl, bm_type == "article")
 
     def afterFlowable(self, flowable):
         """Our rule for the table of contents is simply to take

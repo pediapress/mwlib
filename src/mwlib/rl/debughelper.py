@@ -38,7 +38,7 @@ def dumpFiguresAndParagraphs(fp):
     print("=== FiguresAndParagraphs ===")
     print("  ::", end=" ")
     for f in fp.fs:
-        print(f.imgPath[f.imgPath.rfind("/") :], end=" ")
+        print(f.imgPath[f.imgPath.rfind("/"):], end=" ")
     print()
     print("num paras:", len(fp.ps))
     for p in fp.ps:

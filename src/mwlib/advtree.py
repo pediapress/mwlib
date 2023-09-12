@@ -27,7 +27,12 @@ import six
 
 from mwlib.log import Log
 from mwlib.parser import Math, Ref, Link, URL, NamedURL  # not used but imported
-from mwlib.parser import CategoryLink, SpecialLink, Caption, LangLink  # not used but imported
+from mwlib.parser import (
+    CategoryLink,
+    SpecialLink,
+    Caption,
+    LangLink,
+)  # not used but imported
 from mwlib.parser import ArticleLink, InterwikiLink, NamespaceLink
 from mwlib.parser import Item, ItemList, Node, Table, Row, Cell, Paragraph, PreFormatted
 from mwlib.parser import Section, Style, TagNode, Text, Timeline
@@ -300,7 +305,7 @@ class AdvancedNode:
             else:
                 return {}
 
-        for (key, value) in attrs.items():
+        for key, value in attrs.items():
             if key in ["colspan", "rowspan"]:
                 attrs[key] = ensureInt(value, min_val=1)
             elif key == "style":
@@ -310,7 +315,7 @@ class AdvancedNode:
         return attrs
 
     def get_attributes(self):
-        """ Return dict with node attributes (e.g. class, style, colspan etc.)"""
+        """Return dict with node attributes (e.g. class, style, colspan etc.)"""
         vlist = getattr(self, "vlist", None)
         if vlist is None:
             self.vlist = vlist = {}
@@ -379,12 +384,12 @@ class AdvancedRow(AdvancedNode):
 class AdvancedCell(AdvancedNode):
     @property
     def colspan(self, attr="colspan"):
-        """ colspan of cell. result is always non-zero, positive int"""
+        """colspan of cell. result is always non-zero, positive int"""
         return self.attributes.get("colspan") or 1
 
     @property
     def rowspan(self):
-        """ rowspan of cell. result is always non-zero, positive int"""
+        """rowspan of cell. result is always non-zero, positive int"""
         return self.attributes.get("rowspan") or 1
 
 
@@ -398,7 +403,9 @@ class AdvancedImageLink(AdvancedNode):
 
     @property
     def render_caption(self):
-        explicit_caption = bool(getattr(self, "thumb") or getattr(self, "frame", "") == "frame")
+        explicit_caption = bool(
+            getattr(self, "thumb") or getattr(self, "frame", "") == "frame"
+        )
         is_gallery = len(self.get_parent_nodes_by_class(Gallery)) > 0
         has_children = len(self.children) > 0
         return (explicit_caption or is_gallery) and has_children
@@ -407,9 +414,9 @@ class AdvancedImageLink(AdvancedNode):
 class AdvancedMath(AdvancedNode):
     @property
     def is_block_node(self):
-        if self.caption.strip().startswith("\\begin{align}") or self.caption.strip().startswith(
-            "\\begin{alignat}"
-        ):
+        if self.caption.strip().startswith(
+            "\\begin{align}"
+        ) or self.caption.strip().startswith("\\begin{alignat}"):
             return True
         return False
 
@@ -497,7 +504,9 @@ class Var(Style, AdvancedNode):
     _style = "var"
 
 
-_styleNodeMap = {k._style: k for k in [Overline, Underline, Sub, Sup, Small, Big, Cite, Var]}
+_styleNodeMap = {
+    k._style: k for k in [Overline, Underline, Sub, Sup, Small, Big, Cite, Var]
+}
 
 # --------------------------------------------------------------------------
 # Missing as Classes derived from parser.TagNode
@@ -549,7 +558,9 @@ class Div(TagNode, AdvancedNode):
     _tag = "div"
 
 
-class Span(TagNode, AdvancedNode):  # span is defined as inline node which is in theory correct.
+class Span(
+    TagNode, AdvancedNode
+):  # span is defined as inline node which is in theory correct.
     _tag = "span"
 
 
@@ -789,9 +800,11 @@ def remove_nodes(node):
     the parser generates empty Node elements that do
     nothing but group other nodes. we remove them here
     """
-    if node.__class__ == Node and not (node.previous is None and node.parent.__class__ == Section):
+    if node.__class__ == Node and not (
+        node.previous is None and node.parent.__class__ == Section
+    ):
         # first child of section groups heading text - grouping Node must not be removed
-            node.parent.replace_child(node, node.children)
+        node.parent.replace_child(node, node.children)
 
     for c in node.children[:]:
         remove_nodes(c)
@@ -809,7 +822,9 @@ def remove_newlines(node):
         node = todo.pop()
         if node.__class__ is Text and node.caption:
             if not node.caption.strip():
-                prev = node.previous or node.parent  # previous sibling node or parentnode
+                prev = (
+                    node.previous or node.parent
+                )  # previous sibling node or parentnode
                 next = node.next or node.parent.next
                 if not next or next.is_block_node or not prev or prev.is_block_node:
                     node.parent.remove_child(node)

@@ -59,7 +59,7 @@ def _split_tag(txt):
 
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
-        print(type, repr(text[start:start + len]))
+        print(type, repr(text[start: start + len]))
 
 
 def scan(text):
@@ -69,9 +69,9 @@ def scan(text):
 
 
 def resolve_entity(e):
-    if e[1] == '#':
+    if e[1] == "#":
         try:
-            if e[2] == 'x' or e[2] == 'X':
+            if e[2] == "x" or e[2] == "X":
                 return chr(int(e[3:-1], 16))
             else:
                 return chr(int(e[2:-1]))
@@ -91,7 +91,7 @@ class scan_result:
 
     def rawtext(self, t):
         (type, start, tlen) = t
-        return self.source[start:start + tlen]
+        return self.source[start: start + tlen]
 
     def text(self, t):
         r = self.rawtext(t)
@@ -121,6 +121,7 @@ class scan_result:
 
 class _compat_scanner:
     from mwlib.tagext import default_registry as tagextensions
+
     allowed_tags = None
 
     class ignore:
@@ -154,6 +155,7 @@ class _compat_scanner:
 
     def _init_allowed_tags(self):
         from mwlib.parser import _get_tags
+
         self.allowed_tags = _get_tags()
 
     def __call__(self, text):
@@ -166,7 +168,7 @@ class _compat_scanner:
         res = []
 
         def g():
-            return text[start:start + tlen]
+            return text[start : start + tlen]
 
         def a(x):
             return res.append((x, g()))
@@ -194,7 +196,7 @@ class _compat_scanner:
                 isEndToken = isinstance(tt, EndTagToken)
                 closingOrSelfClosing = isEndToken or tt.selfClosing
 
-                if tt.t in self.tagextensions or tt.t in ('imagemap', 'gallery'):
+                if tt.t in self.tagextensions or tt.t in ("imagemap", "gallery"):
                     if closingOrSelfClosing:
                         i += 1
                         continue
@@ -226,8 +228,6 @@ class _compat_scanner:
                     if end_token:
                         res.append(end_token)
 
-
-
                 elif tt.t == "nowiki":
                     i += 1
                     if isEndToken or tt.selfClosing:
@@ -240,19 +240,19 @@ class _compat_scanner:
                                 break
                         res.append(("TEXT", scanres.text((type, start, tlen))))
                         i += 1
-                elif tt.t in ["font", "noinclude", 'caption']:
+                elif tt.t in ["font", "noinclude", "caption"]:
                     pass
                 elif tt.t == "table":
                     if isEndToken:
                         res.append(("ENDTABLE", g()))
                     else:
                         res.append(("BEGINTABLE", g()))
-                elif tt.t in ['th', 'td']:
+                elif tt.t in ["th", "td"]:
                     if isEndToken:
                         pass
                     else:
                         res.append(("COLUMN", g()))
-                elif tt.t == 'tr':
+                elif tt.t == "tr":
                     if isEndToken:
                         pass
                     else:
@@ -283,10 +283,11 @@ class _compat_scanner:
 
         name, values = _split_tag(name)
         from mwlib.parser import paramrx
+
         values = dict(paramrx.findall(values))
         name = name.lower()
 
-        if name == 'br' or name == 'references':
+        if name == "br" or name == "references":
             klass = TagToken
 
         r = klass(name, text)
@@ -317,7 +318,7 @@ class TagToken(_BaseTagToken):
     values = {}
     selfClosing = False
 
-    def __init__(self, t, text=''):
+    def __init__(self, t, text=""):
         self.t = t
         self.text = text
 
@@ -326,7 +327,7 @@ class TagToken(_BaseTagToken):
 
 
 class EndTagToken(_BaseTagToken):
-    def __init__(self, t, text=''):
+    def __init__(self, t, text=""):
         self.t = t
         self.text = text
 

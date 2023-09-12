@@ -4,8 +4,6 @@
 # See README.rst for additional licensing information.
 
 
-
-
 import os
 import shutil
 import tempfile
@@ -83,7 +81,9 @@ def _renderMathBlahtex(latex, output_path, output_mode):
                 mathml = mathml.next()
                 mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
                 return mathml
-    log.error(f"error converting math (blahtexml). source: {latex!r} \nerror: {result!r}")
+    log.error(
+        f"error converting math (blahtexml). source: {latex!r} \nerror: {result!r}"
+    )
     return None
 
 
@@ -117,7 +117,11 @@ def _renderMathTexvc(latex, output_path, output_mode="png", resolution_in_dpi=12
 
 
 def renderMath(
-    latex, output_path=None, output_mode="png", render_engine="blahtexml", resolution_in_dpi=120
+    latex,
+    output_path=None,
+    output_mode="png",
+    render_engine="blahtexml",
+    resolution_in_dpi=120,
 ):
     """
     @param latex: LaTeX code
@@ -154,7 +158,9 @@ def renderMath(
     result = None
 
     if render_engine == "blahtexml":
-        result = _renderMathBlahtex(latex, output_path=output_path, output_mode=output_mode)
+        result = _renderMathBlahtex(
+            latex, output_path=output_path, output_mode=output_mode
+        )
     if result is None and output_mode == "png":
         result = _renderMathTexvc(
             latex,
@@ -169,7 +175,6 @@ def renderMath(
 
 
 if __name__ == "__main__":
-
     latex = "\\sqrt{4}=2"
 
     # latexlist = ["\\sqrt{4}=2",
@@ -189,4 +194,6 @@ if __name__ == "__main__":
 
     print(renderMath(latex, output_mode="mathml"))
     print(renderMath(latex, output_path="/tmp/", output_mode="png"))
-    print(renderMath(latex, output_path="/tmp/", output_mode="png", render_engine="texvc"))
+    print(
+        renderMath(latex, output_path="/tmp/", output_mode="png", render_engine="texvc")
+    )

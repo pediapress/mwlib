@@ -23,6 +23,7 @@ from odf.opendocument import OpenDocumentText
 from mwlib import advtree, odfconf, parser, writerbase
 from mwlib import odfstyles as style
 from mwlib.log import Log
+from mwlib.mathutils import renderMath
 from mwlib.treecleaner import TreeCleaner
 
 log = Log("odfwriter")
@@ -30,12 +31,17 @@ log = Log("odfwriter")
 # check for ODF version
 e = element.Element(qname=("a", "n"))
 
-if not hasattr(e, "setAttribute") or not hasattr(e, "appendChild") or not hasattr(e, "lastChild"):
+if (
+    not hasattr(e, "setAttribute")
+    or not hasattr(e, "appendChild")
+    or not hasattr(e, "lastChild")
+):
     raise ImportError("odfpy version incompatible")
 
 del e
 
 PARENT_NONE_ERROR = "parent is None"
+
 
 def showNode(obj):
     attrs = list(obj.__dict__.keys())
@@ -142,7 +148,7 @@ class ODFWriter:
         self.namespace = namespace
         self.references = []
         self.doc = OpenDocumentText()
-        style.applyStylesToDoc(self.doc)
+        style.apply_styles_to_doc(self.doc)
         self.text = self.doc.text
         self.namedLinkCount = 0
         self.conf = odfconf.OdfConf
@@ -206,7 +212,13 @@ class ODFWriter:
                 parent.addElement(p)
                 p.addText(obj.caption)
             except odf.element.IllegalChild:
-                log("writeText:", obj, "not allowed in ", parent.type, "adding Paragraph failed")
+                log(
+                    "writeText:",
+                    obj,
+                    "not allowed in ",
+                    parent.type,
+                    "adding Paragraph failed",
+                )
 
     def write(self, obj, parent=None):
         if parent is None:
@@ -216,7 +228,9 @@ class ODFWriter:
             try:
                 p.addElement(c)
                 if c.parentNode is None:
-                    raise ValueError("could not add child") # this check fails if the child could not be added
+                    raise ValueError(
+                        "could not add child"
+                    )  # this check fails if the child could not be added
                 return True
             except odf.element.IllegalChild:
                 # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed
@@ -312,7 +326,8 @@ class ODFWriter:
     def owriteParagraph(self, obj):
         if obj.children:
             imgAsOnlyChild = bool(
-                len(obj.children) == 1 and isinstance(obj.get_first_child(), advtree.ImageLink)
+                len(obj.children) == 1
+                and isinstance(obj.get_first_child(), advtree.ImageLink)
             )
             # handle special case nothing but an image in a paragraph
             if imgAsOnlyChild and isinstance(obj.next, advtree.Paragraph):
@@ -545,9 +560,9 @@ class ODFWriter:
         translate element tree to odf.Elements
         """
         # log("math")
-        r = writerbase.renderMath(obj.caption, output_mode="mathml", render_engine="blahtexml")
+        r = renderMath(obj.caption, output_mode="mathml", render_engine="blahtexml")
         if r is None:
-            log("writerbase.renderMath failed!")
+            log("renderMath failed!")
             return
         # print mathml.ET.tostring(r)
 
@@ -608,10 +623,6 @@ class ODFWriter:
     def owriteCategoryLink(self, obj):
         if True:  # FIXME, collect and add to the end of the page
             return SkipChildren()
-        if not obj.colon and not obj.children:
-            a = text.A(href=obj.target)
-            a.addText(obj.target)
-            return a
 
     def owriteLangLink(self, obj):
         return SkipChildren()  # dont want them
@@ -665,7 +676,8 @@ class ODFWriter:
             ):
                 # image still to large, re-resize to max possible:
                 scale = min(
-                    self.conf.paper["IMG_MAX_WIDTH"] / w, self.conf.paper["IMG_MAX_HEIGHT"] / h
+                    self.conf.paper["IMG_MAX_WIDTH"] / w,
+                    self.conf.paper["IMG_MAX_HEIGHT"] / h,
                 )
 
                 return (w * scale, h * scale, scale)
@@ -720,7 +732,9 @@ class ODFWriter:
         widthIn = "%.2fin" % (width)
         heightIn = "%.2fin" % (height)
 
-        innerframe = draw.Frame(stylename=style.frmInner, width=widthIn, height=heightIn)
+        innerframe = draw.Frame(
+            stylename=style.frmInner, width=widthIn, height=heightIn
+        )
 
         if isImageMap:
             innerframe.wImg = wImg
@@ -744,7 +758,9 @@ class ODFWriter:
         # set image alignment
         attrs = {"width": widthIn, "anchortype": "paragraph"}
         floats = {
-            "right": style.frmOuterRight, "center": style.frmOuterCenter, "left": style.frmOuterLeft
+            "right": style.frmOuterRight,
+            "center": style.frmOuterCenter,
+            "left": style.frmOuterLeft,
         }
         attrs["stylename"] = floats.get(obj.align, style.frmOuterLeft)
         frame = draw.Frame(**attrs)
@@ -789,7 +805,9 @@ def writer(env, output, status_callback):
     book = writerbase.build_book(env, status_callback=buildbook_status)
 
     def scb(status, progress):
-        return status_callback is not None and status_callback(status=status, progress=progress)
+        return status_callback is not None and status_callback(
+            status=status, progress=progress
+        )
 
     scb(status="preprocessing", progress=50)
     preprocess(book)
@@ -826,7 +844,6 @@ def preprocess(root):
 
 def main():
     for fn in sys.argv[1:]:
-
         from mwlib.dummydb import DummyDB
         from mwlib.uparser import parse_string
 

@@ -64,6 +64,7 @@ else:
 
         return walk
 
+
 SECTION_TAG = "@section"
 
 
@@ -147,7 +148,7 @@ class ParseSections:
                 )
 
             body = Token(
-                type=Token.t_complex_node, children=tokens[current.endtitle + 1: i]
+                type=Token.t_complex_node, children=tokens[current.endtitle + 1 : i]
             )
 
             sect = Token(
@@ -460,10 +461,11 @@ class ParseLines:
             endtag = None
         else:
             node = None
+
             def newitem() -> Optional[Token]:
                 return None
-            endtag = None
 
+            endtag = None
 
         return node, newitem, endtag
 
@@ -473,7 +475,7 @@ class ParseLines:
         if endtag:
             for i, x in enumerate(line.children):
                 if x.rawtagname == endtag and x.type == Token.t_html_tag_end:
-                    after = line.children[i + 1:]
+                    after = line.children[i + 1 :]
                     del line.children[i:]
                     item.children.append(line)
                     lines[startpos] = Token(
@@ -985,7 +987,11 @@ class ParseUniq:
             vlist = {}
         if name in self.tagextensions:
             node = self.tagextensions[name](inner, vlist)
-            retval = None if node is None else Token(type=Token.t_complex_compat, compatnode=node)
+            retval = (
+                None
+                if node is None
+                else Token(type=Token.t_complex_compat, compatnode=node)
+            )
 
             return retval
 
@@ -1186,7 +1192,7 @@ def fix_break_between_pre(tokens, xopt):
             and t.text.startswith(" ")
             and tokens[idx + 1].type == Token.t_pre
         ):
-            tokens[idx: idx + 1] = [
+            tokens[idx : idx + 1] = [
                 Token(type=Token.t_pre, text=" "),
                 Token(type=Token.t_newline, text="\n"),
             ]
@@ -1219,7 +1225,7 @@ def process_li_tokens(tokens):
             lst = Token(
                 type=Token.t_complex_tag, tagname="ul", children=tokens[start:idx]
             )
-            tokens[start: idx + 1] = [lst]
+            tokens[start : idx + 1] = [lst]
             idx = start + 1
         else:
             idx += 1

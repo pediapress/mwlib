@@ -3,6 +3,8 @@
 from mwlib import advtree
 from mwlib.exceptions.mwlib_exceptions import InvalidArticleStructureError
 
+ARTICLE_ERROR = "{} needs to be called with Article node"
+
 
 def has_infobox_attrs(node: advtree.Node) -> bool:
     infobox_class_ids = ["infobox", "taxobox"]
@@ -33,7 +35,8 @@ def text_in_node(node: advtree.Node) -> int:
 
 
 def text_before_infobox(
-    node: advtree.Node, infobox: advtree.Node, txt_list: list[tuple[int, bool]] = None
+    node: advtree.Node, infobox: advtree.Node,
+    txt_list: list[tuple[int, bool]] = None
 ) -> int:
     if not txt_list:
         txt_list = []
@@ -48,27 +51,35 @@ def text_before_infobox(
     return sum_txt
 
 
+def get_error_msg(msg: str) -> str:
+    return ARTICLE_ERROR.format(msg)
+
+
 def article_starts_with_infobox(
     article_node: advtree.Article, max_text_until_infobox: int = 0
 ) -> bool:
     if article_node.__class__ != advtree.Article:
-        raise InvalidArticleStructureError("article_starts_with_infobox needs to be called with Article node")
+        error_message = get_error_msg("article_starts_with_infobox")
+        raise InvalidArticleStructureError(ARTICLE_ERROR.format(error_message))
     infobox = None
     for table in article_node.get_child_nodes_by_class(advtree.Table):
         if has_infobox_attrs(table):
             infobox = table
     if not infobox:
         return False
-    return text_before_infobox(article_node, infobox, []) <= max_text_until_infobox
+    text_before = text_before_infobox(article_node, infobox, [])
+    return text_before <= max_text_until_infobox
 
 
 def article_starts_with_table(
     article_node: advtree.Article, max_text_until_infobox: int = 0
 ) -> bool:
     if article_node.__class__ != advtree.Article:
-        raise InvalidArticleStructureError("article_starts_with_table needs to be called with Article node")
+        error_message = get_error_msg("article_starts_with_table")
+        raise InvalidArticleStructureError(error_message)
 
     tables = article_node.get_child_nodes_by_class(advtree.Table)
     if not tables:
         return False
-    return text_before_infobox(article_node, tables[0], []) <= max_text_until_infobox
+    text_before = text_before_infobox(article_node, tables[0], [])
+    return text_before <= max_text_until_infobox

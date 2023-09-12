@@ -144,7 +144,7 @@ class Token:
 
     def _get_text(self):
         if self._text is None and self.source is not None:
-            self._text = self.source[self.start : self.start + self.len]
+            self._text = self.source[self.start: self.start + self.len]
         return self._text
 
     def _set_text(self, t):
@@ -152,7 +152,8 @@ class Token:
 
     text = property(_get_text, _set_text)
 
-    def __init__(self, type=None, start=None, len=None, source=None, text=None, **kw):
+    def __init__(self, type=None, start=None, len=None,
+                 source=None, text=None, **kw):
         self.type = type
         self.start = start
         self.len = len
@@ -254,7 +255,7 @@ def _analyze_html_tag(t):
 
 def dump_tokens(text, tokens):
     for type, start, len in tokens:
-        print(type, repr(text[start : start + len]))
+        print(type, repr(text[start: start + len]))
 
 
 def scan(text):
@@ -286,14 +287,15 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
         res = []
 
         def g():
-            return text[start : start + tlen]
+            return text[start: start + tlen]
 
         for type, start, tlen in tokens:
             if type == Token.t_begintable:
                 txt = g()
                 count = txt.count(":")
                 if count:
-                    res.append(Token(type=Token.t_colon, start=start, len=count, source=text))
+                    res.append(Token(type=Token.t_colon,
+                                     start=start, len=count, source=text))
                 tlen -= count
                 start += count
 
@@ -314,7 +316,8 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
                 if tagname in self.allowed_tags:
                     res.append(t)
                 else:
-                    res.append(Token(type=Token.t_text, start=start, len=tlen, source=text))
+                    res.append(Token(type=Token.t_text, start=start,
+                                     len=tlen, source=text))
             else:
                 res.append(t)
 

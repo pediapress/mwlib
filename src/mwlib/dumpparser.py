@@ -97,7 +97,7 @@ class DumpParser:
     @staticmethod
     def getTag(elem):
         # rough is good enough
-        return elem.tag[elem.tag.rindex("}") + 1 :]
+        return elem.tag[elem.tag.rindex("}") + 1:]
 
     def handleSiteinfo(self, siteinfo):
         pass

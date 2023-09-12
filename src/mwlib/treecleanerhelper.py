@@ -11,17 +11,23 @@ from .advtree import URL, Cell, ImageLink, Link, Math, NamedURL, Reference, Text
 
 
 def getNodeHeight(node, params):
-    lineHeight = params['lineHeight']
-    charsPerLine = params['charsPerLine']
-    paragraphMargin = params['paragraphMargin']
-    imgHeight = params['imgHeight']
+    lineHeight = params["lineHeight"]
+    charsPerLine = params["charsPerLine"]
+    paragraphMargin = params["paragraphMargin"]
+    imgHeight = params["imgHeight"]
 
     height = 0
     nonFollowNodes = [Reference, NamedURL]
-    amap = {Text: "caption", Link: "target", URL: "caption", Math: "caption", NamedURL: 'caption'}
+    amap = {
+        Text: "caption",
+        Link: "target",
+        URL: "caption",
+        Math: "caption",
+        NamedURL: "caption",
+    }
     access = amap.get(node.__class__, "")
     if access:
-        txt = '' if node.__class__ == Link and node.children else getattr(node, access)
+        txt = "" if node.__class__ == Link and node.children else getattr(node, access)
         if txt:
             # 40 chars per line --> number of lines --> 20pt height per line
             addHeight = math.ceil(len(txt) / charsPerLine) * lineHeight
@@ -33,7 +39,9 @@ def getNodeHeight(node, params):
                 addHeight = addHeight / 2
             height += addHeight
     elif node.__class__ == ImageLink:
-        if node.isInline():  # image heights are just wild guesses. in case of normal image, we assume 5 lines of text in height
+        if (
+            node.isInline()
+        ):  # image heights are just wild guesses. in case of normal image, we assume 5 lines of text in height
             height += 0  # lineHeight
         else:
             height += lineHeight * imgHeight
@@ -47,10 +55,10 @@ def getNodeHeight(node, params):
 
 
 def splitRow(row, params):
-    maxCellHeight = params['maxCellHeight']
+    maxCellHeight = params["maxCellHeight"]
     newrows = []
     cols = [[] for i in range(len(row.children))]
-    for (colindex, cell) in enumerate(row.children):
+    for colindex, cell in enumerate(row.children):
         cellHeight = 0
         items = []
         for item in cell.children:

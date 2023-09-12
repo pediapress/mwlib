@@ -22,7 +22,7 @@ log = log.Log("rlwriter")
 def scaleImages(data):
     for row in data:
         for cell in row:
-            for (i, e) in enumerate(cell):
+            for i, e in enumerate(cell):
                 if isinstance(e, Figure):  # scale image to half size
                     cell[i] = Figure(
                         imgFile=e.imgPath,
@@ -38,7 +38,8 @@ def scaleImages(data):
 
 def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
     """
-    the widths for the individual columns are calculated. if the horizontal size exceeds the pagewidth
+    the widths for the individual columns are calculated.
+    if the horizontal size exceeds the pagewidth
     the fontsize is reduced
     """
 
@@ -52,8 +53,8 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
     minwidths = [0 for x in range(len(data[0]))]
     summedwidths = [0 for x in range(len(data[0]))]
     maxbreaks = [0 for x in range(len(data[0]))]
-    for (i, row) in enumerate(data):
-        for (j, cell) in enumerate(row):
+    for i, row in enumerate(data):
+        for j, cell in enumerate(row):
             cellwidth = 0
             try:
                 colspan = getattr(table.children[i].children[j], "colspan", 1)
@@ -64,11 +65,17 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
                 _, maxh = e.wrap(availWidth, pdfstyles.print_height)
                 minw += 6  # FIXME +6 is the cell padding we are using
                 cellwidth += minw
-                rows = minh / maxh - 0.5 if maxh > 0 else 0 # approx. #linebreaks - smooted out
+                rows = (
+                    minh / maxh - 0.5 if maxh > 0 else 0
+                )  # approx. #linebreaks - smooted out
                 if colspan > 1:
                     for offset in range(colspan):
-                        minwidths[j + offset] = max(minw / colspan, minwidths[j + offset])
-                        maxbreaks[j + offset] = max(rows / colspan, maxbreaks[j + offset])
+                        minwidths[j + offset] = max(
+                            minw / colspan, minwidths[j + offset]
+                        )
+                        maxbreaks[j + offset] = max(
+                            rows / colspan, maxbreaks[j + offset]
+                        )
                 else:
                     minwidths[j] = max(minw, minwidths[j])
                     maxbreaks[j] = max(rows, maxbreaks[j])
@@ -93,7 +100,10 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
         if remainingSpace < 0:
             if recursionDepth == 0:
                 scaleImages(data)
-                return getColWidths(data, table=table, recursionDepth=1, nestingLevel=nestingLevel)
+                return getColWidths(
+                    data, table=table,
+                    recursionDepth=1, nestingLevel=nestingLevel
+                )
             else:
                 return None
         else:
@@ -126,7 +136,11 @@ def splitCellContent(data):
                 for cell in row:
                     if len(cell) > splitRun * splitCellCount:
                         n_row.append(
-                            cell[splitRun * splitCellCount : (splitRun + 1) * splitCellCount]
+                            cell[
+                                splitRun
+                                * splitCellCount: (splitRun + 1)
+                                * splitCellCount
+                            ]
                         )
                     else:
                         n_row.append("")
@@ -162,7 +176,9 @@ def reformatTable(t, maxCols):
     nodeInfo = getContentType(t)
     numCols = maxCols
 
-    onlyTables = len(t.children) > 0  # if table is empty onlyTables and onlyLists are False
+    onlyTables = (
+        len(t.children) > 0
+    )  # if table is empty onlyTables and onlyLists are False
     onlyLists = len(t.children) > 0
     if not nodeInfo:
         onlyTables = False
@@ -203,7 +219,7 @@ def splitListItems(t):
             cols.append(items)
             maxItems = max(maxItems, len(items))
         for i in range(maxItems):
-            for (j, col) in enumerate(cols):
+            for j, col in enumerate(cols):
                 try:
                     item = cols[j][i]
                     il = ItemList()
@@ -263,7 +279,9 @@ def customCalcWidths(table, avail_width):
         return None
     col_widths = []
     for cell in first_row.children:
-        width = scale_length(getattr(cell, "vlist", {}).get("style", {}).get("width", ""))
+        width = scale_length(
+            getattr(cell, "vlist", {}).get("style", {}).get("width", "")
+        )
         col_widths.append(width)
     if any(not isinstance(w, float) for w in col_widths):
         return None
@@ -273,7 +291,8 @@ def customCalcWidths(table, avail_width):
     return col_widths
 
 
-def optimizeWidths(min_widths, max_widths, avail_width, stretch=False, table=None):
+def optimizeWidths(min_widths, max_widths, avail_width,
+                   stretch=False, table=None):
     if pdfstyles.table_widths_from_markup:
         col_widths = customCalcWidths(table, avail_width)
         if col_widths is not None:
@@ -287,7 +306,9 @@ def optimizeWidths(min_widths, max_widths, avail_width, stretch=False, table=Non
         remaining = avail_width - total_current
         return [w + w / total_current * remaining for w in max_widths]
     else:
-        total_delta = sum([max_widths[i] - min_widths[i] for i in range(len(min_widths))])
+        total_delta = sum(
+            [max_widths[i] - min_widths[i] for i in range(len(min_widths))]
+        )
 
     # prevent remaining_space to get negative. -5 compensates for table margins
     remaining_space = max(-5, remaining_space)
@@ -297,7 +318,8 @@ def optimizeWidths(min_widths, max_widths, avail_width, stretch=False, table=Non
     col_widths = []
     for i in range(len(min_widths)):
         col_widths.append(
-            min_widths[i] + remaining_space * (max_widths[i] - min_widths[i]) / total_delta
+            min_widths[i]
+            + remaining_space * (max_widths[i] - min_widths[i]) / total_delta
         )
     return col_widths
 
@@ -338,17 +360,23 @@ def checkSpans(t):
                 if col_idx > last_col_idx:
                     emptycell.moveto(t.children[row_idx + 1].children[last_col_idx])
                 else:
-                    emptycell.moveto(t.children[row_idx + 1].children[col_idx], prefix=True)
+                    emptycell.moveto(
+                        t.children[row_idx + 1].children[col_idx], prefix=True
+                    )
                 if not getattr(cell, "rowspanned", False):
                     # allow splitting of cells if rowspan exceeds this value
-                    # max_row_span = 15 for 4 cols, and 6 for 10 cols - empiric value
+                    # max_row_span = 15 for 4 cols, and 6 for
+                    # 10 cols - empiric value
                     max_row_span = 50 / _approx_cols
                     if cell.rowspan <= max_row_span:
                         styles.append(
                             (
                                 "SPAN",
                                 (col_idx, row_idx),
-                                (col_idx + cell.colspan - 1, row_idx + cell.rowspan - 1),
+                                (
+                                    col_idx + cell.colspan - 1,
+                                    row_idx + cell.rowspan - 1,
+                                ),
                             )
                         )
                     else:
@@ -368,7 +396,8 @@ def checkSpans(t):
                             styles.append(
                                 (
                                     "LINEBELOW",
-                                    (col_idx, row_idx + (n + 1) * span_range - 1),
+                                    (col_idx,
+                                     row_idx + (n + 1) * span_range - 1),
                                     (
                                         col_idx + cell.colspan - 1,
                                         row_idx + (n + 1) * span_range - 1,
@@ -381,7 +410,10 @@ def checkSpans(t):
                             (
                                 "SPAN",
                                 (col_idx, row_idx + span_range * (num_splits - 1)),
-                                (col_idx + cell.colspan - 1, row_idx + cell.rowspan - 1),
+                                (
+                                    col_idx + cell.colspan - 1,
+                                    row_idx + cell.rowspan - 1,
+                                ),
                             )
                         )
 
@@ -389,7 +421,10 @@ def checkSpans(t):
                 if cell.colspan > 1:
                     emptycell.colspanned = True
             elif cell.colspan > 1:
-                styles.append(("SPAN", (col_idx, row_idx), (col_idx + cell.colspan - 1, row_idx)))
+                styles.append(
+                    ("SPAN", (col_idx, row_idx),
+                     (col_idx + cell.colspan - 1, row_idx))
+                )
             col_idx += 1
 
     numcols = max(len(row.children) for row in t.children)
@@ -423,8 +458,12 @@ def base_styles(table):
     for row_idx, row in enumerate(table):
         for col_idx, cell in enumerate(row):
             if getattr(cell, "compact", False):
-                styles.append(("TOPPADDING", (col_idx, row_idx), (col_idx, row_idx), 2))
-                styles.append(("BOTTOMPADDING", (col_idx, row_idx), (col_idx, row_idx), 0))
+                styles.append(("TOPPADDING", (col_idx, row_idx),
+                               (col_idx, row_idx), 2))
+                styles.append(
+                    ("BOTTOMPADDING", (col_idx, row_idx),
+                     (col_idx, row_idx), 0)
+                )
     return styles
 
 
@@ -434,7 +473,10 @@ def valign_styles(table):
         for col_idx, cell in enumerate(row):
             valign = styleutils.get_vertical_alignment(cell)
             if valign in ["middle", "bottom"]:
-                styles.append(("VALIGN", (col_idx, row_idx), (col_idx, row_idx), valign.upper()))
+                styles.append(
+                    ("VALIGN", (col_idx, row_idx),
+                     (col_idx, row_idx), valign.upper())
+                )
     return styles
 
 
@@ -445,9 +487,11 @@ def border_styles(table):
         styles.append(("BOX", (0, 0), (-1, -1), 0.25, colors.black))
         for idx, row in enumerate(table):
             if not getattr(row, "suppress_bottom_border", False):
-                styles.append(("LINEBELOW", (0, idx), (-1, idx), 0.25, colors.black))
+                styles.append(("LINEBELOW",
+                               (0, idx), (-1, idx), 0.25, colors.black))
         for col in range(table.numcols):
-            styles.append(("LINEAFTER", (col, 0), (col, -1), 0.25, colors.black))
+            styles.append(("LINEAFTER", (col, 0), (col, -1),
+                           0.25, colors.black))
     return styles
 
 
@@ -456,15 +500,25 @@ def background_styles(table):
     table_bg = styleutils.rgb_bg_color_from_node(table, follow=False)
     if table_bg:
         styles.append(
-            ("BACKGROUND", (0, 0), (-1, -1), colors.Color(table_bg[0], table_bg[1], table_bg[2]))
+            (
+                "BACKGROUND",
+                (0, 0),
+                (-1, -1),
+                colors.Color(table_bg[0], table_bg[1], table_bg[2]),
+            )
         )
-    for (row_idx, row) in enumerate(table.children):
+    for row_idx, row in enumerate(table.children):
         rgb = styleutils.rgb_bg_color_from_node(row, follow=False)
         if rgb:
             styles.append(
-                ("BACKGROUND", (0, row_idx), (-1, row_idx), colors.Color(rgb[0], rgb[1], rgb[2]))
+                (
+                    "BACKGROUND",
+                    (0, row_idx),
+                    (-1, row_idx),
+                    colors.Color(rgb[0], rgb[1], rgb[2]),
+                )
             )
-        for (col_idx, cell) in enumerate(row.children):
+        for col_idx, cell in enumerate(row.children):
             if cell.__class__ != Cell:
                 continue
             rgb = styleutils.rgb_bg_color_from_node(cell, follow=False)
@@ -473,7 +527,8 @@ def background_styles(table):
                     (
                         "BACKGROUND",
                         (col_idx, row_idx),
-                        (col_idx + cell.colspan - 1, row_idx + cell.rowspan - 1),
+                        (col_idx + cell.colspan - 1,
+                         row_idx + cell.rowspan - 1),
                         colors.Color(rgb[0], rgb[1], rgb[2]),
                     )
                 )

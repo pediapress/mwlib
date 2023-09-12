@@ -53,7 +53,8 @@ class ImageUtils:
         )
 
         # check if img_node is thumb, then assign default width
-        max_width = self._compute_max_width_for_thumbs(full_size_thumbs, img_node, max_width)
+        max_width = self._compute_max_width_for_thumbs(full_size_thumbs,
+                                                       img_node, max_width)
 
         if not max_width:
             max_width = min(self.print_width_px, px_width)
@@ -65,7 +66,8 @@ class ImageUtils:
             img_print_width = max_print_width
 
         if max_print_height:
-            img_print_width = min(img_print_width, max_print_height * aspect_ratio)
+            img_print_width = min(img_print_width,
+                                  max_print_height * aspect_ratio)
 
         # check min resolution
         resulting_dpi = px_width / img_print_width * 72
@@ -87,13 +89,15 @@ class ImageUtils:
                 img_print_width -= 12
 
         img_print_width = min(
-            img_print_width, self.print_width, self.print_height * aspect_ratio * 0.9
+            img_print_width, self.print_width,
+            self.print_height * aspect_ratio * 0.9
         )
         img_print_height = img_print_width / aspect_ratio
         return img_print_width, img_print_height
 
     @staticmethod
-    def _compute_aspect_ratio_and_max_width(max_height, max_width, px_height, px_width):
+    def _compute_aspect_ratio_and_max_width(max_height, max_width,
+                                            px_height, px_width):
         aspect_ratio = px_width / px_height
         if max_height and max_width:
             if max_height * aspect_ratio > max_width:
@@ -104,7 +108,8 @@ class ImageUtils:
             max_width = max_height * aspect_ratio
         return aspect_ratio, max_width
 
-    def _compute_max_width_for_thumbs(self, full_size_thumbs, img_node, max_width):
+    def _compute_max_width_for_thumbs(self, full_size_thumbs,
+                                      img_node, max_width):
         if (
                 getattr(img_node, "thumb", None)
                 or getattr(img_node, "frame", None)

@@ -1,7 +1,6 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
 
-
 import os
 import time
 
@@ -25,12 +24,14 @@ log = Log("mwapidb")
 
 class PODClient:
     def __init__(self, posturl, redirecturl=None):
-        self.posturl = posturl.encode('utf-8')
+        self.posturl = posturl.encode("utf-8")
         self.redirecturl = redirecturl
 
     def _post(self, data, content_type=None):
         headers = {"Content-Type": content_type} if content_type is not None else {}
-        return six.moves.urllib.request.urlopen(six.moves.urllib.request.Request(self.posturl, data, headers=headers)).read()
+        return six.moves.urllib.request.urlopen(
+            six.moves.urllib.request.Request(self.posturl, data, headers=headers)
+        ).read()
 
     def post_status(self, status=None, progress=None, article=None, error=None):
         post_data = {}
@@ -47,7 +48,7 @@ class PODClient:
         setv("article", article)
 
         if progress is not None:
-            post_data['progress'] = '%d' % progress
+            post_data["progress"] = "%d" % progress
 
         self._post(six.moves.urllib.parse.urlencode(post_data))
 
@@ -59,17 +60,19 @@ class PODClient:
 
         items = []
         items.append("--" + boundary)
-        items.append('Content-Disposition: form-data; name="collection"; filename="collection.zip"')
-        items.append('Content-Type: application/octet-stream')
-        items.append('')
-        items.append('')
+        items.append(
+            'Content-Disposition: form-data; name="collection"; filename="collection.zip"'
+        )
+        items.append("Content-Type: application/octet-stream")
+        items.append("")
+        items.append("")
 
         before = "\r\n".join(items)
 
         items = []
-        items.append('')
-        items.append('--' + boundary + '--')
-        items.append('')
+        items.append("")
+        items.append("--" + boundary + "--")
+        items.append("")
         after = "\r\n".join(items)
 
         clen = len(before) + len(after) + os.path.getsize(filename)
@@ -108,11 +111,17 @@ class PODClient:
 
     def post_zipfile(self, filename):
         with open(filename, "rb") as f:
-            content_type, data = get_multipart('collection.zip', f.read(), 'collection')
-        log.info('POSTing zipfile %r to %s (%d Bytes)' % (filename, self.posturl, len(data)))
+            content_type, data = get_multipart("collection.zip", f.read(), "collection")
+        log.info(
+            "POSTing zipfile %r to %s (%d Bytes)" % (filename, self.posturl, len(data))
+        )
         self._post(data, content_type=content_type)
 
 
 def podclient_from_serviceurl(serviceurl):
-    result = json.loads(six.text_type(six.moves.urllib.request.urlopen(serviceurl, data="any").read(), 'utf-8'))
+    result = json.loads(
+        six.text_type(
+            six.moves.urllib.request.urlopen(serviceurl, data="any").read(), "utf-8"
+        )
+    )
     return PODClient(result["post_url"], redirecturl=result["redirect_url"])

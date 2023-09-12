@@ -115,7 +115,6 @@ class TableRowParser:
         for i, x in enumerate(children):
             if x.type in (T.t_newline, T.t_break):
                 mod = T.join_as_text(children[:i])
-                #print "MODIFIER:", repr(mod)
                 row.vlist = util.parse_params(mod)
                 del children[:i]
                 return
@@ -215,7 +214,6 @@ class TableParser:
 
         def compute_mod():
             mod = T.join_as_text(children[:i])
-            #print "MODIFIER:", repr(mod)
             table.vlist = util.parse_params(mod)
             del children[:i]
 

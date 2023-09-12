@@ -43,19 +43,27 @@ def zip_dir(dirname, output=None, skip_ext=None):
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zf.write(i, i[len(dirname) + 1:])
+        zf.write(i, i[len(dirname) + 1 :])
     zf.close()
 
 
 def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
-    tmpdir = tempfile.mkdtemp(dir=os.path.dirname(output)) if output else tempfile.mkdtemp()
+    tmpdir = (
+        tempfile.mkdtemp(dir=os.path.dirname(output)) if output else tempfile.mkdtemp()
+    )
 
     try:
         fsdir = os.path.join(tmpdir, "nuwiki")
         print("creating nuwiki in %r" % fsdir)
         from mwlib.apps.make_nuwiki import make_nuwiki
 
-        make_nuwiki(fsdir, metabook=metabook, options=options, podclient=podclient, status=status)
+        make_nuwiki(
+            fsdir,
+            metabook=metabook,
+            options=options,
+            podclient=podclient,
+            status=status,
+        )
 
         if output:
             fd, filename = tempfile.mkstemp(suffix=".zip", dir=os.path.dirname(output))
@@ -105,7 +113,9 @@ def main():
         help="don't remove  temporary files like images",
     )
 
-    parser.add_option("-s", "--status-file", help="write status/progress info to this file")
+    parser.add_option(
+        "-s", "--status-file", help="write status/progress info to this file"
+    )
 
     options, args = parser.parse_args()
     conf.readrc()
@@ -113,7 +123,8 @@ def main():
 
     if parser.metabook is None and options.collectionpage is None:
         parser.error(
-            "Neither --metabook nor, --collectionpage or arguments specified.\n" + use_help
+            "Neither --metabook nor, --collectionpage or arguments specified.\n"
+            + use_help
         )
     pod_client = _init_pod_client(options, parser, use_help)
 
@@ -124,7 +135,9 @@ def main():
         if not env.metabook:
             raise ValueError("no metabook")
 
-        status = Status(options.status_file, podclient=pod_client, progress_range=(1, 90))
+        status = Status(
+            options.status_file, podclient=pod_client, progress_range=(1, 90)
+        )
         status(progress=0)
         output = options.output
 
@@ -144,7 +157,9 @@ def _init_pod_client(options, parser, use_help):
     if options.posturl and options.getposturl:
         parser.error("Specify either --posturl or --getposturl.\n" + use_help)
     if not options.posturl and not options.getposturl and not options.output:
-        parser.error("Neither --output, nor --posturl or --getposturl specified.\n" + use_help)
+        parser.error(
+            "Neither --output, nor --posturl or --getposturl specified.\n" + use_help
+        )
     if options.posturl:
         pod_client = PODClient(options.posturl)
     elif options.getposturl:
@@ -164,7 +179,6 @@ def _init_pod_client(options, parser, use_help):
         time.sleep(1)
         with contextlib.suppress(OSError):
             os.kill(pid, 9)
-
 
     else:
         pod_client = None

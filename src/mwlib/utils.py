@@ -1,5 +1,3 @@
-
-
 import itertools
 import os
 import pprint
@@ -197,12 +195,13 @@ def fetch_url(
     # log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
 
     if hasattr(fetch_cache, "max_cacheable_size"):
-        max_cacheable_size = max(fetch_cache.max_cacheable_size, max_cacheable_size)
+        max_cacheable_size = max(fetch_cache.max_cacheable_size,
+                                 max_cacheable_size)
     if len(data) <= max_cacheable_size:
         fetch_cache[url] = data
 
     if output_filename:
-        with open (output_filename, "wb") as f:
+        with open(output_filename, "wb") as f:
             f.write(data)
         return True
     else:
@@ -238,7 +237,8 @@ def ensure_dir(d):
     return d
 
 
-def send_mail(from_email, to_emails, subject, body, headers=None, host="mail", port=25):
+def send_mail(from_email, to_emails, subject, body,
+              headers=None, host="mail", port=25):
     """Send an email via SMTP
 
     @param from_email: email address for From: header
@@ -302,7 +302,14 @@ def ppdict(dct):
     return "\n".join(tmp)
 
 
-def report(system="", subject="", from_email=None, mail_recipients=None, mail_headers=None, **kw):
+def report(
+    system="",
+    subject="",
+    from_email=None,
+    mail_recipients=None,
+    mail_headers=None,
+    **kw,
+):
     log.report(f"system={system!r} subject={subject!r}")
 
     text = []
@@ -366,7 +373,9 @@ def get_safe_url(url):
         log.warn(f"quote(unquote({path!r})) failed: {exc}")
         return None
     try:
-        return six.moves.urllib.parse.urlunsplit((scheme, netloc, path, query, fragment))
+        return six.moves.urllib.parse.urlunsplit(
+            (scheme, netloc, path, query, fragment)
+        )
     except Exception as exc:
         log.warn("urlunparse() failed: %s" % exc)
 

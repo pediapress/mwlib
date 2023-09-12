@@ -25,7 +25,8 @@ def preprocess(txt, included=True):
         txt = noincluderx.sub("", txt)
 
         if "<onlyinclude>" in txt:
-            # if onlyinclude tags are used, only use text between those tags. template 'legend' is a example
+            # if onlyinclude tags are used, only use text between those tags.
+            # template 'legend' is a example
             txt = "".join(onlyincluderx.findall(txt))
     else:
         txt = includeonlyrx.sub("", txt)

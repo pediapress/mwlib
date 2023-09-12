@@ -31,12 +31,11 @@ def make_collection_id(data):
         sio.write(repr(data.get(key)))
     mb = data.get('metabook')
     if mb:
-        # if isinstance(mb, str):
-        #     mb = six.text_type(mb, 'utf-8')
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        sys.stdout.write("new-collection {}\t{!r}\t{!r}\n".format(num_articles, data.get("base_url"), data.get("writer")))
+        sys.stdout.write("new-collection {}\t{!r}\t{!r}\n".format(num_articles,
+                                                                  data.get("base_url"), data.get("writer")))
 
     return sha256(sio.getvalue().encode()).hexdigest()[:16]
 

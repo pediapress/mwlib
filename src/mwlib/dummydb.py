@@ -2,9 +2,6 @@
 # See README.rst for additional licensing information.
 
 
-
-
-
 class DummyDB:
     def __init__(self, lang="en"):
         from mwlib import siteinfo

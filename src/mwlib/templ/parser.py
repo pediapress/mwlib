@@ -2,7 +2,6 @@
 # See README.md for additional licensing information.
 
 
-
 import re
 from hashlib import sha256 as digest
 
@@ -206,7 +205,6 @@ class Parser:
         return [optimize(x) for x in args]
 
     def _is_good_name(self, node):
-
         # we stop here on the first colon. this is wrong but we don't have
         # the list of allowed magic functions here...
         done = False
@@ -240,7 +238,9 @@ class Parser:
                 name, first = s.split(":", 1)
                 name = self.aliasmap.resolve_magic_alias(name) or name
                 if name in magic_nodes.registry:
-                    return self.magicNodeFromChildren(children, magic_nodes.registry[name])
+                    return self.magicNodeFromChildren(
+                        children, magic_nodes.registry[name]
+                    )
 
         # find the name
         name = []
@@ -320,7 +320,9 @@ class Parser:
             except KeyError:
                 pass
 
-        self.tokens = tokenize(self.txt, included=self.included, replace_tags=self.replace_tags)
+        self.tokens = tokenize(
+            self.txt, included=self.included, replace_tags=self.replace_tags
+        )
         self.pos = 0
         n = []
 
@@ -345,4 +347,6 @@ class Parser:
 
 
 def parse(txt, included=True, replace_tags=None, siteinfo=None):
-    return Parser(txt, included=included, replace_tags=replace_tags, siteinfo=siteinfo).parse()
+    return Parser(
+        txt, included=included, replace_tags=replace_tags, siteinfo=siteinfo
+    ).parse()

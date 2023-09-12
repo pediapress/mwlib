@@ -17,7 +17,8 @@ except ImportError:
 
 
 class License:
-    def __init__(self, name="", display_name="", license_type=None, description=""):
+    def __init__(self, name="", display_name="",
+                 license_type=None, description=""):
         self.name = name
         self.display_name = display_name
         self.license_type = license_type  # free|nonfree|unrelated|unknown
@@ -57,7 +58,8 @@ class LicenseChecker:
         with open(fn) as csv_file:
             for data in csv.reader(csv_file):
                 try:
-                    (name, display_name, license_type, dummy, license_description) = data
+                    (name, display_name, license_type,
+                     dummy, license_description) = data
                 except ValueError:
                     continue
                 if not name:
@@ -154,7 +156,8 @@ class LicenseChecker:
     def dump_stats(self):
         stats = [
             "IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f"
-            % (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio)
+            % (len(self.accepted_images), len(self.rejected_images),
+               self.free_img_ratio)
         ]
 
         images = set()
@@ -169,7 +172,8 @@ class LicenseChecker:
     def dump_unknown_licenses(self, _dir):
         if not self.unknown_licenses:
             return
-        f = tempfile.NamedTemporaryFile(dir=_dir, prefix="licensestats_", suffix=".json")
+        f = tempfile.NamedTemporaryFile(dir=_dir, prefix="licensestats_",
+                                        suffix=".json")
         unknown_licenses = {}
         for lic, urls in self.unknown_licenses.items():
             unknown_licenses[lic] = list(urls)

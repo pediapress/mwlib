@@ -13,7 +13,6 @@
 #################################################################
 
 
-
 import contextlib
 
 from reportlab import rl_config
@@ -25,6 +24,7 @@ from reportlab.lib.units import cm
 
 # used to mark translateable strings:
 if "_" not in globals():
+
     def _(x):
         return x
 
@@ -37,7 +37,7 @@ default_font = "FreeSerif"
 rl_config.canvas_basefontname = default_font
 
 
-######### PAGE CONFIGURATION
+# PAGE CONFIGURATION
 
 page_width, page_height = A4  # roughly: pW= 21*cm pH=29*cm
 
@@ -68,18 +68,25 @@ show_article_attribution = True  # Show/Hide article source and contributors
 show_article_hr = True  # Underline each article header by a horizontal rule
 show_wiki_license = True
 
-# NOTE: strings can contain reportlab styling tags the text needs to be xml excaped.
-# more information is available in the reportlab user documentation (http://www.reportlab.com/docs/userguide.pdf)
+# NOTE: strings can contain reportlab styling tags
+# the text needs to be xml excaped.
+# more information is available in the reportlab
+# user documentation (http://www.reportlab.com/docs/userguide.pdf)
 # check the section 6.2 "Paragraph XML Markup Tags"
-# since the documenatition is not guaranteed to be up to date, you might also want to check the docsting of the
+# since the documenatition is not guaranteed to be up to date,
+# you might also want to check the docsting of the
 # Paragraph class (reportlab/platypus/paragraph.py --> class Paragraph())
-# e.g. the use of inline images is not included in the official documenation of reportlab
+# e.g. the use of inline images is not
+# included in the official documenation of reportlab
 pagefooter = ""
 
 #### TITLE PAGE
 
 title_page_image = ""  # path of an image that is to be displayed on the title page
-title_page_image_size = (12 * cm, 17 * cm)  # max. width, height of image, aspect ratio is kept
+title_page_image_size = (
+    12 * cm,
+    17 * cm,
+)  # max. width, height of image, aspect ratio is kept
 # position of image relativ to bottom, left corner.
 # If component is set to None the image is centered
 # It is ensured that the image is not moved out of the page boundaries
@@ -100,11 +107,13 @@ creation_date_txt = "PDF generated at: %s"
 # note that no TOC is generated if only one article is rendered
 render_toc = True
 
-### TABLE CONFIG
+# TABLE CONFIG
 
 tableOverflowTolerance = 20  # max width overflow for tables    unit: pt
 cell_padding = 3
-min_rows_for_break = 3  # page breaks before tables are only forced if more than n rows are present
+min_rows_for_break = (
+    3  # page breaks before tables are only forced if more than n rows are present
+)
 
 # if set to True column widths are extracted from wiki markup if possible
 table_widths_from_markup = False
@@ -112,13 +121,14 @@ table_widths_from_markup = False
 # alignment of tables: TA_LEFT | TA_CENTER | TA_RIGHT
 table_align = TA_CENTER
 
-######### TREECLEANER CONFIGURATION
+# TREECLEANER CONFIGURATION
 
 treecleaner_skip_methods = ["fixPreFormatted", "removeEmptyReferenceLists"]
 
-######### IMAGE CONFIGURATION
+# IMAGE CONFIGURATION
 
-# margins for floated images - margins like in html/css: (top, right, bottom, left)
+# margins for floated images - margins like in html/css:
+# (top, right, bottom, left)
 img_margins_float_left = (0, 0.4 * cm, 0.7 * cm, 0)  # img that is left aligned
 img_margins_float_right = (0, 0, 0.7 * cm, 0.4 * cm)  # ...
 img_margins_float = (0.2 * cm, 0.2 * cm, 0.2 * cm, 0.2 * cm)  # any other alignment
@@ -134,7 +144,7 @@ img_border_color = (0.75, 0.75, 0.75)
 
 link_images = True
 
-######### TEXT CONFIGURATION
+# TEXT CONFIGURATION
 font_size = 10
 leading = 15
 text_align = TA_JUSTIFY  # default alignment of text outside of tables TA_LEFT, TA_JUSTIFY, TA_RIGHT, TA_CENTER are valid
@@ -153,13 +163,16 @@ list_left_indent = 12  # indentation of lists per level
 
 tabsize = 6
 
-source_max_line_len = 72  # if printing a source node, the maximum number of chars in one line
+source_max_line_len = (
+    72  # if printing a source node, the maximum number of chars in one line
+)
 
 no_float_math_len = 150
 
 max_math_width = 2500
 max_math_height = 2500
-# set to CJK if a PDF is rendered mainly using chinese, japanese or korean glyphs
+# set to CJK if a PDF is rendered mainly using chinese,
+# japanese or korean glyphs
 word_wrap = None
 
 min_preformatted_size = 5
@@ -217,7 +230,8 @@ def text_style(mode="p", indent_lvl=0, in_table=0, relsize="normal", text_align=
         text_align = "left"
 
     style = BaseStyle(
-        name="text_style_%s_indent_%d_table_%d_size_%s" % (mode, indent_lvl, in_table, relsize)
+        name="text_style_%s_indent_%d_table_%d_size_%s"
+        % (mode, indent_lvl, in_table, relsize)
     )
     style.flowable = True  # needed for "flowing" paragraphs around figures
 
@@ -231,7 +245,11 @@ def text_style(mode="p", indent_lvl=0, in_table=0, relsize="normal", text_align=
     elif text_align == "center":
         style.alignment = TA_CENTER
 
-    if in_table or mode in ["footer", "figure"] or (mode == "preformatted" and relsize == "small"):
+    if (
+        in_table
+        or mode in ["footer", "figure"]
+        or (mode == "preformatted" and relsize == "small")
+    ):
         style.fontSize = small_font_size
         style.bulletFontSize = small_font_size
         style.leading = small_leading
@@ -273,9 +291,13 @@ def text_style(mode="p", indent_lvl=0, in_table=0, relsize="normal", text_align=
 
     if mode == "box" or mode == "source" or mode == "preformatted":
         style.backColor = "#eeeeee"
-        style.borderPadding = 3  # borderPadding is not calculated onto the box dimensions.
+        style.borderPadding = (
+            3  # borderPadding is not calculated onto the box dimensions.
+        )
         style.spaceBefore = 6  # therefore spaceBefore = 3 + borderPadding
-        style.spaceAfter = 9  # add an extra 3 to spaceAfter, b/c spacing seems to small otherwise
+        style.spaceAfter = (
+            9  # add an extra 3 to spaceAfter, b/c spacing seems to small otherwise
+        )
 
     if mode == "source" or mode == "preformatted":
         style.fontName = mono_font
@@ -362,12 +384,9 @@ class BaseHeadingStyle(ParagraphStyle):
         self.backcolor = None
         self.wordWrap = None
         self.textTransform = None
-        # self.allowWidows = 0
-        # self.allowOrphans = 0
 
 
 def heading_style(mode="Chapter", lvl=1, text_align=None):
-
     style = BaseHeadingStyle(name="heading_style_%s_%d" % (mode, lvl))
 
     if word_wrap == "RTL":
@@ -422,7 +441,6 @@ def heading_style(mode="Chapter", lvl=1, text_align=None):
 # if doing so, you need to be careful not to break things...
 with contextlib.suppress(ImportError):
     from customconfig import *
-
 
 
 print_width = page_width - page_margin_left - page_margin_right

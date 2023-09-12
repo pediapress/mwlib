@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 
-
 import time
 
 import mwclient
@@ -14,20 +13,23 @@ from mwlib.consts.urls import WIKITRUST_API
 
 class WikiTrustServerError(Exception):
     "For some reason the API often respons with an error"
-    msg_identifier = 'EERROR detected.  Try again in a moment, or report an error on the WikiTrust bug tracker.'
+    msg_identifier = "EERROR detected.  Try again in a moment, or report an error on the WikiTrust bug tracker."
 
 
 class TrustedRevisions:
     min_trust = 0.80
     wikitrust_api = WIKITRUST_API
 
-    def __init__(self, site_name='en.wikipedia.org'):
+    def __init__(self, site_name="en.wikipedia.org"):
         self.site = mwclient.Site(site_name)
 
     def get_wiki_trust_score(self, title, revid):
         # http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=quality&title=Buster_Keaton&pageid=43055&revid=364710354
-        url = '%s?method=quality&title=%s&revid=%d' % \
-            (self.wikitrust_api, six.moves.urllib.parse.quote(title), revid)
+        url = "%s?method=quality&title=%s&revid=%d" % (
+            self.wikitrust_api,
+            six.moves.urllib.parse.quote(title),
+            revid,
+        )
         r = six.moves.urllib.request.urlopen(url).read()
         if r == WikiTrustServerError.msg_identifier:
             raise WikiTrustServerError
@@ -40,36 +42,38 @@ class TrustedRevisions:
         p = self.site.Pages[title]
         for rev in p.revisions():
             # add basic info
-            rev['age'] = (now - time.mktime(rev['timestamp'])) / (24 * 3600)  # days
-            rev['title'] = title
+            rev["age"] = (now - time.mktime(rev["timestamp"])) / (24 * 3600)  # days
+            rev["title"] = title
 
             # don't use bot revs
-            if 'bot' in rev['user'].lower():
+            if "bot" in rev["user"].lower():
                 continue
             # don't use reverted revs (but rather the original one)
-            if 'revert' in rev.get('comment', '').lower():
+            if "revert" in rev.get("comment", "").lower():
                 continue
 
             try:
-                rev['score'] = self.get_wiki_trust_score(title, rev['revid'])
+                rev["score"] = self.get_wiki_trust_score(title, rev["revid"])
             except WikiTrustServerError:
-                #print '%s\t%d\terror' %(title, rev['revid'])
                 continue
 
-            #print '%s\t%d\t%.2f' %(title, rev['revid'], rev['score'])
-            if not best_rev or rev['score'] > best_rev['score']:
+            if not best_rev or rev["score"] > best_rev["score"]:
                 best_rev = rev
-            if rev['score'] > min_trust:  # break if we have a sufficient score
+            if rev["score"] > min_trust:  # break if we have a sufficient score
                 break
-            if max_age and rev['age'] > max_age:  # break if articles get too old
+            if max_age and rev["age"] > max_age:  # break if articles get too old
                 break
 
         return best_rev
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+
     tr = TrustedRevisions()
     trev = tr.get_trusted_revision(sys.argv[1])
-    print('Found revision:', trev)
-    print('title:%s revid:%d age:%.2f days' % (trev['title'], trev['revid'], trev['age']))
+    print("Found revision:", trev)
+    print(
+        "title:%s revid:%d age:%.2f days" % (trev["title"],
+                                             trev["revid"], trev["age"])
+    )

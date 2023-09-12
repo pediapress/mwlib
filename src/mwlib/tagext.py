@@ -24,7 +24,7 @@ http://code.pediapress.com/wiki/wiki/ParserExtensionTags
 """
 import codecs
 
-rot13_encode = codecs.getencoder('rot-13')
+rot13_encode = codecs.getencoder("rot-13")
 
 
 class ExtensionRegistry:
@@ -34,7 +34,7 @@ class ExtensionRegistry:
     def registerExtension(self, k):
         name = k.name
         if name in self.name2ext:
-            raise ValueError(f'tag extension for {name!r} already registered')
+            raise ValueError(f"tag extension for {name!r} already registered")
         self.name2ext[name] = k()
         return k
 
@@ -109,10 +109,13 @@ rss siteactivity templatestyles userpoll videogallerypopulate vote
 welcomeuser xsound pageby uml graphviz categorytree summary slippymap""".split()
 
 for name in tags_to_ignore:
+
     def _f(name):
         class Ignore(IgnoreTagBase):
             name = name
+
         register(Ignore)
+
     _f(name)
 
 
@@ -120,7 +123,8 @@ class Rot13Extension(TagExtension):
     """
     example extension
     """
-    name = 'rot13'  # must equal the tag-name
+
+    name = "rot13"  # must equal the tag-name
 
     def __call__(self, source, attributes):
         """
@@ -140,6 +144,7 @@ class TimelineExtension(TagExtension):
 
     def __call__(self, source, attributes):
         from mwlib.parser import Timeline
+
         return Timeline(source)
 
 
@@ -151,6 +156,7 @@ class MathExtension(TagExtension):
 
     def __call__(self, source, attributes):
         from mwlib.parser import Math
+
         return Math(source)
 
 
@@ -169,13 +175,16 @@ register(IDLExtension)
 
 
 class Syntaxhighlight(TagExtension):
-    '''http://www.mediawiki.org/wiki/Syntaxhighlight'''
+    """http://www.mediawiki.org/wiki/Syntaxhighlight"""
+
     name = "syntaxhighlight"
 
     def __call__(self, source, attributes):
-        return self.parse('<source{}>{}</source>'.format(''.join(f' {k}={v}'
-                                                             for k, v in attributes.items()),
-                                                     source))
+        return self.parse(
+            "<source{}>{}</source>".format(
+                "".join(f" {k}={v}" for k, v in attributes.items()), source
+            )
+        )
 
 
 register(Syntaxhighlight)
@@ -187,7 +196,6 @@ class RDFExtension(TagExtension):
     name = "rdf"
 
     def __call__(self, source, attributes):
-        # return self.parse("<!--\n%s\n -->" % source)
         return  # simply skip for now, since comments are not parsed correctly
 
 
@@ -209,6 +217,7 @@ class HieroExtension(TagExtension):
 
     def __call__(self, source, attributes):
         from mwlib import parser
+
         tn = parser.TagNode("hiero")
         tn.children.append(parser.Text(source))
         return tn
@@ -228,21 +237,21 @@ register(LabledSectionTransclusionExtensionHotFix)
 
 
 class ListingExtension(TagExtension):
-    " http://wikitravel.org/en/Wikitravel:Listings "
+    "http://wikitravel.org/en/Wikitravel:Listings"
     name = "listing"
-    attrs = [("name", "'''%s'''"),
-             ("alt", "(''%s'')"),
-             ("address", ", %s"),
-             ("directions", " (''%s'')"),
-             ("phone", ", ☎ %s"),
-             ("fax", ", fax: %s"),
-             ("email", ", e-mail: %s"),
-             ("url", ", %s"),
-             ("hours", ", %s"),
-             ("price", ", %s"),
-             # ("lat", u", Latitude: %s"), # disable in print as it is disabled in WP as well
-             # ("long", u", Longitude: %s"),
-             ("tags", ", Tags: %s")]
+    attrs = [
+        ("name", "'''%s'''"),
+        ("alt", "(''%s'')"),
+        ("address", ", %s"),
+        ("directions", " (''%s'')"),
+        ("phone", ", ☎ %s"),
+        ("fax", ", fax: %s"),
+        ("email", ", e-mail: %s"),
+        ("url", ", %s"),
+        ("hours", ", %s"),
+        ("price", ", %s"),
+        ("tags", ", Tags: %s"),
+    ]
 
     def __call__(self, source, attributes):
         t = "".join(v % attributes[k] for k, v in self.attrs if attributes.get(k, None))
@@ -294,6 +303,3 @@ class SleepExtension(ListingExtension):
 
 
 register(SleepExtension)
-
-
-#print default_registry.name2ext

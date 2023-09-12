@@ -49,7 +49,8 @@ class Formatter:
         "color": {"*": ("color_style", styleutils.rgb_color_from_node)},
     }
 
-    def __init__(self, font_switcher=None, output_encoding=None, word_split_len=20):
+    def __init__(self, font_switcher=None,
+                 output_encoding=None, word_split_len=20):
 
         self.font_switcher = font_switcher
 

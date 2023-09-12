@@ -14,27 +14,36 @@ from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
 from mwlib.log import Log
 from mwlib.metabook import WikiConf
 
-log = Log('mwlib.utils')
+log = Log("mwlib.utils")
 
 
 def wiki_obsolete_cdb(path=None, **kwargs):
     raise RuntimeError("cdb file format is not supported anymore.")
 
 
-dispatch = {
-    'wiki': {'cdb': wiki_obsolete_cdb, 'nucdb': wiki_obsolete_cdb}
-}
+dispatch = {"wiki": {"cdb": wiki_obsolete_cdb, "nucdb": wiki_obsolete_cdb}}
 
-_en_license_url = 'https://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw'
+_en_license_url = (
+    "https://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw"
+)
 wpwikis = {
-    'de': {'baseurl': 'https://de.wikipedia.org/w/',
-            'mw_license_url': 'https://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw'},
-    'en': {'baseurl': 'https://en.wikipedia.org/w/', 'mw_license_url': _en_license_url},
-    'fr': {'baseurl': 'https://fr.wikipedia.org/w/', 'mw_license_url': None},
-    'es': {'baseurl': 'https://es.wikipedia.org/w/', 'mw_license_url': None},
-    'pt': {'baseurl': 'https://pt.wikipedia.org/w/', 'mw_license_url': None},
-    'enwb': {'baseurl': 'https://en.wikibooks.org/w', 'mw_license_url': _en_license_url},
-    'commons': {'baseurl': 'https://commons.wikimedia.org/w/', 'mw_license_url': _en_license_url}
+    "de": {
+        "baseurl": "https://de.wikipedia.org/w/",
+        "mw_license_url": "https://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw",
+    },
+    "en": {"baseurl": "https://en.wikipedia.org/w/",
+           "mw_license_url": _en_license_url},
+    "fr": {"baseurl": "https://fr.wikipedia.org/w/", "mw_license_url": None},
+    "es": {"baseurl": "https://es.wikipedia.org/w/", "mw_license_url": None},
+    "pt": {"baseurl": "https://pt.wikipedia.org/w/", "mw_license_url": None},
+    "enwb": {
+        "baseurl": "https://en.wikibooks.org/w",
+        "mw_license_url": _en_license_url,
+    },
+    "commons": {
+        "baseurl": "https://commons.wikimedia.org/w/",
+        "mw_license_url": _en_license_url,
+    },
 }
 
 
@@ -46,11 +55,13 @@ class Environment:
         self.images = None
         self.wiki = None
         self.configparser = ConfigParser()
-        defaults = StringIO("""
+        defaults = StringIO(
+            """
 [wiki]
 name=
 url=
-""")
+"""
+        )
         self.configparser.read_file(defaults)
 
     def init_metabook(self):
@@ -82,6 +93,7 @@ class MultiEnvironment(Environment):
 
     def init_metabook(self):
         from mwlib import nuwiki
+
         if not self.metabook:
             return
 
@@ -91,7 +103,8 @@ class MultiEnvironment(Environment):
 
             if wiki_id not in self.id2env:
                 env = Environment()
-                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path, wiki_id))
+                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path,
+                                                                  wiki_id))
                 self.id2env[wiki_id] = env
             else:
                 env = self.id2env[wiki_id]
@@ -121,12 +134,14 @@ def _makewiki(conf, metabook=None, **kw):
     res = Environment(metabook)
 
     url = None
-    if conf.startswith(':'):
+    if conf.startswith(":"):
         if conf[1:] not in wpwikis:
-            wpwikis[conf[1:]] = {'baseurl': "http://%s.wikipedia.org/w/" % conf[1:],
-                                     'mw_license_url': None}
+            wpwikis[conf[1:]] = {
+                "baseurl": "http://%s.wikipedia.org/w/" % conf[1:],
+                "mw_license_url": None,
+            }
 
-        url = wpwikis.get(conf[1:])['baseurl']
+        url = wpwikis.get(conf[1:])["baseurl"]
 
     if conf.startswith("http://") or conf.startswith("https://"):
         url = conf
@@ -137,22 +152,22 @@ def _makewiki(conf, metabook=None, **kw):
         res.image = None
         return res
 
-    nfo_fn = os.path.join(conf, 'nfo.json')
+    nfo_fn = os.path.join(conf, "nfo.json")
     if os.path.exists(nfo_fn):
         from mwlib import myjson as json
         from mwlib import nuwiki
 
         try:
-            with open(nfo_fn, 'rb') as fp:
-                format = json.load(fp)['format']
+            with open(nfo_fn, "rb") as fp:
+                format = json.load(fp)["format"]
         except KeyError:
             pass
         else:
-            if format == 'nuwiki':
+            if format == "nuwiki":
                 res.images = res.wiki = nuwiki.adapt(conf)
                 res.metabook = res.wiki.metabook
                 return res
-            elif format == 'multi-nuwiki':
+            elif format == "multi-nuwiki":
                 return MultiEnvironment(conf)
 
     if os.path.exists(os.path.join(conf, "content.json")):
@@ -167,6 +182,7 @@ def _makewiki(conf, metabook=None, **kw):
         import zipfile
 
         from mwlib import myjson as json
+
         conf = os.path.abspath(conf)
 
         zf = zipfile.ZipFile(conf)
@@ -177,14 +193,16 @@ def _makewiki(conf, metabook=None, **kw):
 
         if format == "nuwiki":
             from mwlib import nuwiki
+
             res.images = res.wiki = nuwiki.adapt(zf)
             if metabook is None:
                 res.metabook = res.wiki.metabook
             return res
-        elif format == 'multi-nuwiki':
+        elif format == "multi-nuwiki":
             import tempfile
 
             from mwlib import nuwiki
+
             tmpdir = tempfile.mkdtemp()
             nuwiki.extractall(zf, tmpdir)
             res = MultiEnvironment(tmpdir)
@@ -197,15 +215,15 @@ def _makewiki(conf, metabook=None, **kw):
     if not cp.read(conf):
         raise RuntimeError(f"could not read config file {conf!r}")
 
-    for s in ['images', 'wiki']:
+    for s in ["images", "wiki"]:
         if not cp.has_section(s):
             continue
 
         args = dict(cp.items(s))
         if "type" not in args:
             raise RuntimeError("section %r does not have key 'type'" % s)
-        t = args['type']
-        del args['type']
+        t = args["type"]
+        del args["type"]
         try:
             m = dispatch[s][t]
         except KeyError:
@@ -219,7 +237,11 @@ def _makewiki(conf, metabook=None, **kw):
 
 
 def makewiki(config, metabook=None, **kw):
-    res = Environment(metabook) if not config else _makewiki(config, metabook=metabook, **kw)
+    res = (
+        Environment(metabook)
+        if not config
+        else _makewiki(config, metabook=metabook, **kw)
+    )
 
     if res.wiki:
         res.wiki.env = res
