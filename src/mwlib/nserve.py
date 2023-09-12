@@ -499,7 +499,6 @@ def _parse_qs(qs):
 
 
 def main():
-    # pywsgi.WSGIHandler.log_request = lambda *args, **kwargs: None
 
     from mwlib import argv
 
@@ -508,7 +507,7 @@ def main():
     )
     qs = []
     port = 8899
-    interface = "0.0.0.0"
+    interface = "127.0.0.1"
     for o, a in opts:
         if o == "--port":
             port = int(a)

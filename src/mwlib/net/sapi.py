@@ -29,7 +29,8 @@ def merge_data(dst, src):
     todo = [(dst, src)]
     while todo:
         dst, src = todo.pop()
-        assert isinstance(dst, type(src)), f"cannot merge {type(dst)!r} with {type(src)!r}"
+        if not isinstance(dst, type(src)):
+            raise ValueError(f"cannot merge {type(dst)!r} with {type(src)!r}")
 
         if isinstance(dst, list):
             dst.extend(src)
@@ -71,7 +72,8 @@ class MwApi:
         pass
 
     def set_limit(self, limit=None):
-        assert self.limit_fetch_semaphore is None, "limit already set"
+        if self.limit_fetch_semaphore is not None:
+            raise ValueError("limit already set")
 
         if limit is None:
             limit = self.api_request_limit
@@ -228,7 +230,8 @@ class MwApi:
         return self.do_request(action="query", **kwargs)
 
     def _update_kwargs(self, kwargs, titles, revids):
-        assert titles or revids and not (titles and revids), "either titles or revids must be set"
+        if not titles and not revids:
+            raise ValueError("either titles or revids must be set")
 
         if titles:
             kwargs["titles"] = "|".join(titles)

@@ -82,7 +82,8 @@ def _get_args(writer_options=None,
 
     if login_credentials:
         username, password, domain = (login_credentials.split(":", 3) + [None] * 3)[:3]
-        assert username and password, "bad login_credentials"
+        if not username or not password:
+            raise ValueError("bad login_credentials")
         args.extend(["--username", username, "--password", password])
         if domain:
             args.extend(["--domain", domain])
@@ -207,7 +208,7 @@ def make_cachedir(cachedir):
 def main():
     global cachedir, cacheurl
     numgreenlets = 10
-    http_address = '0.0.0.0'
+    http_address = '127.0.0.1'
     http_port = 8898
     serve_files = True
     from mwlib import argv

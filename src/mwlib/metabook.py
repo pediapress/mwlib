@@ -8,7 +8,7 @@
 import copy
 import warnings
 from collections import deque
-from hashlib import sha1
+from hashlib import sha256
 
 import six
 
@@ -142,8 +142,10 @@ class collection(MbObj):
                 x._env = env
 
     def get_wiki(self, ident=None, baseurl=None):
-        assert ident is not None or baseurl is not None
-        assert ident is None or baseurl is None
+        if ident is None and baseurl is None:
+            raise ValueError("need ident or baseurl")
+        if ident is not None and baseurl is not None:
+            raise ValueError("need ident or baseurl, not both")
 
         for wikiconf in self.wikis:
             if ident is not None and wikiconf.ident == ident:
@@ -224,7 +226,7 @@ def get_item_list(metabook, filter_type=None):
 
 
 def calc_checksum(metabook):
-    return sha1(metabook.dumps().encode("utf-8")).hexdigest()
+    return sha256(metabook.dumps().encode("utf-8")).hexdigest()
 
 
 def get_licenses(metabook):

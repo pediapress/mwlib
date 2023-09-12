@@ -29,9 +29,10 @@ log = Log("odfwriter")
 
 # check for ODF version
 e = element.Element(qname=("a", "n"))
-assert hasattr(e, "appendChild")
-assert hasattr(e, "lastChild")
-assert hasattr(e, "setAttribute")
+
+if not hasattr(e, "setAttribute") or not hasattr(e, "appendChild") or not hasattr(e, "lastChild"):
+    raise ImportError("odfpy version incompatible")
+
 del e
 
 PARENT_NONE_ERROR = "parent is None"
@@ -92,7 +93,8 @@ class ParagraphProxy(text.Element):
                     raise ValueError("parent is self")
                 p = p.parentNode
             if e.qname not in p.allowed_children:
-                assert p.parentNode is None
+                if p.parentNode is not None:
+                    raise ValueError("p.parentNode is not None")
                 log(
                     "ParagraphProxy:addElement() ",
                     e.type,

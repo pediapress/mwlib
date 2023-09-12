@@ -135,13 +135,16 @@ def renderMath(
     """
     if not latex:
         return
-    assert output_mode in ("png", "mathml")
-    assert render_engine in ("texvc", "blahtexml")
-    assert isinstance(latex, six.text_type), "latex must be of type unicode"
+    if output_mode not in ("png", "mathml"):
+        raise ValueError("output_mode must be one of 'png' or 'mathml'")
+    if render_engine not in ("blahtexml", "texvc"):
+        raise ValueError("render_engine must be one of 'blahtexml' or 'texvc'")
+    if not isinstance(latex, six.text_type):
+        raise TypeError("latex must be of type unicode")
 
     if output_mode == "png" and not output_path:
         log.error("math rendering with output_mode png requires an output_path")
-        raise Exception("output path required")
+        raise ValueError("output path required")
 
     removeTmpDir = False
     if output_mode == "mathml" and not output_path:

@@ -37,8 +37,10 @@ def make_messages(
     localedir="locale",
     extensions=(".py",),
 ):
-    assert os.path.isdir(localedir), f"no directory {localedir} found"
-    assert os.path.isdir(inputdir), f"no directory {inputdir} found"
+    if not os.path.isdir(localedir):
+        raise ValueError("no directory %r found" % localedir)
+    if not os.path.isdir(inputdir):
+        raise ValueError("no directory %r found" % inputdir)
 
     languages = []
     if locale == "all":

@@ -62,7 +62,8 @@ class DumbJsonDB:
     def __getstate__(self):
         # FIXME: pickling zip based containers not supported and currently not needed.
         # if desired the content of the db file need to be persisted...
-        assert self.allow_pickle, 'ERROR: pickling not allowed for zip files. Use unzipped zip file instead'
+        if not self.allow_pickle:
+            raise ValueError('ERROR: pickling not allowed for zip files. Use unzipped zip file instead')
         d = self.__dict__.copy()
         del d['db']
         return d
@@ -198,8 +199,6 @@ class nuwiki:
 
     def get_page(self, name, revision=None):
         retval = self._get_page(name, revision=revision)
-        # if retval is None:
-        #     log.warning("missing page %r" % ((name,revision),))
         return retval
 
     def normalize_and_get_page(self, name, defaultns):
@@ -207,7 +206,8 @@ class nuwiki:
         return self.get_page(fqname)
 
     def normalize_and_get_image_path(self, name):
-        assert isinstance(name, six.string_types)
+        if not isinstance(name, six.string_types):
+            raise ValueError("name must be a string")
         name = six.text_type(name)
         ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if ns != 6:
@@ -273,14 +273,14 @@ def extract_member(zipfile, member, dstdir):
        Extract the ZipInfo object 'member' to a physical
        file on the path targetpath.
     """
-
-    assert dstdir.endswith(os.path.sep), "/ missing at end"
+    if not dstdir.endswith(os.path.sep):
+        raise ValueError("Bad destination directory: %r - / missing at end" % dstdir)
 
     fn = member.filename
     targetpath = os.path.normpath(os.path.join(dstdir, fn))
 
     if not targetpath.startswith(dstdir):
-        raise RuntimeError("bad filename in zipfile %r" % (targetpath, ))
+        raise RuntimeError("bad filename in zipfile {!r}".format(targetpath ))
 
     # Create all upper directories if necessary.
     upperdirs = targetpath if member.filename.endswith('/') else os.path.dirname(targetpath)
@@ -515,9 +515,6 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
 
         author_arg = args.get('Author', None)
         if author_arg:
-            # userlinks = getUserLinks(author_arg)
-            # if userlinks:
-            #     return userlinks
             node = uparser.parse_string('', raw=args['Author'], wikidb=wikidb)
             advtree.extend_classes(node)
             txt = node.get_all_display_text().strip()

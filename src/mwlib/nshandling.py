@@ -68,7 +68,8 @@ def fix_wikipedia_siteinfo(siteinfo):
 
 class nshandler:
     def __init__(self, siteinfo):
-        assert siteinfo is not None
+        if siteinfo is None:
+            raise ValueError("siteinfo is None")
 
         if 'general' in siteinfo and siteinfo['general'].get('server', '').endswith(
                 ".wikipedia.org") and 'interwikimap' in siteinfo:
@@ -183,12 +184,12 @@ def get_nshandler_for_lang(lang):
     if lang is None:
         lang = "de"  # FIXME: we currently need this to make the tests happy
 
-    # assert lang is not None, "expected some language"
     from mwlib import siteinfo
     si = siteinfo.get_siteinfo(lang)
     if si is None:
         si = siteinfo.get_siteinfo("en")
-        assert si, "siteinfo-en not found"
+        if not si:
+            raise ValueError("no siteinfo for en")
     return nshandler(si)
 
 

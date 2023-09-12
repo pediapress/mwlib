@@ -84,7 +84,8 @@ class SharedProgress:
 class FsOutput:
     def __init__(self, path):
         self.path = os.path.abspath(path)
-        assert not os.path.exists(self.path)
+        if os.path.exists(self.path):
+            raise ValueError(f"output path exists: {self.path}")
         os.makedirs(os.path.join(self.path, "images"))
         self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")
         self.seen = {}
@@ -100,7 +101,8 @@ class FsOutput:
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
-        assert storage is not None, f"storage does not exist {name}"
+        if storage is None:
+            raise ValueError(f"storage does not exist {name}")
         storage[key] = json.dumps(value)
 
     def close(self):
@@ -360,10 +362,8 @@ class Fetcher:
             dispatch_gr.kill()
 
         self.finish()
-
-        assert not self.imageinfo_todo
-        assert not self.revids_todo
-        assert not self.pages_todo
+        if self.imageinfo_todo or self.revids_todo or self.pages_todo:
+            raise ValueError("not all items processed")
 
     def extension_img_urls(self, data):
         html = data["text"]["*"]
