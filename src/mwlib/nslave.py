@@ -78,7 +78,8 @@ def system(args, timeout=None):
 
 
 def _get_args(
-    writer_options=None, language=None, zip_only=False, login_credentials=None, **kw
+    writer_options=None, language=None, zip_only=False,
+    login_credentials=None, **kw
 ):
     args = []
 
@@ -167,7 +168,8 @@ class commands:
 
     def rpc_render(self, params=None):
         def doit(
-            metabook_data=None, collection_id=None, base_url=None, writer=None, **kw
+            metabook_data=None, collection_id=None,
+            base_url=None, writer=None, **kw
         ):
             writer = writer or "rl"
             dir = get_collection_dir(collection_id)

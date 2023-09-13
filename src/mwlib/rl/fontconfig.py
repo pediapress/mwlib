@@ -15,11 +15,14 @@ from reportlab.pdfbase.ttfonts import TTFont
 from mwlib import fonts
 from mwlib.writer.fontswitcher import FontSwitcher
 
-font_paths = [os.path.dirname(fonts.__file__), os.path.expanduser("~/mwlibfonts/")]
+font_paths = [os.path.dirname(fonts.__file__),
+              os.path.expanduser("~/mwlibfonts/")]
 
 # from the fonts defined below only FreeFont is part of the mwlib packet
 # the other fonts can be obtained by installing the following debian packets:
-# aptitude install ttf-indic-fonts ttf-unfonts ttf-farsiweb ttf-arphic-uming ttf-gfs-artemisia ttf-sil-ezra ttf-thai-arundina linux-libertine
+# aptitude install ttf-indic-fonts ttf-unfonts ttf-farsiweb
+# ttf-arphic-uming ttf-gfs-artemisia ttf-sil-ezra ttf-thai-arundina
+# linux-libertine
 # after that the fonts need to be moved or symlinked to one of the font_paths
 fonts = [
     {
@@ -270,7 +273,8 @@ class RLFontSwitcher(FontSwitcher):
             if not self.fontInstalled(font):
                 missing_fonts.append(repr(font["name"]))
                 continue
-            self.register_font(font["name"], code_points=font.get("code_points"))
+            self.register_font(font["name"],
+                               code_points=font.get("code_points"))
             if font.get("cjk", False):
                 self.cjk_fonts.append(font["name"])
         if RLFontSwitcher.warn_on_missing_fonts and missing_fonts:
@@ -316,7 +320,8 @@ class RLFontSwitcher(FontSwitcher):
     def getfont_for_script(self, script):
         for font_def in fonts:
             if script in (
-                s.lower() for s in font_def["code_points"] if isinstance(s, str)
+                s.lower() for s in font_def["code_points"] if isinstance(s,
+                                                                         str)
             ) and self.fontInstalled(font_def):
                 return font_def["name"]
         return None

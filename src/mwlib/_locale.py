@@ -1,6 +1,3 @@
-
-
-
 import locale
 
 _supported = [
@@ -456,7 +453,11 @@ def set_locale_from_lang(lang):
     prefix = lang + "_"
     canonical = f"{lang}_{lang.upper()}"
     candidates = sorted(
-        {x for x in [canonical, canonical + ".UTF-8"] + _supported if x.startswith(prefix)},
+        {
+            x
+            for x in [canonical, canonical + ".UTF-8"] + _supported
+            if x.startswith(prefix)
+        },
         key=lambda x: (x.endswith("UTF-8"), x.startswith(canonical)),
         reverse=True,
     )

@@ -37,7 +37,8 @@ def get_templates(raw, title=""):
 
 
 def find_template(raw, name, parsed_raw=None):
-    """Return Template node with given name or None if there is no such template"""
+    """Return Template node with given
+    name or None if there is no such template"""
 
     if not parsed_raw:
         e = Expander('', wikidb=DictDB())
@@ -48,7 +49,9 @@ def find_template(raw, name, parsed_raw=None):
         n = todo.pop()
         if isinstance(n, six.string_types):
             continue
-        if isinstance(n, Template) and isinstance(n[0], six.string_types) and n[0] == name:
+        if isinstance(n,
+                      Template) and isinstance(n[0],
+                                               six.string_types) and n[0] == name:
             return n
         todo.extend(n)
 

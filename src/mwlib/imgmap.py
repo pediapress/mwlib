@@ -65,7 +65,8 @@ def _make_poly(tokens):
 
 def _make_rect(tokens):
     return Rect(
-        caption=tokens[-1].strip(), top_left=tuple(tokens[1]), bottom_right=tuple(tokens[2])
+        caption=tokens[-1].strip(), top_left=tuple(tokens[1]),
+        bottom_right=tuple(tokens[2])
     )
 
 

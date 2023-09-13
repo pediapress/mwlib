@@ -4,6 +4,7 @@
 Helper to list and retrieve all stored books from a wiki
 """
 
+
 class Bookshelf:
     def __init__(self, api):
         self.api = api
@@ -23,7 +24,9 @@ class Bookshelf:
             r = self.api.do_request(**kwargs)
             res.extend(r["query"].get("categorymembers", []))
             if "query-continue" in r:
-                kwargs["cmcontinue"] = r["query-continue"]["categorymembers"]["cmcontinue"]
+                kwargs["cmcontinue"] = r["query-continue"]["categorymembers"][
+                    "cmcontinue"
+                ]
             else:
                 break
         return res

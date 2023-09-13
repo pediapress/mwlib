@@ -91,8 +91,8 @@ class StartFetcher:
             return api
 
         with contextlib.suppress(Exception):
-            cp = six.text_type(six.moves.urllib.parse.unquote(str(cp)), "utf-8")
-
+            cp = six.text_type(six.moves.urllib.parse.unquote(str(cp)),
+                               "utf-8")
 
         self.nfo["collectionpage"] = cp
 
@@ -104,7 +104,14 @@ class StartFetcher:
         # XXX: localised template parameter names???
         meta = extract_metadata(
             rawtext,
-            ("cover-image", "cover-color", "text-color", "editor", "description", "sort_as"),
+            (
+                "cover-image",
+                "cover-color",
+                "text-color",
+                "editor",
+                "description",
+                "sort_as",
+            ),
         )
         mb.editor = meta["editor"]
         mb.cover_image = meta["cover-image"]
@@ -154,7 +161,8 @@ def wikitrust(baseurl, metabook):
                 % (r["title"], r["age"], r["revid"], r["user"])
             )
         except Exception as err:
-            print("error choosing trusted revision for", repr(x.title), repr(err))
+            print("error choosing trusted revision for",
+                  repr(x.title), repr(err))
 
 
 def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):

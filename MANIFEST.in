@@ -62,9 +62,15 @@ include src/mwlib/authors.py
 include src/mwlib/bookshelf.py
 include src/mwlib/caller.py
 include src/mwlib/client.py
+include src/mwlib/command/__init__.py
+include src/mwlib/command/executor.py
 include src/mwlib/conf.py
+include src/mwlib/consts/__init__.py
+include src/mwlib/consts/urls.py
 include src/mwlib/dummydb.py
 include src/mwlib/dumpparser.py
+include src/mwlib/exceptions/__init__.py
+include src/mwlib/exceptions/mwlib_exceptions.py
 include src/mwlib/expander.py
 include src/mwlib/expr.py
 include src/mwlib/filequeue.py

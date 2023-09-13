@@ -135,7 +135,8 @@ class MwApi:
             if sem is not None:
                 sem.release()
 
-    def _do_request(self, query_continue=True, merge_data=merge_data, **kwargs):
+    def _do_request(self, query_continue=True, merge_data=merge_data,
+                    **kwargs):
         last_qc = None
         action = kwargs["action"]
         retval = {}
@@ -148,7 +149,8 @@ class MwApi:
             error = data.get("error")
             if error:
                 raise RuntimeError(
-                    "{}: [fetching {}]".format(error.get("info", ""), self._build_url(**kwargs))
+                    "{}: [fetching {}]".format(error.get("info", ""),
+                                               self._build_url(**kwargs))
                 )
             merge_data(retval, data[action])
 
@@ -163,7 +165,8 @@ class MwApi:
                         kw[str(k)] = v
 
                 if qc == last_qc:
-                    print("warning: cannot continue this query:", self._build_url(**kw))
+                    print("warning: cannot continue this query:",
+                          self._build_url(**kw))
                     return retval
 
                 last_qc = qc
@@ -172,11 +175,13 @@ class MwApi:
         return retval
 
     def ping(self):
-        return self.do_request(action="query", meta="siteinfo", siprop="general")
+        return self.do_request(action="query", meta="siteinfo",
+                               siprop="general")
 
     def get_categorymembers(self, cmtitle):
         return self.do_request(
-            action="query", list="categorymembers", cmtitle=cmtitle, cmlimit=200
+            action="query", list="categorymembers",
+            cmtitle=cmtitle, cmlimit=200
         )
 
     def get_siteinfo(self):
@@ -208,20 +213,23 @@ class MwApi:
 
         login_result = res["login"]["result"]
         if login_result == "NeedToken" and lgtoken is None:
-            return self.login(username, password, domain=domain, lgtoken=res["login"]["token"])
+            return self.login(username, password, domain=domain,
+                              lgtoken=res["login"]["token"])
         elif login_result == "Success":
             return
 
         raise RuntimeError("login failed: %r" % res)
 
-    def fetch_used(self, titles=None, revids=None, fetch_images=True, expanded=False):
+    def fetch_used(self, titles=None, revids=None, fetch_images=True,
+                   expanded=False):
         if fetch_images:
             prop = "images" if expanded else "revisions|templates|images"
         else:
             prop = "" if expanded else "revisions|templates"
 
         kwargs = {
-            "prop": prop, "rvprop": "ids", "imlimit": self.api_result_limit, "tllimit": self.api_result_limit
+            "prop": prop, "rvprop": "ids", "imlimit": self.api_result_limit,
+            "tllimit": self.api_result_limit
         }
         if titles:
             kwargs["redirects"] = 1
@@ -241,7 +249,8 @@ class MwApi:
     def upload(self, title, txt, summary):
         if self.edittoken is None:
             res = self.do_request(
-                action="query", prop="info|revisions", intoken="edit", titles=title
+                action="query", prop="info|revisions", intoken="edit",
+                titles=title
             )
             self.edittoken = list(res["pages"].values())[0]["edittoken"]
 

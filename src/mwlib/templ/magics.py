@@ -20,7 +20,8 @@ from urllib.parse import quote, quote_plus, urljoin, urlparse
 from mwlib import expr
 from mwlib.log import Log
 
-if_error_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
+if_error_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>',
+                         re.I)
 
 log = Log("expander")
 
@@ -118,7 +119,8 @@ class TimeMagic:
 
     @no_arg
     def CURRENTWEEK(self) -> str:
-        """Number of the current week (1-53) according to ISO 8601 with no leading zero."""
+        """Number of the current week (1-53) according
+        to ISO 8601 with no leading zero."""
         return str(self.utcnow.isocalendar()[1])
 
     @no_arg
@@ -177,7 +179,8 @@ class LocaltimeMagic:
 
     @no_arg
     def LOCALWEEK(self) -> str:
-        """Number of the current week (1-53) according to ISO 8601 with no leading zero."""
+        """Number of the current week (1-53) according
+        to ISO 8601 with no leading zero."""
         return str(self.now.isocalendar()[1])
 
     @no_arg
@@ -198,7 +201,8 @@ class PageMagic:
     source = {}
     nshandler = None
 
-    def __init__(self, pagename="", server="https://en.wikipedia.org", revisionid=0):
+    def __init__(self, pagename="",
+                 server="https://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
         self.server = server
         self.the_revisionid = revisionid
@@ -224,7 +228,8 @@ class PageMagic:
 
     @_wrap_pagename
     def PAGENAME(self, pagename):
-        """Returns the name of the current page, including all levels (Title/Subtitle/Sub-subtitle)"""
+        """Returns the name of the current page, including all levels
+        (Title/Subtitle/Sub-subtitle)"""
         return self.nshandler.splitname(pagename)[1]
 
     """same as PAGENAME but More URL-friendly percent encoded
@@ -249,7 +254,8 @@ class PageMagic:
 
     @_wrap_pagename
     def BASEPAGENAME(self, pagename):
-        """[MW1.7+] The basename of a subpage ('Title/Subtitle' becomes 'Title')"""
+        """[MW1.7+] The basename of a subpage
+        ('Title/Subtitle' becomes 'Title')"""
         return self.nshandler.splitname(pagename)[1].rsplit("/", 1)[0]
 
     BASEPAGENAMEE = _quoted(BASEPAGENAME)
@@ -338,7 +344,8 @@ class PageMagic:
         return urlquote(self.LOCALURL(args))
 
     def URLENCODE(self, args):
-        """[MW1.7+] To use a variable (parameter in a template) with spaces in an external link."""
+        """[MW1.7+] To use a variable (parameter in a template)
+        with spaces in an external link."""
         url = quote_plus(args[0].encode("utf-8"))
         return url
 
@@ -361,7 +368,8 @@ class PageMagic:
 
 class NumberMagic:
     def NUMBEROFARTICLES(self):
-        """A variable which returns the total number of articles on the Wiki."""
+        """A variable which returns the total
+        number of articles on the Wiki."""
         return "0"
 
     def NUMBEROFPAGES(self):
@@ -369,11 +377,13 @@ class NumberMagic:
         return "0"
 
     def NUMBEROFFILES(self):
-        """[MW1.5+] Returns the number of uploaded files (rows in the image table)."""
+        """[MW1.5+] Returns the number of uploaded
+        files (rows in the image table)."""
         return "0"
 
     def NUMBEROFUSERS(self):
-        """[MW1.7+] Returns the number of registered users (rows in the user table)."""
+        """[MW1.7+] Returns the number of registered
+        users (rows in the user table)."""
         return "0"
 
     def CURRENTVERSION(self):

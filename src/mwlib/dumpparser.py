@@ -1,5 +1,3 @@
-
-
 import os
 import re
 
@@ -14,7 +12,6 @@ ns = "{http://www.mediawiki.org/xml/export-0.3/}"
 
 
 class Tags:
-
     # <namespaces><namespace> inside <siteinfo>
     namespace = ns + "namespaces/" + ns + "namespace"
 
@@ -59,7 +56,9 @@ class Page:
         "text",
     ]
 
-    redirect_rex = re.compile(r"^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]", re.IGNORECASE)
+    redirect_rex = re.compile(
+        r"^#Redirect:?\s*?\[\[(?P<redirect>.*?)\]\]", re.IGNORECASE
+    )
 
     @property
     def redirect(self):
@@ -77,7 +76,6 @@ class Page:
 
 
 class DumpParser:
-
     tags = Tags()
 
     def __init__(self, xmlfilename, ignore_redirects=False):

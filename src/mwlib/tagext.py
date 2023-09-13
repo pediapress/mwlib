@@ -106,7 +106,8 @@ fan featuredimage gallerypopulate linkfilter listpages
 loggedin loggedout newusers pagequality pollembed randomfeatureduser
 randomgameunit randomimagebycategory randomuserswithavatars
 rss siteactivity templatestyles userpoll videogallerypopulate vote
-welcomeuser xsound pageby uml graphviz categorytree summary slippymap""".split()
+welcomeuser xsound pageby uml graphviz
+categorytree summary slippymap""".split()
 
 for name in tags_to_ignore:
 
@@ -254,7 +255,8 @@ class ListingExtension(TagExtension):
     ]
 
     def __call__(self, source, attributes):
-        t = "".join(v % attributes[k] for k, v in self.attrs if attributes.get(k, None))
+        t = "".join(v % attributes[k] for k,
+                    v in self.attrs if attributes.get(k, None))
         if source:
             t += ", %s" % source
         return self.parse(t)

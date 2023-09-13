@@ -96,7 +96,8 @@ class Parser:
 
             siteinfo = get_siteinfo("en")
         self.siteinfo = siteinfo
-        self.name2rx = {"if": re.compile("^#if:"), "switch": re.compile("^#switch:")}
+        self.name2rx = {"if": re.compile("^#if:"),
+                        "switch": re.compile("^#switch:")}
 
         magicwords = self.siteinfo.get("magicwords", [])
         for d in magicwords:
@@ -105,7 +106,6 @@ class Parser:
                 aliases = [re.escape(x) for x in d["aliases"]]
                 rx = "^#({}):".format("|".join(aliases))
                 self.name2rx[name] = re.compile(rx)
-                # print name, rx
 
         self.aliasmap = aliasmap(self.siteinfo)
 
@@ -124,7 +124,7 @@ class Parser:
             v.append(children)
         else:
             v.append(children[:idx])
-            v.append(children[idx + 1 :])
+            v.append(children[idx + 1:])
 
         return Variable(v)
 
@@ -151,7 +151,8 @@ class Parser:
         if cond and isinstance(cond[0], six.text_type) and not cond[0].strip():
             del cond[0]
 
-        if cond and isinstance(cond[-1], six.text_type) and not cond[-1].strip():
+        if cond and isinstance(cond[-1],
+                               six.text_type) and not cond[-1].strip():
             del cond[-1]
         cond = tuple(cond)
         return cond
@@ -259,7 +260,7 @@ class Parser:
         if not self._is_good_name(name):
             return Node(["{{"] + children + ["}}"])
 
-        args = self._parse_args(children[idx + 1 :], append_arg=append_arg)
+        args = self._parse_args(children[idx + 1:], append_arg=append_arg)
 
         return Template([name, tuple(args)])
 

@@ -80,7 +80,7 @@ show_wiki_license = True
 # included in the official documenation of reportlab
 pagefooter = ""
 
-#### TITLE PAGE
+# TITLE PAGE
 
 title_page_image = ""  # path of an image that is to be displayed on the title page
 title_page_image_size = (
@@ -215,11 +215,15 @@ class BaseStyle(ParagraphStyle):
         self.underlineWidth = 1
 
 
-def text_style(mode="p", indent_lvl=0, in_table=0, relsize="normal", text_align=None):
+def text_style(mode="p", indent_lvl=0, in_table=0,
+               relsize="normal", text_align=None):
     """
-    mode: p (normal paragraph), blockquote, center (centered paragraph), footer, figure (figure caption text),
-          preformatted, list, license, licenselist, box, references, articlefoot
-    relsize: relative text size: small, normal, big  (currently only used for preformatted nodes
+    mode: p (normal paragraph), blockquote, center (centered paragraph),
+    footer, figure (figure caption text),
+          preformatted, list, license, licenselist,
+          box, references, articlefoot
+    relsize: relative text size: small, normal, big  (currently only
+                used for preformatted nodes
     indent_lvl: level of indentation in lists or indented paragraphs
     in_table: 0 - outside table
               1 or above - inside table (nesting level of table)

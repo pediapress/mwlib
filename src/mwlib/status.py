@@ -45,7 +45,8 @@ class Status:
             + progress * (self.progress_range[1] - self.progress_range[0]) / 100
         )
 
-    def __call__(self, status=None, progress=None, article=None, auto_dump=True,
+    def __call__(self, status=None, progress=None,
+                 article=None, auto_dump=True,
                  **kwargs):
         if status is not None and status != self.status.get('status'):
             self.status['status'] = status
@@ -66,7 +67,8 @@ class Status:
             self.podclient.post_status(**self.status)
 
         msg = []
-        msg.append("{}%".format(self.status.get("progress", self.progress_range[0])))
+        msg.append("{}%".format(self.status.get("progress",
+                                                self.progress_range[0])))
         msg.append(self.status.get("status", ""))
         msg.append(self.status.get("article", ""))
         msg = " ".join(msg)

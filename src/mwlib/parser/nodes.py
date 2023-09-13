@@ -116,7 +116,8 @@ class Section(Node):
        etc.
 
     The first element in children contains the caption of the section as a Node
-    instance with 0 or more children. Subsequent children are elements following
+    instance with 0 or more children. Subsequent children
+    are elements following
     the section heading.
     """
 
@@ -130,7 +131,8 @@ class TagNode(Node):
 
     The caption attribute contains the tag name, e.g. 'br', 'pre', 'h1' etc.
 
-    The children attribute contains the elements contained inside the opening and
+    The children attribute contains the elements
+    contained inside the opening and
     closing tag.
 
     Wikitext::
@@ -201,31 +203,39 @@ class Link(Node):
     link prefix (usually the part before the ":").
 
     The target attribute contains the link target with the prefix stripped off.
-    The full_target attribute contains the full link target (but with a potential
+    The full_target attribute contains the full 
+    link target (but with a potential
     leading ":" stripped off).
     The colon attribute is set to True if the original link target is prefixed
     with a ":".
-    The url attribute can contain a valid HTTP URL. If the resolving didn't work
+    The url attribute can contain a valid HTTP URL.
+    If the resolving didn't work
     this attribute is None.
-    The children attribute can contain the nodes making up the name of the link.
-    The namespace attribute is either set to one of the constants NS_... defined
+    The children attribute can contain the nodes
+    making up the name of the link.
+    The namespace attribute is either
+    set to one of the constants NS_... defined
     in mwlib.namespace (int) or to the prefix of the link (unicode).
 
     Wikitext::
 
       [[Some article|An article]]
 
-    This Link would be specialized to an ArticleLink instance. The target attribute
+    This Link would be specialized to an ArticleLink instance.
+    The target attribute
     and the full_target attribute would both be u'Some article', the namespace
-    attribute would be NS_MAIN (0) and the children attribute would contain a Text
+    attribute would be NS_MAIN (0) and the
+    children attribute would contain a Text
     node with caption=u'An article'.
 
     Wikitext::
 
       [[Image:Bla.jpg]]
 
-    This Link would be specialized to an ImageLink instance. The target attribute
-    would be u'Bla.jpg', the full_target attribute would be u'Image:Bla.jpg' and
+    This Link would be specialized to an ImageLink instance.
+    The target attribute
+    would be u'Bla.jpg', the full_target
+    attribute would be u'Image:Bla.jpg' and
     the children attribute would be empty.
     """
 

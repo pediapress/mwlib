@@ -52,13 +52,13 @@ class State:
         if count == 3:
             nextstate(is_bold=not self.is_bold)
 
-            s = self.clone(apocount=self.apocount + 1, previous=previous)
+            state = self.clone(apocount=self.apocount + 1, previous=previous)
 
-            s.get_next(2, res, previous=previous)
+            state.get_next(2, res, previous=previous)
 
         if count == 4:
-            s = self.clone(apocount=self.apocount + 1)
-            s.get_next(3, res, previous=previous)
+            state = self.clone(apocount=self.apocount + 1)
+            state.get_next(3, res, previous=previous)
 
         if count == 5:
             for x in self.get_next(2):
@@ -66,12 +66,12 @@ class State:
             for x in self.get_next(3):
                 x.get_next(2, res, previous=previous)
 
-            s = self.clone(apocount=self.apocount)
-            s.get_next(4, res, previous=previous)
+            state = self.clone(apocount=self.apocount)
+            state.get_next(4, res, previous=previous)
 
         if count > 5:
-            s = self.clone(apocount=self.apocount + (count - 5))
-            s.get_next(5, res, previous=previous)
+            state = self.clone(apocount=self.apocount + (count - 5))
+            state.get_next(5, res, previous=previous)
 
         return res
 
@@ -86,8 +86,8 @@ def compute_path(counts):
 
     for count in counts:
         new_states = []
-        for s in states:
-            s.get_next(count, new_states)
+        for state in states:
+            state.get_next(count, new_states)
         states = new_states
         states = sort_states(states)
         best = states[0]

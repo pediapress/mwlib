@@ -30,7 +30,8 @@ class PODClient:
     def _post(self, data, content_type=None):
         headers = {"Content-Type": content_type} if content_type is not None else {}
         return six.moves.urllib.request.urlopen(
-            six.moves.urllib.request.Request(self.posturl, data, headers=headers)
+            six.moves.urllib.request.Request(self.posturl, data,
+                                             headers=headers)
         ).read()
 
     def post_status(self, status=None, progress=None, article=None, error=None):
@@ -89,7 +90,8 @@ class PODClient:
         h.putheader("Host", pr.netloc)
         h.putheader("Content-Length", str(clen))
         h.putheader("User-Agent", conf.user_agent)
-        h.putheader("Content-Type", "multipart/form-data; boundary=%s" % boundary)
+        h.putheader("Content-Type",
+                    "multipart/form-data; boundary=%s" % boundary)
         h.endheaders()
 
         h.send(before)
@@ -111,9 +113,11 @@ class PODClient:
 
     def post_zipfile(self, filename):
         with open(filename, "rb") as f:
-            content_type, data = get_multipart("collection.zip", f.read(), "collection")
+            content_type, data = get_multipart("collection.zip", f.read(),
+                                               "collection")
         log.info(
-            "POSTing zipfile %r to %s (%d Bytes)" % (filename, self.posturl, len(data))
+            "POSTing zipfile %r to %s (%d Bytes)" % (filename, self.posturl,
+                                                     len(data))
         )
         self._post(data, content_type=content_type)
 
@@ -121,7 +125,8 @@ class PODClient:
 def podclient_from_serviceurl(serviceurl):
     result = json.loads(
         six.text_type(
-            six.moves.urllib.request.urlopen(serviceurl, data="any").read(), "utf-8"
+            six.moves.urllib.request.urlopen(serviceurl, data="any").read(),
+            "utf-8"
         )
     )
     return PODClient(result["post_url"], redirecturl=result["redirect_url"])

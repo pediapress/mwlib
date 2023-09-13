@@ -34,8 +34,10 @@ def make_collection_id(data):
         mbobj = json.loads(mb)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
-        sys.stdout.write("new-collection {}\t{!r}\t{!r}\n".format(num_articles,
-                                                                  data.get("base_url"), data.get("writer")))
+        sys.stdout.write(
+            "new-collection {}\t{!r}\t{!r}\n".format(num_articles,
+                                                     data.get("base_url"),
+                                                     data.get("writer")))
 
     return sha256(sio.getvalue().encode()).hexdigest()[:16]
 
@@ -54,7 +56,8 @@ def get_collection_dirs(cache_dir):
 
 
 def _path_contains_entry_older_than(path, ts):
-    return any(os.stat(os.path.join(path, fn)).st_mtime < ts for fn in os.listdir(path))
+    return any(os.stat(
+        os.path.join(path, fn)).st_mtime < ts for fn in os.listdir(path))
 
 
 def _find_collection_dirs_to_purge(collection_dirs, ts):

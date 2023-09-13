@@ -7,7 +7,8 @@ import toml
 def find_pyproject_toml():
     current_dir = Path(__file__).resolve().parent
 
-    while current_dir != current_dir.parent:  # Check until we reach the root folder
+    # Check until we reach the root folder
+    while current_dir != current_dir.parent:
         candidate = current_dir / "pyproject.toml"
         if candidate.exists():
             return candidate

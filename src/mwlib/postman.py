@@ -96,7 +96,8 @@ def report_mwzip_status(posturl, jobid, host, port):
             break
         info = res.get("info", {})
         if info != last:
-            status(status=info.get("status", "fetching"), progress=info.get("progress", 0.0))
+            status(status=info.get("status", "fetching"),
+                   progress=info.get("progress", 0.0))
             last = info
         else:
             gevent.sleep(0.5)
@@ -136,7 +137,8 @@ class Commands:
     def rpc_post(self, params):
         post_url = params["post_url"]
 
-        def _doit(metabook_data=None, collection_id=None, base_url=None, post_url=None, **kw):
+        def _doit(metabook_data=None, collection_id=None, base_url=None,
+                  post_url=None, **kw):
             directory = get_collection_dir(collection_id)
 
             def getpath(p):
@@ -154,7 +156,8 @@ class Commands:
 
             try:
                 self.qaddw(
-                    channel="makezip", payload={"params": params}, jobid=jobid, timeout=20 * 60
+                    channel="makezip", payload={"params": params},
+                    jobid=jobid, timeout=20 * 60
                 )
             finally:
                 g.kill()
@@ -177,7 +180,8 @@ class Commands:
             except Exception:
                 exc_info = sys.exc_info()
                 gevent.spawn(report_exception, post_url, exc_info)
-                gevent.spawn(report_exception_mail, "zip upload failed", exc_info)
+                gevent.spawn(report_exception_mail, "zip upload failed",
+                             exc_info)
                 del exc_info
                 raise
 

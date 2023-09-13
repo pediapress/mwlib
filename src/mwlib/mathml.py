@@ -30,7 +30,8 @@ def log(err):
 def latex2mathml(latex):
 
     data = "\\displaystyle\n%s\n" % latex.strip()
-    popen = subprocess.Popen(["blahtexml", "--mathml"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    popen = subprocess.Popen(["blahtexml", "--mathml"], stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     popen.stdin.write(data)
     output, errors = popen.communicate()
     popen.wait()

@@ -38,7 +38,8 @@ class MbObj:
         self.type = self.__class__.__name__
 
     def __getitem__(self, key):
-        warnings.warn(f"deprecated __getitem__ [{key!r}]", DeprecationWarning, 2)
+        warnings.warn(f"deprecated __getitem__ [{key!r}]",
+                      DeprecationWarning, 2)
 
         try:
             return getattr(self, str(key))
@@ -46,12 +47,14 @@ class MbObj:
             raise KeyError(repr(key))
 
     def __setitem__(self, key, val):
-        warnings.warn(f"deprecated __setitem__ [{key!r}]=", DeprecationWarning, 2)
+        warnings.warn(f"deprecated __setitem__ [{key!r}]=",
+                      DeprecationWarning, 2)
 
         self.__dict__[key] = val
 
     def __contains__(self, key):
-        warnings.warn(f"deprecated __contains__ {key!r} in ", DeprecationWarning, 2)
+        warnings.warn(f"deprecated __contains__ {key!r} in ",
+                      DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
 
@@ -271,7 +274,8 @@ def get_licenses(metabook):
         if not wikitext:
             continue
 
-        retval.append(License(title=license.get("name", "License"), wikitext=wikitext))
+        retval.append(License(title=license.get("name", "License"),
+                              wikitext=wikitext))
 
     return retval
 

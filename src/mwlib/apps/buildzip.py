@@ -22,9 +22,9 @@ from mwlib.status import Status
 
 def _walk(root):
     retval = []
-    for dirpath, dirnames, files in os.walk(root):
-        # retval.extend([os.path.normpath(os.path.join(dirpath, x))+"/" for x in dirnames])
-        retval.extend([os.path.normpath(os.path.join(dirpath, x)) for x in files])
+    for dirpath, _, files in os.walk(root):
+        retval.extend([os.path.normpath(os.path.join(dirpath,
+                                                     x)) for x in files])
     retval = sorted([x.replace("\\", "/") for x in retval])
     return retval
 
@@ -43,13 +43,16 @@ def zip_dir(dirname, output=None, skip_ext=None):
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zf.write(i, i[len(dirname) + 1 :])
+        zf.write(i, i[len(dirname) + 1:])
     zf.close()
 
 
-def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
+def make_zip(output=None, options=None, metabook=None,
+             podclient=None, status=None):
+    
+    dir_path = os.path.dirname(output)
     tmpdir = (
-        tempfile.mkdtemp(dir=os.path.dirname(output)) if output else tempfile.mkdtemp()
+        tempfile.mkdtemp(dir=dir_path) if output else tempfile.mkdtemp()
     )
 
     try:
@@ -66,7 +69,8 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
         )
 
         if output:
-            fd, filename = tempfile.mkstemp(suffix=".zip", dir=os.path.dirname(output))
+            fd, filename = tempfile.mkstemp(suffix=".zip",
+                                            dir=os.path.dirname(output))
         else:
             fd, filename = tempfile.mkstemp(suffix=".zip")
         os.close(fd)
@@ -99,7 +103,8 @@ def main():
 
     parser = OptionParser()
     parser.add_option("-o", "--output", help="write output to OUTPUT")
-    parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
+    parser.add_option("-p",
+                      "--posturl", help="http post to POSTURL (directly)")
     parser.add_option(
         "-g",
         "--getposturl",
@@ -141,7 +146,8 @@ def main():
         status(progress=0)
         output = options.output
 
-        make_zip(output, options, env.metabook, podclient=pod_client, status=status)
+        make_zip(output, options, env.metabook, podclient=pod_client,
+                 status=status)
 
     except Exception:
         if status:

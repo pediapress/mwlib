@@ -22,7 +22,8 @@ class Client:
         self.error = None
         post_data = dict(args)
         post_data["command"] = command
-        f = six.moves.urllib.request.urlopen(self.url, six.moves.urllib.parse.urlencode(post_data))
+        f = six.moves.urllib.request.urlopen(self.url,
+                                             six.moves.urllib.parse.urlencode(post_data))
         self.response = f.read()
         self.response_code = f.getcode()
         if self.response_code != 200:

@@ -23,7 +23,9 @@ class ConstraintBase:
         return True, None  # passed
 
     def __repr__(self):
-        return "{}({})".format(self.__class__.__name__, ", ".join(k.__name__ for k in self.klasses))
+        return "{}({})".format(
+            self.__class__.__name__, ", ".join(
+                k.__name__ for k in self.klasses))
 
 
 class Forbid(ConstraintBase):

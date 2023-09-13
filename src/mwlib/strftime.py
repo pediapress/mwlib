@@ -9,7 +9,6 @@
 # >>>
 
 
-
 import datetime
 import re
 import time
@@ -35,6 +34,7 @@ def _findall(text, substr):
         sites.append(j)
         i = j + 1
     return sites
+
 
 # Every 28 years the calendar repeats, except through century leap
 # years where it's 6 years.  But only if you're using the Gregorian
@@ -74,12 +74,14 @@ def strftime(dt, fmt):
         s = s[:site] + syear + s[site + 4:]
     return s
 
+
 # Make sure that the day names are in order
 # from 1/1/1 until August 2000
 
 
 def test():
-    s = strftime(datetime.date(1800, 9, 23),
+    s = strftime(datetime.date(1800,
+                               9, 23),
                  "%Y has the same days as 1980 and 2008")
     if s != "1800 has the same days as 1980 and 2008":
         raise AssertionError(s)
@@ -101,8 +103,7 @@ def test():
 
     testdate = startdate + one_day
     while testdate < enddate:
-        if (testdate.day == 1 and testdate.month == 1 and
-                (testdate.year % 100 == 0)):
+        if testdate.day == 1 and testdate.month == 1 and (testdate.year % 100 == 0):
             print("Testing century", testdate.year)
         day = strftime(testdate, "%A")
         if nextday[prevday] != day:

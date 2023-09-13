@@ -2,13 +2,14 @@
 # See README.rst for additional licensing information.
 
 
-
 import re
 
 import six.moves.html_entities
 from six import unichr
 
-param_rx = re.compile(r"(?P<name>\w+)\s*=\s*(?P<value>\"[^\"]*\"|\'[^\']*\'|[\w%:#]+)", re.DOTALL)
+param_rx = re.compile(
+    r"(?P<name>\w+)\s*=\s*(?P<value>\"[^\"]*\"|\'[^\']*\'|[\w%:#]+)", re.DOTALL
+)
 
 
 def parse_params(s):
@@ -44,7 +45,11 @@ def parse_params(s):
 
 class ImageMod:
     default_magicwords = [
-        {"aliases": ["thumbnail", "thumb"], "case-sensitive": "", "name": "img_thumbnail"},
+        {
+            "aliases": ["thumbnail", "thumb"],
+            "case-sensitive": "",
+            "name": "img_thumbnail",
+        },
         {
             "aliases": ["thumbnail=$1", "thumb=$1"],
             "case-sensitive": "",
@@ -54,28 +59,34 @@ class ImageMod:
         {"aliases": ["left"], "case-sensitive": "", "name": "img_left"},
         {"aliases": ["none"], "case-sensitive": "", "name": "img_none"},
         {"aliases": ["$1px"], "case-sensitive": "", "name": "img_width"},
-        {"aliases": ["center", "centre"], "case-sensitive": "", "name": "img_center"},
+        {"aliases": ["center", "centre"], "case-sensitive": "",
+         "name": "img_center"},
         {
             "aliases": ["framed", "enframed", "frame"],
             "case-sensitive": "",
             "name": "img_framed",
         },
-        {"aliases": ["frameless"], "case-sensitive": "", "name": "img_frameless"},
-        {"aliases": ["page=$1", "page $1"], "case-sensitive": "", "name": "img_page"},
+        {"aliases": ["frameless"], "case-sensitive": "",
+         "name": "img_frameless"},
+        {"aliases": ["page=$1", "page $1"], "case-sensitive": "",
+         "name": "img_page"},
         {
             "aliases": ["upright", "upright=$1", "upright $1"],
             "case-sensitive": "",
             "name": "img_upright",
         },
-        {"aliases": ["border"], "case-sensitive": "", "name": "img_border"},
+        {"aliases": ["border"], "case-sensitive": "",
+         "name": "img_border"},
         {"aliases": ["baseline"], "case-sensitive": "", "name": "img_baseline"},
         {"aliases": ["sub"], "case-sensitive": "", "name": "img_sub"},
         {"aliases": ["super", "sup"], "case-sensitive": "", "name": "img_super"},
-        {"aliases": ["top"], "case-sensitive": "", "name": "img_top"},
+        {"aliases": ["top"], "case-sensitive": "",
+         "name": "img_top"},
         {"aliases": ["text-top"], "case-sensitive": "", "name": "img_text_top"},
         {"aliases": ["middle"], "case-sensitive": "", "name": "img_middle"},
         {"aliases": ["bottom"], "case-sensitive": "", "name": "img_bottom"},
-        {"aliases": ["text-bottom"], "case-sensitive": "", "name": "img_text_bottom"},
+        {"aliases": ["text-bottom"], "case-sensitive": "",
+         "name": "img_text_bottom"},
         {"aliases": ["link=$1"], "case-sensitive": "", "name": "img_link"},
         {"aliases": ["alt=$1"], "case-sensitive": "", "name": "img_alt"},
     ]
@@ -94,9 +105,11 @@ class ImageMod:
             aliases = m["aliases"]
             aliases_regexp = "|".join(["^(%s)$" % re.escape(a) for a in aliases])
             if name == "img_upright":
-                aliases_regexp = aliases_regexp.replace("\\$1", "\\s*([0-9.]+)\\s*")
+                aliases_regexp = aliases_regexp.replace("\\$1",
+                                                        "\\s*([0-9.]+)\\s*")
             elif name == "img_width":
-                aliases_regexp = aliases_regexp.replace("\\$1", "\\s*([0-9x]+)\\s*")
+                aliases_regexp = aliases_regexp.replace("\\$1",
+                                                        "\\s*([0-9x]+)\\s*")
             elif name in ["img_alt", "img_link"]:
                 aliases_regexp = aliases_regexp.replace("\\$1", "(.*)")
             self.alias_map[name] = aliases_regexp
@@ -183,5 +196,7 @@ def replace_html_entities(txt):
     return re.sub(r"&[^;]*;", lambda mo: resolve_entity(mo.group(0)), txt)
 
 
-def remove_nowiki_tags(txt, _rx=re.compile("<nowiki>(.*?)</nowiki>", re.IGNORECASE | re.DOTALL)):
+def remove_nowiki_tags(
+    txt, _rx=re.compile("<nowiki>(.*?)</nowiki>", re.IGNORECASE | re.DOTALL)
+):
     return _rx.sub(lambda mo: mo.group(1), txt)

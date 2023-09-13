@@ -26,10 +26,12 @@ class TagParser:
         for t in tags:
             name2tag[t.tagname] = t
 
-        self.guard = (None, TagInfo(tagname="", prio=sys.maxsize, nested=True, blocknode=False))
+        self.guard = (None, TagInfo(tagname="", prio=sys.maxsize,
+                                    nested=True, blocknode=False))
 
     def add(self, tagname=None, prio=None, blocknode=False, nested=True):
-        t = TagInfo(tagname=tagname, prio=prio, blocknode=blocknode, nested=nested)
+        t = TagInfo(tagname=tagname, prio=prio,
+                    blocknode=blocknode, nested=nested)
         self.name2tag[t.tagname] = t
 
     def find_in_stack(self, tag):

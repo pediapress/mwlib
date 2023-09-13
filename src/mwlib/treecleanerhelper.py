@@ -34,7 +34,8 @@ def getNodeHeight(node, params):
             if node.is_block_node:
                 addHeight += paragraphMargin
             else:
-                # for inline nodes we reduce the height guess. below that is compensated
+                # for inline nodes we reduce the height guess.
+                # below that is compensated
                 # for blocknode-heights w/o text
                 addHeight = addHeight / 2
             height += addHeight

@@ -62,7 +62,8 @@ class SimplePage(PageTemplate):
             ph - page_margin_top - page_margin_bottom,
         )
 
-        PageTemplate.__init__(self, id=page_id, frames=frames, pagesize=pageSize)
+        PageTemplate.__init__(self, id=page_id,
+                              frames=frames, pagesize=pageSize)
 
 
 class WikiPage(PageTemplate):
@@ -199,11 +200,15 @@ class TitlePage(PageTemplate):
                 locale.setlocale(locale.LC_ALL, "")
                 footertext.append(
                     pdfstyles.creation_date_txt
-                    % time.strftime(pdfstyles.creation_date_format, time.localtime())
+                    % time.strftime(pdfstyles.creation_date_format,
+                                    time.localtime())
                 )
-            lines = [formatter.clean_text(line, escape=False) for line in footertext]
+            lines = [formatter.clean_text(line,
+                                          escape=False) for line in footertext]
             txt = "<br/>".join(
-                line if isinstance(line, str) else str(line, "utf-8") for line in lines
+                line if isinstance(line,
+                                   str) else str(line,
+                                                 "utf-8") for line in lines
             )
             p = Paragraph(txt, text_style(mode="footer"))
             w, h = p.wrap(print_width, print_height)

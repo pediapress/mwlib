@@ -112,7 +112,8 @@ class ParagraphProxy(text.Element):
                 raise ValueError("p is self")
             # add this type to the parent
             p.addElement(e)
-            # add a new paragraph to this parent and link my addElement and addText to this
+            # add a new paragraph to this parent and link
+            # my addElement and addText to this
             np = ParagraphProxy()
             np.attributes = self.attributes
             p.addElement(np)
@@ -159,7 +160,8 @@ class ODFWriter:
         if language is not None:
             self.doc.meta.addElement(dc.Language(text=language))
         if license is not None:
-            self.doc.meta.addElement(meta.UserDefined(name="Rights", text=license))
+            self.doc.meta.addElement(meta.UserDefined(name="Rights",
+                                                      text=license))
 
     def writeTest(self, root):
         self.write(root, self.doc.text)
@@ -233,12 +235,14 @@ class ODFWriter:
                     )  # this check fails if the child could not be added
                 return True
             except odf.element.IllegalChild:
-                # fails if paragraph in span:  odfwriter >> write: u'text:p' 'not allowed
+                # fails if paragraph in span:
+                # odfwriter >> write: u'text:p' 'not allowed
                 # in ' u'text:span' ', dumping'
                 try:  # maybe c has no attribute type
                     art = obj.get_parent_nodes_by_class(advtree.Article)[0]
                     log("in article ", art.caption)
-                    log("write:", c.type, "not allowed in ", p.type, ", dumping")
+                    log("write:", c.type, "not allowed in ", p.type,
+                        ", dumping")
                 except AttributeError:
                     log(f"missing .type attribute {c!r} {p!r} ")
                 return False
@@ -287,13 +291,15 @@ class ODFWriter:
         title = a.caption
         log("processing article %s" % title)
         r = text.Section(stylename=style.sect, name=title)  # , display="none")
-        r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title))
+        r.addElement(text.H(outlinelevel=1, stylename=style.ArticleHeader,
+                            text=title))
         return r
 
     def owriteChapter(self, obj):
         title = obj.caption
         item = text.Section(stylename=style.sect, name=title)
-        item.addElement(text.H(outlinelevel=1, text=title, stylename=style.chapter))
+        item.addElement(text.H(outlinelevel=1, text=title,
+                               stylename=style.chapter))
         return item
 
     def owriteSection(self, obj):
@@ -545,7 +551,7 @@ class ODFWriter:
         return ParagraphProxy(stylename=style.blockquote)
 
     def owriteIndented(self, s):
-        "Writes a indented Paragraph. Margin to the left.\n Need a lenght of Indented.caption of 1,2 or 3."
+        "Writes a indented Paragraph. Margin to the left. Need a lenght of Indented.caption of 1,2 or 3."
         indentStyles = (
             style.indentedSingle,
             style.indentedDouble,
@@ -560,11 +566,11 @@ class ODFWriter:
         translate element tree to odf.Elements
         """
         # log("math")
-        r = renderMath(obj.caption, output_mode="mathml", render_engine="blahtexml")
+        r = renderMath(obj.caption, output_mode="mathml",
+                       render_engine="blahtexml")
         if r is None:
             log("renderMath failed!")
             return
-        # print mathml.ET.tostring(r)
 
         def _withETElement(e, parent):
             # translate to odf.Elements
@@ -573,13 +579,14 @@ class ODFWriter:
                 parent.addElement(n)
                 if c.text:
                     text = c.text
-                    # if not isinstance(text, unicode):  text = text.decode("utf8")
                     n.appendChild(odf.element.Text(text))  # n.addText(c.text)
-                    # rffixme: odfpy0.8 errors:"AttributeError: Element instance has no
+                    # rffixme: odfpy0.8 errors:"AttributeError:
+                    # Element instance has no
                     # attribute 'elements'" -> this is a lie!
                 _withETElement(c, n)
 
-        mathframe = draw.Frame(stylename=style.formula, zindex=0, anchortype="as-char")
+        mathframe = draw.Frame(stylename=style.formula, zindex=0,
+                               anchortype="as-char")
         mathobject = draw.Object()
         mathframe.addElement(mathobject)
         mroot = math.Math()
@@ -649,7 +656,8 @@ class ODFWriter:
 
     def owriteImageLink(self, obj, isImageMap=False):
         # see http://books.evc-cit.info/odbook/ch04.html
-        # see rl.writer for more advanced image integration, including inline, floating, etc.
+        # see rl.writer for more advanced image integration,
+        # including inline, floating, etc.
         # http://code.pediapress.com/hg/mwlib.rl rlwriter.py
 
         from PIL import Image as PilImage
@@ -699,7 +707,8 @@ class ODFWriter:
         imgPath = imgPath.encode("utf-8")
 
         (wObj, hObj) = (obj.width or 0, obj.height or 0)
-        # sometimes the parser delivers only one value, w or h, so set the other = 0
+        # sometimes the parser delivers only one value,
+        # w or h, so set the other = 0
 
         try:
             img = PilImage.open(imgPath)
@@ -715,7 +724,8 @@ class ODFWriter:
         if wImg == 0 or wImg == 0:
             return
 
-        # sometimes the parser delivers only one value, w or h, so set the other "by hand"
+        # sometimes the parser delivers only one value,
+        # w or h, so set the other "by hand"
         aspectRatio = wImg / hImg
 
         if wObj > 0 and not hObj > 0:
@@ -801,7 +811,8 @@ class ODFWriter:
 
 
 def writer(env, output, status_callback):
-    buildbook_status = status_callback.getSubRange(0, 50) if status_callback else None
+    buildbook_status = status_callback.getSubRange(0,
+                                                   50) if status_callback else None
     book = writerbase.build_book(env, status_callback=buildbook_status)
 
     def scb(status, progress):

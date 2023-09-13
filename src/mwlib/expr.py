@@ -20,7 +20,8 @@ class ExprError(Exception):
 def _myround(a, b):
     if int(b) == 0 and round(a + 1) - round(a) != 1:
         return a + abs(a) / a * 0.5  # simulate Python 2 rounding
-        # via https://stackoverflow.com/questions/21839140/python-3-rounding-behavior-in-python-2
+        # via https://stackoverflow.com/questions/21839140/
+        # python-3-rounding-behavior-in-python-2
     r = round(a, int(b))
     if int(r) == r:
         return int(r)
@@ -68,7 +69,6 @@ unary_ops = set()
 def addop(op, prec, fun, numargs=None):
     precedence[op] = prec
     if numargs is None:
-        # numargs = len(inspect.getargspec(fun)[0])
         numargs = len(inspect.getfullargspec(fun)[0])
 
     if numargs == 1:
@@ -158,7 +158,8 @@ class Expr:
         last_operand, last_operator = False, True
 
         for operand, operator in tokens:
-            if operand in ("e", "E") and (last_operand or last_operator == ")"):
+            if operand in ("e",
+                           "E") and (last_operand or last_operator == ")"):
                 operand, operator = operator, operand
 
             if operand:

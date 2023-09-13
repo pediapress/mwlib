@@ -17,9 +17,12 @@ from mwlib.status import Status
 
 def show():
     parser = optparse.OptionParser()
-    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
-    parser.add_option("-e", "--expand", action="store_true", help="expand templates")
-    parser.add_option("-t", "--template", action="store_true", help="show template")
+    parser.add_option("-c", "--config",
+                      help="configuration file/URL/shortcut")
+    parser.add_option("-e", "--expand",
+                      action="store_true", help="expand templates")
+    parser.add_option("-t", "--template",
+                      action="store_true", help="show template")
     parser.add_option("-f", help="read input from file. implies -e")
 
     options, args = parser.parse_args()
@@ -96,9 +99,13 @@ def post():
 
 
 def parse():
-    parser = optparse.OptionParser(usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]")
-    parser.add_option("-a", "--all", action="store_true", help="parse all articles")
-    parser.add_option("--tb", action="store_true", help="show traceback on error")
+    parser = optparse.OptionParser(
+        usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]"
+    )
+    parser.add_option("-a", "--all", action="store_true",
+                      help="parse all articles")
+    parser.add_option("--tb", action="store_true",
+                      help="show traceback on error")
 
     parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
 
@@ -128,7 +135,8 @@ def parse():
             page = db.normalize_and_get_page(x, 0)
             raw = page.rawtext if page else None
 
-            # yes, raw can be None, when we have a redirect to a non-existing article.
+            # yes, raw can be None, when we have a
+            # redirect to a non-existing article.
             if raw is None:
                 continue
             stime = time.time()

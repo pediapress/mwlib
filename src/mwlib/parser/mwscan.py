@@ -168,7 +168,7 @@ class _compat_scanner:
         res = []
 
         def g():
-            return text[start : start + tlen]
+            return text[start: start + tlen]
 
         def a(x):
             return res.append((x, g()))
@@ -179,24 +179,25 @@ class _compat_scanner:
         i = 0
         numtokens = len(tokens)
         while i < numtokens:
-            type, start, tlen = tokens[i]
-            n = tok2compat.get(type)
+            token_type, start, tlen = tokens[i]
+            n = tok2compat.get(token_type)
             if n is ignore:
                 pass
             elif n is not None:
                 a(n)
-            elif type == token.t_entity:
+            elif token_type == token.t_entity:
                 res.append(("TEXT", resolve_entity(g())))
-            elif type == token.t_hrule:
+            elif token_type == token.t_hrule:
                 res.append((self.tagtoken("<hr />"), g()))
-            elif type == token.t_html_tag:
+            elif token_type == token.t_html_tag:
                 s = g()
 
                 tt = self.tagtoken(s)
                 isEndToken = isinstance(tt, EndTagToken)
                 closingOrSelfClosing = isEndToken or tt.selfClosing
 
-                if tt.t in self.tagextensions or tt.t in ("imagemap", "gallery"):
+                if tt.t in self.tagextensions or tt.t in ("imagemap",
+                                                          "gallery"):
                     if closingOrSelfClosing:
                         i += 1
                         continue
@@ -209,11 +210,11 @@ class _compat_scanner:
                     end_token = None
 
                     while i < numtokens:
-                        type, start, tlen = tokens[i]
+                        token_type, start, tlen = tokens[i]
                         if text_start is None:
                             text_start = start
 
-                        if type == token.t_html_tag:
+                        if token_type == token.t_html_tag:
                             tt = self.tagtoken(g())
                             if tt.t == tagname:
                                 end_token = (tt, g())
@@ -233,12 +234,13 @@ class _compat_scanner:
                     if isEndToken or tt.selfClosing:
                         continue
                     while i < numtokens:
-                        type, start, tlen = tokens[i]
-                        if type == token.t_html_tag:
+                        token_type, start, tlen = tokens[i]
+                        if token_type == token.t_html_tag:
                             tt = self.tagtoken(g())
                             if tt.t == "nowiki":
                                 break
-                        res.append(("TEXT", scanres.text((type, start, tlen))))
+                        res.append(("TEXT", scanres.text((token_type,
+                                                          start, tlen))))
                         i += 1
                 elif tt.t in ["font", "noinclude", "caption"]:
                     pass
@@ -318,8 +320,8 @@ class TagToken(_BaseTagToken):
     values = {}
     selfClosing = False
 
-    def __init__(self, t, text=""):
-        self.t = t
+    def __init__(self, token, text=""):
+        self.t = token
         self.text = text
 
     def __repr__(self):
@@ -327,15 +329,15 @@ class TagToken(_BaseTagToken):
 
 
 class EndTagToken(_BaseTagToken):
-    def __init__(self, t, text=""):
-        self.t = t
+    def __init__(self, token, text=""):
+        self.t = token
         self.text = text
 
     def __repr__(self):
         return f"<EndTag:{self.t!r}>"
 
 
-def tokenize(input):
-    if input is None:
+def tokenize(token_input):
+    if token_input is None:
         raise ValueError("must specify input argument in tokenize")
-    return compat_scan(input)
+    return compat_scan(token_input)

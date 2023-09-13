@@ -76,5 +76,6 @@ class Log:
         s = ""
         if self.timestamps:
             s = "%s " % time.strftime(self.timestamp_fmt)
-        s += "{} >> {}\n".format(".".join(str(x) for x in self._prefix if x), msg)
+        s += "{} >> {}\n".format(".".join(str(x) for x in self._prefix if x),
+                                 msg)
         self.logfile.write(s)

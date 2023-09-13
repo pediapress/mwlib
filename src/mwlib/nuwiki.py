@@ -59,7 +59,8 @@ class DumbJsonDB:
         return list(self.db.items())
 
     def __getstate__(self):
-        # FIXME: pickling zip based containers not supported and currently not needed.
+        # FIXME: pickling zip based containers not supported
+        # and currently not needed.
         # if desired the content of the db file need to be persisted...
         if not self.allow_pickle:
             raise ValueError(
@@ -227,14 +228,16 @@ class nuwiki:
         hd = sha256(fqname.encode("utf-8")).hexdigest()
         ext = os.path.splitext(p)[-1]
         ext = ext.replace(" ", "")
-        # mediawiki gives us png's for these extensions. let's change them here.
+        # mediawiki gives us png's for these extensions. 
+        # let's change them here.
         if ext.lower() in (".gif", ".svg", ".tif", ".tiff"):
             ext = ".png"
         hd += ext
         safe_path = self._pathjoin("images", "safe", hd)
         if not os.path.exists(safe_path):
             try:
-                os.symlink(os.path.join("..", utils.fs_escape(fqname)), safe_path)
+                os.symlink(os.path.join("..", utils.fs_escape(fqname)),
+                           safe_path)
             except OSError as exc:
                 if exc.errno != 17:  # File exists
                     raise
@@ -315,7 +318,8 @@ class adapt:
             self.was_tmpdir = True
 
         if isinstance(path_or_instance, six.string_types):
-            self.nuwiki = NuWiki(path_or_instance, allow_pickle=not self.was_tmpdir)
+            self.nuwiki = NuWiki(path_or_instance,
+                                 allow_pickle=not self.was_tmpdir)
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
@@ -450,7 +454,8 @@ class adapt:
         return self.nuwiki.normalize_and_get_image_path(name)
 
     def get_image_description_page(self, name):
-        ns, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
+        ns, partial, fqname = self.nshandler.splitname(name,
+                                                       nshandling.NS_FILE)
         page = self.get_page(fqname)
         if page is not None:
             return page
@@ -509,7 +514,8 @@ class adapt:
         page = self.get_image_description_page(name)
         if page is None:
             return []
-        users = getContributorsFromInformationTemplate(page.rawtext, page.title, self)
+        users = getContributorsFromInformationTemplate(page.rawtext,
+                                                       page.title, self)
         if users:
             return users
         return self.get_authors(page.title)

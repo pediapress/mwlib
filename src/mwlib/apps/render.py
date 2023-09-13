@@ -56,7 +56,11 @@ class Main:
         a("-e", "--error-file", help="write errors to this file")
         a("-s", "--status-file", help="write status/progress info to this file")
         a("--list-writers", action="store_true", help="list available writers and exit")
-        a("--writer-info", metavar="WRITER", help="list information about given WRITER and exit")
+        a(
+            "--writer-info",
+            metavar="WRITER",
+            help="list information about given WRITER and exit",
+        )
         a("--keep-zip", metavar="FILENAME", help="write ZIP file to FILENAME")
         a(
             "--keep-tmpfiles",
@@ -73,7 +77,10 @@ class Main:
         try:
             entry_point = next(pkg_resources.iter_entry_points("mwlib.writers", name))
         except StopIteration:
-            sys.exit("No such writer: %r (use --list-writers to list available writers)" % name)
+            sys.exit(
+                "No such writer: %r (use --list-writers to list available writers)"
+                % name
+            )
         try:
             return entry_point.load()
         except Exception as e:
@@ -116,7 +123,8 @@ class Main:
         if isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt)) or isinstance(
             env, wiki.MultiEnvironment
         ):
-            self.status = Status(self.options.status_file, progress_range=(0, 100))
+            self.status = Status(self.options.status_file,
+                                 progress_range=(0, 100))
             return env
 
         from mwlib.apps.buildzip import make_zip
@@ -136,7 +144,8 @@ class Main:
                     raise
 
         env = wiki.makewiki(self.zip_filename)
-        self.status = Status(self.options.status_file, progress_range=(34, 100))
+        self.status = Status(self.options.status_file,
+                             progress_range=(34, 100))
         return env
 
     def __call__(self):
@@ -201,9 +210,12 @@ class Main:
 
             basename = os.path.basename(options.output)
             ext = "." + basename.rsplit(".", 1)[-1] if "." in basename else ""
-            fd, tmpout = tempfile.mkstemp(dir=os.path.dirname(options.output), suffix=ext)
+            fd, tmpout = tempfile.mkstemp(
+                dir=os.path.dirname(options.output), suffix=ext
+            )
             os.close(fd)
-            writer(env, output=tmpout, status_callback=self.status, **writer_options)
+            writer(env, output=tmpout, status_callback=self.status,
+                   **writer_options)
             os.rename(tmpout, options.output)
             kwargs = {}
             if hasattr(writer, "content_type"):
@@ -236,7 +248,9 @@ class Main:
                         env.images.clear()
                 except OSError as e:
                     if e.errno != errno.ENOENT:
-                        print("ERROR: Could not remove temporary images: %s" % e, e.errno)
+                        print(
+                            "ERROR: Could not remove temporary images: %s" % e, e.errno
+                        )
 
 
 def main():

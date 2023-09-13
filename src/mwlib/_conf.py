@@ -34,7 +34,8 @@ class ConfBase:
         if varname in os.environ:
             return convert(os.environ[varname])
         if self._inicfg is not None:
-            return self._inicfg.get(section, name, default=default, convert=convert)
+            return self._inicfg.get(section, name, default=default,
+                                    convert=convert)
         return default
 
     @property

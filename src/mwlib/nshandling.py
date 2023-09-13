@@ -132,10 +132,6 @@ class nshandler:
     def splitname(self, title, defaultns=0):
         if not isinstance(title, six.text_type):
             title = six.text_type(title, 'utf-8')
-
-        # if "#" in title:
-        #     title = title.split("#")[0]
-
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
             name = name[1:].strip()
@@ -143,7 +139,8 @@ class nshandler:
 
         if ":" in name:
             ns, partial_name = name.split(":", 1)
-            was_namespace, nsnum, prefix = self._find_namespace(ns, defaultns=defaultns)
+            was_namespace, nsnum, prefix = self._find_namespace(ns,
+                                                                defaultns=defaultns)
             suffix = partial_name.strip() if was_namespace else name
         else:
             prefix = self.siteinfo["namespaces"][str(defaultns)]["*"]

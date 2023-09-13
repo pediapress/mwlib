@@ -177,23 +177,9 @@ def renderMath(
 if __name__ == "__main__":
     latex = "\\sqrt{4}=2"
 
-    # latexlist = ["\\sqrt{4}=2",
-    ##                  r"a^2 + b^2 = c^2\,",
-    ##                  r"E = m c^2",
-    # r"\begin{matrix}e^{\mathrm{i}\,\pi}\end{matrix}+1=0\;",
-    ##                  r"1\,\mathrm{\frac{km}{h}} = 0{,}2\overline{7}\,\mathrm{\frac{m}{s}}",
-    # r"""\begin{array}{ccc}
-    # F^2\sim W&\Leftrightarrow&\frac{F_1^2}{F_2^2}=\frac{W_1}{W_2}\\
-    # \ln\frac{F_1}{F_2}\,\mathrm{Np}&=&
-    # \frac{1}{2}\ln\frac{W_1}{W_2}\,\mathrm{Np}\\
-    # 20\,\lg\frac{F_1}{F_2}\,\mathrm{dB}&=&
-    # 10\,\lg\frac{W_1}{W_2}\,\mathrm{dB}
-    # \end{array}
-    # """,
-    # ]
-
     print(renderMath(latex, output_mode="mathml"))
     print(renderMath(latex, output_path="/tmp/", output_mode="png"))
     print(
-        renderMath(latex, output_path="/tmp/", output_mode="png", render_engine="texvc")
+        renderMath(latex, output_path="/tmp/", output_mode="png",
+                   render_engine="texvc")
     )

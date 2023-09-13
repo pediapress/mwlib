@@ -115,7 +115,8 @@ preformatted.addElement(
         keeptogether="always",
     )
 )
-preformatted.addElement(style.TextProperties(fontname="DejaVumono", fontsize="10pt"))
+preformatted.addElement(style.TextProperties(fontname="DejaVumono",
+                                             fontsize="10pt"))
 
 
 definitionterm = style.Style(name="definitionterm", family="paragraph")
@@ -142,7 +143,8 @@ tableCaption = style.Style(name="TableCaption", family="paragraph")
 tableCaption.addElement(
     style.ParagraphProperties(textalign="center", marginbottom="0.1in")
 )
-tableCaption.addElement(style.TextProperties(fontweight="bold", fontname="DejaVuSerif"))
+tableCaption.addElement(style.TextProperties(fontweight="bold",
+                                             fontname="DejaVuSerif"))
 
 
 center = style.Style(name="Center", family="paragraph")
@@ -206,7 +208,8 @@ indentedTriple.addElement(style.TextProperties(fontname="DejaVuSerif"))
 footnote = style.Style(
     name="Footnote", family="paragraph", liststylename="FootnoteList"
 )  # fixme: liststyle does not work
-footnote.addElement(style.TextProperties(fontsize="10pt", fontname="DejaVuSerif"))
+footnote.addElement(style.TextProperties(fontsize="10pt",
+                                         fontname="DejaVuSerif"))
 
 
 #
@@ -220,14 +223,17 @@ emphasis.addElement(
 italic = emphasis  # alternative name
 
 strong = style.Style(name="Bold", family="text")
-strong.addElement(style.TextProperties(fontweight="bold", fontname="DejaVuSerif"))
+strong.addElement(style.TextProperties(fontweight="bold",
+                                       fontname="DejaVuSerif"))
 bold = strong  # alternative name
 
 sup = style.Style(name="Sup", family="text")
-sup.addElement(style.TextProperties(textposition="super", fontname="DejaVuSerif"))
+sup.addElement(style.TextProperties(textposition="super",
+                                    fontname="DejaVuSerif"))
 
 sub = style.Style(name="Sub", family="text")
-sub.addElement(style.TextProperties(textposition="-30% 50%", fontname="DejaVuSerif"))
+sub.addElement(style.TextProperties(textposition="-30% 50%",
+                                    fontname="DejaVuSerif"))
 
 underline = style.Style(name="Underline", family="text")
 underline.addElement(
@@ -247,7 +253,8 @@ small = style.Style(name="Small", family="text")
 small.addElement(style.TextProperties(fontsize="80%", fontname="DejaVuSerif"))
 
 teletyped = style.Style(name="Teletyped", family="text")
-teletyped.addElement(style.TextProperties(fontsize="80%", fontname="DejaVumono"))
+teletyped.addElement(style.TextProperties(fontsize="80%",
+                                          fontname="DejaVumono"))
 
 
 # logical text tags:
@@ -276,10 +283,12 @@ dumbcolumn.addElement(style.TableColumnProperties(attributes={"columnwidth": "1.
 # ordered list (until lvl2, then bullets)
 numberedlist = text.ListStyle(name="numberedlist")
 numberedlist.addElement(
-    text.ListLevelStyleNumber(level="1", numprefix="  ", numsuffix=".  ", numformat="1")
+    text.ListLevelStyleNumber(level="1", numprefix="  ", numsuffix=".  ",
+                              numformat="1")
 )
 numberedlist.addElement(
-    text.ListLevelStyleNumber(level="2", numprefix="  ", numsuffix=")  ", numformat="a")
+    text.ListLevelStyleNumber(level="2", numprefix="  ", numsuffix=")  ",
+                              numformat="a")
 )
 numberedlist.addElement(
     text.ListLevelStyleBullet(
@@ -394,25 +403,6 @@ imgCaption.addElement(
         fontname="DejaVuSerif",
     )
 )
-
-#
-# Graphic styles:
-#
-# 2do: where is grafic used?
-# fixme: clean it
-# graphic = style.Style(name="Graphic", family="graphic")
-# graphic.addElement(style.GraphicProperties(wrap="dynamic", verticalrel="paragraph", horizontalrel="paragraph"))
-# graphic.addElement(
-#    style.GraphicProperties(padding="0.15in",borderleft="none",borderright="0.0154in double #FFFFFF",
-# bordertop="0.0154in double #FFFFFF",borderbottom="0.0154in double
-# #FFFFFF"))
-
-# graphic.addElement(style.GraphicProperties(padding="0.15in", border="0.01in single #ff00ff"))
-# graphic = style.Style(name="Graphic", family="graphic")
-# graphic.addElement(style.GraphicProperties(runthrough="foreground", wrap="dynamic", numberwrappedparagraphs="no-limit",
-# verticalpos="top", verticalrel="page",horizontalpos="center",
-# horizontalrel="page"))
-
 
 # define a outer frame:
 # frmOuter and frmInner are mainy used to format and align the images

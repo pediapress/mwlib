@@ -42,7 +42,7 @@ class TrustedRevisions:
         p = self.site.Pages[title]
         for rev in p.revisions():
             # add basic info
-            rev["age"] = (now - time.mktime(rev["timestamp"])) / (24 * 3600)  # days
+            rev["age"] = (now - time.mktime(rev["timestamp"])) / (24 * 3600)
             rev["title"] = title
 
             # don't use bot revs
@@ -61,7 +61,7 @@ class TrustedRevisions:
                 best_rev = rev
             if rev["score"] > min_trust:  # break if we have a sufficient score
                 break
-            if max_age and rev["age"] > max_age:  # break if articles get too old
+            if max_age and rev["age"] > max_age:  # article too old
                 break
 
         return best_rev

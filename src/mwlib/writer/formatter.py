@@ -10,6 +10,7 @@ from mwlib.writer import styleutils
 
 class Formatter:
     """store the current formatting state"""
+
     fontsize_style = None
 
     css_style_map = {
@@ -51,7 +52,6 @@ class Formatter:
 
     def __init__(self, font_switcher=None,
                  output_encoding=None, word_split_len=20):
-
         self.font_switcher = font_switcher
 
         self.default_font = "DejaVuSerif"
@@ -82,7 +82,8 @@ class Formatter:
         self.word_split_len = word_split_len
 
     def register_render_styles(self):
-        # example for render styles in html. should probably be overridden when subclassed
+        # example for render styles in html.
+        # should probably be overridden when subclassed
         return [
             ("emphasized_style", "<em>", "</em>"),
             ("strong_style", "<strong>", "</strong>"),
@@ -115,7 +116,7 @@ class Formatter:
 
     def start_style(self):
         start = []
-        for style, style_start, style_end, start_arg in self.render_styles:
+        for style, style_start, _, start_arg in self.render_styles:
             attr = getattr(self, style, 0)
             if not isinstance(attr, int):
                 print(attr)
@@ -132,7 +133,7 @@ class Formatter:
     def end_style(self):
         end = []
         # reverse style list
-        for style, style_start, style_end, start_arg in self.render_styles[::-1]:
+        for style, _, style_end, _ in self.render_styles[::-1]:
             if getattr(self, style, 0) != 0:
                 end.append(style_end)
         if end:
@@ -141,7 +142,8 @@ class Formatter:
 
     def set_relative_font_size(self, rel_font_size):
         # ignore anything too large. see search engine optimized article
-        # http://fr.wikipedia.org/wiki/Licensed_to_Ill (template "Infobox Musique (œuvre)")
+        # http://fr.wikipedia.org/wiki/Licensed_to_Ill
+        # (template "Infobox Musique (œuvre)")
         if rel_font_size > 10:
             return
         rel_font_size = min(rel_font_size, 5)
@@ -183,9 +185,11 @@ class Formatter:
         css = self.css_style_map
         for node_style, style_value in node.style.items():
             if node_style in css:
-                for render_style, action in css[node_style].get(style_value, []):
+                for render_style, action in css[node_style].get(style_value,
+                                                                []):
                     if action == "change":
-                        setattr(self, render_style, getattr(self, render_style) + 1)
+                        setattr(self, render_style,
+                                getattr(self, render_style) + 1)
                     elif action == "reset":
                         setattr(self, render_style, 0)
                 if list(css[node_style].keys()) == ["*"]:
@@ -236,7 +240,8 @@ class Formatter:
         else:
             if escape:
                 if self.minimize_space_mode > 0 or (
-                    break_long and max(len(w) for w in txt.split(" ")) > self.word_split_len
+                    break_long
+                    and max(len(w) for w in txt.split(" ")) > self.word_split_len
                 ):
                     txt = self.escape_and_hyphenate_text(txt)
                 else:

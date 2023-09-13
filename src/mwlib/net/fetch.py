@@ -87,7 +87,8 @@ class FsOutput:
         if os.path.exists(self.path):
             raise ValueError(f"output path exists: {self.path}")
         os.makedirs(os.path.join(self.path, "images"))
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w",
+                            encoding="utf8")
         self.seen = {}
         self.imgcount = 0
         self.nfo = None
@@ -165,11 +166,10 @@ class FsOutput:
                         rev["revid"] = revid
                     self.seen[title] = rev
 
-                    header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
+                    header = "\n --page-- %s\n" % json.dumps(rev,
+                                                              sort_keys=True)
                     self.revfile.write(header)
                     self.revfile.write(txt)
-                # else:
-                #     print "fsoutput: skipping duplicate:", dict(revid=revid, title=title)
 
     def write_authors(self):
         if hasattr(self, "authors"):
@@ -184,7 +184,8 @@ class FsOutput:
 
 
 def split_blocks(lst, limit):
-    """Split list lst in blocks of max. limit entries. Return list of blocks."""
+    """Split list lst in blocks of max.
+    limit entries. Return list of blocks."""
     res = []
     start = 0
     while start < len(lst):
@@ -321,7 +322,8 @@ class Fetcher:
 
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
-            action="query", prop="revisions", rvprop="content", revids=str(revid)
+            action="query", prop="revisions", rvprop="content",
+            revids=str(revid)
         )
         page = list(res["pages"].values())[0]
 
@@ -347,7 +349,8 @@ class Fetcher:
 
         text = "{{:%s}}" % title if nsnum == 0 else "{{%s}}" % title
 
-        res = self.api.do_request(action="expandtemplates", title=title, text=text)
+        res = self.api.do_request(action="expandtemplates", title=title,
+                                  text=text)
         txt = res.get("*")
         if txt:
             self.fsout.write_expanded_page(title, nsnum, txt)
@@ -355,7 +358,8 @@ class Fetcher:
 
     def run(self):
         self.report()
-        dispatch_gr = gevent.spawn(call_when, self.dispatch_event, self.dispatch)
+        dispatch_gr = gevent.spawn(call_when, self.dispatch_event,
+                                   self.dispatch)
         try:
             self.pool.join()
         finally:
@@ -405,7 +409,8 @@ class Fetcher:
         blocks = split_blocks(lst, limit)
         self.count_total += len(blocks)
         for bl in blocks:
-            pool.add(self._refcall_noinc(self.fetch_used_block, name, bl, expanded))
+            pool.add(self._refcall_noinc(self.fetch_used_block,
+                                         name, bl, expanded))
         pool.join()
 
         if conf.noedits:
@@ -418,7 +423,8 @@ class Fetcher:
             self._refcall_noinc(self.get_edits, title, rev)
 
     def fetch_used_block(self, name, lst, expanded):
-        kw = {name: lst, "fetch_images": self.fetch_images, "expanded": expanded}
+        kw = {name: lst, "fetch_images": self.fetch_images,
+              "expanded": expanded}
         used = self.api.fetch_used(**kw)
 
         self._update_redirects(used.get("redirects", []))
@@ -569,11 +575,13 @@ class Fetcher:
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
         temp_path = (path + "\xb7").encode("utf-8")
-        gr = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
+        gr = self.image_download_pool.spawn(download_to_file, url, path,
+                                            temp_path)
         self.pool.add(gr)
 
     def fetch_imageinfo(self, titles):
-        data = self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize)
+        data = self.api.fetch_imageinfo(titles=titles,
+                                        iiurlwidth=self.imagesize)
         infos = list(data.get("pages", {}).values())
         new_base_paths = set()
 
@@ -589,7 +597,8 @@ class Fetcher:
         for path in new_base_paths:
             self._refcall(self.handle_new_basepath, path)
 
-    def _extract_info_from_image(self, image, imageinfo, new_base_paths, title):
+    def _extract_info_from_image(self, image, imageinfo,
+                                 new_base_paths, title):
         self.fsout.set_db_key("imageinfo", title, imageinfo)
         thumb_url = imageinfo.get("thumburl", None)
         if thumb_url is None:  # fallback for old mediawikis
@@ -641,8 +650,6 @@ class Fetcher:
             for r in revisions:
                 with contextlib.suppress(KeyError):
                     del r["revid"]
-
-
         # XXX do we also need to handle redirects here?
         self.fsout.write_pages(data)
 
@@ -652,7 +659,8 @@ class Fetcher:
         del self.imagedescription_todo[path]
 
         titles = {x[0] for x in todo}
-        # "-d-" is just some prefix to make the names here not clash with local names
+        # "-d-" is just some prefix to make the names here
+        # not clash with local names
         titles = [t for t in titles if "-d-" + t not in self.scheduled]
         self.scheduled.update(["-d-" + x for x in titles])
         if not titles:

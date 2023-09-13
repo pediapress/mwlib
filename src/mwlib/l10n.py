@@ -8,7 +8,8 @@ ext2lang = {
 
 
 def execute(*args):
-    popen = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    popen = subprocess.Popen(args, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
     output, errors = popen.communicate()
     popen.wait()
     if errors:
@@ -105,7 +106,8 @@ def compile_messages(localedir="locale"):
                 mo_filename = os.path.splitext(path)[0] + ".mo"
                 try:
                     execute(
-                        "msgfmt", "--check-format", "--output-file", mo_filename, path
+                        "msgfmt", "--check-format", "--output-file",
+                        mo_filename, path
                     )
                 except RuntimeError as exc:
                     print(f"Could not compile {path!r}: {exc}")

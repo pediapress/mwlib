@@ -73,7 +73,8 @@ def parse_collection_page(wikitext):
             continue
 
         # look for initial templates and summaries
-        # multilinetemplates need different handling to those that fit into one line
+        # multilinetemplates need different handling
+        # to those that fit into one line
         if res.group('template_end') or res.group('template'):
             summary = True
             noTemplate = False
@@ -94,7 +95,8 @@ def parse_collection_page(wikitext):
         elif res.group('article'):
             mb.append_article(res.group('article'), res.group('displaytitle'))
         elif res.group('oldarticle'):
-            mb.append_article(title=res.group('oldarticle'), displaytitle=res.group(
+            mb.append_article(title=res.group('oldarticle'),
+                              displaytitle=res.group(
                 'olddisplaytitle'), revision=res.group('oldid'))
         elif res.group('summary') and (noTemplate or summary):
             mb.summary += res.group('summary') + " "

@@ -50,7 +50,8 @@ def check_service(args):
 
     def check_req(command, **kwargs):
         try:
-            success = client.request(command, kwargs, is_json=(command != "download"))
+            success = client.request(command, kwargs,
+                                     is_json=(command != "download"))
         except Exception as exc:
             report("request failed: %s" % exc)
             sys.exit(1)

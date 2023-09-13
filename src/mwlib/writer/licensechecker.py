@@ -99,7 +99,8 @@ class LicenseChecker:
 
     def _check_licenses(self, licenses, imgname, stats=True):
         if not self.image_db:
-            raise ImageDbError("No image_db passed when initializing LicenseChecker")
+            raise ImageDbError(
+                "No image_db passed when initializing LicenseChecker")
         for lic in licenses:
             if lic.license_type == "free":
                 self.license_display_name[imgname] = lic.display_name
@@ -127,10 +128,12 @@ class LicenseChecker:
             return self.display_cache[imgname]
         if self.image_db is None:
             return False
-        templates = [t.lower() for t in self.image_db.getImageTemplatesAndArgs(imgname)]
+        templates = [t.lower() for t in self.image_db.getImageTemplatesAndArgs(
+            imgname)]
         licenses = self._get_licenses(templates)
         display_img = self._check_licenses(licenses, imgname)
-        url = self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(imgname) or imgname
+        url = self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(
+            imgname) or imgname
         if display_img:
             self.accepted_images.add(url)
         else:
@@ -164,9 +167,11 @@ class LicenseChecker:
         for urls in self.unknown_licenses.values():
             for url in urls:
                 images.add(repr(url))
-        stats.append("Images without license information: %s" % (" ".join(list(images))))
+        stats.append("Images without license information: %s" % (" ".join(
+            list(images))))
         stats.append("##############################")
-        stats.append("Rejected Images: %s" % " ".join(list(self.rejected_images)))
+        stats.append("Rejected Images: %s" % " ".join(
+            list(self.rejected_images)))
         return "\n".join(stats)
 
     def dump_unknown_licenses(self, _dir):
@@ -239,9 +244,11 @@ if __name__ == "__main__":
     lc = LicenseChecker()
     lc.read_licenses_csv()
 
-    stats_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("HIQ_STATSDIR")
+    stats_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
+        "HIQ_STATSDIR")
     if not stats_dir:
-        print("specify stats_dir as first arg, or set environment var HIQ_STATSIDR")
+        print(
+            "specify stats_dir as first arg, or set environment var HIQ_STATSIDR")
         sys.exit(1)
 
     lc.analyse_unknown_licenses(stats_dir)

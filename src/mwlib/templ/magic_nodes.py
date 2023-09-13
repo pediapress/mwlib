@@ -40,9 +40,12 @@ class AnchorEncode(nodes.Node):
         evaluate.flatten(self[0], expander, variables, arg)
         arg = "".join(arg)
 
-        # Note: mediawiki has a bug. It tries not to touch colons by replacing '.3A'
-        # with the colon. However, if the original string contains the substring '.3A',
-        # it will also replace it with a colon. We do *not* reproduce that bug here...
+        # Note: mediawiki has a bug. It tries not to touch
+        # colons by replacing '.3A'
+        # with the colon. However, if the original string
+        # contains the substring '.3A',
+        # it will also replace it with a colon. We do *not*
+        # reproduce that bug here...
         import six.moves.urllib.request
 
         e = (

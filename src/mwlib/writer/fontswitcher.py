@@ -16,7 +16,8 @@ class Scripts:
             raise OSError(f"scripts.txt file not found at: {fn!r}")
         with fn.open() as f:
             for line in f.readlines():
-                res = re.search("([A-Z0-9]+)\\.\\.([A-Z0-9]+); (.*)", line.strip())
+                res = re.search("([A-Z0-9]+)\\.\\.([A-Z0-9]+); (.*)",
+                                line.strip())
                 if res:
                     start_block, end_block, the_script = res.groups()
                     self.script2code_block[the_script.lower()] = (
@@ -47,7 +48,8 @@ class Scripts:
     def get_scripts_for_code_blocks(self, code_blocks):
         the_scripts = set()
         for code_block in code_blocks:
-            the_scripts = the_scripts.union(self.get_scripts_for_code_block(code_block))
+            the_scripts = the_scripts.union(
+                self.get_scripts_for_code_block(code_block))
         return the_scripts
 
     def get_scripts(self, txt):
@@ -105,14 +107,16 @@ class FontSwitcher:
             self.code_points2font.pop(entry)
 
     def register_font(self, font_name, code_points: list):
-        """Register a font to certain scripts or a range of code point blocks"""
+        """Register a font to certain scripts
+        or a range of code point blocks"""
         if not code_points:
             return
         for block in code_points:
             if isinstance(block, str):
                 block = self.scripts.get_code_points(block)
             block_start, block_end = block
-            self.code_points2font.insert(0, (block_start, block_end, font_name))
+            self.code_points2font.insert(0, (block_start,
+                                             block_end, font_name))
 
     def register_default_font(self, font_name=None):
         self.default_font = font_name

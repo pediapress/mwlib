@@ -57,7 +57,8 @@ class OptionParser(optparse.OptionParser):
         )
 
     def _cb_config(self, option, opt, value, parser):
-        """handle multiple --config arguments by resetting parser.values and storing
+        """handle multiple --config arguments by
+        resetting parser.values and storing
         the old value in parser.config_values"""
 
         import copy
@@ -139,6 +140,7 @@ class OptionParser(optparse.OptionParser):
 
         if cfg.startswith(":") and not env.metabook.licenses:
             mw_license_url = wiki.wpwikis.get(cfg[1:])["mw_license_url"]
-            env.metabook.licenses.append({"mw_license_url": mw_license_url, "type": "License"})
+            env.metabook.licenses.append({"mw_license_url": mw_license_url,
+                                          "type": "License"})
 
         return env

@@ -40,14 +40,16 @@ def zip_directory(dirname: str, output: str = None, skip_ext: str = None):
     return output
 
 
-def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
+def make_zip(output=None, options=None, metabook=None, podclient=None,
+             status=None):
     with tempfile.TemporaryDirectory(dir=output and Path(output).parent) as tmpdir:
         tmpdir = Path(tmpdir)
         fsdir = tmpdir / "nuwiki"
         print(f"creating nuwiki in {fsdir}")
         from mwlib.apps.make_nuwiki import make_nuwiki
 
-        make_nuwiki(fsdir, metabook=metabook, options=options, podclient=podclient, status=status)
+        make_nuwiki(fsdir, metabook=metabook, options=options,
+                    podclient=podclient, status=status)
 
         zip_path = zip_directory(fsdir, output)
         if podclient:
@@ -104,11 +106,13 @@ def main():
         if not env.metabook:
             raise ValueError("no metabook")
 
-        status = Status(options.status_file, podclient=pod_client, progress_range=(1, 90))
+        status = Status(options.status_file, podclient=pod_client,
+                        progress_range=(1, 90))
         status(progress=0)
         output = options.output
 
-        make_zip(output, options, env.metabook, podclient=pod_client, status=status)
+        make_zip(output, options, env.metabook, podclient=pod_client,
+                 status=status)
 
     except Exception:
         if status:
@@ -140,8 +144,6 @@ def _init_pod_client(options, parser, use_help):
         time.sleep(1)
         with contextlib.suppress(OSError):
             os.kill(pid, 9)
-
-
     else:
         pod_client = None
     return pod_client

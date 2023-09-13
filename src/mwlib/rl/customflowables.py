@@ -93,7 +93,8 @@ class Figure(Flowable):
                     frags.fragment,
                 )
             )
-            canv.linkURL(clean_url, (0, 0, self.imgWidth, self.imgHeight), relative=1, thickness=0)
+            canv.linkURL(clean_url, (0, 0, self.imgWidth, self.imgHeight),
+                         relative=1, thickness=0)
 
     def wrap(self, availWidth, availHeight):
         self.availWidth = availWidth
@@ -264,8 +265,9 @@ class FiguresAndParagraphs(Flowable):
 
     def split(self, availWidth, availheight):
         if not hasattr(self,
-                       "hfs") or len(self.hfs) == 0 or hasattr(self,
-                                                               "keep_together_split"):
+                       "hfs") or len(
+                                    self.hfs) == 0 or hasattr(self,
+                                                              "keep_together_split"):
             self.wrap(availWidth, availheight)
         height = self._getVOffset()
         if self.hfs[0] + height > availheight:

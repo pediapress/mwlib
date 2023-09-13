@@ -1,9 +1,6 @@
 # nserve/nslave only monkeypatch when imported as __main__ so, we
 # monkeypatch here and then call into the respective main function
 
-
-
-
 from gevent import monkey
 
 monkey.patch_all()

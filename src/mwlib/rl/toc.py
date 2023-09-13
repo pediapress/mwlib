@@ -46,7 +46,9 @@ class TocRenderer:
         elements.append(
             Paragraph(
                 _("Contents"),
-                pdfstyles.heading_style(mode="Chapter", text_align="left" if not rtl else "right"),
+                pdfstyles.heading_style(
+                    mode="Chapter",
+                    text_align="left" if not rtl else "right"),
             )
         )
         toc_table = []
@@ -104,7 +106,8 @@ class TocRenderer:
         if not has_title_page:
             cmd.extend(["-f", tocpath, "-f", pdfpath])
         else:
-            cmd.extend(["-f", pdfpath, "-f", tocpath, "-f", pdfpath, "-u", "1-1:all:2-:"])
+            cmd.extend(["-f", pdfpath, "-f", tocpath,
+                        "-f", pdfpath, "-u", "1-1:all:2-:"])
         cmd.extend(["-o", finalpath, "-overwrite", "concat"])
         return self.run_cmd(cmd)
 
