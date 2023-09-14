@@ -575,15 +575,15 @@ class ODFWriter:
         def _withETElement(e, parent):
             # translate to odf.Elements
             for c in e:
-                n = math.Element(qname=(math.MATHNS, str(c.tag)))
-                parent.addElement(n)
+                node = math.Element(qname=(math.MATHNS, str(c.tag)))
+                parent.addElement(node)
                 if c.text:
                     text = c.text
-                    n.appendChild(odf.element.Text(text))  # n.addText(c.text)
+                    node.appendChild(odf.element.Text(text))
                     # rffixme: odfpy0.8 errors:"AttributeError:
                     # Element instance has no
                     # attribute 'elements'" -> this is a lie!
-                _withETElement(c, n)
+                _withETElement(c, node)
 
         mathframe = draw.Frame(stylename=style.formula, zindex=0,
                                anchortype="as-char")
@@ -636,16 +636,16 @@ class ODFWriter:
 
     def owriteReference(self, t):
         self.references.append(t)
-        n = text.Note(noteclass="footnote")
+        node = text.Note(noteclass="footnote")
         nc = text.NoteCitation()
-        n.addElement(nc)
+        node.addElement(nc)
         nc.addText(str(len(self.references)))
         nb = text.NoteBody()
-        n.addElement(nb)
+        node.addElement(nb)
         p = ParagraphProxy(stylename=style.footnote)
         nb.addElement(p)
-        n.writeto = p
-        return n
+        node.writeto = p
+        return node
 
     def owriteReferenceList(self, t):
         # already in odf footnotes
@@ -669,7 +669,7 @@ class ODFWriter:
             @return: (w,h): w(idth), h(eight) of target image in inch (!)
             @rtype float"""
 
-            if obj.isInline:
+            if obj.is_inline:
                 scale = 1 / self.conf.paper["IMG_DPI_STANDARD"]
             else:
                 scale = 1 / self.conf.paper["IMG_DPI_INLINE"]
@@ -757,7 +757,7 @@ class ODFWriter:
         href = self.doc.addPicture(imgPath)
         innerframe.addElement(draw.Image(href=href))
 
-        if obj.isInline():
+        if obj.is_inline():
             return SkipChildren(innerframe)  # FIXME something else formatting?
         else:
             innerframe.setAttribute("anchortype", "paragraph")
@@ -785,10 +785,10 @@ class ODFWriter:
             frame.writeImageMapTo = innerframe
         return frame
 
-    def owriteFont(self, n):
+    def owriteFont(self, node):
         pass  # simply write children
 
-    def owriteNode(self, n):
+    def owriteNode(self, node):
         pass  # simply write children
 
     def owriteGallery(self, obj):

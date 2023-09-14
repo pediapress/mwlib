@@ -9,8 +9,10 @@ import sys
 import _mwscan
 import htmlentitydefs
 
+from mwlib.parser import paramrx
 
-class token:
+
+class Token:
     t_end = 0
     t_text = 1
     t_entity = 2
@@ -41,31 +43,32 @@ class token:
     token2name = {}
 
 
-for d in dir(token):
-    token2name = token.token2name
-    if d.startswith("t_"):
-        token2name[getattr(token, d)] = d
-del d
+for directory in dir(Token):
+    token2name = Token.token2name
+    if directory.startswith("t_"):
+        token2name[getattr(Token, directory)] = directory
+else:
+    del directory
 
 
 def _split_tag(txt):
-    m = re.match(r" *(\w+)(.*)", txt)
-    if m is None:
+    matched_tag = re.match(r" *(\w+)(.*)", txt)
+    if matched_tag is None:
         raise ValueError("could not match tag name")
-    name = m.group(1)
-    values = m.group(2)
+    name = matched_tag.group(1)
+    values = matched_tag.group(2)
     return name, values
 
 
 def dump_tokens(text, tokens):
-    for type, start, len in tokens:
-        print(type, repr(text[start: start + len]))
+    for token_type, start, length in tokens:
+        print(token_type, repr(text[start: start + length]))
 
 
 def scan(text):
     text += "\0" * 32
     tokens = _mwscan.scan(text)
-    return scan_result(text, tokens)
+    return ScanResult(text, tokens)
 
 
 def resolve_entity(e):
@@ -73,8 +76,7 @@ def resolve_entity(e):
         try:
             if e[2] == "x" or e[2] == "X":
                 return chr(int(e[3:-1], 16))
-            else:
-                return chr(int(e[2:-1]))
+            return chr(int(e[2:-1]))
         except ValueError:
             return e
     else:
@@ -84,30 +86,29 @@ def resolve_entity(e):
             return e
 
 
-class scan_result:
+class ScanResult:
     def __init__(self, source, toks):
         self.source = source
         self.toks = toks
 
-    def rawtext(self, t):
-        (type, start, tlen) = t
+    def rawtext(self, token):
+        (_, start, tlen) = token
         return self.source[start: start + tlen]
 
-    def text(self, t):
-        r = self.rawtext(t)
-        if t[0] == token.t_entity:
-            return resolve_entity(r)
-        else:
-            return r
+    def text(self, token):
+        raw_text = self.rawtext(token)
+        if token[0] == Token.t_entity:
+            return resolve_entity(raw_text)
+        return raw_text
 
     def dump(self, out=None):
         if out is None:
             out = sys.stdout
-        for x in self:
-            out.write("%s\n" % self.repr(x))
+        for token in self:
+            out.write("%s\n" % self.repr(token))
 
-    def repr(self, t):
-        return f"({token.token2name.get(t[0])}, {self.rawtext(t)!r})"
+    def repr(self, token):
+        return f"({Token.token2name.get(token[0])}, {self.rawtext(token)!r})"
 
     def __len__(self):
         return len(self.toks)
@@ -128,29 +129,29 @@ class _compat_scanner:
         pass
 
     tok2compat = {
-        token.t_text: "TEXT",
-        token.t_special: "SPECIAL",
-        token.t_2box_open: "[[",
-        token.t_2box_close: "]]",
-        token.t_http_url: "URL",
-        token.t_break: "BREAK",
-        token.t_singlequote: "SINGLEQUOTE",
-        token.t_pre: "PRE",
-        token.t_section: "SECTION",
-        token.t_section_end: "ENDSECTION",
-        token.t_magicword: ignore,
-        token.t_comment: ignore,
-        token.t_end: ignore,
-        token.t_item: "ITEM",
-        token.t_colon: "EOLSTYLE",
-        token.t_semicolon: "EOLSTYLE",
-        token.t_newline: "\n",
-        token.t_begin_table: "BEGINTABLE",
-        token.t_end_table: "ENDTABLE",
-        token.t_column: "COLUMN",
-        token.t_row: "ROW",
-        token.t_tablecaption: "TABLECAPTION",
-        token.t_urllink: "URLLINK",
+        Token.t_text: "TEXT",
+        Token.t_special: "SPECIAL",
+        Token.t_2box_open: "[[",
+        Token.t_2box_close: "]]",
+        Token.t_http_url: "URL",
+        Token.t_break: "BREAK",
+        Token.t_singlequote: "SINGLEQUOTE",
+        Token.t_pre: "PRE",
+        Token.t_section: "SECTION",
+        Token.t_section_end: "ENDSECTION",
+        Token.t_magicword: ignore,
+        Token.t_comment: ignore,
+        Token.t_end: ignore,
+        Token.t_item: "ITEM",
+        Token.t_colon: "EOLSTYLE",
+        Token.t_semicolon: "EOLSTYLE",
+        Token.t_newline: "\n",
+        Token.t_begin_table: "BEGINTABLE",
+        Token.t_end_table: "ENDTABLE",
+        Token.t_column: "COLUMN",
+        Token.t_row: "ROW",
+        Token.t_tablecaption: "TABLECAPTION",
+        Token.t_urllink: "URLLINK",
     }
 
     def _init_allowed_tags(self):
@@ -163,7 +164,7 @@ class _compat_scanner:
             self._init_allowed_tags()
 
         tokens = scan(text)
-        scanres = scan_result(text, tokens)
+        scanres = ScanResult(text, tokens)
 
         res = []
 
@@ -182,28 +183,28 @@ class _compat_scanner:
             token_type, start, tlen = tokens[i]
             n = tok2compat.get(token_type)
             if n is ignore:
-                pass
+                i += 1
+                continue
             elif n is not None:
                 a(n)
-            elif token_type == token.t_entity:
+            elif token_type == Token.t_entity:
                 res.append(("TEXT", resolve_entity(g())))
-            elif token_type == token.t_hrule:
+            elif token_type == Token.t_hrule:
                 res.append((self.tagtoken("<hr />"), g()))
-            elif token_type == token.t_html_tag:
+            elif token_type == Token.t_html_tag:
                 s = g()
 
-                tt = self.tagtoken(s)
-                isEndToken = isinstance(tt, EndTagToken)
-                closingOrSelfClosing = isEndToken or tt.selfClosing
+                tag_token = self.tagtoken(s)
+                is_end_token = isinstance(tag_token, EndTagToken)
+                closing_or_self_closing = is_end_token or tag_token.selfClosing
 
-                if tt.t in self.tagextensions or tt.t in ("imagemap",
-                                                          "gallery"):
-                    if closingOrSelfClosing:
+                if tag_token.t in self.tagextensions or tag_token.t in ("imagemap", "gallery"):
+                    if closing_or_self_closing:
                         i += 1
                         continue
-                    tagname = tt.t
+                    tagname = tag_token.t
 
-                    res.append((tt, s))
+                    res.append((tag_token, s))
                     i += 1
                     text_start = None
                     text_end = None
@@ -214,10 +215,10 @@ class _compat_scanner:
                         if text_start is None:
                             text_start = start
 
-                        if token_type == token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t == tagname:
-                                end_token = (tt, g())
+                        if token_type == Token.t_html_tag:
+                            tag_token = self.tagtoken(g())
+                            if tag_token.t == tagname:
+                                end_token = (tag_token, g())
                                 break
                         text_end = start + tlen
 
@@ -229,39 +230,33 @@ class _compat_scanner:
                     if end_token:
                         res.append(end_token)
 
-                elif tt.t == "nowiki":
+                elif tag_token.t == "nowiki":
                     i += 1
-                    if isEndToken or tt.selfClosing:
+                    if is_end_token or tag_token.selfClosing:
                         continue
                     while i < numtokens:
                         token_type, start, tlen = tokens[i]
-                        if token_type == token.t_html_tag:
-                            tt = self.tagtoken(g())
-                            if tt.t == "nowiki":
+                        if token_type == Token.t_html_tag:
+                            tag_token = self.tagtoken(g())
+                            if tag_token.t == "nowiki":
                                 break
                         res.append(("TEXT", scanres.text((token_type,
                                                           start, tlen))))
                         i += 1
-                elif tt.t in ["font", "noinclude", "caption"]:
-                    pass
-                elif tt.t == "table":
-                    if isEndToken:
+                elif tag_token.t == "table":
+                    if is_end_token:
                         res.append(("ENDTABLE", g()))
                     else:
                         res.append(("BEGINTABLE", g()))
-                elif tt.t in ["th", "td"]:
-                    if isEndToken:
-                        pass
-                    else:
+                elif tag_token.t in ["th", "td"]:
+                    if not is_end_token:
                         res.append(("COLUMN", g()))
-                elif tt.t == "tr":
-                    if isEndToken:
-                        pass
-                    else:
+                elif tag_token.t == "tr":
+                    if not is_end_token:
                         res.append(("ROW", g()))
                 else:
-                    if tt.t in self.allowed_tags:
-                        res.append((tt, s))
+                    if tag_token.t in self.allowed_tags:
+                        res.append((tag_token, s))
                     else:
                         res.append(("TEXT", s))
             else:
@@ -271,31 +266,30 @@ class _compat_scanner:
         return res
 
     def tagtoken(self, text):
-        selfClosing = False
+        self_closing = False
         if text.startswith("</"):
             name = text[2:-1]
             klass = EndTagToken
         elif text.endswith("/>"):
             name = text[1:-2]
             klass = TagToken
-            selfClosing = True
+            self_closing = True
         else:
             name = text[1:-1]
             klass = TagToken
 
         name, values = _split_tag(name)
-        from mwlib.parser import paramrx
 
         values = dict(paramrx.findall(values))
         name = name.lower()
 
-        if name == "br" or name == "references":
+        if name in ['br', 'references']:
             klass = TagToken
 
-        r = klass(name, text)
-        r.selfClosing = selfClosing
-        r.values = values
-        return r
+        result = klass(name, text)
+        result.selfClosing = self_closing
+        result.values = values
+        return result
 
 
 compat_scan = _compat_scanner()
@@ -304,16 +298,16 @@ compat_scan = _compat_scanner()
 class _BaseTagToken:
     def __eq__(self, other):
         if isinstance(other, str):
-            return self.t == other
+            return self.token == other
         if isinstance(other, self.__class__):
-            return self.t == other.t
+            return self.token == other.token
         return False
 
     def __ne__(self, other):
-        return not (self == other)
+        return self != other
 
     def __hash__(self):
-        return hash(self.t)
+        return hash(self.token)
 
 
 class TagToken(_BaseTagToken):
@@ -321,20 +315,20 @@ class TagToken(_BaseTagToken):
     selfClosing = False
 
     def __init__(self, token, text=""):
-        self.t = token
+        self.token = token
         self.text = text
 
     def __repr__(self):
-        return f"<Tag:{self.t!r} {self.text!r}>"
+        return f"<Tag:{self.token!r} {self.text!r}>"
 
 
 class EndTagToken(_BaseTagToken):
     def __init__(self, token, text=""):
-        self.t = token
+        self.token = token
         self.text = text
 
     def __repr__(self):
-        return f"<EndTag:{self.t!r}>"
+        return f"<EndTag:{self.token!r}>"
 
 
 def tokenize(token_input):

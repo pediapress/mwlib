@@ -21,17 +21,17 @@ def get_templates(raw, title=""):
     e = Expander('', wikidb=DictDB())
     todo = [parse(raw, replace_tags=e.replace_tags)]
     while todo:
-        n = todo.pop()
-        if isinstance(n, six.string_types):
+        node = todo.pop()
+        if isinstance(node, six.string_types):
             continue
 
-        if isinstance(n, Template) and isinstance(n[0], six.string_types):
-            name = n[0]
+        if isinstance(node, Template) and isinstance(node[0], six.string_types):
+            name = node[0]
             if name.startswith("/"):
                 name = title + name
             used.add(name)
 
-        todo.extend(n)
+        todo.extend(node)
 
     return used
 
@@ -46,14 +46,14 @@ def find_template(raw, name, parsed_raw=None):
     else:
         todo = parsed_raw
     while todo:
-        n = todo.pop()
-        if isinstance(n, six.string_types):
+        node = todo.pop()
+        if isinstance(node, six.string_types):
             continue
-        if isinstance(n,
-                      Template) and isinstance(n[0],
-                                               six.string_types) and n[0] == name:
-            return n
-        todo.extend(n)
+        if isinstance(node,
+                      Template) and isinstance(node[0],
+                                               six.string_types) and node[0] == name:
+            return node
+        todo.extend(node)
 
 
 def get_template_args(template, expander):

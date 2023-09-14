@@ -32,7 +32,7 @@ def test_headings():
     )
 
     sections = [
-        x.children[0].asText().strip() for x in r.children if isinstance(x, parser.Section)
+        x.children[0].as_text().strip() for x in r.children if isinstance(x, parser.Section)
     ]
     assert sections == ["1", "3"]
 
@@ -99,8 +99,8 @@ def test_parse_image_inline():
     assert len(images) == 2
 
     for i in images:
-        assert i.isInline() is True
-        print("-->Image:", i, i.isInline())
+        assert i.is_inline() is True
+        print("-->Image:", i, i.is_inline())
 
 
 def test_parse_image_6():
@@ -110,7 +110,7 @@ def test_parse_image_6():
     images = r.find(parser.ImageLink)
     assert len(images) == 2
     print(images)
-    assert images[0].isInline() == images[1].isInline()
+    assert images[0].is_inline() == images[1].is_inline()
 
 
 def test_self_closing_nowiki():
@@ -250,7 +250,7 @@ def test_blockquote_with_newline():
     """http://code.pediapress.com/wiki/ticket/41"""
     node = parse("<blockquote>\nblockquoted</blockquote>").find(parser.Style)[0]
     print("STYLE:", node)
-    assert "blockquoted" in node.asText(), "expected 'blockquoted'"
+    assert "blockquoted" in node.as_text(), "expected 'blockquoted'"
 
 
 def test_blockquote_with_two_paras():
@@ -265,7 +265,7 @@ def test_newlines_in_bold_tag():
     """http://code.pediapress.com/wiki/ticket/41"""
     node = parse("<b>test\n\nfoo</b>")
     styles = node.find(parser.Style)
-    txt = "".join([x.asText() for x in styles])
+    txt = "".join([x.as_text() for x in styles])
     print("TXT:", txt)
 
     assert "foo" in txt, "foo should be bold"
@@ -390,10 +390,10 @@ def test_headings_unbalanced_1():
     print("R:", r)
     section = r.find(parser.Section)[0]
     print("SECTION:", section)
-    print("ASTEXT:", section.asText())
+    print("as_text:", section.as_text())
 
     assert section.level == 1, "expected level 1 section"
-    assert section.asText() == "=head"
+    assert section.as_text() == "=head"
 
 
 def test_headings_unbalanced_2():
@@ -401,10 +401,10 @@ def test_headings_unbalanced_2():
     print("R:", r)
     section = r.find(parser.Section)[0]
     print("SECTION:", section)
-    print("ASTEXT:", section.asText())
+    print("as_text:", section.as_text())
 
     assert section.level == 1, "expected level 1 section"
-    assert section.asText() == "head="
+    assert section.as_text() == "head="
 
 
 def test_headings_tab_end():
@@ -773,25 +773,25 @@ def test_source_vlist():
 
 def test_not_pull_in_alpha_image():
     link = parse("[[Image:link.jpg|ab]]cd").find(parser.Link)[0]
-    assert "cd" not in link.asText(), "'cd' not in linkstext"
+    assert "cd" not in link.as_text(), "'cd' not in linkstext"
 
 
 @pytest.mark.xfail
 def test_pull_in_alpha():
     """http://code.pediapress.com/wiki/ticket/130"""
     link = parse("[[link|ab]]cd").find(parser.Link)[0]
-    assert "cd" in link.asText(), "'cd' not in linkstext"
+    assert "cd" in link.as_text(), "'cd' not in linkstext"
 
 
 def test_not_pull_in_numeric():
     link = parse("[[link|ab]]12").find(parser.Link)[0]
 
-    assert "12" not in link.asText(), "'12' in linkstext"
+    assert "12" not in link.as_text(), "'12' in linkstext"
 
 
 def test_section_consume_break():
     r = parse("= about us =\n\nfoobar").find(parser.Section)[0]
-    txt = r.asText()
+    txt = r.as_text()
     assert "foobar" in txt, "foobar should be inside the section"
 
 
@@ -823,7 +823,7 @@ def test_double_exclamation_mark_in_table():
     cells = r.find(parser.Cell)
     print("CELLS:", cells)
     assert len(cells) == 2, "expected two cells"
-    txt = cells[0].asText()
+    txt = cells[0].as_text()
     print("TXT:", txt)
     assert "!!" in txt, 'expected "!!" in cell'
 
@@ -843,10 +843,10 @@ def test_table_row_exclamation_mark():
 def test_unknown_tag():
     """http://code.pediapress.com/wiki/ticket/212"""
     r = parse("<nosuchtag>foobar</nosuchtag>")
-    txt = r.asText()
+    txt = r.as_text()
     print("TXT:", repr(txt))
-    assert "<nosuchtag>" in txt, "opening tag missing in asText()"
-    assert "</nosuchtag>" in txt, "closing tag missing in asText()"
+    assert "<nosuchtag>" in txt, "opening tag missing in as_text()"
+    assert "</nosuchtag>" in txt, "closing tag missing in as_text()"
 
 
 # Test varieties of link
@@ -1046,7 +1046,7 @@ def test_force_close_code():
 
     tagnodes = r.find(parser.TagNode)
     assert len(tagnodes) == 1, "expected exactly one tagnode"
-    txt = tagnodes.asText()
+    txt = tagnodes.as_text()
     print("TXT:", txt)
     assert "after" not in txt
 
@@ -1146,7 +1146,7 @@ def test_closing_td_in_cell():
 |}"""
     )
     cell = r.find(parser.Cell)[0]
-    assert "td" not in cell.asText()
+    assert "td" not in cell.as_text()
 
 
 def test_i_tag():
@@ -1232,7 +1232,7 @@ def test_comment_inside_nowiki():
     s = expander.expand_str("<pre><!-- this is a comment --></pre>")
     assert comment in s
     r = parse(s)
-    txt = r.asText()
+    txt = r.as_text()
     assert "this is a comment" in txt
 
 
@@ -1240,7 +1240,7 @@ def test_imagemod_space_px():
     """http://code.pediapress.com/wiki/ticket/475"""
     r = parse("[[Image:Thales foo.jpg|400 px|right]]")
     img = r.find(parser.ImageLink)[0]
-    txt = img.asText()
+    txt = img.as_text()
     assert "px" not in txt, "should contain no children"
 
 
@@ -1273,7 +1273,7 @@ def test_paragraph_vs_italic():
     """http://code.pediapress.com/wiki/ticket/514"""
     r = parse("<i>first italic\n\nstill italic</i>")
     styles = r.find(parser.Style)
-    txt = " ".join([x.asText() for x in styles])
+    txt = " ".join([x.as_text() for x in styles])
     assert "first italic" in txt
     assert "still italic" in txt
     paras = r.find(parser.Paragraph)
@@ -1284,7 +1284,7 @@ def test_pull_in_styletags_1():
     s = "<b> one\n\n== two ==\n\nthree\n</b>\nfour\n"
     r = uparser.simpleparse(s)
     styles = r.find(parser.Style)
-    txt = " ".join(x.asText() for x in styles)
+    txt = " ".join(x.as_text() for x in styles)
     assert "one" in txt
     assert "two" in txt
     assert "three" in txt
@@ -1292,19 +1292,19 @@ def test_pull_in_styletags_1():
 
 
 def test_magicwords():
-    txt = parse("__NOTOC__").asText()
+    txt = parse("__NOTOC__").as_text()
     print(txt)
     assert "NOTOC" not in txt
 
-    txt = parse("__NOTOC____NOEDITSECTION__").asText()
+    txt = parse("__NOTOC____NOEDITSECTION__").as_text()
     print(txt)
     assert "NOTOC" not in txt
 
-    txt = parse("__NOINDEX__").asText()
+    txt = parse("__NOINDEX__").as_text()
     print(txt)
     assert "NOINDEX" not in txt
 
-    txt = parse("__NOGLOSSARY__").asText()
+    txt = parse("__NOGLOSSARY__").as_text()
     print(txt)
     assert "NOGLOSSARY" not in txt
 
@@ -1325,7 +1325,7 @@ def test_span_vs_ref():
     spans = [x for x in r.find(parser.TagNode) if x.tagname == "span"]
     print("SPAN:", spans)
     span = spans[0]
-    txt = span.asText()
+    txt = span.as_text()
     assert "after" not in txt
 
 
@@ -1353,6 +1353,6 @@ def test_style_tags_vlist():
 
 def test_stray_tag():
     s = "abc</div>def"
-    txt = parse(s).asText()
+    txt = parse(s).as_text()
     print(txt)
     assert "div" not in txt, "stray tag in output"

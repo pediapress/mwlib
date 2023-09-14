@@ -18,7 +18,7 @@ class TocRenderer:
     def __init__(self):
         font_switcher = fontconfig.RLFontSwitcher()
         font_switcher.font_paths = fontconfig.font_paths
-        font_switcher.register_default_font(pdfstyles.default_font)
+        font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
         font_switcher.registerFontDefinitionList(fontconfig.fonts)
         font_switcher.registerReportlabFonts(fontconfig.fonts)
 
@@ -34,14 +34,14 @@ class TocRenderer:
             "<b>%d</b>" % 9999, pdfstyles.text_style(mode="toc_article",
                                                      text_align="right")
         )
-        w, h = p.wrap(0, pdfstyles.print_height)
+        w, h = p.wrap(0, pdfstyles.PRINT_HEIGHT)
         # subtracting 30pt below is *probably* necessary b/c
         # of the table margins
-        return [pdfstyles.print_width - w - 30, w]
+        return [pdfstyles.PRINT_WIDTH - w - 30, w]
 
     def renderToc(self, tocpath, toc_entries, rtl):
-        doc = SimpleDocTemplate(tocpath, pagesize=(pdfstyles.page_width,
-                                                   pdfstyles.page_height))
+        doc = SimpleDocTemplate(tocpath, pagesize=(pdfstyles.PAGE_WIDTH,
+                                                   pdfstyles.PAGE_HEIGHT))
         elements = []
         elements.append(
             Paragraph(

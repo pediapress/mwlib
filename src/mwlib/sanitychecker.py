@@ -32,9 +32,9 @@ class Forbid(ConstraintBase):
     "forbid any of the classes"
 
     def test(self, nodes):
-        for n in nodes:
-            if n.__class__ in self.klasses:
-                return False, n
+        for node in nodes:
+            if node.__class__ in self.klasses:
+                return False, node
         return True, None
 
 
@@ -42,9 +42,9 @@ class Allow(ConstraintBase):
     "allow only these classes"
 
     def test(self, nodes):
-        for n in nodes:
-            if n.__class__ not in self.klasses:
-                return False, n
+        for node in nodes:
+            if node.__class__ not in self.klasses:
+                return False, node
         return True, None
 
 
@@ -52,9 +52,9 @@ class Require(ConstraintBase):
     "require any of these classes"
 
     def test(self, nodes):
-        for n in nodes:
-            if n.__class__ in self.klasses:
-                return True, n
+        for node in nodes:
+            if node.__class__ in self.klasses:
+                return True, node
         return False, None
 
 
@@ -64,9 +64,9 @@ class Equal(ConstraintBase):
     def test(self, nodes):
         if len(nodes) != len(self.klasses):
             return False, None  # FIXME what could we report?
-        for i, n in enumerate(nodes):
-            if n.__class__ != self.klasses[i]:
-                return False, n
+        for i, node in enumerate(nodes):
+            if node.__class__ != self.klasses[i]:
+                return False, node
         return True, None
 
 

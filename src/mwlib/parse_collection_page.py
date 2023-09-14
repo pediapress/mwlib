@@ -16,18 +16,18 @@ def extract_metadata(raw, fields, template_name="saved_book"):
     fields.append("")
 
     templ = "".join(f"{uniq}{f}\n{{{{{{{f}|}}}}}}\n" for f in fields)
-    db = expander.DictDB({template_name: templ})
+    database = expander.DictDB({template_name: templ})
 
-    te = expander.Expander(raw, pagename="", wikidb=db)
-    res = te.expandTemplates()
+    template = expander.Expander(raw, pagename="", wikidb=database)
+    res = template.expandTemplates()
 
-    d = defaultdict(six.text_type)
+    metadata = defaultdict(six.text_type)
     for x in res.split(uniq)[1:-1]:
         name, val = x.split("\n", 1)
         val = val.strip()
-        d[name] = val
+        metadata[name] = val
 
-    return d
+    return metadata
 
 
 def _buildrex():

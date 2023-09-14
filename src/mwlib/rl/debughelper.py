@@ -10,13 +10,13 @@ from reportlab.platypus.tables import Table
 from .customflowables import Figure, FiguresAndParagraphs, SmartKeepTogether
 
 
-def showParseTree(out, node, indent=0):
+def show_parse_tree(out, node, indent=0):
     print("    " * indent, repr(node), file=out)
     for x in node.children:
-        showParseTree(out, x, indent + 1)
+        show_parse_tree(out, x, indent + 1)
 
 
-def dumpText(obj):
+def dump_text(obj):
     if isinstance(obj, Paragraph):
         print(
             "P:  --",
@@ -34,7 +34,7 @@ def dumpText(obj):
         print("U:  --", obj.__class__.__name__)
 
 
-def dumpFiguresAndParagraphs(fp):
+def dump_figures_and_paragraphs(fp):
     print("=== FiguresAndParagraphs ===")
     print("  ::", end=" ")
     for f in fp.fs:
@@ -42,43 +42,43 @@ def dumpFiguresAndParagraphs(fp):
     print()
     print("num paras:", len(fp.ps))
     for p in fp.ps:
-        dumpText(p)
+        dump_text(p)
     print("===/FIG PAR")
 
 
-def dumpKeepTogether(kt):
+def dump_keep_together(kt):
     print("=== KeepTogether ===")
     for f in kt._content:
         if isinstance(f, FiguresAndParagraphs):
-            dumpFiguresAndParagraphs(f)
+            dump_figures_and_paragraphs(f)
         else:
-            dumpText(f)
+            dump_text(f)
     print("===/KEEP")
 
 
-def dumpSmartKeepTogether(kt):
+def dump_smart_keep_together(kt):
     print("=== SmartKeepTogether ===")
     for f in kt._content:
         if isinstance(f, FiguresAndParagraphs):
-            dumpFiguresAndParagraphs(f)
+            dump_figures_and_paragraphs(f)
         else:
-            dumpText(f)
+            dump_text(f)
     print("===/SmartKeep")
 
 
-def dumpTable(table):
+def dump_table(table):
     print("=== Table ===")
     for row in table._cellvalues:
         for cell in row:
             for item in cell:
-                dumpText(item)
+                dump_text(item)
                 print("-" * 20, "</item>")
             print("-" * 30, "</cell>")
         print("-" * 40, "</row>")
     print("===/TABLE")
 
 
-def dumpTableData(tabledata):
+def dump_table_data(tabledata):
     print("=== Table ===")
     for row in tabledata:
         for cell in row:
@@ -86,33 +86,22 @@ def dumpTableData(tabledata):
             if cell.__class__ == dict:
                 cell = cell["content"]
             for item in cell:
-                dumpText(item)
+                dump_text(item)
                 print("-" * 20, "</item>")
             print("-" * 30, "</cell>")
         print("-" * 40, "</row>")
     print("===/TABLE")
 
 
-def dumpElements(elements):
+def dump_elements(elements):
     for e in elements:
         if isinstance(e, FiguresAndParagraphs):
-            dumpFiguresAndParagraphs(e)
+            dump_figures_and_paragraphs(e)
         elif isinstance(e, KeepTogether):
-            dumpKeepTogether(e)
+            dump_keep_together(e)
         elif isinstance(e, SmartKeepTogether):
-            dumpSmartKeepTogether(e)
+            dump_smart_keep_together(e)
         elif isinstance(e, Table):
-            dumpTable(e)
+            dump_table(e)
         else:
-            dumpText(e)
-
-
-def _dt(self, data):
-    # helper for the col/rowspan code
-    for (i, row) in enumerate(data):
-        print("--- ROW ", i)
-        for (j, cell) in enumerate(row):
-            colspan = cell.get("colspan", 0)
-            rowspan = cell.get("rowspan", 0)
-            inserted = cell.get("inserted", "")
-            print("- Cell ", j, "rs", rowspan, "cs", colspan, inserted)
+            dump_text(e)

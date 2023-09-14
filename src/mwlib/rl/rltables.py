@@ -61,8 +61,8 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
             except IndexError:  # caused by empty row b/c of rowspanning
                 colspan = 1
             for e in cell:
-                minw, minh = e.wrap(0, pdfstyles.print_height)
-                _, maxh = e.wrap(availWidth, pdfstyles.print_height)
+                minw, minh = e.wrap(0, pdfstyles.PRINT_HEIGHT)
+                _, maxh = e.wrap(availWidth, pdfstyles.PRINT_HEIGHT)
                 minw += 6  # FIXME +6 is the cell padding we are using
                 cellwidth += minw
                 rows = (
@@ -293,7 +293,7 @@ def customCalcWidths(table, avail_width):
 
 def optimizeWidths(min_widths, max_widths, avail_width,
                    stretch=False, table=None):
-    if pdfstyles.table_widths_from_markup:
+    if pdfstyles.TABLE_WIDTH_FROM_MARKUP:
         col_widths = customCalcWidths(table, avail_width)
         if col_widths is not None:
             return col_widths
@@ -451,8 +451,8 @@ def base_styles(table):
     styles.append(("VALIGN", (0, 0), (-1, -1), "TOP"))
     styles.extend(
         [
-            ("LEFTPADDING", (0, 0), (-1, -1), pdfstyles.cell_padding),
-            ("RIGHTPADDING", (0, 0), (-1, -1), pdfstyles.cell_padding),
+            ("LEFTPADDING", (0, 0), (-1, -1), pdfstyles.CELL_PADDING),
+            ("RIGHTPADDING", (0, 0), (-1, -1), pdfstyles.CELL_PADDING),
         ]
     )
     for row_idx, row in enumerate(table):

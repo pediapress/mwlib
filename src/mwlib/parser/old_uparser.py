@@ -13,28 +13,28 @@ def simplify(node, **kwargs):
 
     last = None
     toremove = []
-    for i, c in enumerate(node.children):
-        if c.__class__ == Text:  # would isinstance be safe?
+    for i, child in enumerate(node.children):
+        if child.__class__ == Text:  # would isinstance be safe?
             if last:
-                last.caption += c.caption
+                last.caption += child.caption
                 toremove.append(i)
             else:
-                last = c
+                last = child
         else:
-            simplify(c)
+            simplify(child)
             last = None
 
-    for i, ii in enumerate(toremove):
-        del node.children[ii - i]
+    for i, index in enumerate(toremove):
+        del node.children[index - i]
 
 
-def removeBoilerplate(node, **kwargs):
+def remove_boilerplate(node, **kwargs):
     i = 0
     while i < len(node.children):
-        x = node.children[i]
-        if isinstance(x, parser.TagNode) and x.caption == 'div':
+        child = node.children[i]
+        if isinstance(child, parser.TagNode) and child.caption == 'div':
             try:
-                klass = x.values.get('class', '')
+                klass = child.values.get('class', '')
             except AttributeError:
                 klass = ''
 
@@ -44,8 +44,8 @@ def removeBoilerplate(node, **kwargs):
 
         i += 1
 
-    for x in node.children:
-        removeBoilerplate(x)
+    for child_node in node.children:
+        remove_boilerplate(child_node)
 
 
-postprocessors = [removeBoilerplate, simplify]
+postprocessors = [remove_boilerplate, simplify]

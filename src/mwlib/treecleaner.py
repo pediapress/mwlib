@@ -711,10 +711,10 @@ class TreeCleaner:
                     self._getPrev(node),
                 ]
                 changed = False
-                for n in check_node:
-                    if n.__class__ == BreakingReturn:
-                        self.report("removing node", n)
-                        tryRemoveNode(n)
+                for node_to_check in check_node:
+                    if node_to_check.__class__ == BreakingReturn:
+                        self.report("removing node", node_to_check)
+                        tryRemoveNode(node_to_check)
                         changed = True
 
         if node.__class__ == BreakingReturn:

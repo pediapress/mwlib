@@ -116,7 +116,7 @@ another paragraph
     lists = tree.get_child_nodes_by_class(ItemList)
     li = lists[0]
     assert li.parent.__class__ == Paragraph
-    txt = "".join([x.asText() for x in li.siblings])
+    txt = "".join([x.as_text() for x in li.siblings])
     assert "some text in the same paragraph" in txt
     assert "another" not in txt
 

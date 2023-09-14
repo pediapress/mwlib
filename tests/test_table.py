@@ -27,8 +27,8 @@ def test_parse_caption():
 |+ caption
 |}
 """
-    n = parse(s)
-    t = n.find(parser.Table)[0]
+    node = parse(s)
+    t = node.find(parser.Table)[0]
     assert isinstance(t.children[0], parser.Caption), "expected a caption node"
 
 
@@ -81,7 +81,7 @@ def test_caption_modifier():
 def _get_styled_txt(s):
     r = parse(s)
     styles = r.find(parser.Style)
-    txt = " ".join(x.asText() for x in styles)
+    txt = " ".join(x.as_text() for x in styles)
     return txt
 
 

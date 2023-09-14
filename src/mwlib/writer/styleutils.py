@@ -163,8 +163,8 @@ def get_text_alignment(node: advtree.Node) -> str:
     nodes = node.get_parents()
     nodes.append(node)
     align = get_base_alignment(node)
-    for n in nodes:
-        parent_align = _get_text_alignment(n)
+    for node in nodes:
+        parent_align = _get_text_alignment(node)
         if parent_align != "none":
             align = parent_align
     return align

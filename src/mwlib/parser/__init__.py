@@ -46,5 +46,5 @@ def show(out, node, indent=0, verbose=False):
         print("    " * indent, node, repr(getattr(node, "vlist", "")), file=out)
     else:
         print("    " * indent, node, file=out)
-    for x in node:
-        show(out, x, indent + 1, verbose=verbose)
+    for child in node:
+        show(out, child, indent + 1, verbose=verbose)

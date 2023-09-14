@@ -58,7 +58,7 @@ def show(node, out=None, indent=0, verbose=False):
             show(x, out=out, indent=indent + 1, verbose=verbose)
 
 
-class _show:
+class _Show:
     def __get__(self, obj, type=None):
         if obj is None:
             return lambda node, out=None: show(node, out=out)
@@ -206,7 +206,7 @@ class Token:
 
         return "".join(r)
 
-    show = _show()
+    show = _Show()
 
 
 token2name = Token.token2name
@@ -217,11 +217,11 @@ del d, token2name
 
 
 def _split_tag(txt):
-    m = re.match(r" *(\w+)(.*)", txt, re.DOTALL)
-    if m is None:
+    matched_tag = re.match(r" *(\w+)(.*)", txt, re.DOTALL)
+    if matched_tag is None:
         raise ValueError("could not match tag name")
-    name = m.group(1)
-    values = m.group(2)
+    name = matched_tag.group(1)
+    values = matched_tag.group(2)
     return name, values
 
 

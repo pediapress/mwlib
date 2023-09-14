@@ -131,9 +131,9 @@ class FiguresAndParagraphs(Flowable):
             self.figAlign = "left" if rtl else "right"
         for f in self.fs:
             if self.figAlign == "left":
-                f.margin = pdfstyles.img_margins_float_left
+                f.margin = pdfstyles.IMG_MARGINS_FLOAT_LEFT
             else:  # default figure alignment is right
-                f.margin = pdfstyles.img_margins_float_right
+                f.margin = pdfstyles.IMG_MARGINS_FLOAT_RIGHT
         self.wfs = []  # width of figures
         self.hfs = []  # height of figures
         self.rtl = rtl  # Flag that indicates if document is set right-to-left
@@ -297,13 +297,13 @@ class FiguresAndParagraphs(Flowable):
                 if len(self.ps) > i + 1 and hasattr(self.ps, "style"):
                     line_height = self.ps[i + 1].style.leading
                 else:
-                    line_height = pdfstyles.leading
+                    line_height = pdfstyles.LEADING
                 if (
                     len(self.ps) > i + 1
                     and (
                         height
                         + self.paraHeights[i]
-                        + pdfstyles.min_lines_after_heading * line_height
+                        + pdfstyles.MIN_LINES_AFTER_HEADING * line_height
                     )
                     > availheight
                 ):
@@ -417,8 +417,8 @@ class SmartKeepTogether(_ContainerSpace, Flowable):
     def split(self, aW, aH):
         if not hasattr(self, "height"):
             self.wrap(aW, aH)
-        remaining_space = aH - sum([h for w, h in self.content_dims[:-1]])
-        if remaining_space < 0.1 * pdfstyles.page_height:
+        remaining_space = aH - sum([h for _, h in self.content_dims[:-1]])
+        if remaining_space < 0.1 * pdfstyles.PAGE_HEIGHT:
             self._content.insert(0, PageBreak())
             return self._content
         if self.height < aH:

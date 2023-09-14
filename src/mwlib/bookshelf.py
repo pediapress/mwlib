@@ -21,10 +21,10 @@ class Bookshelf:
         }
         res = []  # {ns, title}
         while True:
-            r = self.api.do_request(**kwargs)
-            res.extend(r["query"].get("categorymembers", []))
-            if "query-continue" in r:
-                kwargs["cmcontinue"] = r["query-continue"]["categorymembers"][
+            response = self.api.do_request(**kwargs)
+            res.extend(response["query"].get("categorymembers", []))
+            if "query-continue" in response:
+                kwargs["cmcontinue"] = response["query-continue"]["categorymembers"][
                     "cmcontinue"
                 ]
             else:

@@ -82,7 +82,7 @@ class ImageUtils:
                 self.print_height * self.img_max_thumb_height * aspect_ratio,
             )
 
-        if img_node.isInline():
+        if img_node.is_inline():
             if img_print_width < self.print_width / 2:  # scale "small" inline images
                 img_print_width *= self.img_inline_scale_factor
             else:  # FIXME: full width images are 12pt too wide - we need to check why

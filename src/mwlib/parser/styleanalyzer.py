@@ -30,8 +30,12 @@ class State:
     def __lt__(self, other):
         # default_3way_compare from Python 2 as Python code
         # same type but no ordering defined, go by id
-        if type(self) is type(other):
+        self_type = type(self)
+        other_type = type(other)
+        if self_type is other_type:
             return id(self) < id(other)
+        else:
+            raise TypeError(f"unorderable types: {self_type.__name__}() < {other_type.__name__}()")
 
     def get_next(self, count, res=None, previous=None):
         if previous is None:
@@ -41,8 +45,8 @@ class State:
             res = []
 
         def nextstate(**kw):
-            cl = self.clone(previous=previous, **kw)
-            res.append(cl)
+            cloned_state = self.clone(previous=previous, **kw)
+            res.append(cloned_state)
         if count < 2:
             raise ValueError("count must be >= 2")
 
@@ -61,10 +65,10 @@ class State:
             state.get_next(3, res, previous=previous)
 
         if count == 5:
-            for x in self.get_next(2):
-                x.get_next(3, res, previous=previous)
-            for x in self.get_next(3):
-                x.get_next(2, res, previous=previous)
+            for next_state in self.get_next(2):
+                next_state.get_next(3, res, previous=previous)
+            for next_state in self.get_next(3):
+                next_state.get_next(2, res, previous=previous)
 
             state = self.clone(apocount=self.apocount)
             state.get_next(4, res, previous=previous)

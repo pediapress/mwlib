@@ -23,13 +23,13 @@ def handle_chapter(item, book):
 def handle_article(item, env, last_chapter, progress, status_callback):
     wiki_obj = item._env.wiki if item._env else env.wiki
 
-    a = wiki_obj.getParsedArticle(title=item.title, revision=item.revision)
-    if a is not None:
-        a = update_article_attributes(a, item, wiki_obj)
+    article = wiki_obj.getParsedArticle(title=item.title, revision=item.revision)
+    if article is not None:
+        article = update_article_attributes(article, item, wiki_obj)
         if last_chapter:
-            last_chapter.append_child(a)
+            last_chapter.append_child(article)
         else:
-            env.book.append_child(a)
+            env.book.append_child(article)
     else:
         log.warn('No such article: %r' % item.title)
     status_callback(status='parsing', progress=progress, article=item.title)

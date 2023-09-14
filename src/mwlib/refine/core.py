@@ -99,9 +99,9 @@ def _parse_gallery_txt(txt, xopts):
         linode = parse_txt("[[" + xnew + "]]", xopts)
 
         if linode:
-            n = linode[0]
-            if n.ns == nshandling.NS_IMAGE:
-                sub.append(n)
+            node = linode[0]
+            if node.ns == nshandling.NS_IMAGE:
+                sub.append(node)
                 continue
         sub.append(Token(type=Token.t_text, text=xnew))
     return sub

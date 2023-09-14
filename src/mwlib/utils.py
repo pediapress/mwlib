@@ -390,7 +390,7 @@ def get_nodeweight(obj):
     k = obj.__class__.__name__
     if k in ("Text",):
         return k, len(obj.caption)
-    elif k == "ImageLink" and obj.isInline():
+    elif k == "ImageLink" and obj.is_inline():
         return "InlineImageLink", 1
     return k, 1
 

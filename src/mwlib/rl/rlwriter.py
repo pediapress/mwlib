@@ -61,7 +61,7 @@ from mwlib.writer.licensechecker import LicenseChecker
 
 from . import fontconfig, pdfstyles, rltables
 from .pagetemplates import PPDocTemplate, TitlePage, WikiPage
-from .pdfstyles import heading_style, print_height, print_width, table_style, text_style
+from .pdfstyles import PRINT_HEIGHT, PRINT_WIDTH, TABLE_STYLE, heading_style, text_style
 from .rlsourceformatter import ReportlabFormatter
 
 with contextlib.suppress(ImportError):
@@ -102,7 +102,7 @@ def flatten(x):
     return result
 
 
-def isInline(objs):
+def is_inline(objs):
     return all(isinstance(obj, str) for obj in flatten(objs))
 
 
@@ -158,11 +158,11 @@ class RlWriter:
         self.font_switcher = fontconfig.RLFontSwitcher()
 
         self.rtl = False
-        pdfstyles.default_latin_font = pdfstyles.default_font
+        pdfstyles.DEFAULT_LATIN_FONT = pdfstyles.DEFAULT_FONT
         self.word_wrap = None
         if lang in ["ja", "ch", "ko", "zh"]:
             self.word_wrap = "CJK"
-            pdfstyles.word_wrap = self.word_wrap
+            pdfstyles.WORD_WRAP = self.word_wrap
         else:
             self.font_switcher.space_cjk = True
         if lang in [
@@ -193,9 +193,9 @@ class RlWriter:
             # setting Nazli as default shifts the text a little to the top
             arabic_font = self.font_switcher.getfont_for_script("arabic")
             if arabic_font:
-                pdfstyles.default_font = arabic_font
-                pdfstyles.serif_font = arabic_font
-                pdfstyles.sans_font = arabic_font
+                pdfstyles.DEFAULT_FONT = arabic_font
+                pdfstyles.SERIF_FONT = arabic_font
+                pdfstyles.SANS_FONT = arabic_font
             rl_config.rtl = True
 
         self.env = env
@@ -229,26 +229,26 @@ class RlWriter:
         self.img_count = 0
 
         self.font_switcher.font_paths = fontconfig.font_paths
-        self.font_switcher.register_default_font(pdfstyles.default_font)
+        self.font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
         self.font_switcher.registerFontDefinitionList(fontconfig.fonts)
         self.font_switcher.registerReportlabFonts(fontconfig.fonts)
 
         self.tc = TreeCleaner([], save_reports=self.debug, rtl=self.rtl)
-        self.tc.skipMethods = pdfstyles.treecleaner_skip_methods
+        self.tc.skipMethods = pdfstyles.TREE_CLEANER_SKIP_METHODS
         self.tc.contentWithoutTextClasses.append(advtree.ReferenceList)
 
         self.cnt = CustomNodeTransformer()
         self.formatter = RLFormatter(font_switcher=self.font_switcher)
 
         self.image_utils = ImageUtils(
-            pdfstyles.print_width,
-            pdfstyles.print_height,
-            pdfstyles.img_default_thumb_width,
-            pdfstyles.img_min_res,
-            pdfstyles.img_max_thumb_width,
-            pdfstyles.img_max_thumb_height,
-            pdfstyles.img_inline_scale_factor,
-            pdfstyles.print_width_px,
+            pdfstyles.PRINT_WIDTH,
+            pdfstyles.PRINT_HEIGHT,
+            pdfstyles.IMG_DEFAULT_THUMB_WIDTH,
+            pdfstyles.IMG_MIN_RES,
+            pdfstyles.IMG_MAX_THUMG_WIDTH,
+            pdfstyles.IMG_MAX_THUMG_HEIGHT,
+            pdfstyles.IMG_INLINE_SCALE_FACTOR,
+            pdfstyles.PRINT_WIDTH_PX,
         )
 
         self.references = []
@@ -316,11 +316,11 @@ class RlWriter:
                 last = group[-1]
                 if not isHeading(last):
                     try:
-                        w, h = last.wrap(print_width, print_height)
+                        w, h = last.wrap(PRINT_WIDTH, PRINT_HEIGHT)
                     except:
                         h = 0
                     groupHeight += h
-                    if groupHeight > print_height / 10 or isinstance(
+                    if groupHeight > PRINT_HEIGHT / 10 or isinstance(
                         elements[0], NotAtTopPageBreak
                     ):  # 10 % of page_height
                         groupedElements.append(SmartKeepTogether(group))
@@ -354,9 +354,9 @@ class RlWriter:
     def set_rtl(self, rtl):
         self.rtl = rtl
         if rtl is True:
-            pdfstyles.word_wrap = "RTL"
+            pdfstyles.WORD_WRAP = "RTL"
         else:
-            pdfstyles.word_wrap = self.word_wrap
+            pdfstyles.WORD_WRAP = self.word_wrap
 
     def handle_page_break(self, node, mode="before"):
         # mode:
@@ -373,7 +373,7 @@ class RlWriter:
             res = re.search(r"(\d{1,2})\%", page_break)
             if res:
                 min_percent = int(res.groups()[0])
-                return CondPageBreak(min_percent / 100.0 * pdfstyles.print_height)
+                return CondPageBreak(min_percent / 100.0 * pdfstyles.PRINT_HEIGHT)
         return None
 
     def write(self, obj):
@@ -453,13 +453,13 @@ class RlWriter:
 
     def initReportlabDoc(self, output):
         version = self.getVersion()
-        tocCallback = self.tocCallback if pdfstyles.render_toc else None
+        tocCallback = self.tocCallback if pdfstyles.RENDER_TOC else None
         self.doc = PPDocTemplate(
             output,
-            topMargin=pdfstyles.page_margin_top,
-            leftMargin=pdfstyles.page_margin_left,
-            rightMargin=pdfstyles.page_margin_right,
-            bottomMargin=pdfstyles.page_margin_bottom,
+            topMargin=pdfstyles.PAGE_MARGIN_TOP,
+            leftMargin=pdfstyles.PAGE_MARGIN_LEFT,
+            rightMargin=pdfstyles.PAGE_MARGIN_RIGHT,
+            bottomMargin=pdfstyles.PAGE_MARGIN_BOTTOM,
             title=self.book.title,
             keywords=version,
             status_callback=self.render_status,
@@ -469,10 +469,10 @@ class RlWriter:
     def articleRenderingOK(self, node, output):
         testdoc = BaseDocTemplate(
             output,
-            topMargin=pdfstyles.page_margin_top,
-            leftMargin=pdfstyles.page_margin_left,
-            rightMargin=pdfstyles.page_margin_right,
-            bottomMargin=pdfstyles.page_margin_bottom,
+            topMargin=pdfstyles.PAGE_MARGIN_TOP,
+            leftMargin=pdfstyles.PAGE_MARGIN_LEFT,
+            rightMargin=pdfstyles.PAGE_MARGIN_RIGHT,
+            bottomMargin=pdfstyles.PAGE_MARGIN_BOTTOM,
             title="",
         )
         # PageTemplates are registered to self.doc in writeArticle
@@ -510,9 +510,9 @@ class RlWriter:
 
         elements = []
         self.toc_entries = []
-        if pdfstyles.show_title_page:
+        if pdfstyles.SHOW_TITLE_PAGE:
             elements.extend(
-                self.writeTitlePage(coverimage=coverimage or pdfstyles.title_page_image)
+                self.writeTitlePage(coverimage=coverimage or pdfstyles.TITLE_PAGE_IMAGE)
             )
 
         if self.numarticles == 0:
@@ -570,7 +570,7 @@ class RlWriter:
                 )
 
     def renderBook(self, elements, output):
-        if pdfstyles.show_article_attribution:
+        if pdfstyles.SHOW_ARTICLE_ATTRIBUTION:
             elements.append(TocEntry(txt=_("References"), lvl="group"))
             elements.append(
                 self._getPageTemplate(_("Article Sources and Contributors"))
@@ -592,7 +592,7 @@ class RlWriter:
         if not self.fail_safe_rendering:
             self.doc.bookmarks = self.bookmarks
 
-        # debughelper.dumpElements(elements)
+        # debughelper.dump_elements(elements)
 
         log.info("start rendering: %r" % output)
 
@@ -601,7 +601,7 @@ class RlWriter:
             if linuxmem:
                 log.info("memory usage after laying out:", linuxmem.memory())
             self.doc.build(elements)
-            if pdfstyles.render_toc and self.numarticles > 1:
+            if pdfstyles.RENDER_TOC and self.numarticles > 1:
                 err = self.toc_renderer.build(
                     output,
                     self.toc_entries,
@@ -630,7 +630,7 @@ class RlWriter:
     def renderLicense(self):
         self.license_mode = True
         elements = []
-        if not pdfstyles.show_wiki_license:
+        if not pdfstyles.SHOW_WIKI_LICENSE:
             return []
         if self.env.getLicenses():
             elements.append(TocEntry(txt=_("Article Licenses"), lvl="group"))
@@ -711,7 +711,7 @@ class RlWriter:
             width="80%",
             spaceBefore=6,
             spaceAfter=0,
-            color=pdfstyles.chapter_rule_color,
+            color=pdfstyles.CHAPTER_RULE_COLOR,
             thickness=0.5,
         )
 
@@ -902,17 +902,17 @@ class RlWriter:
                 article.get_previous(), advtree.Article
             ):
                 if (
-                    pdfstyles.page_break_after_article
+                    pdfstyles.PAGE_BREAK_AFTER_ARTICLE
                 ):  # if configured and preceded by an article
                     elements.append(NotAtTopPageBreak())
                 elif miscutils.article_starts_with_infobox(
                     article, max_text_until_infobox=100
                 ):
                     elements.append(
-                        CondPageBreak(pdfstyles.article_start_min_space_infobox)
+                        CondPageBreak(pdfstyles.ARTICLE_START_MIN_SPACE_INFOBOX)
                     )
                 else:
-                    elements.append(CondPageBreak(pdfstyles.article_start_min_space))
+                    elements.append(CondPageBreak(pdfstyles.ARTICLE_START_MIN_SPACE))
 
         if self.inline_mode == 0 and self.table_nesting == 0:
             heading_anchor = '<a name="%d"/>' % len(self.bookmarks)
@@ -936,7 +936,7 @@ class RlWriter:
         elements.append(heading_para)
         elements.append(TocEntry(txt=title, lvl="article"))
 
-        if pdfstyles.show_article_hr:
+        if pdfstyles.SHOW_ARTICLE_HR:
             elements.append(
                 HRFlowable(
                     width="100%",
@@ -1012,10 +1012,10 @@ class RlWriter:
 
         def getMargins(align):
             if align == "right":
-                return pdfstyles.img_margins_float_right
+                return pdfstyles.IMG_MARGINS_FLOAT_RIGHT
             elif align == "left":
-                return pdfstyles.img_margins_float_left
-            return pdfstyles.img_margins_float
+                return pdfstyles.IMG_MARGINS_FLOAT_LEFT
+            return pdfstyles.IMG_MARGINS_FLOAT
 
         combinedNodes = []
         floatingNodes = []
@@ -1039,7 +1039,7 @@ class RlWriter:
                 maxImgWidth = max(maxImgWidth, f.imgWidth)
             for p in paras:
                 if isinstance(p, Paragraph):
-                    w, h = p.wrap(print_width - maxImgWidth, print_height)
+                    w, h = p.wrap(PRINT_WIDTH - maxImgWidth, PRINT_HEIGHT)
                     h += p.style.spaceBefore + p.style.spaceAfter
                     hp += h
             return hp > hf - 10
@@ -1134,7 +1134,7 @@ class RlWriter:
             scaled_images = []
             for img in images:
                 ar = img.imgWidth / img.imgHeight
-                w = print_width / 2 - (
+                w = PRINT_WIDTH / 2 - (
                     img.margin[1] + img.margin[3] + img.padding[1] + img.padding[3]
                 )
                 h = w / ar
@@ -1194,32 +1194,32 @@ class RlWriter:
         rtl, self.rtl = self.rtl, False
         txt = self.renderInline(obj)
         self.rtl = rtl
-        t = "".join(txt)
-        t = re.sub("<br */>", "\n", t)
-        t = t.replace("\t", " " * pdfstyles.tabsize)
+        text = "".join(txt)
+        text = re.sub("<br */>", "\n", text)
+        text = text.replace("\t", " " * pdfstyles.TABSIZE)
         self.formatter.pre_mode = False
-        if not len(t):
+        if not len(text):
             return []
 
         avail_width = self.getAvailWidth()
         width = None
         style = text_style(mode="preformatted", in_table=self.table_nesting)
         while not width or width > avail_width:
-            pre = XPreformatted(t, style)
-            width, _ = pre.wrap(avail_width, pdfstyles.page_height)
+            pre = XPreformatted(text, style)
+            width, _ = pre.wrap(avail_width, pdfstyles.PAGE_HEIGHT)
             style.fontSize -= 0.5
-            if style.fontSize < pdfstyles.min_preformatted_size:
+            if style.fontSize < pdfstyles.MIN_PREFORMATTED_SIZE:
                 style = text_style(mode="preformatted",
                                    in_table=self.table_nesting)
                 char_limit = max(
                     1,
                     int(
-                        pdfstyles.source_max_line_len
+                        pdfstyles.SOURCE_MAX_LINE_LEN
                         / (max(1, 0.75 * self.currentColCount))
                     ),
                 )
-                t = self.breakLongLines(t, char_limit)
-                pre = XPreformatted(t, style)
+                text = self.breakLongLines(text, char_limit)
+                pre = XPreformatted(text, style)
                 break
         return [pre]
 
@@ -1237,7 +1237,7 @@ class RlWriter:
         self.inline_mode += 1
         for child in node.children:
             res = self.write(child)
-            if isInline(res):
+            if is_inline(res):
                 txt.extend(res)
             else:
                 log.warning(
@@ -1273,7 +1273,7 @@ class RlWriter:
         math_nodes = node.get_child_nodes_by_class(advtree.Math)
         if math_nodes:
             max_source_len = max([len(math.caption) for math in math_nodes])
-            if max_source_len > pdfstyles.no_float_math_len:
+            if max_source_len > pdfstyles.NO_FLOAT_MATH_LEN:
                 para_style.flowable = False
 
         txt = []
@@ -1307,7 +1307,7 @@ class RlWriter:
             }
         for c in node:
             res = self.write(c)
-            if isInline(res):
+            if is_inline(res):
                 txt.extend(res)
             else:
                 items.extend(buildPara(txt, para_style, txt_style=txt_style))
@@ -1421,20 +1421,20 @@ class RlWriter:
                 href = href[:quote_idx]
         if obj.children:
             txt = self.renderInline(obj)
-            t = "".join(txt)
+            text = "".join(txt)
             if not href:
-                return [t]
+                return [text]
         else:
             txt = urllib.parse.unquote(obj.target.encode("utf-8"))
-            t = self.formatter.style_text(txt)
+            text = self.formatter.style_text(txt)
 
         if not internallink:
             if not obj.target.startswith("#"):  # intrapage links are filtered
-                t = f'<link href="{xmlescape(href)}">{t}</link>'
+                text = f'<link href="{xmlescape(href)}">{text}</link>'
         else:
-            t = f'<link href="#{article_id}">{t}</link>'
+            text = f'<link href="#{article_id}">{text}</link>'
 
-        return [t]
+        return [text]
 
     def writeLangLink(self, obj):
         if obj.colon:
@@ -1469,8 +1469,8 @@ class RlWriter:
         href = xmlescape(href)
         if (
             self.table_nesting
-            and len(href) > pdfstyles.url_ref_len
-            and pdfstyles.url_ref_in_table
+            and len(href) > pdfstyles.URL_REF_LEN
+            and pdfstyles.URL_REF_IN_TABLE
         ) and not self.ref_mode:
             return self.writeNamedURL(obj)
         if self.rtl:
@@ -1491,7 +1491,7 @@ class RlWriter:
                 self.url_map[href] = len(self.references)
         else:  # we are writing a reference section. we therefore directly print URLs
             txt = self.renderInline(obj)
-            if any(href.startswith(url) for url in pdfstyles.url_blacklist):
+            if any(href.startswith(url) for url in pdfstyles.URL_BLACKLIST):
                 return ["".join(txt)]
             txt.append(
                 ' <link href="{}">({})</link>'.format(
@@ -1538,30 +1538,29 @@ class RlWriter:
             img_path + ".png",
         ]
         try:
-            p = subprocess.Popen(cmd, shell=False)
-            pid, status = os.waitpid(p.pid, 0)
+            process = subprocess.Popen(cmd, shell=False)
+            _, status = os.waitpid(process.pid, 0)
             if status != 0:
                 log.warning(
                     "img could not be converted. convert exited with non-zero return code:",
                     repr(cmd),
                 )
                 return ""
-            else:
-                return "%s.png" % img_path
+            return "%s.png" % img_path
         except OSError:
             log.warning("img could not be converted. cmd failed:", repr(cmd))
             return ""
 
     def getImgPath(self, target):
         if self.imgDB:
-            imgPath = self.imgDB.getDiskPath(
+            img_path = self.imgDB.getDiskPath(
                 target, size=800
             )  # FIXME: width should be obsolete now
-            if imgPath and imgPath.lower().endswith("svg"):
-                imgPath = self.svg2png(imgPath)
-            if imgPath:
-                imgPath = imgPath.encode("utf-8")
-                self.tmpImages.add(imgPath)
+            if img_path and img_path.lower().endswith("svg"):
+                img_path = self.svg2png(img_path)
+            if img_path:
+                img_path = img_path.encode("utf-8")
+                self.tmpImages.add(img_path)
             if not self.license_checker.display_image(target):
                 if self.debug:
                     print(
@@ -1571,8 +1570,8 @@ class RlWriter:
                     )
                 return None
         else:
-            imgPath = ""
-        return imgPath
+            img_path = ""
+        return img_path
 
     def _fixBrokenImages(self, img_node, img_path):
         if img_path in self.fixed_images:
@@ -1663,17 +1662,17 @@ class RlWriter:
     def set_svg_default_size(self, img_node):
         image_info = self.imgDB.imageinfo.get(img_node.full_target, {})
         if image_info.get("url", "").endswith(".svg"):
-            w = image_info.get("width")
-            h = image_info.get("height")
+            width = image_info.get("width")
+            height = image_info.get("height")
             if (
-                w
-                and h
+                width
+                and height
                 and img_node.width is None
                 and img_node.height is None
-                and img_node.isInline()
+                and img_node.is_inline()
             ):
-                img_node.width = w
-                img_node.height = h
+                img_node.width = width
+                img_node.height = height
 
     def writeImageLink(self, img_node):
         if img_node.colon is True:
@@ -1705,12 +1704,12 @@ class RlWriter:
         if self.table_nesting > 0 and not max_width:
             cell = img_node.get_parent_nodes_by_class(advtree.Cell)
             if cell:
-                max_width = print_width / len(cell[0].get_all_siblings()) - 10
-        max_height = pdfstyles.img_max_thumb_height * pdfstyles.print_height
+                max_width = PRINT_WIDTH / len(cell[0].get_all_siblings()) - 10
+        max_height = pdfstyles.IMG_MAX_THUMG_HEIGHT * PRINT_HEIGHT
         if self.table_nesting > 0:
-            max_height = print_height / 4  # fixme this needs to be read from config
+            max_height = PRINT_HEIGHT / 4  # fixme this needs to be read from config
         if self.gallery_mode:
-            max_height = print_height / 3  # same as above
+            max_height = PRINT_HEIGHT / 3  # same as above
 
         self.set_svg_default_size(img_node)
 
@@ -1728,9 +1727,9 @@ class RlWriter:
         if img_node.render_caption:
             txt = self.renderInline(img_node)
 
-        is_inline = img_node.isInline()
+        is_inline = img_node.is_inline()
 
-        if pdfstyles.link_images:
+        if pdfstyles.LINK_IMAGES:
             url = self.imgDB.getDescriptionURL(img_node.target) or self.imgDB.getURL(
                 img_node.target
             )
@@ -1750,7 +1749,7 @@ class RlWriter:
         if not self.img_meta_info.get(img_name):
             self.img_count += 1
             url = self.imgDB.getDescriptionURL(img_name) or self.imgDB.getURL(img_name)
-            if url and pdfstyles.link_images:
+            if url and pdfstyles.LINK_IMAGES:
                 url = urllib.parse.unquote(url.encode("utf-8"))
             else:
                 url = ""
@@ -1778,16 +1777,16 @@ class RlWriter:
                 linkend=linkend,
             )
             return [txt]
-        captionTxt = "".join(txt)
+        caption_txt = "".join(txt)
         figure = Figure(
             img_path,
-            captionTxt=captionTxt,
+            captionTxt=caption_txt,
             captionStyle=text_style("figure", in_table=self.table_nesting),
             imgWidth=w,
             imgHeight=h,
             margin=(0.2 * cm, 0.2 * cm, 0.2 * cm, 0.2 * cm),
             padding=(0.2 * cm, 0.2 * cm, 0.2 * cm, 0.2 * cm),
-            borderColor=pdfstyles.img_border_color,
+            borderColor=pdfstyles.IMG_BORDER_COLOR,
             align=align,
             url=url,
         )
@@ -1808,7 +1807,7 @@ class RlWriter:
         data = []
         row = []
         if obj.children:
-            self.colwidth = print_width / perrow - 12
+            self.colwidth = PRINT_WIDTH / perrow - 12
         colwidths = [self.colwidth + 12] * perrow
 
         for node in obj.children:
@@ -1861,8 +1860,7 @@ class RlWriter:
             elements = buildPara(txt, heading_style(mode="tablecaption"))
             elements.append(table)
             return elements
-        else:
-            return [table]
+        return [table]
 
     def _len(self, txt):
         in_tag = False
@@ -1881,22 +1879,22 @@ class RlWriter:
         word = []
         in_tag = False
         in_space = False
-        for c in txt:
-            if c == "<":
+        for character in txt:
+            if character == "<":
                 in_tag = True
-            if c in [" ", "\t"]:
+            if character in [" ", "\t"]:
                 if not in_tag and not in_space:
                     words.append("".join(word))
                     word = []
-                word.append(c)
+                word.append(character)
                 in_space = True
             else:
                 if in_space and not in_tag:
                     words.append("".join(word))
                     word = []
-                word.append(c)
+                word.append(character)
                 in_space = False
-            if c == ">":
+            if character == ">":
                 in_tag = False
         if word:
             words.append("".join(word))
@@ -1932,10 +1930,10 @@ class RlWriter:
 
         source = "".join(self.renderInline(n))
         self.formatter.source_mode -= 1
-        source = source.replace("\t", " " * pdfstyles.tabsize)
+        source = source.replace("\t", " " * pdfstyles.TABSIZE)
         maxCharOnLine = max([len(line) for line in source.split("\n")])
         char_limit = max(
-            1, int(pdfstyles.source_max_line_len / (max(1,
+            1, int(pdfstyles.SOURCE_MAX_LINE_LEN / (max(1,
                                                         self.currentColCount)))
         )
 
@@ -1944,9 +1942,9 @@ class RlWriter:
         txt = ""
         try:
             txt = str(highlight(source, lexer, sourceFormatter), "utf-8")
-            self.font_switcher.register_default_font(pdfstyles.default_latin_font)
+            self.font_switcher.register_default_font(pdfstyles.DEFAULT_LATIN_FONT)
             txt = self.font_switcher.fontifyText(txt)
-            self.font_switcher.register_default_font(pdfstyles.default_font)
+            self.font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
             if n.vlist.get("enclose", False) == "none":
                 txt = re.sub("<para.*?>", "", txt).replace("</para>", "")
                 return txt
@@ -1985,13 +1983,13 @@ class RlWriter:
             rtl, self.rtl = self.rtl, False
             width = None
             avail_width = self.getAvailWidth()
-            font_size = pdfstyles.font_size
+            font_size = pdfstyles.FONT_SIZE
             while not width or width > avail_width:
                 res = self._writeSourceInSourceMode(n, src_lang, lexer,
                                                     font_size)
                 if res.__class__ != XPreformatted:
                     break
-                width, height = res.wrap(avail_width, pdfstyles.page_height)
+                width, _ = res.wrap(avail_width, pdfstyles.PAGE_HEIGHT)
                 font_size -= 0.5
             self.rtl = rtl
             if res:
@@ -2059,24 +2057,24 @@ class RlWriter:
             n, text_style(mode="center", in_table=self.table_nesting)
         )
 
-    def writeDiv(self, n):
-        if not n.children:
-            div_height = n.style.get("height")
+    def writeDiv(self, node):
+        if not node.children:
+            div_height = node.style.get("height")
             if div_height:
                 height = min(
                     styleutils.scale_length(div_height),
-                    pdfstyles.print_height - 20
+                    PRINT_HEIGHT - 20
                 )
                 if height:
                     return [Spacer(0, height)]
             return []
         if (
-            getattr(n, "border", False)
-            and not n.get_parent_nodes_by_class(Table)
-            and not n.get_child_nodes_by_class(advtree.PreFormatted)
+            getattr(node, "border", False)
+            and not node.get_parent_nodes_by_class(Table)
+            and not node.get_child_nodes_by_class(advtree.PreFormatted)
         ):
             return self.renderMixed(
-                n,
+                node,
                 text_style(
                     mode="box",
                     indent_lvl=self.paraIndentLevel,
@@ -2085,7 +2083,7 @@ class RlWriter:
             )
         else:
             return self.renderMixed(
-                n,
+                node,
                 text_style(
                     indent_lvl=self.paraIndentLevel,
                     in_table=self.table_nesting
@@ -2104,16 +2102,16 @@ class RlWriter:
     writeS = writeStrike
     writeDeleted = writeStrike
 
-    def writeImageMap(self, n):
-        if n.imagemap.imagelink:
-            return self.write(n.imagemap.imagelink)
+    def writeImageMap(self, node):
+        if node.imagemap.imagelink:
+            return self.write(node.imagemap.imagelink)
         else:
             return []
 
-    def writeTagNode(self, t):
-        if getattr(t, "caption", None) in ["hiero"]:
+    def writeTagNode(self, tag):
+        if getattr(tag, "caption", None) in ["hiero"]:
             return []
-        return self.renderChildren(t)  # FIXME
+        return self.renderChildren(tag)  # FIXME
 
     def writeItem(self, item, style="itemize", counterID=None,
                   resetCounter=False):
@@ -2123,7 +2121,7 @@ class RlWriter:
         )
 
         if style == "itemize":
-            itemPrefix = "<bullet>%s</bullet>" % pdfstyles.list_item_style
+            itemPrefix = "<bullet>%s</bullet>" % pdfstyles.LIST_ITEM_STYLE
         elif style == "referencelist":
             itemPrefix = '<bullet>%s[<seq id="liCounter%d" />]</bullet>' % (
                 seqReset,
@@ -2203,11 +2201,11 @@ class RlWriter:
 
     def getAvailWidth(self):
         if self.table_nesting > 1 and self.colwidth:
-            availwidth = self.colwidth - 2 * pdfstyles.cell_padding
+            availwidth = self.colwidth - 2 * pdfstyles.CELL_PADDING
         else:
             availwidth = (
-                pdfstyles.print_width
-                - self.paraIndentLevel * pdfstyles.para_left_indent
+                pdfstyles.PRINT_WIDTH
+                - self.paraIndentLevel * pdfstyles.PARA_LEFT_INDENT
             )
         return availwidth
 
@@ -2215,7 +2213,7 @@ class RlWriter:
         txt = []
         for x in node.children:
             res = self.write(x)
-            if isInline(res):
+            if is_inline(res):
                 txt.extend(res)
         txt.insert(0, "<b>")
         txt.append("</b>")
@@ -2266,9 +2264,9 @@ class RlWriter:
             )
         )
 
-        for i, e in enumerate(elements):
-            if isinstance(e, str):
-                elements[i] = buildPara([e])[0]
+        for i, element in enumerate(elements):
+            if isinstance(element, str):
+                elements[i] = buildPara([element])[0]
 
         if getattr(cell, "is_header", False):
             self.formatter.strong_style -= 1
@@ -2295,11 +2293,11 @@ class RlWriter:
 
     def getMinElementSize(self, element):
         try:
-            w_min, h_min = element.wrap(0, pdfstyles.page_height)
+            w_min, h_min = element.wrap(0, pdfstyles.PAGE_HEIGHT)
         except TypeError:  # issue with certain cjk text
             return 0, 0
         min_width = w_min + self._correctWidth(element)
-        min_width += 2 * pdfstyles.cell_padding
+        min_width += 2 * pdfstyles.CELL_PADDING
         return min_width, h_min
 
     def getMaxParaWidth(self, p, print_width):
@@ -2323,15 +2321,15 @@ class RlWriter:
 
     def getMaxElementSize(self, element, w_min, h_min):
         if element.__class__ == Paragraph:
-            element.wrap(pdfstyles.print_width, pdfstyles.print_height)
-            pad = 2 * pdfstyles.cell_padding
-            width = self.getMaxParaWidth(element, pdfstyles.print_width)
+            element.wrap(PRINT_WIDTH, PRINT_HEIGHT)
+            pad = 2 * pdfstyles.CELL_PADDING
+            width = self.getMaxParaWidth(element, PRINT_WIDTH)
             return width + pad, 0
-        w_max, h_max = element.wrap(10 * pdfstyles.page_width,
-                                    pdfstyles.page_height)
+        _, h_max = element.wrap(10 * pdfstyles.PAGE_WIDTH,
+                                pdfstyles.PAGE_HEIGHT)
         rows = h_min / h_max if h_max > 0 else 1
         max_width = rows * w_min
-        max_width += 2 * rows * pdfstyles.cell_padding
+        max_width += 2 * rows * pdfstyles.CELL_PADDING
         return max_width, h_max
 
     def getCurrentColWidth(self, table, cell, col_idx):
@@ -2343,11 +2341,11 @@ class RlWriter:
         max_width = 0
         for element in elements:
             if element.__class__ == DummyTable:
-                pad = 2 * pdfstyles.cell_padding
+                pad = 2 * pdfstyles.CELL_PADDING
                 return sum(element.min_widths) + pad, sum(element.max_widths) + pad
             w_min, h_min = self.getMinElementSize(element)
             min_width = max(min_width, w_min)
-            w_max, h_max = self.getMaxElementSize(element, w_min, h_min)
+            w_max, _ = self.getMaxElementSize(element, w_min, h_min)
             max_width = max(max_width, w_max)
 
         return min_width, max_width
@@ -2394,14 +2392,14 @@ class RlWriter:
         if (table_width > self.getAvailWidth() and self.table_nesting > 1) or (
             table_width
             > (
-                pdfstyles.page_width
-                - (pdfstyles.page_margin_left + pdfstyles.page_margin_right) / 4
+                pdfstyles.PAGE_WIDTH
+                - (pdfstyles.PAGE_MARGIN_LEFT + pdfstyles.PAGE_MARGIN_RIGHT) / 4
             )
             and self.table_nesting == 1
         ):
-            pdfstyles.cell_padding = 2
-            total_padding = t.num_cols * pdfstyles.cell_padding
-            scale = (pdfstyles.print_width - total_padding) / (
+            pdfstyles.CELL_PADDING = 2
+            total_padding = t.num_cols * pdfstyles.CELL_PADDING
+            scale = (pdfstyles.PRINT_WIDTH - total_padding) / (
                 sum(t.min_widths) - total_padding
             )
             log.info("scaling down text in wide table by factor of %.2f" % scale)
@@ -2422,8 +2420,8 @@ class RlWriter:
             return []
         self.table_nesting += 1
         elements = []
-        if len(t.children) >= pdfstyles.min_rows_for_break and self.table_nesting == 1:
-            elements.append(CondPageBreak(pdfstyles.min_table_space))
+        if len(t.children) >= pdfstyles.MIN_ROWS_FOR_BREAK and self.table_nesting == 1:
+            elements.append(CondPageBreak(pdfstyles.MIN_TABLE_SPACE))
         elements.extend(self.renderCaption(t))
         rltables.flip_dir(t, rtl=self.rtl)
         rltables.checkSpans(t)
@@ -2451,17 +2449,17 @@ class RlWriter:
             table_data.append(row_data)
         table = Table(table_data, colWidths=t.colwidths, splitByRow=1)
         table.setStyle(rltables.getStyles(t))
-        table.hAlign = pdfstyles.table_align
-        if table_style.get("spaceBefore", 0) > 0:
-            elements.append(Spacer(0, table_style["spaceBefore"]))
+        table.hAlign = pdfstyles.TABLE_ALIGN
+        if TABLE_STYLE.get("spaceBefore", 0) > 0:
+            elements.append(Spacer(0, TABLE_STYLE["spaceBefore"]))
         elements.append(table)
-        if table_style.get("spaceAfter", 0) > 0:
-            elements.append(Spacer(0, table_style["spaceAfter"]))
+        if TABLE_STYLE.get("spaceAfter", 0) > 0:
+            elements.append(Spacer(0, TABLE_STYLE["spaceAfter"]))
         self.table_nesting -= 1
         if self.table_nesting == 0:
             self.colwidth = 0
         if getattr(t, "small_table", False):
-            pdfstyles.cell_padding = 3
+            pdfstyles.CELL_PADDING = 3
             self.formatter.set_relative_font_size(t.rel_font_size)
         return elements
 
@@ -2470,13 +2468,13 @@ class RlWriter:
         for article_id in self.articleids:
             newAnchor = '<a name="%s" />' % article_id
             anchors = f"{anchors}{newAnchor}"
-        p = Paragraph(anchors, text_style())
+        paragraph = Paragraph(anchors, text_style())
 
-        c = table._cellvalues[0][0]
-        if not c:
-            c = [p]
+        cell = table._cellvalues[0][0]
+        if not cell:
+            cell = [paragraph]
         else:
-            c.append(p)
+            cell.append(paragraph)
 
     def delAnchors(self, table):
         c = table._cellvalues[0][0]
@@ -2534,33 +2532,35 @@ class RlWriter:
         img = PilImage.open(imgpath)
         if self.debug:
             log.info("math png at:", imgpath)
-        w, h = img.size
+        width, height = img.size
         del img
 
-        if w > pdfstyles.max_math_width or h > pdfstyles.max_math_height:
+        if width > pdfstyles.max_math_width or height > pdfstyles.MAX_MATH_HEIGHT:
             log.info(
-                "skipping math formula, png to big: %r, w:%d, h:%d" % (source, w, h)
+                "skipping math formula, png to big: %r, w:%d, h:%d" % (source,
+                                                                       width,
+                                                                       height)
             )
             return ""
         if self.table_nesting:  # scale down math-formulas in tables
-            w = w * pdfstyles.small_font_size / pdfstyles.font_size
-            h = h * pdfstyles.small_font_size / pdfstyles.font_size
+            width = width * pdfstyles.SMALL_FONT_SIZE / pdfstyles.FONT_SIZE
+            height = height * pdfstyles.SMALL_FONT_SIZE / pdfstyles.FONT_SIZE
 
-        scale = (self.getAvailWidth()) / (w / density * 72)
+        scale = (self.getAvailWidth()) / (width / density * 72)
         if scale < 1:
-            w *= scale
-            h *= scale
+            width *= scale
+            height *= scale
 
         # the vertical image placement is calculated below:
         # the "normal" height of a single-line formula is 17px
-        imgAlign = "%fin" % (-(h - 15) / (2 * density))
+        imgAlign = "%fin" % (-(height - 15) / (2 * density))
         # the non-breaking-space is needed to
         # force whitespace after the formula
         return [
             '<img src="{path}" width="{width:f}pt" height="{height:f}pt" valign="{valign}" />'.format(
                 path=imgpath.encode(sys.getfilesystemencoding()),
-                width=w / density * 72,
-                height=h / density * 72,
+                width=width / density * 72,
+                height=height / density * 72,
                 valign=imgAlign,
             )
         ]
@@ -2572,9 +2572,10 @@ class RlWriter:
             # and not guessed by the writer
             node.width = 180
             node.thumb = True
-            node.isInline = lambda: False
-            w, h = self.image_utils.get_image_size(node, img_path)
-            return [Figure(img_path, "", text_style(), imgWidth=w, imgHeight=h)]
+            node.is_inline = lambda: False
+            width, height = self.image_utils.get_image_size(node, img_path)
+            return [Figure(img_path, "",
+                           text_style(), imgWidth=width, imgHeight=height)]
         return []
 
     writeControl = ignore
@@ -2592,8 +2593,8 @@ def writer(
     lang=None,
     profile=None,
 ):
-    r = RlWriter(env, strict=strict, debug=debug, mathcache=mathcache,
-                 lang=lang)
+    rl_writer = RlWriter(env, strict=strict, debug=debug, mathcache=mathcache,
+                         lang=lang)
     if coverimage is None and env.configparser.has_section("pdf"):
         coverimage = env.configparser.get("pdf", "coverimage", None)
 
@@ -2607,7 +2608,7 @@ def writer(
             os.path.expanduser(profile),
         )
     else:
-        r.writeBook(
+        rl_writer.writeBook(
             output=output, coverimage=coverimage,
             status_callback=status_callback
         )

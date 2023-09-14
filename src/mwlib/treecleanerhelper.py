@@ -41,7 +41,7 @@ def getNodeHeight(node, params):
             height += addHeight
     elif node.__class__ == ImageLink:
         if (
-            node.isInline()
+            node.is_inline()
         ):  # image heights are just wild guesses. in case of normal image, we assume 5 lines of text in height
             height += 0  # lineHeight
         else:

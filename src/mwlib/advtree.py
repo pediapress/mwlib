@@ -100,10 +100,10 @@ class AdvancedNode:
         p = self.parent
         try:
             self.parent = None
-            n = copy.deepcopy(self)
+            node = copy.deepcopy(self)
         finally:
             self.parent = p
-        return n
+        return node
 
     def move_to(
         self, targetnode, prefix=False
@@ -160,10 +160,10 @@ class AdvancedNode:
         """
 
         parents = []
-        n = self.parent
-        while n:
-            parents.append(n)
-            n = n.parent
+        node = self.parent
+        while node:
+            parents.append(node)
+            node = node.parent
         parents.reverse()
         return parents
 
@@ -287,12 +287,12 @@ class AdvancedNode:
                 NamespaceLink: "target",
             }
         skip_on_children = [Link, NamespaceLink]
-        for n in self.allchildren():
-            access = amap.get(n.__class__, "")
+        for node in self.allchildren():
+            access = amap.get(node.__class__, "")
             if access:
-                if n.__class__ in skip_on_children and n.children:
+                if node.__class__ in skip_on_children and node.children:
                     continue
-                text.append(getattr(n, access))
+                text.append(getattr(node, access))
         alltext = [t for t in text if t]
         if alltext:
             return "".join(alltext)
@@ -424,7 +424,7 @@ class AdvancedSection(AdvancedNode):
 
 
 class AdvancedImageLink(AdvancedNode):
-    is_block_node = property(lambda s: not s.isInline())
+    is_block_node = property(lambda s: not s.is_inline())
 
     @property
     def render_caption(self):
@@ -680,7 +680,7 @@ We define list for blocknodes, which are used in AdvancedNode as:
 
 AdvancedNode.is_block_node
 
-Image depends on result of Image.isInline() see above
+Image depends on result of Image.is_inline() see above
 
 Open Issues: Math, Magic, (unknown) TagNode
 

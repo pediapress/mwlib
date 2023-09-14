@@ -41,23 +41,23 @@ class Node(utoken.Token):
 
     def find(self, tp):
         """find instances of type tp in self.allchildren()"""
-        return [x for x in self.allchildren() if isinstance(x, tp)]
+        return [child for child in self.allchildren() if isinstance(child, tp)]
 
     def filter(self, fun):
-        for x in self.allchildren():
-            if fun(x):
-                yield x
+        for child in self.allchildren():
+            if fun(child):
+                yield child
 
-    def _asText(self, out):
+    def _as_text(self, out):
         out.write(self.caption)
-        for x in self.children:
-            x._asText(out)
+        for child in self.children:
+            child._as_text(out)
 
-    def asText(
+    def as_text(
         self,
     ):
         out = StringIO()
-        self._asText(out)
+        self._as_text(out)
         return out.getvalue()
 
 
@@ -338,7 +338,7 @@ class ImageLink(Link):
     border = None
     upright = None
 
-    def isInline(self):
+    def is_inline(self):
         return not bool(self.align or self.thumb or self.frame)
 
 

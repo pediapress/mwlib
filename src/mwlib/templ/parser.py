@@ -171,8 +171,8 @@ class Parser:
         cond = self._strip_ws(cond)
 
         args[0] = cond
-        n = IfNode(tuple(args))
-        return n
+        node = IfNode(tuple(args))
+        return node
 
     def magicNodeFromChildren(self, children, klass):
         children[0] = children[0].split(":", 1)[1]

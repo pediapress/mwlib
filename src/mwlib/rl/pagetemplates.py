@@ -17,29 +17,29 @@ from mwlib.rl import pdfstyles
 from mwlib.rl.customflowables import TocEntry
 from mwlib.rl.formatter import RLFormatter
 from mwlib.rl.pdfstyles import (
-    footer_margin_hor,
-    footer_margin_vert,
-    header_margin_hor,
-    header_margin_vert,
-    page_height,
-    page_margin_bottom,
-    page_margin_left,
-    page_margin_right,
-    page_margin_top,
-    page_width,
-    pagefooter,
-    print_height,
-    print_width,
-    serif_font,
+    FOOTER_MARGIN_HOR,
+    FOOTER_MARGIN_VER,
+    HEADER_MARGIN_HOR,
+    HEADER_MARGIN_VERT,
+    PAGE_FOOTER,
+    PAGE_HEIGHT,
+    PAGE_MARGIN_BOTTOM,
+    PAGE_MARGIN_LEFT,
+    PAGE_MARGIN_RIGHT,
+    PAGE_MARGIN_TOP,
+    PAGE_WIDTH,
+    PRINT_HEIGHT,
+    PRINT_WIDTH,
+    SERIF_FONT,
+    TITLE_PAGE_FOOTER,
     text_style,
-    titlepagefooter,
 )
 
 from . import fontconfig, locale
 
 font_switcher = fontconfig.RLFontSwitcher()
 font_switcher.font_paths = fontconfig.font_paths
-font_switcher.register_default_font(pdfstyles.default_font)
+font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
 font_switcher.registerFontDefinitionList(fontconfig.fonts)
 
 formatter = RLFormatter(font_switcher=font_switcher)
@@ -56,10 +56,10 @@ class SimplePage(PageTemplate):
         pw = pageSize[0]
         ph = pageSize[1]
         frames = Frame(
-            page_margin_left,
-            page_margin_bottom,
-            pw - page_margin_left - page_margin_right,
-            ph - page_margin_top - page_margin_bottom,
+            PAGE_MARGIN_LEFT,
+            PAGE_MARGIN_BOTTOM,
+            pw - PAGE_MARGIN_LEFT - PAGE_MARGIN_RIGHT,
+            ph - PAGE_MARGIN_TOP - PAGE_MARGIN_BOTTOM,
         )
 
         PageTemplate.__init__(self, id=page_id,
@@ -73,7 +73,7 @@ class WikiPage(PageTemplate):
         id=None,
         onPage=_doNothing,
         onPageEnd=_doNothing,
-        pagesize=(page_width, page_height),
+        pagesize=(PAGE_WIDTH, PAGE_HEIGHT),
         rtl=False,
     ):
         """
@@ -81,8 +81,8 @@ class WikiPage(PageTemplate):
         """
 
         id = title
-        frames = Frame(page_margin_left, page_margin_bottom,
-                       print_width, print_height)
+        frames = Frame(PAGE_MARGIN_LEFT, PAGE_MARGIN_BOTTOM,
+                       PRINT_WIDTH, PRINT_HEIGHT)
 
         PageTemplate.__init__(
             self,
@@ -97,51 +97,51 @@ class WikiPage(PageTemplate):
         self.rtl = rtl
 
     def beforeDrawPage(self, canvas, doc):
-        canvas.setFont(serif_font, 10)
+        canvas.setFont(SERIF_FONT, 10)
         canvas.setLineWidth(0)
         # header
         canvas.line(
-            header_margin_hor,
-            page_height - header_margin_vert,
-            page_width - header_margin_hor,
-            page_height - header_margin_vert,
+            HEADER_MARGIN_VERT,
+            PAGE_HEIGHT - HEADER_MARGIN_VERT,
+            PAGE_WIDTH - HEADER_MARGIN_HOR,
+            PAGE_HEIGHT - HEADER_MARGIN_VERT,
         )
-        if pdfstyles.show_page_header:
+        if pdfstyles.SHOW_PAGE_HEADER:
             canvas.saveState()
             canvas.resetTransforms()
-            h_offset = header_margin_hor if not self.rtl else 1.5 * header_margin_hor
-            canvas.translate(h_offset, page_height - header_margin_vert - 0.1 * cm)
+            h_offset = HEADER_MARGIN_HOR if not self.rtl else 1.5 * HEADER_MARGIN_HOR
+            canvas.translate(h_offset, PAGE_HEIGHT - HEADER_MARGIN_VERT - 0.1 * cm)
             p = Paragraph(self.title, text_style())
             p.canv = canvas
             p.wrap(
-                page_width - header_margin_hor * 2.5, page_height
+                PAGE_WIDTH - HEADER_MARGIN_HOR * 2.5, PAGE_HEIGHT
             )  # add an extra 0.5 margin to have enough space for page number
             p.drawPara()
             canvas.restoreState()
 
         if not self.rtl:
-            h_pos = page_width - header_margin_hor
+            h_pos = PAGE_WIDTH - HEADER_MARGIN_HOR
             d = canvas.drawRightString
         else:
-            h_pos = header_margin_hor
+            h_pos = HEADER_MARGIN_HOR
             d = canvas.drawString
-        d(h_pos, page_height - header_margin_vert + 0.1 * cm, "%d" % doc.page)
+        d(h_pos, PAGE_HEIGHT - HEADER_MARGIN_VERT + 0.1 * cm, "%d" % doc.page)
 
         # Footer
         canvas.saveState()
-        canvas.setFont(serif_font, 8)
+        canvas.setFont(SERIF_FONT, 8)
         canvas.line(
-            footer_margin_hor,
-            footer_margin_vert,
-            page_width - footer_margin_hor,
-            footer_margin_vert,
+            FOOTER_MARGIN_HOR,
+            FOOTER_MARGIN_VER,
+            PAGE_WIDTH - FOOTER_MARGIN_HOR,
+            FOOTER_MARGIN_VER,
         )
-        if pdfstyles.show_page_footer:
-            p = Paragraph(formatter.clean_text(pagefooter,
+        if pdfstyles.SHOW_PAGE_FOOTER:
+            p = Paragraph(formatter.clean_text(PAGE_FOOTER,
                                                escape=False), text_style())
             p.canv = canvas
-            w, h = p.wrap(page_width - header_margin_hor * 2.5, page_height)
-            p.drawOn(canvas, footer_margin_hor, footer_margin_vert - 10 - h)
+            w, h = p.wrap(PAGE_WIDTH - HEADER_MARGIN_HOR * 2.5, PAGE_HEIGHT)
+            p.drawOn(canvas, FOOTER_MARGIN_HOR, FOOTER_MARGIN_VER - 10 - h)
         canvas.restoreState()
 
 
@@ -152,7 +152,7 @@ class TitlePage(PageTemplate):
         id=None,
         onPage=_doNothing,
         onPageEnd=_doNothing,
-        pagesize=(page_width, page_height),
+        pagesize=(PAGE_WIDTH, PAGE_HEIGHT),
     ):
         id = "TitlePage"
         p = pdfstyles
@@ -176,31 +176,30 @@ class TitlePage(PageTemplate):
     def _scale_img(self, img_area_size, img_fn):
         img = Image.open(self.cover)
         img_width, img_height = img.size
-        img_area_width = min(page_width, img_area_size[0])
-        img_area_height = min(page_height, img_area_size[1])
+        img_area_width = min(PAGE_WIDTH, img_area_size[0])
+        img_area_height = min(PAGE_HEIGHT, img_area_size[1])
         img_ar = img_width / img_height
         img_area_ar = img_area_width / img_area_height
         if img_ar >= img_area_ar:
             return (img_area_width, img_area_width / img_ar)
-        else:
-            return (img_area_height * img_ar, img_area_height)
+        return (img_area_height * img_ar, img_area_height)
 
     def beforeDrawPage(self, canvas, doc):
-        canvas.setFont(serif_font, 8)
+        canvas.setFont(SERIF_FONT, 8)
         canvas.saveState()
-        if pdfstyles.show_title_page_footer:
+        if pdfstyles.SHOW_TITLE_PAGE_FOOTER:
             canvas.line(
-                footer_margin_hor,
-                footer_margin_vert,
-                page_width - footer_margin_hor,
-                footer_margin_vert,
+                FOOTER_MARGIN_HOR,
+                FOOTER_MARGIN_VER,
+                PAGE_WIDTH - FOOTER_MARGIN_HOR,
+                FOOTER_MARGIN_VER,
             )
-            footertext = [_(titlepagefooter)]
-            if pdfstyles.show_creation_date:
+            footertext = [_(TITLE_PAGE_FOOTER)]
+            if pdfstyles.SHOW_CREATION_DATE:
                 locale.setlocale(locale.LC_ALL, "")
                 footertext.append(
-                    pdfstyles.creation_date_txt
-                    % time.strftime(pdfstyles.creation_date_format,
+                    pdfstyles.CREATION_DATE_TXT
+                    % time.strftime(pdfstyles.CREATION_DATE_FORMAT,
                                     time.localtime())
                 )
             lines = [formatter.clean_text(line,
@@ -211,26 +210,26 @@ class TitlePage(PageTemplate):
                                                  "utf-8") for line in lines
             )
             p = Paragraph(txt, text_style(mode="footer"))
-            w, h = p.wrap(print_width, print_height)
-            canvas.translate((page_width - w) / 2.0,
-                             footer_margin_vert - h - 0.25 * cm)
+            width, height = p.wrap(PRINT_WIDTH, PRINT_HEIGHT)
+            canvas.translate((PAGE_WIDTH - width) / 2.0,
+                             FOOTER_MARGIN_VER - height - 0.25 * cm)
             p.canv = canvas
             p.draw()
         canvas.restoreState()
         if self.cover:
-            width, height = self._scale_img(pdfstyles.title_page_image_size,
+            width, height = self._scale_img(pdfstyles.TITLE_PAGE_IMAGE_SIZE,
                                             self.cover)
-            if pdfstyles.title_page_image_pos[0] is None:
-                x = (page_width - width) / 2.0
+            if pdfstyles.TITLE_PAGE_IMAGE_POS[0] is None:
+                x_cord = (PAGE_WIDTH - width) / 2.0
             else:
-                x = max(0, min(page_width - width,
-                               pdfstyles.title_page_image_pos[0]))
-            if pdfstyles.title_page_image_pos[1] is None:
-                y = (page_height - height) / 2.0
+                x_cord = max(0, min(PAGE_WIDTH - width,
+                                    pdfstyles.TITLE_PAGE_IMAGE_POS[0]))
+            if pdfstyles.TITLE_PAGE_IMAGE_POS[1] is None:
+                y_cord = (PAGE_HEIGHT - height) / 2.0
             else:
-                y = max(0, min(page_height - height,
-                               pdfstyles.title_page_image_pos[1]))
-            canvas.drawImage(self.cover, x, y, width, height)
+                y_cord = max(0, min(PAGE_HEIGHT - height, 
+                                    pdfstyles.TITLE_PAGE_IMAGE_POS[1]))
+            canvas.drawImage(self.cover, x_cord, y_cord, width, height)
 
 
 class PPDocTemplate(BaseDocTemplate):
