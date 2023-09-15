@@ -49,7 +49,6 @@ def zip_dir(dirname, output=None, skip_ext=None):
 
 def make_zip(output=None, options=None, metabook=None,
              podclient=None, status=None):
-    
     dir_path = os.path.dirname(output)
     tmpdir = (
         tempfile.mkdtemp(dir=dir_path) if output else tempfile.mkdtemp()

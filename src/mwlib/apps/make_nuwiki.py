@@ -53,9 +53,6 @@ class StartFetcher:
         )
 
         fsout.nfo = nfo
-
-        # fsout.dump_json(nfo=nfo)
-
         pages = fetch.pages_from_metabook(metabook)
         self.fetcher = fetch.Fetcher(
             api,
@@ -165,15 +162,50 @@ def wikitrust(baseurl, metabook):
                   repr(x.title), repr(err))
 
 
-def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
-    id2wiki = {}
-    for x in metabook.wikis:
-        id2wiki[x.ident] = (x, [])
+def write_multi_wiki_metabook(fsdir, metabook):
+    if not os.path.exists(fsdir):
+        os.makedirs(fsdir)
+    with open(os.path.join(fsdir, "metabook.json"), "wb") as f:
+        f.write(metabook.dumps())
+    with open(os.path.join(fsdir, "nfo.json"), "wb") as f:
+        myjson.dump({"format": "multi-nuwiki"}, f)
 
-    for x in metabook.articles():
-        if x.wikiident not in id2wiki:
-            raise ValueError(f"no wikiconf for {x.wikiident!r} ({x})")
-        id2wiki[x.wikiident][1].append(x)
+
+def start_fetchers(fetchers):
+    pool = gevent.pool.Pool()
+    for x in fetchers:
+        pool.spawn(x.run)
+    pool.join(raise_error=True)
+
+    import signal
+
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
+
+def get_metabook(is_multiwiki, articles, metabook):
+    if is_multiwiki:
+        my_mb = collection()
+        my_mb.items = articles
+    else:
+        my_mb = metabook
+    return my_mb
+
+
+def get_id_wikis(metabook):
+    id2wiki = {}
+    for wiki in metabook.wikis:
+        id2wiki[wiki.ident] = (wiki, [])
+
+    for wiki in metabook.articles():
+        if wiki.wikiident not in id2wiki:
+            raise ValueError(f"no wikiconf for {wiki.wikiident!r} ({wiki})")
+        id2wiki[wiki.wikiident][1].append(wiki)
+    return id2wiki
+
+
+def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
+    id2wiki = get_id_wikis(metabook)
 
     is_multiwiki = len(id2wiki) > 1
 
@@ -192,11 +224,7 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
             raise ValueError(f"bad id: {_id!r}")
         my_fsdir = os.path.join(fsdir, _id)
 
-        if is_multiwiki:
-            my_mb = collection()
-            my_mb.items = articles
-        else:
-            my_mb = metabook
+        my_mb = get_metabook(is_multiwiki, articles, metabook)
 
         wikitrust(wikiconf.baseurl, my_mb)
 
@@ -213,19 +241,6 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
         )
 
     if is_multiwiki:
-        if not os.path.exists(fsdir):
-            os.makedirs(fsdir)
-        with open(os.path.join(fsdir, "metabook.json"), "wb") as f:
-            f.write(metabook.dumps())
-        with open(os.path.join(fsdir, "nfo.json"), "wb") as f:
-            myjson.dump({"format": "multi-nuwiki"}, f)
+        write_multi_wiki_metabook(fsdir, metabook)
 
-    pool = gevent.pool.Pool()
-    for x in fetchers:
-        pool.spawn(x.run)
-    pool.join(raise_error=True)
-
-    import signal
-
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    signal.signal(signal.SIGTERM, signal.SIG_DFL)
+    start_fetchers(fetchers)

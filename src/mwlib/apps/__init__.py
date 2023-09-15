@@ -17,12 +17,9 @@ from mwlib.status import Status
 
 def show():
     parser = optparse.OptionParser()
-    parser.add_option("-c", "--config",
-                      help="configuration file/URL/shortcut")
-    parser.add_option("-e", "--expand",
-                      action="store_true", help="expand templates")
-    parser.add_option("-t", "--template",
-                      action="store_true", help="show template")
+    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
+    parser.add_option("-e", "--expand", action="store_true", help="expand templates")
+    parser.add_option("-t", "--template", action="store_true", help="show template")
     parser.add_option("-f", help="read input from file. implies -e")
 
     options, args = parser.parse_args()
@@ -98,14 +95,30 @@ def post():
         raise
 
 
+def parse_article(article, db, options):
+    try:
+        page = db.normalize_and_get_page(article, 0)
+        raw = page.rawtext if page else None
+        # yes, raw can be None, when we have a
+        # redirect to a non-existing article.
+        if raw is None:
+            return
+        stime = time.time()
+        uparser.parse_string(article, raw=raw, wikidb=db)
+    except Exception as err:
+        print("F", repr(article), err)
+        if options.tb:
+            traceback.print_exc()
+    else:
+        print("G", time.time() - stime, repr(article))
+
+
 def parse():
     parser = optparse.OptionParser(
         usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]"
     )
-    parser.add_option("-a", "--all", action="store_true",
-                      help="parse all articles")
-    parser.add_option("--tb", action="store_true",
-                      help="show traceback on error")
+    parser.add_option("-a", "--all", action="store_true", help="parse all articles")
+    parser.add_option("--tb", action="store_true", help="show traceback on error")
 
     parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
 
@@ -131,19 +144,4 @@ def parse():
         articles = db.articles()
 
     for x in articles:
-        try:
-            page = db.normalize_and_get_page(x, 0)
-            raw = page.rawtext if page else None
-
-            # yes, raw can be None, when we have a
-            # redirect to a non-existing article.
-            if raw is None:
-                continue
-            stime = time.time()
-            uparser.parse_string(x, raw=raw, wikidb=db)
-        except Exception as err:
-            print("F", repr(x), err)
-            if options.tb:
-                traceback.print_exc()
-        else:
-            print("G", time.time() - stime, repr(x))
+        parse_article(x, db, options)

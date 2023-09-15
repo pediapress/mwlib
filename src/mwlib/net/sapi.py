@@ -56,7 +56,9 @@ class MwApi:
                 auth_handler,
             )
         else:
-            self.opener = request.build_opener(request.HTTPCookieProcessor(cookiejar.CookieJar()))
+            self.opener = request.build_opener(
+                request.HTTPCookieProcessor(cookiejar.CookieJar())
+            )
         self.opener.addheaders = [("User-Agent", conf.user_agent)]
         self.edittoken = None
         self.qccount = 0
@@ -97,7 +99,9 @@ class MwApi:
                 args[k] = v.encode("utf-8")
         q = parse.urlencode(args)
         q = q.replace("%3A", ":")  # fix for wrong quoting of url for images
-        q = q.replace("%7C", "|")  # fix for wrong quoting of API queries (relevant for redirects)
+        q = q.replace(
+            "%7C", "|"
+        )  # fix for wrong quoting of API queries (relevant for redirects)
 
         url = f"{self.apiurl}?{q}"
         return url
@@ -135,60 +139,77 @@ class MwApi:
             if sem is not None:
                 sem.release()
 
-    def _do_request(self, query_continue=True, merge_data=merge_data,
-                    **kwargs):
+    def _handle_error(self, error, kwargs):
+        raise RuntimeError(
+            "{}: [fetching {}]".format(error.get("info", ""),
+                                       self._build_url(**kwargs))
+        )
+
+    def _handle_request(self, **kwargs):
+        data = loads(self._request(**kwargs))
+        error = data.get("error")
+        if error:
+            self._handle_error(error, kwargs)
+        return data
+
+    def _merge_data(self, retval, action, data):
+        merge_data(retval, data[action])
+
+    def _handle_query_continue(self, qc, last_qc, kwargs):
+        self.qccount += 1
+        self.report()
+        kw = kwargs.copy()
+        for d in qc:
+            for k, v in d.items():
+                kw[str(k)] = v
+
+        if qc == last_qc:
+            print("warning: cannot continue this query:", self._build_url(**kw))
+            return None, True
+
+        return kw, False
+
+    def _do_request(self, query_continue=True, merge_data=None, **kwargs):
         last_qc = None
         action = kwargs["action"]
         retval = {}
         todo = kwargs
+
         while todo is not None:
             kwargs = todo
             todo = None
 
-            data = loads(self._request(**kwargs))
-            error = data.get("error")
-            if error:
-                raise RuntimeError(
-                    "{}: [fetching {}]".format(error.get("info", ""),
-                                               self._build_url(**kwargs))
-                )
-            merge_data(retval, data[action])
+            data = self._handle_request(**kwargs)
+
+            if merge_data:
+                merge_data(retval, data[action])
+            else:
+                self._merge_data(retval, action, data)
 
             qc = list(data.get("query-continue", {}).values())
-
             if qc and query_continue:
-                self.qccount += 1
-                self.report()
-                kw = kwargs.copy()
-                for d in qc:
-                    for k, v in d.items():  # dict of len(1)
-                        kw[str(k)] = v
-
-                if qc == last_qc:
-                    print("warning: cannot continue this query:",
-                          self._build_url(**kw))
+                todo, stop_query = self._handle_query_continue(qc, last_qc, kwargs)
+                if stop_query:
                     return retval
-
                 last_qc = qc
-                todo = kw
 
         return retval
 
     def ping(self):
-        return self.do_request(action="query", meta="siteinfo",
-                               siprop="general")
+        return self.do_request(action="query", meta="siteinfo", siprop="general")
 
     def get_categorymembers(self, cmtitle):
         return self.do_request(
-            action="query", list="categorymembers",
-            cmtitle=cmtitle, cmlimit=200
+            action="query", list="categorymembers", cmtitle=cmtitle, cmlimit=200
         )
 
     def get_siteinfo(self):
         siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
         while len(siprop) >= 3:
             try:
-                r = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
+                r = self.do_request(
+                    action="query", meta="siteinfo", siprop="|".join(siprop)
+                )
                 return r
             except Exception as err:
                 print("ERR:", err)
@@ -213,23 +234,25 @@ class MwApi:
 
         login_result = res["login"]["result"]
         if login_result == "NeedToken" and lgtoken is None:
-            return self.login(username, password, domain=domain,
-                              lgtoken=res["login"]["token"])
+            return self.login(
+                username, password, domain=domain, lgtoken=res["login"]["token"]
+            )
         elif login_result == "Success":
             return
 
         raise RuntimeError("login failed: %r" % res)
 
-    def fetch_used(self, titles=None, revids=None, fetch_images=True,
-                   expanded=False):
+    def fetch_used(self, titles=None, revids=None, fetch_images=True, expanded=False):
         if fetch_images:
             prop = "images" if expanded else "revisions|templates|images"
         else:
             prop = "" if expanded else "revisions|templates"
 
         kwargs = {
-            "prop": prop, "rvprop": "ids", "imlimit": self.api_result_limit,
-            "tllimit": self.api_result_limit
+            "prop": prop,
+            "rvprop": "ids",
+            "imlimit": self.api_result_limit,
+            "tllimit": self.api_result_limit,
         }
         if titles:
             kwargs["redirects"] = 1
@@ -249,8 +272,7 @@ class MwApi:
     def upload(self, title, txt, summary):
         if self.edittoken is None:
             res = self.do_request(
-                action="query", prop="info|revisions", intoken="edit",
-                titles=title
+                action="query", prop="info|revisions", intoken="edit", titles=title
             )
             self.edittoken = list(res["pages"].values())[0]["edittoken"]
 

@@ -6,11 +6,16 @@
 import errno
 import os
 import sys
+import tempfile
+import traceback
 
 import pkg_resources
 
 from mwlib import _locale, conf, utils, wiki
+from mwlib.exceptions.mwlib_exceptions import RenderException
 from mwlib.options import OptionParser
+from mwlib.status import Status
+from mwlib.writerbase import WriterError
 
 
 def init_tmp_cleaner():
@@ -148,20 +153,7 @@ class Main:
                              progress_range=(34, 100))
         return env
 
-    def __call__(self):
-        options, _, parser = self.parse_options()
-        conf.readrc()
-
-        self.parser = parser
-        self.options = options
-
-        import tempfile
-
-        from mwlib.status import Status
-        from mwlib.writerbase import WriterError
-
-        use_help = "Use --help for usage information."
-
+    def _get_writer_from_options(self, options, parser, use_help):
         if options.list_writers:
             self.list_writers()
             return
@@ -194,6 +186,43 @@ class Main:
                 print("Warning: unknown writer option %r" % option)
                 del writer_options[option]
 
+        return writer, writer_options
+
+    def _finish_render(self, writer, options):
+        kwargs = {}
+        if hasattr(writer, "content_type"):
+            kwargs["content_type"] = writer.content_type
+        if hasattr(writer, "file_extension"):
+            kwargs["file_extension"] = writer.file_extension
+        self.status(status="finished", progress=100, **kwargs)
+        if options.keep_zip is None and self.zip_filename is not None:
+            utils.safe_unlink(self.zip_filename)
+
+    def _write_traceback(self, options, exc):
+        self.status(status="error")
+        if options.error_file:
+            fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
+            f = os.fdopen(fd, "wb")
+            if isinstance(exc, WriterError):
+                f.write(str(exc))
+            else:
+                f.write("traceback\n")
+                traceback.print_exc(file=f)
+            f.write(f"sys.argv={utils.garble_password(sys.argv)!r}\n")
+            f.close()
+            os.rename(tmpfile, options.error_file)
+
+    def __call__(self):
+        options, _, parser = self.parse_options()
+        conf.readrc()
+
+        self.parser = parser
+        self.options = options
+
+        use_help = "Use --help for usage information."
+
+        writer, writer_options = self._get_writer_from_options(options, parser, use_help)
+
         init_tmp_cleaner()
 
         self.status = Status(options.status_file, progress_range=(1, 33))
@@ -217,39 +246,19 @@ class Main:
             writer(env, output=tmpout, status_callback=self.status,
                    **writer_options)
             os.rename(tmpout, options.output)
-            kwargs = {}
-            if hasattr(writer, "content_type"):
-                kwargs["content_type"] = writer.content_type
-            if hasattr(writer, "file_extension"):
-                kwargs["file_extension"] = writer.file_extension
-            self.status(status="finished", progress=100, **kwargs)
-            if options.keep_zip is None and self.zip_filename is not None:
-                utils.safe_unlink(self.zip_filename)
-        except Exception as e:
-            import traceback
-
-            self.status(status="error")
-            if options.error_file:
-                fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
-                f = os.fdopen(fd, "wb")
-                if isinstance(e, WriterError):
-                    f.write(str(e))
-                else:
-                    f.write("traceback\n")
-                    traceback.print_exc(file=f)
-                f.write(f"sys.argv={utils.garble_password(sys.argv)!r}\n")
-                f.close()
-                os.rename(tmpfile, options.error_file)
-            raise
+            self._finish_render(writer, options)
+        except Exception as exc:
+            self._write_traceback(options, exc)
+            raise RenderException("ERROR: %s" % exc) from exc
         finally:
             if env is not None and env.images is not None:
                 try:
                     if not options.keep_tmpfiles:
                         env.images.clear()
-                except OSError as e:
-                    if e.errno != errno.ENOENT:
+                except OSError as exc:
+                    if exc.errno != errno.ENOENT:
                         print(
-                            "ERROR: Could not remove temporary images: %s" % e, e.errno
+                            "ERROR: Could not remove temporary images: %s" % exc, exc.errno
                         )
 
 

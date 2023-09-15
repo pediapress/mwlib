@@ -23,3 +23,7 @@ class InconsistentPathLengthException(Exception):
         super().__init__(
             f"Expected path length of {expected_length}, but got {actual_length}."
         )
+
+
+class RenderException(Exception):
+    pass

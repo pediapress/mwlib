@@ -18,6 +18,41 @@ def serve_ctl(args):
         purge_cache(args.purge_cache * 60 * 60, cache_dir=args.cache_dir)
 
 
+def check_req(client, report, command, **kwargs):
+    try:
+        success = client.request(command, kwargs,
+                                 is_json=(command != "download"))
+    except Exception as exc:
+        report("request failed: %s" % exc)
+        sys.exit(1)
+    if success:
+        return client.response
+    if client.error is not None:
+        report("request failed: %s" % client.error)
+        sys.exit(1)
+    else:
+        report("request failed: got response code %d" % client.response_code)
+        sys.exit(1)
+
+
+def get_report_func(args, log):
+    def report_default(msg):
+        log.ERROR(msg)
+
+    if args.report_recipient and args.report_from_mail:
+        def report_email(msg):
+            utils.report(
+                system="mw-check-service",
+                subject="mw-check-service error",
+                from_email=args.report_from_mail.encode("utf-8"),
+                mail_recipients=[args.report_recipient.encode("utf-8")],
+                msg=msg,
+            )
+        return report_email
+    else:
+        return report_default
+
+
 def check_service(args):
     log = Log("mw-check-service")
 
@@ -26,44 +61,12 @@ def check_service(args):
         metabook = f.read()
 
     max_render_time = int(args.max_render_time)
-
-    if args.report_recipient and args.report_from_mail:
-
-        def report(msg):
-            utils.report(
-                system="mw-check-service",
-                subject="mw-check-service error",
-                from_email=args.report_from_mail.encode("utf-8"),
-                mail_recipients=[args.report_recipient.encode("utf-8")],
-                msg=msg,
-            )
-
-    else:
-        report = log.ERROR
-
     writer = args.writer
 
     if args.logfile:
         utils.start_logging(args.logfile)
 
     client = Client(args.url)
-
-    def check_req(command, **kwargs):
-        try:
-            success = client.request(command, kwargs,
-                                     is_json=(command != "download"))
-        except Exception as exc:
-            report("request failed: %s" % exc)
-            sys.exit(1)
-
-        if success:
-            return client.response
-        if client.error is not None:
-            report("request failed: %s" % client.error)
-            sys.exit(1)
-        else:
-            report("request failed: got response code %d" % client.response_code)
-            sys.exit(1)
 
     start_time = time.time()
 
@@ -76,6 +79,7 @@ def check_service(args):
         force_render=True,
     )
     collection_id = response["collection_id"]
+    report = get_report_func(args, log)
 
     while True:
         time.sleep(1)
@@ -86,6 +90,7 @@ def check_service(args):
 
         log.info("checking status")
         response = check_req(
+            client, report,
             "render_status",
             collection_id=collection_id,
             writer=writer,
@@ -95,6 +100,7 @@ def check_service(args):
 
     log.info("downloading")
     response = check_req(
+        client, report,
         "download",
         collection_id=collection_id,
         writer=writer,

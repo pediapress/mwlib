@@ -5,11 +5,14 @@
 
 
 import copy
+import re
 import warnings
 from collections import deque
 from hashlib import sha256
 
 import six
+
+from mwlib import utils
 
 
 def parse_collection_page(txt):
@@ -38,8 +41,7 @@ class MbObj:
         self.type = self.__class__.__name__
 
     def __getitem__(self, key):
-        warnings.warn(f"deprecated __getitem__ [{key!r}]",
-                      DeprecationWarning, 2)
+        warnings.warn(f"deprecated __getitem__ [{key!r}]", DeprecationWarning, 2)
 
         try:
             return getattr(self, str(key))
@@ -47,14 +49,12 @@ class MbObj:
             raise KeyError(repr(key))
 
     def __setitem__(self, key, val):
-        warnings.warn(f"deprecated __setitem__ [{key!r}]=",
-                      DeprecationWarning, 2)
+        warnings.warn(f"deprecated __setitem__ [{key!r}]=", DeprecationWarning, 2)
 
         self.__dict__[key] = val
 
     def __contains__(self, key):
-        warnings.warn(f"deprecated __contains__ {key!r} in ",
-                      DeprecationWarning, 2)
+        warnings.warn(f"deprecated __contains__ {key!r} in ", DeprecationWarning, 2)
         val = getattr(self, str(key), None)
         return val is not None
 
@@ -231,46 +231,52 @@ def calc_checksum(metabook):
     return sha256(metabook.dumps().encode("utf-8")).hexdigest()
 
 
+def get_wiki_text_from_url(license):
+    url = license["mw_license_url"]
+    if (
+        re.match(r"^.*/index\.php.*action=raw", url)
+        and "templates=expand" not in url
+    ):
+        url += "&templates=expand"
+    wikitext = utils.fetch_url(
+        url,
+        ignore_errors=True,
+        expected_content_type="text/x-wiki",
+    )
+    if wikitext:
+        try:
+            wikitext = six.text_type(wikitext, "utf-8")
+        except UnicodeError:
+            wikitext = None
+    return wikitext
+
+
+def get_wiki_text_for_license(license):
+    wikitext = ""
+
+    if license.get("mw_license_url"):
+        wikitext = get_wiki_text_from_url(license)
+    else:
+        wikitext = ""
+        if license.get("mw_rights_text"):
+            wikitext = license["mw_rights_text"]
+        if license.get("mw_rights_page"):
+            wikitext += "\n\n[[%s]]" % license["mw_rights_page"]
+        if license.get("mw_rights_url"):
+            wikitext += "\n\n" + license["mw_rights_url"]
+
+    return wikitext
+
+
 def get_licenses(metabook):
     """Return list of licenses
 
     @returns: list of dicts with license info
     @rtype: [dict]
     """
-    import re
-
-    from mwlib import utils
-
     retval = []
     for license in metabook.licenses:
-        wikitext = ""
-
-        if license.get("mw_license_url"):
-            url = license["mw_license_url"]
-            if (
-                re.match(r"^.*/index\.php.*action=raw", url)
-                and "templates=expand" not in url
-            ):
-                url += "&templates=expand"
-            wikitext = utils.fetch_url(
-                url,
-                ignore_errors=True,
-                expected_content_type="text/x-wiki",
-            )
-            if wikitext:
-                try:
-                    wikitext = six.text_type(wikitext, "utf-8")
-                except UnicodeError:
-                    wikitext = None
-        else:
-            wikitext = ""
-            if license.get("mw_rights_text"):
-                wikitext = license["mw_rights_text"]
-            if license.get("mw_rights_page"):
-                wikitext += "\n\n[[%s]]" % license["mw_rights_page"]
-            if license.get("mw_rights_url"):
-                wikitext += "\n\n" + license["mw_rights_url"]
-
+        wikitext = get_wiki_text_for_license(license)
         if not wikitext:
             continue
 
