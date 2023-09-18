@@ -18,6 +18,7 @@ from mwlib import myjson as json
 from mwlib import nshandling, utils
 from mwlib.log import Log
 from mwlib.utils import python2sort
+from mwlib import metabook
 
 log = Log("nuwiki")
 
@@ -385,10 +386,9 @@ class adapt:
             return authors
 
     def getSource(self, title, revision=None):
-        from mwlib.metabook import make_source
 
         g = self.siteinfo["general"]
-        return make_source(
+        return metabook.Source(
             name="%s (%s)" % (g["sitename"], g["lang"]),
             url=g["base"],
             language=g["lang"],

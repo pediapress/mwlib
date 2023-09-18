@@ -31,9 +31,9 @@ def main():
     if options.subtitle:
         subtitle = str(options.subtitle, "utf-8")
 
-    mb = metabook.make_metabook(title=title, subtitle=subtitle)
+    mb = metabook.collection(title=title, subtitle=subtitle)
     for title in args:
-        mb["items"].append(metabook.make_article(title=str(title, "utf-8")))
+        mb["items"].append(metabook.article(title=str(title, "utf-8")))
 
     if options.output:
         with open("test.json", "w") as f:

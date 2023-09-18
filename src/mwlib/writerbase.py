@@ -59,7 +59,7 @@ def build_book(env, status_callback: Optional[Callable[..., None]] = None):
 
     last_chapter = None
     for item in env.metabook.walk():
-        if item.type == 'chapter':
+        if item.type == 'Chapter':
             last_chapter = handle_chapter(item, env.book)
         elif item.type == 'article':
             progress += progress_step

@@ -21,7 +21,7 @@ def object_hook(dct):
         "collection",
         "article",
         "Chapter",
-        "source",
+        "Source",
         "interwiki",
         "License",
         "WikiConf",

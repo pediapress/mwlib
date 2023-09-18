@@ -59,7 +59,6 @@ def _parse(txt):
 
     res = parse_txt(txt)
 
-    # res is an parser.Article.
     if len(res.children) != 1:
         res.__class__ = parser.Node
         return res
@@ -70,10 +69,6 @@ def _parse(txt):
         res.__class__ = parser.Node
 
     return res
-
-    # if len(res.children)!=1:
-    #     return res
-    # return res.children[0]
 
 
 class TagExtension:

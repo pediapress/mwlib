@@ -157,7 +157,7 @@ class collection(MbObj):
         return None
 
 
-class source(MbObj):
+class Source(MbObj):
     name = None
     url = None
     language = None
@@ -170,12 +170,6 @@ class source(MbObj):
 
 class Interwiki(MbObj):
     local = False
-
-
-class custom(MbObj):
-    title = None
-    content = None
-    content_type = "text/x-wiki"
 
 
 class article(MbObj):
@@ -292,10 +286,3 @@ def make_interwiki(api_entry=None):
     for k, v in api_entry.items():
         d[str(k)] = v
     return Interwiki(**d)
-
-
-make_metabook = collection
-make_chapter = Chapter
-make_source = source
-make_article = article
-make_custom = custom

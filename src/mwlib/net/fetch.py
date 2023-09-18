@@ -674,7 +674,7 @@ class Fetcher:
         local_names = []
         for x in titles:
             partial = x.split(":", 1)[1]
-            local_names.append("%s:%s" % (nsname, partial))
+            local_names.append("{}:{}".format(nsname, partial))
 
         for bl in split_blocks(local_names, api.api_request_limit):
             self._refcall(self.fetch_image_page, bl, api)
@@ -686,8 +686,8 @@ class Fetcher:
         get_authors = api.get_edits(title, None)
         local_nsname = self.nshandler.get_nsname_by_number(6)
         # change title prefix to make them look like local pages
-        prefix, partial = title.split(":", 1)
-        title = "%s:%s" % (local_nsname, partial)
+        _, partial = title.split(":", 1)
+        title = f"{local_nsname}:{partial}"
         authors = get_authors.get_authors()
         self.fsout.set_db_key("authors", title, authors)
 

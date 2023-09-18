@@ -58,7 +58,7 @@ def parse_string(
                 raise ValueError("wikidb.getSource returned a dict. this is no longer supported")
 
         if not src:
-            src = metabook.source()
+            src = metabook.Source()
 
         if lang is None:
             lang = src.language
