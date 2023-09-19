@@ -31,16 +31,16 @@ def main():
     if options.subtitle:
         subtitle = str(options.subtitle, "utf-8")
 
-    mb = metabook.collection(title=title, subtitle=subtitle)
+    meta_book = metabook.collection(title=title, subtitle=subtitle)
     for title in args:
-        mb["items"].append(metabook.article(title=str(title, "utf-8")))
+        meta_book["items"].append(metabook.article(title=str(title, "utf-8")))
 
     if options.output:
         with open("test.json", "w") as f:
-            f.write(simplejson.dumps(mb))
+            f.write(simplejson.dumps(meta_book))
     else:
         f = sys.stdout
-        f.write(simplejson.dumps(mb))
+        f.write(simplejson.dumps(meta_book))
 
 
 if __name__ == "__main__":

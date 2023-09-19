@@ -12,7 +12,7 @@ def writer():
     return r
 
 
-def test_fakeHyphenate():
+def test_fake_hyphenate():
     txt = "1. dont break this"
     r = writer()
     res = r.renderText(txt, break_long=True)

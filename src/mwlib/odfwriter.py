@@ -837,7 +837,7 @@ writer.file_extension = "odt"
 
 def preprocess(root):
     # advtree.buildAdvancedTree(root)
-    # xmltreecleaner.removeChildlessNodes(root)
+    # xmltreecleaner.remove_childless_nodes(root)
     # xmltreecleaner.fixLists(root)
     # xmltreecleaner.fixParagraphs(root)
     # xmltreecleaner.fixBlockElements(root)
@@ -846,7 +846,7 @@ def preprocess(root):
     # print"*** new TreeCleaner "*5
     advtree.build_advanced_tree(root)
     tc = TreeCleaner(root)
-    tc.cleanAll()
+    tc.clean_all()
     # parser.show(sys.stdout, root)
 
 
@@ -864,7 +864,7 @@ def main():
         # parser.show(sys.stdout, r)
         # advtree.buildAdvancedTree(r)
         # tc = TreeCleaner(r)
-        # tc.cleanAll()
+        # tc.clean_all()
 
         preprocess(r)
         parser.show(sys.stdout, r)

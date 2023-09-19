@@ -35,7 +35,7 @@ def renderMW(txt, filesuffix=None):
 
     advtree.build_advanced_tree(parseTree)
     tc = TreeCleaner(parseTree)
-    tc.cleanAll()
+    tc.clean_all()
 
     tmpdir = tempfile.mkdtemp()
     rw = RlWriter(test_mode=True)

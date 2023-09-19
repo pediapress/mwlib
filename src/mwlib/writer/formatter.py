@@ -236,7 +236,7 @@ class Formatter:
         if self.pre_mode:
             txt = self.escape_text(txt)
             txt = self.pre_mode_hook(txt)
-            txt = self.font_switcher.fontifyText(txt)
+            txt = self.font_switcher.fontify_text(txt)
         else:
             if escape:
                 if self.minimize_space_mode > 0 or (
@@ -246,7 +246,7 @@ class Formatter:
                     txt = self.escape_and_hyphenate_text(txt)
                 else:
                     txt = self.escape_text(txt)
-            txt = self.font_switcher.fontifyText(txt, break_long=break_long)
+            txt = self.font_switcher.fontify_text(txt, break_long=break_long)
 
         if self.section_title_mode:
             txt = txt.lstrip()

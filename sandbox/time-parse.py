@@ -18,5 +18,5 @@ print "tree", time.time() - stime
 
 stime = time.time()
 tc = treecleaner.TreeCleaner(r)
-tc.cleanAll()
+tc.clean_all()
 print "clean:", time.time() - stime

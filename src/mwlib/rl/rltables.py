@@ -14,12 +14,10 @@ from mwlib.writer import styleutils
 
 from .customflowables import Figure
 
-# import debughelper
-
 log = log.Log("rlwriter")
 
 
-def scaleImages(data):
+def scale_images(data):
     for row in data:
         for cell in row:
             for i, e in enumerate(cell):
@@ -36,7 +34,7 @@ def scaleImages(data):
                     )
 
 
-def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
+def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
     """
     the widths for the individual columns are calculated.
     if the horizontal size exceeds the pagewidth
@@ -44,7 +42,7 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
     """
 
     if nestingLevel > 1:
-        scaleImages(data)
+        scale_images(data)
 
     if not data:
         return None
@@ -99,8 +97,8 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
         remainingSpace = availWidth - sum(minwidths)
         if remainingSpace < 0:
             if recursionDepth == 0:
-                scaleImages(data)
-                return getColWidths(
+                scale_images(data)
+                return get_col_widths(
                     data, table=table,
                     recursionDepth=1, nestingLevel=nestingLevel
                 )
@@ -122,35 +120,7 @@ def getColWidths(data, table=None, recursionDepth=0, nestingLevel=1):
         return widths
 
 
-def splitCellContent(data):
-    # FIXME: this is a hotfix for tables which contain extremly large cells which cant be handeled by reportlab
-    n_data = []
-    splitCellCount = 14  # some arbitrary constant...: if more than 14 items are present in a cell, the cell is split into two cells in two rows
-    for row in data:
-        maxCellItems = 0
-        for cell in row:
-            maxCellItems = max(maxCellItems, len(cell))
-        if maxCellItems > splitCellCount:
-            for splitRun in range(int(math.ceil(maxCellItems / splitCellCount))):
-                n_row = []
-                for cell in row:
-                    if len(cell) > splitRun * splitCellCount:
-                        n_row.append(
-                            cell[
-                                splitRun
-                                * splitCellCount: (splitRun + 1)
-                                * splitCellCount
-                            ]
-                        )
-                    else:
-                        n_row.append("")
-                n_data.append(n_row)
-        else:
-            n_data.append(row)
-    return n_data
-
-
-def getContentType(t):
+def get_content_type(t):
     nodeInfo = []
     for row in t.children:
         rowNodeInfo = []
@@ -172,8 +142,8 @@ def getContentType(t):
     return nodeInfo
 
 
-def reformatTable(t, maxCols):
-    nodeInfo = getContentType(t)
+def reformat_table(t, maxCols):
+    nodeInfo = get_content_type(t)
     numCols = maxCols
 
     onlyTables = (
@@ -193,18 +163,18 @@ def reformatTable(t, maxCols):
 
     if onlyTables and numCols > 1:
         log.info("got table only table - removing container")
-        t = removeContainerTable(t)
+        t = remove_container_table(t)
     if onlyLists and numCols > 2:
         log.info("got list only table - reducing columns to 2")
-        t = reduceCols(t, colnum=2)
+        t = reduce_cols(t, colnum=2)
     if onlyLists:
         log.info("got list only table - splitting list items")
-        t = splitListItems(t)
+        t = split_list_items(t)
         pass
     return t
 
 
-def splitListItems(t):
+def split_list_items(t):
     nt = t.copy()
     nt.children = []
     for r in t.children:
@@ -219,7 +189,7 @@ def splitListItems(t):
             cols.append(items)
             maxItems = max(maxItems, len(items))
         for i in range(maxItems):
-            for j, col in enumerate(cols):
+            for j, _ in enumerate(cols):
                 try:
                     item = cols[j][i]
                     il = ItemList()
@@ -234,7 +204,7 @@ def splitListItems(t):
     return nt
 
 
-def reduceCols(t, colnum=2):
+def reduce_cols(t, colnum=2):
     nt = t.copy()
     nt.children = []
     for r in t.children:
@@ -252,7 +222,7 @@ def reduceCols(t, colnum=2):
     return nt
 
 
-def removeContainerTable(containertable):
+def remove_container_table(containertable):
     newtables = []
     for row in containertable:
         for cell in row:
@@ -267,7 +237,7 @@ def removeContainerTable(containertable):
 #############################################
 
 
-def customCalcWidths(table, avail_width):
+def custom_calc_widths(table, avail_width):
     from mwlib.writer.styleutils import scale_length
 
     first_row = None
@@ -291,10 +261,10 @@ def customCalcWidths(table, avail_width):
     return col_widths
 
 
-def optimizeWidths(min_widths, max_widths, avail_width,
-                   stretch=False, table=None):
+def optimize_widths(min_widths, max_widths, avail_width,
+                    stretch=False, table=None):
     if pdfstyles.TABLE_WIDTH_FROM_MARKUP:
-        col_widths = customCalcWidths(table, avail_width)
+        col_widths = custom_calc_widths(table, avail_width)
         if col_widths is not None:
             return col_widths
     remaining_space = avail_width - sum(min_widths)
@@ -324,16 +294,101 @@ def optimizeWidths(min_widths, max_widths, avail_width,
     return col_widths
 
 
-def getEmptyCell(color, colspan=1, rowspan=1):
-    emptyCell = advtree.Cell()
-    # emptyCell.append_child(emptyNode)
-    emptyCell.color = color
-    emptyCell.attributes["colspan"] = max(1, colspan)
-    emptyCell.attributes["rowspan"] = max(1, rowspan)
-    return emptyCell
+def get_empty_cell(color, colspan=1, rowspan=1):
+    empty_cell = advtree.Cell()
+    empty_cell.color = color
+    empty_cell.attributes["colspan"] = max(1, colspan)
+    empty_cell.attributes["rowspan"] = max(1, rowspan)
+    return empty_cell
 
 
-def checkSpans(t):
+def _add_styles_to_cell(styles, col_idx, row_idx, span_range, n, cell):
+    styles.append(
+        (
+            "SPAN",
+            (col_idx, row_idx + span_range * n),
+            (
+                col_idx + cell.colspan - 1,
+                row_idx + (n + 1) * span_range - 1,
+            ),
+        )
+    )
+    styles.append(
+        (
+            "LINEBELOW",
+            (col_idx,
+             row_idx + (n + 1) * span_range - 1),
+            (
+                col_idx + cell.colspan - 1,
+                row_idx + (n + 1) * span_range - 1,
+            ),
+            0.25,
+            colors.white,
+        )
+    )
+
+
+def add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols):
+    # allow splitting of cells if rowspan exceeds this value
+    # max_row_span = 15 for 4 cols, and 6 for
+    # 10 cols - empiric value
+    max_row_span = 50 / _approx_cols
+    if cell.rowspan <= max_row_span:
+        styles.append(
+            (
+                "SPAN",
+                (col_idx, row_idx),
+                (
+                    col_idx + cell.colspan - 1,
+                    row_idx + cell.rowspan - 1,
+                ),
+            )
+        )
+    else:
+        num_splits = int(math.ceil(cell.rowspan / max_row_span))
+        span_range = int(math.floor(cell.rowspan / num_splits))
+        for n in range(num_splits - 1):
+            _add_styles_to_cell(
+                styles, col_idx, row_idx, span_range, n, cell
+            )
+        styles.append(
+            (
+                "SPAN",
+                (col_idx, row_idx + span_range * (num_splits - 1)),
+                (
+                    col_idx + cell.colspan - 1,
+                    row_idx + cell.rowspan - 1,
+                ),
+            )
+        )
+
+
+def check_spans_in_row(row, row_idx, col_idx, cell, t, styles, _approx_cols):
+    col_idx = 0
+    for cell in row.children:
+        if cell.rowspan > 1:
+            emptycell = get_empty_cell(None, cell.colspan, cell.rowspan - 1)
+            last_col_idx = len(t.children[row_idx + 1].children) - 1
+            if col_idx > last_col_idx:
+                emptycell.moveto(t.children[row_idx + 1].children[last_col_idx])
+            else:
+                emptycell.moveto(
+                    t.children[row_idx + 1].children[col_idx], prefix=True
+                )
+            if not getattr(cell, "rowspanned", False):
+                add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols)
+            emptycell.rowspanned = True
+            if cell.colspan > 1:
+                emptycell.colspanned = True
+        elif cell.colspan > 1:
+            styles.append(
+                ("SPAN", (col_idx, row_idx),
+                 (col_idx + cell.colspan - 1, row_idx))
+            )
+        col_idx += 1
+
+
+def check_spans(t):
     if getattr(t, "checked_spans", False):
         return
     styles = []
@@ -344,7 +399,7 @@ def checkSpans(t):
         _approx_cols = max(_approx_cols, len(row.children))
         for cell in row.children:
             if cell.colspan > 1:
-                emptycell = getEmptyCell(None, cell.colspan - 1, cell.rowspan)
+                emptycell = get_empty_cell(None, cell.colspan - 1, cell.rowspan)
                 emptycell.move_to(cell)  # move behind orignal cell
                 emptycell.colspanned = True
             if row_idx + cell.rowspan > num_rows:  # fix broken rowspans
@@ -352,85 +407,12 @@ def checkSpans(t):
             col_idx += 1
 
     for row_idx, row in enumerate(t.children):
-        col_idx = 0
-        for cell in row.children:
-            if cell.rowspan > 1:
-                emptycell = getEmptyCell(None, cell.colspan, cell.rowspan - 1)
-                last_col_idx = len(t.children[row_idx + 1].children) - 1
-                if col_idx > last_col_idx:
-                    emptycell.moveto(t.children[row_idx + 1].children[last_col_idx])
-                else:
-                    emptycell.moveto(
-                        t.children[row_idx + 1].children[col_idx], prefix=True
-                    )
-                if not getattr(cell, "rowspanned", False):
-                    # allow splitting of cells if rowspan exceeds this value
-                    # max_row_span = 15 for 4 cols, and 6 for
-                    # 10 cols - empiric value
-                    max_row_span = 50 / _approx_cols
-                    if cell.rowspan <= max_row_span:
-                        styles.append(
-                            (
-                                "SPAN",
-                                (col_idx, row_idx),
-                                (
-                                    col_idx + cell.colspan - 1,
-                                    row_idx + cell.rowspan - 1,
-                                ),
-                            )
-                        )
-                    else:
-                        num_splits = int(math.ceil(cell.rowspan / max_row_span))
-                        span_range = int(math.floor(cell.rowspan / num_splits))
-                        for n in range(num_splits - 1):
-                            styles.append(
-                                (
-                                    "SPAN",
-                                    (col_idx, row_idx + span_range * n),
-                                    (
-                                        col_idx + cell.colspan - 1,
-                                        row_idx + (n + 1) * span_range - 1,
-                                    ),
-                                )
-                            )
-                            styles.append(
-                                (
-                                    "LINEBELOW",
-                                    (col_idx,
-                                     row_idx + (n + 1) * span_range - 1),
-                                    (
-                                        col_idx + cell.colspan - 1,
-                                        row_idx + (n + 1) * span_range - 1,
-                                    ),
-                                    0.25,
-                                    colors.white,
-                                )
-                            )
-                        styles.append(
-                            (
-                                "SPAN",
-                                (col_idx, row_idx + span_range * (num_splits - 1)),
-                                (
-                                    col_idx + cell.colspan - 1,
-                                    row_idx + cell.rowspan - 1,
-                                ),
-                            )
-                        )
-
-                emptycell.rowspanned = True
-                if cell.colspan > 1:
-                    emptycell.colspanned = True
-            elif cell.colspan > 1:
-                styles.append(
-                    ("SPAN", (col_idx, row_idx),
-                     (col_idx + cell.colspan - 1, row_idx))
-                )
-            col_idx += 1
+        check_spans_in_row(row, row_idx, col_idx, cell, t, styles, _approx_cols)
 
     numcols = max(len(row.children) for row in t.children)
     for row in t.children:
         while len(row.children) < numcols:
-            row.append_child(getEmptyCell(None, colspan=1, rowspan=1))
+            row.append_child(get_empty_cell(None, colspan=1, rowspan=1))
 
     t.checked_spans = True
     t.span_styles = styles
@@ -535,9 +517,9 @@ def background_styles(table):
     return styles
 
 
-def flip_dir(t, rtl=False):
-    if not rtl or getattr(t, "flipped", False):
+def flip_dir(table, rtl=False):
+    if not rtl or getattr(table, "flipped", False):
         return
-    for row in t.children:
+    for row in table.children:
         row.children.reverse()
-    t.flipped = True
+    table.flipped = True

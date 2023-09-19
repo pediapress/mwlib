@@ -40,7 +40,7 @@ from . import fontconfig, locale
 font_switcher = fontconfig.RLFontSwitcher()
 font_switcher.font_paths = fontconfig.font_paths
 font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
-font_switcher.registerFontDefinitionList(fontconfig.fonts)
+font_switcher.register_font_def_list(fontconfig.fonts)
 
 formatter = RLFormatter(font_switcher=font_switcher)
 
@@ -240,12 +240,12 @@ class PPDocTemplate(BaseDocTemplate):
         if status_callback:
             self.estimatedDuration = 0
             self.progress = 0
-            self.setProgressCallBack(self.progressCB)
+            self.setProgressCallBack(self.progress_callback)
             self.status_callback = status_callback
         self.tocCallback = tocCallback
         self.title = kwargs["title"]
 
-    def progressCB(self, typ, value):
+    def progress_callback(self, typ, value):
         if typ == "SIZE_EST":
             self.estimatedDuration = int(value)
         if typ == "PROGRESS":

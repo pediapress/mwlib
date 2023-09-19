@@ -19,25 +19,25 @@ class TocRenderer:
         font_switcher = fontconfig.RLFontSwitcher()
         font_switcher.font_paths = fontconfig.font_paths
         font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
-        font_switcher.registerFontDefinitionList(fontconfig.fonts)
-        font_switcher.registerReportlabFonts(fontconfig.fonts)
+        font_switcher.register_font_def_list(fontconfig.fonts)
+        font_switcher.register_reportlab_fonts(fontconfig.fonts)
 
     def build(self, pdfpath, toc_entries, has_title_page=False, rtl=False):
         outpath = os.path.dirname(pdfpath)
         tocpath = os.path.join(outpath, "toc.pdf")
         finalpath = os.path.join(outpath, "final.pdf")
         self.renderToc(tocpath, toc_entries, rtl=rtl)
-        return self.combinePdfs(pdfpath, tocpath, finalpath, has_title_page)
+        return self.comine_pdfs(pdfpath, tocpath, finalpath, has_title_page)
 
     def _getColWidths(self):
-        p = Paragraph(
+        paragraph = Paragraph(
             "<b>%d</b>" % 9999, pdfstyles.text_style(mode="toc_article",
                                                      text_align="right")
         )
-        w, h = p.wrap(0, pdfstyles.PRINT_HEIGHT)
+        width, _ = paragraph.wrap(0, pdfstyles.PRINT_HEIGHT)
         # subtracting 30pt below is *probably* necessary b/c
         # of the table margins
-        return [pdfstyles.PRINT_WIDTH - w - 30, w]
+        return [pdfstyles.PRINT_WIDTH - width - 30, width]
 
     def renderToc(self, tocpath, toc_entries, rtl):
         doc = SimpleDocTemplate(tocpath, pagesize=(pdfstyles.PAGE_WIDTH,
@@ -76,9 +76,9 @@ class TocRenderer:
                     ),
                 ]
             )
-        t = Table(toc_table, colWidths=col_widths)
-        t.setStyle(styles)
-        elements.append(t)
+        table = Table(toc_table, colWidths=col_widths)
+        table.setStyle(styles)
+        elements.append(table)
         doc.build(elements)
 
     def run_cmd(self, cmd):
@@ -111,7 +111,7 @@ class TocRenderer:
         cmd.extend(["-o", finalpath, "-overwrite", "concat"])
         return self.run_cmd(cmd)
 
-    def combinePdfs(self, pdfpath, tocpath, finalpath, has_title_page):
+    def comine_pdfs(self, pdfpath, tocpath, finalpath, has_title_page):
         if os.path.splitext(pdfpath)[1] == ".pdf":
             safe_pdfpath = pdfpath
         else:

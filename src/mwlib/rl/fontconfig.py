@@ -265,12 +265,12 @@ class RLFontSwitcher(FontSwitcher):
         self.force_font = None
         self.hypenation_pattern = re.compile(r"(/|\.|\+|-|_|\?)(\S)")
 
-    def registerFontDefinitionList(self, font_list):
+    def register_font_def_list(self, font_list):
         missing_fonts = []
         for font in font_list:
             if not font["name"]:
                 continue
-            if not self.fontInstalled(font):
+            if not self.font_installed(font):
                 missing_fonts.append(repr(font["name"]))
                 continue
             self.register_font(font["name"],
@@ -281,7 +281,7 @@ class RLFontSwitcher(FontSwitcher):
             print("MISSING FONTS:", ",".join(missing_fonts))
             RLFontSwitcher.warn_on_missing_fonts = False
 
-    def fakeHyphenate(self, font_list):
+    def fake_hyphenate(self, font_list):
         zws = '<font fontSize="1"> </font>'
         res = []
         for txt, font in font_list:
@@ -289,7 +289,7 @@ class RLFontSwitcher(FontSwitcher):
             res.append((txt, font))
         return res
 
-    def insertZWS(self, font_list):
+    def insert_zws(self, font_list):
         zws = '<font fontSize="1"> </font>'
         lst = []
         for txt, font in font_list:
@@ -297,16 +297,16 @@ class RLFontSwitcher(FontSwitcher):
             lst.append((new_txt, font))
         return lst
 
-    def fontifyText(self, txt, break_long=False):
+    def fontify_text(self, txt, break_long=False):
         if self.force_font:
             return f'<font name="{self.force_font}">{txt}</font>'
         font_list = self.get_font_list(txt)
         if self.space_cjk:
             font_list, cjk = font_list
             if cjk:
-                font_list = self.insertZWS(font_list)
+                font_list = self.insert_zws(font_list)
         if break_long:
-            font_list = self.fakeHyphenate(font_list)
+            font_list = self.fake_hyphenate(font_list)
 
         res = []
         for txt, font in font_list:
@@ -322,25 +322,25 @@ class RLFontSwitcher(FontSwitcher):
             if script in (
                 s.lower() for s in font_def["code_points"] if isinstance(s,
                                                                          str)
-            ) and self.fontInstalled(font_def):
+            ) and self.font_installed(font_def):
                 return font_def["name"]
         return None
 
-    def fontInstalled(self, font_def):
+    def font_installed(self, font_def):
         if font_def.get("type") == "cid":
             return True
         return all(
-            self.getAbsFontPath(file_name) for file_name in font_def.get("file_names")
+            self.get_abs_font_path(file_name) for file_name in font_def.get("file_names")
         )
 
-    def getAbsFontPath(self, file_name):
+    def get_abs_font_path(self, file_name):
         for base_dir in self.font_paths:
             full_path = os.path.join(base_dir, file_name)
             if os.path.exists(full_path):
                 return full_path
         return None
 
-    def registerReportlabFonts(self, font_list):
+    def register_reportlab_fonts(self, font_list):
         font_variants = ["", "bold", "italic", "bolditalic"]
         for font in font_list:
             if not font.get("name"):
@@ -349,13 +349,13 @@ class RLFontSwitcher(FontSwitcher):
                 pdfmetrics.registerFont(UnicodeCIDFont(font["name"]))
             else:
                 for i, font_variant in enumerate(font_variants):
-                    if i == len(font.get("file_names")) or not self.fontInstalled(font):
+                    if i == len(font.get("file_names")) or not self.font_installed(font):
                         break
                     full_font_name = font["name"] + font_variant
                     pdfmetrics.registerFont(
                         TTFont(
                             full_font_name,
-                            self.getAbsFontPath(font.get("file_names")[i]),
+                            self.get_abs_font_path(font.get("file_names")[i]),
                         )
                     )
                     italic = font_variant in ["italic", "bolditalic"]

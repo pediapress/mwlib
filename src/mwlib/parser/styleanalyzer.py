@@ -13,9 +13,9 @@ class State:
         self.__dict__.update(kw)
 
     def clone(self, **kw):
-        s = State(**self.__dict__)
-        s.__dict__.update(kw)
-        return s
+        state = State(**self.__dict__)
+        state.__dict__.update(kw)
+        return state
 
     def __repr__(self):
         res = ["<state ", " %s " % self.apocount]

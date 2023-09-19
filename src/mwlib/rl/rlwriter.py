@@ -41,7 +41,7 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tables import Table
 from reportlab.platypus.xpreformatted import XPreformatted
 
-from mwlib import log, parser, timeline, uparser
+from mwlib import advtree, log, parser, timeline, uparser, writerbase
 from mwlib._version import version as mwlibversion
 from mwlib.mathutils import renderMath
 from mwlib.rl._version import version as rlwriterversion
@@ -55,6 +55,7 @@ from mwlib.rl.customflowables import (
 from mwlib.rl.customnodetransformer import CustomNodeTransformer
 from mwlib.rl.formatter import RLFormatter
 from mwlib.rl.toc import TocRenderer
+from mwlib.treecleaner import TreeCleaner
 from mwlib.writer import miscutils, styleutils
 from mwlib.writer.imageutils import ImageUtils
 from mwlib.writer.licensechecker import LicenseChecker
@@ -68,8 +69,6 @@ with contextlib.suppress(ImportError):
     from mwlib import _extversion
 
 
-from mwlib import advtree, writerbase
-from mwlib.treecleaner import TreeCleaner
 
 try:
     from mwlib import linuxmem
@@ -230,12 +229,12 @@ class RlWriter:
 
         self.font_switcher.font_paths = fontconfig.font_paths
         self.font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
-        self.font_switcher.registerFontDefinitionList(fontconfig.fonts)
-        self.font_switcher.registerReportlabFonts(fontconfig.fonts)
+        self.font_switcher.register_font_def_list(fontconfig.fonts)
+        self.font_switcher.register_reportlab_fonts(fontconfig.fonts)
 
         self.tc = TreeCleaner([], save_reports=self.debug, rtl=self.rtl)
         self.tc.skipMethods = pdfstyles.TREE_CLEANER_SKIP_METHODS
-        self.tc.contentWithoutTextClasses.append(advtree.ReferenceList)
+        self.tc.content_without_text_classes.append(advtree.ReferenceList)
 
         self.cnt = CustomNodeTransformer()
         self.formatter = RLFormatter(font_switcher=self.font_switcher)
@@ -444,11 +443,11 @@ class RlWriter:
             parser.show(sys.stdout, art)
             pass
         self.tc.tree = art
-        self.tc.cleanAll()
-        self.cnt.transformCSS(art)
+        self.tc.clean_all()
+        self.cnt.transform_css(art)
         if self.debug:
             # parser.show(sys.stdout, art)
-            print("\n".join([repr(r) for r in self.tc.getReports()]))
+            print("\n".join([repr(r) for r in self.tc.get_reports()]))
         return art
 
     def initReportlabDoc(self, output):
@@ -642,7 +641,7 @@ class RlWriter:
             )
             advtree.build_advanced_tree(license_node)
             self.tc.tree = license_node
-            self.tc.cleanAll()
+            self.tc.clean_all()
             elements.extend(self.writeArticle(license_node))
         self.license_mode = False
         return elements
@@ -1130,7 +1129,7 @@ class RlWriter:
         finalNodes = []
         figures = []
 
-        def scaleImages(images):
+        def scale_images(images):
             scaled_images = []
             for img in images:
                 ar = img.imgWidth / img.imgHeight
@@ -1160,7 +1159,7 @@ class RlWriter:
                 figures.append(n)
             else:
                 if len(figures) > 1:
-                    figures = scaleImages(figures)
+                    figures = scale_images(figures)
                     data = [
                         [figures[2 * i], figures[2 * i + 1]]
                         for i in range(int(len(figures) / 2))
@@ -1176,7 +1175,7 @@ class RlWriter:
                         figures = []
                     finalNodes.append(n)
         if len(figures) > 1:
-            figures = scaleImages(figures)
+            figures = scale_images(figures)
             data = [
                 [figures[2 * i], figures[2 * i + 1]]
                 for i in range(int(len(figures) / 2))
@@ -1943,7 +1942,7 @@ class RlWriter:
         try:
             txt = str(highlight(source, lexer, sourceFormatter), "utf-8")
             self.font_switcher.register_default_font(pdfstyles.DEFAULT_LATIN_FONT)
-            txt = self.font_switcher.fontifyText(txt)
+            txt = self.font_switcher.fontify_text(txt)
             self.font_switcher.register_default_font(pdfstyles.DEFAULT_FONT)
             if n.vlist.get("enclose", False) == "none":
                 txt = re.sub("<para.*?>", "", txt).replace("</para>", "")
@@ -2424,7 +2423,7 @@ class RlWriter:
             elements.append(CondPageBreak(pdfstyles.MIN_TABLE_SPACE))
         elements.extend(self.renderCaption(t))
         rltables.flip_dir(t, rtl=self.rtl)
-        rltables.checkSpans(t)
+        rltables.check_spans(t)
         t.num_cols = t.numcols
         self.table_size_calc += 1
         if not getattr(t, "min_widths", None) and not getattr(t, "max_widths",
@@ -2437,7 +2436,7 @@ class RlWriter:
         avail_width = self.getAvailWidth()
         stretch = self.table_nesting == 1 and t.attributes.get("width",
                                                                "") == "100%"
-        t.colwidths = rltables.optimizeWidths(
+        t.colwidths = rltables.optimize_widths(
             t.min_widths, t.max_widths, avail_width, stretch=stretch, table=t
         )
         table_data = []

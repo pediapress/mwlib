@@ -12,8 +12,8 @@ from .customflowables import Figure, FiguresAndParagraphs, SmartKeepTogether
 
 def show_parse_tree(out, node, indent=0):
     print("    " * indent, repr(node), file=out)
-    for x in node.children:
-        show_parse_tree(out, x, indent + 1)
+    for child in node.children:
+        show_parse_tree(out, child, indent + 1)
 
 
 def dump_text(obj):
@@ -46,9 +46,9 @@ def dump_figures_and_paragraphs(fp):
     print("===/FIG PAR")
 
 
-def dump_keep_together(kt):
+def dump_keep_together(keep_together):
     print("=== KeepTogether ===")
-    for f in kt._content:
+    for f in keep_together._content:
         if isinstance(f, FiguresAndParagraphs):
             dump_figures_and_paragraphs(f)
         else:
@@ -56,9 +56,9 @@ def dump_keep_together(kt):
     print("===/KEEP")
 
 
-def dump_smart_keep_together(kt):
+def dump_smart_keep_together(keep_together):
     print("=== SmartKeepTogether ===")
-    for f in kt._content:
+    for f in keep_together._content:
         if isinstance(f, FiguresAndParagraphs):
             dump_figures_and_paragraphs(f)
         else:
@@ -94,14 +94,14 @@ def dump_table_data(tabledata):
 
 
 def dump_elements(elements):
-    for e in elements:
-        if isinstance(e, FiguresAndParagraphs):
-            dump_figures_and_paragraphs(e)
-        elif isinstance(e, KeepTogether):
-            dump_keep_together(e)
-        elif isinstance(e, SmartKeepTogether):
-            dump_smart_keep_together(e)
-        elif isinstance(e, Table):
-            dump_table(e)
+    for element in elements:
+        if isinstance(element, FiguresAndParagraphs):
+            dump_figures_and_paragraphs(element)
+        elif isinstance(element, KeepTogether):
+            dump_keep_together(element)
+        elif isinstance(element, SmartKeepTogether):
+            dump_smart_keep_together(element)
+        elif isinstance(element, Table):
+            dump_table(element)
         else:
-            dump_text(e)
+            dump_text(element)

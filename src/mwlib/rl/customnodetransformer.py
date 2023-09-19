@@ -34,7 +34,7 @@ class CustomNodeTransformer:
             node_style[style_name.strip()] = style_val.strip()
         node.vlist["style"] = node_style
 
-    def transformCSS(self, node):
+    def transform_css(self, node):
         if getattr(node, "vlist", None) is None:
             node_classes = []
         else:
@@ -44,5 +44,5 @@ class CustomNodeTransformer:
             if node_class in css_map:
                 self._updateStyles(node, css_map[node_class])
 
-        for c in node.children:
-            self.transformCSS(c)
+        for child in node.children:
+            self.transform_css(child)
