@@ -225,8 +225,8 @@ def _split_tag(txt):
     return name, values
 
 
-def _analyze_html_tag(t):
-    text = t.text
+def _analyze_html_tag(tag):
+    text = tag.text
     self_closing = False
     if text.startswith("</"):
         name = text[2:-1]
@@ -240,17 +240,17 @@ def _analyze_html_tag(t):
         is_end_token = False
 
     name, values = _split_tag(name)
-    t.vlist = parse_params(values)
+    tag.vlist = parse_params(values)
     name = name.lower()
 
     if name == "br":
         is_end_token = False
 
-    t.rawtagname = name
-    t.tag_selfClosing = self_closing
-    t.tag_isEndToken = is_end_token
+    tag.rawtagname = name
+    tag.tag_selfClosing = self_closing
+    tag.tag_isEndToken = is_end_token
     if is_end_token:
-        t.type = t.t_html_tag_end
+        tag.type = tag.t_html_tag_end
 
 
 def dump_tokens(text, tokens):
@@ -299,27 +299,27 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
                 tlen -= count
                 start += count
 
-            t = Token(type=type, start=start, len=tlen, source=text)
+            token = Token(type=type, start=start, len=tlen, source=text)
 
             if type == Token.t_entity:
-                t.text = resolve_entity(g())
-                t.type = Token.t_text
-                res.append(t)
+                token.text = resolve_entity(g())
+                token.type = Token.t_text
+                res.append(token)
             elif type == Token.t_html_tag:
                 s = g()
                 if uniquifier:
                     s = uniquifier.replace_uniq(s)
-                    t.text = s
-                _analyze_html_tag(t)
-                tagname = t.rawtagname
+                    token.text = s
+                _analyze_html_tag(token)
+                tagname = token.rawtagname
 
                 if tagname in self.allowed_tags:
-                    res.append(t)
+                    res.append(token)
                 else:
                     res.append(Token(type=Token.t_text, start=start,
                                      len=tlen, source=text))
             else:
-                res.append(t)
+                res.append(token)
 
         return res
 

@@ -74,8 +74,8 @@ from mwlib.treecleanerhelper import getNodeHeight, splitRow
 from mwlib.writer import miscutils, styleutils
 
 
-def show(n):
-    parser.show(sys.stdout, n, verbose=True)
+def show(n_childs):
+    parser.show(sys.stdout, n_childs, verbose=True)
 
 
 def try_remove_node(node):
@@ -92,7 +92,7 @@ class TreeCleaner:
 
     """
 
-    cleanerMethods = [
+    cleaner_methods = [
         "clean_vlist",
         "mark_infoboxes",
         "remove_edit_links",
@@ -181,7 +181,7 @@ class TreeCleaner:
         self.status_cb = status_cb
         self.rtl = rtl
         # list of nodes which do not require child nodes
-        self.childlessOK = [
+        self.childless_ok = [
             ArticleLink,
             BreakingReturn,
             CategoryLink,
@@ -216,7 +216,7 @@ class TreeCleaner:
         # list nodes that apply styles to their children
         # FIXME: Center node might be problematic.
         # Center is a block node and not inline
-        self.inlineStyleNodes = [
+        self.inline_style_nodes = [
             Big,
             Center,
             Cite,
@@ -244,7 +244,7 @@ class TreeCleaner:
         self.forbidden_parents = {
             ImageLink: [PreFormatted],
             ItemList: [PreFormatted],
-            Source: self.inlineStyleNodes,
+            Source: self.inline_style_nodes,
             DefinitionList: [Paragraph],
             Blockquote: [PreFormatted],
             Center: [PreFormatted],
@@ -266,12 +266,12 @@ class TreeCleaner:
         # ex: Paragraphs can not be inside Paragraphs.
         # but if the inner paragraph is inside a
         # table which itself is inside a paragraph this is not a problem
-        self.outsideParentsInvisible = [Table, Section, Reference]
+        self.outside_parents_invisible = [Table, Section, Reference]
         self.nesting_strictness = nesting_strictness  # loose | strict
 
         # ex: delete preformatted nodes which are inside reference nodes,
         # all children off the preformatted node are kept
-        self.removeNodes = {
+        self.remove_nodes = {
             PreFormatted: [Reference, PreFormatted],
             Cite: [Item, Reference],
             Code: [PreFormatted],
@@ -285,7 +285,7 @@ class TreeCleaner:
             Paragraph: [Gallery],
         }
 
-        self.removeNodesAllChildren = {
+        self.remove_nodes_all_children = {
             Table: [ImageLink],  # used to indicate that children should be removed
         }
 
@@ -293,12 +293,12 @@ class TreeCleaner:
         # center nodes have to be pulled out of underline nodes
         # e.g. but only if the center is a direct and only child
         # { ChildClass: [ParentClass, ParentClass2]}
-        self.swap_nodesMap = {Center: [Underline, Emphasized]}
+        self.swap_nodes_map = {Center: [Underline, Emphasized]}
 
         # list of css classes OR id's which
         # trigger the removal of the node from the tree
         # the following list is wikipedia specific
-        self.noDisplayClasses = [
+        self.no_display_classes = [
             "hiddenStructure",
             "dablink",
             "rellink",
@@ -317,14 +317,14 @@ class TreeCleaner:
             "Vorlage_Gesundheitshinweis",
             "hatnote",
         ]
-        self.noDisplayClassMatches = [
+        self.no_display_class_matches = [
             "infobox collapsible collapsed",
         ]
 
         # keys are nodes which can only
         # have child nodes of types inside the valuelist.
         # children of different classes are deleted
-        self.allowedChildren = {
+        self.allowed_children = {
             Gallery: [ImageLink],
         }
 
@@ -351,7 +351,7 @@ class TreeCleaner:
 
         # list of classes or IDs of table nodes which are split into their
         # content. used by splitTableToColumns
-        self.split_table_classIDs = ["mp-upper"]
+        self.split_table_class_ids = ["mp-upper"]
 
         # remove ImageLinks which end with the following file types
         self.forbidden_file_endings = ["ogg"]
@@ -361,13 +361,13 @@ class TreeCleaner:
         # listed here to prevent removal
         self.content_without_text_classes = [Gallery, ImageLink]
 
-    def clean(self, cleanerMethods):
+    def clean(self, cleaner_methods):
         """Clean parse tree using cleaner methods in the methodList."""
-        cleanerList = []
-        for method in cleanerMethods:
+        cleaner_list = []
+        for method in cleaner_methods:
             f = getattr(self, method, None)
             if f:
-                cleanerList.append(f)
+                cleaner_list.append(f)
             else:
                 raise "TreeCleaner has no method: %r" % method
 
@@ -379,15 +379,15 @@ class TreeCleaner:
 
         total_children = len(children)
         for i, child in enumerate(children):
-            for cleaner in cleanerList:
+            for cleaner in cleaner_list:
                 try:
                     cleaner(child)
-                except Exception as e:
-                    self.report("ERROR:", e)
+                except Exception as exc:
+                    self.report("ERROR:", exc)
                     print(
                         "TREECLEANER ERROR in {}: {!r}".format(
                             getattr(child,
-                                    "caption", "").encode("utf-8"), repr(e)
+                                    "caption", "").encode("utf-8"), repr(exc)
                         )
                     )
                     import traceback
@@ -399,7 +399,7 @@ class TreeCleaner:
     def clean_all(self, skipMethods=[]):
         """Clean parse tree using all available cleaner methods."""
         skipMethods = skipMethods or self.skipMethods
-        self.clean([cm for cm in self.cleanerMethods if cm not in skipMethods])
+        self.clean([cm for cm in self.cleaner_methods if cm not in skipMethods])
 
     def report(self, *args):
         if not self.save_reports:
@@ -457,14 +457,14 @@ class TreeCleaner:
                 )
                 node.parent.replace_child(node, node.children)
 
-        for c in node.children[:]:
-            self.remove_list_only_paragraphs(c)
+        for child in node.children[:]:
+            self.remove_list_only_paragraphs(child)
 
     def _can_remove_node(self, node, is_exception):
-        return not node.children and node.__class__ not in self.childlessOK and not is_exception
+        return not node.children and node.__class__ not in self.childless_ok and not is_exception
 
     def _can_remove_child(self, remove_node):
-        return remove_node.parent and not remove_node.siblings and remove_node.parent.__class__ not in self.childlessOK
+        return remove_node.parent and not remove_node.siblings and remove_node.parent.__class__ not in self.childless_ok
 
     def _has_exception_style(self, node):
         is_exception = False
@@ -482,17 +482,17 @@ class TreeCleaner:
         if self._can_remove_node(node, is_exception):
             if node.parent.__class__ == Section and not node.previous:
                 return  # make sure that the first child of a section is not removed - this is the section caption
-            removeNode = node
-            while self._can_remove_child(removeNode):
-                removeNode = removeNode.parent
-            if removeNode.parent:
-                self.report("removed:", removeNode)
-                removeNode.parent.remove_child(removeNode)
+            remove_node = node
+            while self._can_remove_child(remove_node):
+                remove_node = remove_node.parent
+            if remove_node.parent:
+                self.report("removed:", remove_node)
+                remove_node.parent.remove_child(remove_node)
         for child in node.children[:]:
             self.remove_childless_nodes(child)
 
     # FIXME: this method is obsolete as of now. 'navbox' is now a member of
-    # the noDisplayClasses and removed alltogether
+    # the no_display_classes and removed alltogether
     def remove_critical_tables(self, node):
         """Remove problematic table nodes - keep content.
 
@@ -521,8 +521,8 @@ class TreeCleaner:
             return last_cell
 
     def fix_row_colspan(self, row, maxwidth):
-        numCells = len(row.children)
-        if numCells == 1:
+        num_cells = len(row.children)
+        if num_cells == 1:
             cell = row.children[0]
             colspan = cell.attributes.get("colspan", 1)
             if colspan and colspan > maxwidth:
@@ -537,15 +537,15 @@ class TreeCleaner:
     def calc_row_width(self, node):
         maxwidth = 0
         for row in node.children:
-            numCells = len(row.children)
-            rowwidth = 0
+            num_cells = len(row.children)
+            row_width = 0
             for cell in row.children:
                 colspan = cell.attributes.get("colspan", 1)
-                if numCells > 1:
-                    rowwidth += colspan
+                if num_cells > 1:
+                    row_width += colspan
                 else:
-                    rowwidth += 1
-            maxwidth = max(maxwidth, rowwidth)
+                    row_width += 1
+            maxwidth = max(maxwidth, row_width)
         return maxwidth
 
     def fix_table_colspans(self, node):
@@ -575,18 +575,18 @@ class TreeCleaner:
                 cell = self.empty_ending_cell(row)
                 self.report("removed empty cell in single-row table")
 
-        for c in node.children:
-            self.fix_table_colspans(c)
+        for child in node.children:
+            self.fix_table_colspans(child)
 
     def remove_broken_children(self, node):
         """Remove Nodes (while keeping their children) 
         which can't be nested with their parents."""
-        if node.__class__ in list(self.removeNodes.keys()) and any(
-            parent.__class__ in self.removeNodes[node.__class__]
+        if node.__class__ in list(self.remove_nodes.keys()) and any(
+            parent.__class__ in self.remove_nodes[node.__class__]
             for parent in node.parents
         ):
             if node.children and not any(
-                parent.__class__ in self.removeNodesAllChildren.get(node.__class__, [])
+                parent.__class__ in self.remove_nodes_all_children.get(node.__class__, [])
                 for parent in node.parents
             ):
                 children = node.children
@@ -659,12 +659,12 @@ class TreeCleaner:
             for row in node:
                 for cell in row:
                     if div_wrapper:
-                        d = Div()
-                        d.border = 1
-                        d.vlist = node.vlist
+                        div = Div()
+                        div.border = 1
+                        div.vlist = node.vlist
                         for item in cell:
-                            d.append_child(item)
-                        divs.append(d)
+                            div.append_child(item)
+                        divs.append(div)
                     else:
                         for item in cell:
                             items.append(item)
@@ -748,8 +748,8 @@ class TreeCleaner:
             node.moveto(target)
             return True  # changed
         else:
-            for c in node.children[:]:
-                if self._fixParagraphs(c):
+            for child in node.children[:]:
+                if self._fixParagraphs(child):
                     return True
         return False
 
@@ -774,7 +774,7 @@ class TreeCleaner:
         clean_parents = []
         parents.reverse()
         for p in parents:
-            if p.__class__ not in self.outsideParentsInvisible:
+            if p.__class__ not in self.outside_parents_invisible:
                 clean_parents.append(p)
             else:
                 break
@@ -797,34 +797,34 @@ class TreeCleaner:
 
     def _markNodes(self, node, divide, problem_node=None):
         got_divide = False
-        for c in node.children:
+        for child in node.children:
             if getattr(node, "nesting_pos", None):
-                c.nesting_pos = node.nesting_pos
+                child.nesting_pos = node.nesting_pos
                 continue
-            if c in divide:
+            if child in divide:
                 got_divide = True
-                if c == problem_node:
-                    c.nesting_pos = "problem"
+                if child == problem_node:
+                    child.nesting_pos = "problem"
                 continue
             if not got_divide:
-                c.nesting_pos = "top"
+                child.nesting_pos = "top"
             else:
-                c.nesting_pos = "bottom"
-        for c in node.children:
-            self._markNodes(c, divide, problem_node=problem_node)
+                child.nesting_pos = "bottom"
+        for child in node.children:
+            self._markNodes(child, divide, problem_node=problem_node)
 
     def _cleanUpMarks(self, node):
         if hasattr(node, "nesting_pos"):
             del node.nesting_pos
-        for c in node.children:
-            self._cleanUpMarks(c)
+        for child in node.children:
+            self._cleanUpMarks(child)
 
     def _filterTree(self, node, nesting_filter=[]):
         if getattr(node, "nesting_pos", None) in nesting_filter:
             node.parent.remove_child(node)
             return
-        for c in node.children[:]:
-            self._filterTree(c, nesting_filter=nesting_filter)
+        for child in node.children[:]:
+            self._filterTree(child, nesting_filter=nesting_filter)
 
     def _isException(self, node):
         try:
@@ -917,12 +917,12 @@ class TreeCleaner:
             b.children = []
             b.append_child(a)
 
-        if node.__class__ in self.swap_nodesMap:
+        if node.__class__ in self.swap_nodes_map:
             p = node.parent
             if (
                 p
                 and p.parent
-                and p.__class__ in self.swap_nodesMap[node.__class__]
+                and p.__class__ in self.swap_nodes_map[node.__class__]
                 and len(p.children) == 1
             ):
                 self.report("swapping nodes:", node.parent, node)
@@ -1065,9 +1065,9 @@ class TreeCleaner:
 
     def removeNoPrintNodes(self, node):
         if (
-            node.has_class_id(self.noDisplayClasses)
+            node.has_class_id(self.no_display_classes)
             or not node.visible
-            or node.attributes.get("class", "") in self.noDisplayClassMatches
+            or node.attributes.get("class", "") in self.no_display_class_matches
         ) and node.parent:
             named_refs = self._getNamedRefs(node)
             if named_refs:
@@ -1078,8 +1078,8 @@ class TreeCleaner:
                 node.parent.remove_child(node)
             return
 
-        for c in node.children[:]:
-            self.removeNoPrintNodes(c)
+        for child in node.children[:]:
+            self.removeNoPrintNodes(child)
 
     def _replace_section_with_empty_title(self, node):
         children = [BreakingReturn()]
@@ -1131,15 +1131,15 @@ class TreeCleaner:
             self.build_def_lists(child)
 
     def restrict_children(self, node):
-        if node.__class__ in list(self.allowedChildren.keys()):
+        if node.__class__ in list(self.allowed_children.keys()):
             for child in node.children[:]:
-                if child.__class__ not in self.allowedChildren[node.__class__]:
+                if child.__class__ not in self.allowed_children[node.__class__]:
                     node.remove_child(child)
                     self.report(f"removed restricted child {child} from parent {node}")
             return
 
-        for c in node.children:
-            self.restrict_children(c)
+        for child in node.children:
+            self.restrict_children(child)
 
     def simplify_block_nodes(self, node):
         """Remove paragraphs which have a single block node child - keep the child"""
@@ -1301,7 +1301,7 @@ class TreeCleaner:
                 if num_border_tables >= 3:
                     split_table = True
 
-            if node.has_class_id(self.split_table_classIDs):
+            if node.has_class_id(self.split_table_class_ids):
                 split_table = True
 
             if node.numcols >= 3 and len(node.get_all_display_text()) > 2500:
@@ -1434,8 +1434,8 @@ class TreeCleaner:
                 if brs:
                     self.report("removed BreakingReturns from long image caption")
 
-        for c in node.children:
-            self.limit_image_caption_size(c)
+        for child in node.children:
+            self.limit_image_caption_size(child)
 
     def remove_leading_para_in_list(self, node):
         if (
@@ -1492,8 +1492,8 @@ class TreeCleaner:
                     has_txt = True
                     break
             if not has_txt:
-                for c in node.children[1:]:
-                    if c.get_all_display_text():
+                for child in node.children[1:]:
+                    if child.get_all_display_text():
                         has_txt = True
                         break
 
@@ -1559,8 +1559,8 @@ class TreeCleaner:
                 self.report("splitting list only table row")
                 return
 
-        for c in node.children:
-            self.split_table_lists(c)
+        for child in node.children:
+            self.split_table_lists(child)
 
     def mark_short_paragraph(self, node):
         """Hint for writers that allows for special
@@ -1569,12 +1569,12 @@ class TreeCleaner:
             node.__class__ == Paragraph
             and len(node.get_all_display_text()) < 80
             and not node.get_parent_nodes_by_class(Table)
-            and not any(c.is_block_node for c in node.children)
+            and not any(child.is_block_node for child in node.children)
         ):
             node.short_paragraph = True
 
-        for c in node.children:
-            self.mark_short_paragraph(c)
+        for child in node.children:
+            self.mark_short_paragraph(child)
 
     def handle_only_in_print(self, node):
         """Remove nodes with the css class "printonly" which contain URLs.
@@ -1592,8 +1592,8 @@ class TreeCleaner:
             self.report('removed "printonly" node:', node)
             node.parent.remove_child(node)
             return
-        for c in node.children:
-            self.handle_only_in_print(c)
+        for child in node.children:
+            self.handle_only_in_print(child)
 
     def mark_infoboxes(self, node):
         if node.__class__ == Article:
@@ -1613,8 +1613,8 @@ class TreeCleaner:
                 tables[0].isInfobox = True
             return
 
-        for c in node.children:
-            self.mark_infoboxes(c)
+        for child in node.children:
+            self.mark_infoboxes(child)
 
     def remove_absolute_positioned_node(self, node):
         def pos(n):
@@ -1627,8 +1627,8 @@ class TreeCleaner:
                     self.report("removed absolute positioned node", node)
                     return
 
-        for c in node.children[:]:
-            self.remove_absolute_positioned_node(c)
+        for child in node.children[:]:
+            self.remove_absolute_positioned_node(child)
 
     def _should_unnest(self, node):
         tables = node.get_child_nodes_by_class(Table)
@@ -1790,8 +1790,8 @@ class TreeCleaner:
                 if isinstance(c, Table):
                     node.remove_child(c)
             node.append_child(t)
-        for c in node:
-            self.fix_region_list_tables(c)
+        for child in node:
+            self.fix_region_list_tables(child)
 
     def remove_train_templates(self, node):
         if (
@@ -1803,5 +1803,5 @@ class TreeCleaner:
             if parent_tables:
                 try_remove_node(parent_tables[0])
                 return
-        for c in node:
-            self.remove_train_templates(c)
+        for child in node:
+            self.remove_train_templates(child)

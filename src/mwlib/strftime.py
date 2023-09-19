@@ -41,13 +41,13 @@ def _findall(text, substr):
 # calendar.  ;)
 
 
-def strftime(dt, fmt):
+def strftime(date, fmt):
     if _illegal_s.search(fmt):
         raise TypeError("This strftime implementation does not handle %s")
-    if dt.year > 1900:
-        return dt.strftime(fmt)
+    if date.year > 1900:
+        return date.strftime(fmt)
 
-    year = dt.year
+    year = date.year
     # For every non-leap year century, advance by
     # 6 years to get into the 28-year repeat cycle
     delta = 2000 - year
@@ -56,7 +56,7 @@ def strftime(dt, fmt):
 
     # Move to around the year 2000
     year = year + ((2000 - year) // 28) * 28
-    timetuple = dt.timetuple()
+    timetuple = date.timetuple()
     s1 = time.strftime(fmt, (year,) + timetuple[1:])
     sites1 = _findall(s1, str(year))
 
@@ -69,7 +69,7 @@ def strftime(dt, fmt):
             sites.append(site)
 
     s = s1
-    syear = "%4d" % (dt.year,)
+    syear = "%4d" % (date.year,)
     for site in sites:
         s = s[:site] + syear + s[site + 4:]
     return s

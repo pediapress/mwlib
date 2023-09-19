@@ -774,7 +774,7 @@ def fix_tag_nodes(node):
 def fix_style_node(node):
     """
     parser.Style Nodes are mapped to logical markup
-    detection of DefinitionList depends on removeNodes
+    detection of DefinitionList depends on remove_nodes
     and removeNewlines
     """
     if node.__class__ != Style:
