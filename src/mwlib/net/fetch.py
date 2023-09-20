@@ -60,25 +60,25 @@ class SharedProgress:
             sys.stdout.flush()
 
         if self.status:
-            s = ""
+            stdout = ""
             try:
-                s = self.status.stdout
+                stdout = self.status.stdout
                 self.status.stdout = None
                 self.status(status="fetching", progress=percent)
             finally:
-                self.status.stdout = s
+                self.status.stdout = stdout
 
     def set_count(self, key, done, total):
         self.key2count[key] = (done, total)
         self.report()
 
     def get_count(self):
-        done = 0
-        total = 0
-        for d, t in self.key2count.values():
-            done += d
-            total += t
-        return done, total
+        done_count = 0
+        total_count = 0
+        for done, total in self.key2count.values():
+            done_count += done
+            total_count += total
+        return done, total_count
 
 
 class FsOutput:
@@ -94,11 +94,11 @@ class FsOutput:
         self.nfo = None
 
         for storage in ["authors", "html", "imageinfo"]:
-            fn = os.path.join(self.path, storage + ".db")
-            if os.path.exists(fn):
-                os.remove(fn)
-            db = SqliteDict(fn, autocommit=True)
-            setattr(self, storage, db)
+            db_path = os.path.join(self.path, storage + ".db")
+            if os.path.exists(db_path):
+                os.remove(db_path)
+            database = SqliteDict(db_path, autocommit=True)
+            setattr(self, storage, database)
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
@@ -113,16 +113,15 @@ class FsOutput:
         self.revfile = None
 
     def get_imagepath(self, title):
-        p = os.path.join(self.path, "images", f"{utils.fs_escape(title)}")
+        path = os.path.join(self.path, "images", f"{utils.fs_escape(title)}")
         self.imgcount += 1
-        return p
+        return path
 
     def dump_json(self, **kw):
-        for k, v in kw.items():
-            p = os.path.join(self.path, k + ".json")
-            # json.dump(v, open(p, "wb"), indent=4, sort_keys=True)
-            with open(p, "w", encoding="utf8") as f:
-                json.dump(v, f, indent=4, sort_keys=True)
+        for key, value in kw.items():
+            path = os.path.join(self.path, key + ".json")
+            with open(path, "w", encoding="utf8") as f:
+                json.dump(value, f, indent=4, sort_keys=True)
 
     def write_siteinfo(self, siteinfo):
         self.dump_json(siteinfo=siteinfo)
@@ -585,14 +584,14 @@ class Fetcher:
         infos = list(data.get("pages", {}).values())
         new_base_paths = set()
 
-        for i in infos:
-            title = i.get("title")
+        for info in infos:
+            title = info.get("title")
 
-            ii = i.get("imageinfo", [])
+            ii = info.get("imageinfo", [])
             if not ii:
                 continue
             ii = ii[0]
-            self._extract_info_from_image(i, ii, new_base_paths, title)
+            self._extract_info_from_image(info, ii, new_base_paths, title)
 
         for path in new_base_paths:
             self._refcall(self.handle_new_basepath, path)
@@ -643,7 +642,7 @@ class Fetcher:
         for p in pages:
             title = p.get("title")
             _, partial = title.split(":", 1)
-            p["title"] = "%s:%s" % (local_nsname, partial)
+            p["title"] = "{}:{}".format(local_nsname, partial)
 
             revisions = p.get("revisions", [])
             # the revision id's could clash with some local ids. remove them.

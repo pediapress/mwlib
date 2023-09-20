@@ -33,7 +33,7 @@ def show():
     if not conf:
         parser.error("missing --config argument")
 
-    db = wiki.makewiki(conf).wiki
+    db = wiki.make_wiki(conf).wiki
 
     for a in articles:
         defaultns = 10 if options.template else 0
@@ -134,7 +134,7 @@ def parse():
 
     conf = options.config
 
-    w = wiki.makewiki(conf)
+    w = wiki.make_wiki(conf)
 
     db = w.wiki
 

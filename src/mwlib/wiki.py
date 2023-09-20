@@ -5,11 +5,14 @@
 
 
 import os
+import tempfile
+import zipfile
 from io import StringIO
 
 from six.moves.configparser import ConfigParser
 
-from mwlib import myjson
+from mwlib import myjson as json
+from mwlib import nuwiki
 from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
 from mwlib.log import Log
 from mwlib.metabook import WikiConf
@@ -80,7 +83,7 @@ class MultiEnvironment(Environment):
         Environment.__init__(self)
         self.path = path
         with open(os.path.join(self.path, "metabook.json")) as fp:
-            self.metabook = myjson.load(fp)
+            self.metabook = json.load(fp)
         self.id2env = {}
 
     def _validate_wiki_id(self, wiki_id, x):
@@ -124,13 +127,67 @@ class MultiEnvironment(Environment):
         return res
 
 
-def ndict(**original):
+def clean_dict(**original):
     """Delete all keys with value None from dict."""
     return {k: v for k, v in original.items() if v is not None}
 
 
-def _makewiki(conf, metabook=None, **kw):
-    kw = ndict(**kw)
+def process_config_sections(cp, res):
+    for s in ["images", "wiki"]:
+        if not cp.has_section(s):
+            continue
+
+        args = dict(cp.items(s))
+        if "type" not in args:
+            raise RuntimeError("section %r does not have key 'type'" % s)
+        t = args["type"]
+        del args["type"]
+        try:
+            m = dispatch[s][t]
+        except KeyError:
+            raise RuntimeError(f"cannot handle type {t!r} in section {s!r}")
+
+        setattr(res, s, m(**args))
+
+
+def setup_metabook(nfo_fn, res, conf):
+    try:
+        with open(nfo_fn, "rb") as fp:
+            format_data = json.load(fp)["format"]
+    except KeyError:
+        return None
+    else:
+        if format_data == "nuwiki":
+            res.images = res.wiki = nuwiki.adapt(conf)
+            res.metabook = res.wiki.metabook
+            return res
+        elif format_data == "multi-nuwiki":
+            return MultiEnvironment(conf)
+
+
+def extract_wiki(conf, res, metabook):
+    conf = os.path.abspath(conf)
+    zf = zipfile.ZipFile(conf)
+    try:
+        format_data = json.loads(zf.read("nfo.json"))["format"]
+    except KeyError:
+        raise RuntimeError("old zip wikis are not supported anymore")
+    if format_data == "nuwiki":
+        res.images = res.wiki = nuwiki.adapt(zf)
+        if metabook is None:
+            res.metabook = res.wiki.metabook
+        return res
+    elif format_data == "multi-nuwiki":
+        tmpdir = tempfile.mkdtemp()
+        nuwiki.extractall(zf, tmpdir)
+        res = MultiEnvironment(tmpdir)
+        return res
+    else:
+        raise RuntimeError(f"unknown format {format_data!r}")
+
+
+def _make_wiki(conf, metabook=None, **kw):
+    kw = clean_dict(**kw)
     res = Environment(metabook)
 
     url = None
@@ -154,21 +211,9 @@ def _makewiki(conf, metabook=None, **kw):
 
     nfo_fn = os.path.join(conf, "nfo.json")
     if os.path.exists(nfo_fn):
-        from mwlib import myjson as json
-        from mwlib import nuwiki
-
-        try:
-            with open(nfo_fn, "rb") as fp:
-                format = json.load(fp)["format"]
-        except KeyError:
-            pass
-        else:
-            if format == "nuwiki":
-                res.images = res.wiki = nuwiki.adapt(conf)
-                res.metabook = res.wiki.metabook
-                return res
-            elif format == "multi-nuwiki":
-                return MultiEnvironment(conf)
+        result = setup_metabook(nfo_fn, res, conf)
+        if result:
+            return result
 
     if os.path.exists(os.path.join(conf, "content.json")):
         raise RuntimeError("old zip wikis are not supported anymore")
@@ -179,68 +224,25 @@ def _makewiki(conf, metabook=None, **kw):
         conf = wc
 
     if conf.lower().endswith(".zip"):
-        import zipfile
-
-        from mwlib import myjson as json
-
-        conf = os.path.abspath(conf)
-
-        zf = zipfile.ZipFile(conf)
-        try:
-            format = json.loads(zf.read("nfo.json"))["format"]
-        except KeyError:
-            raise RuntimeError("old zip wikis are not supported anymore")
-
-        if format == "nuwiki":
-            from mwlib import nuwiki
-
-            res.images = res.wiki = nuwiki.adapt(zf)
-            if metabook is None:
-                res.metabook = res.wiki.metabook
-            return res
-        elif format == "multi-nuwiki":
-            import tempfile
-
-            from mwlib import nuwiki
-
-            tmpdir = tempfile.mkdtemp()
-            nuwiki.extractall(zf, tmpdir)
-            res = MultiEnvironment(tmpdir)
-            return res
-        else:
-            raise RuntimeError(f"unknown format {format!r}")
+        return extract_wiki(conf, res, metabook)
 
     cp = res.configparser
 
     if not cp.read(conf):
         raise RuntimeError(f"could not read config file {conf!r}")
 
-    for s in ["images", "wiki"]:
-        if not cp.has_section(s):
-            continue
-
-        args = dict(cp.items(s))
-        if "type" not in args:
-            raise RuntimeError("section %r does not have key 'type'" % s)
-        t = args["type"]
-        del args["type"]
-        try:
-            m = dispatch[s][t]
-        except KeyError:
-            raise RuntimeError(f"cannot handle type {t!r} in section {s!r}")
-
-        setattr(res, s, m(**args))
+    process_config_sections(cp, res)
 
     if not res.wiki:
-        raise AttributeError("_makewiki should have set wiki attribute")
+        raise AttributeError("_make_wiki should have set wiki attribute")
     return res
 
 
-def makewiki(config, metabook=None, **kw):
+def make_wiki(config, metabook=None, **kw):
     res = (
         Environment(metabook)
         if not config
-        else _makewiki(config, metabook=metabook, **kw)
+        else _make_wiki(config, metabook=metabook, **kw)
     )
 
     if res.wiki:

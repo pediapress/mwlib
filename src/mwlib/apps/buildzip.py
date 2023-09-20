@@ -135,7 +135,7 @@ def main():
     filename = None
     status = None
     try:
-        env = parser.makewiki()
+        env = parser.make_wiki()
         if not env.metabook:
             raise ValueError("no metabook")
 

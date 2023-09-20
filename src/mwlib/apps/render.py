@@ -11,7 +11,7 @@ import traceback
 
 import pkg_resources
 
-from mwlib import _locale, conf, utils, wiki
+from mwlib import _locale, conf, nuwiki, utils, wiki
 from mwlib.exceptions.mwlib_exceptions import RenderException
 from mwlib.options import OptionParser
 from mwlib.status import Status
@@ -121,10 +121,9 @@ class Main:
                     print(" {}:\t{}".format(name, info["help"]))
 
     def get_environment(self):
-        from mwlib import nuwiki
-        from mwlib.status import Status
 
-        env = self.parser.makewiki()
+
+        env = self.parser.make_wiki()
         if isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt)) or isinstance(
             env, wiki.MultiEnvironment
         ):
@@ -148,7 +147,7 @@ class Main:
                 if err.errno != errno.ENOENT:
                     raise
 
-        env = wiki.makewiki(self.zip_filename)
+        env = wiki.make_wiki(self.zip_filename)
         self.status = Status(self.options.status_file,
                              progress_range=(34, 100))
         return env

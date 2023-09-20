@@ -121,6 +121,18 @@ def safe_unlink(filename):
 fetch_cache = {}
 
 
+def check_content_type(expected_content_type, result, ignore_errors=False):
+    if not expected_content_type:
+        return
+    content_type = result.headers.get_content_type()
+    if content_type != expected_content_type:
+        msg = f"Got content-type {content_type!r}, expected {expected_content_type!r}"
+        if ignore_errors:
+            log.warn(msg)
+        else:
+            raise RuntimeError(msg)
+
+
 def fetch_url(
     url,
     ignore_errors=False,
@@ -178,21 +190,13 @@ def fetch_url(
             post_data = six.moves.urllib.parse.urlencode(post_data)
         result = opener.open(url, post_data)
         data = result.read()
-        if expected_content_type:
-            content_type = result.headers.get_content_type()
-            if content_type != expected_content_type:
-                msg = f"Got content-type {content_type!r}, expected {expected_content_type!r}"
-                if ignore_errors:
-                    log.warn(msg)
-                else:
-                    raise RuntimeError(msg)
-                return None
+        check_content_type(expected_content_type, result, ignore_errors)
+
     except six.moves.urllib.error.URLError as err:
         if ignore_errors:
             log.error(f"{err} - while fetching {url!r}")
             return None
         raise RuntimeError(f"Could not fetch {url!r}: {err}")
-    # log.info("got %r (%dB in %.2fs)" % (url, len(data), time.time() - start_time))
 
     if hasattr(fetch_cache, "max_cacheable_size"):
         max_cacheable_size = max(fetch_cache.max_cacheable_size,
@@ -276,24 +280,14 @@ def send_mail(from_email, to_emails, subject, body,
     connection.close()
 
 
-def asunicode(x):
-    # if not isinstance(x, six.string_types):
-    #     x = repr(x)
-    #
-    # if isinstance(x, str):
-    #     x = six.text_type(x, "utf-8", "replace")
-
-    return str(x)
-
-
 def ppdict(dct):
     items = sorted(dct.items())
     tmp = []
     write = tmp.append
 
     for k, v in items:
-        write("*" + asunicode(k) + "*")
-        v = asunicode(v)
+        write("*" + str(k) + "*")
+        v = str(v)
         lines = v.split("\n")
         for x in lines:
             write(" " * 4 + x)
@@ -317,8 +311,9 @@ def report(
     text.append("%s\n" % traceback.format_exc())
     try:
         fqdn = socket.getfqdn()
-    except BaseException:
+    except (OSError):
         fqdn = "not available"
+
     text.append("CWD: %r\n" % os.getcwd())
 
     text.append(ppdict(kw))

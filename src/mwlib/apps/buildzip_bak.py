@@ -111,7 +111,7 @@ def main():
     pod_client = _init_pod_client(options, parser, use_help)
 
     try:
-        env = parser.makewiki()
+        env = parser.make_wiki()
         if not env.metabook:
             raise ValueError("no metabook")
 

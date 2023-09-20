@@ -113,11 +113,11 @@ class OptionParser(optparse.OptionParser):
 
         return self.options, self.args
 
-    def makewiki(self):
+    def make_wiki(self):
         kw = self.options.__dict__.copy()
         kw["metabook"] = self.metabook
 
-        env = wiki.makewiki(**kw)
+        env = wiki.make_wiki(**kw)
 
         if not env.metabook:
             self.metabook = env.metabook = metabook.collection()

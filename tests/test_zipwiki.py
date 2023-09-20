@@ -29,7 +29,7 @@ class TestXnetZipWiki():
 
     def setup_method(self, method):
         print("reading", self.zip_filename)
-        self.env = wiki.makewiki(self.zip_filename)
+        self.env = wiki.make_wiki(self.zip_filename)
         self.wikidb = self.env.wiki
         self.imagedb = self.env.images
 

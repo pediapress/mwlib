@@ -87,14 +87,14 @@ def parse_inputbox(tokens, xopts):
 
 
 def _parse_gallery_txt(txt, xopts):
-    lines = [x.strip() for x in txt.split("\n")]
+    lines = [line.strip() for line in txt.split("\n")]
     sub = []
-    for x in lines:
-        if not x:
+    for line in lines:
+        if not line:
             continue
         if xopts.expander is None:
             raise ValueError("no expander in _parse_gallery_txt")
-        xnew = xopts.expander.parseAndExpand(x, keep_uniq=True)
+        xnew = xopts.expander.parseAndExpand(line, keep_uniq=True)
 
         linode = parse_txt("[[" + xnew + "]]", xopts)
 
@@ -116,13 +116,13 @@ class Bunch:
 
 
 class ParseSections:
-    def __init__(self, tokens, xopts):
+    def __init__(self, tokens, _):
         self.tokens = tokens
         self.run()
 
     def run(self):
         tokens = self.tokens
-        i = 0
+        index = 0
 
         sections = []
         current = Bunch(start=None, end=None, endtitle=None)
@@ -150,7 +150,7 @@ class ParseSections:
 
             body = Token(
                 type=Token.t_complex_node,
-                children=tokens[current.endtitle + 1: i]
+                children=tokens[current.endtitle + 1: index]
             )
 
             sect = Token(
@@ -160,7 +160,7 @@ class ParseSections:
                 level=level,
                 blocknode=True,
             )
-            tokens[current.start: i] = [sect]
+            tokens[current.start: index] = [sect]
 
             while sections and level <= sections[-1].level:
                 sections.pop()
@@ -172,20 +172,20 @@ class ParseSections:
             sections.append(sect)
             return True
 
-        while i < len(self.tokens):
-            t = tokens[i]
+        while index < len(self.tokens):
+            t = tokens[index]
             if t.type == Token.t_section:
                 if create() and current.start is not None:
-                    i = current.start + 1
+                    index = current.start + 1
                     current = Bunch(start=None, end=None, endtitle=None)
                 else:
-                    current.start = i
-                    i += 1
+                    current.start = index
+                    index += 1
             elif t.type == Token.t_section_end:
-                current.endtitle = i
-                i += 1
+                current.endtitle = index
+                index += 1
             else:
-                i += 1
+                index += 1
 
         create()
 

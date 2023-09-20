@@ -275,15 +275,15 @@ class FiguresAndParagraphs(Flowable):
                 FiguresAndParagraphs(self.fs, self.ps,
                                      figure_margin=self.figure_margin)
             ]
-        fittingFigures = []
-        nextFigures = []
+        fitting_figures = []
+        next_figures = []
         for (i, f) in enumerate(self.fs):
             if (height + self.hfs[i]) < availheight:
-                fittingFigures.append(f)
+                fitting_figures.append(f)
             else:
-                nextFigures.append(f)
+                next_figures.append(f)
             height += self.hfs[i]
-        fittingParas = []
+        fitting_paras = []
         nextParas = []
         height = 0
         splittedParagraph = False
@@ -309,12 +309,12 @@ class FiguresAndParagraphs(Flowable):
                 ):
                     force_split = True
             if (height + self.paraHeights[i]) < availheight and not force_split:
-                fittingParas.append(p)
+                fitting_paras.append(p)
             else:
                 if splittedParagraph:
                     nextParas.append(p)
                     continue
-                paraFrags = p.split(
+                para_frags = p.split(
                     availWidth,
                     availheight
                     - height
@@ -323,27 +323,27 @@ class FiguresAndParagraphs(Flowable):
                     - 2 * p.style.leading,
                 )  # one line-height "safety margin"
                 splittedParagraph = True
-                if len(paraFrags) == 2:
-                    fittingParas.append(paraFrags[0])
-                    nextParas.append(paraFrags[1])
-                elif len(paraFrags) < 2:
+                if len(para_frags) == 2:
+                    fitting_paras.append(para_frags[0])
+                    nextParas.append(para_frags[1])
+                elif len(para_frags) < 2:
                     nextParas.append(p)
                 else:  # fixme: not sure if splitting a paragraph can yield more than two elements...
                     pass
             height += self.paraHeights[i]
 
-        if nextFigures:
+        if next_figures:
             if nextParas:
                 nextElements = [
-                    FiguresAndParagraphs(nextFigures, nextParas,
+                    FiguresAndParagraphs(next_figures, nextParas,
                                          figure_margin=self.figure_margin)
                 ]
             else:
-                nextElements = nextFigures
+                nextElements = next_figures
         else:
             nextElements = nextParas if nextParas else []
         return [
-            FiguresAndParagraphs(fittingFigures, fittingParas,
+            FiguresAndParagraphs(fitting_figures, fitting_paras,
                                  figure_margin=self.figure_margin)
         ] + nextElements
 
@@ -376,10 +376,10 @@ class PreformattedBox(Preformatted):
         if availHeight < self.style.leading:
             return []
 
-        linesThatFit = int((availHeight - self.padding - self.margin) * 1.0 / self.style.leading)
+        lines_that_fit = int((availHeight - self.padding - self.margin) * 1.0 / self.style.leading)
 
-        text1 = string.join(self.lines[0:linesThatFit], "\n")
-        text2 = string.join(self.lines[linesThatFit:], "\n")
+        text1 = string.join(self.lines[0:lines_that_fit], "\n")
+        text2 = string.join(self.lines[lines_that_fit:], "\n")
         style = self.style
         if style.firstLineIndent != 0:
             style = deepcopy(style)

@@ -16,22 +16,21 @@ from mwlib.refine.util import parse_params, resolve_entity
 from . import _uscan as _mwscan
 
 
-def walknode(node, filt=lambda x: True):
+def walk_children(children, filt):
+    for child in children:
+        yield from walknode(child, filt)
+
+
+def walknode(node, filt=lambda _: True):
     if not isinstance(node, Token):
-        for x in node:
-            for k in walknode(x):
-                if filt(k):
-                    yield k
+        yield from walk_children(node, filt)
         return
 
     if filt(node):
         yield node
 
     if node.children:
-        for x in node.children:
-            for k in walknode(x):
-                if filt(k):
-                    yield k
+        yield from walk_children(node.children, filt)
 
 
 def walknodel(node, filt=lambda x: True):
@@ -147,8 +146,8 @@ class Token:
             self._text = self.source[self.start: self.start + self.len]
         return self._text
 
-    def _set_text(self, t):
-        self._text = t
+    def _set_text(self, text):
+        self._text = text
 
     text = property(_get_text, _set_text)
 
@@ -165,55 +164,55 @@ class Token:
 
     def __repr__(self):
         if isinstance(self, Token):
-            r = [self.token2name.get(self.type, self.type)]
+            repr_elements = [self.token2name.get(self.type, self.type)]
         else:
-            r = [self.__class__.__name__]
+            repr_elements = [self.__class__.__name__]
         if self.text is not None:
-            r.append(repr(self.text)[1:])
+            repr_elements.append(repr(self.text)[1:])
         if self.tagname:
-            r.append(" tagname=")
-            r.append(repr(self.tagname))
+            repr_elements.append(" tagname=")
+            repr_elements.append(repr(self.tagname))
         if self.rawtagname:
-            r.append(" rawtagname=")
-            r.append(repr(self.rawtagname))
+            repr_elements.append(" rawtagname=")
+            repr_elements.append(repr(self.rawtagname))
 
         if self.vlist:
-            r.append(" vlist=")
-            r.append(repr(self.vlist))
+            repr_elements.append(" vlist=")
+            repr_elements.append(repr(self.vlist))
         if self.target:
-            r.append(" target=")
-            r.append(repr(self.target))
+            repr_elements.append(" target=")
+            repr_elements.append(repr(self.target))
         if self.level:
-            r.append(" level=")
-            r.append(repr(self.level))
+            repr_elements.append(" level=")
+            repr_elements.append(repr(self.level))
         if self.ns is not None:
-            r.append(" ns=")
-            r.append(repr(self.ns))
+            repr_elements.append(" ns=")
+            repr_elements.append(repr(self.ns))
         if self.lineprefix is not None:
-            r.append(" lineprefix=")
-            r.append(self.lineprefix)
+            repr_elements.append(" lineprefix=")
+            repr_elements.append(self.lineprefix)
         if self.interwiki:
-            r.append(" interwiki=")
-            r.append(repr(self.interwiki))
+            repr_elements.append(" interwiki=")
+            repr_elements.append(repr(self.interwiki))
         if self.langlink:
-            r.append(" langlink=")
-            r.append(repr(self.langlink))
+            repr_elements.append(" langlink=")
+            repr_elements.append(repr(self.langlink))
         if self.type == self.t_complex_style:
-            r.append(repr(self.caption))
+            repr_elements.append(repr(self.caption))
         elif self.caption:
-            r.append("->")
-            r.append(repr(self.caption))
+            repr_elements.append("->")
+            repr_elements.append(repr(self.caption))
 
-        return "".join(r)
+        return "".join(repr_elements)
 
     show = _Show()
 
 
 token2name = Token.token2name
-for d in dir(Token):
-    if d.startswith("t_"):
-        token2name[getattr(Token, d)] = d
-del d, token2name
+for directory in dir(Token):
+    if directory.startswith("t_"):
+        token2name[getattr(Token, directory)] = directory
+del directory, token2name
 
 
 def _split_tag(txt):
@@ -275,6 +274,36 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
 """.split()
         )
 
+    def _get_substring(self, text, start, token_length):
+        return text[start: start + token_length]
+
+    def _append_colon_tokens(self, text, start, token_length,
+                             res: list[Token]):
+        txt = self._get_substring(text, start, token_length)
+        count = txt.count(":")
+        if count:
+            res.append(Token(type=Token.t_colon,
+                             start=start, len=count, source=text))
+        token_length -= count
+        start += count
+
+        return start, token_length
+
+    def _process_and_append_html_token(self, text, start, token_length,
+                                       res: list[Token], token,
+                                       uniquifier=None):
+        s = self._get_substring(text, start, token_length)
+        if uniquifier:
+            s = uniquifier.replace_uniq(s)
+            token.text = s
+        _analyze_html_tag(token)
+        tagname = token.rawtagname
+        if tagname in self.allowed_tags:
+            res.append(token)
+        else:
+            res.append(Token(type=Token.t_text, start=start,
+                             len=token_length, source=text))
+
     def __call__(self, text, uniquifier=None):
         if self.allowed_tags is None:
             self._init_allowed_tags()
@@ -286,38 +315,24 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
 
         res = []
 
-        def g():
-            return text[start: start + tlen]
-
-        for type, start, tlen in tokens:
+        for type, start, token_length in tokens:
             if type == Token.t_begintable:
-                txt = g()
-                count = txt.count(":")
-                if count:
-                    res.append(Token(type=Token.t_colon,
-                                     start=start, len=count, source=text))
-                tlen -= count
-                start += count
+                start, token_length = self._append_colon_tokens(text, start,
+                                                                token_length,
+                                                                res)
 
-            token = Token(type=type, start=start, len=tlen, source=text)
+            token = Token(type=type, start=start, len=token_length,
+                          source=text)
 
             if type == Token.t_entity:
-                token.text = resolve_entity(g())
+                token.text = resolve_entity(self._get_substring(text, start,
+                                                                token_length))
                 token.type = Token.t_text
                 res.append(token)
             elif type == Token.t_html_tag:
-                s = g()
-                if uniquifier:
-                    s = uniquifier.replace_uniq(s)
-                    token.text = s
-                _analyze_html_tag(token)
-                tagname = token.rawtagname
-
-                if tagname in self.allowed_tags:
-                    res.append(token)
-                else:
-                    res.append(Token(type=Token.t_text, start=start,
-                                     len=tlen, source=text))
+                self._process_and_append_html_token(text, start, token_length,
+                                                    res, token,
+                                                    uniquifier=uniquifier)
             else:
                 res.append(token)
 
