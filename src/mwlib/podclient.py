@@ -53,9 +53,9 @@ class PODClient:
 
         self._post(six.moves.urllib.parse.urlencode(post_data))
 
-    def streaming_post_zipfile(self, filename, fh=None):
-        if fh is None:
-            fh = open(filename, "rb")
+    def streaming_post_zipfile(self, filename, file_handler=None):
+        if file_handler is None:
+            file_handler = open(filename, "rb")
 
         boundary = "-" * 20 + ("%f" % time.time()) + "-" * 20
 
@@ -80,31 +80,31 @@ class PODClient:
 
         print("POSTING TO:", self.posturl)
 
-        pr = six.moves.urllib.parse.urlparse(self.posturl)
-        path = pr.path
-        if pr.query:
-            path += "?" + pr.query
+        parsed_url = six.moves.urllib.parse.urlparse(self.posturl)
+        path = parsed_url.path
+        if parsed_url.query:
+            path += "?" + parsed_url.query
 
-        h = six.moves.http_client.HTTP(pr.hostname, pr.port)
-        h.putrequest("POST", path)
-        h.putheader("Host", pr.netloc)
-        h.putheader("Content-Length", str(clen))
-        h.putheader("User-Agent", conf.user_agent)
-        h.putheader("Content-Type",
+        http = six.moves.http_client.HTTP(parsed_url.hostname, parsed_url.port)
+        http.putrequest("POST", path)
+        http.putheader("Host", parsed_url.netloc)
+        http.putheader("Content-Length", str(clen))
+        http.putheader("User-Agent", conf.user_agent)
+        http.putheader("Content-Type",
                     "multipart/form-data; boundary=%s" % boundary)
-        h.endheaders()
+        http.endheaders()
 
-        h.send(before)
+        http.send(before)
 
         while True:
-            data = fh.read(4096)
+            data = file_handler.read(4096)
             if not data:
                 break
-            h.send(data)
+            http.send(data)
 
-        h.send(after)
+        http.send(after)
 
-        errcode, errmsg, headers = h.getreply()
+        errcode, errmsg, headers = http.getreply()
         # h.file.read()
         print("ERRCODE:", (errcode, errmsg, headers))
 

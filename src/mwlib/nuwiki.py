@@ -428,7 +428,7 @@ class adapt:
             expand_templates=expandTemplates,
         )
 
-    def getLicenses(self):
+    def get_licenses(self):
         from mwlib import metabook
 
         licenses = self.nuwiki.get_data("licenses") or []

@@ -23,20 +23,20 @@ def parse_collection_page(txt):
 
 class MbObj:
     def __init__(self, **kw):
-        d = {"type": self.__class__.__name__}
+        type_names= {"type": self.__class__.__name__}
 
         for k in dir(self.__class__):
             if k.startswith("__"):
                 continue
-            v = getattr(self.__class__, k)
-            if callable(v) or v is None:
+            value = getattr(self.__class__, k)
+            if callable(value) or value is None:
                 continue
-            if isinstance(v, (property,)):
+            if isinstance(value, (property,)):
                 continue
 
-            d[k] = v
+            type_names[k] = value
 
-        self.__dict__.update(copy.deepcopy(d))
+        self.__dict__.update(copy.deepcopy(type_names))
         self.__dict__.update(kw)
         self.type = self.__class__.__name__
 
@@ -69,11 +69,11 @@ class MbObj:
             return default
 
     def _json(self):
-        d = {"type": self.__class__.__name__}
-        for k, v in self.__dict__.items():
-            if v is not None and not k.startswith("_"):
-                d[k] = v
-        return d
+        type_names = {"type": self.__class__.__name__}
+        for k, value in self.__dict__.items():
+            if value is not None and not k.startswith("_"):
+                type_names[k] = value
+        return type_names
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.__dict__!r}>"
@@ -139,9 +139,9 @@ class collection(MbObj):
         if env.wikiconf:
             self.wikis.append(env.wikiconf)
 
-        for x in self.articles():
-            if x._env is None:
-                x._env = env
+        for article in self.articles():
+            if article._env is None:
+                article._env = env
 
     def get_wiki(self, ident=None, baseurl=None):
         if ident is None and baseurl is None:
@@ -282,7 +282,7 @@ def get_licenses(metabook):
 
 def make_interwiki(api_entry=None):
     api_entry = api_entry or {}
-    d = {}
+    api_entries = {}
     for k, v in api_entry.items():
-        d[str(k)] = v
-    return Interwiki(**d)
+        api_entries[str(k)] = v
+    return Interwiki(**api_entries)

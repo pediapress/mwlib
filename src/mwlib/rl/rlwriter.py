@@ -499,9 +499,9 @@ class RlWriter:
         self.getArticleIDs()
 
         if status_callback:
-            self.layout_status = status_callback.getSubRange(1, 75)
+            self.layout_status = status_callback.get_sub_range(1, 75)
             self.layout_status(status="laying out")
-            self.render_status = status_callback.getSubRange(76, 100)
+            self.render_status = status_callback.get_sub_range(76, 100)
         else:
             self.layout_status = None
             self.render_status = None
@@ -631,10 +631,10 @@ class RlWriter:
         elements = []
         if not pdfstyles.SHOW_WIKI_LICENSE:
             return []
-        if self.env.getLicenses():
+        if self.env.get_licenses():
             elements.append(TocEntry(txt=_("Article Licenses"), lvl="group"))
 
-        for license in self.env.getLicenses():
+        for license in self.env.get_licenses():
             license_node = uparser.parse_string(
                 title=_(license.title), raw=license.wikitext,
                 wikidb=license._wiki

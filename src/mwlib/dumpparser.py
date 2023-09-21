@@ -8,37 +8,37 @@ try:
 except ImportError:
     import cElementTree
 
-ns = "{http://www.mediawiki.org/xml/export-0.3/}"
+WIKI_NS = "{http://www.mediawiki.org/xml/export-0.3/}"
 
 
 class Tags:
     # <namespaces><namespace> inside <siteinfo>
-    namespace = ns + "namespaces/" + ns + "namespace"
+    namespace = WIKI_NS + "namespaces/" + WIKI_NS + "namespace"
 
-    page = ns + "page"
+    page = WIKI_NS + "page"
 
     # <title> inside <page>
-    title = ns + "title"
+    title = WIKI_NS + "title"
 
     # <revision> inside <page>
-    revision = ns + "revision"
+    revision = WIKI_NS + "revision"
 
     # <id> inside <revision>
-    revid = ns + "id"
+    revid = WIKI_NS + "id"
 
     # <contributor><username> inside <revision>
-    username = ns + "contributor/" + ns + "username"
+    username = WIKI_NS + "contributor/" + WIKI_NS + "username"
 
     # <text> inside <revision>
-    text = ns + "text"
+    text = WIKI_NS + "text"
 
     # <timestamp> inside <revision>
-    timestamp = ns + "timestamp"
+    timestamp = WIKI_NS + "timestamp"
 
     # <revision><text> inside <page>
-    revision_text = ns + "revision/" + ns + "text"
+    revision_text = WIKI_NS + "revision/" + WIKI_NS + "text"
 
-    siteinfo = ns + "siteinfo"
+    siteinfo = WIKI_NS + "siteinfo"
 
 
 class Page:
@@ -62,9 +62,9 @@ class Page:
 
     @property
     def redirect(self):
-        mo = self.redirect_rex.search(self.text)
-        if mo:
-            return mo.group("redirect").split("|", 1)[0]
+        search = self.redirect_rex.search(self.text)
+        if search:
+            return search.group("redirect").split("|", 1)[0]
         return None
 
     def __repr__(self):
@@ -78,98 +78,74 @@ class Page:
 class DumpParser:
     tags = Tags()
 
-    def __init__(self, xmlfilename, ignore_redirects=False):
-        self.xmlfilename = xmlfilename
+    def __init__(self, xml_filename, ignore_redirects=False):
+        self.xml_filename = xml_filename
         self.ignore_redirects = ignore_redirects
 
-    def openInputStream(self):
-        if self.xmlfilename.lower().endswith(".bz2"):
-            f = os.popen("bunzip2 -c %s" % self.xmlfilename, "r")
-        elif self.xmlfilename.lower().endswith(".7z"):
-            f = os.popen("7z -so x %s" % self.xmlfilename, "r")
+    def open_input_stream(self):
+        if self.xml_filename.lower().endswith(".bz2"):
+            xml_file = os.popen("bunzip2 -c %s" % self.xml_filename, "r")
+        elif self.xml_filename.lower().endswith(".7z"):
+            xml_file = os.popen("7z -so x %s" % self.xml_filename, "r")
         else:
-            f = open(self.xmlfilename)
+            xml_file = open(self.xml_filename)
 
-        return f
+        return xml_file
 
     @staticmethod
-    def getTag(elem):
+    def get_tag(elem):
         # rough is good enough
         return elem.tag[elem.tag.rindex("}") + 1:]
 
-    def handleSiteinfo(self, siteinfo):
-        pass
-
-        # for nsElem in siteinfo.findall(self.tags.namespace):
-        #     try:
-        #         self.namespaces[nsElem.text.lower()] = int(nsElem.get('key'))
-        #     except AttributeError:
-        #         # text is probably None
-        #         pass
-
     def __iter__(self):
-        f = self.openInputStream()
+        xml_file = self.open_input_stream()
 
-        elemIter = (el for evt, el in cElementTree.iterparse(f))
-        for elem in elemIter:
-            if self.getTag(elem) == "page":
-                page = self.handlePageElement(elem)
+        elem_iter = (el for _, el in cElementTree.iterparse(f))
+        for elem in elem_iter:
+            if self.get_tag(elem) == "page":
+                page = self.handle_page_element(elem)
                 if page:
                     yield page
                 elem.clear()
-            elif self.getTag(elem) == "siteinfo":
-                self.handleSiteinfo(elem)
+            elif self.get_tag(elem) == "siteinfo":
                 elem.clear()
 
-        f.close()
+        xml_file.close()
 
-    def handlePageElement(self, pageElem):
+    def handle_page_element(self, page_elem):
         res = Page()
-        lastRevision = None
-        for el in pageElem:
-            tag = self.getTag(el)
+        last_revision = None
+        for element in page_elem:
+            tag = self.get_tag(element)
             if tag == "title":
-                title = six.text_type(el.text)
+                title = six.text_type(element.text)
                 res.title = title
             elif tag == "id":
-                res.pageid = int(el.text)
+                res.pageid = int(element.text)
             elif tag == "revision":
-                lastRevision = el
+                last_revision = element
 
-        if lastRevision:
-            self.handleRevisionElement(lastRevision, res)
+        if last_revision:
+            self.handle_revision_element(last_revision, res)
 
         if self.ignore_redirects and res.redirect:
             return None
 
         return res
 
-    def handleRevisionElement(self, revElem, res):
-        for el in revElem:
-            tag = self.getTag(el)
+    def handle_revision_element(self, rev_element, res):
+        for element in rev_element:
+            tag = self.get_tag(element)
             if tag == "id":
-                res.revid = int(el.text)
+                res.revid = int(element.text)
             elif tag == "timestamp":
-                res.timestamp = el.text
-            elif tag == "contributor":
-                pass
-                # res.username, res.userid = self.handleContributorElement(el)
+                res.timestamp = element.text
             elif tag == "minor":
                 res.minor = True
             elif tag == "comment":
-                res.comment = six.text_type(el.text)
+                res.comment = six.text_type(element.text)
             elif tag == "text":
-                res.text = six.text_type(el.text)
-                el.clear()
+                res.text = six.text_type(element.text)
+                element.clear()
 
         return res
-
-    def handleContributorElement(self, conElem):
-        username = None
-        userid = None
-        for el in conElem:
-            if self.getTag(el) == "username":
-                username = six.text_type(el.text)
-            elif self.getTag(el) == "id":
-                userid = int(el.text)
-        return (username, userid)

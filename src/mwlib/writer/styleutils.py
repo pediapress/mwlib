@@ -9,41 +9,41 @@ from typing import Optional
 from mwlib import advtree
 from mwlib.htmlcolornames import colorname2rgb_map
 
-mw_px2pt = 12 / 16
-mw_em2pt = 9.6
+MW_PX2PT = 12 / 16
+MW_EM2PT = 9.6
 
 
 def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
-    def hex2rgb(r: str, g: str,
-                b: str) -> Optional[tuple[float, float, float]]:
+    def hex2rgb(red: str, green: str,
+                blue: str) -> Optional[tuple[float, float, float]]:
         try:
 
-            def conv(c: str) -> float:
-                return max(0.0, min(1.0, int(c, 16) / 255))
+            def conv(color: str) -> float:
+                return max(0.0, min(1.0, int(color, 16) / 255))
 
-            return conv(r), conv(g), conv(b)
+            return conv(red), conv(green), conv(blue)
         except ValueError:
             return None
 
-    def hexshort2rgb(r: str, g: str,
-                     b: str) -> Optional[tuple[float, float, float]]:
+    def hexshort2rgb(red: str, green: str,
+                     blue: str) -> Optional[tuple[float, float, float]]:
         try:
 
-            def conv(c: str) -> float:
-                return float(max(0.0, min(1.0, int(2 * c, 16) / 255)))
+            def conv(color: str) -> float:
+                return float(max(0.0, min(1.0, int(2 * color, 16) / 255)))
 
-            return conv(r), conv(g), conv(b)
+            return conv(red), conv(green), conv(blue)
         except ValueError:
             return None
 
-    def rgb2rgb(r: str, g: str,
-                b: str) -> Optional[tuple[float, float, float]]:
+    def rgb2rgb(red: str, green: str,
+                blue: str) -> Optional[tuple[float, float, float]]:
         try:
 
-            def conv(c: str) -> float:
-                return max(0.0, min(1.0, int(c) / 255))
+            def conv(color: str) -> float:
+                return max(0.0, min(1.0, int(color) / 255))
 
-            return conv(r), conv(g), conv(b)
+            return conv(red), conv(green), conv(blue)
         except ValueError:
             return None
 
@@ -62,16 +62,16 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
         color_str = str(color_str)
     except ValueError:
         return None
-    rgbval = get_rgbval(color_str)
-    hexval = re.search("#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})", color_str)
-    hexvalshort = re.search("#([0-9a-f])([0-9a-f])([0-9a-f])", color_str)
-    if rgbval:
-        return rgb2rgb(rgbval.group(1), rgbval.group(2), rgbval.group(3))
-    elif hexval:
-        return hex2rgb(hexval.group(1), hexval.group(2), hexval.group(3))
-    elif hexvalshort:
+    rgb_val = get_rgbval(color_str)
+    hex_val = re.search("#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})", color_str)
+    hex_val_short = re.search("#([0-9a-f])([0-9a-f])([0-9a-f])", color_str)
+    if rgb_val:
+        return rgb2rgb(rgb_val.group(1), rgb_val.group(2), rgb_val.group(3))
+    elif hex_val:
+        return hex2rgb(hex_val.group(1), hex_val.group(2), hex_val.group(3))
+    elif hex_val_short:
         return hexshort2rgb(
-            hexvalshort.group(1), hexvalshort.group(2), hexvalshort.group(3)
+            hex_val_short.group(1), hex_val_short.group(2), hex_val_short.group(3)
         )
     else:
         return colorname2rgb(color_str)
@@ -232,9 +232,9 @@ def table_border(node: advtree.Node) -> bool:
     if bg_color and bg_color != "transparent":
         return True
 
-    bs = attributes.get("border-spacing", None)
-    if bs:
-        bs_val = re.match(r"(?P<bs>\d)", bs)
+    border_spacing = attributes.get("border-spacing", None)
+    if border_spacing:
+        bs_val = re.match(r"(?P<bs>\d)", border_spacing)
         if bs_val and int(bs_val.group("bs")) > 0:
             return True
 
@@ -260,9 +260,9 @@ def scale_length(length_str, reference=None):
     if unit == "pt":
         return length
     elif unit == "px":
-        return length * mw_px2pt
+        return length * MW_PX2PT
     elif unit == "em":
-        return length * mw_em2pt
+        return length * MW_EM2PT
     elif unit == "%" and reference:
         return length / 100 * reference
     return 0

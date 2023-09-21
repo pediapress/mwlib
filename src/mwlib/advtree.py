@@ -122,33 +122,33 @@ class AdvancedNode:
         tp.children.insert(idx, self)
         self.parent = tp
 
-    def has_child(self, c):
+    def has_child(self, child):
         """Check if node c is child of self"""
         try:
-            _idIndex(self.children, c)
-            if c.parent is not self:
+            _idIndex(self.children, child)
+            if child.parent is not self:
                 raise ValueError("child not found")
             return True
         except ValueError:
             return False
 
-    def append_child(self, c):
-        self.children.append(c)
-        c.parent = self
+    def append_child(self, child):
+        self.children.append(child)
+        child.parent = self
 
-    def remove_child(self, c):
-        self.replace_child(c, [])
-        if c.parent is not None:
+    def remove_child(self, child):
+        self.replace_child(child, [])
+        if child.parent is not None:
             raise ValueError("child not removed")
 
-    def replace_child(self, c, newchildren=[]):
+    def replace_child(self, child, newchildren=[]):
         """Remove child node c and replace with newchildren if given."""
 
-        idx = _idIndex(self.children, c)
+        idx = _idIndex(self.children, child)
         self.children[idx: idx + 1] = newchildren
 
-        c.parent = None
-        if self.has_child(c):
+        child.parent = None
+        if self.has_child(child):
             raise ValueError("child not removed")
         for nc in newchildren:
             nc.parent = self
@@ -186,13 +186,13 @@ class AdvancedNode:
     def get_all_children(self):
         """don't confuse w/ Node.allchildren()
         which returns allchildren + self"""
-        for c in self.children:
-            yield c
-            yield from c.get_all_children()
+        for child in self.children:
+            yield child
+            yield from child.get_all_children()
 
     def get_siblings(self):
         """Return all siblings WITHOUT self"""
-        return [c for c in self.get_all_siblings() if c is not self]
+        return [child for child in self.get_all_siblings() if child is not self]
 
     def get_all_siblings(self):
         """Return all siblings plus self"""
@@ -403,7 +403,7 @@ class AdvancedTable(AdvancedNode):
 class AdvancedRow(AdvancedNode):
     @property
     def cells(self):
-        return [c for c in self if c.__class__ == Cell]
+        return [child for child in self if child.__class__ == Cell]
 
 
 class AdvancedCell(AdvancedNode):
@@ -731,9 +731,9 @@ def mix_in_class(pyClass, mixInClass, makeFirst=False):
 
 
 def extend_classes(node):
-    for c in node.children[:]:
-        extend_classes(c)
-        c.parent = node
+    for child in node.children[:]:
+        extend_classes(child)
+        child.parent = node
 
 
 # Nodes we defined above and that are separetly handled in extendClasses
@@ -756,19 +756,19 @@ for k, v in _advancedNodesMap.items():
 
 def fix_tag_nodes(node):
     """Detect known TagNodes and and transfrom to appropriate Nodes"""
-    for c in node.children:
-        if c.__class__ == TagNode:
-            if c.caption in _tagNodeMap:
-                c.__class__ = _tagNodeMap[c.caption]
-            elif c.caption in ("h1", "h2", "h3", "h4", "h5", "h6"):  # FIXME
+    for child in node.children:
+        if child.__class__ == TagNode:
+            if child.caption in _tagNodeMap:
+                child.__class__ = _tagNodeMap[child.caption]
+            elif child.caption in ("h1", "h2", "h3", "h4", "h5", "h6"):  # FIXME
                 # NEED TO MOVE NODE IF IT REALLY STARTS A SECTION
-                c.__class__ = Section
-                mix_in_class(c.__class__, AdvancedSection)
-                c.level = int(c.caption[1])
-                c.caption = ""
+                child.__class__ = Section
+                mix_in_class(child.__class__, AdvancedSection)
+                child.level = int(child.caption[1])
+                child.caption = ""
             else:
-                log.warn("fixTagNodes, unknowntagnode %r" % c)
-        fix_tag_nodes(c)
+                log.warn("fixTagNodes, unknowntagnode %r" % child)
+        fix_tag_nodes(child)
 
 
 def fix_style_node(node):
@@ -785,11 +785,11 @@ def fix_style_node(node):
     elif node.caption == "'''''":
         node.__class__ = Strong
         node.caption = ""
-        em = Emphasized("''")
-        for c in node.children:
-            em.append_child(c)
+        emphasized = Emphasized("''")
+        for child in node.children:
+            emphasized.append_child(child)
         node.children = []
-        node.append_child(em)
+        node.append_child(emphasized)
     elif node.caption == "'''":
         node.__class__ = Strong
         node.caption = ""
@@ -816,8 +816,8 @@ def fix_style_node(node):
 def fix_style_nodes(node):
     if node.__class__ == Style:
         fix_style_node(node)
-    for c in node.children[:]:
-        fix_style_nodes(c)
+    for child in node.children[:]:
+        fix_style_nodes(child)
 
 
 def remove_nodes(node):
@@ -831,8 +831,8 @@ def remove_nodes(node):
         # first child of section groups heading text - grouping Node must not be removed
         node.parent.replace_child(node, node.children)
 
-    for c in node.children[:]:
-        remove_nodes(c)
+    for child in node.children[:]:
+        remove_nodes(child)
 
 
 def remove_newlines(node):
@@ -860,10 +860,10 @@ def remove_newlines(node):
                     node.parent.remove_child(node)
             node.caption = node.caption.replace("\n", " ")
 
-        for c in node.children:
-            if c.__class__ in (PreFormatted, Source):
+        for child in node.children:
+            if child.__class__ in (PreFormatted, Source):
                 continue
-            todo.append(c)
+            todo.append(child)
 
 
 def build_advanced_tree(root):  # USE WITH CARE
@@ -872,26 +872,26 @@ def build_advanced_tree(root):  # USE WITH CARE
     do not use this funcs without knowing whether these
     Node modifications fit your problem
     """
-    funs = [
+    functions = [
         extend_classes,
         fix_tag_nodes,
         remove_nodes,
         remove_newlines,
         fix_style_nodes,
     ]
-    for f in funs:
-        f(root)
+    for fun in functions:
+        fun(root)
 
 
 def _validate_parser_tree(node, parent=None):
     # helper to assert tree parent link consistency
     if parent is not None:
         _idIndex(parent.children, node)  # asserts it occures only once
-    for c in node:
-        _idIndex(node.children, c)  # asserts it occures only once
-        if c not in node.children:
-            raise ValueError(f"child {c!r} not in children of {node!r}")
-        _validate_parser_tree(c, node)
+    for child in node:
+        _idIndex(node.children, child)  # asserts it occures only once
+        if child not in node.children:
+            raise ValueError(f"child {child!r} not in children of {node!r}")
+        _validate_parser_tree(child, node)
 
 
 def _validate_parents(node, parent=None):
@@ -902,22 +902,22 @@ def _validate_parents(node, parent=None):
     else:
         if node.parent is not None:
             raise ValueError(f"node {node!r} has parent {node.parent!r}")
-    for c in node:
-        if not node.has_child(c):
-            raise ValueError(f"node {node!r} has no child {c!r}")
-        _validate_parents(c, node)
+    for child in node:
+        if not node.has_child(child):
+            raise ValueError(f"node {node!r} has no child {child!r}")
+        _validate_parents(child, node)
 
 
-def get_advanced_tree(fn):
+def get_advanced_tree(fun):
     from mwlib.dummydb import DummyDB
     from mwlib.uparser import parse_string
 
-    db = DummyDB()
-    with open(fn) as f:
-        tree_input = six.text_type(f.read(), "utf8")
-    r = parse_string(title=fn, raw=tree_input, wikidb=db)
-    build_advanced_tree(r)
-    return r
+    database = DummyDB()
+    with open(fun) as wiki_file:
+        tree_input = six.text_type(wiki_file.read(), "utf8")
+    parsed_string = parse_string(title=fun, raw=tree_input, wikidb=database)
+    build_advanced_tree(parsed_string)
+    return parsed_string
 
 
 def simpleparse(raw):  # !!! USE FOR DEBUGGING ONLY !!!
@@ -926,8 +926,8 @@ def simpleparse(raw):  # !!! USE FOR DEBUGGING ONLY !!!
     from mwlib import dummydb, parser
     from mwlib.uparser import parse_string
 
-    input = raw.decode("utf8")
-    r = parse_string(title="title", raw=input, wikidb=dummydb.DummyDB())
-    build_advanced_tree(r)
-    parser.show(sys.stdout, r, 0)
-    return r
+    decoded_input = raw.decode("utf8")
+    parsed_string = parse_string(title="title", raw=decoded_input, wikidb=dummydb.DummyDB())
+    build_advanced_tree(parsed_string)
+    parser.show(sys.stdout, parsed_string, 0)
+    return parsed_string

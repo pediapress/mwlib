@@ -18,8 +18,8 @@ from mwlib.templ.misc import DictDB, expand_str
 
 def get_templates(raw, title=""):
     used = set()
-    e = Expander('', wikidb=DictDB())
-    todo = [parse(raw, replace_tags=e.replace_tags)]
+    expander = Expander('', wikidb=DictDB())
+    todo = [parse(raw, replace_tags=expander.replace_tags)]
     while todo:
         node = todo.pop()
         if isinstance(node, six.string_types):

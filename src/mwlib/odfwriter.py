@@ -811,7 +811,7 @@ class ODFWriter:
 
 
 def writer(env, output, status_callback):
-    buildbook_status = status_callback.getSubRange(0,
+    buildbook_status = status_callback.get_sub_range(0,
                                                    50) if status_callback else None
     book = writerbase.build_book(env, status_callback=buildbook_status)
 

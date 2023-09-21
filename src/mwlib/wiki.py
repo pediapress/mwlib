@@ -26,7 +26,7 @@ def wiki_obsolete_cdb(path=None, **kwargs):
 
 dispatch = {"wiki": {"cdb": wiki_obsolete_cdb, "nucdb": wiki_obsolete_cdb}}
 
-_en_license_url = (
+_EN_LICENSE_URL = (
     "https://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw"
 )
 wpwikis = {
@@ -35,17 +35,17 @@ wpwikis = {
         "mw_license_url": "https://de.wikipedia.org/w/index.php?title=Hilfe:Buchfunktion/Lizenz&action=raw",
     },
     "en": {"baseurl": "https://en.wikipedia.org/w/",
-           "mw_license_url": _en_license_url},
+           "mw_license_url": _EN_LICENSE_URL},
     "fr": {"baseurl": "https://fr.wikipedia.org/w/", "mw_license_url": None},
     "es": {"baseurl": "https://es.wikipedia.org/w/", "mw_license_url": None},
     "pt": {"baseurl": "https://pt.wikipedia.org/w/", "mw_license_url": None},
     "enwb": {
         "baseurl": "https://en.wikibooks.org/w",
-        "mw_license_url": _en_license_url,
+        "mw_license_url": _EN_LICENSE_URL,
     },
     "commons": {
         "baseurl": "https://commons.wikimedia.org/w/",
-        "mw_license_url": _en_license_url,
+        "mw_license_url": _EN_LICENSE_URL,
     },
 }
 
@@ -71,8 +71,8 @@ url=
         if self.metabook:
             self.metabook.set_environment(self)
 
-    def getLicenses(self):
-        return self.wiki.getLicenses()
+    def get_licenses(self):
+        return self.wiki.get_licenses()
 
 
 class MultiEnvironment(Environment):
@@ -82,17 +82,17 @@ class MultiEnvironment(Environment):
     def __init__(self, path):
         Environment.__init__(self)
         self.path = path
-        with open(os.path.join(self.path, "metabook.json")) as fp:
-            self.metabook = json.load(fp)
+        with open(os.path.join(self.path, "metabook.json")) as metabook_file:
+            self.metabook = json.load(metabook_file)
         self.id2env = {}
 
-    def _validate_wiki_id(self, wiki_id, x):
+    def _validate_wiki_id(self, wiki_id, node):
         is_valid = wiki_id
         if not is_valid:
-            raise WikiIdValidationError(f"article has no wikiident: {x!r}")
+            raise WikiIdValidationError(f"article has no wikiident: {node!r}")
         is_valid = "/" not in wiki_id and ".." not in wiki_id
         if not is_valid:
-            raise WikiIdValidationError(f"article has invalid wikiident: {x!r}")
+            raise WikiIdValidationError(f"article has invalid wikiident: {node!r}")
 
     def init_metabook(self):
         from mwlib import nuwiki
@@ -100,9 +100,9 @@ class MultiEnvironment(Environment):
         if not self.metabook:
             return
 
-        for x in self.metabook.articles():
-            wiki_id = x.wikiident
-            self._validate_wiki_id(wiki_id, x)
+        for article in self.metabook.articles():
+            wiki_id = article.wikiident
+            self._validate_wiki_id(wiki_id, article)
 
             if wiki_id not in self.id2env:
                 env = Environment()
@@ -111,15 +111,15 @@ class MultiEnvironment(Environment):
                 self.id2env[wiki_id] = env
             else:
                 env = self.id2env[wiki_id]
-            x._env = env
+            article._env = env
 
-    def getLicenses(self):
+    def get_licenses(self):
         res = list(self.metabook.licenses or [])
         for t in res:
             t._wiki = None
 
         for x in self.id2env.values():
-            tmp = x.wiki.getLicenses()
+            tmp = x.wiki.get_licenses()
             for t in tmp:
                 t._env = x
             res += tmp
@@ -167,19 +167,19 @@ def setup_metabook(nfo_fn, res, conf):
 
 def extract_wiki(conf, res, metabook):
     conf = os.path.abspath(conf)
-    zf = zipfile.ZipFile(conf)
+    zip_file = zipfile.ZipFile(conf)
     try:
-        format_data = json.loads(zf.read("nfo.json"))["format"]
+        format_data = json.loads(zip_file.read("nfo.json"))["format"]
     except KeyError:
         raise RuntimeError("old zip wikis are not supported anymore")
     if format_data == "nuwiki":
-        res.images = res.wiki = nuwiki.adapt(zf)
+        res.images = res.wiki = nuwiki.adapt(zip_file)
         if metabook is None:
             res.metabook = res.wiki.metabook
         return res
     elif format_data == "multi-nuwiki":
         tmpdir = tempfile.mkdtemp()
-        nuwiki.extractall(zf, tmpdir)
+        nuwiki.extractall(zip_file, tmpdir)
         res = MultiEnvironment(tmpdir)
         return res
     else:
@@ -219,19 +219,19 @@ def _make_wiki(conf, metabook=None, **kw):
         raise RuntimeError("old zip wikis are not supported anymore")
 
     # yes, I really don't want to type this everytime
-    wc = os.path.join(conf, "wikiconf.txt")
-    if os.path.exists(wc):
-        conf = wc
+    wiki_conf = os.path.join(conf, "wikiconf.txt")
+    if os.path.exists(wiki_conf):
+        conf = wiki_conf
 
     if conf.lower().endswith(".zip"):
         return extract_wiki(conf, res, metabook)
 
-    cp = res.configparser
+    config_parser = res.configparser
 
-    if not cp.read(conf):
+    if not config_parser.read(conf):
         raise RuntimeError(f"could not read config file {conf!r}")
 
-    process_config_sections(cp, res)
+    process_config_sections(config_parser, res)
 
     if not res.wiki:
         raise AttributeError("_make_wiki should have set wiki attribute")

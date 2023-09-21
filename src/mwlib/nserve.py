@@ -31,12 +31,12 @@ from mwlib.metabook import calc_checksum
 log = log.Log("mwlib.serve")
 
 
-class bunch:
+class Bunch:
     def __init__(self, **kw):
         self.__dict__.update(kw)
 
     def __repr__(self):
-        return "bunch({})".format(
+        return "Bunch({})".format(
             ", ".join([f"{k}={v!r}" for k, v in self.__dict__.items()])
         )
 
@@ -46,15 +46,15 @@ class bunch:
 # -- and we also like to speedup the get_writers method
 
 name2writer = {
-    "odf": bunch(
+    "odf": Bunch(
         file_extension="odt",
         name="odf",
         content_type="application/vnd.oasis.opendocument.text",
     ),
-    "rl": bunch(file_extension="pdf", name="rl", content_type="application/pdf"),
-    "xhtml": bunch(file_extension="html", name="xhtml", content_type="text/xml"),
-    "xl": bunch(file_extension="pdf", name="xl", content_type="application/pdf"),
-    "zim": bunch(file_extension="zim", name="zim", content_type="application/zim"),
+    "rl": Bunch(file_extension="pdf", name="rl", content_type="application/pdf"),
+    "xhtml": Bunch(file_extension="html", name="xhtml", content_type="text/xml"),
+    "xl": Bunch(file_extension="pdf", name="xl", content_type="application/pdf"),
+    "zim": Bunch(file_extension="zim", name="zim", content_type="application/zim"),
 }
 
 
@@ -67,7 +67,7 @@ def get_writers(name2writer):
 
         try:
             writer = entry_point.load()
-            name2writer[entry_point.name] = bunch(
+            name2writer[entry_point.name] = Bunch(
                 name=entry_point.name,
                 file_extension=writer.file_extension,
                 content_type=writer.content_type,
@@ -92,11 +92,11 @@ def make_collection_id(data):
         "login_credentials",
     ):
         sio.write(repr(data.get(key)))
-    mb = data.get("metabook")
-    if mb:
-        if isinstance(mb, str):
-            mb = six.text_type(mb, "utf-8")
-        mbobj = json.loads(mb)
+    meta_book = data.get("metabook")
+    if meta_book:
+        if isinstance(meta_book, str):
+            meta_book = six.text_type(meta_book, "utf-8")
+        mbobj = json.loads(meta_book)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write(
@@ -112,7 +112,7 @@ busy = {}
 collid2qserve = lrucache.LRUCache(4000)
 
 
-class watch_qserve:
+class WatchQServe:
     getstats_timeout = 3.0
     sleeptime = 2.0
 
@@ -168,7 +168,7 @@ class watch_qserve:
             raise
         except Exception as err:
             self._mark_busy("system down")
-            self.log(f"error in watch_qserve: {err}")
+            self.log(f"error in WatchQServe: {err}")
 
     def __call__(self):
         self.busy[self.ident] = True
@@ -195,7 +195,7 @@ def dispatch_command(path):
     return Application().dispatch(request)
 
 
-def get_content_disposition_values(filename, ext):
+def get_content_disposition_values(filename, _):
     if isinstance(filename, str):
         filename = six.text_type(filename)
 
@@ -218,10 +218,10 @@ def get_content_disposition_values(filename, ext):
 def get_content_disposition(filename, ext):
     ascii_fn, utf8_fn = get_content_disposition_values(filename, ext)
 
-    r = f"inline; filename={ascii_fn}.{ext}"
+    disposition = f"inline; filename={ascii_fn}.{ext}"
     if utf8_fn and utf8_fn != ascii_fn:
-        r += f";filename*=UTF-8''{urllib.parse.quote(utf8_fn)}.{ext}"
-    return r
+        disposition += f";filename*=UTF-8''{urllib.parse.quote(utf8_fn)}.{ext}"
+    return disposition
 
 
 class Application:
@@ -282,10 +282,6 @@ class Application:
             return self.error_response(f"error executing command {command!r}: {exc}")
 
     def error_response(self, error, **kw):
-        # if isinstance(error, str):
-        #     error = six.text_type(error, "utf-8", "ignore")
-        # elif not isinstance(error, six.text_type):
-        #     error = six.text_type(repr(error), "ascii")
         return dict(error=error, **kw)
 
     def check_collection_id(self, collection_id):
@@ -310,18 +306,18 @@ class Application:
         return True
 
     def _get_params(self, post_data, collection_id):
-        g = post_data.get
-        params = bunch()
+        get = post_data.get
+        params = Bunch()
         params.__dict__ = {
-            "metabook_data": g("metabook"),
-            "writer": g("writer", self.default_writer),
-            "base_url": g("base_url"),
-            "writer_options": g("writer_options", ""),
-            "login_credentials": g("login_credentials", ""),
-            "force_render": bool(g("force_render")),
-            "script_extension": g("script_extension", ""),
+            "metabook_data": get("metabook"),
+            "writer": get("writer", self.default_writer),
+            "base_url": get("base_url"),
+            "writer_options": get("writer_options", ""),
+            "login_credentials": get("login_credentials", ""),
+            "force_render": bool(get("force_render")),
+            "script_extension": get("script_extension", ""),
             "pod_api_url": post_data.get("pod_api_url", ""),
-            "language": g("language", ""),
+            "language": get("language", ""),
         }
 
         params.collection_id = collection_id
@@ -386,7 +382,7 @@ class Application:
             return dict(collection_id=collection_id, writer=writer, **kw)
 
         writer = post_data.get("writer", self.default_writer)
-        w = name2writer[writer]
+        name_writer = name2writer[writer]
 
         jobid = f"{collection_id}:render-{writer}"
 
@@ -411,12 +407,12 @@ class Application:
             except KeyError:
                 pass
 
-            if w.content_type:
-                more["content_type"] = w.content_type
+            if name_writer.content_type:
+                more["content_type"] = name_writer.content_type
 
-            if w.file_extension:
+            if name_writer.file_extension:
                 more["content_disposition"] = get_content_disposition(
-                    more.get("suggested_filename", None), w.file_extension
+                    more.get("suggested_filename", None), name_writer.file_extension
                 )
 
             return retval(state="finished", **more)
@@ -438,42 +434,42 @@ class Application:
             return self.error_response("POST argument required: collection_id")
 
         writer = post_data.get("writer", self.default_writer)
-        w = name2writer[writer]
+        name_writer = name2writer[writer]
 
         jobid = f"{collection_id}:render-{writer}"
         res = self.qserve.qinfo(jobid=jobid) or {}
         download_url = res["result"]["url"]
 
         print("fetching", download_url)
-        f = six.moves.urllib.request.urlopen(download_url)
-        info = f.info()
+        downloaded_file = six.moves.urllib.request.urlopen(download_url).info()
+        info = downloaded_file.info()
 
         header = {}
 
-        for h in ("Content-Length",):
-            v = info.getheader(h)
-            if v:
-                print("copy header:", h, v)
-                header[h] = v
+        for header in ("Content-Length",):
+            value = info.getheader(header)
+            if value:
+                print("copy header:", header, value)
+                header[header] = value
 
-        if w.content_type:
-            header["Content-Type"] = w.content_type
+        if name_writer.content_type:
+            header["Content-Type"] = name_writer.content_type
 
-        if w.file_extension:
+        if name_writer.file_extension:
             header["Content-Disposition"] = "inline; filename=collection.%s" % (
-                w.file_extension.encode("utf-8", "ignore")
+                name_writer.file_extension.encode("utf-8", "ignore")
             )
 
         def readdata():
             while True:
-                d = f.read(4096)
-                if not d:
+                data = downloaded_file.read(4096)
+                if not data:
                     break
-                yield d
+                yield data
 
         return HTTPResponse(output=readdata(), header=header)
 
-    def do_zip_post(self, collection_id, post_data, is_new=False):
+    def do_zip_post(self, collection_id, post_data, _):
         params = self._get_params(post_data, collection_id=collection_id)
 
         try:
@@ -505,21 +501,21 @@ class Application:
         params.post_url = post_url
 
         self.qserve.qadd(
-            channel="post",  # jobid="%s:post" % collection_id,
+            channel="post",
             payload={"params": params.__dict__},
             timeout=20 * 60,
         )
         return response
 
 
-def _parse_qs(qs):
-    for i, x in enumerate(qs):
-        if ":" in x:
-            host, port = x.split(":", 1)
+def _parse_qs(q_serve):
+    for i, arg in enumerate(q_serve):
+        if ":" in arg:
+            host, port = arg.split(":", 1)
             port = int(port)
-            qs[i] = (host, port)
+            q_serve[i] = (host, port)
         else:
-            qs[i] = (x, 14311)
+            q_serve[i] = (arg, 14311)
 
 
 def main():
@@ -528,34 +524,34 @@ def main():
     opts, args = argv.parse(
         sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface="
     )
-    qs = []
+    q_serve = []
     port = 8899
     interface = "127.0.0.1"
-    for o, a in opts:
-        if o == "--port":
-            port = int(a)
-        elif o == "--qserve":
-            qs.append(a)
-        elif o == "--disable-all-writers":
+    for opt, arg in opts:
+        if opt == "--port":
+            port = int(arg)
+        elif opt == "--qserve":
+            q_serve.append(arg)
+        elif opt == "--disable-all-writers":
             name2writer.clear()
-        elif o in ("-i", "--interface"):
-            interface = a
+        elif opt in ("-i", "--interface"):
+            interface = arg
 
     print("using the following writers", sorted(name2writer.keys()))
 
-    qs += args
+    q_serve += args
 
-    if not qs:
-        qs.append("localhost:14311")
+    if not q_serve:
+        q_serve.append("localhost:14311")
 
-    _parse_qs(qs)
+    _parse_qs(q_serve)
 
     address = interface, port
     server = pywsgi.WSGIServer(address, default_app())
 
     watchers = pool.Pool()
-    for x in qs:
-        watchers.spawn(CallInLoop(5.0, watch_qserve(x, busy)))
+    for x in q_serve:
+        watchers.spawn(CallInLoop(5.0, WatchQServe(x, busy)))
 
     try:
         print("listening on %s:%d" % address)

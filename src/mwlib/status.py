@@ -34,12 +34,12 @@ class Status:
             self.status = {}
         self.progress_range = progress_range
 
-    def getSubRange(self, start, end):
-        progress_range = (self.scaleProgress(start), self.scaleProgress(end))
+    def get_sub_range(self, start, end):
+        progress_range = (self.scale_progress(start), self.scale_progress(end))
         return Status(filename=self.filename, podclient=self.podclient,
                       status=self.status, progress_range=progress_range)
 
-    def scaleProgress(self, progress):
+    def scale_progress(self, progress):
         return (
             self.progress_range[0]
             + progress * (self.progress_range[1] - self.progress_range[0]) / 100
@@ -53,7 +53,7 @@ class Status:
 
         if progress is not None:
             progress = min(max(0, progress), 100)
-            progress = self.scaleProgress(progress)
+            progress = self.scale_progress(progress)
             if progress > self.status.get('progress', -1):
                 self.status['progress'] = progress
 
@@ -91,8 +91,8 @@ class Status:
             return
 
         if not self.qproxy and self.filename.startswith("qserve://"):
-            fn = self.filename[len("qserve://"):]
-            host, jobid = fn.split("/")
+            file_name = self.filename[len("qserve://"):]
+            host, jobid = file_name.split("/")
             try:
                 jobid = int(jobid)
             except ValueError:
@@ -113,8 +113,8 @@ class Status:
             return
 
         try:
-            with open(self.filename + '.tmp', 'wb') as f:
-                f.write(
+            with open(self.filename + '.tmp', 'wb') as tmp_file:
+                tmp_file.write(
                     json.dumps(self.status).encode('utf-8')
                 )
             os.rename(self.filename + '.tmp', self.filename)

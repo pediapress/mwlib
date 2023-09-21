@@ -30,17 +30,17 @@ class TrustedRevisions:
             six.moves.urllib.parse.quote(title),
             revid,
         )
-        r = six.moves.urllib.request.urlopen(url).read()
-        if r == WikiTrustServerError.msg_identifier:
+        rev= six.moves.urllib.request.urlopen(url).read()
+        if rev == WikiTrustServerError.msg_identifier:
             raise WikiTrustServerError
-        return 1 - float(r)  # r is the likelyhood of being spam
+        return 1 - float(rev)  # r is the likelyhood of being spam
 
     def get_trusted_revision(self, title, min_trust=None, max_age=None):
         min_trust = min_trust or self.min_trust
         best_rev = None
         now = time.time()
-        p = self.site.Pages[title]
-        for rev in p.revisions():
+        page = self.site.Pages[title]
+        for rev in page.revisions():
             # add basic info
             rev["age"] = (now - time.mktime(rev["timestamp"])) / (24 * 3600)
             rev["title"] = title

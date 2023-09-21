@@ -30,7 +30,7 @@ def execute(*args):
 def make_messages(
     locale,
     domain,
-    version,
+    _,
     inputdir,
     localedir="locale",
     extensions=(".py",),
@@ -59,11 +59,11 @@ def make_messages(
             os.unlink(potfile)
 
         all_files = []
-        for dirpath, dirnames, filenames in os.walk(inputdir):
+        for dirpath, _, filenames in os.walk(inputdir):
             all_files.extend([(dirpath, f) for f in filenames])
         all_files.sort()
         for dirpath, filename in all_files:
-            file_base, file_ext = os.path.splitext(filename)
+            _, file_ext = os.path.splitext(filename)
             if file_ext not in extensions:
                 continue
             msgs = execute(

@@ -44,10 +44,9 @@ def latex2mathml(latex):
         # outmsg = outmsg.replace('xmlns="http://www.w3.org/1998/Math/MathML"', '')
 
         output = '<?xml version="1.0" encoding="UTF-8"?>\n' + output
-        # print repr(outmsg)
 
         try:
-            p = ET.fromstring(output)
+            tree = ET.fromstring(output)
         except ExpatError:
             log("\n\nparsing failed\n\n")
             log(latex + "\n\n")
@@ -57,21 +56,17 @@ def latex2mathml(latex):
             return
 
         tag = "mathml"
-        mathml = p.iter(tag)
+        mathml = tree.iter(tag)
 
         if mathml:
             mathml = mathml.next()
             mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
-            # add annotation with original TeX
-            # a = ET.Element("annotation", encoding="TeX")
-            # a.text=latex
-            # mathml.append(a)
             return mathml
         else:
             log("an error occured, \n%s\n" % output)
 
 
 if __name__ == "__main__":
-    test = r"\exp(-\gamma x)"
+    TEST = r"\exp(-\gamma x)"
     print()
-    print(ET.tostring(latex2mathml(test)))
+    print(ET.tostring(latex2mathml(TEST)))

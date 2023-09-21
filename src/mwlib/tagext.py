@@ -31,25 +31,25 @@ class ExtensionRegistry:
     def __init__(self):
         self.name2ext = {}
 
-    def registerExtension(self, k):
-        name = k.name
+    def register_extension(self, ext):
+        name = ext.name
         if name in self.name2ext:
             raise ValueError(f"tag extension for {name!r} already registered")
-        self.name2ext[name] = k()
-        return k
+        self.name2ext[name] = ext()
+        return ext
 
     def names(self):
         return list(self.name2ext.keys())
 
-    def __getitem__(self, n):
-        return self.name2ext[n]
+    def __getitem__(self, index):
+        return self.name2ext[index]
 
-    def __contains__(self, n):
-        return n in self.name2ext
+    def __contains__(self, item):
+        return item in self.name2ext
 
 
 default_registry = ExtensionRegistry()
-register = default_registry.registerExtension
+register = default_registry.register_extension
 
 
 def _parse(txt):
@@ -106,13 +106,13 @@ categorytree summary slippymap""".split()
 
 for name in tags_to_ignore:
 
-    def _f(name):
+    def _f():
         class Ignore(IgnoreTagBase):
             name = name
 
         register(Ignore)
 
-    _f(name)
+    _f()
 
 
 class Rot13Extension(TagExtension):
@@ -214,9 +214,9 @@ class HieroExtension(TagExtension):
     def __call__(self, source, attributes):
         from mwlib import parser
 
-        tn = parser.TagNode("hiero")
-        tn.children.append(parser.Text(source))
-        return tn
+        tag_node = parser.TagNode("hiero")
+        tag_node.children.append(parser.Text(source))
+        return tag_node
 
 
 register(HieroExtension)
@@ -250,11 +250,11 @@ class ListingExtension(TagExtension):
     ]
 
     def __call__(self, source, attributes):
-        t = "".join(v % attributes[k] for k,
+        tag = "".join(v % attributes[k] for k,
                     v in self.attrs if attributes.get(k, None))
         if source:
-            t += ", %s" % source
-        return self.parse(t)
+            tag += ", %s" % source
+        return self.parse(tag)
 
 
 register(ListingExtension)

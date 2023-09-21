@@ -160,23 +160,23 @@ class FontSwitcher:
         txt_list = []
         last_font = None
         last_txt = []
-        for c in txt:
-            ord_c = ord(c)
+        for text_char in txt:
+            ord_c = ord(text_char)
             blacklisted = self.char_blacklist.get(ord_c, False)
             if ord_c in self.no_switch_chars or blacklisted:
                 if ord_c in self.remove_chars:
-                    c = ""
+                    text_char = ""
                 if ord_c in self.space_like_chars:
-                    c = " "
+                    text_char = " "
                 if blacklisted:
-                    c = chr(9633)  # U+25A1 WHITE SQUARE
+                    text_char = chr(9633)  # U+25A1 WHITE SQUARE
                 font = last_font if last_font else self.default_font
             else:
                 font = self.get_font(ord_c)
             if font != last_font and last_txt:
                 txt_list.append(("".join(last_txt), last_font))
                 last_txt = []
-            last_txt.append(c)
+            last_txt.append(text_char)
             last_font = font
         return last_font, last_txt, txt_list
 

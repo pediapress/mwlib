@@ -22,15 +22,15 @@ class InspectAuthors:
     def scan_edits(self, revs):
         authors = self.authors
 
-        for r in revs:
-            user = r.get("user", "")
-            if "anon" in r and (
+        for rev in revs:
+            user = rev.get("user", "")
+            if "anon" in rev and (
                 not user or self.ip_rex.match(user) or self.ip6_rex.match(user)
             ):  # anon
                 self.num_anon += 1
             elif not user:
                 continue
-            elif self.bot_rex.search(user) or self.bot_rex.search(r.get("comment", "")):
+            elif self.bot_rex.search(user) or self.bot_rex.search(rev.get("comment", "")):
                 continue  # filter bots
             else:
                 authors.add(user)

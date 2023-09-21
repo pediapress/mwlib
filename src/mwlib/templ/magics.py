@@ -270,19 +270,19 @@ class PageMagic:
 
     @_wrap_pagename
     def TALKSPACE(self, pagename):
-        ns, partial, fullname = self.nshandler.splitname(pagename)
-        if not ns % 2:
-            ns += 1
-        return self.nshandler.get_nsname_by_number(ns)
+        namespace, _, _ = self.nshandler.splitname(pagename)
+        if not namespace % 2:
+            namespace += 1
+        return self.nshandler.get_nsname_by_number(namespace)
 
     TALKSPACEE = _quoted(TALKSPACE)
 
     @_wrap_pagename
     def SUBJECTSPACE(self, pagename):
-        ns, partial, fullname = self.nshandler.splitname(pagename)
-        if ns % 2:
-            ns -= 1
-        return self.nshandler.get_nsname_by_number(ns)
+        namespace, _, _ = self.nshandler.splitname(pagename)
+        if namespace % 2:
+            namespace -= 1
+        return self.nshandler.get_nsname_by_number(namespace)
 
     SUBJECTSPACEE = _quoted(SUBJECTSPACE)
     ARTICLESPACE = SUBJECTSPACE
@@ -290,19 +290,19 @@ class PageMagic:
 
     @_wrap_pagename
     def TALKPAGENAME(self, pagename):
-        ns, partial, fullname = self.nshandler.splitname(pagename)
-        if not ns % 2:
-            ns += 1
-        return self.nshandler.get_nsname_by_number(ns) + ":" + partial
+        namespace, partial, _ = self.nshandler.splitname(pagename)
+        if not namespace % 2:
+            namespace += 1
+        return self.nshandler.get_nsname_by_number(namespace) + ":" + partial
 
     TALKPAGENAMEE = _quoted(TALKPAGENAME)
 
     @_wrap_pagename
     def SUBJECTPAGENAME(self, pagename):
-        ns, partial, fullname = self.nshandler.splitname(pagename)
-        if ns % 2:
-            ns -= 1
-        return self.nshandler.get_nsname_by_number(ns) + ":" + partial
+        namespace, partial, _ = self.nshandler.splitname(pagename)
+        if namespace % 2:
+            namespace -= 1
+        return self.nshandler.get_nsname_by_number(namespace) + ":" + partial
 
     SUBJECTPAGENAMEE = _quoted(SUBJECTPAGENAME)
     ARTICLEPAGENAME = SUBJECTPAGENAME

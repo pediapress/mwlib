@@ -57,7 +57,7 @@ def busy(request):
 @pytest.fixture()
 def wq(request):
     busy = request.getfixturevalue("busy")
-    wq = nserve.watch_qserve(("localhost", 8888), busy)
+    wq = nserve.WatchQServe(("localhost", 8888), busy)
     wq.getstats_timeout = 0.01
     wq.sleep_time = 0.01
     busy[wq.ident] = True

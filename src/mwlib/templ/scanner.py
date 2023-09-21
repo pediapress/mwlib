@@ -5,7 +5,7 @@ import re
 
 from mwlib.templ import pp
 
-splitpattern = r"""
+SPLIT_PATTERN = r"""
 ({{+)                     # opening braces
 |(}}+)                    # closing braces
 |(\[\[|\]\])              # link
@@ -22,7 +22,7 @@ splitpattern = r"""
 |(?:[^=\[\]\|{}<]*))                               # all others
 """
 
-split_rx = re.compile(splitpattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+split_rx = re.compile(SPLIT_PATTERN, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
 
 class Symbols:

@@ -3,17 +3,17 @@ import mwlib.parser
 
 
 def allnodes():
-    all = set()
+    all_nodes = set()
     names = set()
-    for m in (mwlib.parser, mwlib.advtree):
-        for x in dir(m):
-            if x in names:
+    for mw_object in (mwlib.parser, mwlib.advtree):
+        for directory in dir(mw_object):
+            if directory in names:
                 continue
-            k = getattr(m, x)
+            k = getattr(mw_object, directory)
             if isinstance(k, type) and issubclass(k, mwlib.parser.Node):
-                all.add(k)
-                names.add(x)
-    return all
+                all_nodes.add(k)
+                names.add(directory)
+    return all_nodes
 
 
 if __name__ == "__main__":

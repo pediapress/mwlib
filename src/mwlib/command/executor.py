@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 
 
-def run_perl(et, font, basedir, scriptfile, pngfile):
+def run_perl(et, font, basedir, script_file, pngfile):
     try:
         ploticus_path = subprocess.check_output(['which',
                                                  'ploticus']).decode().strip()
@@ -10,7 +10,7 @@ def run_perl(et, font, basedir, scriptfile, pngfile):
         print("Ploticus not found.")
         return None
     command = ["/usr/bin/perl", et, "-P", ploticus_path, "-f",
-               font or 'ascii', "-T", basedir, "-i", scriptfile]
+               font or 'ascii', "-T", basedir, "-i", script_file]
     err = subprocess.run(command).returncode
     if err != 0:
         return None

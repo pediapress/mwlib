@@ -57,22 +57,22 @@ def strftime(date, fmt):
     # Move to around the year 2000
     year = year + ((2000 - year) // 28) * 28
     timetuple = date.timetuple()
-    s1 = time.strftime(fmt, (year,) + timetuple[1:])
-    sites1 = _findall(s1, str(year))
+    time_1 = time.strftime(fmt, (year,) + timetuple[1:])
+    sites1 = _findall(time_1, str(year))
 
-    s2 = time.strftime(fmt, (year + 28,) + timetuple[1:])
-    sites2 = _findall(s2, str(year + 28))
+    time_2 = time.strftime(fmt, (year + 28,) + timetuple[1:])
+    sites2 = _findall(time_2, str(year + 28))
 
     sites = []
     for site in sites1:
         if site in sites2:
             sites.append(site)
 
-    s = s1
+    result_time = time_1
     syear = "%4d" % (date.year,)
     for site in sites:
-        s = s[:site] + syear + s[site + 4:]
-    return s
+        result_time = result_time[:site] + syear + result_time[site + 4:]
+    return result_time
 
 
 # Make sure that the day names are in order
@@ -80,11 +80,11 @@ def strftime(date, fmt):
 
 
 def test():
-    s = strftime(datetime.date(1800,
+    time = strftime(datetime.date(1800,
                                9, 23),
                  "%Y has the same days as 1980 and 2008")
-    if s != "1800 has the same days as 1980 and 2008":
-        raise AssertionError(s)
+    if time != "1800 has the same days as 1980 and 2008":
+        raise AssertionError(time)
 
     print("Testing all day names from 0001/01/01 until 2000/08/01")
     # Get the weekdays.  Can't hard code them; they could be

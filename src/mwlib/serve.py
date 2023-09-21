@@ -29,9 +29,9 @@ def make_collection_id(data):
         'login_credentials',
     ):
         sio.write(repr(data.get(key)))
-    mb = data.get('metabook')
-    if mb:
-        mbobj = json.loads(mb)
+    meta_book = data.get('metabook')
+    if meta_book:
+        mbobj = json.loads(meta_book)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
         sys.stdout.write(
@@ -45,25 +45,25 @@ def make_collection_id(data):
 def get_collection_dirs(cache_dir):
     """Generator yielding full paths of collection directories"""
 
-    for dirpath, dirnames, filenames in os.walk(cache_dir):
+    for dirpath, dirnames, _ in os.walk(cache_dir):
         new_dirnames = []
-        for d in dirnames:
-            if collection_id_rex.match(d):
-                yield os.path.join(dirpath, d)
+        for directory in dirnames:
+            if collection_id_rex.match(directory):
+                yield os.path.join(dirpath, directory)
             else:
-                new_dirnames.append(d)
+                new_dirnames.append(directory)
         dirnames[:] = new_dirnames
 
 
-def _path_contains_entry_older_than(path, ts):
+def _path_contains_entry_older_than(path, time_stamp):
     return any(os.stat(
-        os.path.join(path, fn)).st_mtime < ts for fn in os.listdir(path))
+        os.path.join(path, fn)).st_mtime < time_stamp for fn in os.listdir(path))
 
 
-def _find_collection_dirs_to_purge(collection_dirs, ts):
+def _find_collection_dirs_to_purge(collection_dirs, time_stamp):
     for path in collection_dirs:
         try:
-            if _path_contains_entry_older_than(path, ts):
+            if _path_contains_entry_older_than(path, time_stamp):
                 yield path
         except OSError as err:
             if err.errno != errno.ENOENT:

@@ -5,27 +5,27 @@ class ArgumentError(Exception):
 def parse(args, spec):
     needarg = {}
 
-    for x in spec.split():
-        if x.endswith("="):
+    for spec_part in spec.split():
+        if spec_part.endswith("="):
             needarg[x[:-1]] = True
         else:
-            needarg[x] = False
+            needarg[spec_part] = False
 
     opts = []
     newargs = []
 
     i = 0
     while i < len(args):
-        a, v = (args[i].split("=", 1) + [None])[:2]
-        if a in needarg:
-            if v is None and needarg[a]:
+        arg, value = (args[i].split("=", 1) + [None])[:2]
+        if arg in needarg:
+            if value is None and needarg[arg]:
                 i += 1
                 try:
-                    v = args[i]
+                    value = args[i]
                 except IndexError as exc:
-                    raise ArgumentError(f"option {a} needs an argument") from exc
+                    raise ArgumentError(f"option {arg} needs an argument") from exc
 
-            opts.append((a, v))
+            opts.append((arg, value))
         else:
             newargs.append(args[i])
 

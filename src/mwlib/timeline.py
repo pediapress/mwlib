@@ -26,43 +26,43 @@ def _setupenv():
              "/usr/share/fonts/TTF",
              "/usr/share/fonts/truetype/freefont"]
 
-    for p in paths:
-        if os.path.exists(os.path.join(p, "FreeSans.ttf")):
-            os.environ["GDFONTPATH"] = p
+    for path in paths:
+        if os.path.exists(os.path.join(path, "FreeSans.ttf")):
+            os.environ["GDFONTPATH"] = path
             font = "FreeSans"
 
 
 _setupenv()
 
-_basedir = None
+_BASEDIR = None
 
 
 def _get_global_basedir():
-    global _basedir
-    if not _basedir:
-        _basedir = tempfile.mkdtemp(prefix='timeline-')
+    global _BASEDIR
+    if not _BASEDIR:
+        _BASEDIR = tempfile.mkdtemp(prefix='timeline-')
         import atexit
         import shutil
-        atexit.register(shutil.rmtree, _basedir)
-    return _basedir
+        atexit.register(shutil.rmtree, _BASEDIR)
+    return _BASEDIR
 
 
 def draw_timeline(script, basedir=None):
     if basedir is None:
         basedir = _get_global_basedir()
 
-    m = sha256()
-    m.update(script.encode('utf8'))
-    ident = m.hexdigest()
+    digest = sha256()
+    digest.update(script.encode('utf8'))
+    ident = digest.hexdigest()
 
     pngfile = os.path.join(basedir, ident + '.png')
 
     if os.path.exists(pngfile):
         return pngfile
 
-    scriptfile = os.path.join(basedir, ident + '.txt')
-    with open(scriptfile, 'w') as f:
-        f.write(script)
-    et = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
+    script_filepath = os.path.join(basedir, ident + '.txt')
+    with open(script_filepath, 'w') as script_file:
+        script_file.write(script)
+    easy_timeline_path = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
 
-    return run_perl(et, font, basedir, scriptfile, pngfile)
+    return run_perl(easy_timeline_path, font, basedir, script_filepath, pngfile)

@@ -45,16 +45,16 @@ def show(node, out=None, indent=0, verbose=False):
         out = sys.stdout
 
     if not isinstance(node, Token):
-        for x in node:
-            show(x, out=out, indent=indent, verbose=verbose)
+        for child in node:
+            show(child, out=out, indent=indent, verbose=verbose)
         return
 
     out.write("{}{!r}\n".format("    " * indent, node))
 
     children = node.children
     if children:
-        for x in children:
-            show(x, out=out, indent=indent + 1, verbose=verbose)
+        for child in children:
+            show(child, out=out, indent=indent + 1, verbose=verbose)
 
 
 class _Show:
@@ -292,10 +292,10 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
     def _process_and_append_html_token(self, text, start, token_length,
                                        res: list[Token], token,
                                        uniquifier=None):
-        s = self._get_substring(text, start, token_length)
+        sub_str = self._get_substring(text, start, token_length)
         if uniquifier:
-            s = uniquifier.replace_uniq(s)
-            token.text = s
+            sub_str = uniquifier.replace_uniq(sub_str)
+            token.text = sub_str
         _analyze_html_tag(token)
         tagname = token.rawtagname
         if tagname in self.allowed_tags:
