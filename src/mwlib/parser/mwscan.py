@@ -71,19 +71,19 @@ def scan(text):
     return ScanResult(text, tokens)
 
 
-def resolve_entity(e):
-    if e[1] == "#":
+def resolve_entity(entity):
+    if entity[1] == "#":
         try:
-            if e[2] == "x" or e[2] == "X":
-                return chr(int(e[3:-1], 16))
-            return chr(int(e[2:-1]))
+            if entity[2] == "x" or entity[2] == "X":
+                return chr(int(entity[3:-1], 16))
+            return chr(int(entity[2:-1]))
         except ValueError:
-            return e
+            return entity
     else:
         try:
-            return chr(htmlentitydefs.name2codepoint[e[1:-1]])
+            return chr(htmlentitydefs.name2codepoint[entity[1:-1]])
         except KeyError:
-            return e
+            return entity
 
 
 class ScanResult:
@@ -120,12 +120,12 @@ class ScanResult:
         return self.toks[idx]
 
 
-class _compat_scanner:
+class _CompatScanner:
     from mwlib.tagext import default_registry as tagextensions
 
     allowed_tags = None
 
-    class ignore:
+    class Ignore:
         pass
 
     tok2compat = {
@@ -139,9 +139,9 @@ class _compat_scanner:
         Token.t_pre: "PRE",
         Token.t_section: "SECTION",
         Token.t_section_end: "ENDSECTION",
-        Token.t_magicword: ignore,
-        Token.t_comment: ignore,
-        Token.t_end: ignore,
+        Token.t_magicword: Ignore,
+        Token.t_comment: Ignore,
+        Token.t_end: Ignore,
         Token.t_item: "ITEM",
         Token.t_colon: "EOLSTYLE",
         Token.t_semicolon: "EOLSTYLE",
@@ -196,7 +196,7 @@ class _compat_scanner:
 
                 tag_token = self.tagtoken(s)
                 is_end_token = isinstance(tag_token, EndTagToken)
-                closing_or_self_closing = is_end_token or tag_token.selfClosing
+                closing_or_self_closing = is_end_token or tag_token.self_closing
 
                 if tag_token.t in self.tagextensions or tag_token.t in ("imagemap", "gallery"):
                     if closing_or_self_closing:
@@ -232,7 +232,7 @@ class _compat_scanner:
 
                 elif tag_token.t == "nowiki":
                     i += 1
-                    if is_end_token or tag_token.selfClosing:
+                    if is_end_token or tag_token.self_closing:
                         continue
                     while i < numtokens:
                         token_type, start, tlen = tokens[i]
@@ -287,12 +287,12 @@ class _compat_scanner:
             klass = TagToken
 
         result = klass(name, text)
-        result.selfClosing = self_closing
+        result.self_closing = self_closing
         result.values = values
         return result
 
 
-compat_scan = _compat_scanner()
+compat_scan = _CompatScanner()
 
 
 class _BaseTagToken:
@@ -312,7 +312,7 @@ class _BaseTagToken:
 
 class TagToken(_BaseTagToken):
     values = {}
-    selfClosing = False
+    self_closing = False
 
     def __init__(self, token, text=""):
         self.token = token

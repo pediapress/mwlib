@@ -13,9 +13,9 @@ class OptionParser(optparse.OptionParser):
         self.config_values = []
         optparse.OptionParser.__init__(self, usage=usage)
         self.metabook = None
-        a = self.add_option
+        arg = self.add_option
 
-        a(
+        arg(
             "-c",
             "--config",
             action="callback",
@@ -25,38 +25,38 @@ class OptionParser(optparse.OptionParser):
             help="configuration file, ZIP file or base URL",
         )
 
-        a(
+        arg(
             "-i",
             "--imagesize",
             default=1200,
             help="max. pixel size (width or height) for images (default: 1200)",
         )
 
-        a("-m", "--metabook", help="JSON encoded text file with article collection")
+        arg("-m", "--metabook", help="JSON encoded text file with article collection")
 
-        a("--collectionpage", help="Title of a collection page")
+        arg("--collectionpage", help="Title of a collection page")
 
-        a("-x", "--noimages", action="store_true", help="exclude images")
+        arg("-x", "--noimages", action="store_true", help="exclude images")
 
-        a("-l", "--logfile", help="log to logfile")
+        arg("-l", "--logfile", help="log to logfile")
 
-        a("--username", help="username for login")
-        a("--password", help="password for login")
-        a("--domain", help="domain for login")
+        arg("--username", help="username for login")
+        arg("--password", help="password for login")
+        arg("--domain", help="domain for login")
 
-        a("--title", help="title for article collection")
+        arg("--title", help="title for article collection")
 
-        a("--subtitle", help="subtitle for article collection")
+        arg("--subtitle", help="subtitle for article collection")
 
-        a("--editor", help="editor for article collection")
+        arg("--editor", help="editor for article collection")
 
-        a(
+        arg(
             "--script-extension",
             default=".php",
             help="script extension for PHP scripts (default: .php)",
         )
 
-    def _cb_config(self, option, opt, value, parser):
+    def _cb_config(self, _, opt, value, parser):
         """handle multiple --config arguments by
         resetting parser.values and storing
         the old value in parser.config_values"""
@@ -84,9 +84,9 @@ class OptionParser(optparse.OptionParser):
         self.options, self.args = optparse.OptionParser.parse_args(
             self, args=list(sys.argv[1:])
         )
-        for c in self.config_values:
-            if not hasattr(c, "pages"):
-                c.pages = []
+        for config in self.config_values:
+            if not hasattr(config, "pages"):
+                config.pages = []
 
         if self.options.logfile:
             start_logging(self.options.logfile)

@@ -37,8 +37,8 @@ def dump_text(obj):
 def dump_figures_and_paragraphs(fp):
     print("=== FiguresAndParagraphs ===")
     print("  ::", end=" ")
-    for f in fp.fs:
-        print(f.imgPath[f.imgPath.rfind("/"):], end=" ")
+    for figure in fp.fs:
+        print(figure.imgPath[figure.imgPath.rfind("/"):], end=" ")
     print()
     print("num paras:", len(fp.ps))
     for p in fp.ps:
@@ -48,21 +48,21 @@ def dump_figures_and_paragraphs(fp):
 
 def dump_keep_together(keep_together):
     print("=== KeepTogether ===")
-    for f in keep_together._content:
-        if isinstance(f, FiguresAndParagraphs):
-            dump_figures_and_paragraphs(f)
+    for figure in keep_together._content:
+        if isinstance(figure, FiguresAndParagraphs):
+            dump_figures_and_paragraphs(figure)
         else:
-            dump_text(f)
+            dump_text(figure)
     print("===/KEEP")
 
 
 def dump_smart_keep_together(keep_together):
     print("=== SmartKeepTogether ===")
-    for f in keep_together._content:
-        if isinstance(f, FiguresAndParagraphs):
-            dump_figures_and_paragraphs(f)
+    for figure in keep_together._content:
+        if isinstance(figure, FiguresAndParagraphs):
+            dump_figures_and_paragraphs(figure)
         else:
-            dump_text(f)
+            dump_text(figure)
     print("===/SmartKeep")
 
 

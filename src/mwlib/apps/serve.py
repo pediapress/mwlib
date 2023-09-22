@@ -113,8 +113,8 @@ def check_service(args):
 
     if args.save_output:
         log.info("saving to %r" % args.save_output)
-        with open(args.save_output, "wb") as f:
-            f.write(response)
+        with open(args.save_output, "wb") as out_file:
+            out_file.write(response)
 
     render_time = time.time() - start_time
     log.info("rendering ok, took %fs" % render_time)

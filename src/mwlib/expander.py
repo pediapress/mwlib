@@ -41,8 +41,8 @@ def find_template(raw, name, parsed_raw=None):
     name or None if there is no such template"""
 
     if not parsed_raw:
-        e = Expander('', wikidb=DictDB())
-        todo = [parse(raw, replace_tags=e.replace_tags)]
+        exp = Expander('', wikidb=DictDB())
+        todo = [parse(raw, replace_tags=exp.replace_tags)]
     else:
         todo = parsed_raw
     while todo:

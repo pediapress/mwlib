@@ -244,11 +244,11 @@ if __name__ == "__main__":
     lc = LicenseChecker()
     lc.read_licenses_csv()
 
-    stats_dir = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
+    STATS_DIR = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
         "HIQ_STATSDIR")
-    if not stats_dir:
+    if not STATS_DIR:
         print(
             "specify stats_dir as first arg, or set environment var HIQ_STATSIDR")
         sys.exit(1)
 
-    lc.analyse_unknown_licenses(stats_dir)
+    lc.analyse_unknown_licenses(STATS_DIR)

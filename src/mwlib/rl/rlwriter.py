@@ -44,7 +44,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from mwlib import advtree, log, parser, timeline, uparser, writerbase
 from mwlib._version import version as mwlibversion
 from mwlib.mathutils import renderMath
-from mwlib.rl._version import version as rlwriterversion
+from mwlib.rl._version import VERSION as rlwriterversion
 from mwlib.rl.customflowables import (
     DummyTable,
     Figure,
@@ -2447,7 +2447,7 @@ class RlWriter:
                 row_data.append(self.write(cell))
             table_data.append(row_data)
         table = Table(table_data, colWidths=t.colwidths, splitByRow=1)
-        table.setStyle(rltables.getStyles(t))
+        table.setStyle(rltables.get_styles(t))
         table.hAlign = pdfstyles.TABLE_ALIGN
         if TABLE_STYLE.get("spaceBefore", 0) > 0:
             elements.append(Spacer(0, TABLE_STYLE["spaceBefore"]))

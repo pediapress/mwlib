@@ -95,16 +95,16 @@ def post():
         raise
 
 
-def parse_article(article, db, options):
+def parse_article(article, wiki_db, options):
     try:
-        page = db.normalize_and_get_page(article, 0)
+        page = wiki_db.normalize_and_get_page(article, 0)
         raw = page.rawtext if page else None
         # yes, raw can be None, when we have a
         # redirect to a non-existing article.
         if raw is None:
             return
         stime = time.time()
-        uparser.parse_string(article, raw=raw, wikidb=db)
+        uparser.parse_string(article, raw=raw, wikidb=wiki_db)
     except Exception as err:
         print("F", repr(article), err)
         if options.tb:

@@ -25,8 +25,8 @@ from reportlab.lib.units import cm
 # used to mark translateable strings:
 if "_" not in globals():
 
-    def _(x):
-        return x
+    def _(text):
+        return text
 
 
 SERIF_FONT = "FreeSerif"

@@ -283,6 +283,6 @@ def get_licenses(metabook):
 def make_interwiki(api_entry=None):
     api_entry = api_entry or {}
     api_entries = {}
-    for k, v in api_entry.items():
-        api_entries[str(k)] = v
+    for k, val in api_entry.items():
+        api_entries[str(k)] = val
     return Interwiki(**api_entries)

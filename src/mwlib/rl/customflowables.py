@@ -403,16 +403,16 @@ class PreformattedBox(Preformatted):
 
 
 class SmartKeepTogether(_ContainerSpace, Flowable):
-    def __init__(self, flowables, maxHeight=None):
+    def __init__(self, flowables, max_height=None):
         self._content = _flowableSublist(flowables)
-        self._maxHeight = maxHeight
+        self._max_height = max_height
 
     def wrap(self, aW, aH):
         dims = []
-        W, H = _listWrapOn(self._content, aW, self.canv, dims=dims)
-        self.height = H
+        width, height = _listWrapOn(self._content, aW, self.canv, dims=dims)
+        self.height = height
         self.content_dims = dims
-        return W, 0xFFFFFF  # force a split
+        return width, 0xFFFFFF  # force a split
 
     def split(self, aW, aH):
         if not hasattr(self, "height"):

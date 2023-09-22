@@ -26,10 +26,10 @@ class TocRenderer:
         outpath = os.path.dirname(pdfpath)
         tocpath = os.path.join(outpath, "toc.pdf")
         finalpath = os.path.join(outpath, "final.pdf")
-        self.renderToc(tocpath, toc_entries, rtl=rtl)
+        self.render_toc(tocpath, toc_entries, rtl=rtl)
         return self.comine_pdfs(pdfpath, tocpath, finalpath, has_title_page)
 
-    def _getColWidths(self):
+    def _get_col_widths(self):
         paragraph = Paragraph(
             "<b>%d</b>" % 9999, pdfstyles.text_style(mode="toc_article",
                                                      text_align="right")
@@ -39,7 +39,7 @@ class TocRenderer:
         # of the table margins
         return [pdfstyles.PRINT_WIDTH - width - 30, width]
 
-    def renderToc(self, tocpath, toc_entries, rtl):
+    def render_toc(self, tocpath, toc_entries, rtl):
         doc = SimpleDocTemplate(tocpath, pagesize=(pdfstyles.PAGE_WIDTH,
                                                    pdfstyles.PAGE_HEIGHT))
         elements = []
@@ -53,7 +53,7 @@ class TocRenderer:
         )
         toc_table = []
         styles = []
-        col_widths = self._getColWidths()
+        col_widths = self._get_col_widths()
         for row_idx, (lvl, txt, page_num) in enumerate(toc_entries):
             if lvl == "article":
                 page_num = str(page_num)

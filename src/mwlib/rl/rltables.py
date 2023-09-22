@@ -174,34 +174,34 @@ def reformat_table(t, maxCols):
     return t
 
 
-def split_list_items(t):
-    nt = t.copy()
-    nt.children = []
-    for r in t.children:
-        nr = Row()
+def split_list_items(table):
+    new_table = table.copy()
+    new_table.children = []
+    for row in table.children:
+        new_row = Row()
         cols = []
-        maxItems = 0
-        for cell in r:
+        max_items = 0
+        for cell in row:
             items = []
             for c in cell.children:
                 if c.__class__ == ItemList:
                     items.extend(c.children)
             cols.append(items)
-            maxItems = max(maxItems, len(items))
-        for i in range(maxItems):
+            max_items = max(max_items, len(items))
+        for i in range(max_items):
             for j, _ in enumerate(cols):
                 try:
                     item = cols[j][i]
                     il = ItemList()
                     il.append_child(item)
-                    nc = Cell()
-                    nc.append_child(il)
-                    nr.append_child(nc)
+                    new_cell = Cell()
+                    new_cell.append_child(il)
+                    new_row.append_child(new_cell)
                 except IndexError:
-                    nr.append_child(Cell())
-            nt.append_child(nr)
-            nr = Row()
-    return nt
+                    new_row.append_child(Cell())
+            new_table.append_child(new_row)
+            new_row = Row()
+    return new_table
 
 
 def reduce_cols(t, colnum=2):
@@ -418,7 +418,7 @@ def check_spans(t):
     t.span_styles = styles
 
 
-def getStyles(table):
+def get_styles(table):
     styles = []
     styles.extend(base_styles(table))
     styles.extend(border_styles(table))

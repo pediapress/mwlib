@@ -26,10 +26,10 @@ class Uniquifier:
         return retval
 
     def _repl_from_uniq(self, mo):
-        u = mo.group(0)
-        t = self.uniq2repl.get(u, None)
+        uniq = mo.group(0)
+        t = self.uniq2repl.get(uniq, None)
         if t is None:
-            return u
+            return uniq
         return t["complete"]
 
     def replace_uniq(self, txt):
@@ -40,7 +40,6 @@ class Uniquifier:
     def _repl_to_uniq(self, mo):
         tagname = mo.group("tagname")
         if tagname is None:
-            # comment =  mo.group("comment")
             if self.txt[mo.start()] == '\n' and self.txt[mo.end() - 1] == '\n':
                 return '\n'
             return (mo.group(2) or "") + (mo.group(3) or "")

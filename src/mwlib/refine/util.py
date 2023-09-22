@@ -176,20 +176,20 @@ def handle_imagemod(self, mod_type, match):
         self.height = height
 
 
-def resolve_entity(e):
-    if e[1] == "#":
+def resolve_entity(entity):
+    if entity[1] == "#":
         try:
-            if e[2] == "x" or e[2] == "X":
-                return unichr(int(e[3:-1], 16))
+            if entity[2] == "x" or entity[2] == "X":
+                return unichr(int(entity[3:-1], 16))
             else:
-                return unichr(int(e[2:-1]))
+                return unichr(int(entity[2:-1]))
         except ValueError:
-            return e
+            return entity
     else:
         try:
-            return unichr(six.moves.html_entities.name2codepoint[e[1:-1]])
+            return unichr(six.moves.html_entities.name2codepoint[entity[1:-1]])
         except KeyError:
-            return e
+            return entity
 
 
 def replace_html_entities(txt):

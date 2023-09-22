@@ -67,16 +67,16 @@ def _lookup_handler_function(node):
 
 
 def _handle_link_node(node):
-    ns = node.ns
+    ns_handler = node.ns
     if node.colon:
-        ns = nshandling.NS_SPECIAL
-    if ns == nshandling.NS_IMAGE:
+        ns_handler = nshandling.NS_SPECIAL
+    if ns_handler == nshandling.NS_IMAGE:
         node.__class__ = nodes.ImageLink
-    elif ns == nshandling.NS_MAIN:
+    elif ns_handler == nshandling.NS_MAIN:
         node.__class__ = nodes.ArticleLink
-    elif ns == nshandling.NS_CATEGORY:
+    elif ns_handler == nshandling.NS_CATEGORY:
         node.__class__ = nodes.CategoryLink
-    elif ns is not None:
+    elif ns_handler is not None:
         node.__class__ = nodes.NamespaceLink
     elif node.langlink:
         node.__class__ = nodes.LangLink

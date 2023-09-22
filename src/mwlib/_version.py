@@ -21,8 +21,8 @@ def find_pyproject_toml():
 def get_version_from_pyproject():
     with open(find_pyproject_toml(), encoding="utf-8") as file:
         pyproject_data = toml.load(file)
-        v = pyproject_data["project"]["version"]
-        return v
+        ver = pyproject_data["project"]["version"]
+        return ver
 
 
 def get_version_from_package(package_name):

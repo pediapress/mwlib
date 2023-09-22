@@ -80,13 +80,13 @@ class WikiPage(PageTemplate):
         @type title: unicode
         """
 
-        id = title
+        page_id = title
         frames = Frame(PAGE_MARGIN_LEFT, PAGE_MARGIN_BOTTOM,
                        PRINT_WIDTH, PRINT_HEIGHT)
 
         PageTemplate.__init__(
             self,
-            id=id,
+            id=page_id,
             frames=frames,
             onPage=onPage,
             onPageEnd=onPageEnd,
@@ -110,22 +110,23 @@ class WikiPage(PageTemplate):
             canvas.saveState()
             canvas.resetTransforms()
             h_offset = HEADER_MARGIN_HOR if not self.rtl else 1.5 * HEADER_MARGIN_HOR
-            canvas.translate(h_offset, PAGE_HEIGHT - HEADER_MARGIN_VERT - 0.1 * cm)
-            p = Paragraph(self.title, text_style())
-            p.canv = canvas
-            p.wrap(
+            canvas.translate(h_offset,
+                             PAGE_HEIGHT - HEADER_MARGIN_VERT - 0.1 * cm)
+            paragraph = Paragraph(self.title, text_style())
+            paragraph.canv = canvas
+            paragraph.wrap(
                 PAGE_WIDTH - HEADER_MARGIN_HOR * 2.5, PAGE_HEIGHT
             )  # add an extra 0.5 margin to have enough space for page number
-            p.drawPara()
+            paragraph.drawPara()
             canvas.restoreState()
 
         if not self.rtl:
             h_pos = PAGE_WIDTH - HEADER_MARGIN_HOR
-            d = canvas.drawRightString
+            draw_str = canvas.drawRightString
         else:
             h_pos = HEADER_MARGIN_HOR
-            d = canvas.drawString
-        d(h_pos, PAGE_HEIGHT - HEADER_MARGIN_VERT + 0.1 * cm, "%d" % doc.page)
+            draw_str = canvas.drawString
+        draw_str(h_pos, PAGE_HEIGHT - HEADER_MARGIN_VERT + 0.1 * cm, "%d" % doc.page)
 
         # Footer
         canvas.saveState()
@@ -137,11 +138,14 @@ class WikiPage(PageTemplate):
             FOOTER_MARGIN_VER,
         )
         if pdfstyles.SHOW_PAGE_FOOTER:
-            p = Paragraph(formatter.clean_text(PAGE_FOOTER,
-                                               escape=False), text_style())
-            p.canv = canvas
-            w, h = p.wrap(PAGE_WIDTH - HEADER_MARGIN_HOR * 2.5, PAGE_HEIGHT)
-            p.drawOn(canvas, FOOTER_MARGIN_HOR, FOOTER_MARGIN_VER - 10 - h)
+            paragraph = Paragraph(formatter.clean_text(PAGE_FOOTER,
+                                                       escape=False),
+                                  text_style())
+            paragraph.canv = canvas
+            _, height = paragraph.wrap(PAGE_WIDTH - HEADER_MARGIN_HOR * 2.5,
+                                       PAGE_HEIGHT)
+            paragraph.drawOn(canvas, FOOTER_MARGIN_HOR,
+                             FOOTER_MARGIN_VER - 10 - height)
         canvas.restoreState()
 
 

@@ -63,26 +63,26 @@ from mwlib.parser import (
 log = Log("advtree")
 
 
-def _idIndex(lst, el):
+def _id_index(lst, element_to_check):
     """Return index of first appeareance of element el in list lst"""
 
-    for i, e in enumerate(lst):
-        if e is el:
+    for i, element in enumerate(lst):
+        if element is element_to_check:
             return i
-    raise ValueError("element %r not found" % el)
+    raise ValueError("element %r not found" % element_to_check)
 
 
 def debug(method):  # use as decorator
-    def f(self, *args, **kargs):
+    def foo(self, *args, **kargs):
         log(f"\n{method.__name__} called with {args!r} {kargs!r}")
         log(f"on {self!r} attrs:{self.attributes!r} style:{self.style!r}")
-        p = self
-        while p.parent:
-            p = p.parent
-            log("%r" % p)
+        parent = self
+        while parent.parent:
+            parent = parent.parent
+            log("%r" % parent)
         return method(self, *args, **kargs)
 
-    return f
+    return foo
 
 
 class AdvancedNode:
@@ -97,12 +97,12 @@ class AdvancedNode:
 
     def copy(self):
         "return a copy of this node and all its children"
-        p = self.parent
+        parent = self.parent
         try:
             self.parent = None
             node = copy.deepcopy(self)
         finally:
-            self.parent = p
+            self.parent = parent
         return node
 
     def move_to(
@@ -115,17 +115,17 @@ class AdvancedNode:
 
         if self.parent:
             self.parent.remove_child(self)
-        tp = targetnode.parent
-        idx = _idIndex(tp.children, targetnode)
+        target_parent = targetnode.parent
+        idx = _id_index(target_parent.children, targetnode)
         if not prefix:
             idx += 1
-        tp.children.insert(idx, self)
-        self.parent = tp
+        target_parent.children.insert(idx, self)
+        self.parent = target_parent
 
     def has_child(self, child):
         """Check if node c is child of self"""
         try:
-            _idIndex(self.children, child)
+            _id_index(self.children, child)
             if child.parent is not self:
                 raise ValueError("child not found")
             return True
@@ -144,14 +144,14 @@ class AdvancedNode:
     def replace_child(self, child, newchildren=[]):
         """Remove child node c and replace with newchildren if given."""
 
-        idx = _idIndex(self.children, child)
+        idx = _id_index(self.children, child)
         self.children[idx: idx + 1] = newchildren
 
         child.parent = None
         if self.has_child(child):
             raise ValueError("child not removed")
-        for nc in newchildren:
-            nc.parent = self
+        for new_child in newchildren:
+            new_child.parent = self
 
     def get_parents(self):
         """Return list of parent nodes up to the root node.
@@ -202,39 +202,39 @@ class AdvancedNode:
 
     def get_previous(self):
         """Return previous sibling"""
-        s = self.get_all_siblings()
+        sibling = self.get_all_siblings()
         try:
-            idx = _idIndex(s, self)
+            idx = _id_index(sibling, self)
         except ValueError:
             return None
         if idx - 1 < 0:
             return None
         else:
-            return s[idx - 1]
+            return sibling[idx - 1]
 
     def get_next(self):
         """Return next sibling"""
-        s = self.get_all_siblings()
+        sibling = self.get_all_siblings()
         try:
-            idx = _idIndex(s, self)
+            idx = _id_index(sibling, self)
         except ValueError:
             return None
-        if idx + 1 >= len(s):
+        if idx + 1 >= len(sibling):
             return None
         else:
-            return s[idx + 1]
+            return sibling[idx + 1]
 
     def get_last(self):  # FIXME might return self. is this intended?
         """Return last sibling"""
-        s = self.get_all_siblings()
-        if s:
-            return s[-1]
+        sibling = self.get_all_siblings()
+        if sibling:
+            return sibling[-1]
 
     def get_first(self):  # FIXME might return self. is this intended?
         """Return first sibling"""
-        s = self.get_all_siblings()
-        if s:
-            return s[0]
+        sibling = self.get_all_siblings()
+        if sibling:
+            return sibling[0]
 
     def get_last_child(self):
         """Return last child of this node"""
@@ -246,7 +246,7 @@ class AdvancedNode:
         if self.children:
             return self.children[0]
 
-    def get_first_leaf(self, callerIsSelf=True):
+    def get_first_leaf(self, caller_is_self=True):
         """Return 'first' child that has no children itself"""
         if self.children:
             # first kid of a section is its caption
@@ -254,21 +254,21 @@ class AdvancedNode:
                 if len(self.children) == 1:
                     return None
                 else:
-                    return self.children[1].get_first_leaf(callerIsSelf=False)
+                    return self.children[1].get_first_leaf(caller_is_self=False)
             else:
-                return self.children[0].get_first_leaf(callerIsSelf=False)
+                return self.children[0].get_first_leaf(caller_is_self=False)
         else:
-            if callerIsSelf:
+            if caller_is_self:
                 return None
             else:
                 return self
 
-    def get_last_leaf(self, callerIsSelf=True):
+    def get_last_leaf(self, caller_is_self=True):
         """Return 'last' child that has no children itself"""
         if self.children:
-            return self.children[-1].get_first_leaf(callerIsSelf=False)
+            return self.children[-1].get_first_leaf(caller_is_self=False)
         else:
-            if callerIsSelf:
+            if caller_is_self:
                 return None
             else:
                 return self
@@ -305,37 +305,37 @@ class AdvancedNode:
         else:
             return self.attributes.get("style", {})
 
-    def _clean_attrs(self, attrs):
-        def ensureInt(val, min_val=1):
+    def _ensure_int(self, val, min_val=1):
+        try:
+            return max(min_val, int(val))
+        except ValueError:
+            return min_val
+
+    def _ensure_unicode(self, val):
+        if isinstance(val, six.text_type):
+            return val
+        elif isinstance(val, str):
+            return six.text_type(val, "utf-8")
+        else:
             try:
-                return max(min_val, int(val))
-            except ValueError:
-                return min_val
+                return six.text_type(val)
+            except BaseException:
+                return ""
 
-        def ensureUnicode(val):
-            if isinstance(val, six.text_type):
-                return val
-            elif isinstance(val, str):
-                return six.text_type(val, "utf-8")
-            else:
-                try:
-                    return six.text_type(val)
-                except BaseException:
-                    return ""
+    def _ensure_dict(self, val):
+        if isinstance(val, dict):
+            return val
+        else:
+            return {}
 
-        def ensureDict(val):
-            if isinstance(val, dict):
-                return val
-            else:
-                return {}
-
+    def _clean_attrs(self, attrs):
         for key, value in attrs.items():
             if key in ["colspan", "rowspan"]:
-                attrs[key] = ensureInt(value, min_val=1)
+                attrs[key] = self._ensure_int(value, min_val=1)
             elif key == "style":
-                attrs[key] = self._clean_attrs(ensureDict(value))
+                attrs[key] = self._clean_attrs(self._ensure_dict(value))
             else:
-                attrs[key] = ensureUnicode(value)
+                attrs[key] = self._ensure_unicode(value)
         return attrs
 
     def get_attributes(self):
@@ -348,10 +348,10 @@ class AdvancedNode:
         attrs = self._clean_attrs(vlist)
         return attrs
 
-    def has_class_id(self, classIDs):
+    def has_class_id(self, class_ids):
         _class = self.attributes.get("class", "").split(" ")
         _id = self.attributes.get("id", "")
-        return any(classID in _class or classID == _id for classID in classIDs)
+        return any(classID in _class or classID == _id for classID in class_ids)
 
     def is_visible(self):
         """Return True if node is visble. Used to detect hidden elements."""
@@ -419,7 +419,7 @@ class AdvancedCell(AdvancedNode):
 
 
 class AdvancedSection(AdvancedNode):
-    def getSectionLevel(self):
+    def get_section_level(self):
         return 1 + self.get_level()
 
 
@@ -485,10 +485,10 @@ class Indented(
 ):  # fixme: node is deprecated, now style node ':' always becomes a DefinitionDescription
     """margin to the left"""
 
-    def getIndentLevel(self):
+    def get_indent_level(self):
         return self.caption.count(":")
 
-    indentlevel = property(getIndentLevel)
+    indentlevel = property(get_indent_level)
 
 
 class Overline(Style, AdvancedNode):
@@ -722,12 +722,12 @@ for k in _blockNodes:
 # -------------------------------------------------------------------------
 
 
-def mix_in_class(pyClass, mixInClass, makeFirst=False):
-    if mixInClass not in pyClass.__bases__:
-        if makeFirst:
-            pyClass.__bases__ = (mixInClass,) + pyClass.__bases__
+def mix_in_class(pyClass, mix_in_class, make_first=False):
+    if mix_in_class not in pyClass.__bases__:
+        if make_first:
+            pyClass.__bases__ = (mix_in_class,) + pyClass.__bases__
         else:
-            pyClass.__bases__ += (mixInClass,)
+            pyClass.__bases__ += (mix_in_class,)
 
 
 def extend_classes(node):
@@ -775,7 +775,7 @@ def fix_style_node(node):
     """
     parser.Style Nodes are mapped to logical markup
     detection of DefinitionList depends on remove_nodes
-    and removeNewlines
+    and remove_new_lines
     """
     if node.__class__ != Style:
         return
@@ -886,9 +886,9 @@ def build_advanced_tree(root):  # USE WITH CARE
 def _validate_parser_tree(node, parent=None):
     # helper to assert tree parent link consistency
     if parent is not None:
-        _idIndex(parent.children, node)  # asserts it occures only once
+        _id_index(parent.children, node)  # asserts it occures only once
     for child in node:
-        _idIndex(node.children, child)  # asserts it occures only once
+        _id_index(node.children, child)  # asserts it occures only once
         if child not in node.children:
             raise ValueError(f"child {child!r} not in children of {node!r}")
         _validate_parser_tree(child, node)

@@ -7,10 +7,10 @@ import os
 class Snippet:
     def __init__(self, txt, snippet_id):
         self.txt = txt
-        self.id = snippet_id
+        self.snippet_id = snippet_id
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} {self.id!r} {self.txt[:10]!r}...>"
+        return f"<{self.__class__.__name__} {self.snippet_id!r} {self.txt[:10]!r}...>"
 
 
 def get_all():

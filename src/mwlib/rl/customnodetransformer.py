@@ -24,7 +24,7 @@ class CustomNodeTransformer:
     def __init__(self):
         pass
 
-    def _updateStyles(self, node, styles):
+    def _update_styles(self, node, styles):
         node_style = node.vlist.get("style", {})
         for style in styles.split(";"):
             try:
@@ -42,7 +42,7 @@ class CustomNodeTransformer:
 
         for node_class in node_classes:
             if node_class in css_map:
-                self._updateStyles(node, css_map[node_class])
+                self._update_styles(node, css_map[node_class])
 
         for child in node.children:
             self.transform_css(child)

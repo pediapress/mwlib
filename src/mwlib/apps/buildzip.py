@@ -68,11 +68,11 @@ def make_zip(output=None, options=None, metabook=None,
         )
 
         if output:
-            fd, filename = tempfile.mkstemp(suffix=".zip",
+            file_descriptor, filename = tempfile.mkstemp(suffix=".zip",
                                             dir=os.path.dirname(output))
         else:
-            fd, filename = tempfile.mkstemp(suffix=".zip")
-        os.close(fd)
+            file_descriptor, filename = tempfile.mkstemp(suffix=".zip")
+        os.close(file_descriptor)
         zip_dir(fsdir, filename)
         if output:
             os.rename(filename, output)

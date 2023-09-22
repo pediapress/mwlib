@@ -95,8 +95,8 @@ class StartFetcher:
 
         val = api.fetch_pages([cp])
         rawtext = list(val["pages"].values())[0]["revisions"][0]["*"]
-        mb = self.metabook = parse_collection_page(rawtext)
-        wikitrust(api.baseurl, mb)
+        meta_book = self.metabook = parse_collection_page(rawtext)
+        wikitrust(api.baseurl, meta_book)
 
         # XXX: localised template parameter names???
         meta = extract_metadata(
@@ -110,12 +110,12 @@ class StartFetcher:
                 "sort_as",
             ),
         )
-        mb.editor = meta["editor"]
-        mb.cover_image = meta["cover-image"]
-        mb.cover_color = meta["cover-color"]
-        mb.text_color = meta["text-color"]
-        mb.description = meta["description"]
-        mb.sort_as = meta["sort_as"]
+        meta_book.editor = meta["editor"]
+        meta_book.cover_image = meta["cover-image"]
+        meta_book.cover_color = meta["cover-color"]
+        meta_book.text_color = meta["text-color"]
+        meta_book.description = meta["description"]
+        meta_book.sort_as = meta["sort_as"]
 
         p = os.path.join(self.fsout.path, "collectionpage.txt")
         if isinstance(rawtext, six.text_type):

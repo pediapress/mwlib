@@ -17,11 +17,11 @@ def get_siteinfo(lang):
     except KeyError:
         pass
 
-    si = None
-    p = _get_path(lang)
-    if p.exists():
-        with p.open("r", encoding="utf-8") as f:
-            si = json.load(f)
+    site_info = None
+    path = _get_path(lang)
+    if path.exists():
+        with path.open("r", encoding="utf-8") as f:
+            site_info = json.load(f)
 
-    _cache[lang] = si
-    return si
+    _cache[lang] = site_info
+    return site_info

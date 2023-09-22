@@ -18,7 +18,7 @@ from mwlib.advtree import (
     Row,
     Section,
     Text,
-    _idIndex,
+    _id_index,
     build_advanced_tree,
 )
 from mwlib.dummydb import DummyDB
@@ -30,7 +30,7 @@ def _treesanity(r):
     for c in r.allchildren():
         if c.parent:
             assert c in c.parent.children
-            assert _idIndex(c.parent.children, c) >= 0
+            assert _id_index(c.parent.children, c) >= 0
         for cc in c:
             assert cc.parent
             assert cc.parent is c
@@ -112,7 +112,7 @@ def test_identity():
     brs = r.get_child_nodes_by_class(BreakingReturn)
     for i, br in enumerate(brs):
         assert br in br.siblings
-        assert i == _idIndex(br.parent.children, br)
+        assert i == _id_index(br.parent.children, br)
         assert len([x for x in br.parent.children if x is not br]) == len(brs) - 1
         for bbr in brs:
             if br is bbr:

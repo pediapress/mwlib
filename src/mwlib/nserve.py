@@ -550,8 +550,8 @@ def main():
     server = pywsgi.WSGIServer(address, default_app())
 
     watchers = pool.Pool()
-    for x in q_serve:
-        watchers.spawn(CallInLoop(5.0, WatchQServe(x, busy)))
+    for watcher in q_serve:
+        watchers.spawn(CallInLoop(5.0, WatchQServe(watcher, busy)))
 
     try:
         print("listening on %s:%d" % address)

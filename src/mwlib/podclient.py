@@ -112,8 +112,8 @@ class PODClient:
             raise RuntimeError(f"upload failed: {errmsg!r}")
 
     def post_zipfile(self, filename):
-        with open(filename, "rb") as f:
-            content_type, data = get_multipart("collection.zip", f.read(),
+        with open(filename, "rb") as zip_file:
+            content_type, data = get_multipart("collection.zip", zip_file.read(),
                                                "collection")
         log.info(
             "POSTing zipfile %r to %s (%d Bytes)" % (filename, self.posturl,

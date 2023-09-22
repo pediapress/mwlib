@@ -832,16 +832,16 @@ class CombinedParser:
                                                      SECTION_TAG})
 
         while parsers:
-            p = parsers.pop()
+            parser = parsers.pop()
 
-            need_walker = getattr(p, "need_walker", True)
+            need_walker = getattr(parser, "need_walker", True)
             if need_walker:
-                log.info(f"using default token walker for {p}")
+                log.info(f"using default token walker for {parser}")
                 walker = default_walker
-                for x in walker(tokens):
-                    p(x, xopts)
+                for token in walker(tokens):
+                    parser(token, xopts)
             else:
-                p(tokens, xopts)
+                parser(tokens, xopts)
 
 
 def _create(tokens, i, start, state):

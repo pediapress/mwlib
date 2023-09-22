@@ -158,16 +158,16 @@ class MwApi:
     def _handle_query_continue(self, qc, last_qc, kwargs):
         self.qccount += 1
         self.report()
-        kw = kwargs.copy()
+        new_kw = kwargs.copy()
         for d in qc:
             for k, v in d.items():
-                kw[str(k)] = v
+                new_kw[str(k)] = v
 
         if qc == last_qc:
-            print("warning: cannot continue this query:", self._build_url(**kw))
+            print("warning: cannot continue this query:", self._build_url(**new_kw))
             return None, True
 
-        return kw, False
+        return new_kw, False
 
     def _do_request(self, query_continue=True, merge_data=None, **kwargs):
         last_qc = None
@@ -186,12 +186,12 @@ class MwApi:
             else:
                 self._merge_data(retval, action, data)
 
-            qc = list(data.get("query-continue", {}).values())
-            if qc and query_continue:
-                todo, stop_query = self._handle_query_continue(qc, last_qc, kwargs)
+            qc_values = list(data.get("query-continue", {}).values())
+            if qc_values and query_continue:
+                todo, stop_query = self._handle_query_continue(qc_values, last_qc, kwargs)
                 if stop_query:
                     return retval
-                last_qc = qc
+                last_qc = qc_values
 
         return retval
 

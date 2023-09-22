@@ -39,8 +39,8 @@ def main():
         with open("test.json", "w") as f:
             f.write(simplejson.dumps(meta_book))
     else:
-        f = sys.stdout
-        f.write(simplejson.dumps(meta_book))
+        output_file = sys.stdout
+        output_file.write(simplejson.dumps(meta_book))
 
 
 if __name__ == "__main__":

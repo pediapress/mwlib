@@ -115,13 +115,13 @@ class MultiEnvironment(Environment):
 
     def get_licenses(self):
         res = list(self.metabook.licenses or [])
-        for t in res:
-            t._wiki = None
+        for item in res:
+            item._wiki = None
 
         for x in self.id2env.values():
             tmp = x.wiki.get_licenses()
-            for t in tmp:
-                t._env = x
+            for item in tmp:
+                item._env = x
             res += tmp
 
         return res

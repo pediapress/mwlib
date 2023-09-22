@@ -774,7 +774,7 @@ class Fetcher:
         return gr
 
 
-def pages_from_metabook(mb):
-    articles = mb.articles()
-    pages = [(x.title, x.revision) for x in articles]
+def pages_from_metabook(meta_book):
+    articles = meta_book.articles()
+    pages = [(article.title, article.revision) for article in articles]
     return pages

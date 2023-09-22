@@ -134,7 +134,7 @@ class TreeCleaner:
         "fix_sub_sup",
         "remove_leading_para_in_list",
         "remove_childless_nodes",  # methods above might leave empty nodes behind - clean up
-        "removeNewlines",  # imported from advtree - clean up newlines that are not needed
+        "remove_new_lines",  # imported from advtree - clean up newlines that are not needed
         "remove_breaking_returns",
         "remove_see_also",
         "build_def_lists",
@@ -413,7 +413,7 @@ class TreeCleaner:
     def get_reports(self):
         return self.reports
 
-    def removeNewlines(self, node):
+    def remove_new_lines(self, node):
         remove_newlines(node)
 
     def remove_empty_text_nodes(self, node):
@@ -623,9 +623,9 @@ class TreeCleaner:
         if node.__class__ == Table:
             nested_tables = node.get_child_nodes_by_class(Table)
             nested_rows = 0
-            for t in nested_tables:
+            for table in nested_tables:
                 nested_rows = max(nested_rows,
-                                  len(t.get_child_nodes_by_class(Row)))
+                                  len(table.get_child_nodes_by_class(Row)))
             many_nested_rows = nested_rows > 35
         else:
             many_nested_rows = False
@@ -733,7 +733,7 @@ class TreeCleaner:
         for c in node.children:
             self.remove_breaking_returns(c)
 
-    def _fixParagraphs(self, node: Node):
+    def _fix_paragraphs(self, node: Node):
         """Move paragraphs to the child list of
         the last section (if existent)"""
 
@@ -749,12 +749,12 @@ class TreeCleaner:
             return True  # changed
         else:
             for child in node.children[:]:
-                if self._fixParagraphs(child):
+                if self._fix_paragraphs(child):
                     return True
         return False
 
     def fixParagraphs(self, node):
-        while self._fixParagraphs(node):
+        while self._fix_paragraphs(node):
             pass
 
     def _nestingBroken(self, node):
@@ -819,12 +819,12 @@ class TreeCleaner:
         for child in node.children:
             self._cleanUpMarks(child)
 
-    def _filterTree(self, node, nesting_filter=[]):
+    def _filter_tree(self, node, nesting_filter=[]):
         if getattr(node, "nesting_pos", None) in nesting_filter:
             node.parent.remove_child(node)
             return
         for child in node.children[:]:
-            self._filterTree(child, nesting_filter=nesting_filter)
+            self._filter_tree(child, nesting_filter=nesting_filter)
 
     def _isException(self, node):
         try:
@@ -869,12 +869,12 @@ class TreeCleaner:
         self._markNodes(bad_parent, divide, problem_node=node)
 
         top_tree = bad_parent.copy()
-        self._filterTree(top_tree, nesting_filter=["bottom", "problem"])
+        self._filter_tree(top_tree, nesting_filter=["bottom", "problem"])
         middle_tree = bad_parent.copy()
-        self._filterTree(middle_tree, nesting_filter=["top", "bottom"])
+        self._filter_tree(middle_tree, nesting_filter=["top", "bottom"])
         middle_tree = middle_tree.children[0]
         bottom_tree = bad_parent.copy()
-        self._filterTree(bottom_tree, nesting_filter=["top", "problem"])
+        self._filter_tree(bottom_tree, nesting_filter=["top", "problem"])
         new_tree = [
             part for part in [top_tree, middle_tree,
                               bottom_tree] if part is not None

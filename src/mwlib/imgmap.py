@@ -93,17 +93,17 @@ def _make_imagemap(tokens):
 
 comment = (Literal("#") + restOfLine).setParseAction(_make_comment)
 
-integer = Word(nums).setParseAction(lambda s: int(s[0]))
-integer_pair = (integer + integer).setParseAction(lambda x: tuple(x))
+INTEGER = Word(nums).setParseAction(lambda s: int(s[0]))
+INTEGER_PAIR = (INTEGER + INTEGER).setParseAction(lambda x: tuple(x))
 
-poly = Literal("poly") + Group(ZeroOrMore(integer_pair)) + restOfLine
-poly = poly.setParseAction(_make_poly)
+POLY = Literal("poly") + Group(ZeroOrMore(INTEGER_PAIR)) + restOfLine
+POLY = POLY.setParseAction(_make_poly)
 
-rect = Literal("rect") + integer_pair + integer_pair + restOfLine
-rect = rect.setParseAction(_make_rect)
+RECT = Literal("rect") + INTEGER_PAIR + INTEGER_PAIR + restOfLine
+RECT = RECT.setParseAction(_make_rect)
 
-circle = Literal("circle") + integer_pair + integer + restOfLine
-circle = circle.setParseAction(_make_circle)
+CIRCLE = Literal("circle") + INTEGER_PAIR + INTEGER + restOfLine
+CIRCLE = CIRCLE.setParseAction(_make_circle)
 
 desc = Literal("desc") + (
     Literal("top-right")
@@ -130,7 +130,7 @@ def _make_other(tokens):
 other = And([restOfLine]).setParseAction(_make_other)
 line = (
     Suppress(LineStart())
-    + (comment | poly | rect | circle | desc | default | other)
+    + (comment | POLY | RECT | CIRCLE | desc | default | other)
     + Suppress(LineEnd())
 )
 imagemap = ZeroOrMore(line) + StringEnd()
