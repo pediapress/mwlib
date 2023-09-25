@@ -99,8 +99,8 @@ class Main:
                     description = writer.description
                 else:
                     description = "<no description>"
-            except Exception as e:
-                description = "<NOT LOADABLE: %s>" % e
+            except Exception as exc:
+                description = "<NOT LOADABLE: %s>" % exc
             print(f"{entry_point.name}\t{description}")
 
     def show_writer_info(self, name):

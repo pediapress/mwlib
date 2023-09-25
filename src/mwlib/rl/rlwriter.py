@@ -233,7 +233,7 @@ class RlWriter:
         self.font_switcher.register_reportlab_fonts(fontconfig.fonts)
 
         self.tc = TreeCleaner([], save_reports=self.debug, rtl=self.rtl)
-        self.tc.skipMethods = pdfstyles.TREE_CLEANER_SKIP_METHODS
+        self.tc.skip_methods = pdfstyles.TREE_CLEANER_SKIP_METHODS
         self.tc.content_without_text_classes.append(advtree.ReferenceList)
 
         self.cnt = CustomNodeTransformer()
@@ -793,7 +793,7 @@ class RlWriter:
     def buildArticleID(self, wikiurl, article_name):
         tmplink = advtree.Link()
         tmplink.target = article_name
-        tmplink.capitalizeTarget = True  # this is a hack, this info should pulled out of the environment if available
+        tmplink.capitalize_target = True  # this is a hack, this info should pulled out of the environment if available
         # tmplink._normalizeTarget() # FIXME: this is currently removed from mwlib. we need to check URL handling in mwlib
         idstr = f"{wikiurl}{tmplink.target}"
         m = md5(idstr.encode("utf-8"))

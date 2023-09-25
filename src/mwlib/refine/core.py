@@ -804,12 +804,12 @@ class ParseParagraphs:
                 ]
 
         while i < len(self.tokens):
-            t = tokens[i]
-            if t.type == Token.t_break:
+            token = tokens[i]
+            if token.type == Token.t_break:
                 create()
                 first += 1
                 i = first
-            elif t.blocknode:  # blocknode
+            elif token.blocknode:  # blocknode
                 create(delta=0)
                 first += 1
                 i = first
@@ -1174,13 +1174,13 @@ def fix_urllink_inside_link(tokens, _xopt):
     idx = 0
     last = None
     while idx < len(tokens) - 1:
-        t = tokens[idx]
-        if t.type == Token.t_2box_open:
+        token = tokens[idx]
+        if token.type == Token.t_2box_open:
             last = Token.t_2box_open
-        elif t.type == Token.t_urllink:
+        elif token.type == Token.t_urllink:
             last = Token.t_urllink
         elif (
-            t.type == Token.t_2box_close
+            token.type == Token.t_2box_close
             and tokens[idx + 1].type == Token.t_special
             and tokens[idx + 1].text == "]"
             and last == Token.t_urllink
@@ -1193,8 +1193,8 @@ def fix_urllink_inside_link(tokens, _xopt):
 def fix_named_url_double_brackets(tokens, xopt):
     idx = 0
     while idx < len(tokens) - 1:
-        t = tokens[idx]
-        if t.type == Token.t_2box_open and tokens[idx + 1].type == Token.t_http_url:
+        token = tokens[idx]
+        if token.type == Token.t_2box_open and tokens[idx + 1].type == Token.t_http_url:
             tokens[idx].text = "["
             tokens[idx].type = Token.t_special
             tokens[idx + 1].text = "[" + tokens[idx + 1].text

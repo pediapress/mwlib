@@ -45,10 +45,10 @@ class TableCellParser:
             index += 1
 
     def make_cell(self, tokens, start, index, skip_end=0):
-        st = tokens[start].text.strip()
-        if st == "|":
+        token = tokens[start].text.strip()
+        if token == "|":
             self.is_header = False
-        elif st == "!":
+        elif token == "!":
             self.is_header = True
         is_header = self.is_header
         if tokens[start].rawtagname == "th":

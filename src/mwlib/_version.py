@@ -38,10 +38,10 @@ display_version = __version__ = version
 
 
 def main():
-    for r in ("mwlib", "mwlib.rl", "mwlib.ext", "mwlib.hiq"):
-        v = get_version_from_package(r)
-        if v:
-            print(r, v)
+    for mwlib_package in ("mwlib", "mwlib.rl", "mwlib.ext", "mwlib.hiq"):
+        ver = get_version_from_package(mwlib_package)
+        if ver:
+            print(mwlib_package, ver)
 
 
 if __name__ == "__main__":

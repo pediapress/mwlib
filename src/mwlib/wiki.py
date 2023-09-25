@@ -118,10 +118,10 @@ class MultiEnvironment(Environment):
         for item in res:
             item._wiki = None
 
-        for x in self.id2env.values():
-            tmp = x.wiki.get_licenses()
+        for env in self.id2env.values():
+            tmp = env.wiki.get_licenses()
             for item in tmp:
-                item._env = x
+                item._env = env
             res += tmp
 
         return res
@@ -132,28 +132,28 @@ def clean_dict(**original):
     return {k: v for k, v in original.items() if v is not None}
 
 
-def process_config_sections(cp, res):
-    for s in ["images", "wiki"]:
-        if not cp.has_section(s):
+def process_config_sections(config_sections, res):
+    for obj in ["images", "wiki"]:
+        if not config_sections.has_section(obj):
             continue
 
-        args = dict(cp.items(s))
+        args = dict(config_sections.items(obj))
         if "type" not in args:
-            raise RuntimeError("section %r does not have key 'type'" % s)
-        t = args["type"]
+            raise RuntimeError("section %r does not have key 'type'" % obj)
+        section_type = args["type"]
         del args["type"]
         try:
-            m = dispatch[s][t]
+            dispatcher = dispatch[obj][section_type]
         except KeyError:
-            raise RuntimeError(f"cannot handle type {t!r} in section {s!r}")
+            raise RuntimeError(f"cannot handle type {section_type!r} in section {obj!r}")
 
-        setattr(res, s, m(**args))
+        setattr(res, obj, dispatcher(**args))
 
 
 def setup_metabook(nfo_fn, res, conf):
     try:
-        with open(nfo_fn, "rb") as fp:
-            format_data = json.load(fp)["format"]
+        with open(nfo_fn, "rb") as info_file:
+            format_data = json.load(info_file)["format"]
     except KeyError:
         return None
     else:

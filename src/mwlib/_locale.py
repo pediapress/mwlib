@@ -441,13 +441,13 @@ _supported = [
 
 lang2locale = {"de": ("de_DE.UTF-8", "de_DE"), "en": ("en_US.UTF-8",)}
 
-current_lang = None
+CURRENT_LANG = None
 
 
 def set_locale_from_lang(lang):
-    global current_lang
+    global CURRENT_LANG
 
-    if lang == current_lang:
+    if lang == CURRENT_LANG:
         return
 
     prefix = lang + "_"
@@ -462,11 +462,11 @@ def set_locale_from_lang(lang):
         reverse=True,
     )
 
-    for x in candidates:
+    for candidate in candidates:
         try:
-            locale.setlocale(locale.LC_NUMERIC, x)
-            current_lang = lang
-            print(f"set locale to {x!r} based on the language {current_lang!r}")
+            locale.setlocale(locale.LC_NUMERIC, candidate)
+            CURRENT_LANG = lang
+            print(f"set locale to {candidate!r} based on the language {CURRENT_LANG!r}")
             return
         except locale.Error:
             pass

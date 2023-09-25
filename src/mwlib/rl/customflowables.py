@@ -144,7 +144,7 @@ class FiguresAndParagraphs(Flowable):
                 return p.style.spaceBefore
         return 0
 
-    def resizeInlineImage(self, p, floatWidth):
+    def resizeInlineImage(self, p, float_width):
         if p.text is None:
             return
         img_dims = re.findall('<img.*?width="([0-9.]+)pt".*?height="([0-9.]+)pt".*?/>', p.text)
@@ -152,11 +152,11 @@ class FiguresAndParagraphs(Flowable):
             txt = p.text
             changed = False
             for w, h in img_dims:
-                if float(w) < floatWidth:
+                if float(w) < float_width:
                     continue
                 changed = True
-                new_h = float(h) * floatWidth / float(w)
-                new_w = floatWidth
+                new_h = float(h) * float_width / float(w)
+                new_w = float_width
                 txt = txt.replace('width="%spt"' % w, 'width="%.2fpt"' % new_w)
                 txt = txt.replace('height="%spt"' % h,
                                   'height="%.2fpt"' % new_h)
@@ -187,18 +187,18 @@ class FiguresAndParagraphs(Flowable):
                 else:
                     self.horizontalRuleOffsets.append(0)
                 continue
-            fullWidth = availWidth - p.style.leftIndent - p.style.rightIndent
-            floatWidth = fullWidth - maxWf
-            self.resizeInlineImage(p, floatWidth)
+            full_width = availWidth - p.style.leftIndent - p.style.rightIndent
+            float_width = full_width - maxWf
+            self.resizeInlineImage(p, float_width)
             nfloatLines = max(0,
                               int((totalHf - (sum(self.paraHeights))) / p.style.leading))
             p.width = 0
             if hasattr(p, "blPara"):
                 del p.blPara
             if hasattr(p, "style") and p.style.wordWrap == "CJK":
-                p.blPara = p.breakLinesCJK(nfloatLines * [floatWidth] + [fullWidth])
+                p.blPara = p.breakLinesCJK(nfloatLines * [float_width] + [full_width])
             else:
-                p.blPara = p.breakLines(nfloatLines * [floatWidth] + [fullWidth])
+                p.blPara = p.breakLines(nfloatLines * [float_width] + [full_width])
             if self.figAlign == "left":
                 self._offsets.append([maxWf] * (nfloatLines) + [0])
             autoLeading = getattr(p.style,
@@ -286,7 +286,7 @@ class FiguresAndParagraphs(Flowable):
         fitting_paras = []
         nextParas = []
         height = 0
-        splittedParagraph = False
+        splitted_paragraph = False
         force_split = False
         for (i, p) in enumerate(self.ps):
             # force pagebreak if less than
@@ -311,7 +311,7 @@ class FiguresAndParagraphs(Flowable):
             if (height + self.paraHeights[i]) < availheight and not force_split:
                 fitting_paras.append(p)
             else:
-                if splittedParagraph:
+                if splitted_paragraph:
                     nextParas.append(p)
                     continue
                 para_frags = p.split(
@@ -322,7 +322,7 @@ class FiguresAndParagraphs(Flowable):
                     - p.style.spaceAfter
                     - 2 * p.style.leading,
                 )  # one line-height "safety margin"
-                splittedParagraph = True
+                splitted_paragraph = True
                 if len(para_frags) == 2:
                     fitting_paras.append(para_frags[0])
                     nextParas.append(para_frags[1])
@@ -334,18 +334,18 @@ class FiguresAndParagraphs(Flowable):
 
         if next_figures:
             if nextParas:
-                nextElements = [
+                next_elements = [
                     FiguresAndParagraphs(next_figures, nextParas,
                                          figure_margin=self.figure_margin)
                 ]
             else:
-                nextElements = next_figures
+                next_elements = next_figures
         else:
-            nextElements = nextParas if nextParas else []
+            next_elements = nextParas if nextParas else []
         return [
             FiguresAndParagraphs(fitting_figures, fitting_paras,
                                  figure_margin=self.figure_margin)
-        ] + nextElements
+        ] + next_elements
 
 
 class PreformattedBox(Preformatted):

@@ -46,8 +46,8 @@ def main():
 
     if command == "download":
         fn = "output"
-        with open(fn, "w") as f:
-            f.write(client.response)
+        with open(fn, "w") as out_file:
+            out_file.write(client.response)
         print(f"wrote {len(client.response)} bytes to {fn!r}")
     else:
         print(json.dumps(client.response, indent=4))

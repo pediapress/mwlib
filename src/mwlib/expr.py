@@ -131,24 +131,24 @@ del a
 class Expr:
     constants = {"e": math.e, "pi": math.pi}
 
-    def as_float_or_int(self, s):
+    def as_float_or_int(self, number):
         try:
-            return self.constants[s]
+            return self.constants[number]
         except KeyError:
             pass
 
-        if "." in s:
-            return float(s)
-        return int(s)
+        if "." in number:
+            return float(number)
+        return int(number)
 
-    def output_operator(self, op):
-        return functions[op](self.operand_stack)
+    def output_operator(self, operator):
+        return functions[operator](self.operand_stack)
 
     def output_operand(self, operand):
         self.operand_stack.append(operand)
 
-    def parse_expr(self, s):
-        tokens = tokenize(s)
+    def parse_expr(self, expr):
+        tokens = tokenize(expr)
         if not tokens:
             return ""
 
@@ -172,10 +172,10 @@ class Expr:
                 while True:
                     if not operator_stack:
                         raise ExprError("unbalanced parenthesis")
-                    t = operator_stack.pop()
-                    if t == "(":
+                    char = operator_stack.pop()
+                    if char == "(":
                         break
-                    self.output_operator(t)
+                    self.output_operator(char)
             elif operator in precedence:
                 if last_operator and last_operator != ")":
                     if operator == "-":
@@ -186,8 +186,8 @@ class Expr:
                 is_unary = operator in unary_ops
                 prec = precedence[operator]
                 while not is_unary and operator_stack and prec <= precedence[operator_stack[-1]]:
-                    p = operator_stack.pop()
-                    self.output_operator(p)
+                    char = operator_stack.pop()
+                    self.output_operator(char)
                 operator_stack.append(operator)
             else:
                 raise ExprError(f"unknown operator: {operator!r}")
@@ -209,15 +209,15 @@ class Expr:
 _cache = {}
 
 
-def expr(s):
+def expr(char):
     try:
-        return _cache[s]
+        return _cache[char]
     except KeyError:
         pass
 
-    r = Expr().parse_expr(s)
-    _cache[s] = r
-    return r
+    parsed_expr = Expr().parse_expr(char)
+    _cache[char] = parsed_expr
+    return parsed_expr
 
 
 def main():

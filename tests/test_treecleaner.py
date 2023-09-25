@@ -58,7 +58,7 @@ def clean_markup(raw):
     print("=" * 20)
     build_advanced_tree(tree)
     tc = TreeCleaner(tree, save_reports=True)
-    tc.clean_all(skipMethods=[])
+    tc.clean_all(skip_methods=[])
     reports = tc.get_reports()
     print("after treecleaner: >>>")
     show_tree(tree)

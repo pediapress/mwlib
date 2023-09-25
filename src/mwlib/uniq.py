@@ -15,13 +15,13 @@ class Uniquifier:
         self.uniq2repl = {}
         if self.random_string is None:
             import binascii
-            r = os.urandom(8)
-            self.__class__.random_string = binascii.hexlify(r).decode('utf8')
+            rand_hex = os.urandom(8)
+            self.__class__.random_string = binascii.hexlify(rand_hex).decode('utf8')
 
     def get_uniq(self, repl, name):
-        r = self.random_string
+        rand_string = self.random_string
         count = len(self.uniq2repl)
-        retval = f"\x7fUNIQ-{name}-{count}-{r}-QINU\x7f"
+        retval = f"\x7fUNIQ-{name}-{count}-{rand_string}-QINU\x7f"
         self.uniq2repl[retval] = repl
         return retval
 

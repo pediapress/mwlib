@@ -97,13 +97,13 @@ class MwApi:
         for k, v in args.items():
             if isinstance(v, str):
                 args[k] = v.encode("utf-8")
-        q = parse.urlencode(args)
-        q = q.replace("%3A", ":")  # fix for wrong quoting of url for images
-        q = q.replace(
+        query = parse.urlencode(args)
+        query = query.replace("%3A", ":")  # fix for wrong quoting of url for images
+        query = query.replace(
             "%7C", "|"
         )  # fix for wrong quoting of API queries (relevant for redirects)
 
-        url = f"{self.apiurl}?{q}"
+        url = f"{self.apiurl}?{query}"
         return url
 
     def _request(self, **kwargs):
@@ -398,8 +398,8 @@ def guess_api_urls(url):
 
 
 def main():
-    s = MwApi("https://en.wikipedia.org/w/api.php")
-    print(s.get_categorymembers("Category:Mainz"))
+    mw_api = MwApi("https://en.wikipedia.org/w/api.php")
+    print(mw_api.get_categorymembers("Category:Mainz"))
 
 
 if __name__ == "__main__":

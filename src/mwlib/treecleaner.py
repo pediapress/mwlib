@@ -153,7 +153,7 @@ class TreeCleaner:
         "mark_short_paragraph",
     ]
 
-    skipMethods = []
+    skip_methods = []
 
     def __init__(
         self,
@@ -365,9 +365,9 @@ class TreeCleaner:
         """Clean parse tree using cleaner methods in the methodList."""
         cleaner_list = []
         for method in cleaner_methods:
-            f = getattr(self, method, None)
-            if f:
-                cleaner_list.append(f)
+            cleaner_foo = getattr(self, method, None)
+            if cleaner_foo:
+                cleaner_list.append(cleaner_foo)
             else:
                 raise "TreeCleaner has no method: %r" % method
 
@@ -396,10 +396,10 @@ class TreeCleaner:
             if self.status_cb:
                 self.status_cb(progress=100 * i / total_children)
 
-    def clean_all(self, skipMethods=[]):
+    def clean_all(self, skip_methods=[]):
         """Clean parse tree using all available cleaner methods."""
-        skipMethods = skipMethods or self.skipMethods
-        self.clean([cm for cm in self.cleaner_methods if cm not in skipMethods])
+        skip_methods = skip_methods or self.skip_methods
+        self.clean([cm for cm in self.cleaner_methods if cm not in skip_methods])
 
     def report(self, *args):
         if not self.save_reports:
@@ -503,8 +503,8 @@ class TreeCleaner:
             children = []
             for row in node.children:
                 for cell in row:
-                    for n in cell:
-                        children.append(n)
+                    for item in cell:
+                        children.append(item)
             if node.parent:
                 self.report("replaced child:", node, children)
                 node.parent.replace_child(node, children)
@@ -682,28 +682,28 @@ class TreeCleaner:
         for child in node.children:
             self.transform_single_col_tables(child)
 
-    def _getNext(self, node):  # FIXME: name collides with advtree.getNext
+    def _get_next(self, node):  # FIXME: name collides with advtree.getNext
         if not (node.next or node.parent):
             return
         next_node = node.next or node.parent.next
         if next_node and not next_node.is_block_node and not next_node.get_all_display_text().strip():
-            return self._getNext(next_node)
+            return self._get_next(next_node)
         return next_node
 
-    def _getPrev(self, node):  # FIXME: name collides with advtree.getPrev(ious)
+    def _get_prev(self, node):  # FIXME: name collides with advtree.getPrev(ious)
         if not (node.previous or node.parent):
             return
         prev = node.previous or node.parent
         if prev and not prev.is_block_node and not prev.get_all_display_text().strip():
-            return self._getPrev(prev)
+            return self._get_prev(prev)
         return prev
 
-    def _nextAdjacentNode(self, node):
+    def _next_adjacent_node(self, node):
         if node and node.next:
             res = node.next.get_first_leaf() or node.next
             return res
         if node.parent:
-            return self._nextAdjacentNode(node.parent)
+            return self._next_adjacent_node(node.parent)
         return None
 
     def remove_breaking_returns(self, node):
@@ -715,8 +715,8 @@ class TreeCleaner:
                 check_node = [
                     node.get_first_leaf(),
                     node.get_last_leaf(),
-                    self._getNext(node),
-                    self._getPrev(node),
+                    self._get_next(node),
+                    self._get_prev(node),
                 ]
                 changed = False
                 for node_to_check in check_node:
@@ -726,12 +726,12 @@ class TreeCleaner:
                         changed = True
 
         if node.__class__ == BreakingReturn:
-            next_node = self._nextAdjacentNode(node)
+            next_node = self._next_adjacent_node(node)
             if next_node.__class__ == BreakingReturn:
                 node.parent.remove_child(node)
 
-        for c in node.children:
-            self.remove_breaking_returns(c)
+        for child in node.children:
+            self.remove_breaking_returns(child)
 
     def _fix_paragraphs(self, node: Node):
         """Move paragraphs to the child list of
@@ -757,7 +757,7 @@ class TreeCleaner:
         while self._fix_paragraphs(node):
             pass
 
-    def _nestingBroken(self, node):
+    def _nesting_broken(self, node):
         # FIXME: the list below is used and not node.isblocknode. is there a reason for that?
         blocknodes = (
             Paragraph,
@@ -773,9 +773,9 @@ class TreeCleaner:
         parents = node.get_parents()
         clean_parents = []
         parents.reverse()
-        for p in parents:
-            if p.__class__ not in self.outside_parents_invisible:
-                clean_parents.append(p)
+        for parent in parents:
+            if parent.__class__ not in self.outside_parents_invisible:
+                clean_parents.append(parent)
             else:
                 break
         # clean_parents.reverse()
@@ -795,7 +795,7 @@ class TreeCleaner:
                     return parent
         return None
 
-    def _markNodes(self, node, divide, problem_node=None):
+    def _mark_nodes(self, node, divide, problem_node=None):
         got_divide = False
         for child in node.children:
             if getattr(node, "nesting_pos", None):
@@ -811,13 +811,13 @@ class TreeCleaner:
             else:
                 child.nesting_pos = "bottom"
         for child in node.children:
-            self._markNodes(child, divide, problem_node=problem_node)
+            self._mark_nodes(child, divide, problem_node=problem_node)
 
-    def _cleanUpMarks(self, node):
+    def _clean_up_marks(self, node):
         if hasattr(node, "nesting_pos"):
             del node.nesting_pos
         for child in node.children:
-            self._cleanUpMarks(child)
+            self._clean_up_marks(child)
 
     def _filter_tree(self, node, nesting_filter=[]):
         if getattr(node, "nesting_pos", None) in nesting_filter:
@@ -826,7 +826,7 @@ class TreeCleaner:
         for child in node.children[:]:
             self._filter_tree(child, nesting_filter=nesting_filter)
 
-    def _isException(self, node):
+    def _is_exception(self, node):
         try:
             node.vlist["style"]["direction"]
         except (KeyError, AttributeError, TypeError):
@@ -839,7 +839,7 @@ class TreeCleaner:
 
         The strictness depends on nesting_strictness which
         can either be 'loose' or 'strict'.
-        Depending on the strictness the _nestingBroken
+        Depending on the strictness the _nesting_broken
         method uses different approaches to
         detect forbidden nesting.
 
@@ -857,16 +857,16 @@ class TreeCleaner:
          nbn_4
         """
 
-        if self._isException(node):
+        if self._is_exception(node):
             return
 
-        bad_parent = self._nestingBroken(node)
+        bad_parent = self._nesting_broken(node)
         if not bad_parent:
             return any(self._fix_nesting(c) for c in node.children)
 
         divide = node.get_parents()
         divide.append(node)
-        self._markNodes(bad_parent, divide, problem_node=node)
+        self._mark_nodes(bad_parent, divide, problem_node=node)
 
         top_tree = bad_parent.copy()
         self._filter_tree(top_tree, nesting_filter=["bottom", "problem"])
@@ -883,7 +883,7 @@ class TreeCleaner:
         self.report("moved", node, "from", bad_parent)
         parent = bad_parent.parent
         parent.replace_child(bad_parent, new_tree)
-        self._cleanUpMarks(parent)
+        self._clean_up_marks(parent)
         return True
 
     def fix_nesting(self, node):

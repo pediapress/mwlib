@@ -147,7 +147,7 @@ fonts = [
             "CJK Unified Ideographs",
             "CJK Strokes",
             "CJK Unified Ideographs Extension A",
-            "Halfwidth and Fullwidth Forms",
+            "Halfwidth and full_width Forms",
             "CJK Compatibility Ideographs",
             "Small Form Variants",
             "Low Surrogates",

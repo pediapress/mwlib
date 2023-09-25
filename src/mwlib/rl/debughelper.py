@@ -34,15 +34,15 @@ def dump_text(obj):
         print("U:  --", obj.__class__.__name__)
 
 
-def dump_figures_and_paragraphs(fp):
+def dump_figures_and_paragraphs(file_path):
     print("=== FiguresAndParagraphs ===")
     print("  ::", end=" ")
-    for figure in fp.fs:
+    for figure in file_path.fs:
         print(figure.imgPath[figure.imgPath.rfind("/"):], end=" ")
     print()
-    print("num paras:", len(fp.ps))
-    for p in fp.ps:
-        dump_text(p)
+    print("num paras:", len(file_path.ps))
+    for paragraph in file_path.ps:
+        dump_text(paragraph)
     print("===/FIG PAR")
 
 

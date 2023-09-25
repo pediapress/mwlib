@@ -39,9 +39,9 @@ class Node(utoken.Token):
         for child in self.children:
             yield from child.allchildren()
 
-    def find(self, tp):
+    def find(self, target_type):
         """find instances of type tp in self.allchildren()"""
-        return [child for child in self.allchildren() if isinstance(child, tp)]
+        return [child for child in self.allchildren() if isinstance(child, target_type)]
 
     def filter(self, fun):
         for child in self.allchildren():
@@ -243,7 +243,7 @@ class Link(Node):
     colon = False
     url = None
 
-    capitalizeTarget = False  # Wiki-dependent setting, e.g. Wikipedia => True
+    capitalize_target = False  # Wiki-dependent setting, e.g. Wikipedia => True
 
 
 # Link forms:

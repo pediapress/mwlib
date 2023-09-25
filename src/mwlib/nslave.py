@@ -14,8 +14,8 @@ import time
 from mwlib.asynchronous import proc
 from mwlib.utils import garble_password
 
-cachedir = None
-cacheurl = None
+CACHE_DIR = None
+CACHE_URL = None
 
 
 # -- find_ip is copied from woof sources
@@ -44,7 +44,7 @@ def find_ip():
 
 
 def get_collection_dir(collection_id):
-    return os.path.join(cachedir, collection_id[:2], collection_id)
+    return os.path.join(CACHE_DIR, collection_id[:2], collection_id)
 
 
 def system(args, timeout=None):
@@ -79,7 +79,7 @@ def system(args, timeout=None):
 
 def _get_args(
     writer_options=None, language=None, zip_only=False,
-    login_credentials=None, **kw
+    login_credentials=None
 ):
     args = []
 
@@ -128,7 +128,7 @@ class commands:
         return f"qserve://{host}:{port}/{self.jobid}"
 
     def rpc_makezip(self, params=None):
-        def doit(metabook_data=None, collection_id=None, base_url=None, **kw):
+        def doit(metabook_data=None, collection_id=None, base_url=None):
             dir = get_collection_dir(collection_id)
 
             def getpath(p):
@@ -169,7 +169,7 @@ class commands:
     def rpc_render(self, params=None):
         def doit(
             metabook_data=None, collection_id=None,
-            base_url=None, writer=None, **kw
+            _, writer=None
         ):
             writer = writer or "rl"
             dir = get_collection_dir(collection_id)
@@ -241,7 +241,7 @@ def make_cachedir(cachedir):
 
 
 def main():
-    global cachedir, cacheurl
+    global CACHE_DIR, CACHE_URL
     numgreenlets = 10
     http_address = "127.0.0.1"
     http_port = 8898
@@ -254,9 +254,9 @@ def main():
     )
     for o, a in opts:
         if o == "--cachedir":
-            cachedir = a
+            CACHE_DIR = a
         elif o == "--url":
-            cacheurl = a
+            CACHE_URL = a
         elif o == "--numprocs":
             numgreenlets = int(a)
         elif o == "--no-serve-files":
@@ -266,20 +266,20 @@ def main():
         elif o == "--serve-files-address":
             http_address = str(a)
 
-    if cachedir is None:
+    if CACHE_DIR is None:
         sys.exit("nslave: missing --cachedir argument")
 
     if serve_files:
-        wsgi_server = start_serving_files(cachedir, http_address, http_port)
+        wsgi_server = start_serving_files(CACHE_DIR, http_address, http_port)
         port = wsgi_server.socket.getsockname()[1]
-        if not cacheurl:
-            cacheurl = f"http://{find_ip()}:{port}/cache"
-        print(f"serving files from {cachedir!r} at url {cacheurl}")
+        if not CACHE_URL:
+            CACHE_URL = f"http://{find_ip()}:{port}/cache"
+        print(f"serving files from {CACHE_DIR!r} at url {CACHE_URL}")
 
-    if not cacheurl:
+    if not CACHE_URL:
         sys.exit("--url option missing")
 
-    make_cachedir(cachedir)
+    make_cachedir(CACHE_DIR)
     from mwlib.asynchronous import slave
 
     slave.main(commands, numgreenlets=numgreenlets, argv=args)

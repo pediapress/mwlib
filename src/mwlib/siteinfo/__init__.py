@@ -20,8 +20,8 @@ def get_siteinfo(lang):
     site_info = None
     path = _get_path(lang)
     if path.exists():
-        with path.open("r", encoding="utf-8") as f:
-            site_info = json.load(f)
+        with path.open("r", encoding="utf-8") as site_info_file:
+            site_info = json.load(site_info_file)
 
     _cache[lang] = site_info
     return site_info

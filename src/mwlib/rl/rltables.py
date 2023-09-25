@@ -123,22 +123,22 @@ def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
 def get_content_type(t):
     nodeInfo = []
     for row in t.children:
-        rowNodeInfo = []
+        row_node_info = []
         for cell in row:
-            cellNodeTypes = []
-            cellTextLen = 0
+            cell_node_types = []
+            cell_text_len = 0
             for item in cell.children:
                 if (
                     not item.is_block_node
                 ):  # any inline node is treated as a regular TextNode for simplicity
-                    cellNodeTypes.append(Text)
+                    cell_node_types.append(Text)
                 else:
-                    cellNodeTypes.append(item.__class__)
-                cellTextLen += len(item.get_all_display_text())
+                    cell_node_types.append(item.__class__)
+                cell_text_len += len(item.get_all_display_text())
             if cell.children:
-                rowNodeInfo.append((cellNodeTypes, cellTextLen))
-        if rowNodeInfo:
-            nodeInfo.append(rowNodeInfo)
+                row_node_info.append((cell_node_types, cell_text_len))
+        if row_node_info:
+            nodeInfo.append(row_node_info)
     return nodeInfo
 
 
@@ -146,28 +146,28 @@ def reformat_table(t, maxCols):
     nodeInfo = get_content_type(t)
     numCols = maxCols
 
-    onlyTables = (
+    only_tables = (
         len(t.children) > 0
-    )  # if table is empty onlyTables and onlyLists are False
-    onlyLists = len(t.children) > 0
+    )  # if table is empty only_tables and only_lists are False
+    only_lists = len(t.children) > 0
     if not nodeInfo:
-        onlyTables = False
-        onlyLists = False
+        only_tables = False
+        only_lists = False
     for row in nodeInfo:
         for cell in row:
-            cellNodeTypes, cellTextLen = cell
-            if not all(nodetype == Table for nodetype in cellNodeTypes):
-                onlyTables = False
-            if not all(nodetype == ItemList for nodetype in cellNodeTypes):
-                onlyLists = False
+            cell_node_types, _ = cell
+            if not all(nodetype == Table for nodetype in cell_node_types):
+                only_tables = False
+            if not all(nodetype == ItemList for nodetype in cell_node_types):
+                only_lists = False
 
-    if onlyTables and numCols > 1:
+    if only_tables and numCols > 1:
         log.info("got table only table - removing container")
         t = remove_container_table(t)
-    if onlyLists and numCols > 2:
+    if only_lists and numCols > 2:
         log.info("got list only table - reducing columns to 2")
         t = reduce_cols(t, colnum=2)
-    if onlyLists:
+    if only_lists:
         log.info("got list only table - splitting list items")
         t = split_list_items(t)
         pass
@@ -241,9 +241,9 @@ def custom_calc_widths(table, avail_width):
     from mwlib.writer.styleutils import scale_length
 
     first_row = None
-    for c in table.children:
-        if isinstance(c, Row):
-            first_row = c
+    for child in table.children:
+        if isinstance(child, Row):
+            first_row = child
             break
     if not first_row:
         return None

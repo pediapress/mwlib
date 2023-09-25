@@ -37,10 +37,10 @@ class DictDB:
 
 def expand_str(s, expected=None, wikidb=None, pagename="thispage"):
     """debug function. expand templates in string s"""
-    db = wikidb if wikidb else DictDB({"a": s})
+    wiki_db = wikidb if wikidb else DictDB({"a": s})
 
-    te = evaluate.Expander(s, pagename=pagename, wikidb=db)
-    res = te.expandTemplates()
+    template_expander = evaluate.Expander(s, pagename=pagename, wikidb=wiki_db)
+    res = template_expander.expandTemplates()
     print(f"EXPAND: {s!r} -> {res!r}")
     if expected is not None and res != expected:
         raise AssertionError(f"expected {expected!r}, got {res!r}")

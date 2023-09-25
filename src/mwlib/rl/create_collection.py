@@ -36,8 +36,8 @@ def main():
         meta_book["items"].append(metabook.article(title=str(title, "utf-8")))
 
     if options.output:
-        with open("test.json", "w") as f:
-            f.write(simplejson.dumps(meta_book))
+        with open("test.json", "w") as test_file:
+            test_file.write(simplejson.dumps(meta_book))
     else:
         output_file = sys.stdout
         output_file.write(simplejson.dumps(meta_book))

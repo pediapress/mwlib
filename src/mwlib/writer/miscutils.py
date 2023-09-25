@@ -41,8 +41,8 @@ def text_before_infobox(
     if not txt_list:
         txt_list = []
     txt_list.append((text_in_node(node), node == infobox))
-    for c in node:
-        text_before_infobox(c, infobox, txt_list)
+    for child in node:
+        text_before_infobox(child, infobox, txt_list)
     sum_txt = 0
     for len_txt, is_infobox in txt_list:
         sum_txt += len_txt

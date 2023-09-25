@@ -407,9 +407,9 @@ class Fetcher:
         pool = gevent.pool.Pool()
         blocks = split_blocks(lst, limit)
         self.count_total += len(blocks)
-        for bl in blocks:
+        for block in blocks:
             pool.add(self._refcall_noinc(self.fetch_used_block,
-                                         name, bl, expanded))
+                                         name, block, expanded))
         pool.join()
 
         if conf.noedits:
@@ -517,8 +517,8 @@ class Fetcher:
                 "pageid": p.get("pageid"),
             }
 
-            for c in categories:
-                cattitle = c.get("title")
+            for category in categories:
+                cattitle = category.get("title")
                 if cattitle:
                     self._add_catmember(cattitle, e)
 
@@ -667,16 +667,16 @@ class Fetcher:
 
         siteinfo = self.get_siteinfo_for(api)
 
-        ns = nshandling.nshandler(siteinfo)
-        nsname = ns.get_nsname_by_number(6)
+        ns_handler = nshandling.nshandler(siteinfo)
+        nsname = ns_handler.get_nsname_by_number(6)
 
         local_names = []
         for x in titles:
             partial = x.split(":", 1)[1]
-            local_names.append("{}:{}".format(nsname, partial))
+            local_names.append(f"{nsname}:{partial}")
 
-        for bl in split_blocks(local_names, api.api_request_limit):
-            self._refcall(self.fetch_image_page, bl, api)
+        for block in split_blocks(local_names, api.api_request_limit):
+            self._refcall(self.fetch_image_page, block, api)
 
         for title in local_names:
             self._refcall(self.get_image_edits, title, api)

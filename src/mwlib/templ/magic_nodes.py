@@ -65,8 +65,8 @@ def _rel2abs(rel, base):
 
     import posixpath
 
-    p = posixpath.normpath(f"/{base}/{rel}/").strip("/")
-    return p
+    path = posixpath.normpath(f"/{base}/{rel}/").strip("/")
+    return path
 
 
 class RelativeToAbsolute(nodes.Node):

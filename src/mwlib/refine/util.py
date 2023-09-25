@@ -98,11 +98,11 @@ class ImageMod:
             self.init_alias_map(magicwords)
 
     def init_alias_map(self, magicwords):
-        for m in magicwords:
-            if not m["name"].startswith("img_"):
+        for magic in magicwords:
+            if not magic["name"].startswith("img_"):
                 continue
-            name = m["name"]
-            aliases = m["aliases"]
+            name = magic["name"]
+            aliases = magic["aliases"]
             aliases_regexp = "|".join(["^(%s)$" % re.escape(a) for a in aliases])
             if name == "img_upright":
                 aliases_regexp = aliases_regexp.replace("\\$1",

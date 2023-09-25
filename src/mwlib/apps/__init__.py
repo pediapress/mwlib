@@ -33,24 +33,24 @@ def show():
     if not conf:
         parser.error("missing --config argument")
 
-    db = wiki.make_wiki(conf).wiki
+    wiki_db = wiki.make_wiki(conf).wiki
 
     for a in articles:
         defaultns = 10 if options.template else 0
 
-        page = db.normalize_and_get_page(a, defaultns)
+        page = wiki_db.normalize_and_get_page(a, defaultns)
         raw = page.rawtext if page else None
 
         if raw:
             if options.expand:
-                te = expander.Expander(raw, pagename=a, wikidb=db)
+                te = expander.Expander(raw, pagename=a, wikidb=wiki_db)
                 raw = te.expandTemplates()
 
             print(raw.encode("utf-8"))
     if options.f:
         with open(options.f) as f:
             six.text_type(f.read(), "utf-8")
-        te = expander.Expander(raw, pagename="test", wikidb=db)
+        te = expander.Expander(raw, pagename="test", wikidb=wiki_db)
         raw = te.expandTemplates()
         print(raw.encode("utf-8"))
 

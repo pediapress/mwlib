@@ -127,10 +127,10 @@ def _make_other(tokens):
 # parse action for any occurence of restOfLine
 
 
-other = And([restOfLine]).setParseAction(_make_other)
+OTHER = And([restOfLine]).setParseAction(_make_other)
 line = (
     Suppress(LineStart())
-    + (comment | POLY | RECT | CIRCLE | desc | default | other)
+    + (comment | POLY | RECT | CIRCLE | desc | default | OTHER)
     + Suppress(LineEnd())
 )
 imagemap = ZeroOrMore(line) + StringEnd()

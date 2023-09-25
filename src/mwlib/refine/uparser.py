@@ -17,15 +17,15 @@ def get_article_raw_text(wikidb, title: str):
 
 
 def process_expander_and_siteinfo(wikidb, title, raw, expand_templates):
-    te = uniquifier = siteinfo = None
+    template_expander = uniquifier = siteinfo = None
     _input = raw
     if expand_templates:
-        te = expander.Expander(raw, pagename=title, wikidb=wikidb)
-        uniquifier = te.uniquifier
-        _input = te.expandTemplates(True)
+        template_expander = expander.Expander(raw, pagename=title, wikidb=wikidb)
+        uniquifier = template_expander.uniquifier
+        _input = template_expander.expandTemplates(True)
     if hasattr(wikidb, "get_siteinfo"):
         siteinfo = wikidb.get_siteinfo()
-    return te, uniquifier, siteinfo, _input
+    return template_expander, uniquifier, siteinfo, _input
 
 
 def parse_string(
@@ -38,7 +38,7 @@ def parse_string(
     expand_templates=True,
 ):
     """parse article with title from raw mediawiki text"""
-    te = uniquifier = siteinfo = None
+    template_expander = uniquifier = siteinfo = None
     if title is None:
         raise ValueError("no title given")
     raw = get_article_raw_text(wikidb, title) if raw is None else raw
@@ -47,7 +47,7 @@ def parse_string(
     _input = raw
 
     if wikidb:
-        te, uniquifier, siteinfo, _input = process_expander_and_siteinfo(
+        template_expander, uniquifier, siteinfo, _input = process_expander_and_siteinfo(
             wikidb, title, raw, expand_templates
         )
 
@@ -80,12 +80,12 @@ def parse_string(
         lang=lang,
         magicwords=magicwords,
         uniquifier=uniquifier,
-        expander=te,
+        expander=template_expander,
     )
 
     a.caption = title
-    if te and te.magic_displaytitle:
-        a.caption = te.magic_displaytitle
+    if template_expander and template_expander.magic_displaytitle:
+        a.caption = template_expander.magic_displaytitle
 
     for x in postprocessors:
         x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)

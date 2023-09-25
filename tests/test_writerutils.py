@@ -26,7 +26,7 @@ def build_advanced_tree(raw):
     tree = get_tree_from_markup(raw)
     advtree.build_advanced_tree(tree)
     tc = TreeCleaner(tree, save_reports=True)
-    tc.clean_all(skipMethods=[])
+    tc.clean_all(skip_methods=[])
     return tree
 
 

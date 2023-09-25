@@ -208,8 +208,8 @@ def _change_classes(node):
         node = node.children
 
     if node:
-        for x in node:
-            _change_classes(x)
+        for child in node:
+            _change_classes(child)
 
 
 def parse_txt(raw, **kwargs):

@@ -168,11 +168,11 @@ class _CompatScanner:
 
         res = []
 
-        def g():
+        def get_substring():
             return text[start: start + tlen]
 
-        def a(x):
-            return res.append((x, g()))
+        def append_to_result(token_type):
+            return res.append((token_type, get_substring()))
 
         ignore = self.ignore
         tok2compat = self.tok2compat
@@ -186,15 +186,15 @@ class _CompatScanner:
                 i += 1
                 continue
             elif n is not None:
-                a(n)
+                append_to_result(n)
             elif token_type == Token.t_entity:
-                res.append(("TEXT", resolve_entity(g())))
+                res.append(("TEXT", resolve_entity(get_substring())))
             elif token_type == Token.t_hrule:
-                res.append((self.tagtoken("<hr />"), g()))
+                res.append((self.tagtoken("<hr />"), get_substring()))
             elif token_type == Token.t_html_tag:
-                s = g()
+                substr = get_substring()
 
-                tag_token = self.tagtoken(s)
+                tag_token = self.tagtoken(substr)
                 is_end_token = isinstance(tag_token, EndTagToken)
                 closing_or_self_closing = is_end_token or tag_token.self_closing
 
@@ -204,7 +204,7 @@ class _CompatScanner:
                         continue
                     tagname = tag_token.t
 
-                    res.append((tag_token, s))
+                    res.append((tag_token, substr))
                     i += 1
                     text_start = None
                     text_end = None
@@ -216,9 +216,9 @@ class _CompatScanner:
                             text_start = start
 
                         if token_type == Token.t_html_tag:
-                            tag_token = self.tagtoken(g())
+                            tag_token = self.tagtoken(get_substring())
                             if tag_token.t == tagname:
-                                end_token = (tag_token, g())
+                                end_token = (tag_token, get_substring())
                                 break
                         text_end = start + tlen
 
@@ -237,7 +237,7 @@ class _CompatScanner:
                     while i < numtokens:
                         token_type, start, tlen = tokens[i]
                         if token_type == Token.t_html_tag:
-                            tag_token = self.tagtoken(g())
+                            tag_token = self.tagtoken(get_substring())
                             if tag_token.t == "nowiki":
                                 break
                         res.append(("TEXT", scanres.text((token_type,
@@ -245,22 +245,22 @@ class _CompatScanner:
                         i += 1
                 elif tag_token.t == "table":
                     if is_end_token:
-                        res.append(("ENDTABLE", g()))
+                        res.append(("ENDTABLE", get_substring()))
                     else:
-                        res.append(("BEGINTABLE", g()))
+                        res.append(("BEGINTABLE", get_substring()))
                 elif tag_token.t in ["th", "td"]:
                     if not is_end_token:
-                        res.append(("COLUMN", g()))
+                        res.append(("COLUMN", get_substring()))
                 elif tag_token.t == "tr":
                     if not is_end_token:
-                        res.append(("ROW", g()))
+                        res.append(("ROW", get_substring()))
                 else:
                     if tag_token.t in self.allowed_tags:
-                        res.append((tag_token, s))
+                        res.append((tag_token, substr))
                     else:
-                        res.append(("TEXT", s))
+                        res.append(("TEXT", substr))
             else:
-                a(type)
+                append_to_result(type)
             i += 1
 
         return res
