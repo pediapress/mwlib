@@ -43,7 +43,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 
 from mwlib import advtree, log, parser, timeline, uparser, writerbase
 from mwlib._version import version as mwlibversion
-from mwlib.mathutils import renderMath
+from mwlib.mathutils import render_math
 from mwlib.rl._version import VERSION as rlwriterversion
 from mwlib.rl.customflowables import (
     DummyTable,
@@ -452,7 +452,7 @@ class RlWriter:
 
     def initReportlabDoc(self, output):
         version = self.getVersion()
-        tocCallback = self.tocCallback if pdfstyles.RENDER_TOC else None
+        toc_callback = self.toc_callback if pdfstyles.RENDER_TOC else None
         self.doc = PPDocTemplate(
             output,
             topMargin=pdfstyles.PAGE_MARGIN_TOP,
@@ -462,7 +462,7 @@ class RlWriter:
             title=self.book.title,
             keywords=version,
             status_callback=self.render_status,
-            tocCallback=tocCallback,
+            toc_callback=toc_callback,
         )
 
     def articleRenderingOK(self, node, output):
@@ -658,7 +658,7 @@ class RlWriter:
             article_id = self.buildArticleID(wikiurl, title)
             self.articleids.append(article_id)
 
-    def tocCallback(self, info):
+    def toc_callback(self, info):
         self.toc_entries.append(info)
 
     def writeTitlePage(self, coverimage=None):
@@ -2513,7 +2513,7 @@ class RlWriter:
                 imgpath = cached_path
 
         if not imgpath:
-            imgpath = renderMath(
+            imgpath = render_math(
                 source,
                 output_path=self.tmpdir,
                 output_mode="png",

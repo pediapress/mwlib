@@ -14,16 +14,15 @@ import six.moves.urllib.request
 from six import unichr
 from sqlitedict import SqliteDict
 
+from mwlib import metabook, nshandling, utils
 from mwlib import myjson as json
-from mwlib import nshandling, utils
 from mwlib.log import Log
 from mwlib.utils import python2sort
-from mwlib import metabook
 
 log = Log("nuwiki")
 
 
-class page:
+class Page:
     expanded = 0
 
     def __init__(self, meta, rawtext):
@@ -32,20 +31,20 @@ class page:
 
 
 class DumbJsonDB:
-    db = None
+    database = None
 
-    def __init__(self, fn, allow_pickle=False):
-        self.fn = fn
+    def __init__(self, file_name, allow_pickle=False):
+        self.file_name = file_name
         self.allow_pickle = allow_pickle
         self.read_db()
 
     def read_db(self):
-        self.db = SqliteDict(self.fn)
+        self.database = SqliteDict(self.file_name)
 
     def __getitem__(self, key):
-        v = self.db.get(key, "")
-        if v:
-            return json.loads(v)
+        val = self.database.get(key, "")
+        if val:
+            return json.loads(val)
         else:
             return None
 
@@ -57,32 +56,32 @@ class DumbJsonDB:
             return res
 
     def items(self):
-        return list(self.db.items())
+        return list(self.database.items())
 
     def __getstate__(self):
         # FIXME: pickling zip based containers not supported
         # and currently not needed.
-        # if desired the content of the db file need to be persisted...
+        # if desired the content of the database file need to be persisted...
         if not self.allow_pickle:
             raise ValueError(
                 "ERROR: pickling not allowed for zip files. Use unzipped zip file instead"
             )
-        d = self.__dict__.copy()
-        del d["db"]
-        return d
+        data = self.__dict__.copy()
+        del data["db"]
+        return data
 
-    def __setstate__(self, d):
-        self.__dict__ = d
+    def __setstate__(self, data):
+        self.__dict__ = data
         self.read_db()
 
 
-class nuwiki:
+class NuWiki:
     def __init__(self, path, allow_pickle=False):
         self.path = os.path.abspath(path)
-        d = os.path.join(self.path, "images", "safe")
-        if not os.path.exists(d):
+        directory_path = os.path.join(self.path, "images", "safe")
+        if not os.path.exists(directory_path):
             try:
-                os.makedirs(d)
+                os.makedirs(directory_path)
             except OSError as exc:
                 if exc.errno != 17:  # file exists
                     raise
@@ -92,42 +91,42 @@ class nuwiki:
         self.revisions = {}
         self._read_revisions()
 
-        fn = os.path.join(self.path, "authors.db")
-        if not os.path.exists(fn):
+        file_name = os.path.join(self.path, "authors.db")
+        if not os.path.exists(file_name):
             self.authors = None
             log.warn("no authors present. parsing revision info instead")
         else:
-            self.authors = DumbJsonDB(fn, allow_pickle=allow_pickle)
+            self.authors = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
-        fn = os.path.join(self.path, "html.db")
-        if not os.path.exists(fn):
-            self.html = self.extractHTML(self._loadjson("parsed_html.json", {}))
+        file_name = os.path.join(self.path, "html.db")
+        if not os.path.exists(file_name):
+            self.html = self.extract_html(self._loadjson("parsed_html.json", {}))
             log.warn("no html present. parsing revision info instead")
         else:
-            self.html = DumbJsonDB(fn, allow_pickle=allow_pickle)
+            self.html = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
-        fn = os.path.join(self.path, "imageinfo.db")
-        if not os.path.exists(fn):
+        file_name = os.path.join(self.path, "imageinfo.db")
+        if not os.path.exists(file_name):
             self.imageinfo = self._loadjson("imageinfo.json", {})
             log.warn("loading imageinfo from pickle")
         else:
-            self.imageinfo = DumbJsonDB(fn, allow_pickle=allow_pickle)
+            self.imageinfo = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
-        self.nshandler = nshandling.nshandler(self.siteinfo)
+        self.nshandler = nshandling.NsHandler(self.siteinfo)
         self.en_nshandler = nshandling.get_nshandler_for_lang("en")
         self.nfo = self._loadjson("nfo.json", {})
 
         self.set_make_print_template()
 
     def __getstate__(self):
-        d = self.__dict__.copy()
-        del d["make_print_template"]
-        return d
+        data = self.__dict__.copy()
+        del data["make_print_template"]
+        return data
 
-    def __setstate__(self, d):
-        self.__dict__ = d
+    def __setstate__(self, data):
+        self.__dict__ = data
         self.set_make_print_template()
 
     def set_make_print_template(self):
@@ -142,42 +141,39 @@ class nuwiki:
     def _read_revisions(self):
         count = 1
         while True:
-            fn = self._pathjoin("revisions-%s.txt" % count)
-            if not os.path.exists(fn):
+            file_name = self._pathjoin("revisions-%s.txt" % count)
+            if not os.path.exists(file_name):
                 break
             count += 1
-            print("reading", fn)
-            d = six.text_type(open(self._pathjoin(fn), "rb").read(), "utf-8")
+            print("reading", file_name)
+            d = six.text_type(open(self._pathjoin(file_name), "rb").read(), "utf-8")
             pages = d.split("\n --page-- ")
 
-            for p in pages[1:]:
-                jmeta, rawtext = p.split("\n", 1)
+            for page in pages[1:]:
+                jmeta, rawtext = page.split("\n", 1)
                 meta = json.loads(jmeta)
-                pg = Page(meta, rawtext)
-                if pg.title in self.excluded and pg.ns != 0:
-                    pg.rawtext = unichr(0xEBAD)
+                new_page = Page(meta, rawtext)
+                if new_page.title in self.excluded and new_page.ns != 0:
+                    new_page.rawtext = unichr(0xEBAD)
                 revid = meta.get("revid")
                 if revid is None:
-                    self.revisions[pg.title] = pg
+                    self.revisions[new_page.title] = new_page
                     continue
 
-                self.revisions[meta["revid"]] = pg
-
-                # else:
-                #     print "excluding:", repr(pg.title)
+                self.revisions[meta["revid"]] = new_page
 
         tmp = list(self.revisions.items())
         python2sort(tmp, reverse=True)
-        for revid, p in tmp:
-            title = p.title
+        for revid, page in tmp:
+            title = page.title
             if title not in self.revisions:
-                self.revisions[title] = p
+                self.revisions[title] = page
 
-    def _pathjoin(self, *p):
-        return os.path.join(self.path, *p)
+    def _pathjoin(self, *paths):
+        return os.path.join(self.path, *paths)
 
-    def _exists(self, p):
-        return os.path.exists(p)
+    def _exists(self, path):
+        return os.path.exists(path)
 
     def get_siteinfo(self):
         return self.siteinfo
@@ -212,29 +208,29 @@ class nuwiki:
         if not isinstance(name, six.string_types):
             raise ValueError("name must be a string")
         name = six.text_type(name)
-        ns, partial, fqname = self.nshandler.splitname(name, defaultns=6)
-        if ns != 6:
+        namespace, partial, fqname = self.nshandler.splitname(name, defaultns=6)
+        if namespace != 6:
             return
 
         if "/" in fqname:
             return None
 
-        p = self._pathjoin("images", utils.fs_escape(fqname))
-        if not self._exists(p):
+        path = self._pathjoin("images", utils.fs_escape(fqname))
+        if not self._exists(path):
             fqname = "File:" + partial  # Fallback to default language english
-            p = self._pathjoin("images", utils.fs_escape(fqname))
-            if not self._exists(p):
+            path = self._pathjoin("images", utils.fs_escape(fqname))
+            if not self._exists(path):
                 return None
 
-        hd = sha256(fqname.encode("utf-8")).hexdigest()
-        ext = os.path.splitext(p)[-1]
+        hex_digest = sha256(fqname.encode("utf-8")).hexdigest()
+        ext = os.path.splitext(path)[-1]
         ext = ext.replace(" ", "")
         # mediawiki gives us png's for these extensions. 
         # let's change them here.
         if ext.lower() in (".gif", ".svg", ".tif", ".tiff"):
             ext = ".png"
-        hd += ext
-        safe_path = self._pathjoin("images", "safe", hd)
+        hex_digest += ext
+        safe_path = self._pathjoin("images", "safe", hex_digest)
         if not os.path.exists(safe_path):
             try:
                 os.symlink(os.path.join("..", utils.fs_escape(fqname)),
@@ -253,22 +249,18 @@ class nuwiki:
 
     def select(self, start, end):
         res = set()
-        for p in self.revisions.values():
-            if start <= p.title <= end:
-                res.add(p.title)
+        for paragraph in self.revisions.values():
+            if start <= paragraph.title <= end:
+                res.add(paragraph.title)
         res = sorted(res)
         return res
 
-    def extractHTML(self, parsed_html):
+    def extract_html(self, parsed_html):
         html = {}
         for article in parsed_html:
             _id = article.get("page") or article.get("oldid")
             html[_id] = article
         return html
-
-
-NuWiki = nuwiki
-Page = page
 
 
 def extract_member(zipfile, member, dstdir):
@@ -280,8 +272,8 @@ def extract_member(zipfile, member, dstdir):
     if not dstdir.endswith(os.path.sep):
         raise ValueError("Bad destination directory: %r - / missing at end" % dstdir)
 
-    fn = member.filename
-    targetpath = os.path.normpath(os.path.join(dstdir, fn))
+    file_name = member.filename
+    targetpath = os.path.normpath(os.path.join(dstdir, file_name))
 
     if not targetpath.startswith(dstdir):
         raise RuntimeError("bad filename in zipfile {!r}".format(targetpath))
@@ -298,23 +290,23 @@ def extract_member(zipfile, member, dstdir):
         open(targetpath, "wb").write(zipfile.read(member.filename))
 
 
-def extractall(zf, dst):
+def extractall(zip_file, dst):
     dst = os.path.normpath(os.path.abspath(dst)) + os.path.sep
 
-    for zipinfo in zf.infolist():
-        extract_member(zf, zipinfo, dst)
+    for zipinfo in zip_file.infolist():
+        extract_member(zip_file, zipinfo, dst)
 
 
-class adapt:
+class Adapt:
     edits = None
     interwikimap = None
     was_tmpdir = False
 
     def __init__(self, path_or_instance):
         if isinstance(path_or_instance, zipfile.ZipFile):
-            zf = path_or_instance
+            zip_file = path_or_instance
             tmpdir = tempfile.mkdtemp()
-            extractall(zf, tmpdir)
+            extractall(zip_file, tmpdir)
             path_or_instance = tmpdir
             self.was_tmpdir = True
 
@@ -387,11 +379,11 @@ class adapt:
 
     def getSource(self, title, revision=None):
 
-        g = self.siteinfo["general"]
+        general_info = self.siteinfo["general"]
         return metabook.Source(
-            name="%s (%s)" % (g["sitename"], g["lang"]),
-            url=g["base"],
-            language=g["lang"],
+            name="%s (%s)" % (general_info["sitename"], general_info["lang"]),
+            url=general_info["base"],
+            language=general_info["lang"],
             base_url=self.nfo["base_url"],
             script_extension=self.nfo["script_extension"],
         )
@@ -410,10 +402,10 @@ class adapt:
 
         if page:
             raw = page.rawtext
-            expandTemplates = not page.expanded
+            expand_templates = not page.expanded
         else:
             raw = None
-            expandTemplates = True
+            expand_templates = True
 
         if raw is None:
             return None
@@ -425,7 +417,7 @@ class adapt:
             raw=raw,
             wikidb=self,
             lang=self.siteinfo["general"]["lang"],
-            expand_templates=expandTemplates,
+            expand_templates=expand_templates,
         )
 
     def get_licenses(self):
@@ -433,16 +425,16 @@ class adapt:
 
         licenses = self.nuwiki.get_data("licenses") or []
         res = []
-        for x in licenses:
-            if isinstance(x, dict):
+        for license in licenses:
+            if isinstance(license, dict):
                 res.append(
                     metabook.License(
-                        title=x["title"], wikitext=x["wikitext"], _wiki=self
+                        title=license["title"], wikitext=license["wikitext"], _wiki=self
                     )
                 )
-            elif isinstance(x, metabook.License):
-                res.append(x)
-                x._wiki = self
+            elif isinstance(license, metabook.License):
+                res.append(license)
+                license._wiki = self
         return res
 
     def clear(self):
@@ -454,8 +446,8 @@ class adapt:
         return self.nuwiki.normalize_and_get_image_path(name)
 
     def get_image_description_page(self, name):
-        ns, partial, fqname = self.nshandler.splitname(name,
-                                                       nshandling.NS_FILE)
+        _, partial, fqname = self.nshandler.splitname(name,
+                                                      nshandling.NS_FILE)
         page = self.get_page(fqname)
         if page is not None:
             return page
@@ -483,11 +475,11 @@ class adapt:
             from mwlib.templ.parser import parse
 
             args = set()
-            e = Expander("", wikidb=DictDB())
+            exp = Expander("", wikidb=DictDB())
             # avoid parsing with every call to find_template
-            parsed_raw = [parse(page.rawtext, replace_tags=e.replace_tags)]
-            for t in templates:
-                tmpl = find_template(None, t, parsed_raw[:])
+            parsed_raw = [parse(page.rawtext, replace_tags=exp.replace_tags)]
+            for template in templates:
+                tmpl = find_template(None, template, parsed_raw[:])
                 arg_list = tmpl[1]
                 for arg in arg_list:
                     if (
@@ -571,9 +563,9 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
             return authors
     authors = []
     for template in get_templates(raw):
-        t = find_template(None, template, parsed_raw[:])
-        if t is not None:
-            authors.extend(get_authors_from_template_args(t))
+        found_template = find_template(None, template, parsed_raw[:])
+        if found_template is not None:
+            authors.extend(get_authors_from_template_args(found_template))
     if authors:
         return authors
     return getUserLinks(raw)

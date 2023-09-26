@@ -5,7 +5,7 @@ import shutil
 import tempfile
 
 import pytest
-from mwlib.mathutils import renderMath
+from mwlib.mathutils import render_math
 
 
 @pytest.fixture
@@ -37,9 +37,9 @@ def test_math(tmpdir):
     ]
     for latex in latexlist:
         if blahtexml_present():
-            res = renderMath(latex, tmpdir, output_mode="png", render_engine="blahtexml")
+            res = render_math(latex, tmpdir, output_mode="png", render_engine="blahtexml")
             assert res
-            res = renderMath(latex, tmpdir, output_mode="mathml", render_engine="blahtexml")
+            res = render_math(latex, tmpdir, output_mode="mathml", render_engine="blahtexml")
             assert res
 
 
@@ -54,7 +54,7 @@ F^2\sim W&\Leftrightarrow&\frac{F_1^2}{F_2^2}=\frac{W_1}{W_2}\\
 \end{array}"""
     latex = str(latex)
     if blahtexml_present():
-        res = renderMath(latex, tmpdir, output_mode="mathml", render_engine="blahtexml")
+        res = render_math(latex, tmpdir, output_mode="mathml", render_engine="blahtexml")
         assert res
     else:
         assert False
@@ -64,5 +64,5 @@ def test_single_quote_bug(tmpdir):
     """https://code.pediapress.com/wiki/ticket/241"""
 
     if texvc_present():
-        res = renderMath("f'(x) = x", tmpdir, output_mode="png", render_engine="texvc")
+        res = render_math("f'(x) = x", tmpdir, output_mode="png", render_engine="texvc")
         assert res

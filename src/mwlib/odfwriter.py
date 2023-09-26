@@ -23,7 +23,7 @@ from odf.opendocument import OpenDocumentText
 from mwlib import advtree, odfconf, parser, writerbase
 from mwlib import odfstyles as style
 from mwlib.log import Log
-from mwlib.mathutils import renderMath
+from mwlib.mathutils import render_math
 from mwlib.treecleaner import TreeCleaner
 
 log = Log("odfwriter")
@@ -564,10 +564,10 @@ class ODFWriter:
         translate element tree to odf.Elements
         """
         # log("math")
-        r = renderMath(obj.caption, output_mode="mathml",
-                       render_engine="blahtexml")
+        r = render_math(obj.caption, output_mode="mathml",
+                        render_engine="blahtexml")
         if r is None:
-            log("renderMath failed!")
+            log("render_math failed!")
             return
 
         def _withETElement(e, parent):

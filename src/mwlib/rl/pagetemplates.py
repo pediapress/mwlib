@@ -45,7 +45,7 @@ font_switcher.register_font_def_list(fontconfig.fonts)
 formatter = RLFormatter(font_switcher=font_switcher)
 
 
-def _doNothing(canvas, doc):
+def _do_nothing(canvas, doc):
     "Dummy callback for onPage"
     pass
 
@@ -53,13 +53,13 @@ def _doNothing(canvas, doc):
 class SimplePage(PageTemplate):
     def __init__(self, pageSize=A3):
         page_id = "simplepage"
-        pw = pageSize[0]
-        ph = pageSize[1]
+        page_width = pageSize[0]
+        page_height = pageSize[1]
         frames = Frame(
             PAGE_MARGIN_LEFT,
             PAGE_MARGIN_BOTTOM,
-            pw - PAGE_MARGIN_LEFT - PAGE_MARGIN_RIGHT,
-            ph - PAGE_MARGIN_TOP - PAGE_MARGIN_BOTTOM,
+            page_width - PAGE_MARGIN_LEFT - PAGE_MARGIN_RIGHT,
+            page_height - PAGE_MARGIN_TOP - PAGE_MARGIN_BOTTOM,
         )
 
         PageTemplate.__init__(self, id=page_id,
@@ -71,8 +71,8 @@ class WikiPage(PageTemplate):
         self,
         title=None,
         id=None,
-        onPage=_doNothing,
-        onPageEnd=_doNothing,
+        onPage=_do_nothing,
+        onPageEnd=_do_nothing,
         pagesize=(PAGE_WIDTH, PAGE_HEIGHT),
         rtl=False,
     ):
@@ -154,22 +154,21 @@ class TitlePage(PageTemplate):
         self,
         cover=None,
         id=None,
-        onPage=_doNothing,
-        onPageEnd=_doNothing,
+        onPage=_do_nothing,
+        onPageEnd=_do_nothing,
         pagesize=(PAGE_WIDTH, PAGE_HEIGHT),
     ):
-        id = "TitlePage"
-        p = pdfstyles
+        page_id = "TitlePage"
         frames = Frame(
-            p.title_margin_left,
-            p.title_margin_bottom,
-            p.page_width - p.title_margin_left - p.title_margin_right,
-            p.page_height - p.title_margin_top - p.title_margin_bottom,
+            pdfstyles.TITLE_MARGIN_LEFT,
+            pdfstyles.TITLE_MARGIN_BOTTOM,
+            pdfstyles.PAGE_WIDTH - pdfstyles.TITLE_MARGIN_LEFT - pdfstyles.TITLE_MARGIN_RIGHT,
+            pdfstyles.PAGE_HEIGHT - pdfstyles.TITLE_MARGIN_TOP - pdfstyles.TITLE_MARGIN_BOTTOM,
         )
 
         PageTemplate.__init__(
             self,
-            id=id,
+            id=page_id,
             frames=frames,
             onPage=onPage,
             onPageEnd=onPageEnd,
@@ -177,7 +176,7 @@ class TitlePage(PageTemplate):
         )
         self.cover = cover
 
-    def _scale_img(self, img_area_size, img_fn):
+    def _scale_img(self, img_area_size, _):
         img = Image.open(self.cover)
         img_width, img_height = img.size
         img_area_width = min(PAGE_WIDTH, img_area_size[0])
@@ -188,7 +187,7 @@ class TitlePage(PageTemplate):
             return (img_area_width, img_area_width / img_ar)
         return (img_area_height * img_ar, img_area_height)
 
-    def beforeDrawPage(self, canvas, doc):
+    def beforeDrawPage(self, canvas, _):
         canvas.setFont(SERIF_FONT, 8)
         canvas.saveState()
         if pdfstyles.SHOW_TITLE_PAGE_FOOTER:
@@ -213,12 +212,12 @@ class TitlePage(PageTemplate):
                                    str) else str(line,
                                                  "utf-8") for line in lines
             )
-            p = Paragraph(txt, text_style(mode="footer"))
-            width, height = p.wrap(PRINT_WIDTH, PRINT_HEIGHT)
+            paragraph = Paragraph(txt, text_style(mode="footer"))
+            width, height = paragraph.wrap(PRINT_WIDTH, PRINT_HEIGHT)
             canvas.translate((PAGE_WIDTH - width) / 2.0,
                              FOOTER_MARGIN_VER - height - 0.25 * cm)
-            p.canv = canvas
-            p.draw()
+            paragraph.canv = canvas
+            paragraph.draw()
         canvas.restoreState()
         if self.cover:
             width, height = self._scale_img(pdfstyles.TITLE_PAGE_IMAGE_SIZE,
@@ -238,22 +237,22 @@ class TitlePage(PageTemplate):
 
 class PPDocTemplate(BaseDocTemplate):
     def __init__(self, output, status_callback=None,
-                 tocCallback=None, **kwargs):
+                 toc_callback=None, **kwargs):
         self.bookmarks = []
         BaseDocTemplate.__init__(self, output, **kwargs)
         if status_callback:
-            self.estimatedDuration = 0
+            self.estimated_duration = 0
             self.progress = 0
             self.setProgressCallBack(self.progress_callback)
             self.status_callback = status_callback
-        self.tocCallback = tocCallback
+        self.toc_callback = toc_callback
         self.title = kwargs["title"]
 
     def progress_callback(self, typ, value):
         if typ == "SIZE_EST":
-            self.estimatedDuration = int(value)
+            self.estimated_duration = int(value)
         if typ == "PROGRESS":
-            self.progress = 100 * int(value) / self.estimatedDuration
+            self.progress = 100 * int(value) / self.estimated_duration
         if typ == "PAGE":
             self.status_callback(progress=self.progress, page=value)
 
@@ -290,7 +289,7 @@ class PPDocTemplate(BaseDocTemplate):
         the text of H1, H2 and H3 elements. We broadcast a
         notification to the DocTemplate, which should inform
         the TOC and let it pull them out."""
-        if not self.tocCallback:
+        if not self.toc_callback:
             return
         if flowable.__class__ == TocEntry:
-            self.tocCallback((flowable.lvl, flowable.txt, self.page))
+            self.toc_callback((flowable.lvl, flowable.txt, self.page))

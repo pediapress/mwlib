@@ -8,17 +8,17 @@ import os
 import sys
 
 
-def caller(n=2):
+def caller(frame_depth=2):
     """return caller as string"""
-    f = sys._getframe(n)
-    return f"{f.f_code.co_filename}:{f.f_lineno}"
+    frame = sys._getframe(frame_depth)
+    return f"{frame.f_code.co_filename}:{frame.f_lineno}"
 
 
-def short(n=2):
+def short(frame_depth=2):
     """return caller as string"""
-    frame = sys._getframe(n)
+    frame = sys._getframe(frame_depth)
     return f"{os.path.basename(frame.f_code.co_filename)}:{frame.f_lineno}"
 
 
-def callerframe(n=2):
-    return sys._getframe(n)
+def callerframe(frame_depth=2):
+    return sys._getframe(frame_depth)

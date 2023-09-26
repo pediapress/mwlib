@@ -106,7 +106,7 @@ class MultiEnvironment(Environment):
 
             if wiki_id not in self.id2env:
                 env = Environment()
-                env.images = env.wiki = nuwiki.adapt(os.path.join(self.path,
+                env.images = env.wiki = nuwiki.Adapt(os.path.join(self.path,
                                                                   wiki_id))
                 self.id2env[wiki_id] = env
             else:
@@ -158,7 +158,7 @@ def setup_metabook(nfo_fn, res, conf):
         return None
     else:
         if format_data == "nuwiki":
-            res.images = res.wiki = nuwiki.adapt(conf)
+            res.images = res.wiki = nuwiki.Adapt(conf)
             res.metabook = res.wiki.metabook
             return res
         elif format_data == "multi-nuwiki":
@@ -173,7 +173,7 @@ def extract_wiki(conf, res, metabook):
     except KeyError:
         raise RuntimeError("old zip wikis are not supported anymore")
     if format_data == "nuwiki":
-        res.images = res.wiki = nuwiki.adapt(zip_file)
+        res.images = res.wiki = nuwiki.Adapt(zip_file)
         if metabook is None:
             res.metabook = res.wiki.metabook
         return res

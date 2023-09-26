@@ -171,7 +171,7 @@ class SanityChecker:
     def __init__(self):
         self.rules = []
 
-    def addRule(self, rule, actioncb=exceptioncb):
+    def add_rule(self, rule, actioncb=exceptioncb):
         self.rules.append((rule, actioncb))
 
     def check(self, tree):
@@ -183,9 +183,9 @@ class SanityChecker:
         while modified:
             modified = False
             for node in tree.allchildren():
-                for r, cb in self.rules:
-                    passed, errnode = r.test(node)
-                    if not passed and cb and cb(errnode or node):
+                for rule, callback in self.rules:
+                    passed, errnode = rule.test(node)
+                    if not passed and callback and callback(errnode or node):
                         modified = True
                         break
                 if modified:
@@ -196,7 +196,7 @@ def demo():
     "for documentation only, see tests for more demos"
     from mwlib.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
 
-    sc = SanityChecker()
+    sanity_checker = SanityChecker()
     rules = [
         ChildrenOf(Table, Allow(Row)),
         ChildrenOf(Row, Allow(Cell)),
@@ -210,6 +210,5 @@ def demo():
         modifiedtree = False
         return modifiedtree
 
-    for r in rules:
-        sc.addRule(r, mycb)
-    # sc.check(anytree)
+    for rule in rules:
+        sanity_checker.add_rule(rule, mycb)

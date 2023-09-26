@@ -58,14 +58,14 @@ class Figure(Flowable):
         self.align = align
         self.cs = captionStyle
         self.captionTxt = captionTxt
-        self.availWidth = None
-        self.availHeight = None
+        self.avail_width = None
+        self.avail_height = None
         self.url = url
 
     def draw(self):
         canv = self.canv
         if self.align == "center":
-            canv.translate((self.availWidth - self.width / 2), 0)
+            canv.translate((self.avail_width - self.width / 2), 0)
         canv.saveState()
         canv.setStrokeColor(Color(self.borderColor[0], self.borderColor[1],
                                   self.borderColor[2]))
@@ -96,14 +96,14 @@ class Figure(Flowable):
             canv.linkURL(clean_url, (0, 0, self.imgWidth, self.imgHeight),
                          relative=1, thickness=0)
 
-    def wrap(self, availWidth, availHeight):
-        self.availWidth = availWidth
-        self.availHeight = availHeight
-        contentWidth = max(self.i.drawWidth, self.c.wrap(self.i.drawWidth,
-                                                         availHeight)[0])
-        self.boxWidth = contentWidth + self.padding[1] + self.padding[3]
-        (self.captionWidth, self.captionHeight) = self.c.wrap(contentWidth,
-                                                              availHeight)
+    def wrap(self, avail_width, avail_height):
+        self.avail_width = avail_width
+        self.avail_height = avail_height
+        content_width = max(self.i.drawWidth, self.c.wrap(self.i.drawWidth,
+                                                         avail_height)[0])
+        self.boxWidth = content_width + self.padding[1] + self.padding[3]
+        (self.captionWidth, self.captionHeight) = self.c.wrap(content_width,
+                                                              avail_height)
         self.captionHeight += self.cs.spaceBefore + self.cs.spaceAfter
         self.boxHeight = self.i.drawHeight + self.captionHeight + self.padding[0] + self.padding[2]
         self.width = self.boxWidth + self.margin[1] + self.margin[3]
@@ -164,15 +164,15 @@ class FiguresAndParagraphs(Flowable):
                 p._setup(txt, p.style,
                          p.bulletText, None, cleanBlockQuotedText)
 
-    def wrap(self, availWidth, availHeight):
+    def wrap(self, avail_width, avail_height):
         maxWf = 0
         self.wfs = []
         self.hfs = []
         self.horizontalRuleOffsets = []
-        totalHf = self._getVOffset()
+        total_hf = self._getVOffset()
         for f in self.fs:
-            wf, hf = f.wrap(availWidth, availHeight)
-            totalHf += hf
+            wf, hf = f.wrap(avail_width, avail_height)
+            total_hf += hf
             maxWf = max(maxWf, wf)
             self.wfs.append(wf)
             self.hfs.append(hf)
@@ -182,16 +182,16 @@ class FiguresAndParagraphs(Flowable):
             if isinstance(p, HRFlowable):
                 self.paraHeights.append(1)  # fixme: whats the acutal height of a HRFlowable?
                 self._offsets.append(0)
-                if (totalHf - (sum(self.paraHeights))) > 0:  # behave like the associated heading
+                if (total_hf - (sum(self.paraHeights))) > 0:  # behave like the associated heading
                     self.horizontalRuleOffsets.append(maxWf)
                 else:
                     self.horizontalRuleOffsets.append(0)
                 continue
-            full_width = availWidth - p.style.leftIndent - p.style.rightIndent
+            full_width = avail_width - p.style.leftIndent - p.style.rightIndent
             float_width = full_width - maxWf
             self.resizeInlineImage(p, float_width)
             nfloatLines = max(0,
-                              int((totalHf - (sum(self.paraHeights))) / p.style.leading))
+                              int((total_hf - (sum(self.paraHeights))) / p.style.leading))
             p.width = 0
             if hasattr(p, "blPara"):
                 del p.blPara
@@ -219,9 +219,9 @@ class FiguresAndParagraphs(Flowable):
                     pHeight = len(p.blPara.lines) * p.style.leading
             self.paraHeights.append(pHeight + p.style.spaceBefore + p.style.spaceAfter)
 
-        self.width = availWidth
-        self.height = max(sum(self.paraHeights), totalHf)
-        return (availWidth, self.height)
+        self.width = avail_width
+        self.height = max(sum(self.paraHeights), total_hf)
+        return (avail_width, self.height)
 
     def draw(self):
         canv = self.canv
@@ -263,14 +263,14 @@ class FiguresAndParagraphs(Flowable):
 
         canv.restoreState()
 
-    def split(self, availWidth, availheight):
+    def split(self, avail_width, avail_height):
         if not hasattr(self,
                        "hfs") or len(
                                     self.hfs) == 0 or hasattr(self,
                                                               "keep_together_split"):
-            self.wrap(availWidth, availheight)
+            self.wrap(avail_width, avail_height)
         height = self._getVOffset()
-        if self.hfs[0] + height > availheight:
+        if self.hfs[0] + height > avail_height:
             return [PageBreak()] + [
                 FiguresAndParagraphs(self.fs, self.ps,
                                      figure_margin=self.figure_margin)
@@ -278,13 +278,13 @@ class FiguresAndParagraphs(Flowable):
         fitting_figures = []
         next_figures = []
         for (i, f) in enumerate(self.fs):
-            if (height + self.hfs[i]) < availheight:
+            if (height + self.hfs[i]) < avail_height:
                 fitting_figures.append(f)
             else:
                 next_figures.append(f)
             height += self.hfs[i]
         fitting_paras = []
-        nextParas = []
+        next_paras = []
         height = 0
         splitted_paragraph = False
         force_split = False
@@ -305,18 +305,18 @@ class FiguresAndParagraphs(Flowable):
                         + self.paraHeights[i]
                         + pdfstyles.MIN_LINES_AFTER_HEADING * line_height
                     )
-                    > availheight
+                    > avail_height
                 ):
                     force_split = True
-            if (height + self.paraHeights[i]) < availheight and not force_split:
+            if (height + self.paraHeights[i]) < avail_height and not force_split:
                 fitting_paras.append(p)
             else:
                 if splitted_paragraph:
-                    nextParas.append(p)
+                    next_paras.append(p)
                     continue
                 para_frags = p.split(
-                    availWidth,
-                    availheight
+                    avail_width,
+                    avail_height
                     - height
                     - p.style.spaceBefore
                     - p.style.spaceAfter
@@ -325,23 +325,23 @@ class FiguresAndParagraphs(Flowable):
                 splitted_paragraph = True
                 if len(para_frags) == 2:
                     fitting_paras.append(para_frags[0])
-                    nextParas.append(para_frags[1])
+                    next_paras.append(para_frags[1])
                 elif len(para_frags) < 2:
-                    nextParas.append(p)
+                    next_paras.append(p)
                 else:  # fixme: not sure if splitting a paragraph can yield more than two elements...
                     pass
             height += self.paraHeights[i]
 
         if next_figures:
-            if nextParas:
+            if next_paras:
                 next_elements = [
-                    FiguresAndParagraphs(next_figures, nextParas,
+                    FiguresAndParagraphs(next_figures, next_paras,
                                          figure_margin=self.figure_margin)
                 ]
             else:
                 next_elements = next_figures
         else:
-            next_elements = nextParas if nextParas else []
+            next_elements = next_paras if next_paras else []
         return [
             FiguresAndParagraphs(fitting_figures, fitting_paras,
                                  figure_margin=self.figure_margin)
@@ -356,11 +356,11 @@ class PreformattedBox(Preformatted):
         self.padding = padding
         self.borderwidth = borderwidth
 
-    def wrap(self, availWidth, availHeight):
-        w, h = Preformatted.wrap(self, availWidth, availHeight)
+    def wrap(self, avail_width, avail_height):
+        width, height = Preformatted.wrap(self, avail_width, avail_height)
         return (
-            w + self.margin + self.borderwidth + self.padding * 2,
-            h + self.margin + self.borderwidth + self.padding * 2,
+            width + self.margin + self.borderwidth + self.padding * 2,
+            height + self.margin + self.borderwidth + self.padding * 2,
         )
 
     def draw(self):
@@ -372,11 +372,11 @@ class PreformattedBox(Preformatted):
         Preformatted.draw(self)
         self.canv.restoreState()
 
-    def split(self, availWidth, availHeight):
-        if availHeight < self.style.leading:
+    def split(self, avail_width, avail_height):
+        if avail_height < self.style.leading:
             return []
 
-        lines_that_fit = int((availHeight - self.padding - self.margin) * 1.0 / self.style.leading)
+        lines_that_fit = int((avail_height - self.padding - self.margin) * 1.0 / self.style.leading)
 
         text1 = string.join(self.lines[0:lines_that_fit], "\n")
         text2 = string.join(self.lines[lines_that_fit:], "\n")

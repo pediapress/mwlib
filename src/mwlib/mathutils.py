@@ -22,8 +22,8 @@ log = log.Log("mwlib.mathutils")
 
 
 def try_system(cmd):
-    n = os.path.devnull
-    cmd += f" >{n} 2>{n}"
+    dev_null_path = os.path.devnull
+    cmd += f" >{dev_null_path} 2>{dev_null_path}"
     return os.system(cmd)
 
 
@@ -31,7 +31,7 @@ texvc_available = not try_system("texvc")
 blahtexml_available = not try_system("blahtexml")
 
 
-def _renderMathBlahtex(latex, output_path, output_mode):
+def _render_math_blahtex(latex, output_path, output_mode):
     if not blahtexml_available:
         return None
     cmd = ["blahtexml", "--texvc-compatible-commands"]
@@ -60,23 +60,23 @@ def _renderMathBlahtex(latex, output_path, output_mode):
             os.chdir(curdir)
         return None
 
-    (result, error) = sub.communicate(latex.encode("utf-8"))
+    (result, _) = sub.communicate(latex.encode("utf-8"))
     del sub
 
     if curdir is not None:
         os.chdir(curdir)
     if result:
-        p = ET.fromstring(result)
+        parsed_tree = ET.fromstring(result)
         if output_mode == "png":
-            r = p.iter("png")
-            if r:
-                png_fn = r.next().findtext("md5")
+            png_elements = parsed_tree.iter("png")
+            if png_elements:
+                png_fn = png_elements.next().findtext("md5")
                 if png_fn:
                     png_fn = os.path.join(output_path, png_fn + ".png")
                     if os.path.exists(png_fn):
                         return png_fn
         elif output_mode == "mathml":
-            mathml = p.iter("mathml")
+            mathml = parsed_tree.iter("mathml")
             if mathml:
                 mathml = mathml.next()
                 mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
@@ -87,7 +87,7 @@ def _renderMathBlahtex(latex, output_path, output_mode):
     return None
 
 
-def _renderMathTexvc(latex, output_path, output_mode="png", resolution_in_dpi=120):
+def _render_math_texvc(latex, output_path, output_mode="png", resolution_in_dpi=120):
     """only render mode is png"""
     if not texvc_available:
         return None
@@ -116,7 +116,7 @@ def _renderMathTexvc(latex, output_path, output_mode="png", resolution_in_dpi=12
     return None
 
 
-def renderMath(
+def render_math(
     latex,
     output_path=None,
     output_mode="png",
@@ -150,36 +150,37 @@ def renderMath(
         log.error("math rendering with output_mode png requires an output_path")
         raise ValueError("output path required")
 
-    removeTmpDir = False
+    remove_tmp_dir = False
     if output_mode == "mathml" and not output_path:
         output_path = tempfile.mkdtemp()
-        removeTmpDir = True
+        remove_tmp_dir = True
     output_path = os.path.abspath(output_path)
     result = None
 
     if render_engine == "blahtexml":
-        result = _renderMathBlahtex(
+        result = _render_math_blahtex(
             latex, output_path=output_path, output_mode=output_mode
         )
     if result is None and output_mode == "png":
-        result = _renderMathTexvc(
+        result = _render_math_texvc(
             latex,
             output_path=output_path,
             output_mode=output_mode,
             resolution_in_dpi=resolution_in_dpi,
         )
 
-    if removeTmpDir:
+    if remove_tmp_dir:
         shutil.rmtree(output_path)
     return result
 
 
 if __name__ == "__main__":
-    latex = "\\sqrt{4}=2"
+    LATEX = "\\sqrt{4}=2"
 
-    print(renderMath(latex, output_mode="mathml"))
-    print(renderMath(latex, output_path="/tmp/", output_mode="png"))
+    print(render_math(LATEX, output_mode="mathml"))
+    print(render_math(LATEX, output_path="/tmp/", output_mode="png"))
     print(
-        renderMath(latex, output_path="/tmp/", output_mode="png",
-                   render_engine="texvc")
+        render_math(
+            LATEX, output_path="/tmp/", output_mode="png", render_engine="texvc"
+        )
     )

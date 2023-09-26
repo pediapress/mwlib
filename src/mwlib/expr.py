@@ -17,18 +17,18 @@ class ExprError(Exception):
     pass
 
 
-def _myround(a, b):
-    if int(b) == 0 and round(a + 1) - round(a) != 1:
-        return a + abs(a) / a * 0.5  # simulate Python 2 rounding
+def _myround(number_to_round, decimal_places):
+    if int(decimal_places) == 0 and round(number_to_round + 1) - round(number_to_round) != 1:
+        return number_to_round + abs(number_to_round) / number_to_round * 0.5  # simulate Python 2 rounding
         # via https://stackoverflow.com/questions/21839140/
         # python-3-rounding-behavior-in-python-2
-    r = round(a, int(b))
-    if int(r) == r:
-        return int(r)
-    return r
+    rounded_number = round(number_to_round, int(decimal_places))
+    if int(rounded_number) == rounded_number:
+        return int(rounded_number)
+    return rounded_number
 
 
-pattern = "\n".join(
+PATTERN = "\n".join(
     [
         r"(?:\s+)",
         r"|((?:(?:\d+)(?:\.\d+)?",
@@ -37,7 +37,7 @@ pattern = "\n".join(
     ]
 )
 
-rx_pattern = re.compile(pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE)
+rx_pattern = re.compile(PATTERN, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
 
 def tokenize(s):
@@ -53,11 +53,11 @@ def tokenize(s):
     return res
 
 
-class uminus:
+class UMinus:
     pass
 
 
-class uplus:
+class UPlus:
     pass
 
 
@@ -84,8 +84,8 @@ def addop(op, prec, fun, numargs=None):
 
 
 a = addop
-a(uminus, 10, lambda x: -x)
-a(uplus, 10, lambda x: x)
+a(UMinus, 10, lambda x: -x)
+a(UPlus, 10, lambda x: x)
 a("^", 10, math.pow, 2)
 a("not", 9, lambda x: int(not (bool(x))))
 a("abs", 9, abs, 1)
@@ -179,9 +179,9 @@ class Expr:
             elif operator in precedence:
                 if last_operator and last_operator != ")":
                     if operator == "-":
-                        operator = uminus
+                        operator = UMinus
                     elif operator == "+":
-                        operator = uplus
+                        operator = UPlus
 
                 is_unary = operator in unary_ops
                 prec = precedence[operator]

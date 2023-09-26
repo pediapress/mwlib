@@ -14,7 +14,7 @@ cases = [
     ("___user___:___schmir  __", benutzer_schmir),
     ("User:SchmiR", "Benutzer:SchmiR"),
 ]
-nshandler = nshandling.nshandler(siteinfo_de)
+nshandler = nshandling.NsHandler(siteinfo_de)
 
 
 @pytest.mark.parametrize("case", cases)

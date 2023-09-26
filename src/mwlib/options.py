@@ -95,8 +95,8 @@ class OptionParser(optparse.OptionParser):
             if "{" in self.options.metabook and "}" in self.options.metabook:
                 self.metabook = json.loads(self.options.metabook)
             else:
-                with open(self.options.metabook) as fp:
-                    self.metabook = json.load(fp)
+                with open(self.options.metabook) as file_path:
+                    self.metabook = json.load(file_path)
 
         try:
             self.options.imagesize = int(self.options.imagesize)
@@ -114,10 +114,10 @@ class OptionParser(optparse.OptionParser):
         return self.options, self.args
 
     def make_wiki(self):
-        kw = self.options.__dict__.copy()
-        kw["metabook"] = self.metabook
+        options_dict = self.options.__dict__.copy()
+        options_dict["metabook"] = self.metabook
 
-        env = wiki.make_wiki(**kw)
+        env = wiki.make_wiki(**options_dict)
 
         if not env.metabook:
             self.metabook = env.metabook = metabook.collection()

@@ -34,7 +34,7 @@ def scale_images(data):
                     )
 
 
-def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
+def get_col_widths(data, table=None, recursion_depth=0, nestingLevel=1):
     """
     the widths for the individual columns are calculated.
     if the horizontal size exceeds the pagewidth
@@ -47,7 +47,7 @@ def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
     if not data:
         return None
 
-    availWidth = pdfstyles.print_width - 12  # twice the total cell padding
+    avail_width = pdfstyles.print_width - 12  # twice the total cell padding
     minwidths = [0 for x in range(len(data[0]))]
     summedwidths = [0 for x in range(len(data[0]))]
     maxbreaks = [0 for x in range(len(data[0]))]
@@ -60,7 +60,7 @@ def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
                 colspan = 1
             for e in cell:
                 minw, minh = e.wrap(0, pdfstyles.PRINT_HEIGHT)
-                _, maxh = e.wrap(availWidth, pdfstyles.PRINT_HEIGHT)
+                _, maxh = e.wrap(avail_width, pdfstyles.PRINT_HEIGHT)
                 minw += 6  # FIXME +6 is the cell padding we are using
                 cellwidth += minw
                 rows = (
@@ -86,21 +86,21 @@ def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
         nestingLevel == 2
         and parent_cells
         and parent_tables
-        and parent_cells[0].colspan == parent_tables[0].numcols
+        and parent_cells[0].colspan == parent_tables[0].num_cols
     ):
-        availWidth -= 8
+        avail_width -= 8
     elif nestingLevel > 1:
         return minwidths
 
-    remainingSpace = availWidth - sum(summedwidths)
-    if remainingSpace < 0:
-        remainingSpace = availWidth - sum(minwidths)
-        if remainingSpace < 0:
-            if recursionDepth == 0:
+    remaining_space = avail_width - sum(summedwidths)
+    if remaining_space < 0:
+        remaining_space = avail_width - sum(minwidths)
+        if remaining_space < 0:
+            if recursion_depth == 0:
                 scale_images(data)
                 return get_col_widths(
                     data, table=table,
-                    recursionDepth=1, nestingLevel=nestingLevel
+                    recursion_depth=1, nestingLevel=nestingLevel
                 )
             else:
                 return None
@@ -114,14 +114,14 @@ def get_col_widths(data, table=None, recursionDepth=0, nestingLevel=1):
         return minwidths
     else:
         widths = [
-            _widths[col] + remainingSpace * (breaks / totalbreaks)
+            _widths[col] + remaining_space * (breaks / totalbreaks)
             for (col, breaks) in enumerate(maxbreaks)
         ]
         return widths
 
 
 def get_content_type(t):
-    nodeInfo = []
+    node_info = []
     for row in t.children:
         row_node_info = []
         for cell in row:
@@ -138,22 +138,22 @@ def get_content_type(t):
             if cell.children:
                 row_node_info.append((cell_node_types, cell_text_len))
         if row_node_info:
-            nodeInfo.append(row_node_info)
-    return nodeInfo
+            node_info.append(row_node_info)
+    return node_info
 
 
-def reformat_table(t, maxCols):
-    nodeInfo = get_content_type(t)
-    numCols = maxCols
+def reformat_table(t, max_cols):
+    node_info = get_content_type(t)
+    num_cols = max_cols
 
     only_tables = (
         len(t.children) > 0
     )  # if table is empty only_tables and only_lists are False
     only_lists = len(t.children) > 0
-    if not nodeInfo:
+    if not node_info:
         only_tables = False
         only_lists = False
-    for row in nodeInfo:
+    for row in node_info:
         for cell in row:
             cell_node_types, _ = cell
             if not all(nodetype == Table for nodetype in cell_node_types):
@@ -161,10 +161,10 @@ def reformat_table(t, maxCols):
             if not all(nodetype == ItemList for nodetype in cell_node_types):
                 only_lists = False
 
-    if only_tables and numCols > 1:
+    if only_tables and num_cols > 1:
         log.info("got table only table - removing container")
         t = remove_container_table(t)
-    if only_lists and numCols > 2:
+    if only_lists and num_cols > 2:
         log.info("got list only table - reducing columns to 2")
         t = reduce_cols(t, colnum=2)
     if only_lists:
@@ -192,10 +192,10 @@ def split_list_items(table):
             for j, _ in enumerate(cols):
                 try:
                     item = cols[j][i]
-                    il = ItemList()
-                    il.append_child(item)
+                    item_list = ItemList()
+                    item_list.append_child(item)
                     new_cell = Cell()
-                    new_cell.append_child(il)
+                    new_cell.append_child(item_list)
                     new_row.append_child(new_cell)
                 except IndexError:
                     new_row.append_child(Cell())
@@ -204,22 +204,22 @@ def split_list_items(table):
     return new_table
 
 
-def reduce_cols(t, colnum=2):
-    nt = t.copy()
-    nt.children = []
-    for r in t.children:
-        nr = Row()
-        for c in r:
-            nc = c.copy()
-            if len(nr.children) == colnum:
-                nt.append_child(nr)
-                nr = Row()
-            nr.append_child(nc)
-        if len(nr.children) > 0:
-            while len(nr.children) < colnum:
-                nr.append_child(Cell())
-            nt.append_child(nr)
-    return nt
+def reduce_cols(table, colnum=2):
+    new_table = table.copy()
+    new_table.children = []
+    for row in table.children:
+        new_row = Row()
+        for column in row:
+            new_column = column.copy()
+            if len(new_row.children) == colnum:
+                new_table.append_child(new_row)
+                new_row = Row()
+            new_row.append_child(new_column)
+        if len(new_row.children) > 0:
+            while len(new_row.children) < colnum:
+                new_row.append_child(Cell())
+            new_table.append_child(new_row)
+    return new_table
 
 
 def remove_container_table(containertable):
@@ -363,17 +363,17 @@ def add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols):
         )
 
 
-def check_spans_in_row(row, row_idx, col_idx, cell, t, styles, _approx_cols):
+def check_spans_in_row(row, row_idx, col_idx, cell, table, styles, _approx_cols):
     col_idx = 0
     for cell in row.children:
         if cell.rowspan > 1:
             emptycell = get_empty_cell(None, cell.colspan, cell.rowspan - 1)
-            last_col_idx = len(t.children[row_idx + 1].children) - 1
+            last_col_idx = len(table.children[row_idx + 1].children) - 1
             if col_idx > last_col_idx:
-                emptycell.moveto(t.children[row_idx + 1].children[last_col_idx])
+                emptycell.moveto(table.children[row_idx + 1].children[last_col_idx])
             else:
                 emptycell.moveto(
-                    t.children[row_idx + 1].children[col_idx], prefix=True
+                    table.children[row_idx + 1].children[col_idx], prefix=True
                 )
             if not getattr(cell, "rowspanned", False):
                 add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols)
@@ -388,13 +388,13 @@ def check_spans_in_row(row, row_idx, col_idx, cell, t, styles, _approx_cols):
         col_idx += 1
 
 
-def check_spans(t):
-    if getattr(t, "checked_spans", False):
+def check_spans(table):
+    if getattr(table, "checked_spans", False):
         return
     styles = []
-    num_rows = len(t.children)
+    num_rows = len(table.children)
     _approx_cols = 1
-    for row_idx, row in enumerate(t.children):
+    for row_idx, row in enumerate(table.children):
         col_idx = 0
         _approx_cols = max(_approx_cols, len(row.children))
         for cell in row.children:
@@ -406,16 +406,16 @@ def check_spans(t):
                 cell.attributes["rowspan"] = num_rows - row_idx
             col_idx += 1
 
-    for row_idx, row in enumerate(t.children):
-        check_spans_in_row(row, row_idx, col_idx, cell, t, styles, _approx_cols)
+    for row_idx, row in enumerate(table.children):
+        check_spans_in_row(row, row_idx, col_idx, cell, table, styles, _approx_cols)
 
-    numcols = max(len(row.children) for row in t.children)
-    for row in t.children:
-        while len(row.children) < numcols:
+    num_cols = max(len(row.children) for row in table.children)
+    for row in table.children:
+        while len(row.children) < num_cols:
             row.append_child(get_empty_cell(None, colspan=1, rowspan=1))
 
-    t.checked_spans = True
-    t.span_styles = styles
+    table.checked_spans = True
+    table.span_styles = styles
 
 
 def get_styles(table):
@@ -471,7 +471,7 @@ def border_styles(table):
             if not getattr(row, "suppress_bottom_border", False):
                 styles.append(("LINEBELOW",
                                (0, idx), (-1, idx), 0.25, colors.black))
-        for col in range(table.numcols):
+        for col in range(table.num_cols):
             styles.append(("LINEAFTER", (col, 0), (col, -1),
                            0.25, colors.black))
     return styles

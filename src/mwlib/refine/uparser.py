@@ -71,7 +71,7 @@ def parse_string(
     if siteinfo is None:
         nshandler = nshandling.get_nshandler_for_lang(lang)
     else:
-        nshandler = nshandling.nshandler(siteinfo)
+        nshandler = nshandling.NsHandler(siteinfo)
     a = compat.parse_txt(
         _input,
         title=title,

@@ -298,7 +298,7 @@ class Fetcher:
 
         siteinfo = self.get_siteinfo_for(self.api)
         self.fsout.write_siteinfo(siteinfo)
-        self.nshandler = nshandling.nshandler(siteinfo)
+        self.nshandler = nshandling.NsHandler(siteinfo)
 
         self.make_print_template = None
 
@@ -667,7 +667,7 @@ class Fetcher:
 
         siteinfo = self.get_siteinfo_for(api)
 
-        ns_handler = nshandling.nshandler(siteinfo)
+        ns_handler = nshandling.NsHandler(siteinfo)
         nsname = ns_handler.get_nsname_by_number(6)
 
         local_names = []

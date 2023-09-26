@@ -181,12 +181,12 @@ class _CompatScanner:
         numtokens = len(tokens)
         while i < numtokens:
             token_type, start, tlen = tokens[i]
-            n = tok2compat.get(token_type)
-            if n is ignore:
+            compat = tok2compat.get(token_type)
+            if compat is ignore:
                 i += 1
                 continue
-            elif n is not None:
-                append_to_result(n)
+            elif compat is not None:
+                append_to_result(compat)
             elif token_type == Token.t_entity:
                 res.append(("TEXT", resolve_entity(get_substring())))
             elif token_type == Token.t_hrule:

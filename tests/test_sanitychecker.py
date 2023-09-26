@@ -59,7 +59,7 @@ def checkpass(*rules):
     tree = setup()
     sc = SanityChecker()
     for r in rules:
-        sc.addRule(r)
+        sc.add_rule(r)
     sc.check(tree)  # should pass
 
 
@@ -67,7 +67,7 @@ def checkfail(*rules):
     tree = setup()
     sc = SanityChecker()
     for r in rules:
-        sc.addRule(r)
+        sc.add_rule(r)
     failed = False
     try:
         sc.check(tree)
@@ -100,7 +100,7 @@ def test_remove_cb():
     checkfail(RequireChild(Strong))
     tree = setup()
     sc = SanityChecker()
-    sc.addRule(RequireChild(Strong), removecb)  # this removes the
+    sc.add_rule(RequireChild(Strong), removecb)  # this removes the
     sc.check(tree)
     # now traverse this tree and assert there is no strong
     for c in tree.allchildren():

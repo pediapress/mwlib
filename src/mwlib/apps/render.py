@@ -121,10 +121,8 @@ class Main:
                     print(" {}:\t{}".format(name, info["help"]))
 
     def get_environment(self):
-
-
         env = self.parser.make_wiki()
-        if isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.adapt)) or isinstance(
+        if isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.Adapt)) or isinstance(
             env, wiki.MultiEnvironment
         ):
             self.status = Status(self.options.status_file,

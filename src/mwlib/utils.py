@@ -22,23 +22,23 @@ log = Log("mwlib.utils")
 non_word = re.compile(r"(?u)[^-\w.~]")
 
 
-def fs_escape(s: Union[bytes, str]) -> str:
+def fs_escape(input_string: Union[bytes, str]) -> str:
     """Escape string to be safely used in path names."""
-    if isinstance(s, bytes):
-        s = s.decode("utf-8")
-    if not s.isascii() or any(x in s for x in "~/\\"):
+    if isinstance(input_string, bytes):
+        input_string = input_string.decode("utf-8")
+    if not input_string.isascii() or any(x in input_string for x in "~/\\"):
         result = []
-        for x in s:
-            if x.isascii() and x not in "~/\\":
-                result.append(x)
-            elif x == "~":
+        for char in input_string:
+            if char.isascii() and char not in "~/\\":
+                result.append(char)
+            elif char == "~":
                 result.append("~~")
             else:
-                result.append(f"~{ord(x)}~")
-        s = "".join(result)
-    s = s.strip().replace(" ", "_")
-    s = non_word.sub("", s)
-    return s
+                result.append(f"~{ord(char)}~")
+        input_string = "".join(result)
+    input_string = input_string.strip().replace(" ", "_")
+    input_string = non_word.sub("", input_string)
+    return input_string
 
 
 def start_logging(path, stderr_only=False):
@@ -56,12 +56,12 @@ def start_logging(path, stderr_only=False):
         sys.stdout.flush()
     sys.stderr.flush()
 
-    with open(path, "a") as f:
-        fd = f.fileno()
+    with open(path, "a") as log_file:
+        file_no = log_file.fileno()
 
     if not stderr_only:
-        os.dup2(fd, 1)
-    os.dup2(fd, 2)
+        os.dup2(file_no, 1)
+    os.dup2(file_no, 2)
 
     if not stderr_only:
         null = os.open(os.path.devnull, os.O_RDWR)
@@ -205,8 +205,8 @@ def fetch_url(
         fetch_cache[url] = data
 
     if output_filename:
-        with open(output_filename, "wb") as f:
-            f.write(data)
+        with open(output_filename, "wb") as out_file:
+            out_file.write(data)
         return True
     else:
         return data
@@ -226,19 +226,19 @@ def uid(max_length=10):
     return "".join(hex(x)[2:] for x in some_bytes)[:max_length]
 
 
-def ensure_dir(d):
-    """If directory d does not exist, create it
+def ensure_dir(directory_path):
+    """If directory directory_path does not exist, create it
 
-    @param d: name of an existing or not-yet-existing directory
-    @type d: str
+    @param directory_path: name of an existing or not-yet-existing directory
+    @type directory_path: str
 
-    @returns: d
+    @returns: directory_path
     @rtype: str
     """
 
-    if not os.path.isdir(d):
-        os.makedirs(d)
-    return d
+    if not os.path.isdir(directory_path):
+        os.makedirs(directory_path)
+    return directory_path
 
 
 def send_mail(from_email, to_emails, subject, body,
@@ -272,10 +272,10 @@ def send_mail(from_email, to_emails, subject, body,
     msg["Date"] = formatdate()
     msg["Message-ID"] = make_msgid()
     if headers is not None:
-        for k, v in headers.items():
-            if not isinstance(v, str):
-                v = str(v)
-            msg[k] = v
+        for k, header in headers.items():
+            if not isinstance(header, str):
+                header = str(header)
+            msg[k] = header
     connection.sendmail(from_email, to_emails, msg.as_string())
     connection.close()
 
@@ -285,12 +285,12 @@ def ppdict(dct):
     tmp = []
     write = tmp.append
 
-    for k, v in items:
+    for k, val in items:
         write("*" + str(k) + "*")
-        v = str(v)
-        lines = v.split("\n")
-        for x in lines:
-            write(" " * 4 + x)
+        val = str(val)
+        lines = val.split("\n")
+        for line in lines:
+            write(" " * 4 + line)
         write("")
 
     return "\n".join(tmp)
@@ -336,8 +336,8 @@ def report(
             headers=mail_headers,
         )
         log.info("sent mail to %r" % mail_recipients)
-    except Exception as e:
-        log.ERROR("Could not send mail: %s" % e)
+    except Exception as exc:
+        log.ERROR("Could not send mail: %s" % exc)
     return text
 
 
@@ -421,12 +421,12 @@ def garble_password(argv):
     return argv
 
 
-def python2sort(x, reverse=False):
-    if not x:
-        return x
-    it = iter(x)
-    groups = [[next(it)]]
-    for item in it:
+def python2sort(iterable, reverse=False):
+    if not iterable:
+        return iterable
+    iterator = iter(iterable)
+    groups = [[next(iterator)]]
+    for item in iterator:
         for group in groups:
             try:
                 item < group[0]  # exception if not comparable

@@ -2525,6 +2525,7 @@ static const char __pyx_k__6[] = "{|";
   static const char __pyx_k_resolver[] = "resolver";
   static const char __pyx_k_set_name[] = "__set_name__";
   static const char __pyx_k_siteinfo[] = "siteinfo";
+  static const char __pyx_k_NsHandler[] = "NsHandler";
   static const char __pyx_k_enumerate[] = "enumerate";
   static const char __pyx_k_getSource[] = "getSource";
   static const char __pyx_k_isenabled[] = "isenabled";
@@ -2673,6 +2674,7 @@ typedef struct {
   PyObject *__pyx_n_s_KeyError;
   PyObject *__pyx_n_s_MagicResolver;
   PyObject *__pyx_n_s_MemoryLimitError;
+  PyObject *__pyx_n_s_NsHandler;
   PyObject *__pyx_n_s_TemplateRecursion;
   PyObject *__pyx_n_s_Uniquifier;
   PyObject *__pyx_n_s_ValueError;
@@ -2943,6 +2945,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_KeyError);
   Py_CLEAR(clear_module_state->__pyx_n_s_MagicResolver);
   Py_CLEAR(clear_module_state->__pyx_n_s_MemoryLimitError);
+  Py_CLEAR(clear_module_state->__pyx_n_s_NsHandler);
   Py_CLEAR(clear_module_state->__pyx_n_s_TemplateRecursion);
   Py_CLEAR(clear_module_state->__pyx_n_s_Uniquifier);
   Py_CLEAR(clear_module_state->__pyx_n_s_ValueError);
@@ -3191,6 +3194,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_KeyError);
   Py_VISIT(traverse_module_state->__pyx_n_s_MagicResolver);
   Py_VISIT(traverse_module_state->__pyx_n_s_MemoryLimitError);
+  Py_VISIT(traverse_module_state->__pyx_n_s_NsHandler);
   Py_VISIT(traverse_module_state->__pyx_n_s_TemplateRecursion);
   Py_VISIT(traverse_module_state->__pyx_n_s_Uniquifier);
   Py_VISIT(traverse_module_state->__pyx_n_s_ValueError);
@@ -3449,6 +3453,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_KeyError __pyx_mstate_global->__pyx_n_s_KeyError
 #define __pyx_n_s_MagicResolver __pyx_mstate_global->__pyx_n_s_MagicResolver
 #define __pyx_n_s_MemoryLimitError __pyx_mstate_global->__pyx_n_s_MemoryLimitError
+#define __pyx_n_s_NsHandler __pyx_mstate_global->__pyx_n_s_NsHandler
 #define __pyx_n_s_TemplateRecursion __pyx_mstate_global->__pyx_n_s_TemplateRecursion
 #define __pyx_n_s_Uniquifier __pyx_mstate_global->__pyx_n_s_Uniquifier
 #define __pyx_n_s_ValueError __pyx_mstate_global->__pyx_n_s_ValueError
@@ -8499,7 +8504,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  *             print(f"WARNING: failed to get siteinfo from {self.db!r}")
  *             si = siteinfo.get_siteinfo("de")             # <<<<<<<<<<<<<<
  * 
- *         self.nshandler = nshandler = nshandling.nshandler(si)
+ *         self.nshandler = nshandler = nshandling.NsHandler(si)
  */
       __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_siteinfo); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 199, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
@@ -8543,13 +8548,13 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     /* "mwlib/templ/evaluate.pyx":201
  *             si = siteinfo.get_siteinfo("de")
  * 
- *         self.nshandler = nshandler = nshandling.nshandler(si)             # <<<<<<<<<<<<<<
+ *         self.nshandler = nshandler = nshandling.NsHandler(si)             # <<<<<<<<<<<<<<
  *         self.siteinfo = si
  * 
  */
     __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_nshandling); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_nshandler); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 201, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_NsHandler); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 201, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_2 = NULL;
@@ -8581,7 +8586,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
     /* "mwlib/templ/evaluate.pyx":202
  * 
- *         self.nshandler = nshandler = nshandling.nshandler(si)
+ *         self.nshandler = nshandler = nshandling.NsHandler(si)
  *         self.siteinfo = si             # <<<<<<<<<<<<<<
  * 
  *         if self.db and hasattr(self.db, "getSource"):
@@ -11397,6 +11402,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_KeyError, __pyx_k_KeyError, sizeof(__pyx_k_KeyError), 0, 0, 1, 1},
     {&__pyx_n_s_MagicResolver, __pyx_k_MagicResolver, sizeof(__pyx_k_MagicResolver), 0, 0, 1, 1},
     {&__pyx_n_s_MemoryLimitError, __pyx_k_MemoryLimitError, sizeof(__pyx_k_MemoryLimitError), 0, 0, 1, 1},
+    {&__pyx_n_s_NsHandler, __pyx_k_NsHandler, sizeof(__pyx_k_NsHandler), 0, 0, 1, 1},
     {&__pyx_n_s_TemplateRecursion, __pyx_k_TemplateRecursion, sizeof(__pyx_k_TemplateRecursion), 0, 0, 1, 1},
     {&__pyx_n_s_Uniquifier, __pyx_k_Uniquifier, sizeof(__pyx_k_Uniquifier), 0, 0, 1, 1},
     {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},

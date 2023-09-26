@@ -33,7 +33,7 @@ NS_CATEGORY = 14
 NS_CATEGORY_TALK = 15
 
 
-class ilink:
+class ILink:
     url = ""
     prefix = ""
     local = ""
@@ -48,25 +48,25 @@ def fix_wikipedia_siteinfo(siteinfo):
             x.get("prefix", "")[2:] for x in siteinfo.get("interwikimap", [])]:
         print("WARNING: interwikimap contains garbage")
         from mwlib import siteinfo as simod
-        en = simod.get_siteinfo("en")
-        siteinfo['interwikimap'] = list(en["interwikimap"])
+        eng_locale = simod.get_siteinfo("en")
+        siteinfo['interwikimap'] = list(eng_locale["interwikimap"])
 
     prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
-    for p in "pnb ckb mwl mhr ace krc pcd frr koi gag bjn pfl mrj bjn rue kbd ltg xmf".split():
+    for prefix in "pnb ckb mwl mhr ace krc pcd frr koi gag bjn pfl mrj bjn rue kbd ltg xmf".split():
 
-        if p in prefixes:
+        if prefix in prefixes:
             return
         siteinfo['interwikimap'].append({
-            'prefix': p,
-            'language': p,
-            'url': f'http://{p}.wikipedia.org/wiki/$1',
+            'prefix': prefix,
+            'language': prefix,
+            'url': f'http://{prefix}.wikipedia.org/wiki/$1',
             'local': '',
         })
 
 # TODO: build fast lookup table for use in nshandler.splitname
 
 
-class nshandler:
+class NsHandler:
     def __init__(self, siteinfo):
         if siteinfo is None:
             raise ValueError("siteinfo is None")
@@ -81,9 +81,9 @@ class nshandler:
         except KeyError:
             self.capitalize = True
 
-        p = self.prefix2interwiki = {}
+        prefix2_interwiki = self.prefix2interwiki = {}
         for k in siteinfo.get("interwikimap", []):
-            p[k["prefix"]] = k
+            prefix2_interwiki[k["prefix"]] = k
 
         self.set_redirect_matcher(siteinfo)
 
@@ -91,12 +91,12 @@ class nshandler:
         self.redirect_matcher = get_redirect_matcher(siteinfo, self)
 
     def __getstate__(self):
-        d = self.__dict__.copy()
-        del d['redirect_matcher']
-        return d
+        data = self.__dict__.copy()
+        del data['redirect_matcher']
+        return data
 
-    def __setstate__(self, d):
-        self.__dict__ = d
+    def __setstate__(self, data):
+        self.__dict__ = data
         self.set_redirect_matcher(self.siteinfo)
 
     # workaround for a copy.deepcopy bug in python 2.4
@@ -108,15 +108,15 @@ class nshandler:
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
         namespaces = list(self.siteinfo["namespaces"].values())
-        for ns in namespaces:
-            star = ns["*"]
-            if star.lower() == name or ns.get("canonical", "").lower() == name:
-                return True, ns["id"], star
+        for namespace in namespaces:
+            star = namespace["*"]
+            if star.lower() == name or namespace.get("canonical", "").lower() == name:
+                return True, namespace["id"], star
 
         aliases = self.siteinfo.get("namespacealiases", [])
-        for a in aliases:
-            if a["*"].lower() == name:
-                nsid = a["id"]
+        for alias in aliases:
+            if alias["*"].lower() == name:
+                nsid = alias["id"]
                 return True, nsid, self.siteinfo["namespaces"][str(nsid)]["*"]
 
         return False, defaultns, self.siteinfo["namespaces"][str(defaultns)]["*"]
@@ -124,10 +124,10 @@ class nshandler:
     def get_fqname(self, title, defaultns=0):
         return self.splitname(title, defaultns=defaultns)[2]
 
-    def maybe_capitalize(self, t):
+    def maybe_capitalize(self, tag):
         if self.capitalize:
-            return t[0:1].upper() + t[1:]
-        return t
+            return tag[0:1].upper() + tag[1:]
+        return tag
 
     def splitname(self, title, defaultns=0):
         if not isinstance(title, six.text_type):
@@ -138,8 +138,8 @@ class nshandler:
             defaultns = 0
 
         if ":" in name:
-            ns, partial_name = name.split(":", 1)
-            was_namespace, nsnum, prefix = self._find_namespace(ns,
+            namespace, partial_name = name.split(":", 1)
+            was_namespace, nsnum, prefix = self._find_namespace(namespace,
                                                                 defaultns=defaultns)
             suffix = partial_name.strip() if was_namespace else name
         else:
@@ -154,8 +154,8 @@ class nshandler:
 
         return (nsnum, suffix, f"{prefix}{suffix}")
 
-    def get_nsname_by_number(self, ns):
-        return self.siteinfo["namespaces"][str(ns)]["*"]
+    def get_nsname_by_number(self, namespace):
+        return self.siteinfo["namespaces"][str(namespace)]["*"]
 
     def resolve_interwiki(self, title):
         name = title.replace("_", " ").strip()
@@ -165,13 +165,13 @@ class nshandler:
             return None
         prefix, suffix = name.split(":", 1)
         prefix = prefix.strip().lower()
-        d = self.prefix2interwiki.get(prefix)
-        if d is None:
+        data = self.prefix2interwiki.get(prefix)
+        if data is None:
             return None
 
         suffix = suffix.strip(" _\n\t\r").replace(" ", "_")
-        retval = ilink()
-        retval.__dict__.update(d)
+        retval = ILink()
+        retval.__dict__.update(data)
         retval.url = retval.url.replace("$1", suffix)
         retval.partial = suffix
         return retval
@@ -182,31 +182,31 @@ def get_nshandler_for_lang(lang):
         lang = "de"  # FIXME: we currently need this to make the tests happy
 
     from mwlib import siteinfo
-    si = siteinfo.get_siteinfo(lang)
-    if si is None:
-        si = siteinfo.get_siteinfo("en")
-        if not si:
+    site_info = siteinfo.get_siteinfo(lang)
+    if site_info is None:
+        site_info = siteinfo.get_siteinfo("en")
+        if not site_info:
             raise ValueError("no siteinfo for en")
-    return nshandler(si)
+    return NsHandler(site_info)
 
 
 def get_redirect_matcher(siteinfo, handler=None):
     redirect_str = "#REDIRECT"
     magicwords = siteinfo.get("magicwords")
     if magicwords:
-        for m in magicwords:
-            if m['name'] == 'redirect':
-                redirect_str = "(?:" + "|".join([re.escape(x) for x in m['aliases']]) + ")"
+        for magic in magicwords:
+            if magic['name'] == 'redirect':
+                redirect_str = "(?:" + "|".join([re.escape(x) for x in magic['aliases']]) + ")"
     redirect_rex = re.compile(
         r'^[ \t\n\r\0\x0B]*%s\s*:?\s*?\[\[(?P<redirect>.*?)\]\]' % redirect_str, re.IGNORECASE)
 
     if handler is None:
-        handler = nshandler(siteinfo)
+        handler = NsHandler(siteinfo)
 
     def redirect(text):
-        mo = redirect_rex.search(text)
-        if mo:
-            name = mo.group('redirect').split("|", 1)[0]
+        match_object = redirect_rex.search(text)
+        if match_object:
+            name = match_object.group('redirect').split("|", 1)[0]
             name = name.split("#")[0]
             return handler.get_fqname(name)
         return None

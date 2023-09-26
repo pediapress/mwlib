@@ -71,11 +71,12 @@ class Log:
             msg = repr(msg)
 
         if args:
-            msg = " ".join([msg] + [repr(x) for x in args])
+            msg = " ".join([msg] + [repr(element) for element in args])
 
-        s = ""
+        log_entry = ""
         if self.timestamps:
-            s = "%s " % time.strftime(self.timestamp_fmt)
-        s += "{} >> {}\n".format(".".join(str(x) for x in self._prefix if x),
-                                 msg)
-        self.logfile.write(s)
+            log_entry = "%s " % time.strftime(self.timestamp_fmt)
+        log_entry += "{} >> {}\n".format(
+            ".".join(str(element) for element in self._prefix if element), msg
+        )
+        self.logfile.write(log_entry)

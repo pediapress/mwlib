@@ -63,7 +63,7 @@ def parse_collection_page(wikitext):
     mb = metabook.collection()
 
     summary = False
-    noTemplate = True
+    no_template = True
     for line in wikitext.splitlines():
         line = line.strip()
         if not line:
@@ -77,14 +77,14 @@ def parse_collection_page(wikitext):
         # to those that fit into one line
         if res.group('template_end') or res.group('template'):
             summary = True
-            noTemplate = False
+            no_template = False
         elif res.group('template_start'):
-            noTemplate = False
+            no_template = False
         elif res.group('summary'):
             pass
         else:
             summary = False
-            noTemplate = False
+            no_template = False
 
         if res.group('title'):
             mb.title = res.group('title').strip()
@@ -98,7 +98,7 @@ def parse_collection_page(wikitext):
             mb.append_article(title=res.group('oldarticle'),
                               displaytitle=res.group(
                 'olddisplaytitle'), revision=res.group('oldid'))
-        elif res.group('summary') and (noTemplate or summary):
+        elif res.group('summary') and (no_template or summary):
             mb.summary += res.group('summary') + " "
 
     return mb

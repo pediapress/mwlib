@@ -198,7 +198,7 @@ class Expander:
             print(f"WARNING: failed to get siteinfo from {self.db!r}")
             si = siteinfo.get_siteinfo("de")
 
-        self.nshandler = nshandler = nshandling.nshandler(si)
+        self.nshandler = nshandler = nshandling.NsHandler(si)
         self.siteinfo = si
 
         if self.db and hasattr(self.db, "getSource"):

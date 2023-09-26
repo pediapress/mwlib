@@ -8,7 +8,7 @@ import zipfile
 
 import pytest
 
-from mwlib.nuwiki import adapt
+from mwlib.nuwiki import Adapt
 
 
 @pytest.mark.integration
@@ -36,7 +36,7 @@ class TestNuwikiXnet:
             shutil.rmtree(cls.tmpdir)
 
     def setup_method(self, method):
-        self.nuwiki = adapt(zipfile.ZipFile(self.zip_fn, "r")).nuwiki
+        self.nuwiki = Adapt(zipfile.ZipFile(self.zip_fn, "r")).nuwiki
 
     def test_init(self):
         assert "Monty Python" in self.nuwiki.revisions
