@@ -2527,7 +2527,7 @@ static const char __pyx_k__6[] = "{|";
   static const char __pyx_k_siteinfo[] = "siteinfo";
   static const char __pyx_k_NsHandler[] = "NsHandler";
   static const char __pyx_k_enumerate[] = "enumerate";
-  static const char __pyx_k_getSource[] = "getSource";
+  static const char __pyx_k_getSource[] = "get_source";
   static const char __pyx_k_isenabled[] = "isenabled";
   static const char __pyx_k_keep_uniq[] = "keep_uniq";
   static const char __pyx_k_metaclass[] = "__metaclass__";
@@ -8589,15 +8589,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  *         self.nshandler = nshandler = nshandling.NsHandler(si)
  *         self.siteinfo = si             # <<<<<<<<<<<<<<
  * 
- *         if self.db and hasattr(self.db, "getSource"):
+ *         if self.db and hasattr(self.db, "get_source"):
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_siteinfo, __pyx_v_si) < 0) __PYX_ERR(0, 202, __pyx_L1_error)
 
     /* "mwlib/templ/evaluate.pyx":204
  *         self.siteinfo = si
  * 
- *         if self.db and hasattr(self.db, "getSource"):             # <<<<<<<<<<<<<<
- *             source = self.db.getSource(pagename) or metabook.source()
+ *         if self.db and hasattr(self.db, "get_source"):             # <<<<<<<<<<<<<<
+ *             source = self.db.get_source(pagename) or metabook.source()
  *             local_values = source.locals or ""
  */
     __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_db); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 204, __pyx_L1_error)
@@ -8619,8 +8619,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
       /* "mwlib/templ/evaluate.pyx":205
  * 
- *         if self.db and hasattr(self.db, "getSource"):
- *             source = self.db.getSource(pagename) or metabook.source()             # <<<<<<<<<<<<<<
+ *         if self.db and hasattr(self.db, "get_source"):
+ *             source = self.db.get_source(pagename) or metabook.source()             # <<<<<<<<<<<<<<
  *             local_values = source.locals or ""
  *             local_values = mwlocals.parse_locals(local_values)
  */
@@ -8695,8 +8695,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_t_4 = 0;
 
       /* "mwlib/templ/evaluate.pyx":206
- *         if self.db and hasattr(self.db, "getSource"):
- *             source = self.db.getSource(pagename) or metabook.source()
+ *         if self.db and hasattr(self.db, "get_source"):
+ *             source = self.db.get_source(pagename) or metabook.source()
  *             local_values = source.locals or ""             # <<<<<<<<<<<<<<
  *             local_values = mwlocals.parse_locals(local_values)
  *         else:
@@ -8719,7 +8719,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_t_4 = 0;
 
       /* "mwlib/templ/evaluate.pyx":207
- *             source = self.db.getSource(pagename) or metabook.source()
+ *             source = self.db.get_source(pagename) or metabook.source()
  *             local_values = source.locals or ""
  *             local_values = mwlocals.parse_locals(local_values)             # <<<<<<<<<<<<<<
  *         else:
@@ -8758,8 +8758,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       /* "mwlib/templ/evaluate.pyx":204
  *         self.siteinfo = si
  * 
- *         if self.db and hasattr(self.db, "getSource"):             # <<<<<<<<<<<<<<
- *             source = self.db.getSource(pagename) or metabook.source()
+ *         if self.db and hasattr(self.db, "get_source"):             # <<<<<<<<<<<<<<
+ *             source = self.db.get_source(pagename) or metabook.source()
  *             local_values = source.locals or ""
  */
       goto __pyx_L21;

@@ -40,14 +40,14 @@ class FileJobPoller:
         while self.num_jobs > 0:
             try:
                 flags = 0 if self.num_jobs == self.max_num_jobs else os.WNOHANG
-                pid, rc = os.waitpid(-1, flags)
+                pid, exit_code = os.waitpid(-1, flags)
             except OSError as exc:
                 self.log.ERROR("waitpid(-1) failed: %s" % exc)
                 break
-            if (pid, rc) == (0, 0):
+            if (pid, exit_code) == (0, 0):
                 break
             self.num_jobs -= 1
-            self.log.info("child %s exited: %s. have %d jobs" % (pid, rc, self.num_jobs))
+            self.log.info("child %s exited: %s. have %d jobs" % (pid, exit_code, self.num_jobs))
 
     def run_forever(self):
         self.log.info("running with a max. of %d jobs" % self.max_num_jobs)
@@ -103,8 +103,8 @@ class FileJobPoller:
 
         src = os.path.join(self.queue_dir, filename)
         try:
-            with open(src, "rb") as f:
-                args = six.moves.cPickle.loads(f.read())
+            with open(src, "rb") as job_file:
+                args = six.moves.cPickle.loads(job_file.read())
         finally:
             os.unlink(src)
 

@@ -54,11 +54,11 @@ else:
             todo = [tokens]
 
             while todo:
-                for x in todo.pop():
-                    children = x.children
+                for current_token in todo.pop():
+                    children = current_token.children
                     if children:
                         todo.append(children)
-                        if x.tagname not in skip_tags:
+                        if current_token.tagname not in skip_tags:
                             res.append(children)
             return res
 
@@ -131,21 +131,21 @@ class ParseSections:
             if current.start is None or current.endtitle is None:
                 return False
 
-            l1 = tokens[current.start].text.count("=")
-            l2 = tokens[current.endtitle].text.count("=")
-            level = min(l1, l2)
+            start_equal_count = tokens[current.start].text.count("=")
+            end_equal_count = tokens[current.endtitle].text.count("=")
+            level = min(start_equal_count, end_equal_count)
 
             # KLUDGE: make this a caption
             caption = Token(
                 type=Token.t_complex_node,
                 children=tokens[current.start + 1: current.endtitle],
             )
-            if l2 > l1 and caption.children is not None:
+            if end_equal_count > start_equal_count and caption.children is not None:
                 caption.children.append(Token(type=Token.t_text,
-                                              text="=" * (l2 - l1)))
-            elif l1 > l2 and caption.children is not None:
+                                              text="=" * (end_equal_count - start_equal_count)))
+            elif start_equal_count > end_equal_count and caption.children is not None:
                 caption.children.insert(
-                    0, Token(type=Token.t_text, text="=" * (l1 - l2))
+                    0, Token(type=Token.t_text, text="=" * (start_equal_count - end_equal_count))
                 )
 
             body = Token(
@@ -173,15 +173,15 @@ class ParseSections:
             return True
 
         while index < len(self.tokens):
-            t = tokens[index]
-            if t.type == Token.t_section:
+            token = tokens[index]
+            if token.type == Token.t_section:
                 if create() and current.start is not None:
                     index = current.start + 1
                     current = Bunch(start=None, end=None, endtitle=None)
                 else:
                     current.start = index
                     index += 1
-            elif t.type == Token.t_section_end:
+            elif token.type == Token.t_section_end:
                 current.endtitle = index
                 index += 1
             else:
@@ -200,12 +200,12 @@ class ParseUrls:
         i = 0
         start = None
         while i < len(tokens):
-            t = tokens[i]
+            token = tokens[i]
 
-            if t.type == Token.t_urllink and start is None:
+            if token.type == Token.t_urllink and start is None:
                 start = i
                 i += 1
-            elif t.type == Token.t_special and t.text == "]" and start is not None:
+            elif token.type == Token.t_special and token.text == "]" and start is not None:
                 sub = self.tokens[start + 1: i]
                 self.tokens[start: i + 1] = [
                     Token(
@@ -216,7 +216,7 @@ class ParseUrls:
                 ]
                 i = start
                 start = None
-            elif t.type == Token.t_2box_close and start is not None:
+            elif token.type == Token.t_2box_close and start is not None:
                 self.tokens[i].type = Token.t_special
                 self.tokens[i].text = "]"
                 sub = self.tokens[start + 1: i]
@@ -247,14 +247,14 @@ class ParseSingleQuote:
         states = styleanalyzer.compute_path(self.counts)
 
         last_apocount = 0
-        for i, s in enumerate(states):
-            apos = "'" * (s.apocount - last_apocount)
+        for i, state in enumerate(states):
+            apos = "'" * (state.apocount - last_apocount)
             if apos:
                 self.styles[i].children.insert(0, Token(type=Token.t_text,
                                                         text=apos))
-            last_apocount = s.apocount
+            last_apocount = state.apocount
 
-            if s.is_bold and s.is_italic:
+            if state.is_bold and state.is_italic:
                 self.styles[i].caption = "'''"
                 inner = Token(
                     type=Token.t_complex_style,
@@ -262,9 +262,9 @@ class ParseSingleQuote:
                     children=self.styles[i].children,
                 )
                 self.styles[i].children = [inner]
-            elif s.is_bold:
+            elif state.is_bold:
                 self.styles[i].caption = "'''"
-            elif s.is_italic:
+            elif state.is_italic:
                 self.styles[i].caption = "''"
             else:
                 self.styles[i].type = Token.t_complex_node
@@ -277,10 +277,10 @@ class ParseSingleQuote:
         self.styles = []
 
         while pos < len(tokens):
-            t = tokens[pos]
-            if t.type == Token.t_singlequote:
+            token = tokens[pos]
+            if token.type == Token.t_singlequote:
                 if start is None:
-                    self.counts.append(len(t.text))
+                    self.counts.append(len(token.text))
                     start = pos
                     pos += 1
                 else:
@@ -293,7 +293,7 @@ class ParseSingleQuote:
                     self.styles.append(tokens[start])
                     pos = start + 1
                     start = None
-            elif t.type == Token.t_newline:
+            elif token.type == Token.t_newline:
                 if start is not None:
                     tokens[start:pos] = [
                         Token(
@@ -734,7 +734,7 @@ class ParseLinks:
                 target = target[1:-1]
         else:
             ns, partial, full = self.nshandler.splitname(target)
-        url = self.xopts.wikidb.getURL(full) if self.xopts.wikidb is not None else None
+        url = self.xopts.wikidb.get_url(full) if self.xopts.wikidb is not None else None
         return url, ns, partial, target, full
 
     def process_colon_and_target(self, marks, start, tokens):
@@ -1141,14 +1141,14 @@ class ParseUniq:
                 pages = [f"{base}/{i}" for i in range(si, ei + 1)]
 
             rawtext = "".join("{{%s}}\n" % x for x in pages)
-            te = expander.__class__(
+            template_expander = expander.__class__(
                 rawtext, pagename=expander.pagename, wikidb=expander.db
             )
             children = parse_txt(
-                te.expandTemplates(True),
+                template_expander.expandTemplates(True),
                 xopts=XBunch(**xopts.__dict__),
-                expander=te,
-                uniquifier=te.uniquifier,
+                expander=template_expander,
+                uniquifier=template_expander.uniquifier,
             )
 
         return Token(
@@ -1280,25 +1280,25 @@ def parse_txt(txt, xopts=None, **kwargs):
     tokens = tokenize(txt, uniquifier=uniquifier)
 
     td2 = TagParser()
-    a = td2.add
+    add_tag_2 = td2.add
 
-    a("code", 10)
-    a("span", 20)
+    add_tag_2("code", 10)
+    add_tag_2("span", 20)
 
-    a("li", 25, blocknode=True, nested=False)
-    a("dl", 28, blocknode=True)
-    a("dt", 26, blocknode=True, nested=False)
-    a("dd", 26, blocknode=True, nested=True)
+    add_tag_2("li", 25, blocknode=True, nested=False)
+    add_tag_2("dl", 28, blocknode=True)
+    add_tag_2("dt", 26, blocknode=True, nested=False)
+    add_tag_2("dd", 26, blocknode=True, nested=True)
 
     td1 = TagParser()
-    a = td1.add
-    a("blockquote", 5)
-    a("references", 15)
+    add_tag_1 = td1.add
+    add_tag_1("blockquote", 5)
+    add_tag_1("references", 15)
 
-    a("p", 30, blocknode=True, nested=False)
-    a("ul", 35, blocknode=True)
-    a("ol", 40, blocknode=True)
-    a("center", 45, blocknode=True)
+    add_tag_1("p", 30, blocknode=True, nested=False)
+    add_tag_1("ul", 35, blocknode=True)
+    add_tag_1("ol", 40, blocknode=True)
+    add_tag_1("center", 45, blocknode=True)
 
     td_parse_h = TagParser()
     for i in range(1, 7):

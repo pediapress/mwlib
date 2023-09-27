@@ -25,10 +25,10 @@ class TableCellParser:
         if not children:
             return
         for index, _ in enumerate(children):
-            t = children[index]
-            if t.type == T.t_2box_open:
+            token = children[index]
+            if token.type == T.t_2box_open:
                 break
-            if t.type == T.t_special and t.text == "|":
+            if token.type == T.t_special and token.text == "|":
                 mod = T.join_as_text(children[:index])
                 cell.vlist = util.parse_params(mod)
 
@@ -306,9 +306,9 @@ class TableParser:
             sub = tokens[start + 1:index]
             from mwlib.refine import core
 
-            tp = core.TagParser()
-            tp.add("caption", 5)
-            tp(sub, self.xopts)
+            tag_parser = core.TagParser()
+            tag_parser.add("caption", 5)
+            tag_parser(sub, self.xopts)
             tokens[start:index + 1] = [
                 T(
                     type=T.t_complex_table,
@@ -366,8 +366,8 @@ class TableFixer:
 def extract_garbage(tokens, is_allowed, is_whitespace=None):
     if is_whitespace is None:
 
-        def is_whitespace(t):
-            return t.type in (T.t_newline, T.t_break)
+        def is_whitespace(token):
+            return token.type in (T.t_newline, T.t_break)
 
     res = []
     index = 0
@@ -408,8 +408,8 @@ class TableGarbageRemover:
         from mwlib.refine import core
 
         walker = core.get_token_walker()
-        for t in walker(tokens):
-            self.tokens = t
+        for token in walker(tokens):
+            self.tokens = token
             self.run()
 
     def run(self):

@@ -120,8 +120,8 @@ class FsOutput:
     def dump_json(self, **kw):
         for key, value in kw.items():
             path = os.path.join(self.path, key + ".json")
-            with open(path, "w", encoding="utf8") as f:
-                json.dump(value, f, indent=4, sort_keys=True)
+            with open(path, "w", encoding="utf8") as out_file:
+                json.dump(value, out_file, indent=4, sort_keys=True)
 
     def write_siteinfo(self, siteinfo):
         self.dump_json(siteinfo=siteinfo)
@@ -144,21 +144,21 @@ class FsOutput:
 
     def write_pages(self, data):
         pages = list(data.get("pages", {}).values())
-        for p in pages:
-            title = p.get("title")
-            ns = p.get("ns")
-            revisions = p.get("revisions")
+        for page in pages:
+            title = page.get("title")
+            namespace = page.get("ns")
+            revisions = page.get("revisions")
 
             if revisions is None:
                 continue
 
-            for r in revisions:
-                revid = r.get("revid")
-                txt = r["*"]
+            for revision in revisions:
+                revid = revision.get("revid")
+                txt = revision["*"]
                 if revid not in self.seen:
                     rev = {
                         "title": title,
-                        "ns": ns,
+                        "ns": namespace,
                     }
                     if revid is not None:
                         self.seen[revid] = rev
@@ -209,8 +209,8 @@ def call_when(event, fun):
             fun()
         except gevent.GreenletExit:
             raise
-        except Exception as e:
-            print("call_when", e)
+        except Exception as exc:
+            print("call_when", exc)
             traceback.print_exc()
 
 
@@ -221,9 +221,9 @@ def download_to_file(url, path, temp_path):
     try:
         out = None
         size_read = 0
-        f = opener.open(url)
+        remote_file = opener.open(url)
         while True:
-            data = f.read(16384)
+            data = remote_file.read(16384)
             if not data:
                 break
             size_read += len(data)
@@ -491,13 +491,13 @@ class Fetcher:
         self.fsout.set_db_key("authors", title, authors)
 
     def report(self):
-        qc = self.api.qccount
+        query_count = self.api.qccount
 
         limit = self.api.api_request_limit
-        jt = self.count_total + len(self.pages_todo) // limit + len(self.revids_todo) // limit
-        jt += len(self.title2latest)
+        job_total = self.count_total + len(self.pages_todo) // limit + len(self.revids_todo) // limit
+        job_total += len(self.title2latest)
 
-        self.progress.set_count(self, self.count_done + qc, jt + qc)
+        self.progress.set_count(self, self.count_done + query_count, job_total + query_count)
 
     def _add_catmember(self, title, entry):
         try:
@@ -507,14 +507,14 @@ class Fetcher:
 
     def _handle_categories(self, data):
         pages = list(data.get("pages", {}).values())
-        for p in pages:
-            categories = p.get("categories")
+        for page in pages:
+            categories = page.get("categories")
             if not categories:
                 continue
             e = {
-                "title": p.get("title"),
-                "ns": p.get("ns"),
-                "pageid": p.get("pageid"),
+                "title": page.get("title"),
+                "ns": page.get("ns"),
+                "pageid": page.get("pageid"),
             }
 
             for category in categories:
@@ -525,15 +525,15 @@ class Fetcher:
     def _find_redirect(self, data):
         pages = list(data.get("pages", {}).values())
         targets = []
-        for p in pages:
-            title = p.get("title")
-            revisions = p.get("revisions")
+        for page in pages:
+            title = page.get("title")
+            revisions = page.get("revisions")
 
             if revisions is None:
                 continue
 
-            for r in revisions:
-                txt = r["*"]
+            for rev in revisions:
+                txt = rev["*"]
                 if not txt:
                     continue
 
@@ -547,10 +547,10 @@ class Fetcher:
 
     def _extract_attribute(self, lst, attr):
         res = []
-        for x in lst:
-            t = x.get(attr)
-            if t:
-                res.append(t)
+        for item in lst:
+            attribute_value = item.get(attr)
+            if attribute_value:
+                res.append(attribute_value)
 
         return res
 
@@ -558,11 +558,11 @@ class Fetcher:
         return self._extract_attribute(lst, "title")
 
     def _update_redirects(self, lst):
-        for x in lst:
-            t = x.get("to")
-            f = x.get("from")
-            if t and f:
-                self.redirects[f] = t
+        for item in lst:
+            to_title = item.get("to")
+            from_title = item.get("from")
+            if to_title and from_title:
+                self.redirects[from_title] = to_title
 
     def schedule_download_image(self, url, title):
         key = (url, title)
@@ -639,12 +639,12 @@ class Fetcher:
 
         pages = list(data.get("pages", {}).values())
         # change title prefix to make them look like local pages
-        for p in pages:
-            title = p.get("title")
+        for page in pages:
+            title = page.get("title")
             _, partial = title.split(":", 1)
-            p["title"] = "{}:{}".format(local_nsname, partial)
+            page["title"] = "{}:{}".format(local_nsname, partial)
 
-            revisions = p.get("revisions", [])
+            revisions = page.get("revisions", [])
             # the revision id's could clash with some local ids. remove them.
             for r in revisions:
                 with contextlib.suppress(KeyError):
@@ -671,8 +671,8 @@ class Fetcher:
         nsname = ns_handler.get_nsname_by_number(6)
 
         local_names = []
-        for x in titles:
-            partial = x.split(":", 1)[1]
+        for title in titles:
+            partial = title.split(":", 1)[1]
             local_names.append(f"{nsname}:{partial}")
 
         for block in split_blocks(local_names, api.api_request_limit):
@@ -742,8 +742,8 @@ class Fetcher:
             if revid is not None and revid in seen:
                 continue
 
-            n = self.nshandler.get_fqname(title)
-            if n in seen or self.redirects.get(n, n) in seen:
+            fully_qualified_name = self.nshandler.get_fqname(title)
+            if fully_qualified_name in seen or self.redirects.get(fully_qualified_name, fully_qualified_name) in seen:
                 continue
             print("WARNING: %r could not be fetched" % ((title, revid),))
 
@@ -761,17 +761,17 @@ class Fetcher:
         self.report()
         return self._refcall_noinc(fun, *args, **kw)
 
-    def _refcall_noinc(self, fun, *args, **kw):
+    def _refcall_noinc(self, fun, *args, **kwargs):
         def refcall_fun():
             try:
-                fun(*args, **kw)
+                fun(*args, **kwargs)
             finally:
                 self.count_done += 1
                 self.dispatch_event.set()
 
-        gr = self.refcall_pool.spawn(refcall_fun)
-        self.pool.add(gr)
-        return gr
+        greenlet_instance = self.refcall_pool.spawn(refcall_fun)
+        self.pool.add(greenlet_instance)
+        return greenlet_instance
 
 
 def pages_from_metabook(meta_book):

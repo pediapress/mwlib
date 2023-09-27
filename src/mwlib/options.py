@@ -127,9 +127,9 @@ class OptionParser(optparse.OptionParser):
             env.images = None
 
         def setmb(name):
-            n = getattr(self.options, name)
-            if n:
-                env.metabook[name] = n
+            new_name = getattr(self.options, name)
+            if new_name:
+                env.metabook[name] = new_name
 
         setmb("title")
         setmb("subtitle")

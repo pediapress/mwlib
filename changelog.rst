@@ -475,7 +475,7 @@ mwlib
 
 2009-4-15 release 0.10.2
 ------------------------
-- fix for getURL() method in zipwiki
+- fix for get_url() method in zipwiki
 
 2009-4-9 release 0.10.1
 -----------------------

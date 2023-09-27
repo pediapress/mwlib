@@ -22,8 +22,8 @@ def extract_metadata(raw, fields, template_name="saved_book"):
     res = template.expandTemplates()
 
     metadata = defaultdict(six.text_type)
-    for x in res.split(uniq)[1:-1]:
-        name, val = x.split("\n", 1)
+    for segment in res.split(uniq)[1:-1]:
+        name, val = segment.split("\n", 1)
         val = val.strip()
         metadata[name] = val
 
@@ -60,7 +60,7 @@ def parse_collection_page(wikitext):
     @returns: metabook.collection
     @rtype: metabook.collection
     """
-    mb = metabook.collection()
+    meta_book  = metabook.collection()
 
     summary = False
     no_template = True
@@ -87,18 +87,18 @@ def parse_collection_page(wikitext):
             no_template = False
 
         if res.group('title'):
-            mb.title = res.group('title').strip()
+            meta_book.title = res.group('title').strip()
         elif res.group('subtitle'):
-            mb.subtitle = res.group('subtitle').strip()
+            meta_book.subtitle = res.group('subtitle').strip()
         elif res.group('chapter'):
-            mb.items.append(metabook.Chapter(title=res.group('chapter').strip()))
+            meta_book.items.append(metabook.Chapter(title=res.group('chapter').strip()))
         elif res.group('article'):
-            mb.append_article(res.group('article'), res.group('displaytitle'))
+            meta_book.append_article(res.group('article'), res.group('displaytitle'))
         elif res.group('oldarticle'):
-            mb.append_article(title=res.group('oldarticle'),
+            meta_book.append_article(title=res.group('oldarticle'),
                               displaytitle=res.group(
                 'olddisplaytitle'), revision=res.group('oldid'))
         elif res.group('summary') and (no_template or summary):
-            mb.summary += res.group('summary') + " "
+            meta_book.summary += res.group('summary') + " "
 
-    return mb
+    return meta_book

@@ -40,9 +40,9 @@ def _get_args(writer_options=None, language=None, zip_only=False):
     return args
 
 
-def uploadfile(ipath, posturl, fh=None):
-    if fh is None:
-        fh = open(ipath, "rb")
+def uploadfile(ipath, posturl, file_handler=None):
+    if file_handler is None:
+        file_handler = open(ipath, "rb")
 
     podclient = PODClient(posturl)
 
@@ -50,26 +50,26 @@ def uploadfile(ipath, posturl, fh=None):
 
     try:
         status(status="uploading", progress=0)
-        podclient.streaming_post_zipfile(ipath, fh)
+        podclient.streaming_post_zipfile(ipath, file_handler)
         status(status="finished", progress=100)
     except Exception as err:
         status(status="error")
         raise err
 
 
-def report_upload_status(posturl, fh):
+def report_upload_status(posturl, file_handler):
     podclient = PODClient(posturl)
 
-    fh.seek(0, 2)
-    size = fh.tell()
-    fh.seek(0, 0)
+    file_handler.seek(0, 2)
+    size = file_handler.tell()
+    file_handler.seek(0, 0)
 
     status = Status(podclient=podclient)
     numdots = 0
 
     last = None
     while True:
-        cur = fh.tell()
+        cur = file_handler.tell()
         if cur != last:
             if cur == size:
                 break
@@ -85,11 +85,11 @@ def report_mwzip_status(posturl, jobid, host, port):
     podclient = PODClient(posturl)
     status = Status(podclient=podclient)
 
-    sp = ServerProxy(host, port)
+    server_proxy = ServerProxy(host, port)
 
     last = {}
     while True:
-        res = sp.qinfo(jobid=jobid) or {}
+        res = server_proxy.qinfo(jobid=jobid) or {}
 
         done = res.get("done", False)
         if done:
@@ -104,7 +104,7 @@ def report_mwzip_status(posturl, jobid, host, port):
 
 
 def report_exception(posturl, xxx_todo_changeme):
-    (tp, err, tb) = xxx_todo_changeme
+    (_, err, _) = xxx_todo_changeme
     print("reporting error to", posturl, repr(str(err)[:50]))
 
     podclient = PODClient(posturl)
@@ -141,11 +141,11 @@ class Commands:
                   post_url=None, **kw):
             directory = get_collection_dir(collection_id)
 
-            def getpath(p):
-                return os.path.join(directory, p)
+            def getpath(path):
+                return os.path.join(directory, path)
 
             jobid = f"{collection_id}:makezip"
-            g = gevent.spawn_later(
+            greenlet_for_status = gevent.spawn_later(
                 0.2,
                 report_mwzip_status,
                 post_url,
@@ -160,19 +160,19 @@ class Commands:
                     jobid=jobid, timeout=20 * 60
                 )
             finally:
-                g.kill()
-                del g
+                greenlet_for_status.kill()
+                del greenlet_for_status
 
             ipath = getpath("collection.zip")
 
-            with open(ipath, "wb") as fh:
+            with open(ipath, "wb") as file_handler:
 
-                g = gevent.spawn(report_upload_status, post_url, fh)
+                greenlet_for_upload = gevent.spawn(report_upload_status, post_url, file_handler)
                 try:
-                    uploadfile(ipath, post_url, fh)
+                    uploadfile(ipath, post_url, file_handler)
                 finally:
-                    g.kill()
-                    del g
+                    greenlet_for_upload.kill()
+                    del greenlet_for_upload
 
         def doit(**params):
             try:

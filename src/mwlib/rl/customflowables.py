@@ -41,7 +41,7 @@ class Figure(Flowable):
         url=None,
     ):
         imgFile = imgFile
-        self.imgPath = imgFile
+        self.img_path = imgFile
         # workaround for http://code.pediapress.com/wiki/ticket/324
         # see http://two.pairlist.net/pipermail/reportlab-users/2008-October/007526.html
         if no_mask:

@@ -84,17 +84,17 @@ def _make_desc(tokens):
 
 def _make_imagemap(tokens):
     image = None
-    for x in tokens:
-        if isinstance(x, six.string_types):
-            image = x
+    for token in tokens:
+        if isinstance(token, six.string_types):
+            image = token
             break
     return ImageMap(entries=list(tokens), image=image)
 
 
 comment = (Literal("#") + restOfLine).setParseAction(_make_comment)
 
-INTEGER = Word(nums).setParseAction(lambda s: int(s[0]))
-INTEGER_PAIR = (INTEGER + INTEGER).setParseAction(lambda x: tuple(x))
+INTEGER = Word(nums).setParseAction(lambda single_number: int(single_number[0]))
+INTEGER_PAIR = (INTEGER + INTEGER).setParseAction(lambda pair_of_numbers: tuple(pair_of_numbers))
 
 POLY = Literal("poly") + Group(ZeroOrMore(INTEGER_PAIR)) + restOfLine
 POLY = POLY.setParseAction(_make_poly)

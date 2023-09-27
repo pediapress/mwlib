@@ -43,32 +43,32 @@ class TestXnetZipWiki():
         assert a.rawtext
 
     def test_get_parsed_article(self):
-        p = self.wikidb.getParsedArticle(THE_LIVING_SEA)
+        p = self.wikidb.get_parsed_article(THE_LIVING_SEA)
         assert isinstance(p, parser.Article)
 
     def test_get_url(self):
-        url = self.wikidb.getURL(THE_LIVING_SEA)
+        url = self.wikidb.get_url(THE_LIVING_SEA)
         assert url == "https://en.wikipedia.org/w/index.php?title=The_Living_Sea"
 
     def test_image_db(self):
         image_name = "Thelivingseaimax.jpg"
-        p = self.imagedb.getDiskPath(image_name)
+        p = self.imagedb.get_disk_path(image_name)
         assert isinstance(p, str)
         assert os.path.isfile(p)
         assert os.stat(p).st_size > 0
-        assert p == self.imagedb.getDiskPath(image_name, 123)
+        assert p == self.imagedb.get_disk_path(image_name, 123)
 
-        url = self.imagedb.getDescriptionURL(image_name)
+        url = self.imagedb.get_description_url(image_name)
         assert url == "https://en.wikipedia.org/w/index.php?title=File:Thelivingseaimax.jpg"
 
-        templates = self.imagedb.getImageTemplates(image_name)
+        templates = self.imagedb.get_image_templates(image_name)
         print(templates)
         assert templates
 
-        contribs = self.imagedb.getContributors(image_name)
+        contribs = self.imagedb.get_contributors(image_name)
         print(contribs)
         assert contribs
 
     def test_get_source(self):
-        src = self.wikidb.getSource(THE_LIVING_SEA)
+        src = self.wikidb.get_source(THE_LIVING_SEA)
         print(src)

@@ -63,7 +63,7 @@ class dummyImageDB:
                 d.rectangle([(w * 2 * i, 0), (w * (2 * i + 1), h)], fill=(0, 255, 0))
         img.save(name)
 
-    def getDiskPath(self, name, size=None):
+    def get_disk_path(self, name, size=None):
         res = re.findall(r"(\d+)", name)
         num = int(res[0]) if res else 0
         name = os.path.join(self.basedir, name)
@@ -71,8 +71,8 @@ class dummyImageDB:
         self.imgnum += 1
         return name
 
-    def getDescriptionURL(self, name):
+    def get_description_url(self, name):
         return None
 
-    def getURL(self, name):
+    def get_url(self, name):
         return None

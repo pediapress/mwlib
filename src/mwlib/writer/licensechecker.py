@@ -112,8 +112,8 @@ class LicenseChecker:
             if lic.license_type == "unknown" and stats:
                 urls = self.unknown_licenses.get(lic.name, set())
                 urls.add(
-                    self.image_db.getDescriptionURL(imgname)
-                    or self.image_db.getURL(imgname)
+                    self.image_db.get_description_url(imgname)
+                    or self.image_db.get_url(imgname)
                     or imgname
                 )
                 self.unknown_licenses[lic.name] = urls
@@ -128,11 +128,11 @@ class LicenseChecker:
             return self.display_cache[imgname]
         if self.image_db is None:
             return False
-        templates = [t.lower() for t in self.image_db.getImageTemplatesAndArgs(
+        templates = [t.lower() for t in self.image_db.get_image_templates_and_args(
             imgname)]
         licenses = self._get_licenses(templates)
         display_img = self._check_licenses(licenses, imgname)
-        url = self.image_db.getDescriptionURL(imgname) or self.image_db.getURL(
+        url = self.image_db.get_description_url(imgname) or self.image_db.get_url(
             imgname) or imgname
         if display_img:
             self.accepted_images.add(url)

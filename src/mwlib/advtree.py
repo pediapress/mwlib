@@ -722,12 +722,12 @@ for k in _blockNodes:
 # -------------------------------------------------------------------------
 
 
-def mix_in_class(pyClass, mix_in_class, make_first=False):
-    if mix_in_class not in pyClass.__bases__:
+def mix_in_class(py_class, mix_in_class, make_first=False):
+    if mix_in_class not in py_class.__bases__:
         if make_first:
-            pyClass.__bases__ = (mix_in_class,) + pyClass.__bases__
+            py_class.__bases__ = (mix_in_class,) + py_class.__bases__
         else:
-            pyClass.__bases__ += (mix_in_class,)
+            py_class.__bases__ += (mix_in_class,)
 
 
 def extend_classes(node):

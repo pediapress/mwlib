@@ -146,8 +146,8 @@ class NuWiki:
                 break
             count += 1
             print("reading", file_name)
-            d = six.text_type(open(self._pathjoin(file_name), "rb").read(), "utf-8")
-            pages = d.split("\n --page-- ")
+            file_content = six.text_type(open(self._pathjoin(file_name), "rb").read(), "utf-8")
+            pages = file_content.split("\n --page-- ")
 
             for page in pages[1:]:
                 jmeta, rawtext = page.split("\n", 1)
@@ -327,26 +327,26 @@ class Adapt:
     def __getstate__(self):
         return self.__dict__
 
-    def __setstate__(self, d):
-        self.__dict__ = d
+    def __setstate__(self, data):
+        self.__dict__ = data
 
-    def getURL(self, name, revision=None, defaultns=nshandling.NS_MAIN):
+    def get_url(self, name, revision=None, defaultns=nshandling.NS_MAIN):
         base_url = self.nfo["base_url"]
         if not base_url.endswith("/"):
             base_url += "/"
         script_extension = self.nfo.get("script_extension") or ".php"
 
-        p = "%sindex%s?" % (base_url, script_extension)
+        index_url_prefix = "%sindex%s?" % (base_url, script_extension)
         if revision is not None:
-            return p + "oldid=%s" % revision
+            return index_url_prefix + "oldid=%s" % revision
         else:
             fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
-            return p + "title=%s" % six.moves.urllib.parse.quote(
+            return index_url_prefix + "title=%s" % six.moves.urllib.parse.quote(
                 fqtitle.replace(" ", "_").encode("utf-8"), safe=":/@"
             )
 
-    def getDescriptionURL(self, name):
-        return self.getURL(name, defaultns=nshandling.NS_FILE)
+    def get_description_url(self, name):
+        return self.get_url(name, defaultns=nshandling.NS_FILE)
 
     def get_authors(self, title, revision=None):
         fqname = self.nshandler.get_fqname(title)
@@ -377,7 +377,7 @@ class Adapt:
 
             return authors
 
-    def getSource(self, title, revision=None):
+    def get_source(self, title, revision=None):
 
         general_info = self.siteinfo["general"]
         return metabook.Source(
@@ -388,13 +388,13 @@ class Adapt:
             script_extension=self.nfo["script_extension"],
         )
 
-    def getHTML(self, title, revision=None):
+    def get_html(self, title, revision=None):
         if revision:
             return self.nuwiki.html.get(revision, {})
         else:
             return self.nuwiki.html.get(title, {})
 
-    def getParsedArticle(self, title, revision=None):
+    def get_parsed_article(self, title, revision=None):
         if revision:
             page = self.nuwiki.get_page(None, revision)
         else:
@@ -442,7 +442,7 @@ class Adapt:
             print("removing %r" % self.nuwiki.path)
             shutil.rmtree(self.nuwiki.path, ignore_errors=True)
 
-    def getDiskPath(self, name, size=None):
+    def get_disk_path(self, name, size=None):
         return self.nuwiki.normalize_and_get_image_path(name)
 
     def get_image_description_page(self, name):
@@ -454,7 +454,7 @@ class Adapt:
         fqname = self.en_nshandler.get_fqname(partial, nshandling.NS_FILE)
         return self.get_page(fqname)
 
-    def getImageTemplates(self, name, wikidb=None):
+    def get_image_templates(self, name, wikidb=None):
         from mwlib.expander import get_templates
 
         page = self.get_image_description_page(name)
@@ -463,7 +463,7 @@ class Adapt:
         print("no such image: %r" % name)
         return []
 
-    def getImageTemplatesAndArgs(self, name, wikidb=None):
+    def get_image_templates_and_args(self, name, wikidb=None):
         from mwlib.expander import get_templates
 
         page = self.get_image_description_page(name)
@@ -492,34 +492,24 @@ class Adapt:
             return templates
         return []
 
-    def getImageWords(self, name, wikidb=None):
-        import re
-
-        page = self.get_image_description_page(name)
-        if page is not None:
-            words = re.split(r"\{|\}|\[|\]| |\,|\|", page.rawtext)
-            return list({w.lower() for w in words if w})
-        print("no such image: %r" % name)
-        return []
-
-    def getContributors(self, name, wikidb=None):
+    def get_contributors(self, name, wikidb=None):
         page = self.get_image_description_page(name)
         if page is None:
             return []
-        users = getContributorsFromInformationTemplate(page.rawtext,
+        users = get_contributors_from_information_template(page.rawtext,
                                                        page.title, self)
         if users:
             return users
         return self.get_authors(page.title)
 
 
-def getContributorsFromInformationTemplate(raw, title, wikidb):
+def get_contributors_from_information_template(raw, title, wikidb):
     from mwlib import advtree, parser, uparser
     from mwlib.expander import Expander, find_template, get_template_args, get_templates
     from mwlib.templ.parser import parse
 
-    def getUserLinks(raw):
-        def isUserLink(node):
+    def get_user_links(raw):
+        def is_user_link(node):
             return (
                 isinstance(node, parser.NamespaceLink) and node.namespace == 2
             )  # NS_USER
@@ -531,7 +521,7 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
                     title,
                     raw=raw,
                     wikidb=wikidb,
-                ).filter(isUserLink)
+                ).filter(is_user_link)
             }
         )
         return result
@@ -548,7 +538,7 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
                 return [txt]
 
         if args.args:
-            return getUserLinks(
+            return get_user_links(
                 "\n".join([args.get(i, "") for i in range(len(args.args))])
             )
 
@@ -568,4 +558,4 @@ def getContributorsFromInformationTemplate(raw, title, wikidb):
             authors.extend(get_authors_from_template_args(found_template))
     if authors:
         return authors
-    return getUserLinks(raw)
+    return get_user_links(raw)

@@ -52,10 +52,10 @@ def parse_string(
         )
 
         src = None
-        if hasattr(wikidb, "getSource"):
-            src = wikidb.getSource(title, revision=revision)
+        if hasattr(wikidb, "get_source"):
+            src = wikidb.get_source(title, revision=revision)
             if isinstance(src, dict):
-                raise ValueError("wikidb.getSource returned a dict. this is no longer supported")
+                raise ValueError("wikidb.get_source returned a dict. this is no longer supported")
 
         if not src:
             src = metabook.Source()

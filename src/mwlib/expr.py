@@ -40,16 +40,16 @@ PATTERN = "\n".join(
 rx_pattern = re.compile(PATTERN, re.VERBOSE | re.DOTALL | re.IGNORECASE)
 
 
-def tokenize(s):
+def tokenize(input_string):
     res = []
-    for v1, v2 in rx_pattern.findall(s):
-        if not (v1 or v2):
+    for raw_token, processed_token in rx_pattern.findall(input_string):
+        if not (raw_token or processed_token):
             continue
-        v2 = v2.lower()
-        if v2 in Expr.constants:
-            res.append((v2, ""))
+        processed_token = processed_token.lower()
+        if processed_token in Expr.constants:
+            res.append((processed_token, ""))
         else:
-            res.append((v1, v2))
+            res.append((raw_token, processed_token))
     return res
 
 
@@ -66,13 +66,13 @@ functions = {}
 unary_ops = set()
 
 
-def addop(op, prec, fun, numargs=None):
-    precedence[op] = prec
+def addop(operator, prec, fun, numargs=None):
+    precedence[operator] = prec
     if numargs is None:
         numargs = len(inspect.getfullargspec(fun)[0])
 
     if numargs == 1:
-        unary_ops.add(op)
+        unary_ops.add(operator)
 
     def wrap(stack):
         assert len(stack) >= numargs
@@ -80,7 +80,7 @@ def addop(op, prec, fun, numargs=None):
         del stack[-numargs:]
         stack.append(fun(*args))
 
-    functions[op] = wrap
+    functions[operator] = wrap
 
 
 a = addop
@@ -195,10 +195,10 @@ class Expr:
             last_operand, last_operator = operand, operator
 
         while operator_stack:
-            p = operator_stack.pop()
-            if p == "(":
+            popped_operator = operator_stack.pop()
+            if popped_operator == "(":
                 raise ExprError("unbalanced parenthesis")
-            self.output_operator(p)
+            self.output_operator(popped_operator)
 
         if len(self.operand_stack) != 1:
             raise ExprError(f"bad stack: {self.operand_stack}")

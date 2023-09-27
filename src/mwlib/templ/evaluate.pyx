@@ -201,8 +201,8 @@ class Expander:
         self.nshandler = nshandler = nshandling.NsHandler(si)
         self.siteinfo = si
 
-        if self.db and hasattr(self.db, "getSource"):
-            source = self.db.getSource(pagename) or metabook.source()
+        if self.db and hasattr(self.db, "get_source"):
+            source = self.db.get_source(pagename) or metabook.source()
             local_values = source.locals or ""
             local_values = mwlocals.parse_locals(local_values)
         else:

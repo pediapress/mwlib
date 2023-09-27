@@ -40,17 +40,17 @@ def tokenize(txt, included=True, replace_tags=None):
         txt = replace_tags(txt)
 
     tokens = []
-    for v1, v2, v3, v4, v5 in split_rx.findall(txt):
-        if v5:
-            tokens.append((5, v5))
-        elif v4:
-            tokens.append((4, v4))
-        elif v3:
-            tokens.append((3, v3))
-        elif v2:
-            tokens.append((2, v2))
-        elif v1:
-            tokens.append((1, v1))
+    for token_type_1, token_type_2, token_type_3, token_type_4, token_type_5 in split_rx.findall(txt):
+        if token_type_5:
+            tokens.append((5, token_type_5))
+        elif token_type_4:
+            tokens.append((4, token_type_4))
+        elif token_type_3:
+            tokens.append((3, token_type_3))
+        elif token_type_2:
+            tokens.append((2, token_type_2))
+        elif token_type_1:
+            tokens.append((1, token_type_1))
 
     tokens.append((None, ""))
 

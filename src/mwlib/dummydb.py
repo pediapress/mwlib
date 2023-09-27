@@ -8,7 +8,7 @@ class DummyDB:
 
         self.siteinfo = siteinfo.get_siteinfo(lang)
 
-    def getURL(self, title, revision=None):
+    def get_url(self, title, revision=None):
         return None
 
     def get_siteinfo(self):

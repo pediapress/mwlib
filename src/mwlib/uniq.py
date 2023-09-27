@@ -1,4 +1,3 @@
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
@@ -15,8 +14,9 @@ class Uniquifier:
         self.uniq2repl = {}
         if self.random_string is None:
             import binascii
+
             rand_hex = os.urandom(8)
-            self.__class__.random_string = binascii.hexlify(rand_hex).decode('utf8')
+            self.__class__.random_string = binascii.hexlify(rand_hex).decode("utf8")
 
     def get_uniq(self, repl, name):
         rand_string = self.random_string
@@ -40,18 +40,19 @@ class Uniquifier:
     def _repl_to_uniq(self, mo):
         tagname = mo.group("tagname")
         if tagname is None:
-            if self.txt[mo.start()] == '\n' and self.txt[mo.end() - 1] == '\n':
-                return '\n'
+            if self.txt[mo.start()] == "\n" and self.txt[mo.end() - 1] == "\n":
+                return "\n"
             return (mo.group(2) or "") + (mo.group(3) or "")
 
         else:
             tagname = tagname.lower()
 
         r = {
-            'tagname': tagname,
-            'inner': mo.group("inner") or "",
-            'vlist': mo.group("vlist") or "",
-            'complete': mo.group(0)}
+            "tagname": tagname,
+            "inner": mo.group("inner") or "",
+            "vlist": mo.group("vlist") or "",
+            "complete": mo.group(0),
+        }
 
         if tagname == "nowiki":
             r["complete"] = r["inner"]
@@ -60,13 +61,16 @@ class Uniquifier:
 
     def replace_tags(self, txt):
         self.txt = txt
-        rx = self.rx
-        if rx is None:
-            tags = set("nowiki math imagemap gallery source pre ref timeline poem pages".split())
+        regex_pattern = self.rx
+        if regex_pattern is None:
+            tags = set(
+                "nowiki math imagemap gallery source pre ref timeline poem pages".split()
+            )
             from mwlib import tagext
+
             tags.update(tagext.default_registry.names())
 
-            rx = """
+            regex_pattern = """
                 (?P<comment> (\\n[ ]*)?<!--.*?-->([ ]*\\n)?) |
                 (?:
                 <(?P<tagname> NAMES)
@@ -78,8 +82,10 @@ class Uniquifier:
                 </(?P=tagname)\\s*>))
             """
 
-            rx = rx.replace("NAMES", "|".join(list(tags)))
-            rx = re.compile(rx, re.VERBOSE | re.DOTALL | re.IGNORECASE)
-            self.rx = rx
-        newtxt = rx.sub(self._repl_to_uniq, txt)
+            regex_pattern = regex_pattern.replace("NAMES", "|".join(list(tags)))
+            regex_pattern = re.compile(
+                regex_pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE
+            )
+            self.rx = regex_pattern
+        newtxt = regex_pattern.sub(self._repl_to_uniq, txt)
         return newtxt

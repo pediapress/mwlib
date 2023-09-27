@@ -117,10 +117,10 @@ class ImageMod:
     def parse(self, mod):
         mod = mod.lower().strip()
         for mod_type, mod_reg in self.alias_map.items():
-            rx = re.compile(mod_reg, re.IGNORECASE)
-            mo = rx.match(mod)
-            if mo:
-                for match in mo.groups()[::-1]:
+            compiled_regex = re.compile(mod_reg, re.IGNORECASE)
+            regex_match = compiled_regex.match(mod)
+            if regex_match:
+                for match in regex_match.groups()[::-1]:
                     if match:
                         return mod_type, match
         return None, None

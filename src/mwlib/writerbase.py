@@ -23,7 +23,7 @@ def handle_chapter(item, book):
 def handle_article(item, env, last_chapter, progress, status_callback):
     wiki_obj = item._env.wiki if item._env else env.wiki
 
-    article = wiki_obj.getParsedArticle(title=item.title, revision=item.revision)
+    article = wiki_obj.get_parsed_article(title=item.title, revision=item.revision)
     if article is not None:
         article = update_article_attributes(article, item, wiki_obj)
         if last_chapter:
@@ -38,9 +38,9 @@ def handle_article(item, env, last_chapter, progress, status_callback):
 def update_article_attributes(article, item, wiki_obj):
     if item.displaytitle is not None:
         article.caption = item.displaytitle
-    url = wiki_obj.getURL(item.title, item.revision)
+    url = wiki_obj.get_url(item.title, item.revision)
     article.url = url if url else None
-    source = wiki_obj.getSource(item.title, item.revision)
+    source = wiki_obj.get_source(item.title, item.revision)
     article.wikiurl = source.url if source else None
     article.authors = wiki_obj.get_authors(item.title, revision=item.revision)
     return article

@@ -23,7 +23,7 @@ def scale_images(data):
             for i, e in enumerate(cell):
                 if isinstance(e, Figure):  # scale image to half size
                     cell[i] = Figure(
-                        imgFile=e.imgPath,
+                        imgFile=e.img_path,
                         captionTxt=e.captionTxt,
                         captionStyle=e.cs,
                         imgWidth=e.imgWidth / 2.0,
@@ -183,9 +183,9 @@ def split_list_items(table):
         max_items = 0
         for cell in row:
             items = []
-            for c in cell.children:
-                if c.__class__ == ItemList:
-                    items.extend(c.children)
+            for child in cell.children:
+                if child.__class__ == ItemList:
+                    items.extend(child.children)
             cols.append(items)
             max_items = max(max_items, len(items))
         for i in range(max_items):
@@ -347,9 +347,9 @@ def add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols):
     else:
         num_splits = int(math.ceil(cell.rowspan / max_row_span))
         span_range = int(math.floor(cell.rowspan / num_splits))
-        for n in range(num_splits - 1):
+        for split_index in range(num_splits - 1):
             _add_styles_to_cell(
-                styles, col_idx, row_idx, span_range, n, cell
+                styles, col_idx, row_idx, span_range, split_index, cell
             )
         styles.append(
             (
