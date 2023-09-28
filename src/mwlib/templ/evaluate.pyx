@@ -5,7 +5,7 @@ from typing import Any
 
 from mwlib import metabook, nshandling, siteinfo
 from mwlib.templ import log, magics, mwlocals, parser
-from mwlib.templ.marks import dummy_mark, eqmark, mark, maybe_newline
+from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
 from mwlib.uniq import Uniquifier
 
 
@@ -168,7 +168,7 @@ def insert_implicit_newlines(res, maybe_newline=maybe_newline):
             if i and res[i - 1].endswith("\n"):
                 continue
 
-            if isinstance(s1, mark):
+            if isinstance(s1, Mark):
                 continue
             if len(s1) >= 2:
                 if is_implicit_newline(s1):
@@ -226,7 +226,7 @@ class Expander:
 
         self.recursion_limit = recursion_limit
         self.recursion_count = 0
-        self.aliasmap = parser.aliasmap(self.siteinfo)
+        self.aliasmap = parser.AliasMap(self.siteinfo)
 
         self.parsed = parser.parse(
             txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo
@@ -235,7 +235,7 @@ class Expander:
         self.parsedTemplateCache = {}
 
     def resolve_magic_alias(self, name):
-        return self.aliasmap.resolve_magic_alias(name)
+        return self.AliasMap.resolve_magic_alias(name)
 
     def replace_tags(self, txt):
         return self.uniquifier.replace_tags(txt)

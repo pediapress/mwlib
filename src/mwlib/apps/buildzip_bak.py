@@ -33,11 +33,11 @@ def zip_directory(dirname: str, output: str = None, skip_ext: str = None):
         output = dirname.with_suffix(".zip")
 
     output = Path(output).resolve()
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
         for filepath in walk_directory(dirname):
             if skip_ext and Path(filepath).suffix == skip_ext:
                 continue
-            zf.write(filepath, Path(filepath).relative_to(dirname))
+            zip_file.write(filepath, Path(filepath).relative_to(dirname))
 
     return output
 

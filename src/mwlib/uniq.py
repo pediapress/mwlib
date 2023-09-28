@@ -8,7 +8,7 @@ import re
 
 class Uniquifier:
     random_string = None
-    rx = None
+    regex_pattern = None
 
     def __init__(self):
         self.uniq2repl = {}
@@ -25,43 +25,46 @@ class Uniquifier:
         self.uniq2repl[retval] = repl
         return retval
 
-    def _repl_from_uniq(self, mo):
-        uniq = mo.group(0)
-        t = self.uniq2repl.get(uniq, None)
-        if t is None:
+    def _repl_from_uniq(self, matched_pattern):
+        uniq = matched_pattern.group(0)
+        replacement_data = self.uniq2repl.get(uniq, None)
+        if replacement_data is None:
             return uniq
-        return t["complete"]
+        return replacement_data["complete"]
 
     def replace_uniq(self, txt):
-        rx = re.compile("\x7fUNIQ-[a-z0-9]+-\\d+-[a-f0-9]+-QINU\x7f")
-        txt = rx.sub(self._repl_from_uniq, txt)
+        compiled_regex = re.compile("\x7fUNIQ-[a-z0-9]+-\\d+-[a-f0-9]+-QINU\x7f")
+        txt = compiled_regex.sub(self._repl_from_uniq, txt)
         return txt
 
-    def _repl_to_uniq(self, mo):
-        tagname = mo.group("tagname")
+    def _repl_to_uniq(self, matched_pattern):
+        tagname = matched_pattern.group("tagname")
         if tagname is None:
-            if self.txt[mo.start()] == "\n" and self.txt[mo.end() - 1] == "\n":
+            if (
+                self.txt[matched_pattern.start()] == "\n"
+                and self.txt[matched_pattern.end() - 1] == "\n"
+            ):
                 return "\n"
-            return (mo.group(2) or "") + (mo.group(3) or "")
+            return (matched_pattern.group(2) or "") + (matched_pattern.group(3) or "")
 
         else:
             tagname = tagname.lower()
 
-        r = {
+        result = {
             "tagname": tagname,
-            "inner": mo.group("inner") or "",
-            "vlist": mo.group("vlist") or "",
-            "complete": mo.group(0),
+            "inner": matched_pattern.group("inner") or "",
+            "vlist": matched_pattern.group("vlist") or "",
+            "complete": matched_pattern.group(0),
         }
 
         if tagname == "nowiki":
-            r["complete"] = r["inner"]
+            result["complete"] = result["inner"]
 
-        return self.get_uniq(r, tagname)
+        return self.get_uniq(result, tagname)
 
     def replace_tags(self, txt):
         self.txt = txt
-        regex_pattern = self.rx
+        regex_pattern = self.regex_pattern
         if regex_pattern is None:
             tags = set(
                 "nowiki math imagemap gallery source pre ref timeline poem pages".split()
@@ -86,6 +89,6 @@ class Uniquifier:
             regex_pattern = re.compile(
                 regex_pattern, re.VERBOSE | re.DOTALL | re.IGNORECASE
             )
-            self.rx = regex_pattern
+            self.regex_pattern = regex_pattern
         newtxt = regex_pattern.sub(self._repl_to_uniq, txt)
         return newtxt

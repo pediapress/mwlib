@@ -20,8 +20,7 @@ from urllib.parse import quote, quote_plus, urljoin, urlparse
 from mwlib import expr
 from mwlib.log import Log
 
-if_error_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>',
-                         re.I)
+if_error_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
 
 log = Log("expander")
 
@@ -29,8 +28,8 @@ log = Log("expander")
 def single_arg(fun):
     @wraps(fun)
     def wrap(self, args: list) -> Any:
-        a = args[0] if args else ""
-        return fun(self, a)
+        arg = args[0] if args else ""
+        return fun(self, arg)
 
     return wrap
 
@@ -43,23 +42,23 @@ def no_arg(fun):
     return wrap
 
 
-def as_numeric(x: str) -> Union[int, float]:
+def as_numeric(str_number: str) -> Union[int, float]:
     try:
-        return int(x)
+        return int(str_number)
     except ValueError:
-        return float(x)
+        return float(str_number)
 
 
-def maybe_numeric_compare(a: str, b: str) -> bool:
-    if a == b:
+def maybe_numeric_compare(value1: str, value2: str) -> bool:
+    if value1 == value2:
         return True
     try:
-        a = as_numeric(a)
-        b = as_numeric(b)
+        value1 = as_numeric(value1)
+        value2 = as_numeric(value2)
     except ValueError:
         return False
 
-    return a == b
+    return value1 == value2
 
 
 def urlquote(url: str) -> str:
@@ -201,28 +200,27 @@ class PageMagic:
     source = {}
     nshandler = None
 
-    def __init__(self, pagename="",
-                 server="https://en.wikipedia.org", revisionid=0):
+    def __init__(self, pagename="", server="https://en.wikipedia.org", revisionid=0):
         self.pagename = pagename
         self.server = server
         self.the_revisionid = revisionid
 
         self.niceurl = urljoin(self.server, "wiki")
 
-    def _wrap_pagename(f: T) -> T:
-        @wraps(f)
+    def _wrap_pagename(foo: T) -> T:
+        @wraps(foo)
         def wrapper(self: Any, args: list[Any]) -> Any:
             pagename = self.pagename
             if args:
                 pagename = args[0]
-            return f(self, pagename)
+            return foo(self, pagename)
 
         return wrapper
 
-    def _quoted(f):
-        @wraps(f)
+    def _quoted(foo):
+        @wraps(foo)
         def wrapper(*args, **kwargs):
-            return urlquote(f(*args, **kwargs).replace(" ", "_"))
+            return urlquote(foo(*args, **kwargs).replace(" ", "_"))
 
         return wrapper
 
@@ -326,9 +324,9 @@ class PageMagic:
 
             namespaces = siteinfo.get_siteinfo("en")["namespaces"]
 
-        ns = args[0]
+        namespace = args[0]
         try:
-            retval = namespaces[ns]["*"]
+            retval = namespaces[namespace]["*"]
         except KeyError:
             retval = ""
 
@@ -355,10 +353,10 @@ class PageMagic:
         return self.server
 
     def FULLURL(self, args):
-        a = args[0].capitalize().replace(" ", "_")
-        a = quote_plus(a.encode("utf-8"))
-        q = "?%s" % args[1] if len(args) >= 2 else ""
-        return f"{self.niceurl}/{a}{q}"
+        arg = args[0].capitalize().replace(" ", "_")
+        arg = quote_plus(arg.encode("utf-8"))
+        query = "?%s" % args[1] if len(args) >= 2 else ""
+        return f"{self.niceurl}/{arg}{query}"
 
     @no_arg
     def SERVERNAME(self):
@@ -393,47 +391,57 @@ class NumberMagic:
 
 class StringMagic:
     @single_arg
-    def LC(self, a):
-        return a.lower()
+    def LC(self, input_string):
+        return input_string.lower()
 
     @single_arg
-    def UC(self, a):
-        return a.upper()
+    def UC(self, input_string):
+        return input_string.upper()
 
     @single_arg
-    def LCFIRST(self, a):
-        return a[:1].lower() + a[1:]
+    def LCFIRST(self, input_string):
+        return input_string[:1].lower() + input_string[1:]
 
     @single_arg
-    def UCFIRST(self, a):
-        return a[:1].upper() + a[1:]
+    def UCFIRST(self, input_string):
+        return input_string[:1].upper() + input_string[1:]
 
     def PADLEFT(self, args):
-        s = args[0]
+        original_string = args[0]
         try:
             width = int(args[1])
         except ValueError:
-            return s
+            return original_string
 
         fill_str = args[2] or "0"
-        return "".join([fill_str[i % len(fill_str)] for i in range(width - len(s))]) + s
+        return (
+            "".join(
+                [
+                    fill_str[i % len(fill_str)]
+                    for i in range(width - len(original_string))
+                ]
+            )
+            + original_string
+        )
 
     def PADRIGHT(self, args):
-        s = args[0]
+        original_string = args[0]
         try:
             width = int(args[1])
         except ValueError:
-            return s
+            return original_string
 
         fillstr = args[2] or "0"
-        return s + "".join([fillstr[i % len(fillstr)] for i in range(width - len(s))])
+        return original_string + "".join(
+            [fillstr[i % len(fillstr)] for i in range(width - len(original_string))]
+        )
 
 
 class ParserFunctions:
     wikidb = None
 
-    def _error(self, s):
-        return f'<strong class="error">{s}</strong>'
+    def _error(self, message):
+        return f'<strong class="error">{message}</strong>'
 
     def LANGUAGE(self, args):
         """implement http://meta.wikimedia.org/wiki/Help:Parser_function#.23language:"""
@@ -442,15 +450,15 @@ class ParserFunctions:
 
     def TAG(self, args):
         name = args[0].strip()
-        r = f"<{name}>{args[1]}</{name}>"
-        return r
+        text_to_wrap = f"<{name}>{args[1]}</{name}>"
+        return text_to_wrap
 
     def IFEXIST(self, args):
         name = args[0]
         if not name or not self.wikidb:
             return args.get(args[2], "")
 
-        nsnum, suffix, full = self.wikidb.nshandler.splitname(name)
+        nsnum, _, _ = self.wikidb.nshandler.splitname(name)
         if nsnum == -2:
             exists = bool(self.wikidb.normalize_and_get_image_path(name.split(":")[1]))
         else:
@@ -461,43 +469,41 @@ class ParserFunctions:
         else:
             return args[2]
 
-    def EXPR(self, rl):
+    def EXPR(self, expression_list):
         import math
 
-        if rl:
+        if expression_list:
             try:
-                ex = rl[0].strip()
-                if not ex:
+                expression = expression_list[0].strip()
+                if not expression:
                     return ""
-                val = expr.expr(ex)
+                val = expr.expr(expression)
                 if int(val) == val and math.fabs(val) < 1e14:
                     return str(int(val))
-                r = str(float(val))
+                float_result = str(float(val))
             except Exception as err:
-                # log("ERROR: error while evaluating #expr:%r\n" % (ex,))
                 return self._error(err)
 
-            if "e" in r:
-                f, i = r.split("e")
+            if "e" in float_result:
+                mantissa, i = float_result.split("e")
                 i = int(i)
                 sign = "" if i < 0 else "+"
-                fixed = str(float(f)) + "E" + sign + str(int(i))
+                fixed = str(float(mantissa)) + "E" + sign + str(int(i))
                 return fixed
-            return r
+            return float_result
         return "0"
 
-    def IFEXPR(self, rl):
+    def IFEXPR(self, expression_list):
         try:
-            ex = rl[0].strip()
-            r = expr.expr(rl[0]) if ex else False
+            expression = expression_list[0].strip()
+            evaluation_result = expr.expr(expression_list[0]) if expression else False
         except Exception as err:
-            # log("ERROR: error while evaluating #ifexpr:%r\n" % (rl[0],))
             return self._error(err)
 
-        if r:
-            return rl[1]
+        if evaluation_result:
+            return expression_list[1]
         else:
-            return rl[2]
+            return expression_list[2]
 
     def TITLEPARTS(self, args):
         title = args[0]
@@ -532,11 +538,11 @@ class ParserFunctions:
             return good
 
 
-for x in dir(ParserFunctions):
-    if x.startswith("_"):
+for foo_name in dir(ParserFunctions):
+    if foo_name.startswith("_"):
         continue
-    setattr(ParserFunctions, "#" + x, getattr(ParserFunctions, x))
-    delattr(ParserFunctions, x)
+    setattr(ParserFunctions, "#" + foo_name, getattr(ParserFunctions, foo_name))
+    delattr(ParserFunctions, foo_name)
 
 
 class DummyResolver:
@@ -569,14 +575,14 @@ class MagicResolver(
             except KeyError:
                 pass
 
-        m = getattr(self, upper, None)
-        if m is None:
+        method_to_invoke = getattr(self, upper, None)
+        if method_to_invoke is None:
             return None
 
-        if isinstance(m, str):
-            return m
+        if isinstance(method_to_invoke, str):
+            return method_to_invoke
 
-        res = m(args) or ""  # FIXME: catch TypeErros
+        res = method_to_invoke(args) or ""  # FIXME: catch TypeErros
         if not isinstance(res, str):
             raise TypeError(f"MAGIC {name!r} returned {res!r}")
         return res
@@ -587,8 +593,8 @@ class MagicResolver(
         except UnicodeEncodeError:
             return False
 
-        m = getattr(self, name.upper(), None)
-        return m is not None
+        method = getattr(self, name.upper(), None)
+        return method is not None
 
 
 magic_words = [
@@ -665,7 +671,7 @@ magic_words = [
 
 
 def _populate_dummy():
-    m = MagicResolver()
+    magic_resolver = MagicResolver()
 
     def get_dummy(name):
         def resolve():
@@ -676,7 +682,7 @@ def _populate_dummy():
 
     missing = set()
     for word in magic_words:
-        if not m.has_magic(word):
+        if not magic_resolver.has_magic(word):
             missing.add(word)
             setattr(DummyResolver, word.upper(), get_dummy(word))
 

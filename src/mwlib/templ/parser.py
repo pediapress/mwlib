@@ -13,28 +13,28 @@ from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
 from mwlib.templ.scanner import Symbols, tokenize
 
 
-class aliasmap:
+class AliasMap:
     def __init__(self, siteinfo):
         _map = {}
         _name2aliases = {}
 
-        for d in siteinfo.get("magicwords", []):
-            name = d["name"]
-            aliases = d["aliases"]
+        for magic_word_data in siteinfo.get("magicwords", []):
+            name = magic_word_data["name"]
+            aliases = magic_word_data["aliases"]
             _name2aliases[name] = aliases
             hashname = "#" + name
-            for a in aliases:
-                _map[a] = name
-                _map["#" + a] = hashname
+            for alias in aliases:
+                _map[alias] = name
+                _map["#" + alias] = hashname
 
         self._map = _map
         self._name2aliases = _name2aliases
 
     def resolve_magic_alias(self, name):
         if name.startswith("#"):
-            t = self._map.get(name[1:])
-            if t:
-                return "#" + t
+            resolved_name = self._map.get(name[1:])
+            if resolved_name:
+                return "#" + resolved_name
         else:
             return self._map.get(name)
 
@@ -58,14 +58,14 @@ def optimize(node):
         # combine strings
         res = []
         tmp = []
-        for x in (optimize(x) for x in node):
-            if isinstance(x, six.string_types) and x is not eqmark:
-                tmp.append(x)
+        for optimized_node in (optimize(child_node) for child_node in node):
+            if isinstance(optimized_node, six.string_types) and optimized_node is not eqmark:
+                tmp.append(optimized_node)
             else:
                 if tmp:
                     res.append("".join(tmp))
                     tmp = []
-                res.append(x)
+                res.append(optimized_node)
         if tmp:
             res.append("".join(tmp))
 
@@ -100,37 +100,37 @@ class Parser:
                         "switch": re.compile("^#switch:")}
 
         magicwords = self.siteinfo.get("magicwords", [])
-        for d in magicwords:
-            name = d["name"]
+        for magic_word_data in magicwords:
+            name = magic_word_data["name"]
             if name in ("if", "switch"):
-                aliases = [re.escape(x) for x in d["aliases"]]
-                rx = "^#({}):".format("|".join(aliases))
-                self.name2rx[name] = re.compile(rx)
+                aliases = [re.escape(alias) for alias in magic_word_data["aliases"]]
+                regex_pattern = "^#({}):".format("|".join(aliases))
+                self.name2rx[name] = re.compile(regex_pattern)
 
-        self.aliasmap = aliasmap(self.siteinfo)
+        self.aliasmap = AliasMap(self.siteinfo)
 
-    def getToken(self):
+    def get_token(self):
         return self.tokens[self.pos]
 
-    def setToken(self, tok):
+    def set_token(self, tok):
         self.tokens[self.pos] = tok
 
-    def variableFromChildren(self, children):
-        v = []
+    def variable_from_children(self, children):
+        variable_components = []
 
         try:
             idx = children.index("|")
         except ValueError:
-            v.append(children)
+            variable_components.append(children)
         else:
-            v.append(children[:idx])
-            v.append(children[idx + 1:])
+            variable_components.append(children[:idx])
+            variable_components.append(children[idx + 1:])
 
-        return Variable(v)
+        return Variable(variable_components)
 
     def _consume_closing_braces(self, num):
-        ty, txt = self.getToken()
-        if ty != Symbols.bra_close or len(txt) < num:
+        token_type, txt = self.get_token()
+        if token_type != Symbols.bra_close or len(txt) < num:
             raise ValueError("expected closing braces")
         newlen = len(txt) - num
         if newlen == 0:
@@ -138,10 +138,10 @@ class Parser:
             return
 
         if newlen == 1:
-            ty = Symbols.txt
+            token_type = Symbols.txt
 
         txt = txt[:newlen]
-        self.setToken((ty, txt))
+        self.set_token((token_type, txt))
 
     def _strip_ws(self, cond):
         if isinstance(cond, six.text_type):
@@ -157,14 +157,14 @@ class Parser:
         cond = tuple(cond)
         return cond
 
-    def switchnodeFromChildren(self, children):
+    def switch_node_from_children(self, children):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
         value = optimize(args[0])
         value = self._strip_ws(value)
         return SwitchNode((value, tuple(args[1:])))
 
-    def ifnodeFromChildren(self, children):
+    def if_node_from_children(self, children):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
         cond = optimize(args[0])
@@ -174,7 +174,7 @@ class Parser:
         node = IfNode(tuple(args))
         return node
 
-    def magicNodeFromChildren(self, children, klass):
+    def magic_node_from_children(self, children, klass):
         children[0] = children[0].split(":", 1)[1]
         args = self._parse_args(children)
         return klass(args)
@@ -184,26 +184,26 @@ class Parser:
         arg = []
 
         linkcount = 0
-        for c in children:
-            if c == "[[":
+        for child in children:
+            if child == "[[":
                 linkcount += 1
-            elif c == "]]":
+            elif child == "]]":
                 if linkcount:
                     linkcount -= 1
-            elif c == "|" and linkcount == 0:
+            elif child == "|" and linkcount == 0:
                 args.append(arg)
                 arg = []
                 append_arg = True
                 continue
-            elif c == "=" and linkcount == 0:
+            elif child == "=" and linkcount == 0:
                 arg.append(eqmark)
                 continue
-            arg.append(c)
+            arg.append(child)
 
         if append_arg or arg:
             args.append(arg)
 
-        return [optimize(x) for x in args]
+        return [optimize(arg) for arg in args]
 
     def _is_good_name(self, node):
         # we stop here on the first colon. this is wrong but we don't have
@@ -212,34 +212,34 @@ class Parser:
         if isinstance(node, six.string_types):
             node = [node]
 
-        for x in node:
-            if not isinstance(x, six.string_types):
+        for child in node:
+            if not isinstance(child, six.string_types):
                 continue
-            if ":" in x:
-                x = x.split(":")[0]
+            if ":" in child:
+                child = child.split(":")[0]
                 done = True
 
-            if "[" in x or "]" in x:
+            if "[" in child or "]" in child:
                 return False
             if done:
                 break
         return True
 
-    def templateFromChildren(self, children):
+    def template_from_children(self, children):
         if children and isinstance(children[0], six.text_type):
-            s = children[0].strip().lower()
-            if self.name2rx["if"].match(s):
-                return self.ifnodeFromChildren(children)
-            if self.name2rx["switch"].match(s):
-                return self.switchnodeFromChildren(children)
+            stripped_lower_text = children[0].strip().lower()
+            if self.name2rx["if"].match(stripped_lower_text):
+                return self.if_node_from_children(children)
+            if self.name2rx["switch"].match(stripped_lower_text):
+                return self.switch_node_from_children(children)
 
-            if ":" in s:
+            if ":" in stripped_lower_text:
                 from mwlib.templ import magic_nodes
 
-                name, first = s.split(":", 1)
+                name, _ = stripped_lower_text.split(":", 1)
                 name = self.aliasmap.resolve_magic_alias(name) or name
                 if name in magic_nodes.registry:
-                    return self.magicNodeFromChildren(
+                    return self.magic_node_from_children(
                         children, magic_nodes.registry[name]
                     )
 
@@ -264,8 +264,8 @@ class Parser:
 
         return Template([name, tuple(args)])
 
-    def parseOpenBrace(self):
-        ty, txt = self.getToken()
+    def parse_open_brace(self):
+        token_type, txt = self.get_token()
         n = []
 
         numbraces = len(txt)
@@ -274,22 +274,22 @@ class Parser:
         linkcount = 0
 
         while 1:
-            ty, txt = self.getToken()
+            token_type, txt = self.get_token()
 
-            if ty == Symbols.bra_open:
-                n.append(self.parseOpenBrace())
-            elif ty is None:
+            if token_type == Symbols.bra_open:
+                n.append(self.parse_open_brace())
+            elif token_type is None:
                 break
-            elif ty == Symbols.bra_close and linkcount == 0:
+            elif token_type == Symbols.bra_close and linkcount == 0:
                 closelen = len(txt)
                 if closelen == 2 or numbraces == 2:
-                    t = self.templateFromChildren(n)
+                    t = self.template_from_children(n)
                     n = []
                     n.append(t)
                     self._consume_closing_braces(2)
                     numbraces -= 2
                 else:
-                    v = self.variableFromChildren(n)
+                    v = self.variable_from_children(n)
                     n = []
                     n.append(v)
                     self._consume_closing_braces(3)
@@ -297,7 +297,7 @@ class Parser:
 
                 if numbraces < 2:
                     break
-            elif ty == Symbols.noi:
+            elif token_type == Symbols.noi:
                 self.pos += 1  # ignore <noinclude>
             else:  # link, txt
                 if txt == "[[":
@@ -328,9 +328,9 @@ class Parser:
         n = []
 
         while 1:
-            ty, txt = self.getToken()
+            ty, txt = self.get_token()
             if ty == Symbols.bra_open:
-                n.append(self.parseOpenBrace())
+                n.append(self.parse_open_brace())
             elif ty is None:
                 break
             elif ty == Symbols.noi:

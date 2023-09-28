@@ -179,8 +179,8 @@ def _get_alignment_from_node(node: advtree.Node) -> str:
 
 def get_vertical_alignment(node: advtree.Node) -> str:
     align = None
-    for n in node.parents + [node]:
-        _align = _get_alignment_from_node(n)
+    for parent in node.parents + [node]:
+        _align = _get_alignment_from_node(parent)
         if _align in ["top", "middle", "bottom"]:
             align = _align
     return align or "top"

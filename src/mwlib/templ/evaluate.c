@@ -2455,12 +2455,12 @@ static const char __pyx_k__6[] = "{|";
   static const char __pyx_k_tmp[] = "tmp";
   static const char __pyx_k_txt[] = "txt";
   static const char __pyx_k_val[] = "val";
+  static const char __pyx_k_Mark[] = "Mark";
   static const char __pyx_k_args[] = "args";
   static const char __pyx_k_bool[] = "bool";
   static const char __pyx_k_dict[] = "__dict__";
   static const char __pyx_k_init[] = "__init__";
   static const char __pyx_k_main[] = "__main__";
-  static const char __pyx_k_mark[] = "mark";
   static const char __pyx_k_name[] = "name";
   static const char __pyx_k_node[] = "node";
   static const char __pyx_k_page[] = "page";
@@ -2511,7 +2511,7 @@ static const char __pyx_k__6[] = "{|";
   static const char __pyx_k_Caught_s[] = "Caught: %s";
   static const char __pyx_k_Expander[] = "Expander";
   static const char __pyx_k_KeyError[] = "KeyError";
-  static const char __pyx_k_aliasmap[] = "aliasmap";
+  static const char __pyx_k_aliasmap[] = "AliasMap";
   static const char __pyx_k_do_strip[] = "do_strip";
   static const char __pyx_k_endswith[] = "endswith";
   static const char __pyx_k_expander[] = "expander";
@@ -2527,7 +2527,6 @@ static const char __pyx_k__6[] = "{|";
   static const char __pyx_k_siteinfo[] = "siteinfo";
   static const char __pyx_k_NsHandler[] = "NsHandler";
   static const char __pyx_k_enumerate[] = "enumerate";
-  static const char __pyx_k_getSource[] = "get_source";
   static const char __pyx_k_isenabled[] = "isenabled";
   static const char __pyx_k_keep_uniq[] = "keep_uniq";
   static const char __pyx_k_metaclass[] = "__metaclass__";
@@ -2538,6 +2537,7 @@ static const char __pyx_k__6[] = "{|";
   static const char __pyx_k_Uniquifier[] = "Uniquifier";
   static const char __pyx_k_ValueError[] = "ValueError";
   static const char __pyx_k_dummy_mark[] = "dummy_mark";
+  static const char __pyx_k_get_source[] = "get_source";
   static const char __pyx_k_mwlib_uniq[] = "mwlib.uniq";
   static const char __pyx_k_named_args[] = "named_args";
   static const char __pyx_k_nshandling[] = "nshandling";
@@ -2673,6 +2673,7 @@ typedef struct {
   PyObject *__pyx_n_s_IndexError;
   PyObject *__pyx_n_s_KeyError;
   PyObject *__pyx_n_s_MagicResolver;
+  PyObject *__pyx_n_s_Mark;
   PyObject *__pyx_n_s_MemoryLimitError;
   PyObject *__pyx_n_s_NsHandler;
   PyObject *__pyx_n_s_TemplateRecursion;
@@ -2725,11 +2726,11 @@ typedef struct {
   PyObject *__pyx_kp_u_gc;
   PyObject *__pyx_n_s_genexpr;
   PyObject *__pyx_n_s_get;
-  PyObject *__pyx_n_s_getSource;
-  PyObject *__pyx_n_u_getSource;
   PyObject *__pyx_n_s_get_page;
   PyObject *__pyx_n_s_get_parsed_template;
   PyObject *__pyx_n_s_get_siteinfo;
+  PyObject *__pyx_n_s_get_source;
+  PyObject *__pyx_n_u_get_source;
   PyObject *__pyx_n_s_getitem;
   PyObject *__pyx_n_s_i;
   PyObject *__pyx_n_s_idx;
@@ -2752,7 +2753,6 @@ typedef struct {
   PyObject *__pyx_n_s_magic_displaytitle;
   PyObject *__pyx_n_s_magics;
   PyObject *__pyx_n_s_main;
-  PyObject *__pyx_n_s_mark;
   PyObject *__pyx_n_s_maybe_newline;
   PyObject *__pyx_n_s_metabook;
   PyObject *__pyx_n_s_metaclass;
@@ -2944,6 +2944,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_IndexError);
   Py_CLEAR(clear_module_state->__pyx_n_s_KeyError);
   Py_CLEAR(clear_module_state->__pyx_n_s_MagicResolver);
+  Py_CLEAR(clear_module_state->__pyx_n_s_Mark);
   Py_CLEAR(clear_module_state->__pyx_n_s_MemoryLimitError);
   Py_CLEAR(clear_module_state->__pyx_n_s_NsHandler);
   Py_CLEAR(clear_module_state->__pyx_n_s_TemplateRecursion);
@@ -2996,11 +2997,11 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_kp_u_gc);
   Py_CLEAR(clear_module_state->__pyx_n_s_genexpr);
   Py_CLEAR(clear_module_state->__pyx_n_s_get);
-  Py_CLEAR(clear_module_state->__pyx_n_s_getSource);
-  Py_CLEAR(clear_module_state->__pyx_n_u_getSource);
   Py_CLEAR(clear_module_state->__pyx_n_s_get_page);
   Py_CLEAR(clear_module_state->__pyx_n_s_get_parsed_template);
   Py_CLEAR(clear_module_state->__pyx_n_s_get_siteinfo);
+  Py_CLEAR(clear_module_state->__pyx_n_s_get_source);
+  Py_CLEAR(clear_module_state->__pyx_n_u_get_source);
   Py_CLEAR(clear_module_state->__pyx_n_s_getitem);
   Py_CLEAR(clear_module_state->__pyx_n_s_i);
   Py_CLEAR(clear_module_state->__pyx_n_s_idx);
@@ -3023,7 +3024,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_magic_displaytitle);
   Py_CLEAR(clear_module_state->__pyx_n_s_magics);
   Py_CLEAR(clear_module_state->__pyx_n_s_main);
-  Py_CLEAR(clear_module_state->__pyx_n_s_mark);
   Py_CLEAR(clear_module_state->__pyx_n_s_maybe_newline);
   Py_CLEAR(clear_module_state->__pyx_n_s_metabook);
   Py_CLEAR(clear_module_state->__pyx_n_s_metaclass);
@@ -3193,6 +3193,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_IndexError);
   Py_VISIT(traverse_module_state->__pyx_n_s_KeyError);
   Py_VISIT(traverse_module_state->__pyx_n_s_MagicResolver);
+  Py_VISIT(traverse_module_state->__pyx_n_s_Mark);
   Py_VISIT(traverse_module_state->__pyx_n_s_MemoryLimitError);
   Py_VISIT(traverse_module_state->__pyx_n_s_NsHandler);
   Py_VISIT(traverse_module_state->__pyx_n_s_TemplateRecursion);
@@ -3245,11 +3246,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_kp_u_gc);
   Py_VISIT(traverse_module_state->__pyx_n_s_genexpr);
   Py_VISIT(traverse_module_state->__pyx_n_s_get);
-  Py_VISIT(traverse_module_state->__pyx_n_s_getSource);
-  Py_VISIT(traverse_module_state->__pyx_n_u_getSource);
   Py_VISIT(traverse_module_state->__pyx_n_s_get_page);
   Py_VISIT(traverse_module_state->__pyx_n_s_get_parsed_template);
   Py_VISIT(traverse_module_state->__pyx_n_s_get_siteinfo);
+  Py_VISIT(traverse_module_state->__pyx_n_s_get_source);
+  Py_VISIT(traverse_module_state->__pyx_n_u_get_source);
   Py_VISIT(traverse_module_state->__pyx_n_s_getitem);
   Py_VISIT(traverse_module_state->__pyx_n_s_i);
   Py_VISIT(traverse_module_state->__pyx_n_s_idx);
@@ -3272,7 +3273,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_magic_displaytitle);
   Py_VISIT(traverse_module_state->__pyx_n_s_magics);
   Py_VISIT(traverse_module_state->__pyx_n_s_main);
-  Py_VISIT(traverse_module_state->__pyx_n_s_mark);
   Py_VISIT(traverse_module_state->__pyx_n_s_maybe_newline);
   Py_VISIT(traverse_module_state->__pyx_n_s_metabook);
   Py_VISIT(traverse_module_state->__pyx_n_s_metaclass);
@@ -3452,6 +3452,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_IndexError __pyx_mstate_global->__pyx_n_s_IndexError
 #define __pyx_n_s_KeyError __pyx_mstate_global->__pyx_n_s_KeyError
 #define __pyx_n_s_MagicResolver __pyx_mstate_global->__pyx_n_s_MagicResolver
+#define __pyx_n_s_Mark __pyx_mstate_global->__pyx_n_s_Mark
 #define __pyx_n_s_MemoryLimitError __pyx_mstate_global->__pyx_n_s_MemoryLimitError
 #define __pyx_n_s_NsHandler __pyx_mstate_global->__pyx_n_s_NsHandler
 #define __pyx_n_s_TemplateRecursion __pyx_mstate_global->__pyx_n_s_TemplateRecursion
@@ -3504,11 +3505,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_kp_u_gc __pyx_mstate_global->__pyx_kp_u_gc
 #define __pyx_n_s_genexpr __pyx_mstate_global->__pyx_n_s_genexpr
 #define __pyx_n_s_get __pyx_mstate_global->__pyx_n_s_get
-#define __pyx_n_s_getSource __pyx_mstate_global->__pyx_n_s_getSource
-#define __pyx_n_u_getSource __pyx_mstate_global->__pyx_n_u_getSource
 #define __pyx_n_s_get_page __pyx_mstate_global->__pyx_n_s_get_page
 #define __pyx_n_s_get_parsed_template __pyx_mstate_global->__pyx_n_s_get_parsed_template
 #define __pyx_n_s_get_siteinfo __pyx_mstate_global->__pyx_n_s_get_siteinfo
+#define __pyx_n_s_get_source __pyx_mstate_global->__pyx_n_s_get_source
+#define __pyx_n_u_get_source __pyx_mstate_global->__pyx_n_u_get_source
 #define __pyx_n_s_getitem __pyx_mstate_global->__pyx_n_s_getitem
 #define __pyx_n_s_i __pyx_mstate_global->__pyx_n_s_i
 #define __pyx_n_s_idx __pyx_mstate_global->__pyx_n_s_idx
@@ -3531,7 +3532,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_magic_displaytitle __pyx_mstate_global->__pyx_n_s_magic_displaytitle
 #define __pyx_n_s_magics __pyx_mstate_global->__pyx_n_s_magics
 #define __pyx_n_s_main __pyx_mstate_global->__pyx_n_s_main
-#define __pyx_n_s_mark __pyx_mstate_global->__pyx_n_s_mark
 #define __pyx_n_s_maybe_newline __pyx_mstate_global->__pyx_n_s_maybe_newline
 #define __pyx_n_s_metabook __pyx_mstate_global->__pyx_n_s_metabook
 #define __pyx_n_s_metaclass __pyx_mstate_global->__pyx_n_s_metaclass
@@ -7767,7 +7767,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  *             if i and res[i - 1].endswith("\n"):
  *                 continue             # <<<<<<<<<<<<<<
  * 
- *             if isinstance(s1, mark):
+ *             if isinstance(s1, Mark):
  */
           goto __pyx_L3_continue;
 
@@ -7783,11 +7783,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         /* "mwlib/templ/evaluate.pyx":171
  *                 continue
  * 
- *             if isinstance(s1, mark):             # <<<<<<<<<<<<<<
+ *             if isinstance(s1, Mark):             # <<<<<<<<<<<<<<
  *                 continue
  *             if len(s1) >= 2:
  */
-        __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_mark); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 171, __pyx_L1_error)
+        __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_Mark); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 171, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __pyx_t_7 = PyObject_IsInstance(__pyx_v_s1, __pyx_t_6); if (unlikely(__pyx_t_7 == ((int)-1))) __PYX_ERR(0, 171, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7795,7 +7795,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
           /* "mwlib/templ/evaluate.pyx":172
  * 
- *             if isinstance(s1, mark):
+ *             if isinstance(s1, Mark):
  *                 continue             # <<<<<<<<<<<<<<
  *             if len(s1) >= 2:
  *                 if is_implicit_newline(s1):
@@ -7805,14 +7805,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           /* "mwlib/templ/evaluate.pyx":171
  *                 continue
  * 
- *             if isinstance(s1, mark):             # <<<<<<<<<<<<<<
+ *             if isinstance(s1, Mark):             # <<<<<<<<<<<<<<
  *                 continue
  *             if len(s1) >= 2:
  */
         }
 
         /* "mwlib/templ/evaluate.pyx":173
- *             if isinstance(s1, mark):
+ *             if isinstance(s1, Mark):
  *                 continue
  *             if len(s1) >= 2:             # <<<<<<<<<<<<<<
  *                 if is_implicit_newline(s1):
@@ -7876,7 +7876,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           }
 
           /* "mwlib/templ/evaluate.pyx":173
- *             if isinstance(s1, mark):
+ *             if isinstance(s1, Mark):
  *                 continue
  *             if len(s1) >= 2:             # <<<<<<<<<<<<<<
  *                 if is_implicit_newline(s1):
@@ -8611,7 +8611,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
     __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_db); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 204, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_19 = __Pyx_HasAttr(__pyx_t_4, __pyx_n_u_getSource); if (unlikely(__pyx_t_19 == ((int)-1))) __PYX_ERR(0, 204, __pyx_L1_error)
+    __pyx_t_19 = __Pyx_HasAttr(__pyx_t_4, __pyx_n_u_get_source); if (unlikely(__pyx_t_19 == ((int)-1))) __PYX_ERR(0, 204, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_1 = __pyx_t_19;
     __pyx_L22_bool_binop_done:;
@@ -8626,7 +8626,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
       __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_db); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 205, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getSource); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 205, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_get_source); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 205, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_t_2 = NULL;
@@ -9015,7 +9015,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  * 
  *         self.recursion_limit = recursion_limit             # <<<<<<<<<<<<<<
  *         self.recursion_count = 0
- *         self.aliasmap = parser.aliasmap(self.siteinfo)
+ *         self.aliasmap = parser.AliasMap(self.siteinfo)
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_recursion_limit, __pyx_v_recursion_limit) < 0) __PYX_ERR(0, 227, __pyx_L1_error)
 
@@ -9023,7 +9023,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  * 
  *         self.recursion_limit = recursion_limit
  *         self.recursion_count = 0             # <<<<<<<<<<<<<<
- *         self.aliasmap = parser.aliasmap(self.siteinfo)
+ *         self.aliasmap = parser.AliasMap(self.siteinfo)
  * 
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_recursion_count, __pyx_int_0) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
@@ -9031,7 +9031,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     /* "mwlib/templ/evaluate.pyx":229
  *         self.recursion_limit = recursion_limit
  *         self.recursion_count = 0
- *         self.aliasmap = parser.aliasmap(self.siteinfo)             # <<<<<<<<<<<<<<
+ *         self.aliasmap = parser.AliasMap(self.siteinfo)             # <<<<<<<<<<<<<<
  * 
  *         self.parsed = parser.parse(
  */
@@ -9069,7 +9069,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "mwlib/templ/evaluate.pyx":231
- *         self.aliasmap = parser.aliasmap(self.siteinfo)
+ *         self.aliasmap = parser.AliasMap(self.siteinfo)
  * 
  *         self.parsed = parser.parse(             # <<<<<<<<<<<<<<
  *             txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo
@@ -9106,7 +9106,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
     /* "mwlib/templ/evaluate.pyx":231
- *         self.aliasmap = parser.aliasmap(self.siteinfo)
+ *         self.aliasmap = parser.AliasMap(self.siteinfo)
  * 
  *         self.parsed = parser.parse(             # <<<<<<<<<<<<<<
  *             txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo
@@ -11401,6 +11401,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_IndexError, __pyx_k_IndexError, sizeof(__pyx_k_IndexError), 0, 0, 1, 1},
     {&__pyx_n_s_KeyError, __pyx_k_KeyError, sizeof(__pyx_k_KeyError), 0, 0, 1, 1},
     {&__pyx_n_s_MagicResolver, __pyx_k_MagicResolver, sizeof(__pyx_k_MagicResolver), 0, 0, 1, 1},
+    {&__pyx_n_s_Mark, __pyx_k_Mark, sizeof(__pyx_k_Mark), 0, 0, 1, 1},
     {&__pyx_n_s_MemoryLimitError, __pyx_k_MemoryLimitError, sizeof(__pyx_k_MemoryLimitError), 0, 0, 1, 1},
     {&__pyx_n_s_NsHandler, __pyx_k_NsHandler, sizeof(__pyx_k_NsHandler), 0, 0, 1, 1},
     {&__pyx_n_s_TemplateRecursion, __pyx_k_TemplateRecursion, sizeof(__pyx_k_TemplateRecursion), 0, 0, 1, 1},
@@ -11453,11 +11454,11 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_kp_u_gc, __pyx_k_gc, sizeof(__pyx_k_gc), 0, 1, 0, 0},
     {&__pyx_n_s_genexpr, __pyx_k_genexpr, sizeof(__pyx_k_genexpr), 0, 0, 1, 1},
     {&__pyx_n_s_get, __pyx_k_get, sizeof(__pyx_k_get), 0, 0, 1, 1},
-    {&__pyx_n_s_getSource, __pyx_k_getSource, sizeof(__pyx_k_getSource), 0, 0, 1, 1},
-    {&__pyx_n_u_getSource, __pyx_k_getSource, sizeof(__pyx_k_getSource), 0, 1, 0, 1},
     {&__pyx_n_s_get_page, __pyx_k_get_page, sizeof(__pyx_k_get_page), 0, 0, 1, 1},
     {&__pyx_n_s_get_parsed_template, __pyx_k_get_parsed_template, sizeof(__pyx_k_get_parsed_template), 0, 0, 1, 1},
     {&__pyx_n_s_get_siteinfo, __pyx_k_get_siteinfo, sizeof(__pyx_k_get_siteinfo), 0, 0, 1, 1},
+    {&__pyx_n_s_get_source, __pyx_k_get_source, sizeof(__pyx_k_get_source), 0, 0, 1, 1},
+    {&__pyx_n_u_get_source, __pyx_k_get_source, sizeof(__pyx_k_get_source), 0, 1, 0, 1},
     {&__pyx_n_s_getitem, __pyx_k_getitem, sizeof(__pyx_k_getitem), 0, 0, 1, 1},
     {&__pyx_n_s_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 0, 1, 1},
     {&__pyx_n_s_idx, __pyx_k_idx, sizeof(__pyx_k_idx), 0, 0, 1, 1},
@@ -11480,7 +11481,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_magic_displaytitle, __pyx_k_magic_displaytitle, sizeof(__pyx_k_magic_displaytitle), 0, 0, 1, 1},
     {&__pyx_n_s_magics, __pyx_k_magics, sizeof(__pyx_k_magics), 0, 0, 1, 1},
     {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
-    {&__pyx_n_s_mark, __pyx_k_mark, sizeof(__pyx_k_mark), 0, 0, 1, 1},
     {&__pyx_n_s_maybe_newline, __pyx_k_maybe_newline, sizeof(__pyx_k_maybe_newline), 0, 0, 1, 1},
     {&__pyx_n_s_metabook, __pyx_k_metabook, sizeof(__pyx_k_metabook), 0, 0, 1, 1},
     {&__pyx_n_s_metaclass, __pyx_k_metaclass, sizeof(__pyx_k_metaclass), 0, 0, 1, 1},
@@ -12259,7 +12259,7 @@ if (!__Pyx_RefNanny) {
  * 
  * from mwlib import metabook, nshandling, siteinfo             # <<<<<<<<<<<<<<
  * from mwlib.templ import log, magics, mwlocals, parser
- * from mwlib.templ.marks import dummy_mark, eqmark, mark, maybe_newline
+ * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
  */
   __pyx_t_3 = PyList_New(3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -12293,7 +12293,7 @@ if (!__Pyx_RefNanny) {
  * 
  * from mwlib import metabook, nshandling, siteinfo
  * from mwlib.templ import log, magics, mwlocals, parser             # <<<<<<<<<<<<<<
- * from mwlib.templ.marks import dummy_mark, eqmark, mark, maybe_newline
+ * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
  * from mwlib.uniq import Uniquifier
  */
   __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
@@ -12334,7 +12334,7 @@ if (!__Pyx_RefNanny) {
   /* "mwlib/templ/evaluate.pyx":8
  * from mwlib import metabook, nshandling, siteinfo
  * from mwlib.templ import log, magics, mwlocals, parser
- * from mwlib.templ.marks import dummy_mark, eqmark, mark, maybe_newline             # <<<<<<<<<<<<<<
+ * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline             # <<<<<<<<<<<<<<
  * from mwlib.uniq import Uniquifier
  * 
  */
@@ -12346,9 +12346,9 @@ if (!__Pyx_RefNanny) {
   __Pyx_INCREF(__pyx_n_s_eqmark);
   __Pyx_GIVEREF(__pyx_n_s_eqmark);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_eqmark)) __PYX_ERR(0, 8, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_mark);
-  __Pyx_GIVEREF(__pyx_n_s_mark);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 2, __pyx_n_s_mark)) __PYX_ERR(0, 8, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_Mark);
+  __Pyx_GIVEREF(__pyx_n_s_Mark);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 2, __pyx_n_s_Mark)) __PYX_ERR(0, 8, __pyx_L1_error);
   __Pyx_INCREF(__pyx_n_s_maybe_newline);
   __Pyx_GIVEREF(__pyx_n_s_maybe_newline);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 3, __pyx_n_s_maybe_newline)) __PYX_ERR(0, 8, __pyx_L1_error);
@@ -12363,9 +12363,9 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_eqmark, __pyx_t_3) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_mark); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Mark); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_mark, __pyx_t_3) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Mark, __pyx_t_3) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_maybe_newline); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -12375,7 +12375,7 @@ if (!__Pyx_RefNanny) {
 
   /* "mwlib/templ/evaluate.pyx":9
  * from mwlib.templ import log, magics, mwlocals, parser
- * from mwlib.templ.marks import dummy_mark, eqmark, mark, maybe_newline
+ * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
  * from mwlib.uniq import Uniquifier             # <<<<<<<<<<<<<<
  * 
  * 

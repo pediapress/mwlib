@@ -17,12 +17,12 @@ from mwlib.podclient import PODClient
 from mwlib.status import Status
 from mwlib.utils import send_mail
 
-cachedir = "cache"
+CACHE_DIR = "cache"
 gevent.monkey.patch_all()
 
 
 def get_collection_dir(collection_id):
-    return os.path.join(cachedir, collection_id[:2], collection_id)
+    return os.path.join(CACHE_DIR, collection_id[:2], collection_id)
 
 
 def _get_args(writer_options=None, language=None, zip_only=False):
@@ -122,10 +122,10 @@ def report_exception_mail(subject, exc_info):
 
     print("sending mail to", mailto)
 
-    f = StringIO.StringIO()
-    traceback.print_exception(*exc_info, file=f)
+    exception_traceback_buffer = StringIO.StringIO()
+    traceback.print_exception(*exc_info, file=exception_traceback_buffer)
 
-    send_mail(mailfrom, [mailto], subject, f.getvalue())
+    send_mail(mailfrom, [mailto], subject, exception_traceback_buffer.getvalue())
 
 
 class Commands:
@@ -189,12 +189,12 @@ class Commands:
 
 
 def main():
-    global cachedir
+    global CACHE_DIR
 
     opts, args = argv.parse(sys.argv[1:], "--cachedir=")
-    for o, a in opts:
-        if o == "--cachedir":
-            cachedir = a
+    for opt, arg in opts:
+        if opt == "--cachedir":
+            CACHE_DIR = arg
 
     slave.main(Commands, numgreenlets=32, argv=args)
 

@@ -35,23 +35,23 @@ def show():
 
     wiki_db = wiki.make_wiki(conf).wiki
 
-    for a in articles:
+    for article in articles:
         defaultns = 10 if options.template else 0
 
-        page = wiki_db.normalize_and_get_page(a, defaultns)
+        page = wiki_db.normalize_and_get_page(article, defaultns)
         raw = page.rawtext if page else None
 
         if raw:
             if options.expand:
-                te = expander.Expander(raw, pagename=a, wikidb=wiki_db)
-                raw = te.expandTemplates()
+                template_expander = expander.Expander(raw, pagename=article, wikidb=wiki_db)
+                raw = template_expander.expandTemplates()
 
             print(raw.encode("utf-8"))
     if options.f:
         with open(options.f) as f:
             six.text_type(f.read(), "utf-8")
-        te = expander.Expander(raw, pagename="test", wikidb=wiki_db)
-        raw = te.expandTemplates()
+        template_expander = expander.Expander(raw, pagename="test", wikidb=wiki_db)
+        raw = template_expander.expandTemplates()
         print(raw.encode("utf-8"))
 
 
@@ -134,14 +134,14 @@ def parse():
 
     conf = options.config
 
-    w = wiki.make_wiki(conf)
+    new_wiki = wiki.make_wiki(conf)
 
-    db = w.wiki
+    wiki_db = new_wiki.wiki
 
     if options.all:
-        if not hasattr(db, "articles"):
-            raise RuntimeError(f"{db} does not support iterating over all articles")
-        articles = db.articles()
+        if not hasattr(wiki_db, "articles"):
+            raise RuntimeError(f"{wiki_db} does not support iterating over all articles")
+        articles = wiki_db.articles()
 
-    for x in articles:
-        parse_article(x, db, options)
+    for article in articles:
+        parse_article(article, wiki_db, options)

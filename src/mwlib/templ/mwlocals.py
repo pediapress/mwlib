@@ -12,9 +12,9 @@ def parse_locals(local_str):
     if isinstance(local_str, str):
         local_str = str(local_str)
     res = {}
-    for x in local_str.split("\n----\n"):
+    for entry in local_str.split("\n----\n"):
         try:
-            name, val = x.split("=", 1)
+            name, val = entry.split("=", 1)
         except ValueError:
             continue
         if name:

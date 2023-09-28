@@ -230,7 +230,7 @@ def test_expand_parser_func_name():
 
 def test_expand_name_with_colon():
     wikidb = DictDB()
-    wikidb.d["bla:blubb"] = "foo"
+    wikidb.data_dict["bla:blubb"] = "foo"
     expand_str("{{bla:blubb}}", "foo", wikidb=wikidb)
 
 
@@ -420,7 +420,7 @@ def test_1x_newline_and_spaces():
     # see
     # http://en.wikipedia.org/wiki/Help:Newlines_and_spaces#Spaces_and.2For_newlines_as_value_of_an_unnamed_parameter
     wikidb = DictDB()
-    wikidb.d["1x"] = "{{{1}}}"
+    wikidb.data_dict["1x"] = "{{{1}}}"
 
     def e(a, b):
         return expand_str(a, b, wikidb=wikidb)

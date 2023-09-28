@@ -52,11 +52,11 @@ def make_messages(
         if not os.path.isdir(basedir):
             os.makedirs(basedir)
 
-        pofile = os.path.join(basedir, "%s.po" % domain)
-        potfile = os.path.join(basedir, "%s.pot" % domain)
+        po_file_path = os.path.join(basedir, "%s.po" % domain)
+        pot_file_path = os.path.join(basedir, "%s.pot" % domain)
 
-        if os.path.exists(potfile):
-            os.unlink(potfile)
+        if os.path.exists(pot_file_path):
+            os.unlink(pot_file_path)
 
         all_files = []
         for dirpath, _, filenames in os.walk(inputdir):
@@ -78,31 +78,31 @@ def make_messages(
                 "-",
                 os.path.join(dirpath, filename),
             )
-            if os.path.exists(potfile):
+            if os.path.exists(pot_file_path):
                 # Strip the header
                 msgs = "\n".join(dropwhile(len, msgs.split("\n")))
             else:
                 msgs = msgs.replace("charset=CHARSET", "charset=UTF-8")
             if msgs:
-                with open(potfile, "ab") as f:
-                    f.write(msgs)
+                with open(pot_file_path, "ab") as pot_file:
+                    pot_file.write(msgs)
 
-        if os.path.exists(potfile):
-            msgs = execute("msguniq", "--to-code", "UTF-8", potfile)
-            with open(potfile, "wb") as f:
-                f.write(msgs)
-            if os.path.exists(pofile):
-                msgs = execute("msgmerge", "--quiet", pofile, potfile)
-            with open(pofile, "wb") as f:
-                f.write(msgs)
-            os.unlink(potfile)
+        if os.path.exists(pot_file_path):
+            msgs = execute("msguniq", "--to-code", "UTF-8", pot_file_path)
+            with open(pot_file_path, "wb") as pot_file:
+                pot_file.write(msgs)
+            if os.path.exists(po_file_path):
+                msgs = execute("msgmerge", "--quiet", po_file_path, pot_file_path)
+            with open(po_file_path, "wb") as po_file:
+                po_file.write(msgs)
+            os.unlink(pot_file_path)
 
 
 def compile_messages(localedir="locale"):
     for dirpath, _, filenames in os.walk(localedir):
-        for f in filenames:
-            if f.endswith(".po"):
-                path = os.path.join(dirpath, f)
+        for filename in filenames:
+            if filename.endswith(".po"):
+                path = os.path.join(dirpath, filename)
                 mo_filename = os.path.splitext(path)[0] + ".mo"
                 try:
                     execute(

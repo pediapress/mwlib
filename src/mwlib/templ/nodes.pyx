@@ -168,7 +168,7 @@ class SwitchNode(Node):
                 break
 
         if retval is None:
-            for a in expander.aliasmap.get_aliases("default") or ["#default"]:
+            for a in expander.AliasMap.get_aliases("default") or ["#default"]:
                 retval = self.fast.get(a)
                 if retval is not None:
                     retval = retval[1]
@@ -283,10 +283,10 @@ class Template(Node):
                 if DEBUG:
                     msg = f"EXPANDING {name!r} {var!r}  ===> "
                     old_idx = len(res)
-                res.append(mark_start(repr(name)))
+                res.append(MarkStart(repr(name)))
                 res.append(maybe_newline)
                 flatten(p, expander, var, res)
-                res.append(mark_end(repr(name)))
+                res.append(MarkEnd(repr(name)))
 
                 if DEBUG:
                     msg += repr("".join(res[old_idx:]))
@@ -314,5 +314,5 @@ if True:
         insert_implicit_newlines,
         maybe_newline,
     )
-    from mwlib.templ.marks import mark_end, mark_start
+    from mwlib.templ.marks import MarkEnd, MarkStart
     from mwlib.templ.parser import optimize

@@ -25,13 +25,13 @@ class Time(nodes.Node):
         formats = "".join(formats).strip()
 
         if len(self) > 1:
-            d = []
-            evaluate.flatten(self[1], expander, variables, d)
-            d = "".join(d).strip()
+            date_elements = []
+            evaluate.flatten(self[1], expander, variables, date_elements)
+            date_elements = "".join(date_elements).strip()
         else:
-            d = None
+            date_elements = None
 
-        res.append(magic_time.time(formats, d))
+        res.append(magic_time.time(formats, date_elements))
 
 
 class AnchorEncode(nodes.Node):
@@ -48,12 +48,12 @@ class AnchorEncode(nodes.Node):
         # reproduce that bug here...
         import six.moves.urllib.request
 
-        e = (
+        encoded_argument = (
             six.moves.urllib.parse.quote_plus(arg.encode("utf-8"), ":")
             .replace("%", ".")
             .replace("+", "_")
         )
-        res.append(e)
+        res.append(encoded_argument)
 
 
 def _rel2abs(rel, base):

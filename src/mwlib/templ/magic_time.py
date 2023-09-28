@@ -17,7 +17,7 @@ def ampm(date):
         return "pm"
 
 
-rx = re.compile('"[^"]*"|xr|\\\\.|.')
+COMPILED_REGEX = re.compile('"[^"]*"|xr|\\\\.|.')
 CODENAMES = {
     "y": "%y",
     "Y": "%Y",
@@ -51,25 +51,29 @@ CODENAMES = {
 
 
 def format_date(format_str, date):
-    split = rx.findall(format_str)
+    split = COMPILED_REGEX.findall(format_str)
     process_next = None
 
     tmp = []
-    for x in split:
-        f = CODENAMES.get(x, None)
-        if f is None:
-            if len(x) == 2 and x.startswith("\\"):
-                tmp.append(x[1])
-            elif len(x) >= 2 and x.startswith('"'):
-                tmp.append(x[1:-1])
+    for element in split:
+        format_code = CODENAMES.get(element, None)
+        if format_code is None:
+            if len(element) == 2 and element.startswith("\\"):
+                tmp.append(element[1])
+            elif len(element) >= 2 and element.startswith('"'):
+                tmp.append(element[1:-1])
             else:
-                tmp.append(x)
+                tmp.append(element)
         else:
-            if isinstance(f, tuple):
-                process_next = f[1]
+            if isinstance(format_code, tuple):
+                process_next = format_code[1]
                 continue
 
-            res = strftime(date, f) if isinstance(f, str) else f(date)
+            res = (
+                strftime(date, format_code)
+                if isinstance(format_code, str)
+                else format_code(date)
+            )
 
             if process_next:
                 with suppress(ValueError):
@@ -99,7 +103,9 @@ def time(date_format, date_string=None):
             except ValueError:
                 pass
             except Exception as err:
-                sys.stderr.write(f"ERROR in parsedate: {err!r} while parsing {date_string!r}")
+                sys.stderr.write(
+                    f"ERROR in parsedate: {err!r} while parsing {date_string!r}"
+                )
 
         if date is None:
             return '<strong class="error">Error: invalid time</strong>'

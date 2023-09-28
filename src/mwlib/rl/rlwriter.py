@@ -2379,8 +2379,8 @@ class RlWriter:
             t.small_table = True
             t.min_widths, t.max_widths = self._getTableSize(t)
 
-    def emptyTable(self, t):
-        for row in t.children:
+    def emptyTable(self, table):
+        for row in table.children:
             if row.__class__ == advtree.Row:
                 for _ in row.children:
                     return False
@@ -2435,8 +2435,8 @@ class RlWriter:
     def addAnchors(self, table):
         anchors = ""
         for article_id in self.articleids:
-            newAnchor = '<a name="%s" />' % article_id
-            anchors = f"{anchors}{newAnchor}"
+            new_anchor = '<a name="%s" />' % article_id
+            anchors = f"{anchors}{new_anchor}"
         paragraph = Paragraph(anchors, text_style())
 
         cell = table._cellvalues[0][0]
@@ -2521,7 +2521,7 @@ class RlWriter:
 
         # the vertical image placement is calculated below:
         # the "normal" height of a single-line formula is 17px
-        imgAlign = "%fin" % (-(height - 15) / (2 * density))
+        img_align = "%fin" % (-(height - 15) / (2 * density))
         # the non-breaking-space is needed to
         # force whitespace after the formula
         return [
@@ -2529,7 +2529,7 @@ class RlWriter:
                 path=imgpath.encode(sys.getfilesystemencoding()),
                 width=width / density * 72,
                 height=height / density * 72,
-                valign=imgAlign,
+                valign=img_align,
             )
         ]
 

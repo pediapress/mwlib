@@ -70,7 +70,7 @@ from mwlib.advtree import (
     remove_newlines,
 )
 from mwlib.exceptions.mwlib_exceptions import InvalidTreeNodesError
-from mwlib.treecleanerhelper import getNodeHeight, splitRow
+from mwlib.treecleanerhelper import get_node_height, split_row
 from mwlib.writer import miscutils, styleutils
 
 
@@ -97,13 +97,13 @@ class TreeCleaner:
         "mark_infoboxes",
         "remove_edit_links",
         "remove_empty_text_nodes",
-        "removeInvisibleLinks",
+        "remove_invisible_links",
         "clean_section_captions",
         "remove_childless_nodes",
-        "removeNoPrintNodes",
+        "remove_no_print_nodes",
         "remove_list_only_paragraphs",
         "remove_invalid_file_types",
-        "fixParagraphs",
+        "fix_paragraphs",
         "simplify_block_nodes",
         "remove_absolute_positioned_node",
         "remove_scroll_elements",
@@ -120,7 +120,7 @@ class TreeCleaner:
         "remove_empty_training_table_rows",
         "split_table_lists",
         "transform_single_col_tables",
-        "splitTableToColumns",
+        "split_table_to_columns",
         "linearize_wide_nested_tables",
         "remove_breaking_returns",
         "remove_empty_ref_lists",
@@ -130,7 +130,7 @@ class TreeCleaner:
         "split_big_table_cells",
         "limit_image_caption_size",
         "remove_dup_links_in_refs",
-        "fixItemLists",
+        "fix_item_lists",
         "fix_sub_sup",
         "remove_leading_para_in_list",
         "remove_childless_nodes",  # methods above might leave empty nodes behind - clean up
@@ -143,7 +143,7 @@ class TreeCleaner:
         "remove_broken_children",
         "fix_math_dir",
         "fix_nesting",  # pull DefinitionLists out of Paragraphs
-        "fixPreFormatted",
+        "fix_preformatted",
         "fix_list_nesting",
         "handle_only_in_print",
         "remove_empty_text_nodes",
@@ -350,7 +350,7 @@ class TreeCleaner:
         ]
 
         # list of classes or IDs of table nodes which are split into their
-        # content. used by splitTableToColumns
+        # content. used by split_table_to_columns
         self.split_table_class_ids = ["mp-upper"]
 
         # remove ImageLinks which end with the following file types
@@ -753,7 +753,7 @@ class TreeCleaner:
                     return True
         return False
 
-    def fixParagraphs(self, node):
+    def fix_paragraphs(self, node):
         while self._fix_paragraphs(node):
             pass
 
@@ -1021,33 +1021,33 @@ class TreeCleaner:
         that output on a paginated medium.
         Often these writers can not handle tables where a single cell
         exceeds the page height.
-        Using heuristics in the treecleanerhelper.getNodeHeight function
+        Using heuristics in the treecleanerhelper.get_node_height function
         the height of a cell
         is estimated and the cell is split if necessary.
         """
 
         if node.__class__ == Row:
             for cell in node.children:
-                h = getNodeHeight(cell, self.cell_splitter_params)
+                height = get_node_height(cell, self.cell_splitter_params)
                 if (
-                    h > self.cell_splitter_params["maxCellHeight"]
+                    height > self.cell_splitter_params["maxCellHeight"]
                     and len(cell.children) > 1
                 ):
-                    rows = splitRow(node, self.cell_splitter_params)
+                    rows = split_row(node, self.cell_splitter_params)
                     self.report("replacing child", node, rows)
                     node.parent.replace_child(node, rows)
                     return
 
             return
 
-        for c in node.children[:]:
-            self.split_big_table_cells(c)
+        for child in node.children[:]:
+            self.split_big_table_cells(child)
 
     def _get_named_refs(self, node):
         named_refs = []
-        for n in node.get_child_nodes_by_class(Reference) + [node]:
-            if n.__class__ == Reference and n.attributes.get("name"):
-                named_refs.append(n)
+        for node in node.get_child_nodes_by_class(Reference) + [node]:
+            if node.__class__ == Reference and node.attributes.get("name"):
+                named_refs.append(node)
         return named_refs
 
     def _safe_remove(self, node, named_refs):
@@ -1063,7 +1063,7 @@ class TreeCleaner:
                 ref.move_to(node, prefix=True)
         node.parent.remove_child(node)
 
-    def removeNoPrintNodes(self, node):
+    def remove_no_print_nodes(self, node):
         if (
             node.has_class_id(self.no_display_classes)
             or not node.visible
@@ -1079,7 +1079,7 @@ class TreeCleaner:
             return
 
         for child in node.children[:]:
-            self.removeNoPrintNodes(child)
+            self.remove_no_print_nodes(child)
 
     def _replace_section_with_empty_title(self, node):
         children = [BreakingReturn()]
@@ -1179,7 +1179,7 @@ class TreeCleaner:
         for child in node.children[:]:
             self.remove_textless_styles(child)
 
-    def removeInvisibleLinks(self, node):
+    def remove_invisible_links(self, node):
         """Remove category links that are not displayed in the text,
         but only used to stick the article in a category"""
 
@@ -1193,9 +1193,9 @@ class TreeCleaner:
             return
 
         for child in node.children[:]:
-            self.removeInvisibleLinks(child)
+            self.remove_invisible_links(child)
 
-    def fixPreFormatted(self, node):
+    def fix_preformatted(self, node):
         """Rearrange PreFormatted nodes. Text is broken down into individual
         lines which are separated by BreakingReturns"""
         if node.__class__ == PreFormatted:
@@ -1216,7 +1216,7 @@ class TreeCleaner:
             return
 
         for child in node.children:
-            self.fixPreFormatted(child)
+            self.fix_preformatted(child)
 
     def fix_list_nesting(self, node):
         """workaround for #81"""
@@ -1281,7 +1281,7 @@ class TreeCleaner:
 
         return is_big
 
-    def splitTableToColumns(self, node):
+    def split_table_to_columns(self, node):
         """Removes a table if contained cells are very large.
         Column content is linearized."""
         if node.__class__ == Table and not getattr(node, "isInfobox", False):
@@ -1335,7 +1335,7 @@ class TreeCleaner:
                 node.parent.replace_child(node, lin_cols)
 
         for child in node.children[:]:
-            self.splitTableToColumns(child)
+            self.split_table_to_columns(child)
 
     def fix_reference_nodes(self, node):
         ref_nodes = node.get_child_nodes_by_class(Reference)
@@ -1383,14 +1383,14 @@ class TreeCleaner:
             if sections:
                 section = sections[0]
                 display_text = []
-                for c in section.children[1:]:
-                    display_text.append(c.get_all_display_text().strip())
+                for child in section.children[1:]:
+                    display_text.append(child.get_all_display_text().strip())
                 if not "".join(display_text).strip() and section.parent:
                     section.parent.remove_child(section)
                     self.report("removed empty reference list")
 
-        for c in node.children:
-            self.remove_empty_ref_lists(c)
+        for child in node.children:
+            self.remove_empty_ref_lists(child)
 
     def remove_dup_links_in_refs(self, node):
         if node.__class__ == Reference:
@@ -1421,16 +1421,16 @@ class TreeCleaner:
                     )
                     node.parent.remove_child(node)
 
-        for c in node.children:
-            self.remove_invalid_file_types(c)
+        for child in node.children:
+            self.remove_invalid_file_types(child)
 
     def limit_image_caption_size(self, node):
         if node.__class__ == ImageLink:
             txt = node.get_all_display_text()
             if len(txt) > 500:
                 brs = node.get_child_nodes_by_class(BreakingReturn)
-                for br in brs:
-                    br.parent.remove_child(br)
+                for breaking_return in brs:
+                    breaking_return.parent.remove_child(breaking_return)
                 if brs:
                     self.report("removed BreakingReturns from long image caption")
 
@@ -1448,7 +1448,7 @@ class TreeCleaner:
         for child in node.children:
             self.remove_leading_para_in_list(child)
 
-    def fixItemLists(self, node):
+    def fix_item_lists(self, node):
         if node.__class__ == ItemList:
             for child in node.children:
                 if child.__class__ != Item:
@@ -1461,7 +1461,7 @@ class TreeCleaner:
                     )
 
         for child in node.children:
-            self.fixItemLists(child)
+            self.fix_item_lists(child)
 
     def _is_empty_row(self, row):
         return all(not cell.children for cell in row.children)
@@ -1639,14 +1639,14 @@ class TreeCleaner:
         return False
 
     def _unnest_content(self, last_cell, node):
-        d = Div()
-        d.border = 1
-        d.vlist = last_cell.vlist
+        div = Div()
+        div.border = 1
+        div.vlist = last_cell.vlist
         for item in last_cell.children:
-            d.append_child(item)
+            div.append_child(item)
         last_cell.children = []
-        d.move_to(node)
-        self.report("moved content behind table", d)
+        div.move_to(node)
+        self.report("moved content behind table", div)
 
     def unnest_ending_cell_content(self, node):
         """http://de.wikipedia.org/w/index.php?title=Bahnstrecke_Berlin%E2%80%93Dresden&oldid=72891289"""
@@ -1704,10 +1704,10 @@ class TreeCleaner:
     def gallery_fix(self, node):
         """move gallery nodes out of tables."""
         galleries = node.get_child_nodes_by_class(Gallery)
-        for g in galleries:
-            tables = g.get_parent_nodes_by_class(Table)
+        for gallery in galleries:
+            tables = gallery.get_parent_nodes_by_class(Table)
             if tables:
-                g.move_to(tables[0])
+                gallery.move_to(tables[0])
                 self.report("removed gallery from table")
 
     def fix_sub_sup(self, node):

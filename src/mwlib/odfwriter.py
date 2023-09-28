@@ -553,13 +553,13 @@ class ODFWriter:
 
     def owriteIndented(self, input_string):
         "Writes a indented Paragraph. Margin to the left. Need a lenght of Indented.caption of 1,2 or 3."
-        indentStyles = (
+        indent_styles = (
             style.indentedSingle,
             style.indentedDouble,
             style.indentedTriple,
         )  # 0, 1, 2
-        indentLevel = min(len(input_string.caption) - 1, len(indentStyles) - 1)
-        return ParagraphProxy(stylename=indentStyles[indentLevel])
+        indent_level = min(len(input_string.caption) - 1, len(indent_styles) - 1)
+        return ParagraphProxy(stylename=indent_styles[indent_level])
 
     def owriteMath(self, obj):
         """
@@ -679,7 +679,7 @@ class ODFWriter:
         else:
             return (w_target, h_target, scale)
 
-    def owriteImageLink(self, obj, isImageMap=False):
+    def owriteImageLink(self, obj, is_image_map=False):
         # see http://books.evc-cit.info/odbook/ch04.html
         # see rl.writer for more advanced image integration,
         # including inline, floating, etc.
@@ -741,7 +741,7 @@ class ODFWriter:
             stylename=style.frmInner, width=width_in, height=height_in
         )
 
-        if isImageMap:
+        if is_image_map:
             innerframe.w_img = w_img
             innerframe.h_img = h_img
             innerframe.rescaleFactor = (
@@ -776,7 +776,7 @@ class ODFWriter:
         text_box.addElement(paragraph_proxy)
         paragraph_proxy.addElement(innerframe)
         frame.writeto = paragraph_proxy
-        if isImageMap:
+        if is_image_map:
             frame.writeImageMapTo = innerframe
         return frame
 

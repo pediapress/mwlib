@@ -39,12 +39,12 @@ def zip_dir(dirname, output=None, skip_ext=None):
         output = dirname + ".zip"
 
     output = os.path.abspath(output)
-    zf = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
+    zip_file = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zf.write(i, i[len(dirname) + 1:])
-    zf.close()
+        zip_file.write(i, i[len(dirname) + 1:])
+    zip_file.close()
 
 
 def make_zip(output=None, options=None, metabook=None,

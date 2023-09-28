@@ -10,7 +10,7 @@ import math
 from .advtree import URL, Cell, ImageLink, Link, Math, NamedURL, Reference, Text
 
 
-def getNodeHeight(node, params):
+def get_node_height(node, params):
     line_height = params["lineHeight"]
     chars_per_line = params["charsPerLine"]
     paragraph_margin = params["paragraphMargin"]
@@ -49,21 +49,21 @@ def getNodeHeight(node, params):
     elif node.is_block_node:  # compensation for e.g. listItems which contain text.
         height += 0.5 * line_height
 
-    for n in node.children[:]:
-        if n.__class__ not in non_follow_nodes:
-            height += getNodeHeight(n, params)
+    for child in node.children[:]:
+        if child.__class__ not in non_follow_nodes:
+            height += get_node_height(child, params)
     return height
 
 
-def splitRow(row, params):
+def split_row(row, params):
     max_cell_height = params["maxCellHeight"]
     newrows = []
-    cols = [[] for i in range(len(row.children))]
+    cols = [[] for _ in range(len(row.children))]
     for colindex, cell in enumerate(row.children):
         cell_height = 0
         items = []
         for item in cell.children:
-            cell_height += getNodeHeight(item, params)
+            cell_height += get_node_height(item, params)
             if not items or cell_height < max_cell_height:
                 items.append(item)
             else:

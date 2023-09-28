@@ -10,7 +10,7 @@ del si["magicwords"]
 
 
 def test_aliasmap_no_magicwords():
-    parser.aliasmap(si)
+    parser.AliasMap(si)
 
 
 def test_parser_no_magicwords():

@@ -137,19 +137,19 @@ imagemap = ZeroOrMore(line) + StringEnd()
 imagemap.setParseAction(_make_imagemap)
 
 
-def image_map_from_string(s):
+def image_map_from_string(input_string):
     # uhh. damn. can't get pyparsing to parse
     # commands, other lines (i.e. syntax errors strictly speaking)
     # and lines containing only whitespace...
     lines = []
-    for x in s.split("\n"):
-        x = x.strip()
-        if x:
-            lines.append(x)
-    s = "\n".join(lines)
+    for segment in input_string.split("\n"):
+        segment = segment.strip()
+        if segment:
+            lines.append(segment)
+    input_string = "\n".join(lines)
 
     try:
-        return imagemap.parseString(s)[0]
+        return imagemap.parseString(input_string)[0]
     except ParseException:
         return ImageMap(entries=[], image=None)
 
@@ -170,8 +170,8 @@ default [[Mainz]]
 blubb
 """
     res = image_map_from_string(ex)
-    for x in res.entries:
-        print(x)
+    for entry in res.entries:
+        print(entry)
 
 
 if __name__ == "__main__":

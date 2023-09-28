@@ -123,7 +123,7 @@ TABLE_ALIGN = TA_CENTER
 
 # TREECLEANER CONFIGURATION
 
-TREE_CLEANER_SKIP_METHODS = ["fixPreFormatted", "remove_empty_ref_lists"]
+TREE_CLEANER_SKIP_METHODS = ["fix_preformatted", "remove_empty_ref_lists"]
 
 # IMAGE CONFIGURATION
 

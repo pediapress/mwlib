@@ -3,8 +3,8 @@
 import re
 
 
-def rxc(s):
-    return re.compile(s, re.DOTALL | re.IGNORECASE)
+def rxc(pattern_string):
+    return re.compile(pattern_string, re.DOTALL | re.IGNORECASE)
 
 
 onlyincluderx = rxc(r"<onlyinclude>(.*?)</onlyinclude>")
@@ -13,8 +13,8 @@ includeonlyrx = rxc(r"<includeonly(?:\s[^<>]*)?>.*?(?:</includeonly>|$)")
 
 
 def get_remove_tags(tags):
-    r = rxc(r"</?(%s)(?:\s[^<>]*)?>" % ("|".join(tags)))
-    return lambda s: r.sub("", s)
+    compiled_regex = rxc(r"</?(%s)(?:\s[^<>]*)?>" % ("|".join(tags)))
+    return lambda input_string: compiled_regex.sub("", input_string)
 
 
 remove_not_included = get_remove_tags(["onlyinclude", "noinclude"])
