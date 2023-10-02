@@ -11,11 +11,11 @@ class Scripts:
         self.code_block2scripts = []
         self.read_script_file(scripts_filename)
 
-    def read_script_file(self, fn):
-        if not fn.exists():
-            raise OSError(f"scripts.txt file not found at: {fn!r}")
-        with fn.open() as f:
-            for line in f.readlines():
+    def read_script_file(self, file_name):
+        if not file_name.exists():
+            raise OSError(f"scripts.txt file not found at: {file_name!r}")
+        with file_name.open() as script_file:
+            for line in script_file.readlines():
                 res = re.search("([A-Z0-9]+)\\.\\.([A-Z0-9]+); (.*)",
                                 line.strip())
                 if res:
@@ -88,8 +88,8 @@ class FontSwitcher:
         if not char_blacklist_file:
             return {}
         char_blacklist = {}
-        with open(char_blacklist_file) as f:
-            for char in f.readlines():
+        with open(char_blacklist_file) as blacklist_file:
+            for char in blacklist_file.readlines():
                 if char:
                     char = int(char.strip())
                     char_blacklist[char] = True
@@ -98,7 +98,7 @@ class FontSwitcher:
     def unregister_font(self, font_name_to_unregister):
         registered_entries = []
         i = 0
-        for block_start, block_end, font_name in self.code_points2font:
+        for _, _, font_name in self.code_points2font:
             if font_name_to_unregister == font_name:
                 registered_entries.append(i)
             i += 1

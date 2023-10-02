@@ -48,8 +48,8 @@ def show():
 
             print(raw.encode("utf-8"))
     if options.f:
-        with open(options.f) as f:
-            six.text_type(f.read(), "utf-8")
+        with open(options.f) as opt_file:
+            six.text_type(opt_file.read(), "utf-8")
         template_expander = expander.Expander(raw, pagename="test", wikidb=wiki_db)
         raw = template_expander.expandTemplates()
         print(raw.encode("utf-8"))

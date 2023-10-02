@@ -72,7 +72,7 @@ def parse_string(
         nshandler = nshandling.get_nshandler_for_lang(lang)
     else:
         nshandler = nshandling.NsHandler(siteinfo)
-    a = compat.parse_txt(
+    article = compat.parse_txt(
         _input,
         title=title,
         wikidb=wikidb,
@@ -83,17 +83,17 @@ def parse_string(
         expander=template_expander,
     )
 
-    a.caption = title
+    article.caption = title
     if template_expander and template_expander.magic_displaytitle:
-        a.caption = template_expander.magic_displaytitle
+        article.caption = template_expander.magic_displaytitle
 
-    for x in postprocessors:
-        x(a, title=title, revision=revision, wikidb=wikidb, lang=lang)
+    for post_processor in postprocessors:
+        post_processor(article, title=title, revision=revision, wikidb=wikidb, lang=lang)
 
-    return a
+    return article
 
 
 def simpleparse(raw, lang=None):  # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
-    a = compat.parse_txt(raw, lang=lang)
-    show(a)
-    return a
+    article = compat.parse_txt(raw, lang=lang)
+    show(article)
+    return article

@@ -32,8 +32,8 @@ def main():
         data[key] = value
 
     if "metabook" in data:
-        with open(data["metabook"], "rb") as f:
-            data["metabook"] = f.read()
+        with open(data["metabook"], "rb") as metabook_file:
+            data["metabook"] = metabook_file.read()
 
     client = Client(options.url)
     if not client.request(command, data, is_json=(command != "download")):

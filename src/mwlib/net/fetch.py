@@ -132,8 +132,8 @@ class FsOutput:
     def write_licenses(self, licenses):
         self.dump_json(licenses=licenses)
 
-    def write_expanded_page(self, title, ns, txt, revid=None):
-        rev = {"title": title, "ns": ns, "expanded": 1}
+    def write_expanded_page(self, title, name_space, txt, revid=None):
+        rev = {"title": title, "ns": name_space, "expanded": 1}
         if revid is not None:
             rev["revid"] = revid
 
@@ -196,9 +196,9 @@ def split_blocks(lst, limit):
 def get_block(lst, limit):
     """Return first limit entries from list lst and remove them from the list"""
 
-    r = lst[-limit:]
+    last_n_elements = lst[-limit:]
     del lst[-limit:]
-    return r
+    return last_n_elements
 
 
 def call_when(event, fun):
@@ -313,11 +313,11 @@ class Fetcher:
         self._refcall(self.fetch_used, "titles", titles, True)
         self._refcall(self.fetch_used, "revids", revids, True)
 
-        for t in titles:
-            self._refcall(self.expand_templates_from_title, t)
+        for title in titles:
+            self._refcall(self.expand_templates_from_title, title)
 
-        for r in revids:
-            self._refcall(self.expand_templates_from_revid, int(r))
+        for rev_id in revids:
+            self._refcall(self.expand_templates_from_revid, int(rev_id))
 
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
@@ -385,17 +385,17 @@ class Fetcher:
         return img_urls
 
     def fetch_html(self, name, lst):
-        def fetch(c):
+        def fetch(content):
             with self.api_semaphore:
-                kw = {name: c}
-                res = self.api.do_request(action="parse", redirects="1", **kw)
-                res[name] = c
+                kwargs = {name: content}
+                res = self.api.do_request(action="parse", redirects="1", **kwargs)
+                res[name] = content
 
-            self.fsout.set_db_key("html", c, res)
+            self.fsout.set_db_key("html", content, res)
             img_urls = self.extension_img_urls(res)
             for url in img_urls:
-                fn = url.rsplit("/", 1)[1]
-                title = self.nshandler.splitname(fn, defaultns=6)[2]
+                filename = url.rsplit("/", 1)[1]
+                title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.schedule_download_image(str(url), title)
 
         self.count_total += len(lst)
@@ -422,20 +422,20 @@ class Fetcher:
             self._refcall_noinc(self.get_edits, title, rev)
 
     def fetch_used_block(self, name, lst, expanded):
-        kw = {name: lst, "fetch_images": self.fetch_images,
+        kwargs = {name: lst, "fetch_images": self.fetch_images,
               "expanded": expanded}
-        used = self.api.fetch_used(**kw)
+        used = self.api.fetch_used(**kwargs)
 
         self._update_redirects(used.get("redirects", []))
 
         pages = list(used.get("pages", {}).values())
 
         revids = set()
-        for p in pages:
-            tmp = self._extract_attribute(p.get("revisions", []), "revid")
+        for page in pages:
+            tmp = self._extract_attribute(page.get("revisions", []), "revid")
             if tmp:
                 latest = max(tmp)
-                title = p.get("title", None)
+                title = page.get("title", None)
                 old = self.title2latest.get(title, 0)
                 self.title2latest[title] = max(old, latest)
 
@@ -443,41 +443,41 @@ class Fetcher:
 
         templates = set()
         images = set()
-        for p in pages:
-            images.update(self._extract_title(p.get("images", [])))
-            templates.update(self._extract_title(p.get("templates", [])))
+        for page in pages:
+            images.update(self._extract_title(page.get("images", [])))
+            templates.update(self._extract_title(page.get("templates", [])))
 
         if self.cover_image:
             images.add(self.nshandler.get_fqname(self.cover_image, 6))
             self.cover_image = None
 
-        for i in images:
-            if i not in self.scheduled:
-                self.imageinfo_todo.append(i)
-                self.scheduled.add(i)
+        for image in images:
+            if image not in self.scheduled:
+                self.imageinfo_todo.append(image)
+                self.scheduled.add(image)
 
-        for r in revids:
-            if r not in self.scheduled:
-                self.revids_todo.append(r)
-                self.scheduled.add(r)
+        for rev in revids:
+            if rev not in self.scheduled:
+                self.revids_todo.append(rev)
+                self.scheduled.add(rev)
 
-        for t in templates:
-            if t not in self.scheduled:
-                self.pages_todo.append(t)
-                self.scheduled.add(t)
+        for template in templates:
+            if template not in self.scheduled:
+                self.pages_todo.append(template)
+                self.scheduled.add(template)
 
-    def get_siteinfo_for(self, m):
-        return m.get_siteinfo()
+    def get_siteinfo_for(self, api):
+        return api.get_siteinfo()
 
     def _split_titles_revids(self, pages):
         titles = set()
         revids = set()
 
-        for p in pages:
-            if p[1] is not None:
-                revids.add(p[1])
+        for page in pages:
+            if page[1] is not None:
+                revids.add(page[1])
             else:
-                titles.add(p[0])
+                titles.add(page[0])
 
         titles = sorted(titles)
 
@@ -511,7 +511,7 @@ class Fetcher:
             categories = page.get("categories")
             if not categories:
                 continue
-            e = {
+            page_details = {
                 "title": page.get("title"),
                 "ns": page.get("ns"),
                 "pageid": page.get("pageid"),
@@ -520,7 +520,7 @@ class Fetcher:
             for category in categories:
                 cattitle = category.get("title")
                 if cattitle:
-                    self._add_catmember(cattitle, e)
+                    self._add_catmember(cattitle, page_details)
 
     def _find_redirect(self, data):
         pages = list(data.get("pages", {}).values())
@@ -574,9 +574,9 @@ class Fetcher:
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
         temp_path = (path + "\xb7").encode("utf-8")
-        gr = self.image_download_pool.spawn(download_to_file, url, path,
+        greenlet_task = self.image_download_pool.spawn(download_to_file, url, path,
                                             temp_path)
-        self.pool.add(gr)
+        self.pool.add(greenlet_task)
 
     def fetch_imageinfo(self, titles):
         data = self.api.fetch_imageinfo(titles=titles,
@@ -587,11 +587,11 @@ class Fetcher:
         for info in infos:
             title = info.get("title")
 
-            ii = info.get("imageinfo", [])
-            if not ii:
+            image_info = info.get("imageinfo", [])
+            if not image_info:
                 continue
-            ii = ii[0]
-            self._extract_info_from_image(info, ii, new_base_paths, title)
+            image_info = image_info[0]
+            self._extract_info_from_image(info, image_info, new_base_paths, title)
 
         for path in new_base_paths:
             self._refcall(self.handle_new_basepath, path)
@@ -614,13 +614,13 @@ class Fetcher:
                 description_url = image.get("fullurl", "")
 
             if description_url and "/" in description_url:
-                path, local_name = description_url.rsplit("/", 1)
-                t = (title, description_url)
+                path, _ = description_url.rsplit("/", 1)
+                title_url_tuple = (title, description_url)
                 if path in self.imagedescription_todo:
-                    self.imagedescription_todo[path].append(t)
+                    self.imagedescription_todo[path].append(title_url_tuple)
                 else:
                     new_base_paths.add(path)
-                    self.imagedescription_todo[path] = [t]
+                    self.imagedescription_todo[path] = [title_url_tuple]
 
     def _get_nshandler(self):
         if self._nshandler is not None:
@@ -646,9 +646,9 @@ class Fetcher:
 
             revisions = page.get("revisions", [])
             # the revision id's could clash with some local ids. remove them.
-            for r in revisions:
+            for rev in revisions:
                 with contextlib.suppress(KeyError):
-                    del r["revid"]
+                    del rev["revid"]
         # XXX do we also need to handle redirects here?
         self.fsout.write_pages(data)
 
@@ -714,22 +714,22 @@ class Fetcher:
         def fetch_pages(**kw):
             data = self.api.fetch_pages(**kw)
             self._find_redirect(data)
-            r = data.get("redirects", [])
-            self._update_redirects(r)
+            redirects = data.get("redirects", [])
+            self._update_redirects(redirects)
             self._handle_categories(data)
             self.fsout.write_pages(data)
 
         def doit(name, lst):
             while lst and self.api.idle():
-                bl = get_block(lst, limit)
-                self.scheduled.update(bl)
-                kw = {name: bl}
-                self._refcall(fetch_pages, **kw)
+                block = get_block(lst, limit)
+                self.scheduled.update(block)
+                kwargs= {name: block}
+                self._refcall(fetch_pages, **kwargs)
 
         while self.imageinfo_todo and self.api.idle():
-            bl = get_block(self.imageinfo_todo, limit)
-            self.scheduled.update(bl)
-            self._refcall(self.fetch_imageinfo, bl)
+            block = get_block(self.imageinfo_todo, limit)
+            self.scheduled.update(block)
+            self._refcall(self.fetch_imageinfo, block)
 
         doit("revids", self.revids_todo)
         doit("titles", self.pages_todo)

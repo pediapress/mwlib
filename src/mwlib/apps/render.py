@@ -49,31 +49,31 @@ class Main:
 
     def parse_options(self):
         parser = OptionParser()
-        a = parser.add_option
+        arg = parser.add_option
 
-        a("-o", "--output", help="write output to OUTPUT")
-        a("-w", "--writer", help="use writer backend WRITER")
-        a(
+        arg("-o", "--output", help="write output to OUTPUT")
+        arg("-w", "--writer", help="use writer backend WRITER")
+        arg(
             "-W",
             "--writer-options",
             help='";"-separated list of additional writer-specific options',
         )
-        a("-e", "--error-file", help="write errors to this file")
-        a("-s", "--status-file", help="write status/progress info to this file")
-        a("--list-writers", action="store_true", help="list available writers and exit")
-        a(
+        arg("-e", "--error-file", help="write errors to this file")
+        arg("-s", "--status-file", help="write status/progress info to this file")
+        arg("--list-writers", action="store_true", help="list available writers and exit")
+        arg(
             "--writer-info",
             metavar="WRITER",
             help="list information about given WRITER and exit",
         )
-        a("--keep-zip", metavar="FILENAME", help="write ZIP file to FILENAME")
-        a(
+        arg("--keep-zip", metavar="FILENAME", help="write ZIP file to FILENAME")
+        arg(
             "--keep-tmpfiles",
             action="store_true",
             default=False,
             help="don't remove  temporary files like images",
         )
-        a("-L", "--language", help="use translated strings in LANGUAGE")
+        arg("-L", "--language", help="use translated strings in LANGUAGE")
 
         options, args = parser.parse_args()
         return options, args, parser
@@ -88,8 +88,8 @@ class Main:
             )
         try:
             return entry_point.load()
-        except Exception as e:
-            sys.exit(f"Could not load writer {name!r}: {e}")
+        except Exception as exc:
+            sys.exit(f"Could not load writer {name!r}: {exc}")
 
     def list_writers(self):
         for entry_point in pkg_resources.iter_entry_points("mwlib.writers"):
@@ -198,15 +198,15 @@ class Main:
     def _write_traceback(self, options, exc):
         self.status(status="error")
         if options.error_file:
-            fd, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
-            f = os.fdopen(fd, "wb")
+            file_descriptor, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
+            error_file = os.fdopen(file_descriptor, "wb")
             if isinstance(exc, WriterError):
-                f.write(str(exc))
+                error_file.write(str(exc))
             else:
-                f.write("traceback\n")
-                traceback.print_exc(file=f)
-            f.write(f"sys.argv={utils.garble_password(sys.argv)!r}\n")
-            f.close()
+                error_file.write("traceback\n")
+                traceback.print_exc(file=error_file)
+            error_file.write(f"sys.argv={utils.garble_password(sys.argv)!r}\n")
+            error_file.close()
             os.rename(tmpfile, options.error_file)
 
     def __call__(self):
@@ -236,10 +236,10 @@ class Main:
 
             basename = os.path.basename(options.output)
             ext = "." + basename.rsplit(".", 1)[-1] if "." in basename else ""
-            fd, tmpout = tempfile.mkstemp(
+            file_descriptor, tmpout = tempfile.mkstemp(
                 dir=os.path.dirname(options.output), suffix=ext
             )
-            os.close(fd)
+            os.close(file_descriptor)
             writer(env, output=tmpout, status_callback=self.status,
                    **writer_options)
             os.rename(tmpout, options.output)

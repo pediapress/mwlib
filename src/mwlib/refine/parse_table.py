@@ -119,8 +119,8 @@ class TableRowParser:
 
     def find_modifier(self, row):
         children = row.children
-        for i, x in enumerate(children):
-            if x.type in (T.t_newline, T.t_break):
+        for i, child in enumerate(children):
+            if child.type in (T.t_newline, T.t_break):
                 mod = T.join_as_text(children[:i])
                 row.vlist = util.parse_params(mod)
                 del children[:i]
@@ -249,8 +249,8 @@ class TableParser:
             del children[:i]
 
         i = 0
-        for i, x in enumerate(children):
-            if x.type in (T.t_newline, T.t_break):
+        for i, child in enumerate(children):
+            if child.type in (T.t_newline, T.t_break):
                 break
 
         compute_mod()
@@ -260,22 +260,22 @@ class TableParser:
         start = None
         i = 0
         while i < len(children):
-            t = children[i]
-            if t.type == T.t_tablecaption:
+            token = children[i]
+            if token.type == T.t_tablecaption:
                 start = i
                 i += 1
                 break
 
-            if t.text is None or t.text.strip():
+            if token.text is None or token.text.strip():
                 return
             i += 1
 
         modifier = None
 
         while i < len(children):
-            t = children[i]
-            if t.tagname not in ("ref",) and (
-                t.text is None or t.text.startswith("\n")
+            token = children[i]
+            if token.tagname not in ("ref",) and (
+                token.text is None or token.text.startswith("\n")
             ):
                 if modifier:
                     mod = T.join_as_text(children[start:modifier])
@@ -288,9 +288,9 @@ class TableParser:
                 caption = T(type=T.t_complex_caption, children=sub, vlist=vlist)
                 children[start:i] = [caption]
                 return
-            elif t.text == "|" and modifier is None:
+            elif token.text == "|" and modifier is None:
                 modifier = i
-            elif t.type == T.t_2box_open and modifier is None:
+            elif token.type == T.t_2box_open and modifier is None:
                 modifier = 0
 
             i += 1

@@ -15,8 +15,8 @@ def fetch(lang):
     print(f"fetching {url}")
     try:
         data = urlopen(url).read()
-    except URLError as e:
-        print(f"error fetching {url}: {e}")
+    except URLError as exc:
+        print(f"error fetching {url}: {exc}")
         return
     site_info_path = f"siteinfo-{lang}.json"
     print(f"writing {site_info_path}")

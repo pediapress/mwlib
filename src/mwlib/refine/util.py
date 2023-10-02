@@ -12,35 +12,35 @@ param_rx = re.compile(
 )
 
 
-def parse_params(s):
+def parse_params(input_string):
     def style2dict(s_val):
         res = {}
-        for x in s_val.split(";"):
-            if ":" in x:
-                var, val = x.split(":", 1)
+        for style_item in s_val.split(";"):
+            if ":" in style_item:
+                var, val = style_item.split(":", 1)
                 var = var.strip().lower()
                 val = val.strip()
                 res[var] = val
 
         return res
 
-    def maybe_int(v):
+    def maybe_int(value):
         try:
-            return int(v)
+            return int(value)
         except ValueError:
-            return v
+            return value
 
-    r = {}
-    for name, value in param_rx.findall(s):
+    parsed_parameters = {}
+    for name, value in param_rx.findall(input_string):
         if value.startswith('"') or value.startswith("'"):
             value = value[1:-1]
 
         if name.lower() == "style":
             value = style2dict(value)
-            r["style"] = value
+            parsed_parameters["style"] = value
         else:
-            r[name] = maybe_int(value)
-    return r
+            parsed_parameters[name] = maybe_int(value)
+    return parsed_parameters
 
 
 class ImageMod:

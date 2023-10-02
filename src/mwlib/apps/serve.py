@@ -57,8 +57,8 @@ def check_service(args):
     log = Log("mw-check-service")
 
     base_url = args.base_url
-    with open(args.metabook, "rb") as f:
-        metabook = f.read()
+    with open(args.metabook, "rb") as metabook_file:
+        metabook = metabook_file.read()
 
     max_render_time = int(args.max_render_time)
     writer = args.writer

@@ -17,12 +17,12 @@ from gevent.lock import Semaphore
 from mwlib import authors, conf
 
 
-def loads(s):
+def loads(input_string):
     """Potentially remove UTF-8 BOM and call json.loads()"""
 
-    if s and isinstance(s, str) and s[:3] == "\xef\xbb\xbf":
-        s = s[3:]
-    return json.loads(s)
+    if input_string and isinstance(input_string, str) and input_string[:3] == "\xef\xbb\xbf":
+        input_string = input_string[3:]
+    return json.loads(input_string)
 
 
 def merge_data(dst, src):
@@ -35,11 +35,11 @@ def merge_data(dst, src):
         if isinstance(dst, list):
             dst.extend(src)
         elif isinstance(dst, dict):
-            for k, v in src.items():
+            for k, val in src.items():
                 if k in dst:
-                    todo.append((dst[k], v))
+                    todo.append((dst[k], val))
                 else:
-                    dst[k] = v
+                    dst[k] = val
 
 
 class MwApi:
@@ -86,17 +86,17 @@ class MwApi:
         return f"<mwapi {self.apiurl} at {hex(id(self))}>"
 
     def _fetch(self, url):
-        f = self.opener.open(url)
-        data = f.read()
-        f.close()
+        url_opener = self.opener.open(url)
+        data = url_opener.read()
+        url_opener.close()
         return data
 
     def _build_url(self, **kwargs):
         args = {"format": "json"}
         args.update(**kwargs)
-        for k, v in args.items():
-            if isinstance(v, str):
-                args[k] = v.encode("utf-8")
+        for k, val in args.items():
+            if isinstance(val, str):
+                args[k] = val.encode("utf-8")
         query = parse.urlencode(args)
         query = query.replace("%3A", ":")  # fix for wrong quoting of url for images
         query = query.replace(
@@ -113,9 +113,9 @@ class MwApi:
     def _post(self, **kwargs):
         args = {"format": "json"}
         args.update(**kwargs)
-        for k, v in args.items():
-            if isinstance(v, str):
-                args[k] = v.encode("utf-8")
+        for k, val in args.items():
+            if isinstance(val, str):
+                args[k] = val.encode("utf-8")
 
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         postdata = parse.urlencode(args).encode()
@@ -155,15 +155,15 @@ class MwApi:
     def _merge_data(self, retval, action, data):
         merge_data(retval, data[action])
 
-    def _handle_query_continue(self, qc, last_qc, kwargs):
+    def _handle_query_continue(self, query_continue_data, last_qc, kwargs):
         self.qccount += 1
         self.report()
         new_kw = kwargs.copy()
-        for d in qc:
-            for k, v in d.items():
-                new_kw[str(k)] = v
+        for query_dict in query_continue_data:
+            for k, value in query_dict.items():
+                new_kw[str(k)] = value
 
-        if qc == last_qc:
+        if query_continue_data == last_qc:
             print("warning: cannot continue this query:", self._build_url(**new_kw))
             return None, True
 
@@ -207,10 +207,10 @@ class MwApi:
         siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
         while len(siprop) >= 3:
             try:
-                r = self.do_request(
+                req = self.do_request(
                     action="query", meta="siteinfo", siprop="|".join(siprop)
                 )
-                return r
+                return req
             except Exception as err:
                 print("ERR:", err)
                 siprop.pop()
@@ -343,8 +343,8 @@ class MwApi:
 
         def merge_data(retval, newdata):
             edits = list(newdata["pages"].values())
-            for e in edits:
-                revs = e["revisions"]
+            for edit in edits:
+                revs = edit["revisions"]
                 get_authors.scan_edits(revs)
 
         self.do_request(action="query", merge_data=merge_data, **kwargs)

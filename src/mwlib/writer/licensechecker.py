@@ -52,14 +52,14 @@ class LicenseChecker:
         self.accepted_images = set()
         self.license_display_name = {}
 
-    def read_licenses_csv(self, fn=None):
-        if not fn:
-            fn = os.path.join(os.path.dirname(__file__), "wplicenses.csv")
-        with open(fn) as csv_file:
+    def read_licenses_csv(self, file_name=None):
+        if not file_name:
+            file_name = os.path.join(os.path.dirname(__file__), "wplicenses.csv")
+        with open(file_name) as csv_file:
             for data in csv.reader(csv_file):
                 try:
                     (name, display_name, license_type,
-                     dummy, license_description) = data
+                     _, license_description) = data
                 except ValueError:
                     continue
                 if not name:
@@ -151,9 +151,9 @@ class LicenseChecker:
 
     @property
     def free_img_ratio(self):
-        r = len(self.rejected_images)
-        a = len(self.accepted_images)
-        ratio = a / (a + r) if a + r > 0 else 1
+        num_rejected_images = len(self.rejected_images)
+        num_accepted_images = len(self.accepted_images)
+        ratio = num_accepted_images / (num_accepted_images + num_rejected_images) if num_accepted_images + num_rejected_images > 0 else 1
         return ratio
 
     def dump_stats(self):
@@ -177,27 +177,27 @@ class LicenseChecker:
     def dump_unknown_licenses(self, _dir):
         if not self.unknown_licenses:
             return
-        f = tempfile.NamedTemporaryFile(dir=_dir, prefix="licensestats_",
+        temp_file = tempfile.NamedTemporaryFile(dir=_dir, prefix="licensestats_",
                                         suffix=".json")
         unknown_licenses = {}
         for lic, urls in self.unknown_licenses.items():
             unknown_licenses[lic] = list(urls)
-        f.write(json.dumps(unknown_licenses).encode("utf-8"))
-        f.close()
+        temp_file.write(json.dumps(unknown_licenses).encode("utf-8"))
+        temp_file.close()
 
     def analyse_unknown_licenses(self, _dir):
         files = os.listdir(_dir)
         unknown_licenses = {}
-        for fn in files:
-            fn = os.path.join(_dir, fn)
-            if not fn.endswith("json"):
+        for file_name in files:
+            file_name = os.path.join(_dir, file_name)
+            if not file_name.endswith("json"):
                 continue
-            with open(fn, encoding="utf-8") as f:
-                content = str(f.read())
+            with open(file_name, encoding="utf-8") as file:
+                content = str(file.read())
             try:
                 licenses = json.loads(content)
             except ValueError:
-                print("no json object found in file", fn)
+                print("no json object found in file", file_name)
                 continue
             for lic, urls in licenses.items():
                 if not self.licenses.get(lic, False):

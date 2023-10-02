@@ -83,17 +83,17 @@ class StartFetcher:
         self.fsout = fetch.FsOutput(self.fsdir)
 
     def fetch_collectionpage(self, api):
-        cp = self.options.collectionpage
-        if cp is None:
+        collection_page = self.options.collectionpage
+        if collection_page is None:
             return api
 
         with contextlib.suppress(Exception):
-            cp = six.text_type(six.moves.urllib.parse.unquote(str(cp)),
-                               "utf-8")
+            collection_page = six.text_type(six.moves.urllib.parse.unquote(str(collection_page)),
+                                            "utf-8")
 
-        self.nfo["collectionpage"] = cp
+        self.nfo["collectionpage"] = collection_page
 
-        val = api.fetch_pages([cp])
+        val = api.fetch_pages([collection_page])
         rawtext = list(val["pages"].values())[0]["revisions"][0]["*"]
         meta_book = self.metabook = parse_collection_page(rawtext)
         wikitrust(api.baseurl, meta_book)
@@ -117,11 +117,11 @@ class StartFetcher:
         meta_book.description = meta["description"]
         meta_book.sort_as = meta["sort_as"]
 
-        p = os.path.join(self.fsout.path, "collectionpage.txt")
+        path = os.path.join(self.fsout.path, "collectionpage.txt")
         if isinstance(rawtext, six.text_type):
             rawtext = rawtext.encode("utf-8")
-        with open(p, "wb") as f:
-            f.write(rawtext)
+        with open(path, "wb") as file:
+            file.write(rawtext)
         return api
 
     def run(self):
@@ -143,38 +143,38 @@ def wikitrust(baseurl, metabook):
 
     from mwlib import trustedrevs
 
-    tr = trustedrevs.TrustedRevisions()
+    trust_revisions = trustedrevs.TrustedRevisions()
 
-    for x in metabook.articles():
-        if x.revision:
+    for article in metabook.articles():
+        if article.revision:
             continue
 
         try:
-            r = tr.get_trusted_revision(x.title)
-            x.revision = r["revid"]
+            rev = trust_revisions.get_trusted_revision(x.title)
+            article.revision = rev["revid"]
 
             print(
                 "chosen trusted revision: title=%-20r age=%6.1fd revid=%10d user=%-20r"
-                % (r["title"], r["age"], r["revid"], r["user"])
+                % (rev["title"], rev["age"], rev["revid"], rev["user"])
             )
         except Exception as err:
             print("error choosing trusted revision for",
-                  repr(x.title), repr(err))
+                  repr(article.title), repr(err))
 
 
 def write_multi_wiki_metabook(fsdir, metabook):
     if not os.path.exists(fsdir):
         os.makedirs(fsdir)
-    with open(os.path.join(fsdir, "metabook.json"), "wb") as f:
-        f.write(metabook.dumps())
-    with open(os.path.join(fsdir, "nfo.json"), "wb") as f:
-        myjson.dump({"format": "multi-nuwiki"}, f)
+    with open(os.path.join(fsdir, "metabook.json"), "wb") as metabook_file:
+        metabook_file.write(metabook.dumps())
+    with open(os.path.join(fsdir, "nfo.json"), "wb") as nfo_file:
+        myjson.dump({"format": "multi-nuwiki"}, nfo_file)
 
 
 def start_fetchers(fetchers):
     pool = gevent.pool.Pool()
-    for x in fetchers:
-        pool.spawn(x.run)
+    for fetcher in fetchers:
+        pool.spawn(fetcher.run)
     pool.join(raise_error=True)
 
     import signal

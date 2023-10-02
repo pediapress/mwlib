@@ -20,28 +20,28 @@ log = log.Log("rlwriter")
 def scale_images(data):
     for row in data:
         for cell in row:
-            for i, e in enumerate(cell):
-                if isinstance(e, Figure):  # scale image to half size
+            for i, element in enumerate(cell):
+                if isinstance(element, Figure):  # scale image to half size
                     cell[i] = Figure(
-                        imgFile=e.img_path,
-                        captionTxt=e.captionTxt,
-                        captionStyle=e.cs,
-                        imgWidth=e.imgWidth / 2.0,
-                        imgHeight=e.imgHeight / 2.0,
-                        margin=e.margin,
-                        padding=e.padding,
-                        align=e.align,
+                        imgFile=element.img_path,
+                        captionTxt=element.captionTxt,
+                        captionStyle=element.cs,
+                        imgWidth=element.imgWidth / 2.0,
+                        imgHeight=element.imgHeight / 2.0,
+                        margin=element.margin,
+                        padding=element.padding,
+                        align=element.align,
                     )
 
 
-def get_col_widths(data, table=None, recursion_depth=0, nestingLevel=1):
+def get_col_widths(data, table=None, recursion_depth=0, nesting_level=1):
     """
     the widths for the individual columns are calculated.
     if the horizontal size exceeds the pagewidth
     the fontsize is reduced
     """
 
-    if nestingLevel > 1:
+    if nesting_level > 1:
         scale_images(data)
 
     if not data:
@@ -58,9 +58,9 @@ def get_col_widths(data, table=None, recursion_depth=0, nestingLevel=1):
                 colspan = getattr(table.children[i].children[j], "colspan", 1)
             except IndexError:  # caused by empty row b/c of rowspanning
                 colspan = 1
-            for e in cell:
-                minw, minh = e.wrap(0, pdfstyles.PRINT_HEIGHT)
-                _, maxh = e.wrap(avail_width, pdfstyles.PRINT_HEIGHT)
+            for element in cell:
+                minw, minh = element.wrap(0, pdfstyles.PRINT_HEIGHT)
+                _, maxh = element.wrap(avail_width, pdfstyles.PRINT_HEIGHT)
                 minw += 6  # FIXME +6 is the cell padding we are using
                 cellwidth += minw
                 rows = (
@@ -83,13 +83,13 @@ def get_col_widths(data, table=None, recursion_depth=0, nestingLevel=1):
     parent_tables = table.get_parent_nodes_by_class(Table)
     # nested tables in colspanned cell are expanded to full page width
     if (
-        nestingLevel == 2
+        nesting_level == 2
         and parent_cells
         and parent_tables
         and parent_cells[0].colspan == parent_tables[0].num_cols
     ):
         avail_width -= 8
-    elif nestingLevel > 1:
+    elif nesting_level > 1:
         return minwidths
 
     remaining_space = avail_width - sum(summedwidths)
@@ -100,7 +100,7 @@ def get_col_widths(data, table=None, recursion_depth=0, nestingLevel=1):
                 scale_images(data)
                 return get_col_widths(
                     data, table=table,
-                    recursion_depth=1, nestingLevel=nestingLevel
+                    recursion_depth=1, nesting_level=nesting_level
                 )
             else:
                 return None
@@ -120,9 +120,9 @@ def get_col_widths(data, table=None, recursion_depth=0, nestingLevel=1):
         return widths
 
 
-def get_content_type(t):
+def get_content_type(table):
     node_info = []
-    for row in t.children:
+    for row in table.children:
         row_node_info = []
         for cell in row:
             cell_node_types = []
@@ -142,14 +142,14 @@ def get_content_type(t):
     return node_info
 
 
-def reformat_table(t, max_cols):
-    node_info = get_content_type(t)
+def reformat_table(table, max_cols):
+    node_info = get_content_type(table)
     num_cols = max_cols
 
     only_tables = (
-        len(t.children) > 0
+        len(table.children) > 0
     )  # if table is empty only_tables and only_lists are False
-    only_lists = len(t.children) > 0
+    only_lists = len(table.children) > 0
     if not node_info:
         only_tables = False
         only_lists = False
@@ -163,15 +163,15 @@ def reformat_table(t, max_cols):
 
     if only_tables and num_cols > 1:
         log.info("got table only table - removing container")
-        t = remove_container_table(t)
+        table = remove_container_table(table)
     if only_lists and num_cols > 2:
         log.info("got list only table - reducing columns to 2")
-        t = reduce_cols(t, colnum=2)
+        table = reduce_cols(table, colnum=2)
     if only_lists:
         log.info("got list only table - splitting list items")
-        t = split_list_items(t)
+        table = split_list_items(table)
         pass
-    return t
+    return table
 
 
 def split_list_items(table):
@@ -302,14 +302,14 @@ def get_empty_cell(color, colspan=1, rowspan=1):
     return empty_cell
 
 
-def _add_styles_to_cell(styles, col_idx, row_idx, span_range, n, cell):
+def _add_styles_to_cell(styles, col_idx, row_idx, span_range, iteration, cell):
     styles.append(
         (
             "SPAN",
-            (col_idx, row_idx + span_range * n),
+            (col_idx, row_idx + span_range * iteration),
             (
                 col_idx + cell.colspan - 1,
-                row_idx + (n + 1) * span_range - 1,
+                row_idx + (iteration + 1) * span_range - 1,
             ),
         )
     )
@@ -317,10 +317,10 @@ def _add_styles_to_cell(styles, col_idx, row_idx, span_range, n, cell):
         (
             "LINEBELOW",
             (col_idx,
-             row_idx + (n + 1) * span_range - 1),
+             row_idx + (iteration + 1) * span_range - 1),
             (
                 col_idx + cell.colspan - 1,
-                row_idx + (n + 1) * span_range - 1,
+                row_idx + (iteration + 1) * span_range - 1,
             ),
             0.25,
             colors.white,

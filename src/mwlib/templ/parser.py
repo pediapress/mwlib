@@ -247,11 +247,11 @@ class Parser:
         name = []
         append_arg = False
         idx = 0
-        for idx, c in enumerate(children):
-            if c == "|":
+        for idx, child in enumerate(children):
+            if child == "|":
                 append_arg = True
                 break
-            name.append(c)
+            name.append(child)
 
         name = optimize(name)
         if isinstance(name, six.text_type):
@@ -266,7 +266,7 @@ class Parser:
 
     def parse_open_brace(self):
         token_type, txt = self.get_token()
-        n = []
+        parsed_nodes = []
 
         numbraces = len(txt)
         self.pos += 1
@@ -277,21 +277,21 @@ class Parser:
             token_type, txt = self.get_token()
 
             if token_type == Symbols.bra_open:
-                n.append(self.parse_open_brace())
+                parsed_nodes.append(self.parse_open_brace())
             elif token_type is None:
                 break
             elif token_type == Symbols.bra_close and linkcount == 0:
                 closelen = len(txt)
                 if closelen == 2 or numbraces == 2:
-                    t = self.template_from_children(n)
-                    n = []
-                    n.append(t)
+                    template = self.template_from_children(parsed_nodes)
+                    parsed_nodes = []
+                    parsed_nodes.append(template)
                     self._consume_closing_braces(2)
                     numbraces -= 2
                 else:
-                    v = self.variable_from_children(n)
-                    n = []
-                    n.append(v)
+                    var = self.variable_from_children(parsed_nodes)
+                    parsed_nodes = []
+                    parsed_nodes.append(var)
                     self._consume_closing_braces(3)
                     numbraces -= 3
 
@@ -305,19 +305,19 @@ class Parser:
                 elif txt == "]]" and linkcount > 0:
                     linkcount -= 1
 
-                n.append(txt)
+                parsed_nodes.append(txt)
                 self.pos += 1
 
         if numbraces:
-            n.insert(0, "{" * numbraces)
+            parsed_nodes.insert(0, "{" * numbraces)
 
-        return n
+        return parsed_nodes
 
     def parse(self):
         if self.use_cache:
-            fp = digest(self.txt.encode("utf-8")).digest()
+            fingerprint = digest(self.txt.encode("utf-8")).digest()
             try:
-                return self._cache[fp]
+                return self._cache[fingerprint]
             except KeyError:
                 pass
 
@@ -325,26 +325,26 @@ class Parser:
             self.txt, included=self.included, replace_tags=self.replace_tags
         )
         self.pos = 0
-        n = []
+        parsed_nodes = []
 
         while 1:
-            ty, txt = self.get_token()
-            if ty == Symbols.bra_open:
-                n.append(self.parse_open_brace())
-            elif ty is None:
+            current_token_type, txt = self.get_token()
+            if current_token_type == Symbols.bra_open:
+                parsed_nodes.append(self.parse_open_brace())
+            elif current_token_type is None:
                 break
-            elif ty == Symbols.noi:
+            elif current_token_type == Symbols.noi:
                 self.pos += 1  # ignore <noinclude>
             else:  # bra_close, link, txt
-                n.append(txt)
+                parsed_nodes.append(txt)
                 self.pos += 1
 
-        n = optimize(n)
+        parsed_nodes = optimize(parsed_nodes)
 
         if self.use_cache:
-            self._cache[fp] = n
+            self._cache[fingerprint] = parsed_nodes
 
-        return n
+        return parsed_nodes
 
 
 def parse(txt, included=True, replace_tags=None, siteinfo=None):

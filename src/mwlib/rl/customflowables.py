@@ -28,36 +28,35 @@ from mwlib.rl import pdfstyles
 class Figure(Flowable):
     def __init__(
         self,
-        imgFile,
-        captionTxt,
-        captionStyle,
-        imgWidth=None,
-        imgHeight=None,
+        img_file,
+        caption_txt,
+        caption_style,
+        img_width=None,
+        img_height=None,
         margin=(0, 0, 0, 0),
         padding=(0, 0, 0, 0),
         align=None,
-        borderColor=(0.75, 0.75, 0.75),
+        border_color=(0.75, 0.75, 0.75),
         no_mask=False,
         url=None,
     ):
-        imgFile = imgFile
-        self.img_path = imgFile
+        img_file = img_file
+        self.img_path = img_file
         # workaround for http://code.pediapress.com/wiki/ticket/324
         # see http://two.pairlist.net/pipermail/reportlab-users/2008-October/007526.html
         if no_mask:
-            self.i = Image(imgFile, width=imgWidth,
-                           height=imgHeight, mask=None)
+            self.i = Image(img_file, width=img_width, height=img_height, mask=None)
         else:
-            self.i = Image(imgFile, width=imgWidth, height=imgHeight)
-        self.imgWidth = imgWidth
-        self.imgHeight = imgHeight
-        self.c = Paragraph(captionTxt, style=captionStyle)
+            self.i = Image(img_file, width=img_width, height=img_height)
+        self.img_width = img_width
+        self.img_height = img_height
+        self.paragraph = Paragraph(caption_txt, style=caption_style)
         self.margin = margin  # 4-tuple. margins in order: top, right, bottom, left
         self.padding = padding  # same as above
-        self.borderColor = borderColor
+        self.border_color = border_color
         self.align = align
-        self.cs = captionStyle
-        self.captionTxt = captionTxt
+        self.caption_style = caption_style
+        self.caption_txt = caption_txt
         self.avail_width = None
         self.avail_height = None
         self.url = url
@@ -67,18 +66,19 @@ class Figure(Flowable):
         if self.align == "center":
             canv.translate((self.avail_width - self.width / 2), 0)
         canv.saveState()
-        canv.setStrokeColor(Color(self.borderColor[0], self.borderColor[1],
-                                  self.borderColor[2]))
-        canv.rect(self.margin[3], self.margin[2], self.boxWidth,
-                  self.boxHeight)
+        canv.setStrokeColor(
+            Color(self.border_color[0], self.border_color[1], self.border_color[2])
+        )
+        canv.rect(self.margin[3], self.margin[2], self.box_width, self.box_height)
         canv.restoreState()
-        canv.translate(self.margin[3] + self.padding[3],
-                       self.margin[2] + self.padding[2] - 2)
-        self.c.canv = canv
-        self.c.draw()
         canv.translate(
-            (self.boxWidth - self.padding[1] - self.padding[3] - self.i.drawWidth) / 2,
-            self.captionHeight + 2,
+            self.margin[3] + self.padding[3], self.margin[2] + self.padding[2] - 2
+        )
+        self.paragraph.canv = canv
+        self.paragraph.draw()
+        canv.translate(
+            (self.box_width - self.padding[1] - self.padding[3] - self.i.drawWidth) / 2,
+            self.caption_height + 2,
         )
         self.i.canv = canv
         self.i.draw()
@@ -93,21 +93,31 @@ class Figure(Flowable):
                     frags.fragment,
                 )
             )
-            canv.linkURL(clean_url, (0, 0, self.imgWidth, self.imgHeight),
-                         relative=1, thickness=0)
+            canv.linkURL(
+                clean_url,
+                (0, 0, self.img_width, self.img_height),
+                relative=1,
+                thickness=0,
+            )
 
     def wrap(self, avail_width, avail_height):
         self.avail_width = avail_width
         self.avail_height = avail_height
-        content_width = max(self.i.drawWidth, self.c.wrap(self.i.drawWidth,
-                                                         avail_height)[0])
-        self.boxWidth = content_width + self.padding[1] + self.padding[3]
-        (self.captionWidth, self.captionHeight) = self.c.wrap(content_width,
-                                                              avail_height)
-        self.captionHeight += self.cs.spaceBefore + self.cs.spaceAfter
-        self.boxHeight = self.i.drawHeight + self.captionHeight + self.padding[0] + self.padding[2]
-        self.width = self.boxWidth + self.margin[1] + self.margin[3]
-        self.height = self.boxHeight + self.margin[0] + self.margin[2]
+        content_width = max(
+            self.i.drawWidth, self.paragraph.wrap(self.i.drawWidth, avail_height)[0]
+        )
+        self.box_width = content_width + self.padding[1] + self.padding[3]
+        (self.caption_width, self.caption_height) = self.paragraph.wrap(
+            content_width, avail_height
+        )
+        self.caption_height += (
+            self.caption_style.spaceBefore + self.caption_style.spaceAfter
+        )
+        self.box_height = (
+            self.i.drawHeight + self.caption_height + self.padding[0] + self.padding[2]
+        )
+        self.width = self.box_width + self.margin[1] + self.margin[3]
+        self.height = self.box_height + self.margin[0] + self.margin[2]
         return (self.width, self.height)
 
 
@@ -119,238 +129,269 @@ class FiguresAndParagraphs(Flowable):
      * the biggest figure-width is used as the text-margin
     """
 
-    def __init__(self, figures, paragraphs,
-                 figure_margin=(0, 0, 0, 0), rtl=False):
-        self.fs = figures
+    def __init__(self, figures, paragraphs, figure_margin=(0, 0, 0, 0), rtl=False):
+        self.figures = figures
         self.figure_margin = figure_margin
-        self.ps = paragraphs
-        self.figAlign = figures[
+        self.paragraphs = paragraphs
+        self.fig_align = figures[
             0
         ].align  # fixme: all figures will be aligned like the first figure
-        if not self.figAlign:
-            self.figAlign = "left" if rtl else "right"
-        for f in self.fs:
-            if self.figAlign == "left":
-                f.margin = pdfstyles.IMG_MARGINS_FLOAT_LEFT
+        if not self.fig_align:
+            self.fig_align = "left" if rtl else "right"
+        for figure in self.figures:
+            if self.fig_align == "left":
+                figure.margin = pdfstyles.IMG_MARGINS_FLOAT_LEFT
             else:  # default figure alignment is right
-                f.margin = pdfstyles.IMG_MARGINS_FLOAT_RIGHT
+                figure.margin = pdfstyles.IMG_MARGINS_FLOAT_RIGHT
         self.wfs = []  # width of figures
         self.hfs = []  # height of figures
         self.rtl = rtl  # Flag that indicates if document is set right-to-left
 
-    def _getVOffset(self):
-        for p in self.ps:
-            if hasattr(p, "style") and hasattr(p.style, "spaceBefore"):
-                return p.style.spaceBefore
+    def _get_v_offset(self):
+        for paragraph in self.paragraphs:
+            if hasattr(paragraph, "style") and hasattr(paragraph.style, "spaceBefore"):
+                return paragraph.style.spaceBefore
         return 0
 
-    def resizeInlineImage(self, p, float_width):
-        if p.text is None:
+    def resize_inline_image(self, paragraph, float_width):
+        if paragraph.text is None:
             return
-        img_dims = re.findall('<img.*?width="([0-9.]+)pt".*?height="([0-9.]+)pt".*?/>', p.text)
+        img_dims = re.findall(
+            '<img.*?width="([0-9.]+)pt".*?height="([0-9.]+)pt".*?/>', paragraph.text
+        )
         if img_dims:
-            txt = p.text
+            txt = paragraph.text
             changed = False
-            for w, h in img_dims:
-                if float(w) < float_width:
+            for width, height in img_dims:
+                if float(width) < float_width:
                     continue
                 changed = True
-                new_h = float(h) * float_width / float(w)
+                new_h = float(height) * float_width / float(width)
                 new_w = float_width
-                txt = txt.replace('width="%spt"' % w, 'width="%.2fpt"' % new_w)
-                txt = txt.replace('height="%spt"' % h,
-                                  'height="%.2fpt"' % new_h)
+                txt = txt.replace('width="%spt"' % width, 'width="%.2fpt"' % new_w)
+                txt = txt.replace('height="%spt"' % height, 'height="%.2fpt"' % new_h)
             if changed:
-                p._setup(txt, p.style,
-                         p.bulletText, None, cleanBlockQuotedText)
+                paragraph._setup(
+                    txt,
+                    paragraph.style,
+                    paragraph.bulletText,
+                    None,
+                    cleanBlockQuotedText,
+                )
 
     def wrap(self, avail_width, avail_height):
-        maxWf = 0
+        max_width = 0
         self.wfs = []
         self.hfs = []
-        self.horizontalRuleOffsets = []
-        total_hf = self._getVOffset()
-        for f in self.fs:
-            wf, hf = f.wrap(avail_width, avail_height)
-            total_hf += hf
-            maxWf = max(maxWf, wf)
-            self.wfs.append(wf)
-            self.hfs.append(hf)
-        self.paraHeights = []
+        self.horizontal_rule_offsets = []
+        total_hf = self._get_v_offset()
+        for figure in self.figures:
+            width, height = figure.wrap(avail_width, avail_height)
+            total_hf += height
+            max_width = max(max_width, width)
+            self.wfs.append(width)
+            self.hfs.append(height)
+        self.para_heights = []
         self._offsets = []
-        for p in self.ps:
-            if isinstance(p, HRFlowable):
-                self.paraHeights.append(1)  # fixme: whats the acutal height of a HRFlowable?
+        for paragraph in self.paragraphs:
+            if isinstance(paragraph, HRFlowable):
+                self.para_heights.append(
+                    1
+                )  # fixme: whats the acutal height of a HRFlowable?
                 self._offsets.append(0)
-                if (total_hf - (sum(self.paraHeights))) > 0:  # behave like the associated heading
-                    self.horizontalRuleOffsets.append(maxWf)
+                if (
+                    total_hf - (sum(self.para_heights))
+                ) > 0:  # behave like the associated heading
+                    self.horizontal_rule_offsets.append(max_width)
                 else:
-                    self.horizontalRuleOffsets.append(0)
+                    self.horizontal_rule_offsets.append(0)
                 continue
-            full_width = avail_width - p.style.leftIndent - p.style.rightIndent
-            float_width = full_width - maxWf
-            self.resizeInlineImage(p, float_width)
-            nfloatLines = max(0,
-                              int((total_hf - (sum(self.paraHeights))) / p.style.leading))
-            p.width = 0
-            if hasattr(p, "blPara"):
-                del p.blPara
-            if hasattr(p, "style") and p.style.wordWrap == "CJK":
-                p.blPara = p.breakLinesCJK(nfloatLines * [float_width] + [full_width])
+            full_width = (
+                avail_width - paragraph.style.leftIndent - paragraph.style.rightIndent
+            )
+            float_width = full_width - max_width
+            self.resize_inline_image(paragraph, float_width)
+            n_float_lines = max(
+                0, int((total_hf - (sum(self.para_heights))) / paragraph.style.leading)
+            )
+            paragraph.width = 0
+            if hasattr(paragraph, "blPara"):
+                del paragraph.blPara
+            if hasattr(paragraph, "style") and paragraph.style.wordWrap == "CJK":
+                paragraph.blPara = paragraph.breakLinesCJK(
+                    n_float_lines * [float_width] + [full_width]
+                )
             else:
-                p.blPara = p.breakLines(nfloatLines * [float_width] + [full_width])
-            if self.figAlign == "left":
-                self._offsets.append([maxWf] * (nfloatLines) + [0])
-            autoLeading = getattr(p.style,
-                                  "autoLeading") if hasattr(p, "style") else ""
-            if hasattr(p, "style") and autoLeading == "max" and p.blPara.kind == 1:
-                pHeight = 0
-                for line in p.blPara.lines:
-                    pHeight += (
-                        max(line.ascent - line.descent,
-                            p.style.leading) * 1.025
-                    )  # magic factor! autoLeading==max increases line-height
+                paragraph.blPara = paragraph.breakLines(
+                    n_float_lines * [float_width] + [full_width]
+                )
+            if self.fig_align == "left":
+                self._offsets.append([max_width] * (n_float_lines) + [0])
+            auto_leading = (
+                getattr(paragraph.style, "auto_leading")
+                if hasattr(paragraph, "style")
+                else ""
+            )
+            if (
+                hasattr(paragraph, "style")
+                and auto_leading == "max"
+                and paragraph.blPara.kind == 1
+            ):
+                p_height = 0
+                for line in paragraph.blPara.lines:
+                    p_height += (
+                        max(line.ascent - line.descent, paragraph.style.leading) * 1.025
+                    )  # magic factor! auto_leading==max increases line-height
             else:
-                if autoLeading == "max":
-                    pHeight = len(p.blPara.lines) * max(
-                        p.style.leading, 1.2 * p.style.fontSize
+                if auto_leading == "max":
+                    p_height = len(paragraph.blPara.lines) * max(
+                        paragraph.style.leading, 1.2 * paragraph.style.fontSize
                     )  # used to be 1.2 instead of 1.0
                 else:
-                    pHeight = len(p.blPara.lines) * p.style.leading
-            self.paraHeights.append(pHeight + p.style.spaceBefore + p.style.spaceAfter)
+                    p_height = len(paragraph.blPara.lines) * paragraph.style.leading
+            self.para_heights.append(
+                p_height + paragraph.style.spaceBefore + paragraph.style.spaceAfter
+            )
 
         self.width = avail_width
-        self.height = max(sum(self.paraHeights), total_hf)
+        self.height = max(sum(self.para_heights), total_hf)
         return (avail_width, self.height)
 
     def draw(self):
         canv = self.canv
         canv.saveState()
-        vertical_offset = self._getVOffset()
-        if self.figAlign == "left":
-            horizontal_offsets = [0] * len(self.fs)
+        vertical_offset = self._get_v_offset()
+        if self.fig_align == "left":
+            horizontal_offsets = [0] * len(self.figures)
         else:
             horizontal_offsets = [self.width - wf for wf in self.wfs]
 
-        for (i, f) in enumerate(self.fs):
+        for i, figure in enumerate(self.figures):
             vertical_offset += self.hfs[i]
-            f.drawOn(canv, horizontal_offsets[i],
-                     self.height - vertical_offset)
+            figure.drawOn(canv, horizontal_offsets[i], self.height - vertical_offset)
 
         canv.translate(0, self.height)
 
-        for (count, p) in enumerate(self.ps):
-            if self.figAlign == "left":
-                p._offsets = self._offsets[count]
-                if hasattr(p, "style") and hasattr(p.style, "bulletIndent"):
+        for count, paragraph in enumerate(self.paragraphs):
+            if self.fig_align == "left":
+                paragraph._offsets = self._offsets[count]
+                if hasattr(paragraph, "style") and hasattr(
+                    paragraph.style, "bulletIndent"
+                ):
                     if not self.rtl:
-                        p.style.bulletIndent += p._offsets[0]
+                        paragraph.style.bulletIndent += paragraph._offsets[0]
                     else:
-                        p.style.bulletIndent -= self.ps[0]._offsets[0] - 34
-            if isinstance(p, HRFlowable):
-                p.canv = canv
-                widthOffset = self.horizontalRuleOffsets.pop(0)
-                if self.figAlign == "left":
-                    canv.translate(widthOffset, 0)
-                p.wrap(self.width - widthOffset, self.height)
-                p.draw()
+                        paragraph.style.bulletIndent -= (
+                            self.paragraphs[0]._offsets[0] - 34
+                        )
+            if isinstance(paragraph, HRFlowable):
+                paragraph.canv = canv
+                width_offset = self.horizontal_rule_offsets.pop(0)
+                if self.fig_align == "left":
+                    canv.translate(width_offset, 0)
+                paragraph.wrap(self.width - width_offset, self.height)
+                paragraph.draw()
             else:
-                canv.translate(0, -p.style.spaceBefore)
-                p.canv = canv
-                p.draw()
-                canv.translate(0,
-                               -self.paraHeights[count] + p.style.spaceBefore)
+                canv.translate(0, -paragraph.style.spaceBefore)
+                paragraph.canv = canv
+                paragraph.draw()
+                canv.translate(
+                    0, -self.para_heights[count] + paragraph.style.spaceBefore
+                )
 
         canv.restoreState()
 
     def split(self, avail_width, avail_height):
-        if not hasattr(self,
-                       "hfs") or len(
-                                    self.hfs) == 0 or hasattr(self,
-                                                              "keep_together_split"):
+        if (
+            not hasattr(self, "hfs")
+            or len(self.hfs) == 0
+            or hasattr(self, "keep_together_split")
+        ):
             self.wrap(avail_width, avail_height)
-        height = self._getVOffset()
+        height = self._get_v_offset()
         if self.hfs[0] + height > avail_height:
             return [PageBreak()] + [
-                FiguresAndParagraphs(self.fs, self.ps,
-                                     figure_margin=self.figure_margin)
+                FiguresAndParagraphs(
+                    self.figures, self.paragraphs, figure_margin=self.figure_margin
+                )
             ]
         fitting_figures = []
         next_figures = []
-        for (i, f) in enumerate(self.fs):
+        for i, figure in enumerate(self.figures):
             if (height + self.hfs[i]) < avail_height:
-                fitting_figures.append(f)
+                fitting_figures.append(figure)
             else:
-                next_figures.append(f)
+                next_figures.append(figure)
             height += self.hfs[i]
         fitting_paras = []
         next_paras = []
         height = 0
         splitted_paragraph = False
         force_split = False
-        for (i, p) in enumerate(self.ps):
+        for i, paragraph in enumerate(self.paragraphs):
             # force pagebreak if less than
             # pdfstyles.min_lines_after_heading*line_height available height
-            if hasattr(self.ps[i], "style") and getattr(
-                self.ps[i].style, "prevent_post_pagebreak", False
+            if hasattr(self.paragraphs[i], "style") and getattr(
+                self.paragraphs[i].style, "prevent_post_pagebreak", False
             ):
-                if len(self.ps) > i + 1 and hasattr(self.ps, "style"):
-                    line_height = self.ps[i + 1].style.leading
+                if len(self.paragraphs) > i + 1 and hasattr(self.paragraphs, "style"):
+                    line_height = self.paragraphs[i + 1].style.leading
                 else:
                     line_height = pdfstyles.LEADING
                 if (
-                    len(self.ps) > i + 1
+                    len(self.paragraphs) > i + 1
                     and (
                         height
-                        + self.paraHeights[i]
+                        + self.para_heights[i]
                         + pdfstyles.MIN_LINES_AFTER_HEADING * line_height
                     )
                     > avail_height
                 ):
                     force_split = True
-            if (height + self.paraHeights[i]) < avail_height and not force_split:
-                fitting_paras.append(p)
+            if (height + self.para_heights[i]) < avail_height and not force_split:
+                fitting_paras.append(paragraph)
             else:
                 if splitted_paragraph:
-                    next_paras.append(p)
+                    next_paras.append(paragraph)
                     continue
-                para_frags = p.split(
+                para_frags = paragraph.split(
                     avail_width,
                     avail_height
                     - height
-                    - p.style.spaceBefore
-                    - p.style.spaceAfter
-                    - 2 * p.style.leading,
+                    - paragraph.style.spaceBefore
+                    - paragraph.style.spaceAfter
+                    - 2 * paragraph.style.leading,
                 )  # one line-height "safety margin"
                 splitted_paragraph = True
                 if len(para_frags) == 2:
                     fitting_paras.append(para_frags[0])
                     next_paras.append(para_frags[1])
                 elif len(para_frags) < 2:
-                    next_paras.append(p)
+                    next_paras.append(paragraph)
                 else:  # fixme: not sure if splitting a paragraph can yield more than two elements...
                     pass
-            height += self.paraHeights[i]
+            height += self.para_heights[i]
 
         if next_figures:
             if next_paras:
                 next_elements = [
-                    FiguresAndParagraphs(next_figures, next_paras,
-                                         figure_margin=self.figure_margin)
+                    FiguresAndParagraphs(
+                        next_figures, next_paras, figure_margin=self.figure_margin
+                    )
                 ]
             else:
                 next_elements = next_figures
         else:
             next_elements = next_paras if next_paras else []
         return [
-            FiguresAndParagraphs(fitting_figures, fitting_paras,
-                                 figure_margin=self.figure_margin)
+            FiguresAndParagraphs(
+                fitting_figures, fitting_paras, figure_margin=self.figure_margin
+            )
         ] + next_elements
 
 
 class PreformattedBox(Preformatted):
-    def __init__(self, text, style, margin=4, padding=4,
-                 borderwidth=0.1, **kwargs):
+    def __init__(self, text, style, margin=4, padding=4, borderwidth=0.1, **kwargs):
         Preformatted.__init__(self, text, style, **kwargs)
         self.margin = margin
         self.padding = padding
@@ -376,7 +417,9 @@ class PreformattedBox(Preformatted):
         if avail_height < self.style.leading:
             return []
 
-        lines_that_fit = int((avail_height - self.padding - self.margin) * 1.0 / self.style.leading)
+        lines_that_fit = int(
+            (avail_height - self.padding - self.margin) * 1.0 / self.style.leading
+        )
 
         text1 = string.join(self.lines[0:lines_that_fit], "\n")
         text2 = string.join(self.lines[lines_that_fit:], "\n")
