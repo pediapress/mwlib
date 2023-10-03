@@ -175,6 +175,12 @@ def _handle_complex_node_type(node: nodes.Node):
         _change_classes(node.imagemap.imagelink)
 
 
+def _set_caption_and_check_children(node):
+    node.caption = node.text or ""
+    if node.children:
+        raise ValueError(f"{node!r} has children")
+
+
 def _change_classes(node):
     if isinstance(node, Token):
         handlers = _lookup_handler_function(node)
@@ -191,9 +197,7 @@ def _change_classes(node):
         klass = token2class.get(node.type, nodes.Text)
 
         if klass == nodes.Text:
-            node.caption = node.text or ""
-            if node.children:
-                raise ValueError(f"{node!r} has children")
+            _set_caption_and_check_children(node)
 
         node.__class__ = klass
 

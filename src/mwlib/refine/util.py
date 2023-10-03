@@ -126,16 +126,19 @@ class ImageMod:
         return None, None
 
 
-def handle_imagemod(self, mod_type, match):
-    if mod_type == "img_alt":
-        self.alt = match
+def handle_img_alt(self, match):
+    self.alt = match
 
-    if mod_type == "img_link":
-        self.link = match
 
-    if mod_type == "img_thumbnail":
-        self.thumb = True
+def handle_img_link(self, match):
+    self.link = match
 
+
+def handle_img_thumbnail(self):
+    self.thumb = True
+
+
+def handle_img_align(self, mod_type):
     if mod_type == "img_left":
         self.align = "left"
     if mod_type == "img_right":
@@ -144,36 +147,68 @@ def handle_imagemod(self, mod_type, match):
         self.align = "center"
     if mod_type == "img_none":
         self.align = "none"
+
+
+def handle_img_frame(self, mod_type):
     if mod_type == "img_framed":
         self.frame = "frame"
     if mod_type == "img_frameless":
         self.frame = "frameless"
 
+
+def handle_img_border(self):
+    self.border = True
+
+
+def handle_img_upright(self, match):
+    try:
+        scale = float(match)
+    except ValueError:
+        scale = 0.75
+    self.upright = scale
+
+
+def handle_img_width(self, match):
+    # x200px or 100x200px or 200px
+    width, height = (match.split("x") + ["0"])[:2]
+    try:
+        width = int(width)
+    except ValueError:
+        width = 0
+
+    try:
+        height = int(height)
+    except ValueError:
+        height = 0
+
+    self.width = width
+    self.height = height
+
+
+def handle_imagemod(self, mod_type, match):
+    if mod_type == "img_alt":
+        handle_img_alt(self, match)
+
+    if mod_type == "img_link":
+        handle_img_link(self, match)
+
+    if mod_type == "img_thumbnail":
+        handle_img_thumbnail(self)
+
+    if mod_type in ["img_left", "img_right", "img_center", "img_none"]:
+        handle_img_align(self, mod_type)
+
+    if mod_type in ["img_framed", "img_frameless"]:
+        handle_img_frame(self, mod_type)
+
     if mod_type == "img_border":
-        self.border = True
+        handle_img_border(self)
 
     if mod_type == "img_upright":
-        try:
-            scale = float(match)
-        except ValueError:
-            scale = 0.75
-        self.upright = scale
+        handle_img_upright(self, match)
 
     if mod_type == "img_width":
-        # x200px or 100x200px or 200px
-        width, height = (match.split("x") + ["0"])[:2]
-        try:
-            width = int(width)
-        except ValueError:
-            width = 0
-
-        try:
-            height = int(height)
-        except ValueError:
-            height = 0
-
-        self.width = width
-        self.height = height
+        handle_img_width(self, match)
 
 
 def resolve_entity(entity):

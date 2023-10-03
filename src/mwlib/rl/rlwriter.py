@@ -285,6 +285,35 @@ class RlWriter:
     def ignore(self, obj):
         return []
 
+    def _append_element_to_group_or_list(self, is_heading, elements, group, grouped_elements):
+        if is_heading(elements[0]):
+            group.append(elements.pop(0))
+        else:
+            grouped_elements.append(elements.pop(0))
+
+    def _group_elements_by_heading_and_height(self, group, is_heading, elements, grouped_elements, group_height):
+        if not group:
+            self._append_element_to_group_or_list(is_heading, elements, group, grouped_elements)
+        else:
+            last = group[-1]
+            if not is_heading(last):
+                try:
+                    _, height = last.wrap(PRINT_WIDTH, PRINT_HEIGHT)
+                except:
+                    height = 0
+                group_height += height
+                if group_height > PRINT_HEIGHT / 10 or isinstance(
+                    elements[0], NotAtTopPageBreak
+                ):  # 10 % of page_height
+                    grouped_elements.append(SmartKeepTogether(group))
+                    group = []
+                    group_height = 0
+                else:
+                    group.append(elements.pop(0))
+            else:
+                group.append(elements.pop(0))
+        return group, elements, grouped_elements, group_height
+
     def groupElements(self, elements):
         """Group reportlab flowables into KeepTogether flowables
         to achieve meaningful pagebreaks
@@ -302,29 +331,9 @@ class RlWriter:
 
         group_height = 0
         while elements:
-            if not group:
-                if is_heading(elements[0]):
-                    group.append(elements.pop(0))
-                else:
-                    grouped_elements.append(elements.pop(0))
-            else:
-                last = group[-1]
-                if not is_heading(last):
-                    try:
-                        _, height = last.wrap(PRINT_WIDTH, PRINT_HEIGHT)
-                    except:
-                        height = 0
-                    group_height += height
-                    if group_height > PRINT_HEIGHT / 10 or isinstance(
-                        elements[0], NotAtTopPageBreak
-                    ):  # 10 % of page_height
-                        grouped_elements.append(SmartKeepTogether(group))
-                        group = []
-                        group_height = 0
-                    else:
-                        group.append(elements.pop(0))
-                else:
-                    group.append(elements.pop(0))
+            group, elements, grouped_elements, group_height = self._group_elements_by_heading_and_height(
+                group, is_heading, elements, grouped_elements, group_height
+            )
         if group:
             grouped_elements.append(SmartKeepTogether(group))
 
@@ -563,20 +572,23 @@ class RlWriter:
                     output, coverimage=coverimage, status_callback=status_callback
                 )
 
+    def _append_metadata_and_references_to_elements(self, elements):
+        elements.append(TocEntry(txt=_("References"), lvl="group"))
+        elements.append(
+            self._get_page_template(_("Article Sources and Contributors"))
+        )
+        elements.append(NotAtTopPageBreak())
+        elements.extend(self.writeArticleMetainfo())
+        elements.append(
+            self._get_page_template(_("Image Sources, Licenses and Contributors"))
+        )
+        if self.numarticles > 1:
+            elements.append(NotAtTopPageBreak())
+        elements.extend(self.writeImageMetainfo())
+
     def renderBook(self, elements, output):
         if pdfstyles.SHOW_ARTICLE_ATTRIBUTION:
-            elements.append(TocEntry(txt=_("References"), lvl="group"))
-            elements.append(
-                self._get_page_template(_("Article Sources and Contributors"))
-            )
-            elements.append(NotAtTopPageBreak())
-            elements.extend(self.writeArticleMetainfo())
-            elements.append(
-                self._get_page_template(_("Image Sources, Licenses and Contributors"))
-            )
-            if self.numarticles > 1:
-                elements.append(NotAtTopPageBreak())
-            elements.extend(self.writeImageMetainfo())
+            self._append_metadata_and_references_to_elements(elements)
 
         if not self.debug:
             elements.extend(self.renderLicense())
@@ -867,6 +879,50 @@ class RlWriter:
         res = self.renderInline(title_node)
         return "".join(res)
 
+    def _append_title_and_conditional_page_breaks(self, elements, title, article):
+        elements.append(self._get_page_template(title))
+        # FIXME remove the getPrevious below
+        if self.license_mode:
+            if self.numarticles > 1:
+                elements.append(NotAtTopPageBreak())
+        elif not getattr(article, "has_preceeding_chapter", False) or isinstance(
+            article.get_previous(), advtree.Article
+        ):
+            if (
+                pdfstyles.PAGE_BREAK_AFTER_ARTICLE
+            ):  # if configured and preceded by an article
+                elements.append(NotAtTopPageBreak())
+            elif miscutils.article_starts_with_infobox(
+                article, max_text_until_infobox=100
+            ):
+                elements.append(
+                    CondPageBreak(pdfstyles.ARTICLE_START_MIN_SPACE_INFOBOX)
+                )
+            else:
+                elements.append(CondPageBreak(pdfstyles.ARTICLE_START_MIN_SPACE))
+
+    def _append_references_and_update_metadata(self, elements, title, article, url):
+        if self.references:
+            ref_elements = [
+                Paragraph(
+                    "<b>" + _("References") + "</b>", heading_style("section", lvl=3)
+                )
+            ]
+            ref_elements.extend(self.writeReferenceList())
+            if isinstance(elements[-1], CondPageBreak):
+                elements[-1:-1] = ref_elements
+            else:
+                elements.extend(ref_elements)
+
+        if not self.license_mode and not self.fail_safe_rendering:
+            self.article_meta_info.append((title, url, getattr(article, "authors", "")))
+
+        if self.layout_status:
+            if not self.numarticles:
+                self.layout_status(progress=100)
+            else:
+                self.layout_status(progress=100 * self.articlecount / self.numarticles)
+
     def writeArticle(self, article):
         if self.license_mode and self.debug:
             return []
@@ -879,27 +935,7 @@ class RlWriter:
             self.articlecount += 1
         elements = []
         if hasattr(self, "doc"):  # doc is not present if tests are run
-            elements.append(self._get_page_template(title))
-            # FIXME remove the getPrevious below
-            if self.license_mode:
-                if self.numarticles > 1:
-                    elements.append(NotAtTopPageBreak())
-            elif not getattr(article, "has_preceeding_chapter", False) or isinstance(
-                article.get_previous(), advtree.Article
-            ):
-                if (
-                    pdfstyles.PAGE_BREAK_AFTER_ARTICLE
-                ):  # if configured and preceded by an article
-                    elements.append(NotAtTopPageBreak())
-                elif miscutils.article_starts_with_infobox(
-                    article, max_text_until_infobox=100
-                ):
-                    elements.append(
-                        CondPageBreak(pdfstyles.ARTICLE_START_MIN_SPACE_INFOBOX)
-                    )
-                else:
-                    elements.append(CondPageBreak(pdfstyles.ARTICLE_START_MIN_SPACE))
-
+            self._append_title_and_conditional_page_breaks(elements, title, article)
         if self.inline_mode == 0 and self.table_nesting == 0:
             heading_anchor = '<a name="%d"/>' % len(self.bookmarks)
             self.bookmarks.append((article.caption, "article"))
@@ -951,26 +987,7 @@ class RlWriter:
         elements = self.floatImages(elements)
         elements = self.tabularizeImages(elements)
 
-        if self.references:
-            ref_elements = [
-                Paragraph(
-                    "<b>" + _("References") + "</b>", heading_style("section", lvl=3)
-                )
-            ]
-            ref_elements.extend(self.writeReferenceList())
-            if isinstance(elements[-1], CondPageBreak):
-                elements[-1:-1] = ref_elements
-            else:
-                elements.extend(ref_elements)
-
-        if not self.license_mode and not self.fail_safe_rendering:
-            self.article_meta_info.append((title, url, getattr(article, "authors", "")))
-
-        if self.layout_status:
-            if not self.numarticles:
-                self.layout_status(progress=100)
-            else:
-                self.layout_status(progress=100 * self.articlecount / self.numarticles)
+        self._append_references_and_update_metadata(elements, title, article, url)
 
         self.reference_list_rendered = False
         return elements
@@ -985,6 +1002,116 @@ class RlWriter:
             style = None
         return self.renderMixed(obj, style)
 
+    def got_sufficient_floats(self, figures, paras):
+        total_figure_height = 0
+        total_paragraph_height = 0
+        max_img_width = 0
+        for figure in figures:
+            # assume 40 chars per line for caption text
+            total_figure_height += (
+                figure.imgHeight
+                + figure.margin[0]
+                + figure.margin[2]
+                + figure.padding[0]
+                + figure.padding[2]
+                + figure.cs.leading * max(int(len(figure.captionTxt) / 40), 1)
+            )
+            max_img_width = max(max_img_width, figure.imgWidth)
+        for paragraph in paras:
+            if isinstance(paragraph, Paragraph):
+                _, height = paragraph.wrap(PRINT_WIDTH - max_img_width, PRINT_HEIGHT)
+                height += paragraph.style.spaceBefore + paragraph.style.spaceAfter
+                total_paragraph_height += height
+        return total_paragraph_height > total_figure_height - 10
+
+    def _handle_floating_nodes_and_figures(self, node, combined_nodes, figures, floating_nodes):
+        if (
+            hasattr(floating_nodes[-1], "style")
+            and floating_nodes[-1].style.name.startswith(
+                "heading_style"
+            )
+            and floating_nodes[-1].style.flowable is True
+        ):  # prevent floating headings before nonFloatables
+            no_float_node = floating_nodes[-1]
+            floating_nodes = floating_nodes[:-1]
+        else:
+            no_float_node = None
+        if len(floating_nodes) == 0:
+            combined_nodes.extend(figures)
+            figures = []
+            combined_nodes.append(no_float_node)
+            if getattr(node, "float_figure", False):
+                figures.append(node)
+            else:
+                combined_nodes.append(node)
+            last_node = node
+            return last_node, combined_nodes, figures, floating_nodes, True
+        figure_margin = self.get_margins(figures[0].align or "right")
+        combined_nodes.append(
+            FiguresAndParagraphs(
+                figures,
+                floating_nodes,
+                figure_margin=figure_margin,
+                rtl=self.rtl,
+            )
+        )
+        if no_float_node:
+            combined_nodes.append(no_float_node)
+        figures = []
+        floating_nodes = []
+        if getattr(node, "float_figure", False):
+            figures.append(node)
+        else:
+            combined_nodes.append(node)
+        return figures, floating_nodes, False
+
+    def _append_node_to_appropriate_list(self, node, figures, combined_nodes):
+        if getattr(node, "float_figure", False):
+            figures.append(node)
+        else:
+            combined_nodes.append(node)
+
+    def _organize_and_combine_figure_and_floating_nodes(self, node, combined_nodes, figures, floating_nodes):
+        if not figures:
+            self._append_node_to_appropriate_list(node, figures, combined_nodes)
+        else:
+            if (
+                hasattr(node, "style")
+                and node.style.flowable is True
+                and not self.got_sufficient_floats(figures, floating_nodes)
+            ):  # newpara
+                floating_nodes.append(node)
+            else:
+                if floating_nodes:
+                    figures, floating_nodes, should_continue = self._handle_floating_nodes_and_figures(
+                        node, combined_nodes, figures, floating_nodes
+                    )
+                    if should_continue:
+                        return node, combined_nodes, figures, floating_nodes, True
+                else:
+                    combined_nodes.extend(figures)
+                    combined_nodes.append(node)
+                    figures = []
+        return node, combined_nodes, figures, floating_nodes, False
+
+    def get_margins(self, align):
+        if align == "right":
+            return pdfstyles.IMG_MARGINS_FLOAT_RIGHT
+        elif align == "left":
+            return pdfstyles.IMG_MARGINS_FLOAT_LEFT
+        return pdfstyles.IMG_MARGINS_FLOAT
+    
+    def _combine_figures_and_floating_nodes(self, figures, floating_nodes, combined_nodes):
+        if figures and floating_nodes:
+            figure_margin = self.get_margins(figures[0].align or "right")
+            combined_nodes.append(
+                FiguresAndParagraphs(
+                    figures, floating_nodes, figure_margin=figure_margin, rtl=self.rtl
+                )
+            )
+        else:
+            combined_nodes.extend(figures + floating_nodes)
+
     def floatImages(self, nodes):
         """Floating images are combined with paragraphs.
         This is achieved by sticking images and paragraphs
@@ -994,39 +1121,10 @@ class RlWriter:
         @rtype: [reportlab.platypus.flowable.Flowable]
         """
 
-        def get_margins(align):
-            if align == "right":
-                return pdfstyles.IMG_MARGINS_FLOAT_RIGHT
-            elif align == "left":
-                return pdfstyles.IMG_MARGINS_FLOAT_LEFT
-            return pdfstyles.IMG_MARGINS_FLOAT
-
         combined_nodes = []
         floating_nodes = []
         figures = []
         last_node = None
-
-        def got_sufficient_floats(figures, paras):
-            total_figure_height = 0
-            total_paragraph_height = 0
-            max_img_width = 0
-            for figure in figures:
-                # assume 40 chars per line for caption text
-                total_figure_height += (
-                    figure.imgHeight
-                    + figure.margin[0]
-                    + figure.margin[2]
-                    + figure.padding[0]
-                    + figure.padding[2]
-                    + figure.cs.leading * max(int(len(figure.captionTxt) / 40), 1)
-                )
-                max_img_width = max(max_img_width, figure.imgWidth)
-            for paragraph in paras:
-                if isinstance(paragraph, Paragraph):
-                    _, height = paragraph.wrap(PRINT_WIDTH - max_img_width, PRINT_HEIGHT)
-                    height += paragraph.style.spaceBefore + paragraph.style.spaceAfter
-                    total_paragraph_height += height
-            return total_paragraph_height > total_figure_height - 10
 
         for node in nodes:  # FIXME: somebody should clean up this mess
             if isinstance(last_node, Figure) and isinstance(node, Figure):
@@ -1037,75 +1135,60 @@ class RlWriter:
                     combined_nodes.extend([Spacer(0, 0.5 * cm), node])
                     figures = []
             else:
-                if not figures:
-                    if getattr(node, "float_figure", False):
-                        figures.append(node)
-                    else:
-                        combined_nodes.append(node)
-                else:
-                    if (
-                        hasattr(node, "style")
-                        and node.style.flowable is True
-                        and not got_sufficient_floats(figures, floating_nodes)
-                    ):  # newpara
-                        floating_nodes.append(node)
-                    else:
-                        if len(floating_nodes) > 0:
-                            if (
-                                hasattr(floating_nodes[-1], "style")
-                                and floating_nodes[-1].style.name.startswith(
-                                    "heading_style"
-                                )
-                                and floating_nodes[-1].style.flowable is True
-                            ):  # prevent floating headings before nonFloatables
-                                no_float_node = floating_nodes[-1]
-                                floating_nodes = floating_nodes[:-1]
-                            else:
-                                no_float_node = None
-                            if len(floating_nodes) == 0:
-                                combined_nodes.extend(figures)
-                                figures = []
-                                combined_nodes.append(no_float_node)
-                                if getattr(node, "float_figure", False):
-                                    figures.append(node)
-                                else:
-                                    combined_nodes.append(node)
-                                last_node = node
-                                continue
-                            figure_margin = get_margins(figures[0].align or "right")
-                            combined_nodes.append(
-                                FiguresAndParagraphs(
-                                    figures,
-                                    floating_nodes,
-                                    figure_margin=figure_margin,
-                                    rtl=self.rtl,
-                                )
-                            )
-                            if no_float_node:
-                                combined_nodes.append(no_float_node)
-                            figures = []
-                            floating_nodes = []
-                            if getattr(node, "float_figure", False):
-                                figures.append(node)
-                            else:
-                                combined_nodes.append(node)
-                        else:
-                            combined_nodes.extend(figures)
-                            combined_nodes.append(node)
-                            figures = []
+                node, combined_nodes, figures, floating_nodes, should_continue = self._organize_and_combine_figure_and_floating_nodes(
+                    node, combined_nodes, figures, floating_nodes
+                )
+                if should_continue:
+                    continue
+
             last_node = node
 
-        if figures and floating_nodes:
-            figure_margin = get_margins(figures[0].align or "right")
-            combined_nodes.append(
-                FiguresAndParagraphs(
-                    figures, floating_nodes, figure_margin=figure_margin, rtl=self.rtl
-                )
-            )
-        else:
-            combined_nodes.extend(figures + floating_nodes)
+        self._combine_figures_and_floating_nodes(figures, floating_nodes, combined_nodes)
 
         return combined_nodes
+
+    def _scale_images(self, images):
+        scaled_images = []
+        for img in images:
+            aspect_ratio = img.imgWidth / img.imgHeight
+            width = PRINT_WIDTH / 2 - (
+                img.margin[1] + img.margin[3] + img.padding[1] + img.padding[3]
+            )
+            height = width / aspect_ratio
+            if width > img.imgWidth:
+                scaled = img
+            else:
+                scaled = Figure(
+                    img.img_path,
+                    img.captionTxt,
+                    img.cs,
+                    imgWidth=width,
+                    imgHeight=height,
+                    margin=img.margin,
+                    padding=img.padding,
+                    borderColor=img.borderColor,
+                    url=img.url,
+                )
+            scaled_images.append(scaled)
+        return scaled_images
+
+    def _arrange_and_append_figures(self, figures, final_nodes, node):
+        if len(figures) > 1:
+            figures = self._scale_images(figures)
+            data = [
+                [figures[2 * i], figures[2 * i + 1]]
+                for i in range(int(len(figures) / 2))
+            ]
+            if len(figures) % 2 != 0:
+                data.append([figures[-1], ""])
+            table = Table(data)
+            final_nodes.append(table)
+            figures = []
+        else:
+            if figures:
+                final_nodes.append(figures[0])
+                figures = []
+            final_nodes.append(node)
 
     def tabularizeImages(self, nodes):
         """consecutive images that couldn't be combined with paragraphs
@@ -1114,53 +1197,13 @@ class RlWriter:
         final_nodes = []
         figures = []
 
-        def scale_images(images):
-            scaled_images = []
-            for img in images:
-                aspect_ratio = img.imgWidth / img.imgHeight
-                width = PRINT_WIDTH / 2 - (
-                    img.margin[1] + img.margin[3] + img.padding[1] + img.padding[3]
-                )
-                height = width / aspect_ratio
-                if width > img.imgWidth:
-                    scaled = img
-                else:
-                    scaled = Figure(
-                        img.img_path,
-                        img.captionTxt,
-                        img.cs,
-                        imgWidth=width,
-                        imgHeight=height,
-                        margin=img.margin,
-                        padding=img.padding,
-                        borderColor=img.borderColor,
-                        url=img.url,
-                    )
-                scaled_images.append(scaled)
-            return scaled_images
-
         for node in nodes:
             if isinstance(node, Figure):
                 figures.append(node)
             else:
-                if len(figures) > 1:
-                    figures = scale_images(figures)
-                    data = [
-                        [figures[2 * i], figures[2 * i + 1]]
-                        for i in range(int(len(figures) / 2))
-                    ]
-                    if len(figures) % 2 != 0:
-                        data.append([figures[-1], ""])
-                    table = Table(data)
-                    final_nodes.append(table)
-                    figures = []
-                else:
-                    if figures:
-                        final_nodes.append(figures[0])
-                        figures = []
-                    final_nodes.append(node)
+                self._arrange_and_append_figures(figures, final_nodes, node)
         if len(figures) > 1:
-            figures = scale_images(figures)
+            figures = self._scale_images(figures)
             data = [
                 [figures[2 * i], figures[2 * i + 1]]
                 for i in range(int(len(figures) / 2))
@@ -1238,6 +1281,43 @@ class RlWriter:
             txt.append("</font>")
         return txt
 
+    def _apply_node_style_to_paragraph(self, node, para_style):
+        text_color = styleutils.rgb_color_from_node(node)
+        background_color = styleutils.rgb_bg_color_from_node(node)
+        if text_color:
+            para_style.textColor = text_color
+        if background_color:
+            para_style.backColor = background_color
+        align = styleutils.get_text_alignment(node)
+        if align in ["right", "center", "justify"]:
+            align_map = {
+                "right": TA_RIGHT,
+                "center": TA_CENTER,
+                "justify": TA_JUSTIFY,
+            }
+            para_style.alignment = align_map[align]
+
+    def _process_node_and_generate_styled_items(self, node, items, para_style, txt):
+        txt_style = None
+        if node.__class__ == advtree.Cell and getattr(node, "is_header", False):
+            txt_style = {  # check nesting: start: <a>,<b> --> end: </b></a>
+                "start": ["<b>"],
+                "end": ["</b>"],
+            }
+        for child in node:
+            res = self.write(child)
+            if is_inline(res):
+                txt.extend(res)
+            else:
+                items.extend(build_paragraph(txt, para_style, txt_style=txt_style))
+                items.extend(res)
+                txt = []
+        if not len(items):
+            return build_paragraph(txt, para_style, txt_style=txt_style)
+        else:
+            items.extend(build_paragraph(txt, para_style, txt_style=txt_style))
+            return items
+
     def renderMixed(self, node, para_style=None, text_prefix=None):
         if not para_style:
             if self.license_mode:
@@ -1266,40 +1346,9 @@ class RlWriter:
         if isinstance(
             node, advtree.Node
         ):  # set node styles like text/bg colors, alignment
-            text_color = styleutils.rgb_color_from_node(node)
-            background_color = styleutils.rgb_bg_color_from_node(node)
-            if text_color:
-                para_style.textColor = text_color
-            if background_color:
-                para_style.backColor = background_color
-            align = styleutils.get_text_alignment(node)
-            if align in ["right", "center", "justify"]:
-                align_map = {
-                    "right": TA_RIGHT,
-                    "center": TA_CENTER,
-                    "justify": TA_JUSTIFY,
-                }
-                para_style.alignment = align_map[align]
+            self._apply_node_style_to_paragraph(node, para_style)
 
-        txt_style = None
-        if node.__class__ == advtree.Cell and getattr(node, "is_header", False):
-            txt_style = {  # check nesting: start: <a>,<b> --> end: </b></a>
-                "start": ["<b>"],
-                "end": ["</b>"],
-            }
-        for child in node:
-            res = self.write(child)
-            if is_inline(res):
-                txt.extend(res)
-            else:
-                items.extend(build_paragraph(txt, para_style, txt_style=txt_style))
-                items.extend(res)
-                txt = []
-        if not len(items):
-            return build_paragraph(txt, para_style, txt_style=txt_style)
-        else:
-            items.extend(build_paragraph(txt, para_style, txt_style=txt_style))
-            return items
+        return self._process_node_and_generate_styled_items(node, items, para_style, txt)
 
     def renderChildren(self, node):
         items = []
@@ -1378,20 +1427,34 @@ class RlWriter:
         log.warning("unknown tag node", repr(style))
         return txt
 
+    def _generate_article_id_and_check_internal_link(self, obj):
+        article = obj.get_parent_nodes_by_class(advtree.Article)
+        wikiurl = ""
+        internallink = False
+        if article:
+            wikiurl = getattr(article[0], "wikiurl", "")
+        article_id = self.buildArticleID(wikiurl, obj.full_target)
+        if article_id in self.articleids:
+            internallink = True
+        return article_id, internallink
+
+    def _format_hyperlink_text_based_on_link_type(self, internallink, obj, href, text, article_id):
+        if not internallink:
+            if not obj.target.startswith("#"):  # intrapage links are filtered
+                text = f'<link href="{xmlescape(href)}">{text}</link>'
+        else:
+            text = f'<link href="#{article_id}">{text}</link>'
+        return text
+
     def writeLink(self, obj):
         """Link nodes are intra wiki links"""
         href = obj.url
 
         # looking for internal links
         internallink = False
+        article_id = None
         if isinstance(obj, advtree.ArticleLink) and obj.url:
-            article = obj.get_parent_nodes_by_class(advtree.Article)
-            wikiurl = ""
-            if article:
-                wikiurl = getattr(article[0], "wikiurl", "")
-            article_id = self.buildArticleID(wikiurl, obj.full_target)
-            if article_id in self.articleids:
-                internallink = True
+            article_id, internallink = self._generate_article_id_and_check_internal_link(obj)
 
         if not href:
             log.warning("no link target specified")
@@ -1410,11 +1473,7 @@ class RlWriter:
             txt = urllib.parse.unquote(obj.target.encode("utf-8"))
             text = self.formatter.style_text(txt)
 
-        if not internallink:
-            if not obj.target.startswith("#"):  # intrapage links are filtered
-                text = f'<link href="{xmlescape(href)}">{text}</link>'
-        else:
-            text = f'<link href="#{article_id}">{text}</link>'
+        text = self._format_hyperlink_text_based_on_link_type(internallink, obj, href, text, article_id)
 
         return [text]
 
@@ -1555,6 +1614,20 @@ class RlWriter:
             img_path = ""
         return img_path
 
+    def _execute_image_conversion_commands(self, cmds, img_path):
+        for cmd in cmds:
+            try:
+                ret = subprocess.call(cmd)
+                if ret != 0:
+                    log.warning(
+                        "converting broken image failed (return code: %d): %r"
+                        % (ret, img_path)
+                    )
+                    return ret
+            except OSError:
+                log.warning("converting broken image failed (OSError): %r" % img_path)
+                raise
+
     def _fix_broken_images(self, _, img_path):
         if img_path in self.fixed_images:
             return self.fixed_images[img_path]
@@ -1621,18 +1694,7 @@ class RlWriter:
                 ]
             )
 
-        for cmd in cmds:
-            try:
-                ret = subprocess.call(cmd)
-                if ret != 0:
-                    log.warning(
-                        "converting broken image failed (return code: %d): %r"
-                        % (ret, img_path)
-                    )
-                    return ret
-            except OSError:
-                log.warning("converting broken image failed (OSError): %r" % img_path)
-                raise
+        self._execute_image_conversion_commands(cmds, img_path)
         try:
             del img
         except:
@@ -1656,6 +1718,53 @@ class RlWriter:
                 img_node.width = width
                 img_node.height = height
 
+    def _store_image_metadata(self, img_node, img_name):
+        self.img_count += 1
+        url = self.img_db.get_description_url(img_name) or self.img_db.get_url(
+            img_name
+        )
+        url = urllib.parse.unquote(url.encode("utf-8")) if url and pdfstyles.LINK_IMAGES else ""
+        if not self.test_mode:
+            license_name = self.license_checker.get_license_display_name(img_name)
+            contributors = self.img_db.get_contributors(img_node.target)
+        else:
+            license_name = ""
+            contributors = ""
+        self.img_meta_info[img_name] = (
+            self.img_count,
+            img_name,
+            url,
+            license_name,
+            contributors,
+        )
+
+    def _calculate_image_dimensions(self, img_node):
+        max_width = self.colwidth
+        if self.table_nesting > 0 and not max_width:
+            cell = img_node.get_parent_nodes_by_class(advtree.Cell)
+            if cell:
+                max_width = PRINT_WIDTH / len(cell[0].get_all_siblings()) - 10
+        max_height = pdfstyles.IMG_MAX_THUMG_HEIGHT * PRINT_HEIGHT
+        if self.table_nesting > 0:
+            max_height = PRINT_HEIGHT / 4  # fixme this needs to be read from config
+        if self.gallery_mode:
+            max_height = PRINT_HEIGHT / 3  # same as above
+        return max_width, max_height
+
+    def _handle_invalid_image_url(self, img_node):
+        if img_node.target is None:
+            img_node.target = ""
+        log.warning("invalid image url (obj.target: %r)" % img_node.target)
+        return []
+
+    def _determine_image_alignment(self, img_node):
+        align = img_node.align
+        if align in [None, "none"]:
+            align = styleutils.get_text_alignment(img_node)
+        if advtree.Center in [p.__class__ for p in img_node.get_parents()]:
+            align = "center"
+        return align
+
     def writeImageLink(self, img_node):
         if img_node.colon is True:
             items = []
@@ -1666,10 +1775,7 @@ class RlWriter:
         img_path = self.getImgPath(img_node.target)
 
         if not img_path:
-            if img_node.target is None:
-                img_node.target = ""
-            log.warning("invalid image url (obj.target: %r)" % img_node.target)
-            return []
+            return self._handle_invalid_image_url(img_node)
 
         try:
             ret = self._fix_broken_images(img_node, img_path)
@@ -1682,16 +1788,7 @@ class RlWriter:
             log.warning("image skipped")
             return []
 
-        max_width = self.colwidth
-        if self.table_nesting > 0 and not max_width:
-            cell = img_node.get_parent_nodes_by_class(advtree.Cell)
-            if cell:
-                max_width = PRINT_WIDTH / len(cell[0].get_all_siblings()) - 10
-        max_height = pdfstyles.IMG_MAX_THUMG_HEIGHT * PRINT_HEIGHT
-        if self.table_nesting > 0:
-            max_height = PRINT_HEIGHT / 4  # fixme this needs to be read from config
-        if self.gallery_mode:
-            max_height = PRINT_HEIGHT / 3  # same as above
+        max_width, max_height = self._calculate_image_dimensions(img_node)
 
         self.set_svg_default_size(img_node)
 
@@ -1699,11 +1796,7 @@ class RlWriter:
             img_node, img_path, max_print_width=max_width, max_print_height=max_height
         )
 
-        align = img_node.align
-        if align in [None, "none"]:
-            align = styleutils.get_text_alignment(img_node)
-        if advtree.Center in [p.__class__ for p in img_node.get_parents()]:
-            align = "center"
+        align = self._determine_image_alignment(img_node)
         txt = []
         if img_node.render_caption:
             txt = self.renderInline(img_node)
@@ -1728,27 +1821,7 @@ class RlWriter:
 
         img_name = img_node.target
         if not self.img_meta_info.get(img_name):
-            self.img_count += 1
-            url = self.img_db.get_description_url(img_name) or self.img_db.get_url(
-                img_name
-            )
-            if url and pdfstyles.LINK_IMAGES:
-                url = urllib.parse.unquote(url.encode("utf-8"))
-            else:
-                url = ""
-            if not self.test_mode:
-                license_name = self.license_checker.get_license_display_name(img_name)
-                contributors = self.img_db.get_contributors(img_node.target)
-            else:
-                license_name = ""
-                contributors = ""
-            self.img_meta_info[img_name] = (
-                self.img_count,
-                img_name,
-                url,
-                license_name,
-                contributors,
-            )
+            self._store_image_metadata(img_node, img_name)
 
         if is_inline:
             txt = '{linkstart}<img src="{src}" width="{width:f}pt" height="{height:f}pt" valign="{align}"/>{linkend}'.format(

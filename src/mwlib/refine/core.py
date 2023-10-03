@@ -77,6 +77,7 @@ def get_recursive_tag_parser(tagname, blocknode=False):
 parse_div = get_recursive_tag_parser("div", blocknode=True)
 
 
+
 def parse_inputbox(tokens, xopts):
     get_recursive_tag_parser("inputbox")(tokens, xopts)
 
@@ -84,6 +85,64 @@ def parse_inputbox(tokens, xopts):
         if token.tagname == "inputbox":
             token.inputbox = Token.join_as_text(token.children)
             del token.children[:]
+
+
+def create(current, tokens, sections, index):
+    if current.start is None or current.endtitle is None:
+        return False
+    start_equal_count = tokens[current.start].text.count("=")
+    end_equal_count = tokens[current.endtitle].text.count("=")
+    level = min(start_equal_count, end_equal_count)
+    # KLUDGE: make this a caption
+    caption = Token(
+        type=Token.t_complex_node,
+        children=tokens[current.start + 1: current.endtitle],
+    )
+    if end_equal_count > start_equal_count and caption.children is not None:
+        caption.children.append(Token(type=Token.t_text,
+                                      text="=" * (end_equal_count - start_equal_count)))
+    elif start_equal_count > end_equal_count and caption.children is not None:
+        caption.children.insert(
+            0, Token(type=Token.t_text, text="=" * (start_equal_count - end_equal_count))
+        )
+    body = Token(
+        type=Token.t_complex_node,
+        children=tokens[current.endtitle + 1: index]
+    )
+    sect = Token(
+        type=Token.t_complex_section,
+        tagname=SECTION_TAG,
+        children=[caption, body],
+        level=level,
+        blocknode=True,
+    )
+    tokens[current.start: index] = [sect]
+    while sections and level <= sections[-1].level:
+        sections.pop()
+    if sections:
+        sections[-1].children.append(tokens[current.start])
+        del tokens[current.start]
+        current.start -= 1
+    sections.append(sect)
+    return True
+
+
+def _something(tokens, sections, index, current):
+    token = tokens[index]
+    if token.type == Token.t_section:
+        if create(current, tokens, sections, index) and current.start is not None:
+            index = current.start + 1
+            current = Bunch(start=None, end=None, endtitle=None)
+        else:
+            current.start = index
+            index += 1
+    elif token.type == Token.t_section_end:
+        current.endtitle = index
+        index += 1
+    else:
+        index += 1
+
+    return index, current
 
 
 def _parse_gallery_txt(txt, xopts):
@@ -127,67 +186,10 @@ class ParseSections:
         sections = []
         current = Bunch(start=None, end=None, endtitle=None)
 
-        def create():
-            if current.start is None or current.endtitle is None:
-                return False
-
-            start_equal_count = tokens[current.start].text.count("=")
-            end_equal_count = tokens[current.endtitle].text.count("=")
-            level = min(start_equal_count, end_equal_count)
-
-            # KLUDGE: make this a caption
-            caption = Token(
-                type=Token.t_complex_node,
-                children=tokens[current.start + 1: current.endtitle],
-            )
-            if end_equal_count > start_equal_count and caption.children is not None:
-                caption.children.append(Token(type=Token.t_text,
-                                              text="=" * (end_equal_count - start_equal_count)))
-            elif start_equal_count > end_equal_count and caption.children is not None:
-                caption.children.insert(
-                    0, Token(type=Token.t_text, text="=" * (start_equal_count - end_equal_count))
-                )
-
-            body = Token(
-                type=Token.t_complex_node,
-                children=tokens[current.endtitle + 1: index]
-            )
-
-            sect = Token(
-                type=Token.t_complex_section,
-                tagname=SECTION_TAG,
-                children=[caption, body],
-                level=level,
-                blocknode=True,
-            )
-            tokens[current.start: index] = [sect]
-
-            while sections and level <= sections[-1].level:
-                sections.pop()
-            if sections:
-                sections[-1].children.append(tokens[current.start])
-                del tokens[current.start]
-                current.start -= 1
-
-            sections.append(sect)
-            return True
-
         while index < len(self.tokens):
-            token = tokens[index]
-            if token.type == Token.t_section:
-                if create() and current.start is not None:
-                    index = current.start + 1
-                    current = Bunch(start=None, end=None, endtitle=None)
-                else:
-                    current.start = index
-                    index += 1
-            elif token.type == Token.t_section_end:
-                current.endtitle = index
-                index += 1
-            else:
-                index += 1
+            index, current = _something(tokens, sections, index, current)
 
-        create()
+        create(current, tokens, sections, len(tokens))
 
 
 class ParseUrls:
@@ -269,6 +271,23 @@ class ParseSingleQuote:
             else:
                 self.styles[i].type = Token.t_complex_node
 
+    def _update_token_counts_and_styles(self, token, pos, start, tokens):
+        if start is None:
+            self.counts.append(len(token.text))
+            start = pos
+            pos += 1
+        else:
+            tokens[start:pos] = [
+                Token(
+                    type=Token.t_complex_style,
+                    children=tokens[start + 1: pos]
+                )
+            ]
+            self.styles.append(tokens[start])
+            pos = start + 1
+            start = None
+        return pos, start
+
     def run(self):
         tokens = self.tokens
         pos = 0
@@ -279,20 +298,7 @@ class ParseSingleQuote:
         while pos < len(tokens):
             token = tokens[pos]
             if token.type == Token.t_singlequote:
-                if start is None:
-                    self.counts.append(len(token.text))
-                    start = pos
-                    pos += 1
-                else:
-                    tokens[start:pos] = [
-                        Token(
-                            type=Token.t_complex_style,
-                            children=tokens[start + 1: pos]
-                        )
-                    ]
-                    self.styles.append(tokens[start])
-                    pos = start + 1
-                    start = None
+                pos, start = self._update_token_counts_and_styles(token, pos, start, tokens)
             elif token.type == Token.t_newline:
                 if start is not None:
                     tokens[start:pos] = [
@@ -333,6 +339,24 @@ class ParsePreformatted:
             self.tokens = token
             self.run()
 
+    def _handle_complex_preformatted_tokens(self, tokens, i, start):
+        sub = tokens[start + 1: i + 1]
+        if start > 0 and tokens[start - 1].type == Token.t_complex_preformatted:
+            del tokens[start: i + 1]
+            tokens[start - 1].children.extend(sub)
+            i = start
+        else:
+            tokens[start: i + 1] = [
+                Token(
+                    type=Token.t_complex_preformatted,
+                    children=sub,
+                    blocknode=True,
+                )
+            ]
+            i = start + 1
+        start = None
+        return i, start
+
     def run(self):
         tokens = self.tokens
         i = 0
@@ -345,21 +369,7 @@ class ParsePreformatted:
                 start = i
                 i += 1
             elif token.type == Token.t_newline and start is not None:
-                sub = tokens[start + 1: i + 1]
-                if start > 0 and tokens[start - 1].type == Token.t_complex_preformatted:
-                    del tokens[start: i + 1]
-                    tokens[start - 1].children.extend(sub)
-                    i = start
-                else:
-                    tokens[start: i + 1] = [
-                        Token(
-                            type=Token.t_complex_preformatted,
-                            children=sub,
-                            blocknode=True,
-                        )
-                    ]
-                    i = start + 1
-                start = None
+                i, start = self._handle_complex_preformatted_tokens(tokens, i, start)
             elif token.blocknode or (
                 token.type == Token.t_complex_tag
                 and token.tagname in ("blockquote", "table", "timeline", "div")

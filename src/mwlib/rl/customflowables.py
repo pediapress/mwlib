@@ -121,6 +121,96 @@ class Figure(Flowable):
         return (self.width, self.height)
 
 
+def get_figure_size(figure, avail_width, avail_height):
+    width, height = figure.wrap(avail_width, avail_height)
+    return width, height
+
+
+def get_paragraph_width(paragraph):
+    return (
+        paragraph.style.leftIndent
+        + paragraph.style.rightIndent
+        + paragraph.width
+    )
+
+
+def get_float_width(full_width, max_width):
+    return full_width - max_width
+
+
+def get_n_float_lines(total_hf, para_heights, leading):
+    return max(0, int((total_hf - (sum(para_heights))) / leading))
+
+
+def get_auto_leading_height(paragraph):
+    auto_leading = (
+        getattr(paragraph.style, "auto_leading")
+        if hasattr(paragraph, "style")
+        else ""
+    )
+    if (
+        hasattr(paragraph, "style")
+        and auto_leading == "max"
+        and paragraph.blPara.kind == 1
+    ):
+        p_height = 0
+        for line in paragraph.blPara.lines:
+            p_height += (
+                max(line.ascent - line.descent, paragraph.style.leading) * 1.025
+            )  # magic factor! auto_leading==max increases line-height
+    else:
+        if auto_leading == "max":
+            p_height = len(paragraph.blPara.lines) * max(
+                paragraph.style.leading, 1.2 * paragraph.style.fontSize
+            )  # used to be 1.2 instead of 1.0
+        else:
+            p_height = len(paragraph.blPara.lines) * paragraph.style.leading
+    return p_height
+
+
+def get_paragraph_height(paragraph):
+    return (
+        len(paragraph.blPara.lines) * paragraph.style.leading
+        + paragraph.style.spaceBefore
+        + paragraph.style.spaceAfter
+    )
+
+
+def handle_hr_flowable(self, avail_width, max_width, total_hf):
+    self.para_heights.append(1)
+    self._offsets.append(0)
+    if (total_hf - (sum(self.para_heights))) > 0:
+        self.horizontal_rule_offsets.append(max_width)
+    else:
+        self.horizontal_rule_offsets.append(0)
+
+
+def handle_inline_image(self, paragraph, float_width, n_float_lines, max_width, full_width):
+    self.resize_inline_image(paragraph, float_width)
+    paragraph.width = 0
+    if hasattr(paragraph, "blPara"):
+        del paragraph.blPara
+    if hasattr(paragraph, "style") and paragraph.style.wordWrap == "CJK":
+        paragraph.blPara = paragraph.breakLinesCJK(
+            n_float_lines * [float_width] + [full_width]
+        )
+    else:
+        paragraph.blPara = paragraph.breakLines(
+            n_float_lines * [float_width] + [full_width]
+        )
+    if self.fig_align == "left":
+        self._offsets.append([max_width] * (n_float_lines) + [0])
+
+
+def handle_paragraph(self, paragraph, full_width, max_width, total_hf):
+    float_width = get_float_width(full_width, max_width)
+    n_float_lines = get_n_float_lines(total_hf, self.para_heights, paragraph.style.leading)
+    handle_inline_image(self, paragraph, float_width, n_float_lines, max_width, full_width)
+    auto_leading_height = get_auto_leading_height(paragraph)
+    paragraph_height = get_paragraph_height(paragraph)
+    self.para_heights.append(paragraph_height + auto_leading_height)
+
+  
 class FiguresAndParagraphs(Flowable):
     """takes a list of figures and paragraphs and floats the figures
     next to the paragraphs.
@@ -186,76 +276,61 @@ class FiguresAndParagraphs(Flowable):
         self.horizontal_rule_offsets = []
         total_hf = self._get_v_offset()
         for figure in self.figures:
-            width, height = figure.wrap(avail_width, avail_height)
+            width, height = get_figure_size(figure, avail_width, avail_height)
             total_hf += height
             max_width = max(max_width, width)
             self.wfs.append(width)
             self.hfs.append(height)
+
         self.para_heights = []
         self._offsets = []
         for paragraph in self.paragraphs:
             if isinstance(paragraph, HRFlowable):
-                self.para_heights.append(
-                    1
-                )  # fixme: whats the acutal height of a HRFlowable?
-                self._offsets.append(0)
-                if (
-                    total_hf - (sum(self.para_heights))
-                ) > 0:  # behave like the associated heading
-                    self.horizontal_rule_offsets.append(max_width)
-                else:
-                    self.horizontal_rule_offsets.append(0)
+                handle_hr_flowable(self, avail_width, max_width, total_hf)
                 continue
-            full_width = (
-                avail_width - paragraph.style.leftIndent - paragraph.style.rightIndent
-            )
-            float_width = full_width - max_width
-            self.resize_inline_image(paragraph, float_width)
-            n_float_lines = max(
-                0, int((total_hf - (sum(self.para_heights))) / paragraph.style.leading)
-            )
-            paragraph.width = 0
-            if hasattr(paragraph, "blPara"):
-                del paragraph.blPara
-            if hasattr(paragraph, "style") and paragraph.style.wordWrap == "CJK":
-                paragraph.blPara = paragraph.breakLinesCJK(
-                    n_float_lines * [float_width] + [full_width]
-                )
-            else:
-                paragraph.blPara = paragraph.breakLines(
-                    n_float_lines * [float_width] + [full_width]
-                )
-            if self.fig_align == "left":
-                self._offsets.append([max_width] * (n_float_lines) + [0])
-            auto_leading = (
-                getattr(paragraph.style, "auto_leading")
-                if hasattr(paragraph, "style")
-                else ""
-            )
-            if (
-                hasattr(paragraph, "style")
-                and auto_leading == "max"
-                and paragraph.blPara.kind == 1
-            ):
-                p_height = 0
-                for line in paragraph.blPara.lines:
-                    p_height += (
-                        max(line.ascent - line.descent, paragraph.style.leading) * 1.025
-                    )  # magic factor! auto_leading==max increases line-height
-            else:
-                if auto_leading == "max":
-                    p_height = len(paragraph.blPara.lines) * max(
-                        paragraph.style.leading, 1.2 * paragraph.style.fontSize
-                    )  # used to be 1.2 instead of 1.0
-                else:
-                    p_height = len(paragraph.blPara.lines) * paragraph.style.leading
-            self.para_heights.append(
-                p_height + paragraph.style.spaceBefore + paragraph.style.spaceAfter
-            )
+
+            full_width = get_paragraph_width(paragraph)
+            handle_paragraph(self, paragraph, full_width, max_width, total_hf)
 
         self.width = avail_width
         self.height = max(sum(self.para_heights), total_hf)
         return (avail_width, self.height)
+
+    def draw_figures(self, canv, horizontal_offsets, vertical_offset):
+        for i, figure in enumerate(self.figures):
+            vertical_offset += self.hfs[i]
+            figure.drawOn(canv, horizontal_offsets[i], self.height - vertical_offset)
+        return vertical_offset
+
+    def draw_paragraphs(self, canv, count, paragraph):
+        canv.translate(0, -paragraph.style.spaceBefore)
+        paragraph.canv = canv
+        paragraph.draw()
+        canv.translate(0, -self.para_heights[count] + paragraph.style.spaceBefore)
+
+    def handle_paragraph_offset(self, paragraph, count):
+        if self.fig_align == "left":
+            paragraph._offsets = self._offsets[count]
+            if hasattr(paragraph, "style") and hasattr(paragraph.style, "bulletIndent"):
+                if not self.rtl:
+                    paragraph.style.bulletIndent += paragraph._offsets[0]
+                else:
+                    paragraph.style.bulletIndent -= (self.paragraphs[0]._offsets[0] - 34)
+
+    def handle_horizontal_rule(self, canv, paragraph, width_offset):
+        paragraph.canv = canv
+        if self.fig_align == "left":
+            canv.translate(width_offset, 0)
+        paragraph.wrap(self.width - width_offset, self.height)
+        paragraph.draw()
+
+    def handle_paragraph(self, canv, count, paragraph):
+        self.handle_paragraph_offset(paragraph, count)
+        if isinstance(paragraph, HRFlowable):
+            width_offset = self.horizontal_rule_offsets.pop(0)
+            self.handle_horizontal_rule(canv, paragraph, width_offset)
+        else:
+            self.draw_paragraphs(canv, count, paragraph)
 
     def draw(self):
         canv = self.canv
@@ -266,40 +341,83 @@ class FiguresAndParagraphs(Flowable):
         else:
             horizontal_offsets = [self.width - wf for wf in self.wfs]
 
-        for i, figure in enumerate(self.figures):
-            vertical_offset += self.hfs[i]
-            figure.drawOn(canv, horizontal_offsets[i], self.height - vertical_offset)
-
-        canv.translate(0, self.height)
+        vertical_offset = self.draw_figures(canv, horizontal_offsets, vertical_offset)
 
         for count, paragraph in enumerate(self.paragraphs):
-            if self.fig_align == "left":
-                paragraph._offsets = self._offsets[count]
-                if hasattr(paragraph, "style") and hasattr(
-                    paragraph.style, "bulletIndent"
-                ):
-                    if not self.rtl:
-                        paragraph.style.bulletIndent += paragraph._offsets[0]
-                    else:
-                        paragraph.style.bulletIndent -= (
-                            self.paragraphs[0]._offsets[0] - 34
-                        )
-            if isinstance(paragraph, HRFlowable):
-                paragraph.canv = canv
-                width_offset = self.horizontal_rule_offsets.pop(0)
-                if self.fig_align == "left":
-                    canv.translate(width_offset, 0)
-                paragraph.wrap(self.width - width_offset, self.height)
-                paragraph.draw()
-            else:
-                canv.translate(0, -paragraph.style.spaceBefore)
-                paragraph.canv = canv
-                paragraph.draw()
-                canv.translate(
-                    0, -self.para_heights[count] + paragraph.style.spaceBefore
-                )
+            self.handle_paragraph(canv, count, paragraph)
 
         canv.restoreState()
+
+    def get_fitting_figures(self, avail_height):
+        fitting_figures = []
+        height = self._get_v_offset()
+        for i, figure in enumerate(self.figures):
+            if (height + self.hfs[i]) < avail_height:
+                fitting_figures.append(figure)
+            else:
+                break
+            height += self.hfs[i]
+        return fitting_figures, height
+
+    def should_force_split(self, i, avail_height, height):
+        if hasattr(self.paragraphs[i], "style") and getattr(
+            self.paragraphs[i].style, "prevent_post_pagebreak", False
+        ):
+            if len(self.paragraphs) > i + 1 and hasattr(self.paragraphs, "style"):
+                line_height = self.paragraphs[i + 1].style.leading
+            else:
+                line_height = pdfstyles.LEADING
+            if (
+                len(self.paragraphs) > i + 1
+                and (
+                    height
+                    + self.para_heights[i]
+                    + pdfstyles.MIN_LINES_AFTER_HEADING * line_height
+                )
+                > avail_height
+            ):
+                return True
+        return False
+
+    def _handle_paragraph_splitting(self, i, avail_height, height, avail_width,
+                                    splitted_paragraph, force_split,
+                                    paragraph, fitting_paras):
+        if splitted_paragraph:
+            return force_split, splitted_paragraph
+        if self.should_force_split(i, avail_height, height):
+            force_split = True
+        para_frags = paragraph.split(
+            avail_width,
+            avail_height
+            - height
+            - paragraph.style.spaceBefore
+            - paragraph.style.spaceAfter
+            - 2 * paragraph.style.leading,
+        )  # one line-height "safety margin"
+        splitted_paragraph = True
+        if len(para_frags) == 2:
+            fitting_paras.append(para_frags[0])
+            return force_split, splitted_paragraph
+        elif len(para_frags) < 2:
+            return force_split, splitted_paragraph
+        else:  # fixme: not sure if splitting a paragraph can yield more than two elements...
+            return force_split, splitted_paragraph
+
+    def get_fitting_paragraphs(self, avail_height, avail_width):
+        fitting_paras = []
+        height = 0
+        splitted_paragraph = False
+        force_split = False
+        for i, paragraph in enumerate(self.paragraphs):
+            if (height + self.para_heights[i]) < avail_height and not force_split:
+                fitting_paras.append(paragraph)
+            else:
+                force_split, splitted_paragraph = self._handle_paragraph_splitting(i, avail_height, height,
+                                                                                   avail_width, splitted_paragraph,
+                                                                                   force_split, paragraph, fitting_paras)
+                break
+            height += self.para_heights[i]
+        return fitting_paras, height
 
     def split(self, avail_width, avail_height):
         if (
@@ -308,81 +426,17 @@ class FiguresAndParagraphs(Flowable):
             or hasattr(self, "keep_together_split")
         ):
             self.wrap(avail_width, avail_height)
-        height = self._get_v_offset()
-        if self.hfs[0] + height > avail_height:
-            return [PageBreak()] + [
-                FiguresAndParagraphs(
-                    self.figures, self.paragraphs, figure_margin=self.figure_margin
-                )
-            ]
-        fitting_figures = []
-        next_figures = []
-        for i, figure in enumerate(self.figures):
-            if (height + self.hfs[i]) < avail_height:
-                fitting_figures.append(figure)
-            else:
-                next_figures.append(figure)
-            height += self.hfs[i]
-        fitting_paras = []
-        next_paras = []
-        height = 0
-        splitted_paragraph = False
-        force_split = False
-        for i, paragraph in enumerate(self.paragraphs):
-            # force pagebreak if less than
-            # pdfstyles.min_lines_after_heading*line_height available height
-            if hasattr(self.paragraphs[i], "style") and getattr(
-                self.paragraphs[i].style, "prevent_post_pagebreak", False
-            ):
-                if len(self.paragraphs) > i + 1 and hasattr(self.paragraphs, "style"):
-                    line_height = self.paragraphs[i + 1].style.leading
-                else:
-                    line_height = pdfstyles.LEADING
-                if (
-                    len(self.paragraphs) > i + 1
-                    and (
-                        height
-                        + self.para_heights[i]
-                        + pdfstyles.MIN_LINES_AFTER_HEADING * line_height
-                    )
-                    > avail_height
-                ):
-                    force_split = True
-            if (height + self.para_heights[i]) < avail_height and not force_split:
-                fitting_paras.append(paragraph)
-            else:
-                if splitted_paragraph:
-                    next_paras.append(paragraph)
-                    continue
-                para_frags = paragraph.split(
-                    avail_width,
-                    avail_height
-                    - height
-                    - paragraph.style.spaceBefore
-                    - paragraph.style.spaceAfter
-                    - 2 * paragraph.style.leading,
-                )  # one line-height "safety margin"
-                splitted_paragraph = True
-                if len(para_frags) == 2:
-                    fitting_paras.append(para_frags[0])
-                    next_paras.append(para_frags[1])
-                elif len(para_frags) < 2:
-                    next_paras.append(paragraph)
-                else:  # fixme: not sure if splitting a paragraph can yield more than two elements...
-                    pass
-            height += self.para_heights[i]
 
-        if next_figures:
-            if next_paras:
-                next_elements = [
-                    FiguresAndParagraphs(
-                        next_figures, next_paras, figure_margin=self.figure_margin
-                    )
-                ]
-            else:
-                next_elements = next_figures
+        fitting_figures, height = self.get_fitting_figures(avail_height)
+        fitting_paras, height = self.get_fitting_paragraphs(avail_height, avail_width)
+
+        if height < avail_height:
+            next_elements = self.paragraphs[len(fitting_paras):]
         else:
-            next_elements = next_paras if next_paras else []
+            next_elements = self.figures[len(fitting_figures):] + self.paragraphs[
+                len(fitting_paras):
+            ]
+
         return [
             FiguresAndParagraphs(
                 fitting_figures, fitting_paras, figure_margin=self.figure_margin

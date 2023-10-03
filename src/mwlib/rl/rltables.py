@@ -34,6 +34,54 @@ def scale_images(data):
                     )
 
 
+def get_remaining_space(avail_width, summedwidths, minwidths, recursion_depth, data, table, nesting_level):
+    remaining_space = avail_width - sum(summedwidths)
+    if remaining_space < 0:
+        remaining_space = avail_width - sum(minwidths)
+        if remaining_space < 0:
+            if recursion_depth == 0:
+                scale_images(data)
+                return get_col_widths(
+                    data, table=table,
+                    recursion_depth=1, nesting_level=nesting_level
+                )
+            else:
+                return None
+        else:
+            _widths = minwidths
+    else:
+        _widths = summedwidths
+    return _widths, remaining_space
+
+
+def calculate_table_cell_widths_and_breaks(table, avail_width, cell, i, j, minwidths, maxbreaks, summedwidths):
+    cellwidth = 0
+    try:
+        colspan = getattr(table.children[i].children[j], "colspan", 1)
+    except IndexError:  # caused by empty row b/c of rowspanning
+        colspan = 1
+    for element in cell:
+        minw, minh = element.wrap(0, pdfstyles.PRINT_HEIGHT)
+        _, maxh = element.wrap(avail_width, pdfstyles.PRINT_HEIGHT)
+        minw += 6  # FIXME +6 is the cell padding we are using
+        cellwidth += minw
+        rows = (
+            minh / maxh - 0.5 if maxh > 0 else 0
+        )  # approx. #linebreaks - smooted out
+        if colspan > 1:
+            for offset in range(colspan):
+                minwidths[j + offset] = max(
+                    minw / colspan, minwidths[j + offset]
+                )
+                maxbreaks[j + offset] = max(
+                    rows / colspan, maxbreaks[j + offset]
+                )
+        else:
+            minwidths[j] = max(minw, minwidths[j])
+            maxbreaks[j] = max(rows, maxbreaks[j])
+    summedwidths[j] = max(cellwidth, summedwidths[j])
+
+
 def get_col_widths(data, table=None, recursion_depth=0, nesting_level=1):
     """
     the widths for the individual columns are calculated.
@@ -53,31 +101,9 @@ def get_col_widths(data, table=None, recursion_depth=0, nesting_level=1):
     maxbreaks = [0 for x in range(len(data[0]))]
     for i, row in enumerate(data):
         for j, cell in enumerate(row):
-            cellwidth = 0
-            try:
-                colspan = getattr(table.children[i].children[j], "colspan", 1)
-            except IndexError:  # caused by empty row b/c of rowspanning
-                colspan = 1
-            for element in cell:
-                minw, minh = element.wrap(0, pdfstyles.PRINT_HEIGHT)
-                _, maxh = element.wrap(avail_width, pdfstyles.PRINT_HEIGHT)
-                minw += 6  # FIXME +6 is the cell padding we are using
-                cellwidth += minw
-                rows = (
-                    minh / maxh - 0.5 if maxh > 0 else 0
-                )  # approx. #linebreaks - smooted out
-                if colspan > 1:
-                    for offset in range(colspan):
-                        minwidths[j + offset] = max(
-                            minw / colspan, minwidths[j + offset]
-                        )
-                        maxbreaks[j + offset] = max(
-                            rows / colspan, maxbreaks[j + offset]
-                        )
-                else:
-                    minwidths[j] = max(minw, minwidths[j])
-                    maxbreaks[j] = max(rows, maxbreaks[j])
-            summedwidths[j] = max(cellwidth, summedwidths[j])
+            calculate_table_cell_widths_and_breaks(
+                table, avail_width, cell, i, j, minwidths, maxbreaks, summedwidths
+            )
 
     parent_cells = table.get_parent_nodes_by_class(Cell)
     parent_tables = table.get_parent_nodes_by_class(Table)
@@ -91,23 +117,9 @@ def get_col_widths(data, table=None, recursion_depth=0, nesting_level=1):
         avail_width -= 8
     elif nesting_level > 1:
         return minwidths
-
-    remaining_space = avail_width - sum(summedwidths)
-    if remaining_space < 0:
-        remaining_space = avail_width - sum(minwidths)
-        if remaining_space < 0:
-            if recursion_depth == 0:
-                scale_images(data)
-                return get_col_widths(
-                    data, table=table,
-                    recursion_depth=1, nesting_level=nesting_level
-                )
-            else:
-                return None
-        else:
-            _widths = minwidths
-    else:
-        _widths = summedwidths
+    _widths, remaining_space = get_remaining_space(
+        avail_width, summedwidths, minwidths, recursion_depth, data, table, nesting_level
+    )
 
     totalbreaks = sum(maxbreaks)
     if totalbreaks == 0:
@@ -120,121 +132,40 @@ def get_col_widths(data, table=None, recursion_depth=0, nesting_level=1):
         return widths
 
 
+def get_cell_node_types(cell):
+    cell_node_types = []
+    for item in cell.children:
+        if not item.is_block_node:
+            cell_node_types.append(Text)
+        else:
+            cell_node_types.append(item.__class__)
+    return cell_node_types
+
+
+def get_cell_text_len(cell):
+    cell_text_len = 0
+    for item in cell.children:
+        cell_text_len += len(item.get_all_display_text())
+    return cell_text_len
+
+
+def get_row_node_info(row):
+    row_node_info = []
+    for cell in row:
+        if cell.children:
+            cell_node_types = get_cell_node_types(cell)
+            cell_text_len = get_cell_text_len(cell)
+            row_node_info.append((cell_node_types, cell_text_len))
+    return row_node_info
+
+
 def get_content_type(table):
     node_info = []
     for row in table.children:
-        row_node_info = []
-        for cell in row:
-            cell_node_types = []
-            cell_text_len = 0
-            for item in cell.children:
-                if (
-                    not item.is_block_node
-                ):  # any inline node is treated as a regular TextNode for simplicity
-                    cell_node_types.append(Text)
-                else:
-                    cell_node_types.append(item.__class__)
-                cell_text_len += len(item.get_all_display_text())
-            if cell.children:
-                row_node_info.append((cell_node_types, cell_text_len))
+        row_node_info = get_row_node_info(row)
         if row_node_info:
             node_info.append(row_node_info)
     return node_info
-
-
-def reformat_table(table, max_cols):
-    node_info = get_content_type(table)
-    num_cols = max_cols
-
-    only_tables = (
-        len(table.children) > 0
-    )  # if table is empty only_tables and only_lists are False
-    only_lists = len(table.children) > 0
-    if not node_info:
-        only_tables = False
-        only_lists = False
-    for row in node_info:
-        for cell in row:
-            cell_node_types, _ = cell
-            if not all(nodetype == Table for nodetype in cell_node_types):
-                only_tables = False
-            if not all(nodetype == ItemList for nodetype in cell_node_types):
-                only_lists = False
-
-    if only_tables and num_cols > 1:
-        log.info("got table only table - removing container")
-        table = remove_container_table(table)
-    if only_lists and num_cols > 2:
-        log.info("got list only table - reducing columns to 2")
-        table = reduce_cols(table, colnum=2)
-    if only_lists:
-        log.info("got list only table - splitting list items")
-        table = split_list_items(table)
-        pass
-    return table
-
-
-def split_list_items(table):
-    new_table = table.copy()
-    new_table.children = []
-    for row in table.children:
-        new_row = Row()
-        cols = []
-        max_items = 0
-        for cell in row:
-            items = []
-            for child in cell.children:
-                if child.__class__ == ItemList:
-                    items.extend(child.children)
-            cols.append(items)
-            max_items = max(max_items, len(items))
-        for i in range(max_items):
-            for j, _ in enumerate(cols):
-                try:
-                    item = cols[j][i]
-                    item_list = ItemList()
-                    item_list.append_child(item)
-                    new_cell = Cell()
-                    new_cell.append_child(item_list)
-                    new_row.append_child(new_cell)
-                except IndexError:
-                    new_row.append_child(Cell())
-            new_table.append_child(new_row)
-            new_row = Row()
-    return new_table
-
-
-def reduce_cols(table, colnum=2):
-    new_table = table.copy()
-    new_table.children = []
-    for row in table.children:
-        new_row = Row()
-        for column in row:
-            new_column = column.copy()
-            if len(new_row.children) == colnum:
-                new_table.append_child(new_row)
-                new_row = Row()
-            new_row.append_child(new_column)
-        if len(new_row.children) > 0:
-            while len(new_row.children) < colnum:
-                new_row.append_child(Cell())
-            new_table.append_child(new_row)
-    return new_table
-
-
-def remove_container_table(containertable):
-    newtables = []
-    for row in containertable:
-        for cell in row:
-            for item in cell:
-                if item.__class__ == Table:
-                    newtables.append(item)
-                else:
-                    log.info("unmatched node:", item.__class__)
-    return newtables
-
-
-#############################################
 
 
 def custom_calc_widths(table, avail_width):

@@ -28,6 +28,28 @@ def process_expander_and_siteinfo(wikidb, title, raw, expand_templates):
     return template_expander, uniquifier, siteinfo, _input
 
 
+def get_source(wikidb, title, revision):
+    src = None
+    if hasattr(wikidb, "get_source"):
+        src = wikidb.get_source(title, revision=revision)
+        if isinstance(src, dict):
+            raise ValueError("wikidb.get_source returned a dict. this is no longer supported")
+    if not src:
+        src = metabook.Source()
+    return src
+
+
+def get_lang_and_magicwords(lang, src, magicwords, siteinfo):
+    if lang is None:
+        lang = src.language
+    if magicwords is None:
+        if siteinfo is not None and "magicwords" in siteinfo:
+            magicwords = siteinfo["magicwords"]
+        else:
+            magicwords = src.get("magicwords")
+    return lang, magicwords
+
+
 def parse_string(
     title=None,
     raw=None,
@@ -50,23 +72,8 @@ def parse_string(
         template_expander, uniquifier, siteinfo, _input = process_expander_and_siteinfo(
             wikidb, title, raw, expand_templates
         )
-
-        src = None
-        if hasattr(wikidb, "get_source"):
-            src = wikidb.get_source(title, revision=revision)
-            if isinstance(src, dict):
-                raise ValueError("wikidb.get_source returned a dict. this is no longer supported")
-
-        if not src:
-            src = metabook.Source()
-
-        if lang is None:
-            lang = src.language
-        if magicwords is None:
-            if siteinfo is not None and "magicwords" in siteinfo:
-                magicwords = siteinfo["magicwords"]
-            else:
-                magicwords = src.get("magicwords")
+        src = get_source(wikidb, title, revision)
+        lang, magicwords = get_lang_and_magicwords(lang, src, magicwords, siteinfo)
 
     if siteinfo is None:
         nshandler = nshandling.get_nshandler_for_lang(lang)

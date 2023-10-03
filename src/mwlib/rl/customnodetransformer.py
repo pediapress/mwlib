@@ -21,8 +21,6 @@ except ImportError:
 
 
 class CustomNodeTransformer:
-    def __init__(self):
-        pass
 
     def _update_styles(self, node, styles):
         node_style = node.vlist.get("style", {})

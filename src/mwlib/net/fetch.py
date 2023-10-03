@@ -642,7 +642,7 @@ class Fetcher:
         for page in pages:
             title = page.get("title")
             _, partial = title.split(":", 1)
-            page["title"] = "{}:{}".format(local_nsname, partial)
+            page["title"] = f"{local_nsname}:{partial}"
 
             revisions = page.get("revisions", [])
             # the revision id's could clash with some local ids. remove them.

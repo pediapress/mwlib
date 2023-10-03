@@ -131,6 +131,59 @@ class TableRowParser:
             token.type == T.t_html_tag and token.rawtagname in ("td", "th")
         )
 
+    def should_find_modifier(self, row_begin_token):
+        if row_begin_token is None:
+            return False
+        if row_begin_token.rawtagname:
+            return False
+        return True
+
+    def args(self, row_begin_token):
+        if row_begin_token is None:
+            return {}
+        return {"vlist": row_begin_token.vlist}
+
+    def _handle_table_row_tokens(self, start, i, tokens, row_begin_token, remove_start):
+        if start is not None:
+            children = tokens[start + remove_start: i]
+            tokens[start:i] = [
+                T(
+                    type=T.t_complex_table_row,
+                    tagname="tr",
+                    start=tokens[start].start,
+                    children=children,
+                    **self.args(row_begin_token)
+                )
+            ]
+            if self.should_find_modifier(row_begin_token):
+                self.find_modifier(tokens[start])
+            TableCellParser(children, self.xopts)
+            start += 1  # we didn't remove the start symbol above
+            row_begin_token = tokens[start]
+            remove_start = 1
+            i = start + 1
+        else:
+            row_begin_token = tokens[i]
+            remove_start = 1
+            start = i
+            i += 1
+        return start, i, row_begin_token, remove_start
+
+    def extract_complex_table_row(self, tokens, start, i, row_begin_token, remove_start):
+        sub = tokens[start + remove_start: i]
+        tokens[start: i + 1] = [
+            T(
+                type=T.t_complex_table_row,
+                tagname="tr",
+                start=tokens[start].start,
+                children=sub,
+                **self.args(row_begin_token)
+            )
+        ]
+        if self.should_find_modifier(row_begin_token):
+            self.find_modifier(tokens[start])
+        TableCellParser(sub, self.xopts)
+
     def run(self):
         tokens = self.tokens
         i = 0
@@ -139,18 +192,6 @@ class TableRowParser:
         remove_start = 1
         row_begin_token = None
 
-        def should_find_modifier():
-            if row_begin_token is None:
-                return False
-            if row_begin_token.rawtagname:
-                return False
-            return True
-
-        def args():
-            if row_begin_token is None:
-                return {}
-            return {"vlist": row_begin_token.vlist}
-
         while i < len(tokens):
             if start is None and self.is_table_cell_start(tokens[i]):
                 row_begin_token = None
@@ -158,45 +199,10 @@ class TableRowParser:
                 remove_start = 0
                 i += 1
             elif self.is_table_row_start(tokens[i]):
-                if start is not None:
-                    children = tokens[start + remove_start: i]
-                    tokens[start:i] = [
-                        T(
-                            type=T.t_complex_table_row,
-                            tagname="tr",
-                            start=tokens[start].start,
-                            children=children,
-                            **args()
-                        )
-                    ]
-                    if should_find_modifier():
-                        self.find_modifier(tokens[start])
-                    TableCellParser(children, self.xopts)
-                    start += 1  # we didn't remove the start symbol above
-                    row_begin_token = tokens[start]
-                    remove_start = 1
-                    i = start + 1
-
-                else:
-                    row_begin_token = tokens[i]
-                    remove_start = 1
-                    start = i
-                    i += 1
+                start, i, row_begin_token, remove_start = self._handle_table_row_tokens(start, i, tokens, row_begin_token, remove_start)
             elif self.is_table_row_end(tokens[i]):
                 if start is not None:
-                    sub = tokens[start + remove_start: i]
-                    tokens[start: i + 1] = [
-                        T(
-                            type=T.t_complex_table_row,
-                            tagname="tr",
-                            start=tokens[start].start,
-                            children=sub,
-                            **args()
-                        )
-                    ]
-                    if should_find_modifier():
-                        self.find_modifier(tokens[start])
-                    TableCellParser(sub, self.xopts)
+                    self.extract_complex_table_row(tokens, start, i, row_begin_token, remove_start)
                     i = start + 1
                     start = None
                     row_begin_token = None
@@ -213,10 +219,10 @@ class TableRowParser:
                     tagname="tr",
                     start=tokens[start].start,
                     children=sub,
-                    **args()
+                    **self.args(row_begin_token)
                 )
             ]
-            if should_find_modifier():
+            if self.should_find_modifier(row_begin_token):
                 self.find_modifier(tokens[start])
             TableCellParser(sub, self.xopts)
 
@@ -255,6 +261,18 @@ class TableParser:
 
         compute_mod()
 
+    def parse_complex_caption(self, children, start, i, modifier):
+        if modifier:
+            mod = T.join_as_text(children[start:modifier])
+            vlist = util.parse_params(mod)
+            sub = children[modifier + 1: i]
+        else:
+            sub = children[start + 1: i]
+            vlist = {}
+
+        caption = T(type=T.t_complex_caption, children=sub, vlist=vlist)
+        children[start:i] = [caption]
+
     def find_caption(self, table):
         children = table.children
         start = None
@@ -277,16 +295,7 @@ class TableParser:
             if token.tagname not in ("ref",) and (
                 token.text is None or token.text.startswith("\n")
             ):
-                if modifier:
-                    mod = T.join_as_text(children[start:modifier])
-                    vlist = util.parse_params(mod)
-                    sub = children[modifier + 1: i]
-                else:
-                    sub = children[start + 1: i]
-                    vlist = {}
-
-                caption = T(type=T.t_complex_caption, children=sub, vlist=vlist)
-                children[start:i] = [caption]
+                self.parse_complex_caption(children, start, i, modifier)
                 return
             elif token.text == "|" and modifier is None:
                 modifier = i
@@ -363,6 +372,19 @@ class TableFixer:
                 token.tagname = None
 
 
+def find_end_of_garbage(tokens, start, index, res, is_allowed):
+    while index < len(tokens):
+        if is_allowed(tokens[index]):
+            break
+        index += 1
+
+    garbage = tokens[start:index]
+    del tokens[start:index]
+    index = start
+    res.append(T(type=T.t_complex_node, children=garbage))
+    return index
+
+
 def extract_garbage(tokens, is_allowed, is_whitespace=None):
     if is_whitespace is None:
 
@@ -385,18 +407,8 @@ def extract_garbage(tokens, is_allowed, is_whitespace=None):
             if start is None:
                 start = index
             index += 1
-
             # find end of garbage
-
-            while index < len(tokens):
-                if is_allowed(tokens[index]):
-                    break
-                index += 1
-
-            garbage = tokens[start:index]
-            del tokens[start:index]
-            index = start
-            res.append(T(type=T.t_complex_node, children=garbage))
+            index = find_end_of_garbage(tokens, start, index, res, is_allowed)
 
     return res
 

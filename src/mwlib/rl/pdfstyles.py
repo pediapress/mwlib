@@ -215,6 +215,75 @@ class BaseStyle(ParagraphStyle):
         self.underlineWidth = 1
 
 
+def get_font_size(relsize, mode):
+    if relsize == "small":
+        font_size = SMALL_FONT_SIZE - 1
+    elif relsize == "big":
+        font_size = SMALL_FONT_SIZE + 1
+    elif mode in ["footer", "figure", "center", "references", "articlefoot"]:
+        font_size = SMALL_FONT_SIZE
+    elif mode == "booktitle":
+        font_size = 36
+    elif mode == "booksubtitle":
+        font_size = 24
+    elif mode == "License" or mode == "licenselist":
+        font_size = 5
+    elif mode == "toc_group":
+        font_size = 18
+    elif mode == "toc_chapter":
+        font_size = 14
+    elif mode == "toc_article":
+        font_size = 10
+    else:
+        font_size = None
+    return font_size
+
+
+def get_leading(mode):
+    if mode in ["footer", "figure", "center", "references", "articlefoot", "License", "licenselist"]:
+        leading = SMALL_LEADING
+    elif mode == "booktitle":
+        leading = 40
+    elif mode == "booksubtitle":
+        leading = 30
+    elif mode == "toc_group":
+        leading = 22
+    elif mode == "toc_chapter":
+        leading = 18
+    elif mode == "toc_article":
+        leading = 12
+    else:
+        leading = None
+    return leading
+
+
+def get_alignment(text_align, mode):
+    if text_align == "right":
+        alignment = TA_RIGHT
+    elif text_align == "center" or mode in ["footer", "figure", "center"]:
+        alignment = TA_CENTER
+    elif mode in ["references", "articlefoot", "source", "preformatted", "list", "attribution", "img_attribution"]:
+        alignment = TA_LEFT
+    else:
+        alignment = TA_LEFT
+    return alignment
+
+
+def set_conditional_font_and_leading(in_table, mode, relsize, font_size, leading, style):
+    if (
+        in_table
+        or mode in ["footer", "figure"]
+        or (mode == "preformatted" and relsize == "small")
+    ):
+        style.fontSize = SMALL_FONT_SIZE
+        style.bulletFontSize = SMALL_FONT_SIZE
+        style.leading = SMALL_LEADING
+        if font_size is not None:
+            style.fontSize = font_size
+        if leading is not None:
+            style.leading = leading
+
+
 def text_style(mode="p", indent_lvl=0, in_table=0,
                relsize="normal", text_align=None):
     """
@@ -233,6 +302,10 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
     if not text_align:
         text_align = "left"
 
+    font_size = get_font_size(relsize, mode)
+    leading = get_leading(mode)
+    alignment = get_alignment(text_align, mode)
+
     style = BaseStyle(
         name="text_style_%s_indent_%d_table_%d_size_%s"
         % (mode, indent_lvl, in_table, relsize)
@@ -244,54 +317,13 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
 
     if in_table > 0:
         style.alignment = TABLE_TEXT_ALIGN
-    if text_align == "right":
-        style.alignment = TA_RIGHT
-    elif text_align == "center":
-        style.alignment = TA_CENTER
+    style.alignment = alignment
 
-    if (
-        in_table
-        or mode in ["footer", "figure"]
-        or (mode == "preformatted" and relsize == "small")
-    ):
-        style.fontSize = SMALL_FONT_SIZE
-        style.bulletFontSize = SMALL_FONT_SIZE
-        style.leading = SMALL_LEADING
-        if relsize == "small":
-            style.fontSize -= 1
-        elif relsize == "big":
-            style.fontSize += 1
+    set_conditional_font_and_leading(in_table, mode, relsize, font_size, leading, style)
 
     if mode == "blockquote":
         style.rightIndent = PARA_RIGHT_INDENT
         indent_lvl += 1
-
-    if mode in ["footer", "figure", "center"]:
-        style.alignment = TA_CENTER
-
-    if mode in [
-        "references",
-        "articlefoot",
-        "source",
-        "preformatted",
-        "list",
-        "attribution",
-        "img_attribution",
-    ]:
-        style.alignment = TA_LEFT
-
-    if mode in ["attribution", "img_attribution"]:
-        style.fontSize = 6
-        style.leading = 8
-        style.spaceBefore = 6
-
-    if mode == "img_attribution":
-        style.spaceBefore = 2
-
-    if mode in ["articlefoot", "references"]:
-        style.fontSize = SMALL_FONT_SIZE
-        style.leading = SMALL_LEADING
-        style.bulletFontSize = SMALL_FONT_SIZE
 
     if mode in ['box', 'source', 'preformatted']:
         style.backColor = "#eeeeee"
@@ -314,53 +346,13 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
     else:
         style.leftIndent = indent_lvl * PARA_LEFT_INDENT
 
-    if mode == "booktitle":
-        style.fontSize = 36
-        style.leading = 40
-        style.spaceBefore = 16
-        style.fontName = SANS_FONT
-        style.alignment = TA_LEFT
+    if mode in ["attribution", "img_attribution"]:
+        style.fontSize = 6
+        style.leading = 8
+        style.spaceBefore = 6
 
-    if mode == "booksubtitle":
-        style.fontSize = 24
-        style.leading = 30
-        style.fontName = SANS_FONT
-        style.alignment = TA_LEFT
-
-    if WORD_WRAP == "RTL":
-        # switch all alignment, indentations for rtl languages
-        if style.alignment in [TA_LEFT, TA_JUSTIFY]:
-            style.alignment = TA_RIGHT
-        elif style.alignment == TA_RIGHT:
-            style.alignment = TA_LEFT
-
-        style.leftIndent, style.rightIndent = style.rightIndent, style.leftIndent
-
-    if mode == "License":
-        style.fontSize = 5
-        style.leading = 1
-        style.spaceBefore = 0
-
-    if mode == "licenselist":
-        style.fontSize = 5
-        style.leading = 1
-        style.spaceBefore = 0
-        style.bulletIndent = LIST_LEFT_INDENT * max(0, indent_lvl - 1)
-        style.leftIndent = LIST_LEFT_INDENT * indent_lvl
-        style.bulletFontSize = 5
-
-    if mode == "toc_group":
-        style.fontSize = 18
-        style.leading = 22
-
-    if mode == "toc_chapter":
-        style.fontSize = 14
-        style.leading = 18
-
-    if mode == "toc_article":
-        style.fontSize = 10
-        style.leading = 12
-        style.leftIndent = PARA_LEFT_INDENT
+    if mode == "img_attribution":
+        style.spaceBefore = 2
 
     return style
 

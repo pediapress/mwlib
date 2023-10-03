@@ -159,6 +159,98 @@ class _CompatScanner:
 
         self.allowed_tags = _get_tags()
 
+    def get_substring(self, text, start, tlen):
+        return text[start: start + tlen]
+
+    def append_to_result(self, res, token_type, text, start, tlen):
+        return res.append((token_type, self.get_substring(text, start, tlen)))
+
+    def _process_html_token_and_check_for_tag_match(self, tokens, iterator, text_start, text, tagname):
+        should_break = False
+        token_type, start, tlen = tokens[iterator]
+        if text_start is None:
+            text_start = start
+        if token_type == Token.t_html_tag:
+            tag_token = self.tagtoken(self.get_substring(text, start, tlen))
+            if tag_token.t == tagname:
+                should_break = True
+                end_token = (tag_token, self.get_substring(text, start, tlen))
+        text_end = start + tlen
+        iterator += 1
+        return should_break, iterator, text_start, text_end, end_token
+
+    def _process_tag_and_extract_text(self, tokens, i, text_start, text, tag_token, closing_or_self_closing, res, substr, numtokens):
+        should_continue = False
+        if closing_or_self_closing:
+            i += 1
+            should_continue = True
+        tagname = tag_token.t
+        res.append((tag_token, substr))
+        i += 1
+        text_start = None
+        text_end = None
+        end_token = None
+        while i < numtokens:
+            should_break, i, text_start, text_end, end_token = self._process_html_token_and_check_for_tag_match(tokens, i, text_start, text, tagname)
+            if should_break:
+                break
+        if text_end:
+            res.append(("TEXT", text[text_start:text_end]))
+        if end_token:
+            res.append(end_token)
+        return i, should_continue
+
+    def _handle_nowiki_tag_and_append_text(self, i, is_end_token, tag_token, text, tokens, res, numtokens, scanres):
+        i += 1
+        if is_end_token or tag_token.self_closing:
+            return i, True
+        while i < numtokens:
+            token_type, start, tlen = tokens[i]
+            if token_type == Token.t_html_tag:
+                tag_token = self.tagtoken(self.get_substring(text, start, tlen))
+                if tag_token.t == "nowiki":
+                    break
+            res.append(("TEXT", scanres.text((token_type,
+                                              start, tlen))))
+            i += 1
+        return i
+
+    def _append_allowed_tag_or_text(self, tag_token, res, substr):
+        if tag_token.t in self.allowed_tags:
+            res.append((tag_token, substr))
+        else:
+            res.append(("TEXT", substr))
+
+    def _append_table_start_or_end_token(self, is_end_token, res, text, start, tlen):
+        if is_end_token:
+            res.append(("ENDTABLE", self.get_substring(text, start, tlen)))
+        else:
+            res.append(("BEGINTABLE", self.get_substring(text, start, tlen)))
+
+    def _process_and_classify_html_tags(self, tokens, i, start, tlen, text, res, numtokens, scanres):
+        should_continue = False
+        substr = self.get_substring(text, start, tlen)
+        tag_token = self.tagtoken(substr)
+        is_end_token = isinstance(tag_token, EndTagToken)
+        closing_or_self_closing = is_end_token or tag_token.self_closing
+        if tag_token.t in self.tagextensions or tag_token.t in ("imagemap", "gallery"):
+            i, should_continue = self._process_tag_and_extract_text(tokens, i, None, text, tag_token, closing_or_self_closing, res, substr, numtokens)
+            if should_continue:
+                return i, True
+        elif tag_token.t == "nowiki":
+            i = self._handle_nowiki_tag_and_append_text(i, is_end_token, tag_token, text, tokens, res, numtokens, scanres)
+        elif tag_token.t == "table":
+            self._append_table_start_or_end_token(is_end_token, res, text, start, tlen)
+        elif tag_token.t in ["th", "td"]:
+            if not is_end_token:
+                res.append(("COLUMN", self.get_substring(text, start, tlen)))
+        elif tag_token.t == "tr":
+            if not is_end_token:
+                res.append(("ROW", self.get_substring(text, start, tlen)))
+        else:
+            self._append_allowed_tag_or_text(tag_token, res, substr)
+        return i, False
+
     def __call__(self, text):
         if self.allowed_tags is None:
             self._init_allowed_tags()
@@ -167,12 +259,6 @@ class _CompatScanner:
         scanres = ScanResult(text, tokens)
 
         res = []
-
-        def get_substring():
-            return text[start: start + tlen]
-
-        def append_to_result(token_type):
-            return res.append((token_type, get_substring()))
 
         ignore = self.ignore
         tok2compat = self.tok2compat
@@ -186,81 +272,17 @@ class _CompatScanner:
                 i += 1
                 continue
             elif compat is not None:
-                append_to_result(compat)
+                self.append_to_result(res, compat, text, start, tlen)
             elif token_type == Token.t_entity:
-                res.append(("TEXT", resolve_entity(get_substring())))
+                res.append(("TEXT", resolve_entity(self.get_substring(text, start, tlen))))
             elif token_type == Token.t_hrule:
-                res.append((self.tagtoken("<hr />"), get_substring()))
+                res.append((self.tagtoken("<hr />"), self.get_substring(text, start, tlen)))
             elif token_type == Token.t_html_tag:
-                substr = get_substring()
-
-                tag_token = self.tagtoken(substr)
-                is_end_token = isinstance(tag_token, EndTagToken)
-                closing_or_self_closing = is_end_token or tag_token.self_closing
-
-                if tag_token.t in self.tagextensions or tag_token.t in ("imagemap", "gallery"):
-                    if closing_or_self_closing:
-                        i += 1
-                        continue
-                    tagname = tag_token.t
-
-                    res.append((tag_token, substr))
-                    i += 1
-                    text_start = None
-                    text_end = None
-                    end_token = None
-
-                    while i < numtokens:
-                        token_type, start, tlen = tokens[i]
-                        if text_start is None:
-                            text_start = start
-
-                        if token_type == Token.t_html_tag:
-                            tag_token = self.tagtoken(get_substring())
-                            if tag_token.t == tagname:
-                                end_token = (tag_token, get_substring())
-                                break
-                        text_end = start + tlen
-
-                        i += 1
-
-                    if text_end:
-                        res.append(("TEXT", text[text_start:text_end]))
-
-                    if end_token:
-                        res.append(end_token)
-
-                elif tag_token.t == "nowiki":
-                    i += 1
-                    if is_end_token or tag_token.self_closing:
-                        continue
-                    while i < numtokens:
-                        token_type, start, tlen = tokens[i]
-                        if token_type == Token.t_html_tag:
-                            tag_token = self.tagtoken(get_substring())
-                            if tag_token.t == "nowiki":
-                                break
-                        res.append(("TEXT", scanres.text((token_type,
-                                                          start, tlen))))
-                        i += 1
-                elif tag_token.t == "table":
-                    if is_end_token:
-                        res.append(("ENDTABLE", get_substring()))
-                    else:
-                        res.append(("BEGINTABLE", get_substring()))
-                elif tag_token.t in ["th", "td"]:
-                    if not is_end_token:
-                        res.append(("COLUMN", get_substring()))
-                elif tag_token.t == "tr":
-                    if not is_end_token:
-                        res.append(("ROW", get_substring()))
-                else:
-                    if tag_token.t in self.allowed_tags:
-                        res.append((tag_token, substr))
-                    else:
-                        res.append(("TEXT", substr))
+                i, should_continue = self._process_and_classify_html_tags(tokens, i, start, tlen, text, res, numtokens, scanres)
+                if should_continue:
+                    continue
             else:
-                append_to_result(type)
+                self.append_to_result(res, type, text, start, tlen)
             i += 1
 
         return res
