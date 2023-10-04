@@ -121,7 +121,7 @@ def suggest_filename(metabook_data):
             return x.strip()
 
 
-class commands:
+class Commands:
     def statusfile(self):
         host = self.proxy._rpcclient.host
         port = self.proxy._rpcclient.port
@@ -129,17 +129,17 @@ class commands:
 
     def rpc_makezip(self, params=None):
         def doit(metabook_data=None, collection_id=None, base_url=None):
-            dir = get_collection_dir(collection_id)
+            collection_dir = get_collection_dir(collection_id)
 
             def getpath(p):
-                return os.path.join(dir, p)
+                return os.path.join(collection_dir, p)
 
             zip_path = getpath("collection.zip")
-            if os.path.isdir(dir):
+            if os.path.isdir(collection_dir):
                 if os.path.exists(zip_path):
                     return
             else:
-                os.mkdir(dir)
+                os.mkdir(collection_dir)
 
             metabook_path = getpath("metabook.json")
 
@@ -172,10 +172,10 @@ class commands:
             _, writer=None
         ):
             writer = writer or "rl"
-            dir = get_collection_dir(collection_id)
+            collection_dir = get_collection_dir(collection_id)
 
             def getpath(p):
-                return os.path.join(dir, p)
+                return os.path.join(collection_dir, p)
 
             self.qaddw(
                 channel="makezip",
@@ -282,7 +282,7 @@ def main():
     make_cachedir(CACHE_DIR)
     from mwlib.asynchronous import slave
 
-    slave.main(commands, numgreenlets=numgreenlets, argv=args)
+    slave.main(Commands, numgreenlets=numgreenlets, argv=args)
 
 
 if __name__ == "__main__":

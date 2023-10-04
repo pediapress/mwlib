@@ -180,18 +180,20 @@ class Formatter:
         elif font_style in ["x-large", "xx-large"]:
             self.set_relative_font_size(1.75)
 
-    # noinspection PyUnusedLocal
+    def _modify_or_reset_render_style(self, action, render_style):
+        if action == "change":
+            setattr(self, render_style,
+                    getattr(self, render_style) + 1)
+        elif action == "reset":
+            setattr(self, render_style, 0)
+
     def change_css_style(self, node):
         css = self.css_style_map
         for node_style, style_value in node.style.items():
             if node_style in css:
                 for render_style, action in css[node_style].get(style_value,
                                                                 []):
-                    if action == "change":
-                        setattr(self, render_style,
-                                getattr(self, render_style) + 1)
-                    elif action == "reset":
-                        setattr(self, render_style, 0)
+                    self._modify_or_reset_render_style(action, render_style)
                 if list(css[node_style].keys()) == ["*"]:
                     attr_name, method = css[node_style]["*"]
                     val = method(node)

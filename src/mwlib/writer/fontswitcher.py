@@ -127,6 +127,19 @@ class FontSwitcher:
                 return font_name
         return self.default_font
 
+    def _append_text_and_font_to_list(self, font, txt, new_txt_list):
+        if font != self.default_font:
+            if txt.startswith(" "):
+                new_txt_list.append((" ", self.default_font))
+                new_txt_list.append((txt[1:], font))
+            elif txt.endswith(" "):
+                new_txt_list.append((txt[:-1], font))
+                new_txt_list.append((" ", self.default_font))
+            else:
+                new_txt_list.append((txt, font))
+        else:
+            new_txt_list.append((txt, font))
+
     def get_font_list(self, txt, spaces_to_default=False):
         last_font, last_txt, txt_list = self.extract_last_font_last_text_and_text_list(txt)
 
@@ -136,17 +149,7 @@ class FontSwitcher:
         if spaces_to_default:
             new_txt_list = []
             for txt, font in txt_list:
-                if font != self.default_font:
-                    if txt.startswith(" "):
-                        new_txt_list.append((" ", self.default_font))
-                        new_txt_list.append((txt[1:], font))
-                    elif txt.endswith(" "):
-                        new_txt_list.append((txt[:-1], font))
-                        new_txt_list.append((" ", self.default_font))
-                    else:
-                        new_txt_list.append((txt, font))
-                else:
-                    new_txt_list.append((txt, font))
+                self._append_text_and_font_to_list(font, txt, new_txt_list)
             txt_list = new_txt_list
 
         if self.space_cjk:
@@ -156,6 +159,16 @@ class FontSwitcher:
             return txt_list, False
         return txt_list
 
+    def _get_processed_char_and_font(self, ord_c, blacklisted, last_font, text_char):
+        if ord_c in self.remove_chars:
+            text_char = ""
+        if ord_c in self.space_like_chars:
+            text_char = " "
+        if blacklisted:
+            text_char = chr(9633)  # U+25A1 WHITE SQUARE
+        font = last_font if last_font else self.default_font
+        return text_char, font
+
     def extract_last_font_last_text_and_text_list(self, txt):
         txt_list = []
         last_font = None
@@ -164,13 +177,7 @@ class FontSwitcher:
             ord_c = ord(text_char)
             blacklisted = self.char_blacklist.get(ord_c, False)
             if ord_c in self.no_switch_chars or blacklisted:
-                if ord_c in self.remove_chars:
-                    text_char = ""
-                if ord_c in self.space_like_chars:
-                    text_char = " "
-                if blacklisted:
-                    text_char = chr(9633)  # U+25A1 WHITE SQUARE
-                font = last_font if last_font else self.default_font
+                text_char, font = self._get_processed_char_and_font(ord_c, blacklisted, last_font, text_char)
             else:
                 font = self.get_font(ord_c)
             if font != last_font and last_txt:

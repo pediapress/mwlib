@@ -71,7 +71,7 @@ def strftime(date, fmt):
     result_time = time_1
     syear = "%4d" % (date.year,)
     for site in sites:
-        result_time = result_time[:site] + syear + result_time[site + 4:]
+        result_time = result_time[:site] + syear + result_time[site + 4 :]
     return result_time
 
 
@@ -80,9 +80,7 @@ def strftime(date, fmt):
 
 
 def test():
-    time = strftime(datetime.date(1800,
-                               9, 23),
-                 "%Y has the same days as 1980 and 2008")
+    time = strftime(datetime.date(1800, 9, 23), "%Y has the same days as 1980 and 2008")
     if time != "1800 has the same days as 1980 and 2008":
         raise AssertionError(time)
 

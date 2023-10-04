@@ -42,6 +42,23 @@ class AliasMap:
         return self._name2aliases.get(name) or []
 
 
+def _combine_string(node):
+    # combine strings
+    res = []
+    tmp = []
+    for optimized_node in (optimize(child_node) for child_node in node):
+        if isinstance(optimized_node, six.string_types) and optimized_node is not eqmark:
+            tmp.append(optimized_node)
+        else:
+            if tmp:
+                res.append("".join(tmp))
+                tmp = []
+            res.append(optimized_node)
+    if tmp:
+        res.append("".join(tmp))
+    node[:] = res
+
+
 def optimize(node):
     if type(node) is tuple:
         return tuple(optimize(x) for x in node)
@@ -55,21 +72,7 @@ def optimize(node):
     if isinstance(node, Node):  # (Variable, Template, IfNode)):
         return node.__class__(tuple(optimize(x) for x in node))
     else:
-        # combine strings
-        res = []
-        tmp = []
-        for optimized_node in (optimize(child_node) for child_node in node):
-            if isinstance(optimized_node, six.string_types) and optimized_node is not eqmark:
-                tmp.append(optimized_node)
-            else:
-                if tmp:
-                    res.append("".join(tmp))
-                    tmp = []
-                res.append(optimized_node)
-        if tmp:
-            res.append("".join(tmp))
-
-        node[:] = res
+        _combine_string(node)
 
     if len(node) == 1 and type(node) in (list, Node):
         return optimize(node[0])
@@ -225,6 +228,21 @@ class Parser:
                 break
         return True
 
+    def _parse_name_and_argument_flag(self, children):
+        name = []
+        append_arg = False
+        idx = 0
+        for idx, child in enumerate(children):
+            if child == "|":
+                append_arg = True
+                break
+            name.append(child)
+
+        name = optimize(name)
+        if isinstance(name, six.text_type):
+            name = name.strip()
+        return name, idx, append_arg
+
     def template_from_children(self, children):
         if children and isinstance(children[0], six.text_type):
             stripped_lower_text = children[0].strip().lower()
@@ -242,20 +260,7 @@ class Parser:
                     return self.magic_node_from_children(
                         children, magic_nodes.registry[name]
                     )
-
-        # find the name
-        name = []
-        append_arg = False
-        idx = 0
-        for idx, child in enumerate(children):
-            if child == "|":
-                append_arg = True
-                break
-            name.append(child)
-
-        name = optimize(name)
-        if isinstance(name, six.text_type):
-            name = name.strip()
+        name, idx, append_arg = self._parse_name_and_argument_flag(children)
 
         if not self._is_good_name(name):
             return Node(["{{"] + children + ["}}"])
@@ -263,6 +268,30 @@ class Parser:
         args = self._parse_args(children[idx + 1:], append_arg=append_arg)
 
         return Template([name, tuple(args)])
+
+    def _handle_closing_braces_for_template_or_variable(self, closelen, numbraces, parsed_nodes):
+        if closelen == 2 or numbraces == 2:
+            template = self.template_from_children(parsed_nodes)
+            parsed_nodes = []
+            parsed_nodes.append(template)
+            self._consume_closing_braces(2)
+            numbraces -= 2
+        else:
+            var = self.variable_from_children(parsed_nodes)
+            parsed_nodes = []
+            parsed_nodes.append(var)
+            self._consume_closing_braces(3)
+            numbraces -= 3
+        return numbraces, parsed_nodes
+
+    def _handle_wiki_links(self, txt, parsed_nodes, linkcount):
+        if txt == "[[":
+            linkcount += 1
+        elif txt == "]]" and linkcount > 0:
+            linkcount -= 1
+        parsed_nodes.append(txt)
+        self.pos += 1
+        return linkcount
 
     def parse_open_brace(self):
         token_type, txt = self.get_token()
@@ -282,31 +311,14 @@ class Parser:
                 break
             elif token_type == Symbols.bra_close and linkcount == 0:
                 closelen = len(txt)
-                if closelen == 2 or numbraces == 2:
-                    template = self.template_from_children(parsed_nodes)
-                    parsed_nodes = []
-                    parsed_nodes.append(template)
-                    self._consume_closing_braces(2)
-                    numbraces -= 2
-                else:
-                    var = self.variable_from_children(parsed_nodes)
-                    parsed_nodes = []
-                    parsed_nodes.append(var)
-                    self._consume_closing_braces(3)
-                    numbraces -= 3
+                numbraces, parsed_nodes = self._handle_closing_braces_for_template_or_variable(closelen, numbraces, parsed_nodes)
 
                 if numbraces < 2:
                     break
             elif token_type == Symbols.noi:
                 self.pos += 1  # ignore <noinclude>
             else:  # link, txt
-                if txt == "[[":
-                    linkcount += 1
-                elif txt == "]]" and linkcount > 0:
-                    linkcount -= 1
-
-                parsed_nodes.append(txt)
-                self.pos += 1
+                linkcount = self._handle_wiki_links(txt, parsed_nodes, linkcount)
 
         if numbraces:
             parsed_nodes.insert(0, "{" * numbraces)

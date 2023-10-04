@@ -1849,6 +1849,46 @@ class RlWriter:
         figure.float_figure = img_node.align not in ["center", "none"]
         return [figure]
 
+    def _calculate_min_height_and_aspect_ratios(self, row, aspect_ratios, row_heights):
+        min_height = 999999
+        for cell in row:
+            if cell:
+                figure = cell[0]
+                min_height = min(min_height, figure.imgHeight)
+                aspect_ratios.append(figure.imgHeight / figure.imgWidth)
+        row_heights.append(min_height)
+
+    def _adjust_figure_dimensions_based_on_row_height(self, row, row_heights, row_idx, aspect_ratios):
+        for cell in row:
+            if cell:
+                figure = cell[0]
+                figure.i.drawWidth = row_heights[row_idx] / aspect_ratios.pop(0)
+                figure.i.drawHeight = row_heights[row_idx]
+
+    def _add_caption_to_table(self, caption, table):
+        txt = self.formatter.style_text(caption)
+        elements = build_paragraph(txt, heading_style(mode="tablecaption"))
+        elements.append(table)
+        return elements
+    
+    def _process_node_and_add_to_row(self, node, row, perrow, data):
+        if isinstance(node, advtree.ImageLink):
+            node.align = "center"  # this is a hack. otherwise writeImage thinks this is an inline image
+            res = self.write(node)
+        else:
+            res = self.write(node)
+            try:
+                res = build_paragraph(res)
+            except:
+                res = Paragraph("", text_style(in_table=self.table_nesting))
+        if len(row) < perrow:
+            row.append(res)
+        else:
+            data.append(row)
+            row = []
+            row.append(res)
+        return row
+
     def writeGallery(self, obj):
         self.gallery_mode = True
         try:
@@ -1867,21 +1907,7 @@ class RlWriter:
         colwidths = [self.colwidth + 12] * perrow
 
         for node in obj.children:
-            if isinstance(node, advtree.ImageLink):
-                node.align = "center"  # this is a hack. otherwise writeImage thinks this is an inline image
-                res = self.write(node)
-            else:
-                res = self.write(node)
-                try:
-                    res = build_paragraph(res)
-                except:
-                    res = Paragraph("", text_style(in_table=self.table_nesting))
-            if len(row) < perrow:
-                row.append(res)
-            else:
-                data.append(row)
-                row = []
-                row.append(res)
+            row = self._process_node_and_add_to_row(node, row, perrow, data)
         if len(row):
             while len(row) < perrow:
                 row.append("")
@@ -1890,20 +1916,10 @@ class RlWriter:
         row_heights = []
         aspect_ratios = []
         for row in data:
-            min_height = 999999
-            for cell in row:
-                if cell:
-                    figure = cell[0]
-                    min_height = min(min_height, figure.imgHeight)
-                    aspect_ratios.append(figure.imgHeight / figure.imgWidth)
-            row_heights.append(min_height)
+            self._calculate_min_height_and_aspect_ratios(row, aspect_ratios, row_heights)
 
         for row_idx, row in enumerate(data):
-            for cell in row:
-                if cell:
-                    figure = cell[0]
-                    figure.i.drawWidth = row_heights[row_idx] / aspect_ratios.pop(0)
-                    figure.i.drawHeight = row_heights[row_idx]
+            self._adjust_figure_dimensions_based_on_row_height(row, row_heights, row_idx, aspect_ratios)
 
         table = Table(data, colWidths=colwidths)
         table.setStyle([("VALIGN", (0, 0), (-1, -1), "TOP")])
@@ -1911,10 +1927,7 @@ class RlWriter:
         caption = obj.attributes.get("caption", None)
         self.colwidth = None
         if caption:
-            txt = self.formatter.style_text(caption)
-            elements = build_paragraph(txt, heading_style(mode="tablecaption"))
-            elements.append(table)
-            return elements
+            return self._add_caption_to_table(caption, table)
         return [table]
 
     def _len(self, txt):
@@ -1929,28 +1942,34 @@ class RlWriter:
                 length += 1
         return length
 
+    def _parse_html_character(self, character, words, in_space, in_tag, word):
+        if character == "<":
+            in_tag = True
+        if character in [" ", "\t"]:
+            if not in_tag and not in_space:
+                words.append("".join(word))
+                word = []
+            word.append(character)
+            in_space = True
+        else:
+            if in_space and not in_tag:
+                words.append("".join(word))
+                word = []
+            word.append(character)
+            in_space = False
+        if character == ">":
+            in_tag = False
+        return in_space, in_tag, word
+
     def _get_frags(self, txt):
         words = []
         word = []
         in_tag = False
         in_space = False
         for character in txt:
-            if character == "<":
-                in_tag = True
-            if character in [" ", "\t"]:
-                if not in_tag and not in_space:
-                    words.append("".join(word))
-                    word = []
-                word.append(character)
-                in_space = True
-            else:
-                if in_space and not in_tag:
-                    words.append("".join(word))
-                    word = []
-                word.append(character)
-                in_space = False
-            if character == ">":
-                in_tag = False
+            in_space, in_tag, word = self._parse_html_character(
+                character, words, in_space, in_tag, word
+            )
         if word:
             words.append("".join(word))
         return words
@@ -2208,25 +2227,30 @@ class RlWriter:
 
         return items
 
+    def _determine_list_style(self, numbered, lst):
+        if numbered or lst.numbered:
+            list_style = lst.style.get("list-style-type")
+            list_type = lst.vlist.get("type")
+            if list_style == "lower-alpha" or list_type == "a":
+                style = "enumerateLettera"
+            elif list_style == "upper-alpha" or list_type == "A":
+                style = "enumerateLetterA"
+            elif list_style == "lower-roman" or list_type == "i":
+                style = "enumerateLetteri"
+            elif list_style == "upper-roman" or list_type == "I":
+                style = "enumerateLetterI"
+            else:
+                style = "enumerate"
+        else:
+            style = "itemize"
+        return style
+
     def writeItemList(self, lst, numbered=False, style="itemize"):
         self.list_indentation += 1
         items = []
         if style != "referencelist":
-            if numbered or lst.numbered:
-                list_style = lst.style.get("list-style-type")
-                list_type = lst.vlist.get("type")
-                if list_style == "lower-alpha" or list_type == "a":
-                    style = "enumerateLettera"
-                elif list_style == "upper-alpha" or list_type == "A":
-                    style = "enumerateLetterA"
-                elif list_style == "lower-roman" or list_type == "i":
-                    style = "enumerateLetteri"
-                elif list_style == "upper-roman" or list_type == "I":
-                    style = "enumerateLetterI"
-                else:
-                    style = "enumerate"
-            else:
-                style = "itemize"
+            style = self._determine_list_style(numbered, lst)
+
         self.list_counter_id += 1
         counter_id = self.list_counter_id
         for i, node in enumerate(lst):
@@ -2395,37 +2419,43 @@ class RlWriter:
 
         return min_width, max_width
 
+    def _calculate_and_update_cell_widths(self, row, min_widths, max_widths):
+        for col_idx, cell in enumerate(row.children):
+            content = self.renderCell(cell)
+            min_width, max_width = self.getCellSize(content, cell)
+            cell.min_width, cell.max_width = min_width, max_width
+            if cell.colspan == 1:
+                min_widths[col_idx] = max(min_width, min_widths[col_idx])
+                max_widths[col_idx] = max(max_width, max_widths[col_idx])
+            cell.col_idx = col_idx
+
+    def _adjust_colspan_cell_widths(self, cell, min_widths, max_widths, col_idx):
+        if cell.min_width > sum(
+            min_widths[col_idx: col_idx + cell.colspan]
+        ):
+            for k in range(cell.colspan):
+                min_widths[col_idx + k] = max(
+                    cell.min_width / cell.colspan, min_widths[col_idx + k]
+                )
+        if cell.max_width > sum(
+            max_widths[col_idx: col_idx + cell.colspan]
+        ):
+            for k in range(cell.colspan):
+                max_widths[col_idx + k] = max(
+                    cell.max_width / cell.colspan, max_widths[col_idx + k]
+                )
+
     def _get_table_size(self, table):
         min_widths = [0 for _ in range(table.num_cols)]
         max_widths = [0 for _ in range(table.num_cols)]
         for row in table.children:
-            for col_idx, cell in enumerate(row.children):
-                content = self.renderCell(cell)
-                min_width, max_width = self.getCellSize(content, cell)
-                cell.min_width, cell.max_width = min_width, max_width
-                if cell.colspan == 1:
-                    min_widths[col_idx] = max(min_width, min_widths[col_idx])
-                    max_widths[col_idx] = max(max_width, max_widths[col_idx])
-                cell.col_idx = col_idx
+            self._calculate_and_update_cell_widths(row, min_widths, max_widths)
 
         for row in table.children:  # handle colspanned cells
             col_idx = 0
             for cell in row.children:
                 if cell.colspan > 1:
-                    if cell.min_width > sum(
-                        min_widths[col_idx: col_idx + cell.colspan]
-                    ):
-                        for k in range(cell.colspan):
-                            min_widths[col_idx + k] = max(
-                                cell.min_width / cell.colspan, min_widths[col_idx + k]
-                            )
-                    if cell.max_width > sum(
-                        max_widths[col_idx: col_idx + cell.colspan]
-                    ):
-                        for k in range(cell.colspan):
-                            max_widths[col_idx + k] = max(
-                                cell.max_width / cell.colspan, max_widths[col_idx + k]
-                            )
+                    self._adjust_colspan_cell_widths(cell, min_widths, max_widths, col_idx)
                 col_idx += 1
         return min_widths, max_widths
 
@@ -2522,6 +2552,28 @@ class RlWriter:
         if cells:
             cells.pop()
 
+    def has_cache(self):
+        return self.math_cache_dir and os.path.isdir(self.math_cache_dir)
+
+    def _get_cached_math_image_path(self, source, density, imgpath):
+        _md5 = md5()
+        _md5.update(source.encode("utf-8"))
+        math_id = _md5.hexdigest()
+        cached_path = os.path.join(
+            self.math_cache_dir,
+            f"{math_id[0]}/{math_id[1]}/{math_id}-{density}.png",
+        )
+        if os.path.exists(cached_path):
+            imgpath = cached_path
+        return imgpath, cached_path
+
+    def _move_image_to_cache(self, imgpath, cached_path):
+        if not os.path.isdir(os.path.dirname(cached_path)):
+            os.makedirs(os.path.dirname(cached_path))
+        shutil.move(imgpath, cached_path)
+        imgpath = cached_path
+        return imgpath
+
     def writeMath(self, node):
         source = re.compile("\n+").sub(
             "\n", node.caption.strip()
@@ -2540,19 +2592,8 @@ class RlWriter:
 
         imgpath = None
 
-        def has_cache():
-            return self.math_cache_dir and os.path.isdir(self.math_cache_dir)
-
-        if has_cache():
-            _md5 = md5()
-            _md5.update(source.encode("utf-8"))
-            math_id = _md5.hexdigest()
-            cached_path = os.path.join(
-                self.math_cache_dir,
-                f"{math_id[0]}/{math_id[1]}/{math_id}-{density}.png",
-            )
-            if os.path.exists(cached_path):
-                imgpath = cached_path
+        if self.has_cache():
+            imgpath, cached_path = self._get_cached_math_image_path(source, density, imgpath)
 
         if not imgpath:
             imgpath = render_math(
@@ -2564,11 +2605,8 @@ class RlWriter:
             )
             if not imgpath:
                 return []
-            if has_cache():
-                if not os.path.isdir(os.path.dirname(cached_path)):
-                    os.makedirs(os.path.dirname(cached_path))
-                shutil.move(imgpath, cached_path)
-                imgpath = cached_path
+            if self.has_cache():
+                imgpath = self._move_image_to_cache(imgpath, cached_path)
 
         img = PilImage.open(imgpath)
         if self.debug:

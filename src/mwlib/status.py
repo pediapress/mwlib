@@ -45,12 +45,7 @@ class Status:
             + progress * (self.progress_range[1] - self.progress_range[0]) / 100
         )
 
-    def __call__(self, status=None, progress=None,
-                 article=None, auto_dump=True,
-                 **kwargs):
-        if status is not None and status != self.status.get('status'):
-            self.status['status'] = status
-
+    def _update_status_with_progress_and_article(self, progress, article):
         if progress is not None:
             progress = min(max(0, progress), 100)
             progress = self.scale_progress(progress)
@@ -62,6 +57,14 @@ class Status:
                 del self.status['article']
             else:
                 self.status['article'] = article
+
+    def __call__(self, status=None, progress=None,
+                 article=None, auto_dump=True,
+                 **kwargs):
+        if status is not None and status != self.status.get('status'):
+            self.status['status'] = status
+
+        self._update_status_with_progress_and_article(progress, article)
 
         if self.podclient is not None:
             self.podclient.post_status(**self.status)

@@ -35,27 +35,28 @@ class TrustedRevisions:
             raise WikiTrustServerError
         return 1 - float(rev)  # r is the likelyhood of being spam
 
+    def _update_wiki_revision_with_trust_score(self, rev, now, title):
+        # add basic info
+        rev["age"] = (now - time.mktime(rev["timestamp"])) / (24 * 3600)
+        rev["title"] = title
+        # don't use bot revs
+        if "bot" in rev["user"].lower():
+            return
+        # don't use reverted revs (but rather the original one)
+        if "revert" in rev.get("comment", "").lower():
+            return
+        try:
+            rev["score"] = self.get_wiki_trust_score(title, rev["revid"])
+        except WikiTrustServerError:
+            return
+
     def get_trusted_revision(self, title, min_trust=None, max_age=None):
         min_trust = min_trust or self.min_trust
         best_rev = None
         now = time.time()
         page = self.site.Pages[title]
         for rev in page.revisions():
-            # add basic info
-            rev["age"] = (now - time.mktime(rev["timestamp"])) / (24 * 3600)
-            rev["title"] = title
-
-            # don't use bot revs
-            if "bot" in rev["user"].lower():
-                continue
-            # don't use reverted revs (but rather the original one)
-            if "revert" in rev.get("comment", "").lower():
-                continue
-
-            try:
-                rev["score"] = self.get_wiki_trust_score(title, rev["revid"])
-            except WikiTrustServerError:
-                continue
+            self._update_wiki_revision_with_trust_score(rev, now, title)
 
             if not best_rev or rev["score"] > best_rev["score"]:
                 best_rev = rev

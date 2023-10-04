@@ -597,10 +597,6 @@ class Strike(TagNode, AdvancedNode):
     _tag = "strike"
 
 
-# class S(TagNode, AdvancedNode):
-#     _tag = "s"
-
-
 class ImageMap(TagNode, AdvancedNode):  # defined as block node, maybe incorrect
     _tag = "imagemap"
 
@@ -835,6 +831,20 @@ def remove_nodes(node):
         remove_nodes(child)
 
 
+def _remove_node_if_isolated_or_adjacent_to_block(node):
+    prev = (
+        node.previous or node.parent
+    )  # previous sibling node or parentnode
+    next_node = node.next or node.parent.next
+    if (
+        not next_node
+        or next_node.is_block_node
+        or not prev
+        or prev.is_block_node
+    ):
+        node.parent.remove_child(node)
+
+
 def remove_newlines(node):
     """
     remove newlines, tabs, spaces if we are next to a blockNode
@@ -847,17 +857,7 @@ def remove_newlines(node):
         node = todo.pop()
         if node.__class__ is Text and node.caption:
             if not node.caption.strip():
-                prev = (
-                    node.previous or node.parent
-                )  # previous sibling node or parentnode
-                next_node = node.next or node.parent.next
-                if (
-                    not next_node
-                    or next_node.is_block_node
-                    or not prev
-                    or prev.is_block_node
-                ):
-                    node.parent.remove_child(node)
+                _remove_node_if_isolated_or_adjacent_to_block(node)
             node.caption = node.caption.replace("\n", " ")
 
         for child in node.children:

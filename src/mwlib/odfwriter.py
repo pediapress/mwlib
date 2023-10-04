@@ -242,6 +242,35 @@ class ODFWriter:
                 log(f"missing .type attribute {handler!r} {parent!r} ")
             return False
 
+    def _handle_object_and_determine_child_processing(self, obj, parent):
+        should_return = False
+        # check for method
+        method_name = "owrite" + obj.__class__.__name__
+        method_name = getattr(self, method_name, None)
+
+        if method_name:  # find handler
+            handler = method_name(obj)
+
+        elif self.ignoreUnknownNodes:
+            log("Handler for node %s not found! SKIPPED" % obj.__class__.__name__)
+            show_node(obj)
+            handler = None
+        else:
+            raise ValueError("unknown node:%r" % obj)
+
+        if isinstance(
+            handler, SkipChildren
+        ):  # do not process children of this node
+            if handler.element is not None:
+                self._save_add_child(parent, handler.element, obj)
+            should_return = True
+        elif handler is None:
+            handler = parent
+        else:
+            if not self._save_add_child(parent, handler, obj):
+                should_return = True
+        return handler, should_return
+
     def write(self, obj, parent=None):
         if parent is None:
             raise ValueError("parent is None")
@@ -253,31 +282,9 @@ class ODFWriter:
         if isinstance(obj, parser.Text):
             self.writeText(obj, parent)
         else:
-            # check for method
-            method_name = "owrite" + obj.__class__.__name__
-            method_name = getattr(self, method_name, None)
-
-            if method_name:  # find handler
-                handler = method_name(obj)
-
-            elif self.ignoreUnknownNodes:
-                log("Handler for node %s not found! SKIPPED" % obj.__class__.__name__)
-                show_node(obj)
-                handler = None
-            else:
-                raise ValueError("unknown node:%r" % obj)
-
-            if isinstance(
-                handler, SkipChildren
-            ):  # do not process children of this node
-                if handler.element is not None:
-                    self._save_add_child(parent, handler.element, obj)
-                return  # skip
-            elif handler is None:
-                handler = parent
-            else:
-                if not self._save_add_child(parent, handler, obj):
-                    return
+            handler, should_return = self._handle_object_and_determine_child_processing(obj, parent)
+            if should_return:
+                return
 
             for child in obj.children[:]:
                 self.write(child, handler)
@@ -679,6 +686,31 @@ class ODFWriter:
         else:
             return (w_target, h_target, scale)
 
+    def _determine_image_path_or_write_children(self, obj):
+        if obj.colon is True:
+            return None  # writes children
+            # fixme: handle isImageMap
+
+        if not self.env or not self.env.images:
+            return None
+            # fixme: handle isImageMap
+
+        img_path = self.env.images.get_disk_path(obj.target)
+        if not img_path:
+            log.warning("invalid image url")
+            return None
+        img_path = img_path.encode("utf-8")
+        return img_path
+    
+    def _calculate_object_dimensions_based_on_aspect_ratio(self, w_obj, h_obj, w_img, h_img, aspect_ratio):
+        if w_obj > 0 and not h_obj > 0:
+            h_obj = w_obj / aspect_ratio
+        elif h_obj > 0 and not w_obj > 0:
+            w_obj = aspect_ratio / h_obj
+        elif w_obj == 0 and h_obj == 0:
+            w_obj, h_obj = w_img, h_img
+        return w_obj, h_obj
+
     def owriteImageLink(self, obj, is_image_map=False):
         # see http://books.evc-cit.info/odbook/ch04.html
         # see rl.writer for more advanced image integration,
@@ -687,19 +719,9 @@ class ODFWriter:
 
         from PIL import Image as PilImage
 
-        if obj.colon is True:
-            return  # writes children
-            # fixme: handle isImageMap
-
-        if not self.env or not self.env.images:
-            return
-            # fixme: handle isImageMap
-
-        img_path = self.env.images.get_disk_path(obj.target)
+        img_path = self._determine_image_path_or_write_children(obj)
         if not img_path:
-            log.warning("invalid image url")
             return
-        img_path = img_path.encode("utf-8")
 
         (w_obj, h_obj) = (obj.width or 0, obj.height or 0)
         # sometimes the parser delivers only one value,
@@ -723,12 +745,7 @@ class ODFWriter:
         # w or h, so set the other "by hand"
         aspect_ratio = w_img / h_img
 
-        if w_obj > 0 and not h_obj > 0:
-            h_obj = w_obj / aspect_ratio
-        elif h_obj > 0 and not w_obj > 0:
-            w_obj = aspect_ratio / h_obj
-        elif w_obj == 0 and h_obj == 0:
-            w_obj, h_obj = w_img, h_img
+        (w_obj, h_obj) = self._calculate_object_dimensions_based_on_aspect_ratio(w_obj, h_obj, w_img, h_img, aspect_ratio)
         # hint: w_obj/h_obj are the values of the Thumbnail
         #      w_img/h_img are the real values of the image
 

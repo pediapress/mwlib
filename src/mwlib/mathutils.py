@@ -31,6 +31,25 @@ texvc_available = not try_system("texvc")
 blahtexml_available = not try_system("blahtexml")
 
 
+def _extract_output_from_parsed_xml(result, output_path, output_mode):
+    parsed_tree = ET.fromstring(result)
+    if output_mode == "png":
+        png_elements = parsed_tree.iter("png")
+        if png_elements:
+            png_fn = png_elements.next().findtext("md5")
+            if png_fn:
+                png_fn = os.path.join(output_path, png_fn + ".png")
+                if os.path.exists(png_fn):
+                    return png_fn
+    elif output_mode == "mathml":
+        mathml = parsed_tree.iter("mathml")
+        if mathml:
+            mathml = mathml.next()
+            mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
+            return mathml
+    return None
+
+
 def _render_math_blahtex(latex, output_path, output_mode):
     if not blahtexml_available:
         return None
@@ -66,21 +85,9 @@ def _render_math_blahtex(latex, output_path, output_mode):
     if curdir is not None:
         os.chdir(curdir)
     if result:
-        parsed_tree = ET.fromstring(result)
-        if output_mode == "png":
-            png_elements = parsed_tree.iter("png")
-            if png_elements:
-                png_fn = png_elements.next().findtext("md5")
-                if png_fn:
-                    png_fn = os.path.join(output_path, png_fn + ".png")
-                    if os.path.exists(png_fn):
-                        return png_fn
-        elif output_mode == "mathml":
-            mathml = parsed_tree.iter("mathml")
-            if mathml:
-                mathml = mathml.next()
-                mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
-                return mathml
+        output = _extract_output_from_parsed_xml(result, output_path, output_mode)
+        if output:
+            return output
     log.error(
         f"error converting math (blahtexml). source: {latex!r} \nerror: {result!r}"
     )

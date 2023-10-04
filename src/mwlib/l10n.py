@@ -27,6 +27,44 @@ def execute(*args):
     return output
 
 
+def _process_and_merge_localization_files(pot_file_path, po_file_path):
+    if os.path.exists(pot_file_path):
+        msgs = execute("msguniq", "--to-code", "UTF-8", pot_file_path)
+        with open(pot_file_path, "wb") as pot_file:
+            pot_file.write(msgs)
+        if os.path.exists(po_file_path):
+            msgs = execute("msgmerge", "--quiet", po_file_path, pot_file_path)
+        with open(po_file_path, "wb") as po_file:
+            po_file.write(msgs)
+        os.unlink(pot_file_path)
+
+
+def _generate_message_catalog_from_file(dirpath, filename, extensions, domain, pot_file_path):
+    _, file_ext = os.path.splitext(filename)
+    if file_ext not in extensions:
+        return
+    msgs = execute(
+        "xgettext",
+        "--default-domain",
+        domain,
+        "--language",
+        ext2lang[file_ext],
+        "--from-code",
+        "UTF-8",
+        "--output",
+        "-",
+        os.path.join(dirpath, filename),
+    )
+    if os.path.exists(pot_file_path):
+        # Strip the header
+        msgs = "\n".join(dropwhile(len, msgs.split("\n")))
+    else:
+        msgs = msgs.replace("charset=CHARSET", "charset=UTF-8")
+    if msgs:
+        with open(pot_file_path, "ab") as pot_file:
+            pot_file.write(msgs)
+
+
 def make_messages(
     locale,
     domain,
@@ -63,39 +101,14 @@ def make_messages(
             all_files.extend([(dirpath, f) for f in filenames])
         all_files.sort()
         for dirpath, filename in all_files:
-            _, file_ext = os.path.splitext(filename)
-            if file_ext not in extensions:
-                continue
-            msgs = execute(
-                "xgettext",
-                "--default-domain",
+            _generate_message_catalog_from_file(
+                dirpath,
+                filename,
+                extensions,
                 domain,
-                "--language",
-                ext2lang[file_ext],
-                "--from-code",
-                "UTF-8",
-                "--output",
-                "-",
-                os.path.join(dirpath, filename),
-            )
-            if os.path.exists(pot_file_path):
-                # Strip the header
-                msgs = "\n".join(dropwhile(len, msgs.split("\n")))
-            else:
-                msgs = msgs.replace("charset=CHARSET", "charset=UTF-8")
-            if msgs:
-                with open(pot_file_path, "ab") as pot_file:
-                    pot_file.write(msgs)
+                pot_file_path)
 
-        if os.path.exists(pot_file_path):
-            msgs = execute("msguniq", "--to-code", "UTF-8", pot_file_path)
-            with open(pot_file_path, "wb") as pot_file:
-                pot_file.write(msgs)
-            if os.path.exists(po_file_path):
-                msgs = execute("msgmerge", "--quiet", po_file_path, pot_file_path)
-            with open(po_file_path, "wb") as po_file:
-                po_file.write(msgs)
-            os.unlink(pot_file_path)
+        _process_and_merge_localization_files(pot_file_path, po_file_path)
 
 
 def compile_messages(localedir="locale"):

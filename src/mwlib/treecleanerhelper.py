@@ -10,22 +10,7 @@ import math
 from .advtree import URL, Cell, ImageLink, Link, Math, NamedURL, Reference, Text
 
 
-def get_node_height(node, params):
-    line_height = params["lineHeight"]
-    chars_per_line = params["charsPerLine"]
-    paragraph_margin = params["paragraphMargin"]
-    img_height = params["imgHeight"]
-
-    height = 0
-    non_follow_nodes = [Reference, NamedURL]
-    amap = {
-        Text: "caption",
-        Link: "target",
-        URL: "caption",
-        Math: "caption",
-        NamedURL: "caption",
-    }
-    access = amap.get(node.__class__, "")
+def _calculate_node_height_based_on_content(access, node, height, line_height, chars_per_line, paragraph_margin, img_height):
     if access:
         txt = "" if node.__class__ == Link and node.children else getattr(node, access)
         if txt:
@@ -48,11 +33,51 @@ def get_node_height(node, params):
             height += line_height * img_height
     elif node.is_block_node:  # compensation for e.g. listItems which contain text.
         height += 0.5 * line_height
+    return height
+
+
+def get_node_height(node, params):
+    line_height = params["lineHeight"]
+    chars_per_line = params["charsPerLine"]
+    paragraph_margin = params["paragraphMargin"]
+    img_height = params["imgHeight"]
+
+    height = 0
+    non_follow_nodes = [Reference, NamedURL]
+    amap = {
+        Text: "caption",
+        Link: "target",
+        URL: "caption",
+        Math: "caption",
+        NamedURL: "caption",
+    }
+    access = amap.get(node.__class__, "")
+    height = _calculate_node_height_based_on_content(access, node, height, line_height, chars_per_line, paragraph_margin, img_height)
 
     for child in node.children[:]:
         if child.__class__ not in non_follow_nodes:
             height += get_node_height(child, params)
     return height
+
+
+def _create_and_append_new_rows_based_on_columns(max_new_rows, row, cols, newrows):
+    for rowindex in range(max_new_rows):
+        newrow = row.copy()
+        newrow.children = []
+        for colindex in range(len(cols)):
+            try:
+                cellchildren = cols[colindex][rowindex]
+            except IndexError:
+                cellchildren = []  # fixme maybe some better empty child
+            cell = Cell()
+            with contextlib.suppress(BaseException):
+                cell.vlist = row.children[colindex].vlist
+
+            for child in cellchildren:
+                cell.appendChild(child)
+            newrow.append_child(cell)
+            newrow.suppress_bottom_border = True
+        newrows.append(newrow)
 
 
 def split_row(row, params):
@@ -75,22 +100,6 @@ def split_row(row, params):
 
     max_new_rows = max([len(col) for col in cols])
 
-    for rowindex in range(max_new_rows):
-        newrow = row.copy()
-        newrow.children = []
-        for colindex in range(len(cols)):
-            try:
-                cellchildren = cols[colindex][rowindex]
-            except IndexError:
-                cellchildren = []  # fixme maybe some better empty child
-            cell = Cell()
-            with contextlib.suppress(BaseException):
-                cell.vlist = row.children[colindex].vlist
-
-            for child in cellchildren:
-                cell.appendChild(child)
-            newrow.append_child(cell)
-            newrow.suppress_bottom_border = True
-        newrows.append(newrow)
+    _create_and_append_new_rows_based_on_columns(max_new_rows, row, cols, newrows)
 
     return newrows

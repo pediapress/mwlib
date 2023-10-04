@@ -374,6 +374,25 @@ class Application:
 
         return response
 
+    def _process_and_return_finished_state(self, res, name_writer, retval):
+        more = {}
+        try:
+            if res["result"]:
+                more["url"] = res["result"]["url"]
+                more["content_length"] = res["result"]["size"]
+                more["suggested_filename"] = res["result"].get(
+                    "suggested_filename", ""
+                )
+        except KeyError:
+            pass
+        if name_writer.content_type:
+            more["content_type"] = name_writer.content_type
+        if name_writer.file_extension:
+            more["content_disposition"] = get_content_disposition(
+                more.get("suggested_filename", None), name_writer.file_extension
+            )
+        return retval(state="finished", **more)
+
     def do_render_status(self, collection_id, post_data, is_new=False):
         if is_new:
             return self.error_response("POST argument required: collection_id")
@@ -395,27 +414,7 @@ class Application:
             return retval(state="failed", error=error)
 
         if done:
-            more = {}
-
-            try:
-                if res["result"]:
-                    more["url"] = res["result"]["url"]
-                    more["content_length"] = res["result"]["size"]
-                    more["suggested_filename"] = res["result"].get(
-                        "suggested_filename", ""
-                    )
-            except KeyError:
-                pass
-
-            if name_writer.content_type:
-                more["content_type"] = name_writer.content_type
-
-            if name_writer.file_extension:
-                more["content_disposition"] = get_content_disposition(
-                    more.get("suggested_filename", None), name_writer.file_extension
-                )
-
-            return retval(state="finished", **more)
+            return self._process_and_return_finished_state(res, name_writer, retval)
 
         if not info:
             jobid = f"{collection_id}:makezip"

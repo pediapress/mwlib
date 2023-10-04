@@ -147,6 +147,50 @@ class Expr:
     def output_operand(self, operand):
         self.operand_stack.append(operand)
 
+    def _handle_closing_parenthesis(self, operator_stack):
+        while True:
+            if not operator_stack:
+                raise ExprError("unbalanced parenthesis")
+            char = operator_stack.pop()
+            if char == "(":
+                break
+            self.output_operator(char)
+
+    def _convert_to_unary_operator(self, last_operator, operator):
+        if last_operator and last_operator != ")":
+            if operator == "-":
+                operator = UMinus
+            elif operator == "+":
+                operator = UPlus
+        return operator
+
+    def _process_expression_elements(self, operand, operator, operator_stack, last_operand, last_operator):
+        if operand in ("e",
+                       "E") and (last_operand or last_operator == ")"):
+            operand, operator = operator, operand
+
+        if operand:
+            if last_operand:
+                raise ExprError("expected operator")
+            self.output_operand(self.as_float_or_int(operand))
+        elif operator == "(":
+            operator_stack.append("(")
+        elif operator == ")":
+            self._handle_closing_parenthesis(operator_stack)
+        elif operator in precedence:
+            operator = self._convert_to_unary_operator(last_operator, operator)
+            is_unary = operator in unary_ops
+            prec = precedence[operator]
+            while not is_unary and operator_stack and prec <= precedence[operator_stack[-1]]:
+                char = operator_stack.pop()
+                self.output_operator(char)
+            operator_stack.append(operator)
+        else:
+            raise ExprError(f"unknown operator: {operator!r}")
+
+        last_operand, last_operator = operand, operator
+        return last_operand, last_operator, operand, operator
+
     def parse_expr(self, expr):
         tokens = tokenize(expr)
         if not tokens:
@@ -158,41 +202,8 @@ class Expr:
         last_operand, last_operator = False, True
 
         for operand, operator in tokens:
-            if operand in ("e",
-                           "E") and (last_operand or last_operator == ")"):
-                operand, operator = operator, operand
-
-            if operand:
-                if last_operand:
-                    raise ExprError("expected operator")
-                self.output_operand(self.as_float_or_int(operand))
-            elif operator == "(":
-                operator_stack.append("(")
-            elif operator == ")":
-                while True:
-                    if not operator_stack:
-                        raise ExprError("unbalanced parenthesis")
-                    char = operator_stack.pop()
-                    if char == "(":
-                        break
-                    self.output_operator(char)
-            elif operator in precedence:
-                if last_operator and last_operator != ")":
-                    if operator == "-":
-                        operator = UMinus
-                    elif operator == "+":
-                        operator = UPlus
-
-                is_unary = operator in unary_ops
-                prec = precedence[operator]
-                while not is_unary and operator_stack and prec <= precedence[operator_stack[-1]]:
-                    char = operator_stack.pop()
-                    self.output_operator(char)
-                operator_stack.append(operator)
-            else:
-                raise ExprError(f"unknown operator: {operator!r}")
-
-            last_operand, last_operator = operand, operator
+            last_operand, last_operator, operand, operator = self._process_expression_elements(operand, operator, operator_stack,
+                                                                                               last_operand, last_operator)
 
         while operator_stack:
             popped_operator = operator_stack.pop()

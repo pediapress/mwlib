@@ -50,6 +50,23 @@ CODENAMES = {
 }
 
 
+def _format_and_process_date(format_code, date, tmp, process_next):
+    if isinstance(format_code, tuple):
+        process_next = format_code[1]
+        return process_next
+    res = (
+        strftime(date, format_code)
+        if isinstance(format_code, str)
+        else format_code(date)
+    )
+    if process_next:
+        with suppress(ValueError):
+            res = process_next(res)
+        process_next = None
+    tmp.append(res)
+    return process_next
+
+
 def format_date(format_str, date):
     split = COMPILED_REGEX.findall(format_str)
     process_next = None
@@ -65,24 +82,26 @@ def format_date(format_str, date):
             else:
                 tmp.append(element)
         else:
-            if isinstance(format_code, tuple):
-                process_next = format_code[1]
-                continue
+            process_next = _format_and_process_date(format_code, date, tmp, process_next)
 
-            res = (
-                strftime(date, format_code)
-                if isinstance(format_code, str)
-                else format_code(date)
-            )
-
-            if process_next:
-                with suppress(ValueError):
-                    res = process_next(res)
-                process_next = None
-            tmp.append(res)
 
     tmp = "".join(tmp).strip()
     return tmp
+
+
+def _parse_date_string(date, date_string):
+    if isinstance(date_string, str):
+        # transform to bytes
+        date_string = date_string.encode("utf-8")
+    try:
+        date = parsedate(date_string)
+    except ValueError:
+        pass
+    except Exception as err:
+        sys.stderr.write(
+            f"ERROR in parsedate: {err!r} while parsing {date_string!r}"
+        )
+    return date
 
 
 def time(date_format, date_string=None):
@@ -95,17 +114,7 @@ def time(date_format, date_string=None):
                 )
 
         if date is None:
-            if isinstance(date_string, str):
-                # transform to bytes
-                date_string = date_string.encode("utf-8")
-            try:
-                date = parsedate(date_string)
-            except ValueError:
-                pass
-            except Exception as err:
-                sys.stderr.write(
-                    f"ERROR in parsedate: {err!r} while parsing {date_string!r}"
-                )
+            date = _parse_date_string(date, date_string)
 
         if date is None:
             return '<strong class="error">Error: invalid time</strong>'
