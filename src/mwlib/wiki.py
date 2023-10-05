@@ -82,7 +82,7 @@ class MultiEnvironment(Environment):
     def __init__(self, path):
         Environment.__init__(self)
         self.path = path
-        with open(os.path.join(self.path, "metabook.json")) as metabook_file:
+        with open(os.path.join(self.path, "metabook.json"), encoding='utf-8') as metabook_file:
             self.metabook = json.load(metabook_file)
         self.id2env = {}
 
@@ -95,8 +95,6 @@ class MultiEnvironment(Environment):
             raise WikiIdValidationError(f"article has invalid wikiident: {node!r}")
 
     def init_metabook(self):
-        from mwlib import nuwiki
-
         if not self.metabook:
             return
 
@@ -177,13 +175,12 @@ def extract_wiki(conf, res, metabook):
         if metabook is None:
             res.metabook = res.wiki.metabook
         return res
-    elif format_data == "multi-nuwiki":
+    if format_data == "multi-nuwiki":
         tmpdir = tempfile.mkdtemp()
         nuwiki.extractall(zip_file, tmpdir)
         res = MultiEnvironment(tmpdir)
         return res
-    else:
-        raise RuntimeError(f"unknown format {format_data!r}")
+    raise RuntimeError(f"unknown format {format_data!r}")
 
 
 def _make_wiki(conf, metabook=None, **kw):
@@ -194,7 +191,7 @@ def _make_wiki(conf, metabook=None, **kw):
     if conf.startswith(":"):
         if conf[1:] not in wpwikis:
             wpwikis[conf[1:]] = {
-                "baseurl": "http://%s.wikipedia.org/w/" % conf[1:],
+                "baseurl": f"http://{conf[1:]}.wikipedia.org/w/",
                 "mw_license_url": None,
             }
 

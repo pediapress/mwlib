@@ -7,13 +7,10 @@ import sys
 
 import six
 
-from mwlib.templ import log
-
-from mwlib.templ.nodes import Node, Variable, Template, show
-from mwlib.templ.scanner import tokenize
-from mwlib.templ.parser import parse, Parser
-from mwlib.templ.evaluate import flatten, Expander, ArgumentList
-from mwlib.templ.misc import DictDB, expand_str
+from mwlib.templ.nodes import Template
+from mwlib.templ.parser import parse
+from mwlib.templ.evaluate import Expander, ArgumentList
+from mwlib.templ.misc import DictDB
 
 
 def get_templates(raw, title=""):
@@ -54,6 +51,7 @@ def find_template(raw, name, parsed_raw=None):
                                                six.string_types) and node[0] == name:
             return node
         todo.extend(node)
+    return None
 
 
 def get_template_args(template, expander):
@@ -66,8 +64,7 @@ def get_template_args(template, expander):
 
 
 if __name__ == "__main__":
-    with open(sys.argv[1], 'rb') as f:
-        d = f.read()
-    d = six.text_type(open(sys.argv[1]).read(), 'utf8')
+    with open(sys.argv[1], 'rb', encoding='utf-8') as f:
+        d = six.text_type(f.read(), 'utf8')
     e = Expander(d)
     print(e.expandTemplates())

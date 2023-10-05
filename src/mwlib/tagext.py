@@ -24,6 +24,9 @@ http://code.pediapress.com/wiki/wiki/ParserExtensionTags
 """
 import codecs
 
+from mwlib import parser
+from mwlib.parser import Math, Timeline
+
 rot13_encode = codecs.getencoder("rot-13")
 
 
@@ -32,10 +35,10 @@ class ExtensionRegistry:
         self.name2ext = {}
 
     def register_extension(self, ext):
-        name = ext.name
-        if name in self.name2ext:
-            raise ValueError(f"tag extension for {name!r} already registered")
-        self.name2ext[name] = ext()
+        ext_name = ext.name
+        if ext_name in self.name2ext:
+            raise ValueError(f"tag extension for {ext_name!r} already registered")
+        self.name2ext[ext_name] = ext()
         return ext
 
     def names(self):
@@ -54,7 +57,6 @@ register = default_registry.register_extension
 
 def _parse(txt):
     """parse text....and try to return a 'better' (some inner) node"""
-    from mwlib import parser
     from mwlib.refine.compat import parse_txt
 
     res = parse_txt(txt)
@@ -139,8 +141,6 @@ class TimelineExtension(TagExtension):
     name = "timeline"
 
     def __call__(self, source, attributes):
-        from mwlib.parser import Timeline
-
         return Timeline(source)
 
 
@@ -151,8 +151,6 @@ class MathExtension(TagExtension):
     name = "math"
 
     def __call__(self, source, attributes):
-        from mwlib.parser import Math
-
         return Math(source)
 
 
@@ -250,8 +248,9 @@ class ListingExtension(TagExtension):
     ]
 
     def __call__(self, source, attributes):
-        tag = "".join(v % attributes[k] for k,
-                    v in self.attrs if attributes.get(k, None))
+        tag = "".join(
+            v % attributes[k] for k, v in self.attrs if attributes.get(k, None)
+        )
         if source:
             tag += ", %s" % source
         return self.parse(tag)

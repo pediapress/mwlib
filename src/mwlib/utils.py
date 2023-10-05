@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from email.utils import formatdate, make_msgid
 from typing import Union
 
+import pypdf
 import six
 import six.moves.urllib.error
 import six.moves.urllib.parse
@@ -56,7 +57,7 @@ def start_logging(path, stderr_only=False):
         sys.stdout.flush()
     sys.stderr.flush()
 
-    with open(path, "a") as log_file:
+    with open(path, "a", encoding='utf-8') as log_file:
         file_no = log_file.fileno()
 
     if not stderr_only:
@@ -104,7 +105,7 @@ def get_multipart(filename, data, name):
     items.append("")
 
     body = "\r\n".join(items)
-    content_type = "multipart/form-data; boundary=%s" % boundary
+    content_type = f"multipart/form-data; boundary={boundary}" 
 
     return content_type, body
 
@@ -196,7 +197,7 @@ def fetch_url(
         if ignore_errors:
             log.error(f"{err} - while fetching {url!r}")
             return None
-        raise RuntimeError(f"Could not fetch {url!r}: {err}")
+        raise RuntimeError(f"Could not fetch {url!r}: {err}") from err
 
     if hasattr(fetch_cache, "max_cacheable_size"):
         max_cacheable_size = max(fetch_cache.max_cacheable_size,
@@ -208,8 +209,7 @@ def fetch_url(
         with open(output_filename, "wb") as out_file:
             out_file.write(data)
         return True
-    else:
-        return data
+    return data
 
 
 def uid(max_length=10):
@@ -308,10 +308,10 @@ def report(
 
     text = []
     text.append("SYSTEM: %r\n" % system)
-    text.append("%s\n" % traceback.format_exc())
+    text.append(f"{traceback.format_exc()}\n")
     try:
         fqdn = socket.getfqdn()
-    except (OSError):
+    except OSError:
         fqdn = "not available"
 
     text.append("CWD: %r\n" % os.getcwd())
@@ -372,7 +372,8 @@ def get_safe_url(url):
             (scheme, netloc, path, query, fragment)
         )
     except Exception as exc:
-        log.warn("urlunparse() failed: %s" % exc)
+        log.warn(f"urlunparse() failed: {exc}")
+    return None
 
 
 def get_nodeweight(obj):
@@ -385,7 +386,7 @@ def get_nodeweight(obj):
     k = obj.__class__.__name__
     if k in ("Text",):
         return k, len(obj.caption)
-    elif k == "ImageLink" and obj.is_inline():
+    if k == "ImageLink" and obj.is_inline():
         return "InlineImageLink", 1
     return k, 1
 
@@ -394,8 +395,6 @@ def get_nodeweight(obj):
 def pdf2txt(path):
     """extract text from pdf file"""
     # based on http://code.activestate.com/recipes/511465/
-    import pypdf
-
     content = []
     reader = pypdf.PdfReader(path)
 

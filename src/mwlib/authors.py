@@ -50,7 +50,7 @@ class InspectAuthors:
 
         authors = sorted(self.authors)
         if authors or self.num_anon:
-            authors.append("%s:%d" % (self.ANON, self.num_anon))  # append anon
+            authors.append(f"{self.ANON}:{self.num_anon}")  # append anon
         return authors
 
 

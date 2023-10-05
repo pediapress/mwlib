@@ -75,7 +75,7 @@ class Log:
 
         log_entry = ""
         if self.timestamps:
-            log_entry = "%s " % time.strftime(self.timestamp_fmt)
+            log_entry = f"{time.strftime(self.timestamp_fmt)} "
         log_entry += "{} >> {}\n".format(
             ".".join(str(element) for element in self._prefix if element), msg
         )

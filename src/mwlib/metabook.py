@@ -23,7 +23,7 @@ def parse_collection_page(txt):
 
 class MbObj:
     def __init__(self, **kw):
-        type_names= {"type": self.__class__.__name__}
+        type_names = {"type": self.__class__.__name__}
 
         for k in dir(self.__class__):
             if k.startswith("__"):
@@ -35,7 +35,7 @@ class MbObj:
                 continue
 
             type_names[k] = value
-
+        self.image = None
         self.__dict__.update(copy.deepcopy(type_names))
         self.__dict__.update(kw)
         self.type = self.__class__.__name__
@@ -45,8 +45,8 @@ class MbObj:
 
         try:
             return getattr(self, str(key))
-        except AttributeError:
-            raise KeyError(repr(key))
+        except AttributeError as exc:
+            raise KeyError(repr(key)) from exc
 
     def __setitem__(self, key, val):
         warnings.warn(f"deprecated __setitem__ [{key!r}]=", DeprecationWarning, 2)
@@ -83,7 +83,7 @@ class WikiConf(MbObj):
     baseurl = None
     ident = None
 
-    def __init__(self, env=None, pages=None, **kw):
+    def __init__(self, **kw):
         MbObj.__init__(self, **kw)
 
 
@@ -202,8 +202,8 @@ class Chapter(MbObj):
 # ==============================================================================
 
 
-def append_article(article, displaytitle, metabook, revision=None):
-    metabook.append_article(article, displaytitle, revision=revision)
+def append_article(new_article, displaytitle, metabook, revision=None):
+    metabook.append_article(new_article, displaytitle, revision=revision)
 
 
 def get_item_list(metabook, filter_type=None):
@@ -225,8 +225,8 @@ def calc_checksum(metabook):
     return sha256(metabook.dumps().encode("utf-8")).hexdigest()
 
 
-def get_wiki_text_from_url(license):
-    url = license["mw_license_url"]
+def get_wiki_text_from_url(license_to_check):
+    url = license_to_check["mw_license_url"]
     if (
         re.match(r"^.*/index\.php.*action=raw", url)
         and "templates=expand" not in url
@@ -245,19 +245,20 @@ def get_wiki_text_from_url(license):
     return wikitext
 
 
-def get_wiki_text_for_license(license):
+def get_wiki_text_for_license(license_to_check):
     wikitext = ""
 
-    if license.get("mw_license_url"):
-        wikitext = get_wiki_text_from_url(license)
+    if license_to_check.get("mw_license_url"):
+        wikitext = get_wiki_text_from_url(license_to_check)
     else:
         wikitext = ""
-        if license.get("mw_rights_text"):
-            wikitext = license["mw_rights_text"]
-        if license.get("mw_rights_page"):
-            wikitext += "\n\n[[%s]]" % license["mw_rights_page"]
-        if license.get("mw_rights_url"):
-            wikitext += "\n\n" + license["mw_rights_url"]
+        if license_to_check.get("mw_rights_text"):
+            wikitext = license_to_check["mw_rights_text"]
+        if license_to_check.get("mw_rights_page"):
+            mw_rights_page = license_to_check["mw_rights_page"]
+            wikitext += f"\n\n[[{mw_rights_page}]]"
+        if license_to_check.get("mw_rights_url"):
+            wikitext += "\n\n" + license_to_check["mw_rights_url"]
 
     return wikitext
 

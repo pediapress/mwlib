@@ -71,7 +71,7 @@ class Page:
         text = repr(self.text[:50])
         redir = self.redirect
         if redir:
-            text = "Redirect to %s" % repr(redir)
+            text = f"Redirect to {redir}"
         return f"Page({repr(self.title)} (@{self.timestamp}): {text})"
 
 
@@ -81,6 +81,8 @@ class DumpParser:
     def __init__(self, xml_filename, ignore_redirects=False):
         self.xml_filename = xml_filename
         self.ignore_redirects = ignore_redirects
+        self.title = None
+        self.pageid = None
 
     def open_input_stream(self):
         if self.xml_filename.lower().endswith(".bz2"):
@@ -100,7 +102,7 @@ class DumpParser:
     def __iter__(self):
         xml_file = self.open_input_stream()
 
-        elem_iter = (el for _, el in cElementTree.iterparse(f))
+        elem_iter = (el for _, el in cElementTree.iterparse(xml_file))
         for elem in elem_iter:
             if self.get_tag(elem) == "page":
                 page = self.handle_page_element(elem)

@@ -24,6 +24,7 @@ from mwlib import advtree, odfconf, parser, writerbase
 from mwlib import odfstyles as style
 from mwlib.log import Log
 from mwlib.mathutils import render_math
+from mwlib.parser import Caption
 from mwlib.treecleaner import TreeCleaner
 
 log = Log("odfwriter")
@@ -124,12 +125,10 @@ class ParagraphProxy(text.Element):
             text.Element.addElement(self, handler)
 
 
-"""
-we generate odf.text.Elements and
-patch them with two specialities:
-1) Element.writeto
-2) ParagraphProxy(text.Element)
-"""
+# we generate odf.text.Elements and
+# patch them with two specialities:
+# 1) Element.writeto
+# 2) ParagraphProxy(text.Element)
 
 
 class ODFWriter:
@@ -181,7 +180,7 @@ class ODFWriter:
         doc.save(output, addsuffix=False)
         log("writing to %r" % output)
 
-    def getDoc(self, debuginfo=""):
+    def getDoc(self, _=""):
         return self.doc
 
     def asstring(self, element=None):
@@ -360,8 +359,7 @@ class ODFWriter:
     def owriteItemList(self, lst):
         if lst.numbered:
             return text.List(stylename=style.numberedlist)
-        else:
-            return text.List(stylename=style.unorderedlist)
+        return text.List(stylename=style.unorderedlist)
 
     def owriteDefinitionList(self, _):
         return text.List(stylename=style.definitionlist)
@@ -417,7 +415,7 @@ class ODFWriter:
         # are there caption not in tables ???? FIXME
         if isinstance(obj.parent, advtree.Table):
             return SkipChildren()
-        pass  # FIXME
+        return None
 
     def owriteTable(self, obj):  # FIXME ADD FORMATTING
         # http://books.evc-cit.info/odbook/ch04.html#text-table-section
@@ -428,7 +426,7 @@ class ODFWriter:
         )  # FIXME FIXME
         new_table.addElement(column)
 
-        captions = [c for c in obj.children if isinstance(c, advtree.Caption)]
+        captions = [c for c in obj.children if isinstance(c, Caption)]
         if not captions:  # handle table w/o caption:
             return new_table
         else:  # a section groups table-caption & table:
@@ -510,6 +508,7 @@ class ODFWriter:
             return SkipChildren()
         if getattr(node, "caption", None) in ["abbr"]:
             return self.owriteUnderline(node)
+        return None
 
     # ------- block formattings -------------------
     # use paragraph
@@ -633,11 +632,11 @@ class ODFWriter:
             hyperlink_element.addText(obj.target)
         return hyperlink_element
 
-    def owriteCategoryLink(self, obj):
+    def owriteCategoryLink(self, _):
         if True:  # FIXME, collect and add to the end of the page
             return SkipChildren()
 
-    def owriteLangLink(self, obj):
+    def owriteLangLink(self, _):
         return SkipChildren()  # dont want them
 
     def owriteReference(self, footnote_text):
@@ -683,8 +682,7 @@ class ODFWriter:
                 self.conf.paper["IMG_MAX_HEIGHT"] / height,
             )
             return (width * scale, height * scale, scale)
-        else:
-            return (w_target, h_target, scale)
+        return (w_target, h_target, scale)
 
     def _determine_image_path_or_write_children(self, obj):
         if obj.colon is True:
@@ -701,7 +699,7 @@ class ODFWriter:
             return None
         img_path = img_path.encode("utf-8")
         return img_path
-    
+
     def _calculate_object_dimensions_based_on_aspect_ratio(self, w_obj, h_obj, w_img, h_img, aspect_ratio):
         if w_obj > 0 and not h_obj > 0:
             h_obj = w_obj / aspect_ratio

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-from mwlib.expander import DictDB, expand_str
+from mwlib.expander import DictDB
+from mwlib.templ.misc import expand_str
 
 d4 = """
 {{#if:{{{inline|}}} | dfklghsldfkghslkdfghslkdfjhglskjdfghlskjdfg }}

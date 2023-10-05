@@ -10,6 +10,9 @@ from mwlib.exceptions.mwlib_exceptions import InconsistentPathLengthException
 
 class State:
     def __init__(self, **kw):
+        self.apocount = 0
+        self.is_bold = False
+        self.is_italic = False
         self.__dict__.update(kw)
 
     def clone(self, **kw):
@@ -18,7 +21,7 @@ class State:
         return state
 
     def __repr__(self):
-        res = ["<state ", " %s " % self.apocount]
+        res = ["<state ", f" {self.apocount} "]
         if self.is_bold:
             res.append("bold ")
         if self.is_italic:
@@ -34,8 +37,7 @@ class State:
         other_type = type(other)
         if self_type is other_type:
             return id(self) < id(other)
-        else:
-            raise TypeError(f"unorderable types: {self_type.__name__}() < {other_type.__name__}()")
+        raise TypeError(f"unorderable types: {self_type.__name__}() < {other_type.__name__}()")
 
     def get_next(self, count, res=None, previous=None):
         if previous is None:

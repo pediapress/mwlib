@@ -3,7 +3,7 @@
 import math
 
 from mwlib import expr
-from mwlib.expander import expand_str
+from mwlib.templ.misc import expand_str
 
 
 def ee(s, expected=None):

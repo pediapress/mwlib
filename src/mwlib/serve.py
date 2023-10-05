@@ -34,10 +34,10 @@ def make_collection_id(data):
         mbobj = json.loads(meta_book)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
+        base_url = data.get('base_url')
+        writer = data.get('writer')
         sys.stdout.write(
-            "new-collection {}\t{!r}\t{!r}\n".format(num_articles,
-                                                     data.get("base_url"),
-                                                     data.get("writer")))
+            f"new-collection {num_articles}\t{base_url}\t{writer}\n")
 
     return sha256(sio.getvalue().encode()).hexdigest()[:16]
 

@@ -11,6 +11,8 @@ import re
 
 import six
 
+from mwlib import siteinfo
+
 NS_MEDIA = -2
 NS_SPECIAL = -1
 NS_MAIN = 0
@@ -38,6 +40,7 @@ class ILink:
     prefix = ""
     local = ""
     language = ""
+    partial = ""
 
 
 def fix_wikipedia_siteinfo(siteinfo):
@@ -47,8 +50,7 @@ def fix_wikipedia_siteinfo(siteinfo):
     if '\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd' in [
             x.get("prefix", "")[2:] for x in siteinfo.get("interwikimap", [])]:
         print("WARNING: interwikimap contains garbage")
-        from mwlib import siteinfo as simod
-        eng_locale = simod.get_siteinfo("en")
+        eng_locale = siteinfo.get_siteinfo("en")
         siteinfo['interwikimap'] = list(eng_locale["interwikimap"])
 
     prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
@@ -180,8 +182,6 @@ class NsHandler:
 def get_nshandler_for_lang(lang):
     if lang is None:
         lang = "de"  # FIXME: we currently need this to make the tests happy
-
-    from mwlib import siteinfo
     site_info = siteinfo.get_siteinfo(lang)
     if site_info is None:
         site_info = siteinfo.get_siteinfo("en")

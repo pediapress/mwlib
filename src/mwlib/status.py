@@ -6,12 +6,14 @@
 import os
 import sys
 
+from mwlib.asynchronous import rpcclient
+from mwlib.log import Log
+
 try:
     import simplejson as json
 except ImportError:
     import json
 
-from mwlib.log import Log
 
 log = Log('mwlib.status')
 
@@ -33,6 +35,7 @@ class Status:
         else:
             self.status = {}
         self.progress_range = progress_range
+        self.jobid = None
 
     def get_sub_range(self, start, end):
         progress_range = (self.scale_progress(start), self.scale_progress(end))
@@ -70,8 +73,8 @@ class Status:
             self.podclient.post_status(**self.status)
 
         msg = []
-        msg.append("{}%".format(self.status.get("progress",
-                                                self.progress_range[0])))
+        progress = self.status.get("progress", self.progress_range[0])
+        msg.append(f"{progress}%")
         msg.append(self.status.get("status", ""))
         msg.append(self.status.get("article", ""))
         msg = " ".join(msg)
@@ -107,7 +110,6 @@ class Status:
             else:
                 port = 14311
 
-            from mwlib.asynchronous import rpcclient
             self.qproxy = rpcclient.serverproxy(host=host, port=port)
             self.jobid = jobid
 

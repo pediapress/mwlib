@@ -16,7 +16,7 @@ class Snippet:
 def get_all():
     # FIXME: turn this into a py.text fixture
     snippet_filepath = os.path.join(os.path.dirname(__file__), "snippets.txt")
-    with open(snippet_filepath) as snippet_file:
+    with open(snippet_filepath, encoding='utf-8') as snippet_file:
         examples = snippet_file.read().split("\x0c\n")[1:]
     res = []
     for i, example in enumerate(examples):

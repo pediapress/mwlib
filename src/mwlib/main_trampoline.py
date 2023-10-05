@@ -1,24 +1,21 @@
 # nserve/nslave only monkeypatch when imported as __main__ so, we
 # monkeypatch here and then call into the respective main function
-
 from gevent import monkey
+
+from mwlib.nserve import main as nserve_main_func
+from mwlib.nslave import main as nslave_main_func
+from mwlib.postman import main as postman_main_func
 
 monkey.patch_all()
 
 
 def nserve_main():
-    from mwlib.nserve import main
-
-    return main()
+    return nserve_main_func()
 
 
 def nslave_main():
-    from mwlib.nslave import main
-
-    return main()
+    return nslave_main_func()
 
 
 def postman_main():
-    from mwlib.postman import main
-
-    return main()
+    return postman_main_func()

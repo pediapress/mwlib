@@ -2,12 +2,6 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-import gevent.monkey
-import six
-
-if __name__ == "__main__":
-    gevent.monkey.patch_all()
-
 import re
 import sys
 import traceback
@@ -16,6 +10,9 @@ import urllib
 from hashlib import sha256
 from io import StringIO
 
+import gevent.monkey
+import pkg_resources
+import six
 import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
@@ -29,6 +26,9 @@ from mwlib.asynchronous import rpcclient
 from mwlib.metabook import calc_checksum
 
 log = log.Log("mwlib.serve")
+
+if __name__ == "__main__":
+    gevent.monkey.patch_all()
 
 
 class Bunch:
@@ -58,9 +58,7 @@ name2writer = {
 }
 
 
-def get_writers(name2writer):
-    import pkg_resources
-
+def get_writers():
     for entry_point in pkg_resources.iter_entry_points("mwlib.writers"):
         if entry_point.name in name2writer:
             continue
@@ -78,7 +76,7 @@ def get_writers(name2writer):
     return name2writer
 
 
-get_writers(name2writer)
+get_writers()
 
 collection_id_rex = re.compile(r"^[a-f0-9]{16}$")
 
@@ -99,10 +97,10 @@ def make_collection_id(data):
         mbobj = json.loads(meta_book)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
+        base_url = data.get("base_url")
+        writer = data.get("writer")
         sys.stdout.write(
-            "new-collection {}\t{!r}\t{!r}\n".format(
-                num_articles, data.get("base_url"), data.get("writer")
-            )
+            f"new-collection {num_articles}\t{base_url}\t{writer}\n"
         )
 
     return sha256(sio.getvalue().encode("utf-8")).hexdigest()[:16]
@@ -116,11 +114,11 @@ class WatchQServe:
     getstats_timeout = 3.0
     sleeptime = 2.0
 
-    def __init__(self, xxx_todo_changeme, busy):
+    def __init__(self, xxx_todo_changeme, busy_data):
         (host, port) = xxx_todo_changeme
         self.host = host
         self.port = port
-        self.busy = busy
+        self.busy = busy_data
         self.ident = (host, port)
         self.prefix = f"watch: {host}:{port}:"
         self.qserve = None
@@ -152,9 +150,9 @@ class WatchQServe:
         except gevent.Timeout:
             self.qserve = None
             raise RuntimeError("timeout calling getstats")
-        except BaseException:
+        except BaseException as exc:
             self.qserve = None
-            raise
+            raise RuntimeError(f"error calling getstats: {exc}") from exc
 
     def _iterate(self):
         try:
@@ -173,10 +171,7 @@ class WatchQServe:
     def __call__(self):
         self.busy[self.ident] = True
         while True:
-            try:
-                self._iterate()
-            except gevent.GreenletExit:
-                raise
+            self._iterate()
             self._sleep()
 
 
@@ -227,6 +222,8 @@ def get_content_disposition(filename, ext):
 class Application:
     def __init__(self, default_writer="rl"):
         self.default_writer = default_writer
+        self.collection_id = None
+        self.post_url = None
 
     def dispatch(self, request):
         try:

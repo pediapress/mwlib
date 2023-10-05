@@ -4,6 +4,7 @@
 # See README.txt for additional licensing information.
 
 import copy
+import cProfile
 import gc
 import gettext
 import os
@@ -44,6 +45,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from mwlib import advtree, log, parser, timeline, uparser, writerbase
 from mwlib._version import version as mwlibversion
 from mwlib.mathutils import render_math
+from mwlib.parser import Caption, NamedURL
 from mwlib.rl._version import VERSION as rlwriterversion
 from mwlib.rl.customflowables import (
     DummyTable,
@@ -281,6 +283,8 @@ class RlWriter:
         self.article_meta_info = []
         self.url_map = {}
         self.fixed_images = {}
+        self.numarticles = 0
+        self.render_status = None
 
     def ignore(self, obj):
         return []
@@ -2292,7 +2296,7 @@ class RlWriter:
     def renderCaption(self, table):
         res = []
         for row in table.children[:]:
-            if row.__class__ == advtree.Caption:
+            if row.__class__ == Caption:
                 res = self.writeCaption(row)
                 table.remove_child(
                     row
@@ -2308,7 +2312,7 @@ class RlWriter:
 
     def _extra_cell_padding(self, cell):
         return (
-            cell.get_child_nodes_by_class(advtree.NamedURL)
+            cell.get_child_nodes_by_class(NamedURL)
             or cell.get_child_nodes_by_class(advtree.Reference)
             or cell.get_child_nodes_by_class(advtree.Sup)
         )
@@ -2653,7 +2657,7 @@ class RlWriter:
             node.is_inline = lambda: False
             width, height = self.image_utils.get_image_size(node, img_path)
             return [
-                Figure(img_path, "", text_style(), imgWidth=width, imgHeight=height)
+                Figure(img_path, "", text_style(), img_width=width, img_height=height)
             ]
         return []
 
@@ -2679,7 +2683,6 @@ def writer(
         coverimage = env.configparser.get("pdf", "coverimage", None)
 
     if profile:
-        import cProfile
 
         cProfile.runctx(
             "r.writeBook(output=output, coverimage=coverimage, status_callback=status_callback)",

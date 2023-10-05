@@ -69,7 +69,7 @@ def strftime(date, fmt):
             sites.append(site)
 
     result_time = time_1
-    syear = "%4d" % (date.year,)
+    syear = f"{date.year}"
     for site in sites:
         result_time = result_time[:site] + syear + result_time[site + 4 :]
     return result_time
@@ -80,9 +80,9 @@ def strftime(date, fmt):
 
 
 def test():
-    time = strftime(datetime.date(1800, 9, 23), "%Y has the same days as 1980 and 2008")
-    if time != "1800 has the same days as 1980 and 2008":
-        raise AssertionError(time)
+    formatted_year_comparison = strftime(datetime.date(1800, 9, 23), "%Y has the same days as 1980 and 2008")
+    if formatted_year_comparison != "1800 has the same days as 1980 and 2008":
+        raise AssertionError(formatted_year_comparison)
 
     print("Testing all day names from 0001/01/01 until 2000/08/01")
     # Get the weekdays.  Can't hard code them; they could be

@@ -12,6 +12,7 @@ class Node(utoken.Token):
     caption = ""
 
     def __init__(self, caption=""):
+        super().__init__()
         self.children = []
         self.caption = caption
 
@@ -353,6 +354,7 @@ class Text(Node):
         return repr(self.caption)
 
     def __init__(self, txt):
+        super().__init__()
         self.caption = txt
         self.children = []
 

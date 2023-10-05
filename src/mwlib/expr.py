@@ -11,6 +11,15 @@ http://meta.wikimedia.org/wiki/ParserFunctions#.23expr:
 import inspect
 import math
 import re
+import time
+import traceback
+
+try:
+    import readline  # do not remove. makes raw_input use readline
+
+    readline
+except ImportError:
+    pass
 
 
 class ExprError(Exception):
@@ -87,7 +96,7 @@ a = addop
 a(UMinus, 10, lambda x: -x)
 a(UPlus, 10, lambda x: x)
 a("^", 10, math.pow, 2)
-a("not", 9, lambda x: int(not (bool(x))))
+a("not", 9, lambda x: int(not bool(x)))
 a("abs", 9, abs, 1)
 a("sin", 9, math.sin, 1)
 a("cos", 9, math.cos, 1)
@@ -232,15 +241,6 @@ def expr(char):
 
 
 def main():
-    import time
-
-    try:
-        import readline  # do not remove. makes raw_input use readline
-
-        readline
-    except ImportError:
-        pass
-
     while True:
         input_string = input("> ")
         if not input_string:
@@ -251,8 +251,6 @@ def main():
             res = expr(input_string)
         except Exception as err:
             print("ERROR:", err)
-            import traceback
-
             traceback.print_exc()
 
             continue

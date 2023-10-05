@@ -10,6 +10,7 @@ import _mwscan
 import htmlentitydefs
 
 from mwlib.parser import paramrx
+from mwlib.tagext import default_registry as tagextensions
 
 
 class Token:
@@ -121,9 +122,6 @@ class ScanResult:
 
 
 class _CompatScanner:
-    from mwlib.tagext import default_registry as tagextensions
-
-    allowed_tags = None
 
     class Ignore:
         pass
@@ -154,11 +152,6 @@ class _CompatScanner:
         Token.t_urllink: "URLLINK",
     }
 
-    def _init_allowed_tags(self):
-        from mwlib.parser import _get_tags
-
-        self.allowed_tags = _get_tags()
-
     def get_substring(self, text, start, tlen):
         return text[start: start + tlen]
 
@@ -172,7 +165,7 @@ class _CompatScanner:
             text_start = start
         if token_type == Token.t_html_tag:
             tag_token = self.tagtoken(self.get_substring(text, start, tlen))
-            if tag_token.t == tagname:
+            if tag_token.token == tagname:
                 should_break = True
                 end_token = (tag_token, self.get_substring(text, start, tlen))
         text_end = start + tlen
@@ -184,7 +177,7 @@ class _CompatScanner:
         if closing_or_self_closing:
             i += 1
             should_continue = True
-        tagname = tag_token.t
+        tagname = tag_token.token
         res.append((tag_token, substr))
         i += 1
         text_start = None
@@ -208,18 +201,15 @@ class _CompatScanner:
             token_type, start, tlen = tokens[i]
             if token_type == Token.t_html_tag:
                 tag_token = self.tagtoken(self.get_substring(text, start, tlen))
-                if tag_token.t == "nowiki":
+                if tag_token.token == "nowiki":
                     break
             res.append(("TEXT", scanres.text((token_type,
                                               start, tlen))))
             i += 1
         return i
 
-    def _append_allowed_tag_or_text(self, tag_token, res, substr):
-        if tag_token.t in self.allowed_tags:
-            res.append((tag_token, substr))
-        else:
-            res.append(("TEXT", substr))
+    def _append_allowed_tag_or_text(self, _, res, substr):
+        res.append(("TEXT", substr))
 
     def _append_table_start_or_end_token(self, is_end_token, res, text, start, tlen):
         if is_end_token:
@@ -233,18 +223,18 @@ class _CompatScanner:
         tag_token = self.tagtoken(substr)
         is_end_token = isinstance(tag_token, EndTagToken)
         closing_or_self_closing = is_end_token or tag_token.self_closing
-        if tag_token.t in self.tagextensions or tag_token.t in ("imagemap", "gallery"):
+        if tag_token.token in self.tagextensions or tag_token.token in ("imagemap", "gallery"):
             i, should_continue = self._process_tag_and_extract_text(tokens, i, None, text, tag_token, closing_or_self_closing, res, substr, numtokens)
             if should_continue:
                 return i, True
-        elif tag_token.t == "nowiki":
+        elif tag_token.token == "nowiki":
             i = self._handle_nowiki_tag_and_append_text(i, is_end_token, tag_token, text, tokens, res, numtokens, scanres)
-        elif tag_token.t == "table":
+        elif tag_token.token == "table":
             self._append_table_start_or_end_token(is_end_token, res, text, start, tlen)
-        elif tag_token.t in ["th", "td"]:
+        elif tag_token.token in ["th", "td"]:
             if not is_end_token:
                 res.append(("COLUMN", self.get_substring(text, start, tlen)))
-        elif tag_token.t == "tr":
+        elif tag_token.token == "tr":
             if not is_end_token:
                 res.append(("ROW", self.get_substring(text, start, tlen)))
         else:
@@ -252,15 +242,12 @@ class _CompatScanner:
         return i, False
 
     def __call__(self, text):
-        if self.allowed_tags is None:
-            self._init_allowed_tags()
-
         tokens = scan(text)
         scanres = ScanResult(text, tokens)
 
         res = []
 
-        ignore = self.ignore
+        ignore = self.Ignore
         tok2compat = self.tok2compat
 
         i = 0
@@ -271,7 +258,7 @@ class _CompatScanner:
             if compat is ignore:
                 i += 1
                 continue
-            elif compat is not None:
+            if compat is not None:
                 self.append_to_result(res, compat, text, start, tlen)
             elif token_type == Token.t_entity:
                 res.append(("TEXT", resolve_entity(self.get_substring(text, start, tlen))))
@@ -318,6 +305,11 @@ compat_scan = _CompatScanner()
 
 
 class _BaseTagToken:
+    def __init__(self, token) -> None:
+        self.token = token
+        self.values = {}
+        self.self_closing = False
+
     def __eq__(self, other):
         if isinstance(other, str):
             return self.token == other
@@ -333,11 +325,9 @@ class _BaseTagToken:
 
 
 class TagToken(_BaseTagToken):
-    values = {}
-    self_closing = False
 
     def __init__(self, token, text=""):
-        self.token = token
+        super().__init__(token)
         self.text = text
 
     def __repr__(self):
@@ -346,7 +336,7 @@ class TagToken(_BaseTagToken):
 
 class EndTagToken(_BaseTagToken):
     def __init__(self, token, text=""):
-        self.token = token
+        super().__init__(token)
         self.text = text
 
     def __repr__(self):

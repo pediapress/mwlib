@@ -74,7 +74,9 @@ if __name__ == "__main__":
     tr = TrustedRevisions()
     trev = tr.get_trusted_revision(sys.argv[1])
     print("Found revision:", trev)
+    title = trev["title"]
+    rev = trev["revid"]
+    age = trev["age"]
     print(
-        "title:%s revid:%d age:%.2f days" % (trev["title"],
-                                             trev["revid"], trev["age"])
+        f"title:{title} revid:{rev} age:{'%.2f' % age}"
     )

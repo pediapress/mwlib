@@ -24,41 +24,38 @@ http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 
 import copy
 import re
+import sys
 
 import six
 
+from mwlib import dummydb, parser
+from mwlib.dummydb import DummyDB
 from mwlib.log import Log
 from mwlib.parser import (
     URL,
     Article,
     ArticleLink,
     Book,
-    Caption,
-    CategoryLink,
     Cell,
     Chapter,
     ImageLink,
-    InterwikiLink,
     Item,
     ItemList,
-    LangLink,
     Link,
     Math,
-    NamedURL,
     NamespaceLink,
     Node,
     Paragraph,
     PreFormatted,
-    Ref,
     Row,
     Section,
-    SpecialLink,
     Style,
     Table,
     TagNode,
     Text,
     Timeline,
 )
+from mwlib.uparser import parse_string
 
 log = Log("advtree")
 
@@ -253,25 +250,20 @@ class AdvancedNode:
             if self.__class__ == Section:
                 if len(self.children) == 1:
                     return None
-                else:
-                    return self.children[1].get_first_leaf(caller_is_self=False)
-            else:
-                return self.children[0].get_first_leaf(caller_is_self=False)
+                return self.children[1].get_first_leaf(caller_is_self=False)
+            return self.children[0].get_first_leaf(caller_is_self=False)
         else:
             if caller_is_self:
                 return None
-            else:
-                return self
+            return self
 
     def get_last_leaf(self, caller_is_self=True):
         """Return 'last' child that has no children itself"""
         if self.children:
             return self.children[-1].get_first_leaf(caller_is_self=False)
-        else:
-            if caller_is_self:
-                return None
-            else:
-                return self
+        if caller_is_self:
+            return None
+        return self
 
     def get_all_display_text(self, amap=None):
         "Return all text that is intended for display"
@@ -296,14 +288,12 @@ class AdvancedNode:
         alltext = [t for t in text if t]
         if alltext:
             return "".join(alltext)
-        else:
-            return ""
+        return ""
 
     def get_style(self):
         if not self.attributes:
             return {}
-        else:
-            return self.attributes.get("style", {})
+        return self.attributes.get("style", {})
 
     def _ensure_int(self, val, min_val=1):
         try:
@@ -314,19 +304,17 @@ class AdvancedNode:
     def _ensure_unicode(self, val):
         if isinstance(val, six.text_type):
             return val
-        elif isinstance(val, str):
+        if isinstance(val, str):
             return six.text_type(val, "utf-8")
-        else:
-            try:
-                return six.text_type(val)
-            except BaseException:
-                return ""
+        try:
+            return six.text_type(val)
+        except BaseException:
+            return ""
 
     def _ensure_dict(self, val):
         if isinstance(val, dict):
             return val
-        else:
-            return {}
+        return {}
 
     def _clean_attrs(self, attrs):
         for key, value in attrs.items():
@@ -408,7 +396,7 @@ class AdvancedRow(AdvancedNode):
 
 class AdvancedCell(AdvancedNode):
     @property
-    def colspan(self, attr="colspan"):
+    def colspan(self):
         """colspan of cell. result is always non-zero, positive int"""
         return self.attributes.get("colspan") or 1
 
@@ -909,9 +897,6 @@ def _validate_parents(node, parent=None):
 
 
 def get_advanced_tree(fun):
-    from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parse_string
-
     database = DummyDB()
     with open(fun) as wiki_file:
         tree_input = six.text_type(wiki_file.read(), "utf8")
@@ -921,11 +906,6 @@ def get_advanced_tree(fun):
 
 
 def simpleparse(raw):  # !!! USE FOR DEBUGGING ONLY !!!
-    import sys
-
-    from mwlib import dummydb, parser
-    from mwlib.uparser import parse_string
-
     decoded_input = raw.decode("utf8")
     parsed_string = parse_string(title="title", raw=decoded_input, wikidb=dummydb.DummyDB())
     build_advanced_tree(parsed_string)

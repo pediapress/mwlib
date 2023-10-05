@@ -11,7 +11,6 @@ FIXME: replace with texvc which is deistributed with MediaWiki
 """
 
 
-
 import subprocess
 import sys
 
@@ -24,17 +23,18 @@ from xml.parsers.expat import ExpatError
 
 def log(err):
     sys.stderr.write(err + " ")
-    pass
 
 
 def latex2mathml(latex):
-
-    data = "\\displaystyle\n%s\n" % latex.strip()
-    popen = subprocess.Popen(["blahtexml", "--mathml"], stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    popen.stdin.write(data)
-    output, errors = popen.communicate()
-    popen.wait()
+    data = f"\\displaystyle\n{latex.strip()}\n"
+    with subprocess.Popen(
+        ["blahtexml", "--mathml"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as popen:
+        popen.stdin.write(data)
+        output, errors = popen.communicate()
 
     if output:
         # ET has unreadable namespace handling
@@ -53,7 +53,7 @@ def latex2mathml(latex):
             log(data + "\n\n")
             log(errors + "\n")
             log(output + "\n")
-            return
+            return None
 
         tag = "mathml"
         mathml = tree.iter(tag)
@@ -62,8 +62,8 @@ def latex2mathml(latex):
             mathml = mathml.next()
             mathml.set("xmlns", "http://www.w3.org/1998/Math/MathML")
             return mathml
-        else:
-            log("an error occured, \n%s\n" % output)
+        log(f"an error occured, \n{output}\n")
+    return None
 
 
 if __name__ == "__main__":

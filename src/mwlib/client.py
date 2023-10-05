@@ -15,6 +15,8 @@ class Client:
     def __init__(self, url):
         self.url = url
         self.response = None
+        self.error = None
+        self.response_code = None
 
     def request(self, command, args, is_json=True):
         self.error = None

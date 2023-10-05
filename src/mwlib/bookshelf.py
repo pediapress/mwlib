@@ -40,4 +40,4 @@ if __name__ == "__main__":
     from mwlib.mwapidb import get_api_helper
 
     b = Bookshelf(get_api_helper("http://en.wikipedia.org/w/"))
-    print("have %d books" % len(b.booknames()))
+    print(f"have {len(b.booknames())} books")

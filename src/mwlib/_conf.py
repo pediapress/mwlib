@@ -27,7 +27,7 @@ class ConfBase:
 
     def get(self, section, name, default=None, convert=str):
         if section == "mwlib":
-            varname = "MWLIB_%s" % name.upper()
+            varname = f"MWLIB_{name.upper()}"
         else:
             varname = f"MWLIB_{section.upper()}_{name.upper()}"
 
@@ -46,7 +46,7 @@ class ConfBase:
     def user_agent(self):
         from mwlib._version import version
 
-        return self.get("mwlib", "user_agent", "") or ("mwlib %s" % version)
+        return self.get("mwlib", "user_agent", "") or f"mwlib {version}"
 
 
 class ConfMod(ConfBase, types.ModuleType):

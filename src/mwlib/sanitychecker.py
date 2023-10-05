@@ -5,6 +5,7 @@ class for defining DTD-Like Rules for the tree
 """
 
 
+from mwlib.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
 from mwlib.exceptions.mwlib_exceptions import SanityException
 from mwlib.log import Log
 
@@ -19,7 +20,7 @@ class ConstraintBase:
     def __init__(self, *klasses):
         self.klasses = klasses
 
-    def test(self, nodes):
+    def test(self, _):
         return True, None  # passed
 
     def __repr__(self):
@@ -80,7 +81,7 @@ class RuleBase:
         self.klass = klass
         self.constraint = constraint
 
-    def _tocheck(self):
+    def _tocheck(self, _):
         return []
 
     def test(self, node):
@@ -124,6 +125,7 @@ class SiblingsOf(RuleBase):
 
 class RequireChild(RuleBase):
     def __init__(self, klass):
+        super().__init__(klass, Require(klass))
         self.klass = klass
 
     def __repr__(self):
@@ -138,12 +140,10 @@ class RequireChild(RuleBase):
 # -----------------------------------------------------------
 # Callbacks
 # -----------------------------------------------------------
-"""
-callbacks get called if added to rules
-callback return values should be:
- * True if it modified the tree and the sanity check needs to restart
- * False if the tree is left unmodified
-"""
+# callbacks get called if added to rules
+# callback return values should be:
+# * True if it modified the tree and the sanity check needs to restart
+# * False if the tree is left unmodified
 
 
 def exceptioncb(rule, node=None, parentnode=None):
@@ -194,8 +194,6 @@ class SanityChecker:
 
 def demo():
     "for documentation only, see tests for more demos"
-    from mwlib.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
-
     sanity_checker = SanityChecker()
     rules = [
         ChildrenOf(Table, Allow(Row)),

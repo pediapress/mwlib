@@ -2,7 +2,10 @@
 import pytest
 from mwlib import expander
 from mwlib.dummydb import DummyDB
-from mwlib.expander import DictDB, expand_str
+from mwlib.expander import DictDB
+from mwlib.templ.misc import expand_str
+from mwlib.templ.nodes import Template, Variable, show
+from mwlib.templ.scanner import tokenize
 
 HELP_LINK = "Help:Link/a/b"
 FOO_TEMPLATE_1 = "foo {{tt}}"
@@ -22,7 +25,7 @@ MY_PAGE = "my page"
 def parse_and_show(s):
     res = expander.parse(s)
     print("PARSE:", repr(s))
-    expander.show(res)
+    show(res)
     return res
 
 
@@ -72,17 +75,17 @@ def test_five():
 
 def test_five_parser():
     n = parse_and_show("{{{{{1}}}}}")
-    assert isinstance(n, expander.Template)
+    assert isinstance(n, Template)
 
 
 def test_five_two_three():
     n = parse_and_show("{{{{{1}} }}}")
-    assert isinstance(n, expander.Variable)
+    assert isinstance(n, Variable)
 
 
 def test_five_three_two():
     n = parse_and_show("{{{{{1}}} }}")
-    assert isinstance(n, expander.Template)
+    assert isinstance(n, Template)
 
 
 def test_alfred():
@@ -211,7 +214,7 @@ Image:Drenthe-Position.png|[[w:Drenthe|Drenthe]], the least crowded province
 Image:Friesland-Position.png|[[w:Friesland|Friesland]] has many lakes
 </gallery>
 """
-    tokens = expander.tokenize(gall)
+    tokens = tokenize(gall)
     g = tokens[1][1]
     assert g.startswith("<gallery")
     assert g.endswith("</gallery>")

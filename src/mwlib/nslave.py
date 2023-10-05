@@ -169,7 +169,7 @@ class Commands:
     def rpc_render(self, params=None):
         def doit(
             metabook_data=None, collection_id=None,
-            _, writer=None
+            _=None, writer=None
         ):
             writer = writer or "rl"
             collection_dir = get_collection_dir(collection_id)

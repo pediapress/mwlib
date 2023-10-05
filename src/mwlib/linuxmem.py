@@ -11,7 +11,7 @@ for k, v in _scale.items():
 def _readproc(key):
     """Private."""
     try:
-        with open("/proc/self/status") as proc_file:
+        with open("/proc/self/status", encoding="utf-8") as proc_file:
             value = proc_file.read()
         # get key line e.g. 'VmRSS:  9999  kB\n ...'
         i = value.index(key)

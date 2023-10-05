@@ -14,7 +14,6 @@ from mwlib.advtree import (
     Emphasized,
     Gallery,
     ItemList,
-    LangLink,
     Paragraph,
     PreFormatted,
     Reference,
@@ -27,6 +26,7 @@ from mwlib.advtree import (
     build_advanced_tree,
 )
 from mwlib.dummydb import DummyDB
+from mwlib.parser import LangLink
 from mwlib.treecleaner import TreeCleaner
 from mwlib.uparser import parse_string
 

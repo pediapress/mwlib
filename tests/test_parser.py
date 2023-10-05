@@ -7,7 +7,8 @@ import pytest
 from mwlib import expander, parser, uparser
 from mwlib.dummydb import DummyDB
 from mwlib.expander import DictDB
-from mwlib.refine import core, util
+from mwlib.refine import util
+from mwlib.templ.misc import expand_str
 from mwlib.utoken import show
 
 BAD_URL = "bad url"
@@ -234,7 +235,7 @@ def test_parse_comment():
     ex = """foo
 <!-- comment --->
 bar"""
-    expanded = expander.expand_str(ex)
+    expanded = expand_str(ex)
     print("EXPANDED:", expanded)
     assert "\n\n" not in expanded
 
@@ -1229,7 +1230,7 @@ def test_broken_link_whitespace():
 
 def test_comment_inside_nowiki():
     comment = "this is a comment"
-    s = expander.expand_str("<pre><!-- this is a comment --></pre>")
+    s = expand_str("<pre><!-- this is a comment --></pre>")
     assert comment in s
     r = parse(s)
     txt = r.as_text()

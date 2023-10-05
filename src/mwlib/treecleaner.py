@@ -18,8 +18,6 @@ from mwlib.advtree import (
     Blockquote,
     Book,
     BreakingReturn,
-    Caption,
-    CategoryLink,
     Cell,
     Center,
     Chapter,
@@ -36,14 +34,11 @@ from mwlib.advtree import (
     ImageLink,
     ImageMap,
     Inserted,
-    InterwikiLink,
     Italic,
     Item,
     ItemList,
-    LangLink,
     Link,
     Math,
-    NamedURL,
     NamespaceLink,
     Node,
     Overline,
@@ -56,7 +51,6 @@ from mwlib.advtree import (
     Small,
     Source,
     Span,
-    SpecialLink,
     Strike,
     Strong,
     Sub,
@@ -70,6 +64,7 @@ from mwlib.advtree import (
     remove_newlines,
 )
 from mwlib.exceptions.mwlib_exceptions import InvalidTreeNodesError
+from mwlib.parser import Caption, CategoryLink, InterwikiLink, LangLink, NamedURL, SpecialLink
 from mwlib.treecleanerhelper import get_node_height, split_row
 from mwlib.writer import miscutils, styleutils
 
@@ -237,7 +232,7 @@ class TreeCleaner:
         ]
 
         # USED IN fix_nesting if nesting_strictness == 'loose'
-        # keys are nodes, that are not allowed to be inside one 
+        # keys are nodes, that are not allowed to be inside one
         # of the nodes in the value-list
         # ex: pull image links out of preformatted nodes
         # fixme rename to ancestors
@@ -261,7 +256,7 @@ class TreeCleaner:
         }
         self.forbidden_parents[Source].append(PreFormatted)
 
-        # when checking nesting, some Nodes prevent 
+        # when checking nesting, some Nodes prevent
         # outside nodes to be visible to inner nodes
         # ex: Paragraphs can not be inside Paragraphs.
         # but if the inner paragraph is inside a

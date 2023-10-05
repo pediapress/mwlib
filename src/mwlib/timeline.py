@@ -6,7 +6,9 @@
 """implement http://meta.wikimedia.org/wiki/EasyTimeline
 """
 
+import atexit
 import os
+import shutil
 import tempfile
 from hashlib import sha256
 
@@ -41,8 +43,6 @@ def _get_global_basedir():
     global _BASEDIR
     if not _BASEDIR:
         _BASEDIR = tempfile.mkdtemp(prefix='timeline-')
-        import atexit
-        import shutil
         atexit.register(shutil.rmtree, _BASEDIR)
     return _BASEDIR
 
@@ -61,7 +61,7 @@ def draw_timeline(script, basedir=None):
         return pngfile
 
     script_filepath = os.path.join(basedir, ident + '.txt')
-    with open(script_filepath, 'w') as script_file:
+    with open(script_filepath, 'w', encoding='utf-8') as script_file:
         script_file.write(script)
     easy_timeline_path = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
 

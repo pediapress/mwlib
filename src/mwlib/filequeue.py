@@ -20,7 +20,7 @@ class FileJobQueuer:
     def __call__(self, job_type, job_id, args):
         job_file = "%s.job" % os.path.join(self.queue_dir, job_id)
         if os.path.exists(job_file):
-            self.log.warn("Job file %r already exists" % job_file)
+            self.log.warn(f"Job file {job_file} already exists")
             return
 
         open(job_file + ".tmp", "wb").write(six.moves.cPickle.dumps(args))
@@ -28,7 +28,7 @@ class FileJobQueuer:
 
 
 class FileJobPoller:
-    def __init__(self, queue_dir, processing_dir=None, sleep_time=1, max_num_jobs=5):
+    def __init__(self, queue_dir, _=None, sleep_time=1, max_num_jobs=5):
         self.queue_dir = utils.ensure_dir(queue_dir)
         self.sleep_time = sleep_time
         self.max_num_jobs = max_num_jobs
@@ -124,3 +124,4 @@ class FileJobPoller:
         finally:
             self.log.warn(f"error running {args!r}")
             os._exit(10)
+        return False

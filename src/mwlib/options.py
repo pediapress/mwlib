@@ -1,3 +1,4 @@
+import copy
 import optparse
 import sys
 
@@ -13,6 +14,8 @@ class OptionParser(optparse.OptionParser):
         self.config_values = []
         optparse.OptionParser.__init__(self, usage=usage)
         self.metabook = None
+        self.options = None
+        self.args = None
         arg = self.add_option
 
         arg(
@@ -60,9 +63,6 @@ class OptionParser(optparse.OptionParser):
         """handle multiple --config arguments by
         resetting parser.values and storing
         the old value in parser.config_values"""
-
-        import copy
-
         config_values = parser.config_values
 
         if not config_values:
@@ -95,14 +95,14 @@ class OptionParser(optparse.OptionParser):
             if "{" in self.options.metabook and "}" in self.options.metabook:
                 self.metabook = json.loads(self.options.metabook)
             else:
-                with open(self.options.metabook) as file_path:
+                with open(self.options.metabook, encoding='utf-8') as file_path:
                     self.metabook = json.load(file_path)
 
         try:
             self.options.imagesize = int(self.options.imagesize)
             if self.options.imagesize <= 0:
                 raise ValueError()
-        except (ValueError):
+        except ValueError:
             self.error("Argument for --imagesize must be an integer > 0.")
 
         for title in self.args:
