@@ -14,7 +14,8 @@ def fetch(lang):
 
     print(f"fetching {url}")
     try:
-        data = urlopen(url).read()
+        with urlopen(url) as remote_file:
+            data = remote_file.read()
     except URLError as exc:
         print(f"error fetching {url}: {exc}")
         return

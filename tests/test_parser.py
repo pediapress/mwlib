@@ -4,12 +4,12 @@
 # See README.rst for additional licensing information.
 
 import pytest
-from mwlib import expander, parser, uparser
-from mwlib.dummydb import DummyDB
+from mwlib import expander, parser
+from mwlib.database.dummydb import DummyDB
 from mwlib.expander import DictDB
-from mwlib.refine import util
+from mwlib.refine import uparser, util
 from mwlib.templ.misc import expand_str
-from mwlib.utoken import show
+from mwlib.token.utoken import show
 
 BAD_URL = "bad url"
 BAD_VLIST = "bad vlist"

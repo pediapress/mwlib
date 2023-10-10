@@ -3,9 +3,11 @@
 import sys
 import time
 
+from mwlib.tree import advtree
+
 s = unicode(open(sys.argv[1], "rb").read(), "utf-8")
 
-from mwlib import uparser, advtree, treecleaner
+from mwlib import uparser, treecleaner
 from mwlib.refine import compat
 
 stime = time.time()

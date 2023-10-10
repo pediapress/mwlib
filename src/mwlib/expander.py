@@ -7,10 +7,10 @@ import sys
 
 import six
 
+from mwlib.templ.evaluate import ArgumentList, Expander
+from mwlib.templ.misc import DictDB
 from mwlib.templ.nodes import Template
 from mwlib.templ.parser import parse
-from mwlib.templ.evaluate import Expander, ArgumentList
-from mwlib.templ.misc import DictDB
 
 
 def get_templates(raw, title=""):

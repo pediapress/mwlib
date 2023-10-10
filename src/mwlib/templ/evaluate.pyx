@@ -6,7 +6,7 @@ from typing import Any
 from mwlib import metabook, nshandling, siteinfo
 from mwlib.templ import log, magics, mwlocals, parser
 from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
-from mwlib.uniq import Uniquifier
+from mwlib.miscellaneous.uniq import Uniquifier
 
 
 class TemplateRecursion(Exception):
@@ -235,7 +235,7 @@ class Expander:
         self.parsedTemplateCache = {}
 
     def resolve_magic_alias(self, name):
-        return self.AliasMap.resolve_magic_alias(name)
+        return self.aliasmap.resolve_magic_alias(name)
 
     def replace_tags(self, txt):
         return self.uniquifier.replace_tags(txt)

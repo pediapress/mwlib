@@ -3,8 +3,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from mwlib import parser, uparser
-from mwlib.utoken import show
+from mwlib import parser
+from mwlib.refine import uparser
 
 parse = uparser.simpleparse
 

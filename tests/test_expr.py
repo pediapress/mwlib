@@ -2,7 +2,7 @@
 
 import math
 
-from mwlib import expr
+from mwlib.miscellaneous import expr
 from mwlib.templ.misc import expand_str
 
 

@@ -12,20 +12,17 @@ import time
 import webbrowser
 import zipfile
 
-from gevent import monkey
+from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
+from mwlib.utilities import utils
 
-from mwlib import conf, utils
-from mwlib.options import OptionParser
-from mwlib.podclient import PODClient, podclient_from_serviceurl
-from mwlib.status import Status
+from .utils import build_parser, create_nuwiki, create_zip_from_wiki_env
 
 
 def _walk(root):
     retval = []
     for dirpath, _, files in os.walk(root):
-        retval.extend([os.path.normpath(os.path.join(dirpath,
-                                                     x)) for x in files])
-    retval = sorted([x.replace("\\", "/") for x in retval])
+        retval.extend([os.path.normpath(os.path.join(dirpath, filepath)) for filepath in files])
+    retval = sorted([ret.replace("\\", "/") for ret in retval])
     return retval
 
 
@@ -47,29 +44,24 @@ def zip_dir(dirname, output=None, skip_ext=None):
     zip_file.close()
 
 
-def make_zip(output=None, options=None, metabook=None,
-             podclient=None, status=None):
+def make_zip(output=None, options=None, metabook=None, podclient=None, status=None):
     dir_path = os.path.dirname(output)
-    tmpdir = (
-        tempfile.mkdtemp(dir=dir_path) if output else tempfile.mkdtemp()
-    )
+    tmpdir = tempfile.mkdtemp(dir=dir_path) if output else tempfile.mkdtemp()
 
     try:
         fsdir = os.path.join(tmpdir, "nuwiki")
-        print("creating nuwiki in %r" % fsdir)
-        from mwlib.apps.make_nuwiki import make_nuwiki
-
-        make_nuwiki(
+        create_nuwiki(
             fsdir,
-            metabook=metabook,
             options=options,
+            metabook=metabook,
             podclient=podclient,
             status=status,
         )
 
         if output:
-            file_descriptor, filename = tempfile.mkstemp(suffix=".zip",
-                                            dir=os.path.dirname(output))
+            file_descriptor, filename = tempfile.mkstemp(
+                suffix=".zip", dir=os.path.dirname(output)
+            )
         else:
             file_descriptor, filename = tempfile.mkstemp(suffix=".zip")
         os.close(file_descriptor)
@@ -98,56 +90,14 @@ def make_zip(output=None, options=None, metabook=None,
 
 
 def main():
-    monkey.patch_all(thread=False)
+    parser, options, use_help = build_parser()
 
-    parser = OptionParser()
-    parser.add_option("-o", "--output", help="write output to OUTPUT")
-    parser.add_option("-p",
-                      "--posturl", help="http post to POSTURL (directly)")
-    parser.add_option(
-        "-g",
-        "--getposturl",
-        help="get POST URL from PediaPress.com, open upload page in webbrowser",
-        action="count",
-    )
-    parser.add_option(
-        "--keep-tmpfiles",
-        action="store_true",
-        default=False,
-        help="don't remove  temporary files like images",
-    )
-
-    parser.add_option(
-        "-s", "--status-file", help="write status/progress info to this file"
-    )
-
-    options, args = parser.parse_args()
-    conf.readrc()
-    use_help = "Use --help for usage information."
-
-    if parser.metabook is None and options.collectionpage is None:
-        parser.error(
-            "Neither --metabook nor, --collectionpage or arguments specified.\n"
-            + use_help
-        )
     pod_client = _init_pod_client(options, parser, use_help)
 
     filename = None
     status = None
     try:
-        env = parser.make_wiki()
-        if not env.metabook:
-            raise ValueError("no metabook")
-
-        status = Status(
-            options.status_file, podclient=pod_client, progress_range=(1, 90)
-        )
-        status(progress=0)
-        output = options.output
-
-        make_zip(output, options, env.metabook, podclient=pod_client,
-                 status=status)
-
+        status = create_zip_from_wiki_env(parser, pod_client, options, make_zip)
     except Exception:
         if status:
             status(status="error")

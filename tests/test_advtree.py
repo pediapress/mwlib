@@ -6,7 +6,9 @@ import sys
 
 import pytest
 from mwlib import parser
-from mwlib.advtree import (
+from mwlib.database.dummydb import DummyDB
+from mwlib.refine.uparser import parse_string
+from mwlib.tree.advtree import (
     BreakingReturn,
     Cell,
     DefinitionDescription,
@@ -21,8 +23,6 @@ from mwlib.advtree import (
     _id_index,
     build_advanced_tree,
 )
-from mwlib.dummydb import DummyDB
-from mwlib.uparser import parse_string
 
 
 def _treesanity(r):

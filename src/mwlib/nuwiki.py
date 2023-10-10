@@ -14,10 +14,15 @@ import six.moves.urllib.request
 from six import unichr
 from sqlitedict import SqliteDict
 
-from mwlib import metabook, nshandling, utils
-from mwlib import myjson as json
-from mwlib.log import Log
-from mwlib.utils import python2sort
+from mwlib import metabook, nshandling, parser
+from mwlib.expander import Expander, find_template, get_template_args, get_templates
+from mwlib.refine import uparser
+from mwlib.templ.parser import parse
+from mwlib.tree import advtree
+from mwlib.utilities import myjson as json
+from mwlib.utilities import utils
+from mwlib.utilities.log import Log
+from mwlib.utilities.utils import python2sort
 
 log = Log("nuwiki")
 
@@ -410,8 +415,6 @@ class Adapt:
         if raw is None:
             return None
 
-        from mwlib import uparser
-
         return uparser.parse_string(
             title=title,
             raw=raw,
@@ -504,10 +507,6 @@ class Adapt:
 
 
 def get_contributors_from_information_template(raw, title, wikidb):
-    from mwlib import advtree, parser, uparser
-    from mwlib.expander import Expander, find_template, get_template_args, get_templates
-    from mwlib.templ.parser import parse
-
     def get_user_links(raw):
         def is_user_link(node):
             return (

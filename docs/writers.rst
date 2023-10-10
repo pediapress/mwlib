@@ -83,7 +83,7 @@ attributes to these values::
     writer.content_type = 'application/vnd.oasis.opendocument.text'
     writer.file_extension = 'odt'
 
-and the writer "rl" from mwlib.rl (defined in ``mwlib.rl.rlwriter``) sets
+and the writer "rl" from mwlib.rl (defined in `mwlib.writers.rl.writer``) sets
 the attributes to these values::
 
     writer.description = 'PDF documents (using ReportLab)'

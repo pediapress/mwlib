@@ -3,7 +3,7 @@
 
 import os
 
-import mwlib.log
+import mwlib.utilities.log
 
 DEBUG = "DEBUG_EXPANDER" in os.environ
-log = mwlib.log.Log("expander")
+log = mwlib.utilities.log.Log("expander")

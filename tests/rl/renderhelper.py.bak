@@ -17,10 +17,10 @@ from PIL import Image, ImageDraw
 
 from reportlab.lib.units import cm
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate
-from mwlib.rl.pagetemplates import WikiPage
+from mwlib.writers.rl.pagetemplates import WikiPage
 
 from mwlib import uparser
-from mwlib.rl.rlwriter import RlWriter
+from mwlib.writers.rl.writer import RlWriter
 from mwlib.treecleaner import TreeCleaner
 from mwlib import advtree
 

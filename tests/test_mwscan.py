@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-from mwlib import utoken as mwscan
+from mwlib.token import utoken as mwscan
 
 
 def test_resolve_symbolic_entity():

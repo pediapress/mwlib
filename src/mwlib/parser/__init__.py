@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 
-from mwlib.log import Log
+from mwlib.utilities.log import Log
 from mwlib.parser.nodes import (
     URL,
     Article,
@@ -48,3 +48,11 @@ def show(out, node, indent=0, verbose=False):
         print("    " * indent, node, file=out)
     for child in node:
         show(out, child, indent + 1, verbose=verbose)
+
+def build_amap():
+    return {
+        Text: "caption",
+        Link: "target",
+        URL: "caption",
+        Math: "caption",
+    }

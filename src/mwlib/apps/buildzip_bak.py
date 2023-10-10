@@ -13,12 +13,9 @@ import webbrowser
 import zipfile
 from pathlib import Path
 
-from gevent import monkey
-
-from mwlib import conf
-from mwlib.options import OptionParser
 from mwlib.podclient import PODClient, podclient_from_serviceurl
-from mwlib.status import Status
+
+from .utils import build_parser, create_nuwiki, create_zip_from_wiki_env
 
 
 def walk_directory(root: Path):
@@ -46,13 +43,10 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
     with tempfile.TemporaryDirectory(dir=output and Path(output).parent) as tmpdir:
         tmpdir = Path(tmpdir)
         fsdir = tmpdir / "nuwiki"
-        print(f"creating nuwiki in {fsdir}")
-        from mwlib.apps.make_nuwiki import make_nuwiki
-
-        make_nuwiki(
+        create_nuwiki(
             fsdir,
-            metabook=metabook,
             options=options,
+            metabook=metabook,
             podclient=podclient,
             status=status,
         )
@@ -77,52 +71,11 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
 
 
 def main():
-    monkey.patch_all(thread=False)
-
-    parser = OptionParser()
-    parser.add_option("-o", "--output", help="write output to OUTPUT")
-    parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
-    parser.add_option(
-        "-g",
-        "--getposturl",
-        help="get POST URL from PediaPress.com, open upload page in webbrowser",
-        action="count",
-    )
-    parser.add_option(
-        "--keep-tmpfiles",
-        action="store_true",
-        default=False,
-        help="don't remove  temporary files like images",
-    )
-
-    parser.add_option(
-        "-s", "--status-file", help="write status/progress info to this file"
-    )
-
-    options, args = parser.parse_args()
-    conf.readrc()
-    use_help = "Use --help for usage information."
-
-    if parser.metabook is None and options.collectionpage is None:
-        parser.error(
-            "Neither --metabook nor, --collectionpage or arguments specified.\n"
-            + use_help
-        )
+    parser, options, use_help = build_parser()
     pod_client = _init_pod_client(options, parser, use_help)
 
     try:
-        env = parser.make_wiki()
-        if not env.metabook:
-            raise ValueError("no metabook")
-
-        status = Status(
-            options.status_file, podclient=pod_client, progress_range=(1, 90)
-        )
-        status(progress=0)
-        output = options.output
-
-        make_zip(output, options, env.metabook, podclient=pod_client, status=status)
-
+        status = create_zip_from_wiki_env(parser, pod_client, options, make_zip)
     except Exception:
         if status:
             status(status="error")

@@ -5,7 +5,7 @@ import shutil
 import tempfile
 
 import pytest
-from mwlib.mathutils import render_math
+from mwlib.mw_math.mathutils import render_math
 
 
 @pytest.fixture

@@ -3,11 +3,11 @@
 from mwlib import nshandling
 from mwlib.refine import core
 from mwlib.refine.parse_table import (
+    TableCellParser,
     TableParser,
     TableRowParser,
-    TableCellParser,
 )
-from mwlib.utoken import show, walknode, walknodel
+from mwlib.token.utoken import show, walknode, walknodel
 
 Token = core.Token
 

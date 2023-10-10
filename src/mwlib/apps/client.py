@@ -3,8 +3,8 @@
 import argparse
 import sys
 
-import mwlib.myjson as json
-from mwlib.client import Client
+import mwlib.utilities.myjson as json
+from mwlib.networking.client import Client
 
 
 def main():

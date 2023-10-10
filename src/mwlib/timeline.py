@@ -63,6 +63,6 @@ def draw_timeline(script, basedir=None):
     script_filepath = os.path.join(basedir, ident + '.txt')
     with open(script_filepath, 'w', encoding='utf-8') as script_file:
         script_file.write(script)
-    easy_timeline_path = os.path.join(os.path.dirname(__file__), "EasyTimeline.pl")
+    easy_timeline_path = os.path.join(os.path.dirname(__file__), "third_party", "EasyTimeline.pl")
 
     return run_perl(easy_timeline_path, font, basedir, script_filepath, pngfile)

@@ -4,10 +4,10 @@
 import sys
 
 import pytest
-
-from mwlib import advtree, parser
-from mwlib.dummydb import DummyDB
-from mwlib.uparser import parse_string
+from mwlib import parser
+from mwlib.database.dummydb import DummyDB
+from mwlib.refine.uparser import parse_string
+from mwlib.tree import advtree
 from mwlib.writer import styleutils
 
 

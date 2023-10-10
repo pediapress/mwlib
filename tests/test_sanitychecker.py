@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
-from mwlib.advtree import (
+from mwlib.tree.advtree import (
     Article,
     Cell,
     ImageLink,
@@ -13,7 +13,7 @@ from mwlib.advtree import (
     Text,
     build_advanced_tree,
 )
-from mwlib.sanitychecker import (
+from mwlib.exceptions.sanitychecker import (
     Allow,
     ChildrenOf,
     Equal,

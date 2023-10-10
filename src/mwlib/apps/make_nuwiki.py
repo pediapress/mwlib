@@ -11,11 +11,11 @@ import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
 
-from mwlib import myjson
 from mwlib.metabook import collection, get_licenses, parse_collection_page
 from mwlib.net import fetch
 from mwlib.net import sapi as mwapi
-from mwlib.parse_collection_page import extract_metadata
+from mwlib.parser.parse_collection_page import extract_metadata
+from mwlib.utilities import myjson
 
 
 class StartFetcher:

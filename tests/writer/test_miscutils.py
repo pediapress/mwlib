@@ -4,8 +4,8 @@
 import sys
 
 from mwlib import parser
-from mwlib.dummydb import DummyDB
-from mwlib.uparser import parse_string
+from mwlib.database.dummydb import DummyDB
+from mwlib.refine.uparser import parse_string
 from mwlib.writer import miscutils
 
 

@@ -6,13 +6,14 @@
 
 from typing import Any, Optional
 
-from mwlib import imgmap, nshandling, tagext, uniq
-from mwlib.log import root_logger
+from mwlib import imgmap, nshandling, tagext
+from mwlib.miscellaneous import uniq
 from mwlib.parser import styleanalyzer
 from mwlib.refine import util
 from mwlib.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
 from mwlib.refine.tagparser import TagParser
-from mwlib.utoken import Token, tokenize
+from mwlib.token.utoken import Token, tokenize
+from mwlib.utilities.log import root_logger
 
 try:
     from mwlib.refine import _core

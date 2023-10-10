@@ -3,46 +3,14 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import re
 import sys
 
 import _mwscan
 import htmlentitydefs
 
 from mwlib.parser import paramrx
-from mwlib.tagext import default_registry as tagextensions
-
-
-class Token:
-    t_end = 0
-    t_text = 1
-    t_entity = 2
-    t_special = 3
-    t_magicword = 4
-    t_comment = 5
-    t_2box_open = 6
-    t_2box_close = 7
-    t_http_url = 8
-    t_break = 9
-    t_begin_table = 10
-    t_end_table = 11
-    t_html_tag = 12
-    t_singlequote = 13
-    t_pre = 14
-    t_section = 15
-    t_section_end = 16
-    t_item = 17
-    t_colon = 18
-    t_semicolon = 19
-    t_hrule = 20
-    t_newline = 21
-    t_column = 22
-    t_row = 23
-    t_tablecaption = 24
-    t_urllink = 25
-
-    token2name = {}
-
+from mwlib.token.token import Token
+from mwlib.utilities.utils import split_tag
 
 for directory in dir(Token):
     token2name = Token.token2name
@@ -50,15 +18,6 @@ for directory in dir(Token):
         token2name[getattr(Token, directory)] = directory
 else:
     del directory
-
-
-def _split_tag(txt):
-    matched_tag = re.match(r" *(\w+)(.*)", txt)
-    if matched_tag is None:
-        raise ValueError("could not match tag name")
-    name = matched_tag.group(1)
-    values = matched_tag.group(2)
-    return name, values
 
 
 def dump_tokens(text, tokens):
@@ -106,7 +65,7 @@ class ScanResult:
         if out is None:
             out = sys.stdout
         for token in self:
-            out.write("%s\n" % self.repr(token))
+            out.write(f"{self.repr(token)}\n")
 
     def repr(self, token):
         return f"({Token.token2name.get(token[0])}, {self.rawtext(token)!r})"
@@ -122,7 +81,6 @@ class ScanResult:
 
 
 class _CompatScanner:
-
     class Ignore:
         pass
 
@@ -153,12 +111,14 @@ class _CompatScanner:
     }
 
     def get_substring(self, text, start, tlen):
-        return text[start: start + tlen]
+        return text[start : start + tlen]
 
     def append_to_result(self, res, token_type, text, start, tlen):
         return res.append((token_type, self.get_substring(text, start, tlen)))
 
-    def _process_html_token_and_check_for_tag_match(self, tokens, iterator, text_start, text, tagname):
+    def _process_html_token_and_check_for_tag_match(
+        self, tokens, iterator, text_start, text, tagname
+    ):
         should_break = False
         token_type, start, tlen = tokens[iterator]
         if text_start is None:
@@ -172,7 +132,18 @@ class _CompatScanner:
         iterator += 1
         return should_break, iterator, text_start, text_end, end_token
 
-    def _process_tag_and_extract_text(self, tokens, i, text_start, text, tag_token, closing_or_self_closing, res, substr, numtokens):
+    def _process_tag_and_extract_text(
+        self,
+        tokens,
+        i,
+        text_start,
+        text,
+        tag_token,
+        closing_or_self_closing,
+        res,
+        substr,
+        numtokens,
+    ):
         should_continue = False
         if closing_or_self_closing:
             i += 1
@@ -184,7 +155,15 @@ class _CompatScanner:
         text_end = None
         end_token = None
         while i < numtokens:
-            should_break, i, text_start, text_end, end_token = self._process_html_token_and_check_for_tag_match(tokens, i, text_start, text, tagname)
+            (
+                should_break,
+                i,
+                text_start,
+                text_end,
+                end_token,
+            ) = self._process_html_token_and_check_for_tag_match(
+                tokens, i, text_start, text, tagname
+            )
             if should_break:
                 break
         if text_end:
@@ -193,7 +172,9 @@ class _CompatScanner:
             res.append(end_token)
         return i, should_continue
 
-    def _handle_nowiki_tag_and_append_text(self, i, is_end_token, tag_token, text, tokens, res, numtokens, scanres):
+    def _handle_nowiki_tag_and_append_text(
+        self, i, is_end_token, tag_token, text, tokens, res, numtokens, scanres
+    ):
         i += 1
         if is_end_token or tag_token.self_closing:
             return i, True
@@ -203,8 +184,7 @@ class _CompatScanner:
                 tag_token = self.tagtoken(self.get_substring(text, start, tlen))
                 if tag_token.token == "nowiki":
                     break
-            res.append(("TEXT", scanres.text((token_type,
-                                              start, tlen))))
+            res.append(("TEXT", scanres.text((token_type, start, tlen))))
             i += 1
         return i
 
@@ -217,18 +197,35 @@ class _CompatScanner:
         else:
             res.append(("BEGINTABLE", self.get_substring(text, start, tlen)))
 
-    def _process_and_classify_html_tags(self, tokens, i, start, tlen, text, res, numtokens, scanres):
+    def _process_and_classify_html_tags(
+        self, tokens, i, start, tlen, text, res, numtokens, scanres
+    ):
         should_continue = False
         substr = self.get_substring(text, start, tlen)
         tag_token = self.tagtoken(substr)
         is_end_token = isinstance(tag_token, EndTagToken)
         closing_or_self_closing = is_end_token or tag_token.self_closing
-        if tag_token.token in self.tagextensions or tag_token.token in ("imagemap", "gallery"):
-            i, should_continue = self._process_tag_and_extract_text(tokens, i, None, text, tag_token, closing_or_self_closing, res, substr, numtokens)
+        if tag_token.token in self.tagextensions or tag_token.token in (
+            "imagemap",
+            "gallery",
+        ):
+            i, should_continue = self._process_tag_and_extract_text(
+                tokens,
+                i,
+                None,
+                text,
+                tag_token,
+                closing_or_self_closing,
+                res,
+                substr,
+                numtokens,
+            )
             if should_continue:
                 return i, True
         elif tag_token.token == "nowiki":
-            i = self._handle_nowiki_tag_and_append_text(i, is_end_token, tag_token, text, tokens, res, numtokens, scanres)
+            i = self._handle_nowiki_tag_and_append_text(
+                i, is_end_token, tag_token, text, tokens, res, numtokens, scanres
+            )
         elif tag_token.token == "table":
             self._append_table_start_or_end_token(is_end_token, res, text, start, tlen)
         elif tag_token.token in ["th", "td"]:
@@ -261,11 +258,17 @@ class _CompatScanner:
             if compat is not None:
                 self.append_to_result(res, compat, text, start, tlen)
             elif token_type == Token.t_entity:
-                res.append(("TEXT", resolve_entity(self.get_substring(text, start, tlen))))
+                res.append(
+                    ("TEXT", resolve_entity(self.get_substring(text, start, tlen)))
+                )
             elif token_type == Token.t_hrule:
-                res.append((self.tagtoken("<hr />"), self.get_substring(text, start, tlen)))
+                res.append(
+                    (self.tagtoken("<hr />"), self.get_substring(text, start, tlen))
+                )
             elif token_type == Token.t_html_tag:
-                i, should_continue = self._process_and_classify_html_tags(tokens, i, start, tlen, text, res, numtokens, scanres)
+                i, should_continue = self._process_and_classify_html_tags(
+                    tokens, i, start, tlen, text, res, numtokens, scanres
+                )
                 if should_continue:
                     continue
             else:
@@ -287,12 +290,12 @@ class _CompatScanner:
             name = text[1:-1]
             klass = TagToken
 
-        name, values = _split_tag(name)
+        name, values = split_tag(name, flags=None)
 
         values = dict(paramrx.findall(values))
         name = name.lower()
 
-        if name in ['br', 'references']:
+        if name in ["br", "references"]:
             klass = TagToken
 
         result = klass(name, text)
@@ -325,7 +328,6 @@ class _BaseTagToken:
 
 
 class TagToken(_BaseTagToken):
-
     def __init__(self, token, text=""):
         super().__init__(token)
         self.text = text

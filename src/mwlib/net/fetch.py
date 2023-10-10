@@ -17,9 +17,11 @@ from gevent.lock import Semaphore
 from lxml import etree
 from sqlitedict import SqliteDict
 
-from mwlib import conf, nshandling, utils
-from mwlib import myjson as json
+from mwlib import nshandling
+from mwlib.configuration import conf
 from mwlib.net import sapi as mwapi
+from mwlib.utilities import myjson as json
+from mwlib.utilities import utils
 
 
 class SharedProgress:
@@ -75,6 +77,7 @@ class SharedProgress:
     def get_count(self):
         done_count = 0
         total_count = 0
+        done = 0
         for done, total in self.key2count.values():
             done_count += done
             total_count += total
@@ -706,7 +709,7 @@ class Fetcher:
                 # traceback.print_exc()
                 continue
 
-        raise RuntimeError("cannot guess api url for %r" % (path,))
+        raise RuntimeError(f"cannot guess api url for {path}")
 
     def dispatch(self):
         limit = self.api.api_request_limit
@@ -745,7 +748,7 @@ class Fetcher:
             fully_qualified_name = self.nshandler.get_fqname(title)
             if fully_qualified_name in seen or self.redirects.get(fully_qualified_name, fully_qualified_name) in seen:
                 continue
-            print("WARNING: %r could not be fetched" % ((title, revid),))
+            print(f"WARNING: {title, revid} could not be fetched")
 
     def finish(self):
         self._sanity_check()

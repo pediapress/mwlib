@@ -12,13 +12,12 @@ from hashlib import sha256
 
 import six
 
-from mwlib import utils
+from mwlib.parser.parse_collection_page import parse_collection_page as _parse_collection_page
+from mwlib.utilities import myjson, utils
 
 
 def parse_collection_page(txt):
-    from mwlib.parse_collection_page import parse_collection_page
-
-    return parse_collection_page(txt)
+    return _parse_collection_page(txt)
 
 
 class MbObj:
@@ -116,8 +115,6 @@ class collection(MbObj):
             self.items.append(art)
 
     def dumps(self):
-        from mwlib import myjson
-
         return myjson.dumps(self, sort_keys=True, indent=4)
 
     def walk(self, filter_type=None):

@@ -4,7 +4,10 @@
 # See README.txt for additional licensing information.
 
 
+from pygments import highlight, lexers
 from renderhelper import renderMW
+
+from src.mwlib.writers.rl.rlsourceformatter import ReportlabFormatter
 
 # node combinations: Table, Paragraph, PreFormatted, Emphasized, Definitionlist, Indented, Blockquote, Link,  URL, NamedURL,
 # CategoryLink, LangLink, Image, Gallery, Source, Code, Teletyped, BR, References, Div, Span, ItemList, Math
@@ -307,10 +310,6 @@ while True:
   print 'this is python'
 
 """
-    from pygments import highlight, lexers
-
-    from src.mwlib.rl.rlsourceformatter import ReportlabFormatter
-
     formatter = ReportlabFormatter(
         font_size=10,
         font_name="FreeMono",

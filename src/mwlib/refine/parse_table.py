@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 from mwlib.refine import util
-from mwlib.utoken import Token as T
+from mwlib.token.utoken import Token as T
 
 
 class TableCellParser:
@@ -234,12 +234,12 @@ class TableParser:
         self.run()
 
     def is_table_start(self, token):
-        return token.type == T.t_begintable or (
+        return token.type == T.t_begin_table or (
             token.type == T.t_html_tag and token.rawtagname == "table"
         )
 
     def is_table_end(self, token):
-        return token.type == T.t_endtable or (
+        return token.type == T.t_end_table or (
             token.type == T.t_html_tag_end and token.rawtagname == "table"
         )
 

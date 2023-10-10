@@ -11,11 +11,11 @@ from io import StringIO
 
 from six.moves.configparser import ConfigParser
 
-from mwlib import myjson as json
 from mwlib import nuwiki
 from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
-from mwlib.log import Log
 from mwlib.metabook import WikiConf
+from mwlib.utilities import myjson as json
+from mwlib.utilities.log import Log
 
 log = Log("mwlib.utils")
 

@@ -4,7 +4,7 @@ import os, pytest, gettext
 
 
 def get_translation(lang):
-    import mwlib.rl
+    import mwlib.writers.rl
     localedir = os.path.join(mwlib.rl.__path__[0], "locale")
     translation = gettext.translation('mwlib.rl', localedir, [lang])
     translation.install(unicode=True)

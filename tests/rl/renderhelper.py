@@ -7,10 +7,11 @@ import os
 import re
 import tempfile
 
-from mwlib import advtree, uparser
-from mwlib.rl.pagetemplates import WikiPage
-from mwlib.rl.rlwriter import RlWriter
-from mwlib.treecleaner import TreeCleaner
+from mwlib.refine import uparser
+from mwlib.tree import advtree
+from mwlib.tree.treecleaner import TreeCleaner
+from mwlib.writers.rl.pagetemplates import WikiPage
+from mwlib.writers.rl.writer import RlWriter
 from PIL import Image, ImageDraw
 from reportlab.lib.units import cm
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate

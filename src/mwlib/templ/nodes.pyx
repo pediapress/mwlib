@@ -3,31 +3,12 @@
 from contextlib import suppress
 
 from mwlib.templ import DEBUG, log, magics
-
-
-class Node(tuple):
-    def __eq__(self, other):
-        return type(self) == type(other) and tuple.__eq__(self, other)
-
-    def __ne__(self, other):
-        return type(self) != type(other) or tuple.__ne__(self, other)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}{tuple.__repr__(self)}"
-
-    def show(self, out=None):
-        show(self, out=out)
-
-    def flatten(self, expander, variables, res):
-        for x in self:
-            if isinstance(x, str):
-                res.append(x)
-            else:
-                flatten(x, expander, variables, res)
+from mwlib.templ.node import Node, show
 
 
 class IfNode(Node):
     def flatten(self, expander, variables, res):
+        from mwlib.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
         cond = []
         flatten(self[0], expander, variables, cond)
         cond = "".join(cond).strip()
@@ -51,6 +32,7 @@ class IfNode(Node):
 
 class IfEqNode(Node):
     def flatten(self, expander, variables, res):
+        from mwlib.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
         v1 = []
         flatten(self[0], expander, variables, v1)
         v1 = "".join(v1).strip()
@@ -108,6 +90,7 @@ class SwitchNode(Node):
             unresolved.append((key, value))
 
     def _init(self):
+        from mwlib.templ.evaluate import equal_split
         args = [equal_split(x) for x in self[1]]
 
         unresolved = []
@@ -138,6 +121,7 @@ class SwitchNode(Node):
         self.sentinel = (len(self.unresolved) + 1, None)
 
     def flatten(self, expander, variables, res):
+        from mwlib.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
         if self.unresolved is None:
             self._init()
 
@@ -168,7 +152,7 @@ class SwitchNode(Node):
                 break
 
         if retval is None:
-            for a in expander.AliasMap.get_aliases("default") or ["#default"]:
+            for a in expander.aliasmap.get_aliases("default") or ["#default"]:
                 retval = self.fast.get(a)
                 if retval is not None:
                     retval = retval[1]
@@ -185,6 +169,7 @@ class SwitchNode(Node):
 
 class Variable(Node):
     def flatten(self, expander, variables, res):
+        from mwlib.templ.evaluate import flatten, MemoryLimitError
         name = []
         flatten(self[0], expander, variables, name)
         name = "".join(name).strip()
@@ -217,6 +202,7 @@ class Template(Node):
         return self[1]
 
     def _flatten(self, expander, variables, res):
+        from mwlib.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline
         name = []
         flatten(self[0], expander, variables, name)
         name = "".join(name).strip()
@@ -268,7 +254,7 @@ class Template(Node):
 
         for x in args:
             var.append(x)
-
+        from mwlib.templ.evaluate import ArgumentList
         var = ArgumentList(args=var, expander=expander, variables=variables)
 
         rep = expander.resolver(name, var)
@@ -293,26 +279,8 @@ class Template(Node):
                     print(msg)
 
 
-def show(node, indent=0, out=None):
-    import sys
-
-    if out is None:
-        out = sys.stdout
-
-    out.write(f"{node}\n")
-
-
 if True:
     # avoid circular import issues by placing the imports at the bottom of the file
     # avoid pylint warnings by wrapping the imports in an `if True` block
-    from mwlib.templ.evaluate import (
-        ArgumentList,
-        MemoryLimitError,
-        dummy_mark,
-        equal_split,
-        flatten,
-        insert_implicit_newlines,
-        maybe_newline,
-    )
     from mwlib.templ.marks import MarkEnd, MarkStart
-    from mwlib.templ.parser import optimize
+    from mwlib.templ.optimization import optimize

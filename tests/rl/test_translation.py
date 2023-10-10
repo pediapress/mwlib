@@ -4,7 +4,7 @@ import gettext
 import os
 
 import pytest
-from mwlib import rl as mwlib_rl
+from mwlib.writers import rl as mwlib_rl
 
 
 def get_translation(lang):

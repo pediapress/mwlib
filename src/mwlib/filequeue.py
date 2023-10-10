@@ -7,7 +7,7 @@ import traceback
 import six.moves.cPickle
 
 from mwlib import utils
-from mwlib.log import Log
+from mwlib.utilities.log import Log
 
 
 class FileJobQueuer:
@@ -17,14 +17,15 @@ class FileJobQueuer:
         self.queue_dir = utils.ensure_dir(queue_dir)
         self.log = Log("FileJobQueuer")
 
-    def __call__(self, job_type, job_id, args):
-        job_file = "%s.job" % os.path.join(self.queue_dir, job_id)
-        if os.path.exists(job_file):
-            self.log.warn(f"Job file {job_file} already exists")
+    def __call__(self, _, job_id, args):
+        job_filename = "%s.job" % os.path.join(self.queue_dir, job_id)
+        if os.path.exists(job_filename):
+            self.log.warn(f"Job file {job_filename} already exists")
             return
 
-        open(job_file + ".tmp", "wb").write(six.moves.cPickle.dumps(args))
-        os.rename(job_file + ".tmp", job_file)
+        with open(job_filename + ".tmp", "wb") as job_file:
+            job_file.write(six.moves.cPickle.dumps(args))
+        os.rename(job_filename + ".tmp", job_filename)
 
 
 class FileJobPoller:
@@ -42,12 +43,12 @@ class FileJobPoller:
                 flags = 0 if self.num_jobs == self.max_num_jobs else os.WNOHANG
                 pid, exit_code = os.waitpid(-1, flags)
             except OSError as exc:
-                self.log.ERROR("waitpid(-1) failed: %s" % exc)
+                self.log.ERROR(f"waitpid(-1) failed: {exc}")
                 break
             if (pid, exit_code) == (0, 0):
                 break
             self.num_jobs -= 1
-            self.log.info("child %s exited: %s. have %d jobs" % (pid, exit_code, self.num_jobs))
+            self.log.info(f"child {pid} exited: {exit_code}. have {self.num_jobs} jobs")
 
     def run_forever(self):
         self.log.info("running with a max. of %d jobs" % self.max_num_jobs)
@@ -108,7 +109,7 @@ class FileJobPoller:
         finally:
             os.unlink(src)
 
-        self.log.info("starting job %r" % filename)
+        self.log.info(f"starting job {filename}")
 
         pid = os.fork()
         self.num_jobs += 1

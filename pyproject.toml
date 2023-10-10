@@ -32,14 +32,14 @@ classifiers = [
 homepage = "https://code.pediapress.com/"
 
 [project.entry-points."mwlib.writers"]
-odf = "mwlib.odfwriter:writer"
-rl = "mwlib.rl.rlwriter:writer"
+odf = "mwlib.writers.odf.writer:writer"
+rl = "mwlib.writers.rl.writer:writer"
 
 
 [project.scripts]
-nslave = "mwlib.main_trampoline:nslave_main"
-postman = "mwlib.main_trampoline:postman_main"
-nserve = "mwlib.main_trampoline:nserve_main"
+nslave = "mwlib.core.main_trampoline:nslave_main"
+postman = "mwlib.core.main_trampoline:postman_main"
+nserve = "mwlib.core.main_trampoline:nserve_main"
 mw-zip = "mwlib.apps.buildzip:main"
 mw-version = "mwlib._version:main"
 mw-render = "mwlib.apps.render:main"

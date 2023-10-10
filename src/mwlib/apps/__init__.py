@@ -10,9 +10,11 @@ import webbrowser
 
 import six
 
-from mwlib import expander, uparser, utils, wiki
-from mwlib.podclient import PODClient, podclient_from_serviceurl
-from mwlib.status import Status
+from mwlib import expander, wiki
+from mwlib.miscellaneous.status import Status
+from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
+from mwlib.refine import uparser
+from mwlib.utilities import utils
 
 
 def show():

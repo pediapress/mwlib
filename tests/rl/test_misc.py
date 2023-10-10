@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-from mwlib.rl.rlwriter import RlWriter
+from mwlib.writers.rl.writer import RlWriter
 
 
 def writer():

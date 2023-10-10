@@ -2,10 +2,10 @@ import argparse
 import sys
 import time
 
-from mwlib import utils
-from mwlib.client import Client
-from mwlib.log import Log
-from mwlib.serve import purge_cache
+from mwlib.core.serve import purge_cache
+from mwlib.networking.client import Client
+from mwlib.utilities import utils
+from mwlib.utilities.log import Log
 
 
 def serve_ctl(args):

@@ -3,10 +3,10 @@
 
 
 from mwlib import expander, metabook, nshandling
-from mwlib.log import Log
 from mwlib.parser.old_uparser import postprocessors
 from mwlib.refine import compat
-from mwlib.utoken import show
+from mwlib.token.utoken import show
+from mwlib.utilities.log import Log
 
 log = Log("refine.uparser")
 

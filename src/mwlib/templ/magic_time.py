@@ -7,7 +7,7 @@ from contextlib import suppress
 import roman
 from timelib import strtodatetime as parsedate
 
-from mwlib.strftime import strftime
+from mwlib.utilities.strftime import strftime
 
 
 def ampm(date):

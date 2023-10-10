@@ -1,7 +1,8 @@
 # Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
-from mwlib import advtree
 from mwlib.exceptions.mwlib_exceptions import InvalidArticleStructureError
+from mwlib.parser import URL
+from mwlib.tree import advtree
 
 ARTICLE_ERROR = "{} needs to be called with Article node"
 
@@ -19,7 +20,7 @@ def text_in_node(node: advtree.Node) -> int:
     amap = {
         advtree.Text: "caption",
         advtree.Link: "target",
-        advtree.URL: "caption",
+        URL: "caption",
         advtree.Math: "caption",
         advtree.ImageLink: "caption",
     }

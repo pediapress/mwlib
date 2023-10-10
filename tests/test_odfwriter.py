@@ -12,10 +12,10 @@ from io import StringIO
 import mwlib.parser
 import py
 import pytest
-from mwlib import advtree
-from mwlib.dummydb import DummyDB
-from mwlib.odfwriter import ODFWriter, preprocess
-from mwlib.uparser import parse_string
+from mwlib.database.dummydb import DummyDB
+from mwlib.refine.uparser import parse_string
+from mwlib.tree import advtree
+from mwlib.writers.odf.writer import ODFWriter, preprocess
 
 ODFWriter.ignoreUnknownNodes = False
 

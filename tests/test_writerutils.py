@@ -4,8 +4,11 @@
 
 import sys
 
-from mwlib import advtree, parser
-from mwlib.treecleaner import TreeCleaner
+from mwlib import parser
+from mwlib.database.dummydb import DummyDB
+from mwlib.refine.uparser import parse_string
+from mwlib.tree import advtree
+from mwlib.tree.treecleaner import TreeCleaner
 from mwlib.writer import styleutils
 
 RETURN_FALSE_ALIGNMENT = "styleutils.getCelTextAlign() returns false alignment"
@@ -16,9 +19,6 @@ def show_tree(tree):
 
 
 def get_tree_from_markup(raw):
-    from mwlib.dummydb import DummyDB
-    from mwlib.uparser import parse_string
-
     return parse_string(title="Test", raw=raw, wikidb=DummyDB())
 
 

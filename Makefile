@@ -15,7 +15,10 @@ install::
 
 build:: src/mwlib/_uscan.cc cython MANIFEST.in
 
-cython:: src/mwlib/templ/nodes.c src/mwlib/templ/evaluate.c
+cython:: src/mwlib/templ/node.c src/mwlib/templ/nodes.c src/mwlib/templ/evaluate.c
+
+src/mwlib/templ/node.c: src/mwlib/templ/node.pyx
+	cython -3 src/mwlib/templ/node.pyx
 
 src/mwlib/templ/nodes.c: src/mwlib/templ/nodes.pyx
 	cython -3 src/mwlib/templ/nodes.pyx
@@ -40,7 +43,7 @@ develop:: build
 
 clean::
 	rm -rf build dist
-	rm -f src/mwlib/templ/evaluate.c src/mwlib/templ/nodes.c src/mwlib/_uscan.cc
+	rm -f src/mwlib/templ/node.c src/mwlib/templ/evaluate.c src/mwlib/templ/nodes.c src/mwlib/_uscan.cc
 	rm -f mwlib/_gitversion.py*
 	rm **/*.pyc || true
 	pip uninstall -y mwlib || true

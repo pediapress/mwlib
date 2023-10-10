@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 import pytest
 from mwlib import expander
-from mwlib.dummydb import DummyDB
+from mwlib.database.dummydb import DummyDB
 from mwlib.expander import DictDB
 from mwlib.templ.misc import expand_str
 from mwlib.templ.nodes import Template, Variable, show

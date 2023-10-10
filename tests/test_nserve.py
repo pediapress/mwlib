@@ -7,7 +7,7 @@ import bottle
 import gevent
 import pytest
 import wsgi_intercept.urllib_intercept
-from mwlib import nserve
+from mwlib.core import nserve
 
 try:
     import simplejson as json

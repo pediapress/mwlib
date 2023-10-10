@@ -3,7 +3,7 @@
 """Unittests for mwlib.utils"""
 
 import pytest
-from mwlib import utils
+from mwlib.utilities import utils
 
 
 @pytest.mark.parametrize(

@@ -5,24 +5,26 @@
 
 import errno
 import os
+import shutil
 import sys
 import tempfile
+import time
 import traceback
 
 import pkg_resources
 
-from mwlib import _locale, conf, nuwiki, utils, wiki
+from mwlib import nuwiki, wiki
+from mwlib.apps.buildzip import make_zip
+from mwlib.configuration import conf
 from mwlib.exceptions.mwlib_exceptions import RenderException
-from mwlib.options import OptionParser
-from mwlib.status import Status
+from mwlib.localization import _locale
+from mwlib.miscellaneous.status import Status
+from mwlib.utilities import utils
+from mwlib.utilities.options import OptionParser
 from mwlib.writerbase import WriterError
 
 
 def init_tmp_cleaner():
-    import shutil
-    import tempfile
-    import time
-
     tempfile.tempdir = tempfile.mkdtemp(prefix="tmp-%s" % os.path.basename(sys.argv[0]))
     os.environ["TMP"] = os.environ["TEMP"] = os.environ["TMPDIR"] = tempfile.tempdir
     ppid = os.getpid()
@@ -128,9 +130,6 @@ class Main:
             self.status = Status(self.options.status_file,
                                  progress_range=(0, 100))
             return env
-
-        from mwlib.apps.buildzip import make_zip
-
         self.zip_filename = make_zip(
             output=self.options.keep_zip,
             options=self.options,

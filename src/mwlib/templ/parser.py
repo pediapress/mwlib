@@ -7,10 +7,12 @@ from hashlib import sha256 as digest
 
 import six
 
-from mwlib import lrucache
 from mwlib.templ.marks import eqmark
 from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
 from mwlib.templ.scanner import Symbols, tokenize
+from mwlib.utilities import lrucache
+
+from .optimization import optimize
 
 
 class AliasMap:
@@ -40,47 +42,6 @@ class AliasMap:
 
     def get_aliases(self, name):
         return self._name2aliases.get(name) or []
-
-
-def _combine_string(node):
-    # combine strings
-    res = []
-    tmp = []
-    for optimized_node in (optimize(child_node) for child_node in node):
-        if isinstance(optimized_node, six.string_types) and optimized_node is not eqmark:
-            tmp.append(optimized_node)
-        else:
-            if tmp:
-                res.append("".join(tmp))
-                tmp = []
-            res.append(optimized_node)
-    if tmp:
-        res.append("".join(tmp))
-    node[:] = res
-
-
-def optimize(node):
-    if type(node) is tuple:
-        return tuple(optimize(x) for x in node)
-
-    if isinstance(node, six.string_types):
-        return node
-
-    if len(node) == 1 and type(node) in (list, Node):
-        return optimize(node[0])
-
-    if isinstance(node, Node):  # (Variable, Template, IfNode)):
-        return node.__class__(tuple(optimize(x) for x in node))
-    else:
-        _combine_string(node)
-
-    if len(node) == 1 and type(node) in (list, Node):
-        return optimize(node[0])
-
-    if isinstance(node, list):
-        return tuple(node)
-
-    return node
 
 
 class Parser:

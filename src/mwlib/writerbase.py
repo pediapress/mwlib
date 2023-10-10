@@ -5,7 +5,8 @@
 
 from typing import Callable, Optional
 
-from mwlib import log, parser
+from mwlib import parser
+from mwlib.utilities import log
 
 log = log.Log('mwlib.writerbase')
 

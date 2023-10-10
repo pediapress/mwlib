@@ -14,7 +14,8 @@ except ImportError:
 
 from gevent.lock import Semaphore
 
-from mwlib import authors, conf
+from mwlib import authors
+from mwlib.configuration import conf
 
 
 def loads(input_string):
@@ -133,16 +134,15 @@ class MwApi:
         try:
             if use_post:
                 return self._post(**kwargs)
-            else:
-                return self._do_request(**kwargs)
+            return self._do_request(**kwargs)
         finally:
             if sem is not None:
                 sem.release()
 
     def _handle_error(self, error, kwargs):
+        error_info = error.get("info", ""),
         raise RuntimeError(
-            "{}: [fetching {}]".format(error.get("info", ""),
-                                       self._build_url(**kwargs))
+            f"{error_info}: [fetching {self._build_url(**kwargs)}]"
         )
 
     def _handle_request(self, **kwargs):
@@ -237,8 +237,8 @@ class MwApi:
             return self.login(
                 username, password, domain=domain, lgtoken=res["login"]["token"]
             )
-        elif login_result == "Success":
-            return
+        if login_result == "Success":
+            return None
 
         raise RuntimeError("login failed: %r" % res)
 
@@ -341,7 +341,7 @@ class MwApi:
 
         get_authors = authors.InspectAuthors()
 
-        def merge_data(retval, newdata):
+        def merge_data(_, newdata):
             edits = list(newdata["pages"].values())
             for edit in edits:
                 revs = edit["revisions"]
@@ -364,7 +364,7 @@ def guess_api_urls(url):
         url = url.decode("utf-8")
 
     try:
-        scheme, netloc, path, params, query, fragment = parse.urlparse(url)
+        scheme, netloc, path, _, _, _ = parse.urlparse(url)
     except ValueError:
         return retval
 

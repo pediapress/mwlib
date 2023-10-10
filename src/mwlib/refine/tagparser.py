@@ -5,7 +5,7 @@
 
 import sys
 
-from mwlib.utoken import Token
+from mwlib.token.utoken import Token
 
 
 class TagInfo:
@@ -28,6 +28,7 @@ class TagParser:
 
         self.guard = (None, TagInfo(tagname="", prio=sys.maxsize,
                                     nested=True, blocknode=False))
+        self.stack = []
 
     def add(self, tagname=None, prio=None, blocknode=False, nested=True):
         tag = TagInfo(tagname=tagname, prio=prio,
