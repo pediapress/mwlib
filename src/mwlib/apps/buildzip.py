@@ -12,10 +12,9 @@ import time
 import webbrowser
 import zipfile
 
+from mwlib.apps.utils import build_parser, create_nuwiki, create_zip_from_wiki_env
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utilities import utils
-
-from .utils import build_parser, create_nuwiki, create_zip_from_wiki_env
 
 
 def _walk(root):

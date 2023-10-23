@@ -371,12 +371,9 @@ class Fetcher:
         if self.imageinfo_todo or self.revids_todo or self.pages_todo:
             raise ValueError("not all items processed")
 
-    def extension_img_urls(self, data):
-        html = data["text"]["*"]
-        root = etree.HTML(html)
-
+    def extension_img_urls(self, image_nodes):
         img_urls = set()
-        for img_node in root.xpath(".//img"):
+        for img_node in image_nodes:
             src = img_node.get("src")
             frags = src.split("/")
             if len(frags):
@@ -387,6 +384,26 @@ class Fetcher:
                     img_urls.add(full_url)
         return img_urls
 
+    def timeline_image_urls(self, image_nodes):
+        img_urls = set()
+        for img_node in image_nodes:
+            src = img_node.get("src")
+            frags = src.split("/")
+            if len(frags):
+                full_url = parse.urljoin(self.api.baseurl, src)
+                img_urls.add(full_url)
+        return img_urls
+    
+    def _get_image_nodes(self, data):
+        html = data["text"]["*"]
+        root = etree.HTML(html)
+        return root.xpath(".//img")
+    
+    def _get_timeline_images(self, data):
+        html = data["text"]["*"]
+        root = etree.HTML(html)
+        return root.xpath(".//div[contains(@class, 'timeline-wrapper')]/img")
+
     def fetch_html(self, name, lst):
         def fetch(content):
             with self.api_semaphore:
@@ -395,8 +412,12 @@ class Fetcher:
                 res[name] = content
 
             self.fsout.set_db_key("html", content, res)
-            img_urls = self.extension_img_urls(res)
-            for url in img_urls:
+            image_nodes = self._get_image_nodes(res)
+            timeline_nodes = self._get_timeline_images(res)
+            img_urls = self.extension_img_urls(image_nodes)
+            timeline_image_urls = self.timeline_image_urls(timeline_nodes)
+            all_urls = list(set(list(img_urls) + list(timeline_image_urls)))
+            for url in all_urls:
                 filename = url.rsplit("/", 1)[1]
                 title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.schedule_download_image(str(url), title)
@@ -711,31 +732,29 @@ class Fetcher:
 
         raise RuntimeError(f"cannot guess api url for {path}")
 
+    def _fetch_pages(self, *args, **kwargs):
+        data = self.api.fetch_pages(**kwargs)
+        self._find_redirect(data)
+        redirects = data.get("redirects", [])
+        self._update_redirects(redirects)
+        self._handle_categories(data)
+        self.fsout.write_pages(data)
+
+    def _doit(self, name, lst, limit):
+        while lst and self.api.idle():
+            block = get_block(lst, limit)
+            self.scheduled.update(block)
+            kwargs = {name: block}
+            self._refcall(self._fetch_pages, **kwargs)
+
     def dispatch(self):
         limit = self.api.api_request_limit
-
-        def fetch_pages(**kw):
-            data = self.api.fetch_pages(**kw)
-            self._find_redirect(data)
-            redirects = data.get("redirects", [])
-            self._update_redirects(redirects)
-            self._handle_categories(data)
-            self.fsout.write_pages(data)
-
-        def doit(name, lst):
-            while lst and self.api.idle():
-                block = get_block(lst, limit)
-                self.scheduled.update(block)
-                kwargs= {name: block}
-                self._refcall(fetch_pages, **kwargs)
-
         while self.imageinfo_todo and self.api.idle():
             block = get_block(self.imageinfo_todo, limit)
             self.scheduled.update(block)
             self._refcall(self.fetch_imageinfo, block)
-
-        doit("revids", self.revids_todo)
-        doit("titles", self.pages_todo)
+        self._doit("revids", self.revids_todo, limit)
+        self._doit("titles", self.pages_todo, limit)
 
         self.report()
 
