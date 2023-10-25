@@ -9,13 +9,15 @@ import sys
 import time
 import traceback
 from urllib import parse, request
-
+import re
 import gevent
 import gevent.event
 import gevent.pool
 from gevent.lock import Semaphore
 from lxml import etree
 from sqlitedict import SqliteDict
+from hashlib import sha1
+import shutil
 
 from mwlib import nshandling
 from mwlib.configuration import conf
@@ -103,11 +105,27 @@ class FsOutput:
             database = SqliteDict(db_path, autocommit=True)
             setattr(self, storage, database)
 
+    def open_rev_file_for_reading(self):
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "r",
+                            encoding="utf8")
+
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
         if storage is None:
             raise ValueError(f"storage does not exist {name}")
         storage[key] = json.dumps(value)
+
+    def get_db_key(self, name, key):
+        storage = getattr(self, name, None)
+        if storage is None:
+            raise ValueError(f"storage does not exist {name}")
+        return json.loads(storage[key])
+
+    def get_db_keys(self, name):
+        storage = getattr(self, name, None)
+        if storage is None:
+            raise ValueError(f"storage does not exist {name}")
+        return storage.keys()
 
     def close(self):
         if self.nfo is not None:
@@ -119,6 +137,11 @@ class FsOutput:
         path = os.path.join(self.path, "images", f"{utils.fs_escape(title)}")
         self.imgcount += 1
         return path
+
+    def copy_image(self, image_to_be_copied, new_image_name):
+        image_to_be_copied_path = os.path.join(self.path, "images", f"{utils.fs_escape(image_to_be_copied)}")
+        new_image_path = os.path.join(self.path, "images", f"{utils.fs_escape(new_image_name)}")
+        shutil.copyfile(image_to_be_copied_path, new_image_path)
 
     def dump_json(self, **kw):
         for key, value in kw.items():
@@ -368,8 +391,48 @@ class Fetcher:
             dispatch_gr.kill()
 
         self.finish()
+        self._save_timeline_info()
         if self.imageinfo_todo or self.revids_todo or self.pages_todo:
             raise ValueError("not all items processed")
+        
+    def _save_timeline_info(self):
+        html_content_pages = self.fsout.get_db_keys("html")
+        
+        
+        for page in html_content_pages:
+            txt = self.read_page_by_title(page)
+            rev_timeline_tag_contents = self.find_timeline_tags_from_rev_content(txt)
+            
+            html_content = self.fsout.get_db_key("html", page)
+            image_nodes = self._get_timeline_images(html_content)
+            timeline_image_urls = self.timeline_image_urls(image_nodes)
+            
+            for (url, rev_timeline_tag_content) in zip(timeline_image_urls, rev_timeline_tag_contents):
+                filename = url.rsplit("/", 1)[1]
+                digest = self.calculate_hash_from_timeline_content(rev_timeline_tag_content)
+                filename_extension = filename.rsplit(".", 1)[1]
+                title = self.nshandler.splitname(filename, defaultns=6)[2]
+                self.fsout.copy_image(title, f"{digest}.{filename_extension}")
+    
+    def read_page_by_title(self, target_title):
+        self.fsout.open_rev_file_for_reading()
+        rev_file_content = self.fsout.revfile.read()
+        pages = rev_file_content.split("\n --page-- ")
+        for page in pages[1:]:
+            header, txt = page.split("\n", 1)
+            rev = json.loads(header)
+            if rev["title"] == target_title:
+                self.fsout.revfile.close()
+                return txt
+        self.fsout.revfile.close()
+        return None
+    
+    def calculate_hash_from_timeline_content(self, timeline_content):
+        return sha1(timeline_content.encode("utf-8")).hexdigest()
+
+    
+    def find_timeline_tags_from_rev_content(self, content):
+        return re.findall(r'<timeline>(.*?)<\/timeline>', content, re.DOTALL)
 
     def extension_img_urls(self, image_nodes):
         img_urls = set()
@@ -754,8 +817,7 @@ class Fetcher:
             self.scheduled.update(block)
             self._refcall(self.fetch_imageinfo, block)
         self._doit("revids", self.revids_todo, limit)
-        self._doit("titles", self.pages_todo, limit)
-
+        self._doit("titles", self.pages_todo, limit)        
         self.report()
 
     def _sanity_check(self):
