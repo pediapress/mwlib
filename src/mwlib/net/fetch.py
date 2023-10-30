@@ -426,11 +426,10 @@ class Fetcher:
                 return txt
         self.fsout.revfile.close()
         return None
-    
+
     def calculate_hash_from_timeline_content(self, timeline_content):
         return sha1(timeline_content.encode("utf-8")).hexdigest()
 
-    
     def find_timeline_tags_from_rev_content(self, content):
         return re.findall(r'<timeline>(.*?)<\/timeline>', content, re.DOTALL)
 

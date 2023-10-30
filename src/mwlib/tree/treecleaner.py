@@ -354,6 +354,7 @@ class TreeCleaner:
         # all node classes that have content but no text need to be
         # listed here to prevent removal
         self.content_without_text_classes = [Gallery, ImageLink]
+        self.content_without_text_classes = [Gallery, ImageLink, Timeline]
 
     def clean(self, cleaner_methods):
         """Clean parse tree using cleaner methods in the methodList."""
