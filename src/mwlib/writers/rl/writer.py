@@ -1172,6 +1172,7 @@ class RlWriter:
         return scaled_images
 
     def _arrange_and_append_figures(self, figures, final_nodes, node):
+        should_clear_figures = False
         if len(figures) > 1:
             figures = self._scale_images(figures)
             data = [
@@ -1187,7 +1188,9 @@ class RlWriter:
             if figures:
                 final_nodes.append(figures[0])
                 figures = []
+                should_clear_figures = True
             final_nodes.append(node)
+        return should_clear_figures
 
     def tabularizeImages(self, nodes):
         """consecutive images that couldn't be combined with paragraphs
@@ -1200,7 +1203,11 @@ class RlWriter:
             if isinstance(node, Figure):
                 figures.append(node)
             else:
-                self._arrange_and_append_figures(figures, final_nodes, node)
+                should_clear_figures = self._arrange_and_append_figures(
+                    figures, final_nodes, node
+                )
+                if should_clear_figures:
+                    figures = []
         if len(figures) > 1:
             figures = self._scale_images(figures)
             data = [
@@ -2669,10 +2676,12 @@ class RlWriter:
         if img_path:
             # width and height should be parsed by the....parser
             # and not guessed by the writer
-            node.width = 180
-            node.thumb = True
+            node.width = PRINT_WIDTH
             node.is_inline = lambda: False
-            width, height = self.image_utils.get_image_size(node, img_path)
+            width, height = self.image_utils.get_image_size(
+                node,
+                img_path,
+            )
             return [
                 Figure(img_path, "", text_style(), img_width=width, img_height=height)
             ]
