@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  base:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.base
+    image: mw-base
+
+  render_server:
+    build:
+      context: .
+      dockerfile: docker/MwServe.Dockerfile
+    ports:
+      - "9123:8080"
+    depends_on:
+      - base
+
+  n_serve:
+    build:
+      context: .
+      dockerfile: docker/NServe.Dockerfile
+    ports:
+      - "9124:8080"
+    depends_on:
+      - base
+
+  n_slave:
+    build:
+      context: .
+      dockerfile: docker/NSlave.Dockerfile
+    ports:
+      - "9125:8080"
+    depends_on:
+      - base
+
+  q_serve:
+    build:
+      context: .
+      dockerfile: docker/QServe.Dockerfile
+    ports:
+      - "9126:8080"
+    depends_on:
+      - base
+
+  mediawiki:
+    image: mediawiki
+    restart: always
+    ports:
+      - 8080:80
+    links:
+      - database
+    volumes:
+      - images:/var/www/html/images
+      # After initial setup, download LocalSettings.php to the same directory as
+      # this yaml and uncomment the following line and use compose to restart
+      # the mediawiki service
+      # - ./LocalSettings.php:/var/www/html/LocalSettings.php
+
+  database:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: pedpiapress_db
+      MYSQL_USER: pediapress_user
+      MYSQL_PASSWORD: password
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - db:/var/lib/mysql
+      
+volumes:
+  images:
+  db:

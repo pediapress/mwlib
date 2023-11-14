@@ -1,10 +1,14 @@
 import importlib.metadata
+import os
 from pathlib import Path
 
 import toml
 
 
 def find_pyproject_toml():
+    if os.getenv("MWLIB_PYPROJECT_TOML", None):
+        return Path(os.getenv("MWLIB_PYPROJECT_TOML")).resolve()
+
     current_dir = Path(__file__).resolve().parent
 
     # Check until we reach the root folder

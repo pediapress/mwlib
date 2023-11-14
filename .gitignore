@@ -24,6 +24,7 @@ bla*
 t.py
 mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
+mwlib/templ/node.c
 /.tox/
 /.ropeproject/
 /dist/
