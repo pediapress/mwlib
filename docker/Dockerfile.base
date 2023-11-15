@@ -1,6 +1,12 @@
 FROM python:3.10.11
 
-RUN apt-get update && apt-get -y install postgresql gcc python3-dev musl-dev libc-dev g++ python3-dev cmake
+RUN apt-get update && \
+    apt-get \
+      -o Acquire::BrokenProxy="true" \
+      -o Acquire::http::No-Cache="true" \
+      -o Acquire::http::Pipeline-Depth="0" \
+      -y install \
+      postgresql gcc python3-dev musl-dev libc-dev g++ python3-dev cmake
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
 RUN mkdir /app
