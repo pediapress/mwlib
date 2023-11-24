@@ -431,6 +431,8 @@ class Fetcher:
         return sha1(timeline_content.encode("utf-8")).hexdigest()
 
     def find_timeline_tags_from_rev_content(self, content):
+        if not content:
+            return []
         return re.findall(r'<timeline>(.*?)<\/timeline>', content, re.DOTALL)
 
     def extension_img_urls(self, image_nodes):

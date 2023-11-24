@@ -15,22 +15,65 @@ services:
       - images:/var/www/html/images
       - ./LocalSettings.php:/var/www/html/LocalSettings.php
       - ./extensions/Collection:/var/www/html/extensions/Collection
-      # After initial setup, download LocalSettings.php to the same directory as
-      # this yaml and uncomment the following line and use compose to restart
-      # the mediawiki service
-  # This key also defines the name of the database host used during setup instead of the default "localhost"
+  
   database:
     image: mariadb
     restart: always
     environment:
-      # @see https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/DefaultSettings.php
       MYSQL_DATABASE: my_wiki
       MYSQL_USER: wikiuser
-      MYSQL_PASSWORD: example
-      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
     volumes:
       - db:/var/lib/mysql
 
+  base:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.base
+    image: mw-base
+
+  n_serve:
+    build:
+      context: ..
+      dockerfile: docker/NServe.Dockerfile
+    ports:
+      - "8899:8899"
+    depends_on:
+      - base
+      - q_serve
+
+  n_slave_render:
+    build:
+      context: ..
+      dockerfile: docker/NSlave.Dockerfile
+    ports:
+      - "9125:8898"
+    depends_on:
+      - base
+      - q_serve
+
+  n_slave_zip:
+    build:
+      context: ..
+      dockerfile: docker/NSlaveZip.Dockerfile
+    ports:
+      - "9126:8898"
+    depends_on:
+      - base
+      - q_serve
+
+  q_serve:
+    build:
+      context: ..
+      dockerfile: docker/QServe.Dockerfile
+    ports:
+      - "14311:8080"
+    depends_on:
+      - base
+      
 volumes:
   images:
   db:

@@ -1,5 +1,6 @@
 FROM mw-base
 
 WORKDIR /app
-EXPOSE 8080
-CMD ["nserve"]
+ENV PORT=8899
+EXPOSE 8899
+CMD ["nserve", "qserve:14311"]

@@ -21,18 +21,31 @@ services:
       context: .
       dockerfile: docker/NServe.Dockerfile
     ports:
-      - "9124:8080"
+      - "9124:8899"
     depends_on:
       - base
 
-  n_slave:
+  n_slave_render:
     build:
       context: .
       dockerfile: docker/NSlave.Dockerfile
     ports:
-      - "9125:8080"
+      - "9125:8898"
     depends_on:
       - base
+    volumes:
+      - "./cache:/cache"
+
+  n_slave_zip:
+    build:
+      context: .
+      dockerfile: docker/NSlave.Dockerfile
+    ports:
+      - "9125:8898"
+    depends_on:
+      - base
+    volumes:
+      - "./cache:/cache"
 
   q_serve:
     build:
@@ -52,6 +65,7 @@ services:
       - database
     volumes:
       - images:/var/www/html/images
+      - ./extensions/Collection:/var/www/html/extensions/Collection
       # After initial setup, download LocalSettings.php to the same directory as
       # this yaml and uncomment the following line and use compose to restart
       # the mediawiki service

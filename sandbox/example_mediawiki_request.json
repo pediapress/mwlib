@@ -1,0 +1,7 @@
+{
+  "metabook": "{\"type\":\"collection\",\"licenses\":[{\"type\":\"license\",\"name\":\"License\",\"mw_rights_icon\":\"\",\"mw_rights_page\":\"\",\"mw_rights_url\":\"\",\"mw_rights_text\":\"\"}],\"title\":\"New book\",\"subtitle\":\"My new subtitle\",\"papersize\":\"a4\",\"toc\":\"auto\",\"columns\":\"2\",\"settings\":{\"papersize\":\"a4\",\"toc\":\"auto\",\"columns\":\"2\"},\"items\":[{\"type\":\"chapter\",\"title\":\"New chapter\",\"items\":[{\"type\":\"article\",\"content_type\":\"text/x-wiki\",\"title\":\"Main Page\",\"revision\":\"5\",\"latest\":\"5\",\"timestamp\":\"1700434459\",\"url\":\"http://localhost:8080/index.php/Main_Page\",\"currentVersion\":1}]}],\"wikis\":[{\"type\":\"wikiconf\",\"baseurl\":\"http://localhost:8080/\",\"script_extension\":\".php\",\"format\":\"nuwiki\"}]}",
+  "base_url": "http://localhost:8080/",
+  "script_extension": ".php",
+  "pod_api_url": "http://pediapress.com/api/collections/",
+  "command": "zip_post"
+}

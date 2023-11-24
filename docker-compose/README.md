@@ -42,6 +42,10 @@ Afterwards, the collection extension will be available at [http://localhost:8080
 
 TODO: figure out how to add the collection extension links to the sidebar.
 
+To add extension link login and go to the index.php?title=MediaWiki:Sidebar&action=edit
+and add following line special:book|Collection
+
+
 ## References
 
 https://www.mediawiki.org/wiki/Special:ExtensionDistributor/Collection

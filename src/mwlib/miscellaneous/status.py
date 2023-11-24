@@ -110,7 +110,7 @@ class Status:
             else:
                 port = 14311
 
-            self.qproxy = rpcclient.serverproxy(host=host, port=port)
+            self.qproxy = rpcclient.ServerProxy(host=host, port=port)
             self.jobid = jobid
 
         if self.qproxy:

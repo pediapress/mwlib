@@ -16,18 +16,18 @@ def object_hook(dct):
         document_type = dct["type"]
     except KeyError:
         document_type = None
-
-    if document_type in [
-        "collection",
-        "article",
-        "Chapter",
-        "Source",
-        "interwiki",
-        "License",
-        "WikiConf",
-        "custom",
-    ]:
-        klass = getattr(metabook, document_type)
+    class_name_mapping = {
+        "collection": "collection",
+        "article": "article",
+        "chapter": "Chapter",
+        "source": "Source",
+        "interwiki": "interwiki",
+        "license": "License",
+        "wikiconf": "WikiConf",
+        "custom": "custom",
+    }
+    if document_type in class_name_mapping:
+        klass = getattr(metabook, class_name_mapping[document_type])
         sanitized_dict = {}
         for k, value in dct.items():
             sanitized_dict[str(k)] = value

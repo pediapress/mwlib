@@ -13,21 +13,21 @@ services:
       - database
     volumes:
       - images:/var/www/html/images
-
+      - ./LocalSettings.php:/var/www/html/LocalSettings.php
+      - ./extensions/Collection:/var/www/html/extensions/Collection
+  
   database:
-    container_name: database
     image: mariadb
     restart: always
     environment:
-      # @see https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/DefaultSettings.php
       MYSQL_DATABASE: my_wiki
       MYSQL_USER: wikiuser
       MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: 'password'
-    volumes:
-      - db:/var/lib/mysql
+      MYSQL_ROOT_PASSWORD: password
     ports:
       - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
 volumes:
   images:
   db:

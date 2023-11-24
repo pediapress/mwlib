@@ -138,8 +138,8 @@ class Commands:
                 report_mwzip_status,
                 post_url,
                 jobid,
-                self.proxy._rpcclient.host,
-                self.proxy._rpcclient.port,
+                self.proxy.get_client().host,
+                self.proxy.get_client().port,
             )
 
             try:
@@ -155,7 +155,7 @@ class Commands:
 
             ipath = getpath("collection.zip")
 
-            with open(ipath, "wb") as file_handler:
+            with open(ipath, "rb") as file_handler:
                 greenlet_for_upload = gevent.spawn(
                     report_upload_status, post_url, file_handler
                 )

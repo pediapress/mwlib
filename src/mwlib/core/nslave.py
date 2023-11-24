@@ -79,8 +79,12 @@ def system(args, timeout=None):
 
 
 def _get_args(
-    writer_options=None, language=None, zip_only=False,
-    login_credentials=None
+    writer_options=None,
+    language=None,
+    zip_only=False,
+    login_credentials=None,
+    *new_args,
+    **kwargs,
 ):
     args = []
 
@@ -122,12 +126,19 @@ def suggest_filename(metabook_data):
 
 class Commands:
     def statusfile(self):
-        host = self.proxy._rpcclient.host
-        port = self.proxy._rpcclient.port
+        host = self.proxy.get_client().host
+        port = self.proxy.get_client().port
         return f"qserve://{host}:{port}/{self.jobid}"
 
     def rpc_makezip(self, params=None):
-        def doit(metabook_data=None, collection_id=None, base_url=None):
+        def doit(
+            metabook_data=None,
+            collection_id=None,
+            base_url=None,
+            writer_options=None,
+            *new_args,
+            **kwargs
+        ):
             collection_dir = get_collection_dir(collection_id)
 
             def getpath(p):
@@ -153,12 +164,14 @@ class Commands:
             ]
             if base_url:
                 args.extend(["--config", base_url])
+            if writer_options:
+                args.extend(["--writer-options", writer_options])
 
             args.extend(_get_args(zip_only=True, **params))
 
             if metabook_data:
                 f = open(metabook_path, "wb")
-                f.write(metabook_data)
+                f.write(metabook_data.encode("utf-8"))
                 f.close()
 
             system(args, timeout=8 * 60.0)
@@ -166,10 +179,7 @@ class Commands:
         return doit(**params)
 
     def rpc_render(self, params=None):
-        def doit(
-            metabook_data=None, collection_id=None,
-            _=None, writer=None
-        ):
+        def doit(metabook_data=None, collection_id=None, _=None, writer=None):
             writer = writer or "rl"
             collection_dir = get_collection_dir(collection_id)
 
@@ -200,7 +210,7 @@ class Commands:
             system(args, timeout=15 * 60.0)
             os.chmod(outfile, 0o644)
             size = os.path.getsize(outfile)
-            url = cacheurl + f"/{collection_id[:2]}/{collection_id}/output.{writer}"
+            url = CACHE_DIR + f"/{collection_id[:2]}/{collection_id}/output.{writer}"
             return {
                 "url": url,
                 "size": size,
@@ -242,8 +252,8 @@ def make_cachedir(cachedir):
 def main():
     global CACHE_DIR, CACHE_URL
     numgreenlets = 10
-    http_address = "127.0.0.1"
-    http_port = 8898
+    http_address = "0.0.0.0"
+    http_port = int(os.environ.get("PORT", 8898))
     serve_files = True
     from mwlib import argv
 

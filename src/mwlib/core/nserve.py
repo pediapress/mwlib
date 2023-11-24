@@ -2,6 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
+import os
 import re
 import sys
 import traceback
@@ -12,7 +13,6 @@ from io import StringIO
 
 import gevent.monkey
 import pkg_resources
-import six
 import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
@@ -93,16 +93,12 @@ def make_collection_id(data):
         sio.write(repr(data.get(key)))
     meta_book = data.get("metabook")
     if meta_book:
-        if isinstance(meta_book, str):
-            meta_book = six.text_type(meta_book, "utf-8")
         mbobj = json.loads(meta_book)
         sio.write(calc_checksum(mbobj))
         num_articles = len(list(mbobj.articles()))
         base_url = data.get("base_url")
         writer = data.get("writer")
-        sys.stdout.write(
-            f"new-collection {num_articles}\t{base_url}\t{writer}\n"
-        )
+        sys.stdout.write(f"new-collection {num_articles}\t{base_url}\t{writer}\n")
 
     return sha256(sio.getvalue().encode("utf-8")).hexdigest()[:16]
 
@@ -128,7 +124,7 @@ class WatchQServe:
         print(self.prefix, msg)
 
     def _serverproxy(self):
-        return rpcclient.serverproxy(host=self.host, port=self.port)
+        return rpcclient.ServerProxy(host=self.host, port=self.port)
 
     def _mark_busy(self, is_busy):
         if is_busy and busy[self.ident] != is_busy:
@@ -378,9 +374,7 @@ class Application:
             if res["result"]:
                 more["url"] = res["result"]["url"]
                 more["content_length"] = res["result"]["size"]
-                more["suggested_filename"] = res["result"].get(
-                    "suggested_filename", ""
-                )
+                more["suggested_filename"] = res["result"].get("suggested_filename", "")
         except KeyError:
             pass
         if name_writer.content_type:
@@ -478,7 +472,9 @@ class Application:
         if pod_api_url:
             result = json.loads(
                 six.text_type(
-                    six.moves.urllib.request.urlopen(pod_api_url, data="any").read(),
+                    six.moves.urllib.request.urlopen(
+                        pod_api_url, data="any".encode("utf-8")
+                    ).read(),
                     "utf-8",
                 )
             )
@@ -522,8 +518,8 @@ def main():
         sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface="
     )
     q_serve = []
-    port = 8899
-    interface = "127.0.0.1"
+    port = int(os.environ.get("PORT", 8899))
+    interface = "0.0.0.0"
     for opt, arg in opts:
         if opt == "--port":
             port = int(arg)
