@@ -3,6 +3,7 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import locale
 import time
 
 from PIL import Image
@@ -35,7 +36,7 @@ from mwlib.writers.rl.pdfstyles import (
     text_style,
 )
 
-from . import fontconfig, locale
+from . import fontconfig
 
 font_switcher = fontconfig.RLFontSwitcher()
 font_switcher.font_paths = fontconfig.font_paths
@@ -187,7 +188,7 @@ class TitlePage(PageTemplate):
             return (img_area_width, img_area_width / img_ar)
         return (img_area_height * img_ar, img_area_height)
 
-    def beforeDrawPage(self, canvas, _):
+    def beforeDrawPage(self, canvas, template):
         canvas.setFont(SERIF_FONT, 8)
         canvas.saveState()
         if pdfstyles.SHOW_TITLE_PAGE_FOOTER:

@@ -37,8 +37,12 @@ It will modify the `LocalSettings.php` file and add the following lines:
 ```php
 wfLoadExtension( 'Collection' );
 ```
+## Add mediawiki to your local hosts
 
-Afterwards, the collection extension will be available at [http://localhost:8080/index.php/Special:Collection](http://localhost:8080/index.php/Special:Collection).
+sudo nano /etc/hosts
+127.0.0.1   mediawiki
+
+Afterwards, the collection extension will be available at [http://mediawiki/index.php/Special:Collection](http://localhost:8080/index.php/Special:Collection).
 
 TODO: figure out how to add the collection extension links to the sidebar.
 

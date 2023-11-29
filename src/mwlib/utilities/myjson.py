@@ -13,7 +13,7 @@ except ImportError:
 
 def object_hook(dct):
     try:
-        document_type = dct["type"]
+        document_type = dct["type"].lower()
     except KeyError:
         document_type = None
     class_name_mapping = {
@@ -21,7 +21,7 @@ def object_hook(dct):
         "article": "article",
         "chapter": "Chapter",
         "source": "Source",
-        "interwiki": "interwiki",
+        "interwiki": "Interwiki",
         "license": "License",
         "wikiconf": "WikiConf",
         "custom": "custom",
@@ -33,7 +33,7 @@ def object_hook(dct):
             sanitized_dict[str(k)] = value
         sanitized_dict["type"] = document_type
         return klass(**sanitized_dict)
-
+    print("no match", document_type)
     return dct
 
 

@@ -2,20 +2,22 @@
 #
 # Access via "http://localhost:8080"
 #   (or "http://$(docker-machine ip):8080" if using docker-machine)
-version: '3'
+version: "3"
 services:
   mediawiki:
     image: mediawiki
     restart: always
-    ports:
-      - 8080:80
     links:
       - database
+    ports:
+      - 80:80
+    expose:
+      - "80"
     volumes:
       - images:/var/www/html/images
       - ./LocalSettings.php:/var/www/html/LocalSettings.php
       - ./extensions/Collection:/var/www/html/extensions/Collection
-  
+
   database:
     image: mariadb
     restart: always
@@ -35,6 +37,17 @@ services:
       dockerfile: docker/Dockerfile.base
     image: mw-base
 
+  q_serve:
+    build:
+      context: ..
+      dockerfile: docker/QServe.Dockerfile
+    ports:
+      - "8090:8090"
+    depends_on:
+      - base
+    expose:
+      - "8090"
+
   n_serve:
     build:
       context: ..
@@ -44,36 +57,42 @@ services:
     depends_on:
       - base
       - q_serve
-
-  n_slave_render:
-    build:
-      context: ..
-      dockerfile: docker/NSlave.Dockerfile
-    ports:
-      - "9125:8898"
-    depends_on:
-      - base
-      - q_serve
+    expose:
+      - "8899"
 
   n_slave_zip:
     build:
       context: ..
       dockerfile: docker/NSlaveZip.Dockerfile
+    depends_on:
+      - base
+      - q_serve
+    volumes:
+      - ./cache:/app/cache
+      
+  n_slave_render:
+    build:
+      context: ..
+      dockerfile: docker/NSlave.Dockerfile
+    depends_on:
+      - base
+      - q_serve
     ports:
-      - "9126:8898"
+      - "9123:9123"
+    expose: 
+      - "9123"
+    volumes:
+      - ./cache:/app/cache
+
+  postman:
+    build:
+      context: ..
+      dockerfile: docker/Postman.Dockerfile
     depends_on:
       - base
       - q_serve
 
-  q_serve:
-    build:
-      context: ..
-      dockerfile: docker/QServe.Dockerfile
-    ports:
-      - "14311:8080"
-    depends_on:
-      - base
-      
+
 volumes:
   images:
   db:
