@@ -179,7 +179,7 @@ class Commands:
         return doit(**params)
 
     def rpc_render(self, params=None):
-        def doit(metabook_data=None, collection_id=None, _=None, writer=None):
+        def doit(metabook_data=None, collection_id=None, _=None, writer=None, **kwargs):
             writer = writer or "rl"
             collection_dir = get_collection_dir(collection_id)
 
@@ -263,7 +263,8 @@ def main():
     )
     for o, a in opts:
         if o == "--cachedir":
-            CACHE_DIR = a
+            # expand relative directories into absolute ones.
+            CACHE_DIR = os.path.abspath(a)
         elif o == "--url":
             CACHE_URL = a
         elif o == "--numprocs":
