@@ -12,10 +12,10 @@ services:
     links:
       - database
     volumes:
-      - images:/var/www/html/images
-      - ./LocalSettings.php:/var/www/html/LocalSettings.php
-      - ./extensions/Collection:/var/www/html/extensions/Collection
-  
+      - mediawiki/images:/var/www/html/images
+      - mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+      - mediawiki/extensions/Collection:/var/www/html/extensions/Collection
+
   database:
     image: mariadb
     restart: always

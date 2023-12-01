@@ -1,87 +1,97 @@
-version: "3.9"
-
+# MediaWiki with MariaDB
+#
+# Setup a custom entry in /etc/hosts for localhost (e.g. mediawiki)
+# then access via "http://mediawiki"
+version: "3"
 services:
+  mediawiki:
+    image: mediawiki
+    restart: always
+    links:
+      - database
+    ports:
+      - 80:80
+    volumes:
+      - ./mediawiki/images:/var/www/html/images
+      - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+      - ./mediawiki/extensions/Collection:/var/www/html/extensions/Collection
+      - ./cache:/app/cache
+
+  database:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: my_wiki
+      MYSQL_USER: wikiuser
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+
   base:
     build:
       context: .
       dockerfile: docker/Dockerfile.base
     image: mw-base
 
-  render_server:
+  q_serve:
     build:
       context: .
-      dockerfile: docker/MwServe.Dockerfile
+      dockerfile: docker/QServe.Dockerfile
     ports:
-      - "9123:8080"
+      - "8090:8090"
     depends_on:
       - base
+    expose:
+      - "8090"
 
   n_serve:
     build:
       context: .
       dockerfile: docker/NServe.Dockerfile
     ports:
-      - "9124:8899"
+      - "8899:8899"
     depends_on:
       - base
-
-  n_slave_render:
-    build:
-      context: .
-      dockerfile: docker/NSlave.Dockerfile
-    ports:
-      - "9125:8898"
-    depends_on:
-      - base
-    volumes:
-      - "./cache:/cache"
+      - q_serve
+    expose:
+      - "8899"
 
   n_slave_zip:
     build:
       context: .
       dockerfile: docker/NSlave.Dockerfile
-    ports:
-      - "9125:8898"
+    command: >
+      nslave 
+      --cachedir /app/cache 
+      --host q_serve 
+      --port 8090
+      --numprocs 2 
+      -c makezip
     depends_on:
       - base
+      - q_serve
     volumes:
-      - "./cache:/cache"
-
-  q_serve:
+      - ./cache:/app/cache
+      
+  n_slave_render:
     build:
       context: .
-      dockerfile: docker/QServe.Dockerfile
-    ports:
-      - "9126:8080"
+      dockerfile: docker/NSlave.Dockerfile
     depends_on:
       - base
-
-  mediawiki:
-    image: mediawiki
-    restart: always
-    ports:
-      - 8080:80
-    links:
-      - database
+      - q_serve
+    command: >
+      nslave
+      --cachedir /app/cache
+      --host q_serve
+      --port 8090
+      --numprocs 2
+      -s makezip
     volumes:
-      - images:/var/www/html/images
-      - ./extensions/Collection:/var/www/html/extensions/Collection
-      # After initial setup, download LocalSettings.php to the same directory as
-      # this yaml and uncomment the following line and use compose to restart
-      # the mediawiki service
-      # - ./LocalSettings.php:/var/www/html/LocalSettings.php
+      - ./cache:/app/cache
 
-  database:
-    image: mariadb
-    restart: always
-    environment:
-      MYSQL_DATABASE: pedpiapress_db
-      MYSQL_USER: pediapress_user
-      MYSQL_PASSWORD: password
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-    volumes:
-      - db:/var/lib/mysql
-      
 volumes:
-  images:
   db:

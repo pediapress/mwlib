@@ -14,6 +14,10 @@ import time
 from mwlib.asynchronous import proc
 from mwlib.utilities import myjson
 from mwlib.utilities.utils import garble_password
+from mwlib.utilities.log import root_logger
+from qs import slave
+
+logger = root_logger.getChild(__name__)
 
 CACHE_DIR = None
 CACHE_URL = None
@@ -174,7 +178,9 @@ class Commands:
                 f.write(metabook_data.encode("utf-8"))
                 f.close()
 
+            logger.info("running %r", args)
             system(args, timeout=8 * 60.0)
+
 
         return doit(**params)
 
@@ -207,10 +213,11 @@ class Commands:
 
             args.extend(_get_args(**params))
 
+            logger.info("running %r", args)
             system(args, timeout=15 * 60.0)
             os.chmod(outfile, 0o644)
             size = os.path.getsize(outfile)
-            url = CACHE_DIR + f"/{collection_id[:2]}/{collection_id}/output.{writer}"
+            url = CACHE_URL + f"/{collection_id[:2]}/{collection_id}/output.{writer}"
             return {
                 "url": url,
                 "size": size,
@@ -284,13 +291,13 @@ def main():
         port = wsgi_server.socket.getsockname()[1]
         if not CACHE_URL:
             CACHE_URL = f"http://{find_ip()}:{port}/cache"
-        print(f"serving files from {CACHE_DIR!r} at url {CACHE_URL}")
+        logger.info(f"serving files from {CACHE_DIR!r} at url {CACHE_URL}")
 
     if not CACHE_URL:
         sys.exit("--url option missing")
 
     make_cachedir(CACHE_DIR)
-    from mwlib.asynchronous import slave
+    # from mwlib.asynchronous import slave
 
     slave.main(Commands, numgreenlets=numgreenlets, argv=args)
 

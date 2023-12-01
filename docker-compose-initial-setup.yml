@@ -12,7 +12,7 @@ services:
     links:
       - database
     volumes:
-      - images:/var/www/html/images
+      - mediawiki/images:/var/www/html/images
 
   database:
     container_name: database

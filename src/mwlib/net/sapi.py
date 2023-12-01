@@ -212,7 +212,7 @@ class MwApi:
                 )
                 return req
             except Exception as err:
-                print("ERR:", err)
+                logger.exception(err)
                 siprop.pop()
         raise RuntimeError("could not get siteinfo")
 

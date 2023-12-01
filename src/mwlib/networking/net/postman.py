@@ -16,7 +16,9 @@ from mwlib.asynchronous import slave
 from mwlib.miscellaneous.status import Status
 from mwlib.networking.net.podclient import PODClient
 from mwlib.utilities.utils import send_mail
+from mwlib.utilities.log import root_logger
 
+logger = root_logger.getChild(__name__)
 CACHE_DIR = "cache"
 gevent.monkey.patch_all()
 
@@ -92,7 +94,7 @@ def report_mwzip_status(posturl, jobid, host, port):
 
 def report_exception(posturl, xxx_todo_changeme):
     (_, err, _) = xxx_todo_changeme
-    print("reporting error to", posturl, repr(str(err)[:50]))
+    logger.error("reporting error to", posturl, repr(str(err)[:50]))
 
     podclient = PODClient(posturl)
     podclient.post_status(error=str(err))
@@ -104,15 +106,15 @@ mailfrom = f"{getpass.getuser()}@{socket.gethostname()}"
 def report_exception_mail(subject, exc_info):
     mailto = os.environ.get("MAILTO")
     if not mailto:
-        print("MAILTO not set. not sending email.")
+        logger.warn("MAILTO not set. not sending email.")
         return
 
-    print("sending mail to", mailto)
+    logger.info("sending mail to", mailto)
 
-    exception_traceback_buffer = StringIO.StringIO()
-    traceback.print_exception(*exc_info, file=exception_traceback_buffer)
-
-    send_mail(mailfrom, [mailto], subject, exception_traceback_buffer.getvalue())
+    try:
+        send_mail(mailfrom, [mailto], subject, exception_traceback_buffer.getvalue())
+    except Exception as err:
+        logger.exception(err)
 
 
 class Commands:

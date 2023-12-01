@@ -6,7 +6,7 @@ RUN apt-get update && \
       -o Acquire::http::No-Cache="true" \
       -o Acquire::http::Pipeline-Depth="0" \
       -y install \
-      postgresql gcc python3-dev musl-dev libc-dev g++ python3-dev cmake git
+      postgresql gcc python3-dev musl-dev libc-dev g++ python3-dev cmake git re2c
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
 RUN mkdir /app

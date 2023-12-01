@@ -26,7 +26,7 @@ from mwlib.metabook import calc_checksum
 from mwlib.utilities import log, lrucache
 from mwlib.utilities import myjson as json
 
-log = log.Log("mwlib.serve")
+log = log.root_logger.getChild("mwlib.serve")
 
 if __name__ == "__main__":
     gevent.monkey.patch_all()
@@ -229,12 +229,13 @@ class Application:
             log.error("no command given")
             raise HTTPResponse("no command given", status=400)
 
+        log.info(vars(request.params))
+
         try:
             method = getattr(self, "do_%s" % command)
         except AttributeError:
             log.error(f"no such command: {command!r}")
             raise HTTPResponse(f"no such command: {command!r}", status=400)
-
         collection_id = request.params.get("collection_id")
         if not collection_id:
             collection_id = self.new_collection(request.params)
@@ -321,6 +322,7 @@ class Application:
     def do_render(self, collection_id, post_data, is_new=False):
         params = self._get_params(post_data, collection_id=collection_id)
         metabook_data = params.metabook_data
+        log.info(f"render {collection_id} {metabook_data}")
         base_url = params.base_url
         writer = params.writer
 

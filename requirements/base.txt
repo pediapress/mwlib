@@ -9,11 +9,11 @@ apipkg==3.0.2
     # via -r requirements/base.in
 bottle==0.12.25
     # via -r requirements/base.in
-certifi==2023.7.22
+certifi==2023.11.17
     # via requests
 charset-normalizer==3.3.2
     # via requests
-cython==3.0.5
+cython==3.0.6
     # via -r requirements/base.in
 defusedxml==0.7.1
     # via odfpy
@@ -25,7 +25,7 @@ gevent==23.9.1
     #   qserve
 greenlet==3.0.1
     # via gevent
-idna==3.4
+idna==3.6
     # via requests
 lxml==4.9.3
     # via -r requirements/base.in
@@ -41,11 +41,11 @@ pillow==10.1.0
     #   reportlab
 py==1.11.0
     # via -r requirements/base.in
-pygments==2.16.1
+pygments==2.17.2
     # via -r requirements/base.in
 pyparsing==3.1.1
     # via -r requirements/base.in
-pypdf==3.17.0
+pypdf==3.17.1
     # via -r requirements/base.in
 qserve==0.3.1
     # via -r requirements/base.in
@@ -67,6 +67,8 @@ timelib==0.3.0
     # via -r requirements/base.in
 toml==0.10.2
     # via -r requirements/base.in
+typing-extensions==4.8.0
+    # via pypdf
 urllib3==2.1.0
     # via requests
 zope-event==5.0
