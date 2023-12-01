@@ -39,11 +39,9 @@ __pycache__/
 /.python-version
 .pytest_cache
 venv
-
-
-# Ignore mediawiki related files
 mediawiki/extensions
 mediawiki/images
 mediawiki/math_formulas
 Collection-*.tar.gz
 LocalSettings.php
+cache
