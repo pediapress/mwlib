@@ -1,5 +1,8 @@
 import os
 import sys
+
+import gevent
+import greenlet
 import pytest
 
 xnet = os.environ.get("XNET", "")  # eXclude NETwork tests
@@ -54,3 +57,7 @@ def pytest_configure(config):
         else:
             kw = "-xnet"
         config.option.keyword = kw
+
+
+def pytest_report_header(config):
+    return "gevent %s  --  greenlet %s" % (gevent.__version__, greenlet.__version__)

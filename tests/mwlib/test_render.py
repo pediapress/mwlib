@@ -2,8 +2,12 @@
 
 import glob
 import os
+from importlib.metadata import entry_points
 
 import pytest
+from mwlib.utilities.log import root_logger
+
+logger = root_logger.getChild("test_render")
 
 
 def zip_files():
@@ -11,9 +15,7 @@ def zip_files():
 
 
 def writer_names():
-    import pkg_resources
-
-    for x in pkg_resources.iter_entry_points("mwlib.writers"):
+    for x in entry_points().get("mwlib.writers", []):
         try:
             x.load()
             yield x.name
@@ -39,9 +41,10 @@ def skip_by_invalid_writer_zipfile_combination(request, writer, zip_file):
             pytest.skip("skipping because of bug in %s writer" % writer)
 
 
+@pytest.mark.integration
 @pytest.mark.skip_writer_zipfile("rl", "lambda.zip")
 def test_render(writer, zip_file, tmpdir):
     cmd = "mw-render -w {} -c {} -o {}".format(writer, zip_file, tmpdir.join("output"))
-    print(("running", cmd))
+    logger.info("running %s" % cmd)
     err = os.system(cmd)
     assert err == 0

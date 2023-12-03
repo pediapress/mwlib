@@ -7,7 +7,7 @@
 from pygments import highlight, lexers
 from renderhelper import renderMW
 
-from src.mwlib.writers.rl.rlsourceformatter import ReportlabFormatter
+from mwlib.writers.rl.rlsourceformatter import ReportlabFormatter
 
 # node combinations: Table, Paragraph, PreFormatted, Emphasized, Definitionlist, Indented, Blockquote, Link,  URL, NamedURL,
 # CategoryLink, LangLink, Image, Gallery, Source, Code, Teletyped, BR, References, Div, Span, ItemList, Math

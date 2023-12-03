@@ -4,7 +4,7 @@ from pathlib import Path
 import toml
 from setuptools import Extension
 
-root_dir = Path(__file__).resolve().parent.parent
+root_dir = Path(__file__).resolve().parent.parent.parent
 
 # Import setup.py as a module
 spec = importlib.util.spec_from_file_location("setup", root_dir / "setup.py")
@@ -14,7 +14,7 @@ spec.loader.exec_module(setup)
 # Import functions and constants from setup.py
 get_version = setup.get_version
 get_ext_modules = setup.get_ext_modules
-MWLIB_SRC_DIR = setup.MWLIB_SRC_DIR
+MWLIB_SRC_DIR = root_dir / setup.MWLIB_SRC_DIR
 
 
 def test_get_version():
@@ -30,10 +30,13 @@ def test_get_ext_modules():
     expected_extensions = [
         Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
         Extension("mwlib.templ.nodes", sources=[f"{MWLIB_SRC_DIR}/templ/nodes.c"]),
-        Extension("mwlib.templ.node", sources=[f"{MWLIB_SRC_DIR}/templ/node.c"]),
         Extension("mwlib.templ.evaluate", sources=[f"{MWLIB_SRC_DIR}/templ/evaluate.c"]),
+        Extension("mwlib.templ.node", sources=[f"{MWLIB_SRC_DIR}/templ/node.c"]),
         Extension("mwlib.refine._core", sources=[f"{MWLIB_SRC_DIR}/refine/_core.c"]),
     ]
+
+    # Patch the MWLIB_SRC_DIR in the setup module
+    setup.MWLIB_SRC_DIR = str(MWLIB_SRC_DIR)
 
     extensions = get_ext_modules()
 

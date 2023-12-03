@@ -1,5 +1,7 @@
 #! /usr/bin/env py.test
+import os
 
+import pytest
 from mwlib import timeline
 
 example_script = """ImageSize  = width:800 height:100
@@ -108,7 +110,7 @@ PlotData=
 """
 
 
-# @pytest.mark.skipif(not os.path.isfile("/usr/bin/ploticus"), reason="no ploticus")
+@pytest.mark.skipif(not os.path.isfile("/usr/bin/ploticus"), reason="no ploticus")
 def test_draw_timeline():
     fp = timeline.draw_timeline(example_script)
     print("result in", fp)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import toml
 from Cython.Build import cythonize
-from setuptools import setup, Extension
+from setuptools import Extension, setup
 
 MWLIB_SRC_DIR = "src/mwlib"
 MWLIB_MODULES_DIR = "mwlib"
@@ -41,7 +41,7 @@ def main():
         version=get_version(),
         install_requires=["Pillow", "setuptools"],
         ext_modules=cythonize(get_ext_modules(), language_level=3),
-        packages=[MWLIB_MODULES_DIR, f"{MWLIB_MODULES_DIR}.templ"],
+        packages=[MWLIB_MODULES_DIR, f"{MWLIB_MODULES_DIR}.templ", "qs"],
         namespace_packages=[MWLIB_MODULES_DIR],
         package_dir={"": "src"},
         include_package_data=True,

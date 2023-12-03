@@ -10,8 +10,7 @@ import sys
 import tempfile
 import time
 import traceback
-
-import pkg_resources
+from importlib.metadata import entry_points
 
 from mwlib import nuwiki, wiki
 from mwlib.apps.buildzip import make_zip
@@ -20,8 +19,12 @@ from mwlib.exceptions.mwlib_exceptions import RenderException
 from mwlib.localization import _locale
 from mwlib.miscellaneous.status import Status
 from mwlib.utilities import utils
+from mwlib.utilities.log import root_logger
 from mwlib.utilities.options import OptionParser
 from mwlib.writerbase import WriterError
+
+
+logger = root_logger.getChild(__name__)
 
 
 def init_tmp_cleaner():
@@ -82,28 +85,35 @@ class Main:
 
     def load_writer(self, name):
         try:
-            entry_point = next(pkg_resources.iter_entry_points("mwlib.writers", name))
-        except StopIteration:
-            sys.exit(
-                "No such writer: %r (use --list-writers to list available writers)"
-                % name
+            entry_point = next(
+                ep for ep in entry_points().get("mwlib.writers", []) if ep.name == name
             )
+        except StopIteration:
+            sys.exit("No such writer: %r (use --list-writers to list available writers)" % name)
         try:
             return entry_point.load()
         except Exception as exc:
             sys.exit(f"Could not load writer {name!r}: {exc}")
 
     def list_writers(self):
-        for entry_point in pkg_resources.iter_entry_points("mwlib.writers"):
+        writers = set()
+        for entry_point in entry_points().get('mwlib.writers', []):
             try:
                 writer = entry_point.load()
                 if hasattr(writer, "description"):
                     description = writer.description
                 else:
                     description = "<no description>"
-            except Exception as exc:
+            except ImportError as exc:
+                # logger.exception("Could not load writer %r: %s", entry_point.name, exc)
                 description = "<NOT LOADABLE: %s>" % exc
-            print(f"{entry_point.name}\t{description}")
+                continue
+            writers.add((entry_point.name, description))
+        print("Available writers:")
+        for (name, description) in sorted(writers):
+            print(f"  {name}\t{description}")
+
+        sys.exit(0)
 
     def show_writer_info(self, name):
         writer = self.load_writer(name)
@@ -127,8 +137,7 @@ class Main:
         if isinstance(env.wiki, (nuwiki.NuWiki, nuwiki.Adapt)) or isinstance(
             env, wiki.MultiEnvironment
         ):
-            self.status = Status(self.options.status_file,
-                                 progress_range=(0, 100))
+            self.status = Status(self.options.status_file, progress_range=(0, 100))
             return env
         self.zip_filename = make_zip(
             output=self.options.keep_zip,
@@ -145,8 +154,7 @@ class Main:
                     raise
 
         env = wiki.make_wiki(self.zip_filename)
-        self.status = Status(self.options.status_file,
-                             progress_range=(34, 100))
+        self.status = Status(self.options.status_file, progress_range=(34, 100))
         return env
 
     def _get_writer_from_options(self, options, parser, use_help):
@@ -239,8 +247,7 @@ class Main:
                 dir=os.path.dirname(options.output), suffix=ext
             )
             os.close(file_descriptor)
-            writer(env, output=tmpout, status_callback=self.status,
-                   **writer_options)
+            writer(env, output=tmpout, status_callback=self.status, **writer_options)
             os.rename(tmpout, options.output)
             self._finish_render(writer, options)
         except Exception as exc:
@@ -253,9 +260,7 @@ class Main:
                         env.images.clear()
                 except OSError as exc:
                     if exc.errno != errno.ENOENT:
-                        print(
-                            "ERROR: Could not remove temporary images: %s" % exc, exc.errno
-                        )
+                        print("ERROR: Could not remove temporary images: %s" % exc, exc.errno)
 
 
 def main():

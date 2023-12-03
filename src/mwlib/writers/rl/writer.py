@@ -679,7 +679,7 @@ class RlWriter:
         if not first_article_title:
             return elements
         self.doc.addPageTemplates(WikiPage(first_article_title, rtl=self.rtl))
-        elements.append(NextPageTemplate(first_article_title.encode("utf-8")))
+        elements.append(NextPageTemplate(first_article_title))
         elements.append(PageBreak())
         return elements
 
