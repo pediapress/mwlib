@@ -11,11 +11,12 @@ import socket
 import sys
 import time
 
+from qs import slave
+
 from mwlib.asynchronous import proc
 from mwlib.utilities import myjson
-from mwlib.utilities.utils import garble_password
 from mwlib.utilities.log import root_logger
-from qs import slave
+from mwlib.utilities.utils import garble_password
 
 logger = root_logger.getChild(__name__)
 
@@ -232,9 +233,12 @@ def start_serving_files(cachedir, address, port):
     from gevent.pywsgi import WSGIServer
 
     cachedir = os.path.abspath(cachedir)
+    logger.info(f"serving files from {cachedir!r}")
 
     @route("/cache/:filename#.*#")
     def server_static(filename):
+        logger.info("serving %r", filename)
+        print("serving", filename, " from ", cachedir)
         response = static_file(
             filename, root=cachedir, mimetype="application/octet-stream"
         )

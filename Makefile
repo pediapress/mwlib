@@ -88,9 +88,9 @@ docker-py27-test::
 # Directory for extensions
 EXTENSIONS_DIR := ./mediawiki/extensions
 # MediaWiki Collection extension tarball URL
-COLLECTION_URL := https://extdist.wmflabs.org/dist/extensions/Collection-REL1_40-29bc85d.tar.gz
+COLLECTION_URL := https://extdist.wmflabs.org/dist/extensions/Collection-REL1_39-55a940a.tar.gz   
 # Collection tarball file name
-COLLECTION_TAR := Collection-REL1_40-29bc85d.tar.gz
+COLLECTION_TAR := Collection-REL1_39-55a940a.tar.gz   
 # LocalSettings backup file
 LOCAL_SETTINGS_BAK := ./LocalSettings.php.bak
 # Docker container name for MariaDB
@@ -101,7 +101,7 @@ initial_setup:
 	docker compose -f docker-compose-initial-setup.yml up -d
 
 grant_privilges:
-	docker exec $(DB_CONTAINER_NAME) mariadb -uroot -p'password' -e "GRANT ALL ON *.* TO 'wikiuser'@'%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;"
+	docker compose exec $(DB_CONTAINER_NAME) mariadb -uroot -ppassword -e "GRANT ALL ON *.* TO 'wikiuser'@'%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;"
 
 initial_setup_down:
 	docker compose -f docker-compose-initial-setup.yml down

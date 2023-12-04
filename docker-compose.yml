@@ -24,7 +24,7 @@ services:
       MYSQL_DATABASE: my_wiki
       MYSQL_USER: wikiuser
       MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: password
     ports:
       - 3306:3306
     volumes:
@@ -47,10 +47,10 @@ services:
     expose:
       - "8090"
 
-  n_serve:
+  job_dispatcher:
     build:
       context: .
-      dockerfile: docker/NServe.Dockerfile
+      dockerfile: docker/JobDispatcher.Dockerfile
     ports:
       - "8899:8899"
     depends_on:
@@ -59,10 +59,10 @@ services:
     expose:
       - "8899"
 
-  n_slave_zip:
+  zip_worker:
     build:
       context: .
-      dockerfile: docker/NSlave.Dockerfile
+      dockerfile: docker/Worker.Dockerfile
     command: >
       nslave 
       --cachedir /app/cache 
@@ -76,10 +76,10 @@ services:
     volumes:
       - ./cache:/app/cache
       
-  n_slave_render:
+  render_worker:
     build:
       context: .
-      dockerfile: docker/NSlave.Dockerfile
+      dockerfile: docker/Worker.Dockerfile
     depends_on:
       - base
       - q_serve
@@ -89,9 +89,11 @@ services:
       --host q_serve
       --port 8090
       --numprocs 2
+      --url http://render_worker:9123/cache
       -s makezip
     volumes:
       - ./cache:/app/cache
 
 volumes:
   db:
+  mediawiki:

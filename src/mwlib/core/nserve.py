@@ -184,6 +184,7 @@ def choose_idle_qserve():
 @get("<path:re:.*>")
 @post("<path:re:.*>")
 def dispatch_command(path):
+    log.info(f"dispatch_command {path}")
     return Application().dispatch(request)
 
 
@@ -226,7 +227,9 @@ class Application:
         try:
             command = request.params["command"]
         except KeyError:
-            log.error("no command given")
+            log.error("no command given in request for url: %r", request.url)
+            log.info(vars(request.params))
+            log.info(vars(request))
             raise HTTPResponse("no command given", status=400)
 
         log.info(vars(request.params))

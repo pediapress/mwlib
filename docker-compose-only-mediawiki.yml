@@ -17,6 +17,7 @@ services:
       - mediawiki/extensions/Collection:/var/www/html/extensions/Collection
 
   database:
+    container_name: database
     image: mariadb
     restart: always
     environment:
@@ -31,3 +32,4 @@ services:
 volumes:
   images:
   db:
+  mediawiki:
