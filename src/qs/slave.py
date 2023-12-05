@@ -4,8 +4,6 @@ import os
 import sys
 import time
 import traceback
-from builtins import range
-from builtins import str
 
 from qs.log import root_logger
 from qs.rpcclient import ServerProxy
@@ -39,7 +37,6 @@ class Worker:
         self.jobid_prefix = None
 
         method = job["channel"]
-        
         method_name = f"rpc_{method}"
 
         m = getattr(self, method_name, None)
@@ -250,9 +247,9 @@ def main(
                 pass
 
     def run_with_gevent():
-        from qs.misc import CallInLoop
-
         import gevent.pool
+
+        from qs.misc import CallInLoop
 
         pool = gevent.pool.Pool()
         for i in range(numgreenlets):

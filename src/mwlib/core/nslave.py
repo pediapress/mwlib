@@ -11,6 +11,7 @@ import socket
 import sys
 import time
 
+from bottle import default_app, route, static_file
 from qs import slave
 
 from mwlib.asynchronous import proc
@@ -142,7 +143,7 @@ class Commands:
             base_url=None,
             writer_options=None,
             *new_args,
-            **kwargs
+            **kwargs,
         ):
             collection_dir = get_collection_dir(collection_id)
 
@@ -181,7 +182,6 @@ class Commands:
 
             logger.info("running %r", args)
             system(args, timeout=8 * 60.0)
-
 
         return doit(**params)
 
@@ -229,23 +229,10 @@ class Commands:
 
 
 def start_serving_files(cachedir, address, port):
-    from bottle import default_app, route, static_file
     from gevent.pywsgi import WSGIServer
 
     cachedir = os.path.abspath(cachedir)
     logger.info(f"serving files from {cachedir!r}")
-
-    @route("/cache/:filename#.*#")
-    def server_static(filename):
-        logger.info("serving %r", filename)
-        print("serving", filename, " from ", cachedir)
-        response = static_file(
-            filename, root=cachedir, mimetype="application/octet-stream"
-        )
-        if filename.endswith(".rl"):
-            response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
-        return response
-
     s = WSGIServer((address, port), default_app())
     s.start()
     return s
@@ -258,7 +245,15 @@ def make_cachedir(cachedir):
         p = os.path.join(cachedir, hex(i)[3:])
         if not os.path.isdir(p):
             os.mkdir(p)
-
+            
+@route("/cache/:filename#.*#")
+def server_static(filename):
+    logger.info("serving %r xdfd", filename)
+    print("serving", filename, " from ", '/app/cache')
+    response = static_file(filename, root='/app/cache', mimetype="application/octet-stream")
+    if filename.endswith(".rl"):
+        response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
+    return response
 
 def main():
     global CACHE_DIR, CACHE_URL

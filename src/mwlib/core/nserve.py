@@ -16,7 +16,7 @@ import pkg_resources
 import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
-from bottle import HTTPResponse, default_app, get, post, request
+from bottle import HTTPResponse, default_app, get, post, request, route, static_file
 from gevent import pool, pywsgi
 from qs.misc import CallInLoop
 
@@ -181,6 +181,15 @@ def choose_idle_qserve():
     return random.choice(idle)  # XXX probably store number of render jobs in busy
 
 
+@route("/cache/:filename#.*#")
+def server_static(filename):
+    log.info("serving %r xd", filename)
+    print("serving", filename, " from ", '/app/cache')
+    response = static_file(filename, root='/app/cache', mimetype="application/octet-stream")
+    if filename.endswith(".rl"):
+        response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
+    return response
+
 @get("<path:re:.*>")
 @post("<path:re:.*>")
 def dispatch_command(path):
@@ -228,8 +237,6 @@ class Application:
             command = request.params["command"]
         except KeyError:
             log.error("no command given in request for url: %r", request.url)
-            log.info(vars(request.params))
-            log.info(vars(request))
             raise HTTPResponse("no command given", status=400)
 
         log.info(vars(request.params))
