@@ -1,29 +1,20 @@
-.. -*- mode: rst; coding: utf-8 -*-
+# mwlib - MediaWiki Parser and Utility Library
 
-======================================================================
-mwlib - MediaWiki parser and utility library
-======================================================================
-
-
-Overview
-======================================================================
-mwlib provides a library for parsing MediaWiki articles and
-converting them to different output formats. mwlib is used by
-wikipedia's "Print/export" feature in order to generate PDF documents
-from wikipedia articles.
+## Overview
+**mwlib** is a versatile library designed for parsing MediaWiki articles and converting them to various output formats. A notable application of mwlib is in Wikipedia's "Print/export" feature, where it is used to create PDF documents from Wikipedia articles.
 
 
+## Getting Started
 
-Getting Started
-======================================================================
-To build mwlib, you need to have the following software installed:
-
-- Python 3.8 or later
-- ploticus
+### Prerequisites
+To build mwlib, ensure you have the following software installed:
+- Python (version 3.8 or later)
+- Ploticus
 - re2c
-- perl
-- pillow / pyimage
-- imageMagick
+- Perl
+- Pillow / PyImage
+- ImageMagick
+
 
 Setup a virtual environment for Python 3.8 or later and activate it.
 
@@ -38,12 +29,16 @@ To build mwlib, run the following commands:
     $ python setup.py install
 
 Documentation
-=================
+
 Please visit http://mwlib.readthedocs.org/en/latest/index.html for
 detailed documentation.
 
+## Docker Compose Setup
+For users interested in setting up mwlib using Docker Compose, detailed instructions are available at [Docker Compose documentation](https://docs.docker.com/compose/).
+
+
 License
-======================================================================
+
 Copyright (c) 2007-2012 PediaPress GmbH
 
 All rights reserved.
