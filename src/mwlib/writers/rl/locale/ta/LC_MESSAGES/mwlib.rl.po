@@ -1,0 +1,215 @@
+# Translation of Mwlib.rl to Tamil (தமிழ்)
+# Exported from translatewiki.net
+#
+# Author: Shanmugamp7
+# Author: Surya Prakash.S.A.
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:06:02+0000\n"
+"Language-Team: Tamil <https://translatewiki.net/wiki/Portal:ta>\n"
+"Language: ta\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: ta\n"
+"X-Message-Group: #out-mwlibrl\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "அட்டவணை"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "மூலம்:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "உரிமம்:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "பங்களிப்பாளர்கள்:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "கட்டுரையின் உரிமங்கள்"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "தலைப்பு"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "துணைத்தலைப்பு:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "தொகுப்பாளர்:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "உருவாக்கப்பட்டது:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "உள்ளடக்கம்"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "கட்டுரைகள்"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "இவரால் உருவாக்கப்பட்டது:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "pdf எழுதி பதிப்பு:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib பதிப்பு:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "உள்ளடக்க அட்டவணை"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "கட்டுரைகளை தாவுகிறது!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr "குறிப்பு: இது நூல் எப்படி காட்சியளிக்கும் என்பதன் ஒரு முன்தோற்றம் மட்டுமே."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"குறிப்பு: இது உங்கள் நூலின் ஒரு முன்தோற்றம் மட்டுமே. இது உங்கள் நூல் எப்படி இருக்கும் என்ற "
+"ஒரு யோசனையை உங்களுக்கு அளிக்கும். உங்கள் நூலின் சில பக்கங்கள் மட்டுமே காட்டப்படும். "
+"முன்தோற்றத்தில் காட்டப்படாத பக்கங்களும் உங்கள் அச்சான நூலில் இருக்கும் என்பதை மனதில் கொள்க."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "மேற்கோள்கள்"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "பின்னிணைப்பு"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"பின்வரும் பகுதிகள் இந்த நூலில் பயன்படுத்தப்பட்டுள்ள கட்டுரைகளின் மூலத்தையும் படங்களின் "
+"மூலத்தையும் பட்டியலிடுகின்றன. அவை உரிமம் தொடர்பான தகவல்களையும் பதிப்புரிமை நிலை, "
+"பதிப்ப்பாசிரியர், உரிம நிபந்தனைகள் ஆகியவற்றையும் தெரிவிக்கும்."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"ஒவ்வொரு கட்டுரைக்கும் பட்டியலிடப்பட்டுள்ள தகவல் மூலங்கள் பதிப்புரிமை தகவல்களான பதிப்புரிமை "
+"நிலை, பதிப்பாளர், உரிமம் போன்றவற்றை வழங்கும்."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"ஒவ்வொரு படத்திற்கும் பட்டியலிடப்பட்டுள்ள தகவல் மூலங்கள் பதிப்புரிமை தகவல்களான பதிப்புரிமை "
+"நிலை, பதிப்பாளர், உரிமம் போன்றவற்றை வழங்கும்."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "கட்டுரை மூலங்களும் பங்களிப்பாளர்களும்"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "பட மூலங்கள், உரிமங்களும் பங்களிப்பாளர்களும்"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "படம்"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "அறியாப்பயனர் திருத்தங்கள்"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "படம்"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "மேலும் பார்க்க"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"திறமூல mwlib கருவியைப் பயன்படுத்தி PDF உருவாக்கப்படுகிறது. மேலதிக விபரங்களுக்குப் "
+"பார்க்கவும் http://code.pediapress.com/"
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext பதிப்பு: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib பதிப்பு: %(mwlibversion)s, mwlib.rl பதிப்பு: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "மூலம்"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "பங்களிப்பாளர்கள்"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "அறியப்படாதது"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "உரிமம்"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>எச்சரிக்கை:கட்டுரையை வழங்க முடியாது-சாதாரண உரையை கொடுக்கிறது.</strong><br/"
+">இந்த பிரச்சனையின் சாத்தியமுள்ள காரணங்கள்: (a) ஒரு bug  pdf-எழுதும் மென்பொருளில் (b) "
+"சிக்கலான மீடியாவிக்கி குறியீடு (c) அட்டவணை மிகவும் பரந்து உள்ளது"

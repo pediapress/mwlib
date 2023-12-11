@@ -1,0 +1,43 @@
+deactivate && rm -r ./venv/ && python3 -m venv venv && source venv/bin/activate && pip3 install pip-compile-multi && make install && python3 setup.py build && python3 setup.py install && pip install -e . && python3 -m pytest --cache-clear
+
+
+structure the code in bvetter way - use init.py
+
+
+__init__.py  
+import pkg_resources
+pkg_resources.declare_namespace("mwlib")
+
+
+in artcile classname create issue on github
+
+
+better exception handling - too broad exceptions
+
+uparser.py? 
+
+//release notes - what happens
+
+// documentation
+
+
+# D - pydocstyle
+# F - pyflakes
+# E - pycodestyle
+# G - flake8-logging-format
+# I - isort
+# N - pep8-naming
+# Q - flake8-quotes
+# UP - pyupgrade
+# C90 - mccabe (complexity)
+# T20 - flake8-print
+# TID - flake8-tidy-imports
+select = ["D", "E", "F", "G", "I", "N", "Q", "UP", "C90", "T20", "TID"]
+ignore = ["D10", "D203", "D213"]
+
+
+// Is olduparser required?
+
+// set up test system or render server with mwlib
+
+edutechwiki unige ch Mediawiki collection extension installation

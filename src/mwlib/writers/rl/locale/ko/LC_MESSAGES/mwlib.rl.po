@@ -1,0 +1,218 @@
+# Translation of Mwlib.rl to Korean (한국어)
+# Exported from translatewiki.net
+#
+# Author: Kwj2772
+# Author: Yknok29
+# Author: 아라
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:25+0000\n"
+"Language-Team: Korean <https://translatewiki.net/wiki/Portal:ko>\n"
+"Language: ko\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: ko\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "색인"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "출처:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "라이선스:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "기여자:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "문서 라이선스"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "제목"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "부제:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "편집자:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "생성일:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "목차"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "문서"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "만든이:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "pdf 작성기 버전:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib 버전:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "목차"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "문서 건너뛰기!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"참고하세요: 책이 종류 집합하는 방법 아이디어를 제공하기 위한 미리 보기입니다."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"참고하세요: 책이 보이는 아이디어를 제공하기 위한 도서만 미리 보기합니다. 오로"
+"지 처음 몇 문서뿐만 아니라 도서의 색인의 첫 번째 페이지는 이 미리 보기에 표시"
+"됩니다. 심지어 모든 문서가 미리 보기 밖으로 떠날 경우 최종 인쇄된 책자에 포함"
+"됩니다."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "참고"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "부록"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"다음 부분에서 이 책에서 사용한 모든 문서와 그림 자료를 나열합니다. 이 소식통"
+"은 저작권 상태, 저작권 소유자와 라이선스 조건 등 상세한 라이센스 정보를 제공"
+"합니다."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"각 문서에 대해 나열한 자료는 저작권 상태, 저작권 소유자와 라이선스 조건 등 자"
+"세한 라이선스 정보를 제공합니다."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"각 그림에 대해 나열한 자료는 저작권 상태, 저작권 소유자와 라이선스 조건 등 자"
+"세한 라이선스 정보를 제공합니다."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "문서 출처 및 기여자"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "그림 출처, 라이선스와 기여자"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "그림"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "익명 편집"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "도형"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "같이 보기"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF는 오픈 소스 mwlib 도구를 사용하여 생성합니다. 자세한 내용은 http://code."
+"pediapress.com/ 을 참고하세요."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext 버전: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib 버전: %(mwlibversion)s, mwlib.rl 버전: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "출처"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "기여자"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "알 수 없음"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "라이선스"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>경고 : 문서를 렌더링할 수 없습니다 - 일반 텍스트로 출력합니다.</"
+"strong><br/>문제의 잠재적 원인은 다음과 같습니다: (a) PDF-작성기 소프트웨어"
+"의 버그 (b) 문제가 있는 미디어위키 문법 (c) 테이블이 너무 넓음"

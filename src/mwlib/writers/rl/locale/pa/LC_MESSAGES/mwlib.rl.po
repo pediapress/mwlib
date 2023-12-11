@@ -1,0 +1,213 @@
+# Translation of Mwlib.rl to Punjabi (ਪੰਜਾਬੀ)
+# Exported from translatewiki.net
+#
+# Author: Aalam
+# Author: Babanwalia
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:45+0000\n"
+"Language: pa\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "ਤਤਕਰਾ"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "ਸਰੋਤ:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "ਲਸੰਸ:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "ਯੋਗਦਾਨੀ:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "ਲੇਖ ਦੇ ਲਸੰਸ"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "ਸਿਰਲੇਖ"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "ਉਪ-ਸਿਰਲੇਖ"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "ਸੰਪਾਦਕ:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "ਬਣਾਇਆ:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "ਸਮੱਗਰੀ"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "ਲੇਖ"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "ਤਿਆਰ ਕਰਤਾ:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "ਪੀਡੀਐਫ ਲੇਖਕ ਵਰਜਨ:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib ਵਰਜਨ:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "ਸਮੱਗਰੀ ਸਾਰਨੀ"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "ਕੁਝ ਲੇਖ ਛੱਡੇ ਜਾ ਰਹੇ ਹਨ!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"ਧਿਆਨ ਦਿਓ: ਇਹ ਸਿਰਫ਼ ਇੱਕ ਝਲਕ ਹੈ ਜਿਹਦਾ ਮਕਸਦ ਤੁਹਾਨੂੰ ਇਹ ਦੱਸਣਾ ਹੈ ਕਿ ਕਿਤਾਬ ਕਿਵੇਂ ਛਪੀ ਹੋਈ ਹੈ।"
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"ਧਿਆਨ ਦਿਓ: ਇਹ ਤੁਹਾਡੀ ਕਿਤਾਬ ਦੀ ਸਿਰਫ਼ ਝਲਕ ਹੈ ਤਾਂ ਜੋ ਤੁਹਾਨੂੰ ਪਤਾ ਲੱਗ ਸਕੇ ਕਿ ਕਿਤਾਬ ਕਿਵੇਂ ਦੀ "
+"ਹੈ। ਇਸ ਝਲਕ ਵਿਚ ਤੁਹਾਡੀ ਕਿਤਾਬ ਦੇ ਸਿਰਫ਼ ਮੂਹਰਲੇ ਕੁਝ ਲੇਖ ਅਤੇ ਵਿਸ਼ਾ ਸੂਚੀ ਦੇ ਮੂਹਰਲੇ ਸਫ਼ੇ ਵਿਖਾਏ ਗਏ "
+"ਹਨ। ਆਖ਼ਰੀ ਛਾਪੀ ਹੋਈ ਕਿਤਾਬ ਵਿਚ ਸਾਰੇ ਲੇਖ, ਉਹ ਵੀ ਜੋ ਇਸ ਝਲਕ ਵਿਚੋਂ ਛੱਡੇ ਹੋਏ ਹਨ, ਸ਼ਾਮਲ ਹੋਣਗੇ।"
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "ਹਵਾਲੇ"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "ਅੰਤਕਾ"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"ਹੇਠਲੇ ਭਾਗਾਂ ਵਿਚ ਇਸ ਕਿਤਾਬ ਵਿਚ ਵਰਤੇ ਗਏ ਲੇਖਾਂ ਅਤੇ ਤਸਵੀਰਾਂ ਦੇ ਸਰੋਤਾਂ ਦੀ ਸੂਚੀ ਦਿੱਤੀ ਹੋਈ ਹੈ। ਇਹ "
+"ਸਰੋਤ ਲਸੰਸ ਦੀ ਜਾਣਕਾਰੀ ਹੋਰ ਵਿਸਥਾਰ ਵਿਚ ਦਿੰਦੇ ਹਨ ਜਿਸ ਵਿਚ ਕਾਪੀਰਾਈਟ ਦਾ ਦਰਜਾ ਅਤੇ ਮਾਲਕ ਅਤੇ "
+"ਲਸੰਸ ਦੀਆਂ ਸ਼ਰਤਾਂ ਸ਼ਾਮਲ ਹਨ।"
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"ਹਰੇਕ ਲੇਖ ਲਈ ਦਿੱਤੇ ਹੋਏ ਸਰੋਤ, ਲਸੰਸ ਦੀ ਜਾਣਕਾਰੀ ਹੋਰ ਵਿਸਥਾਰ ਵਿਚ ਦਿੰਦੇ ਹਨ ਜਿਸ ਵਿਚ ਕਾਪੀਰਾਈਟ "
+"ਦਾ ਦਰਜਾ ਅਤੇ ਮਾਲਕ ਅਤੇ ਲਸੰਸ ਦੀਆਂ ਸ਼ਰਤਾਂ ਸ਼ਾਮਲ ਹਨ।"
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"ਹਰੇਕ ਤਸਵੀਰ ਲਈ ਦਿੱਤੇ ਸਰੋਤ ਲਸੰਸ ਦੀ ਜਾਣਕਾਰੀ ਹੋਰ ਵਿਸਥਾਰ ਵਿਚ ਦਿੰਦੇ ਹਨ ਜਿਸ ਵਿਚ ਕਾਪੀਰਾਈਟ ਦਾ "
+"ਦਰਜਾ ਅਤੇ ਮਾਲਕ ਅਤੇ ਲਸੰਸ ਦੀਆਂ ਸ਼ਰਤਾਂ ਸ਼ਾਮਲ ਹਨ।"
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "ਲੇਖ ਦੇ ਸਰੋਤ ਅਤੇ ਯੋਗਦਾਨੀ"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "ਤਸਵੀਰ ਦੇ ਸਰੋਤ, ਲਸੰਸ ਅਤੇ ਯੋਗਦਾਨੀ"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "ਤਸਵੀਰ"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "ਗੁਮਨਾਮ ਸੋਧਾਂ"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "ਚਿੱਤਰ"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "ਇਹ ਵੀ ਵੇਖੋ"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF ਨੂੰ ਓਪਨ ਸਰੋਤ mwlib ਟੂਲਕਿੱਟ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਤਿਆਰ ਕੀਤਾ ਗਿਆ ਹੈ। ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ http://"
+"code.pediapress.com/ ਵੇਖੋ।"
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext ਵਰਜਨ: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib ਵਰਜਨ: %(mwlibversion)s, mwlib.rl ਵਰਜਨ: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "ਸਰੋਤ"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "ਯੋਗਦਾਨੀ"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "ਅਣਜਾਣ"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "ਲਸੰਸ"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>WARNING: ਲੇਖ ਪੇਸ਼ ਨਾ ਕੀਤਾ ਜਾ ਸਕਿਆ - ਸਧਾਰਨ ਲਿਖਤ ਵਿਖਾਈ ਜਾ ਰਹੀ ਹੈ।</"
+"strong><br/>ਇਸ ਔਕੜ ਦੇ ਸੰਭਵ ਕਾਰਨ: (ਕ) ਪੀਡੀਐੱਫ਼-ਰਾਈਟਰ ਸਾਫ਼ਟਵੇਅਰ ਵਿਚ ਕੋਈ ਦੋਸ਼ (ਖ) "
+"ਮੀਡੀਆਵਿਕੀ ਮਾਰਕਅੱਪ ਵਿਚ ਔਕੜ (ਗ) ਸਾਰਨੀ ਬਹੁਤ ਚੌੜੀ ਹੈ"

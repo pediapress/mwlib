@@ -1,90 +1,53 @@
-#! /usr/bin/env python
-
-# Copyright (c) 2007-2011 PediaPress GmbH
-# See README.rst for additional licensing information.
-
-import sys
 import os
-import time
-import glob
+import subprocess
+from pathlib import Path
 
-if not (2, 5) < sys.version_info[:2] < (3, 0):
-    sys.exit("""
-***** ERROR ***********************************************************
-* mwlib does not work with python %s.%s. You need to use python 2.6 or
-* 2.7
-***********************************************************************
-""" % sys.version_info[:2])
+import toml
+from Cython.Build import cythonize
+from setuptools import Extension, setup
 
-
-from setuptools import setup, Extension
+MWLIB_SRC_DIR = "src/mwlib"
+MWLIB_MODULES_DIR = "mwlib"
 
 
 def get_version():
-    d = {}
-    execfile("mwlib/_version.py", d, d)
-    return str(d["version"])
-
-
-def mtime(fn):
-    if os.path.exists(fn):
-        return os.stat(fn).st_mtime
-    return 0
+    pyproject_toml_path = os.path.dirname(os.path.abspath(__file__)) + "/pyproject.toml"
+    with open(pyproject_toml_path) as f:
+        pyproject = toml.load(f)
+    return pyproject["project"]["version"]
 
 
 def build_deps():
-    # we will *not* add support for automatic generation of those files as that
-    # might break with source distributions from pypi
-    err = os.system("make all")
-    if err != 0:
-        sys.exit("Error: make failed")
+    subprocess.run("make build", shell=True, check=True)
+
+
+def get_ext_modules():
+    extensions = [
+        Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
+    ]
+    for path in Path(MWLIB_SRC_DIR).rglob("**/*.c"):
+        module_name = path.relative_to(MWLIB_SRC_DIR).with_suffix("").as_posix().replace("/", ".")
+        module_name = "mwlib." + module_name
+        extensions.append(Extension(module_name, sources=[str(path)]))
+    return extensions
 
 
 def main():
-    if os.path.exists('Makefile'):
-        build_deps()   # this is a git clone
-
-    install_requires = [
-        "pyparsing>=1.4.11,<1.6", "timelib>=0.2", "bottle>=0.10",
-        "pyPdf>=1.12", "apipkg>=1.2", "qserve>=0.2.7", "lxml",
-        "py>=1.4", "sqlite3dbm", "simplejson>=2.3", "roman", "gevent",
-        "odfpy>=0.9, <0.10", "Pillow", "setuptools"]
-
-    ext_modules = []
-    ext_modules.append(Extension("mwlib._uscan", ["mwlib/_uscan.cc"]))
-
-    for x in glob.glob("mwlib/*/*.c"):
-        modname = x[:-2].replace("/", ".")
-        ext_modules.append(Extension(modname, [x]))
-
-    console_scripts = [
-        "nslave = mwlib.main_trampoline:nslave_main",
-        "postman = mwlib.main_trampoline:postman_main",
-        "nserve = mwlib.main_trampoline:nserve_main",
-        "mw-zip = mwlib.apps.buildzip:main",
-        "mw-version = mwlib._version:main",
-        "mw-render = mwlib.apps.render:main",
-        "mw-qserve = qs.qserve:main",
-        "mw-serve-ctl = mwlib.apps.serve:serve_ctl"]
+    if Path("Makefile").exists():
+        build_deps()
 
     setup(
         name="mwlib",
         version=get_version(),
-        entry_points={'mwlib.writers': ['odf = mwlib.odfwriter:writer'],
-                      "console_scripts": console_scripts},
-        install_requires=install_requires,
-        ext_modules=ext_modules,
-        packages=["mwlib", "mwlib.templ"],
-        namespace_packages=['mwlib'],
+        install_requires=["Pillow", "setuptools"],
+        ext_modules=cythonize(get_ext_modules(), language_level=3),
+        packages=[MWLIB_MODULES_DIR, f"{MWLIB_MODULES_DIR}.templ", "qs"],
+        namespace_packages=[MWLIB_MODULES_DIR],
+        package_dir={"": "src"},
         include_package_data=True,
         zip_safe=False,
-        url="http://code.pediapress.com/",
-        description="mediawiki parser and utility library",
-        license="BSD License",
-        maintainer="pediapress.com",
-        maintainer_email="info@pediapress.com",
-        long_description=open("README.rst").read())
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

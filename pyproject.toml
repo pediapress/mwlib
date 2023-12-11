@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools", "wheel", "Cython", "toml"]
+
+[project]
+name = "mwlib"
+version = "0.17.0"
+description = "mediawiki parser and utility library"
+authors = [
+    {name = "pediapress.com", email = "info@pediapress.com"}
+]
+readme = "README.rst"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Wiki",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: XML",
+]
+#license = "License: BSD License"
+
+[project.urls]
+homepage = "https://code.pediapress.com/"
+
+[project.entry-points."mwlib.writers"]
+odf = "mwlib.writers.odf.writer:writer"
+rl = "mwlib.writers.rl.writer:writer"
+
+
+[project.scripts]
+nslave = "mwlib.core.main_trampoline:nslave_main"
+postman = "mwlib.core.main_trampoline:postman_main"
+nserve = "mwlib.core.main_trampoline:nserve_main"
+mw-zip = "mwlib.apps.buildzip:main"
+mw-version = "mwlib._version:main"
+mw-render = "mwlib.apps.render:main"
+mw-qserve = "qs.qserve:main"
+mw-serve-ctl = "mwlib.apps.serve:main"
+
+
+[tool.ruff]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+extend-select = ["C4", "I", "SIM", "TCH", "UP", "W"]
+ignore = [
+    "E501",  # Line length
+#    "W503",  # Line break before binary operator
+#    "F403",  # Import * used
+#    "F405"   # Name may be undefined, or defined from star imports
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "I", "SIM", "TCH", "UP", "W"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".idea",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Same as Black.
+line-length = 99
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Assume Python 3.9.
+target-version = "py39"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10

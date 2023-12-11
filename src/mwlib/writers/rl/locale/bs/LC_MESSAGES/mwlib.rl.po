@@ -1,0 +1,221 @@
+# Translation of Mwlib.rl to Bosnian (bosanski)
+# Exported from translatewiki.net
+#
+# Author: CERminator
+# Author: KWiki
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:05+0200\n"
+"PO-Revision-Date: 2014-10-06 10:05:50+0000\n"
+"Language-Team: Bosnian <https://translatewiki.net/wiki/Portal:bs>\n"
+"Language: bs\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.25alpha (d8e297c); Translate 2014-09-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: bs\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=3; plural=(n%10 == 1 && n%100 != 11) ? 0 : ( (n%10 >= "
+"2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20)) ? 1 : 2 );\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Indeks"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Izvor:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Licenca:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Autori:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Licence članka"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Naslov"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Podnaslov:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Urednik:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Napravljen dana:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Sadržaj"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Članci"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Napravljeno od strane:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "verzija pdf pisača:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "mwlib.ext verzija:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Sadržaj"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Preskačem članke!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Molimo zapamtite: Ovo je samo pregled koji je napravljen da Vam prikaže kako "
+"knjiga treba da izgleda."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Molimo zapamtite: Ovo je samo pregled vaše knjige, planiran da vam dadne "
+"okvirno pokaže kako će vaša knjiga izgledati. U ovom pregledu prikazano je "
+"samo prvih nekoliko  članaka kao prvih nekoliko stranica indeksa vaše "
+"knjige. Svi članci, čak i oni koji nisu prikazani u pregledu, će biti "
+"uključeni u gotovo odštampanu knjigu."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Reference"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Dodatak"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Slijedeće sekcije prikazuju spisak izvora za sve članke i slike koje se "
+"koriste u ovoj knjizi. Ovi izvori omogućuju mnogo detaljnije informacije o "
+"licencama uključujući status autorskih prava, njihovih vlasnika i stanja "
+"licence."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Izvori prikazani za svaki članak daju detaljnije informacije o licencama, "
+"uključujući status autorskih prava, njihovih vlasnika i licence."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Izvori prikazani za svaku sliku daju detaljnije informacije o licencama "
+"uključujući status autorskih prava, njihovih vlasnika i licence."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Izvori članka i urednici"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Izvori, licence i urednici slike"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Slika"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "anonimne izmjene"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Predstavljanje"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Također pogledajte"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF je generiran putem alata otvorenog koda mwlib. Pogledajte http://code."
+"pediapress.com/ za više informacija."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "mwlib.ext verzija: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"mwlib verzija: %(mwlibversion)s, mwlib.rl verzija: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Izvor"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Autori"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "nepoznato"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Licenca"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>UPOZORENJE: Članak nije mogao biti prikazan - ispisat će se obični "
+"tekst.</strong><br/>Mogući uzroci ovog problema su: (a) greška u softveru "
+"PDF-pisača (b) problematični Mediawiki opisi (c) tabela je preširoka"

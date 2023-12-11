@@ -1,0 +1,228 @@
+# Translation of Mwlib.rl to French (français)
+# Exported from translatewiki.net
+#
+# Author: Crochet.david
+# Author: IAlex
+# Author: Od1n
+# Author: Peter17
+# Author: Rastus Vernon
+# Author: Verdy p
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2014-10-06 10:05:51+0000\n"
+"Language-Team: French <https://translatewiki.net/wiki/Portal:fr>\n"
+"Language: fr\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: MediaWiki 1.25alpha (d8e297c); Translate 2014-09-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: fr\n"
+"X-Message-Group: #out-mwlibrl\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Index"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Source :"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Licence :"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Contributeurs :"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Licence des articles"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Titre"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Sous-titre :"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Éditeur :"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Créé le :"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Contenus"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Articles"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Produit par :"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "version de pdf writer :"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "version de mwlib :"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Sommaire"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Certains articles ont été omis !"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Veuillez noter : ceci n’est qu’un aperçu destiné à donner une idée de "
+"comment le livre sera composé."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Veuillez notez : ceci n’est qu’un aperçu de votre livre, destiné a donner "
+"une idée de ce à quoi il ressemblera. Seuls quelques premiers articles, "
+"ainsi que les premières pages de l’index, sont inclus dans cet aperçu. Tous "
+"les articles, y compris ceux qui n’apparaissent pas dans cet aperçu, seront "
+"inclus dans le livre imprimé final."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Références"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Annexe"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Les sections suivantes listent les sources de tous les articles et images "
+"inclus dans ce livre. Ces sources donnent des informations plus détaillées "
+"quant à leurs licences, y compris le statut des droits d’auteurs, les "
+"détenteurs des droits d’auteurs et les conditions de licence."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Les sources listées pour chaque article fournissent des informations de "
+"licence plus détaillées, y compris le statut des droits d’auteurs, les "
+"détenteurs de ces droits et les conditions de licence."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Les sources listées pour chaque image fournissent des informations de "
+"licence plus détaillées, y compris le statut des droits d’auteurs, les "
+"détenteurs de ces droits et les conditions de licence."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Sources et contributeurs de l’article"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Source des images, licences et contributeurs"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Image"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "modifications anonymes"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Figure"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Voir aussi"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF générés en utilisant l’atelier libre « mwlib ». Voir http://code."
+"pediapress.com/ pour plus d’informations."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "version de mwlib.ext : %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"version de mwlib : %(mwlibversion)s, version de mwlib.rl : "
+"%(mwlibrlversion)s, %(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Source"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Contributeurs"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "inconnu"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Licence"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>AVERTISSEMENT : l’article n’a pas pu être reproduit dans son "
+"intégralité—ceci est l'édition en texte simple.</strong><br/>Les causes "
+"potentielles de ce problème sont : (a) un bogue dans le logiciel PDF-"
+"Writer ; (b) un balisage problématique du code MediaWiki ; (c) un tableau "
+"trop large."

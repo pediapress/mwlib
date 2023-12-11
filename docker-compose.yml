@@ -1,0 +1,99 @@
+# MediaWiki with MariaDB
+#
+# Setup a custom entry in /etc/hosts for localhost (e.g. mediawiki)
+# then access via "http://mediawiki"
+version: "3"
+services:
+  mediawiki:
+    image: mediawiki
+    restart: always
+    links:
+      - database
+    ports:
+      - 80:80
+    volumes:
+      - ./mediawiki/images:/var/www/html/images
+      - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+      - ./mediawiki/extensions/Collection:/var/www/html/extensions/Collection
+      - ./cache:/app/cache
+
+  database:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: my_wiki
+      MYSQL_USER: wikiuser
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+
+  base:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.base
+    image: mw-base
+
+  q_serve:
+    build:
+      context: .
+      dockerfile: docker/QServe.Dockerfile
+    ports:
+      - "8090:8090"
+    depends_on:
+      - base
+    expose:
+      - "8090"
+
+  job_dispatcher:
+    build:
+      context: .
+      dockerfile: docker/JobDispatcher.Dockerfile
+    ports:
+      - "8899:8899"
+    depends_on:
+      - base
+      - q_serve
+    expose:
+      - "8899"
+
+  zip_worker:
+    build:
+      context: .
+      dockerfile: docker/Worker.Dockerfile
+    command: >
+      nslave 
+      --cachedir /app/cache 
+      --host q_serve 
+      --port 8090
+      --numprocs 2 
+      -c makezip
+    depends_on:
+      - base
+      - q_serve
+    volumes:
+      - ./cache:/app/cache
+      
+  render_worker:
+    build:
+      context: .
+      dockerfile: docker/Worker.Dockerfile
+    depends_on:
+      - base
+      - q_serve
+    command: >
+      nslave
+      --cachedir /app/cache
+      --host q_serve
+      --port 8090
+      --numprocs 2
+      --url http://render_worker:9123/cache
+      -s makezip
+    volumes:
+      - ./cache:/app/cache
+
+volumes:
+  db:
+  mediawiki:

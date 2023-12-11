@@ -4,7 +4,7 @@
 measure template expansion performance
 """
 
-citeweb = u"""
+citeweb = """
 <includeonly>{{
 #if: {{#if: {{{url|}}} | {{#if: {{{title|}}} |1}}}}
   ||You must specify  '''''title = ''''' and '''''url = ''''' when using {{[[Template:cite web|cite web]]}}.

@@ -1,0 +1,224 @@
+# Translation of Mwlib.rl to Ukrainian (українська)
+# Exported from translatewiki.net
+#
+# Author: Dim Grits
+# Author: Microcell
+# Author: Prima klasy4na
+# Author: Дар'я Козлова
+# Author: Тест
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:06:09+0000\n"
+"Language-Team: Ukrainian <https://translatewiki.net/wiki/Portal:uk>\n"
+"Language: uk\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Language-Code: uk\n"
+"X-Message-Group: #out-mwlibrl\n"
+"Plural-Forms: nplurals=3; plural=(n%10 == 1 && n%100 != 11) ? 0 : ( (n%10 >= "
+"2 && n%10 <= 4 && (n%100 < 10 || n%100 >= 20)) ? 1 : 2 );\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Індекс"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Джерело:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Ліцензія:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Автори:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Ліцензії статті"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Назва"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Підзаголовок:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Редактор:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Створено"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Вміст"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Статті"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Створено:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "версія формату pdf"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "версія mwlib"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Зміст"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Пропущені статті!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Зверніть, будь ласка, увагу: це тільки попередній перегляд, покликаний дати "
+"уявлення як набирається книга."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Зверніть увагу! Це лише попередній перегляд вашої книги, призначений "
+"показати, як саме буде виглядати книга. У попередньому перегляді книги "
+"представлені лише перші сторінки та сторінки змісту. В остаточну друковану "
+"версію книги будуть внесені усі вибрані статті, навіть ті, що не "
+"представлені в цьому попередньому перегляді."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Примітки"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Додаток"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Наступні розділи містять список джерел для всіх статей та зображень, що "
+"використовуються у цій книзі. В цих джерелах вказана докладна інформація про "
+"правовласників, ліцензії та умови розповсюдження."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Більш докладна інформація про статус, правовласників та умови ліцензії "
+"представлена в джерелах, що вказані для кожної статті окремо."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Більш докладна інформація про статус, правовласників та умови ліцензії "
+"представлена в джерелах, що вказані для кожного зображення окремо."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Джерела та автори статті"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Джерела, ліцензії та редактори зображень"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Зображення"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "анонімне редагування"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Малюнок"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Дивіться також"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF-файл створено за допомогою інструментарія mwlib з відкритим вихідним "
+"кодом. Для більш детальної інформації переглянте сторінку за посиланням - "
+"http://code.pediapress.com ."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "версія mwlib.ext: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"версія mwlib: %(mwlibversion)s, версія mwlib.rl: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Джерело"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Автори"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "невідомо"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Ліцензія"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>Попередження: Стаття не може бути оброблена - результат виведений як "
+"звичайний текст.</strong><br>Можливі причини проблеми: (а) помилка програми "
+"запису PDF-файла (б) проблема вікі-розмітки (c) таблиці занадто широкі"

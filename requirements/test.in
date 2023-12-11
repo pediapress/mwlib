@@ -1,0 +1,6 @@
+-r base.in
+
+pygments
+pytest
+pytest-xdist
+wsgi-intercept

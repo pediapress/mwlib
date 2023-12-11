@@ -1,0 +1,36 @@
+FROM python:3.10.11
+
+RUN apt-get update && \
+    apt-get \
+      -o Acquire::BrokenProxy="true" \
+      -o Acquire::http::No-Cache="true" \
+      -o Acquire::http::Pipeline-Depth="0" \
+      -y install \
+      postgresql gcc python3-dev musl-dev libc-dev g++ python3-dev cmake git re2c
+RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+
+RUN mkdir /app
+RUN mkdir /app/src
+
+WORKDIR /app
+
+RUN pip install --upgrade pip
+RUN pip install pip-compile-multi==2.6.3
+
+COPY ./Makefile /app/
+COPY ./requirements /app/requirements
+COPY ./setup.py /app/
+COPY ./make-manifest /app
+COPY ./pyproject.toml /app
+
+ENV MWLIB_PYPROJECT_TOML=/app/pyproject.toml
+
+WORKDIR /app
+
+COPY ./src /app/src
+
+RUN make install
+RUN python3 setup.py build
+RUN pip install .
+
+#Check for pyproject.toml in /usr/local/lib/python3.10/site-packages/mwlib-0.16.0-py3.10-linux-x86_64.egg/mwlib

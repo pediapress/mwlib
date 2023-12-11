@@ -1,0 +1,35 @@
+{
+    "items": [
+        {
+            "content_type": "text/x-wiki",
+            "currentVersion": 1, 
+            "latest": 300591834, 
+            "revision": 300591834, 
+            "timestamp": 1246886591, 
+            "title": "Canthus (anatomy)", 
+            "type": "article", 
+            "url": "http://en.wikipedia.org/wiki/Canthus_(anatomy)", 
+            "wikiident": "en"
+        }
+    ], 
+    "licenses": [
+        {
+            "mw_rights_icon": "https://creativecommons.org/images/public/somerights20.png",
+            "mw_rights_page": null, 
+            "mw_rights_text": "Creative Commons Attribution-Share Alike 3.0 Unported", 
+            "mw_rights_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+            "name": "License", 
+            "type": "License"
+        }
+    ], 
+    "subtitle": "", 
+    "title": "", 
+    "type": "collection", 
+    "wikis": [
+        {
+            "baseurl": "https://en.wikipedia.org/w/",
+            "ident": "en", 
+            "type": "WikiConf"
+        }
+    ]
+}

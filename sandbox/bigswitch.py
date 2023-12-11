@@ -1,8 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+import time
 
+from mwlib import expander
+from mwlib.templ.misc import expand_str
 
-einwohnerzahlen = u"""
+einwohnerzahlen = """
 {{#switch: {{{1}}}
 | 64001 = 190 | 64001 (Jahr) = 1999 | 64001 (Name) = Aast
 | 64002 = 144 | 64002 (Jahr) = 2006 | 64002 (Name) = Abère
@@ -2161,10 +2164,8 @@ einwohnerzahlen = u"""
 [[Kategorie:Vorlage:Bevölkerungszahlen (Frankreich)]]
 """
 
-import time
-from mwlib import expander
 db = expander.DictDB(einwohnerzahlen=einwohnerzahlen)
 stime = time.time()
 for i in range(5):
-    expander.expandstr("{{einwohnerzahlen|68384}}", wikidb=db)
-print (time.time() - stime) / 5
+    expand_str("{{einwohnerzahlen|68384}}", wikidb=db)
+print((time.time() - stime) / 5)

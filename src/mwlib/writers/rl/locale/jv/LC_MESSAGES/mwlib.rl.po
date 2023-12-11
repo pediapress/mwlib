@@ -1,0 +1,217 @@
+# Translation of Mwlib.rl to Javanese (Basa Jawa)
+# Exported from translatewiki.net
+#
+# Author: NoiX180
+msgid ""
+msgstr ""
+"Project-Id-Version: Mwlib.rl\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-06 12:06+0200\n"
+"PO-Revision-Date: 2013-10-07 20:05:20+0000\n"
+"Language: jv\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-POT-Import-Date: 2013-10-07 17:45:25+0000\n"
+"X-Translation-Project: translatewiki.net <https://translatewiki.net>\n"
+"X-Generator: MediaWiki 1.22alpha (f6375da); Translate 2013-04-29\n"
+"Plural-Forms: nplurals=2; plural=(n != 0);\n"
+
+#: mwlib/rl/pdfmessages.py:11
+msgid "Index"
+msgstr "Indèks"
+
+#: mwlib/rl/pdfmessages.py:13
+msgid "Source:"
+msgstr "Sumber:"
+
+#: mwlib/rl/pdfmessages.py:15
+msgid "License:"
+msgstr "Lisènsi:"
+
+#: mwlib/rl/pdfmessages.py:17
+msgid "Contributors:"
+msgstr "Kontributor:"
+
+#: mwlib/rl/pdfmessages.py:19 mwlib/rl/rlwriter.py:584
+msgid "Article Licenses"
+msgstr "Lisènsi Artikel"
+
+#: mwlib/rl/pdfmessages.py:21
+msgid "Title"
+msgstr "Judhul"
+
+#: mwlib/rl/pdfmessages.py:23
+msgid "Subtitle:"
+msgstr "Subjudhul:"
+
+#: mwlib/rl/pdfmessages.py:25
+msgid "Editor:"
+msgstr "Panyunting:"
+
+#: mwlib/rl/pdfmessages.py:27
+msgid "Created on:"
+msgstr "Digawé dhèk:"
+
+#: mwlib/rl/pdfmessages.py:29 mwlib/rl/toc.py:46
+msgid "Contents"
+msgstr "Isi"
+
+#: mwlib/rl/pdfmessages.py:31 mwlib/rl/rlwriter.py:487
+msgid "Articles"
+msgstr "Artikel"
+
+#: mwlib/rl/pdfmessages.py:33
+msgid "Produced by:"
+msgstr "Diasilaké déning:"
+
+#: mwlib/rl/pdfmessages.py:35
+msgid "pdf writer version:"
+msgstr "vèrsi panganggit pdf:"
+
+#: mwlib/rl/pdfmessages.py:37
+msgid "mwlib version:"
+msgstr "vèrsi mwlib:"
+
+#: mwlib/rl/pdfmessages.py:39
+msgid "Table of Contents"
+msgstr "Daptar Isi"
+
+#: mwlib/rl/pdfmessages.py:41
+msgid "Skipping Articles!"
+msgstr "Ngliwati Artikel!"
+
+#: mwlib/rl/pdfmessages.py:43
+msgid ""
+"Please note:  This is only a preview intended to give an idea how the book "
+"is typeset."
+msgstr ""
+"Gatèkaké: Iki mung pratayang sing dimaksudaké kanggo ngawèhi sawangan piyé "
+"buku iki disetèl."
+
+#: mwlib/rl/pdfmessages.py:45
+msgid ""
+"Please note: This is only a preview of your book, intended to give an idea "
+"how your book looks. Only the first few articles, as well as the first pages "
+"of the index, of your book are shown in this preview. All articles, even "
+"those left out of the preview, will be included in the final printed book."
+msgstr ""
+"Éling: Iki namung pratayang saka buku Sampéyan kanggo ngawèhi Sampéyan "
+"sawangan ngenani wujud bukuné. Namung sebagéyan artikel wiwitan uga kaca-"
+"kaca wiwitan saka indèks nèng bukuné Sampéyan sing dituduhaké pratayang iki. "
+"Kabèh artikel, masiya ora ana nèng pratayang, tetep bakal kalebu nèng "
+"chitakan pungkasan bukuné."
+
+#: mwlib/rl/pdfmessages.py:47 mwlib/rl/rlwriter.py:535
+#: mwlib/rl/rlwriter.py:853
+msgid "References"
+msgstr "Reperènsi"
+
+#: mwlib/rl/pdfmessages.py:49
+msgid "Appendix"
+msgstr "Lampiran"
+
+#: mwlib/rl/pdfmessages.py:51
+msgid ""
+"The following sections list the sources for all articles and images used in "
+"this book. Those sources provide more detailed licensing information "
+"including the copyright status, the copyright owner, and the license "
+"conditions."
+msgstr ""
+"Bagèyan iki ngadaptar sumber saka kabèh artikel lan gambar kanggo buku iki. "
+"Sumber kuwi mau nyadhiyakaké inpormasi lisensi sing luwih rinci kalebu "
+"status hak cipta, sing nduwé hak cipta, lan kondisi lisènsi."
+
+#: mwlib/rl/pdfmessages.py:53
+msgid ""
+"The sources listed for each article provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Sumber sing kadaptar nèng pendhak artikel nyadhiyakaké rincian luwih ngenani "
+"informasi lisènsi kalebu status hak cipta, sing nduwéni hak cipta, lan "
+"kahanan lisènsi."
+
+#: mwlib/rl/pdfmessages.py:55
+msgid ""
+"The sources listed for each image provide more detailed licensing "
+"information including the copyright status, the copyright owner, and the "
+"license conditions."
+msgstr ""
+"Sumber sing kadaptar nèng pendhak gambar nyadhiyakaké rincian luwih ngenani "
+"informasi lisènsi kalebu status hak cipta, sing nduwéni hak cipta, lan "
+"kahanan lisènsi."
+
+#: mwlib/rl/pdfmessages.py:57 mwlib/rl/rlwriter.py:536
+#: mwlib/rl/rlwriter.py:728
+msgid "Article Sources and Contributors"
+msgstr "Sumber lan Kontributor Artikel"
+
+#: mwlib/rl/pdfmessages.py:59 mwlib/rl/rlwriter.py:539
+#: mwlib/rl/rlwriter.py:747
+msgid "Image Sources, Licenses and Contributors"
+msgstr "Sumber, Lisènsi lan Kontributor Gambar"
+
+#: mwlib/rl/pdfmessages.py:61
+msgid "Image"
+msgstr "Gambar"
+
+#: mwlib/rl/pdfmessages.py:63 mwlib/rl/rlwriter.py:720
+msgid "anonymous edits"
+msgstr "suntingan ora dikenal"
+
+#: mwlib/rl/pdfmessages.py:65
+msgid "Figure"
+msgstr "Angka"
+
+#: mwlib/rl/pdfmessages.py:67
+msgid "See also"
+msgstr "Uga delok"
+
+#: mwlib/rl/pdfstyles.py:90
+msgid ""
+"PDF generated using the open source mwlib toolkit. See http://code."
+"pediapress.com/ for more information."
+msgstr ""
+"PDF kaasilaké mawa piranti mwlib sumber kabuka. Delok http://code.pediapress."
+"com/ kanggo informasi luwihé."
+
+#: mwlib/rl/rlwriter.py:371
+#, python-format
+msgid "mwlib.ext version: %(version)s"
+msgstr "vèrsi mwlib.ext: %(version)s"
+
+#: mwlib/rl/rlwriter.py:377
+#, python-format
+msgid ""
+"mwlib version: %(mwlibversion)s, mwlib.rl version: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+msgstr ""
+"vèrsi mwlib: %(mwlibversion)s, vèrsi mwlib.rl: %(mwlibrlversion)s, "
+"%(mwlibextversion)s"
+
+#: mwlib/rl/rlwriter.py:735 mwlib/rl/rlwriter.py:760
+msgid "Source"
+msgstr "Sumber"
+
+#: mwlib/rl/rlwriter.py:737 mwlib/rl/rlwriter.py:763
+msgid "Contributors"
+msgstr "Kontributor"
+
+#: mwlib/rl/rlwriter.py:753
+msgid "unknown"
+msgstr "ora dingertèni"
+
+#: mwlib/rl/rlwriter.py:755
+msgid "License"
+msgstr "Lisènsi"
+
+#: mwlib/rl/rlwriter.py:843
+#, fuzzy
+msgid ""
+"<strong>WARNING: Article could not be rendered - outputting plain text.</"
+"strong><br/>Potential causes of the problem are: (a) a bug in the pdf-writer "
+"software (b) problematic Mediawiki markup (c) table is too wide"
+msgstr ""
+"<strong>PÈNGETAN: Artikel ora bisa diasilaké - dadiné teks oblong.</"
+"strong><br/>Gara-garané mungkin: (a) ana bug nèng njero piranti alus "
+"panganggit pdf, (b) tenger Mediawiki lagi ana masalah, (c) tabèl kaamban"

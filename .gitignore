@@ -1,3 +1,10 @@
+.DS_Store
+.env
+.envrc
+.idea/
+.mypy_cache
+.ruff_cache
+/cache
 *.so
 *.o
 *.pyc
@@ -8,8 +15,8 @@
 *.orig
 *.rej
 t/*
-ID
-mwlib.egg-info
+/ID
+*.egg-info
 build/
 trunk
 mwlib/*.cc
@@ -20,6 +27,7 @@ bla*
 t.py
 mwlib/templ/evaluate.c
 mwlib/templ/nodes.c
+mwlib/templ/node.c
 /.tox/
 /.ropeproject/
 /dist/
@@ -30,3 +38,10 @@ __pycache__/
 /junit-*.xml
 /.python-version
 .pytest_cache
+venv
+mediawiki/extensions
+mediawiki/images
+mediawiki/math_formulas
+Collection-*.tar.gz
+LocalSettings.php
+cache

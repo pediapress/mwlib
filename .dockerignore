@@ -1,0 +1,12 @@
+**/*.log
+**/__pycache__
+**/*.pyc
+.env*
+.git
+.idea
+.pytest_cache
+.python-version
+.tox
+/mwlib.egg-info
+build
+dist
