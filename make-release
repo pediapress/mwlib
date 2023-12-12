@@ -1,13 +1,12 @@
 #! /usr/bin/env python
 
-import commands
 import os
-import sys
 import subprocess
+import sys
 
 
 def system(cmd, dry_run=False):
-    print "====> Running", cmd
+    print("====> Running", cmd)
     if dry_run:
         return
 
@@ -26,25 +25,26 @@ def system(cmd, dry_run=False):
     st = popen.wait()
     if st != 0:
         sys.exit("Error: command %r failed" % cmd)
-    print
+    print()
 
 
 def main():
     dry_run = "dry" in os.environ
-    st, tags = commands.getstatusoutput("git tag")
+    st, tags = subprocess.getstatusoutput("git tag")
     assert st == 0, "failed to get tags"
     tags = set(tags.split())
     import setup
+
     version = setup.get_version()
 
     assert version not in tags, "already have tagged %s" % version
 
-    print "building version", version
-    st, descr = commands.getstatusoutput("git describe --all --dirty")
+    print("building version", version)
+    st, descr = subprocess.getstatusoutput("git describe --all --dirty")
     assert st == 0
     dirty = "-dirty" in descr
     if dirty:
-        print "working directory is dirty"
+        print("working directory is dirty")
 
     system("tox")
     if not dirty:
@@ -53,7 +53,7 @@ def main():
         system("%s setup.py register" % sys.executable, dry_run)
         system("%s setup.py sdist recompress upload" % sys.executable, dry_run)
     else:
-        print "WARNING: build was dirty. did not upload or tag a release"
+        print("WARNING: build was dirty. did not upload or tag a release")
         sys.exit(1)
 
 
