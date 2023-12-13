@@ -10,7 +10,7 @@ def system(cmd, dry_run=False):
     if dry_run:
         return
 
-    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, encoding="utf-8")
     nl = True
     while True:
         char = popen.stdout.read(1)
@@ -46,7 +46,6 @@ def main():
     if dirty:
         print("working directory is dirty")
 
-    system("tox")
     if not dirty:
         system("git tag %s" % version)
         system("%s setup.py sdist recompress" % sys.executable)
