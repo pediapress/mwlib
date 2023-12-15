@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "Cython", "toml"]
 
 [project]
 name = "mwlib"
-version = "0.17.0"
+version = "0.17.0.post1"
 description = "mediawiki parser and utility library"
 authors = [
     {name = "pediapress.com", email = "info@pediapress.com"}
