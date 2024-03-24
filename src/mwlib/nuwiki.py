@@ -73,6 +73,7 @@ class DumbJsonDB:
             )
         data = self.__dict__.copy()
         del data["database"]
+        print(data)
         return data
 
     def __setstate__(self, data):
