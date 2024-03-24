@@ -847,7 +847,7 @@ class CombinedParser:
 
             need_walker = getattr(parser, "need_walker", True)
             if need_walker:
-                log.info(f"using default token walker for {parser}")
+                log.debug(f"using default token walker for {parser}")
                 walker = default_walker
                 for token in walker(tokens):
                     parser(token, xopts)

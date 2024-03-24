@@ -5,19 +5,20 @@
 
 import contextlib
 import os
+import re
+import shutil
 import sys
 import time
 import traceback
+from hashlib import sha1
 from urllib import parse, request
-import re
+
 import gevent
 import gevent.event
 import gevent.pool
 from gevent.lock import Semaphore
 from lxml import etree
 from sqlitedict import SqliteDict
-from hashlib import sha1
-import shutil
 
 from mwlib import nshandling
 from mwlib.configuration import conf

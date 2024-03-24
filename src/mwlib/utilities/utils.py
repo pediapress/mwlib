@@ -57,8 +57,8 @@ def start_logging(path, stderr_only=False):
         sys.stdout.flush()
     sys.stderr.flush()
 
-    with open(path, "a", encoding="utf-8") as log_file:
-        file_no = log_file.fileno()
+    log_file = open(path, "a", encoding="utf-8")
+    file_no = log_file.fileno()
 
     if not stderr_only:
         os.dup2(file_no, 1)
@@ -438,6 +438,7 @@ def python2sort(iterable, reverse=False):
     if reverse:
         result = reversed(list(result))
     return result
+
 
 def split_tag(txt, flags=re.DOTALL):
     matched_tag = re.match(r" *(\w+)(.*)", txt, flags)

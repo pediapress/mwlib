@@ -4,8 +4,6 @@ import getpass
 import os
 import socket
 import sys
-import traceback
-from io import StringIO
 
 import gevent
 import gevent.monkey
@@ -15,8 +13,8 @@ from mwlib import argv
 from mwlib.asynchronous import slave
 from mwlib.miscellaneous.status import Status
 from mwlib.networking.net.podclient import PODClient
-from mwlib.utilities.utils import send_mail
 from mwlib.utilities.log import root_logger
+from mwlib.utilities.utils import send_mail
 
 logger = root_logger.getChild(__name__)
 CACHE_DIR = "cache"
@@ -112,7 +110,7 @@ def report_exception_mail(subject, exc_info):
     logger.info("sending mail to", mailto)
 
     try:
-        send_mail(mailfrom, [mailto], subject, exception_traceback_buffer.getvalue())
+        send_mail(mailfrom, [mailto], subject, exc_info)
     except Exception as err:
         logger.exception(err)
 

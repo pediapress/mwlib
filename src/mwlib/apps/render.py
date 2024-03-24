@@ -23,7 +23,6 @@ from mwlib.utilities.log import root_logger
 from mwlib.utilities.options import OptionParser
 from mwlib.writerbase import WriterError
 
-
 logger = root_logger.getChild(__name__)
 
 
@@ -65,7 +64,11 @@ class Main:
         )
         arg("-e", "--error-file", help="write errors to this file")
         arg("-s", "--status-file", help="write status/progress info to this file")
-        arg("--list-writers", action="store_true", help="list available writers and exit")
+        arg(
+            "--list-writers",
+            action="store_true",
+            help="list available writers and exit",
+        )
         arg(
             "--writer-info",
             metavar="WRITER",
@@ -89,7 +92,10 @@ class Main:
                 ep for ep in entry_points().get("mwlib.writers", []) if ep.name == name
             )
         except StopIteration:
-            sys.exit("No such writer: %r (use --list-writers to list available writers)" % name)
+            sys.exit(
+                "No such writer: %r (use --list-writers to list available writers)"
+                % name
+            )
         try:
             return entry_point.load()
         except Exception as exc:
@@ -97,7 +103,7 @@ class Main:
 
     def list_writers(self):
         writers = set()
-        for entry_point in entry_points().get('mwlib.writers', []):
+        for entry_point in entry_points().get("mwlib.writers", []):
             try:
                 writer = entry_point.load()
                 if hasattr(writer, "description"):
@@ -105,12 +111,12 @@ class Main:
                 else:
                     description = "<no description>"
             except ImportError as exc:
-                # logger.exception("Could not load writer %r: %s", entry_point.name, exc)
+                logger.exception("Could not load writer %r: %s", entry_point.name, exc)
                 description = "<NOT LOADABLE: %s>" % exc
                 continue
             writers.add((entry_point.name, description))
         print("Available writers:")
-        for (name, description) in sorted(writers):
+        for name, description in sorted(writers):
             print(f"  {name}\t{description}")
 
         sys.exit(0)
@@ -185,10 +191,13 @@ class Main:
                 writer_options[str(key)] = value
         if options.language:
             writer_options["lang"] = options.language
+        options_to_remove = []
         for option in writer_options:
             if option not in getattr(writer, "options", {}):
                 print("Warning: unknown writer option %r" % option)
-                del writer_options[option]
+                options_to_remove.append(option)
+        for option in options_to_remove:
+            del writer_options[option]
 
         return writer, writer_options
 
@@ -205,7 +214,9 @@ class Main:
     def _write_traceback(self, options, exc):
         self.status(status="error")
         if options.error_file:
-            file_descriptor, tmpfile = tempfile.mkstemp(dir=os.path.dirname(options.error_file))
+            file_descriptor, tmpfile = tempfile.mkstemp(
+                dir=os.path.dirname(options.error_file)
+            )
             error_file = os.fdopen(file_descriptor, "wb")
             if isinstance(exc, WriterError):
                 error_file.write(str(exc))
@@ -225,7 +236,9 @@ class Main:
 
         use_help = "Use --help for usage information."
 
-        writer, writer_options = self._get_writer_from_options(options, parser, use_help)
+        writer, writer_options = self._get_writer_from_options(
+            options, parser, use_help
+        )
 
         init_tmp_cleaner()
 
@@ -260,7 +273,10 @@ class Main:
                         env.images.clear()
                 except OSError as exc:
                     if exc.errno != errno.ENOENT:
-                        print("ERROR: Could not remove temporary images: %s" % exc, exc.errno)
+                        print(
+                            "ERROR: Could not remove temporary images: %s" % exc,
+                            exc.errno,
+                        )
 
 
 def main():
