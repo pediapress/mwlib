@@ -1,12 +1,16 @@
 import importlib.metadata
+import logging
 import os
 from pathlib import Path
 
 import toml
 
+logger = logging.getLogger(__name__)
+
 
 def find_pyproject_toml():
-    if os.getenv("MWLIB_PYPROJECT_TOML", None):
+    MWLIB_PYPROJECT_TOML = os.getenv("MWLIB_PYPROJECT_TOML", "")
+    if MWLIB_PYPROJECT_TOML:
         return Path(os.getenv("MWLIB_PYPROJECT_TOML")).resolve()
 
     current_dir = Path(__file__).resolve().parent
@@ -23,7 +27,11 @@ def find_pyproject_toml():
 
 
 def get_version_from_pyproject():
-    with open(find_pyproject_toml(), encoding="utf-8") as file:
+    pyproject_toml_path = find_pyproject_toml()
+    if not pyproject_toml_path:
+        logger.warning("pyproject.toml not found")
+        return "0.0.0"
+    with open(pyproject_toml_path, encoding="utf-8") as file:
         pyproject_data = toml.load(file)
         ver = pyproject_data["project"]["version"]
         return ver
