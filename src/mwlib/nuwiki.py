@@ -72,10 +72,7 @@ class DumbJsonDB:
                 "ERROR: pickling not allowed for zip files. Use unzipped zip file instead"
             )
         data = self.__dict__.copy()
-        try:
-            del data["db"]
-        except KeyError:
-            log.warn("no db attribute found")
+        del data["database"]
         return data
 
     def __setstate__(self, data):
