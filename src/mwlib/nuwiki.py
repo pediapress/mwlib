@@ -72,7 +72,7 @@ class DumbJsonDB:
                 "ERROR: pickling not allowed for zip files. Use unzipped zip file instead"
             )
         data = self.__dict__.copy()
-        del data["db"]
+        del data["database"]
         return data
 
     def __setstate__(self, data):
@@ -151,7 +151,9 @@ class NuWiki:
                 break
             count += 1
             print("reading", file_name)
-            file_content = six.text_type(open(self._pathjoin(file_name), "rb").read(), "utf-8")
+            file_content = six.text_type(
+                open(self._pathjoin(file_name), "rb").read(), "utf-8"
+            )
             pages = file_content.split("\n --page-- ")
 
             for page in pages[1:]:

@@ -6,20 +6,19 @@ import sys
 import gevent
 import gevent.pool
 
-from qs import jobs, rpcserver, misc
+from qs import jobs, misc, rpcserver
 from qs.log import root_logger
-
 
 logger = root_logger.getChild("qserve")
 
 
-class db(object):
+class db:
     def __init__(self):
         self.key2data = {}
         self.workq = jobs.workq()
 
 
-class QPlugin(object):
+class QPlugin:
     def __init__(self, **kw):
         self.running_jobs = {}
 
@@ -33,6 +32,7 @@ class QPlugin(object):
         timeout=None,
         ttl=None,
     ):
+        logger.info(f"add: {channel} {payload!r}")
         jobid = self.workq.push(
             payload=payload,
             priority=priority,
@@ -41,36 +41,38 @@ class QPlugin(object):
             timeout=timeout,
             ttl=ttl,
         )
+        logger.info(f"jobid: {jobid}")
         if not wait:
             return jobid
 
         res = self.workq.waitjobs([jobid])[0]
+        logger.info(f"waited: {res}")
         return res._json()
 
     def rpc_qpull(self, channels=None):
         if not channels:
             channels = []
-
+        logger.info(f"pull {channels}")
         j = self.workq.pop(channels)
         self.running_jobs[j.jobid] = j
-        logger.info(f"pull {j}")
+        logger.info(f"pulled {j}")
         return j._json()
 
     def rpc_qfinish(self, jobid, result=None, error=None, traceback=None):
         if error:
-            logger.error("error finish: %s: %r" % (jobid, error))
+            logger.error(f"error finish: {jobid}: {error!r}")
         else:
-            logger.info("finish: %s: %r" % (jobid, result))
+            logger.info(f"finish: {jobid}: {result!r}")
         self.workq.finishjob(jobid, result=result, error=error)
         if jobid in self.running_jobs:
             del self.running_jobs[jobid]
 
     def rpc_qsetinfo(self, jobid, info):
-        logger.info("setinfo: %s: %r" % (jobid, info))
+        logger.info(f"setinfo: {jobid}: {info!r}")
         self.workq.updatejob(jobid, info)
 
     def rpc_qinfo(self, jobid):
-        logger.info("info: %s" % (jobid,))
+        logger.info(f"info: {jobid}")
         if jobid in self.workq.id2job:
             return self.workq.id2job[jobid]._json()
         return None
@@ -103,7 +105,7 @@ class QPlugin(object):
             self.workq.pushjob(j)
 
 
-class Main(object):
+class Main:
     def __init__(self, port, interface, data_dir, allowed_ips):
         self.port = port
         self.interface = interface
@@ -115,7 +117,7 @@ class Main(object):
         data_dir = self.data_dir
         if data_dir is not None:
             if not os.path.isdir(data_dir):
-                sys.exit("%r is not a directory" % (data_dir,))
+                sys.exit(f"{data_dir!r} is not a directory")
             qpath = os.path.join(data_dir, "workq.pickle")
         else:
             qpath = None
@@ -146,7 +148,7 @@ class Main(object):
     def report(self):
         self.db.workq.report()
         pool = self.server.pool
-        logger.debug ("= %s clients" % len(pool))
+        logger.debug("= %s clients" % len(pool))
         for cl in pool:
             logger.debug(cl)
 
@@ -165,7 +167,7 @@ class Main(object):
             is_allowed=self.is_allowed_ip,
         )
         self.port = s.stream_server.socket.getsockname()[1]
-        logger.info("listening on %s:%s" % (self.interface, self.port))
+        logger.info(f"listening on {self.interface}:{self.port}")
 
         loops = [(self.report, 20), (self.watchdog, 15), (self.handletimeouts, 1)]
         workers = gevent.pool.Pool()
@@ -182,14 +184,21 @@ class Main(object):
 
             bs = backdoor.BackdoorServer(
                 ("localhost", backdoor_port),
-                locals=dict(_main=self, workers=workers, server=s, workq=self.db.workq),
+                locals={
+                    "_main": self,
+                    "workers": workers,
+                    "server": s,
+                    "workq": self.db.workq,
+                },
             )
             bs.banner = "Welcome to qserve!"
             if hasattr(bs, "pre_start"):
                 bs.pre_start()
             else:
                 bs.init_socket()  # gevent >= 1.0b1
-            logger.info("starting backdoor on 127.0.0.1:%s" % bs.socket.getsockname()[1])
+            logger.info(
+                "starting backdoor on 127.0.0.1:%s" % bs.socket.getsockname()[1]
+            )
             bs.start()
 
         try:
@@ -250,9 +259,12 @@ def parse_options(argv=None):
             usage()
             sys.exit(0)
 
-    return dict(
-        port=port, interface=interface, data_dir=data_dir, allowed_ips=allowed_ips
-    )
+    return {
+        "port": port,
+        "interface": interface,
+        "data_dir": data_dir,
+        "allowed_ips": allowed_ips,
+    }
 
 
 def main(argv=None):

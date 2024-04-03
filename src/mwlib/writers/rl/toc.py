@@ -27,7 +27,7 @@ class TocRenderer:
         tocpath = os.path.join(outpath, "toc.pdf")
         finalpath = os.path.join(outpath, "final.pdf")
         self.render_toc(tocpath, toc_entries, rtl=rtl)
-        return self.comine_pdfs(pdfpath, tocpath, finalpath, has_title_page)
+        return self.combine_pdfs(pdfpath, tocpath, finalpath, has_title_page)
 
     def _get_col_widths(self):
         paragraph = Paragraph(
@@ -111,7 +111,7 @@ class TocRenderer:
         cmd.extend(["-o", finalpath, "-overwrite", "concat"])
         return self.run_cmd(cmd)
 
-    def comine_pdfs(self, pdfpath, tocpath, finalpath, has_title_page):
+    def combine_pdfs(self, pdfpath, tocpath, finalpath, has_title_page):
         if os.path.splitext(pdfpath)[1] == ".pdf":
             safe_pdfpath = pdfpath
         else:

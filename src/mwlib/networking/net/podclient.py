@@ -1,12 +1,11 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
-
+import http.client
 import os
 import time
-import requests
-
 import urllib.parse
-import http.client
+
+import requests
 
 try:
     import simplejson as json
@@ -114,7 +113,7 @@ class PODClient:
         response = http_data.getresponse()
         status_code = response.status
         reason = response.reason
-        headers = response.getheaders() 
+        headers = response.getheaders()
         print("Response:", (status_code, reason, headers))
         if status_code != 200:
             raise RuntimeError(f"Upload failed: {reason!r}")
@@ -131,9 +130,5 @@ class PODClient:
 
 
 def podclient_from_serviceurl(serviceurl):
-    result = json.loads(
-        six.text_type(
-            six.moves.urllib.request.urlopen(serviceurl, data="any").read(), "utf-8"
-        )
-    )
-    return PODClient(result["post_url"], redirecturl=result["redirect_url"])
+    response = requests.post(serviceurl, data="any".encode("utf-8")).json()
+    return PODClient(response["post_url"], redirecturl=response["redirect_url"])

@@ -10,8 +10,9 @@ We're thrilled to announce the release of mwlib version 0.17.0, a significant st
 
 ### Features and Improvements
 - **Ploticus Dependency Removed:** Transitioned to using PNG images from HTML for a more streamlined experience.
--  **Docker Compose Examples Added:** Easy-to-follow Docker Compose examples for quick setup and integration.
+- **Docker Compose Examples Added:** Easy-to-follow Docker Compose examples for quick setup and integration.
 - **Local MediaWiki Instance Setup:** Instructions on setting up mwlib with a local MediaWiki instance for seamless integration.
+- **Integrated Dependencies:** The [qserve](https://github.com/pediapress/qserve) and [mwlib.rl](https://github.com/pediapress/mwlib.rl) libraries are now integrated into core mwlib for a more straightforward development process and easier setup.   
 
 
 ### Code Quality and Security

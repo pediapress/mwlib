@@ -7,7 +7,18 @@ try:
 except ImportError:
     import json
 
-from gevent import pool, server as gserver, Greenlet, getcurrent, queue, spawn, GreenletExit
+from gevent import (
+    Greenlet,
+    GreenletExit,
+    getcurrent,
+    pool,
+    queue,
+    spawn,
+)
+from gevent import (
+    server as gserver,
+)
+
 from qs.log import root_logger
 
 logger = root_logger.getChild(__name__)
@@ -55,7 +66,9 @@ class ClientGreenlet(Greenlet):
 
 
 class Server:
-    def __init__(self, port=8080, host="", get_request_handler=None, secret=None, is_allowed=None):
+    def __init__(
+        self, port=8080, host="", get_request_handler=None, secret=None, is_allowed=None
+    ):
         self.port = port
         self.host = host
         self.secret = secret
@@ -109,9 +122,11 @@ class Server:
             readgr = spawn(readlines)
             readgr.link(lambda _: current.kill())
             current.link(lambda _: readgr.kill())
-            handle_request = self.get_request_handler(client=(sock, addr), clientid=clientid)
+            handle_request = self.get_request_handler(
+                client=(sock, addr), clientid=clientid
+            )
 
-            self.log("+connect: %s" % (clientid, ))
+            self.log("+connect: %s" % (clientid,))
 
             while 1:
                 current.status = "idle"
@@ -122,17 +137,17 @@ class Server:
                 try:
                     req = json.loads(line)
                 except ValueError as err:
-                    self.log("+protocol error %s: %s" % (clientid, err))
+                    self.log(f"+protocol error {clientid}: {err}")
                     break
 
                 current.status = "dispatching: %s" % line[:-1]
                 try:
                     d = handle_request(req)
-                    response = json.dumps(dict(result=d)) + "\n"
+                    response = json.dumps({"result": d}) + "\n"
                 except GreenletExit:
                     raise
                 except Exception as err:
-                    response = json.dumps(dict(error=str(err))) + "\n"
+                    response = json.dumps({"error": str(err)}) + "\n"
                     logger.exception(err)
 
                 current.status = "sending response: %s" % response[:-1]

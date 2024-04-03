@@ -13,6 +13,7 @@ from io import StringIO
 
 import gevent.monkey
 import pkg_resources
+import requests
 import six.moves.urllib.error
 import six.moves.urllib.parse
 import six.moves.urllib.request
@@ -183,12 +184,15 @@ def choose_idle_qserve():
 
 @route("/cache/:filename#.*#")
 def server_static(filename):
-    log.info("serving %r xd", filename)
-    print("serving", filename, " from ", '/app/cache')
-    response = static_file(filename, root='/app/cache', mimetype="application/octet-stream")
+    log.info("serving %r", filename)
+    print("serving", filename, " from ", "/app/cache")
+    response = static_file(
+        filename, root="/app/cache", mimetype="application/octet-stream"
+    )
     if filename.endswith(".rl"):
         response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
     return response
+
 
 @get("<path:re:.*>")
 @post("<path:re:.*>")
@@ -240,7 +244,6 @@ class Application:
             raise HTTPResponse("no command given", status=400)
 
         log.info(vars(request.params))
-
         try:
             method = getattr(self, "do_%s" % command)
         except AttributeError:
@@ -482,14 +485,8 @@ class Application:
 
         pod_api_url = params.pod_api_url
         if pod_api_url:
-            result = json.loads(
-                six.text_type(
-                    six.moves.urllib.request.urlopen(
-                        pod_api_url, data="any".encode("utf-8")
-                    ).read(),
-                    "utf-8",
-                )
-            )
+            response = requests.post(pod_api_url, data="any".encode("utf-8"))
+            result = response.json()
             post_url = result["post_url"].encode("utf-8")
             response = {
                 "state": "ok",
@@ -525,7 +522,6 @@ def _parse_qs(q_serve):
 
 def main():
     from mwlib import argv
-
     opts, args = argv.parse(
         sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface="
     )

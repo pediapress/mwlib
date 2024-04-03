@@ -245,15 +245,19 @@ def make_cachedir(cachedir):
         p = os.path.join(cachedir, hex(i)[3:])
         if not os.path.isdir(p):
             os.mkdir(p)
-            
+
+
 @route("/cache/:filename#.*#")
 def server_static(filename):
     logger.info("serving %r xdfd", filename)
-    print("serving", filename, " from ", '/app/cache')
-    response = static_file(filename, root='/app/cache', mimetype="application/octet-stream")
+    print("serving", filename, " from ", "/app/cache")
+    response = static_file(
+        filename, root="/app/cache", mimetype="application/octet-stream"
+    )
     if filename.endswith(".rl"):
         response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
     return response
+
 
 def main():
     global CACHE_DIR, CACHE_URL
