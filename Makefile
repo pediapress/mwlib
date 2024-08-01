@@ -87,10 +87,10 @@ docker-py27-test::
 
 # Directory for extensions
 EXTENSIONS_DIR := ./mediawiki/extensions
-# MediaWiki Collection extension tarball URL
-COLLECTION_URL := https://extdist.wmflabs.org/dist/extensions/Collection-REL1_39-55a940a.tar.gz   
 # Collection tarball file name
-COLLECTION_TAR := Collection-REL1_39-55a940a.tar.gz   
+COLLECTION_TAR := Collection-REL1_39-73539ac.tar.gz    
+# MediaWiki Collection extension tarball URL
+COLLECTION_URL := https://extdist.wmflabs.org/dist/extensions/$(COLLECTION_TAR) 
 # LocalSettings backup file
 LOCAL_SETTINGS_BAK := ./LocalSettings.php.bak
 # Docker container name for MariaDB
