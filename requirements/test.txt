@@ -6,21 +6,21 @@
 #    pip-compile-multi
 #
 -r base.txt
-exceptiongroup==1.2.0
+exceptiongroup==1.2.2
     # via pytest
-execnet==2.0.2
+execnet==2.1.1
     # via pytest-xdist
 iniconfig==2.0.0
     # via pytest
-packaging==24.0
+packaging==24.1
     # via pytest
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
-pytest==8.1.1
+pytest==8.3.2
     # via
     #   -r requirements/test.in
     #   pytest-xdist
-pytest-xdist==3.5.0
+pytest-xdist==3.6.1
     # via -r requirements/test.in
 tomli==2.0.1
     # via pytest

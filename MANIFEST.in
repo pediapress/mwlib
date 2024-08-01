@@ -31,6 +31,7 @@ include docs/writers.rst
 include mediawiki/.gitkeep
 include mw-post
 include mwlib/_uscan.cc
+include nginx/default.conf
 include pyproject.toml
 include pytest.ini
 include requirements/base.in
