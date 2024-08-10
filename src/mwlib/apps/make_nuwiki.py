@@ -54,6 +54,7 @@ class StartFetcher:
 
         fsout.nfo = nfo
         pages = fetch.pages_from_metabook(metabook)
+        print("APIIIIIIIIII", api)
         self.fetcher = fetch.Fetcher(
             api,
             fsout,
