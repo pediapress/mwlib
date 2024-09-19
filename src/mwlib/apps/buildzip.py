@@ -18,8 +18,6 @@ from mwlib.apps.utils import build_parser, create_nuwiki, create_zip_from_wiki_e
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utilities import utils
 
-monkey.patch_all(thread=False)
-
 
 def _walk(root):
     retval = []
@@ -93,6 +91,7 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
 
 
 def main():
+    monkey.patch_all(thread=False)
     parser, options, use_help = build_parser()
 
     pod_client = _init_pod_client(options, parser, use_help)
