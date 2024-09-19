@@ -871,7 +871,7 @@ def _create(tokens, i, start, state):
 
 def mark_style_tags(tokens, xopts):  # pylint: disable=unused-argument
     tags = set(
-        "abbr tt strike ins del small sup sub b strong cite i u em big font s var kbd".split()
+        "mapframe abbr tt strike ins del small sup sub b strong cite i u em big font s var kbd".split()
     )
 
     todo = [(0, {}, tokens)]

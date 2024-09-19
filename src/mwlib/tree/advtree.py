@@ -621,6 +621,10 @@ class Abbreviation(TagNode, AdvancedNode):
     _tag = "abbr"
 
 
+class MapFrame(TagNode, AdvancedNode):
+    _tag = "mapframe"
+
+
 _tagNodeMap = {
     k._tag: k
     for k in [
@@ -639,6 +643,7 @@ _tagNodeMap = {
         ImageMap,
         Index,
         Inserted,
+        MapFrame,
         Reference,
         ReferenceList,
         Ruby,
@@ -687,6 +692,7 @@ _blockNodes = (
     Indented,
     Item,
     ItemList,
+    MapFrame,
     Paragraph,
     PreFormatted,
     ReferenceList,

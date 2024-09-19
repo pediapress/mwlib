@@ -228,7 +228,7 @@ class CompatScanner:
             """
 abbr b big blockquote br center cite code del div em endfeed font h1 h2 h3
 h4 h5 h6 hr i index inputbox ins kbd li ol p pages references rss s small span
-startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
+startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd mapframe 
 """.split()
         )
 
