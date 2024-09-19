@@ -12,9 +12,13 @@ import time
 import webbrowser
 import zipfile
 
+from gevent import monkey
+
 from mwlib.apps.utils import build_parser, create_nuwiki, create_zip_from_wiki_env
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utilities import utils
+
+monkey.patch_all(thread=False)
 
 
 def _walk(root):
@@ -39,7 +43,7 @@ def zip_dir(dirname, output=None, skip_ext=None):
     for i in _walk(dirname):
         if skip_ext and os.path.splitext(i)[1] == skip_ext:
             continue
-        zip_file.write(i, i[len(dirname) + 1:])
+        zip_file.write(i, i[len(dirname) + 1 :])
     zip_file.close()
 
 
@@ -111,9 +115,7 @@ def _init_pod_client(options, parser, use_help):
     if options.posturl and options.getposturl:
         parser.error("Specify either --posturl or --getposturl.\n" + use_help)
     if not options.posturl and not options.getposturl and not options.output:
-        parser.error(
-            "Neither --output, nor --posturl or --getposturl specified.\n" + use_help
-        )
+        parser.error("Neither --output, nor --posturl or --getposturl specified.\n" + use_help)
     if options.posturl:
         pod_client = PODClient(options.posturl)
     elif options.getposturl:
