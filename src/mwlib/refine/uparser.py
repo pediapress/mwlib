@@ -65,9 +65,10 @@ def parse_string(
     template_expander = uniquifier = siteinfo = None
     if title is None:
         raise ValueError("no title given")
+
     if raw is None and wikidb is None:
         raise ValueError("no raw text or wikidb given")
-    raw = raw if raw else get_article_raw_text(wikidb, title)
+    raw = raw if raw is not None else get_article_raw_text(wikidb, title)
     if raw is None:
         raise ValueError(f"cannot get article {title!r}")
     _input = raw
