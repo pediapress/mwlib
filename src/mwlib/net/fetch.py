@@ -93,8 +93,7 @@ class FsOutput:
         if os.path.exists(self.path):
             raise ValueError(f"output path exists: {self.path}")
         os.makedirs(os.path.join(self.path, "images"))
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w",
-                            encoding="utf8")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")
         self.seen = {}
         self.imgcount = 0
         self.nfo = None
@@ -107,8 +106,7 @@ class FsOutput:
             setattr(self, storage, database)
 
     def open_rev_file_for_reading(self):
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "r",
-                            encoding="utf8")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "r", encoding="utf8")
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
@@ -140,7 +138,9 @@ class FsOutput:
         return path
 
     def copy_image(self, image_to_be_copied, new_image_name):
-        image_to_be_copied_path = os.path.join(self.path, "images", f"{utils.fs_escape(image_to_be_copied)}")
+        image_to_be_copied_path = os.path.join(
+            self.path, "images", f"{utils.fs_escape(image_to_be_copied)}"
+        )
         new_image_path = os.path.join(self.path, "images", f"{utils.fs_escape(new_image_name)}")
         shutil.copyfile(image_to_be_copied_path, new_image_path)
 
@@ -192,8 +192,7 @@ class FsOutput:
                         rev["revid"] = revid
                     self.seen[title] = rev
 
-                    header = "\n --page-- %s\n" % json.dumps(rev,
-                                                              sort_keys=True)
+                    header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
                     self.revfile.write(header)
                     self.revfile.write(txt)
 
@@ -215,7 +214,7 @@ def split_blocks(lst, limit):
     res = []
     start = 0
     while start < len(lst):
-        res.append(lst[start: start + limit])
+        res.append(lst[start : start + limit])
         start += limit
     return res
 
@@ -270,16 +269,16 @@ def download_to_file(url, path, temp_path):
 
 class Fetcher:
     def __init__(
-            self,
-            api,
-            fsout,
-            pages,
-            licenses,
-            status=None,
-            progress=None,
-            cover_image=None,
-            imagesize=800,
-            fetch_images=True,
+        self,
+        api,
+        fsout,
+        pages,
+        licenses,
+        status=None,
+        progress=None,
+        cover_image=None,
+        imagesize=800,
+        fetch_images=True,
     ):
         self.dispatch_event = gevent.event.Event()
         self.api_semaphore = Semaphore(20)
@@ -348,8 +347,7 @@ class Fetcher:
 
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
-            action="query", prop="revisions", rvprop="content",
-            revids=str(revid)
+            action="query", prop="revisions", rvprop="content", revids=str(revid)
         )
         page = list(res["pages"].values())[0]
 
@@ -375,8 +373,7 @@ class Fetcher:
 
         text = "{{:%s}}" % title if nsnum == 0 else "{{%s}}" % title
 
-        res = self.api.do_request(action="expandtemplates", title=title,
-                                  text=text)
+        res = self.api.do_request(action="expandtemplates", title=title, text=text)
         txt = res.get("*")
         if txt:
             self.fsout.write_expanded_page(title, nsnum, txt)
@@ -384,8 +381,7 @@ class Fetcher:
 
     def run(self):
         self.report()
-        dispatch_gr = gevent.spawn(call_when, self.dispatch_event,
-                                   self.dispatch)
+        dispatch_gr = gevent.spawn(call_when, self.dispatch_event, self.dispatch)
         try:
             self.pool.join()
         finally:
@@ -395,26 +391,27 @@ class Fetcher:
         self._save_timeline_info()
         if self.imageinfo_todo or self.revids_todo or self.pages_todo:
             raise ValueError("not all items processed")
-        
+
     def _save_timeline_info(self):
         html_content_pages = self.fsout.get_db_keys("html")
-        
-        
+
         for page in html_content_pages:
             txt = self.read_page_by_title(page)
             rev_timeline_tag_contents = self.find_timeline_tags_from_rev_content(txt)
-            
+
             html_content = self.fsout.get_db_key("html", page)
             image_nodes = self._get_timeline_images(html_content)
             timeline_image_urls = self.timeline_image_urls(image_nodes)
-            
-            for (url, rev_timeline_tag_content) in zip(timeline_image_urls, rev_timeline_tag_contents):
+
+            for url, rev_timeline_tag_content in zip(
+                timeline_image_urls, rev_timeline_tag_contents
+            ):
                 filename = url.rsplit("/", 1)[1]
                 digest = self.calculate_hash_from_timeline_content(rev_timeline_tag_content)
                 filename_extension = filename.rsplit(".", 1)[1]
                 title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.fsout.copy_image(title, f"{digest}.{filename_extension}")
-    
+
     def read_page_by_title(self, target_title):
         self.fsout.open_rev_file_for_reading()
         rev_file_content = self.fsout.revfile.read()
@@ -434,7 +431,7 @@ class Fetcher:
     def find_timeline_tags_from_rev_content(self, content):
         if not content:
             return []
-        return re.findall(r'<timeline>(.*?)<\/timeline>', content, re.DOTALL)
+        return re.findall(r"<timeline>(.*?)<\/timeline>", content, re.DOTALL)
 
     def extension_img_urls(self, image_nodes):
         img_urls = set()
@@ -444,7 +441,7 @@ class Fetcher:
             if len(frags):
                 full_url = parse.urljoin(self.api.baseurl, src)
                 if img_node.get("class") != "thumbimage" and (
-                        "extensions" in src or "math" in src
+                    "extensions" in src or "math" in src
                 ):
                     img_urls.add(full_url)
         return img_urls
@@ -458,12 +455,12 @@ class Fetcher:
                 full_url = parse.urljoin(self.api.baseurl, src)
                 img_urls.add(full_url)
         return img_urls
-    
+
     def _get_image_nodes(self, data):
         html = data["text"]["*"]
         root = etree.HTML(html)
         return root.xpath(".//img")
-    
+
     def _get_timeline_images(self, data):
         html = data["text"]["*"]
         root = etree.HTML(html)
@@ -497,8 +494,7 @@ class Fetcher:
         blocks = split_blocks(lst, limit)
         self.count_total += len(blocks)
         for block in blocks:
-            pool.add(self._refcall_noinc(self.fetch_used_block,
-                                         name, block, expanded))
+            pool.add(self._refcall_noinc(self.fetch_used_block, name, block, expanded))
         pool.join()
 
         if conf.noedits:
@@ -511,8 +507,7 @@ class Fetcher:
             self._refcall_noinc(self.get_edits, title, rev)
 
     def fetch_used_block(self, name, lst, expanded):
-        kwargs = {name: lst, "fetch_images": self.fetch_images,
-              "expanded": expanded}
+        kwargs = {name: lst, "fetch_images": self.fetch_images, "expanded": expanded}
         used = self.api.fetch_used(**kwargs)
 
         self._update_redirects(used.get("redirects", []))
@@ -583,7 +578,9 @@ class Fetcher:
         query_count = self.api.qccount
 
         limit = self.api.api_request_limit
-        job_total = self.count_total + len(self.pages_todo) // limit + len(self.revids_todo) // limit
+        job_total = (
+            self.count_total + len(self.pages_todo) // limit + len(self.revids_todo) // limit
+        )
         job_total += len(self.title2latest)
 
         self.progress.set_count(self, self.count_done + query_count, job_total + query_count)
@@ -663,13 +660,11 @@ class Fetcher:
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
         temp_path = (path + "\xb7").encode("utf-8")
-        greenlet_task = self.image_download_pool.spawn(download_to_file, url, path,
-                                            temp_path)
+        greenlet_task = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
         self.pool.add(greenlet_task)
 
     def fetch_imageinfo(self, titles):
-        data = self.api.fetch_imageinfo(titles=titles,
-                                        iiurlwidth=self.imagesize)
+        data = self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize)
         infos = list(data.get("pages", {}).values())
         new_base_paths = set()
 
@@ -685,8 +680,7 @@ class Fetcher:
         for path in new_base_paths:
             self._refcall(self.handle_new_basepath, path)
 
-    def _extract_info_from_image(self, image, imageinfo,
-                                 new_base_paths, title):
+    def _extract_info_from_image(self, image, imageinfo, new_base_paths, title):
         self.fsout.set_db_key("imageinfo", title, imageinfo)
         thumb_url = imageinfo.get("thumburl", None)
         if thumb_url is None:  # fallback for old mediawikis
@@ -819,7 +813,7 @@ class Fetcher:
             self.scheduled.update(block)
             self._refcall(self.fetch_imageinfo, block)
         self._doit("revids", self.revids_todo, limit)
-        self._doit("titles", self.pages_todo, limit)        
+        self._doit("titles", self.pages_todo, limit)
         self.report()
 
     def _sanity_check(self):
@@ -829,7 +823,10 @@ class Fetcher:
                 continue
 
             fully_qualified_name = self.nshandler.get_fqname(title)
-            if fully_qualified_name in seen or self.redirects.get(fully_qualified_name, fully_qualified_name) in seen:
+            if (
+                fully_qualified_name in seen
+                or self.redirects.get(fully_qualified_name, fully_qualified_name) in seen
+            ):
                 continue
             print(f"WARNING: {title, revid} could not be fetched")
 
