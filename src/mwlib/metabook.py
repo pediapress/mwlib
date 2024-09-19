@@ -169,6 +169,12 @@ class Interwiki(MbObj):
     local = False
 
 
+class custom(MbObj):
+    title=None
+    content=None
+    content_type='text/x-wiki'
+
+
 class article(MbObj):
     title = None
     displaytitle = None
