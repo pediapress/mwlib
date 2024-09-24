@@ -4,6 +4,7 @@
 import os
 import shutil
 import tempfile
+import urllib
 import zipfile
 from hashlib import sha256
 
@@ -214,7 +215,7 @@ class NuWiki:
     def normalize_and_get_image_path(self, name):
         if not isinstance(name, six.string_types):
             raise ValueError("name must be a string")
-        name = six.text_type(name)
+        name = urllib.parse.unquote(six.text_type(name))
         namespace, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if namespace != 6:
             return
