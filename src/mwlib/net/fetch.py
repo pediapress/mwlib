@@ -345,6 +345,10 @@ class Fetcher:
         for rev_id in revids:
             self._refcall(self.expand_templates_from_revid, int(rev_id))
 
+        # store revisions in memory for later use
+        # KLUDGE: in memory storage might fail for very large collections
+        self.revisions = []
+
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
             action="query", prop="revisions", rvprop="content", revids=str(revid)
@@ -396,11 +400,11 @@ class Fetcher:
         html_content_pages = self.fsout.get_db_keys("html")
 
         for page in html_content_pages:
-            txt = self.read_page_by_title(page)
+            txt = self.find_source_by_title_or_revid(page)
             rev_timeline_tag_contents = self.find_timeline_tags_from_rev_content(txt)
 
             html_content = self.fsout.get_db_key("html", page)
-            image_nodes = self._get_timeline_images(html_content)
+            image_nodes = self._get_timeline_image_nodes(html_content)
             timeline_image_urls = self.timeline_image_urls(image_nodes)
 
             for url, rev_timeline_tag_content in zip(
@@ -412,18 +416,21 @@ class Fetcher:
                 title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.fsout.copy_image(title, f"{digest}.{filename_extension}")
 
-    def read_page_by_title(self, target_title):
-        self.fsout.open_rev_file_for_reading()
-        rev_file_content = self.fsout.revfile.read()
-        pages = rev_file_content.split("\n --page-- ")
-        for page in pages[1:]:
-            header, txt = page.split("\n", 1)
-            rev = json.loads(header)
-            if rev["title"] == target_title:
-                self.fsout.revfile.close()
-                return txt
-        self.fsout.revfile.close()
-        return None
+    def find_source_by_title_or_revid(self, title_or_revid):
+        title = int(title_or_revid) if title_or_revid.isdigit() else title_or_revid
+        if not self.revisions:
+            self.fsout.open_rev_file_for_reading()
+            rev_file_content = self.fsout.revfile.read()
+            pages = rev_file_content.split("\n --page-- ")
+            for page in pages[1:]:
+                header, txt = page.split("\n", 1)
+                rev = json.loads(header)
+                rev["text"] = txt
+                self.revisions.append(rev)
+            self.fsout.revfile.close()
+        result = [r for r in self.revisions if r.get("title") == title or r.get("revid") == title]
+        if result:
+            return result[0]["text"]
 
     def calculate_hash_from_timeline_content(self, timeline_content):
         return sha1(timeline_content.encode("utf-8")).hexdigest()
@@ -461,7 +468,7 @@ class Fetcher:
         root = etree.HTML(html)
         return root.xpath(".//img")
 
-    def _get_timeline_images(self, data):
+    def _get_timeline_image_nodes(self, data):
         html = data["text"]["*"]
         root = etree.HTML(html)
         return root.xpath(".//div[contains(@class, 'timeline-wrapper')]/img")
@@ -475,7 +482,7 @@ class Fetcher:
 
             self.fsout.set_db_key("html", content, res)
             image_nodes = self._get_image_nodes(res)
-            timeline_nodes = self._get_timeline_images(res)
+            timeline_nodes = self._get_timeline_image_nodes(res)
             img_urls = self.extension_img_urls(image_nodes)
             timeline_image_urls = self.timeline_image_urls(timeline_nodes)
             all_urls = list(set(list(img_urls) + list(timeline_image_urls)))
