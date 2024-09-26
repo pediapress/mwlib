@@ -58,7 +58,7 @@ class Main:
         arg("-o", "--output", help="write output to OUTPUT")
         arg("-w", "--writer", help="use writer backend WRITER")
         arg(
-            "-W",
+            "-y",
             "--writer-options",
             help='";"-separated list of additional writer-specific options',
         )
