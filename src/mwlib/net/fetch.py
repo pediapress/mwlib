@@ -4,6 +4,7 @@
 # See README.rst for additional licensing information.
 
 import contextlib
+import logging
 import os
 import re
 import shutil
@@ -26,6 +27,7 @@ from mwlib.net import sapi as mwapi
 from mwlib.utilities import myjson as json
 from mwlib.utilities import utils
 
+logger = logging.getLogger(__name__)
 
 class SharedProgress:
     status = None
@@ -256,11 +258,11 @@ def download_to_file(url, path, temp_path):
             if out is None:
                 out = open(temp_path, "wb")
             out.write(data)
-
+        logger.debug(f"read {size_read} bytes from {url}")
         if out is not None:
             out.close()
             os.rename(temp_path, path)
-        print(f"read {size_read} bytes from {url}")
+
 
     except Exception as err:
         print("ERROR DOWNLOADING", url, err)
