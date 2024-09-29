@@ -4,7 +4,7 @@ import os
 import time
 import traceback
 
-import six.moves.cPickle
+import pickle
 
 from mwlib import utils
 from mwlib.utilities.log import Log
@@ -24,7 +24,7 @@ class FileJobQueuer:
             return
 
         with open(job_filename + ".tmp", "wb") as job_file:
-            job_file.write(six.moves.cPickle.dumps(args))
+            job_file.write(pickle.dumps(args))
         os.rename(job_filename + ".tmp", job_filename)
 
 
@@ -105,7 +105,7 @@ class FileJobPoller:
         src = os.path.join(self.queue_dir, filename)
         try:
             with open(src, "rb") as job_file:
-                args = six.moves.cPickle.loads(job_file.read())
+                args = pickle.loads(job_file.read())
         finally:
             os.unlink(src)
 

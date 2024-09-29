@@ -4,9 +4,6 @@
 # See README.rst for additional licensing information.
 
 
-
-
-import six
 from pyparsing import (
     And,
     Group,
@@ -65,8 +62,9 @@ def _make_poly(tokens):
 
 def _make_rect(tokens):
     return Rect(
-        caption=tokens[-1].strip(), top_left=tuple(tokens[1]),
-        bottom_right=tuple(tokens[2])
+        caption=tokens[-1].strip(),
+        top_left=tuple(tokens[1]),
+        bottom_right=tuple(tokens[2]),
     )
 
 
@@ -85,7 +83,7 @@ def _make_desc(tokens):
 def _make_imagemap(tokens):
     image = None
     for token in tokens:
-        if isinstance(token, six.string_types):
+        if isinstance(token, str):
             image = token
             break
     return ImageMap(entries=list(tokens), image=image)
@@ -94,7 +92,9 @@ def _make_imagemap(tokens):
 comment = (Literal("#") + restOfLine).setParseAction(_make_comment)
 
 INTEGER = Word(nums).setParseAction(lambda single_number: int(single_number[0]))
-INTEGER_PAIR = (INTEGER + INTEGER).setParseAction(lambda pair_of_numbers: tuple(pair_of_numbers))
+INTEGER_PAIR = (INTEGER + INTEGER).setParseAction(
+    lambda pair_of_numbers: tuple(pair_of_numbers)
+)
 
 POLY = Literal("poly") + Group(ZeroOrMore(INTEGER_PAIR)) + restOfLine
 POLY = POLY.setParseAction(_make_poly)

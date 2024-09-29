@@ -16,7 +16,6 @@ More Info:
 import sys
 
 import odf
-import six
 from odf import dc, draw, element, math, meta, table, text
 from odf.opendocument import OpenDocumentText
 
@@ -193,7 +192,7 @@ class ODFWriter:
                 self.res = []
 
             def write(self, txt):
-                if isinstance(txt, six.text_type):
+                if isinstance(txt, str):
                     self.res.append(str(txt))
                 else:
                     self.res.append(txt)
@@ -861,7 +860,7 @@ def main():
     for filename in sys.argv[1:]:
         database = DummyDB()
         with open(filename) as input_file:
-            text_input = six.text_type(input_file.read(), "utf8")
+            text_input = str(input_file.read(), "utf8")
         parsed_string = parse_string(title=filename, raw=text_input, wikidb=database)
         preprocess(parsed_string)
         parser.show(sys.stdout, parsed_string)

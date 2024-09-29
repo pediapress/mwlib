@@ -10,8 +10,6 @@ import warnings
 from collections import deque
 from hashlib import sha256
 
-import six
-
 from mwlib.parser.parse_collection_page import parse_collection_page as _parse_collection_page
 from mwlib.utilities import myjson, utils
 
@@ -242,7 +240,7 @@ def get_wiki_text_from_url(license_to_check):
     )
     if wikitext:
         try:
-            wikitext = six.text_type(wikitext, "utf-8")
+            wikitext = str(wikitext, "utf-8")
         except UnicodeError:
             wikitext = None
     return wikitext

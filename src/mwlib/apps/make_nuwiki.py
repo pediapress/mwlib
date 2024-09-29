@@ -3,13 +3,10 @@
 
 import contextlib
 import os
+import urllib.parse
 
 import gevent
 import gevent.pool
-import six
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
 
 from mwlib.metabook import collection, get_licenses, parse_collection_page
 from mwlib.net import fetch
@@ -89,7 +86,7 @@ class StartFetcher:
             return api
 
         with contextlib.suppress(Exception):
-            collection_page = six.text_type(six.moves.urllib.parse.unquote(str(collection_page)),
+            collection_page = str(urllib.parse.unquote(str(collection_page)),
                                             "utf-8")
 
         self.nfo["collectionpage"] = collection_page
@@ -119,7 +116,7 @@ class StartFetcher:
         meta_book.sort_as = meta["sort_as"]
 
         path = os.path.join(self.fsout.path, "collectionpage.txt")
-        if isinstance(rawtext, six.text_type):
+        if isinstance(rawtext, str):
             rawtext = rawtext.encode("utf-8")
         with open(path, "wb") as file:
             file.write(rawtext)
@@ -151,7 +148,7 @@ def wikitrust(baseurl, metabook):
             continue
 
         try:
-            rev = trust_revisions.get_trusted_revision(x.title)
+            rev = trust_revisions.get_trusted_revision(article.title)
             article.revision = rev["revid"]
 
             print(

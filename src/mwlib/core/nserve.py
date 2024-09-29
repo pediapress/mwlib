@@ -8,15 +8,14 @@ import sys
 import traceback
 import unicodedata
 import urllib
+import urllib.parse
+import urllib.request
 from hashlib import sha256
 from io import StringIO
 
 import gevent.monkey
 import pkg_resources
 import requests
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
 from bottle import HTTPResponse, default_app, get, post, request, route, static_file
 from gevent import pool, pywsgi
 from qs.misc import CallInLoop
@@ -203,7 +202,7 @@ def dispatch_command(path):
 
 def get_content_disposition_values(filename, _):
     if isinstance(filename, str):
-        filename = six.text_type(filename)
+        filename = str(filename)
 
     if filename:
         filename = filename.strip()
@@ -304,7 +303,7 @@ class Application:
         return collection_id
 
     def is_good_baseurl(self, url):
-        netloc = six.moves.urllib.parse.urlparse(url)[1].split(":")[0].lower()
+        netloc = urllib.parse.urlparse(url)[1].split(":")[0].lower()
         if (
             netloc == "localhost"
             or netloc.startswith("127.0.")
@@ -447,7 +446,7 @@ class Application:
         download_url = res["result"]["url"]
 
         print("fetching", download_url)
-        downloaded_file = six.moves.urllib.request.urlopen(download_url).info()
+        downloaded_file = urllib.request.urlopen(download_url).info()
         info = downloaded_file.info()
 
         header = {}

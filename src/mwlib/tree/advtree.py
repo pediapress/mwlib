@@ -26,8 +26,6 @@ import copy
 import re
 import sys
 
-import six
-
 from mwlib import parser
 from mwlib.database import dummydb
 from mwlib.database.dummydb import DummyDB
@@ -302,12 +300,12 @@ class AdvancedNode:
             return min_val
 
     def _ensure_unicode(self, val):
-        if isinstance(val, six.text_type):
+        if isinstance(val, str):
             return val
         if isinstance(val, str):
-            return six.text_type(val, "utf-8")
+            return str(val, "utf-8")
         try:
-            return six.text_type(val)
+            return str(val)
         except BaseException:
             return ""
 
@@ -898,7 +896,7 @@ def _validate_parents(node, parent=None):
 def get_advanced_tree(fun):
     database = DummyDB()
     with open(fun) as wiki_file:
-        tree_input = six.text_type(wiki_file.read(), "utf8")
+        tree_input = str(wiki_file.read(), "utf8")
     parsed_string = parse_string(title=fun, raw=tree_input, wikidb=database)
     build_advanced_tree(parsed_string)
     return parsed_string

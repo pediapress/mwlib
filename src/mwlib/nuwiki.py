@@ -5,14 +5,10 @@ import os
 import shutil
 import tempfile
 import urllib
+import urllib.parse
 import zipfile
 from hashlib import sha256
 
-import six
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
-from six import unichr
 from sqlitedict import SqliteDict
 
 from mwlib import metabook, nshandling, parser
@@ -152,7 +148,7 @@ class NuWiki:
                 break
             count += 1
             print("reading", file_name)
-            file_content = six.text_type(
+            file_content = str(
                 open(self._pathjoin(file_name), "rb").read(), "utf-8"
             )
             pages = file_content.split("\n --page-- ")
@@ -162,7 +158,7 @@ class NuWiki:
                 meta = json.loads(jmeta)
                 new_page = Page(meta, rawtext)
                 if new_page.title in self.excluded and new_page.ns != 0:
-                    new_page.rawtext = unichr(0xEBAD)
+                    new_page.rawtext = chr(0xEBAD)
                 revid = meta.get("revid")
                 if revid is None:
                     self.revisions[new_page.title] = new_page
@@ -213,9 +209,9 @@ class NuWiki:
         return self.get_page(fqname)
 
     def normalize_and_get_image_path(self, name):
-        if not isinstance(name, six.string_types):
+        if not isinstance(name, str):
             raise ValueError("name must be a string")
-        name = urllib.parse.unquote(six.text_type(name))
+        name = urllib.parse.unquote(str(name))
         namespace, partial, fqname = self.nshandler.splitname(name, defaultns=6)
         if namespace != 6:
             return
@@ -318,7 +314,7 @@ class Adapt:
             path_or_instance = tmpdir
             self.was_tmpdir = True
 
-        if isinstance(path_or_instance, six.string_types):
+        if isinstance(path_or_instance, str):
             self.nuwiki = NuWiki(path_or_instance,
                                  allow_pickle=not self.was_tmpdir)
         else:
@@ -349,7 +345,7 @@ class Adapt:
             return index_url_prefix + "oldid=%s" % revision
         else:
             fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
-            return index_url_prefix + "title=%s" % six.moves.urllib.parse.quote(
+            return index_url_prefix + "title=%s" % urllib.parse.quote(
                 fqtitle.replace(" ", "_").encode("utf-8"), safe=":/@"
             )
 
@@ -489,7 +485,7 @@ class Adapt:
                 arg_list = tmpl[1]
                 for arg in arg_list:
                     if (
-                        isinstance(arg, six.string_types)
+                        isinstance(arg, str)
                         and len(arg) > 3
                         and " " not in arg
                     ):
