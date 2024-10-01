@@ -3,45 +3,36 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
-import optparse
 import sys
 
+import click
 import simplejson
 
 from mwlib import metabook
 
 
-def main():
-    optparser = optparse.OptionParser(
-        usage="%prog [-o OUTPUT] [-t TITLE] [-s SUBTITLE] ARTICLE [...]"
-    )
-    optparser.add_option("-o", "--output", help="write output to file OUTPUT")
-    optparser.add_option("-t", "--title", help="use given TITLE")
-    optparser.add_option("-s", "--subtitle", help="use given SUBTITLE")
-    options, args = optparser.parse_args()
+@click.command()
+@click.option('-o', '--output', type=click.Path(writable=True), help="Write output to file OUTPUT")
+@click.option('-t', '--title', help="Use given TITLE")
+@click.option('-s', '--subtitle', help="Use given SUBTITLE")
+@click.argument('articles', nargs=-1)
+def main(output, title, subtitle, articles):
 
-    if not args:
+    if not articles:
         sys.exit("No article given.")
 
-    title = None
-    if options.title:
-        title = str(options.title, "utf-8")
-    subtitle = None
-
-    if options.subtitle:
-        subtitle = str(options.subtitle, "utf-8")
+    title = title if title else None
+    subtitle = subtitle if subtitle else None
 
     meta_book = metabook.collection(title=title, subtitle=subtitle)
-    for title in args:
-        meta_book["items"].append(metabook.article(title=str(title, "utf-8")))
+    for article_title in articles:
+        meta_book["items"].append(metabook.article(title=str(article_title, "utf-8")))
 
-    if options.output:
-        with open("test.json", "w") as test_file:
-            test_file.write(simplejson.dumps(meta_book))
+    if output:
+        with open(output, "w") as output_file:
+            output_file.write(simplejson.dumps(meta_book))
     else:
-        output_file = sys.stdout
-        output_file.write(simplejson.dumps(meta_book))
-
+        sys.stdout.write(simplejson.dumps(meta_book))
 
 if __name__ == "__main__":
     main()

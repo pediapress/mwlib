@@ -3,10 +3,11 @@
 
 """main programs - installed via setuptools' entry_points"""
 
-import optparse
 import time
 import traceback
 import webbrowser
+
+import click
 
 from mwlib import expander, wiki
 from mwlib.miscellaneous.status import Status
@@ -15,87 +16,78 @@ from mwlib.refine import uparser
 from mwlib.utilities import utils
 
 
-def show():
-    parser = optparse.OptionParser()
-    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
-    parser.add_option("-e", "--expand", action="store_true", help="expand templates")
-    parser.add_option("-t", "--template", action="store_true", help="show template")
-    parser.add_option("-f", help="read input from file. implies -e")
+@click.command()
+@click.option("-c", "--config", required=True, help="Configuration file/URL/shortcut")
+@click.option("-e", "--expand", is_flag=True, help="Expand templates")
+@click.option("-t", "--template", is_flag=True, help="Show template")
+@click.option(
+    "-f", type=click.Path(exists=True), help="Read input from file. Implies -e"
+)
+@click.argument("articles", nargs=-1)
+def show(config, expand, template, f, articles):
+    if not articles and not f:
+        raise click.UsageError("missing ARTICLE argument")
 
-    options, args = parser.parse_args()
-
-    if not args and not options.f:
-        parser.error("missing ARTICLE argument")
-
-    articles = [str(x, "utf-8") for x in args]
-
-    conf = options.config
-    if not conf:
-        parser.error("missing --config argument")
-
-    wiki_db = wiki.make_wiki(conf).wiki
+    articles = [str(x, "utf-8") for x in articles]
+    wiki_db = wiki.make_wiki(config).wiki
 
     for article in articles:
-        defaultns = 10 if options.template else 0
+        defaultns = 10 if template else 0
 
         page = wiki_db.normalize_and_get_page(article, defaultns)
         raw = page.rawtext if page else None
 
         if raw:
-            if options.expand:
-                template_expander = expander.Expander(raw, pagename=article, wikidb=wiki_db)
+            if expand:
+                template_expander = expander.Expander(
+                    raw, pagename=article, wikidb=wiki_db
+                )
                 raw = template_expander.expandTemplates()
 
             print(raw.encode("utf-8"))
-    if options.f:
-        with open(options.f) as opt_file:
+    if f:
+        with open(f) as opt_file:
             str(opt_file.read(), "utf-8")
         template_expander = expander.Expander(raw, pagename="test", wikidb=wiki_db)
         raw = template_expander.expandTemplates()
         print(raw.encode("utf-8"))
 
 
-def post():
-    parser = optparse.OptionParser(usage="%prog OPTIONS")
-    parser.add_option("-i", "--input", help="ZIP file to POST")
-    parser.add_option("-l", "--logfile", help="log output to LOGFILE")
-    parser.add_option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
-    parser.add_option(
-        "-g",
-        "--getposturl",
-        help="get POST URL from PediaPress.com, open upload page in webbrowser",
-        action="store_true",
-    )
-    options, _ = parser.parse_args()
+@click.command()
+@click.option("-i", "--input", required=True, help="ZIP file to POST")
+@click.option("-l", "--logfile", help="Log output to LOGFILE")
+@click.option("-p", "--posturl", help="HTTP POST ZIP file to POSTURL")
+@click.option(
+    "-g",
+    "--getposturl",
+    is_flag=True,
+    help="Get POST URL from PediaPress.com, open upload page in webbrowser",
+)
+def post(input, logfile, posturl, getposturl):
+    if (posturl and getposturl) or (not posturl and not getposturl):
+        raise click.UsageError("Specify either --posturl or --getposturl")
 
-    use_help = "Use --help for usage information."
-    if not options.input:
-        parser.error("Specify --input.\n" + use_help)
-    if (options.posturl and options.getposturl) or (
-        not options.posturl and not options.getposturl
-    ):
-        parser.error("Specify either --posturl or --getposturl.\n" + use_help)
-    if options.posturl:
-        podclient = PODClient(options.posturl)
-    elif options.getposturl:
+    if posturl:
+        podclient = PODClient(posturl)
+    elif getposturl:
         podclient = podclient_from_serviceurl("http://pediapress.com/api/collections/")
         webbrowser.open(podclient.redirecturl)
 
-    if options.logfile:
-        utils.start_logging(options.logfile)
+    if logfile:
+        utils.start_logging(logfile)
 
     status = Status(podclient=podclient)
 
     try:
         status(status="uploading", progress=0)
-        podclient.post_zipfile(options.input)
+        podclient.post_zipfile(input)
         status(status="finished", progress=100)
     except Exception:
         status(status="error")
         raise
 
 
-def parse_article(article, wiki_db, options):
+def parse_article(article, wiki_db, tb):
     try:
         page = wiki_db.normalize_and_get_page(article, 0)
         raw = page.rawtext if page else None
@@ -107,41 +99,30 @@ def parse_article(article, wiki_db, options):
         uparser.parse_string(article, raw=raw, wikidb=wiki_db)
     except Exception as err:
         print("F", repr(article), err)
-        if options.tb:
+        if tb:
             traceback.print_exc()
     else:
         print("G", time.time() - stime, repr(article))
 
 
-def parse():
-    parser = optparse.OptionParser(
-        usage="%prog [-a|--all] --config CONFIG [ARTICLE1 ...]"
-    )
-    parser.add_option("-a", "--all", action="store_true", help="parse all articles")
-    parser.add_option("--tb", action="store_true", help="show traceback on error")
+@click.command()
+@click.option("-a", "--all", is_flag=True, help="Parse all articles")
+@click.option("--tb", is_flag=True, help="Show traceback on error")
+@click.option("-c", "--config", required=True, help="Configuration file/URL/shortcut")
+@click.argument("articles", nargs=-1)
+def parse(all, tb, config, articles):
+    if not articles and not all:
+        raise click.UsageError("missing option.")
 
-    parser.add_option("-c", "--config", help="configuration file/URL/shortcut")
-
-    options, args = parser.parse_args()
-
-    if not args and not options.all:
-        parser.error("missing option.")
-
-    if not options.config:
-        parser.error("missing --config argument")
-
-    articles = [str(x, "utf-8") for x in args]
-
-    conf = options.config
-
-    new_wiki = wiki.make_wiki(conf)
-
+    new_wiki = wiki.make_wiki(config)
     wiki_db = new_wiki.wiki
 
-    if options.all:
+    if all:
         if not hasattr(wiki_db, "articles"):
-            raise RuntimeError(f"{wiki_db} does not support iterating over all articles")
+            raise RuntimeError(
+                f"{wiki_db} does not support iterating over all articles"
+            )
         articles = wiki_db.articles()
 
     for article in articles:
-        parse_article(article, wiki_db, options)
+        parse_article(article, wiki_db, tb)

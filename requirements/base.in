@@ -16,3 +16,4 @@ simplejson
 sqlitedict
 timelib>=0.3.0
 toml
+click
