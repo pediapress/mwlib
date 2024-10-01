@@ -1,8 +1,6 @@
 import os
 import re
 
-import six
-
 try:
     from xml.etree import cElementTree
 except ImportError:
@@ -120,7 +118,7 @@ class DumpParser:
         for element in page_elem:
             tag = self.get_tag(element)
             if tag == "title":
-                title = six.text_type(element.text)
+                title = str(element.text)
                 res.title = title
             elif tag == "id":
                 res.pageid = int(element.text)
@@ -145,9 +143,9 @@ class DumpParser:
             elif tag == "minor":
                 res.minor = True
             elif tag == "comment":
-                res.comment = six.text_type(element.text)
+                res.comment = str(element.text)
             elif tag == "text":
-                res.text = six.text_type(element.text)
+                res.text = str(element.text)
                 element.clear()
 
         return res

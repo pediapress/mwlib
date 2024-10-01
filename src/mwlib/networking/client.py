@@ -1,6 +1,6 @@
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import mwlib.utilities.myjson as json
 
@@ -22,8 +22,8 @@ class Client:
         self.error = None
         post_data = dict(args)
         post_data["command"] = command
-        url_file = six.moves.urllib.request.urlopen(
-            self.url, six.moves.urllib.parse.urlencode(post_data)
+        url_file = urllib.request.urlopen(
+            self.url, urllib.parse.urlencode(post_data)
         )
         self.response = url_file.read()
         self.response_code = url_file.getcode()

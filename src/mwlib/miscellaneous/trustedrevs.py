@@ -2,11 +2,11 @@
 
 
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 
 import mwclient
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
 
 from mwlib.consts.urls import WIKITRUST_API
 
@@ -27,10 +27,10 @@ class TrustedRevisions:
         # http://en.collaborativetrust.com/WikiTrust/RemoteAPI?method=quality&title=Buster_Keaton&pageid=43055&revid=364710354
         url = "%s?method=quality&title=%s&revid=%d" % (
             self.wikitrust_api,
-            six.moves.urllib.parse.quote(title),
+            urllib.parse.quote(title),
             revid,
         )
-        rev= six.moves.urllib.request.urlopen(url).read()
+        rev= urllib.request.urlopen(url).read()
         if rev == WikiTrustServerError.msg_identifier:
             raise WikiTrustServerError
         return 1 - float(rev)  # r is the likelyhood of being spam

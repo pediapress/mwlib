@@ -9,8 +9,6 @@ import shutil
 import tempfile
 from subprocess import PIPE, Popen
 
-import six
-
 try:
     import xml.etree.ElementTree as ET
 except BaseException:
@@ -150,7 +148,7 @@ def render_math(
         raise ValueError("output_mode must be one of 'png' or 'mathml'")
     if render_engine not in ("blahtexml", "texvc"):
         raise ValueError("render_engine must be one of 'blahtexml' or 'texvc'")
-    if not isinstance(latex, six.text_type):
+    if not isinstance(latex, str):
         raise TypeError("latex must be of type unicode")
 
     if output_mode == "png" and not output_path:

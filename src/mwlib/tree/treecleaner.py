@@ -7,8 +7,6 @@
 import sys
 import unicodedata
 
-import six
-
 from mwlib import parser
 from mwlib.exceptions.mwlib_exceptions import InvalidTreeNodesError
 from mwlib.parser import URL, Caption, CategoryLink, InterwikiLink, LangLink, NamedURL, SpecialLink
@@ -1777,7 +1775,7 @@ class TreeCleaner:
             except IndexError:
                 section_title = ""
             if (
-                isinstance(section_title, six.string_types)
+                isinstance(section_title, str)
                 and section_title.strip() == seealso_section
             ):
                 self.report("removed see also section", node)

@@ -46,10 +46,10 @@ class AnchorEncode(nodes.Node):
         # contains the substring '.3A',
         # it will also replace it with a colon. We do *not*
         # reproduce that bug here...
-        import six.moves.urllib.request
+        import urllib.parse
 
         encoded_argument = (
-            six.moves.urllib.parse.quote_plus(arg.encode("utf-8"), ":")
+            urllib.parse.quote_plus(arg.encode("utf-8"), ":")
             .replace("%", ".")
             .replace("+", "_")
         )

@@ -8,8 +8,6 @@ import time
 import traceback
 import webbrowser
 
-import six
-
 from mwlib import expander, wiki
 from mwlib.miscellaneous.status import Status
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
@@ -29,7 +27,7 @@ def show():
     if not args and not options.f:
         parser.error("missing ARTICLE argument")
 
-    articles = [six.text_type(x, "utf-8") for x in args]
+    articles = [str(x, "utf-8") for x in args]
 
     conf = options.config
     if not conf:
@@ -51,7 +49,7 @@ def show():
             print(raw.encode("utf-8"))
     if options.f:
         with open(options.f) as opt_file:
-            six.text_type(opt_file.read(), "utf-8")
+            str(opt_file.read(), "utf-8")
         template_expander = expander.Expander(raw, pagename="test", wikidb=wiki_db)
         raw = template_expander.expandTemplates()
         print(raw.encode("utf-8"))
@@ -132,7 +130,7 @@ def parse():
     if not options.config:
         parser.error("missing --config argument")
 
-    articles = [six.text_type(x, "utf-8") for x in args]
+    articles = [str(x, "utf-8") for x in args]
 
     conf = options.config
 

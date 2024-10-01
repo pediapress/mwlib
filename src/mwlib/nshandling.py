@@ -9,8 +9,6 @@ returned by api.php
 
 import re
 
-import six
-
 from mwlib import siteinfo
 
 NS_MEDIA = -2
@@ -132,8 +130,8 @@ class NsHandler:
         return tag
 
     def splitname(self, title, defaultns=0):
-        if not isinstance(title, six.text_type):
-            title = six.text_type(title, 'utf-8')
+        if not isinstance(title, str):
+            title = str(title, 'utf-8')
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
             name = name[1:].strip()

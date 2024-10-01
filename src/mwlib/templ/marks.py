@@ -1,9 +1,7 @@
-import six
 
-
-class Mark(six.text_type):
+class Mark(str):
     def __new__(klass, msg):
-        new_instance = six.text_type.__new__(klass)
+        new_instance = str.__new__(klass)
         new_instance.msg = msg
         return new_instance
 
@@ -27,7 +25,7 @@ maybe_newline = MarkMaybeNewline("maybe_newline")
 dummy_mark = Mark("dummy")
 
 
-class _EqMark(six.text_type):
+class _EqMark(str):
     def __eq__(self, other):
         return self is other
 
