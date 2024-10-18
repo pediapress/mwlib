@@ -350,6 +350,29 @@ class Fetcher:
         # store revisions in memory for later use
         # KLUDGE: in memory storage might fail for very large collections
         self.revisions = []
+        
+    def lower_infobox_parameters(self, text):
+        parameters_to_lower = {
+            '| Type': '| type',
+            '| Label': '| label',
+            '| Released': '| released',
+            '| Artist': '| artist',
+            '| This album': '| this_album',
+            '| Last album': '| last_album',
+            '| Next album': '| next_album',
+            '| Name': '| name',
+            '| Cover': '| cover',
+            '| Producer': '| producer',
+            '| Length': '| length',
+            '| Recorded': '| recorded',
+            '| Genre': '| genre',
+        }
+
+        for old_param, new_param in parameters_to_lower.items():
+            text = re.sub(rf'({re.escape(old_param)})\s*=', f'{new_param} =', text)
+        print(text)
+        return text
+        
 
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
@@ -359,6 +382,7 @@ class Fetcher:
 
         title = page["title"]
         text = page["revisions"][0]["*"]
+        text = self.lower_infobox_parameters(text)
         res = self.api.do_request(
             use_post=True, action="expandtemplates", title=title, text=text
         ).get("expandtemplates", {})

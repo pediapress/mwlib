@@ -58,10 +58,8 @@ include src/mwlib/_version.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
 include src/mwlib/apps/buildzip_bak.py
-include src/mwlib/apps/client.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
-include src/mwlib/apps/serve.py
 include src/mwlib/apps/utils.py
 include src/mwlib/argv.py
 include src/mwlib/asynchronous/__init__.py
@@ -196,7 +194,6 @@ include src/mwlib/utilities/htmlcolornames.py
 include src/mwlib/utilities/log.py
 include src/mwlib/utilities/lrucache.py
 include src/mwlib/utilities/myjson.py
-include src/mwlib/utilities/options.py
 include src/mwlib/utilities/strftime.py
 include src/mwlib/utilities/utils.py
 include src/mwlib/wiki.py

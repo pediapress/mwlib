@@ -20,6 +20,9 @@ from mwlib.configuration import conf
 logger = logging.getLogger(__name__)
 
 
+
+
+
 def loads(input_string):
     """Potentially remove UTF-8 BOM and call json.loads()"""
 
@@ -93,6 +96,8 @@ class MwApi:
         return f"<mwapi {self.apiurl} at {hex(id(self))}>"
 
     def _fetch(self, url):
+        if isinstance(url, str):
+            logger.debug("fetching url:  %r", url)
         url_opener = self.opener.open(url)
         data = url_opener.read()
         url_opener.close()
@@ -127,8 +132,8 @@ class MwApi:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         postdata = parse.urlencode(args).encode()
 
+        logger.debug("posting to %r", self.apiurl)
         req = request.Request(self.apiurl, postdata, headers)
-
         res = loads(self._fetch(req))
         return res
 
