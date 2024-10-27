@@ -357,9 +357,6 @@ class Fetcher:
             '| Label': '| label',
             '| Released': '| released',
             '| Artist': '| artist',
-            '| This album': '| this_album',
-            '| Last album': '| last_album',
-            '| Next album': '| next_album',
             '| Name': '| name',
             '| Cover': '| cover',
             '| Producer': '| producer',
@@ -367,10 +364,12 @@ class Fetcher:
             '| Recorded': '| recorded',
             '| Genre': '| genre',
         }
+        
+        delete_pattern = r'^\|\s*(?:This album|Last album|Next album).*\n'
+        text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
 
         for old_param, new_param in parameters_to_lower.items():
             text = re.sub(rf'({re.escape(old_param)})\s*=', f'{new_param} =', text)
-        print(text)
         return text
         
 
