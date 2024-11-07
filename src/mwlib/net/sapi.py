@@ -98,6 +98,8 @@ class MwApi:
     def _fetch(self, url):
         if isinstance(url, str):
             logger.debug("fetching url:  %r", url)
+            url = request.Request(url)
+            url.add_header("Referer", 'https://pediapress.com')
         url_opener = self.opener.open(url)
         data = url_opener.read()
         url_opener.close()
@@ -134,6 +136,7 @@ class MwApi:
 
         logger.debug("posting to %r", self.apiurl)
         req = request.Request(self.apiurl, postdata, headers)
+        req.add_header("Referer", 'https://pediapress.com')
         res = loads(self._fetch(req))
         return res
 

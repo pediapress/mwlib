@@ -285,7 +285,7 @@ def main(
 
 def get_environment(options):
     env = make_wiki_env_from_options(None, options)
-    
+
     if isinstance(env.wiki, nuwiki.NuWiki | nuwiki.Adapt) or isinstance(
         env, wiki.MultiEnvironment
     ):
