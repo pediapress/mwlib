@@ -1,25 +1,6 @@
 from mwlib import metabook as metabook_module
 from mwlib import wiki
-from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.miscellaneous.status import Status
-
-
-def create_nuwiki(
-    fsdir,
-    metabook,
-    wiki_options,
-    pod_client,
-    status,
-):
-    print("creating nuwiki in %r" % fsdir)
-
-    make_nuwiki(
-        fsdir=fsdir,
-        metabook=metabook,
-        wiki_options=wiki_options,
-        pod_client=pod_client,
-        status=status,
-    )
 
 
 def create_zip_from_wiki_env(

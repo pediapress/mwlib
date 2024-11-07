@@ -15,7 +15,8 @@ import zipfile
 import click
 from gevent import monkey
 
-from mwlib.apps.utils import create_nuwiki, create_zip_from_wiki_env, make_wiki_env_from_options
+from mwlib.apps.make_nuwiki import make_nuwiki
+from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
 from mwlib.configuration import conf
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utilities import myjson as json
@@ -64,10 +65,11 @@ def make_zip(
 
     try:
         fsdir = os.path.join(tmpdir, "nuwiki")
-        create_nuwiki(
+        print("creating nuwiki in %r" % fsdir)
+        make_nuwiki(
             fsdir=fsdir,
-            wiki_options=wiki_options,
             metabook=metabook,
+            wiki_options=wiki_options,
             pod_client=pod_client,
             status=status,
         )

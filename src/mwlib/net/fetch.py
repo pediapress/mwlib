@@ -244,7 +244,7 @@ def call_when(event, fun):
 
 def download_to_file(url, path, temp_path):
     opener = request.build_opener()
-    opener.addheaders = [("User-Agent", conf.user_agent)]
+    opener.addheaders = [("User-Agent", conf.user_agent), ("Referer", 'https://pediapress.com/')]
 
     try:
         out = None
@@ -351,6 +351,28 @@ class Fetcher:
         # KLUDGE: in memory storage might fail for very large collections
         self.revisions = []
 
+    def lower_infobox_parameters(self, text):
+        parameters_to_lower = {
+            '| Type': '| type',
+            '| Label': '| label',
+            '| Released': '| released',
+            '| Artist': '| artist',
+            '| Name': '| name',
+            '| Cover': '| cover',
+            '| Producer': '| producer',
+            '| Length': '| length',
+            '| Recorded': '| recorded',
+            '| Genre': '| genre',
+        }
+
+        delete_pattern = r'^\|\s*(?:This album|Last album|Next album).*\n'
+        text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
+
+        for old_param, new_param in parameters_to_lower.items():
+            text = re.sub(rf'({re.escape(old_param)})\s*=', f'{new_param} =', text)
+        return text
+
+
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
             action="query", prop="revisions", rvprop="content", revids=str(revid)
@@ -359,6 +381,7 @@ class Fetcher:
 
         title = page["title"]
         text = page["revisions"][0]["*"]
+        text = self.lower_infobox_parameters(text)
         res = self.api.do_request(
             use_post=True, action="expandtemplates", title=title, text=text
         ).get("expandtemplates", {})
@@ -395,6 +418,7 @@ class Fetcher:
 
         self.finish()
         self._save_timeline_info()
+        self._save_map_frame_image_info()
         if self.imageinfo_todo or self.revids_todo or self.pages_todo:
             raise ValueError("not all items processed")
 
@@ -418,6 +442,25 @@ class Fetcher:
                 title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.fsout.copy_image(title, f"{digest}.{filename_extension}")
 
+    def _save_map_frame_image_info(self):
+        html_content_pages = self.fsout.get_db_keys("html")
+
+        for page in html_content_pages:
+            txt = self.find_source_by_title_or_revid(page)
+            rev_map_frame_tag_contents = self.find_map_frame_tags_from_rev_content(txt)
+
+            html_content = self.fsout.get_db_key("html", page)
+            image_nodes = self._get_map_image_nodes(html_content)
+            map_image_urls = self.map_image_urls(image_nodes)
+
+            for url, rev_map_tag_content in zip(map_image_urls, rev_map_frame_tag_contents):
+                filename = url.rsplit("/", 1)[1]
+                filename = filename.split("?")[0]
+                digest = self.calculate_hash_from_map_content(rev_map_tag_content)
+                filename_extension = filename.rsplit(".", 1)[1]
+                title = self.nshandler.splitname(filename, defaultns=6)[2]
+                self.fsout.copy_image(title, f"{digest}.{filename_extension}")
+
     def find_source_by_title_or_revid(self, title_or_revid):
         title = int(title_or_revid) if title_or_revid.isdigit() else title_or_revid
         if not self.revisions:
@@ -436,11 +479,47 @@ class Fetcher:
 
     def calculate_hash_from_timeline_content(self, timeline_content):
         return sha1(timeline_content.encode("utf-8")).hexdigest()
+    
+    def calculate_hash_from_map_content(self, map_content_attributes):
+        height = map_content_attributes.get("height", "")
+        width = map_content_attributes.get("width", "")
+        latitude = map_content_attributes.get("latitude", "")
+        longitude = map_content_attributes.get("longitude", "")
+        zoom = map_content_attributes.get("zoom", "")
+        identifier = f"{height}x{width}x{latitude}x{longitude}x{zoom}"
+        digest = sha1()
+        digest.update(identifier.encode("utf8"))
+        ident = digest.hexdigest()
+        return ident
 
     def find_timeline_tags_from_rev_content(self, content):
         if not content:
             return []
         return re.findall(r"<timeline>(.*?)<\/timeline>", content, re.DOTALL)
+    
+    def find_map_frame_tags_from_rev_content(self, content):
+        if not content:
+            return []
+        mapframes =  re.findall(r"<mapframe(.*?)>", content, re.DOTALL)
+
+        mapframes_with_attributes = []
+
+        for map_frame in mapframes:
+            attributes = self.extract_attributes_from_map_frame_tag(map_frame)
+            if not attributes:
+                continue
+            map_frame_content = re.search(r"<div class=\"mw-kartographer-map\"(.*?)<\/div>", content, re.DOTALL)
+            if map_frame_content:
+                attributes.append(map_frame_content.group(1))
+            attributes_dict = {}
+            for key, value in attributes:
+                attributes_dict[key] = value
+            mapframes_with_attributes.append(attributes_dict)
+        return mapframes_with_attributes
+
+    def extract_attributes_from_map_frame_tag(self, tag):
+        return re.findall(r'(\w+)\s*=\s*"(.*?)"', tag)
+
 
     def extension_img_urls(self, image_nodes):
         img_urls = set()
@@ -465,6 +544,16 @@ class Fetcher:
                 img_urls.add(full_url)
         return img_urls
 
+    def map_image_urls(self, image_nodes):
+        img_urls = set()
+        for img_node in image_nodes:
+            src = img_node.get("src")
+            frags = src.split("/")
+            if len(frags):
+                full_url = parse.urljoin(self.api.baseurl, src)
+                img_urls.add(full_url)
+        return img_urls
+
     def _get_image_nodes(self, data):
         html = data["text"]["*"]
         root = etree.HTML(html)
@@ -474,6 +563,11 @@ class Fetcher:
         html = data["text"]["*"]
         root = etree.HTML(html)
         return root.xpath(".//div[contains(@class, 'timeline-wrapper')]/img")
+
+    def _get_map_image_nodes(self, data):
+        html = data["text"]["*"]
+        root = etree.HTML(html)
+        return root.xpath(".//a[contains(@class, 'mw-kartographer-map')]/img")
 
     def fetch_html(self, name, lst):
         def fetch(content):
@@ -485,14 +579,20 @@ class Fetcher:
             self.fsout.set_db_key("html", content, res)
             image_nodes = self._get_image_nodes(res)
             timeline_nodes = self._get_timeline_image_nodes(res)
+            map_nodes = self._get_map_image_nodes(res)
             img_urls = self.extension_img_urls(image_nodes)
             timeline_image_urls = self.timeline_image_urls(timeline_nodes)
+            map_image_urls = self.map_image_urls(map_nodes)
             all_urls = list(set(list(img_urls) + list(timeline_image_urls)))
             for url in all_urls:
                 filename = url.rsplit("/", 1)[1]
                 title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.schedule_download_image(str(url), title)
-
+            for url in map_image_urls:
+                filename = url.rsplit("/", 1)[1]
+                filename = filename.split("?")[0]
+                title = self.nshandler.splitname(filename, defaultns=6)[2]
+                self.schedule_download_image(str(url), title)
         self.count_total += len(lst)
         for item in lst:
             self._refcall_noinc(fetch, item)
