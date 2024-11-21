@@ -372,6 +372,51 @@ class Fetcher:
             text = re.sub(rf'({re.escape(old_param)})\s*=', f'{new_param} =', text)
         return text
 
+    def update_infobox_parameters(self, text):
+        parameters = [
+            'empty weight main',
+            'height main',
+            'area main',
+            'ceiling main',
+            'stall speed main',
+            'max speed main',
+            'range main',
+            'cruise speed main',
+            'loaded weight main',
+            'climb rate main',
+            'length main',
+            'span main',
+            'power main',
+            'max takeoff weight main',
+            'empty weight alt',
+            'height alt',
+            'area alt',
+            'ceiling alt',
+            'stall speed alt',
+            'max speed alt',
+            'range alt',
+            'cruise speed alt',
+            'loaded weight alt',
+            'length alt',
+            'climb rate alt',
+            'span alt',
+            'power alt',
+            'engine (prop)',
+            'plane or copter?',
+            'jet or prop?',
+            'max takeoff weight alt',
+            'number of props',
+            'type of prop',
+            'power/mass alt',
+            'power/mass main',
+            'loading main',
+            'loading alt',
+        ]
+        escaped_parameters = [re.escape(param) for param in parameters]
+        delete_pattern = r'^\|\s*(?:' + '|'.join(escaped_parameters) + r')\s*=\s*.*\n'
+        text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
+    
+        return text
 
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
@@ -382,6 +427,7 @@ class Fetcher:
         title = page["title"]
         text = page["revisions"][0]["*"]
         text = self.lower_infobox_parameters(text)
+        text = self.update_infobox_parameters(text)
         res = self.api.do_request(
             use_post=True, action="expandtemplates", title=title, text=text
         ).get("expandtemplates", {})

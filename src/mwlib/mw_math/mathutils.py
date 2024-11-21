@@ -110,6 +110,7 @@ def _render_math_texvc(latex, output_path, output_mode="png", resolution_in_dpi=
         log.error("error with texvc. cmd:", repr(" ".join(cmd)))
         return None
     (result, error) = sub.communicate()
+    result = result.decode("utf-8")
     del sub
 
     if output_mode == "png" and len(result) >= 32:
