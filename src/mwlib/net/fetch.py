@@ -24,6 +24,7 @@ from sqlitedict import SqliteDict
 from mwlib import nshandling
 from mwlib.configuration import conf
 from mwlib.net import sapi as mwapi
+from mwlib.net.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
 from mwlib.utilities import myjson as json
 from mwlib.utilities import utils
 
@@ -373,45 +374,7 @@ class Fetcher:
         return text
 
     def update_infobox_parameters(self, text):
-        parameters = [
-            'empty weight main',
-            'height main',
-            'area main',
-            'ceiling main',
-            'stall speed main',
-            'max speed main',
-            'range main',
-            'cruise speed main',
-            'loaded weight main',
-            'climb rate main',
-            'length main',
-            'span main',
-            'power main',
-            'max takeoff weight main',
-            'empty weight alt',
-            'height alt',
-            'area alt',
-            'ceiling alt',
-            'stall speed alt',
-            'max speed alt',
-            'range alt',
-            'cruise speed alt',
-            'loaded weight alt',
-            'length alt',
-            'climb rate alt',
-            'span alt',
-            'power alt',
-            'engine (prop)',
-            'plane or copter?',
-            'jet or prop?',
-            'max takeoff weight alt',
-            'number of props',
-            'type of prop',
-            'power/mass alt',
-            'power/mass main',
-            'loading main',
-            'loading alt',
-        ]
+        parameters = DEPRECATED_ALBUM_INFOBOX_PARAMS
         escaped_parameters = [re.escape(param) for param in parameters]
         delete_pattern = r'^\|\s*(?:' + '|'.join(escaped_parameters) + r')\s*=\s*.*\n'
         text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
