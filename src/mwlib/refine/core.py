@@ -1275,7 +1275,7 @@ def parse_txt(txt, xopts=None, **kwargs):
 
     uniquifier = xopts.uniquifier
     if uniquifier is None:
-        log.info(f"creating uniquifier for {txt}")
+        log.debug(f"creating uniquifier for {txt}")
         uniquifier = uniq.Uniquifier()
         txt = uniquifier.replace_tags(txt)
         xopts.uniquifier = uniquifier

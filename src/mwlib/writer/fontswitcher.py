@@ -169,12 +169,17 @@ class FontSwitcher:
         font = last_font if last_font else self.default_font
         return text_char, font
 
-    def extract_last_font_last_text_and_text_list(self, txt):
+    def extract_last_font_last_text_and_text_list(self, txt: str | bytes):
         txt_list = []
         last_font = None
         last_txt = []
+        if isinstance(txt, bytes):
+            txt = txt.decode("utf-8")
         for text_char in txt:
-            ord_c = ord(text_char)
+            try:
+                ord_c = ord(text_char)
+            except TypeError:
+                raise TypeError(f"Invalid character in text: {text_char!r}")
             blacklisted = self.char_blacklist.get(ord_c, False)
             if ord_c in self.no_switch_chars or blacklisted:
                 text_char, font = self._get_processed_char_and_font(ord_c, blacklisted, last_font, text_char)
