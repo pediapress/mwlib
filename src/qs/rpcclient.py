@@ -1,5 +1,3 @@
-from builtins import object
-
 try:
     import simplejson as json
 except ImportError:
@@ -7,8 +5,12 @@ except ImportError:
 
 import socket
 
+from qs.log import root_logger
 
-class RpcClient(object):
+logger = root_logger.getChild(__name__)
+
+
+class RpcClient:
     def __init__(self, host=None, port=None):
         if host is None:
             host = "localhost"
@@ -23,6 +25,7 @@ class RpcClient(object):
         self.writer = self.reader = self.socket = None
 
     def _get_socket(self):
+        logger.info(f"connecting to {self.host}:{self.port}")
         s = self.socket = socket.create_connection((self.host, self.port))
         self.reader = s.makefile("r")
         self.writer = s.makefile("w")
@@ -36,6 +39,7 @@ class RpcClient(object):
         d = json.dumps((name, kwargs)) + "\n"
 
         def _send():
+            logger.info(f"sending {d!r}")
             try:
                 self.writer.write(d)
                 self.writer.flush()
@@ -54,11 +58,12 @@ class RpcClient(object):
 
         err = data.get("error")
         if err:
+            logger.error(f"error: {err}")
             raise RuntimeError(err)
         return data["result"]
 
 
-class ServerProxy(object):
+class ServerProxy:
     _make_client = RpcClient
 
     def __init__(self, host=None, port=None, rpc_client=None):
@@ -76,3 +81,6 @@ class ServerProxy(object):
 
     def get_client(self):
         return self._rpc_client
+
+    def __str__(self):
+        return f"ServerProxy({self._rpc_client.host}, {self._rpc_client.port})"

@@ -7,15 +7,14 @@ import socket
 import sys
 import time
 import traceback
+import urllib.error
+import urllib.parse
+import urllib.request
 from email.mime.text import MIMEText
 from email.utils import formatdate, make_msgid
 from typing import Union
 
 import pypdf
-import six
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
 
 from mwlib.utilities.log import Log
 
@@ -57,8 +56,8 @@ def start_logging(path, stderr_only=False):
         sys.stdout.flush()
     sys.stderr.flush()
 
-    with open(path, "a", encoding="utf-8") as log_file:
-        file_no = log_file.fileno()
+    log_file = open(path, "a", encoding="utf-8")
+    file_no = log_file.fileno()
 
     if not stderr_only:
         os.dup2(file_no, 1)
@@ -86,9 +85,9 @@ def get_multipart(filename, data, name):
     @rtype: (str, str)
     """
 
-    if isinstance(filename, six.text_type):
+    if isinstance(filename, str):
         filename = filename.encode("utf-8", "ignore")
-    if isinstance(name, six.text_type):
+    if isinstance(name, str):
         name = name.encode("utf-8", "ignore")
 
     boundary = "-" * 20 + ("%f" % time.time()) + "-" * 20
@@ -184,16 +183,16 @@ def fetch_url(
     if not hasattr(socket, "_delegate_methods"):  # not using gevent?
         socket.setdefaulttimeout(timeout)
     if opener is None:
-        opener = six.moves.urllib.request.build_opener()
+        opener = urllib.request.build_opener()
         opener.addheaders = [("User-agent", "mwlib")]
     try:
         if post_data:
-            post_data = six.moves.urllib.parse.urlencode(post_data)
+            post_data = urllib.parse.urlencode(post_data)
         result = opener.open(url, post_data)
         data = result.read()
         check_content_type(expected_content_type, result, ignore_errors)
 
-    except six.moves.urllib.error.URLError as err:
+    except urllib.error.URLError as err:
         if ignore_errors:
             log.error(f"{err} - while fetching {url!r}")
             return None
@@ -345,7 +344,7 @@ def get_safe_url(url):
 
     nonwhitespace_rex = re.compile(r"^\S+$")
     try:
-        result = six.moves.urllib.parse.urlsplit(url)
+        result = urllib.parse.urlsplit(url)
         scheme, netloc, path, query, fragment = result
     except Exception as exc:
         log.warn(f"urlparse({url!r}) failed: {exc}")
@@ -361,12 +360,12 @@ def get_safe_url(url):
 
     try:
         # catches things like path='bla " target="_blank'
-        path = six.moves.urllib.parse.quote(six.moves.urllib.parse.unquote(path))
+        path = urllib.parse.quote(urllib.parse.unquote(path))
     except Exception as exc:
         log.warn(f"quote(unquote({path!r})) failed: {exc}")
         return None
     try:
-        return six.moves.urllib.parse.urlunsplit(
+        return urllib.parse.urlunsplit(
             (scheme, netloc, path, query, fragment)
         )
     except Exception as exc:
@@ -438,6 +437,7 @@ def python2sort(iterable, reverse=False):
     if reverse:
         result = reversed(list(result))
     return result
+
 
 def split_tag(txt, flags=re.DOTALL):
     matched_tag = re.match(r" *(\w+)(.*)", txt, flags)

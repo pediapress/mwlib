@@ -1,66 +1,65 @@
-from gevent import monkey
-
-from mwlib.apps.make_nuwiki import make_nuwiki
-from mwlib.configuration import conf
+from mwlib import metabook as metabook_module
+from mwlib import wiki
 from mwlib.miscellaneous.status import Status
-from mwlib.utilities.options import OptionParser
 
 
-def create_nuwiki(fsdir, options=None, metabook=None, podclient=None, status=None):
-    print("creating nuwiki in %r" % fsdir)
-
-    make_nuwiki(
-        fsdir,
-        metabook=metabook,
-        options=options,
-        podclient=podclient,
-        status=status,
-    )
-
-
-def create_zip_from_wiki_env(parser, pod_client, options, make_zip):
-    env = parser.make_wiki()
+def create_zip_from_wiki_env(
+    env,
+    pod_client,
+    wiki_options,
+    make_zip,
+):
     if not env.metabook:
         raise ValueError("no metabook")
+    status_file = wiki_options.get("status_file")
     status = Status(
-        options.status_file, podclient=pod_client, progress_range=(1, 90)
+        status_file, podclient=pod_client, progress_range=(1, 90)
     )
     status(progress=0)
-    output = options.output
-    make_zip(output, options, env.metabook, podclient=pod_client, status=status)
+    make_zip(
+        metabook=env.metabook,
+        wiki_options=wiki_options,
+        pod_client=pod_client,
+        status=status,
+    )
     return status
 
 
-def build_parser():
-    monkey.patch_all(thread=False)
 
-    parser = OptionParser()
-    parser.add_option("-o", "--output", help="write output to OUTPUT")
-    parser.add_option("-p", "--posturl", help="http post to POSTURL (directly)")
-    parser.add_option(
-        "-g",
-        "--getposturl",
-        help="get POST URL from PediaPress.com, open upload page in webbrowser",
-        action="count",
+def make_wiki_env_from_options(
+    metabook,
+    wiki_options,
+):
+    wiki_options_with_metabook = wiki_options.copy()
+    wiki_options_with_metabook["metabook"] = metabook
+    env = wiki.make_wiki(
+        **wiki_options_with_metabook,
     )
-    parser.add_option(
-        "--keep-tmpfiles",
-        action="store_true",
-        default=False,
-        help="don't remove  temporary files like images",
-    )
+    if not env.metabook:
+        env.metabook = metabook_module.collection()
+        env.init_metabook()
 
-    parser.add_option(
-        "-s", "--status-file", help="write status/progress info to this file"
-    )
+    noimages = wiki_options.get("noimages")
+    if noimages:
+        env.images = None
 
-    options, _ = parser.parse_args()
-    conf.readrc()
-    use_help = "Use --help for usage information."
+    title = wiki_options.get("title")
+    subtitle = wiki_options.get("subtitle")
+    editor = wiki_options.get("editor")
 
-    if parser.metabook is None and options.collectionpage is None:
-        parser.error(
-            "Neither --metabook nor, --collectionpage or arguments specified.\n"
-            + use_help
+    if title:
+        env.metabook.title = title
+    if subtitle:
+        env.metabook.subtitle = subtitle
+    if editor:
+        env.metabook.editor = editor
+    # add default licenses
+
+    config = wiki_options.get("config")
+    cfg = config or ""
+    if cfg.startswith(":") and not env.metabook.licenses:
+        mw_license_url = wiki.wpwikis.get(cfg[1:])["mw_license_url"]
+        env.metabook.licenses.append(
+            {"mw_license_url": mw_license_url, "type": "License"}
         )
-    return parser, options, use_help
+    return env

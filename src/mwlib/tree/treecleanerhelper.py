@@ -71,7 +71,7 @@ def _create_and_append_new_rows_based_on_columns(max_new_rows, row, cols, newrow
                 cell.vlist = row.children[colindex].vlist
 
             for child in cellchildren:
-                cell.appendChild(child)
+                cell.append_child(child)
             newrow.append_child(cell)
             newrow.suppress_bottom_border = True
         newrows.append(newrow)

@@ -15,7 +15,7 @@ def zip_files():
 
 
 def writer_names():
-    for x in entry_points().get("mwlib.writers", []):
+    for x in entry_points().select(group="mwlib.writers"):
         try:
             x.load()
             yield x.name

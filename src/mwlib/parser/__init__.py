@@ -43,9 +43,9 @@ log = Log("parser")
 
 def show(out, node, indent=0, verbose=False):
     if verbose:
-        print("    " * indent, node, repr(getattr(node, "vlist", "")), file=out)
+        log.debug(("parser:show    " * indent) + f"{node} {repr(getattr(node, 'vlist', ''))}")
     else:
-        print("    " * indent, node, file=out)
+        log.info(("parser:show    " * indent) + str(node))
     for child in node:
         show(out, child, indent + 1, verbose=verbose)
 

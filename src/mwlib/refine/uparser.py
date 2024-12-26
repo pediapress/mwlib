@@ -33,7 +33,9 @@ def get_source(wikidb, title, revision):
     if hasattr(wikidb, "get_source"):
         src = wikidb.get_source(title, revision=revision)
         if isinstance(src, dict):
-            raise ValueError("wikidb.get_source returned a dict. this is no longer supported")
+            raise ValueError(
+                "wikidb.get_source returned a dict. this is no longer supported"
+            )
     if not src:
         src = metabook.Source()
     return src
@@ -63,11 +65,13 @@ def parse_string(
     template_expander = uniquifier = siteinfo = None
     if title is None:
         raise ValueError("no title given")
-    raw = get_article_raw_text(wikidb, title) if raw is None else raw
+
+    if raw is None and wikidb is None:
+        raise ValueError("no raw text or wikidb given")
+    raw = raw if raw is not None else get_article_raw_text(wikidb, title)
     if raw is None:
         raise ValueError(f"cannot get article {title!r}")
     _input = raw
-
     if wikidb:
         template_expander, uniquifier, siteinfo, _input = process_expander_and_siteinfo(
             wikidb, title, raw, expand_templates
@@ -95,12 +99,16 @@ def parse_string(
         article.caption = template_expander.magic_displaytitle
 
     for post_processor in postprocessors:
-        post_processor(article, title=title, revision=revision, wikidb=wikidb, lang=lang)
+        post_processor(
+            article, title=title, revision=revision, wikidb=wikidb, lang=lang
+        )
 
     return article
 
 
-def simpleparse(raw, lang=None):  # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
+def simpleparse(
+    raw, lang=None
+):  # !!! USE FOR DEBUGGING ONLY !!! does not use post processors
     article = compat.parse_txt(raw, lang=lang)
     show(article)
     return article

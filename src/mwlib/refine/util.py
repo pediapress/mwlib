@@ -2,10 +2,8 @@
 # See README.rst for additional licensing information.
 
 
+import html.entities
 import re
-
-import six.moves.html_entities
-from six import unichr
 
 param_rx = re.compile(
     r"(?P<name>\w+)\s*=\s*(?P<value>\"[^\"]*\"|\'[^\']*\'|[\w%:#]+)", re.DOTALL
@@ -215,14 +213,14 @@ def resolve_entity(entity):
     if entity[1] == "#":
         try:
             if entity[2] == "x" or entity[2] == "X":
-                return unichr(int(entity[3:-1], 16))
+                return chr(int(entity[3:-1], 16))
             else:
-                return unichr(int(entity[2:-1]))
+                return chr(int(entity[2:-1]))
         except ValueError:
             return entity
     else:
         try:
-            return unichr(six.moves.html_entities.name2codepoint[entity[1:-1]])
+            return chr(html.entities.name2codepoint[entity[1:-1]])
         except KeyError:
             return entity
 

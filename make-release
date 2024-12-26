@@ -18,9 +18,9 @@ def system(cmd, dry_run=False):
             break
         if nl:
             sys.stdout.write("    ")
-        sys.stdout.write(char)
+        sys.stdout.write(char.decode('utf-8', errors='replace'))
         sys.stdout.flush()
-        nl = char == "\n"
+        nl = char == b"\n"
 
     st = popen.wait()
     if st != 0:

@@ -33,7 +33,11 @@ class Node(utoken.Token):
         )
 
     def __ne__(self, other):
-        return self != other
+        return (
+            not isinstance(other, self.__class__)
+            or self.caption != other.caption
+            or self.children != other.children
+        )
 
     def allchildren(self):  # name is broken, returns self, which is not a child
         yield self

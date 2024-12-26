@@ -50,14 +50,14 @@ clean::
 	pip freeze | xargs pip uninstall -y
 
 sdist:: build
-	echo gitversion=\"$(shell git describe --tags)\" >mwlib/_gitversion.py
-	echo gitid=\"$(shell git rev-parse HEAD)\" >>mwlib/_gitversion.py
+	echo gitversion=\"$(shell git describe --tags)\" > _gitversion.py
+	echo gitid=\"$(shell git rev-parse HEAD)\" >> _gitversion.py
 
-	python setup.py -q build sdist
-	rm -f mwlib/_gitversion.py mwlib/_gitversion.pyc
+	python3 setup.py -q build sdist
+	rm -f _gitversion.py _gitversion.pyc
 
 sdist-upload:: sdist
-	python setup.py build sdist upload -r pypi
+	python3 setup.py build sdist upload -r pypi
 
 pip-install:: clean sdist
 	pip uninstall -y mwlib || true
@@ -87,10 +87,10 @@ docker-py27-test::
 
 # Directory for extensions
 EXTENSIONS_DIR := ./mediawiki/extensions
-# MediaWiki Collection extension tarball URL
-COLLECTION_URL := https://extdist.wmflabs.org/dist/extensions/Collection-REL1_39-55a940a.tar.gz   
 # Collection tarball file name
-COLLECTION_TAR := Collection-REL1_39-55a940a.tar.gz   
+COLLECTION_TAR := Collection-REL1_39-73539ac.tar.gz    
+# MediaWiki Collection extension tarball URL
+COLLECTION_URL := https://extdist.wmflabs.org/dist/extensions/$(COLLECTION_TAR) 
 # LocalSettings backup file
 LOCAL_SETTINGS_BAK := ./LocalSettings.php.bak
 # Docker container name for MariaDB

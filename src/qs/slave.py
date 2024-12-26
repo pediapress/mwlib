@@ -21,7 +21,7 @@ def short_err_msg():
     a(str(val))
 
     file, lineno, name, _ = traceback.extract_tb(tb)[-1]
-    a(" in function %s, file %s, line %s" % (name, file, lineno))
+    a(f" in function {name}, file {file}, line {lineno}")
 
     return "".join(msg)
 
@@ -56,7 +56,14 @@ class Worker:
         return self.proxy.q_set_info(jobid=self.jobid, info=info)
 
     def qadd(
-        self, channel, payload=None, jobid=None, prefix=None, wait=False, timeout=None, ttl=None
+        self,
+        channel,
+        payload=None,
+        jobid=None,
+        prefix=None,
+        wait=False,
+        timeout=None,
+        ttl=None,
     ):
         """call q_add on proxy with the same priority as the current job"""
         if jobid is None and prefix is not None:
@@ -89,7 +96,13 @@ class Worker:
 
 
 def main(
-    commands, host="localhost", port=None, numthreads=10, num_procs=0, numgreenlets=0, argv=None
+    commands,
+    host="localhost",
+    port=None,
+    numthreads=10,
+    num_procs=0,
+    numgreenlets=0,
+    argv=None,
 ):
     if port is None:
         port = 14311
@@ -101,7 +114,9 @@ def main(
 
         try:
             opts, _ = getopt.getopt(
-                argv, "c:s:", ["host=", "port=", "numthreads=", "numprocs=", "channel=", "skip="]
+                argv,
+                "c:s:",
+                ["host=", "port=", "numthreads=", "numprocs=", "channel=", "skip="],
             )
         except getopt.GetoptError as err:
             logger.exception(str(err))
@@ -129,7 +144,7 @@ def main(
     available_channels = []
     for x in dir(WorkHandler):
         if x.startswith("rpc_"):
-            available_channels.append(x[len("rpc_") :])
+            available_channels.append(x[len("rpc_"):])
     available_channels.sort()
 
     if not channels:
@@ -162,7 +177,9 @@ def main(
 
         while 1:
             try:
+                logger.info(f"pulling job from {host}:{port} for {channels}")
                 job = server_proxy.qpull(channels=channels)
+                logger.info("job: %s" % job)
                 break
             except Exception as err:
                 check_parent()
@@ -192,7 +209,7 @@ def main(
             pass
 
     def start_worker():
-        logger.info("Server proxy form start_worker %s:%s" % (host, port))
+        logger.info(f"Server proxy form start_worker {host}:{port}")
         qs = ServerProxy(host=host, port=port)
         while 1:
             handle_one_job(qs)
@@ -202,6 +219,7 @@ def main(
 
     def run_with_threads():
         import threading
+
         for i in range(numthreads):
             logger.debug("starting thread %s" % i)
             t = threading.Thread(target=start_worker)
@@ -209,7 +227,7 @@ def main(
 
         try:
             while True:
-                time.sleep(2 ** 26)
+                time.sleep(2**26)
         finally:
             os._exit(0)
 
@@ -227,7 +245,7 @@ def main(
 
                 if pid == 0:
                     try:
-                        logger.info("Server Proxy %s:%s" % (host, port))
+                        logger.info(f"Server Proxy {host}:{port}")
                         qs = ServerProxy(host=host, port=port)
                         handle_one_job(qs)
                     finally:
@@ -272,7 +290,7 @@ if __name__ == "__main__":
 
     class Commands:
         def rpc_divide(self, a, b):
-            logger.info("rpc_divide %s %s" % (a, b))
+            logger.info(f"rpc_divide {a} {b}")
             return a // b
 
     main(Commands, num_procs=2)

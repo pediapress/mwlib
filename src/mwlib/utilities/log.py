@@ -7,8 +7,6 @@ import logging
 import sys
 import time
 
-import six
-
 from mwlib.configuration import conf
 
 logging.basicConfig(format="%(asctime)-15s %(levelname)s %(name)s: %(message)s")
@@ -49,7 +47,7 @@ class Log:
         if prefix is None:
             self._prefix = []
         else:
-            if isinstance(prefix, six.string_types):
+            if isinstance(prefix, str):
                 self._prefix = [prefix]
             else:
                 self._prefix = prefix

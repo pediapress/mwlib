@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "Cython", "toml"]
 
 [project]
 name = "mwlib"
-version = "0.17.0.post1"
+version = "0.18.0"
 description = "mediawiki parser and utility library"
 authors = [
     {name = "pediapress.com", email = "info@pediapress.com"}
@@ -37,14 +37,10 @@ rl = "mwlib.writers.rl.writer:writer"
 
 
 [project.scripts]
-nslave = "mwlib.core.main_trampoline:nslave_main"
 postman = "mwlib.core.main_trampoline:postman_main"
-nserve = "mwlib.core.main_trampoline:nserve_main"
 mw-zip = "mwlib.apps.buildzip:main"
 mw-version = "mwlib._version:main"
 mw-render = "mwlib.apps.render:main"
-mw-qserve = "qs.qserve:main"
-mw-serve-ctl = "mwlib.apps.serve:main"
 
 
 [tool.ruff]
@@ -93,8 +89,8 @@ line-length = 99
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-# Assume Python 3.9.
-target-version = "py39"
+# Assume Python 3.10.
+target-version = "py310"
 
 [tool.ruff.mccabe]
 # Unlike Flake8, default to a complexity level of 10.

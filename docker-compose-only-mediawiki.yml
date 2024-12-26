@@ -1,20 +1,21 @@
 # MediaWiki with MariaDB
-#
-# Access via "http://localhost:8080"
-#   (or "http://$(docker-machine ip):8080" if using docker-machine)
-version: '3'
+
 services:
   mediawiki:
     image: mediawiki
     restart: always
     ports:
-      - 8080:80
+      - 8000:80
     links:
       - database
     volumes:
-      - mediawiki/images:/var/www/html/images
-      - mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
-      - mediawiki/extensions/Collection:/var/www/html/extensions/Collection
+      - ./mediawiki/images:/var/www/html/images
+      - ./mediawiki/LocalSettings.php:/var/www/html/LocalSettings.php
+      - ./mediawiki/extensions/Collection:/var/www/html/extensions/Collection
+      - ./cache:/app/cache
+    extra_hosts:
+      - "pediapress.com:host-gateway"
+      - "asset_server:host-gateway"
 
   database:
     container_name: database
@@ -29,6 +30,18 @@ services:
       - 3306:3306
     volumes:
       - db:/var/lib/mysql
+
+  reverse_proxy:
+    image: nginx
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 volumes:
   images:
   db:

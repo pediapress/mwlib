@@ -8,14 +8,14 @@ import sys
 import traceback
 import unicodedata
 import urllib
+import urllib.parse
+import urllib.request
 from hashlib import sha256
 from io import StringIO
 
 import gevent.monkey
 import pkg_resources
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
+import requests
 from bottle import HTTPResponse, default_app, get, post, request, route, static_file
 from gevent import pool, pywsgi
 from qs.misc import CallInLoop
@@ -183,12 +183,15 @@ def choose_idle_qserve():
 
 @route("/cache/:filename#.*#")
 def server_static(filename):
-    log.info("serving %r xd", filename)
-    print("serving", filename, " from ", '/app/cache')
-    response = static_file(filename, root='/app/cache', mimetype="application/octet-stream")
+    log.info("serving %r", filename)
+    print("serving", filename, " from ", "/app/cache")
+    response = static_file(
+        filename, root="/app/cache", mimetype="application/octet-stream"
+    )
     if filename.endswith(".rl"):
         response.headers["Content-Disposition"] = "inline; filename=collection.pdf"
     return response
+
 
 @get("<path:re:.*>")
 @post("<path:re:.*>")
@@ -199,7 +202,7 @@ def dispatch_command(path):
 
 def get_content_disposition_values(filename, _):
     if isinstance(filename, str):
-        filename = six.text_type(filename)
+        filename = str(filename)
 
     if filename:
         filename = filename.strip()
@@ -240,7 +243,6 @@ class Application:
             raise HTTPResponse("no command given", status=400)
 
         log.info(vars(request.params))
-
         try:
             method = getattr(self, "do_%s" % command)
         except AttributeError:
@@ -301,7 +303,7 @@ class Application:
         return collection_id
 
     def is_good_baseurl(self, url):
-        netloc = six.moves.urllib.parse.urlparse(url)[1].split(":")[0].lower()
+        netloc = urllib.parse.urlparse(url)[1].split(":")[0].lower()
         if (
             netloc == "localhost"
             or netloc.startswith("127.0.")
@@ -444,7 +446,7 @@ class Application:
         download_url = res["result"]["url"]
 
         print("fetching", download_url)
-        downloaded_file = six.moves.urllib.request.urlopen(download_url).info()
+        downloaded_file = urllib.request.urlopen(download_url).info()
         info = downloaded_file.info()
 
         header = {}
@@ -482,14 +484,8 @@ class Application:
 
         pod_api_url = params.pod_api_url
         if pod_api_url:
-            result = json.loads(
-                six.text_type(
-                    six.moves.urllib.request.urlopen(
-                        pod_api_url, data="any".encode("utf-8")
-                    ).read(),
-                    "utf-8",
-                )
-            )
+            response = requests.post(pod_api_url, data="any".encode("utf-8"))
+            result = response.json()
             post_url = result["post_url"].encode("utf-8")
             response = {
                 "state": "ok",
@@ -525,7 +521,6 @@ def _parse_qs(q_serve):
 
 def main():
     from mwlib import argv
-
     opts, args = argv.parse(
         sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface="
     )

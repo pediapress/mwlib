@@ -5,8 +5,6 @@
 import re
 from hashlib import sha256 as digest
 
-import six
-
 from mwlib.templ.marks import eqmark
 from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
 from mwlib.templ.scanner import Symbols, tokenize
@@ -49,8 +47,6 @@ class Parser:
     _cache = lrucache.MTLRUCache(2000)
 
     def __init__(self, txt, included=True, replace_tags=None, siteinfo=None):
-        if isinstance(txt, str):
-            txt = six.text_type(txt)
 
         self.txt = txt
         self.included = included
@@ -108,15 +104,15 @@ class Parser:
         self.set_token((token_type, txt))
 
     def _strip_ws(self, cond):
-        if isinstance(cond, six.text_type):
+        if isinstance(cond, str):
             return cond.strip()
 
         cond = list(cond)
-        if cond and isinstance(cond[0], six.text_type) and not cond[0].strip():
+        if cond and isinstance(cond[0], str) and not cond[0].strip():
             del cond[0]
 
         if cond and isinstance(cond[-1],
-                               six.text_type) and not cond[-1].strip():
+                               str) and not cond[-1].strip():
             del cond[-1]
         cond = tuple(cond)
         return cond
@@ -173,11 +169,11 @@ class Parser:
         # we stop here on the first colon. this is wrong but we don't have
         # the list of allowed magic functions here...
         done = False
-        if isinstance(node, six.string_types):
+        if isinstance(node, str):
             node = [node]
 
         for child in node:
-            if not isinstance(child, six.string_types):
+            if not isinstance(child, str):
                 continue
             if ":" in child:
                 child = child.split(":")[0]
@@ -200,12 +196,12 @@ class Parser:
             name.append(child)
 
         name = optimize(name)
-        if isinstance(name, six.text_type):
+        if isinstance(name, str):
             name = name.strip()
         return name, idx, append_arg
 
     def template_from_children(self, children):
-        if children and isinstance(children[0], six.text_type):
+        if children and isinstance(children[0], str):
             stripped_lower_text = children[0].strip().lower()
             if self.name2rx["if"].match(stripped_lower_text):
                 return self.if_node_from_children(children)

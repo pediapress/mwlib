@@ -3,7 +3,6 @@
 import heapq
 import random
 import time
-from builtins import hex, object
 from functools import total_ordering
 
 from gevent import event
@@ -14,7 +13,7 @@ logger = root_logger.getChild("qserve.jobs")
 
 
 @total_ordering
-class job(object):
+class job:
     serial = None
     jobid = None
     result = None
@@ -24,7 +23,9 @@ class job(object):
     ttl = 3600
     drop = False
 
-    def __init__(self, channel, payload=None, priority=0, jobid=None, timeout=None, ttl=None):
+    def __init__(
+        self, channel, payload=None, priority=0, jobid=None, timeout=None, ttl=None
+    ):
         self.payload = payload
         self.priority = priority
         self.channel = channel
@@ -39,7 +40,7 @@ class job(object):
             self.ttl = ttl
 
     def __repr__(self):
-        return "<job %r at %s>" % (self.jobid, hex(id(self)))
+        return "<job {!r} at {}>".format(self.jobid, hex(id(self)))
 
     def __eq__(self, other):
         return (self.priority, self.serial) == (other.priority, other.serial)
@@ -65,7 +66,7 @@ class job(object):
         return self.__getstate__()
 
 
-class workq(object):
+class workq:
     def __init__(self):
         self.channel2q = {}
 
@@ -76,7 +77,7 @@ class workq(object):
         self._channel2count = {}
 
     def __getstate__(self):
-        return dict(count=self.count, jobs=list(self.id2job.values()))
+        return {"count": self.count, "jobs": list(self.id2job.values())}
 
     def __setstate__(self, state):
         self.__init__()
@@ -122,7 +123,9 @@ class workq(object):
         try:
             c = self._channel2count[job.channel]
         except KeyError:
-            c = self._channel2count[job.channel] = dict(error=0, timeout=0, killed=0, success=0)
+            c = self._channel2count[job.channel] = {
+                "error": 0, "timeout": 0, "killed": 0, "success": 0
+            }
 
         e = job.error
         if e is None:
@@ -181,7 +184,9 @@ class workq(object):
                 job.deadline = now + job.ttl
                 mcount += 1
         if dcount or mcount:
-            logger.info("watchdog: dropped %s jobs, marked %s jobs with a deadline" % (dcount, mcount))
+            logger.info(
+                f"watchdog: dropped {dcount} jobs, marked {mcount} jobs with a deadline"
+            )
 
     def getstats(self):
         def count_not_done(lst):
@@ -191,12 +196,14 @@ class workq(object):
                     res += 1
             return res
 
-        stats = dict(
-            count=self.count,
-            numjobs=len(self.id2job),
-            channel2stat=self._channel2count,
-            busy=dict([(c, count_not_done(todo)) for c, todo in list(self.channel2q.items())]),
-        )
+        stats = {
+            "count": self.count,
+            "numjobs": len(self.id2job),
+            "channel2stat": self._channel2count,
+            "busy": {
+                c: count_not_done(todo) for c, todo in list(self.channel2q.items())
+            },
+        }
         return stats
 
     def report(self):
@@ -213,7 +220,6 @@ class workq(object):
             status.append("all channels idle")
         logger.info(" | ".join(status))
 
-
     def waitjobs(self, jobids):
         "Wait for jobs to finish. Drop jobs marked by dropjobs()."
 
@@ -226,10 +232,7 @@ class workq(object):
 
     def finishjob(self, jobid, result=None, error=None):
         j = self.id2job[jobid]
-        if error:
-            ttl = min(10, j.ttl)
-        else:
-            ttl = j.ttl
+        ttl = min(10, j.ttl) if error else j.ttl
 
         self._mark_finished(j, result=result, error=error, ttl=ttl)
 
@@ -269,10 +272,11 @@ class workq(object):
 
         return job.jobid
 
-    def push(self, channel, payload=None, priority=0, jobid=None, timeout=None, ttl=None):
-        if jobid is not None:
-            if jobid in self.id2job and self.id2job[jobid].error != "killed":
-                return jobid
+    def push(
+        self, channel, payload=None, priority=0, jobid=None, timeout=None, ttl=None
+    ):
+        if jobid is not None and jobid in self.id2job and self.id2job[jobid].error != "killed":
+            return jobid
         logger.info(f"Job {jobid} not found, pushing new job")
         return self.pushjob(
             job(
@@ -286,10 +290,7 @@ class workq(object):
         )
 
     def pop(self, channels):
-        if not channels:
-            try_channels = list(self.channel2q.keys())
-        else:
-            try_channels = channels
+        try_channels = channels if channels else list(self.channel2q.keys())
 
         self._preenall()
 

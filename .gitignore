@@ -45,3 +45,6 @@ mediawiki/math_formulas
 Collection-*.tar.gz
 LocalSettings.php
 cache
+notes.txt
+launch.json
+*.php.bak

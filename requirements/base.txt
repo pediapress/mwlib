@@ -9,23 +9,23 @@ apipkg==3.0.2
     # via -r requirements/base.in
 bottle==0.12.25
     # via -r requirements/base.in
-certifi==2023.11.17
+certifi==2024.7.4
     # via requests
 chardet==5.2.0
     # via reportlab
 charset-normalizer==3.3.2
     # via requests
-cython==3.0.6
+cython==3.0.10
     # via -r requirements/base.in
 defusedxml==0.7.1
     # via odfpy
-gevent==23.9.1
+gevent==24.2.1
     # via -r requirements/base.in
-greenlet==3.0.2
+greenlet==3.0.3
     # via gevent
-idna==3.6
+idna==3.7
     # via requests
-lxml==4.9.3
+lxml==5.2.2
     # via -r requirements/base.in
 mwclient==0.10.1
     # via -r requirements/base.in
@@ -33,25 +33,25 @@ oauthlib==3.2.2
     # via requests-oauthlib
 odfpy==1.4.1
     # via -r requirements/base.in
-pillow==10.1.0
+pillow==10.4.0
     # via
     #   -r requirements/base.in
     #   reportlab
 py==1.11.0
     # via -r requirements/base.in
-pygments==2.17.2
+pygments==2.18.0
     # via -r requirements/base.in
-pyparsing==3.1.1
+pyparsing==3.1.2
     # via -r requirements/base.in
-pypdf==3.17.2
+pypdf==4.3.1
     # via -r requirements/base.in
-reportlab==4.0.8
+reportlab==4.2.2
     # via -r requirements/base.in
-requests==2.31.0
+requests==2.32.3
     # via requests-oauthlib
-requests-oauthlib==1.3.1
+requests-oauthlib==2.0.0
     # via mwclient
-roman==4.1
+roman==4.2
     # via -r requirements/base.in
 simplejson==3.19.2
     # via -r requirements/base.in
@@ -63,11 +63,13 @@ timelib==0.3.0
     # via -r requirements/base.in
 toml==0.10.2
     # via -r requirements/base.in
-urllib3==2.1.0
+typing-extensions==4.12.2
+    # via pypdf
+urllib3==2.2.2
     # via requests
 zope-event==5.0
     # via gevent
-zope-interface==6.1
+zope-interface==6.4.post2
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:

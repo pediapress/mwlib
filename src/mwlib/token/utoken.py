@@ -8,8 +8,6 @@
 import sys
 from typing import Optional
 
-import six
-
 from mwlib import _uscan as _mwscan
 from mwlib.refine.util import parse_params, resolve_entity
 from mwlib.token.token import Token as BaseToken
@@ -228,7 +226,7 @@ class CompatScanner:
             """
 abbr b big blockquote br center cite code del div em endfeed font h1 h2 h3
 h4 h5 h6 hr i index inputbox ins kbd li ol p pages references rss s small span
-startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
+startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd mapframe 
 """.split()
         )
 
@@ -265,9 +263,6 @@ startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd
     def __call__(self, text, uniquifier=None):
         if self.allowed_tags is None:
             self._init_allowed_tags()
-
-        if isinstance(text, str):
-            text = six.text_type(text)
 
         tokens = scan(text)
 

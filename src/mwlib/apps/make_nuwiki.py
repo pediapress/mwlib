@@ -3,13 +3,10 @@
 
 import contextlib
 import os
+import urllib.parse
 
 import gevent
 import gevent.pool
-import six
-import six.moves.urllib.error
-import six.moves.urllib.parse
-import six.moves.urllib.request
 
 from mwlib.metabook import collection, get_licenses, parse_collection_page
 from mwlib.net import fetch
@@ -27,14 +24,17 @@ class StartFetcher:
         self.nfo = {}
 
     def get_api(self):
-        if self.username:
-            api = mwapi.MwApi(self.api_url, self.username, self.password)
+        username = self.wiki_options.get("username")
+        password = self.wiki_options.get("password")
+        domain = self.wiki_options.get("domain")
+        if username:
+            api = mwapi.MwApi(self.api_url, username, password)
         else:
             api = mwapi.MwApi(self.api_url)
         api.set_limit()
 
-        if self.username:
-            api.login(self.username, self.password, self.domain)
+        if username:
+            api.login(username, password, domain)
         return api
 
     def fetch_pages_from_metabook(self, api):
@@ -48,7 +48,7 @@ class StartFetcher:
             {
                 "format": "nuwiki",
                 "base_url": self.base_url,
-                "script_extension": self.options.script_extension,
+                "script_extension": self.wiki_options.get("script_extension"),
             }
         )
 
@@ -61,34 +61,35 @@ class StartFetcher:
             licenses=self.licenses,
             status=self.status,
             progress=self.progress,
-            imagesize=self.options.imagesize,
+            imagesize=self.wiki_options.get("imagesize"),
             cover_image=metabook.cover_image,
-            fetch_images=not self.options.noimages,
+            fetch_images=not self.wiki_options.get("noimages"),
         )
         self.fetcher.run()
 
     def init_variables(self):
         base_url = self.base_url
-        options = self.options
+        options = self.wiki_options
 
         if not base_url.endswith("/"):
             base_url += "/"
-        api_url = "".join([base_url, "api", options.script_extension])
+        script_extension = options.get("script_extension")
+        api_url = "".join([base_url, "api", script_extension])
         self.api_url = api_url
 
-        self.username = options.username
-        self.password = options.password
-        self.domain = options.domain
+        self.username = options.get("username")
+        self.password = options.get("password")
+        self.domain = options.get("domain")
 
         self.fsout = fetch.FsOutput(self.fsdir)
 
     def fetch_collectionpage(self, api):
-        collection_page = self.options.collectionpage
+        collection_page = self.wiki_options.get("collection_page")
         if collection_page is None:
             return api
 
         with contextlib.suppress(Exception):
-            collection_page = six.text_type(six.moves.urllib.parse.unquote(str(collection_page)),
+            collection_page = str(urllib.parse.unquote(str(collection_page)),
                                             "utf-8")
 
         self.nfo["collectionpage"] = collection_page
@@ -118,7 +119,7 @@ class StartFetcher:
         meta_book.sort_as = meta["sort_as"]
 
         path = os.path.join(self.fsout.path, "collectionpage.txt")
-        if isinstance(rawtext, six.text_type):
+        if isinstance(rawtext, str):
             rawtext = rawtext.encode("utf-8")
         with open(path, "wb") as file:
             file.write(rawtext)
@@ -150,7 +151,7 @@ def wikitrust(baseurl, metabook):
             continue
 
         try:
-            rev = trust_revisions.get_trusted_revision(x.title)
+            rev = trust_revisions.get_trusted_revision(article.title)
             article.revision = rev["revid"]
 
             print(
@@ -158,8 +159,7 @@ def wikitrust(baseurl, metabook):
                 % (rev["title"], rev["age"], rev["revid"], rev["user"])
             )
         except Exception as err:
-            print("error choosing trusted revision for",
-                  repr(article.title), repr(err))
+            print("error choosing trusted revision for", repr(article.title), repr(err))
 
 
 def write_multi_wiki_metabook(fsdir, metabook):
@@ -204,7 +204,13 @@ def get_id_wikis(metabook):
     return id2wiki
 
 
-def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
+def make_nuwiki(
+    fsdir,
+    metabook,
+    wiki_options,
+    pod_client,
+    status,
+):
     id2wiki = get_id_wikis(metabook)
 
     is_multiwiki = len(id2wiki) > 1
@@ -234,8 +240,8 @@ def make_nuwiki(fsdir, metabook, options, podclient=None, status=None):
                 progress=progress,
                 base_url=wikiconf.baseurl,
                 metabook=my_mb,
-                options=options,
-                podclient=podclient,
+                wiki_options=wiki_options,
+                pod_client=pod_client,
                 status=status,
             )
         )

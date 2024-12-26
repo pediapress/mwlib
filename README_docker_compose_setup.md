@@ -17,7 +17,7 @@ Mediawiki requires an initial setup phase where it installs the database and cre
 ```shell
 make initial_setup
 ```
-MediaWiki will be available at [http://localhost:8080](http://localhost:8080).
+MediaWiki will be available at [http://localhost](http://localhost).
 
 After that, you can shut down the containers with the following `make` command:
 

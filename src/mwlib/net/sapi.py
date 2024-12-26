@@ -3,7 +3,7 @@
 # Copyright (c) PediaPress GmbH
 
 """api.php client"""
-
+import logging
 from http import cookiejar
 from urllib import parse, request
 
@@ -17,11 +17,20 @@ from gevent.lock import Semaphore
 from mwlib import authors
 from mwlib.configuration import conf
 
+logger = logging.getLogger(__name__)
+
+
+
+
 
 def loads(input_string):
     """Potentially remove UTF-8 BOM and call json.loads()"""
 
-    if input_string and isinstance(input_string, str) and input_string[:3] == "\xef\xbb\xbf":
+    if (
+        input_string
+        and isinstance(input_string, str)
+        and input_string[:3] == "\xef\xbb\xbf"
+    ):
         input_string = input_string[3:]
     return json.loads(input_string)
 
@@ -87,6 +96,10 @@ class MwApi:
         return f"<mwapi {self.apiurl} at {hex(id(self))}>"
 
     def _fetch(self, url):
+        if isinstance(url, str):
+            logger.debug("fetching url:  %r", url)
+            url = request.Request(url)
+            url.add_header("Referer", 'https://pediapress.com')
         url_opener = self.opener.open(url)
         data = url_opener.read()
         url_opener.close()
@@ -121,8 +134,9 @@ class MwApi:
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         postdata = parse.urlencode(args).encode()
 
+        logger.debug("posting to %r", self.apiurl)
         req = request.Request(self.apiurl, postdata, headers)
-
+        req.add_header("Referer", 'https://pediapress.com')
         res = loads(self._fetch(req))
         return res
 
@@ -140,10 +154,8 @@ class MwApi:
                 sem.release()
 
     def _handle_error(self, error, kwargs):
-        error_info = error.get("info", ""),
-        raise RuntimeError(
-            f"{error_info}: [fetching {self._build_url(**kwargs)}]"
-        )
+        error_info = (error.get("info", ""),)
+        raise RuntimeError(f"{error_info}: [fetching {self._build_url(**kwargs)}]")
 
     def _handle_request(self, **kwargs):
         data = loads(self._request(**kwargs))
@@ -188,7 +200,9 @@ class MwApi:
 
             qc_values = list(data.get("query-continue", {}).values())
             if qc_values and query_continue:
-                todo, stop_query = self._handle_query_continue(qc_values, last_qc, kwargs)
+                todo, stop_query = self._handle_query_continue(
+                    qc_values, last_qc, kwargs
+                )
                 if stop_query:
                     return retval
                 last_qc = qc_values

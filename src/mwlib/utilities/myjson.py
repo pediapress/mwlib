@@ -33,7 +33,8 @@ def object_hook(dct):
             sanitized_dict[str(k)] = value
         sanitized_dict["type"] = document_type
         return klass(**sanitized_dict)
-    print("no match", document_type)
+    if document_type is not None:
+        print(f"No class found for document type: {document_type}")
     return dct
 
 

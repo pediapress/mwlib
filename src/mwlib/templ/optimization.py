@@ -1,5 +1,3 @@
-import six
-
 from mwlib.templ.marks import eqmark
 from mwlib.templ.node import Node
 
@@ -10,7 +8,7 @@ def _combine_string(node):
     tmp = []
     for optimized_node in (optimize(child_node) for child_node in node):
         if (
-            isinstance(optimized_node, six.string_types)
+            isinstance(optimized_node, str)
             and optimized_node is not eqmark
         ):
             tmp.append(optimized_node)
@@ -28,7 +26,7 @@ def optimize(node):
     if type(node) is tuple:
         return tuple(optimize(x) for x in node)
 
-    if isinstance(node, six.string_types):
+    if isinstance(node, str):
         return node
 
     if len(node) == 1 and type(node) in (list, Node):

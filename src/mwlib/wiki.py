@@ -7,9 +7,8 @@
 import os
 import tempfile
 import zipfile
+from configparser import ConfigParser
 from io import StringIO
-
-from six.moves.configparser import ConfigParser
 
 from mwlib import nuwiki
 from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
