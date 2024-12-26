@@ -8,7 +8,7 @@ description = "mediawiki parser and utility library"
 authors = [
     {name = "pediapress.com", email = "info@pediapress.com"}
 ]
-readme = "README.rst"
+readme = "README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",

@@ -26,7 +26,9 @@ def get_ext_modules():
         Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
     ]
     for path in Path(MWLIB_SRC_DIR).rglob("**/*.c"):
-        module_name = path.relative_to(MWLIB_SRC_DIR).with_suffix("").as_posix().replace("/", ".")
+        module_name = (
+            path.relative_to(MWLIB_SRC_DIR).with_suffix("").as_posix().replace("/", ".")
+        )
         module_name = "mwlib." + module_name
         extensions.append(Extension(module_name, sources=[str(path)]))
     return extensions
@@ -35,6 +37,8 @@ def get_ext_modules():
 def main():
     if Path("Makefile").exists():
         build_deps()
+
+    long_description = Path("README.md").read_text()
 
     setup(
         name="mwlib",
@@ -46,6 +50,8 @@ def main():
         package_dir={"": "src"},
         include_package_data=True,
         zip_safe=False,
+        long_description=long_description,
+        long_description_content_type="text/markdown",
     )
 
 
