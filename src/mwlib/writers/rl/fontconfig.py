@@ -170,16 +170,16 @@ fonts = [
             "Arabic Supplement",
         ],
         "file_names": [
-            "customnazli/nazli.ttf",
-            "customnazli/nazlib.ttf",
-            "customnazli/nazli-italic.ttf",
-            "customnazli/nazlib-italic.ttf",
+            "farsiweb/nazli.ttf",
+            "farsiweb/nazlib.ttf",
+            # not found "customnazli/nazli-italic.ttf",
+            # not found "customnazli/nazlib-italic.ttf",
         ],
     },
     {
         "name": "UnBatang",
         "code_points": ["Hangul Syllables", "Hangul Jamo", "Hangul Compatibility Jamo"],
-        "file_names": ["unfonts/UnBatang.ttf"],
+        "file_names": ["unfonts-core/UnBatang.ttf"],
     },
     {
         "name": "Arundina Serif",
@@ -194,32 +194,32 @@ fonts = [
     {
         "name": "Lohit Telugu",
         "code_points": ["Telugu"],
-        "file_names": ["ttf-telugu-fonts/lohit_te.ttf"],
+        "file_names": ["lohit-telugu/Lohit-Telugu.ttf"],
     },
     {
         "name": "Sarai",
         "code_points": ["Devanagari"],
-        "file_names": ["ttf-devanagari-fonts/Sarai_07.ttf"],
+        "file_names": ["lohit-devanagari/Lohit-Devanagari.ttf"],
     },
     {
         "name": "Gujarati",
         "code_points": ["Gujarati"],
-        "file_names": ["ttf-indic-fonts-core/lohit_gu.ttf"],
+        "file_names": ["lohit-gujarati/Lohit-Gujarati.ttf"],
     },
     {
         "name": "Lohit Punjabi",
         "code_points": ["Gurmukhi"],
-        "file_names": ["ttf-indic-fonts-core/lohit_pa.ttf"],
+        "file_names": ["lohit-punjabi/Lohit-Gurmukhi.ttf"],
     },
     {
         "name": "Lohit Oriya",
         "code_points": ["Oriya"],
-        "file_names": ["ttf-oriya-fonts/lohit_or.ttf"],
+        "file_names": ["lohit-oriya/Lohit-Odia.ttf"],
     },
     {
         "name": "AnjaliOldLipi",
         "code_points": ["Malayalam"],
-        "file_names": ["ttf-malayalam-fonts/AnjaliOldLipi.ttf"],
+        "file_names": ["malayalam/AnjaliOldLipi-Regular.ttf"],
     },
     {
         "name": "Kedage",
@@ -234,17 +234,17 @@ fonts = [
     {
         "name": "LikhanNormal",
         "code_points": ["Bengali"],
-        "file_names": ["ttf-bengali-fonts/LikhanNormal.ttf"],
+        "file_names": ["fonts-beng-extra/LikhanNormal.ttf"],
     },
     {
         "name": "Lohit Tamil",
         "code_points": ["Tamil"],
-        "file_names": ["ttf-indic-fonts-core/lohit_ta.ttf"],
+        "file_names": ["lohit-tamil/Lohit-Tamil.ttf"],
     },
     {
         "name": "Khmer",
         "code_points": ["Khmer", "Khmer Symbols"],
-        "file_names": ["ttf-khmeros-core/KhmerOS.ttf"],
+        "file_names": ["khmeros/KhmerOS.ttf"],
     },
 ]
 
@@ -263,7 +263,7 @@ class RLFontSwitcher(FontSwitcher):
         FontSwitcher.__init__(self)
         self.font_paths = font_paths
         self.force_font = None
-        self.hypenation_pattern = re.compile(r"(/|\.|\+|-|_|\?)(\S)")
+        self.hyphenation_pattern = re.compile(r"([/._+?-])(\S)")
 
     def register_font_def_list(self, font_list):
         missing_fonts = []
@@ -285,7 +285,7 @@ class RLFontSwitcher(FontSwitcher):
         zws = '<font fontSize="1"> </font>'
         res = []
         for txt, font in font_list:
-            txt = re.sub(self.hypenation_pattern, r"\g<1>%s\g<2>" % zws, txt)
+            txt = re.sub(self.hyphenation_pattern, r"\g<1>%s\g<2>" % zws, txt)
             res.append((txt, font))
         return res
 
