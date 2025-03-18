@@ -23,6 +23,7 @@ from mwlib.localization import _locale
 from mwlib.miscellaneous.status import Status
 from mwlib.utilities import utils
 from mwlib.utilities.log import root_logger
+from mwlib.utilities.utils import start_logging
 from mwlib.writerbase import WriterError
 
 logger = root_logger.getChild(__name__)
@@ -219,6 +220,8 @@ def main(
     args,
 ):
     conf.readrc()
+    if logfile:
+        start_logging(logfile)
     options = {
         "list_writers": list_writers,
         "writer_info": writer_info,
@@ -295,7 +298,7 @@ def get_environment(options):
     keep_zip = options.get("keep_zip")
     zip_filename = make_zip(
         output=keep_zip,
-        options=options,
+        wiki_options=options,
         metabook=env.metabook,
         status=status,
     )
@@ -356,7 +359,7 @@ def get_writer_from_options(options):
     options_to_remove = []
     for option in writer_options:
         if option not in getattr(writer, "options", {}):
-            print("Warning: unknown writer option %r" % option)
+            logger.warning("Warning: unknown writer option %r" % option)
             options_to_remove.append(option)
     for option in options_to_remove:
         del writer_options[option]
