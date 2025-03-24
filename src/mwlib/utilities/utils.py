@@ -432,7 +432,7 @@ def python2sort(iterable, reverse=False):
                 continue
         else:  # did not break, make new group
             groups.append([item])
-    print(groups)  # for debugging
+    log.debug(groups)  # for debugging
     result = itertools.chain.from_iterable(sorted(group) for group in groups)
     if reverse:
         result = reversed(list(result))

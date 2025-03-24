@@ -147,7 +147,7 @@ class NuWiki:
             if not os.path.exists(file_name):
                 break
             count += 1
-            print("reading", file_name)
+            log.info("reading", file_name)
             file_content = str(
                 open(self._pathjoin(file_name), "rb").read(), "utf-8"
             )
@@ -462,7 +462,7 @@ class Adapt:
         page = self.get_image_description_page(name)
         if page is not None:
             return get_templates(page.rawtext)
-        print("no such image: %r" % name)
+        log.error("no such image: %r" % name)
         return []
 
     def get_image_templates_and_args(self, name, wikidb=None):
