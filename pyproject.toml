@@ -3,22 +3,23 @@ requires = ["setuptools", "wheel", "Cython", "toml"]
 
 [project]
 name = "mwlib"
-version = "0.18.0"
+version = "0.18.1"
 description = "mediawiki parser and utility library"
 authors = [
     {name = "pediapress.com", email = "info@pediapress.com"}
 ]
 readme = "README.md"
+requires-python = ">=3.11, <3.13"
+keywords = ["mediawiki", "wikipedia", "parser", "pdf", "writer"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: Wiki",
@@ -26,10 +27,11 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: HTML",
     "Topic :: Text Processing :: Markup :: XML",
 ]
-#license = "License: BSD License"
+license = "BSD-3-Clause"
 
 [project.urls]
 homepage = "https://code.pediapress.com/"
+repository = "https://github.com/pediapress/mwlib"
 
 [project.entry-points."mwlib.writers"]
 odf = "mwlib.writers.odf.writer:writer"
