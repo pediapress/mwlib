@@ -23,6 +23,7 @@ http://meta.wikimedia.org/wiki/Help:HTML_in_wikitext
 
 
 import copy
+import logging
 import re
 import sys
 
@@ -54,9 +55,9 @@ from mwlib.parser import (
     build_amap,
 )
 from mwlib.refine.uparser import parse_string
-from mwlib.utilities.log import Log
 
-log = Log("advtree")
+
+log = logging.getLogger(__name__)
 
 
 def _id_index(lst, element_to_check):
@@ -70,8 +71,8 @@ def _id_index(lst, element_to_check):
 
 def debug(method):  # use as decorator
     def foo(self, *args, **kargs):
-        log(f"\n{method.__name__} called with {args!r} {kargs!r}")
-        log(f"on {self!r} attrs:{self.attributes!r} style:{self.style!r}")
+        log.info(f"\n{method.__name__} called with {args!r} {kargs!r}")
+        log.ingo(f"on {self!r} attrs:{self.attributes!r} style:{self.style!r}")
         parent = self
         while parent.parent:
             parent = parent.parent

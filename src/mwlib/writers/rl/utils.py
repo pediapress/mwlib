@@ -1,13 +1,13 @@
+import logging
 import traceback
 
 from reportlab.pdfbase.pdfdoc import PDFDictionary
 from reportlab.platypus.paragraph import Paragraph
 
-from mwlib.utilities import log
 
 from .pdfstyles import text_style
 
-log = log.Log("rlwriter")
+log = logging.getLogger("rlwriter")
 
 
 def check_reportlab():

@@ -20,5 +20,7 @@ def get_all():
         examples = snippet_file.read().split("\x0c\n")[1:]
     res = []
     for i, example in enumerate(examples):
+        if not example:
+            continue
         res.append(Snippet(example, i))
     return res

@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-
+import logging
 import os
 import tempfile
 import zipfile
@@ -14,9 +14,8 @@ from mwlib import nuwiki
 from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
 from mwlib.metabook import WikiConf
 from mwlib.utilities import myjson as json
-from mwlib.utilities.log import Log
 
-log = Log("mwlib.utils")
+log = logging.getLogger(__name__)
 
 
 def wiki_obsolete_cdb(path=None, **kwargs):

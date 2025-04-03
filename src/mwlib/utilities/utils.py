@@ -1,4 +1,5 @@
 import itertools
+import logging
 import os
 import pprint
 import re
@@ -16,9 +17,8 @@ from typing import Union
 
 import pypdf
 
-from mwlib.utilities.log import Log
+log = logging.getLogger(__name__)
 
-log = Log("mwlib.utils")
 non_word = re.compile(r"(?u)[^-\w.~]")
 
 
@@ -301,7 +301,7 @@ def report(
     mail_headers=None,
     **kw,
 ):
-    log.report(f"system={system!r} subject={subject!r}")
+    log.info(f"system={system!r} subject={subject!r}")
 
     text = []
     text.append("SYSTEM: %r\n" % system)

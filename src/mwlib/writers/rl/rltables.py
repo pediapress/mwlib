@@ -3,19 +3,19 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import logging
 import math
 
 from reportlab.lib import colors
 
 from mwlib.parser.nodes import Cell, Row, Table, Text
 from mwlib.tree import advtree
-from mwlib.utilities import log
 from mwlib.writer import styleutils
 from mwlib.writers.rl import pdfstyles
 
 from .customflowables import Figure
 
-log = log.Log("rlwriter")
+log = logging.getLogger("rlwriter")
 
 
 def scale_images(data):

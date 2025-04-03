@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-
+import logging
 import os
 import shutil
 import tempfile
@@ -14,9 +14,8 @@ try:
 except BaseException:
     from elementtree import ElementTree as ET
 
-from mwlib.utilities import log
 
-log = log.Log("mwlib.mathutils")
+log = logging.getLogger("mwlib.mathutils")
 
 
 def try_system(cmd):

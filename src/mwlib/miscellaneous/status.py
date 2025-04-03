@@ -2,12 +2,11 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-
+import logging
 import os
 import sys
 
 from mwlib.asynchronous import rpcclient
-from mwlib.utilities.log import Log
 
 try:
     import simplejson as json
@@ -15,7 +14,7 @@ except ImportError:
     import json
 
 
-log = Log('mwlib.status')
+log = logging.getLogger(__name__)
 
 
 class Status:

@@ -6,6 +6,7 @@ if __name__ == "__main__":
 
     monkey.patch_all()
 
+import logging
 import os
 import socket
 import sys
@@ -16,10 +17,9 @@ from qs import slave
 
 from mwlib.asynchronous import proc
 from mwlib.utilities import myjson
-from mwlib.utilities.log import root_logger
 from mwlib.utilities.utils import garble_password
 
-logger = root_logger.getChild(__name__)
+logger = logging.getLogger(__name__)
 
 CACHE_DIR = None
 CACHE_URL = None

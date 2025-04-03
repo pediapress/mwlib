@@ -1,9 +1,11 @@
 import os
 import subprocess
+import tempfile
 import unittest
 
 import click
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
+import pytest
 
 
 @click.command()
@@ -59,6 +61,7 @@ COLLECTIONS = [
 ]
 
 
+@pytest.mark.integration
 class TestBuildAndRender(unittest.TestCase):
     collection_dir = None
     output_dir = None

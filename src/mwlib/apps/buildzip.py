@@ -4,6 +4,7 @@
 """mz-zip - installed via setuptools' entry_points"""
 
 import contextlib
+import logging
 import os
 import shutil
 import sys
@@ -18,10 +19,15 @@ from gevent import monkey
 from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
 from mwlib.configuration import conf
+from mwlib.metabook import collection
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utilities import myjson as json
 from mwlib.utilities import utils
 from mwlib.utilities.utils import start_logging
+from mwlib.utilities.log import setup_console_logging
+
+
+log = logging.getLogger(__name__)
 
 USE_HELP_TEXT = "Use --help for usage information."
 
@@ -203,8 +209,8 @@ def main(
     script_extension,
     args,
 ):
-    if logfile:
-        start_logging(logfile)
+    setup_console_logging(level=logging.INFO, stream=sys.stderr)
+    log.info("starting mw-zip with log level ")
     if metabook:
         if "{" in metabook and "}" in metabook:
             metabook = json.loads(metabook)
@@ -213,7 +219,7 @@ def main(
                 metabook = json.load(file_path)
     for title in args:
         if metabook is None:
-            metabook = metabook.collection()
+            metabook = collection()
         metabook.append_article(title)
     try:
         imagesize = int(imagesize)

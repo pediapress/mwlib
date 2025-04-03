@@ -408,6 +408,8 @@ def guess_api_urls(url):
             retval.append(base_url)
     if url.endswith("/index.php"):
         retval.append(url[: -len("index.php")] + "api.php")
+    if not url.endswith("api.php"):
+        retval.append(f"{url}api.php")
     return retval
 
 

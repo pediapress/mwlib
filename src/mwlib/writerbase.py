@@ -3,12 +3,12 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import logging
 from typing import Callable, Optional
 
 from mwlib import parser
-from mwlib.utilities import log
 
-log = log.Log('mwlib.writerbase')
+log = logging.getLogger('mwlib.writerbase')
 
 
 class WriterError(RuntimeError):

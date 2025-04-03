@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import getpass
+import logging
 import os
 import socket
 import sys
@@ -13,10 +14,9 @@ from mwlib import argv
 from mwlib.asynchronous import slave
 from mwlib.miscellaneous.status import Status
 from mwlib.networking.net.podclient import PODClient
-from mwlib.utilities.log import root_logger
 from mwlib.utilities.utils import send_mail
 
-logger = root_logger.getChild(__name__)
+logger = logging.getLogger(__name__)
 CACHE_DIR = "cache"
 gevent.monkey.patch_all()
 

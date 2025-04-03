@@ -1,13 +1,12 @@
 #! /usr/bin/env py.test
-
 import glob
+import logging
 import os
 from importlib.metadata import entry_points
 
 import pytest
-from mwlib.utilities.log import root_logger
 
-logger = root_logger.getChild("test_render")
+logger = logging.getLogger("test_render")
 
 
 def zip_files():

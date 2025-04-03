@@ -13,6 +13,7 @@ import traceback
 from importlib.metadata import entry_points
 
 import click
+import logging
 
 from mwlib import nuwiki, wiki
 from mwlib.apps.buildzip import make_zip
@@ -22,11 +23,11 @@ from mwlib.exceptions.mwlib_exceptions import RenderException
 from mwlib.localization import _locale
 from mwlib.miscellaneous.status import Status
 from mwlib.utilities import utils
-from mwlib.utilities.log import root_logger
+from mwlib.utilities.log import setup_console_logging
 from mwlib.utilities.utils import start_logging
 from mwlib.writerbase import WriterError
 
-logger = root_logger.getChild(__name__)
+logger = logging.getLogger(__name__)
 USE_HELP_TEXT = "Use --help for usage information."
 
 
@@ -222,6 +223,7 @@ def main(
     conf.readrc()
     if logfile:
         start_logging(logfile)
+    setup_console_logging(level="INFO", stream=sys.stderr)
     options = {
         "list_writers": list_writers,
         "writer_info": writer_info,

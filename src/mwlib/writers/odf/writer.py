@@ -12,7 +12,7 @@ More Info:
 * http://opendocumentfellowship.com/projects/odfpy
 * http://testsuite.opendocumentfellowship.com/ sample documents
 """
-
+import logging
 import sys
 
 import odf
@@ -26,11 +26,10 @@ from mwlib.parser import Caption
 from mwlib.refine.uparser import parse_string
 from mwlib.tree import advtree
 from mwlib.tree.treecleaner import TreeCleaner
-from mwlib.utilities.log import Log
 from mwlib.writers.odf import odfconf
 from mwlib.writers.odf import odfstyles as style
 
-log = Log("odfwriter")
+log = logging.getLogger("odfwriter")
 
 # check for ODF version
 e = element.Element(qname=("a", "n"))
@@ -49,14 +48,14 @@ PARENT_NONE_ERROR = "parent is None"
 
 def show_node(obj):
     attrs = list(obj.__dict__.keys())
-    log(obj.__class__.__name__)
+    log.info(obj.__class__.__name__)
     stuff = [
         f"{k} => {getattr(obj, k)!r}"
         for k in attrs
         if (k != "children") and getattr(obj, k)
     ]
     if stuff:
-        log(repr(stuff))
+        log.info(repr(stuff))
 
 
 class SkipChildren:
@@ -94,7 +93,7 @@ class ParagraphProxy(text.Element):
         elif handler.qname not in self.allowed_children:
             if self.parentNode is None:
                 raise ValueError(PARENT_NONE_ERROR)
-            # log("addElement", e.type, "not allowed in ", self.type)
+            # log.debug("addElement", e.type, "not allowed in ", self.type)
             # find a parent that accepts this type
             parent = self
             while (
@@ -107,7 +106,7 @@ class ParagraphProxy(text.Element):
             if handler.qname not in parent.allowed_children:
                 if parent.parentNode is not None:
                     raise ValueError("p.parentNode is not None")
-                log(
+                log.info(
                     "ParagraphProxy:addElement() ",
                     handler.type,
                     "not allowed in any parents, failed, should have been added to",
@@ -181,7 +180,7 @@ class ODFWriter:
             self.write(child, self.doc.text)
         doc = self.getDoc()
         doc.save(output, addsuffix=False)
-        log(f"writing to {output}")
+        log.info(f"writing to {output}")
 
     def getDoc(self, _=""):
         return self.doc
@@ -216,7 +215,7 @@ class ODFWriter:
                 parent.addElement(paragraph_proxy)
                 paragraph_proxy.addText(obj.caption)
             except odf.element.IllegalChild:
-                log(
+                log.info(
                     "writeText:",
                     obj,
                     "not allowed in ",
@@ -238,10 +237,10 @@ class ODFWriter:
             # in ' u'text:span' ', dumping'
             try:  # maybe c has no attribute type
                 art = obj.get_parent_nodes_by_class(advtree.Article)[0]
-                log("in article ", art.caption)
-                log("write:", handler.type, "not allowed in ", parent.type, ", dumping")
+                log.info("in article %s", art.caption)
+                log.info(f"write: {handler.type} not allowed in {parent.type}, dumping")
             except AttributeError:
-                log(f"missing .type attribute {handler!r} {parent!r} ")
+                log.info(f"missing .type attribute {handler!r} {parent!r} ")
             return False
 
     def _handle_object_and_determine_child_processing(self, obj, parent):
@@ -254,7 +253,7 @@ class ODFWriter:
             handler = method_name(obj)
 
         elif self.ignoreUnknownNodes:
-            log("Handler for node %s not found! SKIPPED" % obj.__class__.__name__)
+            log.info("Handler for node %s not found! SKIPPED" % obj.__class__.__name__)
             show_node(obj)
             handler = None
         else:
@@ -299,7 +298,7 @@ class ODFWriter:
     def owriteArticle(self, article):
         self.references = []  # collect references
         title = article.caption
-        log("processing article %s" % title)
+        log.info("processing article %s" % title)
         section = text.Section(stylename=style.sect, name=title)
         section.addElement(
             text.H(outlinelevel=1, stylename=style.ArticleHeader, text=title)
@@ -434,7 +433,7 @@ class ODFWriter:
             return new_table
         # a section groups table-caption & table:
         if len(captions) != 1:
-            log(
+            log.info(
                 "owriteTable: more than one Table Caption not handeled. Using only first Caption!"
             )
         # group using a section
@@ -575,10 +574,10 @@ class ODFWriter:
         get a MATHML from Latex
         translate element tree to odf.Elements
         """
-        # log("math")
+        # log.info("math")
         rendered_math = render_math(obj.caption, output_mode="mathml", render_engine="blahtexml")
         if rendered_math is None:
-            log("render_math failed!")
+            log.info("render_math failed!")
             return
 
         def _with_et_element(element, parent):
@@ -765,7 +764,7 @@ class ODFWriter:
             innerframe.rescaleFactor = (
                 scale  # needed cuz image map coordinates needs the same rescaled
             )
-            log(f"w_obj ,w_img: {w_obj},{w_img}")
+            log.info(f"w_obj ,w_img: {w_obj},{w_img}")
 
         href = self.doc.addPicture(img_path)
         innerframe.addElement(draw.Image(href=href))

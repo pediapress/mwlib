@@ -2,9 +2,9 @@
 
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
+import logging
 
 
-from mwlib.utilities.log import Log
 from mwlib.parser.nodes import (
     URL,
     Article,
@@ -38,7 +38,7 @@ from mwlib.parser.nodes import (
     Timeline,
 )
 
-log = Log("parser")
+log = logging.getLogger(__name__)
 
 
 def show(out, node, indent=0, verbose=False):

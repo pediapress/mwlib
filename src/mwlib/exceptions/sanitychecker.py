@@ -4,12 +4,11 @@
 class for defining DTD-Like Rules for the tree
 """
 
-
+import logging
 from mwlib.exceptions.mwlib_exceptions import SanityException
 from mwlib.tree.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
-from mwlib.utilities.log import Log
 
-log = Log("sanitychecker")
+log = logging.getLogger("sanitychecker")
 
 # -----------------------------------------------------------
 # Constraints

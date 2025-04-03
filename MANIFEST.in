@@ -50,7 +50,6 @@ include sandbox/time-expr.py
 include sandbox/time-parse.py
 include setup.cfg
 include setup.py
-include src/mwlib/__init__.py
 include src/mwlib/_expander.re
 include src/mwlib/_uscan.cc
 include src/mwlib/_uscan.re
@@ -78,7 +77,6 @@ include src/mwlib/core/main_trampoline.py
 include src/mwlib/core/nserve.py
 include src/mwlib/core/nslave.py
 include src/mwlib/core/serve.py
-include src/mwlib/core/test_nserve.py
 include src/mwlib/database/dummydb.py
 include src/mwlib/exceptions/__init__.py
 include src/mwlib/exceptions/mwlib_exceptions.py
@@ -110,6 +108,7 @@ include src/mwlib/linuxmem.py
 include src/mwlib/localization/__init__.py
 include src/mwlib/localization/_locale.py
 include src/mwlib/localization/l10n.py
+include src/mwlib/mapframe.py
 include src/mwlib/metabook.py
 include src/mwlib/miscellaneous/__init__.py
 include src/mwlib/miscellaneous/expr.py
@@ -121,6 +120,7 @@ include src/mwlib/mw_math/mathml.py
 include src/mwlib/mw_math/mathutils.py
 include src/mwlib/net/__init__.py
 include src/mwlib/net/fetch.py
+include src/mwlib/net/infobox.py
 include src/mwlib/net/sapi.py
 include src/mwlib/networking/__init__.py
 include src/mwlib/networking/client.py
@@ -526,6 +526,7 @@ include src/qs/rpcclient.py
 include src/qs/rpcserver.py
 include src/qs/slave.py
 include tests/conftest.py
+include tests/mwlib/apps/test_buildzip.py
 include tests/mwlib/canthus.mb.json
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
@@ -583,5 +584,6 @@ include tests/qs/test_call_in_loop.py
 include tests/qs/test_jobs.py
 include tests/qs/test_proc.py
 include tests/qs/test_qserve.py
+include tests/test_end_to_end.py
 include tools/set-interwiki.py
 include tox.ini

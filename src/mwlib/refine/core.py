@@ -3,6 +3,7 @@
 
 # Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
+import logging
 
 from typing import Any, Optional
 
@@ -13,14 +14,14 @@ from mwlib.refine import util
 from mwlib.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
 from mwlib.refine.tagparser import TagParser
 from mwlib.token.utoken import Token, tokenize
-from mwlib.utilities.log import root_logger
+
 
 try:
     from mwlib.refine import _core
 except ImportError:
     _core = None
 
-log = root_logger.getChild("refine")
+log = logging.getLogger(__name__)
 
 setattr(Token, "t_complex_table", "complex_table")
 setattr(Token, "t_complex_caption", "complex_caption")

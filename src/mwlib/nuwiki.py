@@ -1,6 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import logging
 import os
 import shutil
 import tempfile
@@ -18,10 +19,9 @@ from mwlib.templ.parser import parse
 from mwlib.tree import advtree
 from mwlib.utilities import myjson as json
 from mwlib.utilities import utils
-from mwlib.utilities.log import Log
 from mwlib.utilities.utils import python2sort
 
-log = Log("nuwiki")
+log = logging.getLogger(__name__)
 
 
 class Page:
@@ -147,7 +147,7 @@ class NuWiki:
             if not os.path.exists(file_name):
                 break
             count += 1
-            log.info("reading", file_name)
+            log.info("reading %s", file_name)
             file_content = str(
                 open(self._pathjoin(file_name), "rb").read(), "utf-8"
             )

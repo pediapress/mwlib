@@ -1,6 +1,7 @@
 """Client to a Print-on-Demand partner service (e.g. pediapress.com)"""
 
 import http.client
+import logging
 import os
 import time
 import urllib.parse
@@ -13,10 +14,9 @@ except ImportError:
     import json
 
 from mwlib.configuration import conf
-from mwlib.utilities.log import Log
 from mwlib.utilities.utils import get_multipart
 
-log = Log("mwapidb")
+log = logging.getLogger(__name__)
 
 
 class PODClient:

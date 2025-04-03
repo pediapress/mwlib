@@ -2,8 +2,7 @@
 # See README.md for additional licensing information.
 
 import os
-
-import mwlib.utilities.log
+import logging
 
 DEBUG = "DEBUG_EXPANDER" in os.environ
-log = mwlib.utilities.log.Log("expander")
+log = logging.getLogger(__name__)

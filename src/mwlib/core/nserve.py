@@ -2,19 +2,19 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
+import logging
 import os
 import re
 import sys
 import traceback
 import unicodedata
-import urllib
 import urllib.parse
 import urllib.request
 from hashlib import sha256
 from io import StringIO
+import importlib.metadata
 
 import gevent.monkey
-import pkg_resources
 import requests
 from bottle import HTTPResponse, default_app, get, post, request, route, static_file
 from gevent import pool, pywsgi
@@ -23,10 +23,10 @@ from qs.misc import CallInLoop
 from mwlib import _version
 from mwlib.asynchronous import rpcclient
 from mwlib.metabook import calc_checksum
-from mwlib.utilities import log, lrucache
+from mwlib.utilities import lrucache
 from mwlib.utilities import myjson as json
 
-log = log.root_logger.getChild("mwlib.serve")
+log = logging.getLogger("mwlib.serve")
 
 if __name__ == "__main__":
     gevent.monkey.patch_all()
@@ -59,8 +59,8 @@ name2writer = {
 }
 
 
-def get_writers():
-    for entry_point in pkg_resources.iter_entry_points("mwlib.writers"):
+def get_writers() -> dict[str, Bunch]:
+    for entry_point in importlib.metadata.entry_points(group="mwlib.writers"):
         if entry_point.name in name2writer:
             continue
 
@@ -235,22 +235,22 @@ class Application:
         self.collection_id = None
         self.post_url = None
 
-    def dispatch(self, request):
+    def dispatch(self, http_request):
         try:
-            command = request.params["command"]
+            command = http_request.params["command"]
         except KeyError:
-            log.error("no command given in request for url: %r", request.url)
+            log.error("no command given in request for url: %r", http_request.url)
             raise HTTPResponse("no command given", status=400)
 
-        log.info(vars(request.params))
+        log.info(vars(http_request.params))
         try:
             method = getattr(self, "do_%s" % command)
         except AttributeError:
             log.error(f"no such command: {command!r}")
             raise HTTPResponse(f"no such command: {command!r}", status=400)
-        collection_id = request.params.get("collection_id")
+        collection_id = http_request.params.get("collection_id")
         if not collection_id:
-            collection_id = self.new_collection(request.params)
+            collection_id = self.new_collection(http_request.params)
             is_new = True
         else:
             is_new = False
@@ -270,7 +270,7 @@ class Application:
         self.qserve = rpcclient.ServerProxy(host=qserve[0], port=qserve[1])
 
         try:
-            return method(collection_id, request.params, is_new)
+            return method(collection_id, http_request.params, is_new)
         except Exception as exc:
             print(
                 "ERROR while dispatching {!r}: {}".format(

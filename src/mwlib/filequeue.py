@@ -1,5 +1,4 @@
-
-
+import logging
 import os
 import time
 import traceback
@@ -7,7 +6,6 @@ import traceback
 import pickle
 
 from mwlib import utils
-from mwlib.utilities.log import Log
 
 
 class FileJobQueuer:
@@ -15,12 +13,12 @@ class FileJobQueuer:
 
     def __init__(self, queue_dir):
         self.queue_dir = utils.ensure_dir(queue_dir)
-        self.log = Log("FileJobQueuer")
+        self.log = logging.getLogger("FileJobQueuer")
 
     def __call__(self, _, job_id, args):
         job_filename = "%s.job" % os.path.join(self.queue_dir, job_id)
         if os.path.exists(job_filename):
-            self.log.warn(f"Job file {job_filename} already exists")
+            self.log.warning(f"Job file {job_filename} already exists")
             return
 
         with open(job_filename + ".tmp", "wb") as job_file:
@@ -34,7 +32,7 @@ class FileJobPoller:
         self.sleep_time = sleep_time
         self.max_num_jobs = max_num_jobs
         self.num_jobs = 0
-        self.log = Log("FileJobPoller")
+        self.log = logging.getLogger("FileJobPoller")
         self.files = []
 
     def _reap_children(self):
@@ -43,7 +41,7 @@ class FileJobPoller:
                 flags = 0 if self.num_jobs == self.max_num_jobs else os.WNOHANG
                 pid, exit_code = os.waitpid(-1, flags)
             except OSError as exc:
-                self.log.ERROR(f"waitpid(-1) failed: {exc}")
+                self.log.error(f"waitpid(-1) failed: {exc}")
                 break
             if (pid, exit_code) == (0, 0):
                 break
@@ -88,7 +86,7 @@ class FileJobPoller:
             try:
                 mtime = os.stat(path).st_mtime
             except Exception as exc:
-                self.log.ERROR(f"Could not stat {path!r}: {exc}")
+                self.log.error(f"Could not stat {path!r}: {exc}")
                 continue
             files.append((mtime, filename))
 
@@ -123,6 +121,6 @@ class FileJobPoller:
         except BaseException:
             traceback.print_exc()
         finally:
-            self.log.warn(f"error running {args!r}")
+            self.log.warning(f"error running {args!r}")
             os._exit(10)
         return False

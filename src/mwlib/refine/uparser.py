@@ -1,14 +1,14 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import logging
 
 from mwlib import expander, metabook, nshandling
 from mwlib.parser.old_uparser import postprocessors
 from mwlib.refine import compat
 from mwlib.token.utoken import show
-from mwlib.utilities.log import Log
 
-log = Log("refine.uparser")
+log = logging.getLogger(__name__)
 
 
 def get_article_raw_text(wikidb, title: str):

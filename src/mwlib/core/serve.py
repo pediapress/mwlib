@@ -2,7 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-
+import logging
 import errno
 import os
 import re
@@ -14,10 +14,9 @@ from io import StringIO
 
 from mwlib import _version
 from mwlib.metabook import calc_checksum
-from mwlib.utilities import log
 from mwlib.utilities import myjson as json
 
-log = log.Log('mwlib.serve')
+log = logging.getLogger('mwlib.serve')
 collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
 
 
@@ -68,7 +67,7 @@ def _find_collection_dirs_to_purge(collection_dirs, time_stamp):
                 yield path
         except OSError as err:
             if err.errno != errno.ENOENT:
-                log.ERROR(f"error while examining {path!r}: {err}")
+                log.error(f"error while examining {path!r}: {err}")
 
 
 def _rmtree(path):
@@ -76,7 +75,7 @@ def _rmtree(path):
         shutil.rmtree(path)
     except OSError as exc:
         if exc.errno != errno.ENOENT:
-            log.ERROR(f'could not remove directory {path!r}: {exc}')
+            log.error(f'could not remove directory {path!r}: {exc}')
 
 
 def purge_cache(max_age, cache_dir):

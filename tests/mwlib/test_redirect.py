@@ -16,7 +16,10 @@ def mwzip(metabook):
 def render_get_text(metabook):
     z = mwzip(metabook)
     dst = z.with_suffix(".pdf")
-    subprocess.run(["mw-render", "-c", str(z), "-o", str(dst), "-w", "rl"], check=True)
+    try:
+        subprocess.run(["mw-render", "-c", str(z), "-o", str(dst), "-w", "rl"], check=True)
+    except subprocess.CalledProcessError as e:
+        print("return code:", e.returncode, "ignoring errors")
     txt = utils.pdf2txt(str(dst))
     return txt
 

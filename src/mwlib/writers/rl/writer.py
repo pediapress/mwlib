@@ -7,6 +7,7 @@ import copy
 import cProfile
 import gc
 import gettext
+import logging
 import os
 import re
 import shutil
@@ -51,7 +52,6 @@ from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL
 from mwlib.refine import uparser
 from mwlib.tree.treecleaner import TreeCleaner
-from mwlib.utilities import log
 from mwlib.writer import miscutils, styleutils
 from mwlib.writer.imageutils import ImageUtils
 from mwlib.writer.licensechecker import LicenseChecker
@@ -92,7 +92,7 @@ except ImportError:
 check_reportlab()
 
 
-log = log.Log("rlwriter")
+log = logging.getLogger("rlwriter")
 
 
 class ReportlabError(Exception):
@@ -368,11 +368,9 @@ class RlWriter:
     def write(self, obj):
         method_name = "write" + obj.__class__.__name__
         if not hasattr(self, method_name):
-            log.error("unknown node:", repr(obj.__class__.__name__))
+            log.error("unknown node: %s", repr(obj.__class__.__name__))
             if self.strict:
-                raise writerbase.WriterError(
-                    "Unkown Node: %s " % obj.__class__.__name__
-                )
+                raise writerbase.WriterError("Unkown Node: %s " % obj.__class__.__name__)
             return []
         method = getattr(self, method_name)
         styles = self.formatter.set_style(obj)
@@ -437,7 +435,7 @@ class RlWriter:
         self.cnt.transform_css(art)
         if self.debug:
             # parser.show(sys.stdout, art)
-            print("\n".join([repr(r) for r in self.tree_cleaner.get_reports()]))
+            log.info("\n".join([repr(r) for r in self.tree_cleaner.get_reports()]))
         return art
 
     def initReportlabDoc(self, output):
@@ -472,7 +470,7 @@ class RlWriter:
             self.doc = doc_bak
             return True
         except:
-            log.error("article failed:", repr(node.caption))
+            log.error("article failed: %s", repr(node.caption))
             trace = traceback.format_exc()
             log.error(trace)
             self.doc = doc_bak
@@ -587,7 +585,7 @@ class RlWriter:
         try:
             gc.collect()
             if linuxmem:
-                log.info("memory usage after laying out:", linuxmem.memory())
+                log.info("memory usage after laying out: %s", linuxmem.memory())
             self.doc.build(elements)
             if pdfstyles.RENDER_TOC and self.numarticles > 1:
                 err = self.toc_renderer.build(
@@ -601,7 +599,7 @@ class RlWriter:
                         f"TOC not rendered. Probably pdftk is not properly installed. returncode: {err}"
                     )
             if linuxmem:
-                log.info("memory usage after reportlab rendering:", linuxmem.memory())
+                log.info("memory usage after reportlab rendering: %s", linuxmem.memory())
         except:
             traceback.print_exc()
             log.info("rendering failed - trying safe rendering")
@@ -611,7 +609,7 @@ class RlWriter:
         if license_stats_dir and os.path.exists(license_stats_dir):
             self.license_checker.dump_unknown_licenses(license_stats_dir)
             if self.debug:
-                print(self.license_checker.dump_stats())
+                log.info(self.license_checker.dump_stats())
 
     def renderLicense(self):
         self.license_mode = True
@@ -1272,11 +1270,9 @@ class RlWriter:
             if is_inline(res):
                 txt.extend(res)
             else:
-                log.warning(
-                    node.__class__.__name__,
-                    " contained block element: ",
-                    child.__class__.__name__,
-                )
+                node_class_name = node.__class__.__name__
+                child_class_name = child.__class__.__name__
+                log.warning(f"{node_class_name} contained block element: {child_class_name}")
                 txt.append(self.renderText(child.get_all_display_text()))
         self.inline_mode -= 1
 
@@ -1432,7 +1428,7 @@ class RlWriter:
     def writeStyle(self, style):
         txt = []
         txt.extend(self.renderInline(style))
-        log.warning("unknown tag node", repr(style))
+        log.warning("unknown tag node %s", repr(style))
         return txt
 
     def _generate_article_id_and_check_internal_link(self, obj):
@@ -1598,13 +1594,13 @@ class RlWriter:
             _, status = os.waitpid(process.pid, 0)
             if status != 0:
                 log.warning(
-                    "img could not be converted. convert exited with non-zero return code:",
+                    "img could not be converted. convert exited with non-zero return code: %s",
                     repr(cmd),
                 )
                 return ""
             return f"{img_path}.png"
         except OSError:
-            log.warning("img could not be converted. cmd failed:", repr(cmd))
+            log.warning("img could not be converted. cmd failed: %s", repr(cmd))
             return ""
 
     def getImgPath(self, target):
@@ -1619,7 +1615,7 @@ class RlWriter:
                 self.tmp_images.add(img_path)
             if not self.license_checker.display_image(target):
                 if self.debug:
-                    print(
+                    log.info(
                         "filtering image",
                         target,
                         self.license_checker.get_license_display_name(target),
@@ -2226,7 +2222,7 @@ class RlWriter:
                 % (seq_reset, counter_id, style[-1], counter_id)
             )
         else:
-            log.warn("invalid list style:", repr(style))
+            log.warn("invalid list style: %s", repr(style))
             item_prefix = ""
 
         list_indent = max(0, (self.list_indentation + self.para_indent_level))
@@ -2643,7 +2639,7 @@ class RlWriter:
 
         img = PilImage.open(imgpath)
         if self.debug:
-            log.info("math png at:", imgpath)
+            log.info("math png at: %s", imgpath)
         width, height = img.size
         del img
 
