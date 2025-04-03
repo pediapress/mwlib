@@ -43,12 +43,14 @@ def main():
     setup(
         name="mwlib",
         version=get_version(),
-        install_requires=["Pillow", "setuptools"],
         ext_modules=cythonize(get_ext_modules(), language_level=3),
         packages=[MWLIB_MODULES_DIR, f"{MWLIB_MODULES_DIR}.templ", "qs"],
         namespace_packages=[MWLIB_MODULES_DIR],
         package_dir={"": "src"},
         include_package_data=True,
+        package_data={
+            "mwlib.writers.rl.locale": ["*.mo", "*.po"],
+        },
         zip_safe=False,
         long_description=long_description,
         long_description_content_type="text/markdown",
