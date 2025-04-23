@@ -18,6 +18,7 @@ import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
+from gettext import gettext as _
 
 from mwlib.tree import advtree
 
@@ -180,7 +181,7 @@ class RlWriter:
             strict_server = self.env.wiki.siteinfo["general"]["server"] in [
                 "http://de.wikipedia.org"
             ]
-        except:
+        except Exception:
             strict_server = False
         if strict_server:
             self.license_checker = LicenseChecker(
@@ -278,7 +279,7 @@ class RlWriter:
             if not is_heading(last):
                 try:
                     _, height = last.wrap(PRINT_WIDTH, PRINT_HEIGHT)
-                except:
+                except Exception:
                     height = 0
                 group_height += height
                 if group_height > PRINT_HEIGHT / 10 or isinstance(
@@ -469,7 +470,7 @@ class RlWriter:
             testdoc.build(elements)
             self.doc = doc_bak
             return True
-        except:
+        except Exception:
             log.error("article failed: %s", repr(node.caption))
             trace = traceback.format_exc()
             log.error(trace)
@@ -818,7 +819,7 @@ class RlWriter:
         title = self.formatter.clean_text(_("Image Sources, Licenses and Contributors"))
         elements.append(Paragraph("<b>%s</b>" % title, heading_style(mode="article")))
         elements.append(TocEntry(txt=title, lvl="article"))
-        for _, title, url, license, authors in sorted(self.img_meta_info.values()):
+        for unused, title, url, license, authors in sorted(self.img_meta_info.values()):
             authors_text = self._filter_anon_ip_edits(authors)
             if not license:
                 license = _("unknown")
@@ -1793,7 +1794,7 @@ class RlWriter:
             ret = self._fix_broken_images(img_node, img_path)
             if ret != 0:
                 return []
-        except:
+        except Exception:
             traceback.print_exc()
             log.warning("image skipped")
             return []
@@ -1891,7 +1892,7 @@ class RlWriter:
             res = self.write(node)
             try:
                 res = build_paragraph(res)
-            except:
+            except Exception:
                 res = Paragraph("", text_style(in_table=self.table_nesting))
         if len(row) < perrow:
             row.append(res)
@@ -2040,7 +2041,7 @@ class RlWriter:
             return XPreformatted(
                 txt, text_style(mode="source", in_table=self.table_nesting)
             )
-        except:
+        except Exception:
             traceback.print_exc()
             log.error(
                 f"unsuitable lexer for source code language: {src_lang} - Lexer: {lexer.__class__.__name__}"

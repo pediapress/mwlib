@@ -5,7 +5,8 @@
 
 
 # This file is used to store translatable messages. The messages will probably be used in the future in the PDF.
-# Currently they are only used in the printed version.
+# Currently, they are only used in the printed version.
+from gettext import gettext as _
 
 _("Index")
 

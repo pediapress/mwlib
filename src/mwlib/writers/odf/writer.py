@@ -611,7 +611,6 @@ class ODFWriter:
     obwriteLangLink = owriteLink
     owriteNamespaceLink = owriteLink
     owriteInterwikiLink = owriteLink
-    owriteSpecialLink = owriteLink
 
     def owriteURL(self, obj):
         hyperlink_element = text.A(href=obj.caption)

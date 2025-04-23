@@ -7,7 +7,8 @@ import signal
 import sys
 import traceback
 
-from gevent import socket, core, event, Timeout, version_info
+from gevent import Timeout, core, event, socket, version_info
+
 from qs.log import root_logger
 
 logger = root_logger.getChild(__name__)
@@ -66,7 +67,7 @@ def run_cmd(args, timeout=None):
             sp[0].close()
             sp[1].close()
             os.execvp(args[0], args)
-        except:
+        except Exception:
             stderr = os.fdopen(2, "w", 0)
             os.write(
                 2, "failed to exec child process: %r\nPATH=%r" % (args, os.environ.get("PATH"))

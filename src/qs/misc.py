@@ -9,7 +9,7 @@ def safe_call(fun, *args, **kwargs):
         return fun(*args, **kwargs)
     except gevent.GreenletExit:
         raise
-    except:
+    except Exception:
         pass
 
 
@@ -33,7 +33,7 @@ class CallInLoop(object):
             self.function(*self.args, **self.kwargs)
         except gevent.GreenletExit:
             raise
-        except:
+        except Exception:
             safe_call(self.report_error)
         safe_call(gevent.sleep, self.sleep_time)
 
@@ -43,7 +43,7 @@ class CallInLoop(object):
                 self.iterate()
             except gevent.GreenletExit:
                 raise
-            except:
+            except Exception:
                 pass
 
     def report_error(self):

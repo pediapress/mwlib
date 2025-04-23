@@ -4,7 +4,6 @@ import traceback
 from reportlab.pdfbase.pdfdoc import PDFDictionary
 from reportlab.platypus.paragraph import Paragraph
 
-
 from .pdfstyles import text_style
 
 log = logging.getLogger("rlwriter")
@@ -45,7 +44,7 @@ def build_paragraph(txt_list, style=text_style(), txt_style=None):
     if len(_txt) > 0:
         try:
             return [Paragraph(_txt, style)]
-        except:
+        except Exception:
             traceback.print_exc()
             log.warning("reportlab paragraph error:", repr(_txt))
             return []

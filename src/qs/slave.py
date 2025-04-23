@@ -199,13 +199,13 @@ def main(
             try:
                 server_proxy.qfinish(jobid=job["jobid"], error=short_err_msg())
                 logger.exception("error while handling job")
-            except:
+            except Exception:
                 pass
             return
 
         try:
             server_proxy.qfinish(jobid=job["jobid"], result=result)
-        except:
+        except Exception:
             pass
 
     def start_worker():
@@ -238,7 +238,7 @@ def main(
             while len(children) < num_procs:
                 try:
                     pid = os.fork()
-                except:
+                except Exception:
                     logger.info("failed to fork child")
                     time.sleep(1)
                     continue

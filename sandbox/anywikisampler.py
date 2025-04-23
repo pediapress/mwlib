@@ -3,14 +3,17 @@
 # Copyright (c) 2008, PediaPress GmbH
 # See README.rst for additional licensing information.
 
-import urllib
-import sys
 import cgi
 import subprocess
+import sys
+import urllib
+
 import BaseHTTPServer
 import SimpleHTTPServer
 import urllib2
+
 from mwlib.utils import daemonize
+
 try:
     import simplejson as json
 except ImportError:
@@ -79,13 +82,13 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         path, query = urllib.splitquery(self.path)
         path = [urllib.unquote_plus(x) for x in path.split("/")]
         query = cgi.parse_qs(query or "")
-        print path, query
-        app = path[1]
+        print(path, query)
+        # app = path[1]
         args = path[2:]
-        print args, query
+        print(args, query)
         redir = False
 
-        print self.state.articles
+        print(self.state.articles)
 
         if "articles" in query:
             self.state.articles = [x.strip() for x in query["articles"]
@@ -118,7 +121,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.end_headers()
             return
 
-        print self.state.articles
+        print(self.state.articles)
 
         response = self.renderpage()
         #self.send_header("Content-type", "text/html")
@@ -133,8 +136,8 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         h = json.loads(u.read())
         posturl = h["post_url"]
         redirect_url = h["redirect_url"]
-        print "acquired post url", posturl
-        print "redirected browser to", redirect_url
+        print("acquired post url", posturl)
+        print("redirected browser to", redirect_url)
 
         args = [
             mwzip_cmd,
@@ -148,7 +151,7 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             if a:
                 args.append('%s' % str(a))
 
-        print "executing", mwzip_cmd, args
+        print("executing", mwzip_cmd, args)
         daemonize()
         rc = subprocess.call(executable=mwzip_cmd, args=args)
         if rc != 0:
@@ -164,8 +167,8 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 def run():
     server_address = (host, port)
     httpd = BaseHTTPServer.HTTPServer(server_address, MyHandler)
-    print "usage: %s [host=localhost] [port=8000]" % sys.argv[0]
-    print "listening as http://%s:%d" % (host, port)
+    print("usage: %s [host=localhost] [port=8000]" % sys.argv[0])
+    print("listening as http://%s:%d" % (host, port))
     httpd.serve_forever()
 
 

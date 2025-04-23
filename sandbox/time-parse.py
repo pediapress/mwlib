@@ -3,22 +3,22 @@
 import sys
 import time
 
+from mwlib import treecleaner, uparser
+from mwlib.refine import compat
 from mwlib.tree import advtree
 
-s = unicode(open(sys.argv[1], "rb").read(), "utf-8")
-
-from mwlib import uparser, treecleaner
-from mwlib.refine import compat
+with open(sys.argv[1], "r", encoding="utf-8") as f:
+    s = f.read()
 
 stime = time.time()
 r = compat.parse_txt(s)
-print "parse:", time.time() - stime
+print("parse:", time.time() - stime)
 
 stime = time.time()
 advtree.build_advanced_tree(r)
-print "tree", time.time() - stime
+print("tree", time.time() - stime)
 
 stime = time.time()
 tc = treecleaner.TreeCleaner(r)
 tc.clean_all()
-print "clean:", time.time() - stime
+print("clean:", time.time() - stime)

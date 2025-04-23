@@ -5,12 +5,10 @@ import io
 import pickle
 import sys
 import time
-from builtins import chr
-from builtins import object
-from builtins import range
+from builtins import chr, object, range
 
 import pytest
-from gevent import sleep, pool
+from gevent import pool, sleep
 
 from qs import jobs
 
@@ -86,7 +84,7 @@ def test_job_pickle():
     assert j2.jobid == 11
     assert j2.timeout == j1.timeout
     assert j2.ttl == 20
-    assert j2.done == False
+    assert j2.done is False
 
 
 def test_job_unpickle_event():

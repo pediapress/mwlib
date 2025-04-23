@@ -3,6 +3,9 @@
 """
 measure template expansion performance
 """
+import time
+
+from mwlib import expander
 
 citeweb = """
 <includeonly>{{
@@ -86,10 +89,6 @@ citeweb = """
 </noinclude>
 """
 
-
-import time
-from mwlib import expander
-
 snippet = """
 {{citeweb|url=http://www.webbyawards.com/webbys/winners-2004.php|title=Webby Awards 2004|publisher=The International Academy of Digital Arts and Sciences|date=2004|accessdate=2007-06-19}}
 """
@@ -98,4 +97,4 @@ db = expander.DictDB(citeweb=citeweb)
 e = expander.Expander(snippet * 1000, pagename='test', wikidb=db)
 stime = time.time()
 e.expandTemplates()
-print time.time() - stime
+print(time.time() - stime)

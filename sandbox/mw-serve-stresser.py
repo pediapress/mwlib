@@ -2,23 +2,25 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from optparse import OptionParser
 import os
-import urllib
-import urllib2
-import tempfile
-import time
 import random
 import subprocess
 import sys
+import tempfile
+import time
+import urllib
+from optparse import OptionParser
+
+import urllib2
+
 try:
     import simplejson as json
 except ImportError:
     import json
 
-from mwlib import mwapidb, utils, log, bookshelf
 import mwlib.metabook
-
+from mwlib import bookshelf, log, mwapidb
+from mwlib.utilities import utils
 
 RENDER_TIMEOUT_DEFAULT = 60 * 60  # 60 minutes
 LICENSE_URL = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'
@@ -27,12 +29,12 @@ system = 'mw-serve-stresser'
 log = log.Log('mw-serve-stresser')
 
 # disable fetch cache
-utils.fetch_url_orig = utils.fetch_url
+fetch_url_orig = utils.fetch_url
 
 
 def fetch_url(*args, **kargs):
     kargs["fetch_cache"] = {}
-    return utils.fetch_url_orig(*args, **kargs)
+    return fetch_url_orig(*args, **kargs)
 
 
 utils.fetch_url = fetch_url
@@ -47,11 +49,11 @@ def getRandomArticles(api, min=1, max=100):
     num = random.randint(min, max)
     articles = set()
     steps = (1 + num / 10)
-    print num, steps
+    print(num, steps)
     for i in range(steps):
         res = api.query(list="random", rnnamespace=0, rnlimit=10)
         if res is None or 'query' not in res:
-            print res
+            print(res)
             time.sleep(5)
             continue
         res = res["query"]["random"]
@@ -100,7 +102,6 @@ def addLicense(mbook):
         ignore_errors=False,
         expected_content_type='text/x-wiki',
     )
-    license_text = unicode(license_text, 'utf-8')
     license = {'mw_rights_text': license_text,
                'name': 'GNU Free Documentation License',
                }
@@ -118,7 +119,7 @@ def postRenderCommand(metabook, baseurl, serviceurl, writer):
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return json.loads(unicode(res, 'utf-8'))
+    return json.loads(res)
 
 
 def postRenderKillCommand(collection_id, serviceurl, writer):
@@ -130,14 +131,14 @@ def postRenderKillCommand(collection_id, serviceurl, writer):
     }
     data = urllib.urlencode(data)
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return json.loads(unicode(res, 'utf-8'))
+    return json.loads(res)
 
 
 def getRenderStatus(colid, serviceurl, writer):
     #log.info('get render status')
     data = urllib.urlencode({"command": "render_status", "collection_id": colid, 'writer': writer})
     res = urllib2.urlopen(urllib2.Request(serviceurl.encode("utf8"), data)).read()
-    return json.loads(unicode(res, 'utf-8'))
+    return json.loads(res)
 
 
 def download(colid, serviceurl, writer):
@@ -254,7 +255,6 @@ def main():
                       default='http://tools.pediapress.com/mw-serve/',
                       # default='http://localhost:8899/mw-serve/',
                       )
-    use_help = 'Use --help for usage information.'
     options, args = parser.parse_args()
 
     assert options.from_email

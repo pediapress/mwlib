@@ -6,6 +6,7 @@
 import os
 import shutil
 import subprocess
+from gettext import gettext as _
 
 from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.platypus.paragraph import Paragraph

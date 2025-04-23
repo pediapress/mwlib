@@ -2,8 +2,8 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
-import logging
 import errno
+import logging
 import os
 import re
 import shutil

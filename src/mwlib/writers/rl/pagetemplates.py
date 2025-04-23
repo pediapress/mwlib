@@ -5,6 +5,7 @@
 
 import locale
 import time
+from gettext import gettext as _
 
 from PIL import Image
 from reportlab.lib.pagesizes import A3

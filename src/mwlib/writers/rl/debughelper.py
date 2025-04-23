@@ -83,7 +83,7 @@ def dump_table_data(tabledata):
     for row in tabledata:
         for cell in row:
             print(cell.__class__.__name__)
-            if cell.__class__ == dict:
+            if isinstance(cell.__class__, dict):
                 cell = cell["content"]
             for item in cell:
                 dump_text(item)
