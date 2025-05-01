@@ -1,9 +1,9 @@
 #! /usr/bin/env py.test
 import pytest
 
-from mwlib import expander
+from mwlib.parser import expander
 from mwlib.database.dummydb import DummyDB
-from mwlib.expander import DictDB
+from mwlib.parser.expander import DictDB
 from mwlib.templ.misc import expand_str
 from mwlib.templ.nodes import Template, Variable, show
 from mwlib.templ.scanner import tokenize

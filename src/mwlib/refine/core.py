@@ -1263,7 +1263,7 @@ def parse_txt(txt, xopts=None, **kwargs):
         xopts.__dict__.update(**kwargs)
 
     if xopts.expander is None:
-        from mwlib.expander import DictDB, Expander
+        from mwlib.parser.expander import DictDB, Expander
 
         xopts.expander = Expander("", "pagename", wikidb=DictDB())
 

@@ -5,7 +5,7 @@ measure template expansion performance
 """
 import time
 
-from mwlib import expander
+from mwlib.parser import expander
 
 citeweb = """
 <includeonly>{{

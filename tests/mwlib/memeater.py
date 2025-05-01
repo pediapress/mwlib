@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from mwlib.expander import DictDB
+from mwlib.parser.expander import DictDB
 from mwlib.templ.misc import expand_str
 
 d4 = """

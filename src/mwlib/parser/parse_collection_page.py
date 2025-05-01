@@ -3,7 +3,8 @@ import os
 import re
 from collections import defaultdict
 
-from mwlib import expander, metabook
+from mwlib import metabook
+from mwlib.parser import expander
 
 uniq = "--%s--" % binascii.hexlify(os.urandom(16))
 

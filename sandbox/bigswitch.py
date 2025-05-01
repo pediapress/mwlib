@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import time
 
-from mwlib import expander
+from mwlib.parser import expander
 from mwlib.templ.misc import expand_str
 
 einwohnerzahlen = """

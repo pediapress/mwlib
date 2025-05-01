@@ -3,7 +3,7 @@
 """tests for the convert macros, I can't get them to work inside our
 mediawiki installation.
 """
-from mwlib.expander import DictDB
+from mwlib.parser.expander import DictDB
 from mwlib.templ.misc import expand_str
 
 db = {

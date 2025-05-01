@@ -1,5 +1,5 @@
 #! /usr/bin/env py.test
-from mwlib.expander import parse
+from mwlib.parser.expander import parse
 from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import magic_nodes, nodes
 

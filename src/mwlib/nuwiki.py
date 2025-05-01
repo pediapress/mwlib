@@ -14,7 +14,7 @@ from sqlitedict import SqliteDict
 
 from mwlib import metabook, nshandling, parser
 from mwlib.core.authors import get_authors
-from mwlib.expander import Expander, find_template, get_template_args, get_templates
+from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.refine import uparser
 from mwlib.templ.parser import parse
 from mwlib.tree import advtree
@@ -456,7 +456,7 @@ class Adapt:
         return self.get_page(fqname)
 
     def get_image_templates(self, name, wikidb=None):
-        from mwlib.expander import get_templates
+        from mwlib.parser.expander import get_templates
 
         page = self.get_image_description_page(name)
         if page is not None:
@@ -465,12 +465,12 @@ class Adapt:
         return []
 
     def get_image_templates_and_args(self, name, wikidb=None):
-        from mwlib.expander import get_templates
+        from mwlib.parser.expander import get_templates
 
         page = self.get_image_description_page(name)
         if page is not None:
             templates = get_templates(page.rawtext)
-            from mwlib.expander import find_template
+            from mwlib.parser.expander import find_template
             from mwlib.templ.evaluate import Expander
             from mwlib.templ.misc import DictDB
             from mwlib.templ.parser import parse
