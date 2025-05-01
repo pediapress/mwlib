@@ -13,6 +13,7 @@ from hashlib import sha256
 from sqlitedict import SqliteDict
 
 from mwlib import metabook, nshandling, parser
+from mwlib.core.authors import get_authors
 from mwlib.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.refine import uparser
 from mwlib.templ.parser import parse
@@ -366,8 +367,6 @@ class Adapt:
             authors = self.nuwiki.authors[fqname]
             return authors
         else:
-            from mwlib.authors import get_authors
-
             if self.edits is None:
                 edits = self.edits = {}
                 for edit in self.nuwiki.get_data("edits") or []:

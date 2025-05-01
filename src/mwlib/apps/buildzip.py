@@ -3,6 +3,7 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
+
 import contextlib
 import logging
 import os
@@ -26,6 +27,7 @@ from mwlib.utilities import utils
 from mwlib.utilities.log import setup_console_logging
 from mwlib.utilities.utils import start_logging
 
+monkey.patch_all(thread=False)
 log = logging.getLogger(__name__)
 
 USE_HELP_TEXT = "Use --help for usage information."
@@ -227,7 +229,6 @@ def main(
     except ValueError:
         raise click.ClickException("Argument for --imagesize must be an integer > 0.")
 
-    monkey.patch_all(thread=False)
     conf.readrc()
     if metabook is None and collectionpage is None:
         raise click.ClickException(

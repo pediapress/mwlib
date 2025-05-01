@@ -1,5 +1,5 @@
 #! /usr/bin/env py.test
-from mwlib import authors
+from mwlib.core import authors
 
 example_1 = [
     {

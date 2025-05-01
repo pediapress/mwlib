@@ -61,6 +61,7 @@ COLLECTIONS = [
 ]
 
 
+@pytest.mark.skip("some collections are missing")
 @pytest.mark.integration
 class TestBuildAndRender(unittest.TestCase):
     collection_dir = None
