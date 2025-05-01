@@ -15,7 +15,7 @@ import time
 from bottle import default_app, route, static_file
 
 from mwlib.asynchronous import proc
-from mwlib.utilities import myjson
+from mwlib.utilities import myjson, argv
 from mwlib.utilities.utils import garble_password
 from qs import slave
 
@@ -265,7 +265,6 @@ def main():
     http_address = "0.0.0.0"
     http_port = int(os.environ.get("PORT", 8898))
     serve_files = True
-    from mwlib import argv
 
     opts, args = argv.parse(
         sys.argv[1:],

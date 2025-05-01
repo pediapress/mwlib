@@ -14,25 +14,25 @@ def _process_command_line_argument(value, i, needarg, arg, args, opts):
 
 
 def parse(args, spec):
-    needarg = {}
+    required_args = {}
 
     for spec_part in spec.split():
         if spec_part.endswith("="):
-            needarg[spec_part[:-1]] = True
+            required_args[spec_part[:-1]] = True
         else:
-            needarg[spec_part] = False
+            required_args[spec_part] = False
 
     opts = []
-    newargs = []
+    new_args = []
 
     i = 0
     while i < len(args):
         arg, value = (args[i].split("=", 1) + [None])[:2]
-        if arg in needarg:
-            i = _process_command_line_argument(value, i, needarg, arg, args, opts)
+        if arg in required_args:
+            i = _process_command_line_argument(value, i, required_args, arg, args, opts)
         else:
-            newargs.append(args[i])
+            new_args.append(args[i])
 
         i += 1
 
-    return opts, newargs
+    return opts, new_args

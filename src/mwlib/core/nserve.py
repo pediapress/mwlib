@@ -22,7 +22,7 @@ from gevent import pool, pywsgi
 from mwlib import _version
 from mwlib.asynchronous import rpcclient
 from mwlib.metabook import calc_checksum
-from mwlib.utilities import lrucache
+from mwlib.utilities import lrucache, argv
 from mwlib.utilities import myjson as json
 from qs.misc import CallInLoop
 
@@ -520,7 +520,6 @@ def _parse_qs(q_serve):
 
 
 def main():
-    from mwlib import argv
     opts, args = argv.parse(
         sys.argv[1:], "--disable-all-writers --qserve= --port= -i= --interface="
     )
