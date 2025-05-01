@@ -239,7 +239,7 @@ class NuWiki:
         safe_path = self._pathjoin("images", "safe", hex_digest)
         if not os.path.exists(safe_path):
             try:
-                os.symlink(os.path.join("..", utils.fs_escape(fqname)),
+                os.symlink(os.path.join("../..", utils.fs_escape(fqname)),
                            safe_path)
             except OSError as exc:
                 if exc.errno != 17:  # File exists

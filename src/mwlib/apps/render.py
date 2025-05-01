@@ -15,7 +15,8 @@ from importlib.metadata import entry_points
 
 import click
 
-from mwlib import nuwiki, wiki
+from mwlib import wiki
+from mwlib.core import nuwiki
 from mwlib.apps.buildzip import make_zip
 from mwlib.apps.utils import make_wiki_env_from_options
 from mwlib.configuration import conf

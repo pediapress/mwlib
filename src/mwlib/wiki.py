@@ -10,7 +10,7 @@ import zipfile
 from configparser import ConfigParser
 from io import StringIO
 
-from mwlib import nuwiki
+from mwlib.core import nuwiki
 from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
 from mwlib.core.metabook import WikiConf
 from mwlib.utilities import myjson as json

@@ -8,7 +8,7 @@ import zipfile
 
 import pytest
 
-from mwlib.nuwiki import Adapt
+from mwlib.core.nuwiki import Adapt
 
 
 @pytest.mark.integration
