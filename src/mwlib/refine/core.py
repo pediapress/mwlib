@@ -6,7 +6,8 @@
 import logging
 from typing import Any, Optional
 
-from mwlib import imgmap, nshandling, tagext
+from mwlib import nshandling, tagext
+from mwlib.extensions import imgmap
 from mwlib.miscellaneous import uniq
 from mwlib.parser import styleanalyzer
 from mwlib.refine import util

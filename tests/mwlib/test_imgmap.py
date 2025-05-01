@@ -1,5 +1,5 @@
 #! /usr/bin/env py.test
-from mwlib import imgmap
+from mwlib.extensions import imgmap
 
 
 def test_whitespace_line():
