@@ -74,6 +74,7 @@ include src/mwlib/core/bookshelf.py
 include src/mwlib/core/main_trampoline.py
 include src/mwlib/core/metabook.py
 include src/mwlib/core/nserve.py
+include src/mwlib/core/nshandling.py
 include src/mwlib/core/nslave.py
 include src/mwlib/core/serve.py
 include src/mwlib/database/dummydb.py
@@ -122,7 +123,6 @@ include src/mwlib/networking/client.py
 include src/mwlib/networking/net/__init__.py
 include src/mwlib/networking/net/podclient.py
 include src/mwlib/networking/net/postman.py
-include src/mwlib/nshandling.py
 include src/mwlib/nuwiki.py
 include src/mwlib/parser/__init__.py
 include src/mwlib/parser/dumpparser.py

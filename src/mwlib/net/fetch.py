@@ -21,7 +21,7 @@ from gevent.lock import Semaphore
 from lxml import etree
 from sqlitedict import SqliteDict
 
-from mwlib import nshandling
+from mwlib.core import nshandling
 from mwlib.configuration import conf
 from mwlib.net import sapi as mwapi
 from mwlib.net.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS

@@ -12,8 +12,8 @@ from hashlib import sha256
 
 from sqlitedict import SqliteDict
 
-from mwlib import nshandling, parser
-from mwlib.core import metabook
+from mwlib import parser
+from mwlib.core import metabook, nshandling
 from mwlib.core.authors import get_authors
 from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.refine import uparser
@@ -423,7 +423,7 @@ class Adapt:
         )
 
     def get_licenses(self):
-        from mwlib import metabook
+        from mwlib.core import metabook
 
         licenses = self.nuwiki.get_data("licenses") or []
         res = []

@@ -1,7 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing informationodes.
 
-from mwlib import nshandling
+from mwlib.core import nshandling
 from mwlib.parser import nodes
 from mwlib.refine import core
 from mwlib.token.utoken import Token

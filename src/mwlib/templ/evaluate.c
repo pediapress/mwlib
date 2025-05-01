@@ -12388,24 +12388,17 @@ if (!__Pyx_RefNanny) {
   /* "templ/evaluate.pyx":4
  * # See README.md for additional licensing information.
  * 
- * from mwlib import nshandling, siteinfo             # <<<<<<<<<<<<<<
- * from mwlib.core import metabook
+ * from mwlib import siteinfo             # <<<<<<<<<<<<<<
+ * from mwlib.core import metabook, nshandling
  * from mwlib.templ import log, magics, mwlocals, parser
  */
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_INCREF(__pyx_n_s_nshandling);
-  __Pyx_GIVEREF(__pyx_n_s_nshandling);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_nshandling)) __PYX_ERR(0, 4, __pyx_L1_error);
   __Pyx_INCREF(__pyx_n_s_siteinfo);
   __Pyx_GIVEREF(__pyx_n_s_siteinfo);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 1, __pyx_n_s_siteinfo)) __PYX_ERR(0, 4, __pyx_L1_error);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_siteinfo)) __PYX_ERR(0, 4, __pyx_L1_error);
   __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_nshandling); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_nshandling, __pyx_t_2) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_siteinfo); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -12415,16 +12408,19 @@ if (!__Pyx_RefNanny) {
 
   /* "templ/evaluate.pyx":5
  * 
- * from mwlib import nshandling, siteinfo
- * from mwlib.core import metabook             # <<<<<<<<<<<<<<
+ * from mwlib import siteinfo
+ * from mwlib.core import metabook, nshandling             # <<<<<<<<<<<<<<
  * from mwlib.templ import log, magics, mwlocals, parser
  * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
  */
-  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_n_s_metabook);
   __Pyx_GIVEREF(__pyx_n_s_metabook);
   if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_metabook)) __PYX_ERR(0, 5, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_nshandling);
+  __Pyx_GIVEREF(__pyx_n_s_nshandling);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_nshandling)) __PYX_ERR(0, 5, __pyx_L1_error);
   __pyx_t_2 = __Pyx_Import(__pyx_n_s_mwlib_core, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -12432,11 +12428,15 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_metabook, __pyx_t_3) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_nshandling); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_nshandling, __pyx_t_3) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "templ/evaluate.pyx":6
- * from mwlib import nshandling, siteinfo
- * from mwlib.core import metabook
+ * from mwlib import siteinfo
+ * from mwlib.core import metabook, nshandling
  * from mwlib.templ import log, magics, mwlocals, parser             # <<<<<<<<<<<<<<
  * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
  * from mwlib.miscellaneous.uniq import Uniquifier
@@ -12477,7 +12477,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "templ/evaluate.pyx":7
- * from mwlib.core import metabook
+ * from mwlib.core import metabook, nshandling
  * from mwlib.templ import log, magics, mwlocals, parser
  * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline             # <<<<<<<<<<<<<<
  * from mwlib.miscellaneous.uniq import Uniquifier
