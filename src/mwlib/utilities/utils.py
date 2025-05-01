@@ -115,7 +115,7 @@ def safe_unlink(filename):
     try:
         os.unlink(filename)
     except Exception as exc:
-        log.warn(f"Could not remove file {filename!r}: {exc}")
+        log.warning(f"Could not remove file {filename!r}: {exc}")
 
 
 fetch_cache = {}
@@ -128,7 +128,7 @@ def check_content_type(expected_content_type, result, ignore_errors=False):
     if content_type != expected_content_type:
         msg = f"Got content-type {content_type!r}, expected {expected_content_type!r}"
         if ignore_errors:
-            log.warn(msg)
+            log.warning(msg)
         else:
             raise RuntimeError(msg)
 
@@ -347,29 +347,29 @@ def get_safe_url(url):
         result = urllib.parse.urlsplit(url)
         scheme, netloc, path, query, fragment = result
     except Exception as exc:
-        log.warn(f"urlparse({url!r}) failed: {exc}")
+        log.warning(f"urlparse({url!r}) failed: {exc}")
         return None
 
     if not (scheme and netloc):
-        log.warn(f"Empty scheme or netloc: {scheme!r} {netloc!r}")
+        log.warning(f"Empty scheme or netloc: {scheme!r} {netloc!r}")
         return None
 
     if not (nonwhitespace_rex.match(scheme) and nonwhitespace_rex.match(netloc)):
-        log.warn(f"Found whitespace in scheme or netloc: {scheme!r} {netloc!r}")
+        log.warning(f"Found whitespace in scheme or netloc: {scheme!r} {netloc!r}")
         return None
 
     try:
         # catches things like path='bla " target="_blank'
         path = urllib.parse.quote(urllib.parse.unquote(path))
     except Exception as exc:
-        log.warn(f"quote(unquote({path!r})) failed: {exc}")
+        log.warning(f"quote(unquote({path!r})) failed: {exc}")
         return None
     try:
         return urllib.parse.urlunsplit(
             (scheme, netloc, path, query, fragment)
         )
     except Exception as exc:
-        log.warn(f"urlunparse() failed: {exc}")
+        log.warning(f"urlunparse() failed: {exc}")
     return None
 
 

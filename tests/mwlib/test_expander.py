@@ -1,5 +1,6 @@
 #! /usr/bin/env py.test
 import pytest
+
 from mwlib import expander
 from mwlib.database.dummydb import DummyDB
 from mwlib.expander import DictDB

@@ -5,6 +5,7 @@ import shutil
 import tempfile
 
 import pytest
+
 from mwlib.mw_math.mathutils import render_math
 
 

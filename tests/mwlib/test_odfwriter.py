@@ -9,9 +9,10 @@ import tempfile
 from contextlib import suppress
 from io import StringIO
 
-import mwlib.parser
 import py
 import pytest
+
+import mwlib.parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.refine.uparser import parse_string
 from mwlib.tree import advtree

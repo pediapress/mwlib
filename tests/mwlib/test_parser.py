@@ -4,6 +4,7 @@
 # See README.rst for additional licensing information.
 
 import pytest
+
 from mwlib import expander, parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.expander import DictDB

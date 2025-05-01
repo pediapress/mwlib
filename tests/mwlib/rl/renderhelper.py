@@ -7,14 +7,15 @@ import os
 import re
 import tempfile
 
+from PIL import Image, ImageDraw
+from reportlab.lib.units import cm
+from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate
+
 from mwlib.refine import uparser
 from mwlib.tree import advtree
 from mwlib.tree.treecleaner import TreeCleaner
 from mwlib.writers.rl.pagetemplates import WikiPage
 from mwlib.writers.rl.writer import RlWriter
-from PIL import Image, ImageDraw
-from reportlab.lib.units import cm
-from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate
 
 
 def renderElements(elements, filesuffix=None, tmpdir=None):

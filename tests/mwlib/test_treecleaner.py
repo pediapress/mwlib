@@ -5,6 +5,7 @@
 import sys
 
 import pytest
+
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.parser import LangLink

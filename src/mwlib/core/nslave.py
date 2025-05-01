@@ -13,11 +13,11 @@ import sys
 import time
 
 from bottle import default_app, route, static_file
-from qs import slave
 
 from mwlib.asynchronous import proc
 from mwlib.utilities import myjson
 from mwlib.utilities.utils import garble_password
+from qs import slave
 
 logger = logging.getLogger(__name__)
 
@@ -247,7 +247,7 @@ def make_cachedir(cachedir):
             os.mkdir(p)
 
 
-@route("/cache/:filename#.*#")
+@route("/cache/<filename>#.*#")
 def server_static(filename):
     logger.info("serving %r xdfd", filename)
     print("serving", filename, " from ", "/app/cache")

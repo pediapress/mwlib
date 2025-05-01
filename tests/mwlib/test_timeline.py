@@ -2,6 +2,7 @@
 import os
 
 import pytest
+
 from mwlib import timeline
 
 example_script = """ImageSize  = width:800 height:100

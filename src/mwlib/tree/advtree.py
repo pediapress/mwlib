@@ -56,7 +56,6 @@ from mwlib.parser import (
 )
 from mwlib.refine.uparser import parse_string
 
-
 log = logging.getLogger(__name__)
 
 
@@ -72,11 +71,11 @@ def _id_index(lst, element_to_check):
 def debug(method):  # use as decorator
     def foo(self, *args, **kargs):
         log.info(f"\n{method.__name__} called with {args!r} {kargs!r}")
-        log.ingo(f"on {self!r} attrs:{self.attributes!r} style:{self.style!r}")
+        log.info(f"on {self!r} attrs:{self.attributes!r} style:{self.style!r}")
         parent = self
         while parent.parent:
             parent = parent.parent
-            log("%r" % parent)
+            log.info("%r" % parent)
         return method(self, *args, **kargs)
 
     return foo
@@ -756,7 +755,7 @@ def fix_tag_nodes(node):
                 child.level = int(child.caption[1])
                 child.caption = ""
             else:
-                log.warn("fixTagNodes, unknowntagnode %r" % child)
+                log.warning("fixTagNodes, unknowntagnode %r" % child)
         fix_tag_nodes(child)
 
 
@@ -796,7 +795,7 @@ def fix_style_node(node):
         node.__class__ = _styleNodeMap[node.caption]
         node.caption = ""
     else:
-        log.warn("fixStyle, unknownstyle %r" % node)
+        log.warning("fixStyle, unknownstyle %r" % node)
         return node
 
     return node

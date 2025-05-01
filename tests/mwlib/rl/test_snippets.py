@@ -4,8 +4,9 @@
 # See README.txt for additional licensing information.
 
 import pytest
-from mwlib import snippets
 from renderhelper import renderMW
+
+from mwlib import snippets
 
 
 def doit(ex):

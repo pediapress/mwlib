@@ -4,6 +4,7 @@
 """mw-render -- installed via setuptools' entry_points"""
 
 import errno
+import logging
 import os
 import shutil
 import sys
@@ -13,7 +14,6 @@ import traceback
 from importlib.metadata import entry_points
 
 import click
-import logging
 
 from mwlib import nuwiki, wiki
 from mwlib.apps.buildzip import make_zip

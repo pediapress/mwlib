@@ -2,7 +2,10 @@
 
 """Unittests for mwlib.utils"""
 
+import socket
+
 import pytest
+
 from mwlib.utilities import utils
 
 
@@ -34,7 +37,8 @@ def test_uid():
         assert len(utils.uid(max_length)) <= max_length
 
 
-def test_report():
+def test_report(monkeypatch):
+    monkeypatch.setattr(socket, "getfqdn", lambda: "mwlib-server.org")
     data = utils.report(system="system123", subject="subject123", foo="foo123")
     assert "foo" in data
     assert "foo123" in data

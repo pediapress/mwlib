@@ -1,8 +1,10 @@
 import os
 import tempfile
+
 import pytest
-from mwlib.apps import buildzip
 from click.testing import CliRunner
+
+from mwlib.apps import buildzip
 
 
 @pytest.mark.integration

@@ -3,7 +3,6 @@
 import logging
 import sys
 
-
 # --- Add NullHandler for library use ---
 # Get the root logger for the 'mwlib' namespace package.
 _mwlib_root_logger = logging.getLogger('mwlib')

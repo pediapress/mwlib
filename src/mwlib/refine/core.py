@@ -4,7 +4,6 @@
 # Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
 import logging
-
 from typing import Any, Optional
 
 from mwlib import imgmap, nshandling, tagext
@@ -14,7 +13,6 @@ from mwlib.refine import util
 from mwlib.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
 from mwlib.refine.tagparser import TagParser
 from mwlib.token.utoken import Token, tokenize
-
 
 try:
     from mwlib.refine import _core

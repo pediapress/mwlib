@@ -2,6 +2,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+
 from mwlib.utilities import utils
 
 here = Path(__file__).parent

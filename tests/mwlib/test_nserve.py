@@ -7,6 +7,7 @@ import bottle
 import gevent
 import pytest
 import wsgi_intercept.urllib_intercept
+
 from mwlib.core import nserve
 
 try:

@@ -23,9 +23,8 @@ from mwlib.metabook import collection
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utilities import myjson as json
 from mwlib.utilities import utils
-from mwlib.utilities.utils import start_logging
 from mwlib.utilities.log import setup_console_logging
-
+from mwlib.utilities.utils import start_logging
 
 log = logging.getLogger(__name__)
 

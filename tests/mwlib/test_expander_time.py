@@ -1,5 +1,6 @@
 #! /usr/bin/env py.test
 import pytest
+
 from mwlib.templ.misc import expand_str
 
 cases = [

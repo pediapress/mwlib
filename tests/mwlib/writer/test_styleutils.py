@@ -4,6 +4,7 @@
 import sys
 
 import pytest
+
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.refine.uparser import parse_string

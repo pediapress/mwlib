@@ -8,13 +8,13 @@ import sys
 
 import gevent
 import gevent.monkey
-from qs.rpcclient import ServerProxy
 
 from mwlib import argv
 from mwlib.asynchronous import slave
 from mwlib.miscellaneous.status import Status
 from mwlib.networking.net.podclient import PODClient
 from mwlib.utilities.utils import send_mail
+from qs.rpcclient import ServerProxy
 
 logger = logging.getLogger(__name__)
 CACHE_DIR = "cache"

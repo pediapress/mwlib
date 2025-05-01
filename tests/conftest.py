@@ -16,9 +16,9 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.fixture(scope="session")
 def alarm(request):
+    import math
     import signal
     import time
-    import math
 
     def sighandler(signum, frame):
         __tracebackhide__ = True

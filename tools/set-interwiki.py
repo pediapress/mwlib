@@ -6,6 +6,7 @@
 """
 
 import sys
+
 try:
     import simplejson as json
 except ImportError:

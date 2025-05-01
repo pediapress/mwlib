@@ -4,21 +4,21 @@ import tempfile
 import unittest
 
 import click
-from pypdf import PdfReader
 import pytest
+from pypdf import PdfReader
 
 
 @click.command()
 @click.option(
     "--collection-dir",
     type=click.Path(exists=True, file_okay=False),
-    default="/home/fingon/Dev/pediapress/mwlib.pdf/assets/test_files",
+    default="./sample_collections",
     help="Path to the directory containing collection files",
 )
 @click.option(
     "--output-dir",
     type=click.Path(file_okay=False, writable=True),
-    default="/home/fingon/Dev/pediapress/hiq",
+    default="./sample_collections_output",
     help="Path to the directory where outputs will be saved",
 )
 def main(collection_dir, output_dir):
@@ -104,7 +104,7 @@ class TestBuildAndRender(unittest.TestCase):
             self.output_zip,
             "-Len",
             "--writer-options",
-            f"wokrdir={self.workdir}",
+            f"workdir={self.workdir}",
         ]
         env = os.environ.copy()
         env["GEVENT_SUPPORT"] = "True"
@@ -129,7 +129,15 @@ class TestBuildAndRender(unittest.TestCase):
 
     def test_build_and_render(self):
         """Run BuildZip and Render for each collection name and validate the PDF."""
+        assert self.collection_dir is not None
         for collection_name in COLLECTIONS:
+            # Check if either collection_name.json or collection_name.zip exists
+            json_file = os.path.join(self.collection_dir, f"{collection_name}.json")
+            zip_file = os.path.join(self.collection_dir, f"{collection_name}.zip")
+            if not (os.path.exists(json_file) or os.path.exists(zip_file)):
+                print(f"Skipping {collection_name}: Neither {json_file} nor {zip_file} exists")
+                continue
+
             with self.subTest(collection=collection_name):
                 self.run_buildzip(collection_name)
                 self.run_render(collection_name)

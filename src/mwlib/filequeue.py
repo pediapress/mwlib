@@ -1,9 +1,8 @@
 import logging
 import os
+import pickle
 import time
 import traceback
-
-import pickle
 
 from mwlib import utils
 

@@ -2,6 +2,7 @@
 
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
+import importlib.metadata
 import logging
 import os
 import re
@@ -12,19 +13,18 @@ import urllib.parse
 import urllib.request
 from hashlib import sha256
 from io import StringIO
-import importlib.metadata
 
 import gevent.monkey
 import requests
 from bottle import HTTPResponse, default_app, get, post, request, route, static_file
 from gevent import pool, pywsgi
-from qs.misc import CallInLoop
 
 from mwlib import _version
 from mwlib.asynchronous import rpcclient
 from mwlib.metabook import calc_checksum
 from mwlib.utilities import lrucache
 from mwlib.utilities import myjson as json
+from qs.misc import CallInLoop
 
 log = logging.getLogger("mwlib.serve")
 
@@ -181,7 +181,7 @@ def choose_idle_qserve():
     return random.choice(idle)  # XXX probably store number of render jobs in busy
 
 
-@route("/cache/:filename#.*#")
+@route("/cache/<filename>#.*#")
 def server_static(filename):
     log.info("serving %r", filename)
     print("serving", filename, " from ", "/app/cache")
