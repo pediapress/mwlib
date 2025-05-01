@@ -2,24 +2,15 @@
 
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
+import os
 
 import pytest
 from renderhelper import renderMW
 
-from mwlib import snippets
 
-
-def doit(ex):
-    print("rendering", ex)
-    renderMW(ex.txt)
-
-
-@pytest.mark.parametrize("ex", snippets.get_all())
-def test_examples(ex):
-    if not ex.txt:
+def test_examples(snippet):
+    if not snippet.txt:
         with pytest.raises(ValueError):
-            doit(ex)
+            renderMW(snippet.txt)
     else:
-        doit(ex)
-
-    # FIXME: move snippets to test directory
+        renderMW(snippet.txt)

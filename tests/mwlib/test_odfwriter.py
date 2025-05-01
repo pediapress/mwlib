@@ -425,13 +425,10 @@ def test_math2():
 
 
 @pytest.mark.xfail
-def test_snippets():
-    from mwlib import snippets
-
-    for s in snippets.get_all():
-        print("testing", repr(s.txt))
-        xml = get_xml(s.txt)
-        assert "test" in xml
+def test_snippets(snippet):
+    print("testing", repr(s.txt))
+    xml = get_xml(s.txt)
+    assert "test" in xml
 
 
 def test_horizontal_rule():

@@ -76,6 +76,7 @@ include src/mwlib/core/metabook.py
 include src/mwlib/core/nserve.py
 include src/mwlib/core/nshandling.py
 include src/mwlib/core/nslave.py
+include src/mwlib/core/nuwiki.py
 include src/mwlib/core/serve.py
 include src/mwlib/database/dummydb.py
 include src/mwlib/exceptions/__init__.py
@@ -123,7 +124,6 @@ include src/mwlib/networking/client.py
 include src/mwlib/networking/net/__init__.py
 include src/mwlib/networking/net/podclient.py
 include src/mwlib/networking/net/postman.py
-include src/mwlib/nuwiki.py
 include src/mwlib/parser/__init__.py
 include src/mwlib/parser/dumpparser.py
 include src/mwlib/parser/expander.py
@@ -155,8 +155,6 @@ include src/mwlib/siteinfo/siteinfo-pl.json
 include src/mwlib/siteinfo/siteinfo-pt.json
 include src/mwlib/siteinfo/siteinfo-simple.json
 include src/mwlib/siteinfo/siteinfo-sv.json
-include src/mwlib/snippets.py
-include src/mwlib/snippets.txt
 include src/mwlib/tagext.py
 include src/mwlib/templ/__init__.py
 include src/mwlib/templ/evaluate.c
@@ -534,12 +532,12 @@ include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
 include tests/mwlib/rl/renderhelper.py
 include tests/mwlib/rl/renderhelper.py.bak
+include tests/mwlib/rl/snippets.txt
 include tests/mwlib/rl/test_advanced.py
 include tests/mwlib/rl/test_basicnodes.py
 include tests/mwlib/rl/test_basicnodes.py.bak
 include tests/mwlib/rl/test_misc.py
 include tests/mwlib/rl/test_snippets.py
-include tests/mwlib/rl/test_snippets.py.bak
 include tests/mwlib/rl/test_translation.py
 include tests/mwlib/rl/test_translation.py.bak
 include tests/mwlib/test_advtree.py
