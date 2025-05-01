@@ -8,7 +8,7 @@ import sys
 import click
 import simplejson
 
-from mwlib import metabook
+from mwlib.core import metabook
 
 
 @click.command()

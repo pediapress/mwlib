@@ -13,7 +13,7 @@ from hashlib import sha256
 from io import StringIO
 
 from mwlib import _version
-from mwlib.metabook import calc_checksum
+from mwlib.core.metabook import calc_checksum
 from mwlib.utilities import myjson as json
 
 log = logging.getLogger('mwlib.serve')

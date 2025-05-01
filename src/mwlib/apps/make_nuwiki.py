@@ -8,7 +8,7 @@ import urllib.parse
 import gevent
 import gevent.pool
 
-from mwlib.metabook import collection, get_licenses, parse_collection_page
+from mwlib.core.metabook import collection, get_licenses, parse_collection_page
 from mwlib.net import fetch
 from mwlib.net import sapi as mwapi
 from mwlib.parser.parse_collection_page import extract_metadata

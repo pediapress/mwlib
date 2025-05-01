@@ -18,7 +18,7 @@ try:
 except ImportError:
     import json
 
-import mwlib.metabook
+import mwlib.core.metabook
 from mwlib import bookshelf, log, mwapidb
 from mwlib.utilities import utils
 
@@ -63,11 +63,11 @@ def getRandomArticles(api, min=1, max=100):
 
 
 def getMetabook(articles):
-    metabook = mwlib.metabook.collection()
+    metabook = mwlib.core.metabook.collection()
     metabook.title = u"title test"
     metabook.subtitle = u"sub title test"
     for a in articles:
-        article = mwlib.metabook.article(title=a)
+        article = mwlib.core.metabook.article(title=a)
         metabook.items.append(article)
     addLicense(metabook)
     return metabook
@@ -88,7 +88,7 @@ def getRandomMetabook(api, min=1, max=100):
         c = api.content_query(bn)
         if not c:
             continue
-        mbook = mwlib.metabook.parse_collection_page(c)
+        mbook = mwlib.core.metabook.parse_collection_page(c)
         num_articles = len(mbook.articles())
         log.info("getRandomMetabook num arts min:%d this:%d max:%d" % (min, num_articles, max))
     mbook['book_page'] = bn

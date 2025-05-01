@@ -60,11 +60,7 @@ include src/mwlib/apps/buildzip_bak.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
 include src/mwlib/apps/utils.py
-include src/mwlib/argv.py
 include src/mwlib/asynchronous/__init__.py
-include src/mwlib/authors.py
-include src/mwlib/bookshelf.py
-include src/mwlib/caller.py
 include src/mwlib/command/__init__.py
 include src/mwlib/command/executor.py
 include src/mwlib/configuration/__init__.py
@@ -73,7 +69,10 @@ include src/mwlib/configuration/conf.py
 include src/mwlib/consts/__init__.py
 include src/mwlib/consts/urls.py
 include src/mwlib/core/__init__.py
+include src/mwlib/core/authors.py
+include src/mwlib/core/bookshelf.py
 include src/mwlib/core/main_trampoline.py
+include src/mwlib/core/metabook.py
 include src/mwlib/core/nserve.py
 include src/mwlib/core/nslave.py
 include src/mwlib/core/serve.py
@@ -81,8 +80,9 @@ include src/mwlib/database/dummydb.py
 include src/mwlib/exceptions/__init__.py
 include src/mwlib/exceptions/mwlib_exceptions.py
 include src/mwlib/exceptions/sanitychecker.py
-include src/mwlib/expander.py
-include src/mwlib/filequeue.py
+include src/mwlib/extensions/imgmap.py
+include src/mwlib/extensions/infobox_magic.py
+include src/mwlib/extensions/mapframe.py
 include src/mwlib/fonts/__init__.py
 include src/mwlib/fonts/freefont/AUTHORS
 include src/mwlib/fonts/freefont/COPYING
@@ -102,14 +102,9 @@ include src/mwlib/fonts/freefont/FreeSerifBoldItalic.ttf
 include src/mwlib/fonts/freefont/FreeSerifItalic.ttf
 include src/mwlib/fonts/freefont/INSTALL
 include src/mwlib/fonts/freefont/README
-include src/mwlib/imgmap.py
-include src/mwlib/infobox_magic.py
-include src/mwlib/linuxmem.py
 include src/mwlib/localization/__init__.py
 include src/mwlib/localization/_locale.py
 include src/mwlib/localization/l10n.py
-include src/mwlib/mapframe.py
-include src/mwlib/metabook.py
 include src/mwlib/miscellaneous/__init__.py
 include src/mwlib/miscellaneous/expr.py
 include src/mwlib/miscellaneous/status.py
@@ -131,6 +126,7 @@ include src/mwlib/nshandling.py
 include src/mwlib/nuwiki.py
 include src/mwlib/parser/__init__.py
 include src/mwlib/parser/dumpparser.py
+include src/mwlib/parser/expander.py
 include src/mwlib/parser/mwscan.py
 include src/mwlib/parser/nodes.py
 include src/mwlib/parser/old_uparser.py
@@ -190,7 +186,11 @@ include src/mwlib/tree/allnodes.py
 include src/mwlib/tree/treecleaner.py
 include src/mwlib/tree/treecleanerhelper.py
 include src/mwlib/utilities/__init__.py
+include src/mwlib/utilities/argv.py
+include src/mwlib/utilities/caller.py
+include src/mwlib/utilities/filequeue.py
 include src/mwlib/utilities/htmlcolornames.py
+include src/mwlib/utilities/linuxmem.py
 include src/mwlib/utilities/log.py
 include src/mwlib/utilities/lrucache.py
 include src/mwlib/utilities/myjson.py
@@ -525,9 +525,11 @@ include src/qs/qserve.py
 include src/qs/rpcclient.py
 include src/qs/rpcserver.py
 include src/qs/slave.py
+include tasks.md
 include tests/conftest.py
 include tests/mwlib/apps/test_buildzip.py
 include tests/mwlib/canthus.mb.json
+include tests/mwlib/core/test_authors.py
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
 include tests/mwlib/rl/renderhelper.py
@@ -542,7 +544,6 @@ include tests/mwlib/rl/test_translation.py
 include tests/mwlib/rl/test_translation.py.bak
 include tests/mwlib/test_advtree.py
 include tests/mwlib/test_async_import.py
-include tests/mwlib/test_authors.py
 include tests/mwlib/test_convert_templates.py
 include tests/mwlib/test_ebad.py
 include tests/mwlib/test_expander.py
@@ -574,6 +575,7 @@ include tests/mwlib/test_templ_parser.py
 include tests/mwlib/test_templ_pp.py
 include tests/mwlib/test_timeline.py
 include tests/mwlib/test_treecleaner.py
+include tests/mwlib/test_uid.py
 include tests/mwlib/test_uniq.py
 include tests/mwlib/test_utils.py
 include tests/mwlib/test_writerutils.py

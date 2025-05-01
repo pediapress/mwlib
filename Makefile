@@ -46,8 +46,8 @@ clean::
 	rm -f src/mwlib/templ/node.c src/mwlib/templ/evaluate.c src/mwlib/templ/nodes.c src/mwlib/_uscan.cc
 	rm -f mwlib/_gitversion.py*
 	rm **/*.pyc || true
-	pip uninstall -y mwlib || true
-	pip freeze | xargs pip uninstall -y
+	uv pip uninstall mwlib || true
+	#uv pip freeze | xargs pip uninstall -y
 
 sdist:: build
 	echo gitversion=\"$(shell git describe --tags)\" > _gitversion.py

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from mwlib import metabook
+from mwlib.core import metabook
 
 c = metabook.collection()
 c.append_article(title="Mainz", wikiident="de")

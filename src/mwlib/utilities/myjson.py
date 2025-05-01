@@ -3,7 +3,7 @@
 
 """custom json encoder/decoder, which can handle metabook objects"""
 
-from mwlib import metabook
+from mwlib.core import metabook
 
 try:
     import simplejson as json

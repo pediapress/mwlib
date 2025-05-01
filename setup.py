@@ -25,12 +25,17 @@ def get_ext_modules():
     extensions = [
         Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
     ]
-    for path in Path(MWLIB_SRC_DIR).rglob("**/*.c"):
+    for path in Path(MWLIB_SRC_DIR).rglob("**/*.pyx"):
         module_name = (
             path.relative_to(MWLIB_SRC_DIR).with_suffix("").as_posix().replace("/", ".")
         )
         module_name = "mwlib." + module_name
-        extensions.append(Extension(module_name, sources=[str(path)]))
+        extensions.append(
+            Extension(
+                module_name,
+                sources=[str(path)],
+            )
+        )
     return extensions
 
 
@@ -43,9 +48,16 @@ def main():
     setup(
         name="mwlib",
         version=get_version(),
-        ext_modules=cythonize(get_ext_modules(), language_level=3),
+        ext_modules=cythonize(
+            get_ext_modules(),
+            compiler_directives={
+                "language_level": 3,
+                "boundscheck": False,
+                "wraparound": False,
+            },
+            annotate=True,
+        ),
         packages=[MWLIB_MODULES_DIR, f"{MWLIB_MODULES_DIR}.templ", "qs"],
-        namespace_packages=[MWLIB_MODULES_DIR],
         package_dir={"": "src"},
         include_package_data=True,
         package_data={

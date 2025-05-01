@@ -29,16 +29,17 @@ def test_get_version():
 def test_get_ext_modules():
     expected_extensions = [
         Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
-        Extension("mwlib.templ.nodes", sources=[f"{MWLIB_SRC_DIR}/templ/nodes.c"]),
-        Extension("mwlib.templ.evaluate", sources=[f"{MWLIB_SRC_DIR}/templ/evaluate.c"]),
-        Extension("mwlib.templ.node", sources=[f"{MWLIB_SRC_DIR}/templ/node.c"]),
-        Extension("mwlib.refine._core", sources=[f"{MWLIB_SRC_DIR}/refine/_core.c"]),
+        Extension("mwlib.refine._core", sources=[f"{MWLIB_SRC_DIR}/refine/_core.pyx"]),
+        Extension("mwlib.templ.evaluate", sources=[f"{MWLIB_SRC_DIR}/templ/evaluate.pyx"]),
+        Extension("mwlib.templ.node", sources=[f"{MWLIB_SRC_DIR}/templ/node.pyx"]),
+        Extension("mwlib.templ.nodes", sources=[f"{MWLIB_SRC_DIR}/templ/nodes.pyx"]),
     ]
 
     # Patch the MWLIB_SRC_DIR in the setup module
     setup.MWLIB_SRC_DIR = str(MWLIB_SRC_DIR)
 
     extensions = get_ext_modules()
+    extensions.sort(key=lambda e: e.name)
 
     assert len(extensions) == len(expected_extensions)
 

@@ -3,7 +3,8 @@
 
 import logging
 
-from mwlib import metabook, nshandling
+from mwlib import nshandling
+from mwlib.core import metabook
 from mwlib.parser import expander
 from mwlib.parser.old_uparser import postprocessors
 from mwlib.refine import compat

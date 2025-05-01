@@ -12,7 +12,8 @@ from hashlib import sha256
 
 from sqlitedict import SqliteDict
 
-from mwlib import metabook, nshandling, parser
+from mwlib import nshandling, parser
+from mwlib.core import metabook
 from mwlib.core.authors import get_authors
 from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.refine import uparser

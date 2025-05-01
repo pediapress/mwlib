@@ -12,7 +12,7 @@ from io import StringIO
 
 from mwlib import nuwiki
 from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
-from mwlib.metabook import WikiConf
+from mwlib.core.metabook import WikiConf
 from mwlib.utilities import myjson as json
 
 log = logging.getLogger(__name__)
