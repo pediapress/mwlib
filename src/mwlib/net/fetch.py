@@ -25,7 +25,7 @@ from mwlib import nshandling
 from mwlib.configuration import conf
 from mwlib.net import sapi as mwapi
 from mwlib.net.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
-from mwlib.utilities import myjson as json
+from mwlib.utilities import myjson as json, linuxmem
 from mwlib.utilities import utils
 
 logger = logging.getLogger(__name__)
@@ -61,8 +61,6 @@ class SharedProgress:
         if isatty and isatty():
             msg = f"{done} of {total}, {percent:.2f}%, {needed:.2f} seconds,"
             if sys.platform in ("linux2", "linux3"):
-                from mwlib import linuxmem
-
                 msg += " %.1f MB mem used" % linuxmem.resident()
             sys.stdout.write("\x1b[K" + msg + "\r")
             sys.stdout.flush()

@@ -22,10 +22,9 @@ from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_option
 from mwlib.configuration import conf
 from mwlib.metabook import collection
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl
-from mwlib.utilities import myjson as json
+from mwlib.utilities import myjson as json, linuxmem
 from mwlib.utilities import utils
 from mwlib.utilities.log import setup_console_logging
-from mwlib.utilities.utils import start_logging
 
 monkey.patch_all(thread=False)
 log = logging.getLogger(__name__)
@@ -107,8 +106,6 @@ def make_zip(
             print("keeping tmpdir %r" % tmpdir)
 
         if sys.platform in ("linux2", "linux3"):
-            from mwlib import linuxmem
-
             linuxmem.report()
 
 

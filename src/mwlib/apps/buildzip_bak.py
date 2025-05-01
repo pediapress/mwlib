@@ -63,7 +63,7 @@ def make_zip(output=None, options=None, metabook=None, podclient=None, status=No
             shutil.rmtree(tmpdir, ignore_errors=True)
 
         if sys.platform.startswith("linux"):
-            from mwlib import linuxmem
+            from mwlib.utilities import linuxmem
 
             linuxmem.report()
 

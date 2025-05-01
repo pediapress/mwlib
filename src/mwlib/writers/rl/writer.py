@@ -85,7 +85,7 @@ with contextlib.suppress(ImportError):
 
 
 try:
-    from mwlib import linuxmem
+    from ...utilities import linuxmem
 except ImportError:
     linuxmem = None
 
