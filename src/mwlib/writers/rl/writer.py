@@ -48,14 +48,13 @@ from reportlab.platypus.tables import Table
 from reportlab.platypus.xpreformatted import XPreformatted
 
 from mwlib import parser
-from .. import writerbase
 from ...extensions import timeline
 from mwlib.utils._version import version as mwlibversion
 from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL
 from ...parser.refine import uparser
 from mwlib.tree.treecleaner import TreeCleaner
-from mwlib.rendering import miscutils, styleutils
+from mwlib.rendering import miscutils, styleutils, writerbase
 from mwlib.rendering.imageutils import ImageUtils
 from mwlib.rendering.licensechecker import LicenseChecker
 from mwlib.writers.rl._version import VERSION as rlwriterversion

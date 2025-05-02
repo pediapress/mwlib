@@ -24,7 +24,7 @@ from mwlib.miscellaneous.status import Status
 from mwlib.utils import unorganized, conf
 from mwlib.utils.log import setup_console_logging
 from mwlib.utils.unorganized import start_logging
-from mwlib.writers.writerbase import WriterError
+from mwlib.rendering.writerbase import WriterError
 
 logger = logging.getLogger(__name__)
 USE_HELP_TEXT = "Use --help for usage information."
