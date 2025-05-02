@@ -1,11 +1,11 @@
 import mwlib.parser
-import mwlib.tree.advtree
+import mwlib.parser.advtree
 
 
 def allnodes():
     all_nodes = set()
     names = set()
-    for mw_object in (mwlib.parser, mwlib.tree.advtree):
+    for mw_object in (mwlib.parser, mwlib.parser.advtree):
         for directory in dir(mw_object):
             if directory in names:
                 continue

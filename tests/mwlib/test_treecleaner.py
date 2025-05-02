@@ -10,7 +10,7 @@ from mwlib import parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.parser import LangLink
 from mwlib.parser.refine.uparser import parse_string
-from mwlib.tree.advtree import (
+from mwlib.parser.advtree import (
     BreakingReturn,
     Center,
     DefinitionDescription,
@@ -29,7 +29,7 @@ from mwlib.tree.advtree import (
     Underline,
     build_advanced_tree,
 )
-from mwlib.tree.treecleaner import TreeCleaner
+from mwlib.parser.treecleaner import TreeCleaner
 
 
 def _treesanity(r):

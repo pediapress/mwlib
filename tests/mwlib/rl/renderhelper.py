@@ -12,8 +12,8 @@ from reportlab.lib.units import cm
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate
 
 from mwlib.parser.refine import uparser
-from mwlib.tree import advtree
-from mwlib.tree.treecleaner import TreeCleaner
+from mwlib.parser import advtree
+from mwlib.parser.treecleaner import TreeCleaner
 from mwlib.writers.rl.pagetemplates import WikiPage
 from mwlib.writers.rl.writer import RlWriter
 

@@ -10,7 +10,7 @@ import unicodedata
 from mwlib import parser
 from mwlib.exceptions.mwlib_exceptions import InvalidTreeNodesError
 from mwlib.parser import URL, Caption, CategoryLink, InterwikiLink, LangLink, NamedURL, SpecialLink
-from mwlib.tree.advtree import (
+from mwlib.parser.advtree import (
     Article,
     ArticleLink,
     Big,
@@ -62,7 +62,7 @@ from mwlib.tree.advtree import (
     Var,
     remove_newlines,
 )
-from mwlib.tree.treecleanerhelper import get_node_height, split_row
+from mwlib.parser.treecleanerhelper import get_node_height, split_row
 from mwlib.rendering import miscutils, styleutils
 
 

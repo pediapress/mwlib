@@ -133,6 +133,8 @@ include src/mwlib/network/postman.py
 include src/mwlib/network/sapi.py
 include src/mwlib/network/siteinfo.py
 include src/mwlib/parser/__init__.py
+include src/mwlib/parser/advtree.py
+include src/mwlib/parser/allnodes.py
 include src/mwlib/parser/dumpparser.py
 include src/mwlib/parser/expander.py
 include src/mwlib/parser/mwscan.py
@@ -172,6 +174,8 @@ include src/mwlib/parser/token/_uscan.cc
 include src/mwlib/parser/token/_uscan.re
 include src/mwlib/parser/token/token.py
 include src/mwlib/parser/token/utoken.py
+include src/mwlib/parser/treecleaner.py
+include src/mwlib/parser/treecleanerhelper.py
 include src/mwlib/rendering/__init__.py
 include src/mwlib/rendering/fontswitcher.py
 include src/mwlib/rendering/formatter.py
@@ -182,11 +186,6 @@ include src/mwlib/rendering/scripts.txt
 include src/mwlib/rendering/styleutils.py
 include src/mwlib/rendering/wplicenses.csv
 include src/mwlib/rendering/writerbase.py
-include src/mwlib/tree/__init__.py
-include src/mwlib/tree/advtree.py
-include src/mwlib/tree/allnodes.py
-include src/mwlib/tree/treecleaner.py
-include src/mwlib/tree/treecleanerhelper.py
 include src/mwlib/utils/__init__.py
 include src/mwlib/utils/_conf.py
 include src/mwlib/utils/_version.py

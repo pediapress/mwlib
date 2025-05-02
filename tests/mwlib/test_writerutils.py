@@ -7,8 +7,8 @@ import sys
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.parser.refine.uparser import parse_string
-from mwlib.tree import advtree
-from mwlib.tree.treecleaner import TreeCleaner
+from mwlib.parser import advtree
+from mwlib.parser.treecleaner import TreeCleaner
 from mwlib.rendering import styleutils
 
 RETURN_FALSE_ALIGNMENT = "styleutils.getCelTextAlign() returns false alignment"

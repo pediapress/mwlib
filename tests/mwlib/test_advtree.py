@@ -9,7 +9,7 @@ import pytest
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.parser.refine.uparser import parse_string
-from mwlib.tree.advtree import (
+from mwlib.parser.advtree import (
     BreakingReturn,
     Cell,
     DefinitionDescription,

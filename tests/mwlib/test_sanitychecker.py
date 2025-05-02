@@ -12,7 +12,7 @@ from mwlib.exceptions.sanitychecker import (
     SanityException,
     removecb,
 )
-from mwlib.tree.advtree import (
+from mwlib.parser.advtree import (
     Article,
     Cell,
     ImageLink,

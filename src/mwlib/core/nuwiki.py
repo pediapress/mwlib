@@ -18,7 +18,7 @@ from mwlib.core.authors import get_authors
 from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.parser.refine import uparser
 from mwlib.parser.templ.parser import parse
-from mwlib.tree import advtree
+from mwlib.parser import advtree
 from mwlib.utils import myjson as json
 from mwlib.utils import unorganized
 from mwlib.utils.unorganized import python2sort

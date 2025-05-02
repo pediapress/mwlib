@@ -9,7 +9,7 @@ import math
 from reportlab.lib import colors
 
 from mwlib.parser.nodes import Cell, Row, Table, Text
-from mwlib.tree import advtree
+from ...parser import advtree
 from mwlib.rendering import styleutils
 from mwlib.writers.rl import pdfstyles
 

@@ -20,8 +20,6 @@ import urllib.parse
 import urllib.request
 from gettext import gettext as _
 
-from mwlib.tree import advtree
-
 try:
     from hashlib import md5
 except ImportError:
@@ -51,9 +49,9 @@ from mwlib import parser
 from ...extensions import timeline
 from mwlib.utils._version import version as mwlibversion
 from mwlib.mw_math.mathutils import render_math
-from mwlib.parser import URL, Caption, NamedURL
+from mwlib.parser import URL, Caption, NamedURL, advtree
 from ...parser.refine import uparser
-from mwlib.tree.treecleaner import TreeCleaner
+from mwlib.parser.treecleaner import TreeCleaner
 from mwlib.rendering import miscutils, styleutils, writerbase
 from mwlib.rendering.imageutils import ImageUtils
 from mwlib.rendering.licensechecker import LicenseChecker

@@ -6,7 +6,7 @@
 import re
 from typing import Optional
 
-from mwlib.tree import advtree
+from mwlib.parser import advtree
 from mwlib.utils.htmlcolornames import colorname2rgb_map
 
 MW_PX2PT = 12 / 16

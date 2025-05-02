@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 
-from mwlib.tree import advtree
+from mwlib.parser import advtree
 from mwlib.rendering import styleutils
 
 
