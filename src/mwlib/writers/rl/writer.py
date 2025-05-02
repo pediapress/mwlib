@@ -55,9 +55,9 @@ from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL
 from ...parser.refine import uparser
 from mwlib.tree.treecleaner import TreeCleaner
-from mwlib.writer import miscutils, styleutils
-from mwlib.writer.imageutils import ImageUtils
-from mwlib.writer.licensechecker import LicenseChecker
+from mwlib.rendering import miscutils, styleutils
+from mwlib.rendering.imageutils import ImageUtils
+from mwlib.rendering.licensechecker import LicenseChecker
 from mwlib.writers.rl._version import VERSION as rlwriterversion
 from mwlib.writers.rl.customflowables import (
     DummyTable,

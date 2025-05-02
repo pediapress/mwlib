@@ -13,7 +13,7 @@ from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase.ttfonts import TTFont
 
 from mwlib import fonts
-from mwlib.writer.fontswitcher import FontSwitcher
+from mwlib.rendering.fontswitcher import FontSwitcher
 
 font_paths = [os.path.dirname(fonts.__file__),
               os.path.expanduser("~/mwlibfonts/")]

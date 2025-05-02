@@ -5,7 +5,7 @@
 
 from xml.sax.saxutils import escape as xmlescape
 
-from mwlib.writer.formatter import Formatter
+from mwlib.rendering.formatter import Formatter
 from mwlib.writers.rl import pdfstyles
 
 

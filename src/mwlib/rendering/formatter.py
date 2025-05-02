@@ -5,7 +5,7 @@
 
 
 from mwlib.tree import advtree
-from mwlib.writer import styleutils
+from mwlib.rendering import styleutils
 
 
 class Formatter:

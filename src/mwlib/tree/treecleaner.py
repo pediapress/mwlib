@@ -63,7 +63,7 @@ from mwlib.tree.advtree import (
     remove_newlines,
 )
 from mwlib.tree.treecleanerhelper import get_node_height, split_row
-from mwlib.writer import miscutils, styleutils
+from mwlib.rendering import miscutils, styleutils
 
 
 def show(n_childs):

@@ -10,7 +10,7 @@ from reportlab.lib import colors
 
 from mwlib.parser.nodes import Cell, Row, Table, Text
 from mwlib.tree import advtree
-from mwlib.writer import styleutils
+from mwlib.rendering import styleutils
 from mwlib.writers.rl import pdfstyles
 
 from .customflowables import Figure
@@ -170,7 +170,7 @@ def get_content_type(table):
 
 
 def custom_calc_widths(table, avail_width):
-    from mwlib.writer.styleutils import scale_length
+    from mwlib.rendering.styleutils import scale_length
 
     first_row = None
     for child in table.children:
