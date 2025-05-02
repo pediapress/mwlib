@@ -14,10 +14,9 @@ import time
 
 from bottle import default_app, route, static_file
 
-from mwlib.asynchronous import proc
 from mwlib.utils import myjson, argv
 from mwlib.utils.unorganized import garble_password
-from qs import slave
+from qs import proc, slave
 
 logger = logging.getLogger(__name__)
 
@@ -299,7 +298,6 @@ def main():
         sys.exit("--url option missing")
 
     make_cachedir(CACHE_DIR)
-    # from mwlib.asynchronous import slave
 
     slave.main(Commands, numgreenlets=numgreenlets, argv=args)
 

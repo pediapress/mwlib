@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 
-from mwlib.asynchronous import rpcclient
+from qs import rpcclient
 
 try:
     import simplejson as json

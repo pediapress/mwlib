@@ -52,12 +52,10 @@ include setup.cfg
 include setup.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
-include src/mwlib/apps/buildzip_bak.py
 include src/mwlib/apps/executor.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
 include src/mwlib/apps/utils.py
-include src/mwlib/asynchronous/__init__.py
 include src/mwlib/core/__init__.py
 include src/mwlib/core/_locale.py
 include src/mwlib/core/authors.py
@@ -108,8 +106,8 @@ include src/mwlib/parser/expander.py
 include src/mwlib/parser/expr.py
 include src/mwlib/parser/mwscan.py
 include src/mwlib/parser/nodes.py
-include src/mwlib/parser/old_uparser.py
 include src/mwlib/parser/parse_collection_page.py
+include src/mwlib/parser/post_processors.py
 include src/mwlib/parser/refine/__init__.py
 include src/mwlib/parser/refine/_core.c
 include src/mwlib/parser/refine/_core.pyx
