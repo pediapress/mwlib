@@ -44,7 +44,7 @@ class ConfBase:
 
     @property
     def user_agent(self):
-        from mwlib._version import version
+        from mwlib.utilities._version import version
 
         return self.get("mwlib", "user_agent", "") or f"mwlib {version}"
 

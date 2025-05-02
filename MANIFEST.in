@@ -53,7 +53,6 @@ include setup.py
 include src/mwlib/_expander.re
 include src/mwlib/_uscan.cc
 include src/mwlib/_uscan.re
-include src/mwlib/_version.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
 include src/mwlib/apps/buildzip_bak.py
@@ -185,6 +184,7 @@ include src/mwlib/tree/allnodes.py
 include src/mwlib/tree/treecleaner.py
 include src/mwlib/tree/treecleanerhelper.py
 include src/mwlib/utilities/__init__.py
+include src/mwlib/utilities/_version.py
 include src/mwlib/utilities/argv.py
 include src/mwlib/utilities/caller.py
 include src/mwlib/utilities/filequeue.py

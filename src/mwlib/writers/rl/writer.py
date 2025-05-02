@@ -50,7 +50,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from mwlib import parser
 from .. import writerbase
 from ...extensions import timeline
-from mwlib._version import version as mwlibversion
+from mwlib.utilities._version import version as mwlibversion
 from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL
 from mwlib.refine import uparser

@@ -19,10 +19,9 @@ import requests
 from bottle import HTTPResponse, default_app, get, post, request, route, static_file
 from gevent import pool, pywsgi
 
-from mwlib import _version
 from mwlib.asynchronous import rpcclient
 from mwlib.core.metabook import calc_checksum
-from mwlib.utilities import lrucache, argv
+from mwlib.utilities import lrucache, argv, _version
 from mwlib.utilities import myjson as json
 from qs.misc import CallInLoop
 

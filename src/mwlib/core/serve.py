@@ -12,9 +12,8 @@ import time
 from hashlib import sha256
 from io import StringIO
 
-from mwlib import _version
 from mwlib.core.metabook import calc_checksum
-from mwlib.utilities import myjson as json
+from mwlib.utilities import myjson as json, _version
 
 log = logging.getLogger('mwlib.serve')
 collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
@@ -23,7 +22,7 @@ collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
 def make_collection_id(data):
     sio = StringIO()
     for key in (
-        _version.version,
+            _version.version,
         'base_url',
         'script_extension',
         'login_credentials',
