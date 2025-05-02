@@ -1216,8 +1216,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__templ__evaluate
-#define __PYX_HAVE_API__templ__evaluate
+#define __PYX_HAVE__mwlib__templ__evaluate
+#define __PYX_HAVE_API__mwlib__templ__evaluate
 /* Early includes */
 #ifdef _OPENMP
 #include <omp.h>
@@ -1480,37 +1480,37 @@ static const char *__pyx_f[] = {
 /* #### Code section: type_declarations ### */
 
 /*--- Type declarations ---*/
-struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
-struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr;
+struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
+struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr;
 struct __pyx_defaults;
 typedef struct __pyx_defaults __pyx_defaults;
 struct __pyx_defaults {
   PyObject *__pyx_arg_maybe_newline;
 };
 
-/* "templ/evaluate.pyx":150
+/* "mwlib/templ/evaluate.pyx":150
  * 
  * 
  * def is_implicit_newline(raw):             # <<<<<<<<<<<<<<
  *     """should we add a newline to templates starting with *, #, :, ;, {|
  *     see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
  */
-struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline {
+struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline {
   PyObject_HEAD
   PyObject *__pyx_v_sw;
 };
 
 
-/* "templ/evaluate.pyx":155
+/* "mwlib/templ/evaluate.pyx":155
  *     """
  *     sw = raw.startswith
  *     return any(sw(x) for x in ("*", "#", ":", ";", "{|"))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr {
+struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr {
   PyObject_HEAD
-  struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *__pyx_outer_scope;
+  struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *__pyx_outer_scope;
   PyObject *__pyx_genexpr_arg_0;
   PyObject *__pyx_v_x;
 };
@@ -2486,14 +2486,14 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* #### Code section: module_declarations ### */
 
-/* Module declarations from "templ.evaluate" */
+/* Module declarations from "mwlib.templ.evaluate" */
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
-#define __Pyx_MODULE_NAME "templ.evaluate"
-extern int __pyx_module_is_main_templ__evaluate;
-int __pyx_module_is_main_templ__evaluate = 0;
+#define __Pyx_MODULE_NAME "mwlib.templ.evaluate"
+extern int __pyx_module_is_main_mwlib__templ__evaluate;
+int __pyx_module_is_main_mwlib__templ__evaluate = 0;
 
-/* Implementation of "templ.evaluate" */
+/* Implementation of "mwlib.templ.evaluate" */
 /* #### Code section: global_var ### */
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_AssertionError;
@@ -2559,7 +2559,6 @@ static const char __pyx_k_after[] = "after";
 static const char __pyx_k_close[] = "close";
 static const char __pyx_k_count[] = "count";
 static const char __pyx_k_index[] = "index";
-static const char __pyx_k_mwlib[] = "mwlib";
 static const char __pyx_k_parse[] = "parse";
 static const char __pyx_k_print[] = "print";
 static const char __pyx_k_range[] = "range";
@@ -2646,9 +2645,9 @@ static const char __pyx_k_MagicResolver[] = "MagicResolver";
 static const char __pyx_k_class_getitem[] = "__class_getitem__";
 static const char __pyx_k_init_subclass[] = "__init_subclass__";
 static const char __pyx_k_maybe_newline[] = "maybe_newline";
+static const char __pyx_k_mwlib_network[] = "mwlib.network";
 static const char __pyx_k_AssertionError[] = "AssertionError";
 static const char __pyx_k_parseAndExpand[] = "parseAndExpand";
-static const char __pyx_k_templ_evaluate[] = "templ.evaluate";
 static const char __pyx_k_Expander___init[] = "Expander.__init__";
 static const char __pyx_k_expandTemplates[] = "expandTemplates";
 static const char __pyx_k_recursion_count[] = "recursion_count";
@@ -2668,6 +2667,7 @@ static const char __pyx_k_get_parsed_template[] = "get_parsed_template";
 static const char __pyx_k_is_implicit_newline[] = "is_implicit_newline";
 static const char __pyx_k_parsedTemplateCache[] = "parsedTemplateCache";
 static const char __pyx_k_resolve_magic_alias[] = "resolve_magic_alias";
+static const char __pyx_k_mwlib_templ_evaluate[] = "mwlib.templ.evaluate";
 static const char __pyx_k_Expander_replace_tags[] = "Expander.replace_tags";
 static const char __pyx_k_ArgumentList___getitem[] = "ArgumentList.__getitem__";
 static const char __pyx_k_expected_int_or_string[] = "expected int or string";
@@ -2686,26 +2686,26 @@ static const char __pyx_k_must_supply_wikidb_argument_in_E[] = "must supply wiki
 static const char __pyx_k_template_argument_too_long_s_byt[] = "template argument too long: %s bytes";
 static const char __pyx_k_template_recursion_error_ignored[] = "template recursion error ignored";
 /* #### Code section: decls ### */
-static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_args, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n, PyObject *__pyx_v_default); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_19is_implicit_newline_genexpr(PyObject *__pyx_self, PyObject *__pyx_genexpr_arg_0); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_4is_implicit_newline(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_raw); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8__defaults__(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_6insert_implicit_newlines(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_res, PyObject *__pyx_v_maybe_newline); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_pagename, PyObject *__pyx_v_wikidb, PyObject *__pyx_v_recursion_limit); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_2resolve_magic_alias(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_4replace_tags(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_6get_parsed_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_8_parse_raw_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_name, PyObject *__pyx_v_raw); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_10_expand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_parsed, PyObject *__pyx_v_keep_uniq); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_12parseAndExpand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_keep_uniq); /* proto */
-static PyObject *__pyx_pf_5templ_8evaluate_8Expander_14expandTemplates(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_keep_uniq); /* proto */
-static PyObject *__pyx_tp_new_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static PyObject *__pyx_tp_new_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_args, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n, PyObject *__pyx_v_default); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_19is_implicit_newline_genexpr(PyObject *__pyx_self, PyObject *__pyx_genexpr_arg_0); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_4is_implicit_newline(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_raw); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8__defaults__(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_6insert_implicit_newlines(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_res, PyObject *__pyx_v_maybe_newline); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_pagename, PyObject *__pyx_v_wikidb, PyObject *__pyx_v_recursion_limit); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_2resolve_magic_alias(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_4replace_tags(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_6get_parsed_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_8_parse_raw_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_name, PyObject *__pyx_v_raw); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_10_expand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_parsed, PyObject *__pyx_v_keep_uniq); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_12parseAndExpand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_keep_uniq); /* proto */
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_14expandTemplates(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_keep_uniq); /* proto */
+static PyObject *__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static __Pyx_CachedCFunction __pyx_umethod_PyUnicode_Type_strip = {0, 0, 0, 0, 0};
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
@@ -2735,11 +2735,11 @@ typedef struct {
   PyTypeObject *__pyx_CoroutineType;
   #endif
   #if CYTHON_USE_MODULE_STATE
-  PyObject *__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
-  PyObject *__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr;
+  PyObject *__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
+  PyObject *__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr;
   #endif
-  PyTypeObject *__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
-  PyTypeObject *__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr;
+  PyTypeObject *__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
+  PyTypeObject *__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr;
   PyObject *__pyx_kp_u_;
   PyObject *__pyx_n_s_AliasMap;
   PyObject *__pyx_n_s_Any;
@@ -2848,10 +2848,11 @@ typedef struct {
   PyObject *__pyx_n_s_module;
   PyObject *__pyx_n_s_mro_entries;
   PyObject *__pyx_kp_u_must_supply_wikidb_argument_in_E;
-  PyObject *__pyx_n_s_mwlib;
   PyObject *__pyx_n_s_mwlib_core;
   PyObject *__pyx_n_s_mwlib_miscellaneous_uniq;
+  PyObject *__pyx_n_s_mwlib_network;
   PyObject *__pyx_n_s_mwlib_templ;
+  PyObject *__pyx_n_s_mwlib_templ_evaluate;
   PyObject *__pyx_n_s_mwlib_templ_marks;
   PyObject *__pyx_n_s_mwlocals;
   PyObject *__pyx_n_s_n;
@@ -2909,7 +2910,6 @@ typedef struct {
   PyObject *__pyx_n_s_super;
   PyObject *__pyx_n_s_sw;
   PyObject *__pyx_n_s_t;
-  PyObject *__pyx_n_s_templ_evaluate;
   PyObject *__pyx_kp_u_template_argument_too_long_s_byt;
   PyObject *__pyx_kp_u_template_recursion_error_ignored;
   PyObject *__pyx_n_s_test;
@@ -3008,10 +3008,10 @@ static int __pyx_m_clear(PyObject *m) {
   #ifdef __Pyx_FusedFunction_USED
   Py_CLEAR(clear_module_state->__pyx_FusedFunctionType);
   #endif
-  Py_CLEAR(clear_module_state->__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
-  Py_CLEAR(clear_module_state->__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
-  Py_CLEAR(clear_module_state->__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr);
-  Py_CLEAR(clear_module_state->__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr);
+  Py_CLEAR(clear_module_state->__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
+  Py_CLEAR(clear_module_state->__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
+  Py_CLEAR(clear_module_state->__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr);
+  Py_CLEAR(clear_module_state->__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr);
   Py_CLEAR(clear_module_state->__pyx_kp_u_);
   Py_CLEAR(clear_module_state->__pyx_n_s_AliasMap);
   Py_CLEAR(clear_module_state->__pyx_n_s_Any);
@@ -3120,10 +3120,11 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_module);
   Py_CLEAR(clear_module_state->__pyx_n_s_mro_entries);
   Py_CLEAR(clear_module_state->__pyx_kp_u_must_supply_wikidb_argument_in_E);
-  Py_CLEAR(clear_module_state->__pyx_n_s_mwlib);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_core);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_miscellaneous_uniq);
+  Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_network);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_templ);
+  Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_templ_evaluate);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_templ_marks);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlocals);
   Py_CLEAR(clear_module_state->__pyx_n_s_n);
@@ -3181,7 +3182,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_super);
   Py_CLEAR(clear_module_state->__pyx_n_s_sw);
   Py_CLEAR(clear_module_state->__pyx_n_s_t);
-  Py_CLEAR(clear_module_state->__pyx_n_s_templ_evaluate);
   Py_CLEAR(clear_module_state->__pyx_kp_u_template_argument_too_long_s_byt);
   Py_CLEAR(clear_module_state->__pyx_kp_u_template_recursion_error_ignored);
   Py_CLEAR(clear_module_state->__pyx_n_s_test);
@@ -3258,10 +3258,10 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   #ifdef __Pyx_FusedFunction_USED
   Py_VISIT(traverse_module_state->__pyx_FusedFunctionType);
   #endif
-  Py_VISIT(traverse_module_state->__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
-  Py_VISIT(traverse_module_state->__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
-  Py_VISIT(traverse_module_state->__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr);
-  Py_VISIT(traverse_module_state->__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr);
+  Py_VISIT(traverse_module_state->__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
+  Py_VISIT(traverse_module_state->__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline);
+  Py_VISIT(traverse_module_state->__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr);
+  Py_VISIT(traverse_module_state->__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr);
   Py_VISIT(traverse_module_state->__pyx_kp_u_);
   Py_VISIT(traverse_module_state->__pyx_n_s_AliasMap);
   Py_VISIT(traverse_module_state->__pyx_n_s_Any);
@@ -3370,10 +3370,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_module);
   Py_VISIT(traverse_module_state->__pyx_n_s_mro_entries);
   Py_VISIT(traverse_module_state->__pyx_kp_u_must_supply_wikidb_argument_in_E);
-  Py_VISIT(traverse_module_state->__pyx_n_s_mwlib);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_core);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_miscellaneous_uniq);
+  Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_network);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_templ);
+  Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_templ_evaluate);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_templ_marks);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlocals);
   Py_VISIT(traverse_module_state->__pyx_n_s_n);
@@ -3431,7 +3432,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_super);
   Py_VISIT(traverse_module_state->__pyx_n_s_sw);
   Py_VISIT(traverse_module_state->__pyx_n_s_t);
-  Py_VISIT(traverse_module_state->__pyx_n_s_templ_evaluate);
   Py_VISIT(traverse_module_state->__pyx_kp_u_template_argument_too_long_s_byt);
   Py_VISIT(traverse_module_state->__pyx_kp_u_template_recursion_error_ignored);
   Py_VISIT(traverse_module_state->__pyx_n_s_test);
@@ -3517,11 +3517,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_CoroutineType __pyx_mstate_global->__pyx_CoroutineType
 #endif
 #if CYTHON_USE_MODULE_STATE
-#define __pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline __pyx_mstate_global->__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline
-#define __pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr __pyx_mstate_global->__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr
+#define __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline __pyx_mstate_global->__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline
+#define __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr __pyx_mstate_global->__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr
 #endif
-#define __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline __pyx_mstate_global->__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline
-#define __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr __pyx_mstate_global->__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr
+#define __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline __pyx_mstate_global->__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline
+#define __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr __pyx_mstate_global->__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr
 #define __pyx_kp_u_ __pyx_mstate_global->__pyx_kp_u_
 #define __pyx_n_s_AliasMap __pyx_mstate_global->__pyx_n_s_AliasMap
 #define __pyx_n_s_Any __pyx_mstate_global->__pyx_n_s_Any
@@ -3630,10 +3630,11 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_module __pyx_mstate_global->__pyx_n_s_module
 #define __pyx_n_s_mro_entries __pyx_mstate_global->__pyx_n_s_mro_entries
 #define __pyx_kp_u_must_supply_wikidb_argument_in_E __pyx_mstate_global->__pyx_kp_u_must_supply_wikidb_argument_in_E
-#define __pyx_n_s_mwlib __pyx_mstate_global->__pyx_n_s_mwlib
 #define __pyx_n_s_mwlib_core __pyx_mstate_global->__pyx_n_s_mwlib_core
 #define __pyx_n_s_mwlib_miscellaneous_uniq __pyx_mstate_global->__pyx_n_s_mwlib_miscellaneous_uniq
+#define __pyx_n_s_mwlib_network __pyx_mstate_global->__pyx_n_s_mwlib_network
 #define __pyx_n_s_mwlib_templ __pyx_mstate_global->__pyx_n_s_mwlib_templ
+#define __pyx_n_s_mwlib_templ_evaluate __pyx_mstate_global->__pyx_n_s_mwlib_templ_evaluate
 #define __pyx_n_s_mwlib_templ_marks __pyx_mstate_global->__pyx_n_s_mwlib_templ_marks
 #define __pyx_n_s_mwlocals __pyx_mstate_global->__pyx_n_s_mwlocals
 #define __pyx_n_s_n __pyx_mstate_global->__pyx_n_s_n
@@ -3691,7 +3692,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_super __pyx_mstate_global->__pyx_n_s_super
 #define __pyx_n_s_sw __pyx_mstate_global->__pyx_n_s_sw
 #define __pyx_n_s_t __pyx_mstate_global->__pyx_n_s_t
-#define __pyx_n_s_templ_evaluate __pyx_mstate_global->__pyx_n_s_templ_evaluate
 #define __pyx_kp_u_template_argument_too_long_s_byt __pyx_mstate_global->__pyx_kp_u_template_argument_too_long_s_byt
 #define __pyx_kp_u_template_recursion_error_ignored __pyx_mstate_global->__pyx_kp_u_template_recursion_error_ignored
 #define __pyx_n_s_test __pyx_mstate_global->__pyx_n_s_test
@@ -3750,7 +3750,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_codeobj__48 __pyx_mstate_global->__pyx_codeobj__48
 /* #### Code section: module_code ### */
 
-/* "templ/evaluate.pyx":15
+/* "mwlib/templ/evaluate.pyx":15
  * 
  * 
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:             # <<<<<<<<<<<<<<
@@ -3759,15 +3759,15 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_1flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_5templ_8evaluate_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5templ_8evaluate_1flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3882,12 +3882,12 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("templ.evaluate.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_res), (&PyList_Type), 0, "res", 1))) __PYX_ERR(0, 15, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5templ_8evaluate_flatten(__pyx_self, __pyx_v_node, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_flatten(__pyx_self, __pyx_v_node, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   goto __pyx_L0;
@@ -3904,7 +3904,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyTypeObject *__pyx_v_t = NULL;
   PyObject *__pyx_v_before = NULL;
   Py_ssize_t __pyx_v_old_len;
@@ -3938,7 +3938,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("flatten", 1);
 
-  /* "templ/evaluate.pyx":16
+  /* "mwlib/templ/evaluate.pyx":16
  * 
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:
  *     t = type(node)             # <<<<<<<<<<<<<<
@@ -3948,7 +3948,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   __Pyx_INCREF(((PyObject *)Py_TYPE(__pyx_v_node)));
   __pyx_v_t = ((PyTypeObject*)((PyObject *)Py_TYPE(__pyx_v_node)));
 
-  /* "templ/evaluate.pyx":17
+  /* "mwlib/templ/evaluate.pyx":17
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:
  *     t = type(node)
  *     if isinstance(node, str):             # <<<<<<<<<<<<<<
@@ -3958,7 +3958,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   __pyx_t_1 = PyUnicode_Check(__pyx_v_node); 
   if (__pyx_t_1) {
 
-    /* "templ/evaluate.pyx":18
+    /* "mwlib/templ/evaluate.pyx":18
  *     t = type(node)
  *     if isinstance(node, str):
  *         res.append(node)             # <<<<<<<<<<<<<<
@@ -3967,7 +3967,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
     __pyx_t_2 = __Pyx_PyList_Append(__pyx_v_res, __pyx_v_node); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 18, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":19
+    /* "mwlib/templ/evaluate.pyx":19
  *     if isinstance(node, str):
  *         res.append(node)
  *         return True             # <<<<<<<<<<<<<<
@@ -3979,7 +3979,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     __pyx_r = Py_True;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":17
+    /* "mwlib/templ/evaluate.pyx":17
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:
  *     t = type(node)
  *     if isinstance(node, str):             # <<<<<<<<<<<<<<
@@ -3988,7 +3988,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "templ/evaluate.pyx":21
+  /* "mwlib/templ/evaluate.pyx":21
  *         return True
  * 
  *     if expander.recursion_count > expander.recursion_limit:             # <<<<<<<<<<<<<<
@@ -4006,7 +4006,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   if (unlikely(__pyx_t_1)) {
 
-    /* "templ/evaluate.pyx":22
+    /* "mwlib/templ/evaluate.pyx":22
  * 
  *     if expander.recursion_count > expander.recursion_limit:
  *         raise TemplateRecursion()             # <<<<<<<<<<<<<<
@@ -4041,7 +4041,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __PYX_ERR(0, 22, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":21
+    /* "mwlib/templ/evaluate.pyx":21
  *         return True
  * 
  *     if expander.recursion_count > expander.recursion_limit:             # <<<<<<<<<<<<<<
@@ -4050,7 +4050,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "templ/evaluate.pyx":24
+  /* "mwlib/templ/evaluate.pyx":24
  *         raise TemplateRecursion()
  * 
  *     expander.recursion_count += 1             # <<<<<<<<<<<<<<
@@ -4065,7 +4065,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_expander, __pyx_n_s_recursion_count, __pyx_t_4) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "templ/evaluate.pyx":25
+  /* "mwlib/templ/evaluate.pyx":25
  * 
  *     expander.recursion_count += 1
  *     try:             # <<<<<<<<<<<<<<
@@ -4074,7 +4074,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
   /*try:*/ {
 
-    /* "templ/evaluate.pyx":26
+    /* "mwlib/templ/evaluate.pyx":26
  *     expander.recursion_count += 1
  *     try:
  *         before = variables.count             # <<<<<<<<<<<<<<
@@ -4086,7 +4086,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     __pyx_v_before = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":27
+    /* "mwlib/templ/evaluate.pyx":27
  *     try:
  *         before = variables.count
  *         old_len = len(res)             # <<<<<<<<<<<<<<
@@ -4096,7 +4096,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     __pyx_t_7 = __Pyx_PyList_GET_SIZE(__pyx_v_res); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 27, __pyx_L6_error)
     __pyx_v_old_len = __pyx_t_7;
 
-    /* "templ/evaluate.pyx":28
+    /* "mwlib/templ/evaluate.pyx":28
  *         before = variables.count
  *         old_len = len(res)
  *         try:             # <<<<<<<<<<<<<<
@@ -4112,7 +4112,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
       __Pyx_XGOTREF(__pyx_t_10);
       /*try:*/ {
 
-        /* "templ/evaluate.pyx":29
+        /* "mwlib/templ/evaluate.pyx":29
  *         old_len = len(res)
  *         try:
  *             if t is list or t is tuple:  # noqa             # <<<<<<<<<<<<<<
@@ -4130,7 +4130,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
         __pyx_L15_bool_binop_done:;
         if (__pyx_t_1) {
 
-          /* "templ/evaluate.pyx":30
+          /* "mwlib/templ/evaluate.pyx":30
  *         try:
  *             if t is list or t is tuple:  # noqa
  *                 for x in node:             # <<<<<<<<<<<<<<
@@ -4192,7 +4192,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
             __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_5);
             __pyx_t_5 = 0;
 
-            /* "templ/evaluate.pyx":31
+            /* "mwlib/templ/evaluate.pyx":31
  *             if t is list or t is tuple:  # noqa
  *                 for x in node:
  *                     flatten(x, expander, variables, res)             # <<<<<<<<<<<<<<
@@ -4225,7 +4225,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
             }
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-            /* "templ/evaluate.pyx":30
+            /* "mwlib/templ/evaluate.pyx":30
  *         try:
  *             if t is list or t is tuple:  # noqa
  *                 for x in node:             # <<<<<<<<<<<<<<
@@ -4235,7 +4235,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
           }
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-          /* "templ/evaluate.pyx":29
+          /* "mwlib/templ/evaluate.pyx":29
  *         old_len = len(res)
  *         try:
  *             if t is list or t is tuple:  # noqa             # <<<<<<<<<<<<<<
@@ -4245,7 +4245,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
           goto __pyx_L14;
         }
 
-        /* "templ/evaluate.pyx":33
+        /* "mwlib/templ/evaluate.pyx":33
  *                     flatten(x, expander, variables, res)
  *             else:
  *                 node.flatten(expander, variables, res)             # <<<<<<<<<<<<<<
@@ -4281,7 +4281,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
         }
         __pyx_L14:;
 
-        /* "templ/evaluate.pyx":28
+        /* "mwlib/templ/evaluate.pyx":28
  *         before = variables.count
  *         old_len = len(res)
  *         try:             # <<<<<<<<<<<<<<
@@ -4299,7 +4299,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "templ/evaluate.pyx":34
+      /* "mwlib/templ/evaluate.pyx":34
  *             else:
  *                 node.flatten(expander, variables, res)
  *         except TemplateRecursion:             # <<<<<<<<<<<<<<
@@ -4314,13 +4314,13 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
       __Pyx_ErrRestore(__pyx_t_4, __pyx_t_5, __pyx_t_3);
       __pyx_t_4 = 0; __pyx_t_5 = 0; __pyx_t_3 = 0;
       if (__pyx_t_14) {
-        __Pyx_AddTraceback("templ.evaluate.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+        __Pyx_AddTraceback("mwlib.templ.evaluate.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
         if (__Pyx_GetException(&__pyx_t_3, &__pyx_t_5, &__pyx_t_4) < 0) __PYX_ERR(0, 34, __pyx_L10_except_error)
         __Pyx_XGOTREF(__pyx_t_3);
         __Pyx_XGOTREF(__pyx_t_5);
         __Pyx_XGOTREF(__pyx_t_4);
 
-        /* "templ/evaluate.pyx":35
+        /* "mwlib/templ/evaluate.pyx":35
  *                 node.flatten(expander, variables, res)
  *         except TemplateRecursion:
  *             if expander.recursion_count > 2:             # <<<<<<<<<<<<<<
@@ -4335,7 +4335,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
         __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
         if (unlikely(__pyx_t_1)) {
 
-          /* "templ/evaluate.pyx":36
+          /* "mwlib/templ/evaluate.pyx":36
  *         except TemplateRecursion:
  *             if expander.recursion_count > 2:
  *                 raise             # <<<<<<<<<<<<<<
@@ -4349,7 +4349,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
           __pyx_t_3 = 0; __pyx_t_5 = 0; __pyx_t_4 = 0; 
           __PYX_ERR(0, 36, __pyx_L10_except_error)
 
-          /* "templ/evaluate.pyx":35
+          /* "mwlib/templ/evaluate.pyx":35
  *                 node.flatten(expander, variables, res)
  *         except TemplateRecursion:
  *             if expander.recursion_count > 2:             # <<<<<<<<<<<<<<
@@ -4358,7 +4358,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
         }
 
-        /* "templ/evaluate.pyx":37
+        /* "mwlib/templ/evaluate.pyx":37
  *             if expander.recursion_count > 2:
  *                 raise
  *             del res[old_len:]             # <<<<<<<<<<<<<<
@@ -4367,7 +4367,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
         if (__Pyx_PyObject_DelSlice(__pyx_v_res, __pyx_v_old_len, 0, NULL, NULL, NULL, 1, 0, 1) < 0) __PYX_ERR(0, 37, __pyx_L10_except_error)
 
-        /* "templ/evaluate.pyx":38
+        /* "mwlib/templ/evaluate.pyx":38
  *                 raise
  *             del res[old_len:]
  *             log.warning("template recursion error ignored")             # <<<<<<<<<<<<<<
@@ -4409,7 +4409,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
       }
       goto __pyx_L10_except_error;
 
-      /* "templ/evaluate.pyx":28
+      /* "mwlib/templ/evaluate.pyx":28
  *         before = variables.count
  *         old_len = len(res)
  *         try:             # <<<<<<<<<<<<<<
@@ -4430,7 +4430,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
       __pyx_L13_try_end:;
     }
 
-    /* "templ/evaluate.pyx":39
+    /* "mwlib/templ/evaluate.pyx":39
  *             del res[old_len:]
  *             log.warning("template recursion error ignored")
  *         after = variables.count             # <<<<<<<<<<<<<<
@@ -4442,7 +4442,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     __pyx_v_after = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":40
+    /* "mwlib/templ/evaluate.pyx":40
  *             log.warning("template recursion error ignored")
  *         after = variables.count
  *         return before == after             # <<<<<<<<<<<<<<
@@ -4456,7 +4456,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     goto __pyx_L5_return;
   }
 
-  /* "templ/evaluate.pyx":42
+  /* "mwlib/templ/evaluate.pyx":42
  *         return before == after
  *     finally:
  *         expander.recursion_count -= 1             # <<<<<<<<<<<<<<
@@ -4535,7 +4535,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
     }
   }
 
-  /* "templ/evaluate.pyx":15
+  /* "mwlib/templ/evaluate.pyx":15
  * 
  * 
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:             # <<<<<<<<<<<<<<
@@ -4551,7 +4551,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   __Pyx_XDECREF(__pyx_t_13);
   __Pyx_XDECREF(__pyx_t_15);
   __Pyx_XDECREF(__pyx_t_16);
-  __Pyx_AddTraceback("templ.evaluate.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF((PyObject *)__pyx_v_t);
@@ -4563,7 +4563,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "templ/evaluate.pyx":49
+/* "mwlib/templ/evaluate.pyx":49
  * 
  * 
  * def equal_split(node):             # <<<<<<<<<<<<<<
@@ -4572,15 +4572,15 @@ static PyObject *__pyx_pf_5templ_8evaluate_flatten(CYTHON_UNUSED PyObject *__pyx
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_3equal_split(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_3equal_split(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_5templ_8evaluate_3equal_split = {"equal_split", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_3equal_split, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5templ_8evaluate_3equal_split(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_3equal_split = {"equal_split", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_3equal_split, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_3equal_split(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4650,11 +4650,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("templ.evaluate.equal_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.equal_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5templ_8evaluate_2equal_split(__pyx_self, __pyx_v_node);
+  __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_2equal_split(__pyx_self, __pyx_v_node);
 
   /* function exit code */
   {
@@ -4667,7 +4667,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node) {
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node) {
   PyObject *__pyx_v_idx = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -4686,7 +4686,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("equal_split", 1);
 
-  /* "templ/evaluate.pyx":50
+  /* "mwlib/templ/evaluate.pyx":50
  * 
  * def equal_split(node):
  *     if isinstance(node, str):             # <<<<<<<<<<<<<<
@@ -4696,7 +4696,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
   __pyx_t_1 = PyUnicode_Check(__pyx_v_node); 
   if (__pyx_t_1) {
 
-    /* "templ/evaluate.pyx":51
+    /* "mwlib/templ/evaluate.pyx":51
  * def equal_split(node):
  *     if isinstance(node, str):
  *         return None, node             # <<<<<<<<<<<<<<
@@ -4716,7 +4716,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":50
+    /* "mwlib/templ/evaluate.pyx":50
  * 
  * def equal_split(node):
  *     if isinstance(node, str):             # <<<<<<<<<<<<<<
@@ -4725,7 +4725,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
  */
   }
 
-  /* "templ/evaluate.pyx":53
+  /* "mwlib/templ/evaluate.pyx":53
  *         return None, node
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4741,7 +4741,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
     __Pyx_XGOTREF(__pyx_t_5);
     /*try:*/ {
 
-      /* "templ/evaluate.pyx":54
+      /* "mwlib/templ/evaluate.pyx":54
  * 
  *     try:
  *         idx = node.index(eqmark)             # <<<<<<<<<<<<<<
@@ -4778,7 +4778,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
       __pyx_v_idx = __pyx_t_2;
       __pyx_t_2 = 0;
 
-      /* "templ/evaluate.pyx":53
+      /* "mwlib/templ/evaluate.pyx":53
  *         return None, node
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4796,7 +4796,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-    /* "templ/evaluate.pyx":55
+    /* "mwlib/templ/evaluate.pyx":55
  *     try:
  *         idx = node.index(eqmark)
  *     except ValueError:             # <<<<<<<<<<<<<<
@@ -4805,13 +4805,13 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
  */
     __pyx_t_10 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_ValueError);
     if (__pyx_t_10) {
-      __Pyx_AddTraceback("templ.evaluate.equal_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("mwlib.templ.evaluate.equal_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
       if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_6, &__pyx_t_7) < 0) __PYX_ERR(0, 55, __pyx_L6_except_error)
       __Pyx_XGOTREF(__pyx_t_2);
       __Pyx_XGOTREF(__pyx_t_6);
       __Pyx_XGOTREF(__pyx_t_7);
 
-      /* "templ/evaluate.pyx":56
+      /* "mwlib/templ/evaluate.pyx":56
  *         idx = node.index(eqmark)
  *     except ValueError:
  *         return None, node             # <<<<<<<<<<<<<<
@@ -4836,7 +4836,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
     }
     goto __pyx_L6_except_error;
 
-    /* "templ/evaluate.pyx":53
+    /* "mwlib/templ/evaluate.pyx":53
  *         return None, node
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4858,7 +4858,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
     __pyx_L9_try_end:;
   }
 
-  /* "templ/evaluate.pyx":58
+  /* "mwlib/templ/evaluate.pyx":58
  *         return None, node
  * 
  *     return node[:idx], node[idx + 1 :]             # <<<<<<<<<<<<<<
@@ -4885,7 +4885,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "templ/evaluate.pyx":49
+  /* "mwlib/templ/evaluate.pyx":49
  * 
  * 
  * def equal_split(node):             # <<<<<<<<<<<<<<
@@ -4899,7 +4899,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_AddTraceback("templ.evaluate.equal_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.equal_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_idx);
@@ -4908,7 +4908,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
   return __pyx_r;
 }
 
-/* "templ/evaluate.pyx":62
+/* "mwlib/templ/evaluate.pyx":62
  * 
  * class ArgumentList:
  *     def __init__(self, args=(), expander=None, variables=None):             # <<<<<<<<<<<<<<
@@ -4917,15 +4917,15 @@ static PyObject *__pyx_pf_5templ_8evaluate_2equal_split(CYTHON_UNUSED PyObject *
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_1__init__(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_1__init__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_5templ_8evaluate_12ArgumentList_1__init__ = {"__init__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_12ArgumentList_1__init__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_1__init__(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_1__init__ = {"__init__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_1__init__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_1__init__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -5039,11 +5039,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5templ_8evaluate_12ArgumentList___init__(__pyx_self, __pyx_v_self, __pyx_v_args, __pyx_v_expander, __pyx_v_variables);
+  __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList___init__(__pyx_self, __pyx_v_self, __pyx_v_args, __pyx_v_expander, __pyx_v_variables);
 
   /* function exit code */
   {
@@ -5056,7 +5056,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_args, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables) {
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_args, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -5066,7 +5066,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 1);
 
-  /* "templ/evaluate.pyx":63
+  /* "mwlib/templ/evaluate.pyx":63
  * class ArgumentList:
  *     def __init__(self, args=(), expander=None, variables=None):
  *         self.args = tuple(args)             # <<<<<<<<<<<<<<
@@ -5078,7 +5078,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_args, __pyx_t_1) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "templ/evaluate.pyx":65
+  /* "mwlib/templ/evaluate.pyx":65
  *         self.args = tuple(args)
  * 
  *         assert expander is not None             # <<<<<<<<<<<<<<
@@ -5097,7 +5097,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
   if ((1)); else __PYX_ERR(0, 65, __pyx_L1_error)
   #endif
 
-  /* "templ/evaluate.pyx":68
+  /* "mwlib/templ/evaluate.pyx":68
  *         # assert variables is not None
  * 
  *         self.expander = expander             # <<<<<<<<<<<<<<
@@ -5106,7 +5106,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_expander, __pyx_v_expander) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":69
+  /* "mwlib/templ/evaluate.pyx":69
  * 
  *         self.expander = expander
  *         self.variables = variables             # <<<<<<<<<<<<<<
@@ -5115,7 +5115,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_variables, __pyx_v_variables) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":70
+  /* "mwlib/templ/evaluate.pyx":70
  *         self.expander = expander
  *         self.variables = variables
  *         self.var_count = 1             # <<<<<<<<<<<<<<
@@ -5124,7 +5124,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_var_count, __pyx_int_1) < 0) __PYX_ERR(0, 70, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":71
+  /* "mwlib/templ/evaluate.pyx":71
  *         self.variables = variables
  *         self.var_count = 1
  *         self.var_num = 0             # <<<<<<<<<<<<<<
@@ -5133,7 +5133,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_var_num, __pyx_int_0) < 0) __PYX_ERR(0, 71, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":73
+  /* "mwlib/templ/evaluate.pyx":73
  *         self.var_num = 0
  * 
  *         self.named_args = {}             # <<<<<<<<<<<<<<
@@ -5145,7 +5145,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_named_args, __pyx_t_1) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "templ/evaluate.pyx":74
+  /* "mwlib/templ/evaluate.pyx":74
  * 
  *         self.named_args = {}
  *         self.count = 0             # <<<<<<<<<<<<<<
@@ -5154,7 +5154,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_count, __pyx_int_0) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":62
+  /* "mwlib/templ/evaluate.pyx":62
  * 
  * class ArgumentList:
  *     def __init__(self, args=(), expander=None, variables=None):             # <<<<<<<<<<<<<<
@@ -5167,7 +5167,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -5175,7 +5175,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
   return __pyx_r;
 }
 
-/* "templ/evaluate.pyx":76
+/* "mwlib/templ/evaluate.pyx":76
  *         self.count = 0
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -5184,15 +5184,15 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList___init__(CYTHON_UNUSED
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_3__len__(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_3__len__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_5templ_8evaluate_12ArgumentList_3__len__ = {"__len__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_12ArgumentList_3__len__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_3__len__(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_3__len__ = {"__len__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_3__len__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_3__len__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -5262,11 +5262,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.__len__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.__len__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(__pyx_self, __pyx_v_self);
+  __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_2__len__(__pyx_self, __pyx_v_self);
 
   /* function exit code */
   {
@@ -5279,7 +5279,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self) {
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -5290,7 +5290,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__len__", 1);
 
-  /* "templ/evaluate.pyx":77
+  /* "mwlib/templ/evaluate.pyx":77
  * 
  *     def __len__(self):
  *         self.count += 1             # <<<<<<<<<<<<<<
@@ -5305,7 +5305,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_count, __pyx_t_2) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":78
+  /* "mwlib/templ/evaluate.pyx":78
  *     def __len__(self):
  *         self.count += 1
  *         return len(self.args)             # <<<<<<<<<<<<<<
@@ -5323,7 +5323,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "templ/evaluate.pyx":76
+  /* "mwlib/templ/evaluate.pyx":76
  *         self.count = 0
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -5335,7 +5335,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.__len__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.__len__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -5343,7 +5343,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED
   return __pyx_r;
 }
 
-/* "templ/evaluate.pyx":80
+/* "mwlib/templ/evaluate.pyx":80
  *         return len(self.args)
  * 
  *     def __getitem__(self, n):             # <<<<<<<<<<<<<<
@@ -5352,15 +5352,15 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_2__len__(CYTHON_UNUSED
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_5__getitem__(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_5__getitem__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_5templ_8evaluate_12ArgumentList_5__getitem__ = {"__getitem__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_12ArgumentList_5__getitem__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_5__getitem__(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_5__getitem__ = {"__getitem__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_5__getitem__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_5__getitem__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -5445,11 +5445,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(__pyx_self, __pyx_v_self, __pyx_v_n);
+  __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_4__getitem__(__pyx_self, __pyx_v_self, __pyx_v_n);
 
   /* function exit code */
   {
@@ -5462,7 +5462,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n) {
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n) {
   PyObject *__pyx_v_start = NULL;
   PyObject *__pyx_v_stop = NULL;
   PyObject *__pyx_7genexpr__pyx_v_x = NULL;
@@ -5483,7 +5483,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__getitem__", 1);
 
-  /* "templ/evaluate.pyx":81
+  /* "mwlib/templ/evaluate.pyx":81
  * 
  *     def __getitem__(self, n):
  *         self.count += 1             # <<<<<<<<<<<<<<
@@ -5498,7 +5498,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_count, __pyx_t_2) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":82
+  /* "mwlib/templ/evaluate.pyx":82
  *     def __getitem__(self, n):
  *         self.count += 1
  *         if isinstance(n, slice):             # <<<<<<<<<<<<<<
@@ -5508,7 +5508,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
   __pyx_t_3 = PySlice_Check(__pyx_v_n); 
   if (__pyx_t_3) {
 
-    /* "templ/evaluate.pyx":83
+    /* "mwlib/templ/evaluate.pyx":83
  *         self.count += 1
  *         if isinstance(n, slice):
  *             start = n.start or 0             # <<<<<<<<<<<<<<
@@ -5534,7 +5534,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
     __pyx_v_start = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "templ/evaluate.pyx":84
+    /* "mwlib/templ/evaluate.pyx":84
  *         if isinstance(n, slice):
  *             start = n.start or 0
  *             stop = n.stop or len(self)             # <<<<<<<<<<<<<<
@@ -5561,7 +5561,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
     __pyx_v_stop = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "templ/evaluate.pyx":85
+    /* "mwlib/templ/evaluate.pyx":85
  *             start = n.start or 0
  *             stop = n.stop or len(self)
  *             return [self.get(x, None) or "" for x in range(start, stop)]             # <<<<<<<<<<<<<<
@@ -5689,7 +5689,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":82
+    /* "mwlib/templ/evaluate.pyx":82
  *     def __getitem__(self, n):
  *         self.count += 1
  *         if isinstance(n, slice):             # <<<<<<<<<<<<<<
@@ -5698,7 +5698,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
  */
   }
 
-  /* "templ/evaluate.pyx":86
+  /* "mwlib/templ/evaluate.pyx":86
  *             stop = n.stop or len(self)
  *             return [self.get(x, None) or "" for x in range(start, stop)]
  *         return self.get(n, None) or ""             # <<<<<<<<<<<<<<
@@ -5746,7 +5746,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "templ/evaluate.pyx":80
+  /* "mwlib/templ/evaluate.pyx":80
  *         return len(self.args)
  * 
  *     def __getitem__(self, n):             # <<<<<<<<<<<<<<
@@ -5762,7 +5762,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.__getitem__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_start);
@@ -5773,7 +5773,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
   return __pyx_r;
 }
 
-/* "templ/evaluate.pyx":88
+/* "mwlib/templ/evaluate.pyx":88
  *         return self.get(n, None) or ""
  * 
  *     def get(self, n, default):             # <<<<<<<<<<<<<<
@@ -5782,15 +5782,15 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_4__getitem__(CYTHON_UN
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_7get(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_7get(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_5templ_8evaluate_12ArgumentList_7get = {"get", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_12ArgumentList_7get, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5templ_8evaluate_12ArgumentList_7get(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_7get = {"get", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_7get, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_12ArgumentList_7get(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -5890,11 +5890,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5templ_8evaluate_12ArgumentList_6get(__pyx_self, __pyx_v_self, __pyx_v_n, __pyx_v_default);
+  __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_6get(__pyx_self, __pyx_v_self, __pyx_v_n, __pyx_v_default);
 
   /* function exit code */
   {
@@ -5907,7 +5907,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n, PyObject *__pyx_v_default) {
+static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_n, PyObject *__pyx_v_default) {
   PyObject *__pyx_v_a = NULL;
   PyObject *__pyx_v_tmp = NULL;
   PyObject *__pyx_v_arg = NULL;
@@ -5935,7 +5935,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get", 1);
 
-  /* "templ/evaluate.pyx":89
+  /* "mwlib/templ/evaluate.pyx":89
  * 
  *     def get(self, n, default):
  *         self.count += 1             # <<<<<<<<<<<<<<
@@ -5950,7 +5950,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_count, __pyx_t_2) < 0) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":90
+  /* "mwlib/templ/evaluate.pyx":90
  *     def get(self, n, default):
  *         self.count += 1
  *         if isinstance(n, int):             # <<<<<<<<<<<<<<
@@ -5960,7 +5960,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __pyx_t_3 = PyInt_Check(__pyx_v_n); 
   if (__pyx_t_3) {
 
-    /* "templ/evaluate.pyx":91
+    /* "mwlib/templ/evaluate.pyx":91
  *         self.count += 1
  *         if isinstance(n, int):
  *             try:             # <<<<<<<<<<<<<<
@@ -5976,7 +5976,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_XGOTREF(__pyx_t_6);
       /*try:*/ {
 
-        /* "templ/evaluate.pyx":92
+        /* "mwlib/templ/evaluate.pyx":92
  *         if isinstance(n, int):
  *             try:
  *                 a = self.args[n]             # <<<<<<<<<<<<<<
@@ -5991,7 +5991,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __pyx_v_a = __pyx_t_1;
         __pyx_t_1 = 0;
 
-        /* "templ/evaluate.pyx":91
+        /* "mwlib/templ/evaluate.pyx":91
  *         self.count += 1
  *         if isinstance(n, int):
  *             try:             # <<<<<<<<<<<<<<
@@ -6007,7 +6007,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "templ/evaluate.pyx":93
+      /* "mwlib/templ/evaluate.pyx":93
  *             try:
  *                 a = self.args[n]
  *             except IndexError:             # <<<<<<<<<<<<<<
@@ -6016,13 +6016,13 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
       __pyx_t_7 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_IndexError);
       if (__pyx_t_7) {
-        __Pyx_AddTraceback("templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
+        __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
         if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_2, &__pyx_t_8) < 0) __PYX_ERR(0, 93, __pyx_L6_except_error)
         __Pyx_XGOTREF(__pyx_t_1);
         __Pyx_XGOTREF(__pyx_t_2);
         __Pyx_XGOTREF(__pyx_t_8);
 
-        /* "templ/evaluate.pyx":94
+        /* "mwlib/templ/evaluate.pyx":94
  *                 a = self.args[n]
  *             except IndexError:
  *                 return default             # <<<<<<<<<<<<<<
@@ -6039,7 +6039,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       }
       goto __pyx_L6_except_error;
 
-      /* "templ/evaluate.pyx":91
+      /* "mwlib/templ/evaluate.pyx":91
  *         self.count += 1
  *         if isinstance(n, int):
  *             try:             # <<<<<<<<<<<<<<
@@ -6061,7 +6061,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __pyx_L9_try_end:;
     }
 
-    /* "templ/evaluate.pyx":95
+    /* "mwlib/templ/evaluate.pyx":95
  *             except IndexError:
  *                 return default
  *             if isinstance(a, str):             # <<<<<<<<<<<<<<
@@ -6071,7 +6071,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __pyx_t_3 = PyUnicode_Check(__pyx_v_a); 
     if (__pyx_t_3) {
 
-      /* "templ/evaluate.pyx":96
+      /* "mwlib/templ/evaluate.pyx":96
  *                 return default
  *             if isinstance(a, str):
  *                 return a.strip()             # <<<<<<<<<<<<<<
@@ -6107,7 +6107,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __pyx_t_8 = 0;
       goto __pyx_L0;
 
-      /* "templ/evaluate.pyx":95
+      /* "mwlib/templ/evaluate.pyx":95
  *             except IndexError:
  *                 return default
  *             if isinstance(a, str):             # <<<<<<<<<<<<<<
@@ -6116,7 +6116,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
     }
 
-    /* "templ/evaluate.pyx":97
+    /* "mwlib/templ/evaluate.pyx":97
  *             if isinstance(a, str):
  *                 return a.strip()
  *             tmp = []             # <<<<<<<<<<<<<<
@@ -6128,7 +6128,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __pyx_v_tmp = __pyx_t_8;
     __pyx_t_8 = 0;
 
-    /* "templ/evaluate.pyx":98
+    /* "mwlib/templ/evaluate.pyx":98
  *                 return a.strip()
  *             tmp = []
  *             flatten(a, self.expander, self.variables, tmp)             # <<<<<<<<<<<<<<
@@ -6167,7 +6167,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     }
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-    /* "templ/evaluate.pyx":99
+    /* "mwlib/templ/evaluate.pyx":99
  *             tmp = []
  *             flatten(a, self.expander, self.variables, tmp)
  *             insert_implicit_newlines(tmp)             # <<<<<<<<<<<<<<
@@ -6200,7 +6200,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     }
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-    /* "templ/evaluate.pyx":100
+    /* "mwlib/templ/evaluate.pyx":100
  *             flatten(a, self.expander, self.variables, tmp)
  *             insert_implicit_newlines(tmp)
  *             tmp = "".join(tmp).strip()             # <<<<<<<<<<<<<<
@@ -6237,7 +6237,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __Pyx_DECREF_SET(__pyx_v_tmp, __pyx_t_8);
     __pyx_t_8 = 0;
 
-    /* "templ/evaluate.pyx":101
+    /* "mwlib/templ/evaluate.pyx":101
  *             insert_implicit_newlines(tmp)
  *             tmp = "".join(tmp).strip()
  *             if len(tmp) > 256 * 1024:             # <<<<<<<<<<<<<<
@@ -6248,7 +6248,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __pyx_t_3 = (__pyx_t_12 > 0x40000);
     if (unlikely(__pyx_t_3)) {
 
-      /* "templ/evaluate.pyx":102
+      /* "mwlib/templ/evaluate.pyx":102
  *             tmp = "".join(tmp).strip()
  *             if len(tmp) > 256 * 1024:
  *                 raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))             # <<<<<<<<<<<<<<
@@ -6290,7 +6290,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __PYX_ERR(0, 102, __pyx_L1_error)
 
-      /* "templ/evaluate.pyx":101
+      /* "mwlib/templ/evaluate.pyx":101
  *             insert_implicit_newlines(tmp)
  *             tmp = "".join(tmp).strip()
  *             if len(tmp) > 256 * 1024:             # <<<<<<<<<<<<<<
@@ -6299,7 +6299,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
     }
 
-    /* "templ/evaluate.pyx":104
+    /* "mwlib/templ/evaluate.pyx":104
  *                 raise MemoryLimitError("template argument too long: %s bytes" % len(tmp))
  *             # FIXME: cache value ???
  *             return tmp             # <<<<<<<<<<<<<<
@@ -6311,7 +6311,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __pyx_r = __pyx_v_tmp;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":90
+    /* "mwlib/templ/evaluate.pyx":90
  *     def get(self, n, default):
  *         self.count += 1
  *         if isinstance(n, int):             # <<<<<<<<<<<<<<
@@ -6320,7 +6320,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
   }
 
-  /* "templ/evaluate.pyx":106
+  /* "mwlib/templ/evaluate.pyx":106
  *             return tmp
  * 
  *         assert isinstance(n, (str, int)), "expected int or string"             # <<<<<<<<<<<<<<
@@ -6347,7 +6347,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   if ((1)); else __PYX_ERR(0, 106, __pyx_L1_error)
   #endif
 
-  /* "templ/evaluate.pyx":108
+  /* "mwlib/templ/evaluate.pyx":108
  *         assert isinstance(n, (str, int)), "expected int or string"
  * 
  *         if n not in self.named_args:             # <<<<<<<<<<<<<<
@@ -6360,7 +6360,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   if (__pyx_t_3) {
 
-    /* "templ/evaluate.pyx":109
+    /* "mwlib/templ/evaluate.pyx":109
  * 
  *         if n not in self.named_args:
  *             while self.var_num < len(self.args):             # <<<<<<<<<<<<<<
@@ -6383,7 +6383,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       if (!__pyx_t_3) break;
 
-      /* "templ/evaluate.pyx":110
+      /* "mwlib/templ/evaluate.pyx":110
  *         if n not in self.named_args:
  *             while self.var_num < len(self.args):
  *                 arg = self.args[self.var_num]             # <<<<<<<<<<<<<<
@@ -6401,7 +6401,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_XDECREF_SET(__pyx_v_arg, __pyx_t_8);
       __pyx_t_8 = 0;
 
-      /* "templ/evaluate.pyx":111
+      /* "mwlib/templ/evaluate.pyx":111
  *             while self.var_num < len(self.args):
  *                 arg = self.args[self.var_num]
  *                 self.var_num += 1             # <<<<<<<<<<<<<<
@@ -6416,7 +6416,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_var_num, __pyx_t_10) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-      /* "templ/evaluate.pyx":113
+      /* "mwlib/templ/evaluate.pyx":113
  *                 self.var_num += 1
  * 
  *                 name, val = equal_split(arg)             # <<<<<<<<<<<<<<
@@ -6498,7 +6498,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_XDECREF_SET(__pyx_v_val, __pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "templ/evaluate.pyx":114
+      /* "mwlib/templ/evaluate.pyx":114
  * 
  *                 name, val = equal_split(arg)
  *                 if name is not None:             # <<<<<<<<<<<<<<
@@ -6508,7 +6508,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __pyx_t_3 = (__pyx_v_name != Py_None);
       if (__pyx_t_3) {
 
-        /* "templ/evaluate.pyx":115
+        /* "mwlib/templ/evaluate.pyx":115
  *                 name, val = equal_split(arg)
  *                 if name is not None:
  *                     tmp = []             # <<<<<<<<<<<<<<
@@ -6520,7 +6520,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __Pyx_XDECREF_SET(__pyx_v_tmp, __pyx_t_10);
         __pyx_t_10 = 0;
 
-        /* "templ/evaluate.pyx":116
+        /* "mwlib/templ/evaluate.pyx":116
  *                 if name is not None:
  *                     tmp = []
  *                     flatten(name, self.expander, self.variables, tmp)             # <<<<<<<<<<<<<<
@@ -6559,7 +6559,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         }
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-        /* "templ/evaluate.pyx":117
+        /* "mwlib/templ/evaluate.pyx":117
  *                     tmp = []
  *                     flatten(name, self.expander, self.variables, tmp)
  *                     insert_implicit_newlines(tmp)             # <<<<<<<<<<<<<<
@@ -6592,7 +6592,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         }
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-        /* "templ/evaluate.pyx":118
+        /* "mwlib/templ/evaluate.pyx":118
  *                     flatten(name, self.expander, self.variables, tmp)
  *                     insert_implicit_newlines(tmp)
  *                     name = "".join(tmp).strip()             # <<<<<<<<<<<<<<
@@ -6629,7 +6629,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __Pyx_DECREF_SET(__pyx_v_name, __pyx_t_10);
         __pyx_t_10 = 0;
 
-        /* "templ/evaluate.pyx":119
+        /* "mwlib/templ/evaluate.pyx":119
  *                     insert_implicit_newlines(tmp)
  *                     name = "".join(tmp).strip()
  *                     do_strip = True             # <<<<<<<<<<<<<<
@@ -6639,7 +6639,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __Pyx_INCREF(Py_True);
         __Pyx_XDECREF_SET(__pyx_v_do_strip, Py_True);
 
-        /* "templ/evaluate.pyx":114
+        /* "mwlib/templ/evaluate.pyx":114
  * 
  *                 name, val = equal_split(arg)
  *                 if name is not None:             # <<<<<<<<<<<<<<
@@ -6649,7 +6649,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         goto __pyx_L21;
       }
 
-      /* "templ/evaluate.pyx":121
+      /* "mwlib/templ/evaluate.pyx":121
  *                     do_strip = True
  *                 else:
  *                     name = str(self.var_count)             # <<<<<<<<<<<<<<
@@ -6665,7 +6665,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __Pyx_DECREF_SET(__pyx_v_name, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "templ/evaluate.pyx":122
+        /* "mwlib/templ/evaluate.pyx":122
  *                 else:
  *                     name = str(self.var_count)
  *                     self.var_count += 1             # <<<<<<<<<<<<<<
@@ -6680,7 +6680,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_var_count, __pyx_t_10) < 0) __PYX_ERR(0, 122, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-        /* "templ/evaluate.pyx":123
+        /* "mwlib/templ/evaluate.pyx":123
  *                     name = str(self.var_count)
  *                     self.var_count += 1
  *                     do_strip = False             # <<<<<<<<<<<<<<
@@ -6692,7 +6692,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       }
       __pyx_L21:;
 
-      /* "templ/evaluate.pyx":125
+      /* "mwlib/templ/evaluate.pyx":125
  *                     do_strip = False
  * 
  *                 if do_strip and isinstance(val, str):             # <<<<<<<<<<<<<<
@@ -6710,7 +6710,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __pyx_L23_bool_binop_done:;
       if (__pyx_t_3) {
 
-        /* "templ/evaluate.pyx":126
+        /* "mwlib/templ/evaluate.pyx":126
  * 
  *                 if do_strip and isinstance(val, str):
  *                     val = val.strip()             # <<<<<<<<<<<<<<
@@ -6744,7 +6744,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __Pyx_DECREF_SET(__pyx_v_val, __pyx_t_10);
         __pyx_t_10 = 0;
 
-        /* "templ/evaluate.pyx":125
+        /* "mwlib/templ/evaluate.pyx":125
  *                     do_strip = False
  * 
  *                 if do_strip and isinstance(val, str):             # <<<<<<<<<<<<<<
@@ -6753,7 +6753,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
       }
 
-      /* "templ/evaluate.pyx":127
+      /* "mwlib/templ/evaluate.pyx":127
  *                 if do_strip and isinstance(val, str):
  *                     val = val.strip()
  *                 self.named_args[name] = (do_strip, val)             # <<<<<<<<<<<<<<
@@ -6774,7 +6774,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-      /* "templ/evaluate.pyx":129
+      /* "mwlib/templ/evaluate.pyx":129
  *                 self.named_args[name] = (do_strip, val)
  * 
  *                 if n == name:             # <<<<<<<<<<<<<<
@@ -6786,7 +6786,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       if (__pyx_t_3) {
 
-        /* "templ/evaluate.pyx":130
+        /* "mwlib/templ/evaluate.pyx":130
  * 
  *                 if n == name:
  *                     break             # <<<<<<<<<<<<<<
@@ -6795,7 +6795,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
         goto __pyx_L18_break;
 
-        /* "templ/evaluate.pyx":129
+        /* "mwlib/templ/evaluate.pyx":129
  *                 self.named_args[name] = (do_strip, val)
  * 
  *                 if n == name:             # <<<<<<<<<<<<<<
@@ -6806,7 +6806,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     }
     __pyx_L18_break:;
 
-    /* "templ/evaluate.pyx":108
+    /* "mwlib/templ/evaluate.pyx":108
  *         assert isinstance(n, (str, int)), "expected int or string"
  * 
  *         if n not in self.named_args:             # <<<<<<<<<<<<<<
@@ -6815,7 +6815,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
   }
 
-  /* "templ/evaluate.pyx":132
+  /* "mwlib/templ/evaluate.pyx":132
  *                     break
  * 
  *         try:             # <<<<<<<<<<<<<<
@@ -6831,7 +6831,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __Pyx_XGOTREF(__pyx_t_4);
     /*try:*/ {
 
-      /* "templ/evaluate.pyx":133
+      /* "mwlib/templ/evaluate.pyx":133
  * 
  *         try:
  *             do_strip, val = self.named_args[n]             # <<<<<<<<<<<<<<
@@ -6894,7 +6894,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __Pyx_XDECREF_SET(__pyx_v_val, __pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "templ/evaluate.pyx":134
+      /* "mwlib/templ/evaluate.pyx":134
  *         try:
  *             do_strip, val = self.named_args[n]
  *             if isinstance(val, str):             # <<<<<<<<<<<<<<
@@ -6904,7 +6904,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
       __pyx_t_3 = PyUnicode_Check(__pyx_v_val); 
       if (__pyx_t_3) {
 
-        /* "templ/evaluate.pyx":135
+        /* "mwlib/templ/evaluate.pyx":135
  *             do_strip, val = self.named_args[n]
  *             if isinstance(val, str):
  *                 return val             # <<<<<<<<<<<<<<
@@ -6916,7 +6916,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
         __pyx_r = __pyx_v_val;
         goto __pyx_L30_try_return;
 
-        /* "templ/evaluate.pyx":134
+        /* "mwlib/templ/evaluate.pyx":134
  *         try:
  *             do_strip, val = self.named_args[n]
  *             if isinstance(val, str):             # <<<<<<<<<<<<<<
@@ -6925,7 +6925,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
       }
 
-      /* "templ/evaluate.pyx":132
+      /* "mwlib/templ/evaluate.pyx":132
  *                     break
  * 
  *         try:             # <<<<<<<<<<<<<<
@@ -6944,7 +6944,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-    /* "templ/evaluate.pyx":136
+    /* "mwlib/templ/evaluate.pyx":136
  *             if isinstance(val, str):
  *                 return val
  *         except KeyError:             # <<<<<<<<<<<<<<
@@ -6953,13 +6953,13 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
     __pyx_t_7 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_KeyError);
     if (__pyx_t_7) {
-      __Pyx_AddTraceback("templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
       if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_1, &__pyx_t_10) < 0) __PYX_ERR(0, 136, __pyx_L28_except_error)
       __Pyx_XGOTREF(__pyx_t_2);
       __Pyx_XGOTREF(__pyx_t_1);
       __Pyx_XGOTREF(__pyx_t_10);
 
-      /* "templ/evaluate.pyx":137
+      /* "mwlib/templ/evaluate.pyx":137
  *                 return val
  *         except KeyError:
  *             return default             # <<<<<<<<<<<<<<
@@ -6976,7 +6976,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     }
     goto __pyx_L28_except_error;
 
-    /* "templ/evaluate.pyx":132
+    /* "mwlib/templ/evaluate.pyx":132
  *                     break
  * 
  *         try:             # <<<<<<<<<<<<<<
@@ -7004,7 +7004,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __pyx_L31_try_end:;
   }
 
-  /* "templ/evaluate.pyx":139
+  /* "mwlib/templ/evaluate.pyx":139
  *             return default
  * 
  *         tmp = []             # <<<<<<<<<<<<<<
@@ -7016,7 +7016,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __Pyx_XDECREF_SET(__pyx_v_tmp, __pyx_t_10);
   __pyx_t_10 = 0;
 
-  /* "templ/evaluate.pyx":140
+  /* "mwlib/templ/evaluate.pyx":140
  * 
  *         tmp = []
  *         flatten(val, self.expander, self.variables, tmp)             # <<<<<<<<<<<<<<
@@ -7055,7 +7055,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   }
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-  /* "templ/evaluate.pyx":141
+  /* "mwlib/templ/evaluate.pyx":141
  *         tmp = []
  *         flatten(val, self.expander, self.variables, tmp)
  *         insert_implicit_newlines(tmp)             # <<<<<<<<<<<<<<
@@ -7088,7 +7088,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   }
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-  /* "templ/evaluate.pyx":142
+  /* "mwlib/templ/evaluate.pyx":142
  *         flatten(val, self.expander, self.variables, tmp)
  *         insert_implicit_newlines(tmp)
  *         tmp = "".join(tmp)             # <<<<<<<<<<<<<<
@@ -7100,7 +7100,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __Pyx_DECREF_SET(__pyx_v_tmp, __pyx_t_10);
   __pyx_t_10 = 0;
 
-  /* "templ/evaluate.pyx":143
+  /* "mwlib/templ/evaluate.pyx":143
  *         insert_implicit_newlines(tmp)
  *         tmp = "".join(tmp)
  *         if do_strip:             # <<<<<<<<<<<<<<
@@ -7110,7 +7110,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_v_do_strip); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 143, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "templ/evaluate.pyx":144
+    /* "mwlib/templ/evaluate.pyx":144
  *         tmp = "".join(tmp)
  *         if do_strip:
  *             tmp = tmp.strip()             # <<<<<<<<<<<<<<
@@ -7122,7 +7122,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
     __Pyx_DECREF_SET(__pyx_v_tmp, __pyx_t_10);
     __pyx_t_10 = 0;
 
-    /* "templ/evaluate.pyx":143
+    /* "mwlib/templ/evaluate.pyx":143
  *         insert_implicit_newlines(tmp)
  *         tmp = "".join(tmp)
  *         if do_strip:             # <<<<<<<<<<<<<<
@@ -7131,7 +7131,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
   }
 
-  /* "templ/evaluate.pyx":146
+  /* "mwlib/templ/evaluate.pyx":146
  *             tmp = tmp.strip()
  * 
  *         self.named_args[n] = (do_strip, tmp)             # <<<<<<<<<<<<<<
@@ -7152,7 +7152,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-  /* "templ/evaluate.pyx":147
+  /* "mwlib/templ/evaluate.pyx":147
  * 
  *         self.named_args[n] = (do_strip, tmp)
  *         return tmp             # <<<<<<<<<<<<<<
@@ -7164,7 +7164,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __pyx_r = __pyx_v_tmp;
   goto __pyx_L0;
 
-  /* "templ/evaluate.pyx":88
+  /* "mwlib/templ/evaluate.pyx":88
  *         return self.get(n, None) or ""
  * 
  *     def get(self, n, default):             # <<<<<<<<<<<<<<
@@ -7179,7 +7179,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_10);
   __Pyx_XDECREF(__pyx_t_11);
-  __Pyx_AddTraceback("templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.templ.evaluate.ArgumentList.get", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_a);
@@ -7193,7 +7193,7 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "templ/evaluate.pyx":150
+/* "mwlib/templ/evaluate.pyx":150
  * 
  * 
  * def is_implicit_newline(raw):             # <<<<<<<<<<<<<<
@@ -7202,16 +7202,16 @@ static PyObject *__pyx_pf_5templ_8evaluate_12ArgumentList_6get(CYTHON_UNUSED PyO
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5templ_8evaluate_5is_implicit_newline(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_5is_implicit_newline(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-PyDoc_STRVAR(__pyx_doc_5templ_8evaluate_4is_implicit_newline, "should we add a newline to templates starting with *, #, :, ;, {|\n    see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start\n    ");
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_5is_implicit_newline = {"is_implicit_newline", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_5is_implicit_newline, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_5templ_8evaluate_4is_implicit_newline};
-  static PyObject *__pyx_pw_5templ_8evaluate_5is_implicit_newline(PyObject *__pyx_self, 
+PyDoc_STRVAR(__pyx_doc_5mwlib_5templ_8evaluate_4is_implicit_newline, "should we add a newline to templates starting with *, #, :, ;, {|\n    see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start\n    ");
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_5is_implicit_newline = {"is_implicit_newline", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_5is_implicit_newline, __Pyx_METH_FASTCALL|METH_KEYWORDS, __pyx_doc_5mwlib_5templ_8evaluate_4is_implicit_newline};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_5is_implicit_newline(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7281,11 +7281,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.is_implicit_newline", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.is_implicit_newline", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_4is_implicit_newline(__pyx_self, __pyx_v_raw);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_4is_implicit_newline(__pyx_self, __pyx_v_raw);
 
     /* function exit code */
     {
@@ -7297,9 +7297,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_RefNannyFinishContext();
     return __pyx_r;
   }
-  static PyObject *__pyx_gb_5templ_8evaluate_19is_implicit_newline_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
+  static PyObject *__pyx_gb_5mwlib_5templ_8evaluate_19is_implicit_newline_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value); /* proto */
 
-  /* "templ/evaluate.pyx":155
+  /* "mwlib/templ/evaluate.pyx":155
  *     """
  *     sw = raw.startswith
  *     return any(sw(x) for x in ("*", "#", ":", ";", "{|"))             # <<<<<<<<<<<<<<
@@ -7307,30 +7307,30 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  * 
  */
 
-  static PyObject *__pyx_pf_5templ_8evaluate_19is_implicit_newline_genexpr(PyObject *__pyx_self, PyObject *__pyx_genexpr_arg_0) {
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *__pyx_cur_scope;
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_19is_implicit_newline_genexpr(PyObject *__pyx_self, PyObject *__pyx_genexpr_arg_0) {
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *__pyx_cur_scope;
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     int __pyx_lineno = 0;
     const char *__pyx_filename = NULL;
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("genexpr", 0);
-    __pyx_cur_scope = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *)__pyx_tp_new_5templ_8evaluate___pyx_scope_struct_1_genexpr(__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr, __pyx_empty_tuple, NULL);
+    __pyx_cur_scope = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *)__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr(__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr, __pyx_empty_tuple, NULL);
     if (unlikely(!__pyx_cur_scope)) {
-      __pyx_cur_scope = ((struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *)Py_None);
+      __pyx_cur_scope = ((struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *)Py_None);
       __Pyx_INCREF(Py_None);
       __PYX_ERR(0, 155, __pyx_L1_error)
     } else {
       __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
     }
-    __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *) __pyx_self;
+    __pyx_cur_scope->__pyx_outer_scope = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *) __pyx_self;
     __Pyx_INCREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
     __Pyx_GIVEREF((PyObject *)__pyx_cur_scope->__pyx_outer_scope);
     __pyx_cur_scope->__pyx_genexpr_arg_0 = __pyx_genexpr_arg_0;
     __Pyx_INCREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
     __Pyx_GIVEREF(__pyx_cur_scope->__pyx_genexpr_arg_0);
     {
-      __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_5templ_8evaluate_19is_implicit_newline_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_is_implicit_newline_locals_genex, __pyx_n_s_templ_evaluate); if (unlikely(!gen)) __PYX_ERR(0, 155, __pyx_L1_error)
+      __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_5mwlib_5templ_8evaluate_19is_implicit_newline_2generator, NULL, (PyObject *) __pyx_cur_scope, __pyx_n_s_genexpr, __pyx_n_s_is_implicit_newline_locals_genex, __pyx_n_s_mwlib_templ_evaluate); if (unlikely(!gen)) __PYX_ERR(0, 155, __pyx_L1_error)
       __Pyx_DECREF(__pyx_cur_scope);
       __Pyx_RefNannyFinishContext();
       return (PyObject *) gen;
@@ -7338,7 +7338,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
 
     /* function exit code */
     __pyx_L1_error:;
-    __Pyx_AddTraceback("templ.evaluate.is_implicit_newline.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.is_implicit_newline.genexpr", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __Pyx_DECREF((PyObject *)__pyx_cur_scope);
     __Pyx_XGIVEREF(__pyx_r);
@@ -7346,9 +7346,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_gb_5templ_8evaluate_19is_implicit_newline_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value) /* generator body */
+  static PyObject *__pyx_gb_5mwlib_5templ_8evaluate_19is_implicit_newline_2generator(__pyx_CoroutineObject *__pyx_generator, CYTHON_UNUSED PyThreadState *__pyx_tstate, PyObject *__pyx_sent_value) /* generator body */
 {
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *__pyx_cur_scope = ((struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *)__pyx_generator->closure);
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *__pyx_cur_scope = ((struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *)__pyx_generator->closure);
     PyObject *__pyx_r = NULL;
     PyObject *__pyx_t_1 = NULL;
     Py_ssize_t __pyx_t_2;
@@ -7454,7 +7454,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":150
+  /* "mwlib/templ/evaluate.pyx":150
  * 
  * 
  * def is_implicit_newline(raw):             # <<<<<<<<<<<<<<
@@ -7462,9 +7462,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  *     see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
  */
 
-  static PyObject *__pyx_pf_5templ_8evaluate_4is_implicit_newline(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_raw) {
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *__pyx_cur_scope;
-    PyObject *__pyx_gb_5templ_8evaluate_19is_implicit_newline_2generator = 0;
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_4is_implicit_newline(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_raw) {
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *__pyx_cur_scope;
+    PyObject *__pyx_gb_5mwlib_5templ_8evaluate_19is_implicit_newline_2generator = 0;
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     PyObject *__pyx_t_1 = NULL;
@@ -7473,16 +7473,16 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     const char *__pyx_filename = NULL;
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("is_implicit_newline", 0);
-    __pyx_cur_scope = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)__pyx_tp_new_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, __pyx_empty_tuple, NULL);
+    __pyx_cur_scope = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, __pyx_empty_tuple, NULL);
     if (unlikely(!__pyx_cur_scope)) {
-      __pyx_cur_scope = ((struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)Py_None);
+      __pyx_cur_scope = ((struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)Py_None);
       __Pyx_INCREF(Py_None);
       __PYX_ERR(0, 150, __pyx_L1_error)
     } else {
       __Pyx_GOTREF((PyObject *)__pyx_cur_scope);
     }
 
-    /* "templ/evaluate.pyx":154
+    /* "mwlib/templ/evaluate.pyx":154
  *     see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
  *     """
  *     sw = raw.startswith             # <<<<<<<<<<<<<<
@@ -7495,7 +7495,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_cur_scope->__pyx_v_sw = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":155
+    /* "mwlib/templ/evaluate.pyx":155
  *     """
  *     sw = raw.startswith
  *     return any(sw(x) for x in ("*", "#", ":", ";", "{|"))             # <<<<<<<<<<<<<<
@@ -7503,7 +7503,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __pyx_pf_5templ_8evaluate_19is_implicit_newline_genexpr(((PyObject*)__pyx_cur_scope), __pyx_tuple__7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
+    __pyx_t_1 = __pyx_pf_5mwlib_5templ_8evaluate_19is_implicit_newline_genexpr(((PyObject*)__pyx_cur_scope), __pyx_tuple__7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_2 = __Pyx_Generator_Next(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 155, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -7512,7 +7512,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":150
+    /* "mwlib/templ/evaluate.pyx":150
  * 
  * 
  * def is_implicit_newline(raw):             # <<<<<<<<<<<<<<
@@ -7524,17 +7524,17 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_L1_error:;
     __Pyx_XDECREF(__pyx_t_1);
     __Pyx_XDECREF(__pyx_t_2);
-    __Pyx_AddTraceback("templ.evaluate.is_implicit_newline", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.is_implicit_newline", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
-    __Pyx_XDECREF(__pyx_gb_5templ_8evaluate_19is_implicit_newline_2generator);
+    __Pyx_XDECREF(__pyx_gb_5mwlib_5templ_8evaluate_19is_implicit_newline_2generator);
     __Pyx_DECREF((PyObject *)__pyx_cur_scope);
     __Pyx_XGIVEREF(__pyx_r);
     __Pyx_RefNannyFinishContext();
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":158
+  /* "mwlib/templ/evaluate.pyx":158
  * 
  * 
  * def insert_implicit_newlines(res, maybe_newline=maybe_newline):             # <<<<<<<<<<<<<<
@@ -7542,7 +7542,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  *     res.append(dummy_mark)
  */
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8__defaults__(CYTHON_UNUSED PyObject *__pyx_self) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8__defaults__(CYTHON_UNUSED PyObject *__pyx_self) {
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     PyObject *__pyx_t_1 = NULL;
@@ -7573,7 +7573,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_L1_error:;
     __Pyx_XDECREF(__pyx_t_1);
     __Pyx_XDECREF(__pyx_t_2);
-    __Pyx_AddTraceback("templ.evaluate.__defaults__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.__defaults__", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XGIVEREF(__pyx_r);
@@ -7582,15 +7582,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_7insert_implicit_newlines(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_7insert_implicit_newlines(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_7insert_implicit_newlines = {"insert_implicit_newlines", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_7insert_implicit_newlines, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_7insert_implicit_newlines(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_7insert_implicit_newlines = {"insert_implicit_newlines", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_7insert_implicit_newlines, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_7insert_implicit_newlines(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7677,11 +7677,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.insert_implicit_newlines", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.insert_implicit_newlines", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_6insert_implicit_newlines(__pyx_self, __pyx_v_res, __pyx_v_maybe_newline);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_6insert_implicit_newlines(__pyx_self, __pyx_v_res, __pyx_v_maybe_newline);
 
     /* function exit code */
     {
@@ -7694,7 +7694,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_6insert_implicit_newlines(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_res, PyObject *__pyx_v_maybe_newline) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_6insert_implicit_newlines(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_res, PyObject *__pyx_v_maybe_newline) {
     PyObject *__pyx_v_i = NULL;
     PyObject *__pyx_v_p = NULL;
     PyObject *__pyx_v_s1 = NULL;
@@ -7719,7 +7719,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("insert_implicit_newlines", 1);
 
-    /* "templ/evaluate.pyx":160
+    /* "mwlib/templ/evaluate.pyx":160
  * def insert_implicit_newlines(res, maybe_newline=maybe_newline):
  *     # do not pass the second argument
  *     res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -7731,7 +7731,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_2 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 160, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":161
+    /* "mwlib/templ/evaluate.pyx":161
  *     # do not pass the second argument
  *     res.append(dummy_mark)
  *     res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -7743,7 +7743,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_2 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 161, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":163
+    /* "mwlib/templ/evaluate.pyx":163
  *     res.append(dummy_mark)
  * 
  *     for i, p in enumerate(res):             # <<<<<<<<<<<<<<
@@ -7814,7 +7814,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_t_1 = __pyx_t_6;
       __pyx_t_6 = 0;
 
-      /* "templ/evaluate.pyx":164
+      /* "mwlib/templ/evaluate.pyx":164
  * 
  *     for i, p in enumerate(res):
  *         if p is maybe_newline:             # <<<<<<<<<<<<<<
@@ -7824,7 +7824,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_t_7 = (__pyx_v_p == __pyx_v_maybe_newline);
       if (__pyx_t_7) {
 
-        /* "templ/evaluate.pyx":165
+        /* "mwlib/templ/evaluate.pyx":165
  *     for i, p in enumerate(res):
  *         if p is maybe_newline:
  *             s1 = res[i + 1]             # <<<<<<<<<<<<<<
@@ -7839,7 +7839,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_XDECREF_SET(__pyx_v_s1, __pyx_t_8);
         __pyx_t_8 = 0;
 
-        /* "templ/evaluate.pyx":166
+        /* "mwlib/templ/evaluate.pyx":166
  *         if p is maybe_newline:
  *             s1 = res[i + 1]
  *             s2 = res[i + 2]             # <<<<<<<<<<<<<<
@@ -7854,7 +7854,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_XDECREF_SET(__pyx_v_s2, __pyx_t_6);
         __pyx_t_6 = 0;
 
-        /* "templ/evaluate.pyx":167
+        /* "mwlib/templ/evaluate.pyx":167
  *             s1 = res[i + 1]
  *             s2 = res[i + 2]
  *             if i and res[i - 1].endswith("\n"):             # <<<<<<<<<<<<<<
@@ -7903,7 +7903,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __pyx_L7_bool_binop_done:;
         if (__pyx_t_7) {
 
-          /* "templ/evaluate.pyx":168
+          /* "mwlib/templ/evaluate.pyx":168
  *             s2 = res[i + 2]
  *             if i and res[i - 1].endswith("\n"):
  *                 continue             # <<<<<<<<<<<<<<
@@ -7912,7 +7912,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
           goto __pyx_L3_continue;
 
-          /* "templ/evaluate.pyx":167
+          /* "mwlib/templ/evaluate.pyx":167
  *             s1 = res[i + 1]
  *             s2 = res[i + 2]
  *             if i and res[i - 1].endswith("\n"):             # <<<<<<<<<<<<<<
@@ -7921,7 +7921,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
         }
 
-        /* "templ/evaluate.pyx":170
+        /* "mwlib/templ/evaluate.pyx":170
  *                 continue
  * 
  *             if isinstance(s1, Mark):             # <<<<<<<<<<<<<<
@@ -7934,7 +7934,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         if (__pyx_t_7) {
 
-          /* "templ/evaluate.pyx":171
+          /* "mwlib/templ/evaluate.pyx":171
  * 
  *             if isinstance(s1, Mark):
  *                 continue             # <<<<<<<<<<<<<<
@@ -7943,7 +7943,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
           goto __pyx_L3_continue;
 
-          /* "templ/evaluate.pyx":170
+          /* "mwlib/templ/evaluate.pyx":170
  *                 continue
  * 
  *             if isinstance(s1, Mark):             # <<<<<<<<<<<<<<
@@ -7952,7 +7952,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
         }
 
-        /* "templ/evaluate.pyx":172
+        /* "mwlib/templ/evaluate.pyx":172
  *             if isinstance(s1, Mark):
  *                 continue
  *             if len(s1) >= 2:             # <<<<<<<<<<<<<<
@@ -7963,7 +7963,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __pyx_t_7 = (__pyx_t_12 >= 2);
         if (__pyx_t_7) {
 
-          /* "templ/evaluate.pyx":173
+          /* "mwlib/templ/evaluate.pyx":173
  *                 continue
  *             if len(s1) >= 2:
  *                 if is_implicit_newline(s1):             # <<<<<<<<<<<<<<
@@ -7998,7 +7998,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           if (__pyx_t_7) {
 
-            /* "templ/evaluate.pyx":174
+            /* "mwlib/templ/evaluate.pyx":174
  *             if len(s1) >= 2:
  *                 if is_implicit_newline(s1):
  *                     res[i] = "\n"             # <<<<<<<<<<<<<<
@@ -8007,7 +8007,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
             if (unlikely((PyObject_SetItem(__pyx_v_res, __pyx_v_i, __pyx_kp_u__8) < 0))) __PYX_ERR(0, 174, __pyx_L1_error)
 
-            /* "templ/evaluate.pyx":173
+            /* "mwlib/templ/evaluate.pyx":173
  *                 continue
  *             if len(s1) >= 2:
  *                 if is_implicit_newline(s1):             # <<<<<<<<<<<<<<
@@ -8016,7 +8016,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
           }
 
-          /* "templ/evaluate.pyx":172
+          /* "mwlib/templ/evaluate.pyx":172
  *             if isinstance(s1, Mark):
  *                 continue
  *             if len(s1) >= 2:             # <<<<<<<<<<<<<<
@@ -8026,7 +8026,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           goto __pyx_L10;
         }
 
-        /* "templ/evaluate.pyx":176
+        /* "mwlib/templ/evaluate.pyx":176
  *                     res[i] = "\n"
  *             else:
  *                 if is_implicit_newline("".join([s1, s2])):             # <<<<<<<<<<<<<<
@@ -8074,7 +8074,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
           if (__pyx_t_7) {
 
-            /* "templ/evaluate.pyx":177
+            /* "mwlib/templ/evaluate.pyx":177
  *             else:
  *                 if is_implicit_newline("".join([s1, s2])):
  *                     res[i] = "\n"             # <<<<<<<<<<<<<<
@@ -8083,7 +8083,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
             if (unlikely((PyObject_SetItem(__pyx_v_res, __pyx_v_i, __pyx_kp_u__8) < 0))) __PYX_ERR(0, 177, __pyx_L1_error)
 
-            /* "templ/evaluate.pyx":176
+            /* "mwlib/templ/evaluate.pyx":176
  *                     res[i] = "\n"
  *             else:
  *                 if is_implicit_newline("".join([s1, s2])):             # <<<<<<<<<<<<<<
@@ -8094,7 +8094,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         }
         __pyx_L10:;
 
-        /* "templ/evaluate.pyx":164
+        /* "mwlib/templ/evaluate.pyx":164
  * 
  *     for i, p in enumerate(res):
  *         if p is maybe_newline:             # <<<<<<<<<<<<<<
@@ -8103,7 +8103,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
       }
 
-      /* "templ/evaluate.pyx":163
+      /* "mwlib/templ/evaluate.pyx":163
  *     res.append(dummy_mark)
  * 
  *     for i, p in enumerate(res):             # <<<<<<<<<<<<<<
@@ -8115,7 +8115,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":178
+    /* "mwlib/templ/evaluate.pyx":178
  *                 if is_implicit_newline("".join([s1, s2])):
  *                     res[i] = "\n"
  *     del res[-2:]             # <<<<<<<<<<<<<<
@@ -8124,7 +8124,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (__Pyx_PyObject_DelSlice(__pyx_v_res, -2L, 0, NULL, NULL, &__pyx_slice__9, 1, 0, 1) < 0) __PYX_ERR(0, 178, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":158
+    /* "mwlib/templ/evaluate.pyx":158
  * 
  * 
  * def insert_implicit_newlines(res, maybe_newline=maybe_newline):             # <<<<<<<<<<<<<<
@@ -8142,7 +8142,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_10);
     __Pyx_XDECREF(__pyx_t_13);
-    __Pyx_AddTraceback("templ.evaluate.insert_implicit_newlines", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.insert_implicit_newlines", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XDECREF(__pyx_v_i);
@@ -8154,7 +8154,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":184
+  /* "mwlib/templ/evaluate.pyx":184
  *     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
  * 
  *     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):             # <<<<<<<<<<<<<<
@@ -8163,15 +8163,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_1__init__(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_1__init__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_1__init__ = {"__init__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_1__init__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_1__init__(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_1__init__ = {"__init__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_1__init__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_1__init__(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -8300,11 +8300,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander___init__(__pyx_self, __pyx_v_self, __pyx_v_txt, __pyx_v_pagename, __pyx_v_wikidb, __pyx_v_recursion_limit);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander___init__(__pyx_self, __pyx_v_self, __pyx_v_txt, __pyx_v_pagename, __pyx_v_wikidb, __pyx_v_recursion_limit);
 
     /* function exit code */
     {
@@ -8317,7 +8317,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_pagename, PyObject *__pyx_v_wikidb, PyObject *__pyx_v_recursion_limit) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_pagename, PyObject *__pyx_v_wikidb, PyObject *__pyx_v_recursion_limit) {
     PyObject *__pyx_v_si = NULL;
     PyObject *__pyx_v_err = NULL;
     PyObject *__pyx_v_nshandler = NULL;
@@ -8352,7 +8352,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("__init__", 1);
 
-    /* "templ/evaluate.pyx":185
+    /* "mwlib/templ/evaluate.pyx":185
  * 
  *     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
  *         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"             # <<<<<<<<<<<<<<
@@ -8371,7 +8371,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if ((1)); else __PYX_ERR(0, 185, __pyx_L1_error)
     #endif
 
-    /* "templ/evaluate.pyx":186
+    /* "mwlib/templ/evaluate.pyx":186
  *     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):
  *         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
  *         self.pagename = pagename             # <<<<<<<<<<<<<<
@@ -8380,7 +8380,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_pagename, __pyx_v_pagename) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":187
+    /* "mwlib/templ/evaluate.pyx":187
  *         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
  *         self.pagename = pagename
  *         self.db = wikidb             # <<<<<<<<<<<<<<
@@ -8389,7 +8389,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_db, __pyx_v_wikidb) < 0) __PYX_ERR(0, 187, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":188
+    /* "mwlib/templ/evaluate.pyx":188
  *         self.pagename = pagename
  *         self.db = wikidb
  *         self.uniquifier = Uniquifier()             # <<<<<<<<<<<<<<
@@ -8423,7 +8423,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_uniquifier, __pyx_t_2) < 0) __PYX_ERR(0, 188, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "templ/evaluate.pyx":190
+    /* "mwlib/templ/evaluate.pyx":190
  *         self.uniquifier = Uniquifier()
  * 
  *         si = None             # <<<<<<<<<<<<<<
@@ -8433,7 +8433,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_INCREF(Py_None);
     __pyx_v_si = Py_None;
 
-    /* "templ/evaluate.pyx":191
+    /* "mwlib/templ/evaluate.pyx":191
  * 
  *         si = None
  *         try:             # <<<<<<<<<<<<<<
@@ -8449,7 +8449,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_XGOTREF(__pyx_t_8);
       /*try:*/ {
 
-        /* "templ/evaluate.pyx":192
+        /* "mwlib/templ/evaluate.pyx":192
  *         si = None
  *         try:
  *             si = self.db.get_siteinfo()             # <<<<<<<<<<<<<<
@@ -8486,7 +8486,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_DECREF_SET(__pyx_v_si, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "templ/evaluate.pyx":191
+        /* "mwlib/templ/evaluate.pyx":191
  * 
  *         si = None
  *         try:             # <<<<<<<<<<<<<<
@@ -8503,7 +8503,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":193
+      /* "mwlib/templ/evaluate.pyx":193
  *         try:
  *             si = self.db.get_siteinfo()
  *         except Exception as err:             # <<<<<<<<<<<<<<
@@ -8512,7 +8512,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
       __pyx_t_9 = __Pyx_PyErr_ExceptionMatches(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
       if (__pyx_t_9) {
-        __Pyx_AddTraceback("templ.evaluate.Expander.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+        __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
         if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_4, &__pyx_t_3) < 0) __PYX_ERR(0, 193, __pyx_L5_except_error)
         __Pyx_XGOTREF(__pyx_t_2);
         __Pyx_XGOTREF(__pyx_t_4);
@@ -8521,7 +8521,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __pyx_v_err = __pyx_t_4;
         /*try:*/ {
 
-          /* "templ/evaluate.pyx":194
+          /* "mwlib/templ/evaluate.pyx":194
  *             si = self.db.get_siteinfo()
  *         except Exception as err:
  *             print("Caught: %s" % err)             # <<<<<<<<<<<<<<
@@ -8536,7 +8536,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         }
 
-        /* "templ/evaluate.pyx":193
+        /* "mwlib/templ/evaluate.pyx":193
  *         try:
  *             si = self.db.get_siteinfo()
  *         except Exception as err:             # <<<<<<<<<<<<<<
@@ -8590,7 +8590,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       }
       goto __pyx_L5_except_error;
 
-      /* "templ/evaluate.pyx":191
+      /* "mwlib/templ/evaluate.pyx":191
  * 
  *         si = None
  *         try:             # <<<<<<<<<<<<<<
@@ -8611,7 +8611,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_L8_try_end:;
     }
 
-    /* "templ/evaluate.pyx":196
+    /* "mwlib/templ/evaluate.pyx":196
  *             print("Caught: %s" % err)
  * 
  *         if si is None:             # <<<<<<<<<<<<<<
@@ -8621,7 +8621,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_1 = (__pyx_v_si == Py_None);
     if (__pyx_t_1) {
 
-      /* "templ/evaluate.pyx":197
+      /* "mwlib/templ/evaluate.pyx":197
  * 
  *         if si is None:
  *             print(f"WARNING: failed to get siteinfo from {self.db!r}")             # <<<<<<<<<<<<<<
@@ -8641,7 +8641,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":198
+      /* "mwlib/templ/evaluate.pyx":198
  *         if si is None:
  *             print(f"WARNING: failed to get siteinfo from {self.db!r}")
  *             si = siteinfo.get_siteinfo("de")             # <<<<<<<<<<<<<<
@@ -8678,7 +8678,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_DECREF_SET(__pyx_v_si, __pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":196
+      /* "mwlib/templ/evaluate.pyx":196
  *             print("Caught: %s" % err)
  * 
  *         if si is None:             # <<<<<<<<<<<<<<
@@ -8687,7 +8687,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     }
 
-    /* "templ/evaluate.pyx":200
+    /* "mwlib/templ/evaluate.pyx":200
  *             si = siteinfo.get_siteinfo("de")
  * 
  *         self.nshandler = nshandler = nshandling.NsHandler(si)             # <<<<<<<<<<<<<<
@@ -8726,7 +8726,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_v_nshandler = __pyx_t_4;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":201
+    /* "mwlib/templ/evaluate.pyx":201
  * 
  *         self.nshandler = nshandler = nshandling.NsHandler(si)
  *         self.siteinfo = si             # <<<<<<<<<<<<<<
@@ -8735,7 +8735,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_siteinfo, __pyx_v_si) < 0) __PYX_ERR(0, 201, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":203
+    /* "mwlib/templ/evaluate.pyx":203
  *         self.siteinfo = si
  * 
  *         if self.db and hasattr(self.db, "get_source"):             # <<<<<<<<<<<<<<
@@ -8759,7 +8759,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_L22_bool_binop_done:;
     if (__pyx_t_1) {
 
-      /* "templ/evaluate.pyx":204
+      /* "mwlib/templ/evaluate.pyx":204
  * 
  *         if self.db and hasattr(self.db, "get_source"):
  *             source = self.db.get_source(pagename) or metabook.source()             # <<<<<<<<<<<<<<
@@ -8836,7 +8836,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_v_source = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":205
+      /* "mwlib/templ/evaluate.pyx":205
  *         if self.db and hasattr(self.db, "get_source"):
  *             source = self.db.get_source(pagename) or metabook.source()
  *             local_values = source.locals or ""             # <<<<<<<<<<<<<<
@@ -8860,7 +8860,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_v_local_values = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":206
+      /* "mwlib/templ/evaluate.pyx":206
  *             source = self.db.get_source(pagename) or metabook.source()
  *             local_values = source.locals or ""
  *             local_values = mwlocals.parse_locals(local_values)             # <<<<<<<<<<<<<<
@@ -8897,7 +8897,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_DECREF_SET(__pyx_v_local_values, __pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":203
+      /* "mwlib/templ/evaluate.pyx":203
  *         self.siteinfo = si
  * 
  *         if self.db and hasattr(self.db, "get_source"):             # <<<<<<<<<<<<<<
@@ -8907,7 +8907,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       goto __pyx_L21;
     }
 
-    /* "templ/evaluate.pyx":208
+    /* "mwlib/templ/evaluate.pyx":208
  *             local_values = mwlocals.parse_locals(local_values)
  *         else:
  *             local_values = None             # <<<<<<<<<<<<<<
@@ -8918,7 +8918,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_INCREF(Py_None);
       __pyx_v_local_values = Py_None;
 
-      /* "templ/evaluate.pyx":209
+      /* "mwlib/templ/evaluate.pyx":209
  *         else:
  *             local_values = None
  *             source = {}             # <<<<<<<<<<<<<<
@@ -8932,7 +8932,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
     __pyx_L21:;
 
-    /* "templ/evaluate.pyx":212
+    /* "mwlib/templ/evaluate.pyx":212
  * 
  *         # XXX we really should call Expander with a nuwiki.page object.
  *         revision_id = 0             # <<<<<<<<<<<<<<
@@ -8942,7 +8942,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_INCREF(__pyx_int_0);
     __pyx_v_revision_id = __pyx_int_0;
 
-    /* "templ/evaluate.pyx":213
+    /* "mwlib/templ/evaluate.pyx":213
  *         # XXX we really should call Expander with a nuwiki.page object.
  *         revision_id = 0
  *         if self.db and hasattr(self.db, "nuwiki") and pagename:             # <<<<<<<<<<<<<<
@@ -8972,7 +8972,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_L29_bool_binop_done:;
     if (__pyx_t_1) {
 
-      /* "templ/evaluate.pyx":214
+      /* "mwlib/templ/evaluate.pyx":214
  *         revision_id = 0
  *         if self.db and hasattr(self.db, "nuwiki") and pagename:
  *             page = self.db.nuwiki.get_page(self.pagename)             # <<<<<<<<<<<<<<
@@ -9015,7 +9015,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_v_page = __pyx_t_4;
       __pyx_t_4 = 0;
 
-      /* "templ/evaluate.pyx":215
+      /* "mwlib/templ/evaluate.pyx":215
  *         if self.db and hasattr(self.db, "nuwiki") and pagename:
  *             page = self.db.nuwiki.get_page(self.pagename)
  *             if page is not None:             # <<<<<<<<<<<<<<
@@ -9025,7 +9025,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_t_1 = (__pyx_v_page != Py_None);
       if (__pyx_t_1) {
 
-        /* "templ/evaluate.pyx":216
+        /* "mwlib/templ/evaluate.pyx":216
  *             page = self.db.nuwiki.get_page(self.pagename)
  *             if page is not None:
  *                 revision_id = getattr(page, "revid", 0) or 0             # <<<<<<<<<<<<<<
@@ -9051,7 +9051,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_DECREF_SET(__pyx_v_revision_id, __pyx_t_4);
         __pyx_t_4 = 0;
 
-        /* "templ/evaluate.pyx":215
+        /* "mwlib/templ/evaluate.pyx":215
  *         if self.db and hasattr(self.db, "nuwiki") and pagename:
  *             page = self.db.nuwiki.get_page(self.pagename)
  *             if page is not None:             # <<<<<<<<<<<<<<
@@ -9060,7 +9060,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
       }
 
-      /* "templ/evaluate.pyx":213
+      /* "mwlib/templ/evaluate.pyx":213
  *         # XXX we really should call Expander with a nuwiki.page object.
  *         revision_id = 0
  *         if self.db and hasattr(self.db, "nuwiki") and pagename:             # <<<<<<<<<<<<<<
@@ -9069,7 +9069,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     }
 
-    /* "templ/evaluate.pyx":218
+    /* "mwlib/templ/evaluate.pyx":218
  *                 revision_id = getattr(page, "revid", 0) or 0
  * 
  *         self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revision_id)             # <<<<<<<<<<<<<<
@@ -9092,7 +9092,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_resolver, __pyx_t_3) < 0) __PYX_ERR(0, 218, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":219
+    /* "mwlib/templ/evaluate.pyx":219
  * 
  *         self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revision_id)
  *         self.resolver.siteinfo = si             # <<<<<<<<<<<<<<
@@ -9104,7 +9104,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_t_3, __pyx_n_s_siteinfo, __pyx_v_si) < 0) __PYX_ERR(0, 219, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":220
+    /* "mwlib/templ/evaluate.pyx":220
  *         self.resolver = magics.MagicResolver(pagename=pagename, revisionid=revision_id)
  *         self.resolver.siteinfo = si
  *         self.resolver.nshandler = nshandler             # <<<<<<<<<<<<<<
@@ -9116,7 +9116,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_t_3, __pyx_n_s_nshandler, __pyx_v_nshandler) < 0) __PYX_ERR(0, 220, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":222
+    /* "mwlib/templ/evaluate.pyx":222
  *         self.resolver.nshandler = nshandler
  * 
  *         self.resolver.wikidb = wikidb             # <<<<<<<<<<<<<<
@@ -9128,7 +9128,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_t_3, __pyx_n_s_wikidb, __pyx_v_wikidb) < 0) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":223
+    /* "mwlib/templ/evaluate.pyx":223
  * 
  *         self.resolver.wikidb = wikidb
  *         self.resolver.local_values = local_values             # <<<<<<<<<<<<<<
@@ -9140,7 +9140,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_t_3, __pyx_n_s_local_values, __pyx_v_local_values) < 0) __PYX_ERR(0, 223, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":224
+    /* "mwlib/templ/evaluate.pyx":224
  *         self.resolver.wikidb = wikidb
  *         self.resolver.local_values = local_values
  *         self.resolver.source = source             # <<<<<<<<<<<<<<
@@ -9152,7 +9152,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_t_3, __pyx_n_s_source, __pyx_v_source) < 0) __PYX_ERR(0, 224, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":226
+    /* "mwlib/templ/evaluate.pyx":226
  *         self.resolver.source = source
  * 
  *         self.recursion_limit = recursion_limit             # <<<<<<<<<<<<<<
@@ -9161,7 +9161,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_recursion_limit, __pyx_v_recursion_limit) < 0) __PYX_ERR(0, 226, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":227
+    /* "mwlib/templ/evaluate.pyx":227
  * 
  *         self.recursion_limit = recursion_limit
  *         self.recursion_count = 0             # <<<<<<<<<<<<<<
@@ -9170,7 +9170,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_recursion_count, __pyx_int_0) < 0) __PYX_ERR(0, 227, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":228
+    /* "mwlib/templ/evaluate.pyx":228
  *         self.recursion_limit = recursion_limit
  *         self.recursion_count = 0
  *         self.aliasmap = parser.AliasMap(self.siteinfo)             # <<<<<<<<<<<<<<
@@ -9210,7 +9210,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_aliasmap, __pyx_t_3) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":230
+    /* "mwlib/templ/evaluate.pyx":230
  *         self.aliasmap = parser.AliasMap(self.siteinfo)
  * 
  *         self.parsed = parser.parse(             # <<<<<<<<<<<<<<
@@ -9223,7 +9223,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "templ/evaluate.pyx":231
+    /* "mwlib/templ/evaluate.pyx":231
  * 
  *         self.parsed = parser.parse(
  *             txt, included=False, replace_tags=self.replace_tags, siteinfo=self.siteinfo             # <<<<<<<<<<<<<<
@@ -9247,7 +9247,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_siteinfo, __pyx_t_11) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-    /* "templ/evaluate.pyx":230
+    /* "mwlib/templ/evaluate.pyx":230
  *         self.aliasmap = parser.AliasMap(self.siteinfo)
  * 
  *         self.parsed = parser.parse(             # <<<<<<<<<<<<<<
@@ -9262,7 +9262,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_parsed, __pyx_t_11) < 0) __PYX_ERR(0, 230, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-    /* "templ/evaluate.pyx":234
+    /* "mwlib/templ/evaluate.pyx":234
  *         )
  *         # show(self.parsed)
  *         self.parsedTemplateCache = {}             # <<<<<<<<<<<<<<
@@ -9274,7 +9274,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_parsedTemplateCache, __pyx_t_11) < 0) __PYX_ERR(0, 234, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
 
-    /* "templ/evaluate.pyx":184
+    /* "mwlib/templ/evaluate.pyx":184
  *     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
  * 
  *     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):             # <<<<<<<<<<<<<<
@@ -9291,7 +9291,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_10);
     __Pyx_XDECREF(__pyx_t_11);
-    __Pyx_AddTraceback("templ.evaluate.Expander.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XDECREF(__pyx_v_si);
@@ -9306,7 +9306,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":236
+  /* "mwlib/templ/evaluate.pyx":236
  *         self.parsedTemplateCache = {}
  * 
  *     def resolve_magic_alias(self, name):             # <<<<<<<<<<<<<<
@@ -9315,15 +9315,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_3resolve_magic_alias(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_3resolve_magic_alias(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_3resolve_magic_alias = {"resolve_magic_alias", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_3resolve_magic_alias, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_3resolve_magic_alias(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_3resolve_magic_alias = {"resolve_magic_alias", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_3resolve_magic_alias, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_3resolve_magic_alias(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -9408,11 +9408,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander.resolve_magic_alias", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.resolve_magic_alias", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_2resolve_magic_alias(__pyx_self, __pyx_v_self, __pyx_v_name);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_2resolve_magic_alias(__pyx_self, __pyx_v_self, __pyx_v_name);
 
     /* function exit code */
     {
@@ -9425,7 +9425,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_2resolve_magic_alias(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_2resolve_magic_alias(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name) {
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     PyObject *__pyx_t_1 = NULL;
@@ -9437,7 +9437,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("resolve_magic_alias", 1);
 
-    /* "templ/evaluate.pyx":237
+    /* "mwlib/templ/evaluate.pyx":237
  * 
  *     def resolve_magic_alias(self, name):
  *         return self.aliasmap.resolve_magic_alias(name)             # <<<<<<<<<<<<<<
@@ -9476,7 +9476,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":236
+    /* "mwlib/templ/evaluate.pyx":236
  *         self.parsedTemplateCache = {}
  * 
  *     def resolve_magic_alias(self, name):             # <<<<<<<<<<<<<<
@@ -9489,7 +9489,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_1);
     __Pyx_XDECREF(__pyx_t_2);
     __Pyx_XDECREF(__pyx_t_3);
-    __Pyx_AddTraceback("templ.evaluate.Expander.resolve_magic_alias", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.resolve_magic_alias", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XGIVEREF(__pyx_r);
@@ -9497,7 +9497,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":239
+  /* "mwlib/templ/evaluate.pyx":239
  *         return self.aliasmap.resolve_magic_alias(name)
  * 
  *     def replace_tags(self, txt):             # <<<<<<<<<<<<<<
@@ -9506,15 +9506,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_5replace_tags(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_5replace_tags(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_5replace_tags = {"replace_tags", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_5replace_tags, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_5replace_tags(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_5replace_tags = {"replace_tags", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_5replace_tags, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_5replace_tags(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -9599,11 +9599,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander.replace_tags", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.replace_tags", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_4replace_tags(__pyx_self, __pyx_v_self, __pyx_v_txt);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_4replace_tags(__pyx_self, __pyx_v_self, __pyx_v_txt);
 
     /* function exit code */
     {
@@ -9616,7 +9616,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_4replace_tags(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_4replace_tags(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt) {
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     PyObject *__pyx_t_1 = NULL;
@@ -9628,7 +9628,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("replace_tags", 1);
 
-    /* "templ/evaluate.pyx":240
+    /* "mwlib/templ/evaluate.pyx":240
  * 
  *     def replace_tags(self, txt):
  *         return self.uniquifier.replace_tags(txt)             # <<<<<<<<<<<<<<
@@ -9667,7 +9667,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":239
+    /* "mwlib/templ/evaluate.pyx":239
  *         return self.aliasmap.resolve_magic_alias(name)
  * 
  *     def replace_tags(self, txt):             # <<<<<<<<<<<<<<
@@ -9680,7 +9680,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_1);
     __Pyx_XDECREF(__pyx_t_2);
     __Pyx_XDECREF(__pyx_t_3);
-    __Pyx_AddTraceback("templ.evaluate.Expander.replace_tags", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.replace_tags", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XGIVEREF(__pyx_r);
@@ -9688,7 +9688,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":242
+  /* "mwlib/templ/evaluate.pyx":242
  *         return self.uniquifier.replace_tags(txt)
  * 
  *     def get_parsed_template(self, name):             # <<<<<<<<<<<<<<
@@ -9697,15 +9697,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_7get_parsed_template(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_7get_parsed_template(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_7get_parsed_template = {"get_parsed_template", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_7get_parsed_template, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_7get_parsed_template(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_7get_parsed_template = {"get_parsed_template", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_7get_parsed_template, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_7get_parsed_template(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -9790,11 +9790,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander.get_parsed_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.get_parsed_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_6get_parsed_template(__pyx_self, __pyx_v_self, __pyx_v_name);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_6get_parsed_template(__pyx_self, __pyx_v_self, __pyx_v_name);
 
     /* function exit code */
     {
@@ -9807,7 +9807,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_6get_parsed_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_6get_parsed_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name) {
     long __pyx_v_ns;
     PyObject *__pyx_v_page = NULL;
     PyObject *__pyx_v_raw = NULL;
@@ -9832,7 +9832,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_RefNannySetupContext("get_parsed_template", 0);
     __Pyx_INCREF(__pyx_v_name);
 
-    /* "templ/evaluate.pyx":243
+    /* "mwlib/templ/evaluate.pyx":243
  * 
  *     def get_parsed_template(self, name):
  *         if not name or name.startswith("[[") or "|" in name:             # <<<<<<<<<<<<<<
@@ -9882,7 +9882,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_L4_bool_binop_done:;
     if (__pyx_t_1) {
 
-      /* "templ/evaluate.pyx":244
+      /* "mwlib/templ/evaluate.pyx":244
  *     def get_parsed_template(self, name):
  *         if not name or name.startswith("[[") or "|" in name:
  *             return None             # <<<<<<<<<<<<<<
@@ -9893,7 +9893,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __pyx_r = Py_None; __Pyx_INCREF(Py_None);
       goto __pyx_L0;
 
-      /* "templ/evaluate.pyx":243
+      /* "mwlib/templ/evaluate.pyx":243
  * 
  *     def get_parsed_template(self, name):
  *         if not name or name.startswith("[[") or "|" in name:             # <<<<<<<<<<<<<<
@@ -9902,7 +9902,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     }
 
-    /* "templ/evaluate.pyx":246
+    /* "mwlib/templ/evaluate.pyx":246
  *             return None
  * 
  *         if name.startswith("/"):             # <<<<<<<<<<<<<<
@@ -9937,7 +9937,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (__pyx_t_1) {
 
-      /* "templ/evaluate.pyx":247
+      /* "mwlib/templ/evaluate.pyx":247
  * 
  *         if name.startswith("/"):
  *             name = self.pagename + name             # <<<<<<<<<<<<<<
@@ -9952,7 +9952,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_DECREF_SET(__pyx_v_name, __pyx_t_5);
       __pyx_t_5 = 0;
 
-      /* "templ/evaluate.pyx":248
+      /* "mwlib/templ/evaluate.pyx":248
  *         if name.startswith("/"):
  *             name = self.pagename + name
  *             ns = 0             # <<<<<<<<<<<<<<
@@ -9961,7 +9961,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
       __pyx_v_ns = 0;
 
-      /* "templ/evaluate.pyx":246
+      /* "mwlib/templ/evaluate.pyx":246
  *             return None
  * 
  *         if name.startswith("/"):             # <<<<<<<<<<<<<<
@@ -9971,7 +9971,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       goto __pyx_L7;
     }
 
-    /* "templ/evaluate.pyx":250
+    /* "mwlib/templ/evaluate.pyx":250
  *             ns = 0
  *         else:
  *             ns = 10             # <<<<<<<<<<<<<<
@@ -9983,7 +9983,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
     __pyx_L7:;
 
-    /* "templ/evaluate.pyx":252
+    /* "mwlib/templ/evaluate.pyx":252
  *             ns = 10
  * 
  *         try:             # <<<<<<<<<<<<<<
@@ -9999,7 +9999,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_XGOTREF(__pyx_t_10);
       /*try:*/ {
 
-        /* "templ/evaluate.pyx":253
+        /* "mwlib/templ/evaluate.pyx":253
  * 
  *         try:
  *             return self.parsedTemplateCache[name]             # <<<<<<<<<<<<<<
@@ -10016,7 +10016,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __pyx_t_4 = 0;
         goto __pyx_L12_try_return;
 
-        /* "templ/evaluate.pyx":252
+        /* "mwlib/templ/evaluate.pyx":252
  *             ns = 10
  * 
  *         try:             # <<<<<<<<<<<<<<
@@ -10029,7 +10029,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-      /* "templ/evaluate.pyx":254
+      /* "mwlib/templ/evaluate.pyx":254
  *         try:
  *             return self.parsedTemplateCache[name]
  *         except KeyError:             # <<<<<<<<<<<<<<
@@ -10043,7 +10043,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       }
       goto __pyx_L10_except_error;
 
-      /* "templ/evaluate.pyx":252
+      /* "mwlib/templ/evaluate.pyx":252
  *             ns = 10
  * 
  *         try:             # <<<<<<<<<<<<<<
@@ -10069,7 +10069,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_ExceptionReset(__pyx_t_8, __pyx_t_9, __pyx_t_10);
     }
 
-    /* "templ/evaluate.pyx":257
+    /* "mwlib/templ/evaluate.pyx":257
  *             pass
  * 
  *         page = self.db.normalize_and_get_page(name, ns)             # <<<<<<<<<<<<<<
@@ -10109,7 +10109,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_v_page = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":258
+    /* "mwlib/templ/evaluate.pyx":258
  * 
  *         page = self.db.normalize_and_get_page(name, ns)
  *         raw = page.rawtext if page else None             # <<<<<<<<<<<<<<
@@ -10129,7 +10129,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_v_raw = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":260
+    /* "mwlib/templ/evaluate.pyx":260
  *         raw = page.rawtext if page else None
  * 
  *         res = None if raw is None else self._parse_raw_template(name=name, raw=raw)             # <<<<<<<<<<<<<<
@@ -10157,7 +10157,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_v_res = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":262
+    /* "mwlib/templ/evaluate.pyx":262
  *         res = None if raw is None else self._parse_raw_template(name=name, raw=raw)
  * 
  *         self.parsedTemplateCache[name] = res             # <<<<<<<<<<<<<<
@@ -10169,7 +10169,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     if (unlikely((PyObject_SetItem(__pyx_t_4, __pyx_v_name, __pyx_v_res) < 0))) __PYX_ERR(0, 262, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":263
+    /* "mwlib/templ/evaluate.pyx":263
  * 
  *         self.parsedTemplateCache[name] = res
  *         return res             # <<<<<<<<<<<<<<
@@ -10181,7 +10181,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_r = __pyx_v_res;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":242
+    /* "mwlib/templ/evaluate.pyx":242
  *         return self.uniquifier.replace_tags(txt)
  * 
  *     def get_parsed_template(self, name):             # <<<<<<<<<<<<<<
@@ -10195,7 +10195,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_6);
     __Pyx_XDECREF(__pyx_t_12);
-    __Pyx_AddTraceback("templ.evaluate.Expander.get_parsed_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.get_parsed_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XDECREF(__pyx_v_page);
@@ -10207,7 +10207,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":265
+  /* "mwlib/templ/evaluate.pyx":265
  *         return res
  * 
  *     def _parse_raw_template(self, name, raw):             # <<<<<<<<<<<<<<
@@ -10216,15 +10216,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_9_parse_raw_template(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_9_parse_raw_template(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_9_parse_raw_template = {"_parse_raw_template", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_9_parse_raw_template, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_9_parse_raw_template(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_9_parse_raw_template = {"_parse_raw_template", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_9_parse_raw_template, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_9_parse_raw_template(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -10324,11 +10324,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander._parse_raw_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander._parse_raw_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_8_parse_raw_template(__pyx_self, __pyx_v_self, __pyx_v_name, __pyx_v_raw);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_8_parse_raw_template(__pyx_self, __pyx_v_self, __pyx_v_name, __pyx_v_raw);
 
     /* function exit code */
     {
@@ -10341,7 +10341,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_8_parse_raw_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_name, PyObject *__pyx_v_raw) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_8_parse_raw_template(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_name, PyObject *__pyx_v_raw) {
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     PyObject *__pyx_t_1 = NULL;
@@ -10353,7 +10353,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("_parse_raw_template", 1);
 
-    /* "templ/evaluate.pyx":266
+    /* "mwlib/templ/evaluate.pyx":266
  * 
  *     def _parse_raw_template(self, name, raw):
  *         return parser.parse(raw, replace_tags=self.replace_tags)             # <<<<<<<<<<<<<<
@@ -10386,7 +10386,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":265
+    /* "mwlib/templ/evaluate.pyx":265
  *         return res
  * 
  *     def _parse_raw_template(self, name, raw):             # <<<<<<<<<<<<<<
@@ -10400,7 +10400,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_2);
     __Pyx_XDECREF(__pyx_t_3);
     __Pyx_XDECREF(__pyx_t_4);
-    __Pyx_AddTraceback("templ.evaluate.Expander._parse_raw_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander._parse_raw_template", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XGIVEREF(__pyx_r);
@@ -10408,7 +10408,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":268
+  /* "mwlib/templ/evaluate.pyx":268
  *         return parser.parse(raw, replace_tags=self.replace_tags)
  * 
  *     def _expand(self, parsed, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -10417,15 +10417,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_11_expand(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_11_expand(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_11_expand = {"_expand", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_11_expand, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_11_expand(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_11_expand = {"_expand", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_11_expand, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_11_expand(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -10526,11 +10526,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander._expand", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander._expand", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_10_expand(__pyx_self, __pyx_v_self, __pyx_v_parsed, __pyx_v_keep_uniq);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_10_expand(__pyx_self, __pyx_v_self, __pyx_v_parsed, __pyx_v_keep_uniq);
 
     /* function exit code */
     {
@@ -10543,7 +10543,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_10_expand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_parsed, PyObject *__pyx_v_keep_uniq) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_10_expand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_parsed, PyObject *__pyx_v_keep_uniq) {
     PyObject *__pyx_v_res = NULL;
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
@@ -10560,7 +10560,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("_expand", 1);
 
-    /* "templ/evaluate.pyx":269
+    /* "mwlib/templ/evaluate.pyx":269
  * 
  *     def _expand(self, parsed, keep_uniq=False):
  *         res = ["\n"]  # guard, against implicit newlines at the beginning             # <<<<<<<<<<<<<<
@@ -10575,7 +10575,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_v_res = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":270
+    /* "mwlib/templ/evaluate.pyx":270
  *     def _expand(self, parsed, keep_uniq=False):
  *         res = ["\n"]  # guard, against implicit newlines at the beginning
  *         flatten(parsed, self, ArgumentList(expander=self), res)             # <<<<<<<<<<<<<<
@@ -10618,7 +10618,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":271
+    /* "mwlib/templ/evaluate.pyx":271
  *         res = ["\n"]  # guard, against implicit newlines at the beginning
  *         flatten(parsed, self, ArgumentList(expander=self), res)
  *         insert_implicit_newlines(res)             # <<<<<<<<<<<<<<
@@ -10651,7 +10651,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":272
+    /* "mwlib/templ/evaluate.pyx":272
  *         flatten(parsed, self, ArgumentList(expander=self), res)
  *         insert_implicit_newlines(res)
  *         res[0] = ""             # <<<<<<<<<<<<<<
@@ -10660,7 +10660,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     if (unlikely((__Pyx_SetItemInt(__pyx_v_res, 0, __pyx_kp_u_, long, 1, __Pyx_PyInt_From_long, 0, 0, 1) < 0))) __PYX_ERR(0, 272, __pyx_L1_error)
 
-    /* "templ/evaluate.pyx":273
+    /* "mwlib/templ/evaluate.pyx":273
  *         insert_implicit_newlines(res)
  *         res[0] = ""
  *         res = "".join(res)             # <<<<<<<<<<<<<<
@@ -10672,7 +10672,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_DECREF_SET(__pyx_v_res, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "templ/evaluate.pyx":274
+    /* "mwlib/templ/evaluate.pyx":274
  *         res[0] = ""
  *         res = "".join(res)
  *         if not keep_uniq:             # <<<<<<<<<<<<<<
@@ -10683,7 +10683,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_8 = (!__pyx_t_7);
     if (__pyx_t_8) {
 
-      /* "templ/evaluate.pyx":275
+      /* "mwlib/templ/evaluate.pyx":275
  *         res = "".join(res)
  *         if not keep_uniq:
  *             res = self.uniquifier.replace_uniq(res)             # <<<<<<<<<<<<<<
@@ -10720,7 +10720,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_DECREF_SET(__pyx_v_res, __pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "templ/evaluate.pyx":274
+      /* "mwlib/templ/evaluate.pyx":274
  *         res[0] = ""
  *         res = "".join(res)
  *         if not keep_uniq:             # <<<<<<<<<<<<<<
@@ -10729,7 +10729,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
     }
 
-    /* "templ/evaluate.pyx":276
+    /* "mwlib/templ/evaluate.pyx":276
  *         if not keep_uniq:
  *             res = self.uniquifier.replace_uniq(res)
  *         return res             # <<<<<<<<<<<<<<
@@ -10741,7 +10741,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_r = __pyx_v_res;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":268
+    /* "mwlib/templ/evaluate.pyx":268
  *         return parser.parse(raw, replace_tags=self.replace_tags)
  * 
  *     def _expand(self, parsed, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -10756,7 +10756,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_3);
     __Pyx_XDECREF(__pyx_t_4);
     __Pyx_XDECREF(__pyx_t_5);
-    __Pyx_AddTraceback("templ.evaluate.Expander._expand", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander._expand", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XDECREF(__pyx_v_res);
@@ -10765,7 +10765,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":278
+  /* "mwlib/templ/evaluate.pyx":278
  *         return res
  * 
  *     def parseAndExpand(self, txt, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -10774,15 +10774,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_13parseAndExpand(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_13parseAndExpand(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_13parseAndExpand = {"parseAndExpand", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_13parseAndExpand, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_13parseAndExpand(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_13parseAndExpand = {"parseAndExpand", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_13parseAndExpand, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_13parseAndExpand(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -10883,11 +10883,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander.parseAndExpand", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.parseAndExpand", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_12parseAndExpand(__pyx_self, __pyx_v_self, __pyx_v_txt, __pyx_v_keep_uniq);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_12parseAndExpand(__pyx_self, __pyx_v_self, __pyx_v_txt, __pyx_v_keep_uniq);
 
     /* function exit code */
     {
@@ -10900,7 +10900,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_12parseAndExpand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_keep_uniq) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_12parseAndExpand(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_txt, PyObject *__pyx_v_keep_uniq) {
     PyObject *__pyx_v_parsed = NULL;
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
@@ -10913,7 +10913,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("parseAndExpand", 1);
 
-    /* "templ/evaluate.pyx":279
+    /* "mwlib/templ/evaluate.pyx":279
  * 
  *     def parseAndExpand(self, txt, keep_uniq=False):
  *         parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags)             # <<<<<<<<<<<<<<
@@ -10945,7 +10945,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_v_parsed = __pyx_t_4;
     __pyx_t_4 = 0;
 
-    /* "templ/evaluate.pyx":280
+    /* "mwlib/templ/evaluate.pyx":280
  *     def parseAndExpand(self, txt, keep_uniq=False):
  *         parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags)
  *         return self._expand(parsed, keep_uniq=keep_uniq)             # <<<<<<<<<<<<<<
@@ -10972,7 +10972,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":278
+    /* "mwlib/templ/evaluate.pyx":278
  *         return res
  * 
  *     def parseAndExpand(self, txt, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -10986,7 +10986,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_2);
     __Pyx_XDECREF(__pyx_t_3);
     __Pyx_XDECREF(__pyx_t_4);
-    __Pyx_AddTraceback("templ.evaluate.Expander.parseAndExpand", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.parseAndExpand", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XDECREF(__pyx_v_parsed);
@@ -10995,7 +10995,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  /* "templ/evaluate.pyx":282
+  /* "mwlib/templ/evaluate.pyx":282
  *         return self._expand(parsed, keep_uniq=keep_uniq)
  * 
  *     def expandTemplates(self, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -11003,15 +11003,15 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
  */
 
   /* Python wrapper */
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_15expandTemplates(PyObject *__pyx_self, 
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_15expandTemplates(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-  static PyMethodDef __pyx_mdef_5templ_8evaluate_8Expander_15expandTemplates = {"expandTemplates", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5templ_8evaluate_8Expander_15expandTemplates, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-  static PyObject *__pyx_pw_5templ_8evaluate_8Expander_15expandTemplates(PyObject *__pyx_self, 
+  static PyMethodDef __pyx_mdef_5mwlib_5templ_8evaluate_8Expander_15expandTemplates = {"expandTemplates", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_5templ_8evaluate_8Expander_15expandTemplates, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+  static PyObject *__pyx_pw_5mwlib_5templ_8evaluate_8Expander_15expandTemplates(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -11097,11 +11097,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
         __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
       }
     }
-    __Pyx_AddTraceback("templ.evaluate.Expander.expandTemplates", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.expandTemplates", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __Pyx_RefNannyFinishContext();
     return NULL;
     __pyx_L4_argument_unpacking_done:;
-    __pyx_r = __pyx_pf_5templ_8evaluate_8Expander_14expandTemplates(__pyx_self, __pyx_v_self, __pyx_v_keep_uniq);
+    __pyx_r = __pyx_pf_5mwlib_5templ_8evaluate_8Expander_14expandTemplates(__pyx_self, __pyx_v_self, __pyx_v_keep_uniq);
 
     /* function exit code */
     {
@@ -11114,7 +11114,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return __pyx_r;
   }
 
-  static PyObject *__pyx_pf_5templ_8evaluate_8Expander_14expandTemplates(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_keep_uniq) {
+  static PyObject *__pyx_pf_5mwlib_5templ_8evaluate_8Expander_14expandTemplates(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_keep_uniq) {
     PyObject *__pyx_r = NULL;
     __Pyx_RefNannyDeclarations
     PyObject *__pyx_t_1 = NULL;
@@ -11126,7 +11126,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     int __pyx_clineno = 0;
     __Pyx_RefNannySetupContext("expandTemplates", 1);
 
-    /* "templ/evaluate.pyx":283
+    /* "mwlib/templ/evaluate.pyx":283
  * 
  *     def expandTemplates(self, keep_uniq=False):
  *         return self._expand(self.parsed, keep_uniq=keep_uniq)             # <<<<<<<<<<<<<<
@@ -11153,7 +11153,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "templ/evaluate.pyx":282
+    /* "mwlib/templ/evaluate.pyx":282
  *         return self._expand(parsed, keep_uniq=keep_uniq)
  * 
  *     def expandTemplates(self, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -11166,7 +11166,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     __Pyx_XDECREF(__pyx_t_2);
     __Pyx_XDECREF(__pyx_t_3);
     __Pyx_XDECREF(__pyx_t_4);
-    __Pyx_AddTraceback("templ.evaluate.Expander.expandTemplates", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("mwlib.templ.evaluate.Expander.expandTemplates", __pyx_clineno, __pyx_lineno, __pyx_filename);
     __pyx_r = NULL;
     __pyx_L0:;
     __Pyx_XGIVEREF(__pyx_r);
@@ -11175,20 +11175,20 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
 
   #if CYTHON_USE_FREELISTS
-  static struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *__pyx_freelist_5templ_8evaluate___pyx_scope_struct__is_implicit_newline[8];
-  static int __pyx_freecount_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = 0;
+  static struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *__pyx_freelist_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline[8];
+  static int __pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = 0;
   #endif
 
-  static PyObject *__pyx_tp_new_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  static PyObject *__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
     PyObject *o;
     #if CYTHON_COMPILING_IN_LIMITED_API
     allocfunc alloc_func = (allocfunc)PyType_GetSlot(t, Py_tp_alloc);
     o = alloc_func(t, 0);
     #else
     #if CYTHON_USE_FREELISTS
-    if (likely((int)(__pyx_freecount_5templ_8evaluate___pyx_scope_struct__is_implicit_newline > 0) & (int)(t->tp_basicsize == sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline)))) {
-      o = (PyObject*)__pyx_freelist_5templ_8evaluate___pyx_scope_struct__is_implicit_newline[--__pyx_freecount_5templ_8evaluate___pyx_scope_struct__is_implicit_newline];
-      memset(o, 0, sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline));
+    if (likely((int)(__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline > 0) & (int)(t->tp_basicsize == sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline)))) {
+      o = (PyObject*)__pyx_freelist_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline[--__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline];
+      memset(o, 0, sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline));
       (void) PyObject_INIT(o, t);
       PyObject_GC_Track(o);
     } else
@@ -11201,11 +11201,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return o;
   }
 
-  static void __pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyObject *o) {
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *p = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o;
+  static void __pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyObject *o) {
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *p = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o;
     #if CYTHON_USE_TP_FINALIZE
     if (unlikely((PY_VERSION_HEX >= 0x03080000 || __Pyx_PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE)) && __Pyx_PyObject_GetSlot(o, tp_finalize, destructor)) && !__Pyx_PyObject_GC_IsFinalized(o)) {
-      if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct__is_implicit_newline) {
+      if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline) {
         if (PyObject_CallFinalizerFromDealloc(o)) return;
       }
     }
@@ -11213,8 +11213,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     PyObject_GC_UnTrack(o);
     Py_CLEAR(p->__pyx_v_sw);
     #if CYTHON_USE_FREELISTS
-    if (((int)(__pyx_freecount_5templ_8evaluate___pyx_scope_struct__is_implicit_newline < 8) & (int)(Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline)))) {
-      __pyx_freelist_5templ_8evaluate___pyx_scope_struct__is_implicit_newline[__pyx_freecount_5templ_8evaluate___pyx_scope_struct__is_implicit_newline++] = ((struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o);
+    if (((int)(__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline < 8) & (int)(Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline)))) {
+      __pyx_freelist_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline[__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline++] = ((struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o);
     } else
     #endif
     {
@@ -11229,46 +11229,46 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
   }
 
-  static int __pyx_tp_traverse_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyObject *o, visitproc v, void *a) {
+  static int __pyx_tp_traverse_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyObject *o, visitproc v, void *a) {
     int e;
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *p = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o;
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *p = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o;
     if (p->__pyx_v_sw) {
       e = (*v)(p->__pyx_v_sw, a); if (e) return e;
     }
     return 0;
   }
 
-  static int __pyx_tp_clear_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyObject *o) {
+  static int __pyx_tp_clear_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline(PyObject *o) {
     PyObject* tmp;
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *p = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o;
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *p = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline *)o;
     tmp = ((PyObject*)p->__pyx_v_sw);
     p->__pyx_v_sw = Py_None; Py_INCREF(Py_None);
     Py_XDECREF(tmp);
     return 0;
   }
   #if CYTHON_USE_TYPE_SPECS
-  static PyType_Slot __pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_slots[] = {
-    {Py_tp_dealloc, (void *)__pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
-    {Py_tp_traverse, (void *)__pyx_tp_traverse_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
-    {Py_tp_clear, (void *)__pyx_tp_clear_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
-    {Py_tp_new, (void *)__pyx_tp_new_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
+  static PyType_Slot __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_slots[] = {
+    {Py_tp_dealloc, (void *)__pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
+    {Py_tp_traverse, (void *)__pyx_tp_traverse_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
+    {Py_tp_clear, (void *)__pyx_tp_clear_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
+    {Py_tp_new, (void *)__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline},
     {0, 0},
   };
-  static PyType_Spec __pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_spec = {
-    "templ.evaluate.__pyx_scope_struct__is_implicit_newline",
-    sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline),
+  static PyType_Spec __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_spec = {
+    "mwlib.templ.evaluate.__pyx_scope_struct__is_implicit_newline",
+    sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_HAVE_FINALIZE,
-    __pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_slots,
+    __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_slots,
   };
   #else
 
-  static PyTypeObject __pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = {
+  static PyTypeObject __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = {
     PyVarObject_HEAD_INIT(0, 0)
-    "templ.evaluate.""__pyx_scope_struct__is_implicit_newline", /*tp_name*/
-    sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct__is_implicit_newline), /*tp_basicsize*/
+    "mwlib.templ.evaluate.""__pyx_scope_struct__is_implicit_newline", /*tp_name*/
+    sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline), /*tp_basicsize*/
     0, /*tp_itemsize*/
-    __pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_dealloc*/
+    __pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_dealloc*/
     #if PY_VERSION_HEX < 0x030800b4
     0, /*tp_print*/
     #endif
@@ -11295,8 +11295,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     0, /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_HAVE_FINALIZE, /*tp_flags*/
     0, /*tp_doc*/
-    __pyx_tp_traverse_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_traverse*/
-    __pyx_tp_clear_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_clear*/
+    __pyx_tp_traverse_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_traverse*/
+    __pyx_tp_clear_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_clear*/
     0, /*tp_richcompare*/
     0, /*tp_weaklistoffset*/
     0, /*tp_iter*/
@@ -11313,7 +11313,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     #endif
     0, /*tp_init*/
     0, /*tp_alloc*/
-    __pyx_tp_new_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_new*/
+    __pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline, /*tp_new*/
     0, /*tp_free*/
     0, /*tp_is_gc*/
     0, /*tp_bases*/
@@ -11349,20 +11349,20 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   #endif
 
   #if CYTHON_USE_FREELISTS
-  static struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *__pyx_freelist_5templ_8evaluate___pyx_scope_struct_1_genexpr[8];
-  static int __pyx_freecount_5templ_8evaluate___pyx_scope_struct_1_genexpr = 0;
+  static struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *__pyx_freelist_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr[8];
+  static int __pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr = 0;
   #endif
 
-  static PyObject *__pyx_tp_new_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  static PyObject *__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
     PyObject *o;
     #if CYTHON_COMPILING_IN_LIMITED_API
     allocfunc alloc_func = (allocfunc)PyType_GetSlot(t, Py_tp_alloc);
     o = alloc_func(t, 0);
     #else
     #if CYTHON_USE_FREELISTS
-    if (likely((int)(__pyx_freecount_5templ_8evaluate___pyx_scope_struct_1_genexpr > 0) & (int)(t->tp_basicsize == sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr)))) {
-      o = (PyObject*)__pyx_freelist_5templ_8evaluate___pyx_scope_struct_1_genexpr[--__pyx_freecount_5templ_8evaluate___pyx_scope_struct_1_genexpr];
-      memset(o, 0, sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr));
+    if (likely((int)(__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr > 0) & (int)(t->tp_basicsize == sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr)))) {
+      o = (PyObject*)__pyx_freelist_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr[--__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr];
+      memset(o, 0, sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr));
       (void) PyObject_INIT(o, t);
       PyObject_GC_Track(o);
     } else
@@ -11375,11 +11375,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return o;
   }
 
-  static void __pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyObject *o) {
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *)o;
+  static void __pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyObject *o) {
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *)o;
     #if CYTHON_USE_TP_FINALIZE
     if (unlikely((PY_VERSION_HEX >= 0x03080000 || __Pyx_PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE)) && __Pyx_PyObject_GetSlot(o, tp_finalize, destructor)) && !__Pyx_PyObject_GC_IsFinalized(o)) {
-      if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct_1_genexpr) {
+      if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr) {
         if (PyObject_CallFinalizerFromDealloc(o)) return;
       }
     }
@@ -11389,8 +11389,8 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     Py_CLEAR(p->__pyx_genexpr_arg_0);
     Py_CLEAR(p->__pyx_v_x);
     #if CYTHON_USE_FREELISTS
-    if (((int)(__pyx_freecount_5templ_8evaluate___pyx_scope_struct_1_genexpr < 8) & (int)(Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr)))) {
-      __pyx_freelist_5templ_8evaluate___pyx_scope_struct_1_genexpr[__pyx_freecount_5templ_8evaluate___pyx_scope_struct_1_genexpr++] = ((struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *)o);
+    if (((int)(__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr < 8) & (int)(Py_TYPE(o)->tp_basicsize == sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr)))) {
+      __pyx_freelist_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr[__pyx_freecount_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr++] = ((struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *)o);
     } else
     #endif
     {
@@ -11405,9 +11405,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     }
   }
 
-  static int __pyx_tp_traverse_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyObject *o, visitproc v, void *a) {
+  static int __pyx_tp_traverse_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr(PyObject *o, visitproc v, void *a) {
     int e;
-    struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr *)o;
+    struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *p = (struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr *)o;
     if (p->__pyx_outer_scope) {
       e = (*v)(((PyObject *)p->__pyx_outer_scope), a); if (e) return e;
     }
@@ -11417,27 +11417,27 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     return 0;
   }
   #if CYTHON_USE_TYPE_SPECS
-  static PyType_Slot __pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr_slots[] = {
-    {Py_tp_dealloc, (void *)__pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct_1_genexpr},
-    {Py_tp_traverse, (void *)__pyx_tp_traverse_5templ_8evaluate___pyx_scope_struct_1_genexpr},
-    {Py_tp_new, (void *)__pyx_tp_new_5templ_8evaluate___pyx_scope_struct_1_genexpr},
+  static PyType_Slot __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr_slots[] = {
+    {Py_tp_dealloc, (void *)__pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr},
+    {Py_tp_traverse, (void *)__pyx_tp_traverse_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr},
+    {Py_tp_new, (void *)__pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr},
     {0, 0},
   };
-  static PyType_Spec __pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr_spec = {
-    "templ.evaluate.__pyx_scope_struct_1_genexpr",
-    sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr),
+  static PyType_Spec __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr_spec = {
+    "mwlib.templ.evaluate.__pyx_scope_struct_1_genexpr",
+    sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr),
     0,
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_HAVE_FINALIZE,
-    __pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr_slots,
+    __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr_slots,
   };
   #else
 
-  static PyTypeObject __pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr = {
+  static PyTypeObject __pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr = {
     PyVarObject_HEAD_INIT(0, 0)
-    "templ.evaluate.""__pyx_scope_struct_1_genexpr", /*tp_name*/
-    sizeof(struct __pyx_obj_5templ_8evaluate___pyx_scope_struct_1_genexpr), /*tp_basicsize*/
+    "mwlib.templ.evaluate.""__pyx_scope_struct_1_genexpr", /*tp_name*/
+    sizeof(struct __pyx_obj_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr), /*tp_basicsize*/
     0, /*tp_itemsize*/
-    __pyx_tp_dealloc_5templ_8evaluate___pyx_scope_struct_1_genexpr, /*tp_dealloc*/
+    __pyx_tp_dealloc_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr, /*tp_dealloc*/
     #if PY_VERSION_HEX < 0x030800b4
     0, /*tp_print*/
     #endif
@@ -11464,7 +11464,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     0, /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_HAVE_FINALIZE, /*tp_flags*/
     0, /*tp_doc*/
-    __pyx_tp_traverse_5templ_8evaluate___pyx_scope_struct_1_genexpr, /*tp_traverse*/
+    __pyx_tp_traverse_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr, /*tp_traverse*/
     0, /*tp_clear*/
     0, /*tp_richcompare*/
     0, /*tp_weaklistoffset*/
@@ -11482,7 +11482,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
     #endif
     0, /*tp_init*/
     0, /*tp_alloc*/
-    __pyx_tp_new_5templ_8evaluate___pyx_scope_struct_1_genexpr, /*tp_new*/
+    __pyx_tp_new_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr, /*tp_new*/
     0, /*tp_free*/
     0, /*tp_is_gc*/
     0, /*tp_bases*/
@@ -11641,10 +11641,11 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_module, __pyx_k_module, sizeof(__pyx_k_module), 0, 0, 1, 1},
     {&__pyx_n_s_mro_entries, __pyx_k_mro_entries, sizeof(__pyx_k_mro_entries), 0, 0, 1, 1},
     {&__pyx_kp_u_must_supply_wikidb_argument_in_E, __pyx_k_must_supply_wikidb_argument_in_E, sizeof(__pyx_k_must_supply_wikidb_argument_in_E), 0, 1, 0, 0},
-    {&__pyx_n_s_mwlib, __pyx_k_mwlib, sizeof(__pyx_k_mwlib), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_core, __pyx_k_mwlib_core, sizeof(__pyx_k_mwlib_core), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_miscellaneous_uniq, __pyx_k_mwlib_miscellaneous_uniq, sizeof(__pyx_k_mwlib_miscellaneous_uniq), 0, 0, 1, 1},
+    {&__pyx_n_s_mwlib_network, __pyx_k_mwlib_network, sizeof(__pyx_k_mwlib_network), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_templ, __pyx_k_mwlib_templ, sizeof(__pyx_k_mwlib_templ), 0, 0, 1, 1},
+    {&__pyx_n_s_mwlib_templ_evaluate, __pyx_k_mwlib_templ_evaluate, sizeof(__pyx_k_mwlib_templ_evaluate), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_templ_marks, __pyx_k_mwlib_templ_marks, sizeof(__pyx_k_mwlib_templ_marks), 0, 0, 1, 1},
     {&__pyx_n_s_mwlocals, __pyx_k_mwlocals, sizeof(__pyx_k_mwlocals), 0, 0, 1, 1},
     {&__pyx_n_s_n, __pyx_k_n, sizeof(__pyx_k_n), 0, 0, 1, 1},
@@ -11702,7 +11703,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_super, __pyx_k_super, sizeof(__pyx_k_super), 0, 0, 1, 1},
     {&__pyx_n_s_sw, __pyx_k_sw, sizeof(__pyx_k_sw), 0, 0, 1, 1},
     {&__pyx_n_s_t, __pyx_k_t, sizeof(__pyx_k_t), 0, 0, 1, 1},
-    {&__pyx_n_s_templ_evaluate, __pyx_k_templ_evaluate, sizeof(__pyx_k_templ_evaluate), 0, 0, 1, 1},
     {&__pyx_kp_u_template_argument_too_long_s_byt, __pyx_k_template_argument_too_long_s_byt, sizeof(__pyx_k_template_argument_too_long_s_byt), 0, 1, 0, 0},
     {&__pyx_kp_u_template_recursion_error_ignored, __pyx_k_template_recursion_error_ignored, sizeof(__pyx_k_template_recursion_error_ignored), 0, 1, 0, 0},
     {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
@@ -11740,7 +11740,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "templ/evaluate.pyx":155
+  /* "mwlib/templ/evaluate.pyx":155
  *     """
  *     sw = raw.startswith
  *     return any(sw(x) for x in ("*", "#", ":", ";", "{|"))             # <<<<<<<<<<<<<<
@@ -11751,7 +11751,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "templ/evaluate.pyx":178
+  /* "mwlib/templ/evaluate.pyx":178
  *                 if is_implicit_newline("".join([s1, s2])):
  *                     res[i] = "\n"
  *     del res[-2:]             # <<<<<<<<<<<<<<
@@ -11762,7 +11762,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__9);
   __Pyx_GIVEREF(__pyx_slice__9);
 
-  /* "templ/evaluate.pyx":15
+  /* "mwlib/templ/evaluate.pyx":15
  * 
  * 
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:             # <<<<<<<<<<<<<<
@@ -11774,7 +11774,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__14);
   __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_flatten, 15, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 15, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":49
+  /* "mwlib/templ/evaluate.pyx":49
  * 
  * 
  * def equal_split(node):             # <<<<<<<<<<<<<<
@@ -11786,7 +11786,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__16);
   __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_equal_split, 49, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 49, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":62
+  /* "mwlib/templ/evaluate.pyx":62
  * 
  * class ArgumentList:
  *     def __init__(self, args=(), expander=None, variables=None):             # <<<<<<<<<<<<<<
@@ -11801,7 +11801,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
 
-  /* "templ/evaluate.pyx":76
+  /* "mwlib/templ/evaluate.pyx":76
  *         self.count = 0
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
@@ -11813,7 +11813,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__21);
   __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_len, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 76, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":80
+  /* "mwlib/templ/evaluate.pyx":80
  *         return len(self.args)
  * 
  *     def __getitem__(self, n):             # <<<<<<<<<<<<<<
@@ -11825,7 +11825,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__23);
   __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_getitem, 80, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 80, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":88
+  /* "mwlib/templ/evaluate.pyx":88
  *         return self.get(n, None) or ""
  * 
  *     def get(self, n, default):             # <<<<<<<<<<<<<<
@@ -11837,7 +11837,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__25);
   __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 9, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__25, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_get, 88, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 88, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":150
+  /* "mwlib/templ/evaluate.pyx":150
  * 
  * 
  * def is_implicit_newline(raw):             # <<<<<<<<<<<<<<
@@ -11849,7 +11849,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__27);
   __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_is_implicit_newline, 150, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) __PYX_ERR(0, 150, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":158
+  /* "mwlib/templ/evaluate.pyx":158
  * 
  * 
  * def insert_implicit_newlines(res, maybe_newline=maybe_newline):             # <<<<<<<<<<<<<<
@@ -11861,7 +11861,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__29);
   __pyx_codeobj__30 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__29, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_insert_implicit_newlines, 158, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__30)) __PYX_ERR(0, 158, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":184
+  /* "mwlib/templ/evaluate.pyx":184
  *     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
  * 
  *     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):             # <<<<<<<<<<<<<<
@@ -11876,7 +11876,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__33);
   __Pyx_GIVEREF(__pyx_tuple__33);
 
-  /* "templ/evaluate.pyx":236
+  /* "mwlib/templ/evaluate.pyx":236
  *         self.parsedTemplateCache = {}
  * 
  *     def resolve_magic_alias(self, name):             # <<<<<<<<<<<<<<
@@ -11888,7 +11888,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__34);
   __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_resolve_magic_alias, 236, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 236, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":239
+  /* "mwlib/templ/evaluate.pyx":239
  *         return self.aliasmap.resolve_magic_alias(name)
  * 
  *     def replace_tags(self, txt):             # <<<<<<<<<<<<<<
@@ -11900,7 +11900,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__36);
   __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_replace_tags, 239, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 239, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":242
+  /* "mwlib/templ/evaluate.pyx":242
  *         return self.uniquifier.replace_tags(txt)
  * 
  *     def get_parsed_template(self, name):             # <<<<<<<<<<<<<<
@@ -11912,7 +11912,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__38);
   __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_get_parsed_template, 242, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 242, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":265
+  /* "mwlib/templ/evaluate.pyx":265
  *         return res
  * 
  *     def _parse_raw_template(self, name, raw):             # <<<<<<<<<<<<<<
@@ -11924,7 +11924,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__40);
   __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_parse_raw_template, 265, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 265, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":268
+  /* "mwlib/templ/evaluate.pyx":268
  *         return parser.parse(raw, replace_tags=self.replace_tags)
  * 
  *     def _expand(self, parsed, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -11939,7 +11939,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__44);
   __Pyx_GIVEREF(__pyx_tuple__44);
 
-  /* "templ/evaluate.pyx":278
+  /* "mwlib/templ/evaluate.pyx":278
  *         return res
  * 
  *     def parseAndExpand(self, txt, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -11951,7 +11951,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__45);
   __pyx_codeobj__46 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__45, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_templ_evaluate_pyx, __pyx_n_s_parseAndExpand, 278, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__46)) __PYX_ERR(0, 278, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":282
+  /* "mwlib/templ/evaluate.pyx":282
  *         return self._expand(parsed, keep_uniq=keep_uniq)
  * 
  *     def expandTemplates(self, keep_uniq=False):             # <<<<<<<<<<<<<<
@@ -12036,41 +12036,41 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_spec, NULL); if (unlikely(!__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline)) __PYX_ERR(0, 150, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_spec, __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline) < 0) __PYX_ERR(0, 150, __pyx_L1_error)
+  __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_spec, NULL); if (unlikely(!__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline)) __PYX_ERR(0, 150, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline_spec, __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline) < 0) __PYX_ERR(0, 150, __pyx_L1_error)
   #else
-  __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = &__pyx_type_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
+  __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline = &__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline) < 0) __PYX_ERR(0, 150, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline) < 0) __PYX_ERR(0, 150, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
-  __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_print = 0;
+  __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_print = 0;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_dictoffset && __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_ptype_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_dictoffset && __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct__is_implicit_newline->tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
   }
   #endif
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr)) __PYX_ERR(0, 155, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr_spec, __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 155, __pyx_L1_error)
+  __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr_spec, NULL); if (unlikely(!__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr)) __PYX_ERR(0, 155, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr_spec, __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 155, __pyx_L1_error)
   #else
-  __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr = &__pyx_type_5templ_8evaluate___pyx_scope_struct_1_genexpr;
+  __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr = &__pyx_type_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 155, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr) < 0) __PYX_ERR(0, 155, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
-  __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_print = 0;
+  __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_print = 0;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_dictoffset && __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_ptype_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_dictoffset && __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_ptype_5mwlib_5templ_8evaluate___pyx_scope_struct_1_genexpr->tp_getattro = __Pyx_PyObject_GenericGetAttrNoDict;
   }
   #endif
   __Pyx_RefNannyFinishContext();
@@ -12357,14 +12357,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_templ__evaluate) {
+  if (__pyx_module_is_main_mwlib__templ__evaluate) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name_2, __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "templ.evaluate")) {
-      if (unlikely((PyDict_SetItemString(modules, "templ.evaluate", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "mwlib.templ.evaluate")) {
+      if (unlikely((PyDict_SetItemString(modules, "mwlib.templ.evaluate", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -12385,161 +12385,161 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "templ/evaluate.pyx":4
+  /* "mwlib/templ/evaluate.pyx":4
  * # See README.md for additional licensing information.
  * 
- * from mwlib import siteinfo             # <<<<<<<<<<<<<<
+ * from mwlib.core import metabook, nshandling             # <<<<<<<<<<<<<<
+ * from mwlib.miscellaneous.uniq import Uniquifier
+ * from mwlib.network import siteinfo
+ */
+  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_INCREF(__pyx_n_s_metabook);
+  __Pyx_GIVEREF(__pyx_n_s_metabook);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_metabook)) __PYX_ERR(0, 4, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_nshandling);
+  __Pyx_GIVEREF(__pyx_n_s_nshandling);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 1, __pyx_n_s_nshandling)) __PYX_ERR(0, 4, __pyx_L1_error);
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib_core, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_metabook); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_metabook, __pyx_t_2) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_nshandling); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_nshandling, __pyx_t_2) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+
+  /* "mwlib/templ/evaluate.pyx":5
+ * 
  * from mwlib.core import metabook, nshandling
+ * from mwlib.miscellaneous.uniq import Uniquifier             # <<<<<<<<<<<<<<
+ * from mwlib.network import siteinfo
  * from mwlib.templ import log, magics, mwlocals, parser
  */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_INCREF(__pyx_n_s_Uniquifier);
+  __Pyx_GIVEREF(__pyx_n_s_Uniquifier);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_Uniquifier)) __PYX_ERR(0, 5, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_mwlib_miscellaneous_uniq, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Uniquifier); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Uniquifier, __pyx_t_3) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "mwlib/templ/evaluate.pyx":6
+ * from mwlib.core import metabook, nshandling
+ * from mwlib.miscellaneous.uniq import Uniquifier
+ * from mwlib.network import siteinfo             # <<<<<<<<<<<<<<
+ * from mwlib.templ import log, magics, mwlocals, parser
+ * from mwlib.templ.marks import Mark, dummy_mark, eqmark, maybe_newline
+ */
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_siteinfo);
   __Pyx_GIVEREF(__pyx_n_s_siteinfo);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_siteinfo)) __PYX_ERR(0, 4, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_siteinfo)) __PYX_ERR(0, 6, __pyx_L1_error);
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib_network, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_siteinfo); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_siteinfo); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_siteinfo, __pyx_t_2) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_siteinfo, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "templ/evaluate.pyx":5
- * 
- * from mwlib import siteinfo
- * from mwlib.core import metabook, nshandling             # <<<<<<<<<<<<<<
- * from mwlib.templ import log, magics, mwlocals, parser
- * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
- */
-  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_INCREF(__pyx_n_s_metabook);
-  __Pyx_GIVEREF(__pyx_n_s_metabook);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_metabook)) __PYX_ERR(0, 5, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_nshandling);
-  __Pyx_GIVEREF(__pyx_n_s_nshandling);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_nshandling)) __PYX_ERR(0, 5, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_mwlib_core, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_metabook); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_metabook, __pyx_t_3) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_nshandling); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_nshandling, __pyx_t_3) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "templ/evaluate.pyx":6
- * from mwlib import siteinfo
- * from mwlib.core import metabook, nshandling
+  /* "mwlib/templ/evaluate.pyx":7
+ * from mwlib.miscellaneous.uniq import Uniquifier
+ * from mwlib.network import siteinfo
  * from mwlib.templ import log, magics, mwlocals, parser             # <<<<<<<<<<<<<<
- * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
- * from mwlib.miscellaneous.uniq import Uniquifier
- */
-  __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_INCREF(__pyx_n_s_log);
-  __Pyx_GIVEREF(__pyx_n_s_log);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_log)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_magics);
-  __Pyx_GIVEREF(__pyx_n_s_magics);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 1, __pyx_n_s_magics)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_mwlocals);
-  __Pyx_GIVEREF(__pyx_n_s_mwlocals);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 2, __pyx_n_s_mwlocals)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_parser);
-  __Pyx_GIVEREF(__pyx_n_s_parser);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 3, __pyx_n_s_parser)) __PYX_ERR(0, 6, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib_templ, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_log); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_log, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_magics); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_magics, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_mwlocals); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_mwlocals, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_parser); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parser, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "templ/evaluate.pyx":7
- * from mwlib.core import metabook, nshandling
- * from mwlib.templ import log, magics, mwlocals, parser
- * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline             # <<<<<<<<<<<<<<
- * from mwlib.miscellaneous.uniq import Uniquifier
+ * from mwlib.templ.marks import Mark, dummy_mark, eqmark, maybe_newline
  * 
  */
   __pyx_t_3 = PyList_New(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_INCREF(__pyx_n_s_dummy_mark);
-  __Pyx_GIVEREF(__pyx_n_s_dummy_mark);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_dummy_mark)) __PYX_ERR(0, 7, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_eqmark);
-  __Pyx_GIVEREF(__pyx_n_s_eqmark);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_eqmark)) __PYX_ERR(0, 7, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_Mark);
-  __Pyx_GIVEREF(__pyx_n_s_Mark);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 2, __pyx_n_s_Mark)) __PYX_ERR(0, 7, __pyx_L1_error);
-  __Pyx_INCREF(__pyx_n_s_maybe_newline);
-  __Pyx_GIVEREF(__pyx_n_s_maybe_newline);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 3, __pyx_n_s_maybe_newline)) __PYX_ERR(0, 7, __pyx_L1_error);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_mwlib_templ_marks, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_INCREF(__pyx_n_s_log);
+  __Pyx_GIVEREF(__pyx_n_s_log);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 0, __pyx_n_s_log)) __PYX_ERR(0, 7, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_magics);
+  __Pyx_GIVEREF(__pyx_n_s_magics);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 1, __pyx_n_s_magics)) __PYX_ERR(0, 7, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_mwlocals);
+  __Pyx_GIVEREF(__pyx_n_s_mwlocals);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 2, __pyx_n_s_mwlocals)) __PYX_ERR(0, 7, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_parser);
+  __Pyx_GIVEREF(__pyx_n_s_parser);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_3, 3, __pyx_n_s_parser)) __PYX_ERR(0, 7, __pyx_L1_error);
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_mwlib_templ, __pyx_t_3, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_dummy_mark); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_log); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_dummy_mark, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_log, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_eqmark); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_magics); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_eqmark, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_magics, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Mark); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_mwlocals); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Mark, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_mwlocals, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_maybe_newline); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_parser); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_maybe_newline, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parser, __pyx_t_3) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":8
+  /* "mwlib/templ/evaluate.pyx":8
+ * from mwlib.network import siteinfo
  * from mwlib.templ import log, magics, mwlocals, parser
- * from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
- * from mwlib.miscellaneous.uniq import Uniquifier             # <<<<<<<<<<<<<<
+ * from mwlib.templ.marks import Mark, dummy_mark, eqmark, maybe_newline             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_INCREF(__pyx_n_s_Uniquifier);
-  __Pyx_GIVEREF(__pyx_n_s_Uniquifier);
-  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Uniquifier)) __PYX_ERR(0, 8, __pyx_L1_error);
-  __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib_miscellaneous_uniq, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_INCREF(__pyx_n_s_Mark);
+  __Pyx_GIVEREF(__pyx_n_s_Mark);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Mark)) __PYX_ERR(0, 8, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_dummy_mark);
+  __Pyx_GIVEREF(__pyx_n_s_dummy_mark);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 1, __pyx_n_s_dummy_mark)) __PYX_ERR(0, 8, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_eqmark);
+  __Pyx_GIVEREF(__pyx_n_s_eqmark);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 2, __pyx_n_s_eqmark)) __PYX_ERR(0, 8, __pyx_L1_error);
+  __Pyx_INCREF(__pyx_n_s_maybe_newline);
+  __Pyx_GIVEREF(__pyx_n_s_maybe_newline);
+  if (__Pyx_PyList_SET_ITEM(__pyx_t_2, 3, __pyx_n_s_maybe_newline)) __PYX_ERR(0, 8, __pyx_L1_error);
+  __pyx_t_3 = __Pyx_Import(__pyx_n_s_mwlib_templ_marks, __pyx_t_2, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_Uniquifier); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_Mark); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Uniquifier, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Mark, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_dummy_mark); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_dummy_mark, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_eqmark); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_eqmark, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_3, __pyx_n_s_maybe_newline); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_maybe_newline, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "templ/evaluate.pyx":11
+  /* "mwlib/templ/evaluate.pyx":11
  * 
  * 
  * class TemplateRecursion(Exception):             # <<<<<<<<<<<<<<
@@ -12555,7 +12555,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_Py3MetaclassPrepare(__pyx_t_4, __pyx_t_2, __pyx_n_s_TemplateRecursion, __pyx_n_s_TemplateRecursion, (PyObject *) NULL, __pyx_n_s_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 11, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_Py3MetaclassPrepare(__pyx_t_4, __pyx_t_2, __pyx_n_s_TemplateRecursion, __pyx_n_s_TemplateRecursion, (PyObject *) NULL, __pyx_n_s_mwlib_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__pyx_t_2 != __pyx_t_3) {
     if (unlikely((PyDict_SetItemString(__pyx_t_5, "__orig_bases__", __pyx_t_3) < 0))) __PYX_ERR(0, 11, __pyx_L1_error)
@@ -12569,7 +12569,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":15
+  /* "mwlib/templ/evaluate.pyx":15
  * 
  * 
  * def flatten(node: Any, expander: Any, variables: Any, res: list[str]) -> bool:             # <<<<<<<<<<<<<<
@@ -12583,14 +12583,14 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_variables, __pyx_n_s_Any) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_res, __pyx_kp_s_list_str) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_return, __pyx_n_s_bool) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_1flatten, 0, __pyx_n_s_flatten, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_1flatten, 0, __pyx_n_s_flatten, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_4, __pyx_t_2);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_flatten, __pyx_t_4) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "templ/evaluate.pyx":45
+  /* "mwlib/templ/evaluate.pyx":45
  * 
  * 
  * class MemoryLimitError(Exception):             # <<<<<<<<<<<<<<
@@ -12606,7 +12606,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_5 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_5, __pyx_t_2, __pyx_n_s_MemoryLimitError, __pyx_n_s_MemoryLimitError, (PyObject *) NULL, __pyx_n_s_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_5, __pyx_t_2, __pyx_n_s_MemoryLimitError, __pyx_n_s_MemoryLimitError, (PyObject *) NULL, __pyx_n_s_mwlib_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (__pyx_t_2 != __pyx_t_4) {
     if (unlikely((PyDict_SetItemString(__pyx_t_3, "__orig_bases__", __pyx_t_4) < 0))) __PYX_ERR(0, 45, __pyx_L1_error)
@@ -12620,78 +12620,78 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":49
+  /* "mwlib/templ/evaluate.pyx":49
  * 
  * 
  * def equal_split(node):             # <<<<<<<<<<<<<<
  *     if isinstance(node, str):
  *         return None, node
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_3equal_split, 0, __pyx_n_s_equal_split, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_3equal_split, 0, __pyx_n_s_equal_split, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_equal_split, __pyx_t_2) < 0) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":61
+  /* "mwlib/templ/evaluate.pyx":61
  * 
  * 
  * class ArgumentList:             # <<<<<<<<<<<<<<
  *     def __init__(self, args=(), expander=None, variables=None):
  *         self.args = tuple(args)
  */
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_ArgumentList, __pyx_n_s_ArgumentList, (PyObject *) NULL, __pyx_n_s_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_ArgumentList, __pyx_n_s_ArgumentList, (PyObject *) NULL, __pyx_n_s_mwlib_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "templ/evaluate.pyx":62
+  /* "mwlib/templ/evaluate.pyx":62
  * 
  * class ArgumentList:
  *     def __init__(self, args=(), expander=None, variables=None):             # <<<<<<<<<<<<<<
  *         self.args = tuple(args)
  * 
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_12ArgumentList_1__init__, 0, __pyx_n_s_ArgumentList___init, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__19)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_1__init__, 0, __pyx_n_s_ArgumentList___init, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__19)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_tuple__20);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_init, __pyx_t_5) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":76
+  /* "mwlib/templ/evaluate.pyx":76
  *         self.count = 0
  * 
  *     def __len__(self):             # <<<<<<<<<<<<<<
  *         self.count += 1
  *         return len(self.args)
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_12ArgumentList_3__len__, 0, __pyx_n_s_ArgumentList___len, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__22)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_3__len__, 0, __pyx_n_s_ArgumentList___len, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__22)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_len, __pyx_t_5) < 0) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":80
+  /* "mwlib/templ/evaluate.pyx":80
  *         return len(self.args)
  * 
  *     def __getitem__(self, n):             # <<<<<<<<<<<<<<
  *         self.count += 1
  *         if isinstance(n, slice):
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_12ArgumentList_5__getitem__, 0, __pyx_n_s_ArgumentList___getitem, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_5__getitem__, 0, __pyx_n_s_ArgumentList___getitem, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_getitem, __pyx_t_5) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":88
+  /* "mwlib/templ/evaluate.pyx":88
  *         return self.get(n, None) or ""
  * 
  *     def get(self, n, default):             # <<<<<<<<<<<<<<
  *         self.count += 1
  *         if isinstance(n, int):
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_12ArgumentList_7get, 0, __pyx_n_s_ArgumentList_get, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_12ArgumentList_7get, 0, __pyx_n_s_ArgumentList_get, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get, __pyx_t_5) < 0) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":61
+  /* "mwlib/templ/evaluate.pyx":61
  * 
  * 
  * class ArgumentList:             # <<<<<<<<<<<<<<
@@ -12704,26 +12704,26 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":150
+  /* "mwlib/templ/evaluate.pyx":150
  * 
  * 
  * def is_implicit_newline(raw):             # <<<<<<<<<<<<<<
  *     """should we add a newline to templates starting with *, #, :, ;, {|
  *     see: https://meta.wikimedia.org/wiki/Help:Newlines_and_spaces#Automatic_newline_at_the_start
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_5is_implicit_newline, 0, __pyx_n_s_is_implicit_newline, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__28)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_5is_implicit_newline, 0, __pyx_n_s_is_implicit_newline, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__28)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_is_implicit_newline, __pyx_t_2) < 0) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":158
+  /* "mwlib/templ/evaluate.pyx":158
  * 
  * 
  * def insert_implicit_newlines(res, maybe_newline=maybe_newline):             # <<<<<<<<<<<<<<
  *     # do not pass the second argument
  *     res.append(dummy_mark)
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_7insert_implicit_newlines, 0, __pyx_n_s_insert_implicit_newlines, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__30)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_7insert_implicit_newlines, 0, __pyx_n_s_insert_implicit_newlines, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__30)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults), 1)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_maybe_newline); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 158, __pyx_L1_error)
@@ -12731,21 +12731,21 @@ if (!__Pyx_RefNanny) {
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_maybe_newline = __pyx_t_5;
   __Pyx_GIVEREF(__pyx_t_5);
   __pyx_t_5 = 0;
-  __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_2, __pyx_pf_5templ_8evaluate_8__defaults__);
+  __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_2, __pyx_pf_5mwlib_5templ_8evaluate_8__defaults__);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_insert_implicit_newlines, __pyx_t_2) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":181
+  /* "mwlib/templ/evaluate.pyx":181
  * 
  * 
  * class Expander:             # <<<<<<<<<<<<<<
  *     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
  * 
  */
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_Expander, __pyx_n_s_Expander, (PyObject *) NULL, __pyx_n_s_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_Expander, __pyx_n_s_Expander, (PyObject *) NULL, __pyx_n_s_mwlib_templ_evaluate, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "templ/evaluate.pyx":182
+  /* "mwlib/templ/evaluate.pyx":182
  * 
  * class Expander:
  *     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}             # <<<<<<<<<<<<<<
@@ -12754,106 +12754,106 @@ if (!__Pyx_RefNanny) {
  */
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_magic_displaytitle, Py_None) < 0) __PYX_ERR(0, 182, __pyx_L1_error)
 
-  /* "templ/evaluate.pyx":184
+  /* "mwlib/templ/evaluate.pyx":184
  *     magic_displaytitle = None  # set via {{DISPLAYTITLE:...}}
  * 
  *     def __init__(self, txt, pagename="", wikidb=None, recursion_limit=100):             # <<<<<<<<<<<<<<
  *         assert wikidb is not None, "must supply wikidb argument in Expander.__init__"
  *         self.pagename = pagename
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_1__init__, 0, __pyx_n_s_Expander___init, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__32)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 184, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_1__init__, 0, __pyx_n_s_Expander___init, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__32)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 184, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_tuple__33);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_init, __pyx_t_5) < 0) __PYX_ERR(0, 184, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":236
+  /* "mwlib/templ/evaluate.pyx":236
  *         self.parsedTemplateCache = {}
  * 
  *     def resolve_magic_alias(self, name):             # <<<<<<<<<<<<<<
  *         return self.aliasmap.resolve_magic_alias(name)
  * 
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_3resolve_magic_alias, 0, __pyx_n_s_Expander_resolve_magic_alias, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__35)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_3resolve_magic_alias, 0, __pyx_n_s_Expander_resolve_magic_alias, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__35)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_resolve_magic_alias, __pyx_t_5) < 0) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":239
+  /* "mwlib/templ/evaluate.pyx":239
  *         return self.aliasmap.resolve_magic_alias(name)
  * 
  *     def replace_tags(self, txt):             # <<<<<<<<<<<<<<
  *         return self.uniquifier.replace_tags(txt)
  * 
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_5replace_tags, 0, __pyx_n_s_Expander_replace_tags, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__37)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 239, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_5replace_tags, 0, __pyx_n_s_Expander_replace_tags, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__37)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 239, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_replace_tags, __pyx_t_5) < 0) __PYX_ERR(0, 239, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":242
+  /* "mwlib/templ/evaluate.pyx":242
  *         return self.uniquifier.replace_tags(txt)
  * 
  *     def get_parsed_template(self, name):             # <<<<<<<<<<<<<<
  *         if not name or name.startswith("[[") or "|" in name:
  *             return None
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_7get_parsed_template, 0, __pyx_n_s_Expander_get_parsed_template, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__39)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_7get_parsed_template, 0, __pyx_n_s_Expander_get_parsed_template, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__39)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 242, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get_parsed_template, __pyx_t_5) < 0) __PYX_ERR(0, 242, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":265
+  /* "mwlib/templ/evaluate.pyx":265
  *         return res
  * 
  *     def _parse_raw_template(self, name, raw):             # <<<<<<<<<<<<<<
  *         return parser.parse(raw, replace_tags=self.replace_tags)
  * 
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_9_parse_raw_template, 0, __pyx_n_s_Expander__parse_raw_template, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__41)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 265, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_9_parse_raw_template, 0, __pyx_n_s_Expander__parse_raw_template, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__41)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_parse_raw_template, __pyx_t_5) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":268
+  /* "mwlib/templ/evaluate.pyx":268
  *         return parser.parse(raw, replace_tags=self.replace_tags)
  * 
  *     def _expand(self, parsed, keep_uniq=False):             # <<<<<<<<<<<<<<
  *         res = ["\n"]  # guard, against implicit newlines at the beginning
  *         flatten(parsed, self, ArgumentList(expander=self), res)
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_11_expand, 0, __pyx_n_s_Expander__expand, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__43)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_11_expand, 0, __pyx_n_s_Expander__expand, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__43)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 268, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_tuple__44);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_expand, __pyx_t_5) < 0) __PYX_ERR(0, 268, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":278
+  /* "mwlib/templ/evaluate.pyx":278
  *         return res
  * 
  *     def parseAndExpand(self, txt, keep_uniq=False):             # <<<<<<<<<<<<<<
  *         parsed = parser.parse(txt, included=False, replace_tags=self.replace_tags)
  *         return self._expand(parsed, keep_uniq=keep_uniq)
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_13parseAndExpand, 0, __pyx_n_s_Expander_parseAndExpand, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__46)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 278, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_13parseAndExpand, 0, __pyx_n_s_Expander_parseAndExpand, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__46)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_tuple__44);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_parseAndExpand, __pyx_t_5) < 0) __PYX_ERR(0, 278, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":282
+  /* "mwlib/templ/evaluate.pyx":282
  *         return self._expand(parsed, keep_uniq=keep_uniq)
  * 
  *     def expandTemplates(self, keep_uniq=False):             # <<<<<<<<<<<<<<
  *         return self._expand(self.parsed, keep_uniq=keep_uniq)
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5templ_8evaluate_8Expander_15expandTemplates, 0, __pyx_n_s_Expander_expandTemplates, NULL, __pyx_n_s_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__48)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 282, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_5templ_8evaluate_8Expander_15expandTemplates, 0, __pyx_n_s_Expander_expandTemplates, NULL, __pyx_n_s_mwlib_templ_evaluate, __pyx_d, ((PyObject *)__pyx_codeobj__48)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_5, __pyx_tuple__44);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_expandTemplates, __pyx_t_5) < 0) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "templ/evaluate.pyx":181
+  /* "mwlib/templ/evaluate.pyx":181
  * 
  * 
  * class Expander:             # <<<<<<<<<<<<<<
@@ -12866,7 +12866,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "templ/evaluate.pyx":1
+  /* "mwlib/templ/evaluate.pyx":1
  * # Copyright (c) 2007-2009 PediaPress GmbH             # <<<<<<<<<<<<<<
  * # See README.md for additional licensing information.
  * 
@@ -12886,7 +12886,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_5);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
-      __Pyx_AddTraceback("init templ.evaluate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init mwlib.templ.evaluate", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     #if !CYTHON_USE_MODULE_STATE
     Py_CLEAR(__pyx_m);
@@ -12900,7 +12900,7 @@ if (!__Pyx_RefNanny) {
     }
     #endif
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init templ.evaluate");
+    PyErr_SetString(PyExc_ImportError, "init mwlib.templ.evaluate");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

@@ -1,11 +1,11 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-from mwlib import siteinfo
 from mwlib.core import metabook, nshandling
-from mwlib.templ import log, magics, mwlocals, parser
-from mwlib.templ.marks import dummy_mark, eqmark, Mark, maybe_newline
 from mwlib.miscellaneous.uniq import Uniquifier
+from mwlib.network import siteinfo
+from mwlib.templ import log, magics, mwlocals, parser
+from mwlib.templ.marks import Mark, dummy_mark, eqmark, maybe_newline
 
 
 class TemplateRecursion(Exception):

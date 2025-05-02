@@ -4,7 +4,7 @@ from gevent import monkey
 
 from mwlib.core.nserve import main as nserve_main_func
 from mwlib.core.nslave import main as nslave_main_func
-from mwlib.networking.net.postman import main as postman_main_func
+from mwlib.network.postman import main as postman_main_func
 
 monkey.patch_all()
 

@@ -1,7 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
 
-from mwlib.siteinfo import get_siteinfo
+from mwlib.network.siteinfo import get_siteinfo
 from mwlib.templ import evaluate
 
 

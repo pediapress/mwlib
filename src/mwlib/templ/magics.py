@@ -320,7 +320,7 @@ class PageMagic:
         try:
             namespaces = self.siteinfo["namespaces"]
         except (AttributeError, KeyError):
-            from mwlib import siteinfo
+            from mwlib.network import siteinfo
 
             namespaces = siteinfo.get_siteinfo("en")["namespaces"]
 

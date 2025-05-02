@@ -9,7 +9,7 @@ returned by api.php
 
 import re
 
-from mwlib import siteinfo
+from mwlib.network import siteinfo
 
 NS_MEDIA = -2
 NS_SPECIAL = -1

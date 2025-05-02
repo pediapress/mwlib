@@ -2,7 +2,7 @@
 
 import copy
 
-from mwlib.siteinfo import get_siteinfo
+from mwlib.network.siteinfo import get_siteinfo
 from mwlib.templ import parser
 
 si = copy.deepcopy(get_siteinfo("en"))

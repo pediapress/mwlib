@@ -52,7 +52,7 @@ class Parser:
         self.included = included
         self.replace_tags = replace_tags
         if siteinfo is None:
-            from mwlib.siteinfo import get_siteinfo
+            from mwlib.network.siteinfo import get_siteinfo
 
             siteinfo = get_siteinfo("en")
         self.siteinfo = siteinfo

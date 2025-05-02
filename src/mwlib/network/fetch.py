@@ -23,8 +23,8 @@ from sqlitedict import SqliteDict
 
 from mwlib.core import nshandling
 from mwlib.configuration import conf
-from mwlib.net import sapi as mwapi
-from mwlib.net.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
+from mwlib.network import sapi as mwapi
+from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
 from mwlib.utilities import myjson as json, linuxmem
 from mwlib.utilities import utils
 

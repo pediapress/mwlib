@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 import pytest
 
-from mwlib import siteinfo
+from mwlib.network import siteinfo
 from mwlib.core import nshandling
 
 siteinfo_de = siteinfo.get_siteinfo("de")

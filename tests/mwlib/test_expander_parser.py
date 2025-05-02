@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
+from mwlib.network.siteinfo import get_siteinfo
 from mwlib.parser.expander import parse
-from mwlib.siteinfo import get_siteinfo
 from mwlib.templ import magic_nodes, nodes
 
 nl_siteinfo = get_siteinfo("nl")

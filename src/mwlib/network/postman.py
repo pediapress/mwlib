@@ -12,7 +12,7 @@ import gevent.monkey
 from mwlib.utilities import argv
 from mwlib.asynchronous import slave
 from mwlib.miscellaneous.status import Status
-from mwlib.networking.net.podclient import PODClient
+from mwlib.network.podclient import PODClient
 from mwlib.utilities.utils import send_mail
 from qs.rpcclient import ServerProxy
 
