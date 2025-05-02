@@ -8,7 +8,7 @@ import urllib.request
 
 import mwclient
 
-from mwlib.consts.urls import WIKITRUST_API
+WIKITRUST_API = 'http://en.collaborativetrust.com/WikiTrust/RemoteAPI'
 
 
 class WikiTrustServerError(Exception):

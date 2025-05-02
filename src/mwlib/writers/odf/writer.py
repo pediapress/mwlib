@@ -21,7 +21,7 @@ from odf.opendocument import OpenDocumentText
 
 from mwlib import parser
 from mwlib.rendering import writerbase
-from mwlib.database.dummydb import DummyDB
+from mwlib.parser.dummydb import DummyDB
 from mwlib.rendering.mathutils import render_math
 from mwlib.parser import Caption, advtree
 from mwlib.parser.refine.uparser import parse_string

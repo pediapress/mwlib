@@ -28,8 +28,7 @@ import re
 import sys
 
 from mwlib import parser
-from mwlib.database import dummydb
-from mwlib.database.dummydb import DummyDB
+from mwlib.parser.dummydb import DummyDB
 from mwlib.parser import (
     Article,
     ArticleLink,
@@ -52,7 +51,7 @@ from mwlib.parser import (
     TagNode,
     Text,
     Timeline,
-    build_amap,
+    build_amap, dummydb,
 )
 from mwlib.parser.refine.uparser import parse_string
 

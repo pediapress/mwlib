@@ -2,7 +2,7 @@
 import pytest
 
 from mwlib.parser import expander
-from mwlib.database.dummydb import DummyDB
+from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.expander import DictDB
 from mwlib.parser.templ.misc import expand_str
 from mwlib.parser.templ.nodes import Template, Variable

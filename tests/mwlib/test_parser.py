@@ -7,7 +7,7 @@ import pytest
 
 from mwlib import parser
 from mwlib.parser import expander
-from mwlib.database.dummydb import DummyDB
+from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.expander import DictDB
 from mwlib.parser.refine import util
 from mwlib.parser.refine import uparser
