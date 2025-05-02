@@ -204,7 +204,6 @@ include src/mwlib/writer/miscutils.py
 include src/mwlib/writer/scripts.txt
 include src/mwlib/writer/styleutils.py
 include src/mwlib/writer/wplicenses.csv
-include src/mwlib/writerbase.py
 include src/mwlib/writers/__init__.py
 include src/mwlib/writers/odf/__init__.py
 include src/mwlib/writers/odf/odfconf.py
@@ -513,6 +512,7 @@ include src/mwlib/writers/rl/toc.py
 include src/mwlib/writers/rl/utils.py
 include src/mwlib/writers/rl/wikipedia_logo.png
 include src/mwlib/writers/rl/writer.py
+include src/mwlib/writers/writerbase.py
 include src/qs/__init__.py
 include src/qs/__main__.py
 include src/qs/jobs.py

@@ -47,7 +47,8 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tables import Table
 from reportlab.platypus.xpreformatted import XPreformatted
 
-from mwlib import parser, writerbase
+from mwlib import parser
+from .. import writerbase
 from ...extensions import timeline
 from mwlib._version import version as mwlibversion
 from mwlib.mw_math.mathutils import render_math

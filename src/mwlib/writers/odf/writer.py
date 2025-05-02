@@ -19,7 +19,8 @@ import odf
 from odf import dc, draw, element, math, meta, table, text
 from odf.opendocument import OpenDocumentText
 
-from mwlib import parser, writerbase
+from mwlib import parser
+from mwlib.writers import writerbase
 from mwlib.database.dummydb import DummyDB
 from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import Caption
