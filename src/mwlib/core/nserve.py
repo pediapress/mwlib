@@ -21,8 +21,8 @@ from gevent import pool, pywsgi
 
 from mwlib.asynchronous import rpcclient
 from mwlib.core.metabook import calc_checksum
-from mwlib.utilities import lrucache, argv, _version
-from mwlib.utilities import myjson as json
+from mwlib.utils import lrucache, argv, _version
+from mwlib.utils import myjson as json
 from qs.misc import CallInLoop
 
 log = logging.getLogger("mwlib.serve")

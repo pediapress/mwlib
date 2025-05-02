@@ -8,7 +8,7 @@ from hashlib import sha256 as digest
 from mwlib.templ.marks import eqmark
 from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
 from mwlib.templ.scanner import Symbols, tokenize
-from mwlib.utilities import lrucache
+from mwlib.utils import lrucache
 
 from .optimization import optimize
 

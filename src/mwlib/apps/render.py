@@ -18,13 +18,12 @@ import click
 from mwlib.core import nuwiki, wiki
 from mwlib.apps.buildzip import make_zip
 from mwlib.apps.utils import make_wiki_env_from_options
-from mwlib.configuration import conf
 from mwlib.exceptions.mwlib_exceptions import RenderException
 from mwlib.localization import _locale
 from mwlib.miscellaneous.status import Status
-from mwlib.utilities import utils
-from mwlib.utilities.log import setup_console_logging
-from mwlib.utilities.utils import start_logging
+from mwlib.utils import unorganized, conf
+from mwlib.utils.log import setup_console_logging
+from mwlib.utils.unorganized import start_logging
 from mwlib.writers.writerbase import WriterError
 
 logger = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ def finish_render(writer, options, zip_filename, status):
     status(status="finished", progress=100, **kwargs)
     keep_zip = options.get("keep_zip")
     if keep_zip is None and zip_filename is not None:
-        utils.safe_unlink(zip_filename)
+        unorganized.safe_unlink(zip_filename)
 
 def write_traceback(options, exc, status):
     status(status="error")
@@ -78,7 +77,7 @@ def write_traceback(options, exc, status):
         else:
             error_file.write("traceback\n")
             traceback.print_exc(file=error_file)
-        error_file.write(f"sys.argv={utils.garble_password(sys.argv)!r}\n")
+        error_file.write(f"sys.argv={unorganized.garble_password(sys.argv)!r}\n")
         error_file.close()
         os.rename(tmpfile, error_file)
 

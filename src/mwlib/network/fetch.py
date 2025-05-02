@@ -22,11 +22,10 @@ from lxml import etree
 from sqlitedict import SqliteDict
 
 from mwlib.core import nshandling
-from mwlib.configuration import conf
 from mwlib.network import sapi as mwapi
 from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
-from mwlib.utilities import myjson as json, linuxmem
-from mwlib.utilities import utils
+from mwlib.utils import myjson as json, linuxmem, conf
+from mwlib.utils import unorganized
 
 logger = logging.getLogger(__name__)
 
@@ -134,15 +133,15 @@ class FsOutput:
         self.revfile = None
 
     def get_imagepath(self, title):
-        path = os.path.join(self.path, "images", f"{utils.fs_escape(title)}")
+        path = os.path.join(self.path, "images", f"{unorganized.fs_escape(title)}")
         self.imgcount += 1
         return path
 
     def copy_image(self, image_to_be_copied, new_image_name):
         image_to_be_copied_path = os.path.join(
-            self.path, "images", f"{utils.fs_escape(image_to_be_copied)}"
+            self.path, "images", f"{unorganized.fs_escape(image_to_be_copied)}"
         )
-        new_image_path = os.path.join(self.path, "images", f"{utils.fs_escape(new_image_name)}")
+        new_image_path = os.path.join(self.path, "images", f"{unorganized.fs_escape(new_image_name)}")
         shutil.copyfile(image_to_be_copied_path, new_image_path)
 
     def dump_json(self, **kw):

@@ -10,7 +10,7 @@ import htmlentitydefs
 
 from mwlib.parser import paramrx
 from mwlib.token.token import Token
-from mwlib.utilities.utils import split_tag
+from mwlib.utils.utils import split_tag
 
 for directory in dir(Token):
     token2name = Token.token2name

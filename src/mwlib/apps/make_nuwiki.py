@@ -12,7 +12,7 @@ from mwlib.core.metabook import collection, get_licenses, parse_collection_page
 from mwlib.network import fetch
 from mwlib.network import sapi as mwapi
 from mwlib.parser.parse_collection_page import extract_metadata
-from mwlib.utilities import myjson
+from mwlib.utils import myjson
 
 
 class StartFetcher:

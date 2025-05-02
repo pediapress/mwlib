@@ -13,8 +13,8 @@ try:
 except ImportError:
     import json
 
-from mwlib.configuration import conf
-from mwlib.utilities.utils import get_multipart
+from mwlib.utils import conf
+from mwlib.utils.unorganized import get_multipart
 
 log = logging.getLogger(__name__)
 

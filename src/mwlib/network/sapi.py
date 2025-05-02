@@ -15,7 +15,7 @@ except ImportError:
 from gevent.lock import Semaphore
 
 from mwlib.core import authors
-from mwlib.configuration import conf
+from mwlib.utils import conf
 
 logger = logging.getLogger(__name__)
 

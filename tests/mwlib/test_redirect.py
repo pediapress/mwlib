@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from mwlib.utilities import utils
+from mwlib.utils import unorganized
 
 here = Path(__file__).parent
 
@@ -21,7 +21,7 @@ def render_get_text(metabook):
         subprocess.run(["mw-render", "-c", str(z), "-o", str(dst), "-w", "rl"], check=True)
     except subprocess.CalledProcessError as e:
         print("return code:", e.returncode, "ignoring errors")
-    txt = utils.pdf2txt(str(dst))
+    txt = unorganized.pdf2txt(str(dst))
     return txt
 
 

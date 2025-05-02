@@ -1,6 +1,6 @@
 import pytest
 
-from mwlib.utilities.utils import uid
+from mwlib.utils.unorganized import uid
 
 
 def test_uid_length():

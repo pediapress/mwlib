@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 
 from mwlib.core import metabook
-from mwlib.utilities import myjson as json
+from mwlib.utils import myjson as json
 
 ARTICLE1 = "Article 1"
 ARTICLE2 = "Article 2"

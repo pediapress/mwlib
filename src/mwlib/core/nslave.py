@@ -15,8 +15,8 @@ import time
 from bottle import default_app, route, static_file
 
 from mwlib.asynchronous import proc
-from mwlib.utilities import myjson, argv
-from mwlib.utilities.utils import garble_password
+from mwlib.utils import myjson, argv
+from mwlib.utils.utils import garble_password
 from qs import slave
 
 logger = logging.getLogger(__name__)

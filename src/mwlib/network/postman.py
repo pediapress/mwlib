@@ -9,11 +9,11 @@ import sys
 import gevent
 import gevent.monkey
 
-from mwlib.utilities import argv
+from mwlib.utils import argv
 from mwlib.asynchronous import slave
 from mwlib.miscellaneous.status import Status
 from mwlib.network.podclient import PODClient
-from mwlib.utilities.utils import send_mail
+from mwlib.utils.utils import send_mail
 from qs.rpcclient import ServerProxy
 
 logger = logging.getLogger(__name__)

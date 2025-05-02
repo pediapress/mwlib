@@ -11,7 +11,7 @@ from collections import deque
 from hashlib import sha256
 
 from mwlib.parser.parse_collection_page import parse_collection_page as _parse_collection_page
-from mwlib.utilities import myjson, utils
+from mwlib.utils import myjson, unorganized
 
 
 def parse_collection_page(txt):
@@ -233,7 +233,7 @@ def get_wiki_text_from_url(license_to_check):
         and "templates=expand" not in url
     ):
         url += "&templates=expand"
-    wikitext = utils.fetch_url(
+    wikitext = unorganized.fetch_url(
         url,
         ignore_errors=True,
         expected_content_type="text/x-wiki",

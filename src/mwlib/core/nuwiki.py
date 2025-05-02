@@ -19,9 +19,9 @@ from mwlib.parser.expander import Expander, find_template, get_template_args, ge
 from mwlib.refine import uparser
 from mwlib.templ.parser import parse
 from mwlib.tree import advtree
-from mwlib.utilities import myjson as json
-from mwlib.utilities import utils
-from mwlib.utilities.utils import python2sort
+from mwlib.utils import myjson as json
+from mwlib.utils import unorganized
+from mwlib.utils.unorganized import python2sort
 
 log = logging.getLogger(__name__)
 
@@ -221,11 +221,11 @@ class NuWiki:
         if "/" in fqname:
             return None
 
-        path = self._pathjoin("images", utils.fs_escape(fqname))
+        path = self._pathjoin("images", unorganized.fs_escape(fqname))
         if not self._exists(path):
             # old collection zip files might still follow different escape rules
             fqname = "File:" + partial  # Fallback to default language english
-            path = self._pathjoin("images", utils.fs_escape(fqname))
+            path = self._pathjoin("images", unorganized.fs_escape(fqname))
             if not self._exists(path):
                 return None
 
@@ -242,7 +242,7 @@ class NuWiki:
         if not os.path.exists(safe_path):
             log.debug("no such file: %s" % safe_path)
             try:
-                link_target = os.path.join("../..", utils.fs_escape(fqname))
+                link_target = os.path.join("../..", unorganized.fs_escape(fqname))
                 log.debug(link_target)
                 os.symlink(link_target, safe_path)
             except OSError as exc:

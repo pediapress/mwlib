@@ -50,7 +50,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from mwlib import parser
 from .. import writerbase
 from ...extensions import timeline
-from mwlib.utilities._version import version as mwlibversion
+from mwlib.utils._version import version as mwlibversion
 from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL
 from mwlib.refine import uparser
@@ -87,7 +87,7 @@ with contextlib.suppress(ImportError):
 
 
 try:
-    from ...utilities import linuxmem
+    from ...utils import linuxmem
 except ImportError:
     linuxmem = None
 

@@ -20,7 +20,7 @@ except ImportError:
 
 import mwlib.core.metabook
 from mwlib import bookshelf, log, mwapidb
-from mwlib.utilities import utils
+from mwlib.utils import utils
 
 RENDER_TIMEOUT_DEFAULT = 60 * 60  # 60 minutes
 LICENSE_URL = 'http://en.wikipedia.org/w/index.php?title=Wikipedia:Text_of_the_GNU_Free_Documentation_License&action=raw'

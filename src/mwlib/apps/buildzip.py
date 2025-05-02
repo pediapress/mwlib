@@ -19,12 +19,11 @@ from gevent import monkey
 
 from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
-from mwlib.configuration import conf
 from mwlib.core.metabook import collection
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
-from mwlib.utilities import myjson as json, linuxmem
-from mwlib.utilities import utils
-from mwlib.utilities.log import setup_console_logging
+from mwlib.utils import myjson as json, linuxmem, conf
+from mwlib.utils import unorganized
+from mwlib.utils.log import setup_console_logging
 
 monkey.patch_all(thread=False)
 log = logging.getLogger(__name__)
@@ -271,7 +270,7 @@ def main(
     finally:
         if output is None and filename:
             print("removing %r" % filename)
-            utils.safe_unlink(filename)
+            unorganized.safe_unlink(filename)
 
 
 def _init_pod_client(posturl, getposturl, output):

@@ -11,7 +11,7 @@ from typing import Optional
 from mwlib.token import _uscan as _mwscan
 from mwlib.refine.util import parse_params, resolve_entity
 from mwlib.token.token import Token as BaseToken
-from mwlib.utilities.utils import split_tag
+from mwlib.utils.unorganized import split_tag
 
 
 def walk_children(children, filt):

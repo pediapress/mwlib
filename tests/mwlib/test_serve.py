@@ -3,7 +3,7 @@
 import time
 
 from mwlib.core import serve
-from mwlib.utilities import myjson as json
+from mwlib.utils import myjson as json
 
 
 def make_collection_dir(tmpdir, name):

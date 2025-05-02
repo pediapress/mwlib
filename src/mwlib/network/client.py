@@ -2,7 +2,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-import mwlib.utilities.myjson as json
+import mwlib.utils.myjson as json
 
 
 class Error(Exception):

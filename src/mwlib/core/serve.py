@@ -13,7 +13,7 @@ from hashlib import sha256
 from io import StringIO
 
 from mwlib.core.metabook import calc_checksum
-from mwlib.utilities import myjson as json, _version
+from mwlib.utils import myjson as json, _version
 
 log = logging.getLogger('mwlib.serve')
 collection_id_rex = re.compile(r'^[a-z0-9]{16}$')
