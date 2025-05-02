@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 from mwlib.core import nshandling
 from mwlib.extensions import imgmap
-from mwlib.miscellaneous import uniq
+from mwlib.utils import uniq
 from mwlib.parser import styleanalyzer, tagext
 from mwlib.parser.refine import util
 from mwlib.parser.refine.parse_table import TableFixer, TableGarbageRemover, TableParser

@@ -1,5 +1,5 @@
 from mwlib.core import metabook as metabook_module, wiki
-from mwlib.miscellaneous.status import Status
+from mwlib.utils.status import Status
 
 
 def create_zip_from_wiki_env(

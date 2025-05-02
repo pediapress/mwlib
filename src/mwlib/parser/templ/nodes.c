@@ -1216,8 +1216,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__parser__templ__nodes
-#define __PYX_HAVE_API__parser__templ__nodes
+#define __PYX_HAVE__mwlib__parser__templ__nodes
+#define __PYX_HAVE_API__mwlib__parser__templ__nodes
 /* Early includes */
 #ifdef _OPENMP
 #include <omp.h>
@@ -2427,14 +2427,14 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* #### Code section: module_declarations ### */
 
-/* Module declarations from "parser.templ.nodes" */
+/* Module declarations from "mwlib.parser.templ.nodes" */
 /* #### Code section: typeinfo ### */
 /* #### Code section: before_global_var ### */
-#define __Pyx_MODULE_NAME "parser.templ.nodes"
-extern int __pyx_module_is_main_parser__templ__nodes;
-int __pyx_module_is_main_parser__templ__nodes = 0;
+#define __Pyx_MODULE_NAME "mwlib.parser.templ.nodes"
+extern int __pyx_module_is_main_mwlib__parser__templ__nodes;
+int __pyx_module_is_main_mwlib__parser__templ__nodes = 0;
 
-/* Implementation of "parser.templ.nodes" */
+/* Implementation of "mwlib.parser.templ.nodes" */
 /* #### Code section: global_var ### */
 static PyObject *__pyx_builtin_chr;
 static PyObject *__pyx_builtin_ValueError;
@@ -2563,7 +2563,6 @@ static const char __pyx_k_Template__get_args[] = "Template._get_args";
 static const char __pyx_k_asyncio_coroutines[] = "asyncio.coroutines";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_mwlib_parser_templ[] = "mwlib.parser.templ";
-static const char __pyx_k_parser_templ_nodes[] = "parser.templ.nodes";
 static const char __pyx_k_get_parsed_template[] = "get_parsed_template";
 static const char __pyx_k_resolve_magic_alias[] = "resolve_magic_alias";
 static const char __pyx_k_SwitchNode__store_key[] = "SwitchNode._store_key";
@@ -2572,21 +2571,22 @@ static const char __pyx_k_template_name_too_long[] = "template name too long: ";
 static const char __pyx_k_mwlib_parser_templ_node[] = "mwlib.parser.templ.node";
 static const char __pyx_k_insert_implicit_newlines[] = "insert_implicit_newlines";
 static const char __pyx_k_mwlib_parser_templ_marks[] = "mwlib.parser.templ.marks";
+static const char __pyx_k_mwlib_parser_templ_nodes[] = "mwlib.parser.templ.nodes";
 static const char __pyx_k_mwlib_parser_templ_magics[] = "mwlib.parser.templ.magics";
 static const char __pyx_k_mwlib_parser_templ_evaluate[] = "mwlib.parser.templ.evaluate";
 static const char __pyx_k_mwlib_parser_templ_optimization[] = "mwlib.parser.templ.optimization";
 static const char __pyx_k_src_mwlib_parser_templ_nodes_pyx[] = "src/mwlib/parser/templ/nodes.pyx";
 /* #### Code section: decls ### */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_v_value, PyObject *__pyx_v_fast, PyObject *__pyx_v_unresolved); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_v_value, PyObject *__pyx_v_fast, PyObject *__pyx_v_unresolved); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res); /* proto */
 /* #### Code section: late_includes ### */
 /* #### Code section: module_state ### */
 typedef struct {
@@ -2703,6 +2703,7 @@ typedef struct {
   PyObject *__pyx_n_s_mwlib_parser_templ_magics;
   PyObject *__pyx_n_s_mwlib_parser_templ_marks;
   PyObject *__pyx_n_s_mwlib_parser_templ_node;
+  PyObject *__pyx_n_s_mwlib_parser_templ_nodes;
   PyObject *__pyx_n_s_mwlib_parser_templ_optimization;
   PyObject *__pyx_n_s_name;
   PyObject *__pyx_n_s_name_2;
@@ -2713,7 +2714,6 @@ typedef struct {
   PyObject *__pyx_n_s_optimize;
   PyObject *__pyx_n_s_other;
   PyObject *__pyx_n_s_p;
-  PyObject *__pyx_n_s_parser_templ_nodes;
   PyObject *__pyx_n_s_pos;
   PyObject *__pyx_n_s_prepare;
   PyObject *__pyx_n_s_print;
@@ -2905,6 +2905,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_parser_templ_magics);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_parser_templ_marks);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_parser_templ_node);
+  Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_parser_templ_nodes);
   Py_CLEAR(clear_module_state->__pyx_n_s_mwlib_parser_templ_optimization);
   Py_CLEAR(clear_module_state->__pyx_n_s_name);
   Py_CLEAR(clear_module_state->__pyx_n_s_name_2);
@@ -2915,7 +2916,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_optimize);
   Py_CLEAR(clear_module_state->__pyx_n_s_other);
   Py_CLEAR(clear_module_state->__pyx_n_s_p);
-  Py_CLEAR(clear_module_state->__pyx_n_s_parser_templ_nodes);
   Py_CLEAR(clear_module_state->__pyx_n_s_pos);
   Py_CLEAR(clear_module_state->__pyx_n_s_prepare);
   Py_CLEAR(clear_module_state->__pyx_n_s_print);
@@ -3085,6 +3085,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_parser_templ_magics);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_parser_templ_marks);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_parser_templ_node);
+  Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_parser_templ_nodes);
   Py_VISIT(traverse_module_state->__pyx_n_s_mwlib_parser_templ_optimization);
   Py_VISIT(traverse_module_state->__pyx_n_s_name);
   Py_VISIT(traverse_module_state->__pyx_n_s_name_2);
@@ -3095,7 +3096,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_optimize);
   Py_VISIT(traverse_module_state->__pyx_n_s_other);
   Py_VISIT(traverse_module_state->__pyx_n_s_p);
-  Py_VISIT(traverse_module_state->__pyx_n_s_parser_templ_nodes);
   Py_VISIT(traverse_module_state->__pyx_n_s_pos);
   Py_VISIT(traverse_module_state->__pyx_n_s_prepare);
   Py_VISIT(traverse_module_state->__pyx_n_s_print);
@@ -3275,6 +3275,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_mwlib_parser_templ_magics __pyx_mstate_global->__pyx_n_s_mwlib_parser_templ_magics
 #define __pyx_n_s_mwlib_parser_templ_marks __pyx_mstate_global->__pyx_n_s_mwlib_parser_templ_marks
 #define __pyx_n_s_mwlib_parser_templ_node __pyx_mstate_global->__pyx_n_s_mwlib_parser_templ_node
+#define __pyx_n_s_mwlib_parser_templ_nodes __pyx_mstate_global->__pyx_n_s_mwlib_parser_templ_nodes
 #define __pyx_n_s_mwlib_parser_templ_optimization __pyx_mstate_global->__pyx_n_s_mwlib_parser_templ_optimization
 #define __pyx_n_s_name __pyx_mstate_global->__pyx_n_s_name
 #define __pyx_n_s_name_2 __pyx_mstate_global->__pyx_n_s_name_2
@@ -3285,7 +3286,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_optimize __pyx_mstate_global->__pyx_n_s_optimize
 #define __pyx_n_s_other __pyx_mstate_global->__pyx_n_s_other
 #define __pyx_n_s_p __pyx_mstate_global->__pyx_n_s_p
-#define __pyx_n_s_parser_templ_nodes __pyx_mstate_global->__pyx_n_s_parser_templ_nodes
 #define __pyx_n_s_pos __pyx_mstate_global->__pyx_n_s_pos
 #define __pyx_n_s_prepare __pyx_mstate_global->__pyx_n_s_prepare
 #define __pyx_n_s_print __pyx_mstate_global->__pyx_n_s_print
@@ -3350,7 +3350,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_codeobj__30 __pyx_mstate_global->__pyx_codeobj__30
 /* #### Code section: module_code ### */
 
-/* "parser/templ/nodes.pyx":10
+/* "mwlib/parser/templ/nodes.pyx":10
  * 
  * class IfNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -3359,15 +3359,15 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_6IfNode_1flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_6IfNode_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_6IfNode_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_6IfNode_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_6IfNode_1flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_6IfNode_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_6IfNode_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_6IfNode_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -3482,11 +3482,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.IfNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.IfNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_6IfNode_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   {
@@ -3499,7 +3499,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyObject *__pyx_v_flatten = NULL;
   PyObject *__pyx_v_dummy_mark = NULL;
   PyObject *__pyx_v_insert_implicit_newlines = NULL;
@@ -3521,7 +3521,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("flatten", 1);
 
-  /* "parser/templ/nodes.pyx":11
+  /* "mwlib/parser/templ/nodes.pyx":11
  * class IfNode(Node):
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline             # <<<<<<<<<<<<<<
@@ -3567,7 +3567,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":12
+  /* "mwlib/parser/templ/nodes.pyx":12
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         cond = []             # <<<<<<<<<<<<<<
@@ -3579,7 +3579,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __pyx_v_cond = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":13
+  /* "mwlib/parser/templ/nodes.pyx":13
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         cond = []
  *         flatten(self[0], expander, variables, cond)             # <<<<<<<<<<<<<<
@@ -3614,7 +3614,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":14
+  /* "mwlib/parser/templ/nodes.pyx":14
  *         cond = []
  *         flatten(self[0], expander, variables, cond)
  *         cond = "".join(cond).strip()             # <<<<<<<<<<<<<<
@@ -3651,7 +3651,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __Pyx_DECREF_SET(__pyx_v_cond, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":18
+  /* "mwlib/parser/templ/nodes.pyx":18
  *         # template blacklisting results in 0xebad
  *         # see http://code.pediapress.com/wiki/ticket/700#comment:1
  *         cond = cond.strip(chr(0xEBAD))             # <<<<<<<<<<<<<<
@@ -3688,7 +3688,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __Pyx_DECREF_SET(__pyx_v_cond, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":20
+  /* "mwlib/parser/templ/nodes.pyx":20
  *         cond = cond.strip(chr(0xEBAD))
  * 
  *         res.append(maybe_newline)             # <<<<<<<<<<<<<<
@@ -3697,7 +3697,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
  */
   __pyx_t_6 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_maybe_newline); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 20, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":21
+  /* "mwlib/parser/templ/nodes.pyx":21
  * 
  *         res.append(maybe_newline)
  *         tmp = []             # <<<<<<<<<<<<<<
@@ -3709,7 +3709,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __pyx_v_tmp = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":22
+  /* "mwlib/parser/templ/nodes.pyx":22
  *         res.append(maybe_newline)
  *         tmp = []
  *         if cond:             # <<<<<<<<<<<<<<
@@ -3719,7 +3719,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_cond); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 22, __pyx_L1_error)
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":23
+    /* "mwlib/parser/templ/nodes.pyx":23
  *         tmp = []
  *         if cond:
  *             if len(self) > 1:             # <<<<<<<<<<<<<<
@@ -3730,7 +3730,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
     __pyx_t_7 = (__pyx_t_8 > 1);
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":24
+      /* "mwlib/parser/templ/nodes.pyx":24
  *         if cond:
  *             if len(self) > 1:
  *                 flatten(self[1], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -3765,7 +3765,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
       }
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":23
+      /* "mwlib/parser/templ/nodes.pyx":23
  *         tmp = []
  *         if cond:
  *             if len(self) > 1:             # <<<<<<<<<<<<<<
@@ -3774,7 +3774,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
  */
     }
 
-    /* "parser/templ/nodes.pyx":22
+    /* "mwlib/parser/templ/nodes.pyx":22
  *         res.append(maybe_newline)
  *         tmp = []
  *         if cond:             # <<<<<<<<<<<<<<
@@ -3784,7 +3784,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
     goto __pyx_L3;
   }
 
-  /* "parser/templ/nodes.pyx":26
+  /* "mwlib/parser/templ/nodes.pyx":26
  *                 flatten(self[1], expander, variables, tmp)
  *         else:
  *             if len(self) > 2:             # <<<<<<<<<<<<<<
@@ -3796,7 +3796,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
     __pyx_t_7 = (__pyx_t_8 > 2);
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":27
+      /* "mwlib/parser/templ/nodes.pyx":27
  *         else:
  *             if len(self) > 2:
  *                 flatten(self[2], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -3831,7 +3831,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
       }
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":26
+      /* "mwlib/parser/templ/nodes.pyx":26
  *                 flatten(self[1], expander, variables, tmp)
  *         else:
  *             if len(self) > 2:             # <<<<<<<<<<<<<<
@@ -3842,7 +3842,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   }
   __pyx_L3:;
 
-  /* "parser/templ/nodes.pyx":28
+  /* "mwlib/parser/templ/nodes.pyx":28
  *             if len(self) > 2:
  *                 flatten(self[2], expander, variables, tmp)
  *         insert_implicit_newlines(tmp)             # <<<<<<<<<<<<<<
@@ -3874,7 +3874,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":29
+  /* "mwlib/parser/templ/nodes.pyx":29
  *                 flatten(self[2], expander, variables, tmp)
  *         insert_implicit_newlines(tmp)
  *         res.append("".join(tmp).strip())             # <<<<<<<<<<<<<<
@@ -3911,7 +3911,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __pyx_t_6 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_2); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":30
+  /* "mwlib/parser/templ/nodes.pyx":30
  *         insert_implicit_newlines(tmp)
  *         res.append("".join(tmp).strip())
  *         res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -3920,7 +3920,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
  */
   __pyx_t_6 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_dummy_mark); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 30, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":10
+  /* "mwlib/parser/templ/nodes.pyx":10
  * 
  * class IfNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -3936,7 +3936,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("parser.templ.nodes.IfNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.IfNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_flatten);
@@ -3950,7 +3950,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":34
+/* "mwlib/parser/templ/nodes.pyx":34
  * 
  * class IfEqNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -3959,15 +3959,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_6IfNode_flatten(CYTHON_UNUSED Py
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8IfEqNode_1flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8IfEqNode_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_8IfEqNode_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_8IfEqNode_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8IfEqNode_1flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_8IfEqNode_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_8IfEqNode_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8IfEqNode_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4082,11 +4082,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.IfEqNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.IfEqNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_8IfEqNode_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   {
@@ -4099,7 +4099,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyObject *__pyx_v_flatten = NULL;
   PyObject *__pyx_v_dummy_mark = NULL;
   PyObject *__pyx_v_insert_implicit_newlines = NULL;
@@ -4123,7 +4123,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("flatten", 1);
 
-  /* "parser/templ/nodes.pyx":35
+  /* "mwlib/parser/templ/nodes.pyx":35
  * class IfEqNode(Node):
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline             # <<<<<<<<<<<<<<
@@ -4169,7 +4169,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":36
+  /* "mwlib/parser/templ/nodes.pyx":36
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         v1 = []             # <<<<<<<<<<<<<<
@@ -4181,7 +4181,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __pyx_v_v1 = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":37
+  /* "mwlib/parser/templ/nodes.pyx":37
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         v1 = []
  *         flatten(self[0], expander, variables, v1)             # <<<<<<<<<<<<<<
@@ -4216,7 +4216,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":38
+  /* "mwlib/parser/templ/nodes.pyx":38
  *         v1 = []
  *         flatten(self[0], expander, variables, v1)
  *         v1 = "".join(v1).strip()             # <<<<<<<<<<<<<<
@@ -4253,7 +4253,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __Pyx_DECREF_SET(__pyx_v_v1, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":40
+  /* "mwlib/parser/templ/nodes.pyx":40
  *         v1 = "".join(v1).strip()
  * 
  *         v2 = []             # <<<<<<<<<<<<<<
@@ -4265,7 +4265,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __pyx_v_v2 = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":41
+  /* "mwlib/parser/templ/nodes.pyx":41
  * 
  *         v2 = []
  *         if len(self) > 1:             # <<<<<<<<<<<<<<
@@ -4276,7 +4276,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __pyx_t_7 = (__pyx_t_6 > 1);
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":42
+    /* "mwlib/parser/templ/nodes.pyx":42
  *         v2 = []
  *         if len(self) > 1:
  *             flatten(self[1], expander, variables, v2)             # <<<<<<<<<<<<<<
@@ -4311,7 +4311,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "parser/templ/nodes.pyx":41
+    /* "mwlib/parser/templ/nodes.pyx":41
  * 
  *         v2 = []
  *         if len(self) > 1:             # <<<<<<<<<<<<<<
@@ -4320,7 +4320,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
  */
   }
 
-  /* "parser/templ/nodes.pyx":43
+  /* "mwlib/parser/templ/nodes.pyx":43
  *         if len(self) > 1:
  *             flatten(self[1], expander, variables, v2)
  *         v2 = "".join(v2).strip()             # <<<<<<<<<<<<<<
@@ -4357,7 +4357,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __Pyx_DECREF_SET(__pyx_v_v2, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":45
+  /* "mwlib/parser/templ/nodes.pyx":45
  *         v2 = "".join(v2).strip()
  * 
  *         from mwlib.parser.templ.magics import maybe_numeric_compare             # <<<<<<<<<<<<<<
@@ -4379,7 +4379,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "parser/templ/nodes.pyx":47
+  /* "mwlib/parser/templ/nodes.pyx":47
  *         from mwlib.parser.templ.magics import maybe_numeric_compare
  * 
  *         res.append(maybe_newline)             # <<<<<<<<<<<<<<
@@ -4388,7 +4388,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
  */
   __pyx_t_8 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_maybe_newline); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 47, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":48
+  /* "mwlib/parser/templ/nodes.pyx":48
  * 
  *         res.append(maybe_newline)
  *         tmp = []             # <<<<<<<<<<<<<<
@@ -4400,7 +4400,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __pyx_v_tmp = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "parser/templ/nodes.pyx":50
+  /* "mwlib/parser/templ/nodes.pyx":50
  *         tmp = []
  * 
  *         if maybe_numeric_compare(v1, v2):             # <<<<<<<<<<<<<<
@@ -4434,7 +4434,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":51
+    /* "mwlib/parser/templ/nodes.pyx":51
  * 
  *         if maybe_numeric_compare(v1, v2):
  *             if len(self) > 2:             # <<<<<<<<<<<<<<
@@ -4445,7 +4445,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
     __pyx_t_7 = (__pyx_t_6 > 2);
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":52
+      /* "mwlib/parser/templ/nodes.pyx":52
  *         if maybe_numeric_compare(v1, v2):
  *             if len(self) > 2:
  *                 flatten(self[2], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -4480,7 +4480,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
       }
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "parser/templ/nodes.pyx":51
+      /* "mwlib/parser/templ/nodes.pyx":51
  * 
  *         if maybe_numeric_compare(v1, v2):
  *             if len(self) > 2:             # <<<<<<<<<<<<<<
@@ -4489,7 +4489,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
  */
     }
 
-    /* "parser/templ/nodes.pyx":50
+    /* "mwlib/parser/templ/nodes.pyx":50
  *         tmp = []
  * 
  *         if maybe_numeric_compare(v1, v2):             # <<<<<<<<<<<<<<
@@ -4499,7 +4499,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
     goto __pyx_L4;
   }
 
-  /* "parser/templ/nodes.pyx":54
+  /* "mwlib/parser/templ/nodes.pyx":54
  *                 flatten(self[2], expander, variables, tmp)
  *         else:
  *             if len(self) > 3:             # <<<<<<<<<<<<<<
@@ -4511,7 +4511,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
     __pyx_t_7 = (__pyx_t_6 > 3);
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":55
+      /* "mwlib/parser/templ/nodes.pyx":55
  *         else:
  *             if len(self) > 3:
  *                 flatten(self[3], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -4546,7 +4546,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
       }
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "parser/templ/nodes.pyx":54
+      /* "mwlib/parser/templ/nodes.pyx":54
  *                 flatten(self[2], expander, variables, tmp)
  *         else:
  *             if len(self) > 3:             # <<<<<<<<<<<<<<
@@ -4557,7 +4557,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   }
   __pyx_L4:;
 
-  /* "parser/templ/nodes.pyx":57
+  /* "mwlib/parser/templ/nodes.pyx":57
  *                 flatten(self[3], expander, variables, tmp)
  * 
  *         insert_implicit_newlines(tmp)             # <<<<<<<<<<<<<<
@@ -4589,7 +4589,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "parser/templ/nodes.pyx":58
+  /* "mwlib/parser/templ/nodes.pyx":58
  * 
  *         insert_implicit_newlines(tmp)
  *         res.append("".join(tmp).strip())             # <<<<<<<<<<<<<<
@@ -4626,7 +4626,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __pyx_t_8 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "parser/templ/nodes.pyx":59
+  /* "mwlib/parser/templ/nodes.pyx":59
  *         insert_implicit_newlines(tmp)
  *         res.append("".join(tmp).strip())
  *         res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -4635,7 +4635,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
  */
   __pyx_t_8 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_dummy_mark); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 59, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":34
+  /* "mwlib/parser/templ/nodes.pyx":34
  * 
  * class IfEqNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -4651,7 +4651,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("parser.templ.nodes.IfEqNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.IfEqNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_flatten);
@@ -4667,7 +4667,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":62
+/* "mwlib/parser/templ/nodes.pyx":62
  * 
  * 
  * def maybe_numeric(a):             # <<<<<<<<<<<<<<
@@ -4676,15 +4676,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8IfEqNode_flatten(CYTHON_UNUSED 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_1maybe_numeric(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_1maybe_numeric(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_1maybe_numeric = {"maybe_numeric", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_1maybe_numeric, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_1maybe_numeric(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_1maybe_numeric = {"maybe_numeric", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_1maybe_numeric, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_1maybe_numeric(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -4754,11 +4754,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.maybe_numeric", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.maybe_numeric", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_maybe_numeric(__pyx_self, __pyx_v_a);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_maybe_numeric(__pyx_self, __pyx_v_a);
 
   /* function exit code */
   {
@@ -4771,7 +4771,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_a) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -4784,7 +4784,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("maybe_numeric", 1);
 
-  /* "parser/templ/nodes.pyx":63
+  /* "mwlib/parser/templ/nodes.pyx":63
  * 
  * def maybe_numeric(a):
  *     try:             # <<<<<<<<<<<<<<
@@ -4800,7 +4800,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "parser/templ/nodes.pyx":64
+      /* "mwlib/parser/templ/nodes.pyx":64
  * def maybe_numeric(a):
  *     try:
  *         return int(a)             # <<<<<<<<<<<<<<
@@ -4814,7 +4814,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
       __pyx_t_4 = 0;
       goto __pyx_L7_try_return;
 
-      /* "parser/templ/nodes.pyx":63
+      /* "mwlib/parser/templ/nodes.pyx":63
  * 
  * def maybe_numeric(a):
  *     try:             # <<<<<<<<<<<<<<
@@ -4825,7 +4825,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     __pyx_L3_error:;
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "parser/templ/nodes.pyx":65
+    /* "mwlib/parser/templ/nodes.pyx":65
  *     try:
  *         return int(a)
  *     except ValueError:             # <<<<<<<<<<<<<<
@@ -4839,7 +4839,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     }
     goto __pyx_L5_except_error;
 
-    /* "parser/templ/nodes.pyx":63
+    /* "mwlib/parser/templ/nodes.pyx":63
  * 
  * def maybe_numeric(a):
  *     try:             # <<<<<<<<<<<<<<
@@ -4865,7 +4865,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     __Pyx_ExceptionReset(__pyx_t_1, __pyx_t_2, __pyx_t_3);
   }
 
-  /* "parser/templ/nodes.pyx":68
+  /* "mwlib/parser/templ/nodes.pyx":68
  *         pass
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4881,7 +4881,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     __Pyx_XGOTREF(__pyx_t_1);
     /*try:*/ {
 
-      /* "parser/templ/nodes.pyx":69
+      /* "mwlib/parser/templ/nodes.pyx":69
  * 
  *     try:
  *         return float(a)             # <<<<<<<<<<<<<<
@@ -4895,7 +4895,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
       __pyx_t_4 = 0;
       goto __pyx_L13_try_return;
 
-      /* "parser/templ/nodes.pyx":68
+      /* "mwlib/parser/templ/nodes.pyx":68
  *         pass
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4906,7 +4906,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     __pyx_L9_error:;
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "parser/templ/nodes.pyx":70
+    /* "mwlib/parser/templ/nodes.pyx":70
  *     try:
  *         return float(a)
  *     except ValueError:             # <<<<<<<<<<<<<<
@@ -4920,7 +4920,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     }
     goto __pyx_L11_except_error;
 
-    /* "parser/templ/nodes.pyx":68
+    /* "mwlib/parser/templ/nodes.pyx":68
  *         pass
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -4946,7 +4946,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
     __Pyx_ExceptionReset(__pyx_t_3, __pyx_t_2, __pyx_t_1);
   }
 
-  /* "parser/templ/nodes.pyx":72
+  /* "mwlib/parser/templ/nodes.pyx":72
  *     except ValueError:
  *         pass
  *     return None             # <<<<<<<<<<<<<<
@@ -4957,7 +4957,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
 
-  /* "parser/templ/nodes.pyx":62
+  /* "mwlib/parser/templ/nodes.pyx":62
  * 
  * 
  * def maybe_numeric(a):             # <<<<<<<<<<<<<<
@@ -4968,7 +4968,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("parser.templ.nodes.maybe_numeric", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.maybe_numeric", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -4976,7 +4976,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":79
+/* "mwlib/parser/templ/nodes.pyx":79
  *     unresolved = None
  * 
  *     def _store_key(self, key, value, fast, unresolved):             # <<<<<<<<<<<<<<
@@ -4985,15 +4985,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_maybe_numeric(CYTHON_UNUSED PyOb
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_10SwitchNode_1_store_key(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_1_store_key(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_10SwitchNode_1_store_key = {"_store_key", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_10SwitchNode_1_store_key, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_10SwitchNode_1_store_key(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_10SwitchNode_1_store_key = {"_store_key", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_1_store_key, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_1_store_key(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -5123,11 +5123,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.SwitchNode._store_key", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.SwitchNode._store_key", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(__pyx_self, __pyx_v_self, __pyx_v_key, __pyx_v_value, __pyx_v_fast, __pyx_v_unresolved);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode__store_key(__pyx_self, __pyx_v_self, __pyx_v_key, __pyx_v_value, __pyx_v_fast, __pyx_v_unresolved);
 
   /* function exit code */
   {
@@ -5140,7 +5140,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_v_value, PyObject *__pyx_v_fast, PyObject *__pyx_v_unresolved) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, PyObject *__pyx_v_key, PyObject *__pyx_v_value, PyObject *__pyx_v_fast, PyObject *__pyx_v_unresolved) {
   PyObject *__pyx_v_num_key = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -5158,7 +5158,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
   __Pyx_RefNannySetupContext("_store_key", 0);
   __Pyx_INCREF(__pyx_v_key);
 
-  /* "parser/templ/nodes.pyx":80
+  /* "mwlib/parser/templ/nodes.pyx":80
  * 
  *     def _store_key(self, key, value, fast, unresolved):
  *         if isinstance(key, str):             # <<<<<<<<<<<<<<
@@ -5168,7 +5168,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
   __pyx_t_1 = PyUnicode_Check(__pyx_v_key); 
   if (__pyx_t_1) {
 
-    /* "parser/templ/nodes.pyx":81
+    /* "mwlib/parser/templ/nodes.pyx":81
  *     def _store_key(self, key, value, fast, unresolved):
  *         if isinstance(key, str):
  *             key = key.strip()             # <<<<<<<<<<<<<<
@@ -5202,7 +5202,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
     __Pyx_DECREF_SET(__pyx_v_key, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "parser/templ/nodes.pyx":82
+    /* "mwlib/parser/templ/nodes.pyx":82
  *         if isinstance(key, str):
  *             key = key.strip()
  *             if key in fast:             # <<<<<<<<<<<<<<
@@ -5212,7 +5212,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
     __pyx_t_1 = (__Pyx_PySequence_ContainsTF(__pyx_v_key, __pyx_v_fast, Py_EQ)); if (unlikely((__pyx_t_1 < 0))) __PYX_ERR(0, 82, __pyx_L1_error)
     if (__pyx_t_1) {
 
-      /* "parser/templ/nodes.pyx":83
+      /* "mwlib/parser/templ/nodes.pyx":83
  *             key = key.strip()
  *             if key in fast:
  *                 return             # <<<<<<<<<<<<<<
@@ -5223,7 +5223,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
       __pyx_r = Py_None; __Pyx_INCREF(Py_None);
       goto __pyx_L0;
 
-      /* "parser/templ/nodes.pyx":82
+      /* "mwlib/parser/templ/nodes.pyx":82
  *         if isinstance(key, str):
  *             key = key.strip()
  *             if key in fast:             # <<<<<<<<<<<<<<
@@ -5232,7 +5232,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
  */
     }
 
-    /* "parser/templ/nodes.pyx":85
+    /* "mwlib/parser/templ/nodes.pyx":85
  *                 return
  * 
  *             fast[key] = (len(unresolved), value)             # <<<<<<<<<<<<<<
@@ -5253,7 +5253,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
     if (unlikely((PyObject_SetItem(__pyx_v_fast, __pyx_v_key, __pyx_t_3) < 0))) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":86
+    /* "mwlib/parser/templ/nodes.pyx":86
  * 
  *             fast[key] = (len(unresolved), value)
  *             num_key = maybe_numeric(key)             # <<<<<<<<<<<<<<
@@ -5287,7 +5287,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
     __pyx_v_num_key = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":87
+    /* "mwlib/parser/templ/nodes.pyx":87
  *             fast[key] = (len(unresolved), value)
  *             num_key = maybe_numeric(key)
  *             if num_key is not None and num_key not in fast:             # <<<<<<<<<<<<<<
@@ -5305,7 +5305,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
     __pyx_L6_bool_binop_done:;
     if (__pyx_t_1) {
 
-      /* "parser/templ/nodes.pyx":88
+      /* "mwlib/parser/templ/nodes.pyx":88
  *             num_key = maybe_numeric(key)
  *             if num_key is not None and num_key not in fast:
  *                 fast[num_key] = (len(unresolved), value)             # <<<<<<<<<<<<<<
@@ -5326,7 +5326,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
       if (unlikely((PyObject_SetItem(__pyx_v_fast, __pyx_v_num_key, __pyx_t_2) < 0))) __PYX_ERR(0, 88, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":87
+      /* "mwlib/parser/templ/nodes.pyx":87
  *             fast[key] = (len(unresolved), value)
  *             num_key = maybe_numeric(key)
  *             if num_key is not None and num_key not in fast:             # <<<<<<<<<<<<<<
@@ -5335,7 +5335,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
  */
     }
 
-    /* "parser/templ/nodes.pyx":80
+    /* "mwlib/parser/templ/nodes.pyx":80
  * 
  *     def _store_key(self, key, value, fast, unresolved):
  *         if isinstance(key, str):             # <<<<<<<<<<<<<<
@@ -5345,7 +5345,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
     goto __pyx_L3;
   }
 
-  /* "parser/templ/nodes.pyx":90
+  /* "mwlib/parser/templ/nodes.pyx":90
  *                 fast[num_key] = (len(unresolved), value)
  *         else:
  *             unresolved.append((key, value))             # <<<<<<<<<<<<<<
@@ -5366,7 +5366,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
   }
   __pyx_L3:;
 
-  /* "parser/templ/nodes.pyx":79
+  /* "mwlib/parser/templ/nodes.pyx":79
  *     unresolved = None
  * 
  *     def _store_key(self, key, value, fast, unresolved):             # <<<<<<<<<<<<<<
@@ -5381,7 +5381,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("parser.templ.nodes.SwitchNode._store_key", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.SwitchNode._store_key", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_num_key);
@@ -5391,7 +5391,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":92
+/* "mwlib/parser/templ/nodes.pyx":92
  *             unresolved.append((key, value))
  * 
  *     def _init(self):             # <<<<<<<<<<<<<<
@@ -5400,15 +5400,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode__store_key(CYTHON_U
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_10SwitchNode_3_init(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_3_init(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_10SwitchNode_3_init = {"_init", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_10SwitchNode_3_init, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_10SwitchNode_3_init(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_10SwitchNode_3_init = {"_init", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_3_init, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_3_init(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -5478,11 +5478,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.SwitchNode._init", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.SwitchNode._init", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(__pyx_self, __pyx_v_self);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode_2_init(__pyx_self, __pyx_v_self);
 
   /* function exit code */
   {
@@ -5495,7 +5495,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_v_equal_split = NULL;
   PyObject *__pyx_v_args = NULL;
   PyObject *__pyx_v_unresolved = NULL;
@@ -5524,7 +5524,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_init", 1);
 
-  /* "parser/templ/nodes.pyx":93
+  /* "mwlib/parser/templ/nodes.pyx":93
  * 
  *     def _init(self):
  *         from mwlib.parser.templ.evaluate import equal_split             # <<<<<<<<<<<<<<
@@ -5546,7 +5546,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":94
+  /* "mwlib/parser/templ/nodes.pyx":94
  *     def _init(self):
  *         from mwlib.parser.templ.evaluate import equal_split
  *         args = [equal_split(x) for x in self[1]]             # <<<<<<<<<<<<<<
@@ -5650,7 +5650,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __pyx_v_args = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":96
+  /* "mwlib/parser/templ/nodes.pyx":96
  *         args = [equal_split(x) for x in self[1]]
  * 
  *         unresolved = []             # <<<<<<<<<<<<<<
@@ -5662,7 +5662,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __pyx_v_unresolved = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":97
+  /* "mwlib/parser/templ/nodes.pyx":97
  * 
  *         unresolved = []
  *         fast = {}             # <<<<<<<<<<<<<<
@@ -5674,7 +5674,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __pyx_v_fast = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":99
+  /* "mwlib/parser/templ/nodes.pyx":99
  *         fast = {}
  * 
  *         no_key_seen = []             # <<<<<<<<<<<<<<
@@ -5686,7 +5686,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __pyx_v_no_key_seen = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":101
+  /* "mwlib/parser/templ/nodes.pyx":101
  *         no_key_seen = []
  * 
  *         for key, value in args:             # <<<<<<<<<<<<<<
@@ -5760,7 +5760,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     __Pyx_XDECREF_SET(__pyx_v_value, __pyx_t_6);
     __pyx_t_6 = 0;
 
-    /* "parser/templ/nodes.pyx":102
+    /* "mwlib/parser/templ/nodes.pyx":102
  * 
  *         for key, value in args:
  *             if key is not None:             # <<<<<<<<<<<<<<
@@ -5770,7 +5770,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     __pyx_t_10 = (__pyx_v_key != Py_None);
     if (__pyx_t_10) {
 
-      /* "parser/templ/nodes.pyx":103
+      /* "mwlib/parser/templ/nodes.pyx":103
  *         for key, value in args:
  *             if key is not None:
  *                 key = optimize(list(key))             # <<<<<<<<<<<<<<
@@ -5807,7 +5807,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
       __Pyx_DECREF_SET(__pyx_v_key, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "parser/templ/nodes.pyx":102
+      /* "mwlib/parser/templ/nodes.pyx":102
  * 
  *         for key, value in args:
  *             if key is not None:             # <<<<<<<<<<<<<<
@@ -5816,7 +5816,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
     }
 
-    /* "parser/templ/nodes.pyx":104
+    /* "mwlib/parser/templ/nodes.pyx":104
  *             if key is not None:
  *                 key = optimize(list(key))
  *             if type(value) is tuple:             # <<<<<<<<<<<<<<
@@ -5826,7 +5826,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     __pyx_t_10 = (((PyObject *)Py_TYPE(__pyx_v_value)) == ((PyObject *)(&PyTuple_Type)));
     if (__pyx_t_10) {
 
-      /* "parser/templ/nodes.pyx":105
+      /* "mwlib/parser/templ/nodes.pyx":105
  *                 key = optimize(list(key))
  *             if type(value) is tuple:
  *                 value = optimize(list(value))             # <<<<<<<<<<<<<<
@@ -5863,7 +5863,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
       __Pyx_DECREF_SET(__pyx_v_value, __pyx_t_3);
       __pyx_t_3 = 0;
 
-      /* "parser/templ/nodes.pyx":104
+      /* "mwlib/parser/templ/nodes.pyx":104
  *             if key is not None:
  *                 key = optimize(list(key))
  *             if type(value) is tuple:             # <<<<<<<<<<<<<<
@@ -5872,7 +5872,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
     }
 
-    /* "parser/templ/nodes.pyx":107
+    /* "mwlib/parser/templ/nodes.pyx":107
  *                 value = optimize(list(value))
  * 
  *             if key is None:             # <<<<<<<<<<<<<<
@@ -5882,7 +5882,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     __pyx_t_10 = (__pyx_v_key == Py_None);
     if (__pyx_t_10) {
 
-      /* "parser/templ/nodes.pyx":108
+      /* "mwlib/parser/templ/nodes.pyx":108
  * 
  *             if key is None:
  *                 no_key_seen.append(value)             # <<<<<<<<<<<<<<
@@ -5891,7 +5891,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
       __pyx_t_11 = __Pyx_PyList_Append(__pyx_v_no_key_seen, __pyx_v_value); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 108, __pyx_L1_error)
 
-      /* "parser/templ/nodes.pyx":109
+      /* "mwlib/parser/templ/nodes.pyx":109
  *             if key is None:
  *                 no_key_seen.append(value)
  *                 continue             # <<<<<<<<<<<<<<
@@ -5900,7 +5900,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
       goto __pyx_L10_continue;
 
-      /* "parser/templ/nodes.pyx":107
+      /* "mwlib/parser/templ/nodes.pyx":107
  *                 value = optimize(list(value))
  * 
  *             if key is None:             # <<<<<<<<<<<<<<
@@ -5909,7 +5909,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
     }
 
-    /* "parser/templ/nodes.pyx":111
+    /* "mwlib/parser/templ/nodes.pyx":111
  *                 continue
  * 
  *             for k in no_key_seen:             # <<<<<<<<<<<<<<
@@ -5935,7 +5935,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
       __Pyx_XDECREF_SET(__pyx_v_k, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "parser/templ/nodes.pyx":112
+      /* "mwlib/parser/templ/nodes.pyx":112
  * 
  *             for k in no_key_seen:
  *                 self._store_key(k, value, fast, unresolved)             # <<<<<<<<<<<<<<
@@ -5968,7 +5968,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
       }
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-      /* "parser/templ/nodes.pyx":111
+      /* "mwlib/parser/templ/nodes.pyx":111
  *                 continue
  * 
  *             for k in no_key_seen:             # <<<<<<<<<<<<<<
@@ -5978,7 +5978,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":113
+    /* "mwlib/parser/templ/nodes.pyx":113
  *             for k in no_key_seen:
  *                 self._store_key(k, value, fast, unresolved)
  *             del no_key_seen[:]             # <<<<<<<<<<<<<<
@@ -5987,7 +5987,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
     if (__Pyx_PyObject_DelSlice(__pyx_v_no_key_seen, 0, 0, NULL, NULL, NULL, 0, 0, 1) < 0) __PYX_ERR(0, 113, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":114
+    /* "mwlib/parser/templ/nodes.pyx":114
  *                 self._store_key(k, value, fast, unresolved)
  *             del no_key_seen[:]
  *             self._store_key(key, value, fast, unresolved)             # <<<<<<<<<<<<<<
@@ -6020,7 +6020,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":101
+    /* "mwlib/parser/templ/nodes.pyx":101
  *         no_key_seen = []
  * 
  *         for key, value in args:             # <<<<<<<<<<<<<<
@@ -6031,7 +6031,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":116
+  /* "mwlib/parser/templ/nodes.pyx":116
  *             self._store_key(key, value, fast, unresolved)
  * 
  *         if no_key_seen:             # <<<<<<<<<<<<<<
@@ -6041,7 +6041,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __pyx_t_10 = (PyList_GET_SIZE(__pyx_v_no_key_seen) != 0);
   if (__pyx_t_10) {
 
-    /* "parser/templ/nodes.pyx":117
+    /* "mwlib/parser/templ/nodes.pyx":117
  * 
  *         if no_key_seen:
  *             self._store_key("#default", no_key_seen[-1], fast, unresolved)             # <<<<<<<<<<<<<<
@@ -6077,7 +6077,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "parser/templ/nodes.pyx":116
+    /* "mwlib/parser/templ/nodes.pyx":116
  *             self._store_key(key, value, fast, unresolved)
  * 
  *         if no_key_seen:             # <<<<<<<<<<<<<<
@@ -6086,7 +6086,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
   }
 
-  /* "parser/templ/nodes.pyx":119
+  /* "mwlib/parser/templ/nodes.pyx":119
  *             self._store_key("#default", no_key_seen[-1], fast, unresolved)
  * 
  *         self.unresolved = tuple(unresolved)             # <<<<<<<<<<<<<<
@@ -6098,7 +6098,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_unresolved, __pyx_t_2) < 0) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":120
+  /* "mwlib/parser/templ/nodes.pyx":120
  * 
  *         self.unresolved = tuple(unresolved)
  *         self.fast = fast             # <<<<<<<<<<<<<<
@@ -6107,7 +6107,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_fast, __pyx_v_fast) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":121
+  /* "mwlib/parser/templ/nodes.pyx":121
  *         self.unresolved = tuple(unresolved)
  *         self.fast = fast
  *         self.sentinel = (len(self.unresolved) + 1, None)             # <<<<<<<<<<<<<<
@@ -6131,7 +6131,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_sentinel, __pyx_t_3) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":92
+  /* "mwlib/parser/templ/nodes.pyx":92
  *             unresolved.append((key, value))
  * 
  *     def _init(self):             # <<<<<<<<<<<<<<
@@ -6148,7 +6148,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("parser.templ.nodes.SwitchNode._init", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.SwitchNode._init", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_equal_split);
@@ -6165,7 +6165,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":123
+/* "mwlib/parser/templ/nodes.pyx":123
  *         self.sentinel = (len(self.unresolved) + 1, None)
  * 
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -6174,15 +6174,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_2_init(CYTHON_UNUSE
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_10SwitchNode_5flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_5flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_10SwitchNode_5flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_10SwitchNode_5flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_10SwitchNode_5flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_10SwitchNode_5flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_5flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_10SwitchNode_5flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -6297,11 +6297,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.SwitchNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.SwitchNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode_4flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   {
@@ -6314,7 +6314,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyObject *__pyx_v_flatten = NULL;
   PyObject *__pyx_v_dummy_mark = NULL;
   PyObject *__pyx_v_insert_implicit_newlines = NULL;
@@ -6348,7 +6348,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("flatten", 1);
 
-  /* "parser/templ/nodes.pyx":124
+  /* "mwlib/parser/templ/nodes.pyx":124
  * 
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline             # <<<<<<<<<<<<<<
@@ -6394,7 +6394,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":125
+  /* "mwlib/parser/templ/nodes.pyx":125
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         if self.unresolved is None:             # <<<<<<<<<<<<<<
@@ -6407,7 +6407,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
 
-    /* "parser/templ/nodes.pyx":126
+    /* "mwlib/parser/templ/nodes.pyx":126
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         if self.unresolved is None:
  *             self._init()             # <<<<<<<<<<<<<<
@@ -6440,7 +6440,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "parser/templ/nodes.pyx":125
+    /* "mwlib/parser/templ/nodes.pyx":125
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         if self.unresolved is None:             # <<<<<<<<<<<<<<
@@ -6449,7 +6449,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
   }
 
-  /* "parser/templ/nodes.pyx":128
+  /* "mwlib/parser/templ/nodes.pyx":128
  *             self._init()
  * 
  *         res.append(maybe_newline)             # <<<<<<<<<<<<<<
@@ -6458,7 +6458,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
   __pyx_t_6 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_maybe_newline); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 128, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":129
+  /* "mwlib/parser/templ/nodes.pyx":129
  * 
  *         res.append(maybe_newline)
  *         val = []             # <<<<<<<<<<<<<<
@@ -6470,7 +6470,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_v_val = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":130
+  /* "mwlib/parser/templ/nodes.pyx":130
  *         res.append(maybe_newline)
  *         val = []
  *         flatten(self[0], expander, variables, val)             # <<<<<<<<<<<<<<
@@ -6505,7 +6505,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":131
+  /* "mwlib/parser/templ/nodes.pyx":131
  *         val = []
  *         flatten(self[0], expander, variables, val)
  *         val = "".join(val).strip()             # <<<<<<<<<<<<<<
@@ -6542,7 +6542,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __Pyx_DECREF_SET(__pyx_v_val, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":133
+  /* "mwlib/parser/templ/nodes.pyx":133
  *         val = "".join(val).strip()
  * 
  *         num_val = maybe_numeric(val)             # <<<<<<<<<<<<<<
@@ -6576,7 +6576,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_v_num_val = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":135
+  /* "mwlib/parser/templ/nodes.pyx":135
  *         num_val = maybe_numeric(val)
  * 
  *         t1 = self.fast.get(val, self.sentinel)             # <<<<<<<<<<<<<<
@@ -6616,7 +6616,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_v_t1 = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":136
+  /* "mwlib/parser/templ/nodes.pyx":136
  * 
  *         t1 = self.fast.get(val, self.sentinel)
  *         t2 = self.fast.get(num_val, self.sentinel)             # <<<<<<<<<<<<<<
@@ -6656,7 +6656,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_v_t2 = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":138
+  /* "mwlib/parser/templ/nodes.pyx":138
  *         t2 = self.fast.get(num_val, self.sentinel)
  * 
  *         pos, retval = min(t1, t2)             # <<<<<<<<<<<<<<
@@ -6733,7 +6733,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_v_retval = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "parser/templ/nodes.pyx":140
+  /* "mwlib/parser/templ/nodes.pyx":140
  *         pos, retval = min(t1, t2)
  * 
  *         if pos is None:             # <<<<<<<<<<<<<<
@@ -6743,7 +6743,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_t_3 = (__pyx_v_pos == Py_None);
   if (__pyx_t_3) {
 
-    /* "parser/templ/nodes.pyx":141
+    /* "mwlib/parser/templ/nodes.pyx":141
  * 
  *         if pos is None:
  *             pos = len(self.unresolved) + 1             # <<<<<<<<<<<<<<
@@ -6759,7 +6759,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __Pyx_DECREF_SET(__pyx_v_pos, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "parser/templ/nodes.pyx":140
+    /* "mwlib/parser/templ/nodes.pyx":140
  *         pos, retval = min(t1, t2)
  * 
  *         if pos is None:             # <<<<<<<<<<<<<<
@@ -6768,7 +6768,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
   }
 
-  /* "parser/templ/nodes.pyx":143
+  /* "mwlib/parser/templ/nodes.pyx":143
  *             pos = len(self.unresolved) + 1
  * 
  *         for k, v in self.unresolved[:pos]:             # <<<<<<<<<<<<<<
@@ -6884,7 +6884,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __Pyx_XDECREF_SET(__pyx_v_v, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "parser/templ/nodes.pyx":144
+    /* "mwlib/parser/templ/nodes.pyx":144
  * 
  *         for k, v in self.unresolved[:pos]:
  *             tmp = []             # <<<<<<<<<<<<<<
@@ -6896,7 +6896,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __Pyx_XDECREF_SET(__pyx_v_tmp, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "parser/templ/nodes.pyx":145
+    /* "mwlib/parser/templ/nodes.pyx":145
  *         for k, v in self.unresolved[:pos]:
  *             tmp = []
  *             flatten(k, expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -6928,7 +6928,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "parser/templ/nodes.pyx":146
+    /* "mwlib/parser/templ/nodes.pyx":146
  *             tmp = []
  *             flatten(k, expander, variables, tmp)
  *             tmp = "".join(tmp).strip()             # <<<<<<<<<<<<<<
@@ -6965,7 +6965,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __Pyx_DECREF_SET(__pyx_v_tmp, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "parser/templ/nodes.pyx":147
+    /* "mwlib/parser/templ/nodes.pyx":147
  *             flatten(k, expander, variables, tmp)
  *             tmp = "".join(tmp).strip()
  *             if tmp == val:             # <<<<<<<<<<<<<<
@@ -6977,7 +6977,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (__pyx_t_3) {
 
-      /* "parser/templ/nodes.pyx":148
+      /* "mwlib/parser/templ/nodes.pyx":148
  *             tmp = "".join(tmp).strip()
  *             if tmp == val:
  *                 retval = v             # <<<<<<<<<<<<<<
@@ -6987,7 +6987,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
       __Pyx_INCREF(__pyx_v_v);
       __Pyx_DECREF_SET(__pyx_v_retval, __pyx_v_v);
 
-      /* "parser/templ/nodes.pyx":149
+      /* "mwlib/parser/templ/nodes.pyx":149
  *             if tmp == val:
  *                 retval = v
  *                 break             # <<<<<<<<<<<<<<
@@ -6996,7 +6996,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
       goto __pyx_L8_break;
 
-      /* "parser/templ/nodes.pyx":147
+      /* "mwlib/parser/templ/nodes.pyx":147
  *             flatten(k, expander, variables, tmp)
  *             tmp = "".join(tmp).strip()
  *             if tmp == val:             # <<<<<<<<<<<<<<
@@ -7005,7 +7005,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
     }
 
-    /* "parser/templ/nodes.pyx":150
+    /* "mwlib/parser/templ/nodes.pyx":150
  *                 retval = v
  *                 break
  *             if num_val is not None and maybe_numeric(tmp) == num_val:             # <<<<<<<<<<<<<<
@@ -7050,7 +7050,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __pyx_L13_bool_binop_done:;
     if (__pyx_t_3) {
 
-      /* "parser/templ/nodes.pyx":151
+      /* "mwlib/parser/templ/nodes.pyx":151
  *                 break
  *             if num_val is not None and maybe_numeric(tmp) == num_val:
  *                 retval = v             # <<<<<<<<<<<<<<
@@ -7060,7 +7060,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
       __Pyx_INCREF(__pyx_v_v);
       __Pyx_DECREF_SET(__pyx_v_retval, __pyx_v_v);
 
-      /* "parser/templ/nodes.pyx":152
+      /* "mwlib/parser/templ/nodes.pyx":152
  *             if num_val is not None and maybe_numeric(tmp) == num_val:
  *                 retval = v
  *                 break             # <<<<<<<<<<<<<<
@@ -7069,7 +7069,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
       goto __pyx_L8_break;
 
-      /* "parser/templ/nodes.pyx":150
+      /* "mwlib/parser/templ/nodes.pyx":150
  *                 retval = v
  *                 break
  *             if num_val is not None and maybe_numeric(tmp) == num_val:             # <<<<<<<<<<<<<<
@@ -7078,7 +7078,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
     }
 
-    /* "parser/templ/nodes.pyx":143
+    /* "mwlib/parser/templ/nodes.pyx":143
  *             pos = len(self.unresolved) + 1
  * 
  *         for k, v in self.unresolved[:pos]:             # <<<<<<<<<<<<<<
@@ -7093,7 +7093,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   goto __pyx_L15_for_end;
   __pyx_L15_for_end:;
 
-  /* "parser/templ/nodes.pyx":154
+  /* "mwlib/parser/templ/nodes.pyx":154
  *                 break
  * 
  *         if retval is None:             # <<<<<<<<<<<<<<
@@ -7103,7 +7103,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __pyx_t_3 = (__pyx_v_retval == Py_None);
   if (__pyx_t_3) {
 
-    /* "parser/templ/nodes.pyx":155
+    /* "mwlib/parser/templ/nodes.pyx":155
  * 
  *         if retval is None:
  *             for a in expander.aliasmap.get_aliases("default") or ["#default"]:             # <<<<<<<<<<<<<<
@@ -7211,7 +7211,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
       __Pyx_XDECREF_SET(__pyx_v_a, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":156
+      /* "mwlib/parser/templ/nodes.pyx":156
  *         if retval is None:
  *             for a in expander.aliasmap.get_aliases("default") or ["#default"]:
  *                 retval = self.fast.get(a)             # <<<<<<<<<<<<<<
@@ -7248,7 +7248,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
       __Pyx_DECREF_SET(__pyx_v_retval, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":157
+      /* "mwlib/parser/templ/nodes.pyx":157
  *             for a in expander.aliasmap.get_aliases("default") or ["#default"]:
  *                 retval = self.fast.get(a)
  *                 if retval is not None:             # <<<<<<<<<<<<<<
@@ -7258,7 +7258,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
       __pyx_t_3 = (__pyx_v_retval != Py_None);
       if (__pyx_t_3) {
 
-        /* "parser/templ/nodes.pyx":158
+        /* "mwlib/parser/templ/nodes.pyx":158
  *                 retval = self.fast.get(a)
  *                 if retval is not None:
  *                     retval = retval[1]             # <<<<<<<<<<<<<<
@@ -7270,7 +7270,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
         __Pyx_DECREF_SET(__pyx_v_retval, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "parser/templ/nodes.pyx":159
+        /* "mwlib/parser/templ/nodes.pyx":159
  *                 if retval is not None:
  *                     retval = retval[1]
  *                     break             # <<<<<<<<<<<<<<
@@ -7279,7 +7279,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
         goto __pyx_L18_break;
 
-        /* "parser/templ/nodes.pyx":157
+        /* "mwlib/parser/templ/nodes.pyx":157
  *             for a in expander.aliasmap.get_aliases("default") or ["#default"]:
  *                 retval = self.fast.get(a)
  *                 if retval is not None:             # <<<<<<<<<<<<<<
@@ -7288,7 +7288,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
       }
 
-      /* "parser/templ/nodes.pyx":155
+      /* "mwlib/parser/templ/nodes.pyx":155
  * 
  *         if retval is None:
  *             for a in expander.aliasmap.get_aliases("default") or ["#default"]:             # <<<<<<<<<<<<<<
@@ -7303,7 +7303,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     goto __pyx_L22_for_end;
     __pyx_L22_for_end:;
 
-    /* "parser/templ/nodes.pyx":160
+    /* "mwlib/parser/templ/nodes.pyx":160
  *                     retval = retval[1]
  *                     break
  *             retval = retval or ""             # <<<<<<<<<<<<<<
@@ -7323,7 +7323,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
     __Pyx_DECREF_SET(__pyx_v_retval, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "parser/templ/nodes.pyx":154
+    /* "mwlib/parser/templ/nodes.pyx":154
  *                 break
  * 
  *         if retval is None:             # <<<<<<<<<<<<<<
@@ -7332,7 +7332,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
   }
 
-  /* "parser/templ/nodes.pyx":162
+  /* "mwlib/parser/templ/nodes.pyx":162
  *             retval = retval or ""
  * 
  *         tmp = []             # <<<<<<<<<<<<<<
@@ -7344,7 +7344,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __Pyx_XDECREF_SET(__pyx_v_tmp, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":163
+  /* "mwlib/parser/templ/nodes.pyx":163
  * 
  *         tmp = []
  *         flatten(retval, expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -7376,7 +7376,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":164
+  /* "mwlib/parser/templ/nodes.pyx":164
  *         tmp = []
  *         flatten(retval, expander, variables, tmp)
  *         insert_implicit_newlines(tmp)             # <<<<<<<<<<<<<<
@@ -7408,7 +7408,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":165
+  /* "mwlib/parser/templ/nodes.pyx":165
  *         flatten(retval, expander, variables, tmp)
  *         insert_implicit_newlines(tmp)
  *         tmp = "".join(tmp).strip()             # <<<<<<<<<<<<<<
@@ -7445,7 +7445,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __Pyx_DECREF_SET(__pyx_v_tmp, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":166
+  /* "mwlib/parser/templ/nodes.pyx":166
  *         insert_implicit_newlines(tmp)
  *         tmp = "".join(tmp).strip()
  *         res.append(tmp)             # <<<<<<<<<<<<<<
@@ -7454,7 +7454,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
   __pyx_t_6 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_tmp); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 166, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":167
+  /* "mwlib/parser/templ/nodes.pyx":167
  *         tmp = "".join(tmp).strip()
  *         res.append(tmp)
  *         res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -7463,7 +7463,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
   __pyx_t_6 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_dummy_mark); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 167, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":123
+  /* "mwlib/parser/templ/nodes.pyx":123
  *         self.sentinel = (len(self.unresolved) + 1, None)
  * 
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -7480,7 +7480,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_11);
-  __Pyx_AddTraceback("parser.templ.nodes.SwitchNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.SwitchNode.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_flatten);
@@ -7502,7 +7502,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":171
+/* "mwlib/parser/templ/nodes.pyx":171
  * 
  * class Variable(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -7511,15 +7511,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_10SwitchNode_4flatten(CYTHON_UNU
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Variable_1flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Variable_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_8Variable_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_8Variable_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Variable_1flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_8Variable_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_8Variable_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Variable_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -7634,11 +7634,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.Variable.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Variable.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_8Variable_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_8Variable_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   {
@@ -7651,7 +7651,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyObject *__pyx_v_flatten = NULL;
   PyObject *__pyx_v_MemoryLimitError = NULL;
   PyObject *__pyx_v_name = NULL;
@@ -7673,7 +7673,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("flatten", 1);
 
-  /* "parser/templ/nodes.pyx":172
+  /* "mwlib/parser/templ/nodes.pyx":172
  * class Variable(Node):
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError             # <<<<<<<<<<<<<<
@@ -7703,7 +7703,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":173
+  /* "mwlib/parser/templ/nodes.pyx":173
  *     def flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError
  *         name = []             # <<<<<<<<<<<<<<
@@ -7715,7 +7715,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __pyx_v_name = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":174
+  /* "mwlib/parser/templ/nodes.pyx":174
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError
  *         name = []
  *         flatten(self[0], expander, variables, name)             # <<<<<<<<<<<<<<
@@ -7750,7 +7750,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":175
+  /* "mwlib/parser/templ/nodes.pyx":175
  *         name = []
  *         flatten(self[0], expander, variables, name)
  *         name = "".join(name).strip()             # <<<<<<<<<<<<<<
@@ -7787,7 +7787,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __Pyx_DECREF_SET(__pyx_v_name, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":176
+  /* "mwlib/parser/templ/nodes.pyx":176
  *         flatten(self[0], expander, variables, name)
  *         name = "".join(name).strip()
  *         if len(name) > 256 * 1024:             # <<<<<<<<<<<<<<
@@ -7798,7 +7798,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __pyx_t_7 = (__pyx_t_6 > 0x40000);
   if (unlikely(__pyx_t_7)) {
 
-    /* "parser/templ/nodes.pyx":177
+    /* "mwlib/parser/templ/nodes.pyx":177
  *         name = "".join(name).strip()
  *         if len(name) > 256 * 1024:
  *             raise MemoryLimitError(f"template name too long: {len(name)} bytes")             # <<<<<<<<<<<<<<
@@ -7855,7 +7855,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __PYX_ERR(0, 177, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":176
+    /* "mwlib/parser/templ/nodes.pyx":176
  *         flatten(self[0], expander, variables, name)
  *         name = "".join(name).strip()
  *         if len(name) > 256 * 1024:             # <<<<<<<<<<<<<<
@@ -7864,7 +7864,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
  */
   }
 
-  /* "parser/templ/nodes.pyx":179
+  /* "mwlib/parser/templ/nodes.pyx":179
  *             raise MemoryLimitError(f"template name too long: {len(name)} bytes")
  * 
  *         v = variables.get(name, None)             # <<<<<<<<<<<<<<
@@ -7898,7 +7898,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __pyx_v_v = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":181
+  /* "mwlib/parser/templ/nodes.pyx":181
  *         v = variables.get(name, None)
  * 
  *         if v is None:             # <<<<<<<<<<<<<<
@@ -7908,7 +7908,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __pyx_t_7 = (__pyx_v_v == Py_None);
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":182
+    /* "mwlib/parser/templ/nodes.pyx":182
  * 
  *         if v is None:
  *             if len(self) > 1:             # <<<<<<<<<<<<<<
@@ -7919,7 +7919,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
     __pyx_t_7 = (__pyx_t_6 > 1);
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":183
+      /* "mwlib/parser/templ/nodes.pyx":183
  *         if v is None:
  *             if len(self) > 1:
  *                 flatten(self[1], expander, variables, res)             # <<<<<<<<<<<<<<
@@ -7954,7 +7954,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
       }
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":182
+      /* "mwlib/parser/templ/nodes.pyx":182
  * 
  *         if v is None:
  *             if len(self) > 1:             # <<<<<<<<<<<<<<
@@ -7964,7 +7964,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
       goto __pyx_L5;
     }
 
-    /* "parser/templ/nodes.pyx":186
+    /* "mwlib/parser/templ/nodes.pyx":186
  *             else:
  *                 # FIXME. breaks If ???
  *                 res.append(f"{{{{{{{name}}}}}}}")             # <<<<<<<<<<<<<<
@@ -7999,7 +7999,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
     }
     __pyx_L5:;
 
-    /* "parser/templ/nodes.pyx":181
+    /* "mwlib/parser/templ/nodes.pyx":181
  *         v = variables.get(name, None)
  * 
  *         if v is None:             # <<<<<<<<<<<<<<
@@ -8009,7 +8009,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
     goto __pyx_L4;
   }
 
-  /* "parser/templ/nodes.pyx":188
+  /* "mwlib/parser/templ/nodes.pyx":188
  *                 res.append(f"{{{{{{{name}}}}}}}")
  *         else:
  *             res.append(v)             # <<<<<<<<<<<<<<
@@ -8021,7 +8021,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   }
   __pyx_L4:;
 
-  /* "parser/templ/nodes.pyx":171
+  /* "mwlib/parser/templ/nodes.pyx":171
  * 
  * class Variable(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -8037,7 +8037,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("parser.templ.nodes.Variable.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Variable.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_flatten);
@@ -8049,7 +8049,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":192
+/* "mwlib/parser/templ/nodes.pyx":192
  * 
  * class Template(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -8058,15 +8058,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Variable_flatten(CYTHON_UNUSED 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Template_1flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_8Template_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_8Template_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Template_1flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_8Template_1flatten = {"flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_1flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_1flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -8181,11 +8181,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_8Template_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   {
@@ -8198,7 +8198,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyObject *__pyx_v_err = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -8231,7 +8231,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("flatten", 1);
 
-  /* "parser/templ/nodes.pyx":193
+  /* "mwlib/parser/templ/nodes.pyx":193
  * class Template(Node):
  *     def flatten(self, expander, variables, res):
  *         try:             # <<<<<<<<<<<<<<
@@ -8247,7 +8247,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "parser/templ/nodes.pyx":194
+      /* "mwlib/parser/templ/nodes.pyx":194
  *     def flatten(self, expander, variables, res):
  *         try:
  *             return self._flatten(expander, variables, res)             # <<<<<<<<<<<<<<
@@ -8283,7 +8283,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
       __pyx_t_4 = 0;
       goto __pyx_L7_try_return;
 
-      /* "parser/templ/nodes.pyx":193
+      /* "mwlib/parser/templ/nodes.pyx":193
  * class Template(Node):
  *     def flatten(self, expander, variables, res):
  *         try:             # <<<<<<<<<<<<<<
@@ -8296,7 +8296,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "parser/templ/nodes.pyx":195
+    /* "mwlib/parser/templ/nodes.pyx":195
  *         try:
  *             return self._flatten(expander, variables, res)
  *         except RuntimeError as err:             # <<<<<<<<<<<<<<
@@ -8305,7 +8305,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
  */
     __pyx_t_8 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_RuntimeError);
     if (__pyx_t_8) {
-      __Pyx_AddTraceback("parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
       if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_5, &__pyx_t_6) < 0) __PYX_ERR(0, 195, __pyx_L5_except_error)
       __Pyx_XGOTREF(__pyx_t_4);
       __Pyx_XGOTREF(__pyx_t_5);
@@ -8314,7 +8314,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
       __pyx_v_err = __pyx_t_5;
       /*try:*/ {
 
-        /* "parser/templ/nodes.pyx":198
+        /* "mwlib/parser/templ/nodes.pyx":198
  *             # we expect a "RuntimeError: maximum recursion depth exceeded" here.
  *             # logging this error is rather hard...
  *             with suppress(Exception):             # <<<<<<<<<<<<<<
@@ -8384,7 +8384,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
               __Pyx_XGOTREF(__pyx_t_16);
               /*try:*/ {
 
-                /* "parser/templ/nodes.pyx":199
+                /* "mwlib/parser/templ/nodes.pyx":199
  *             # logging this error is rather hard...
  *             with suppress(Exception):
  *                 log.warn(f"error {err} ignored")             # <<<<<<<<<<<<<<
@@ -8443,7 +8443,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
                 }
                 __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-                /* "parser/templ/nodes.pyx":198
+                /* "mwlib/parser/templ/nodes.pyx":198
  *             # we expect a "RuntimeError: maximum recursion depth exceeded" here.
  *             # logging this error is rather hard...
  *             with suppress(Exception):             # <<<<<<<<<<<<<<
@@ -8461,7 +8461,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
               __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
               __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
               /*except:*/ {
-                __Pyx_AddTraceback("parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+                __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
                 if (__Pyx_GetException(&__pyx_t_9, &__pyx_t_11, &__pyx_t_13) < 0) __PYX_ERR(0, 198, __pyx_L24_except_error)
                 __Pyx_XGOTREF(__pyx_t_9);
                 __Pyx_XGOTREF(__pyx_t_11);
@@ -8525,7 +8525,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
         }
       }
 
-      /* "parser/templ/nodes.pyx":195
+      /* "mwlib/parser/templ/nodes.pyx":195
  *         try:
  *             return self._flatten(expander, variables, res)
  *         except RuntimeError as err:             # <<<<<<<<<<<<<<
@@ -8581,7 +8581,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
     }
     goto __pyx_L5_except_error;
 
-    /* "parser/templ/nodes.pyx":193
+    /* "mwlib/parser/templ/nodes.pyx":193
  * class Template(Node):
  *     def flatten(self, expander, variables, res):
  *         try:             # <<<<<<<<<<<<<<
@@ -8607,7 +8607,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
     __Pyx_ExceptionReset(__pyx_t_1, __pyx_t_2, __pyx_t_3);
   }
 
-  /* "parser/templ/nodes.pyx":192
+  /* "mwlib/parser/templ/nodes.pyx":192
  * 
  * class Template(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -8626,7 +8626,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
   __Pyx_XDECREF(__pyx_t_10);
   __Pyx_XDECREF(__pyx_t_11);
   __Pyx_XDECREF(__pyx_t_13);
-  __Pyx_AddTraceback("parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template.flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_err);
@@ -8635,7 +8635,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":201
+/* "mwlib/parser/templ/nodes.pyx":201
  *                 log.warn(f"error {err} ignored")
  * 
  *     def _get_args(self):             # <<<<<<<<<<<<<<
@@ -8644,15 +8644,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_flatten(CYTHON_UNUSED 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Template_3_get_args(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_3_get_args(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_8Template_3_get_args = {"_get_args", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_8Template_3_get_args, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Template_3_get_args(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_8Template_3_get_args = {"_get_args", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_3_get_args, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_3_get_args(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -8722,11 +8722,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.Template._get_args", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template._get_args", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(__pyx_self, __pyx_v_self);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_2_get_args(__pyx_self, __pyx_v_self);
 
   /* function exit code */
   {
@@ -8739,7 +8739,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -8748,7 +8748,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUS
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_get_args", 1);
 
-  /* "parser/templ/nodes.pyx":202
+  /* "mwlib/parser/templ/nodes.pyx":202
  * 
  *     def _get_args(self):
  *         return self[1]             # <<<<<<<<<<<<<<
@@ -8762,7 +8762,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUS
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "parser/templ/nodes.pyx":201
+  /* "mwlib/parser/templ/nodes.pyx":201
  *                 log.warn(f"error {err} ignored")
  * 
  *     def _get_args(self):             # <<<<<<<<<<<<<<
@@ -8773,7 +8773,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUS
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("parser.templ.nodes.Template._get_args", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template._get_args", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -8781,7 +8781,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUS
   return __pyx_r;
 }
 
-/* "parser/templ/nodes.pyx":204
+/* "mwlib/parser/templ/nodes.pyx":204
  *         return self[1]
  * 
  *     def _flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -8790,15 +8790,15 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_2_get_args(CYTHON_UNUS
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Template_5_flatten(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_5_flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_6parser_5templ_5nodes_8Template_5_flatten = {"_flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_6parser_5templ_5nodes_8Template_5_flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6parser_5templ_5nodes_8Template_5_flatten(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_5mwlib_6parser_5templ_5nodes_8Template_5_flatten = {"_flatten", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_5_flatten, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5mwlib_6parser_5templ_5nodes_8Template_5_flatten(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -8913,11 +8913,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("parser.templ.nodes.Template._flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template._flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
+  __pyx_r = __pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_4_flatten(__pyx_self, __pyx_v_self, __pyx_v_expander, __pyx_v_variables, __pyx_v_res);
 
   /* function exit code */
   {
@@ -8930,7 +8930,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
+static PyObject *__pyx_pf_5mwlib_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_expander, PyObject *__pyx_v_variables, PyObject *__pyx_v_res) {
   PyObject *__pyx_v_flatten = NULL;
   PyObject *__pyx_v_MemoryLimitError = NULL;
   PyObject *__pyx_v_dummy_mark = NULL;
@@ -8971,7 +8971,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_flatten", 1);
 
-  /* "parser/templ/nodes.pyx":205
+  /* "mwlib/parser/templ/nodes.pyx":205
  * 
  *     def _flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline             # <<<<<<<<<<<<<<
@@ -9017,7 +9017,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":206
+  /* "mwlib/parser/templ/nodes.pyx":206
  *     def _flatten(self, expander, variables, res):
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline
  *         name = []             # <<<<<<<<<<<<<<
@@ -9029,7 +9029,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_v_name = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":207
+  /* "mwlib/parser/templ/nodes.pyx":207
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline
  *         name = []
  *         flatten(self[0], expander, variables, name)             # <<<<<<<<<<<<<<
@@ -9064,7 +9064,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":208
+  /* "mwlib/parser/templ/nodes.pyx":208
  *         name = []
  *         flatten(self[0], expander, variables, name)
  *         name = "".join(name).strip()             # <<<<<<<<<<<<<<
@@ -9101,7 +9101,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __Pyx_DECREF_SET(__pyx_v_name, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":209
+  /* "mwlib/parser/templ/nodes.pyx":209
  *         flatten(self[0], expander, variables, name)
  *         name = "".join(name).strip()
  *         if len(name) > 256 * 1024:             # <<<<<<<<<<<<<<
@@ -9112,7 +9112,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_t_7 = (__pyx_t_6 > 0x40000);
   if (unlikely(__pyx_t_7)) {
 
-    /* "parser/templ/nodes.pyx":210
+    /* "mwlib/parser/templ/nodes.pyx":210
  *         name = "".join(name).strip()
  *         if len(name) > 256 * 1024:
  *             raise MemoryLimitError(f"template name too long: {len(name)} bytes")             # <<<<<<<<<<<<<<
@@ -9169,7 +9169,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __PYX_ERR(0, 210, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":209
+    /* "mwlib/parser/templ/nodes.pyx":209
  *         flatten(self[0], expander, variables, name)
  *         name = "".join(name).strip()
  *         if len(name) > 256 * 1024:             # <<<<<<<<<<<<<<
@@ -9178,7 +9178,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
   }
 
-  /* "parser/templ/nodes.pyx":212
+  /* "mwlib/parser/templ/nodes.pyx":212
  *             raise MemoryLimitError(f"template name too long: {len(name)} bytes")
  * 
  *         args = self._get_args()             # <<<<<<<<<<<<<<
@@ -9212,7 +9212,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_v_args = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":214
+  /* "mwlib/parser/templ/nodes.pyx":214
  *         args = self._get_args()
  * 
  *         remainder = None             # <<<<<<<<<<<<<<
@@ -9222,7 +9222,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __Pyx_INCREF(Py_None);
   __pyx_v_remainder = Py_None;
 
-  /* "parser/templ/nodes.pyx":215
+  /* "mwlib/parser/templ/nodes.pyx":215
  * 
  *         remainder = None
  *         if ":" in name:             # <<<<<<<<<<<<<<
@@ -9232,7 +9232,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_t_7 = (__Pyx_PySequence_ContainsTF(__pyx_kp_u__7, __pyx_v_name, Py_EQ)); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 215, __pyx_L1_error)
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":216
+    /* "mwlib/parser/templ/nodes.pyx":216
  *         remainder = None
  *         if ":" in name:
  *             try_name, try_remainder = name.split(":", 1)             # <<<<<<<<<<<<<<
@@ -9295,7 +9295,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __pyx_v_try_remainder = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":217
+    /* "mwlib/parser/templ/nodes.pyx":217
  *         if ":" in name:
  *             try_name, try_remainder = name.split(":", 1)
  *             from mwlib.parser.templ import magic_nodes             # <<<<<<<<<<<<<<
@@ -9317,7 +9317,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":219
+    /* "mwlib/parser/templ/nodes.pyx":219
  *             from mwlib.parser.templ import magic_nodes
  * 
  *             try_name = expander.resolve_magic_alias(try_name) or try_name             # <<<<<<<<<<<<<<
@@ -9363,7 +9363,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __Pyx_DECREF_SET(__pyx_v_try_name, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":221
+    /* "mwlib/parser/templ/nodes.pyx":221
  *             try_name = expander.resolve_magic_alias(try_name) or try_name
  * 
  *             klass = magic_nodes.registry.get(try_name)             # <<<<<<<<<<<<<<
@@ -9400,7 +9400,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __pyx_v_klass = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "parser/templ/nodes.pyx":222
+    /* "mwlib/parser/templ/nodes.pyx":222
  * 
  *             klass = magic_nodes.registry.get(try_name)
  *             if klass is not None:             # <<<<<<<<<<<<<<
@@ -9410,7 +9410,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __pyx_t_7 = (__pyx_v_klass != Py_None);
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":223
+      /* "mwlib/parser/templ/nodes.pyx":223
  *             klass = magic_nodes.registry.get(try_name)
  *             if klass is not None:
  *                 children = (try_remainder,) + args             # <<<<<<<<<<<<<<
@@ -9428,7 +9428,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_v_children = __pyx_t_2;
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":225
+      /* "mwlib/parser/templ/nodes.pyx":225
  *                 children = (try_remainder,) + args
  *                 # print "MAGIC:", klass,  children
  *                 klass(children).flatten(expander, variables, res)             # <<<<<<<<<<<<<<
@@ -9485,7 +9485,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       }
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":226
+      /* "mwlib/parser/templ/nodes.pyx":226
  *                 # print "MAGIC:", klass,  children
  *                 klass(children).flatten(expander, variables, res)
  *                 return             # <<<<<<<<<<<<<<
@@ -9496,7 +9496,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_r = Py_None; __Pyx_INCREF(Py_None);
       goto __pyx_L0;
 
-      /* "parser/templ/nodes.pyx":222
+      /* "mwlib/parser/templ/nodes.pyx":222
  * 
  *             klass = magic_nodes.registry.get(try_name)
  *             if klass is not None:             # <<<<<<<<<<<<<<
@@ -9505,7 +9505,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     }
 
-    /* "parser/templ/nodes.pyx":228
+    /* "mwlib/parser/templ/nodes.pyx":228
  *                 return
  * 
  *             if expander.resolver.has_magic(try_name):             # <<<<<<<<<<<<<<
@@ -9543,7 +9543,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":229
+      /* "mwlib/parser/templ/nodes.pyx":229
  * 
  *             if expander.resolver.has_magic(try_name):
  *                 name = try_name             # <<<<<<<<<<<<<<
@@ -9553,7 +9553,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_INCREF(__pyx_v_try_name);
       __Pyx_DECREF_SET(__pyx_v_name, __pyx_v_try_name);
 
-      /* "parser/templ/nodes.pyx":230
+      /* "mwlib/parser/templ/nodes.pyx":230
  *             if expander.resolver.has_magic(try_name):
  *                 name = try_name
  *                 remainder = try_remainder             # <<<<<<<<<<<<<<
@@ -9563,7 +9563,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_INCREF(__pyx_v_try_remainder);
       __Pyx_DECREF_SET(__pyx_v_remainder, __pyx_v_try_remainder);
 
-      /* "parser/templ/nodes.pyx":228
+      /* "mwlib/parser/templ/nodes.pyx":228
  *                 return
  * 
  *             if expander.resolver.has_magic(try_name):             # <<<<<<<<<<<<<<
@@ -9572,7 +9572,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     }
 
-    /* "parser/templ/nodes.pyx":232
+    /* "mwlib/parser/templ/nodes.pyx":232
  *                 remainder = try_remainder
  * 
  *             if name == "#ifeq":             # <<<<<<<<<<<<<<
@@ -9582,7 +9582,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __pyx_t_7 = (__Pyx_PyUnicode_Equals(__pyx_v_name, __pyx_kp_u_ifeq, Py_EQ)); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 232, __pyx_L1_error)
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":233
+      /* "mwlib/parser/templ/nodes.pyx":233
  * 
  *             if name == "#ifeq":
  *                 res.append(maybe_newline)             # <<<<<<<<<<<<<<
@@ -9591,7 +9591,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
       __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_maybe_newline); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 233, __pyx_L1_error)
 
-      /* "parser/templ/nodes.pyx":234
+      /* "mwlib/parser/templ/nodes.pyx":234
  *             if name == "#ifeq":
  *                 res.append(maybe_newline)
  *                 tmp = []             # <<<<<<<<<<<<<<
@@ -9603,7 +9603,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_v_tmp = ((PyObject*)__pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":235
+      /* "mwlib/parser/templ/nodes.pyx":235
  *                 res.append(maybe_newline)
  *                 tmp = []
  *                 if len(args) >= 1:             # <<<<<<<<<<<<<<
@@ -9614,7 +9614,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_t_7 = (__pyx_t_6 >= 1);
       if (__pyx_t_7) {
 
-        /* "parser/templ/nodes.pyx":236
+        /* "mwlib/parser/templ/nodes.pyx":236
  *                 tmp = []
  *                 if len(args) >= 1:
  *                     flatten(args[0], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -9649,7 +9649,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         }
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-        /* "parser/templ/nodes.pyx":235
+        /* "mwlib/parser/templ/nodes.pyx":235
  *                 res.append(maybe_newline)
  *                 tmp = []
  *                 if len(args) >= 1:             # <<<<<<<<<<<<<<
@@ -9658,7 +9658,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
       }
 
-      /* "parser/templ/nodes.pyx":237
+      /* "mwlib/parser/templ/nodes.pyx":237
  *                 if len(args) >= 1:
  *                     flatten(args[0], expander, variables, tmp)
  *                 other = "".join(tmp).strip()             # <<<<<<<<<<<<<<
@@ -9695,7 +9695,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_v_other = __pyx_t_2;
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":238
+      /* "mwlib/parser/templ/nodes.pyx":238
  *                     flatten(args[0], expander, variables, tmp)
  *                 other = "".join(tmp).strip()
  *                 remainder = remainder.strip()             # <<<<<<<<<<<<<<
@@ -9729,7 +9729,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_DECREF_SET(__pyx_v_remainder, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":239
+      /* "mwlib/parser/templ/nodes.pyx":239
  *                 other = "".join(tmp).strip()
  *                 remainder = remainder.strip()
  *                 tmp = []             # <<<<<<<<<<<<<<
@@ -9741,7 +9741,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_DECREF_SET(__pyx_v_tmp, ((PyObject*)__pyx_t_2));
       __pyx_t_2 = 0;
 
-      /* "parser/templ/nodes.pyx":240
+      /* "mwlib/parser/templ/nodes.pyx":240
  *                 remainder = remainder.strip()
  *                 tmp = []
  *                 if magics.maybe_numeric_compare(remainder, other):             # <<<<<<<<<<<<<<
@@ -9779,7 +9779,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       if (__pyx_t_7) {
 
-        /* "parser/templ/nodes.pyx":241
+        /* "mwlib/parser/templ/nodes.pyx":241
  *                 tmp = []
  *                 if magics.maybe_numeric_compare(remainder, other):
  *                     if len(args) >= 2:             # <<<<<<<<<<<<<<
@@ -9790,7 +9790,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         __pyx_t_7 = (__pyx_t_6 >= 2);
         if (__pyx_t_7) {
 
-          /* "parser/templ/nodes.pyx":242
+          /* "mwlib/parser/templ/nodes.pyx":242
  *                 if magics.maybe_numeric_compare(remainder, other):
  *                     if len(args) >= 2:
  *                         flatten(args[1], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -9825,7 +9825,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
           }
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-          /* "parser/templ/nodes.pyx":243
+          /* "mwlib/parser/templ/nodes.pyx":243
  *                     if len(args) >= 2:
  *                         flatten(args[1], expander, variables, tmp)
  *                         res.append("".join(tmp).strip())             # <<<<<<<<<<<<<<
@@ -9862,7 +9862,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
           __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_2); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 243, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-          /* "parser/templ/nodes.pyx":241
+          /* "mwlib/parser/templ/nodes.pyx":241
  *                 tmp = []
  *                 if magics.maybe_numeric_compare(remainder, other):
  *                     if len(args) >= 2:             # <<<<<<<<<<<<<<
@@ -9871,7 +9871,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
         }
 
-        /* "parser/templ/nodes.pyx":240
+        /* "mwlib/parser/templ/nodes.pyx":240
  *                 remainder = remainder.strip()
  *                 tmp = []
  *                 if magics.maybe_numeric_compare(remainder, other):             # <<<<<<<<<<<<<<
@@ -9881,7 +9881,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         goto __pyx_L13;
       }
 
-      /* "parser/templ/nodes.pyx":245
+      /* "mwlib/parser/templ/nodes.pyx":245
  *                         res.append("".join(tmp).strip())
  *                 else:
  *                     if len(args) >= 3:             # <<<<<<<<<<<<<<
@@ -9893,7 +9893,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         __pyx_t_7 = (__pyx_t_6 >= 3);
         if (__pyx_t_7) {
 
-          /* "parser/templ/nodes.pyx":246
+          /* "mwlib/parser/templ/nodes.pyx":246
  *                 else:
  *                     if len(args) >= 3:
  *                         flatten(args[2], expander, variables, tmp)             # <<<<<<<<<<<<<<
@@ -9928,7 +9928,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
           }
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-          /* "parser/templ/nodes.pyx":247
+          /* "mwlib/parser/templ/nodes.pyx":247
  *                     if len(args) >= 3:
  *                         flatten(args[2], expander, variables, tmp)
  *                         res.append("".join(tmp).strip())             # <<<<<<<<<<<<<<
@@ -9965,7 +9965,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
           __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_2); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 247, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-          /* "parser/templ/nodes.pyx":245
+          /* "mwlib/parser/templ/nodes.pyx":245
  *                         res.append("".join(tmp).strip())
  *                 else:
  *                     if len(args) >= 3:             # <<<<<<<<<<<<<<
@@ -9976,7 +9976,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       }
       __pyx_L13:;
 
-      /* "parser/templ/nodes.pyx":248
+      /* "mwlib/parser/templ/nodes.pyx":248
  *                         flatten(args[2], expander, variables, tmp)
  *                         res.append("".join(tmp).strip())
  *                 res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -9985,7 +9985,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
       __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_dummy_mark); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 248, __pyx_L1_error)
 
-      /* "parser/templ/nodes.pyx":249
+      /* "mwlib/parser/templ/nodes.pyx":249
  *                         res.append("".join(tmp).strip())
  *                 res.append(dummy_mark)
  *                 return             # <<<<<<<<<<<<<<
@@ -9996,7 +9996,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_r = Py_None; __Pyx_INCREF(Py_None);
       goto __pyx_L0;
 
-      /* "parser/templ/nodes.pyx":232
+      /* "mwlib/parser/templ/nodes.pyx":232
  *                 remainder = try_remainder
  * 
  *             if name == "#ifeq":             # <<<<<<<<<<<<<<
@@ -10005,7 +10005,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     }
 
-    /* "parser/templ/nodes.pyx":215
+    /* "mwlib/parser/templ/nodes.pyx":215
  * 
  *         remainder = None
  *         if ":" in name:             # <<<<<<<<<<<<<<
@@ -10014,7 +10014,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
   }
 
-  /* "parser/templ/nodes.pyx":251
+  /* "mwlib/parser/templ/nodes.pyx":251
  *                 return
  * 
  *         var = []             # <<<<<<<<<<<<<<
@@ -10026,7 +10026,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_v_var = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":252
+  /* "mwlib/parser/templ/nodes.pyx":252
  * 
  *         var = []
  *         if remainder is not None:             # <<<<<<<<<<<<<<
@@ -10036,7 +10036,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_t_7 = (__pyx_v_remainder != Py_None);
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":253
+    /* "mwlib/parser/templ/nodes.pyx":253
  *         var = []
  *         if remainder is not None:
  *             var.append(remainder)             # <<<<<<<<<<<<<<
@@ -10045,7 +10045,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_var, __pyx_v_remainder); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 253, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":252
+    /* "mwlib/parser/templ/nodes.pyx":252
  * 
  *         var = []
  *         if remainder is not None:             # <<<<<<<<<<<<<<
@@ -10054,7 +10054,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
   }
 
-  /* "parser/templ/nodes.pyx":255
+  /* "mwlib/parser/templ/nodes.pyx":255
  *             var.append(remainder)
  * 
  *         for x in args:             # <<<<<<<<<<<<<<
@@ -10116,7 +10116,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "parser/templ/nodes.pyx":256
+    /* "mwlib/parser/templ/nodes.pyx":256
  * 
  *         for x in args:
  *             var.append(x)             # <<<<<<<<<<<<<<
@@ -10125,7 +10125,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_var, __pyx_v_x); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 256, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":255
+    /* "mwlib/parser/templ/nodes.pyx":255
  *             var.append(remainder)
  * 
  *         for x in args:             # <<<<<<<<<<<<<<
@@ -10135,7 +10135,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":257
+  /* "mwlib/parser/templ/nodes.pyx":257
  *         for x in args:
  *             var.append(x)
  *         from mwlib.parser.templ.evaluate import ArgumentList             # <<<<<<<<<<<<<<
@@ -10157,7 +10157,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "parser/templ/nodes.pyx":258
+  /* "mwlib/parser/templ/nodes.pyx":258
  *             var.append(x)
  *         from mwlib.parser.templ.evaluate import ArgumentList
  *         var = ArgumentList(args=var, expander=expander, variables=variables)             # <<<<<<<<<<<<<<
@@ -10175,7 +10175,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __Pyx_DECREF_SET(__pyx_v_var, __pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":260
+  /* "mwlib/parser/templ/nodes.pyx":260
  *         var = ArgumentList(args=var, expander=expander, variables=variables)
  * 
  *         rep = expander.resolver(name, var)             # <<<<<<<<<<<<<<
@@ -10209,7 +10209,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_v_rep = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":262
+  /* "mwlib/parser/templ/nodes.pyx":262
  *         rep = expander.resolver(name, var)
  * 
  *         if rep is not None:             # <<<<<<<<<<<<<<
@@ -10219,7 +10219,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __pyx_t_7 = (__pyx_v_rep != Py_None);
   if (__pyx_t_7) {
 
-    /* "parser/templ/nodes.pyx":263
+    /* "mwlib/parser/templ/nodes.pyx":263
  * 
  *         if rep is not None:
  *             res.append(maybe_newline)             # <<<<<<<<<<<<<<
@@ -10228,7 +10228,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_maybe_newline); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 263, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":264
+    /* "mwlib/parser/templ/nodes.pyx":264
  *         if rep is not None:
  *             res.append(maybe_newline)
  *             res.append(rep)             # <<<<<<<<<<<<<<
@@ -10237,7 +10237,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_rep); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 264, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":265
+    /* "mwlib/parser/templ/nodes.pyx":265
  *             res.append(maybe_newline)
  *             res.append(rep)
  *             res.append(dummy_mark)             # <<<<<<<<<<<<<<
@@ -10246,7 +10246,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
     __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_dummy_mark); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 265, __pyx_L1_error)
 
-    /* "parser/templ/nodes.pyx":262
+    /* "mwlib/parser/templ/nodes.pyx":262
  *         rep = expander.resolver(name, var)
  * 
  *         if rep is not None:             # <<<<<<<<<<<<<<
@@ -10256,7 +10256,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     goto __pyx_L20;
   }
 
-  /* "parser/templ/nodes.pyx":267
+  /* "mwlib/parser/templ/nodes.pyx":267
  *             res.append(dummy_mark)
  *         else:
  *             p = expander.get_parsed_template(name)             # <<<<<<<<<<<<<<
@@ -10291,7 +10291,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __pyx_v_p = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "parser/templ/nodes.pyx":268
+    /* "mwlib/parser/templ/nodes.pyx":268
  *         else:
  *             p = expander.get_parsed_template(name)
  *             if p:             # <<<<<<<<<<<<<<
@@ -10301,7 +10301,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
     __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_p); if (unlikely((__pyx_t_7 < 0))) __PYX_ERR(0, 268, __pyx_L1_error)
     if (__pyx_t_7) {
 
-      /* "parser/templ/nodes.pyx":269
+      /* "mwlib/parser/templ/nodes.pyx":269
  *             p = expander.get_parsed_template(name)
  *             if p:
  *                 if DEBUG:             # <<<<<<<<<<<<<<
@@ -10314,7 +10314,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       if (__pyx_t_7) {
 
-        /* "parser/templ/nodes.pyx":270
+        /* "mwlib/parser/templ/nodes.pyx":270
  *             if p:
  *                 if DEBUG:
  *                     msg = f"EXPANDING {name!r} {var!r}  ===> "             # <<<<<<<<<<<<<<
@@ -10357,7 +10357,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         __pyx_v_msg = __pyx_t_1;
         __pyx_t_1 = 0;
 
-        /* "parser/templ/nodes.pyx":271
+        /* "mwlib/parser/templ/nodes.pyx":271
  *                 if DEBUG:
  *                     msg = f"EXPANDING {name!r} {var!r}  ===> "
  *                     old_idx = len(res)             # <<<<<<<<<<<<<<
@@ -10367,7 +10367,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         __pyx_t_6 = PyObject_Length(__pyx_v_res); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 271, __pyx_L1_error)
         __pyx_v_old_idx = __pyx_t_6;
 
-        /* "parser/templ/nodes.pyx":269
+        /* "mwlib/parser/templ/nodes.pyx":269
  *             p = expander.get_parsed_template(name)
  *             if p:
  *                 if DEBUG:             # <<<<<<<<<<<<<<
@@ -10376,7 +10376,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
       }
 
-      /* "parser/templ/nodes.pyx":272
+      /* "mwlib/parser/templ/nodes.pyx":272
  *                     msg = f"EXPANDING {name!r} {var!r}  ===> "
  *                     old_idx = len(res)
  *                 res.append(MarkStart(repr(name)))             # <<<<<<<<<<<<<<
@@ -10413,7 +10413,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 272, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "parser/templ/nodes.pyx":273
+      /* "mwlib/parser/templ/nodes.pyx":273
  *                     old_idx = len(res)
  *                 res.append(MarkStart(repr(name)))
  *                 res.append(maybe_newline)             # <<<<<<<<<<<<<<
@@ -10422,7 +10422,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
       __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_v_maybe_newline); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 273, __pyx_L1_error)
 
-      /* "parser/templ/nodes.pyx":274
+      /* "mwlib/parser/templ/nodes.pyx":274
  *                 res.append(MarkStart(repr(name)))
  *                 res.append(maybe_newline)
  *                 flatten(p, expander, var, res)             # <<<<<<<<<<<<<<
@@ -10454,7 +10454,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       }
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "parser/templ/nodes.pyx":275
+      /* "mwlib/parser/templ/nodes.pyx":275
  *                 res.append(maybe_newline)
  *                 flatten(p, expander, var, res)
  *                 res.append(MarkEnd(repr(name)))             # <<<<<<<<<<<<<<
@@ -10491,7 +10491,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __pyx_t_11 = __Pyx_PyObject_Append(__pyx_v_res, __pyx_t_1); if (unlikely(__pyx_t_11 == ((int)-1))) __PYX_ERR(0, 275, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-      /* "parser/templ/nodes.pyx":277
+      /* "mwlib/parser/templ/nodes.pyx":277
  *                 res.append(MarkEnd(repr(name)))
  * 
  *                 if DEBUG:             # <<<<<<<<<<<<<<
@@ -10504,7 +10504,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       if (__pyx_t_7) {
 
-        /* "parser/templ/nodes.pyx":278
+        /* "mwlib/parser/templ/nodes.pyx":278
  * 
  *                 if DEBUG:
  *                     msg += repr("".join(res[old_idx:]))             # <<<<<<<<<<<<<<
@@ -10526,7 +10526,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         __Pyx_XDECREF_SET(__pyx_v_msg, __pyx_t_2);
         __pyx_t_2 = 0;
 
-        /* "parser/templ/nodes.pyx":279
+        /* "mwlib/parser/templ/nodes.pyx":279
  *                 if DEBUG:
  *                     msg += repr("".join(res[old_idx:]))
  *                     print(msg)             # <<<<<<<<<<<<<<
@@ -10537,7 +10537,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-        /* "parser/templ/nodes.pyx":277
+        /* "mwlib/parser/templ/nodes.pyx":277
  *                 res.append(MarkEnd(repr(name)))
  * 
  *                 if DEBUG:             # <<<<<<<<<<<<<<
@@ -10546,7 +10546,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
  */
       }
 
-      /* "parser/templ/nodes.pyx":268
+      /* "mwlib/parser/templ/nodes.pyx":268
  *         else:
  *             p = expander.get_parsed_template(name)
  *             if p:             # <<<<<<<<<<<<<<
@@ -10557,7 +10557,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   }
   __pyx_L20:;
 
-  /* "parser/templ/nodes.pyx":204
+  /* "mwlib/parser/templ/nodes.pyx":204
  *         return self[1]
  * 
  *     def _flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -10573,7 +10573,7 @@ static PyObject *__pyx_pf_6parser_5templ_5nodes_8Template_4_flatten(CYTHON_UNUSE
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("parser.templ.nodes.Template._flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("mwlib.parser.templ.nodes.Template._flatten", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_flatten);
@@ -10704,6 +10704,7 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_mwlib_parser_templ_magics, __pyx_k_mwlib_parser_templ_magics, sizeof(__pyx_k_mwlib_parser_templ_magics), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_parser_templ_marks, __pyx_k_mwlib_parser_templ_marks, sizeof(__pyx_k_mwlib_parser_templ_marks), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_parser_templ_node, __pyx_k_mwlib_parser_templ_node, sizeof(__pyx_k_mwlib_parser_templ_node), 0, 0, 1, 1},
+    {&__pyx_n_s_mwlib_parser_templ_nodes, __pyx_k_mwlib_parser_templ_nodes, sizeof(__pyx_k_mwlib_parser_templ_nodes), 0, 0, 1, 1},
     {&__pyx_n_s_mwlib_parser_templ_optimization, __pyx_k_mwlib_parser_templ_optimization, sizeof(__pyx_k_mwlib_parser_templ_optimization), 0, 0, 1, 1},
     {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
     {&__pyx_n_s_name_2, __pyx_k_name_2, sizeof(__pyx_k_name_2), 0, 0, 1, 1},
@@ -10714,7 +10715,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_optimize, __pyx_k_optimize, sizeof(__pyx_k_optimize), 0, 0, 1, 1},
     {&__pyx_n_s_other, __pyx_k_other, sizeof(__pyx_k_other), 0, 0, 1, 1},
     {&__pyx_n_s_p, __pyx_k_p, sizeof(__pyx_k_p), 0, 0, 1, 1},
-    {&__pyx_n_s_parser_templ_nodes, __pyx_k_parser_templ_nodes, sizeof(__pyx_k_parser_templ_nodes), 0, 0, 1, 1},
     {&__pyx_n_s_pos, __pyx_k_pos, sizeof(__pyx_k_pos), 0, 0, 1, 1},
     {&__pyx_n_s_prepare, __pyx_k_prepare, sizeof(__pyx_k_prepare), 0, 0, 1, 1},
     {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
@@ -10772,7 +10772,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "parser/templ/nodes.pyx":18
+  /* "mwlib/parser/templ/nodes.pyx":18
  *         # template blacklisting results in 0xebad
  *         # see http://code.pediapress.com/wiki/ticket/700#comment:1
  *         cond = cond.strip(chr(0xEBAD))             # <<<<<<<<<<<<<<
@@ -10783,7 +10783,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "parser/templ/nodes.pyx":198
+  /* "mwlib/parser/templ/nodes.pyx":198
  *             # we expect a "RuntimeError: maximum recursion depth exceeded" here.
  *             # logging this error is rather hard...
  *             with suppress(Exception):             # <<<<<<<<<<<<<<
@@ -10794,7 +10794,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "parser/templ/nodes.pyx":216
+  /* "mwlib/parser/templ/nodes.pyx":216
  *         remainder = None
  *         if ":" in name:
  *             try_name, try_remainder = name.split(":", 1)             # <<<<<<<<<<<<<<
@@ -10805,7 +10805,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "parser/templ/nodes.pyx":10
+  /* "mwlib/parser/templ/nodes.pyx":10
  * 
  * class IfNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -10817,7 +10817,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__11);
   __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_flatten, 10, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 10, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":34
+  /* "mwlib/parser/templ/nodes.pyx":34
  * 
  * class IfEqNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -10829,7 +10829,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__13);
   __pyx_codeobj__14 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__13, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_flatten, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__14)) __PYX_ERR(0, 34, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":62
+  /* "mwlib/parser/templ/nodes.pyx":62
  * 
  * 
  * def maybe_numeric(a):             # <<<<<<<<<<<<<<
@@ -10841,7 +10841,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__15);
   __pyx_codeobj__16 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__15, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_maybe_numeric, 62, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__16)) __PYX_ERR(0, 62, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":79
+  /* "mwlib/parser/templ/nodes.pyx":79
  *     unresolved = None
  * 
  *     def _store_key(self, key, value, fast, unresolved):             # <<<<<<<<<<<<<<
@@ -10853,7 +10853,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__17);
   __pyx_codeobj__18 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__17, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_store_key, 79, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__18)) __PYX_ERR(0, 79, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":92
+  /* "mwlib/parser/templ/nodes.pyx":92
  *             unresolved.append((key, value))
  * 
  *     def _init(self):             # <<<<<<<<<<<<<<
@@ -10865,7 +10865,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__19);
   __pyx_codeobj__20 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__19, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_init, 92, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__20)) __PYX_ERR(0, 92, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":123
+  /* "mwlib/parser/templ/nodes.pyx":123
  *         self.sentinel = (len(self.unresolved) + 1, None)
  * 
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -10877,7 +10877,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__21);
   __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 18, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_flatten, 123, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 123, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":171
+  /* "mwlib/parser/templ/nodes.pyx":171
  * 
  * class Variable(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -10889,7 +10889,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__23);
   __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_flatten, 171, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 171, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":192
+  /* "mwlib/parser/templ/nodes.pyx":192
  * 
  * class Template(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -10901,7 +10901,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__25);
   __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__25, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_flatten, 192, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 192, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":201
+  /* "mwlib/parser/templ/nodes.pyx":201
  *                 log.warn(f"error {err} ignored")
  * 
  *     def _get_args(self):             # <<<<<<<<<<<<<<
@@ -10913,7 +10913,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__27);
   __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_mwlib_parser_templ_nodes_pyx, __pyx_n_s_get_args, 201, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) __PYX_ERR(0, 201, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":204
+  /* "mwlib/parser/templ/nodes.pyx":204
  *         return self[1]
  * 
  *     def _flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
@@ -11264,14 +11264,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_parser__templ__nodes) {
+  if (__pyx_module_is_main_mwlib__parser__templ__nodes) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name, __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "parser.templ.nodes")) {
-      if (unlikely((PyDict_SetItemString(modules, "parser.templ.nodes", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "mwlib.parser.templ.nodes")) {
+      if (unlikely((PyDict_SetItemString(modules, "mwlib.parser.templ.nodes", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -11292,7 +11292,7 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "parser/templ/nodes.pyx":3
+  /* "mwlib/parser/templ/nodes.pyx":3
  * # Copyright (c) 2007-2009 PediaPress GmbH
  * # See README.md for additional licensing information.
  * from contextlib import suppress             # <<<<<<<<<<<<<<
@@ -11313,7 +11313,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":5
+  /* "mwlib/parser/templ/nodes.pyx":5
  * from contextlib import suppress
  * 
  * from mwlib.parser.templ import DEBUG, log, magics             # <<<<<<<<<<<<<<
@@ -11348,7 +11348,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":6
+  /* "mwlib/parser/templ/nodes.pyx":6
  * 
  * from mwlib.parser.templ import DEBUG, log, magics
  * from mwlib.parser.templ.node import Node             # <<<<<<<<<<<<<<
@@ -11369,7 +11369,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":9
+  /* "mwlib/parser/templ/nodes.pyx":9
  * 
  * 
  * class IfNode(Node):             # <<<<<<<<<<<<<<
@@ -11387,26 +11387,26 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = __Pyx_CalculateMetaclass(NULL, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_Py3MetaclassPrepare(__pyx_t_4, __pyx_t_3, __pyx_n_s_IfNode, __pyx_n_s_IfNode, (PyObject *) NULL, __pyx_n_s_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_Py3MetaclassPrepare(__pyx_t_4, __pyx_t_3, __pyx_n_s_IfNode, __pyx_n_s_IfNode, (PyObject *) NULL, __pyx_n_s_mwlib_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__pyx_t_3 != __pyx_t_2) {
     if (unlikely((PyDict_SetItemString(__pyx_t_5, "__orig_bases__", __pyx_t_2) < 0))) __PYX_ERR(0, 9, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":10
+  /* "mwlib/parser/templ/nodes.pyx":10
  * 
  * class IfNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         cond = []
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_6IfNode_1flatten, 0, __pyx_n_s_IfNode_flatten, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__12)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_6IfNode_1flatten, 0, __pyx_n_s_IfNode_flatten, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__12)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (__Pyx_SetNameInClass(__pyx_t_5, __pyx_n_s_flatten, __pyx_t_2) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":9
+  /* "mwlib/parser/templ/nodes.pyx":9
  * 
  * 
  * class IfNode(Node):             # <<<<<<<<<<<<<<
@@ -11421,7 +11421,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":33
+  /* "mwlib/parser/templ/nodes.pyx":33
  * 
  * 
  * class IfEqNode(Node):             # <<<<<<<<<<<<<<
@@ -11439,26 +11439,26 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_5 = __Pyx_CalculateMetaclass(NULL, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 33, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare(__pyx_t_5, __pyx_t_3, __pyx_n_s_IfEqNode, __pyx_n_s_IfEqNode, (PyObject *) NULL, __pyx_n_s_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Py3MetaclassPrepare(__pyx_t_5, __pyx_t_3, __pyx_n_s_IfEqNode, __pyx_n_s_IfEqNode, (PyObject *) NULL, __pyx_n_s_mwlib_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 33, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (__pyx_t_3 != __pyx_t_4) {
     if (unlikely((PyDict_SetItemString(__pyx_t_2, "__orig_bases__", __pyx_t_4) < 0))) __PYX_ERR(0, 33, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":34
+  /* "mwlib/parser/templ/nodes.pyx":34
  * 
  * class IfEqNode(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         v1 = []
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_8IfEqNode_1flatten, 0, __pyx_n_s_IfEqNode_flatten, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__14)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_8IfEqNode_1flatten, 0, __pyx_n_s_IfEqNode_flatten, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__14)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_flatten, __pyx_t_4) < 0) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":33
+  /* "mwlib/parser/templ/nodes.pyx":33
  * 
  * 
  * class IfEqNode(Node):             # <<<<<<<<<<<<<<
@@ -11473,19 +11473,19 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":62
+  /* "mwlib/parser/templ/nodes.pyx":62
  * 
  * 
  * def maybe_numeric(a):             # <<<<<<<<<<<<<<
  *     try:
  *         return int(a)
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_1maybe_numeric, 0, __pyx_n_s_maybe_numeric, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__16)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_1maybe_numeric, 0, __pyx_n_s_maybe_numeric, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__16)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_maybe_numeric, __pyx_t_3) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":75
+  /* "mwlib/parser/templ/nodes.pyx":75
  * 
  * 
  * class SwitchNode(Node):             # <<<<<<<<<<<<<<
@@ -11503,14 +11503,14 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_3, __pyx_n_s_SwitchNode, __pyx_n_s_SwitchNode, (PyObject *) NULL, __pyx_n_s_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_3, __pyx_n_s_SwitchNode, __pyx_n_s_SwitchNode, (PyObject *) NULL, __pyx_n_s_mwlib_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__pyx_t_3 != __pyx_t_5) {
     if (unlikely((PyDict_SetItemString(__pyx_t_4, "__orig_bases__", __pyx_t_5) < 0))) __PYX_ERR(0, 75, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "parser/templ/nodes.pyx":76
+  /* "mwlib/parser/templ/nodes.pyx":76
  * 
  * class SwitchNode(Node):
  *     fast = None             # <<<<<<<<<<<<<<
@@ -11519,7 +11519,7 @@ if (!__Pyx_RefNanny) {
  */
   if (__Pyx_SetNameInClass(__pyx_t_4, __pyx_n_s_fast, Py_None) < 0) __PYX_ERR(0, 76, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":77
+  /* "mwlib/parser/templ/nodes.pyx":77
  * class SwitchNode(Node):
  *     fast = None
  *     unresolved = None             # <<<<<<<<<<<<<<
@@ -11528,43 +11528,43 @@ if (!__Pyx_RefNanny) {
  */
   if (__Pyx_SetNameInClass(__pyx_t_4, __pyx_n_s_unresolved, Py_None) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
 
-  /* "parser/templ/nodes.pyx":79
+  /* "mwlib/parser/templ/nodes.pyx":79
  *     unresolved = None
  * 
  *     def _store_key(self, key, value, fast, unresolved):             # <<<<<<<<<<<<<<
  *         if isinstance(key, str):
  *             key = key.strip()
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_10SwitchNode_1_store_key, 0, __pyx_n_s_SwitchNode__store_key, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__18)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_10SwitchNode_1_store_key, 0, __pyx_n_s_SwitchNode__store_key, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__18)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_4, __pyx_n_s_store_key, __pyx_t_5) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "parser/templ/nodes.pyx":92
+  /* "mwlib/parser/templ/nodes.pyx":92
  *             unresolved.append((key, value))
  * 
  *     def _init(self):             # <<<<<<<<<<<<<<
  *         from mwlib.parser.templ.evaluate import equal_split
  *         args = [equal_split(x) for x in self[1]]
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_10SwitchNode_3_init, 0, __pyx_n_s_SwitchNode__init, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_10SwitchNode_3_init, 0, __pyx_n_s_SwitchNode__init, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__20)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 92, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_4, __pyx_n_s_init, __pyx_t_5) < 0) __PYX_ERR(0, 92, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "parser/templ/nodes.pyx":123
+  /* "mwlib/parser/templ/nodes.pyx":123
  *         self.sentinel = (len(self.unresolved) + 1, None)
  * 
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
  *         from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
  *         if self.unresolved is None:
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_10SwitchNode_5flatten, 0, __pyx_n_s_SwitchNode_flatten, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__22)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_10SwitchNode_5flatten, 0, __pyx_n_s_SwitchNode_flatten, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__22)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__Pyx_SetNameInClass(__pyx_t_4, __pyx_n_s_flatten, __pyx_t_5) < 0) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "parser/templ/nodes.pyx":75
+  /* "mwlib/parser/templ/nodes.pyx":75
  * 
  * 
  * class SwitchNode(Node):             # <<<<<<<<<<<<<<
@@ -11579,7 +11579,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":170
+  /* "mwlib/parser/templ/nodes.pyx":170
  * 
  * 
  * class Variable(Node):             # <<<<<<<<<<<<<<
@@ -11597,26 +11597,26 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = __Pyx_CalculateMetaclass(NULL, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_Py3MetaclassPrepare(__pyx_t_4, __pyx_t_3, __pyx_n_s_Variable, __pyx_n_s_Variable, (PyObject *) NULL, __pyx_n_s_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_Py3MetaclassPrepare(__pyx_t_4, __pyx_t_3, __pyx_n_s_Variable, __pyx_n_s_Variable, (PyObject *) NULL, __pyx_n_s_mwlib_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 170, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (__pyx_t_3 != __pyx_t_2) {
     if (unlikely((PyDict_SetItemString(__pyx_t_5, "__orig_bases__", __pyx_t_2) < 0))) __PYX_ERR(0, 170, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":171
+  /* "mwlib/parser/templ/nodes.pyx":171
  * 
  * class Variable(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError
  *         name = []
  */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_8Variable_1flatten, 0, __pyx_n_s_Variable_flatten, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_8Variable_1flatten, 0, __pyx_n_s_Variable_flatten, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__24)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (__Pyx_SetNameInClass(__pyx_t_5, __pyx_n_s_flatten, __pyx_t_2) < 0) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "parser/templ/nodes.pyx":170
+  /* "mwlib/parser/templ/nodes.pyx":170
  * 
  * 
  * class Variable(Node):             # <<<<<<<<<<<<<<
@@ -11631,7 +11631,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":191
+  /* "mwlib/parser/templ/nodes.pyx":191
  * 
  * 
  * class Template(Node):             # <<<<<<<<<<<<<<
@@ -11649,50 +11649,50 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_5 = __Pyx_CalculateMetaclass(NULL, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare(__pyx_t_5, __pyx_t_3, __pyx_n_s_Template, __pyx_n_s_Template, (PyObject *) NULL, __pyx_n_s_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 191, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Py3MetaclassPrepare(__pyx_t_5, __pyx_t_3, __pyx_n_s_Template, __pyx_n_s_Template, (PyObject *) NULL, __pyx_n_s_mwlib_parser_templ_nodes, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (__pyx_t_3 != __pyx_t_4) {
     if (unlikely((PyDict_SetItemString(__pyx_t_2, "__orig_bases__", __pyx_t_4) < 0))) __PYX_ERR(0, 191, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":192
+  /* "mwlib/parser/templ/nodes.pyx":192
  * 
  * class Template(Node):
  *     def flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
  *         try:
  *             return self._flatten(expander, variables, res)
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_8Template_1flatten, 0, __pyx_n_s_Template_flatten, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_8Template_1flatten, 0, __pyx_n_s_Template_flatten, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__26)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_flatten, __pyx_t_4) < 0) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":201
+  /* "mwlib/parser/templ/nodes.pyx":201
  *                 log.warn(f"error {err} ignored")
  * 
  *     def _get_args(self):             # <<<<<<<<<<<<<<
  *         return self[1]
  * 
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_8Template_3_get_args, 0, __pyx_n_s_Template__get_args, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__28)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_8Template_3_get_args, 0, __pyx_n_s_Template__get_args, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__28)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 201, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get_args, __pyx_t_4) < 0) __PYX_ERR(0, 201, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":204
+  /* "mwlib/parser/templ/nodes.pyx":204
  *         return self[1]
  * 
  *     def _flatten(self, expander, variables, res):             # <<<<<<<<<<<<<<
  *         from mwlib.parser.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline
  *         name = []
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_6parser_5templ_5nodes_8Template_5_flatten, 0, __pyx_n_s_Template__flatten, NULL, __pyx_n_s_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__30)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 204, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_5mwlib_6parser_5templ_5nodes_8Template_5_flatten, 0, __pyx_n_s_Template__flatten, NULL, __pyx_n_s_mwlib_parser_templ_nodes, __pyx_d, ((PyObject *)__pyx_codeobj__30)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_flatten_2, __pyx_t_4) < 0) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "parser/templ/nodes.pyx":191
+  /* "mwlib/parser/templ/nodes.pyx":191
  * 
  * 
  * class Template(Node):             # <<<<<<<<<<<<<<
@@ -11707,7 +11707,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":285
+  /* "mwlib/parser/templ/nodes.pyx":285
  *     # avoid circular import issues by placing the imports at the bottom of the file
  *     # avoid pylint warnings by wrapping the imports in an `if True` block
  *     from mwlib.parser.templ.marks import MarkEnd, MarkStart             # <<<<<<<<<<<<<<
@@ -11734,7 +11734,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "parser/templ/nodes.pyx":286
+  /* "mwlib/parser/templ/nodes.pyx":286
  *     # avoid pylint warnings by wrapping the imports in an `if True` block
  *     from mwlib.parser.templ.marks import MarkEnd, MarkStart
  *     from mwlib.parser.templ.optimization import optimize             # <<<<<<<<<<<<<<
@@ -11753,7 +11753,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "parser/templ/nodes.pyx":1
+  /* "mwlib/parser/templ/nodes.pyx":1
  * # Copyright (c) 2007-2009 PediaPress GmbH             # <<<<<<<<<<<<<<
  * # See README.md for additional licensing information.
  * from contextlib import suppress
@@ -11773,7 +11773,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_5);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
-      __Pyx_AddTraceback("init parser.templ.nodes", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init mwlib.parser.templ.nodes", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     #if !CYTHON_USE_MODULE_STATE
     Py_CLEAR(__pyx_m);
@@ -11787,7 +11787,7 @@ if (!__Pyx_RefNanny) {
     }
     #endif
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init parser.templ.nodes");
+    PyErr_SetString(PyExc_ImportError, "init mwlib.parser.templ.nodes");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

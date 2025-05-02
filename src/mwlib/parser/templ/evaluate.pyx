@@ -1,9 +1,8 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
-from typing import Any
 
 from mwlib.core import metabook, nshandling
-from mwlib.miscellaneous.uniq import Uniquifier
+from mwlib.utils.uniq import Uniquifier
 from mwlib.network import siteinfo
 from mwlib.parser.templ import log, magics, mwlocals, parser
 from mwlib.parser.templ.marks import Mark, dummy_mark, eqmark, maybe_newline

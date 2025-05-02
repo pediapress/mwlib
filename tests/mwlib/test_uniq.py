@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-from mwlib.miscellaneous import uniq
+from mwlib.utils import uniq
 
 
 def test_self_closing():

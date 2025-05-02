@@ -18,7 +18,7 @@ from functools import wraps
 from typing import Any, Callable, TypeVar, Union
 from urllib.parse import quote, quote_plus, urljoin, urlparse
 
-from mwlib.miscellaneous import expr
+from mwlib.parser import expr
 
 if_error_rx = re.compile(r'<(div|span|p|strong)\s[^<>]*class="error"[^<>]*>', re.I)
 

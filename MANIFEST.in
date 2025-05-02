@@ -103,12 +103,6 @@ include src/mwlib/fonts/freefont/README
 include src/mwlib/localization/__init__.py
 include src/mwlib/localization/_locale.py
 include src/mwlib/localization/l10n.py
-include src/mwlib/miscellaneous/__init__.py
-include src/mwlib/miscellaneous/expr.py
-include src/mwlib/miscellaneous/status.py
-include src/mwlib/miscellaneous/trustedrevs.py
-include src/mwlib/miscellaneous/uniq.py
-include src/mwlib/mw_math/__init__.py
 include src/mwlib/network/__init__.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
@@ -130,11 +124,13 @@ include src/mwlib/network/podclient.py
 include src/mwlib/network/postman.py
 include src/mwlib/network/sapi.py
 include src/mwlib/network/siteinfo.py
+include src/mwlib/network/trustedrevs.py
 include src/mwlib/parser/__init__.py
 include src/mwlib/parser/advtree.py
 include src/mwlib/parser/allnodes.py
 include src/mwlib/parser/dumpparser.py
 include src/mwlib/parser/expander.py
+include src/mwlib/parser/expr.py
 include src/mwlib/parser/mwscan.py
 include src/mwlib/parser/nodes.py
 include src/mwlib/parser/old_uparser.py
@@ -198,7 +194,9 @@ include src/mwlib/utils/linuxmem.py
 include src/mwlib/utils/log.py
 include src/mwlib/utils/lrucache.py
 include src/mwlib/utils/myjson.py
+include src/mwlib/utils/status.py
 include src/mwlib/utils/strftime.py
+include src/mwlib/utils/uniq.py
 include src/mwlib/utils/unorganized.py
 include src/mwlib/writers/__init__.py
 include src/mwlib/writers/odf/__init__.py
