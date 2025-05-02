@@ -4,7 +4,7 @@
 from mwlib.core import nshandling
 from mwlib.parser import nodes
 from mwlib.parser.refine import core
-from mwlib.token.utoken import Token
+from mwlib.parser.token.utoken import Token
 
 token2class = {
     Token.t_complex_table: nodes.Table,

@@ -23,7 +23,7 @@ def build_deps():
 
 def get_ext_modules():
     extensions = [
-        Extension("mwlib.token._uscan", sources=[f"{MWLIB_SRC_DIR}/token/_uscan.cc"]),
+        Extension("mwlib.parser.token._uscan", sources=[f"{MWLIB_SRC_DIR}/parser/token/_uscan.cc"]),
     ]
     for path in Path(MWLIB_SRC_DIR).rglob("**/*.pyx"):
         module_name = (
@@ -34,7 +34,11 @@ def get_ext_modules():
             Extension(
                 module_name,
                 sources=[str(path)],
-                extra_compile_args=["-Wno-unreachable-code-fallthrough"],
+                extra_compile_args=[
+                    "-Wno-unreachable-code-fallthrough",
+                    # ignore false positive warning "fallthrough annotation in unreachable code"
+                    # https://github.com/cython/cython/issues/5041
+                ],
             )
         )
     return extensions

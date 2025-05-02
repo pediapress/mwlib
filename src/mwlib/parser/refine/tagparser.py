@@ -5,7 +5,7 @@
 
 import sys
 
-from mwlib.token.utoken import Token
+from mwlib.parser.token.utoken import Token
 
 
 class TagInfo:

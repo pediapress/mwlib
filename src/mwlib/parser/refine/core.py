@@ -13,7 +13,7 @@ from mwlib.parser import styleanalyzer, tagext
 from mwlib.parser.refine import util
 from mwlib.parser.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
 from mwlib.parser.refine.tagparser import TagParser
-from mwlib.token.utoken import Token, tokenize
+from mwlib.parser.token.utoken import Token, tokenize
 
 try:
     from mwlib.parser.refine import _core

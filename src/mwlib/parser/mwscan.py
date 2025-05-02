@@ -9,7 +9,7 @@ import _mwscan
 import htmlentitydefs
 
 from mwlib.parser import paramrx
-from mwlib.token.token import Token
+from mwlib.parser.token.token import Token
 from mwlib.utils.utils import split_tag
 
 for directory in dir(Token):

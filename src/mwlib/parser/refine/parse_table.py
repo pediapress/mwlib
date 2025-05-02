@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 from mwlib.parser.refine import util
-from mwlib.token.utoken import Token as T
+from mwlib.parser.token.utoken import Token as T
 
 
 class TableCellParser:

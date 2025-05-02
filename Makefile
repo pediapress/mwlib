@@ -13,7 +13,7 @@ install::
 	pip install -r requirements/base.txt
 	pip install -r requirements/test.txt
 
-build:: src/mwlib/token/_uscan.cc cython MANIFEST.in
+build:: src/mwlib/parser/token/_uscan.cc cython MANIFEST.in
 
 cython:: src/mwlib/parser/templ/node.c src/mwlib/parser/templ/nodes.c src/mwlib/parser/templ/evaluate.c
 
@@ -26,7 +26,7 @@ src/mwlib/parser/templ/nodes.c: src/mwlib/parser/templ
 src/mwlib/parser/templ/evaluate.c: src/mwlib/parser/templ
 	cython -3 src/mwlib/parser/templ/evaluate.pyx
 
-src/mwlib/token/_uscan.cc: src/mwlib/token/_uscan.re
+src/mwlib/parser/token/_uscan.cc: src/mwlib/parser/token/_uscan.re
 	re2c -w --no-generation-date -o src/mwlib/token/_uscan.cc src/mwlib/token/_uscan.re
 
 documentation:: README.html

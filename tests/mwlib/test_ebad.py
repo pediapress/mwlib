@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 from mwlib.parser.refine import core
-from mwlib.token.utoken import Token as T
+from mwlib.parser.token.utoken import Token as T
 
 
 def test_ebad_in_text():

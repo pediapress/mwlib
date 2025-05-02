@@ -12,7 +12,7 @@ from mwlib.parser.expander import DictDB
 from mwlib.parser.refine import util
 from mwlib.parser.refine import uparser
 from mwlib.parser.templ.misc import expand_str
-from mwlib.token.utoken import show
+from mwlib.parser.token.utoken import show
 
 BAD_URL = "bad url"
 BAD_VLIST = "bad vlist"

@@ -3,7 +3,7 @@
 
 from io import StringIO
 
-from mwlib.token import utoken
+from mwlib.parser.token import utoken
 
 
 class Node(utoken.Token):

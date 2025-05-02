@@ -7,7 +7,7 @@ from mwlib.parser.refine.parse_table import (
     TableParser,
     TableRowParser,
 )
-from mwlib.token.utoken import show, walknode, walknodel
+from mwlib.parser.token.utoken import show, walknode, walknodel
 
 Token = core.Token
 
