@@ -7,7 +7,7 @@ import pytest
 
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
-from mwlib.refine.uparser import parse_string
+from mwlib.parser.refine.uparser import parse_string
 from mwlib.tree import advtree
 from mwlib.writer import styleutils
 

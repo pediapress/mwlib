@@ -10,13 +10,13 @@ from mwlib.core import nshandling
 from mwlib.extensions import imgmap
 from mwlib.miscellaneous import uniq
 from mwlib.parser import styleanalyzer, tagext
-from mwlib.refine import util
-from mwlib.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
-from mwlib.refine.tagparser import TagParser
+from mwlib.parser.refine import util
+from mwlib.parser.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
+from mwlib.parser.refine.tagparser import TagParser
 from mwlib.token.utoken import Token, tokenize
 
 try:
-    from mwlib.refine import _core
+    from mwlib.parser.refine import _core
 except ImportError:
     _core = None
 

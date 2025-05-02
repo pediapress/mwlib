@@ -57,7 +57,7 @@ register = default_registry.register_extension
 
 def _parse(txt):
     """parse text....and try to return a 'better' (some inner) node"""
-    from mwlib.refine.compat import parse_txt
+    from mwlib.parser.refine.compat import parse_txt
 
     res = parse_txt(txt)
 

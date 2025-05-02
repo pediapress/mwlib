@@ -4,7 +4,7 @@
 # See README.rst for additional licensing information.
 
 from mwlib import parser
-from mwlib.refine import uparser
+from mwlib.parser.refine import uparser
 
 parse = uparser.simpleparse
 

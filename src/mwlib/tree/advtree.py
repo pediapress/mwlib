@@ -54,7 +54,7 @@ from mwlib.parser import (
     Timeline,
     build_amap,
 )
-from mwlib.refine.uparser import parse_string
+from mwlib.parser.refine.uparser import parse_string
 
 log = logging.getLogger(__name__)
 

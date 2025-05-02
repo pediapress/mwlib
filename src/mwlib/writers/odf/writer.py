@@ -24,7 +24,7 @@ from mwlib.writers import writerbase
 from mwlib.database.dummydb import DummyDB
 from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import Caption
-from mwlib.refine.uparser import parse_string
+from mwlib.parser.refine.uparser import parse_string
 from mwlib.tree import advtree
 from mwlib.tree.treecleaner import TreeCleaner
 from mwlib.writers.odf import odfconf

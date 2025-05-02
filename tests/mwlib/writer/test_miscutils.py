@@ -5,7 +5,7 @@ import sys
 
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
-from mwlib.refine.uparser import parse_string
+from mwlib.parser.refine.uparser import parse_string
 from mwlib.writer import miscutils
 
 

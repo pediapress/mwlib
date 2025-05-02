@@ -13,7 +13,7 @@ from mwlib.core import wiki
 from mwlib.parser import expander
 from mwlib.miscellaneous.status import Status
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
-from mwlib.refine import uparser
+from mwlib.parser.refine import uparser
 from mwlib.utils import unorganized
 
 

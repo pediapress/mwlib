@@ -14,7 +14,7 @@ import pytest
 
 import mwlib.parser
 from mwlib.database.dummydb import DummyDB
-from mwlib.refine.uparser import parse_string
+from mwlib.parser.refine.uparser import parse_string
 from mwlib.tree import advtree
 from mwlib.writers.odf.writer import ODFWriter, preprocess
 

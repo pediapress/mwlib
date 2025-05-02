@@ -28,7 +28,7 @@ def test_get_version():
 
 def test_get_ext_modules():
     expected_extensions = [
-        Extension("mwlib.refine._core", sources=[f"{MWLIB_SRC_DIR}/refine/_core.pyx"]),
+        Extension("mwlib.parser.refine._core", sources=[f"{MWLIB_SRC_DIR}/parser/refine/_core.pyx"]),
         Extension("mwlib.templ.evaluate", sources=[f"{MWLIB_SRC_DIR}/templ/evaluate.pyx"]),
         Extension("mwlib.templ.node", sources=[f"{MWLIB_SRC_DIR}/templ/node.pyx"]),
         Extension("mwlib.templ.nodes", sources=[f"{MWLIB_SRC_DIR}/templ/nodes.pyx"]),

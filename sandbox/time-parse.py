@@ -4,7 +4,7 @@ import sys
 import time
 
 from mwlib import treecleaner, uparser
-from mwlib.refine import compat
+from mwlib.parser.refine import compat
 from mwlib.tree import advtree
 
 with open(sys.argv[1], "r", encoding="utf-8") as f:

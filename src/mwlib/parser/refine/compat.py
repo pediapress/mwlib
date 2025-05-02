@@ -3,7 +3,7 @@
 
 from mwlib.core import nshandling
 from mwlib.parser import nodes
-from mwlib.refine import core
+from mwlib.parser.refine import core
 from mwlib.token.utoken import Token
 
 token2class = {

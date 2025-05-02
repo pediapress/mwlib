@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-from mwlib.refine.util import parse_params
+from mwlib.parser.refine.util import parse_params
 
 
 def test_display_none():

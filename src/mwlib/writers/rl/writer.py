@@ -53,7 +53,7 @@ from ...extensions import timeline
 from mwlib.utils._version import version as mwlibversion
 from mwlib.mw_math.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL
-from mwlib.refine import uparser
+from ...parser.refine import uparser
 from mwlib.tree.treecleaner import TreeCleaner
 from mwlib.writer import miscutils, styleutils
 from mwlib.writer.imageutils import ImageUtils

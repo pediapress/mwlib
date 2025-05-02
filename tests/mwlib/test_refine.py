@@ -1,8 +1,8 @@
 #! /usr/bin/env py.test
 
 from mwlib.core import nshandling
-from mwlib.refine import core
-from mwlib.refine.parse_table import (
+from mwlib.parser.refine import core
+from mwlib.parser.refine.parse_table import (
     TableCellParser,
     TableParser,
     TableRowParser,

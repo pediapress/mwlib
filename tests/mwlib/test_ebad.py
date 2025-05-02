@@ -1,5 +1,5 @@
 #! /usr/bin/env py.test
-from mwlib.refine import core
+from mwlib.parser.refine import core
 from mwlib.token.utoken import Token as T
 
 

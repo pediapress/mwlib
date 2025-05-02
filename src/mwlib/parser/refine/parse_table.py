@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
-from mwlib.refine import util
+from mwlib.parser.refine import util
 from mwlib.token.utoken import Token as T
 
 
@@ -313,7 +313,7 @@ class TableParser:
             start = stack.pop()
             starttoken = tokens[start]
             sub = tokens[start + 1:index]
-            from mwlib.refine import core
+            from mwlib.parser.refine import core
 
             tag_parser = core.TagParser()
             tag_parser.add("caption", 5)
@@ -417,7 +417,7 @@ class TableGarbageRemover:
     need_walker = False
 
     def __init__(self, tokens, xopts):
-        from mwlib.refine import core
+        from mwlib.parser.refine import core
 
         walker = core.get_token_walker()
         for token in walker(tokens):

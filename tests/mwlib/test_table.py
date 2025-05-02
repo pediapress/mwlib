@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 
 from mwlib import parser
-from mwlib.refine import uparser
+from mwlib.parser.refine import uparser
 
 parse = uparser.simpleparse
 

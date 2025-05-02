@@ -9,7 +9,7 @@ import pytest
 from mwlib import parser
 from mwlib.database.dummydb import DummyDB
 from mwlib.parser import LangLink
-from mwlib.refine.uparser import parse_string
+from mwlib.parser.refine.uparser import parse_string
 from mwlib.tree.advtree import (
     BreakingReturn,
     Center,
