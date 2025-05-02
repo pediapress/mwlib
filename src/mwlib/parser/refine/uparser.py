@@ -5,7 +5,7 @@ import logging
 
 from mwlib.core import metabook, nshandling
 from mwlib.parser import expander
-from mwlib.parser.old_uparser import postprocessors
+from mwlib.parser.post_processors import postprocessors
 from mwlib.parser.refine import compat
 from mwlib.parser.token.utoken import show
 
