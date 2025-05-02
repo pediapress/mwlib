@@ -15,11 +15,10 @@ from importlib.metadata import entry_points
 
 import click
 
-from mwlib.core import nuwiki, wiki
+from mwlib.core import nuwiki, wiki, _locale
 from mwlib.apps.buildzip import make_zip
 from mwlib.apps.utils import make_wiki_env_from_options
 from mwlib.exceptions.mwlib_exceptions import RenderException
-from mwlib.localization import _locale
 from mwlib.utils.status import Status
 from mwlib.utils import unorganized, conf
 from mwlib.utils.log import setup_console_logging

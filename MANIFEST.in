@@ -61,8 +61,10 @@ include src/mwlib/asynchronous/__init__.py
 include src/mwlib/consts/__init__.py
 include src/mwlib/consts/urls.py
 include src/mwlib/core/__init__.py
+include src/mwlib/core/_locale.py
 include src/mwlib/core/authors.py
 include src/mwlib/core/bookshelf.py
+include src/mwlib/core/l10n.py
 include src/mwlib/core/main_trampoline.py
 include src/mwlib/core/metabook.py
 include src/mwlib/core/nserve.py
@@ -100,9 +102,6 @@ include src/mwlib/fonts/freefont/FreeSerifBoldItalic.ttf
 include src/mwlib/fonts/freefont/FreeSerifItalic.ttf
 include src/mwlib/fonts/freefont/INSTALL
 include src/mwlib/fonts/freefont/README
-include src/mwlib/localization/__init__.py
-include src/mwlib/localization/_locale.py
-include src/mwlib/localization/l10n.py
 include src/mwlib/network/__init__.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
