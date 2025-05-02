@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from mwlib import timeline
+from mwlib.extensions import timeline
 
 example_script = """ImageSize  = width:800 height:100
 PlotArea   = left:65 right:15 bottom:20 top:5
