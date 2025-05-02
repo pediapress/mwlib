@@ -79,6 +79,7 @@ include src/mwlib/database/dummydb.py
 include src/mwlib/exceptions/__init__.py
 include src/mwlib/exceptions/mwlib_exceptions.py
 include src/mwlib/exceptions/sanitychecker.py
+include src/mwlib/extensions/EasyTimeline.pl
 include src/mwlib/extensions/__init__.py
 include src/mwlib/extensions/imgmap.py
 include src/mwlib/extensions/infobox_magic.py
@@ -170,7 +171,6 @@ include src/mwlib/templ/optimization.py
 include src/mwlib/templ/parser.py
 include src/mwlib/templ/pp.py
 include src/mwlib/templ/scanner.py
-include src/mwlib/third_party/EasyTimeline.pl
 include src/mwlib/token/__init__.py
 include src/mwlib/token/_expander.re
 include src/mwlib/token/_uscan.cc
