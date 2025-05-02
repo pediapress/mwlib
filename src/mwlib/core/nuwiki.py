@@ -105,14 +105,14 @@ class NuWiki:
         file_name = os.path.join(self.path, "html.db")
         if not os.path.exists(file_name):
             self.html = self.extract_html(self._loadjson("parsed_html.json", {}))
-            log.warn("no html present. parsing revision info instead")
+            log.warning("no html present. parsing revision info instead")
         else:
             self.html = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
         file_name = os.path.join(self.path, "imageinfo.db")
         if not os.path.exists(file_name):
             self.imageinfo = self._loadjson("imageinfo.json", {})
-            log.warn("loading imageinfo from pickle")
+            log.warning("loading imageinfo from pickle")
         else:
             self.imageinfo = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
@@ -223,6 +223,7 @@ class NuWiki:
 
         path = self._pathjoin("images", utils.fs_escape(fqname))
         if not self._exists(path):
+            # old collection zip files might still follow different escape rules
             fqname = "File:" + partial  # Fallback to default language english
             path = self._pathjoin("images", utils.fs_escape(fqname))
             if not self._exists(path):
@@ -231,19 +232,23 @@ class NuWiki:
         hex_digest = sha256(fqname.encode("utf-8")).hexdigest()
         ext = os.path.splitext(path)[-1]
         ext = ext.replace(" ", "")
-        # mediawiki gives us png's for these extensions. 
-        # let's change them here.
+        # mediawiki returns png files for some file types,
+        # so let's change the file extension to png here.
         if ext.lower() in (".gif", ".svg", ".tif", ".tiff"):
             ext = ".png"
         hex_digest += ext
         safe_path = self._pathjoin("images", "safe", hex_digest)
+        log.debug(safe_path)
         if not os.path.exists(safe_path):
+            log.debug("no such file: %s" % safe_path)
             try:
-                os.symlink(os.path.join("../..", utils.fs_escape(fqname)),
-                           safe_path)
+                link_target = os.path.join("../..", utils.fs_escape(fqname))
+                log.debug(link_target)
+                os.symlink(link_target, safe_path)
             except OSError as exc:
                 if exc.errno != 17:  # File exists
                     raise
+        assert os.path.islink(safe_path), "symlink failed: %s" % safe_path
         return safe_path
 
     def get_data(self, name):

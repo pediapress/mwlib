@@ -53,10 +53,10 @@ class TestXnetZipWiki():
 
     def test_image_db(self):
         image_name = "Thelivingseaimax.jpg"
-        p = self.imagedb.get_disk_path(image_name)
+        p = self.imagedb.get_disk_path(image_name)  # returns a symlink to the original image
         assert isinstance(p, str)
-        assert os.path.isfile(p)
-        assert os.stat(p).st_size > 0
+        assert os.path.islink(p)
+        assert os.lstat(p).st_size > 0
         assert p == self.imagedb.get_disk_path(image_name, 123)
 
         url = self.imagedb.get_description_url(image_name)
