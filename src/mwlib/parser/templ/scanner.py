@@ -3,7 +3,7 @@
 
 import re
 
-from mwlib.templ import pp
+from mwlib.parser.templ import pp
 
 SPLIT_PATTERN = r"""
 ({{+)                     # opening braces

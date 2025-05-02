@@ -2,7 +2,7 @@
 # See README.md for additional licensing information.
 
 from mwlib.network.siteinfo import get_siteinfo
-from mwlib.templ import evaluate
+from mwlib.parser.templ import evaluate
 
 
 class Page:

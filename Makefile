@@ -15,16 +15,16 @@ install::
 
 build:: src/mwlib/token/_uscan.cc cython MANIFEST.in
 
-cython:: src/mwlib/templ/node.c src/mwlib/templ/nodes.c src/mwlib/templ/evaluate.c
+cython:: src/mwlib/parser/templ/node.c src/mwlib/parser/templ/nodes.c src/mwlib/parser/templ/evaluate.c
 
-src/mwlib/templ/node.c: src/mwlib/templ/node.pyx
-	cython -3 src/mwlib/templ/node.pyx
+src/mwlib/parser/templ/node.c: src/mwlib/parser/templ
+	cython -3 src/mwlib/parser/templ/node.pyx
 
-src/mwlib/templ/nodes.c: src/mwlib/templ/nodes.pyx
-	cython -3 src/mwlib/templ/nodes.pyx
+src/mwlib/parser/templ/nodes.c: src/mwlib/parser/templ
+	cython -3 src/mwlib/parser/templ/nodes.pyx
 
-src/mwlib/templ/evaluate.c: src/mwlib/templ/evaluate.pyx
-	cython -3 src/mwlib/templ/evaluate.pyx
+src/mwlib/parser/templ/evaluate.c: src/mwlib/parser/templ
+	cython -3 src/mwlib/parser/templ/evaluate.pyx
 
 src/mwlib/token/_uscan.cc: src/mwlib/token/_uscan.re
 	re2c -w --no-generation-date -o src/mwlib/token/_uscan.cc src/mwlib/token/_uscan.re

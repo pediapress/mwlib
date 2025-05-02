@@ -1,7 +1,7 @@
 from xml.sax.saxutils import quoteattr
 
 from mwlib.parser import expander
-from mwlib.templ import parser
+from mwlib.parser.templ import parser
 
 
 def mark_infobox(self, name, raw):

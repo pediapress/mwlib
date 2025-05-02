@@ -2,13 +2,13 @@
 # See README.md for additional licensing information.
 from contextlib import suppress
 
-from mwlib.templ import DEBUG, log, magics
-from mwlib.templ.node import Node, show
+from mwlib.parser.templ import DEBUG, log, magics
+from mwlib.parser.templ.node import Node
 
 
 class IfNode(Node):
     def flatten(self, expander, variables, res):
-        from mwlib.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
+        from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
         cond = []
         flatten(self[0], expander, variables, cond)
         cond = "".join(cond).strip()
@@ -32,7 +32,7 @@ class IfNode(Node):
 
 class IfEqNode(Node):
     def flatten(self, expander, variables, res):
-        from mwlib.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
+        from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
         v1 = []
         flatten(self[0], expander, variables, v1)
         v1 = "".join(v1).strip()
@@ -42,7 +42,7 @@ class IfEqNode(Node):
             flatten(self[1], expander, variables, v2)
         v2 = "".join(v2).strip()
 
-        from mwlib.templ.magics import maybe_numeric_compare
+        from mwlib.parser.templ.magics import maybe_numeric_compare
 
         res.append(maybe_newline)
         tmp = []
@@ -90,7 +90,7 @@ class SwitchNode(Node):
             unresolved.append((key, value))
 
     def _init(self):
-        from mwlib.templ.evaluate import equal_split
+        from mwlib.parser.templ.evaluate import equal_split
         args = [equal_split(x) for x in self[1]]
 
         unresolved = []
@@ -121,7 +121,7 @@ class SwitchNode(Node):
         self.sentinel = (len(self.unresolved) + 1, None)
 
     def flatten(self, expander, variables, res):
-        from mwlib.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
+        from mwlib.parser.templ.evaluate import flatten, dummy_mark, insert_implicit_newlines, maybe_newline
         if self.unresolved is None:
             self._init()
 
@@ -169,7 +169,7 @@ class SwitchNode(Node):
 
 class Variable(Node):
     def flatten(self, expander, variables, res):
-        from mwlib.templ.evaluate import flatten, MemoryLimitError
+        from mwlib.parser.templ.evaluate import flatten, MemoryLimitError
         name = []
         flatten(self[0], expander, variables, name)
         name = "".join(name).strip()
@@ -202,7 +202,7 @@ class Template(Node):
         return self[1]
 
     def _flatten(self, expander, variables, res):
-        from mwlib.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline
+        from mwlib.parser.templ.evaluate import flatten, MemoryLimitError, dummy_mark, maybe_newline
         name = []
         flatten(self[0], expander, variables, name)
         name = "".join(name).strip()
@@ -214,7 +214,7 @@ class Template(Node):
         remainder = None
         if ":" in name:
             try_name, try_remainder = name.split(":", 1)
-            from mwlib.templ import magic_nodes
+            from mwlib.parser.templ import magic_nodes
 
             try_name = expander.resolve_magic_alias(try_name) or try_name
 
@@ -254,7 +254,7 @@ class Template(Node):
 
         for x in args:
             var.append(x)
-        from mwlib.templ.evaluate import ArgumentList
+        from mwlib.parser.templ.evaluate import ArgumentList
         var = ArgumentList(args=var, expander=expander, variables=variables)
 
         rep = expander.resolver(name, var)
@@ -282,5 +282,5 @@ class Template(Node):
 if True:
     # avoid circular import issues by placing the imports at the bottom of the file
     # avoid pylint warnings by wrapping the imports in an `if True` block
-    from mwlib.templ.marks import MarkEnd, MarkStart
-    from mwlib.templ.optimization import optimize
+    from mwlib.parser.templ.marks import MarkEnd, MarkStart
+    from mwlib.parser.templ.optimization import optimize

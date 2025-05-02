@@ -34,6 +34,7 @@ def get_ext_modules():
             Extension(
                 module_name,
                 sources=[str(path)],
+                extra_compile_args=["-Wno-unreachable-code-fallthrough"],
             )
         )
     return extensions
@@ -55,9 +56,8 @@ def main():
                 "boundscheck": False,
                 "wraparound": False,
             },
-            annotate=True,
         ),
-        packages=[MWLIB_MODULES_DIR, f"{MWLIB_MODULES_DIR}.templ", "qs"],
+        packages=[MWLIB_MODULES_DIR, "qs"],
         package_dir={"": "src"},
         include_package_data=True,
         package_data={

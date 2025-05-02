@@ -5,10 +5,10 @@
 
 import sys
 
-from mwlib.templ.evaluate import ArgumentList, Expander
-from mwlib.templ.misc import DictDB
-from mwlib.templ.nodes import Template
-from mwlib.templ.parser import parse
+from mwlib.parser.templ.evaluate import ArgumentList, Expander
+from mwlib.parser.templ.misc import DictDB
+from mwlib.parser.templ.nodes import Template
+from mwlib.parser.templ.parser import parse
 
 
 def get_templates(raw, title=""):

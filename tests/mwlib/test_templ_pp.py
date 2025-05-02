@@ -1,6 +1,6 @@
 #! /usr/bin/env py.test
 
-from mwlib.templ import pp
+from mwlib.parser.templ import pp
 
 
 def preprocess(s, expected, included=True):

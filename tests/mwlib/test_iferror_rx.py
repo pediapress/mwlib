@@ -1,5 +1,5 @@
 #! /usr/bin/env py.test
-from mwlib.templ import magics
+from mwlib.parser.templ import magics
 
 
 def test_long_running_match():

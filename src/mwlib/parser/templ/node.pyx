@@ -20,7 +20,7 @@ class Node(tuple):
         show(self, out=out)
 
     def flatten(self, expander, variables, res):
-        from mwlib.templ.evaluate import flatten
+        from mwlib.parser.templ.evaluate import flatten
 
         for x in self:
             if isinstance(x, str):

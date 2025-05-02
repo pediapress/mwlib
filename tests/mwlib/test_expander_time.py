@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 import pytest
 
-from mwlib.templ.misc import expand_str
+from mwlib.parser.templ.misc import expand_str
 
 cases = [
     ("Y-m-d", "2008-02-09"),

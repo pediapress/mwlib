@@ -4,7 +4,7 @@
 mediawiki installation.
 """
 from mwlib.parser.expander import DictDB
-from mwlib.templ.misc import expand_str
+from mwlib.parser.templ.misc import expand_str
 
 db = {
     "convert": """<includeonly>{{convert/{{{2}}}|{{{1}}}|{{#ifeq:{{#expr:{{{3|0}}}*0}}|0|0}}|{{{3|}}}|{{{4|}}}|{{{5|}}}|{{{6|}}}|r={{#ifeq:{{{sp}}}|us|er|re}}|d=L{{{lk|off}}}A{{{abbr|off}}}D{{{disp|b}}}S{{{adj|{{{sing|off}}}}}}|s={{{sigfig|}}}}}</includeonly><noinclude>{{pp-template|small=yes}}{{esoteric}}

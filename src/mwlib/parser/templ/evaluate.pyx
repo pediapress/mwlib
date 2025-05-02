@@ -1,11 +1,12 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.md for additional licensing information.
+from typing import Any
 
 from mwlib.core import metabook, nshandling
 from mwlib.miscellaneous.uniq import Uniquifier
 from mwlib.network import siteinfo
-from mwlib.templ import log, magics, mwlocals, parser
-from mwlib.templ.marks import Mark, dummy_mark, eqmark, maybe_newline
+from mwlib.parser.templ import log, magics, mwlocals, parser
+from mwlib.parser.templ.marks import Mark, dummy_mark, eqmark, maybe_newline
 
 
 class TemplateRecursion(Exception):
@@ -266,7 +267,7 @@ class Expander:
         return parser.parse(raw, replace_tags=self.replace_tags)
 
     def _expand(self, parsed, keep_uniq=False):
-        res = ["\n"]  # guard, against implicit newlines at the beginning
+        res = ["\n"]  # guard against implicit newlines at the beginning
         flatten(parsed, self, ArgumentList(expander=self), res)
         insert_implicit_newlines(res)
         res[0] = ""

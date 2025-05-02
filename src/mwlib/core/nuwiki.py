@@ -17,7 +17,7 @@ from mwlib.core import metabook, nshandling
 from mwlib.core.authors import get_authors
 from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.parser.refine import uparser
-from mwlib.templ.parser import parse
+from mwlib.parser.templ.parser import parse
 from mwlib.tree import advtree
 from mwlib.utils import myjson as json
 from mwlib.utils import unorganized
@@ -477,9 +477,9 @@ class Adapt:
         if page is not None:
             templates = get_templates(page.rawtext)
             from mwlib.parser.expander import find_template
-            from mwlib.templ.evaluate import Expander
-            from mwlib.templ.misc import DictDB
-            from mwlib.templ.parser import parse
+            from mwlib.parser.templ.evaluate import Expander
+            from mwlib.parser.templ.misc import DictDB
+            from mwlib.parser.templ.parser import parse
 
             args = set()
             exp = Expander("", wikidb=DictDB())

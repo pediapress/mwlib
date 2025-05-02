@@ -3,7 +3,7 @@
 import time
 
 from mwlib.parser import expander
-from mwlib.templ.misc import expand_str
+from mwlib.parser.templ import expand_str
 
 einwohnerzahlen = """
 {{#switch: {{{1}}}

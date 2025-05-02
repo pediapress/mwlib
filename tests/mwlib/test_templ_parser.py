@@ -3,7 +3,7 @@
 import copy
 
 from mwlib.network.siteinfo import get_siteinfo
-from mwlib.templ import parser
+from mwlib.parser.templ import parser
 
 si = copy.deepcopy(get_siteinfo("en"))
 del si["magicwords"]

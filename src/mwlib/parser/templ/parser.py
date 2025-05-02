@@ -5,9 +5,9 @@
 import re
 from hashlib import sha256 as digest
 
-from mwlib.templ.marks import eqmark
-from mwlib.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
-from mwlib.templ.scanner import Symbols, tokenize
+from mwlib.parser.templ.marks import eqmark
+from mwlib.parser.templ.nodes import IfNode, Node, SwitchNode, Template, Variable
+from mwlib.parser.templ.scanner import Symbols, tokenize
 from mwlib.utils import lrucache
 
 from .optimization import optimize
@@ -209,7 +209,7 @@ class Parser:
                 return self.switch_node_from_children(children)
 
             if ":" in stripped_lower_text:
-                from mwlib.templ import magic_nodes
+                from . import magic_nodes
 
                 name, _ = stripped_lower_text.split(":", 1)
                 name = self.aliasmap.resolve_magic_alias(name) or name

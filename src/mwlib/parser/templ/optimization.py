@@ -1,5 +1,5 @@
-from mwlib.templ.marks import eqmark
-from mwlib.templ.node import Node
+from mwlib.parser.templ.marks import eqmark
+from mwlib.parser.templ.node import Node
 
 
 def _combine_string(node):

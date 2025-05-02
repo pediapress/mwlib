@@ -4,9 +4,10 @@ import pytest
 from mwlib.parser import expander
 from mwlib.database.dummydb import DummyDB
 from mwlib.parser.expander import DictDB
-from mwlib.templ.misc import expand_str
-from mwlib.templ.nodes import Template, Variable, show
-from mwlib.templ.scanner import tokenize
+from mwlib.parser.templ.misc import expand_str
+from mwlib.parser.templ.nodes import Template, Variable
+from mwlib.parser.templ.node import show
+from mwlib.parser.templ.scanner import tokenize
 
 HELP_LINK = "Help:Link/a/b"
 FOO_TEMPLATE_1 = "foo {{tt}}"
