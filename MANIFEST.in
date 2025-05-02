@@ -53,12 +53,11 @@ include setup.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
 include src/mwlib/apps/buildzip_bak.py
+include src/mwlib/apps/executor.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
 include src/mwlib/apps/utils.py
 include src/mwlib/asynchronous/__init__.py
-include src/mwlib/command/__init__.py
-include src/mwlib/command/executor.py
 include src/mwlib/configuration/__init__.py
 include src/mwlib/configuration/_conf.py
 include src/mwlib/configuration/conf.py

@@ -9,8 +9,6 @@
 import os
 from hashlib import sha1
 
-from mwlib.command.executor import run_perl
-
 font = None
 
 
