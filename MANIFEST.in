@@ -78,6 +78,7 @@ include src/mwlib/core/nshandling.py
 include src/mwlib/core/nslave.py
 include src/mwlib/core/nuwiki.py
 include src/mwlib/core/serve.py
+include src/mwlib/core/wiki.py
 include src/mwlib/database/dummydb.py
 include src/mwlib/exceptions/__init__.py
 include src/mwlib/exceptions/mwlib_exceptions.py
@@ -194,7 +195,6 @@ include src/mwlib/utilities/lrucache.py
 include src/mwlib/utilities/myjson.py
 include src/mwlib/utilities/strftime.py
 include src/mwlib/utilities/utils.py
-include src/mwlib/wiki.py
 include src/mwlib/writer/__init__.py
 include src/mwlib/writer/fontswitcher.py
 include src/mwlib/writer/formatter.py

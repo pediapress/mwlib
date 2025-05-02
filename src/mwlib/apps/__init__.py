@@ -9,7 +9,7 @@ import webbrowser
 
 import click
 
-from mwlib import wiki
+from mwlib.core import wiki
 from mwlib.parser import expander
 from mwlib.miscellaneous.status import Status
 from mwlib.networking.net.podclient import PODClient, podclient_from_serviceurl

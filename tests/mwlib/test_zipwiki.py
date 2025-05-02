@@ -5,7 +5,8 @@ import tempfile
 
 import pytest
 
-from mwlib import parser, wiki
+from mwlib import parser
+from mwlib.core import wiki
 
 THE_LIVING_SEA = "The Living Sea"
 
