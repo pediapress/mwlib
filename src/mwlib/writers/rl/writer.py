@@ -48,7 +48,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from mwlib import parser
 from ...extensions import timeline
 from mwlib.utils._version import version as mwlibversion
-from mwlib.mw_math.mathutils import render_math
+from mwlib.rendering.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL, advtree
 from ...parser.refine import uparser
 from mwlib.parser.treecleaner import TreeCleaner

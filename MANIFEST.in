@@ -109,8 +109,6 @@ include src/mwlib/miscellaneous/status.py
 include src/mwlib/miscellaneous/trustedrevs.py
 include src/mwlib/miscellaneous/uniq.py
 include src/mwlib/mw_math/__init__.py
-include src/mwlib/mw_math/mathml.py
-include src/mwlib/mw_math/mathutils.py
 include src/mwlib/network/__init__.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
@@ -181,6 +179,8 @@ include src/mwlib/rendering/fontswitcher.py
 include src/mwlib/rendering/formatter.py
 include src/mwlib/rendering/imageutils.py
 include src/mwlib/rendering/licensechecker.py
+include src/mwlib/rendering/mathml.py
+include src/mwlib/rendering/mathutils.py
 include src/mwlib/rendering/miscutils.py
 include src/mwlib/rendering/scripts.txt
 include src/mwlib/rendering/styleutils.py

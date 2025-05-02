@@ -6,7 +6,7 @@ import tempfile
 
 import pytest
 
-from mwlib.mw_math.mathutils import render_math
+from mwlib.rendering.mathutils import render_math
 
 
 @pytest.fixture
