@@ -50,9 +50,6 @@ include sandbox/time-expr.py
 include sandbox/time-parse.py
 include setup.cfg
 include setup.py
-include src/mwlib/_expander.re
-include src/mwlib/_uscan.cc
-include src/mwlib/_uscan.re
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
 include src/mwlib/apps/buildzip_bak.py
@@ -176,6 +173,9 @@ include src/mwlib/templ/pp.py
 include src/mwlib/templ/scanner.py
 include src/mwlib/third_party/EasyTimeline.pl
 include src/mwlib/token/__init__.py
+include src/mwlib/token/_expander.re
+include src/mwlib/token/_uscan.cc
+include src/mwlib/token/_uscan.re
 include src/mwlib/token/token.py
 include src/mwlib/token/utoken.py
 include src/mwlib/tree/__init__.py

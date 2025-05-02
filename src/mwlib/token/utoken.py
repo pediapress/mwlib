@@ -8,7 +8,7 @@
 import sys
 from typing import Optional
 
-from mwlib import _uscan as _mwscan
+from mwlib.token import _uscan as _mwscan
 from mwlib.refine.util import parse_params, resolve_entity
 from mwlib.token.token import Token as BaseToken
 from mwlib.utilities.utils import split_tag

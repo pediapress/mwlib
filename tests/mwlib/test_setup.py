@@ -28,11 +28,11 @@ def test_get_version():
 
 def test_get_ext_modules():
     expected_extensions = [
-        Extension("mwlib._uscan", sources=[f"{MWLIB_SRC_DIR}/_uscan.cc"]),
         Extension("mwlib.refine._core", sources=[f"{MWLIB_SRC_DIR}/refine/_core.pyx"]),
         Extension("mwlib.templ.evaluate", sources=[f"{MWLIB_SRC_DIR}/templ/evaluate.pyx"]),
         Extension("mwlib.templ.node", sources=[f"{MWLIB_SRC_DIR}/templ/node.pyx"]),
         Extension("mwlib.templ.nodes", sources=[f"{MWLIB_SRC_DIR}/templ/nodes.pyx"]),
+        Extension("mwlib.token._uscan", sources=[f"{MWLIB_SRC_DIR}/token/_uscan.cc"]),
     ]
 
     # Patch the MWLIB_SRC_DIR in the setup module
