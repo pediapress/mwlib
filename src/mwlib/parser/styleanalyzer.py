@@ -5,7 +5,7 @@
 # ''italic''
 
 
-from mwlib.exceptions.mwlib_exceptions import InconsistentPathLengthException
+from mwlib.utils.mwlib_exceptions import InconsistentPathLengthException
 
 
 class State:

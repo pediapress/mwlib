@@ -8,7 +8,7 @@ import sys
 import unicodedata
 
 from mwlib import parser
-from mwlib.exceptions.mwlib_exceptions import InvalidTreeNodesError
+from mwlib.utils.mwlib_exceptions import InvalidTreeNodesError
 from mwlib.parser import URL, Caption, CategoryLink, InterwikiLink, LangLink, NamedURL, SpecialLink
 from mwlib.parser.advtree import (
     Article,

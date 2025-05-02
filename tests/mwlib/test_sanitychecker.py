@@ -1,7 +1,7 @@
 #! /usr/bin/env py.test
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
-from mwlib.exceptions.sanitychecker import (
+from mwlib.utils.sanitychecker import (
     Allow,
     ChildrenOf,
     Equal,

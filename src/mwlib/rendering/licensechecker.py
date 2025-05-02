@@ -8,7 +8,7 @@ import os
 import sys
 import tempfile
 
-from mwlib.exceptions.mwlib_exceptions import ImageDbError
+from mwlib.utils.mwlib_exceptions import ImageDbError
 
 try:
     import simplejson as json

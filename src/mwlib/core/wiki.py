@@ -11,7 +11,7 @@ from configparser import ConfigParser
 from io import StringIO
 
 from mwlib.core import nuwiki
-from mwlib.exceptions.mwlib_exceptions import WikiIdValidationError
+from mwlib.utils.mwlib_exceptions import WikiIdValidationError
 from mwlib.core.metabook import WikiConf
 from mwlib.utils import myjson as json
 
