@@ -12,10 +12,10 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase.ttfonts import TTFont
 
-from mwlib import fonts
+from mwlib import rendering
 from mwlib.rendering.fontswitcher import FontSwitcher
 
-font_paths = [os.path.dirname(fonts.__file__),
+font_paths = [os.path.dirname(rendering.__file__),
               os.path.expanduser("~/mwlibfonts/")]
 
 # from the fonts defined below only FreeFont is part of the mwlib packet

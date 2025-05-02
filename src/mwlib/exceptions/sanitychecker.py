@@ -193,7 +193,7 @@ class SanityChecker:
 
 
 def demo():
-    "for documentation only, see tests for more demos"
+    """for documentation only, see tests for more demos."""
     sanity_checker = SanityChecker()
     rules = [
         ChildrenOf(Table, Allow(Row)),
