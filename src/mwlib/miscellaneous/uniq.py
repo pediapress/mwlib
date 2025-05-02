@@ -69,7 +69,7 @@ class Uniquifier:
             tags = set(
                 "nowiki math imagemap gallery source pre ref timeline poem pages".split()
             )
-            from mwlib import tagext
+            from mwlib.parser import tagext
 
             tags.update(tagext.default_registry.names())
 

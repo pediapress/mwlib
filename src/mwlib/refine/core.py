@@ -6,11 +6,10 @@
 import logging
 from typing import Any, Optional
 
-from mwlib import tagext
 from mwlib.core import nshandling
 from mwlib.extensions import imgmap
 from mwlib.miscellaneous import uniq
-from mwlib.parser import styleanalyzer
+from mwlib.parser import styleanalyzer, tagext
 from mwlib.refine import util
 from mwlib.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
 from mwlib.refine.tagparser import TagParser

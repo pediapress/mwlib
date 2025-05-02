@@ -132,6 +132,7 @@ include src/mwlib/parser/nodes.py
 include src/mwlib/parser/old_uparser.py
 include src/mwlib/parser/parse_collection_page.py
 include src/mwlib/parser/styleanalyzer.py
+include src/mwlib/parser/tagext.py
 include src/mwlib/refine/__init__.py
 include src/mwlib/refine/_core.c
 include src/mwlib/refine/_core.pyx
@@ -155,7 +156,6 @@ include src/mwlib/siteinfo/siteinfo-pl.json
 include src/mwlib/siteinfo/siteinfo-pt.json
 include src/mwlib/siteinfo/siteinfo-simple.json
 include src/mwlib/siteinfo/siteinfo-sv.json
-include src/mwlib/tagext.py
 include src/mwlib/templ/__init__.py
 include src/mwlib/templ/evaluate.c
 include src/mwlib/templ/evaluate.pyx
