@@ -4,7 +4,8 @@
 # See README.rst for additional licensing information.
 
 import logging
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Optional
 
 from mwlib import parser
 
@@ -47,7 +48,7 @@ def update_article_attributes(article, item, wiki_obj):
     return article
 
 
-def build_book(env, status_callback: Optional[Callable[..., None]] = None):
+def build_book(env, status_callback: Callable[..., None] | None = None):
     env.book = parser.Book()
     progress = 0
     if status_callback is None:

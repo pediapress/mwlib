@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 non_word = re.compile(r"(?u)[^-\w.~]")
 
 
-def fs_escape(input_string: Union[bytes, str]) -> str:
+def fs_escape(input_string: bytes | str) -> str:
     """Escape string to be safely used in path names."""
     if isinstance(input_string, bytes):
         input_string = input_string.decode("utf-8")

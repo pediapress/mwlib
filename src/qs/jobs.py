@@ -40,7 +40,7 @@ class job:
             self.ttl = ttl
 
     def __repr__(self):
-        return "<job {!r} at {}>".format(self.jobid, hex(id(self)))
+        return f"<job {self.jobid!r} at {hex(id(self))}>"
 
     def __eq__(self, other):
         return (self.priority, self.serial) == (other.priority, other.serial)

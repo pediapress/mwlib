@@ -9,10 +9,10 @@ import math
 from reportlab.lib import colors
 
 from mwlib.parser.nodes import Cell, Row, Table, Text
-from ...parser import advtree
 from mwlib.rendering import styleutils
 from mwlib.writers.rl import pdfstyles
 
+from ...parser import advtree
 from .customflowables import Figure
 
 log = logging.getLogger("rlwriter")

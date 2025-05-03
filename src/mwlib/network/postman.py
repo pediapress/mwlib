@@ -9,9 +9,9 @@ import sys
 import gevent
 import gevent.monkey
 
+from mwlib.network.podclient import PODClient
 from mwlib.utils import argv
 from mwlib.utils.status import Status
-from mwlib.network.podclient import PODClient
 from mwlib.utils.utils import send_mail
 from qs import slave
 from qs.rpcclient import ServerProxy

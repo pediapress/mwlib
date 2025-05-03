@@ -32,7 +32,7 @@ def get_styled_text(txt):
 
 def test_list_and_tables_3():
     # oversized table -> nested table is rendered in plain-text
-    txt = """
+    txt = f"""
 {{| class="prettytable"
 |-
 |
@@ -65,15 +65,13 @@ def test_list_and_tables_3():
 |-
 |text after nesting || {links}
 |}}
-""".format(
-        links=links,
-    )
+"""
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_3")
 
 
 def test_list_and_tables_2():
     # oversized table -> nested table is rendered in plain-text
-    txt = """
+    txt = f"""
 {{| class="prettytable"
 |-
 |
@@ -106,47 +104,43 @@ def test_list_and_tables_2():
 |-
 |text after nesting || {links}
 |}}
-""".format(
-        links=links,
-    )
+"""
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_2")
 
 
 def test_list_and_tables_1():
-    txt = """
+    txt = f"""
 some text outside a table
    
 {{| class="prettytable"
 |-
 |
-* lvl 1 {nasty}
+* lvl 1 {nastyChars}
 * lvl 1
-** lvl 2 {nasty}
+** lvl 2 {nastyChars}
 ** lvl 2
 *** lvl 3
-*** {nasty}
+*** {nastyChars}
 ** lvl 2
 ** lvl 2
 * lvl 1
 |
-# lvl 1 {nasty}
+# lvl 1 {nastyChars}
 # lvl 1
 ## lvl 2
-## lvl 2 {nasty}
+## lvl 2 {nastyChars}
 ### lvl 3
-### {nasty}
+### {nastyChars}
 ## lvl 2
 ## lvl 2
 # lvl 1
 |}}
-""".format(
-        nasty=nastyChars,
-    )
+"""
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_1")
 
 
 def test_link_and_lists():
-    txt = """
+    txt = f"""
 == Lists ==
 
 # {links}
@@ -158,15 +152,13 @@ def test_link_and_lists():
 * plain text
 ** lvl2: {links}
 ** lvl 2: plain text
-""".format(
-        links=links,
-    )
+"""
 
     renderMW("\n\n".join(get_styled_text(txt)), "links_and_lists")
 
 
 def test_link_in_table():
-    txt = """
+    txt = f"""
 == Table ==
 
 {{| class="prettytable"
@@ -191,9 +183,7 @@ def test_link_in_table():
 |}}
 
 |}}
-""".format(
-        links=links,
-    )
+"""
 
     renderMW("\n\n".join(get_styled_text(txt)), "links_and_tables")
 

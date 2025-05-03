@@ -14,8 +14,9 @@ https://meta.wikimedia.org/wiki/ParserFunctions
 import datetime
 import logging
 import re
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, TypeVar, Union
+from typing import Any, TypeVar, Union
 from urllib.parse import quote, quote_plus, urljoin, urlparse
 
 from mwlib.parser import expr
@@ -42,7 +43,7 @@ def no_arg(fun):
     return wrap
 
 
-def as_numeric(str_number: str) -> Union[int, float]:
+def as_numeric(str_number: str) -> int | float:
     try:
         return int(str_number)
     except ValueError:

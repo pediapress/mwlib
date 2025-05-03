@@ -5,8 +5,8 @@ from mwlib.parser import expander
 from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.expander import DictDB
 from mwlib.parser.templ.misc import expand_str
-from mwlib.parser.templ.nodes import Template, Variable
 from mwlib.parser.templ.node import show
+from mwlib.parser.templ.nodes import Template, Variable
 from mwlib.parser.templ.scanner import tokenize
 
 HELP_LINK = "Help:Link/a/b"
@@ -478,7 +478,7 @@ def test_get_templates():
         r = expander.get_templates(source, "")
         assert r == expected, f"expected {expected!r}, got {r!r}"
 
-    doit("{{foo| {{ bar }} }}", set("foo bar".split()))
+    doit("{{foo| {{ bar }} }}", set(["foo", "bar"]))
     doit("{{foo{{{1}}} }}", set())
     doit("{{{ {{foo}} }}}", {"foo"})
     doit("{{ #if: {{{1}}} |yes|no}}", set())

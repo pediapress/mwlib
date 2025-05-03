@@ -46,15 +46,13 @@ from reportlab.platypus.tables import Table
 from reportlab.platypus.xpreformatted import XPreformatted
 
 from mwlib import parser
-from ...extensions import timeline
-from mwlib.utils._version import version as mwlibversion
-from mwlib.rendering.mathutils import render_math
 from mwlib.parser import URL, Caption, NamedURL, advtree
-from ...parser.refine import uparser
 from mwlib.parser.treecleaner import TreeCleaner
 from mwlib.rendering import miscutils, styleutils, writerbase
 from mwlib.rendering.imageutils import ImageUtils
 from mwlib.rendering.licensechecker import LicenseChecker
+from mwlib.rendering.mathutils import render_math
+from mwlib.utils._version import version as mwlibversion
 from mwlib.writers.rl._version import VERSION as rlwriterversion
 from mwlib.writers.rl.customflowables import (
     DummyTable,
@@ -67,6 +65,8 @@ from mwlib.writers.rl.customnodetransformer import CustomNodeTransformer
 from mwlib.writers.rl.formatter import RLFormatter
 from mwlib.writers.rl.toc import TocRenderer
 
+from ...extensions import timeline
+from ...parser.refine import uparser
 from . import fontconfig, pdfstyles, rltables
 from .pagetemplates import PPDocTemplate, TitlePage, WikiPage
 from .pdfstyles import (
@@ -1546,9 +1546,7 @@ class RlWriter:
             if any(href.startswith(url) for url in pdfstyles.URL_BLACKLIST):
                 return ["".join(txt)]
             txt.append(
-                ' <link href="{}">({})</link>'.format(
-                    xmlescape(href), self.renderURL(urllib.parse.unquote(href))
-                )
+                f' <link href="{xmlescape(href)}">({self.renderURL(urllib.parse.unquote(href))})</link>'
             )
             return ["".join(txt)]
 
@@ -1557,9 +1555,7 @@ class RlWriter:
         else:
             linktext = self.renderInline(obj)
             linktext.append(
-                ' <super><link href="{}"><font size="10">[{}]</font></link></super> '.format(
-                    xmlescape(href), self.url_map[href]
-                )
+                f' <super><link href="{xmlescape(href)}"><font size="10">[{self.url_map[href]}]</font></link></super> '
             )
             linktext = "".join(linktext).strip()
         return linktext

@@ -130,5 +130,5 @@ class PODClient:
 
 
 def podclient_from_serviceurl(serviceurl):
-    response = requests.post(serviceurl, data="any".encode("utf-8")).json()
+    response = requests.post(serviceurl, data=b"any").json()
     return PODClient(response["post_url"], redirecturl=response["redirect_url"])

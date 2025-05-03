@@ -24,8 +24,8 @@ from sqlitedict import SqliteDict
 from mwlib.core import nshandling
 from mwlib.network import sapi as mwapi
 from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
-from mwlib.utils import myjson as json, linuxmem, conf
-from mwlib.utils import unorganized
+from mwlib.utils import conf, linuxmem, unorganized
+from mwlib.utils import myjson as json
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ class FsOutput:
             setattr(self, storage, database)
 
     def open_rev_file_for_reading(self):
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "r", encoding="utf8")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), encoding="utf8")
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
@@ -375,7 +375,7 @@ class Fetcher:
         escaped_parameters = [re.escape(param) for param in parameters]
         delete_pattern = r'^\|\s*(?:' + '|'.join(escaped_parameters) + r')\s*=\s*.*\n'
         text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
-    
+
         return text
 
     def expand_templates_from_revid(self, revid):
@@ -440,7 +440,7 @@ class Fetcher:
             timeline_image_urls = self.timeline_image_urls(image_nodes)
 
             for url, rev_timeline_tag_content in zip(
-                timeline_image_urls, rev_timeline_tag_contents
+                timeline_image_urls, rev_timeline_tag_contents, strict=False
             ):
                 filename = url.rsplit("/", 1)[1]
                 digest = self.calculate_hash_from_timeline_content(rev_timeline_tag_content)
@@ -459,7 +459,7 @@ class Fetcher:
             image_nodes = self._get_map_image_nodes(html_content)
             map_image_urls = self.map_image_urls(image_nodes)
 
-            for url, rev_map_tag_content in zip(map_image_urls, rev_map_frame_tag_contents):
+            for url, rev_map_tag_content in zip(map_image_urls, rev_map_frame_tag_contents, strict=False):
                 filename = url.rsplit("/", 1)[1]
                 filename = filename.split("?")[0]
                 digest = self.calculate_hash_from_map_content(rev_map_tag_content)
@@ -485,7 +485,7 @@ class Fetcher:
 
     def calculate_hash_from_timeline_content(self, timeline_content):
         return sha1(timeline_content.encode("utf-8")).hexdigest()
-    
+
     def calculate_hash_from_map_content(self, map_content_attributes):
         height = map_content_attributes.get("height", "")
         width = map_content_attributes.get("width", "")
@@ -502,7 +502,7 @@ class Fetcher:
         if not content:
             return []
         return re.findall(r"<timeline>(.*?)<\/timeline>", content, re.DOTALL)
-    
+
     def find_map_frame_tags_from_rev_content(self, content):
         if not content:
             return []

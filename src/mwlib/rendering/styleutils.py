@@ -13,9 +13,9 @@ MW_PX2PT = 12 / 16
 MW_EM2PT = 9.6
 
 
-def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
+def _color_from_str(color_str: str) -> tuple[float, float, float] | None:
     def hex2rgb(red: str, green: str,
-                blue: str) -> Optional[tuple[float, float, float]]:
+                blue: str) -> tuple[float, float, float] | None:
         try:
 
             def conv(color: str) -> float:
@@ -26,7 +26,7 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
             return None
 
     def hexshort2rgb(red: str, green: str,
-                     blue: str) -> Optional[tuple[float, float, float]]:
+                     blue: str) -> tuple[float, float, float] | None:
         try:
 
             def conv(color: str) -> float:
@@ -37,7 +37,7 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
             return None
 
     def rgb2rgb(red: str, green: str,
-                blue: str) -> Optional[tuple[float, float, float]]:
+                blue: str) -> tuple[float, float, float] | None:
         try:
 
             def conv(color: str) -> float:
@@ -47,7 +47,7 @@ def _color_from_str(color_str: str) -> Optional[tuple[float, float, float]]:
         except ValueError:
             return None
 
-    def colorname2rgb(color_str_param: str) -> Optional[tuple[float, ...]]:
+    def colorname2rgb(color_str_param: str) -> tuple[float, ...] | None:
         rgb = colorname2rgb_map.get(color_str_param.lower(), None)
         if rgb:
             return tuple(max(0.0, min(1, channel / 255)) for channel in rgb)
@@ -95,7 +95,7 @@ def rgb_bg_color_from_node(
     grey_scale: bool = False,
     darkness_limit: float = 0,
     follow: bool = True,
-) -> Optional[tuple[float, float, float]]:
+) -> tuple[float, float, float] | None:
     color_str = (
         node.attributes.get("bgcolor", None)
         or node.style.get("background")
@@ -125,7 +125,7 @@ def rgb_color_from_node(
     node: advtree.Node,
     grey_scale: bool = False,
     darkness_limit: float = 0,
-) -> Optional[tuple[float, float, float]]:
+) -> tuple[float, float, float] | None:
     color_str = _get_color(node)
     color = None
     if color_str:
@@ -186,7 +186,7 @@ def get_vertical_alignment(node: advtree.Node) -> str:
     return align or "top"
 
 
-def get_bg_color(attributes, style) -> Optional[str]:
+def get_bg_color(attributes, style) -> str | None:
     return attributes.get("background-color") or style.get("background-color")
 
 
@@ -241,7 +241,7 @@ def table_border(node: advtree.Node) -> bool:
     return False
 
 
-def parse_length(txt: str) -> tuple[Optional[float], Optional[str]]:
+def parse_length(txt: str) -> tuple[float | None, str | None]:
     length_res = re.search(r"(?P<val>.*?)(?P<unit>(pt|px|em|%))", txt)
     length = unit = None
     if length_res:

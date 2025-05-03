@@ -67,7 +67,7 @@ class Uniquifier:
         regex_pattern = self.regex_pattern
         if regex_pattern is None:
             tags = set(
-                "nowiki math imagemap gallery source pre ref timeline poem pages".split()
+                ["nowiki", "math", "imagemap", "gallery", "source", "pre", "ref", "timeline", "poem", "pages"]
             )
             from mwlib.parser import tagext
 

@@ -113,7 +113,7 @@ class Server:
                     try:
                         line = sock_file.readline()
                     except Exception as e:
-                        self.log("error reading socket: {}".format(e))
+                        self.log(f"error reading socket: {e}")
                         break
                     lineq.put(line)
                     if not line:

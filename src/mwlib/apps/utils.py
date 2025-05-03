@@ -1,4 +1,5 @@
-from mwlib.core import metabook as metabook_module, wiki
+from mwlib.core import metabook as metabook_module
+from mwlib.core import wiki
 from mwlib.utils.status import Status
 
 

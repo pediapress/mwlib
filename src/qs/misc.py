@@ -13,7 +13,7 @@ def safe_call(fun, *args, **kwargs):
         pass
 
 
-class CallInLoop(object):
+class CallInLoop:
     def __init__(self, sleep_time, function, *args, **kwargs):
         self.sleep_time = sleep_time
         self.function = function

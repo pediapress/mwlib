@@ -1,5 +1,4 @@
 #! /usr/bin/env py.test
-from __future__ import print_function
 
 import io
 import pickle
@@ -29,7 +28,7 @@ def spawn(request):
 def faketime(request):
     monkeypatch = request.getfixturevalue("monkeypatch")
 
-    class faketime(object):
+    class faketime:
         def __init__(self):
             self.current_time = time.time()
 

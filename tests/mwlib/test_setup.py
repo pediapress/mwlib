@@ -43,6 +43,6 @@ def test_get_ext_modules():
 
     assert len(extensions) == len(expected_extensions)
 
-    for expected_ext, ext in zip(expected_extensions, extensions):
+    for expected_ext, ext in zip(expected_extensions, extensions, strict=False):
         assert expected_ext.name == ext.name
         assert expected_ext.sources == ext.sources

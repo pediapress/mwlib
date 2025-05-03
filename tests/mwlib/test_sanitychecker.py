@@ -1,17 +1,6 @@
 #! /usr/bin/env py.test
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
-from mwlib.utils.sanitychecker import (
-    Allow,
-    ChildrenOf,
-    Equal,
-    Forbid,
-    Require,
-    RequireChild,
-    SanityChecker,
-    SanityException,
-    removecb,
-)
 from mwlib.parser.advtree import (
     Article,
     Cell,
@@ -23,6 +12,17 @@ from mwlib.parser.advtree import (
     Table,
     Text,
     build_advanced_tree,
+)
+from mwlib.utils.sanitychecker import (
+    Allow,
+    ChildrenOf,
+    Equal,
+    Forbid,
+    Require,
+    RequireChild,
+    SanityChecker,
+    SanityException,
+    removecb,
 )
 
 

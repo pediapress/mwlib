@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # mwlib documentation build configuration file, created by
 # sphinx-quickstart on Mon Nov 14 17:53:19 2011.

@@ -39,17 +39,7 @@ def _buildrex():
     template_end_rex = r".*?(?P<template_end>\}\})$"
     summary_rex = "(?P<summary>.*)"
     alltogether_rex = re.compile(
-        "({})|({})|({})|({})|({})|({})|({})|({})|({})".format(
-            title_rex,
-            subtitle_rex,
-            chapter_rex,
-            article_rex,
-            oldarticle_rex,
-            template_rex,
-            template_start_rex,
-            template_end_rex,
-            summary_rex,
-        )
+        f"({title_rex})|({subtitle_rex})|({chapter_rex})|({article_rex})|({oldarticle_rex})|({template_rex})|({template_start_rex})|({template_end_rex})|({summary_rex})"
     )
     return alltogether_rex
 

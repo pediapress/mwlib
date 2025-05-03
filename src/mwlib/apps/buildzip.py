@@ -21,8 +21,8 @@ from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
 from mwlib.core.metabook import collection
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
-from mwlib.utils import myjson as json, linuxmem, conf
-from mwlib.utils import unorganized
+from mwlib.utils import conf, linuxmem, unorganized
+from mwlib.utils import myjson as json
 from mwlib.utils.log import setup_console_logging
 
 monkey.patch_all(thread=False)

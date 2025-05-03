@@ -14,7 +14,7 @@ except ImportError:
 # The *css_map* is used to map node class to node styles
 # Example:
 # css_map = {
-#     'control':'font-size: 110%;font-weight: 
+#     'control':'font-size: 110%;font-weight:
 #       bold;background-color:rgb(240, 240, 240);padding: 3px;margin-top: 1em;',
 #     'doc_key': 'font-weight: bold; display: inline;',
 #     }

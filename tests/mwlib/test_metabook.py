@@ -154,7 +154,7 @@ def test_get_item_list():
 
     result = test_metabook.walk()
     assert len(result) == len(expected)
-    for e, r in zip(expected, result):
+    for e, r in zip(expected, result, strict=False):
         assert e["type"] == r.type
         assert e["title"] == r.title
 
@@ -174,7 +174,7 @@ def test_get_item_list():
     ]
     result = test_metabook.walk(filter_type="article")
     assert len(result) == len(expected)
-    for e, r in zip(expected, result):
+    for e, r in zip(expected, result, strict=False):
         assert e["type"] == r.type
         assert e["title"] == r.title
 

@@ -8,8 +8,8 @@
 import sys
 from typing import Optional
 
-from mwlib.parser.token import _uscan as _mwscan
 from mwlib.parser.refine.util import parse_params, resolve_entity
+from mwlib.parser.token import _uscan as _mwscan
 from mwlib.parser.token.token import Token as BaseToken
 from mwlib.utils.unorganized import split_tag
 
@@ -68,8 +68,8 @@ class Token(BaseToken):
     vlist = None
     target = None
     level = None
-    children: Optional[list] = None
-    target: Optional[str] = None
+    children: list | None = None
+    target: str | None = None
     full_target = None
 
     rawtagname = None
@@ -223,11 +223,7 @@ class CompatScanner:
 
     def _init_allowed_tags(self):
         self.allowed_tags = set(
-            """
-abbr b big blockquote br center cite code del div em endfeed font h1 h2 h3
-h4 h5 h6 hr i index inputbox ins kbd li ol p pages references rss s small span
-startfeed strike strong sub sup caption table td th tr tt u ul var dl dt dd mapframe 
-""".split()
+            ["abbr", "b", "big", "blockquote", "br", "center", "cite", "code", "del", "div", "em", "endfeed", "font", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i", "index", "inputbox", "ins", "kbd", "li", "ol", "p", "pages", "references", "rss", "s", "small", "span", "startfeed", "strike", "strong", "sub", "sup", "caption", "table", "td", "th", "tr", "tt", "u", "ul", "var", "dl", "dt", "dd", "mapframe"]
         )
 
     def _get_substring(self, text, start, token_length):

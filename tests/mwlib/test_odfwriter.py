@@ -13,9 +13,9 @@ import py
 import pytest
 
 import mwlib.parser
+from mwlib.parser import advtree
 from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.refine.uparser import parse_string
-from mwlib.parser import advtree
 from mwlib.writers.odf.writer import ODFWriter, preprocess
 
 ODFWriter.ignoreUnknownNodes = False

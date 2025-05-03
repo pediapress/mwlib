@@ -8,12 +8,12 @@ from typing import Any, Optional
 
 from mwlib.core import nshandling
 from mwlib.extensions import imgmap
-from mwlib.utils import uniq
 from mwlib.parser import styleanalyzer, tagext
 from mwlib.parser.refine import util
 from mwlib.parser.refine.parse_table import TableFixer, TableGarbageRemover, TableParser
 from mwlib.parser.refine.tagparser import TagParser
 from mwlib.parser.token.utoken import Token, tokenize
+from mwlib.utils import uniq
 
 try:
     from mwlib.parser.refine import _core
@@ -22,22 +22,22 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-setattr(Token, "t_complex_table", "complex_table")
-setattr(Token, "t_complex_caption", "complex_caption")
-setattr(Token, "t_complex_table_row", "complex_table_row")
-setattr(Token, "t_complex_table_cell", "complex_table_cell")
-setattr(Token, "t_complex_tag", "complex_tag")
-setattr(Token, "t_complex_link", "link")
-setattr(Token, "t_complex_section", "section")
-setattr(Token, "t_complex_article", "article")
-setattr(Token, "t_complex_indent", "indent")
-setattr(Token, "t_complex_line", "line")
-setattr(Token, "t_complex_named_url", "named_url")
-setattr(Token, "t_complex_style", "style")
-setattr(Token, "t_complex_node", "node")
-setattr(Token, "t_complex_preformatted", "preformatted")
-setattr(Token, "t_complex_compat", "compat")
-setattr(Token, "t_vlist", "vlist")
+Token.t_complex_table = "complex_table"
+Token.t_complex_caption = "complex_caption"
+Token.t_complex_table_row = "complex_table_row"
+Token.t_complex_table_cell = "complex_table_cell"
+Token.t_complex_tag = "complex_tag"
+Token.t_complex_link = "link"
+Token.t_complex_section = "section"
+Token.t_complex_article = "article"
+Token.t_complex_indent = "indent"
+Token.t_complex_line = "line"
+Token.t_complex_named_url = "named_url"
+Token.t_complex_style = "style"
+Token.t_complex_node = "node"
+Token.t_complex_preformatted = "preformatted"
+Token.t_complex_compat = "compat"
+Token.t_vlist = "vlist"
 
 Token.children = None
 
@@ -168,8 +168,8 @@ def _parse_gallery_txt(txt, xopts):
 
 
 class Bunch:
-    start: Optional[int] = None
-    endtitle: Optional[int] = None
+    start: int | None = None
+    endtitle: int | None = None
 
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -451,35 +451,35 @@ class ParseLines:
         if prefix == ":":
             node = Token(type=Token.t_complex_style, caption=":")
 
-            def newitem() -> Optional[Token]:
+            def newitem() -> Token | None:
                 return Token(type=Token.t_complex_node, blocknode=True)
 
             endtag = None
         elif prefix == "*":
             node = Token(type=Token.t_complex_tag, tagname="ul")
 
-            def newitem() -> Optional[Token]:
+            def newitem() -> Token | None:
                 return Token(type=Token.t_complex_tag, tagname="li", blocknode=True)
 
             endtag = "ul"
         elif prefix == "#":
             node = Token(type=Token.t_complex_tag, tagname="ol")
 
-            def newitem() -> Optional[Token]:
+            def newitem() -> Token | None:
                 return Token(type=Token.t_complex_tag, tagname="li", blocknode=True)
 
             endtag = "ol"
         elif prefix == ";":
             node = Token(type=Token.t_complex_style, caption=";")
 
-            def newitem() -> Optional[Token]:
+            def newitem() -> Token | None:
                 return Token(type=Token.t_complex_node, blocknode=True)
 
             endtag = None
         else:
             node = None
 
-            def newitem() -> Optional[Token]:
+            def newitem() -> Token | None:
                 return None
 
             endtag = None
@@ -871,7 +871,7 @@ def _create(tokens, i, start, state):
 
 def mark_style_tags(tokens, xopts):  # pylint: disable=unused-argument
     tags = set(
-        "mapframe abbr tt strike ins del small sup sub b strong cite i u em big font s var kbd".split()
+        ["mapframe", "abbr", "tt", "strike", "ins", "del", "small", "sup", "sub", "b", "strong", "cite", "i", "u", "em", "big", "font", "s", "var", "kbd"]
     )
 
     todo = [(0, {}, tokens)]
@@ -1161,10 +1161,10 @@ class ParseUniq:
 
 
 class XBunch:
-    expander: Optional[Any] = None
-    imagemod: Optional[Any] = None
-    nshandler: Optional[Any] = None
-    uniquifier: Optional[Any] = None
+    expander: Any | None = None
+    imagemod: Any | None = None
+    nshandler: Any | None = None
+    uniquifier: Any | None = None
 
     def __init__(self, **kw):
         self.__dict__.update(kw)

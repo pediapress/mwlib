@@ -1,7 +1,7 @@
 import locale
 from xml.sax.saxutils import quoteattr
 
-from mwlib.parser.templ import nodes, evaluate, magic_time
+from mwlib.parser.templ import evaluate, magic_time, nodes
 
 
 class Subst(nodes.Node):

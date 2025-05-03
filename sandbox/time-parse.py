@@ -1,13 +1,12 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
 import sys
 import time
 
 from mwlib import treecleaner, uparser
-from mwlib.parser.refine import compat
 from mwlib.parser import advtree
+from mwlib.parser.refine import compat
 
-with open(sys.argv[1], "r", encoding="utf-8") as f:
+with open(sys.argv[1], encoding="utf-8") as f:
     s = f.read()
 
 stime = time.time()

@@ -5,9 +5,9 @@
 import sys
 
 from mwlib import parser
+from mwlib.parser import advtree
 from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.refine.uparser import parse_string
-from mwlib.parser import advtree
 from mwlib.parser.treecleaner import TreeCleaner
 from mwlib.rendering import styleutils
 

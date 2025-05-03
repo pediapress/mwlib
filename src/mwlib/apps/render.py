@@ -15,15 +15,15 @@ from importlib.metadata import entry_points
 
 import click
 
-from mwlib.core import nuwiki, wiki, _locale
 from mwlib.apps.buildzip import make_zip
 from mwlib.apps.utils import make_wiki_env_from_options
+from mwlib.core import _locale, nuwiki, wiki
+from mwlib.rendering.writerbase import WriterError
+from mwlib.utils import conf, unorganized
+from mwlib.utils.log import setup_console_logging
 from mwlib.utils.mwlib_exceptions import RenderException
 from mwlib.utils.status import Status
-from mwlib.utils import unorganized, conf
-from mwlib.utils.log import setup_console_logging
 from mwlib.utils.unorganized import start_logging
-from mwlib.rendering.writerbase import WriterError
 
 logger = logging.getLogger(__name__)
 USE_HELP_TEXT = "Use --help for usage information."

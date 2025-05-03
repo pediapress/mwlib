@@ -218,7 +218,7 @@ class MwApi:
         )
 
     def get_siteinfo(self):
-        siprop = "general namespaces interwikimap namespacealiases magicwords rightsinfo".split()
+        siprop = ["general", "namespaces", "interwikimap", "namespacealiases", "magicwords", "rightsinfo"]
         while len(siprop) >= 3:
             try:
                 req = self.do_request(

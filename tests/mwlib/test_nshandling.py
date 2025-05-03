@@ -1,8 +1,8 @@
 #! /usr/bin/env py.test
 import pytest
 
-from mwlib.network import siteinfo
 from mwlib.core import nshandling
+from mwlib.network import siteinfo
 
 siteinfo_de = siteinfo.get_siteinfo("de")
 assert siteinfo_de, "cannot find german siteinfo"

@@ -12,7 +12,7 @@ THE_LIVING_SEA = "The Living Sea"
 
 
 @pytest.mark.integration
-class TestXnetZipWiki():
+class TestXnetZipWiki:
     zip_filename = None
 
     @classmethod

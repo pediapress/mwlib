@@ -6,8 +6,8 @@ class for defining DTD-Like Rules for the tree
 
 import logging
 
-from mwlib.utils.mwlib_exceptions import SanityException
 from mwlib.parser.advtree import Cell, ImageLink, PreFormatted, Row, Table, Text
+from mwlib.utils.mwlib_exceptions import SanityException
 
 log = logging.getLogger("sanitychecker")
 

@@ -73,7 +73,7 @@ def format_date(format_str, date):
 
     tmp = []
     for element in split:
-        format_code = CODENAMES.get(element, None)
+        format_code = CODENAMES.get(element)
         if format_code is None:
             if len(element) == 2 and element.startswith("\\"):
                 tmp.append(element[1])

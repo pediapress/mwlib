@@ -6,9 +6,9 @@ import sys
 import pytest
 
 from mwlib import parser
+from mwlib.parser import advtree
 from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.refine.uparser import parse_string
-from mwlib.parser import advtree
 from mwlib.rendering import styleutils
 
 
@@ -72,10 +72,7 @@ left
         if txt != align:
             show(cell)
 
-        assert txt == align, "alignment not correctly parsed. expected:|{}|, got |{}|".format(
-            txt,
-            align,
-        )
+        assert txt == align, f"alignment not correctly parsed. expected:|{txt}|, got |{align}|"
 
 
 @pytest.mark.parametrize(
@@ -92,5 +89,5 @@ left
 )
 def test_greyscale_conversion(rgb_triple, darkness_limit, expected_output):
     result = styleutils._rgb_to_greyscale(rgb_triple, darkness_limit)  # pylint: disable=W0212
-    for result, expected in zip([*result], [*expected_output]):
+    for result, expected in zip([*result], [*expected_output], strict=False):
         assert result == pytest.approx(expected, 0.00001)

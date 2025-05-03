@@ -1,7 +1,7 @@
 # Copyright (c) 2007-2023 PediaPress GmbH
 # See README.rst for additional licensing information.
-from mwlib.utils.mwlib_exceptions import InvalidArticleStructureError
 from mwlib.parser import URL, advtree
+from mwlib.utils.mwlib_exceptions import InvalidArticleStructureError
 
 ARTICLE_ERROR = "{} needs to be called with Article node"
 

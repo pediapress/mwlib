@@ -10,11 +10,11 @@ import webbrowser
 import click
 
 from mwlib.core import wiki
-from mwlib.parser import expander
-from mwlib.utils.status import Status
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
+from mwlib.parser import expander
 from mwlib.parser.refine import uparser
 from mwlib.utils import unorganized
+from mwlib.utils.status import Status
 
 
 @click.command()

@@ -8,7 +8,6 @@ import sys
 import unicodedata
 
 from mwlib import parser
-from mwlib.utils.mwlib_exceptions import InvalidTreeNodesError
 from mwlib.parser import URL, Caption, CategoryLink, InterwikiLink, LangLink, NamedURL, SpecialLink
 from mwlib.parser.advtree import (
     Article,
@@ -64,6 +63,7 @@ from mwlib.parser.advtree import (
 )
 from mwlib.parser.treecleanerhelper import get_node_height, split_row
 from mwlib.rendering import miscutils, styleutils
+from mwlib.utils.mwlib_exceptions import InvalidTreeNodesError
 
 
 def show(n_childs):

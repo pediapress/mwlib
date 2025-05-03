@@ -9,8 +9,7 @@ from mwlib import parser
 from mwlib.parser import expander
 from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.expander import DictDB
-from mwlib.parser.refine import util
-from mwlib.parser.refine import uparser
+from mwlib.parser.refine import uparser, util
 from mwlib.parser.templ.misc import expand_str
 from mwlib.parser.token.utoken import show
 

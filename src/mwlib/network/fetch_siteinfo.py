@@ -29,7 +29,7 @@ def fetch(lang):
 def main(argv):
     languages = argv[1:]
     if not languages:
-        languages = "de en es fr it ja nl no pl pt simple sv".split()
+        languages = ["de", "en", "es", "fr", "it", "ja", "nl", "no", "pl", "pt", "simple", "sv"]
 
     for lang in languages:
         fetch(lang.lower())

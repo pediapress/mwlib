@@ -18,7 +18,7 @@ def draw_map_frame(node, image_nuwiki_dir):
     latitude = node.attributes.get("latitude", "")
     longitude = node.attributes.get("longitude", "")
     zoom = node.attributes.get("zoom", "")
-    
+
     digest = sha1()
     identifier = f"{height}x{width}x{latitude}x{longitude}x{zoom}"
     digest.update(identifier.encode("utf8"))

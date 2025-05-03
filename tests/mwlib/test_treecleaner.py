@@ -7,9 +7,7 @@ import sys
 import pytest
 
 from mwlib import parser
-from mwlib.parser.dummydb import DummyDB
 from mwlib.parser import LangLink
-from mwlib.parser.refine.uparser import parse_string
 from mwlib.parser.advtree import (
     BreakingReturn,
     Center,
@@ -29,6 +27,8 @@ from mwlib.parser.advtree import (
     Underline,
     build_advanced_tree,
 )
+from mwlib.parser.dummydb import DummyDB
+from mwlib.parser.refine.uparser import parse_string
 from mwlib.parser.treecleaner import TreeCleaner
 
 

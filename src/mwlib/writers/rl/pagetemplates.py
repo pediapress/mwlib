@@ -232,7 +232,7 @@ class TitlePage(PageTemplate):
             if pdfstyles.TITLE_PAGE_IMAGE_POS[1] is None:
                 y_cord = (PAGE_HEIGHT - height) / 2.0
             else:
-                y_cord = max(0, min(PAGE_HEIGHT - height, 
+                y_cord = max(0, min(PAGE_HEIGHT - height,
                                     pdfstyles.TITLE_PAGE_IMAGE_POS[1]))
             canvas.drawImage(self.cover, x_cord, y_cord, width, height)
 

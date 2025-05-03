@@ -144,7 +144,7 @@ def get_n_float_lines(total_hf, para_heights, leading):
 
 def get_auto_leading_height(paragraph):
     auto_leading = (
-        getattr(paragraph.style, "auto_leading")
+        paragraph.style.auto_leading
         if hasattr(paragraph, "style")
         else ""
     )
@@ -210,7 +210,7 @@ def handle_paragraph(self, paragraph, full_width, max_width, total_hf):
     paragraph_height = get_paragraph_height(paragraph)
     self.para_heights.append(paragraph_height + auto_leading_height)
 
-  
+
 class FiguresAndParagraphs(Flowable):
     """takes a list of figures and paragraphs and floats the figures
     next to the paragraphs.

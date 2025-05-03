@@ -28,7 +28,6 @@ import re
 import sys
 
 from mwlib import parser
-from mwlib.parser.dummydb import DummyDB
 from mwlib.parser import (
     Article,
     ArticleLink,
@@ -51,8 +50,10 @@ from mwlib.parser import (
     TagNode,
     Text,
     Timeline,
-    build_amap, dummydb,
+    build_amap,
+    dummydb,
 )
+from mwlib.parser.dummydb import DummyDB
 from mwlib.parser.refine.uparser import parse_string
 
 log = logging.getLogger(__name__)
@@ -414,7 +415,7 @@ class AdvancedImageLink(AdvancedNode):
     @property
     def render_caption(self):
         explicit_caption = bool(
-            getattr(self, "thumb") or getattr(self, "frame", "") == "frame"
+            self.thumb or getattr(self, "frame", "") == "frame"
         )
         is_gallery = len(self.get_parent_nodes_by_class(Gallery)) > 0
         has_children = len(self.children) > 0
