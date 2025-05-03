@@ -15,10 +15,10 @@ from sqlitedict import SqliteDict
 from mwlib import parser
 from mwlib.core import metabook, nshandling
 from mwlib.core.authors import get_authors
+from mwlib.parser import advtree
 from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.parser.refine import uparser
 from mwlib.parser.templ.parser import parse
-from mwlib.parser import advtree
 from mwlib.utils import myjson as json
 from mwlib.utils import unorganized
 from mwlib.utils.unorganized import python2sort
@@ -63,9 +63,8 @@ class DumbJsonDB:
         return list(self.database.items())
 
     def __getstate__(self):
-        # FIXME: pickling zip based containers not supported
-        # and currently not needed.
-        # if desired the content of the database file need to be persisted...
+        # Pickling zip based containers is not supported and currently not needed.
+        # If desired, the content of the database file would need to be persisted.
         if not self.allow_pickle:
             raise ValueError(
                 "ERROR: pickling not allowed for zip files. Use unzipped zip file instead"
@@ -98,7 +97,7 @@ class NuWiki:
         file_name = os.path.join(self.path, "authors.db")
         if not os.path.exists(file_name):
             self.authors = None
-            log.warn("no authors present. parsing revision info instead")
+            log.warning("no authors present. parsing revision info instead")
         else:
             self.authors = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
@@ -145,11 +144,11 @@ class NuWiki:
     def _read_revisions(self):
         count = 1
         while True:
-            file_name = self._pathjoin("revisions-%s.txt" % count)
+            file_name = self._pathjoin(f"revisions-{count}.txt")
             if not os.path.exists(file_name):
                 break
             count += 1
-            log.info("reading %s", file_name)
+            log.info(f"reading {file_name}")
             file_content = str(
                 open(self._pathjoin(file_name), "rb").read(), "utf-8"
             )
@@ -189,7 +188,7 @@ class NuWiki:
             try:
                 page = self.revisions.get(int(revision))
             except TypeError:
-                print("Warning: non-integer revision %r" % revision)
+                print(f"Warning: non-integer revision {revision!r}")
             else:
                 if page and page.rawtext:
                     redirect = self.nshandler.redirect_matcher(page.rawtext)
@@ -287,7 +286,7 @@ def extract_member(zipfile, member, dstdir):
     targetpath = os.path.normpath(os.path.join(dstdir, file_name))
 
     if not targetpath.startswith(dstdir):
-        raise RuntimeError("bad filename in zipfile {!r}".format(targetpath))
+        raise RuntimeError(f"bad filename in zipfile {targetpath!r}")
 
     # Create all upper directories if necessary.
     upperdirs = (

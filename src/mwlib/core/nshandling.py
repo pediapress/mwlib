@@ -52,7 +52,7 @@ def fix_wikipedia_siteinfo(siteinfo):
         siteinfo['interwikimap'] = list(eng_locale["interwikimap"])
 
     prefixes = [x['prefix'] for x in siteinfo['interwikimap']]
-    for prefix in "pnb ckb mwl mhr ace krc pcd frr koi gag bjn pfl mrj bjn rue kbd ltg xmf".split():
+    for prefix in ["pnb", "ckb", "mwl", "mhr", "ace", "krc", "pcd", "frr", "koi", "gag", "bjn", "pfl", "mrj", "bjn", "rue", "kbd", "ltg", "xmf"]:
 
         if prefix in prefixes:
             return
@@ -63,7 +63,6 @@ def fix_wikipedia_siteinfo(siteinfo):
             'local': '',
         })
 
-# TODO: build fast lookup table for use in nshandler.splitname
 
 
 class NsHandler:
@@ -99,11 +98,6 @@ class NsHandler:
         self.__dict__ = data
         self.set_redirect_matcher(self.siteinfo)
 
-    # workaround for a copy.deepcopy bug in python 2.4
-    # should be save to return the instance itself without copying
-    # since it's basically immutable.
-    def __deepcopy__(self, memo):
-        return self
 
     def _find_namespace(self, name, defaultns=0):
         name = name.lower().strip()
@@ -131,7 +125,7 @@ class NsHandler:
 
     def splitname(self, title, defaultns=0):
         if not isinstance(title, str):
-            title = str(title, 'utf-8')
+            title = title.decode('utf-8') if isinstance(title, bytes) else str(title)
         name = re.sub(r' +', ' ', title.replace("_", " ").strip())
         if name.startswith(":"):
             name = name[1:].strip()

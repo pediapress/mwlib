@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Helper to list and retrieve all stored books from a wiki
 """
@@ -8,15 +6,13 @@ Helper to list and retrieve all stored books from a wiki
 class Bookshelf:
     def __init__(self, api):
         self.api = api
-        self.coll_bookscategory = "Category:%s" % self.api.content_query(
-            "MediaWiki:Coll-bookscategory"
-        )
+        self.coll_bookscategory = f"Category:{self.api.content_query('MediaWiki:Coll-bookscategory')}"
 
     def _get_category_members(self, title):
         kwargs = {
             "action": "query",
             "list": "categorymembers",
-            "cmtitle": title,  # FIXME
+            "cmtitle": title,
             "cmlimit": 500,
         }
         res = []  # {ns, title}

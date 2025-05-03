@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
@@ -11,18 +9,13 @@ from configparser import ConfigParser
 from io import StringIO
 
 from mwlib.core import nuwiki
-from mwlib.utils.mwlib_exceptions import WikiIdValidationError
 from mwlib.core.metabook import WikiConf
 from mwlib.utils import myjson as json
+from mwlib.utils.mwlib_exceptions import WikiIdValidationError
 
 log = logging.getLogger(__name__)
 
 
-def wiki_obsolete_cdb(path=None, **kwargs):
-    raise RuntimeError("cdb file format is not supported anymore.")
-
-
-dispatch = {"wiki": {"cdb": wiki_obsolete_cdb, "nucdb": wiki_obsolete_cdb}}
 
 _EN_LICENSE_URL = (
     "https://en.wikipedia.org/w/index.php?title=Help:Books/License&action=raw"
@@ -135,15 +128,11 @@ def process_config_sections(config_sections, res):
 
         args = dict(config_sections.items(obj))
         if "type" not in args:
-            raise RuntimeError("section %r does not have key 'type'" % obj)
+            raise RuntimeError(f"section {obj!r} does not have key 'type'")
         section_type = args["type"]
-        del args["type"]
-        try:
-            dispatcher = dispatch[obj][section_type]
-        except KeyError:
-            raise RuntimeError(f"cannot handle type {section_type!r} in section {obj!r}")
 
-        setattr(res, obj, dispatcher(**args))
+        # All legacy file formats are no longer supported
+        raise RuntimeError(f"File format type {section_type!r} in section {obj!r} is not supported anymore")
 
 
 def setup_metabook(nfo_fn, res, conf):

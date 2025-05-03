@@ -14,15 +14,11 @@ def execute(*args):
     popen.wait()
     if errors:
         raise RuntimeError(
-            "Errors while executing {!r}: {}".format(" ".join(args), errors),
+            f"Errors while executing {' '.join(args)!r}: {errors}",
         )
     elif popen.returncode != 0:
         raise RuntimeError(
-            "Got returncode %d != 0 when executing %r"
-            % (
-                popen.returncode,
-                " ".join(args),
-            )
+            f"Got returncode {popen.returncode} != 0 when executing {' '.join(args)!r}"
         )
     return output
 
@@ -74,9 +70,9 @@ def make_messages(
     extensions=(".py",),
 ):
     if not os.path.isdir(localedir):
-        raise ValueError("no directory %r found" % localedir)
+        raise ValueError(f"no directory {localedir!r} found")
     if not os.path.isdir(inputdir):
-        raise ValueError("no directory %r found" % inputdir)
+        raise ValueError(f"no directory {inputdir!r} found")
 
     languages = []
     if locale == "all":

@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """WSGI server interface to mw-render and mw-zip/mw-post"""
 
 import importlib.metadata
@@ -20,7 +18,7 @@ from bottle import HTTPResponse, default_app, get, post, request, route, static_
 from gevent import pool, pywsgi
 
 from mwlib.core.metabook import calc_checksum
-from mwlib.utils import lrucache, argv, _version
+from mwlib.utils import _version, argv, lrucache
 from mwlib.utils import myjson as json
 from qs import rpcclient
 from qs.misc import CallInLoop
@@ -36,9 +34,7 @@ class Bunch:
         self.__dict__.update(kw)
 
     def __repr__(self):
-        return "Bunch({})".format(
-            ", ".join([f"{k}={v!r}" for k, v in self.__dict__.items()])
-        )
+        return f"Bunch({', '.join([f'{k}={v!r}' for k, v in self.__dict__.items()])})"
 
 
 # -- we try to load all writers here but also keep a list of known writers
@@ -110,8 +106,8 @@ class WatchQServe:
     getstats_timeout = 3.0
     sleeptime = 2.0
 
-    def __init__(self, xxx_todo_changeme, busy_data):
-        (host, port) = xxx_todo_changeme
+    def __init__(self, server_address, busy_data):
+        (host, port) = server_address
         self.host = host
         self.port = port
         self.busy = busy_data
@@ -177,13 +173,13 @@ def choose_idle_qserve():
     idle = [k for k, v in busy.items() if not v]
     if not idle:
         return None
-    return random.choice(idle)  # XXX probably store number of render jobs in busy
+    return random.choice(idle)
 
 
 @route("/cache/<filename>#.*#")
 def server_static(filename):
-    log.info("serving %r", filename)
-    print("serving", filename, " from ", "/app/cache")
+    log.info(f"serving {filename!r}")
+    print(f"serving {filename} from /app/cache")
     response = static_file(
         filename, root="/app/cache", mimetype="application/octet-stream"
     )
@@ -200,9 +196,6 @@ def dispatch_command(path):
 
 
 def get_content_disposition_values(filename, _):
-    if isinstance(filename, str):
-        filename = str(filename)
-
     if filename:
         filename = filename.strip()
 
@@ -352,9 +345,7 @@ class Application:
         if base_url and not self.is_good_baseurl(base_url):
             log.bad(f"bad base_url: {base_url!r}")
             return self.error_response(
-                "bad base_url {!r}. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed.".format(
-                    base_url
-                )
+                f"bad base_url {base_url!r}. check your $wgServer and $wgScriptPath variables. localhost, 192.168.*.* and 127.0.*.* are not allowed."
             )
 
         log.info(f"render {collection_id} {writer}")
@@ -394,7 +385,7 @@ class Application:
             more["content_type"] = name_writer.content_type
         if name_writer.file_extension:
             more["content_disposition"] = get_content_disposition(
-                more.get("suggested_filename", None), name_writer.file_extension
+                more.get("suggested_filename"), name_writer.file_extension
             )
         return retval(state="finished", **more)
 
@@ -483,7 +474,7 @@ class Application:
 
         pod_api_url = params.pod_api_url
         if pod_api_url:
-            response = requests.post(pod_api_url, data="any".encode("utf-8"))
+            response = requests.post(pod_api_url, data=b"any")
             result = response.json()
             post_url = result["post_url"].encode("utf-8")
             response = {

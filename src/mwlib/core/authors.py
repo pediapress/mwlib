@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 # Copyright (c) 2007-2011 PediaPress GmbH
 # See README.rst for additional licensing information.
 

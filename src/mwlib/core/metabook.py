@@ -1,8 +1,5 @@
-#! /usr/bin/env python
-
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
-
 
 import copy
 import re
@@ -10,12 +7,8 @@ import warnings
 from collections import deque
 from hashlib import sha256
 
-from mwlib.parser.parse_collection_page import parse_collection_page as _parse_collection_page
+from mwlib.parser.parse_collection_page import parse_collection_page
 from mwlib.utils import myjson, unorganized
-
-
-def parse_collection_page(txt):
-    return _parse_collection_page(txt)
 
 
 class MbObj:
