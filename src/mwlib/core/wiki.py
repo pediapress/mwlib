@@ -89,7 +89,7 @@ class MultiEnvironment(Environment):
         if not self.metabook:
             return
 
-        for article in self.metabook.articles():
+        for article in self.metabook.get_articles():
             wiki_id = article.wikiident
             self._validate_wiki_id(wiki_id, article)
 

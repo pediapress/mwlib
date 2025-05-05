@@ -76,7 +76,7 @@ def parse_collection_page(wikitext):
     @returns: metabook.collection
     @rtype: metabook.collection
     """
-    meta_book = metabook.collection()
+    meta_book = metabook.Collection()
 
     summary = False
     no_template = True

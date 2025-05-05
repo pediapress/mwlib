@@ -31,7 +31,7 @@ def make_collection_id(data):
     if meta_book:
         mbobj = json.loads(meta_book)
         sio.write(calc_checksum(mbobj))
-        num_articles = len(list(mbobj.articles()))
+        num_articles = len(list(mbobj.get_articles()))
         base_url = data.get('base_url')
         writer = data.get('writer')
         sys.stdout.write(

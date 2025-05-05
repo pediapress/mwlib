@@ -241,13 +241,15 @@ class NuWiki:
         if not os.path.exists(safe_path):
             log.debug("no such file: %s" % safe_path)
             try:
-                link_target = os.path.join("../..", unorganized.fs_escape(fqname))
+                link_target = os.path.join("..", unorganized.fs_escape(fqname))
                 log.debug(link_target)
                 os.symlink(link_target, safe_path)
             except OSError as exc:
                 if exc.errno != 17:  # File exists
                     raise
         assert os.path.islink(safe_path), "symlink failed: %s" % safe_path
+        assert os.path.exists(safe_path), "file does not exist: %s" % safe_path
+        assert os.path.getsize(safe_path) > 0, "symlink failed: %s" % safe_path
         return safe_path
 
     def get_data(self, name):

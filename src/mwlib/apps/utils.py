@@ -36,7 +36,7 @@ def make_wiki_env_from_options(
         **wiki_options_with_metabook,
     )
     if not env.metabook:
-        env.metabook = metabook_module.collection()
+        env.metabook = metabook_module.Collection()
         env.init_metabook()
 
     noimages = wiki_options.get("noimages")

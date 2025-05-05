@@ -17,14 +17,14 @@ def object_hook(dct):
     except KeyError:
         document_type = None
     class_name_mapping = {
-        "collection": "collection",
-        "article": "article",
+        "collection": "Collection",
+        "article": "Article",
         "chapter": "Chapter",
         "source": "Source",
         "interwiki": "Interwiki",
         "license": "License",
         "wikiconf": "WikiConf",
-        "custom": "custom",
+        "custom": "Custom",
     }
     if document_type in class_name_mapping:
         klass = getattr(metabook, class_name_mapping[document_type])

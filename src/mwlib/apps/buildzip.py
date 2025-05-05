@@ -19,7 +19,7 @@ from gevent import monkey
 
 from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
-from mwlib.core.metabook import collection
+from mwlib.core.metabook import Collection
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
 from mwlib.utils import conf, linuxmem, unorganized
 from mwlib.utils import myjson as json
@@ -70,7 +70,7 @@ def make_zip(
 
     try:
         fsdir = os.path.join(tmpdir, "nuwiki")
-        print("creating nuwiki in %r" % fsdir)
+        log.info("creating nuwiki in %r" % fsdir)
         make_nuwiki(
             fsdir=fsdir,
             metabook=metabook,
@@ -99,10 +99,10 @@ def make_zip(
     finally:
         keep_tmpfiles = wiki_options.get("keep_tmpfiles")
         if not keep_tmpfiles:
-            print("removing tmpdir %r" % tmpdir)
+            log.info("removing tmpdir %r" % tmpdir)
             shutil.rmtree(tmpdir, ignore_errors=True)
         else:
-            print("keeping tmpdir %r" % tmpdir)
+            log.info("keeping tmpdir %r" % tmpdir)
 
         if sys.platform in ("linux2", "linux3"):
             linuxmem.report()
@@ -207,7 +207,8 @@ def main(
     args,
 ):
     setup_console_logging(level=logging.INFO, stream=sys.stderr)
-    log.info("starting mw-zip with log level ")
+    level = logging.getLevelName(log.getEffectiveLevel())
+    log.info(f"starting mw-zip with log level {level}")
     if metabook:
         if "{" in metabook and "}" in metabook:
             metabook = json.loads(metabook)
@@ -216,7 +217,7 @@ def main(
                 metabook = json.load(file_path)
     for title in args:
         if metabook is None:
-            metabook = collection()
+            metabook = Collection()
         metabook.append_article(title)
     try:
         imagesize = int(imagesize)
@@ -269,7 +270,7 @@ def main(
         raise
     finally:
         if output is None and filename:
-            print("removing %r" % filename)
+            log.info("removing %r" % filename)
             unorganized.safe_unlink(filename)
 
 

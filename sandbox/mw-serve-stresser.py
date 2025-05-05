@@ -63,11 +63,11 @@ def getRandomArticles(api, min=1, max=100):
 
 
 def getMetabook(articles):
-    metabook = mwlib.core.metabook.collection()
+    metabook = mwlib.core.metabook.Collection()
     metabook.title = "title test"
     metabook.subtitle = "sub title test"
     for a in articles:
-        article = mwlib.core.metabook.article(title=a)
+        article = mwlib.core.metabook.Article(title=a)
         metabook.items.append(article)
     addLicense(metabook)
     return metabook
@@ -89,7 +89,7 @@ def getRandomMetabook(api, min=1, max=100):
         if not c:
             continue
         mbook = mwlib.core.metabook.parse_collection_page(c)
-        num_articles = len(mbook.articles())
+        num_articles = len(mbook.get_articles())
         log.info("getRandomMetabook num arts min:%d this:%d max:%d" % (min, num_articles, max))
     mbook['book_page'] = bn
     addLicense(mbook)

@@ -2,17 +2,20 @@
 # See README.rst for additional licensing information.
 
 import contextlib
+import logging
 import os
 import urllib.parse
 
 import gevent
 import gevent.pool
 
-from mwlib.core.metabook import collection, get_licenses, parse_collection_page
+from mwlib.core.metabook import Collection, get_licenses, parse_collection_page
 from mwlib.network import fetch
 from mwlib.network import sapi as mwapi
 from mwlib.parser.parse_collection_page import extract_metadata
 from mwlib.utils import myjson
+
+logger = logging.getLogger(__name__)
 
 
 class StartFetcher:
@@ -146,7 +149,7 @@ def wikitrust(baseurl, metabook):
 
     trust_revisions = trustedrevs.TrustedRevisions()
 
-    for article in metabook.articles():
+    for article in metabook.get_articles():
         if article.revision:
             continue
 
@@ -185,7 +188,7 @@ def start_fetchers(fetchers):
 
 def get_metabook(is_multiwiki, articles, metabook):
     if is_multiwiki:
-        my_mb = collection()
+        my_mb = Collection()
         my_mb.items = articles
     else:
         my_mb = metabook
@@ -196,8 +199,7 @@ def get_id_wikis(metabook):
     id2wiki = {}
     for wiki in metabook.wikis:
         id2wiki[wiki.ident] = (wiki, [])
-
-    for wiki in metabook.articles():
+    for wiki in metabook.get_articles():
         if wiki.wikiident not in id2wiki:
             raise ValueError(f"no wikiconf for {wiki.wikiident!r} ({wiki})")
         id2wiki[wiki.wikiident][1].append(wiki)
@@ -211,6 +213,7 @@ def make_nuwiki(
     pod_client,
     status,
 ):
+    logger.info("making nuwiki")
     id2wiki = get_id_wikis(metabook)
 
     is_multiwiki = len(id2wiki) > 1

@@ -973,6 +973,6 @@ class Fetcher:
 
 
 def pages_from_metabook(meta_book):
-    articles = meta_book.articles()
+    articles = meta_book.get_articles()
     pages = [(article.title, article.revision) for article in articles]
     return pages

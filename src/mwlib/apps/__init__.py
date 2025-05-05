@@ -123,7 +123,7 @@ def parse(all, tb, config, articles):
             raise RuntimeError(
                 f"{wiki_db} does not support iterating over all articles"
             )
-        articles = wiki_db.articles()
+        articles = wiki_db.get_articles()
 
     for article in articles:
         parse_article(article, wiki_db, tb)

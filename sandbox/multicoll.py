@@ -2,7 +2,7 @@
 
 from mwlib.core import metabook
 
-c = metabook.collection()
+c = metabook.Collection()
 c.append_article(title="Mainz", wikiident="de")
 c.append_article(title="Mainz", wikiident="en")
 c.wikis.append(metabook.WikiConf(ident="de", baseurl="http://de.wikipedia.org/w/"))

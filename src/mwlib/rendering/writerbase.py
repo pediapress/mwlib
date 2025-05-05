@@ -55,7 +55,7 @@ def build_book(env, status_callback: Callable[..., None] | None = None):
         def status_callback(**kwargs):
             return None
 
-    num_articles = float(len(env.metabook.articles()))
+    num_articles = float(len(env.metabook.get_articles()))
     if num_articles > 0:
         progress_step = 100 / num_articles
 

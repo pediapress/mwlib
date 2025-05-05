@@ -22,6 +22,7 @@ DEFAULT_SILENCED_LOGGERS = {
     'urllib3': logging.WARNING,
     'PIL.Image': logging.WARNING, # Pillow uses 'PIL.Image' or just 'PIL'
     'PIL': logging.WARNING,
+    'sqlitedict': logging.WARNING,
 }
 
 def setup_console_logging(

@@ -11,7 +11,7 @@ from mwlib.parser.parse_collection_page import parse_collection_page
 from mwlib.utils import myjson, unorganized
 
 
-class MbObj:
+class MetabookObject:
     def __init__(self, **kw):
         type_names = {"type": self.__class__.__name__}
 
@@ -69,15 +69,15 @@ class MbObj:
         return f"<{self.__class__.__name__} {self.__dict__!r}>"
 
 
-class WikiConf(MbObj):
+class WikiConf(MetabookObject):
     baseurl = None
     ident = None
 
     def __init__(self, **kw):
-        MbObj.__init__(self, **kw)
+        MetabookObject.__init__(self, **kw)
 
 
-class collection(MbObj):
+class Collection(MetabookObject):
     title = None
     subtitle = None
     editor = None
@@ -98,7 +98,7 @@ class collection(MbObj):
         title = title.strip()
         if displaytitle is not None:
             displaytitle = displaytitle.strip()
-        art = article(title=title, displaytitle=displaytitle, **kw)
+        art = Article(title=title, displaytitle=displaytitle, **kw)
 
         if self.items and isinstance(self.items[-1], Chapter):
             self.items[-1].items.append(art)
@@ -120,14 +120,15 @@ class collection(MbObj):
                 todo.extendleft(items[::-1])
         return res
 
-    def articles(self):
-        return self.walk("article")
+    def get_articles(self):
+        """Get all articles in this collection."""
+        return self.walk("Article")
 
     def set_environment(self, env):
         if env.wikiconf:
             self.wikis.append(env.wikiconf)
 
-        for article in self.articles():
+        for article in self.get_articles():
             if article._env is None:
                 article._env = env
 
@@ -145,7 +146,7 @@ class collection(MbObj):
         return None
 
 
-class Source(MbObj):
+class Source(MetabookObject):
     name = None
     url = None
     language = None
@@ -156,17 +157,17 @@ class Source(MbObj):
     namespaces = None
 
 
-class Interwiki(MbObj):
+class Interwiki(MetabookObject):
     local = False
 
 
-class custom(MbObj):
+class Custom(MetabookObject):
     title=None
     content=None
     content_type='text/x-wiki'
 
 
-class article(MbObj):
+class Article(MetabookObject):
     title = None
     displaytitle = None
     revision = None
@@ -183,12 +184,12 @@ class article(MbObj):
         return self._env.images
 
 
-class License(MbObj):
+class License(MetabookObject):
     title = None
     wikitext = None
 
 
-class Chapter(MbObj):
+class Chapter(MetabookObject):
     items = []
     title = ""
 
