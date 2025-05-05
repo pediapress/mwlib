@@ -302,9 +302,9 @@ def check_spans_in_row(row, row_idx, col_idx, cell, table, styles, _approx_cols)
             emptycell = get_empty_cell(None, cell.colspan, cell.rowspan - 1)
             last_col_idx = len(table.children[row_idx + 1].children) - 1
             if col_idx > last_col_idx:
-                emptycell.moveto(table.children[row_idx + 1].children[last_col_idx])
+                emptycell.move_to(table.children[row_idx + 1].children[last_col_idx])
             else:
-                emptycell.moveto(
+                emptycell.move_to(
                     table.children[row_idx + 1].children[col_idx], prefix=True
                 )
             if not getattr(cell, "rowspanned", False):

@@ -24,9 +24,9 @@ def main(output, title, subtitle, articles):
     title = title if title else None
     subtitle = subtitle if subtitle else None
 
-    meta_book = metabook.collection(title=title, subtitle=subtitle)
+    meta_book = metabook.Collection(title=title, subtitle=subtitle)
     for article_title in articles:
-        meta_book["items"].append(metabook.article(title=str(article_title, "utf-8")))
+        meta_book["items"].append(metabook.Article(title=str(article_title, "utf-8")))
 
     if output:
         with open(output, "w") as output_file:

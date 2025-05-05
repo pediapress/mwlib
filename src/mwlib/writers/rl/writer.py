@@ -3,6 +3,7 @@
 # Copyright (c) 2007, PediaPress GmbH
 # See README.txt for additional licensing information.
 
+import contextlib
 import copy
 import cProfile
 import gc
@@ -19,13 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from gettext import gettext as _
-
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
-
-import contextlib
+from hashlib import md5
 from xml.sax.saxutils import escape as xmlescape
 
 from PIL import Image as PilImage
@@ -482,7 +477,7 @@ class RlWriter:
         return Paragraph(" ", text_style())
 
     def writeBook(self, output, coverimage=None, status_callback=None):
-        self.numarticles = len(self.env.metabook.articles())
+        self.numarticles = len(self.env.metabook.get_articles())
         self.articlecount = 0
         self.getArticleIDs()
 
@@ -497,7 +492,7 @@ class RlWriter:
 
         elements = []
         self.toc_entries = []
-        if pdfstyles.SHOW_TITLE_PAGE:
+        if pdfstyles.SHOW_TITLE_PAGE and self.numarticles > 1:
             elements.extend(
                 self.writeTitlePage(coverimage=coverimage or pdfstyles.TITLE_PAGE_IMAGE)
             )
@@ -517,7 +512,7 @@ class RlWriter:
                     chapter.next_article_title = ""
                 elements.extend(self.writeChapter(chapter))
                 got_chapter = True
-            elif item.type == "article":
+            elif item.type == "Article":
                 art = self.buildArticle(item)
                 self.img_db = item.images
                 self.license_checker.image_db = self.img_db
@@ -633,7 +628,7 @@ class RlWriter:
     def getArticleIDs(self):
         self.articleids = []
         for item in self.env.metabook.walk():
-            if item.type != "article":
+            if item.type != "Article":
                 continue
             title = item.displaytitle or item.title
 
@@ -658,7 +653,7 @@ class RlWriter:
                 item.type == "Chapter"
             ):  # dont set page header if pdf starts with a chapter
                 break
-            if item.type == "article":
+            if item.type == "Article":
                 first_article_title = self.renderArticleTitle(
                     item.displaytitle or item.title
                 )
@@ -990,14 +985,14 @@ class RlWriter:
         for figure in figures:
             # assume 40 chars per line for caption text
             total_figure_height += (
-                figure.imgHeight
+                figure.img_height
                 + figure.margin[0]
                 + figure.margin[2]
                 + figure.padding[0]
                 + figure.padding[2]
-                + figure.cs.leading * max(int(len(figure.captionTxt) / 40), 1)
+                + figure.caption_style.leading * max(int(len(figure.caption_txt) / 40), 1)
             )
-            max_img_width = max(max_img_width, figure.imgWidth)
+            max_img_width = max(max_img_width, figure.img_width)
         for paragraph in paras:
             if isinstance(paragraph, Paragraph):
                 _, height = paragraph.wrap(PRINT_WIDTH - max_img_width, PRINT_HEIGHT)
@@ -1147,7 +1142,7 @@ class RlWriter:
     def _scale_images(self, images):
         scaled_images = []
         for img in images:
-            aspect_ratio = img.imgWidth / img.imgHeight
+            aspect_ratio = img.img_width / img.img_height
             width = PRINT_WIDTH / 2 - (
                 img.margin[1] + img.margin[3] + img.padding[1] + img.padding[3]
             )
@@ -1157,7 +1152,7 @@ class RlWriter:
             else:
                 scaled = Figure(
                     img.img_path,
-                    img.captionTxt,
+                    img.caption_txt,
                     img.cs,
                     img_width=width,
                     img_height=height,
@@ -1600,6 +1595,7 @@ class RlWriter:
             return ""
 
     def getImgPath(self, target):
+        log.info("getImgPath target: %s", target)
         if self.img_db:
             img_path = self.img_db.get_disk_path(
                 target, size=800
@@ -1842,13 +1838,13 @@ class RlWriter:
         caption_txt = "".join(txt)
         figure = Figure(
             img_path,
-            captionTxt=caption_txt,
-            captionStyle=text_style("figure", in_table=self.table_nesting),
-            imgWidth=width,
-            imgHeight=height,
+            caption_txt=caption_txt,
+            caption_style=text_style("figure", in_table=self.table_nesting),
+            img_width=width,
+            img_height=height,
             margin=(0.2 * cm, 0.2 * cm, 0.2 * cm, 0.2 * cm),
             padding=(0.2 * cm, 0.2 * cm, 0.2 * cm, 0.2 * cm),
-            borderColor=pdfstyles.IMG_BORDER_COLOR,
+            border_color=pdfstyles.IMG_BORDER_COLOR,
             align=align,
             url=url,
         )
