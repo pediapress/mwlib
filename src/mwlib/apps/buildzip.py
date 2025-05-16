@@ -3,7 +3,6 @@
 
 """mz-zip - installed via setuptools' entry_points"""
 
-
 import contextlib
 import logging
 import os
@@ -15,7 +14,6 @@ import webbrowser
 import zipfile
 
 import click
-from gevent import monkey
 
 from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
@@ -25,7 +23,6 @@ from mwlib.utils import conf, linuxmem, unorganized
 from mwlib.utils import myjson as json
 from mwlib.utils.log import setup_console_logging
 
-monkey.patch_all(thread=False)
 log = logging.getLogger(__name__)
 
 USE_HELP_TEXT = "Use --help for usage information."

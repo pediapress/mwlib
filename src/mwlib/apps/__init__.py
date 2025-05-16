@@ -3,11 +3,14 @@
 
 """main programs - installed via setuptools' entry_points"""
 
+
 import time
 import traceback
 import webbrowser
 
 import click
+from gevent import monkey
+monkey.patch_all()
 
 from mwlib.core import wiki
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
