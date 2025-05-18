@@ -396,7 +396,7 @@ def heading_style(mode="Chapter", lvl=1, text_align=None):
     if WORD_WRAP == "RTL":
         style.wordWrap = "RTL"
         if not text_align:
-            style.alignment = TA_RIGHT
+            text_align = "right"
 
     if mode == "chapter":
         style.fontSize = 26
