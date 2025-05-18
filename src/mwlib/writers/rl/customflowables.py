@@ -203,7 +203,7 @@ class FiguresAndParagraphs(Flowable):
             fullWidth = avail_width - p.style.leftIndent - p.style.rightIndent
             floatWidth = fullWidth - maxWf
             self.resize_inline_image(p, floatWidth)
-            nfloatLines = max(0, int((totalHf - (sum(self.paraHeights)))/p.style.leading))
+            nfloatLines = max(0, int((totalHf - (sum(self.paraHeights))) / p.style.leading))
             p.width = 0
             if hasattr(p, 'blPara'):
                 del p.blPara
@@ -219,11 +219,12 @@ class FiguresAndParagraphs(Flowable):
                 autoLeading = ''
             if hasattr(p, 'style') and autoLeading == 'max' and p.blPara.kind == 1:
                 pHeight = 0
-                for l in p.blPara.lines:
-                    pHeight += max(l.ascent - l.descent, p.style.leading) * 1.025 #magic factor! autoLeading==max increases line-height
+                for line in p.blPara.lines:
+                    pHeight += max(line.ascent - line.descent, p.style.leading) * 1.025 #magic factor! autoLeading==max increases line-height
             else:
                 if autoLeading=='max':
-                    pHeight = len(p.blPara.lines)*max(p.style.leading, 1.2*p.style.fontSize) # used to be 1.2 instead of 1.0
+                    pHeight = len(p.blPara.lines)*max(p.style.leading, 1.2 * p.style.fontSize)
+                    # used to be 1.2 instead of 1.0
                 else:
                     pHeight = len(p.blPara.lines)*p.style.leading
             self.paraHeights.append(pHeight + p.style.spaceBefore + p.style.spaceAfter)
@@ -304,7 +305,7 @@ class FiguresAndParagraphs(Flowable):
                 if splittedParagraph:
                     nextParas.append(p)
                     continue
-                paraFrags = p.split(availWidth, availheight - height - p.style.spaceBefore - p.style.spaceAfter - 2*p.style.leading) # one line-height "safety margin"
+                paraFrags = p.split(availWidth, availheight - height - p.style.spaceBefore - p.style.spaceAfter - 2 * p.style.leading) # one line-height "safety margin"
                 splittedParagraph=True
                 if len(paraFrags) == 2:
                     fittingParas.append(paraFrags[0])
@@ -385,7 +386,7 @@ class PreformattedBox(Preformatted):
 class SmartKeepTogether(_ContainerSpace, Flowable):
     def __init__(self, flowables, max_height=None):
         self._content = _flowableSublist(flowables)
-        self._max_height = max_height
+        self._max_height = max_height # 144891,14
 
     def wrap(self, aW, aH):
         dims = []

@@ -195,7 +195,7 @@ def custom_calc_widths(table, avail_width):
 
 def optimize_widths(min_widths, max_widths, avail_width,
                     stretch=False, table=None):
-    if pdfstyles.TABLE_WIDTH_FROM_MARKUP:
+    if pdfstyles.TABLE_WIDTHS_FROM_MARKUP:
         col_widths = custom_calc_widths(table, avail_width)
         if col_widths is not None:
             return col_widths

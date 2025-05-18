@@ -196,7 +196,7 @@ class RlWriter:
         self.font_switcher.register_reportlab_fonts(fontconfig.fonts)
 
         self.tree_cleaner = TreeCleaner([], save_reports=self.debug, rtl=self.rtl)
-        self.tree_cleaner.skip_methods = pdfstyles.TREE_CLEANER_SKIP_METHODS
+        self.tree_cleaner.skip_methods = pdfstyles.TREECLEANER_SKIP_METHODS
         self.tree_cleaner.content_without_text_classes.append(advtree.ReferenceList)
 
         self.cnt = CustomNodeTransformer()
@@ -207,8 +207,8 @@ class RlWriter:
             pdfstyles.PRINT_HEIGHT,
             pdfstyles.IMG_DEFAULT_THUMB_WIDTH,
             pdfstyles.IMG_MIN_RES,
-            pdfstyles.IMG_MAX_THUMG_WIDTH,
-            pdfstyles.IMG_MAX_THUMG_HEIGHT,
+            pdfstyles.IMG_MAX_THUMB_WIDTH,
+            pdfstyles.IMG_MAX_THUMB_HEIGHT,
             pdfstyles.IMG_INLINE_SCALE_FACTOR,
             pdfstyles.PRINT_WIDTH_PX,
         )
@@ -614,15 +614,14 @@ class RlWriter:
         if self.env.get_licenses():
             elements.append(TocEntry(txt=_("Article Licenses"), lvl="group"))
 
-        for license in self.env.get_licenses():
+        for lic in self.env.get_licenses():
             license_node = uparser.parse_string(
-                title=_(license.title), raw=license.wikitext, wikidb=license._wiki
+                title=_(lic.title), raw=lic.wikitext, wikidb=lic._wiki
             )
             advtree.build_advanced_tree(license_node)
             self.tree_cleaner.tree = license_node
             self.tree_cleaner.clean_all()
             elements.extend(self.writeArticle(license_node))
-        self.license_mode = False
         return elements
 
     def getArticleIDs(self):
@@ -985,12 +984,12 @@ class RlWriter:
         for figure in figures:
             # assume 40 chars per line for caption text
             total_figure_height += (
-                figure.img_height
-                + figure.margin[0]
-                + figure.margin[2]
-                + figure.padding[0]
-                + figure.padding[2]
-                + figure.caption_style.leading * max(int(len(figure.caption_txt) / 40), 1)
+                    figure.img_height
+                    + figure.margin[0]
+                    + figure.margin[2]
+                    + figure.padding[0]
+                    + figure.padding[2]
+                    + figure.caption_style.leading * max(int(len(figure.caption_txt) / 40), 1)
             )
             max_img_width = max(max_img_width, figure.img_width)
         for paragraph in paras:
@@ -1748,7 +1747,7 @@ class RlWriter:
             cell = img_node.get_parent_nodes_by_class(advtree.Cell)
             if cell:
                 max_width = PRINT_WIDTH / len(cell[0].get_all_siblings()) - 10
-        max_height = pdfstyles.IMG_MAX_THUMG_HEIGHT * PRINT_HEIGHT
+        max_height = pdfstyles.IMG_MAX_THUMB_HEIGHT * PRINT_HEIGHT
         if self.table_nesting > 0:
             max_height = PRINT_HEIGHT / 4  # fixme this needs to be read from config
         if self.gallery_mode:
@@ -2635,7 +2634,7 @@ class RlWriter:
         width, height = img.size
         del img
 
-        if width > pdfstyles.max_math_width or height > pdfstyles.MAX_MATH_HEIGHT:
+        if width > pdfstyles.MAX_MATH_WIDTH or height > pdfstyles.MAX_MATH_HEIGHT:
             log.info(
                 f"skipping math formula, png to big: {source}, w:{width}, h:{height}"
             )

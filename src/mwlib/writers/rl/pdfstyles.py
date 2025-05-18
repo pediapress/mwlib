@@ -14,6 +14,7 @@
 
 
 import contextlib
+import logging
 
 from reportlab import rl_config
 from reportlab.lib import colors
@@ -22,9 +23,10 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 
-# used to mark translateable strings:
-if "_" not in globals():
+log = logging.getLogger(__name__)
 
+# used to mark translateable strings:
+if '_' not in globals():
     def _(text):
         return text
 
@@ -36,10 +38,10 @@ DEFAULT_FONT = "FreeSerif"
 
 rl_config.canvas_basefontname = DEFAULT_FONT
 
-
+# --------------------------------------------
 # PAGE CONFIGURATION
 
-PAGE_WIDTH, PAGE_HEIGHT = A4  # roughly: pW= 21*cm pH=29*cm
+PAGE_WIDTH, PAGE_HEIGHT = A4   # roughly: pW= 21*cm pH=29.7*cm
 
 PAGE_MARGIN_LEFT = 2 * cm
 PAGE_MARGIN_RIGHT = 2 * cm
@@ -47,7 +49,7 @@ PAGE_MARGIN_TOP = 2 * cm
 PAGE_MARGIN_BOTTOM = 2 * cm
 
 HEADER_MARGIN_HOR = 1.5 * cm
-HEADER_MARGIN_VERT = 1.5 * cm
+HEADER_MARGIN_VERT= 1.5 * cm
 
 FOOTER_MARGIN_HOR = 1.5 * cm
 FOOTER_MARGIN_VER = 1.5 * cm
@@ -64,8 +66,8 @@ SHOW_PAGE_HEADER = True
 SHOW_PAGE_FOOTER = True
 PAGE_BREAK_AFTER_ARTICLE = False
 
-SHOW_ARTICLE_ATTRIBUTION = True  # Show/Hide article source and contributors
-SHOW_ARTICLE_HR = True  # Underline each article header by a horizontal rule
+SHOW_ARTICLE_ATTRIBUTION = True   # Show/Hide article source and contributors
+SHOW_ARTICLE_HR = True           # Underline each article header by a horizontal rule
 SHOW_WIKI_LICENSE = True
 
 # NOTE: strings can contain reportlab styling tags
@@ -77,9 +79,10 @@ SHOW_WIKI_LICENSE = True
 # you might also want to check the docstring of the
 # Paragraph class (reportlab/platypus/paragraph.py --> class Paragraph())
 # e.g. the use of inline images is not
-# included in the official documenation of reportlab
+# included in the official documentation of reportlab
 PAGE_FOOTER = ""
 
+# --------------------------------------------
 # TITLE PAGE
 
 TITLE_PAGE_IMAGE = ""  # path of an image that is to be displayed on the title page
@@ -108,6 +111,7 @@ CREATION_DATE_TXT = "PDF generated at: %s"
 # note that no TOC is generated if only one article is rendered
 RENDER_TOC = True
 
+# --------------------------------------------
 # TABLE CONFIG
 
 TABLE_OVERFLOW_TOLERANCE = 20  # max width overflow for tables (unit: pt)
@@ -117,15 +121,17 @@ MIN_ROWS_FOR_BREAK = (
 )
 
 # if set to True column widths are extracted from wiki markup if possible
-TABLE_WIDTH_FROM_MARKUP = False
+TABLE_WIDTHS_FROM_MARKUP = False
 
 # alignment of tables: TA_LEFT | TA_CENTER | TA_RIGHT
 TABLE_ALIGN = TA_CENTER
 
+# --------------------------------------------
 # TREECLEANER CONFIGURATION
 
-TREE_CLEANER_SKIP_METHODS = ["fix_preformatted", "remove_empty_ref_lists"]
+TREECLEANER_SKIP_METHODS = ["fixPreFormatted", "removeEmptyReferenceLists"]
 
+# --------------------------------------------
 # IMAGE CONFIGURATION
 
 # margins for floated images - margins like in html/css:
@@ -135,8 +141,8 @@ IMG_MARGINS_FLOAT_RIGHT = (0, 0, 0.7 * cm, 0.4 * cm)  # ...
 IMG_MARGINS_FLOAT = (0.2 * cm, 0.2 * cm, 0.2 * cm, 0.2 * cm)  # any other alignment
 
 IMG_DEFAULT_THUMB_WIDTH = 180
-IMG_MAX_THUMG_WIDTH = 0.6  # fraction of print width for floated images
-IMG_MAX_THUMG_HEIGHT = 0.45
+IMG_MAX_THUMB_WIDTH = 0.6  # fraction of print width for floated images
+IMG_MAX_THUMB_HEIGHT = 0.45
 IMG_MIN_RES = 75
 IMG_INLINE_SCALE_FACTOR = 0.7  # factor by which inline images are scaled.
 PRINT_WIDTH_PX = 540  # 540px are assumed to be the equivalent for a full print width
@@ -145,7 +151,9 @@ IMG_BORDER_COLOR = (0.75, 0.75, 0.75)
 
 LINK_IMAGES = True
 
+# --------------------------------------------
 # TEXT CONFIGURATION
+
 FONT_SIZE = 10
 LEADING = 15
 TEXT_ALIGN = TA_JUSTIFY  # default alignment of text outside of tables TA_LEFT, TA_JUSTIFY, TA_RIGHT, TA_CENTER are valid
@@ -172,8 +180,7 @@ NO_FLOAT_MATH_LEN = 150
 
 MAX_MATH_WIDTH = 2500
 MAX_MATH_HEIGHT = 2500
-# set to CJK if a PDF is rendered mainly using chinese,
-# japanese or korean glyphs
+# set to CJK if a PDF is rendered mainly using chinese, japanese or korean glyphs
 WORD_WRAP = None
 
 MIN_PREFORMATTED_SIZE = 5
@@ -181,7 +188,7 @@ MIN_PREFORMATTED_SIZE = 5
 
 CHAPTER_RULE_COLOR = colors.black
 
-
+# --------------------------------------------
 # misc options
 
 LIST_ITEM_STYLE = "\u2022"
@@ -218,64 +225,7 @@ class BaseStyle(ParagraphStyle):
         self.underlineWidth = 1
 
 
-# def get_font_size(relsize, mode):
-#     if relsize == "small":
-#         font_size = SMALL_FONT_SIZE - 1
-#     elif relsize == "big":
-#         font_size = SMALL_FONT_SIZE + 1
-#     elif mode in ["footer", "figure", "center", "references", "articlefoot"]:
-#         font_size = SMALL_FONT_SIZE
-#     elif mode == "booktitle":
-#         font_size = 36
-#     elif mode == "booksubtitle":
-#         font_size = 24
-#     elif mode == "License" or mode == "licenselist":
-#         font_size = 5
-#     elif mode == "toc_group":
-#         font_size = 18
-#     elif mode == "toc_chapter":
-#         font_size = 14
-#     elif mode == "toc_article":
-#         font_size = 10
-#     else:
-#         font_size = None
-#     return font_size
-#
-#
-# def get_leading(mode):
-#     if mode in ["footer", "figure", "center", "references", "articlefoot", "License", "licenselist"]:
-#         leading = SMALL_LEADING
-#     elif mode == "booktitle":
-#         leading = 40
-#     elif mode == "booksubtitle":
-#         leading = 30
-#     elif mode == "toc_group":
-#         leading = 22
-#     elif mode == "toc_chapter":
-#         leading = 18
-#     elif mode == "toc_article":
-#         leading = 12
-#     else:
-#         leading = None
-#     return leading
-#
-#
-# def get_alignment(text_align, mode):
-#     if text_align == "right":
-#         alignment = TA_RIGHT
-#     elif text_align == "center" or mode in ["footer", "figure", "center"]:
-#         alignment = TA_CENTER
-#     elif text_align == "justify":
-#         alignment = TA_JUSTIFY
-#     elif mode in ["references", "articlefoot", "source", "preformatted", "list", "attribution", "img_attribution"]:
-#         alignment = TA_LEFT
-#     else:
-#         alignment = TEXT_ALIGN
-#     return alignment
-
-
-def text_style(mode="p", indent_lvl=0, in_table=0,
-               relsize="normal", text_align=None):
+def text_style(mode='p', indent_lvl=0, in_table=0, relsize='normal', text_align=None):
     """
     mode: p (normal paragraph), blockquote, center (centered paragraph),
     footer, figure (figure caption text),
@@ -289,34 +239,30 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
     text_align: left, center, right, justify
     """
 
+    # default alignment to "justify"
     if not text_align:
-        text_align = "left"
+        text_align = "justify"
 
-    # font_size = get_font_size(relsize, mode)
-    # leading = get_leading(mode)
-    # alignment = get_alignment(text_align, mode)
+    mode = mode.lower()
 
-    style = BaseStyle(
-        name="text_style_%s_indent_%d_table_%d_size_%s"
-        % (mode, indent_lvl, in_table, relsize)
-    )
-    style.flowable = True  # needed for "flowing" paragraphs around figures
+    style = BaseStyle(name="text_style_%s_indent_%d_table_%d_size_%s" % (mode, indent_lvl, in_table, relsize))
+    style.flowable = True # needed for "flowing" paragraphs around figures
 
     if WORD_WRAP in ["CJK", "RTL"] and mode not in ["preformatted", "source"]:
         style.wordWrap = WORD_WRAP
 
     if in_table > 0:
         style.alignment = TABLE_TEXT_ALIGN
-    if text_align == 'right':
+    if text_align == "right":
         style.alignment = TA_RIGHT
-    elif text_align == 'center':
+    elif text_align == "center":
         style.alignment = TA_CENTER
+    elif text_align == "left":
+        style.alignment = TA_LEFT
+    else:
+        style.alignment = TA_JUSTIFY
 
-    if (
-        in_table
-        or mode in ["footer", "figure"]
-        or (mode == "preformatted" and relsize == "small")
-    ):
+    if in_table or mode in ["footer", "figure"] or (mode=="preformatted" and relsize=="small"):
         style.fontSize = SMALL_FONT_SIZE
         style.bulletFontSize = SMALL_FONT_SIZE
         style.leading = SMALL_LEADING
@@ -348,21 +294,17 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
         style.leading = SMALL_LEADING
         style.bulletFontSize = SMALL_FONT_SIZE
 
-    if mode in ['box', 'source', 'preformatted']:
+    if mode in ["box", "source", "preformatted"]:
         style.backColor = "#eeeeee"
-        style.borderPadding = (
-            3  # borderPadding is not calculated onto the box dimensions.
-        )
+        style.borderPadding = 3  # borderPadding is not calculated onto the box dimensions.
         style.spaceBefore = 6  # therefore spaceBefore = 3 + borderPadding
-        style.spaceAfter = (
-            9  # add an extra 3 to spaceAfter, b/c spacing seems to small otherwise
-        )
+        style.spaceAfter = 9  # add an extra 3 to spaceAfter, b/c spacing seems too small otherwise
 
-    if mode in ['source', 'preformatted']:
+    if mode in ["source", "preformatted"]:
         style.fontName = MONO_FONT
         style.flowable = False
 
-    if mode in ['list', 'references']:
+    if mode in ["list", "references"]:
         style.spaceBefore = 0
         style.bulletIndent = LIST_LEFT_INDENT * max(0, indent_lvl - 1)
         style.leftIndent = LIST_LEFT_INDENT * indent_lvl
@@ -376,13 +318,13 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
         style.fontName = SANS_FONT
         style.alignment = TA_LEFT
 
-    if mode == 'booksubtitle':
+    if mode == "booksubtitle":
         style.fontSize = 24
         style.leading = 30
         style.fontName= SANS_FONT
         style.alignment = TA_LEFT
 
-    if WORD_WRAP == 'RTL':
+    if WORD_WRAP == "RTL":
         # switch all alignment, indentations for rtl languages
         if style.alignment in [TA_LEFT, TA_JUSTIFY]:
             style.alignment = TA_RIGHT
@@ -391,40 +333,40 @@ def text_style(mode="p", indent_lvl=0, in_table=0,
 
         style.leftIndent, style.rightIndent = style.rightIndent, style.leftIndent
 
-    if mode == 'license':
+    if mode == "license":
         style.fontSize = 5
         style.leading = 1
         style.spaceBefore = 0
 
-    if mode == 'licenselist':
+    if mode == "licenselist":
         style.fontSize = 5
         style.leading = 1
         style.spaceBefore = 0
-        style.bulletIndent = LIST_LEFT_INDENT * max(0, indent_lvl-1)
+        style.bulletIndent = LIST_LEFT_INDENT * max(0, indent_lvl - 1)
         style.leftIndent = LIST_LEFT_INDENT * indent_lvl
         style.bulletFontSize = 5
 
-    if mode == 'toc_group':
+    if mode == "toc_group":
         style.fontSize = 18
         style.leading = 22
-
-    if mode == 'toc_chapter':
+       
+    if mode == "toc_chapter":
         style.fontSize = 14
         style.leading = 18
-
-    if mode == 'toc_article':
+        
+    if mode == "toc_article":
         style.fontSize = 10
         style.leading = 12
         style.leftIndent = PARA_LEFT_INDENT
 
-
     return style
 
-
-TABLE_STYLE = {"spaceBefore": 0.25 * cm, "spaceAfter": 0.25 * cm}
+TABLE_STYLE = {'spaceBefore': 0.25 * cm,
+               'spaceAfter': 0.25*cm}
 
 
 class BaseHeadingStyle(ParagraphStyle):
+
     def __init__(self, name, parent=None, **kw):
         ParagraphStyle.__init__(self, name=name, parent=parent, **kw)
         self.fontName = SERIF_FONT
@@ -447,18 +389,20 @@ class BaseHeadingStyle(ParagraphStyle):
 
 
 def heading_style(mode="Chapter", lvl=1, text_align=None):
+    mode = mode.lower()
     style = BaseHeadingStyle(name="heading_style_%s_%d" % (mode, lvl))
+
 
     if WORD_WRAP == "RTL":
         style.wordWrap = "RTL"
         if not text_align:
             style.alignment = TA_RIGHT
 
-    if mode == "Chapter":
+    if mode == "chapter":
         style.fontSize = 26
         style.leading = 30
         style.alignment = TA_CENTER
-    elif mode.lower() == "article":
+    elif mode == "article":
         style.fontSize = 22
         style.leading = 26
         style.spaceBefore = 20
@@ -478,7 +422,7 @@ def heading_style(mode="Chapter", lvl=1, text_align=None):
         style.alignment = TA_CENTER
         style.flowable = False
         style.spaceAfter = 0
-    elif mode.lower() == "license":
+    elif mode == "license":
         style.fontSize = 7
         style.leading = 5
         style.spaceAfter = 0

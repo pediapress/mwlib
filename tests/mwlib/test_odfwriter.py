@@ -424,10 +424,9 @@ def test_math2():
     assert "test" in xml
 
 
-@pytest.mark.xfail
 def test_snippets(snippet):
-    print("testing", repr(s.txt))
-    xml = get_xml(s.txt)
+    print("testing", repr(snippet.txt))
+    xml = get_xml(snippet.txt)
     assert "test" in xml
 
 
