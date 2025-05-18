@@ -10,14 +10,15 @@ import webbrowser
 
 import click
 from gevent import monkey
+
 monkey.patch_all()
 
-from mwlib.core import wiki
-from mwlib.network.podclient import PODClient, podclient_from_serviceurl
-from mwlib.parser import expander
-from mwlib.parser.refine import uparser
-from mwlib.utils import unorganized
-from mwlib.utils.status import Status
+from mwlib.core import wiki  # noqa: E402
+from mwlib.network.podclient import PODClient, podclient_from_serviceurl  # noqa: E402
+from mwlib.parser import expander  # noqa: E402
+from mwlib.parser.refine import uparser  # noqa: E402
+from mwlib.utils import unorganized  # noqa: E402
+from mwlib.utils.status import Status  # noqa: E402
 
 
 @click.command()
