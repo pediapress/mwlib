@@ -124,7 +124,7 @@ class Main:
 
         if qpath and os.path.exists(qpath):
             logger.info(f"loading {qpath}")
-            q_file = open(qpath, "rb")
+            q_file = open(qpath, "rb")  # noqa: SIM115
             self.db = pickle.load(q_file)
             logger.info(f"loaded {len(self.db.workq.id2job)} jobs")
         else:
@@ -134,7 +134,8 @@ class Main:
     def savedb(self):
         if self.qpath:
             logger.info(f"saving {self.qpath}")
-            pickle.dump(self.db, open(self.qpath, "w"), 2)
+            with open(self.qpath, "wb") as f:
+                pickle.dump(self.db, f, 2)
 
     def is_allowed_ip(self, ip):
         return not self.allowed_ips or ip in self.allowed_ips
@@ -176,7 +177,7 @@ class Main:
 
         bs = None
         try:
-            backdoor_port = port_from_str(os.environ.get("qserve_backdoor", ""))
+            backdoor_port = port_from_str(os.environ.get("QSERVE_BACKDOOR", ""))
         except ValueError:
             pass
         else:

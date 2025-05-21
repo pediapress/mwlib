@@ -358,12 +358,16 @@ def text_style(mode="p", indent_lvl=0, in_table=0, relsize="normal", text_align=
         style.spaceBefore = 2
     elif mode in ["articlefoot", "references"]:
         style.bulletFontSize = SMALL_FONT_SIZE
-    elif mode in ["box", "source", "preformatted"]:
+    elif mode == "box":
         style.backColor = "#eeeeee"
         style.borderPadding = 3  # borderPadding is not calculated onto the box dimensions.
         style.spaceBefore = 6  # therefore spaceBefore = 3 + borderPadding
         style.spaceAfter = 9  # add an extra 3 to spaceAfter, b/c spacing seems too small otherwise
     elif mode in ["source", "preformatted"]:
+        style.backColor = "#eeeeee"
+        style.borderPadding = 3  # borderPadding is not calculated onto the box dimensions.
+        style.spaceBefore = 6  # therefore spaceBefore = 3 + borderPadding
+        style.spaceAfter = 9  # add an extra 3 to spaceAfter, b/c spacing seems too small otherwise
         style.fontName = MONO_FONT
         style.flowable = False
     elif mode == "booktitle":

@@ -93,7 +93,7 @@ class FsOutput:
         if os.path.exists(self.path):
             raise ValueError(f"output path exists: {self.path}")
         os.makedirs(os.path.join(self.path, "images"))
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8") # noqa: SIM115
         self.seen = {}
         self.imgcount = 0
         self.nfo = None
@@ -106,7 +106,7 @@ class FsOutput:
             setattr(self, storage, database)
 
     def open_rev_file_for_reading(self):
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), encoding="utf8")
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), encoding="utf8") # noqa: SIM115
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
@@ -242,25 +242,20 @@ def call_when(event, fun):
 
 def download_to_file(url, path, temp_path):
     opener = request.build_opener()
-    opener.addheaders = [("User-Agent", conf.user_agent), ("Referer", 'https://pediapress.com/')]
+    opener.addheaders = [("User-Agent", conf.user_agent), ("Referer", "https://pediapress.com/")]
 
     try:
-        out = None
         size_read = 0
         remote_file = opener.open(url)
-        while True:
-            data = remote_file.read(16384)
-            if not data:
-                break
-            size_read += len(data)
-            if out is None:
-                out = open(temp_path, "wb")
-            out.write(data)
+        with open(temp_path, "wb") as out:
+            while True:
+                data = remote_file.read(16384)
+                if not data:
+                    break
+                size_read += len(data)
+                out.write(data)
         logger.debug(f"read {size_read} bytes from {url}")
-        if out is not None:
-            out.close()
-            os.rename(temp_path, path)
-
+        os.rename(temp_path, path)
 
     except Exception as err:
         print("ERROR DOWNLOADING", url, err)

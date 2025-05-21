@@ -98,10 +98,9 @@ class FontSwitcher:
     def unregister_font(self, font_name_to_unregister):
         registered_entries = []
         i = 0
-        for _, _, font_name in self.code_points2font:
+        for i, (_, _, font_name) in enumerate(self.code_points2font):
             if font_name_to_unregister == font_name:
                 registered_entries.append(i)
-            i += 1
         registered_entries.reverse()
         for entry in registered_entries:
             self.code_points2font.pop(entry)

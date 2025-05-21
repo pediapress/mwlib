@@ -170,9 +170,8 @@ class Commands:
             args.extend(_get_args(zip_only=True, **params))
 
             if metabook_data:
-                f = open(metabook_path, "wb")
-                f.write(metabook_data.encode("utf-8"))
-                f.close()
+                with open(metabook_path, "wb") as f:
+                    f.write(metabook_data.encode("utf-8"))
 
             logger.info(f"running {args!r}")
             system(args, timeout=8 * 60.0)

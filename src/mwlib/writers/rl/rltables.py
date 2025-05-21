@@ -296,28 +296,21 @@ def add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols):
 
 
 def check_spans_in_row(row, row_idx, col_idx, cell, table, styles, _approx_cols):
-    col_idx = 0
-    for cell in row.children:
+    for col_idx, cell in enumerate(row.children):
         if cell.rowspan > 1:
             emptycell = get_empty_cell(None, cell.colspan, cell.rowspan - 1)
             last_col_idx = len(table.children[row_idx + 1].children) - 1
             if col_idx > last_col_idx:
                 emptycell.move_to(table.children[row_idx + 1].children[last_col_idx])
             else:
-                emptycell.move_to(
-                    table.children[row_idx + 1].children[col_idx], prefix=True
-                )
+                emptycell.move_to(table.children[row_idx + 1].children[col_idx], prefix=True)
             if not getattr(cell, "rowspanned", False):
                 add_styles_to_row(cell, row_idx, col_idx, styles, _approx_cols)
             emptycell.rowspanned = True
             if cell.colspan > 1:
                 emptycell.colspanned = True
         elif cell.colspan > 1:
-            styles.append(
-                ("SPAN", (col_idx, row_idx),
-                 (col_idx + cell.colspan - 1, row_idx))
-            )
-        col_idx += 1
+            styles.append(("SPAN", (col_idx, row_idx), (col_idx + cell.colspan - 1, row_idx)))
 
 
 def check_spans(table):

@@ -88,7 +88,7 @@ class DumpParser:
         elif self.xml_filename.lower().endswith(".7z"):
             xml_file = os.popen("7z -so x %s" % self.xml_filename, "r")
         else:
-            xml_file = open(self.xml_filename)
+            xml_file = open(self.xml_filename)  # noqa: SIM115
 
         return xml_file
 

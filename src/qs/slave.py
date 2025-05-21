@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import contextlib
 import os
 import sys
 import time
@@ -95,7 +95,7 @@ class Worker:
         return r["result"]
 
 
-def main(
+def main(  # noqa: C901
     commands,
     host="localhost",
     port=None,
@@ -203,10 +203,8 @@ def main(
                 pass
             return
 
-        try:
+        with contextlib.suppress(Exception):
             server_proxy.qfinish(jobid=job["jobid"], result=result)
-        except Exception:
-            pass
 
     def start_worker():
         logger.info(f"Server proxy form start_worker {host}:{port}")
@@ -259,10 +257,8 @@ def main(
                 continue
 
             logger.debug("done %s" % pid)
-            try:
+            with contextlib.suppress(KeyError):
                 children.remove(pid)
-            except KeyError:
-                pass
 
     def run_with_gevent():
         import gevent.pool

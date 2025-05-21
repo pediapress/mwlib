@@ -44,7 +44,7 @@ def test_text_style_modes():
         "p", "blockquote", "center", "footer", "figure", "preformatted", 
         "list", "license", "licenselist", "box", "references", "articlefoot",
         "attribution", "img_attribution", "booktitle", "booksubtitle",
-        "toc_group", "toc_chapter", "toc_article"
+        "toc_group", "toc_chapter", "toc_article", "source"
     ]
 
     for mode in modes:

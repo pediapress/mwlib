@@ -8,11 +8,9 @@ ARTICLE_ERROR = "{} needs to be called with Article node"
 
 def has_infobox_attrs(node: advtree.Node) -> bool:
     infobox_class_ids = ["infobox", "taxobox"]
-    if node.has_class_id(infobox_class_ids):
-        return True
-    if node.attributes.get("summary", "").lower() in infobox_class_ids:
-        return True
-    return False
+    has_infobox_class_id = node.has_class_id(infobox_class_ids)
+    has_summary_class_id = node.attributes.get("summary", "").lower() in infobox_class_ids
+    return (has_infobox_class_id or has_summary_class_id)
 
 
 def text_in_node(node: advtree.Node) -> int:

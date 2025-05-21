@@ -2457,13 +2457,9 @@ class RlWriter:
             self._calculate_and_update_cell_widths(row, min_widths, max_widths)
 
         for row in table.children:  # handle colspanned cells
-            col_idx = 0
-            for cell in row.children:
+            for col_idx, cell in enumerate(row.children):
                 if cell.colspan > 1:
-                    self._adjust_colspan_cell_widths(
-                        cell, min_widths, max_widths, col_idx
-                    )
-                col_idx += 1
+                    self._adjust_colspan_cell_widths(cell, min_widths, max_widths, col_idx)
         return min_widths, max_widths
 
     def getTableSize(self, table):

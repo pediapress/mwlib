@@ -56,7 +56,7 @@ def start_logging(path, stderr_only=False):
         sys.stdout.flush()
     sys.stderr.flush()
 
-    log_file = open(path, "a", encoding="utf-8")
+    log_file = open(path, "a", encoding="utf-8")  # noqa: SIM115
     file_no = log_file.fileno()
 
     if not stderr_only:

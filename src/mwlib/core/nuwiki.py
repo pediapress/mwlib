@@ -149,9 +149,8 @@ class NuWiki:
                 break
             count += 1
             log.info(f"reading {file_name}")
-            file_content = str(
-                open(self._pathjoin(file_name), "rb").read(), "utf-8"
-            )
+            with open(self._pathjoin(file_name), "rb") as f:
+                file_content = str(f.read(), "utf-8")
             pages = file_content.split("\n --page-- ")
 
             for page in pages[1:]:
@@ -299,7 +298,8 @@ def extract_member(zipfile, member, dstdir):
         os.makedirs(upperdirs)
 
     if not member.filename.endswith("/"):
-        open(targetpath, "wb").write(zipfile.read(member.filename))
+        with open(targetpath, "wb") as output_file:
+            output_file.write(zipfile.read(member.filename))
 
 
 def extractall(zip_file, dst):

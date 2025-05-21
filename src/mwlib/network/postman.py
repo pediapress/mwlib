@@ -26,17 +26,19 @@ def get_collection_dir(collection_id):
 
 
 def uploadfile(ipath, posturl, file_handler=None):
-    if file_handler is None:
-        file_handler = open(ipath, "rb")
-
     podclient = PODClient(posturl)
-
     status = Status(podclient=podclient)
 
     try:
-        status(status="uploading", progress=0)
-        podclient.streaming_post_zipfile(ipath, file_handler)
-        status(status="finished", progress=100)
+        if file_handler is None:
+            with open(ipath, "rb") as file_handler:
+                status(status="uploading", progress=0)
+                podclient.streaming_post_zipfile(ipath, file_handler)
+                status(status="finished", progress=100)
+        else:
+            status(status="uploading", progress=0)
+            podclient.streaming_post_zipfile(ipath, file_handler)
+            status(status="finished", progress=100)
     except Exception as err:
         status(status="error")
         raise err

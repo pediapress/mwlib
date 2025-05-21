@@ -341,11 +341,9 @@ class AdvancedNode:
 
     def is_visible(self):
         """Return True if node is visble. Used to detect hidden elements."""
-        if self.style.get("display", "").lower() == "none":
-            return False
-        if self.style.get("visibility", "").lower() == "hidden":
-            return False
-        return True
+        hidden = self.style.get("visibility", "").lower() == "hidden"
+        display_none = self.style.get("display", "").lower() == "none"
+        return not(hidden or display_none)
 
     style = property(get_style)
     attributes = property(get_attributes)
@@ -425,11 +423,10 @@ class AdvancedImageLink(AdvancedNode):
 class AdvancedMath(AdvancedNode):
     @property
     def is_block_node(self):
-        if self.caption.strip().startswith(
-            "\\begin{align}"
-        ) or self.caption.strip().startswith("\\begin{alignat}"):
-            return True
-        return False
+        return (
+            self.caption.strip().startswith("\\begin{align}")
+            or self.caption.strip().startswith("\\begin{alignat}")
+        )
 
 
 # --------------------------------------------------------------------------

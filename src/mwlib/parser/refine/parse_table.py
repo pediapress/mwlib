@@ -132,11 +132,7 @@ class TableRowParser:
         )
 
     def should_find_modifier(self, row_begin_token):
-        if row_begin_token is None:
-            return False
-        if row_begin_token.rawtagname:
-            return False
-        return True
+        return not(row_begin_token is None or row_begin_token.rawtagname)
 
     def args(self, row_begin_token):
         if row_begin_token is None:

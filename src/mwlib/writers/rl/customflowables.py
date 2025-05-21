@@ -213,10 +213,7 @@ class FiguresAndParagraphs(Flowable):
                 p.blPara = p.breakLines(nfloatLines*[floatWidth] + [fullWidth])
             if self.figAlign=='left':
                 self._offsets.append([maxWf]*(nfloatLines) + [0])
-            if hasattr(p, 'style'):
-                autoLeading = getattr(p.style, 'autoLeading')
-            else:
-                autoLeading = ''
+            autoLeading = p.style.autoLeading if hasattr(p, "style") else ""
             if hasattr(p, 'style') and autoLeading == 'max' and p.blPara.kind == 1:
                 pHeight = 0
                 for line in p.blPara.lines:
@@ -322,10 +319,7 @@ class FiguresAndParagraphs(Flowable):
             else:
                 nextElements = nextFigures
         else:
-            if nextParas:
-                nextElements = nextParas
-            else:
-                nextElements = []
+            nextElements = nextParas if nextParas else []
         return [FiguresAndParagraphs(fittingFigures, fittingParas, figure_margin=self.figure_margin)] + nextElements
 
 class PreformattedBox(Preformatted):

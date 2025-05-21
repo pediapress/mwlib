@@ -177,13 +177,13 @@ class LicenseChecker:
     def dump_unknown_licenses(self, _dir):
         if not self.unknown_licenses:
             return
-        temp_file = tempfile.NamedTemporaryFile(dir=_dir, prefix="licensestats_",
-                                        suffix=".json")
         unknown_licenses = {}
         for lic, urls in self.unknown_licenses.items():
             unknown_licenses[lic] = list(urls)
-        temp_file.write(json.dumps(unknown_licenses).encode("utf-8"))
-        temp_file.close()
+        with tempfile.NamedTemporaryFile(
+            dir=_dir, prefix="licensestats_", suffix=".json", mode="w"
+        ) as temp_file:
+            json.dump(unknown_licenses, temp_file)
 
     def analyse_unknown_licenses(self, _dir):
         files = os.listdir(_dir)
