@@ -75,7 +75,7 @@ select = [
 #  "RET",    # flake8-return
 #  "RUF",    # Ruff-specific rules
   "SIM",    # flake8-simplify
-#  "TID",    # flake8-tidy-imports
+  "TID",    # flake8-tidy-imports
 #  "UP",     # pyupgrade
 #  "W",      # pycodestyle warning
 ]

@@ -4,7 +4,7 @@ import traceback
 from reportlab.pdfbase.pdfdoc import PDFDictionary
 from reportlab.platypus.paragraph import Paragraph
 
-from .pdfstyles import text_style
+from mwlib.writers.rl.pdfstyles import text_style
 
 log = logging.getLogger("rlwriter")
 

@@ -7,7 +7,7 @@ from reportlab.platypus.flowables import KeepTogether
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tables import Table
 
-from .customflowables import Figure, FiguresAndParagraphs, SmartKeepTogether
+from mwlib.writers.rl.customflowables import Figure, FiguresAndParagraphs, SmartKeepTogether
 
 
 def show_parse_tree(out, node, indent=0):

@@ -8,8 +8,7 @@ import contextlib
 import math
 
 from mwlib.parser import NamedURL, build_amap
-
-from .advtree import Cell, ImageLink, Link, Reference
+from mwlib.parser.advtree import Cell, ImageLink, Link, Reference
 
 
 def _calculate_node_height_based_on_content(access, node, height, line_height, chars_per_line, paragraph_margin, img_height):

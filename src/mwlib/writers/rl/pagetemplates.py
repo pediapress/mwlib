@@ -15,7 +15,7 @@ from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.paragraph import Paragraph
 
-from mwlib.writers.rl import pdfstyles
+from mwlib.writers.rl import fontconfig, pdfstyles
 from mwlib.writers.rl.customflowables import TocEntry
 from mwlib.writers.rl.formatter import RLFormatter
 from mwlib.writers.rl.pdfstyles import (
@@ -36,8 +36,6 @@ from mwlib.writers.rl.pdfstyles import (
     TITLE_PAGE_FOOTER,
     text_style,
 )
-
-from . import fontconfig
 
 font_switcher = fontconfig.RLFontSwitcher()
 font_switcher.font_paths = fontconfig.font_paths

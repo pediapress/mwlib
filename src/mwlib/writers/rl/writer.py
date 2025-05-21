@@ -41,13 +41,16 @@ from reportlab.platypus.tables import Table
 from reportlab.platypus.xpreformatted import XPreformatted
 
 from mwlib import parser
+from mwlib.extensions import timeline
 from mwlib.parser import URL, Caption, NamedURL, advtree
+from mwlib.parser.refine import uparser
 from mwlib.parser.treecleaner import TreeCleaner
 from mwlib.rendering import miscutils, styleutils, writerbase
 from mwlib.rendering.imageutils import ImageUtils
 from mwlib.rendering.licensechecker import LicenseChecker
 from mwlib.rendering.mathutils import render_math
 from mwlib.utils._version import version as mwlibversion
+from mwlib.writers.rl import fontconfig, pdfstyles, rltables
 from mwlib.writers.rl._version import VERSION as rlwriterversion
 from mwlib.writers.rl.customflowables import (
     DummyTable,
@@ -58,28 +61,24 @@ from mwlib.writers.rl.customflowables import (
 )
 from mwlib.writers.rl.customnodetransformer import CustomNodeTransformer
 from mwlib.writers.rl.formatter import RLFormatter
-from mwlib.writers.rl.toc import TocRenderer
-
-from ...extensions import timeline
-from ...parser.refine import uparser
-from . import fontconfig, pdfstyles, rltables
-from .pagetemplates import PPDocTemplate, TitlePage, WikiPage
-from .pdfstyles import (
+from mwlib.writers.rl.pagetemplates import PPDocTemplate, TitlePage, WikiPage
+from mwlib.writers.rl.pdfstyles import (
     PRINT_HEIGHT,
     PRINT_WIDTH,
     TABLE_STYLE,
     heading_style,
     text_style,
 )
-from .rlsourceformatter import ReportlabFormatter
-from .utils import build_paragraph, check_reportlab, is_inline
+from mwlib.writers.rl.rlsourceformatter import ReportlabFormatter
+from mwlib.writers.rl.toc import TocRenderer
+from mwlib.writers.rl.utils import build_paragraph, check_reportlab, is_inline
 
 with contextlib.suppress(ImportError):
     from mwlib import _extversion
 
 
 try:
-    from ...utils import linuxmem
+    from mwlib.utils import linuxmem
 except ImportError:
     linuxmem = None
 
