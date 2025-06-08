@@ -514,6 +514,7 @@ include tests/conftest.py
 include tests/mwlib/apps/test_buildzip.py
 include tests/mwlib/canthus.mb.json
 include tests/mwlib/core/test_authors.py
+include tests/mwlib/core/test_metabook.py
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
 include tests/mwlib/rl/renderhelper.py
@@ -523,6 +524,7 @@ include tests/mwlib/rl/test_advanced.py
 include tests/mwlib/rl/test_basicnodes.py
 include tests/mwlib/rl/test_basicnodes.py.bak
 include tests/mwlib/rl/test_misc.py
+include tests/mwlib/rl/test_pdfstyles.py
 include tests/mwlib/rl/test_snippets.py
 include tests/mwlib/rl/test_translation.py
 include tests/mwlib/rl/test_translation.py.bak
@@ -537,7 +539,6 @@ include tests/mwlib/test_expr.py
 include tests/mwlib/test_iferror_rx.py
 include tests/mwlib/test_imgmap.py
 include tests/mwlib/test_math_utils.py
-include tests/mwlib/test_metabook.py
 include tests/mwlib/test_mwscan.py
 include tests/mwlib/test_nserve.py
 include tests/mwlib/test_nshandling.py
