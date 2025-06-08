@@ -9,9 +9,6 @@ import traceback
 import webbrowser
 
 import click
-from gevent import monkey
-
-monkey.patch_all()
 
 from mwlib.core import wiki  # noqa: E402
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl  # noqa: E402
