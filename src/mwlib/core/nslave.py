@@ -70,9 +70,9 @@ def system(args, timeout=None):
         a("\n====================\n")
 
         writemsg()
-        lines = ["    " + x for x in stdout[-4096:].split("\n")]
+        lines = "\n".join(["    " + x for x in stdout[-4096:].split("\n")])
         raise RuntimeError(
-            f"command failed with returncode {retcode}: {pub_args!r}\nLast Output:\n{'\n'.join(lines)}"
+            f"command failed with returncode {retcode}: {pub_args!r}\nLast Output:\n{lines}\n"
         )
 
     writemsg()

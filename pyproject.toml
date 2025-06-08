@@ -39,10 +39,10 @@ rl = "mwlib.writers.rl.writer:writer"
 
 
 [project.scripts]
+mw-render = "mwlib.core.main_trampoline:mw_render_main"
+mw-version = "mwlib.utils._version:main"
+mw-zip = "mwlib.core.main_trampoline:mw_zip_main"
 postman = "mwlib.core.main_trampoline:postman_main"
-mw-zip = "mwlib.apps.buildzip:main"
-mw-version = "mwlib._version:main"
-mw-render = "mwlib.apps.render:main"
 
 [tool.ruff]
 force-exclude = true
