@@ -27,7 +27,7 @@ src/mwlib/parser/templ/evaluate.c: src/mwlib/parser/templ
 	cython -3 src/mwlib/parser/templ/evaluate.pyx
 
 src/mwlib/parser/token/_uscan.cc: src/mwlib/parser/token/_uscan.re
-	re2c -w --no-generation-date -o src/mwlib/token/_uscan.cc src/mwlib/token/_uscan.re
+	re2c -w --no-generation-date -o src/mwlib/parser/token/_uscan.cc src/mwlib/parser/token/_uscan.re
 
 documentation:: README.html
 	cd docs; make html
