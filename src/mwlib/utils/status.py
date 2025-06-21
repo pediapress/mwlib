@@ -117,10 +117,11 @@ class Status:
             return
 
         try:
-            with open(self.filename + '.tmp', 'wb') as tmp_file:
-                tmp_file.write(
-                    json.dumps(self.status).encode('utf-8')
-                )
+            with open(self.filename + '.tmp', 'w') as tmp_file:
+                tmp_file.write(json.dumps(self.status))
             os.rename(self.filename + '.tmp', self.filename)
+        except FileNotFoundError as exc:
+            log.info(f'Could not write status file {self.filename!r}: {json.dumps(self.status)}')
         except Exception as exc:
-            log.ERROR(f'Could not write status file {self.filename!r}: {exc}')
+            log.error(f'Unknown exception {self.filename!r}: {exc}')
+            raise

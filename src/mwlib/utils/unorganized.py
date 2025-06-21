@@ -334,7 +334,7 @@ def report(
         )
         log.info("sent mail to %r" % mail_recipients)
     except Exception as exc:
-        log.ERROR("Could not send mail: %s" % exc)
+        log.error("Could not send mail: %s" % exc)
     return text
 
 
