@@ -180,12 +180,6 @@ def write_traceback(options, exc, status):
     help="write ZIP file to FILENAME",
 )
 @click.option(
-    "--keep-tmpfiles",
-    is_flag=True,
-    default=False,
-    help="don't remove  temporary files like images",
-)
-@click.option(
     "-L",
     "--language",
     help="use translated strings in LANGUAGE",
