@@ -13,6 +13,7 @@ import time
 import traceback
 from hashlib import sha1
 from urllib import parse, request
+from urllib.error import HTTPError
 
 import gevent
 import gevent.event
@@ -240,26 +241,51 @@ def call_when(event, fun):
             traceback.print_exc()
 
 
-def download_to_file(url, path, temp_path):
+def download_to_file(url, path, temp_path, max_retries=5, initial_delay=1, backoff_factor=2):
+    """Download a file from a URL to a local path with exponential backoff for HTTP 429 errors.
+
+    Args:
+        url: URL to download from
+        path: Final path where the file should be saved
+        temp_path: Temporary path to download to before moving to final path
+        max_retries: Maximum number of retries for HTTP 429 errors
+        initial_delay: Initial delay in seconds before retrying
+        backoff_factor: Factor by which the delay increases with each retry
+    """
     opener = request.build_opener()
     opener.addheaders = [("User-Agent", conf.user_agent), ("Referer", "https://pediapress.com/")]
 
-    try:
-        size_read = 0
-        remote_file = opener.open(url)
-        with open(temp_path, "wb") as out:
-            while True:
-                data = remote_file.read(16384)
-                if not data:
-                    break
-                size_read += len(data)
-                out.write(data)
-        logger.debug(f"read {size_read} bytes from {url}")
-        os.rename(temp_path, path)
+    retry_count = 0
+    delay = initial_delay
 
-    except Exception as err:
-        print("ERROR DOWNLOADING", url, err)
-        raise
+    while True:
+        try:
+            size_read = 0
+            remote_file = opener.open(url)
+            with open(temp_path, "wb") as out:
+                while True:
+                    data = remote_file.read(16384)
+                    if not data:
+                        break
+                    size_read += len(data)
+                    out.write(data)
+            logger.debug(f"read {size_read} bytes from {url}")
+            os.rename(temp_path, path)
+            return  # Success, exit the retry loop
+
+        except HTTPError as err:
+            if err.code == 429 and retry_count < max_retries:
+                retry_count += 1
+                logger.warning(f"Received HTTP 429 (Too Many Requests) for {url}. Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+                time.sleep(delay)
+                delay *= backoff_factor  # Exponential backoff
+            else:
+                # Either not a 429 error or we've exceeded max retries
+                logger.info("ERROR DOWNLOADING", url, err)
+                raise
+        except Exception as err:
+            logger.info("ERROR DOWNLOADING", url, err)
+            raise
 
 
 class Fetcher:
