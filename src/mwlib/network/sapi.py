@@ -4,8 +4,10 @@
 
 """api.php client"""
 import logging
+import time
 from http import cookiejar
 from urllib import parse, request
+from urllib.error import HTTPError, URLError
 
 try:
     import simplejson as json
@@ -95,15 +97,106 @@ class MwApi:
     def __repr__(self):
         return f"<mwapi {self.apiurl} at {hex(id(self))}>"
 
-    def _fetch(self, url):
+    def _get_url_display(self, url):
+        """Get a string representation of the URL for logging purposes."""
+        return url.full_url if hasattr(url, 'full_url') else url
+
+    def _should_retry(self, error_type, error_code=None, retry_count=0, max_retries=5):
+        """Determine if a request should be retried based on the error type and retry count."""
+        if retry_count >= max_retries:
+            return False
+
+        if error_type == 'http':
+            # Retry on rate limiting (429) or server errors (5xx)
+            return error_code == 429 or (500 <= error_code < 600)
+        elif error_type == 'url':
+            # Always retry URLErrors (connection issues) if we haven't exceeded max_retries
+            return True
+
+        # Don't retry other types of errors
+        return False
+
+    def _handle_retry(self, url, error_type, error_detail, retry_count, max_retries, delay, backoff_factor):
+        """Handle retry logic including logging and sleeping."""
+        url_display = self._get_url_display(url)
+
+        if error_type == 'http':
+            if error_detail == 429:
+                logger.warning(f"Rate limit exceeded (HTTP 429) for {url_display}. "
+                              f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+            else:
+                logger.warning(f"Server error {error_detail} for {url_display}. "
+                              f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+        elif error_type == 'url':
+            logger.warning(f"URL error {error_detail} for {url_display}. "
+                          f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+
+        time.sleep(delay)
+        return delay * backoff_factor  # Return the new delay with exponential backoff
+
+    def _log_error(self, url, error_type, error_detail, max_retries=None):
+        """Log an error that won't be retried."""
+        url_display = self._get_url_display(url)
+
+        if error_type == 'http':
+            logger.error(f"HTTP error {error_detail} for {url_display}")
+        elif error_type == 'url':
+            logger.error(f"URL error {error_detail} for {url_display} after {max_retries} retries")
+        else:
+            logger.error(f"Error fetching {url_display}: {error_detail}")
+
+    def _fetch(self, url, max_retries=5, initial_delay=1, backoff_factor=2):
+        """Fetch data from a URL with exponential backoff for transient errors.
+
+        Args:
+            url: URL to fetch (string or Request object)
+            max_retries: Maximum number of retries for transient errors
+            initial_delay: Initial delay in seconds before retrying
+            backoff_factor: Factor by which the delay increases with each retry
+
+        Returns:
+            The data fetched from the URL
+
+        Raises:
+            HTTPError: For non-transient HTTP errors
+            URLError: For non-transient URL errors
+            Other exceptions that might be raised by urllib.request
+        """
         if isinstance(url, str):
-            logger.debug("fetching url:  %r", url)
+            logger.debug("fetching url: %r", url)
             url = request.Request(url)
             url.add_header("Referer", 'https://pediapress.com')
-        url_opener = self.opener.open(url)
-        data = url_opener.read()
-        url_opener.close()
-        return data
+
+        retry_count = 0
+        delay = initial_delay
+
+        while True:
+            try:
+                url_opener = self.opener.open(url)
+                data = url_opener.read()
+                url_opener.close()
+                return data
+
+            except HTTPError as err:
+                if self._should_retry('http', err.code, retry_count, max_retries):
+                    retry_count += 1
+                    delay = self._handle_retry(url, 'http', err.code, retry_count, max_retries, delay, backoff_factor)
+                else:
+                    self._log_error(url, 'http', err.code)
+                    raise
+
+            except URLError as err:
+                if self._should_retry('url', retry_count=retry_count, max_retries=max_retries):
+                    retry_count += 1
+                    delay = self._handle_retry(url, 'url', err.reason, retry_count, max_retries, delay, backoff_factor)
+                else:
+                    self._log_error(url, 'url', err.reason, max_retries)
+                    raise
+
+            except Exception as err:
+                # For other exceptions, log and re-raise
+                self._log_error(url, 'other', err)
+                raise
 
     def _build_url(self, **kwargs):
         args = {"format": "json"}
