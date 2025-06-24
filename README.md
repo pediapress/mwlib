@@ -8,25 +8,41 @@
 
 ### Prerequisites
 To build mwlib, ensure you have the following software installed:
-- Python (version 3.8 or later)
+- Python (version 3.11 or 3.12)
 - Ploticus
 - re2c
 - Perl
 - Pillow / PyImage
 - ImageMagick
+- uv (Python package installer, faster alternative to pip)
 
 
-Setup a virtual environment for Python 3.8 or later and activate it.
+Setup a virtual environment for Python 3.11 or 3.12 and activate it.
 
-mwlib uses `pip-compile-multi <https://pip-compile-multi.readthedocs.io/en/latest/index.html>`_ to
-manage dependencies. To install all dependencies, run the following commands:
+#### Installing uv
+If you don't have uv installed, you can install it following the instructions at [uv's official documentation](https://github.com/astral-sh/uv).
+
+For example, on Unix-like systems:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Or using pip:
+```bash
+pip install uv
+```
+
+#### Installing mwlib
+To install all dependencies and the project, run:
 
     $ make install
 
-To build mwlib, run the following commands:
+This will use uv to install all required dependencies.
 
-    $ python setup.py build
-    $ python setup.py install
+To build the C extensions and install mwlib in development mode:
+
+    $ make build
+    $ make develop
 
 Documentation
 

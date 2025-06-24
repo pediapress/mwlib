@@ -10,6 +10,29 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.11, <3.13"
+dependencies = [
+    "Cython",
+    "Pillow",
+    "apipkg",
+    "authlib>=1.6.0",
+    "bottle",
+    "click",
+    "gevent",
+    "httpx",
+    "lxml",
+    "mwclient",
+    "odfpy",
+    "py",
+    "pyPdf",
+    "pygments",
+    "pyparsing",
+    "reportlab",
+    "roman",
+    "simplejson",
+    "sqlitedict",
+    "timelib>=0.3.0",
+    "toml",
+]
 keywords = ["mediawiki", "wikipedia", "parser", "pdf", "writer"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -28,6 +51,13 @@ classifiers = [
     "Topic :: Text Processing :: Markup :: XML",
 ]
 license = "BSD-3-Clause"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-xdist",
+    "wsgi-intercept",
+]
 
 [project.urls]
 homepage = "https://code.pediapress.com/"
@@ -60,6 +90,7 @@ select = [
 #  "B",      # flake8-bugbear
 #  "C4",     # flake8-executable
   "C90",    # mccabe (complexity)
+  "D",      # pydocstyle
   "E",      # pycodestyle error
 #  "EXE",    # flake8-executable
   "F",      # pyflakes
@@ -80,7 +111,7 @@ select = [
 #  "W",      # pycodestyle warning
 ]
 #extend-select = ["C4", "I", "SIM", "TCH", "UP", "W"]
-ignore = ["C408", "E501", "F401", "F403", "F405", "G004"]
+ignore = ["C408", "D10", "D203", "D213", "E501", "F401", "F403", "F405", "G004"]
 flake8-tidy-imports.ban-relative-imports = "all"
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.

@@ -9,9 +9,7 @@ RST2HTML ?= rst2html.py
 default::
 
 install::
-	pip-compile-multi
-	pip install -r requirements/base.txt
-	pip install -r requirements/test.txt
+	uv pip install .
 
 build:: src/mwlib/parser/token/_uscan.cc cython MANIFEST.in
 
@@ -39,7 +37,7 @@ README.html: README.rst
 	$(RST2HTML) README.rst >README.html
 
 develop:: build
-	pip install -e .
+	uv pip install -e .
 
 clean::
 	rm -rf build dist
@@ -60,8 +58,8 @@ sdist-upload:: sdist
 	python3 setup.py build sdist upload -r pypi
 
 pip-install:: clean sdist
-	pip uninstall -y mwlib || true
-	pip install dist/*
+	uv pip uninstall -y mwlib || true
+	uv pip install dist/*
 
 update::
 	git pull
@@ -69,7 +67,7 @@ update::
 
 
 test::
-	pip install -r requirements/test.txt
+	uv pip install .[dev]
 	py.test tests
 
 docker-py27-build::
