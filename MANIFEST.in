@@ -34,10 +34,6 @@ include mwlib/_uscan.cc
 include nginx/default.conf
 include pyproject.toml
 include pytest.ini
-include requirements/base.in
-include requirements/base.txt
-include requirements/test.in
-include requirements/test.txt
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py
@@ -575,3 +571,4 @@ include tests/qs/test_qserve.py
 include tests/test_end_to_end.py
 include tools/set-interwiki.py
 include tox.ini
+include uv.lock
