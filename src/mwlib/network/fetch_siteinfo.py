@@ -59,7 +59,9 @@ def fetch(lang):
             base_url=base_url,
             use_http2=use_http2 and (http2_supported or not http2_auto_detect)
         )
-        if isinstance(client, OAuth2Client):
+        if isinstance(client, OAuth2Client) and (
+            not hasattr(client, "token") or not client.token or client.token.is_expired()
+        ):
             client.fetch_token()
 
         # Make the request using the client
