@@ -241,7 +241,7 @@ def call_when(event, fun):
             traceback.print_exc()
 
 
-def download_to_file(url, path, temp_path, max_retries=5, initial_delay=1, backoff_factor=2):
+def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backoff_factor=2):
     """Download a file from a URL to a local path with exponential backoff for HTTP 429 errors.
 
     Args:
