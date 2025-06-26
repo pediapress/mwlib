@@ -1,7 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
-# See README.rst for additional licensing information.
+# See README.md for additional licensing information.
 
-"""mw-render -- installed via setuptools' entry_points"""
+"""mw-render -- installed via setuptools' entry_points."""
 
 import errno
 import logging
@@ -51,7 +51,6 @@ def init_tmp_cleaner():
             time.sleep(1)
 
 
-
 def finish_render(writer, options, zip_filename, status):
     kwargs = {}
     if hasattr(writer, "content_type"):
@@ -63,13 +62,12 @@ def finish_render(writer, options, zip_filename, status):
     if keep_zip is None and zip_filename is not None:
         unorganized.safe_unlink(zip_filename)
 
+
 def write_traceback(options, exc, status):
     status(status="error")
     error_file = options.get("error_file")
     if error_file:
-        file_descriptor, tmpfile = tempfile.mkstemp(
-            dir=os.path.dirname(error_file)
-        )
+        file_descriptor, tmpfile = tempfile.mkstemp(dir=os.path.dirname(error_file))
         error_file = os.fdopen(file_descriptor, "wb")
         if isinstance(exc, WriterError):
             error_file.write(str(exc))
@@ -79,6 +77,7 @@ def write_traceback(options, exc, status):
         error_file.write(f"sys.argv={unorganized.garble_password(sys.argv)!r}\n")
         error_file.close()
         os.rename(tmpfile, error_file)
+
 
 @click.command()
 @click.option("-o", "--output", help="write output to OUTPUT")
@@ -212,7 +211,6 @@ def main(
     language,
     args,
 ):
-    conf.readrc()
     if logfile:
         start_logging(logfile)
     setup_console_logging(level="INFO", stream=sys.stderr)
@@ -243,9 +241,7 @@ def main(
         "language": language,
         "args": args,
     }
-    writer, writer_options = get_writer_from_options(
-        options
-    )
+    writer, writer_options = get_writer_from_options(options)
     init_tmp_cleaner()
     status = Status(status_file, progress_range=(1, 33))
     status(progress=0)
@@ -258,9 +254,7 @@ def main(
             print("Error: could not set locale", err)
         basename = os.path.basename(output)
         ext = "." + basename.rsplit(".", 1)[-1] if "." in basename else ""
-        file_descriptor, tmpout = tempfile.mkstemp(
-            dir=os.path.dirname(output), suffix=ext
-        )
+        file_descriptor, tmpout = tempfile.mkstemp(dir=os.path.dirname(output), suffix=ext)
         os.close(file_descriptor)
         writer(env, output=tmpout, status_callback=status, **writer_options)
         os.rename(tmpout, output)
@@ -279,6 +273,7 @@ def main(
                         "ERROR: Could not remove temporary images: %s" % exc,
                         exc.errno,
                     )
+
 
 def get_environment(options):
     env = make_wiki_env_from_options(None, options)
@@ -306,6 +301,7 @@ def get_environment(options):
     status = Status(options.status_file, progress_range=(34, 100))
     return env, status, zip_filename
 
+
 def show_writer_info(name):
     writer = load_writer(name)
     if hasattr(writer, "description"):
@@ -323,6 +319,7 @@ def show_writer_info(name):
             else:
                 print(" {}:\t{}".format(name, info["help"]))
 
+
 def get_writer_from_options(options):
     if options.get("list_writers"):
         list_writers()
@@ -334,14 +331,14 @@ def get_writer_from_options(options):
     output = options.get("output")
     if output is None:
         raise click.UsageError("Please specify an output file with --output.\n" + USE_HELP_TEXT)
-    options['output'] = os.path.abspath(output)
+    options["output"] = os.path.abspath(output)
     writer = options.get("writer")
     if writer is None:
         raise click.UsageError("Please specify a writer with --writer.\n" + USE_HELP_TEXT)
     writer = load_writer(writer)
     writer_options = {}
     if options.get("writer_options"):
-        for wopt in options['writer_options'].split(";"):
+        for wopt in options["writer_options"].split(";"):
             if "=" in wopt:
                 key, value = wopt.split("=", 1)
             else:
@@ -359,15 +356,12 @@ def get_writer_from_options(options):
         del writer_options[option]
     return writer, writer_options
 
+
 def load_writer(name):
     try:
-        entry_point = next(
-            ep for ep in entry_points().get("mwlib.writers", []) if ep.name == name
-        )
+        entry_point = next(ep for ep in entry_points().get("mwlib.writers", []) if ep.name == name)
     except StopIteration:
-        sys.exit(
-            "No such writer: %r (use --list-writers to list available writers)" % name
-        )
+        sys.exit("No such writer: %r (use --list-writers to list available writers)" % name)
     try:
         return entry_point.load()
     except Exception as exc:
