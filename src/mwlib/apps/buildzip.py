@@ -223,7 +223,7 @@ def main(
     except ValueError:
         raise click.ClickException("Argument for --imagesize must be an integer > 0.")
 
-    conf.readrc()
+    # conf.readrc()
     if metabook is None and collectionpage is None:
         raise click.ClickException(
             "Neither --metabook nor, --collectionpage or arguments specified.\n"

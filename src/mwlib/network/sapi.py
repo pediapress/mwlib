@@ -6,7 +6,7 @@
 import logging
 import time
 from http import cookiejar
-from urllib import parse, request
+from urllib import parse
 from urllib.error import HTTPError, URLError
 
 try:
@@ -15,9 +15,11 @@ except ImportError:
     import json
 
 from gevent.lock import Semaphore
+import httpx
 
 from mwlib.core import authors
 from mwlib.utils import conf
+from mwlib.network.http_client import HttpClientManager
 
 logger = logging.getLogger(__name__)
 
@@ -55,23 +57,28 @@ def merge_data(dst, src):
 
 
 class MwApi:
-    def __init__(self, apiurl, username=None, password=None):
+    # Track domains for which tokens have been fetched
+    _fetched_tokens = set()
+
+    def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
         self.apiurl = apiurl
         self.baseurl = apiurl  # XXX
 
-        if username:
-            passman = request.HTTPPasswordMgrWithDefaultRealm()
-            passman.add_password(None, apiurl, username, password)
-            auth_handler = request.HTTPBasicAuthHandler(passman)
-            self.opener = request.build_opener(
-                request.HTTPCookieProcessor(cookiejar.CookieJar()),
-                auth_handler,
-            )
-        else:
-            self.opener = request.build_opener(
-                request.HTTPCookieProcessor(cookiejar.CookieJar())
-            )
-        self.opener.addheaders = [("User-Agent", conf.user_agent)]
+        # Determine whether to use OAuth2 and HTTP/2 from configuration if not specified
+        self.use_oauth2 = use_oauth2 if use_oauth2 is not None else conf.get("oauth2", "enabled", False, bool)
+        self.use_http2 = use_http2 if use_http2 is not None else conf.get("http2", "enabled", True, bool)
+
+        # Get HTTP client from manager
+        self.http_client = HttpClientManager.get_instance().get_client(
+            self.apiurl,
+            use_oauth2=self.use_oauth2,
+            use_http2=self.use_http2
+        )
+
+        # Set basic auth if username is provided and OAuth2 is not enabled
+        if username and not self.use_oauth2:
+            self.http_client.auth = httpx.BasicAuth(username, password or "")
+
         self.edittoken = None
         self.qccount = 0
         self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)
@@ -99,7 +106,8 @@ class MwApi:
 
     def _get_url_display(self, url):
         """Get a string representation of the URL for logging purposes."""
-        return url.full_url if hasattr(url, 'full_url') else url
+        # With httpx, we're always using string URLs
+        return url
 
     def _should_retry(self, error_type, error_code=None, retry_count=0, max_retries=5):
         """Determine if a request should be retried based on the error type and retry count."""
@@ -145,52 +153,64 @@ class MwApi:
         else:
             logger.error(f"Error fetching {url_display}: {error_detail}")
 
-    def _fetch(self, url, max_retries=5, initial_delay=1, backoff_factor=2):
+    def _fetch(self, url, max_retries=5, initial_delay=1, backoff_factor=2, method="GET", data=None, headers=None):
         """Fetch data from a URL with exponential backoff for transient errors.
 
         Args:
-            url: URL to fetch (string or Request object)
+            url: URL to fetch (string)
             max_retries: Maximum number of retries for transient errors
             initial_delay: Initial delay in seconds before retrying
             backoff_factor: Factor by which the delay increases with each retry
+            method: HTTP method to use (GET or POST)
+            data: Data to send in the request body (for POST requests)
+            headers: Additional headers to send with the request
 
         Returns:
             The data fetched from the URL
 
         Raises:
-            HTTPError: For non-transient HTTP errors
-            URLError: For non-transient URL errors
-            Other exceptions that might be raised by urllib.request
+            httpx.HTTPStatusError: For non-transient HTTP errors
+            httpx.RequestError: For non-transient request errors
+            Other exceptions that might be raised by httpx
         """
         if isinstance(url, str):
             logger.debug("fetching url: %r", url)
-            url = request.Request(url)
-            url.add_header("Referer", 'https://pediapress.com')
+
+        # Prepare headers
+        request_headers = {"Referer": "https://pediapress.com"}
+        if headers:
+            request_headers.update(headers)
 
         retry_count = 0
         delay = initial_delay
 
         while True:
             try:
-                url_opener = self.opener.open(url)
-                data = url_opener.read()
-                url_opener.close()
-                return data
-
-            except HTTPError as err:
-                if self._should_retry('http', err.code, retry_count, max_retries):
-                    retry_count += 1
-                    delay = self._handle_retry(url, 'http', err.code, retry_count, max_retries, delay, backoff_factor)
+                if method.upper() == "POST":
+                    response = self.http_client.post(url, data=data, headers=request_headers)
                 else:
-                    self._log_error(url, 'http', err.code)
+                    response = self.http_client.get(url, headers=request_headers)
+
+                # Raise for status to catch HTTP errors
+                response.raise_for_status()
+
+                return response.content
+
+            except httpx.HTTPStatusError as err:
+                status_code = err.response.status_code
+                if self._should_retry('http', status_code, retry_count, max_retries):
+                    retry_count += 1
+                    delay = self._handle_retry(url, 'http', status_code, retry_count, max_retries, delay, backoff_factor)
+                else:
+                    self._log_error(url, 'http', status_code)
                     raise
 
-            except URLError as err:
+            except httpx.RequestError as err:
                 if self._should_retry('url', retry_count=retry_count, max_retries=max_retries):
                     retry_count += 1
-                    delay = self._handle_retry(url, 'url', err.reason, retry_count, max_retries, delay, backoff_factor)
+                    delay = self._handle_retry(url, 'url', str(err), retry_count, max_retries, delay, backoff_factor)
                 else:
-                    self._log_error(url, 'url', err.reason, max_retries)
+                    self._log_error(url, 'url', str(err), max_retries)
                     raise
 
             except Exception as err:
@@ -215,7 +235,8 @@ class MwApi:
 
     def _request(self, **kwargs):
         url = self._build_url(**kwargs)
-        return self._fetch(url)
+        data = self._fetch(url, method="GET")
+        return data
 
     def _post(self, **kwargs):
         args = {"format": "json"}
@@ -228,9 +249,13 @@ class MwApi:
         postdata = parse.urlencode(args).encode()
 
         logger.debug("posting to %r", self.apiurl)
-        req = request.Request(self.apiurl, postdata, headers)
-        req.add_header("Referer", 'https://pediapress.com')
-        res = loads(self._fetch(req))
+        data = self._fetch(
+            self.apiurl, 
+            method="POST", 
+            data=postdata, 
+            headers=headers
+        )
+        res = loads(data)
         return res
 
     def do_request(self, use_post=False, **kwargs):
@@ -239,6 +264,21 @@ class MwApi:
             sem.acquire()
 
         try:
+            # If OAuth2 is enabled, fetch a token for the domain
+            if self.use_oauth2:
+                # Extract domain from apiurl
+                _, netloc, _, _, _, _ = parse.urlparse(self.apiurl)
+                domain = netloc
+
+                # Fetch token only if not already fetched for this domain
+                if domain not in self._fetched_tokens:
+                    try:
+                        logger.debug(f"Fetching OAuth2 token for domain: {domain}")
+                        self.http_client.fetch_token()
+                        self._fetched_tokens.add(domain)
+                    except Exception as e:
+                        logger.warning(f"Failed to fetch OAuth2 token for {domain}: {e}")
+
             if use_post:
                 return self._post(**kwargs)
             return self._do_request(**kwargs)
@@ -251,7 +291,11 @@ class MwApi:
         raise RuntimeError(f"{error_info}: [fetching {self._build_url(**kwargs)}]")
 
     def _handle_request(self, **kwargs):
-        data = loads(self._request(**kwargs))
+        response_data = self._request(**kwargs)
+        # Convert bytes to string if necessary
+        if isinstance(response_data, bytes):
+            response_data = response_data.decode('utf-8')
+        data = loads(response_data)
         error = data.get("error")
         if error:
             self._handle_error(error, kwargs)

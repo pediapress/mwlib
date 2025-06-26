@@ -22,11 +22,13 @@ include docs/changelog.rst
 include docs/collection.rst
 include docs/commands.rst
 include docs/conf.py
+include docs/configuration.rst
 include docs/index.rst
 include docs/installation.rst
 include docs/internals.rst
 include docs/metabook.rst
 include docs/renderserver.rst
+include docs/rlwriter.rst
 include docs/writers.rst
 include mediawiki/.gitkeep
 include mw-post
@@ -75,6 +77,7 @@ include src/mwlib/network/__init__.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
 include src/mwlib/network/fetch_siteinfo.py
+include src/mwlib/network/http_client.py
 include src/mwlib/network/infobox.py
 include src/mwlib/network/known_sites/siteinfo-de.json
 include src/mwlib/network/known_sites/siteinfo-en.json
@@ -513,6 +516,7 @@ include tests/mwlib/core/test_authors.py
 include tests/mwlib/core/test_metabook.py
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
+include tests/mwlib/network/test_http_client.py
 include tests/mwlib/network/test_sapi.py
 include tests/mwlib/rl/renderhelper.py
 include tests/mwlib/rl/renderhelper.py.bak

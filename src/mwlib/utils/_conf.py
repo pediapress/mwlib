@@ -1,122 +1,118 @@
-"""Configuration utilities for mwlib.
-
-This module provides utilities for handling configuration settings from
-environment variables and ini files.
-"""
-
+import configparser
+import logging
 import os
-import types
 
-import py
+from mwlib.utils._version import version
 
-
-def as_bool(val):
-    """Convert a string value to a boolean.
-
-    Args:
-        val: A string value to convert to boolean.
-
-    Returns:
-        bool: True if the string represents a positive value 
-        ("yes", "true", "on", "1"), False otherwise.
-    """
-    val = val.lower()
-    if val in ("yes", "true", "on", "1"):
-        return True
-    if val in ("no", "false", "off", "0"):
-        return False
-
-    return False
+logger = logging.getLogger("mwlib.utils.conf")
 
 
-class ConfBase:
-    """Base configuration class for mwlib.
+class ConfigSection:
+    """Wrapper for a config section to allow attribute-style access to options."""
 
-    This class provides methods to read configuration from ini files and
-    environment variables.
-    """
+    def __init__(self, section):
+        self._section = section
 
-    def __init__(self):
-        """Initialize a new ConfBase instance.
+    def __getattr__(self, name):
+        if name in self._section:
+            return self._section[name]
+        raise AttributeError(f"No option '{name}' in this section")
 
-        The configuration is initially empty until readrc() is called.
+    def __getitem__(self, key):
+        return self._section[key]
+
+    def get(self, option, fallback=None):
+        return self._section.get(option, fallback)
+
+    def getint(self, option, fallback=None):
+        return self._section.getint(option, fallback)
+
+    def getfloat(self, option, fallback=None):
+        return self._section.getfloat(option, fallback)
+
+    def getboolean(self, option, fallback=None):
+        return self._section.getboolean(option, fallback)
+
+
+class ConfMod:
+    def __init__(self, name):
+        self.__name__ = name
+
+        default_config = {
+            "DEFAULT": {
+                "user_agent": f"mwlib {version}",
+                "version": f"mwlib {version}",
+            },
+            "fetch": {
+                "noedits": "False",
+            },
+        }
+
+        self.config = configparser.ConfigParser()
+        self.config.read_dict(default_config)
+
+        # Try to load from config files
+        config_files = [
+            os.path.expanduser("~/.mwlibrc"),  # User-specific config
+            "/etc/mwlib.ini",  # System-wide config
+            "mwlib.ini",  # Local directory config
+        ]
+        found_files = self.config.read(config_files)
+        logger.debug(f"found {len(found_files)} config files: {found_files}")
+
+        # Override with environment variables
+        self._load_from_env()
+
+    def _load_from_env(self):
+        """Load configuration from environment variables.
+
+        Format: MWLIB_SECTION_OPTION=value
+        Example: MWLIB_DEFAULT_DEBUG=true will set config['DEFAULT']['debug'] = 'true'
         """
-        self._inicfg = None
+        prefix = "MWLIB_"  # Change this to your app's prefix
 
-    def readrc(self, path=None):
-        """Read configuration from an ini file.
+        for key, value in os.environ.items():
+            if key.startswith(prefix):
+                parts = key[len(prefix) :].lower().split("_", 1)
+                if len(parts) == 2:
+                    section, option = parts
+                    if not self.config.has_section(section) and section.lower() != "default":
+                        self.config.add_section(section)
+                    self.config[section][option] = value
 
-        Args:
-            path: Path to the ini file. If None, uses ~/.mwlibrc if it exists.
-        """
-        if path is None:
-            path = os.path.expanduser("~/.mwlibrc")
-            if not os.path.exists(path):
-                return
-        self._inicfg = py.iniconfig.IniConfig(path, None)
+    def get(self, section, option, fallback=None, type_=str):
+        """Get a configuration value with type conversion."""
+        try:
+            if type_ is bool:
+                return self.config.getboolean(section, option)
+            elif type_ is int:
+                return self.config.getint(section, option)
+            elif type_ is float:
+                return self.config.getfloat(section, option)
+            else:
+                return self.config.get(section, option)
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            return fallback
 
-    def get(self, section, name, default=None, convert=str):
-        """Get a configuration value.
+    def __getattr__(self, name):
+        # This allows accessing config sections as attributes
+        # e.g., conf.general.debug instead of conf.get('general', 'debug')
+        if name in self.config:
+            return ConfigSection(self.config[name])
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
-        Looks for the value in environment variables first, then in the ini file.
-        Environment variables are named MWLIB_SECTION_NAME or MWLIB_NAME (if section is "mwlib").
-
-        Args:
-            section: Section name in the ini file.
-            name: Configuration key name.
-            default: Default value if the key is not found.
-            convert: Function to convert the string value to the desired type.
-
-        Returns:
-            The configuration value converted to the appropriate type, or the default value.
-        """
-        if section == "mwlib":
-            varname = f"MWLIB_{name.upper()}"
-        else:
-            varname = f"MWLIB_{section.upper()}_{name.upper()}"
-
-        if varname in os.environ:
-            return convert(os.environ[varname])
-        if self._inicfg is not None:
-            return self._inicfg.get(section, name, default=default,
-                                    convert=convert)
-        return default
+    def __getitem__(self, section):
+        # Allow dictionary-style access to sections
+        return self.config[section]
 
     @property
     def noedits(self):
-        """Get the noedits configuration value.
+        return self.get("fetch", "noedits", False, bool)
 
-        Returns:
-            bool: True if edits should be disabled, False otherwise.
-        """
-        return self.get("fetch", "noedits", False, as_bool)
+    @property
+    def version(self):
+        return self.get("DEFAULT", "version", "")
 
     @property
     def user_agent(self):
-        """Get the user agent string for HTTP requests.
-
-        Returns:
-            str: The configured user agent or a default one based on the mwlib version.
-        """
-        from mwlib.utils._version import version
-
-        return self.get("mwlib", "user_agent", "") or f"mwlib {version}"
-
-
-class ConfMod(ConfBase, types.ModuleType):
-    """Configuration module class.
-
-    This class combines ConfBase with ModuleType to allow the configuration
-    to be used as a Python module.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Initialize a new ConfMod instance.
-
-        Args:
-            *args: Arguments to pass to ModuleType.__init__.
-            **kwargs: Keyword arguments to pass to ModuleType.__init__.
-        """
-        ConfBase.__init__(self)
-        types.ModuleType.__init__(self, *args, **kwargs)
-        self.__file__ = __file__
+        return self.get("DEFAULT", "user_agent", "")

@@ -23,6 +23,9 @@ DEFAULT_SILENCED_LOGGERS = {
     'PIL.Image': logging.WARNING, # Pillow uses 'PIL.Image' or just 'PIL'
     'PIL': logging.WARNING,
     'sqlitedict': logging.WARNING,
+    'httpx': logging.WARNING,
+    'httpcore': logging.INFO,
+    'hpack': logging.INFO,
 }
 
 def setup_console_logging(

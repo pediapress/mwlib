@@ -18,7 +18,7 @@ dependencies = [
     "bottle",
     "click",
     "gevent",
-    "httpx",
+    "httpx[http2]",
     "lxml",
     "mwclient",
     "odfpy",
@@ -55,6 +55,7 @@ license = "BSD-3-Clause"
 [dependency-groups]
 dev = [
     "pytest",
+    "pytest-httpx>=0.35.0",
     "pytest-xdist",
     "wsgi-intercept",
 ]
