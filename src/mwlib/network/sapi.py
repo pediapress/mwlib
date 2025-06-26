@@ -2,7 +2,8 @@
 
 # Copyright (c) PediaPress GmbH
 
-"""api.php client"""
+"""api.php client."""
+
 import logging
 import time
 from http import cookiejar
@@ -14,27 +15,19 @@ try:
 except ImportError:
     import json
 
-from gevent.lock import Semaphore
 import httpx
+from gevent.lock import Semaphore
 
 from mwlib.core import authors
-from mwlib.utils import conf
 from mwlib.network.http_client import HttpClientManager
+from mwlib.utils import conf
 
 logger = logging.getLogger(__name__)
 
 
-
-
-
 def loads(input_string):
-    """Potentially remove UTF-8 BOM and call json.loads()"""
-
-    if (
-        input_string
-        and isinstance(input_string, str)
-        and input_string[:3] == "\xef\xbb\xbf"
-    ):
+    """Potentially remove UTF-8 BOM and call json.loads()."""
+    if input_string and isinstance(input_string, str) and input_string[:3] == "\xef\xbb\xbf":
         input_string = input_string[3:]
     return json.loads(input_string)
 
@@ -57,22 +50,24 @@ def merge_data(dst, src):
 
 
 class MwApi:
-    # Track domains for which tokens have been fetched
-    _fetched_tokens = set()
+    # Track domains and their token expiration timestamps
+    _token_info = {}  # Format: {domain: {'token': token, 'expires_at': timestamp}}
 
     def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
         self.apiurl = apiurl
         self.baseurl = apiurl  # XXX
 
         # Determine whether to use OAuth2 and HTTP/2 from configuration if not specified
-        self.use_oauth2 = use_oauth2 if use_oauth2 is not None else conf.get("oauth2", "enabled", False, bool)
-        self.use_http2 = use_http2 if use_http2 is not None else conf.get("http2", "enabled", True, bool)
+        self.use_oauth2 = (
+            use_oauth2 if use_oauth2 is not None else conf.get("oauth2", "enabled", False, bool)
+        )
+        self.use_http2 = (
+            use_http2 if use_http2 is not None else conf.get("http2", "enabled", True, bool)
+        )
 
         # Get HTTP client from manager
         self.http_client = HttpClientManager.get_instance().get_client(
-            self.apiurl,
-            use_oauth2=self.use_oauth2,
-            use_http2=self.use_http2
+            self.apiurl, use_oauth2=self.use_oauth2, use_http2=self.use_http2
         )
 
         # Set basic auth if username is provided and OAuth2 is not enabled
@@ -89,7 +84,7 @@ class MwApi:
         self.limit_fetch_semaphore = None
 
     def report(self):
-        """dummy method for compatibility with sapi"""
+        """Guarantee compatibility with sapi using this placeholder method."""
         pass
 
     def set_limit(self, limit=None):
@@ -114,30 +109,38 @@ class MwApi:
         if retry_count >= max_retries:
             return False
 
-        if error_type == 'http':
+        if error_type == "http":
             # Retry on rate limiting (429) or server errors (5xx)
             return error_code == 429 or (500 <= error_code < 600)
-        elif error_type == 'url':
+        elif error_type == "url":
             # Always retry URLErrors (connection issues) if we haven't exceeded max_retries
             return True
 
         # Don't retry other types of errors
         return False
 
-    def _handle_retry(self, url, error_type, error_detail, retry_count, max_retries, delay, backoff_factor):
+    def _handle_retry(
+        self, url, error_type, error_detail, retry_count, max_retries, delay, backoff_factor
+    ):
         """Handle retry logic including logging and sleeping."""
         url_display = self._get_url_display(url)
 
-        if error_type == 'http':
+        if error_type == "http":
             if error_detail == 429:
-                logger.warning(f"Rate limit exceeded (HTTP 429) for {url_display}. "
-                              f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+                logger.warning(
+                    f"Rate limit exceeded (HTTP 429) for {url_display}. "
+                    f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
+                )
             else:
-                logger.warning(f"Server error {error_detail} for {url_display}. "
-                              f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
-        elif error_type == 'url':
-            logger.warning(f"URL error {error_detail} for {url_display}. "
-                          f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+                logger.warning(
+                    f"Server error {error_detail} for {url_display}. "
+                    f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
+                )
+        elif error_type == "url":
+            logger.warning(
+                f"URL error {error_detail} for {url_display}. "
+                f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
+            )
 
         time.sleep(delay)
         return delay * backoff_factor  # Return the new delay with exponential backoff
@@ -146,14 +149,23 @@ class MwApi:
         """Log an error that won't be retried."""
         url_display = self._get_url_display(url)
 
-        if error_type == 'http':
+        if error_type == "http":
             logger.error(f"HTTP error {error_detail} for {url_display}")
-        elif error_type == 'url':
+        elif error_type == "url":
             logger.error(f"URL error {error_detail} for {url_display} after {max_retries} retries")
         else:
             logger.error(f"Error fetching {url_display}: {error_detail}")
 
-    def _fetch(self, url, max_retries=0, initial_delay=1, backoff_factor=2, method="GET", data=None, headers=None):
+    def _fetch(
+        self,
+        url,
+        max_retries=0,
+        initial_delay=1,
+        backoff_factor=2,
+        method="GET",
+        data=None,
+        headers=None,
+    ):
         """Fetch data from a URL with exponential backoff for transient errors.
 
         Args:
@@ -172,6 +184,7 @@ class MwApi:
             httpx.HTTPStatusError: For non-transient HTTP errors
             httpx.RequestError: For non-transient request errors
             Other exceptions that might be raised by httpx
+
         """
         if isinstance(url, str):
             logger.debug("fetching url: %r", url)
@@ -198,24 +211,28 @@ class MwApi:
 
             except httpx.HTTPStatusError as err:
                 status_code = err.response.status_code
-                if self._should_retry('http', status_code, retry_count, max_retries):
+                if self._should_retry("http", status_code, retry_count, max_retries):
                     retry_count += 1
-                    delay = self._handle_retry(url, 'http', status_code, retry_count, max_retries, delay, backoff_factor)
+                    delay = self._handle_retry(
+                        url, "http", status_code, retry_count, max_retries, delay, backoff_factor
+                    )
                 else:
-                    self._log_error(url, 'http', status_code)
+                    self._log_error(url, "http", status_code)
                     raise
 
             except httpx.RequestError as err:
-                if self._should_retry('url', retry_count=retry_count, max_retries=max_retries):
+                if self._should_retry("url", retry_count=retry_count, max_retries=max_retries):
                     retry_count += 1
-                    delay = self._handle_retry(url, 'url', str(err), retry_count, max_retries, delay, backoff_factor)
+                    delay = self._handle_retry(
+                        url, "url", str(err), retry_count, max_retries, delay, backoff_factor
+                    )
                 else:
-                    self._log_error(url, 'url', str(err), max_retries)
+                    self._log_error(url, "url", str(err), max_retries)
                     raise
 
             except Exception as err:
                 # For other exceptions, log and re-raise
-                self._log_error(url, 'other', err)
+                self._log_error(url, "other", err)
                 raise
 
     def _build_url(self, **kwargs):
@@ -249,12 +266,7 @@ class MwApi:
         postdata = parse.urlencode(args).encode()
 
         logger.debug("posting to %r", self.apiurl)
-        data = self._fetch(
-            self.apiurl, 
-            method="POST", 
-            data=postdata, 
-            headers=headers
-        )
+        data = self._fetch(self.apiurl, method="POST", data=postdata, headers=headers)
         res = loads(data)
         return res
 
@@ -270,12 +282,21 @@ class MwApi:
                 _, netloc, _, _, _, _ = parse.urlparse(self.apiurl)
                 domain = netloc
 
-                # Fetch token only if not already fetched for this domain
-                if domain not in self._fetched_tokens:
+                # Check if token exists and is not expired
+                current_time = time.time()
+                token_expired = domain not in self._token_info or current_time >= self._token_info[
+                    domain
+                ].get("expires_at", 0)
+
+                if token_expired:
                     try:
                         logger.debug(f"Fetching OAuth2 token for domain: {domain}")
-                        self.http_client.fetch_token()
-                        self._fetched_tokens.add(domain)
+                        token = self.http_client.fetch_token()
+                        # Store token info with expiration (default 1 hour if not specified)
+                        self._token_info[domain] = {
+                            "token": token,
+                            "expires_at": current_time + token.get("expires_in", 3600),
+                        }
                     except Exception as e:
                         logger.warning(f"Failed to fetch OAuth2 token for {domain}: {e}")
 
@@ -294,7 +315,7 @@ class MwApi:
         response_data = self._request(**kwargs)
         # Convert bytes to string if necessary
         if isinstance(response_data, bytes):
-            response_data = response_data.decode('utf-8')
+            response_data = response_data.decode("utf-8")
         data = loads(response_data)
         error = data.get("error")
         if error:
@@ -337,9 +358,7 @@ class MwApi:
 
             qc_values = list(data.get("query-continue", {}).values())
             if qc_values and query_continue:
-                todo, stop_query = self._handle_query_continue(
-                    qc_values, last_qc, kwargs
-                )
+                todo, stop_query = self._handle_query_continue(qc_values, last_qc, kwargs)
                 if stop_query:
                     return retval
                 last_qc = qc_values
@@ -355,12 +374,17 @@ class MwApi:
         )
 
     def get_siteinfo(self):
-        siprop = ["general", "namespaces", "interwikimap", "namespacealiases", "magicwords", "rightsinfo"]
+        siprop = [
+            "general",
+            "namespaces",
+            "interwikimap",
+            "namespacealiases",
+            "magicwords",
+            "rightsinfo",
+        ]
         while len(siprop) >= 3:
             try:
-                req = self.do_request(
-                    action="query", meta="siteinfo", siprop="|".join(siprop)
-                )
+                req = self.do_request(action="query", meta="siteinfo", siprop="|".join(siprop))
                 return req
             except Exception as err:
                 logger.exception(err)
@@ -385,9 +409,7 @@ class MwApi:
 
         login_result = res["login"]["result"]
         if login_result == "NeedToken" and lgtoken is None:
-            return self.login(
-                username, password, domain=domain, lgtoken=res["login"]["token"]
-            )
+            return self.login(username, password, domain=domain, lgtoken=res["login"]["token"])
         if login_result == "Success":
             return None
 
@@ -503,12 +525,14 @@ class MwApi:
 
 
 def guess_api_urls(url):
-    """
-    @param url: URL of a MediaWiki article
-    @type url: str
+    """Guesses possible api.php URLs from a MediaWiki article URL.
 
-    @returns: list of possible api.php urls
-    @rtype: list
+    Args:
+        url (str): URL of a MediaWiki article
+
+    Returns:
+        list: List of possible api.php URLs
+
     """
     retval = []
     if isinstance(url, bytes):
