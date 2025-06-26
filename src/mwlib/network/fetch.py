@@ -18,17 +18,21 @@ from urllib.error import HTTPError
 import gevent
 import gevent.event
 import gevent.pool
+import httpx
+from authlib.integrations.httpx_client import OAuth2Client
 from gevent.lock import Semaphore
 from lxml import etree
 from sqlitedict import SqliteDict
 
 from mwlib.core import nshandling
 from mwlib.network import sapi as mwapi
+from mwlib.network.http_client import HttpClientManager
 from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
 from mwlib.utils import conf, linuxmem, unorganized
 from mwlib.utils import myjson as json
 
 logger = logging.getLogger(__name__)
+
 
 class SharedProgress:
     status = None
@@ -94,7 +98,7 @@ class FsOutput:
         if os.path.exists(self.path):
             raise ValueError(f"output path exists: {self.path}")
         os.makedirs(os.path.join(self.path, "images"))
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8") # noqa: SIM115
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")  # noqa: SIM115
         self.seen = {}
         self.imgcount = 0
         self.nfo = None
@@ -107,7 +111,7 @@ class FsOutput:
             setattr(self, storage, database)
 
     def open_rev_file_for_reading(self):
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), encoding="utf8") # noqa: SIM115
+        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), encoding="utf8")  # noqa: SIM115
 
     def set_db_key(self, name, key, value):
         storage = getattr(self, name, None)
@@ -142,7 +146,9 @@ class FsOutput:
         image_to_be_copied_path = os.path.join(
             self.path, "images", f"{unorganized.fs_escape(image_to_be_copied)}"
         )
-        new_image_path = os.path.join(self.path, "images", f"{unorganized.fs_escape(new_image_name)}")
+        new_image_path = os.path.join(
+            self.path, "images", f"{unorganized.fs_escape(new_image_name)}"
+        )
         shutil.copyfile(image_to_be_copied_path, new_image_path)
 
     def dump_json(self, **kw):
@@ -210,8 +216,7 @@ class FsOutput:
 
 
 def split_blocks(lst, limit):
-    """Split list lst in blocks of max.
-    limit entries. Return list of blocks."""
+    """Split list lst in blocks of max. limit entries. Return list of blocks."""
     res = []
     start = 0
     while start < len(lst):
@@ -221,8 +226,7 @@ def split_blocks(lst, limit):
 
 
 def get_block(lst, limit):
-    """Return first limit entries from list lst and remove them from the list"""
-
+    """Return first limit entries from list lst and remove them from the list."""
     last_n_elements = lst[-limit:]
     del lst[-limit:]
     return last_n_elements
@@ -251,9 +255,34 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
         max_retries: Maximum number of retries for HTTP 429 errors
         initial_delay: Initial delay in seconds before retrying
         backoff_factor: Factor by which the delay increases with each retry
+
     """
-    opener = request.build_opener()
-    opener.addheaders = [("User-Agent", conf.user_agent), ("Referer", "https://pediapress.com/")]
+    # Parse the URL to get the base URL for HTTP/2 detection
+    parsed_url = parse.urlparse(url)
+    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+    # Check if HTTP/2 is enabled in configuration
+    use_http2 = conf.get("http2", "enabled", True, bool)
+
+    # Detect HTTP/2 support if auto-detect is enabled
+    http2_auto_detect = conf.get("http2", "auto_detect", True, bool)
+    http2_supported = False
+
+    if use_http2 and http2_auto_detect:
+        # Use the HttpClientManager to detect HTTP/2 support
+        client_manager = HttpClientManager.get_instance()
+        http2_supported = client_manager.detect_http2_support(base_url)
+        logger.debug(f"HTTP/2 support detected for {base_url}: {http2_supported}")
+
+    # Get a client with appropriate HTTP/2 settings
+    client_manager = HttpClientManager.get_instance()
+    client = client_manager.get_client(
+        base_url=base_url, use_http2=use_http2 and (http2_supported or not http2_auto_detect)
+    )
+    if isinstance(client, OAuth2Client) and (
+        not hasattr(client, "token") or not client.token or client.token.is_expired()
+    ):
+        client.fetch_token()
 
     retry_count = 0
     delay = initial_delay
@@ -261,30 +290,32 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
     while True:
         try:
             size_read = 0
-            remote_file = opener.open(url)
-            with open(temp_path, "wb") as out:
-                while True:
-                    data = remote_file.read(16384)
-                    if not data:
-                        break
-                    size_read += len(data)
-                    out.write(data)
+            # Use httpx streaming to download the file in chunks
+            with client.stream("GET", url) as response:
+                response.raise_for_status()
+                with open(temp_path, "wb") as out:
+                    for chunk in response.iter_bytes(chunk_size=16384):
+                        size_read += len(chunk)
+                        out.write(chunk)
+
             logger.debug(f"read {size_read} bytes from {url}")
             os.rename(temp_path, path)
             return  # Success, exit the retry loop
 
-        except HTTPError as err:
-            if err.code == 429 and retry_count < max_retries:
+        except httpx.HTTPStatusError as err:
+            if err.response.status_code == 429 and retry_count < max_retries:
                 retry_count += 1
-                logger.warning(f"Received HTTP 429 (Too Many Requests) for {url}. Retrying in {delay} seconds. Retry {retry_count}/{max_retries}")
+                logger.warning(
+                    f"Received HTTP 429 (Too Many Requests) for {url}. Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
+                )
                 time.sleep(delay)
                 delay *= backoff_factor  # Exponential backoff
             else:
                 # Either not a 429 error or we've exceeded max retries
-                logger.info("ERROR DOWNLOADING", url, err)
+                logger.info(f"ERROR DOWNLOADING {url}: {err}")
                 raise
         except Exception as err:
-            logger.info("ERROR DOWNLOADING", url, err)
+            logger.info(f"ERROR DOWNLOADING {url}: {err}")
             raise
 
 
@@ -372,30 +403,30 @@ class Fetcher:
 
     def lower_infobox_parameters(self, text):
         parameters_to_lower = {
-            '| Type': '| type',
-            '| Label': '| label',
-            '| Released': '| released',
-            '| Artist': '| artist',
-            '| Name': '| name',
-            '| Cover': '| cover',
-            '| Producer': '| producer',
-            '| Length': '| length',
-            '| Recorded': '| recorded',
-            '| Genre': '| genre',
+            "| Type": "| type",
+            "| Label": "| label",
+            "| Released": "| released",
+            "| Artist": "| artist",
+            "| Name": "| name",
+            "| Cover": "| cover",
+            "| Producer": "| producer",
+            "| Length": "| length",
+            "| Recorded": "| recorded",
+            "| Genre": "| genre",
         }
 
-        delete_pattern = r'^\|\s*(?:This album|Last album|Next album).*\n'
-        text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
+        delete_pattern = r"^\|\s*(?:This album|Last album|Next album).*\n"
+        text = re.sub(delete_pattern, "", text, flags=re.MULTILINE)
 
         for old_param, new_param in parameters_to_lower.items():
-            text = re.sub(rf'({re.escape(old_param)})\s*=', f'{new_param} =', text)
+            text = re.sub(rf"({re.escape(old_param)})\s*=", f"{new_param} =", text)
         return text
 
     def update_infobox_parameters(self, text):
         parameters = DEPRECATED_ALBUM_INFOBOX_PARAMS
         escaped_parameters = [re.escape(param) for param in parameters]
-        delete_pattern = r'^\|\s*(?:' + '|'.join(escaped_parameters) + r')\s*=\s*.*\n'
-        text = re.sub(delete_pattern, '', text, flags=re.MULTILINE)
+        delete_pattern = r"^\|\s*(?:" + "|".join(escaped_parameters) + r")\s*=\s*.*\n"
+        text = re.sub(delete_pattern, "", text, flags=re.MULTILINE)
 
         return text
 
@@ -480,7 +511,9 @@ class Fetcher:
             image_nodes = self._get_map_image_nodes(html_content)
             map_image_urls = self.map_image_urls(image_nodes)
 
-            for url, rev_map_tag_content in zip(map_image_urls, rev_map_frame_tag_contents, strict=False):
+            for url, rev_map_tag_content in zip(
+                map_image_urls, rev_map_frame_tag_contents, strict=False
+            ):
                 filename = url.rsplit("/", 1)[1]
                 filename = filename.split("?")[0]
                 digest = self.calculate_hash_from_map_content(rev_map_tag_content)
@@ -527,7 +560,7 @@ class Fetcher:
     def find_map_frame_tags_from_rev_content(self, content):
         if not content:
             return []
-        mapframes =  re.findall(r"<mapframe(.*?)>", content, re.DOTALL)
+        mapframes = re.findall(r"<mapframe(.*?)>", content, re.DOTALL)
 
         mapframes_with_attributes = []
 
@@ -535,7 +568,9 @@ class Fetcher:
             attributes = self.extract_attributes_from_map_frame_tag(map_frame)
             if not attributes:
                 continue
-            map_frame_content = re.search(r"<div class=\"mw-kartographer-map\"(.*?)<\/div>", content, re.DOTALL)
+            map_frame_content = re.search(
+                r"<div class=\"mw-kartographer-map\"(.*?)<\/div>", content, re.DOTALL
+            )
             if map_frame_content:
                 attributes.append(map_frame_content.group(1))
             attributes_dict = {}
@@ -546,7 +581,6 @@ class Fetcher:
 
     def extract_attributes_from_map_frame_tag(self, tag):
         return re.findall(r'(\w+)\s*=\s*"(.*?)"', tag)
-
 
     def extension_img_urls(self, image_nodes):
         img_urls = set()
@@ -620,6 +654,7 @@ class Fetcher:
                 filename = filename.split("?")[0]
                 title = self.nshandler.splitname(filename, defaultns=6)[2]
                 self.schedule_download_image(str(url), title)
+
         self.count_total += len(lst)
         for item in lst:
             self._refcall_noinc(fetch, item)
@@ -973,9 +1008,7 @@ class Fetcher:
         self.fsout.close()
 
     def _refcall(self, fun, *args, **kw):
-        """Increment refcount, schedule call of fun
-        decrement refcount after fun has finished.
-        """
+        """Increment refcount, schedule call of fun and decrement refcount after fun has finished."""
         self.count_total += 1
         self.report()
         return self._refcall_noinc(fun, *args, **kw)
