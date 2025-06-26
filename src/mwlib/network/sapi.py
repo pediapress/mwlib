@@ -109,7 +109,7 @@ class MwApi:
         # With httpx, we're always using string URLs
         return url
 
-    def _should_retry(self, error_type, error_code=None, retry_count=0, max_retries=5):
+    def _should_retry(self, error_type, error_code=None, retry_count=0, max_retries=0):
         """Determine if a request should be retried based on the error type and retry count."""
         if retry_count >= max_retries:
             return False
@@ -153,7 +153,7 @@ class MwApi:
         else:
             logger.error(f"Error fetching {url_display}: {error_detail}")
 
-    def _fetch(self, url, max_retries=5, initial_delay=1, backoff_factor=2, method="GET", data=None, headers=None):
+    def _fetch(self, url, max_retries=0, initial_delay=1, backoff_factor=2, method="GET", data=None, headers=None):
         """Fetch data from a URL with exponential backoff for transient errors.
 
         Args:
