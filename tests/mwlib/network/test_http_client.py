@@ -75,7 +75,6 @@ class TestHttpClientManager:
         # They should be the same object
         assert client1 is client2
 
-
     def test_get_client_different_urls(self, http_client_manager, mock_conf):
         """Test that different URLs get different clients."""
         # Get clients for different URLs
@@ -85,26 +84,14 @@ class TestHttpClientManager:
         # They should be different objects
         assert client1 is not client2
 
-
-    def test_get_client_with_oauth2(self, http_client_manager, mock_conf, mock_oauth2_client, monkeypatch):
+    def test_get_client_with_oauth2(
+        self, http_client_manager, mock_conf, mock_oauth2_client, monkeypatch
+    ):
         """Test that OAuth2 clients are created when use_oauth2 is True."""
-        mock_client_class, _ = mock_oauth2_client
-
-        # Keep track of calls to create_oauth2_client
-        original_create_oauth2_client = http_client_manager.create_oauth2_client
-        create_oauth2_client_calls = []
-
-        def mock_create_oauth2_client(base_url, use_http2=True):
-            create_oauth2_client_calls.append((base_url, use_http2))
-            print(f"create_oauth2_client called with base_url={base_url}, use_http2={use_http2}")
-            result = original_create_oauth2_client(base_url, use_http2)
-            print(f"create_oauth2_client returned {result}")
-            return result
-
-        monkeypatch.setattr(http_client_manager, 'create_oauth2_client', mock_create_oauth2_client)
+        mock_client_class, mock_instance = mock_oauth2_client
 
         # Configure mock to return OAuth2 settings
-        mock_conf.get.side_effect = lambda section, name, default, convert=None: {
+        mock_conf.get.side_effect = lambda section, name, default=None, convert=None: {
             ("oauth2", "client_id"): "test_client_id",
             ("oauth2", "client_secret"): "test_client_secret",
             ("oauth2", "token_url"): "https://example.com/token",
@@ -112,16 +99,30 @@ class TestHttpClientManager:
             ("http2", "auto_detect"): False,
         }.get((section, name), default)
 
+        # Set the user_agent attribute on the mock_conf
+        mock_conf.user_agent = "mwlib test"
+
+        # Store the original isinstance function
+        original_isinstance = isinstance
+
+        # Create a custom isinstance function that handles our mock
+        def mock_isinstance(obj, class_or_tuple):
+            # If checking our mock instance against OAuth2Client, return True
+            if obj is mock_instance and "OAuth2Client" in str(class_or_tuple):
+                return True
+            # For all other cases, use the original isinstance
+            return original_isinstance(obj, class_or_tuple)
+
         # Get a client with OAuth2 explicitly enabled
-        client = http_client_manager.get_client("https://example.com", use_oauth2=True, use_http2=False)
+        with patch("builtins.isinstance", mock_isinstance):
+            client = http_client_manager.get_client(
+                "https://example.com", use_oauth2=True, use_http2=False
+            )
 
-        # Print debug information
-        print(f"create_oauth2_client_calls: {create_oauth2_client_calls}")
-        print(f"client: {client}")
-        print(f"mock_client_class.call_count: {mock_client_class.call_count}")
-        print(f"mock_client_class.call_args_list: {mock_client_class.call_args_list}")
+        # Verify the client is the mocked OAuth2Client instance
+        assert client is mock_instance
 
-        # The OAuth2Client should have been created
+        # The OAuth2Client should have been created with the correct parameters
         mock_client_class.assert_called_once_with(
             client_id="test_client_id",
             client_secret="test_client_secret",
@@ -131,6 +132,9 @@ class TestHttpClientManager:
             timeout=httpx.Timeout(30.0),
             follow_redirects=True,
         )
+
+        # Verify the headers were set correctly
+        mock_instance.headers.__setitem__.assert_called_with("User-Agent", "mwlib test")
 
     def test_get_client_with_http2(self, http_client_manager, mock_conf):
         """Test that HTTP/2 is enabled when use_http2 is True."""
@@ -158,7 +162,6 @@ class TestHttpClientManager:
 
         assert "http2=True" in list(http_client_manager._clients.keys())[0]
 
-
     def test_detect_http2_support_failure(self, http_client_manager, httpx_mock):
         """Test HTTP/2 detection when the server doesn't support it."""
         httpx_mock.add_response(method="HEAD", http_version="HTTP/1.1")
@@ -175,7 +178,9 @@ class TestHttpClientManager:
 
         assert "http2=False" in list(http_client_manager._clients.keys())[0]
 
-    def test_create_oauth2_client_missing_credentials(self, http_client_manager, mock_conf, httpx_mock):
+    def test_create_oauth2_client_missing_credentials(
+        self, http_client_manager, mock_conf, httpx_mock
+    ):
         """Test that a standard client is created when OAuth2 credentials are missing."""
         httpx_mock.add_response(method="HEAD", http_version="HTTP/1.1")
 
@@ -191,7 +196,9 @@ class TestHttpClientManager:
         # A standard client should have been created instead
         assert "oauth2=False" in list(http_client_manager._clients.keys())[0]
 
-    def test_create_oauth2_client_with_credentials(self, http_client_manager, mock_conf, httpx_mock):
+    def test_create_oauth2_client_with_credentials(
+        self, http_client_manager, mock_conf, httpx_mock
+    ):
         """Test that a standard client is created when OAuth2 credentials are missing."""
         httpx_mock.add_response(method="HEAD", http_version="HTTP/1.1")
 

@@ -85,10 +85,10 @@ class HttpClientManager:
             client = self.create_standard_client(base_url, use_http2)
 
         http2_version = "HTTP/2" if use_http2 else "HTTP/1.1"
-        if isinstance(client, StandardClient):
-            logger.info(f"Created standard client and using {http2_version}")
+        if isinstance(client, OAuth2Client):
+            logger.info(f"Created OAuth2 client and using {http2_version} for {base_url}")
         else:
-            logger.info(f"Created OAuth2 client and using {http2_version}")
+            logger.info(f"Created standard client and using {http2_version} for {base_url}")
 
 
         # Cache and return the client
