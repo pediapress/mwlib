@@ -516,6 +516,8 @@ include tests/mwlib/core/test_authors.py
 include tests/mwlib/core/test_metabook.py
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
+include tests/mwlib/network/test_fetch.py
+include tests/mwlib/network/test_fetch_siteinfo.py
 include tests/mwlib/network/test_http_client.py
 include tests/mwlib/network/test_sapi.py
 include tests/mwlib/rl/renderhelper.py

@@ -11,6 +11,7 @@ import shutil
 import sys
 import time
 import traceback
+from collections import defaultdict
 from hashlib import sha1
 from urllib import parse, request
 from urllib.error import HTTPError
@@ -28,6 +29,7 @@ from mwlib.core import nshandling
 from mwlib.network import sapi as mwapi
 from mwlib.network.http_client import HttpClientManager
 from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
+from mwlib.network.sapi import MwApi
 from mwlib.utils import conf, linuxmem, unorganized
 from mwlib.utils import myjson as json
 
@@ -320,6 +322,9 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
 
 
 class Fetcher:
+    titles_pending_contributor_lookup = defaultdict(list)
+    title_mapping = {}
+
     def __init__(
         self,
         api,
@@ -453,18 +458,20 @@ class Fetcher:
                 self._refcall(self.fetch_used, "titles", [redirect], True)
 
             self.fsout.write_expanded_page(title, page["ns"], txt, revid=revid)
-            self.get_edits(title, revid)
+            self.get_edits(title)
 
     def expand_templates_from_title(self, title):
         nsnum, _, _ = self.nshandler.splitname(title)
 
         text = "{{:%s}}" % title if nsnum == 0 else "{{%s}}" % title
 
+        # produces deprecated output format, might have to add prop param and handle output
+        # check https://commons.wikimedia.org/w/api.php?action=help&modules=expandtemplates
         res = self.api.do_request(action="expandtemplates", title=title, text=text)
         txt = res.get("*")
         if txt:
             self.fsout.write_expanded_page(title, nsnum, txt)
-            self.get_edits(title, None)
+            self.get_edits(title)
 
     def run(self):
         self.report()
@@ -740,10 +747,76 @@ class Fetcher:
         revids.sort()
         return titles, revids
 
-    def get_edits(self, title, rev):
-        inspect_authors = self.api.get_edits(title, rev)
-        authors = inspect_authors.get_authors()
-        self.fsout.set_db_key("authors", title, authors)
+    def get_edits(self, title):
+        """Get contributors for a given page title.
+
+        This method is now a wrapper around _add_to_titles_pending_contributor_lookup,
+        which collects titles for batched processing. The actual API request is made
+        when the batch is full or when explicitly flushed.
+
+        Args:
+            title (str): Title of the page to get edit history for
+
+        """
+        # Add the title to the batch
+        self._add_to_titles_pending_contributor_lookup(title, self.api)
+
+    def _add_to_titles_pending_contributor_lookup(self, title, api: MwApi):
+        """Add a title to the authors batch for processing.
+
+        If the batch reaches the API request limit, it will be processed automatically.
+
+        Args:
+            title (str): Title of the page to add to the batch
+            api (MwApi): MwApi instance
+
+        """
+        if not api:
+            api = self.api
+        # Add the title to the batch
+        self.titles_pending_contributor_lookup[api].append(title)
+
+        # Process the batch if it reaches the API request limit
+        if len(self.titles_pending_contributor_lookup[api]) >= 50:  # MediaWiki API allows up to 50 titles per request
+            self._lookup_contributors(api)
+
+    def _lookup_contributors(self, api: MwApi) -> None:
+        """Process the current batch of titles for author information.
+
+        This method makes a single API request for all titles in the batch,
+        then processes the results and stores them in the database.
+        """
+        # Make the API request for all titles in the batch
+        title_to_authors = api.get_contributors(self.titles_pending_contributor_lookup[api])
+
+        # Process the results for each title
+        authors_dict = {}
+        title: str
+        for title in self.titles_pending_contributor_lookup[api]:
+            # Skip if the title is not in the results (e.g., if it was redirected)
+            if title not in title_to_authors:
+                continue
+
+            # Get the InspectAuthors object for this title
+            inspect_authors = title_to_authors[title]
+
+            # Get the authors for this title
+            authors = inspect_authors.get_authors()
+
+            # Use the mapped title if available (for image pages)
+            db_title = title
+            if title in self.title_mapping:
+                db_title = self.title_mapping[title]
+
+            # Store the authors in the database
+            self.fsout.set_db_key("authors", db_title, authors)
+
+            # Store the authors in a dictionary for future use
+            authors_dict[title] = authors
+
+        # Clear the batch
+        self.authors_batch = []
+
 
     def report(self):
         query_count = self.api.qccount
@@ -835,6 +908,21 @@ class Fetcher:
         self.pool.add(greenlet_task)
 
     def fetch_imageinfo(self, titles):
+        """Fetch and process image information for given titles.
+
+        This method retrieves image information from the MediaWiki API for the specified titles,
+        including thumbnails and description URLs. It processes the retrieved data by:
+        1. Extracting image info and storing it in the output
+        2. Scheduling thumbnail downloads
+        3. Collecting base paths for image descriptions
+
+        Args:
+            titles: List of image titles to fetch information for
+
+        The method handles the scheduling of image downloads and triggers processing of
+        description pages through handle_new_basepath().
+
+        """
         data = self.api.fetch_imageinfo(titles=titles, iiurlwidth=self.imagesize)
         infos = list(data.get("pages", {}).values())
         new_base_paths = set()
@@ -935,14 +1023,28 @@ class Fetcher:
         for title in local_names:
             self._refcall(self.get_image_edits, title, api)
 
-    def get_image_edits(self, title, api):
-        get_authors = api.get_edits(title, None)
+    def get_image_edits(self, title: str, api: MwApi):
+        """Get edit history for an image page.
+
+        This method is now a wrapper around _add_to_authors_batch, which collects titles
+        for batched processing. The actual API request is made when the batch is full
+        or when explicitly flushed.
+
+        Args:
+            title (str): Title of the image page to get edit history for
+            api (MwApi): API instance to use for the request
+
+        """
         local_nsname = self.nshandler.get_nsname_by_number(6)
         # change title prefix to make them look like local pages
         _, partial = title.split(":", 1)
-        title = f"{local_nsname}:{partial}"
-        authors = get_authors.get_authors()
-        self.fsout.set_db_key("authors", title, authors)
+        local_title = f"{local_nsname}:{partial}"
+
+        # Add the title to the batch
+        self._add_to_titles_pending_contributor_lookup(title, api)
+
+        # Map the original title to the local title for later use
+        self.title_mapping[title] = local_title
 
     def _get_mwapi_for_path(self, path):
         urls = mwapi.guess_api_urls(path)
@@ -978,6 +1080,7 @@ class Fetcher:
             self._refcall(self._fetch_pages, **kwargs)
 
     def dispatch(self):
+        """Dispatch all requests to the appropriate handlers."""
         limit = self.api.api_request_limit
         while self.imageinfo_todo and self.api.idle():
             block = get_block(self.imageinfo_todo, limit)
@@ -1001,8 +1104,22 @@ class Fetcher:
                 continue
             print(f"WARNING: {title, revid} could not be fetched")
 
+    def lookup_contributors_for_remaining_titles(self):
+        """Flush any pending authors batch.
+
+        This method should be called at the end of processing to ensure that
+        all authors are processed and stored.
+        """
+        for api in self.titles_pending_contributor_lookup:
+            if self.titles_pending_contributor_lookup[api]:
+                self._lookup_contributors(api)
+
     def finish(self):
         self._sanity_check()
+        # Process any pending authors batch
+        self.lookup_contributors_for_remaining_titles()
+        for api in self.titles_pending_contributor_lookup:
+            logger.info(f"did {api.request_counter} requests to {api.baseurl}")
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
         self.fsout.close()

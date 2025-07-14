@@ -52,6 +52,7 @@ def merge_data(dst, src):
 class MwApi:
     # Track domains and their token expiration timestamps
     _token_info = {}  # Format: {domain: {'token': token, 'expires_at': timestamp}}
+    request_counter = 0
 
     def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
         self.apiurl = apiurl
@@ -312,6 +313,8 @@ class MwApi:
         raise RuntimeError(f"{error_info}: [fetching {self._build_url(**kwargs)}]")
 
     def _handle_request(self, **kwargs):
+        self.request_counter += 1
+        logger.debug(f"Request #{self.request_counter}: ACTION:{kwargs.get('action')} PROP:{kwargs.get('prop')}")
         response_data = self._request(**kwargs)
         # Convert bytes to string if necessary
         if isinstance(response_data, bytes):
@@ -500,6 +503,17 @@ class MwApi:
         return self.do_request(action="query", **kwargs)
 
     def get_edits(self, title, revision, rvlimit=None):
+        """Get edit history for a given page title up to a specific revision.
+
+        Args:
+            title (str): Title of the page to get edit history for
+            revision (int): Revision ID to start from. If None, starts from latest revision
+            rvlimit (int, optional): Maximum number of revisions to retrieve. Defaults to
+                                     self.rvlimit
+
+        Returns:
+            InspectAuthors: Object containing edit history and author statistics
+        """
         rvlimit = rvlimit or self.rvlimit
         kwargs = {
             "titles": title,
@@ -522,6 +536,78 @@ class MwApi:
 
         self.do_request(action="query", merge_data=merge_data, **kwargs)
         return get_authors
+
+    def get_contributors(self, titles: list[str], rvlimit=None):
+        """Get contributors for a list of page titles using the contributors API.
+
+        This method fetches contributors directly using prop=contributors, which is more
+        efficient than fetching all revisions and extracting authors from them.
+
+        Args:
+            titles (list[str]): List of page titles to get authors for
+            rvlimit (int, optional): Maximum number of contributors to retrieve. Defaults to
+                                     self.rvlimit
+
+        Returns:
+            dict: Dictionary mapping titles to their respective InspectAuthors objects
+        """
+        rvlimit = rvlimit or self.rvlimit
+        kwargs = {
+            "titles": "|".join(titles),
+            "redirects": 1,
+            "prop": "contributors",
+            "pclimit": rvlimit,
+        }
+
+        # Dictionary to store InspectAuthors objects for each title
+        contributors_by_title = {}
+
+        # Initialize InspectAuthors objects for each title
+        for title in titles:
+            contributors_by_title[title] = authors.InspectAuthors()
+
+        # Dictionary to store title to pageid mapping
+        pageid_to_title = {}
+
+        def merge_data(_, newdata):
+            # Process redirects to update title mapping
+            redirects = newdata.get("redirects", [])
+            for redirect in redirects:
+                from_title = redirect.get("from")
+                to_title = redirect.get("to")
+                if from_title and to_title and from_title in contributors_by_title:
+                    # Move the InspectAuthors object to the new title
+                    contributors_by_title[to_title] = contributors_by_title[from_title]
+                    del contributors_by_title[from_title]
+
+            # Process pages
+            pages = newdata.get("pages", {})
+            for pageid, page in pages.items():
+                title = page.get("title")
+                if title:
+                    pageid_to_title[pageid] = title
+
+                    # Get the InspectAuthors object for this title
+                    if title in contributors_by_title:
+                        get_authors = contributors_by_title[title]
+                    else:
+                        # Create a new InspectAuthors object if needed
+                        get_authors = authors.InspectAuthors()
+                        contributors_by_title[title] = get_authors
+
+                    # Process anonymous contributors
+                    anon_count = page.get("anoncontributors", 0)
+                    get_authors.num_anon += anon_count
+
+                    # Process named contributors
+                    contributors = page.get("contributors", [])
+                    for contributor in contributors:
+                        name = contributor.get("name", "")
+                        if name and not get_authors.bot_rex.search(name):
+                            get_authors.authors.add(name)
+
+        self.do_request(action="query", merge_data=merge_data, **kwargs)
+        return contributors_by_title
 
 
 def guess_api_urls(url):
