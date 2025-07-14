@@ -235,7 +235,7 @@ def make_nuwiki(
 
         my_mb = get_metabook(is_multiwiki, articles, metabook)
 
-        wikitrust(wikiconf.baseurl, my_mb)
+        wikitrust(wikiconf.baseurl, my_mb) # TODO: doesn't seem to work anymore
 
         fetchers.append(
             StartFetcher(
