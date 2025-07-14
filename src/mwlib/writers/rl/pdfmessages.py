@@ -68,7 +68,7 @@ _("Image Sources, Licenses and Contributors")
 
 _("Image")
 
-_("anonymous edits")
+_("anonymous contributors")
 
 _("Figure")
 

@@ -419,7 +419,7 @@ class RlWriter:
             art.wikiurl = source.url or ""
         else:
             art.wikiurl = None
-        art.authors = mywiki.get_authors(item.title, revision=item.revision)
+        art.authors = mywiki.get_authors(item.title)
         advtree.build_advanced_tree(art)
         if self.debug:
             parser.show(sys.stdout, art)
@@ -779,7 +779,7 @@ class RlWriter:
             authors_text = ", ".join([a for a in authors if a != "ANONIPEDITS:0"])
             authors_text = re.sub(
                 r"ANONIPEDITS:(?P<num>\d+)",
-                r"\g<num> %s" % _("anonymous edits"),
+                r"\g<num> %s" % _("anonymous contributors"),
                 authors_text,
             )
             authors_text = self.formatter.clean_text(authors_text)
@@ -1019,7 +1019,7 @@ class RlWriter:
             else:
                 combined_nodes.append(node)
             last_node = node
-            return last_node, combined_nodes, figures, floating_nodes, True
+            return figures, floating_nodes, True
         figure_margin = self.get_margins(figures[0].align or "right")
         combined_nodes.append(
             FiguresAndParagraphs(
@@ -1571,7 +1571,7 @@ class RlWriter:
 
     def svg2png(self, img_path):
         cmd = [
-            "convert",
+            "magick",
             img_path,
             "-flatten",
             "-coalesce",
@@ -1618,6 +1618,7 @@ class RlWriter:
     def _execute_image_conversion_commands(self, cmds, img_path):
         for cmd in cmds:
             try:
+                # log.debug("executing command: %s", cmd)
                 ret = subprocess.call(cmd)
                 if ret != 0:
                     log.warning(
@@ -1632,6 +1633,7 @@ class RlWriter:
         if img_path in self.fixed_images:
             return self.fixed_images[img_path]
         self.fixed_images[img_path] = -1
+        img_path = str(img_path, 'utf-8')
 
         try:
             img = PilImage.open(img_path)
@@ -1643,7 +1645,7 @@ class RlWriter:
             return -1
         cmds = []
         base_cmd = [
-            "convert",
+            "magick",
             "-limit",
             "memory",
             "32000000",
