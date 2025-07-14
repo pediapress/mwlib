@@ -2,7 +2,11 @@ import configparser
 import logging
 import os
 
+from dotenv import find_dotenv, load_dotenv
+
 from mwlib.utils._version import version
+
+load_dotenv(find_dotenv())
 
 logger = logging.getLogger("mwlib.utils.conf")
 

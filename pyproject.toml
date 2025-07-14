@@ -26,6 +26,7 @@ dependencies = [
     "pyPdf",
     "pygments",
     "pyparsing",
+    "python-dotenv>=1.1.1",
     "reportlab",
     "roman",
     "simplejson",
