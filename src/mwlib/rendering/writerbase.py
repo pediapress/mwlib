@@ -44,7 +44,7 @@ def update_article_attributes(article, item, wiki_obj):
     article.url = url if url else None
     source = wiki_obj.get_source(item.title, item.revision)
     article.wikiurl = source.url if source else None
-    article.authors = wiki_obj.get_authors(item.title, revision=item.revision)
+    article.authors = wiki_obj.get_authors(item.title)
     return article
 
 
