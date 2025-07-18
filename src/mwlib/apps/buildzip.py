@@ -129,7 +129,7 @@ def make_zip(
 @click.option(
     "-i",
     "--imagesize",
-    default=1200,
+    default=1280,
     help="max. pixel size (width or height) for images (default: 1200)",
 )
 @click.option(
