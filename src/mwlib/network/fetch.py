@@ -779,6 +779,7 @@ class Fetcher:
         # Process the batch if it reaches the API request limit
         if len(self.titles_pending_contributor_lookup[api]) >= 50:  # MediaWiki API allows up to 50 titles per request
             self._lookup_contributors(api)
+            self.titles_pending_contributor_lookup[api] = []
 
     def _lookup_contributors(self, api: MwApi) -> None:
         """Process the current batch of titles for author information.
