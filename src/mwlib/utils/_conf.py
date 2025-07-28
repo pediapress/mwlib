@@ -37,6 +37,33 @@ class ConfigSection:
     def getboolean(self, option, fallback=None):
         return self._section.getboolean(option, fallback)
 
+    def as_dict(self, include_defaults=False):
+        """Convert the section to a dictionary."""
+        if include_defaults:
+            return dict(self._section)
+        parser = self._section.parser
+        section_name = self._section.name
+
+        if not parser.has_section(section_name):
+            return {}
+
+        section_dict = {}
+        section_options = parser.options(section_name)
+        default_options = set(parser.defaults().keys()) if parser.defaults() else set()
+
+        for option in section_options:
+            # Include option if it's not in defaults OR if its value differs from default
+            if option not in default_options:
+                section_dict[option] = self._section[option]
+            else:
+                # Check if the value is different from the default
+                default_value = parser.defaults().get(option)
+                section_value = parser.get(section_name, option, fallback=None, raw=True)
+                if section_value != default_value:
+                    section_dict[option] = self._section[option]
+
+        return section_dict
+
 
 class ConfMod:
     def __init__(self, name):

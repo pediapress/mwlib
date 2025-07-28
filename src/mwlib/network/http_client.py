@@ -28,9 +28,10 @@ class HttpClientManager:
 
     _instance = None
     _clients: Dict[str, Union[StandardClient, OAuth2Client]] = {}
+    headers = {}
 
     @classmethod
-    def get_instance(cls) -> 'HttpClientManager':
+    def get_instance(cls) -> "HttpClientManager":
         """Get the singleton instance of HttpClientManager.
 
         Returns:
@@ -41,10 +42,7 @@ class HttpClientManager:
         return cls._instance
 
     def get_client(
-        self, 
-        base_url: str, 
-        use_oauth2: Optional[bool] = None, 
-        use_http2: Optional[bool] = None
+        self, base_url: str, use_oauth2: Optional[bool] = None, use_http2: Optional[bool] = None
     ) -> Union[StandardClient, OAuth2Client]:
         """Get an HTTP client for the given base URL.
 
@@ -71,6 +69,10 @@ class HttpClientManager:
         if use_http2 and conf.get("http2", "auto_detect", True, bool):
             use_http2 = self.detect_http2_support(base_url)
 
+        if hasattr(conf, "headers"):
+            self.headers = getattr(conf, "headers").as_dict()
+        self.headers["User-Agent"] = getattr(conf, "user_agent")
+
         # Create a cache key that includes the base URL, authentication and HTTP/2 settings
         cache_key = f"{base_url}|oauth2={use_oauth2}|http2={use_http2}"
 
@@ -90,12 +92,13 @@ class HttpClientManager:
         else:
             logger.info(f"Created standard client and using {http2_version} for {base_url}")
 
-
         # Cache and return the client
         self._clients[cache_key] = client
         return client
 
-    def create_oauth2_client(self, base_url: str, use_http2: bool = True) -> OAuth2Client|StandardClient:
+    def create_oauth2_client(
+        self, base_url: str, use_http2: bool = True
+    ) -> OAuth2Client | StandardClient:
         """Create an OAuth2 client for the given base URL.
 
         Args:
@@ -107,10 +110,9 @@ class HttpClientManager:
         """
         client_id = conf.get("oauth2", "client_id", "")
         client_secret = conf.get("oauth2", "client_secret", "")
+
         token_url = conf.get(
-            "oauth2", 
-            "token_url", 
-            "https://meta.wikimedia.org/w/rest.php/oauth2/access_token"
+            "oauth2", "token_url", "https://meta.wikimedia.org/w/rest.php/oauth2/access_token"
         )
 
         if not client_id or not client_secret:
@@ -120,6 +122,8 @@ class HttpClientManager:
             )
             return self.create_standard_client(base_url, use_http2)
 
+        logger.info(f"headers {self.headers}")
+
         # Create an OAuth2 client with client_credentials grant
         client = OAuth2Client(
             client_id=client_id,
@@ -127,12 +131,10 @@ class HttpClientManager:
             token_endpoint=token_url,
             grant_type="client_credentials",
             http2=use_http2,
+            headers=self.headers,
             timeout=httpx.Timeout(30.0),
             follow_redirects=True,
         )
-
-        # Set the user agent
-        client.headers["User-Agent"] = conf.user_agent
 
         return client
 
@@ -150,11 +152,9 @@ class HttpClientManager:
             http2=use_http2,
             timeout=httpx.Timeout(30.0),
             follow_redirects=True,
+            headers=self.headers,
             base_url=base_url,
         )
-
-        # Set the user agent
-        client.headers["User-Agent"] = conf.user_agent
 
         return client
 
