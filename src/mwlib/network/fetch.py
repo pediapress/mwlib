@@ -314,10 +314,10 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
                 delay *= backoff_factor  # Exponential backoff
             else:
                 # Either not a 429 error or we've exceeded max retries
-                logger.info(f"ERROR DOWNLOADING {url}: {err}")
+                logger.error(f"ERROR DOWNLOADING {url}: {err}")
                 raise
         except Exception as err:
-            logger.info(f"ERROR DOWNLOADING {url}: {err}")
+            logger.error(f"ERROR DOWNLOADING {url}: {err}")
             raise
 
 
@@ -446,10 +446,10 @@ class Fetcher:
         text = self.lower_infobox_parameters(text)
         text = self.update_infobox_parameters(text)
         res = self.api.do_request(
-            use_post=True, action="expandtemplates", title=title, text=text
+            use_post=True, action="expandtemplates", title=title, text=text, prop="wikitext"
         ).get("expandtemplates", {})
 
-        txt = res.get("*")
+        txt = res.get("wikitext")
         if txt:
             redirect = self.nshandler.redirect_matcher(txt)
             if redirect:
@@ -467,8 +467,10 @@ class Fetcher:
 
         # produces deprecated output format, might have to add prop param and handle output
         # check https://commons.wikimedia.org/w/api.php?action=help&modules=expandtemplates
-        res = self.api.do_request(action="expandtemplates", title=title, text=text)
-        txt = res.get("*")
+        res = self.api.do_request(
+            action="expandtemplates", title=title, text=text, prop="wikitext"
+        )
+        txt = res.get("wikitext")
         if txt:
             self.fsout.write_expanded_page(title, nsnum, txt)
             self.get_edits(title)
@@ -773,22 +775,23 @@ class Fetcher:
         """
         if not api:
             api = self.api
-        # Add the title to the batch
-        self.titles_pending_contributor_lookup[api].append(title)
 
-        # Process the batch if it reaches the API request limit
-        if len(self.titles_pending_contributor_lookup[api]) >= 50:  # MediaWiki API allows up to 50 titles per request
-            self._lookup_contributors(api)
-            self.titles_pending_contributor_lookup[api] = []
+        # KLUDGE: doing batched requests for contributors didn't work because of a
+        # race condition or shared status in gevent.
+        # Reverting to looking up individual titles - at least for the time being
+        self._lookup_contributors(api, title)
 
-    def _lookup_contributors(self, api: MwApi) -> None:
+    def _lookup_contributors(self, api: MwApi, title=None) -> None:
         """Process the current batch of titles for author information.
 
         This method makes a single API request for all titles in the batch,
         then processes the results and stores them in the database.
         """
         # Make the API request for all titles in the batch
-        title_to_authors = api.get_contributors(self.titles_pending_contributor_lookup[api])
+        if title is None:
+            title_to_authors = api.get_contributors(self.titles_pending_contributor_lookup[api])
+        else:
+            title_to_authors = api.get_contributors([title])
 
         # Process the results for each title
         authors_dict = {}
@@ -817,7 +820,6 @@ class Fetcher:
 
         # Clear the batch
         self.authors_batch = []
-
 
     def report(self):
         query_count = self.api.qccount

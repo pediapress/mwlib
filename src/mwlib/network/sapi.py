@@ -212,6 +212,10 @@ class MwApi:
 
             except httpx.HTTPStatusError as err:
                 status_code = err.response.status_code
+                if status_code == 503 and retry_count == 0:
+                    logger.warning("Retrying because of 503 status code for %s", url)
+                    time.sleep(1)
+                    max_retries += 1
                 if self._should_retry("http", status_code, retry_count, max_retries):
                     retry_count += 1
                     delay = self._handle_retry(
@@ -219,6 +223,39 @@ class MwApi:
                     )
                 else:
                     self._log_error(url, "http", status_code)
+                    raise
+
+            except httpx.LocalProtocolError as err:
+                logger.error("HTTP/2 Protocol error for url: %r", url)
+                time.sleep(1)
+                max_retries += 1
+                # Handle HTTP/2 protocol errors
+                if self._should_retry(
+                    "protocol", retry_count=retry_count, max_retries=max_retries
+                ):
+                    retry_count += 1
+                    delay = self._handle_retry(
+                        url, "protocol", str(err), retry_count, max_retries, delay, backoff_factor
+                    )
+                else:
+                    self._log_error(url, "protocol", str(err), max_retries)
+                    raise
+
+            except httpx.ReadTimeout as err:
+                logger.error("Read Timeout for url: %r", url)
+                if retry_count == 0:
+                    time.sleep(1)
+                    max_retries += 1
+
+                if self._should_retry(
+                    "timeout", retry_count=retry_count, max_retries=max_retries
+                ):
+                    retry_count += 1
+                    delay = self._handle_retry(
+                        url, "timeout", str(err), retry_count, max_retries, delay, backoff_factor
+                    )
+                else:
+                    self._log_error(url, "timeout", str(err), max_retries)
                     raise
 
             except httpx.RequestError as err:
