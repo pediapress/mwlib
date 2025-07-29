@@ -1856,8 +1856,8 @@ class RlWriter:
         for cell in row:
             if cell:
                 figure = cell[0]
-                min_height = min(min_height, figure.imgHeight)
-                aspect_ratios.append(figure.imgHeight / figure.imgWidth)
+                min_height = min(min_height, figure.img_height)
+                aspect_ratios.append(figure.img_height / figure.img_width)
         row_heights.append(min_height)
 
     def _adjust_figure_dimensions_based_on_row_height(
