@@ -1786,7 +1786,7 @@ class TreeCleaner:
 
     def clean_vlist(self, node):
         if node.vlist:
-            for attr, val in node.vlist.items():
+            for attr, val in list(node.vlist.items()):
                 if attr != attr.lower():
                     node.vlist[attr.lower()] = val
 
