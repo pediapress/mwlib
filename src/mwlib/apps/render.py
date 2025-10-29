@@ -11,7 +11,11 @@ import sys
 import tempfile
 import time
 import traceback
-from importlib.metadata import entry_points
+import sys
+if sys.version_info >= (3, 10):
+    from importlib.metadata import entry_points
+else:
+    from importlib_metadata import entry_points
 
 import click
 
@@ -359,13 +363,18 @@ def get_writer_from_options(options):
 
 def load_writer(name):
     try:
-        entry_point = next(ep for ep in entry_points().get("mwlib.writers", []) if ep.name == name)
-    except StopIteration:
-        sys.exit("No such writer: %r (use --list-writers to list available writers)" % name)
-    try:
-        return entry_point.load()
-    except Exception as exc:
-        sys.exit(f"Could not load writer {name!r}: {exc}")
+        if sys.version_info >= (3, 10):
+            eps = entry_points(group="mwlib.writers")
+        else:
+            eps = entry_points().get("mwlib.writers", [])
+    except Exception:
+        eps = []
+
+    entry_point = next((ep for ep in eps if ep.name == name), None)
+    if entry_point is None:
+        raise ValueError(f"No entry point found for writer: {name}")
+
+    return entry_point.load()
 
 
 def list_writers():
