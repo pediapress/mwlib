@@ -219,15 +219,20 @@ class NuWiki:
         if "/" in fqname:
             return None
 
+        # Try with the local language namespace first (as that's how files are stored)
         path = self._pathjoin("images", unorganized.fs_escape(fqname))
+        canonical_fqname = fqname
+
         if not self._exists(path):
-            # old collection zip files might still follow different escape rules
-            fqname = "File:" + partial  # Fallback to default language english
-            path = self._pathjoin("images", unorganized.fs_escape(fqname))
+            # Fallback: try with the canonical English namespace
+            canonical_fqname = self.en_nshandler.get_fqname(partial, nshandling.NS_FILE)
+            path = self._pathjoin("images", unorganized.fs_escape(canonical_fqname))
             if not self._exists(path):
+                # Last resort: try other variations
+                log.debug(f"Image not found: {fqname} or {canonical_fqname}")
                 return None
 
-        hex_digest = sha256(fqname.encode("utf-8")).hexdigest()
+        hex_digest = sha256(canonical_fqname.encode("utf-8")).hexdigest()
         ext = os.path.splitext(path)[-1]
         ext = ext.replace(" ", "")
         # mediawiki returns png files for some file types,
@@ -240,7 +245,7 @@ class NuWiki:
         if not os.path.exists(safe_path):
             log.debug("no such file: %s" % safe_path)
             try:
-                link_target = os.path.join("..", unorganized.fs_escape(fqname))
+                link_target = os.path.join("..", unorganized.fs_escape(canonical_fqname))
                 log.debug(link_target)
                 os.symlink(link_target, safe_path)
             except OSError as exc:
