@@ -206,3 +206,37 @@ class TestMwApi:
 
         requests = httpx_mock.get_requests()
         assert requests[0].headers["Referer"] == "https://pediapress.com"
+
+    def test_fetch_jitter_and_max_delay_are_applied(self, mw_api, httpx_mock):
+        httpx_mock.add_response(429, content="Too Many Requests")
+        httpx_mock.add_response(200, content="ok")
+
+        mock_sleep = MagicMock()
+
+        with patch("time.sleep", mock_sleep), patch("random.uniform", return_value=2.0):
+            mw_api._fetch(
+                "https://test.wikipedia.org/w/api.php?action=query",
+                max_retries=1,
+                initial_delay=10,
+                backoff_factor=2,
+                jitter=0.1,
+                max_delay=5,
+            )
+
+        # First computed delay: 10 * uniform(2.0) => 20, then capped to 5
+        mock_sleep.assert_called_once_with(5)
+
+    def test_oauth2_token_fetch_backoff_on_failure(self, mw_api):
+        """Token fetch failures should not be retried on every request (backoff)."""
+        mw_api.use_oauth2 = True
+        mw_api.http_client.fetch_token = MagicMock(side_effect=Exception("token failed"))
+
+        with patch.object(mw_api, "_do_request", return_value={}), patch(
+                "time.time", side_effect=[1000, 1000, 1005, 1005]  # time.time() is called twice
+        ):
+            mw_api.do_request(action="query", meta="siteinfo")
+            mw_api.do_request(action="query", meta="siteinfo")
+
+        assert mw_api.http_client.fetch_token.call_count == 1
+        domain = "test.wikipedia.org"
+        assert mw_api._token_info[domain]["next_retry_at"] > 1005

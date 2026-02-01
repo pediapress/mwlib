@@ -5,6 +5,7 @@
 """api.php client."""
 
 import logging
+import random
 import time
 from http import cookiejar
 from urllib import parse
@@ -113,8 +114,9 @@ class MwApi:
         if error_type == "http":
             # Retry on rate limiting (429) or server errors (5xx)
             return error_code == 429 or (500 <= error_code < 600)
-        elif error_type == "url":
-            # Always retry URLErrors (connection issues) if we haven't exceeded max_retries
+
+        # Retry transient transport issues with exponential backoff too
+        if error_type in ("url", "protocol", "timeout"):
             return True
 
         # Don't retry other types of errors
@@ -142,6 +144,11 @@ class MwApi:
                 f"URL error {error_detail} for {url_display}. "
                 f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
             )
+        else:
+            logger.warning(
+                f"{error_type} error {error_detail} for {url_display}. "
+                f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
+            )
 
         time.sleep(delay)
         return delay * backoff_factor  # Return the new delay with exponential backoff
@@ -151,9 +158,19 @@ class MwApi:
         url_display = self._get_url_display(url)
 
         if error_type == "http":
-            logger.error(f"HTTP error {error_detail} for {url_display}")
+            logger.error(
+                f"HTTP error {error_detail} for {url_display} after {max_retries} retries"
+            )
         elif error_type == "url":
             logger.error(f"URL error {error_detail} for {url_display} after {max_retries} retries")
+        elif error_type == "protocol":
+            logger.error(
+                f"Protocol error {error_detail} for {url_display} after {max_retries} retries"
+            )
+        elif error_type == "timeout":
+            logger.error(
+                f"Timeout error {error_detail} for {url_display} after {max_retries} retries"
+            )
         else:
             logger.error(f"Error fetching {url_display}: {error_detail}")
 
@@ -166,6 +183,8 @@ class MwApi:
         method="GET",
         data=None,
         headers=None,
+        max_delay=None,
+        jitter=0.0,
     ):
         """Fetch data from a URL with exponential backoff for transient errors.
 
@@ -177,6 +196,8 @@ class MwApi:
             method: HTTP method to use (GET or POST)
             data: Data to send in the request body (for POST requests)
             headers: Additional headers to send with the request
+            max_delay: Maximum delay before retrying
+            jitter: fraction, e.g. 0.1 => random factor in [0.9, 1.1]
 
         Returns:
             The data fetched from the URL
@@ -190,83 +211,81 @@ class MwApi:
         if isinstance(url, str):
             logger.debug("fetching url: %r", url)
 
+        method_normalized = method.upper()
+        if method_normalized not in {"GET", "POST"}:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+
         # Prepare headers
         request_headers = {"Referer": "https://pediapress.com"}
         if headers:
             request_headers.update(headers)
 
-        retry_count = 0
+        retry_count = 0  # number of retries already performed
         delay = initial_delay
+
+        def _compute_effective_delay(current_delay: float) -> float:
+            effective = current_delay
+            if jitter:
+                effective *= random.uniform(1.0 - jitter, 1.0 + jitter)
+            if max_delay is not None:
+                effective = min(effective, max_delay)
+            return effective
+
+        def _retry_or_raise(
+            error_type: str, error_detail, *, http_status_code: int | None = None
+        ) -> bool:
+            nonlocal retry_count, delay
+
+            code_for_retry = http_status_code if error_type == "http" else None
+            if self._should_retry(error_type, code_for_retry, retry_count, max_retries):
+                retry_count += 1
+                effective_delay = _compute_effective_delay(delay)
+                delay = self._handle_retry(
+                    url,
+                    error_type,
+                    error_detail,
+                    retry_count,
+                    max_retries,
+                    effective_delay,
+                    backoff_factor,
+                )
+                return True
+
+            self._log_error(url, error_type, error_detail, max_retries)
+            return False
 
         while True:
             try:
-                if method.upper() == "POST":
+                if method_normalized == "POST":
                     response = self.http_client.post(url, data=data, headers=request_headers)
                 else:
                     response = self.http_client.get(url, headers=request_headers)
 
-                # Raise for status to catch HTTP errors
                 response.raise_for_status()
-
                 return response.content
 
             except httpx.HTTPStatusError as err:
                 status_code = err.response.status_code
-                if status_code == 503 and retry_count == 0:
-                    logger.warning("Retrying because of 503 status code for %s", url)
-                    time.sleep(1)
-                    max_retries += 1
-                if self._should_retry("http", status_code, retry_count, max_retries):
-                    retry_count += 1
-                    delay = self._handle_retry(
-                        url, "http", status_code, retry_count, max_retries, delay, backoff_factor
-                    )
-                else:
-                    self._log_error(url, "http", status_code)
-                    raise
+                if _retry_or_raise("http", status_code, http_status_code=status_code):
+                    continue
+                raise err
 
             except httpx.LocalProtocolError as err:
                 logger.error("HTTP/2 Protocol error for url: %r", url)
-                time.sleep(1)
-                max_retries += 1
-                # Handle HTTP/2 protocol errors
-                if self._should_retry(
-                    "protocol", retry_count=retry_count, max_retries=max_retries
-                ):
-                    retry_count += 1
-                    delay = self._handle_retry(
-                        url, "protocol", str(err), retry_count, max_retries, delay, backoff_factor
-                    )
-                else:
-                    self._log_error(url, "protocol", str(err), max_retries)
-                    raise
+                if _retry_or_raise("protocol", str(err)):
+                    continue
+                raise
 
             except httpx.ReadTimeout as err:
                 logger.error("Read Timeout for url: %r", url)
-                if retry_count == 0:
-                    time.sleep(1)
-                    max_retries += 1
-
-                if self._should_retry(
-                    "timeout", retry_count=retry_count, max_retries=max_retries
-                ):
-                    retry_count += 1
-                    delay = self._handle_retry(
-                        url, "timeout", str(err), retry_count, max_retries, delay, backoff_factor
-                    )
-                else:
-                    self._log_error(url, "timeout", str(err), max_retries)
-                    raise
+                if _retry_or_raise("timeout", str(err)):
+                    continue
+                raise
 
             except httpx.RequestError as err:
-                if self._should_retry("url", retry_count=retry_count, max_retries=max_retries):
-                    retry_count += 1
-                    delay = self._handle_retry(
-                        url, "url", str(err), retry_count, max_retries, delay, backoff_factor
-                    )
-                else:
-                    self._log_error(url, "url", str(err), max_retries)
-                    raise
+                if _retry_or_raise("url", str(err)):
+                    continue
+                raise
 
             except Exception as err:
                 # For other exceptions, log and re-raise
@@ -290,7 +309,7 @@ class MwApi:
 
     def _request(self, **kwargs):
         url = self._build_url(**kwargs)
-        data = self._fetch(url, method="GET")
+        data = self._fetch(url, method="GET", max_retries=self.max_retry_count)
         return data
 
     def _post(self, **kwargs):
@@ -322,11 +341,15 @@ class MwApi:
 
                 # Check if token exists and is not expired
                 current_time = time.time()
-                token_expired = domain not in self._token_info or current_time >= self._token_info[
-                    domain
-                ].get("expires_at", 0)
+                token_info = self._token_info.get(domain, {})
+                token_expired = (
+                        domain not in self._token_info
+                        or current_time >= token_info.get("expires_at", 0)
+                )
 
-                if token_expired:
+                # Simple backoff after failures to avoid hammering token endpoint
+                next_retry_at = token_info.get("next_retry_at", 0)
+                if token_expired and current_time >= next_retry_at:
                     try:
                         logger.debug(f"Fetching OAuth2 token for domain: {domain}")
                         token = self.http_client.fetch_token()
@@ -334,9 +357,21 @@ class MwApi:
                         self._token_info[domain] = {
                             "token": token,
                             "expires_at": current_time + token.get("expires_in", 3600),
+                            "next_retry_at": 0,
+                            "retry_delay": 0,
                         }
                     except Exception as e:
-                        logger.warning(f"Failed to fetch OAuth2 token for {domain}: {e}")
+                        retry_delay = token_info.get("retry_delay", 5) or 5
+                        retry_delay = min(retry_delay * 2, 300)
+                        self._token_info[domain] = {
+                            **token_info,
+                            "next_retry_at": current_time + retry_delay,
+                            "retry_delay": retry_delay,
+                        }
+                        logger.warning(
+                            f"Failed to fetch OAuth2 token for {domain}: {e}. "
+                            f"Retrying in {retry_delay} seconds."
+                        )
 
             if use_post:
                 return self._post(**kwargs)
@@ -351,7 +386,9 @@ class MwApi:
 
     def _handle_request(self, **kwargs):
         self.request_counter += 1
-        logger.debug(f"Request #{self.request_counter}: ACTION:{kwargs.get('action')} PROP:{kwargs.get('prop')}")
+        logger.debug(
+            f"Request #{self.request_counter}: ACTION:{kwargs.get('action')} PROP:{kwargs.get('prop')}"
+        )
         response_data = self._request(**kwargs)
         # Convert bytes to string if necessary
         if isinstance(response_data, bytes):
@@ -550,6 +587,7 @@ class MwApi:
 
         Returns:
             InspectAuthors: Object containing edit history and author statistics
+
         """
         rvlimit = rvlimit or self.rvlimit
         kwargs = {
@@ -587,6 +625,7 @@ class MwApi:
 
         Returns:
             dict: Dictionary mapping titles to their respective InspectAuthors objects
+
         """
         rvlimit = rvlimit or self.rvlimit
         kwargs = {
