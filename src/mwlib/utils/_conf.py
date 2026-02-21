@@ -107,6 +107,8 @@ class ConfMod:
                 parts = key[len(prefix) :].lower().split("_", 1)
                 if len(parts) == 2:
                     section, option = parts
+                    if section == "default":
+                        section = "DEFAULT"
                     if not self.config.has_section(section) and section.lower() != "default":
                         self.config.add_section(section)
                     self.config[section][option] = value

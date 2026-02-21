@@ -338,7 +338,7 @@ class Fetcher:
         fetch_images=True,
     ):
         self.dispatch_event = gevent.event.Event()
-        self.api_semaphore = Semaphore(20)
+        self.api_semaphore = Semaphore(conf.get("fetch", "api_request_limit", 5, int))
 
         self.cover_image = cover_image
 

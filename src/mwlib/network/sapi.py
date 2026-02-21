@@ -7,6 +7,7 @@
 import logging
 import random
 import time
+from collections import deque
 from http import cookiejar
 from urllib import parse
 from urllib.error import HTTPError, URLError
@@ -50,10 +51,48 @@ def merge_data(dst, src):
                     dst[k] = val
 
 
+class RateLimiter:
+    """Token-bucket rate limiter for gevent-based concurrency.
+
+    Limits the number of operations allowed within a sliding time window.
+    """
+
+    def __init__(self, max_calls: int, period: float = 1.0):
+        """Initialize the rate limiter.
+
+        Args:
+            max_calls: Maximum number of calls allowed within the period.
+            period: Time window in seconds (default: 1.0).
+        """
+        self._max_calls = max_calls
+        self._period = period
+        self._timestamps: deque[float] = deque()
+        self._lock = Semaphore(1)
+
+    def acquire(self):
+        """Block until a request is allowed under the rate limit."""
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                # Remove timestamps outside the sliding window
+                while self._timestamps and self._timestamps[0] <= now - self._period:
+                    self._timestamps.popleft()
+
+                if len(self._timestamps) < self._max_calls:
+                    self._timestamps.append(now)
+                    return
+
+                # Calculate how long to wait until the oldest entry expires
+                wait_time = self._period - (now - self._timestamps[0])
+
+            time.sleep(max(wait_time, 0.01))
+
+
 class MwApi:
     # Track domains and their token expiration timestamps
     _token_info = {}  # Format: {domain: {'token': token, 'expires_at': timestamp}}
     request_counter = 0
+    _rate_limiter = None  # Shared across all MwApi instances
 
     def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
         self.apiurl = apiurl
@@ -84,6 +123,12 @@ class MwApi:
         self.max_retry_count = conf.get("fetch", "max_retry_count", 2, int)
         self.rvlimit = conf.get("fetch", "rvlimit", 500, int)
         self.limit_fetch_semaphore = None
+
+        # Initialize rate limiter (shared across instances)
+        max_rps = conf.get("fetch", "max_requests_per_second", 0, int)
+        if max_rps > 0 and MwApi._rate_limiter is None:
+            MwApi._rate_limiter = RateLimiter(max_calls=max_rps, period=1.0)
+            logger.info(f"Rate limiter initialized: {max_rps} requests/second")
 
     def report(self):
         """Guarantee compatibility with sapi using this placeholder method."""
@@ -211,14 +256,24 @@ class MwApi:
         if isinstance(url, str):
             logger.debug("fetching url: %r", url)
 
+        # Enforce rate limit before making the request
+        if MwApi._rate_limiter is not None:
+            MwApi._rate_limiter.acquire()
+
         method_normalized = method.upper()
         if method_normalized not in {"GET", "POST"}:
             raise ValueError(f"Unsupported HTTP method: {method}")
 
         # Prepare headers
         request_headers = {"Referer": "https://pediapress.com"}
+        request_headers.update(self.http_client.headers)
         if headers:
             request_headers.update(headers)
+
+        if self.use_oauth2:
+            token = getattr(self.http_client, "token", None)
+            if token and "access_token" in token:
+                request_headers["Authorization"] = f"Bearer {token['access_token']}"
 
         retry_count = 0  # number of retries already performed
         delay = initial_delay
@@ -342,9 +397,8 @@ class MwApi:
                 # Check if token exists and is not expired
                 current_time = time.time()
                 token_info = self._token_info.get(domain, {})
-                token_expired = (
-                        domain not in self._token_info
-                        or current_time >= token_info.get("expires_at", 0)
+                token_expired = domain not in self._token_info or current_time >= token_info.get(
+                    "expires_at", 0
                 )
 
                 # Simple backoff after failures to avoid hammering token endpoint
@@ -352,7 +406,10 @@ class MwApi:
                 if token_expired and current_time >= next_retry_at:
                     try:
                         logger.debug(f"Fetching OAuth2 token for domain: {domain}")
-                        token = self.http_client.fetch_token()
+                        ua = self.http_client.headers.get("user-agent", "mwlib")
+                        token = self.http_client.fetch_token(
+                            headers={"User-Agent": ua},
+                        )
                         # Store token info with expiration (default 1 hour if not specified)
                         self._token_info[domain] = {
                             "token": token,
@@ -368,10 +425,13 @@ class MwApi:
                             "next_retry_at": current_time + retry_delay,
                             "retry_delay": retry_delay,
                         }
-                        logger.warning(
+                        logger.error(
                             f"Failed to fetch OAuth2 token for {domain}: {e}. "
                             f"Retrying in {retry_delay} seconds."
                         )
+                        raise RuntimeError(
+                            f"Failed to fetch OAuth2 token for {domain}: {e}"
+                        ) from e
 
             if use_post:
                 return self._post(**kwargs)
