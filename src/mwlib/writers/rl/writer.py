@@ -2651,8 +2651,9 @@ class RlWriter:
         img_align = f"{img_align_value}in"
         # the non-breaking-space is needed to
         # force whitespace after the formula
+        img_src = xmlescape(os.fsdecode(imgpath))
         return [
-            f'<img src="{imgpath.encode(sys.getfilesystemencoding())}" width="{width / density * 72:f}pt" height="{height / density * 72:f}pt" valign="{img_align}" />'
+            f'<img src="{img_src}" width="{width / density * 72:f}pt" height="{height / density * 72:f}pt" valign="{img_align}" />'
         ]
 
     def writeTimeline(self, node):

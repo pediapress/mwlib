@@ -46,7 +46,7 @@ def build_paragraph(txt_list, style=text_style(), txt_style=None):
             return [Paragraph(_txt, style)]
         except Exception:
             traceback.print_exc()
-            log.warning("reportlab paragraph error:", repr(_txt))
+            log.warning("reportlab paragraph error: %s", repr(_txt))
             return []
     else:
         return []
