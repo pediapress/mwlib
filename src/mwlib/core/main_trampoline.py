@@ -9,7 +9,6 @@ from mwlib.apps.render import main as render_main_func  # noqa: E402
 from mwlib.core.nserve import main as nserve_main_func  # noqa: E402
 from mwlib.core.nslave import main as nslave_main_func  # noqa: E402
 from mwlib.network.postman import main as postman_main_func  # noqa: E402
-from mwlib.apps.buildzip2 import main as buildzip2_main_func
 
 
 def nserve_main():
@@ -25,9 +24,6 @@ def postman_main():
 
 def mw_zip_main():
     return buildzip_main_func()
-
-def mw_zip2_main():
-    return buildzip2_main_func()
 
 def mw_render_main():
     return render_main_func()
