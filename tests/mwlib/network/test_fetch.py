@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import httpx
 import pytest
 
+from mwlib.network import fetch
 from mwlib.network.fetch import download_to_file
 
 
@@ -210,3 +211,27 @@ class TestFetch:
         # Call the function and expect an exception
         with pytest.raises(Exception):
             download_to_file("https://example.com/file.txt", path, temp_path)
+
+    def test_download_to_file_applies_rate_limit(self, mock_http_client_manager, mock_conf, temp_files):
+        """Download requests should respect configured max_requests_per_second."""
+        path, temp_path = temp_files
+
+        with patch("mwlib.network.fetch._acquire_download_rate_limit") as mock_rate_limit:
+            download_to_file("https://example.com/file.txt", path, temp_path)
+            mock_rate_limit.assert_called_once_with("https://example.com/file.txt")
+
+    def test_acquire_download_rate_limit_uses_conf_value(self, mock_conf):
+        """Rate limiter should be built from conf.get(fetch, max_requests_per_second)."""
+        fetch._download_rate_limiter = {}
+        fetch._download_rate_limiter_rps = {}
+        mock_conf.get.side_effect = lambda section, name, default, bool: {
+            ("fetch", "max_requests_per_second"): 3,
+        }.get((section, name), default)
+
+        with patch("mwlib.network.fetch.mwapi.RateLimiter") as mock_rate_limiter_cls:
+            mock_rate_limiter = MagicMock()
+            mock_rate_limiter_cls.return_value = mock_rate_limiter
+            fetch._acquire_download_rate_limit("https://example.com/file.txt")
+
+            mock_rate_limiter_cls.assert_called_once_with(max_calls=3, period=1.0)
+            mock_rate_limiter.acquire.assert_called_once_with()

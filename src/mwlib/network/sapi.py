@@ -21,6 +21,8 @@ import httpx
 from gevent.lock import Semaphore
 
 from mwlib.core import authors
+from mwlib.network import api as network_api
+from mwlib.network import auth as network_auth
 from mwlib.network.http_client import HttpClientManager
 from mwlib.utils import conf
 
@@ -63,6 +65,7 @@ class RateLimiter:
         Args:
             max_calls: Maximum number of calls allowed within the period.
             period: Time window in seconds (default: 1.0).
+
         """
         self._max_calls = max_calls
         self._period = period
@@ -92,7 +95,9 @@ class MwApi:
     # Track domains and their token expiration timestamps
     _token_info = {}  # Format: {domain: {'token': token, 'expires_at': timestamp}}
     request_counter = 0
-    _rate_limiter = None  # Shared across all MwApi instances
+    _rate_limiters = {}  # Format: {origin: RateLimiter}
+    _rate_limiter_rps = {}  # Format: {origin: max_rps}
+    _rate_limiter_lock = Semaphore(1)
 
     def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
         self.apiurl = apiurl
@@ -124,12 +129,6 @@ class MwApi:
         self.rvlimit = conf.get("fetch", "rvlimit", 500, int)
         self.limit_fetch_semaphore = None
 
-        # Initialize rate limiter (shared across instances)
-        max_rps = conf.get("fetch", "max_requests_per_second", 0, int)
-        if max_rps > 0 and MwApi._rate_limiter is None:
-            MwApi._rate_limiter = RateLimiter(max_calls=max_rps, period=1.0)
-            logger.info(f"Rate limiter initialized: {max_rps} requests/second")
-
     def report(self):
         """Guarantee compatibility with sapi using this placeholder method."""
         pass
@@ -151,73 +150,91 @@ class MwApi:
         # With httpx, we're always using string URLs
         return url
 
-    def _should_retry(self, error_type, error_code=None, retry_count=0, max_retries=0):
-        """Determine if a request should be retried based on the error type and retry count."""
-        if retry_count >= max_retries:
-            return False
+    def _origin(self, url):
+        parsed = parse.urlparse(str(url))
+        if parsed.scheme and parsed.netloc:
+            return f"{parsed.scheme}://{parsed.netloc}"
+        parsed_api = parse.urlparse(str(self.apiurl))
+        return f"{parsed_api.scheme}://{parsed_api.netloc}"
 
-        if error_type == "http":
-            # Retry on rate limiting (429) or server errors (5xx)
-            return error_code == 429 or (500 <= error_code < 600)
+    def _acquire_rate_limit(self, url):
+        max_rps = conf.get("fetch", "max_requests_per_second", 0, int)
+        if max_rps <= 0:
+            return
 
-        # Retry transient transport issues with exponential backoff too
-        if error_type in ("url", "protocol", "timeout"):
-            return True
-
-        # Don't retry other types of errors
-        return False
-
-    def _handle_retry(
-        self, url, error_type, error_detail, retry_count, max_retries, delay, backoff_factor
-    ):
-        """Handle retry logic including logging and sleeping."""
-        url_display = self._get_url_display(url)
-
-        if error_type == "http":
-            if error_detail == 429:
-                logger.warning(
-                    f"Rate limit exceeded (HTTP 429) for {url_display}. "
-                    f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
+        origin = self._origin(url)
+        with MwApi._rate_limiter_lock:
+            limiter = MwApi._rate_limiters.get(origin)
+            limiter_rps = MwApi._rate_limiter_rps.get(origin)
+            if limiter is None or limiter_rps != max_rps:
+                limiter = RateLimiter(max_calls=max_rps, period=1.0)
+                MwApi._rate_limiters[origin] = limiter
+                MwApi._rate_limiter_rps[origin] = max_rps
+                logger.info(
+                    f"Rate limiter initialized for {origin}: {max_rps} requests/second"
                 )
-            else:
-                logger.warning(
-                    f"Server error {error_detail} for {url_display}. "
-                    f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
-                )
-        elif error_type == "url":
-            logger.warning(
-                f"URL error {error_detail} for {url_display}. "
-                f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
-            )
+
+        limiter.acquire()
+
+    def _normalize_http_method(self, method):
+        method_normalized = method.upper()
+        if method_normalized not in {"GET", "POST"}:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+        return method_normalized
+
+    def _build_request_headers(self, headers=None):
+        request_headers = dict(self.http_client.headers)
+        has_referer = any(key.lower() == "referer" for key in request_headers)
+        if not has_referer:
+            request_headers["Referer"] = "https://pediapress.com"
+        if headers:
+            request_headers.update(headers)
+
+        if self.use_oauth2:
+            token = getattr(self.http_client, "token", None)
+            if token and "access_token" in token:
+                request_headers["Authorization"] = f"Bearer {token['access_token']}"
+
+        return request_headers
+
+    def _send_http_request(self, method, url, data, request_headers):
+        if method == "POST":
+            response = self.http_client.post(url, data=data, headers=request_headers)
         else:
-            logger.warning(
-                f"{error_type} error {error_detail} for {url_display}. "
-                f"Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
-            )
+            response = self.http_client.get(url, headers=request_headers)
+        response.raise_for_status()
+        return response.content
 
-        time.sleep(delay)
-        return delay * backoff_factor  # Return the new delay with exponential backoff
+    def _retry_or_raise(self, *, url, error, retry_state, retry_policy):
+        return network_api.retry_or_raise(
+            url=url,
+            error=error,
+            retry_state=retry_state,
+            retry_policy=retry_policy,
+            logger=logger,
+            sleep_fn=time.sleep,
+            uniform_fn=random.uniform,
+        )
+
+    def _classify_retryable_fetch_error(self, url, err):
+        return network_api.classify_retryable_fetch_error(url, err, logger=logger)
+
+    def _build_retry_policy(self, max_retries, backoff_factor, jitter, max_delay):
+        return network_api.build_fetch_retry_policy(
+            max_retries,
+            backoff_factor,
+            jitter,
+            max_delay,
+        )
 
     def _log_error(self, url, error_type, error_detail, max_retries=None):
-        """Log an error that won't be retried."""
-        url_display = self._get_url_display(url)
-
-        if error_type == "http":
-            logger.error(
-                f"HTTP error {error_detail} for {url_display} after {max_retries} retries"
-            )
-        elif error_type == "url":
-            logger.error(f"URL error {error_detail} for {url_display} after {max_retries} retries")
-        elif error_type == "protocol":
-            logger.error(
-                f"Protocol error {error_detail} for {url_display} after {max_retries} retries"
-            )
-        elif error_type == "timeout":
-            logger.error(
-                f"Timeout error {error_detail} for {url_display} after {max_retries} retries"
-            )
-        else:
-            logger.error(f"Error fetching {url_display}: {error_detail}")
+        network_api.log_fetch_error(
+            url,
+            error_type,
+            error_detail,
+            logger=logger,
+            max_retries=max_retries,
+        )
 
     def _fetch(
         self,
@@ -256,89 +273,34 @@ class MwApi:
         if isinstance(url, str):
             logger.debug("fetching url: %r", url)
 
-        # Enforce rate limit before making the request
-        if MwApi._rate_limiter is not None:
-            MwApi._rate_limiter.acquire()
+        method_normalized = self._normalize_http_method(method)
+        origin = self._origin(url)
+        logger.debug(f"Starting API request [{method_normalized}] to {origin}: {url}")
 
-        method_normalized = method.upper()
-        if method_normalized not in {"GET", "POST"}:
-            raise ValueError(f"Unsupported HTTP method: {method}")
+        self._acquire_rate_limit(url)
 
-        # Prepare headers
-        request_headers = {"Referer": "https://pediapress.com"}
-        request_headers.update(self.http_client.headers)
-        if headers:
-            request_headers.update(headers)
-
-        if self.use_oauth2:
-            token = getattr(self.http_client, "token", None)
-            if token and "access_token" in token:
-                request_headers["Authorization"] = f"Bearer {token['access_token']}"
-
-        retry_count = 0  # number of retries already performed
-        delay = initial_delay
-
-        def _compute_effective_delay(current_delay: float) -> float:
-            effective = current_delay
-            if jitter:
-                effective *= random.uniform(1.0 - jitter, 1.0 + jitter)
-            if max_delay is not None:
-                effective = min(effective, max_delay)
-            return effective
-
-        def _retry_or_raise(
-            error_type: str, error_detail, *, http_status_code: int | None = None
-        ) -> bool:
-            nonlocal retry_count, delay
-
-            code_for_retry = http_status_code if error_type == "http" else None
-            if self._should_retry(error_type, code_for_retry, retry_count, max_retries):
-                retry_count += 1
-                effective_delay = _compute_effective_delay(delay)
-                delay = self._handle_retry(
-                    url,
-                    error_type,
-                    error_detail,
-                    retry_count,
-                    max_retries,
-                    effective_delay,
-                    backoff_factor,
-                )
-                return True
-
-            self._log_error(url, error_type, error_detail, max_retries)
-            return False
+        request_headers = self._build_request_headers(headers=headers)
+        retry_policy = self._build_retry_policy(max_retries, backoff_factor, jitter, max_delay)
+        retry_state = network_api.FetchRetryState(delay=initial_delay)
 
         while True:
             try:
-                if method_normalized == "POST":
-                    response = self.http_client.post(url, data=data, headers=request_headers)
-                else:
-                    response = self.http_client.get(url, headers=request_headers)
+                return self._send_http_request(method_normalized, url, data, request_headers)
 
-                response.raise_for_status()
-                return response.content
-
-            except httpx.HTTPStatusError as err:
-                status_code = err.response.status_code
-                if _retry_or_raise("http", status_code, http_status_code=status_code):
-                    continue
-                raise err
-
-            except httpx.LocalProtocolError as err:
-                logger.error("HTTP/2 Protocol error for url: %r", url)
-                if _retry_or_raise("protocol", str(err)):
-                    continue
-                raise
-
-            except httpx.ReadTimeout as err:
-                logger.error("Read Timeout for url: %r", url)
-                if _retry_or_raise("timeout", str(err)):
-                    continue
-                raise
-
-            except httpx.RequestError as err:
-                if _retry_or_raise("url", str(err)):
+            except (
+                httpx.HTTPStatusError,
+                httpx.LocalProtocolError,
+                httpx.ReadTimeout,
+                httpx.RequestError,
+            ) as err:
+                error = self._classify_retryable_fetch_error(url, err)
+                should_retry, retry_state = self._retry_or_raise(
+                    url=url,
+                    error=error,
+                    retry_state=retry_state,
+                    retry_policy=retry_policy,
+                )
+                if should_retry:
                     continue
                 raise
 
@@ -382,57 +344,23 @@ class MwApi:
         res = loads(data)
         return res
 
+    def _ensure_oauth2_token(self):
+        network_auth.ensure_oauth2_token(
+            enabled=self.use_oauth2,
+            apiurl=self.apiurl,
+            token_info_map=self._token_info,
+            http_client=self.http_client,
+            logger=logger,
+            current_time_fn=time.time,
+        )
+
     def do_request(self, use_post=False, **kwargs):
         sem = self.limit_fetch_semaphore
         if sem is not None:
             sem.acquire()
 
         try:
-            # If OAuth2 is enabled, fetch a token for the domain
-            if self.use_oauth2:
-                # Extract domain from apiurl
-                _, netloc, _, _, _, _ = parse.urlparse(self.apiurl)
-                domain = netloc
-
-                # Check if token exists and is not expired
-                current_time = time.time()
-                token_info = self._token_info.get(domain, {})
-                token_expired = domain not in self._token_info or current_time >= token_info.get(
-                    "expires_at", 0
-                )
-
-                # Simple backoff after failures to avoid hammering token endpoint
-                next_retry_at = token_info.get("next_retry_at", 0)
-                if token_expired and current_time >= next_retry_at:
-                    try:
-                        logger.debug(f"Fetching OAuth2 token for domain: {domain}")
-                        ua = self.http_client.headers.get("user-agent", "mwlib")
-                        token = self.http_client.fetch_token(
-                            headers={"User-Agent": ua},
-                        )
-                        # Store token info with expiration (default 1 hour if not specified)
-                        self._token_info[domain] = {
-                            "token": token,
-                            "expires_at": current_time + token.get("expires_in", 3600),
-                            "next_retry_at": 0,
-                            "retry_delay": 0,
-                        }
-                    except Exception as e:
-                        retry_delay = token_info.get("retry_delay", 5) or 5
-                        retry_delay = min(retry_delay * 2, 300)
-                        self._token_info[domain] = {
-                            **token_info,
-                            "next_retry_at": current_time + retry_delay,
-                            "retry_delay": retry_delay,
-                        }
-                        logger.error(
-                            f"Failed to fetch OAuth2 token for {domain}: {e}. "
-                            f"Retrying in {retry_delay} seconds."
-                        )
-                        raise RuntimeError(
-                            f"Failed to fetch OAuth2 token for {domain}: {e}"
-                        ) from e
-
+            self._ensure_oauth2_token()
             if use_post:
                 return self._post(**kwargs)
             return self._do_request(**kwargs)
@@ -746,6 +674,18 @@ class MwApi:
         return contributors_by_title
 
 
+def _append_unique(values, value):
+    if value not in values:
+        values.append(value)
+
+
+def _get_path_prefix(path):
+    for marker in ("/wiki/", "/w/"):
+        if marker in path:
+            return path[: path.find(marker)]
+    return ""
+
+
 def guess_api_urls(url):
     """Guesses possible api.php URLs from a MediaWiki article URL.
 
@@ -772,13 +712,9 @@ def guess_api_urls(url):
         path = path.decode("utf-8")
 
     if path.endswith("/wiki"):
-        retval.append(f"{scheme}://{netloc}/w/api.php")
+        _append_unique(retval, f"{scheme}://{netloc}/w/api.php")
 
-    path_prefix = ""
-    if "/wiki/" in str(path):
-        path_prefix = path[: path.find("/wiki/")]
-    elif "/w/" in path:
-        path_prefix = path[: path.find("/w/")]
+    path_prefix = _get_path_prefix(str(path))
 
     prefix = f"{scheme}://{netloc}{path_prefix}"
 
@@ -787,12 +723,11 @@ def guess_api_urls(url):
 
     for _path in (path + "/", "/w/", "/wiki/", "/"):
         base_url = f"{prefix}{_path}sapi.php"
-        if base_url not in retval:
-            retval.append(base_url)
+        _append_unique(retval, base_url)
     if url.endswith("/index.php"):
-        retval.append(url[: -len("index.php")] + "api.php")
+        _append_unique(retval, url[: -len("index.php")] + "api.php")
     if not url.endswith("api.php"):
-        retval.append(f"{url}api.php")
+        _append_unique(retval, f"{url}api.php")
     return retval
 
 

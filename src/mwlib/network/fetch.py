@@ -27,6 +27,8 @@ from sqlitedict import SqliteDict
 
 from mwlib.core import nshandling
 from mwlib.network import sapi as mwapi
+from mwlib.network import transport as network_transport
+from mwlib.network import workflow as network_workflow
 from mwlib.network.http_client import HttpClientManager
 from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
 from mwlib.network.sapi import MwApi
@@ -34,6 +36,10 @@ from mwlib.utils import conf, linuxmem, unorganized
 from mwlib.utils import myjson as json
 
 logger = logging.getLogger(__name__)
+
+_download_rate_limiter = {}
+_download_rate_limiter_rps = {}
+_download_rate_limiter_init_lock = Semaphore(1)
 
 
 class SharedProgress:
@@ -247,78 +253,64 @@ def call_when(event, fun):
             traceback.print_exc()
 
 
-def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backoff_factor=2):
-    """Download a file from a URL to a local path with exponential backoff for HTTP 429 errors.
-
-    Args:
-        url: URL to download from
-        path: Final path where the file should be saved
-        temp_path: Temporary path to download to before moving to final path
-        max_retries: Maximum number of retries for HTTP 429 errors
-        initial_delay: Initial delay in seconds before retrying
-        backoff_factor: Factor by which the delay increases with each retry
-
-    """
-    # Parse the URL to get the base URL for HTTP/2 detection
-    parsed_url = parse.urlparse(url)
-    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-
-    # Check if HTTP/2 is enabled in configuration
-    use_http2 = conf.get("http2", "enabled", True, bool)
-
-    # Detect HTTP/2 support if auto-detect is enabled
-    http2_auto_detect = conf.get("http2", "auto_detect", True, bool)
-    http2_supported = False
-
-    if use_http2 and http2_auto_detect:
-        # Use the HttpClientManager to detect HTTP/2 support
-        client_manager = HttpClientManager.get_instance()
-        http2_supported = client_manager.detect_http2_support(base_url)
-        logger.debug(f"HTTP/2 support detected for {base_url}: {http2_supported}")
-
-    # Get a client with appropriate HTTP/2 settings
-    client_manager = HttpClientManager.get_instance()
-    client = client_manager.get_client(
-        base_url=base_url, use_http2=use_http2 and (http2_supported or not http2_auto_detect)
+def _get_download_client(url):
+    return network_transport.get_download_client(
+        url,
+        conf_module=conf,
+        client_manager_factory=HttpClientManager.get_instance,
+        oauth2_client_cls=OAuth2Client,
+        logger=logger,
     )
-    if isinstance(client, OAuth2Client) and (
-        not hasattr(client, "token") or not client.token or client.token.is_expired()
-    ):
-        client.fetch_token()
 
-    retry_count = 0
-    delay = initial_delay
 
-    while True:
-        try:
-            size_read = 0
-            # Use httpx streaming to download the file in chunks
-            with client.stream("GET", url) as response:
-                response.raise_for_status()
-                with open(temp_path, "wb") as out:
-                    for chunk in response.iter_bytes(chunk_size=16384):
-                        size_read += len(chunk)
-                        out.write(chunk)
+def _build_download_retry_policy(max_retries, initial_delay, backoff_factor):
+    return network_transport.build_download_retry_policy(
+        max_retries,
+        initial_delay,
+        backoff_factor,
+    )
 
-            logger.debug(f"read {size_read} bytes from {url}")
-            os.rename(temp_path, path)
-            return  # Success, exit the retry loop
 
-        except httpx.HTTPStatusError as err:
-            if err.response.status_code == 429 and retry_count < max_retries:
-                retry_count += 1
-                logger.warning(
-                    f"Received HTTP 429 (Too Many Requests) for {url}. Retrying in {delay} seconds. Retry {retry_count}/{max_retries}"
-                )
-                time.sleep(delay)
-                delay *= backoff_factor  # Exponential backoff
-            else:
-                # Either not a 429 error or we've exceeded max retries
-                logger.error(f"ERROR DOWNLOADING {url}: {err}")
-                raise
-        except Exception as err:
-            logger.error(f"ERROR DOWNLOADING {url}: {err}")
-            raise
+def _download_with_retries(client, url, path, temp_path, retry_policy):
+    return network_transport.download_with_retries(
+        client=client,
+        url=url,
+        path=path,
+        temp_path=temp_path,
+        retry_policy=retry_policy,
+        http_status_error_cls=httpx.HTTPStatusError,
+        sleep_fn=time.sleep,
+        logger=logger,
+    )
+
+
+def _acquire_download_rate_limit(url):
+    global _download_rate_limiter, _download_rate_limiter_rps
+    max_rps = conf.get("fetch", "max_requests_per_second", 1, int)
+    if max_rps <= 0:
+        return
+
+    with _download_rate_limiter_init_lock:
+        parsed_url = parse.urlparse(url)
+        origin = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        limiter = _download_rate_limiter.get(origin)
+        limiter_rps = _download_rate_limiter_rps.get(origin)
+        if limiter is None or limiter_rps != max_rps:
+            limiter = mwapi.RateLimiter(max_calls=max_rps, period=1.0)
+            _download_rate_limiter[origin] = limiter
+            _download_rate_limiter_rps[origin] = max_rps
+            logger.info(f"Download rate limiter initialized for {origin}: {max_rps} requests/second")
+
+    limiter.acquire()
+
+
+def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backoff_factor=2):
+    """Download a file from a URL to a local path with exponential backoff for HTTP 429 errors."""
+    logger.debug(f"Starting download: {url}")
+    client = _get_download_client(url)
+    retry_policy = _build_download_retry_policy(max_retries, initial_delay, backoff_factor)
+    _acquire_download_rate_limit(url)
+    _download_with_retries(client, url, path, temp_path, retry_policy)
 
 
 class Fetcher:
@@ -344,7 +336,8 @@ class Fetcher:
 
         self.pages = pages
 
-        self.image_download_pool = gevent.pool.Pool(10)
+        max_connections = conf.get("fetch", "max_connections", 10, int)
+        self.image_download_pool = gevent.pool.Pool(max(1, max_connections))
 
         self.fatal_error = "stopped by signal"
 
@@ -691,44 +684,16 @@ class Fetcher:
         used = self.api.fetch_used(**kwargs)
 
         self._update_redirects(used.get("redirects", []))
-
         pages = list(used.get("pages", {}).values())
-
-        revids = set()
-        for page in pages:
-            tmp = self._extract_attribute(page.get("revisions", []), "revid")
-            if tmp:
-                latest = max(tmp)
-                title = page.get("title", None)
-                old = self.title2latest.get(title, 0)
-                self.title2latest[title] = max(old, latest)
-
-            revids.update(tmp)
-
-        templates = set()
-        images = set()
-        for page in pages:
-            images.update(self._extract_title(page.get("images", [])))
-            templates.update(self._extract_title(page.get("templates", [])))
+        revids, images, templates = network_workflow.collect_page_data(pages, self.title2latest)
 
         if self.cover_image:
             images.add(self.nshandler.get_fqname(self.cover_image, 6))
             self.cover_image = None
 
-        for image in images:
-            if image not in self.scheduled:
-                self.imageinfo_todo.append(image)
-                self.scheduled.add(image)
-
-        for rev in revids:
-            if rev not in self.scheduled:
-                self.revids_todo.append(rev)
-                self.scheduled.add(rev)
-
-        for template in templates:
-            if template not in self.scheduled:
-                self.pages_todo.append(template)
-                self.scheduled.add(template)
+        network_workflow.enqueue_missing(images, self.imageinfo_todo, self.scheduled)
+        network_workflow.enqueue_missing(revids, self.revids_todo, self.scheduled)
+        network_workflow.enqueue_missing(templates, self.pages_todo, self.scheduled)
 
     def get_siteinfo_for(self, api):
         return api.get_siteinfo()

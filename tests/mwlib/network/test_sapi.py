@@ -19,9 +19,17 @@ class TestMwApi:
         """Reset the HttpClientManager singleton before each test"""
         HttpClientManager._instance = None
         HttpClientManager._clients = {}
+        MwApi._rate_limiters = {}
+        MwApi._rate_limiter_rps = {}
+        MwApi._token_info = {}
+        MwApi.request_counter = 0
         yield
         HttpClientManager._instance = None
         HttpClientManager._clients = {}
+        MwApi._rate_limiters = {}
+        MwApi._rate_limiter_rps = {}
+        MwApi._token_info = {}
+        MwApi.request_counter = 0
 
     @pytest.fixture
     def mw_api(self, reset_http_client_manager):
@@ -50,7 +58,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
 
@@ -70,7 +78,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
 
@@ -90,7 +98,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
 
@@ -111,7 +119,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL and expect HTTPStatusError
             with pytest.raises(httpx.HTTPStatusError) as excinfo:
                 mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
@@ -134,7 +142,7 @@ class TestMwApi:
         # Mock time.sleep to verify it's not called
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL and expect HTTPStatusError
             with pytest.raises(httpx.HTTPStatusError) as excinfo:
                 mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
@@ -154,7 +162,7 @@ class TestMwApi:
         # Mock time.sleep to verify it's not called
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL and expect Exception
             with pytest.raises(Exception) as excinfo:
                 mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
@@ -176,7 +184,7 @@ class TestMwApi:
         # Mock time.sleep to verify exponential backoff
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", 
                                   max_retries=3, initial_delay=2, backoff_factor=3)
@@ -213,7 +221,9 @@ class TestMwApi:
 
         mock_sleep = MagicMock()
 
-        with patch("time.sleep", mock_sleep), patch("random.uniform", return_value=2.0):
+        with patch("mwlib.network.sapi.time.sleep", mock_sleep), patch(
+            "mwlib.network.sapi.random.uniform", return_value=2.0
+        ):
             mw_api._fetch(
                 "https://test.wikipedia.org/w/api.php?action=query",
                 max_retries=1,
@@ -229,14 +239,31 @@ class TestMwApi:
     def test_oauth2_token_fetch_backoff_on_failure(self, mw_api):
         """Token fetch failures should not be retried on every request (backoff)."""
         mw_api.use_oauth2 = True
-        mw_api.http_client.fetch_token = MagicMock(side_effect=Exception("token failed"))
+        mw_api.http_client.fetch_token = MagicMock(side_effect=httpx.ConnectError("token failed"))
 
         with patch.object(mw_api, "_do_request", return_value={}), patch(
-                "time.time", side_effect=[1000, 1000, 1005, 1005]  # time.time() is called twice
+            "mwlib.network.sapi.time.time", side_effect=[1000, 1000, 1005, 1005]
         ):
-            mw_api.do_request(action="query", meta="siteinfo")
+            with pytest.raises(RuntimeError):
+                mw_api.do_request(action="query", meta="siteinfo")
             mw_api.do_request(action="query", meta="siteinfo")
 
         assert mw_api.http_client.fetch_token.call_count == 1
         domain = "test.wikipedia.org"
         assert mw_api._token_info[domain]["next_retry_at"] > 1005
+
+    def test_rate_limiter_is_scoped_per_domain(self, mw_api):
+        with patch("mwlib.network.sapi.conf.get", return_value=2), patch(
+            "mwlib.network.sapi.RateLimiter"
+        ) as mock_limiter_cls:
+            limiter_a = MagicMock()
+            limiter_b = MagicMock()
+            mock_limiter_cls.side_effect = [limiter_a, limiter_b]
+
+            mw_api._acquire_rate_limit("https://en.wikipedia.org/w/api.php?action=query")
+            mw_api._acquire_rate_limit("https://en.wikipedia.org/w/api.php?action=parse")
+            mw_api._acquire_rate_limit("https://commons.wikimedia.org/w/api.php?action=query")
+
+            assert mock_limiter_cls.call_count == 2
+            limiter_a.acquire.assert_called()
+            limiter_b.acquire.assert_called_once_with()

@@ -50,6 +50,7 @@ include setup.cfg
 include setup.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
+include src/mwlib/apps/buildzip2.py
 include src/mwlib/apps/executor.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
@@ -74,6 +75,8 @@ include src/mwlib/extensions/infobox_magic.py
 include src/mwlib/extensions/mapframe.py
 include src/mwlib/extensions/timeline.py
 include src/mwlib/network/__init__.py
+include src/mwlib/network/api.py
+include src/mwlib/network/auth.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
 include src/mwlib/network/fetch_siteinfo.py
@@ -95,7 +98,9 @@ include src/mwlib/network/podclient.py
 include src/mwlib/network/postman.py
 include src/mwlib/network/sapi.py
 include src/mwlib/network/siteinfo.py
+include src/mwlib/network/transport.py
 include src/mwlib/network/trustedrevs.py
+include src/mwlib/network/workflow.py
 include src/mwlib/parser/__init__.py
 include src/mwlib/parser/advtree.py
 include src/mwlib/parser/allnodes.py
