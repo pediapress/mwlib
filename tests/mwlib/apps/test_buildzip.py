@@ -4,7 +4,7 @@ import tempfile
 import pytest
 from click.testing import CliRunner
 
-from mwlib.apps import buildzip, buildzip2
+from mwlib.apps import buildzip
 
 
  # Characterization Tests - Capturing Current Observable Behavior
@@ -152,38 +152,38 @@ def test_buildzip_with_valid_imagesize():
 
 
 # ============================================================================
-# Characterization Tests for buildzip2 (Modern Implementation)
+# Characterization Tests for buildzip (Modern Implementation)
 # ============================================================================
 
 
-def test_buildzip2_no_output_or_post_fails():
-    """Buildzip2: Requires at least one of --output, --posturl, or --getposturl."""
+def test_buildzip_no_output_or_post_fails():
+    """buildzip: Requires at least one of --output, --posturl, or --getposturl."""
     runner = CliRunner()
 
-    result = runner.invoke(buildzip2.main, ["-c", ":de", "Test Article"])
+    result = runner.invoke(buildzip.main, ["-c", ":de", "Test Article"])
 
     assert result.exit_code != 0
     assert "Neither --output, nor --posturl or --getposturl specified" in result.output
 
 
-def test_buildzip2_no_content_fails():
-    """Buildzip2: Requires either --metabook, --collectionpage, or article arguments."""
+def test_buildzip_no_content_fails():
+    """buildzip: Requires either --metabook, --collectionpage, or article arguments."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
-    result = runner.invoke(buildzip2.main, ["-o", zip_fn, "-c", ":de"])
+    result = runner.invoke(buildzip.main, ["-o", zip_fn, "-c", ":de"])
 
     assert result.exit_code != 0
     assert "Neither --metabook nor, --collectionpage or arguments specified" in result.output
 
 
-def test_buildzip2_posturl_and_getposturl_conflict():
-    """Buildzip2: Cannot specify both --posturl and --getposturl."""
+def test_buildzip_posturl_and_getposturl_conflict():
+    """buildzip: Cannot specify both --posturl and --getposturl."""
     runner = CliRunner()
 
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["--posturl", "http://example.com", "--getposturl", "-c", ":de", "Test"]
     )
 
@@ -191,14 +191,14 @@ def test_buildzip2_posturl_and_getposturl_conflict():
     assert "Specify either --posturl or --getposturl" in result.output
 
 
-def test_buildzip2_invalid_imagesize():
-    """Buildzip2: Image size must be a positive integer."""
+def test_buildzip_invalid_imagesize():
+    """buildzip: Image size must be a positive integer."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["-o", zip_fn, "-c", ":de", "--imagesize", "0", "Test"]
     )
 
@@ -206,14 +206,14 @@ def test_buildzip2_invalid_imagesize():
     assert "Argument for --imagesize must be an integer > 0" in result.output
 
 
-def test_buildzip2_negative_imagesize():
-    """Buildzip2: Negative image size is invalid."""
+def test_buildzip_negative_imagesize():
+    """buildzip: Negative image size is invalid."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["-o", zip_fn, "-c", ":de", "--imagesize", "-100", "Test"]
     )
 
@@ -221,14 +221,14 @@ def test_buildzip2_negative_imagesize():
     assert "Argument for --imagesize must be an integer > 0" in result.output
 
 
-def test_buildzip2_non_numeric_imagesize():
-    """Buildzip2: Image size must be numeric - Click validates this."""
+def test_buildzip_non_numeric_imagesize():
+    """buildzip: Image size must be numeric - Click validates this."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["-o", zip_fn, "-c", ":de", "--imagesize", "abc", "Test"]
     )
 
@@ -236,15 +236,16 @@ def test_buildzip2_non_numeric_imagesize():
     assert "'abc' is not a valid integer" in result.output
 
 
-def test_buildzip2_accepts_multiple_articles():
-    """Buildzip2: Multiple article names can be passed as arguments."""
+@pytest.mark.integration
+def test_buildzip_accepts_multiple_articles():
+    """buildzip: Multiple article names can be passed as arguments."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
     # This will likely fail due to network/config issues, but tests argument parsing
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["-o", zip_fn, "-c", ":de", "Article1", "Article2", "Article3"]
     )
 
@@ -253,15 +254,16 @@ def test_buildzip2_accepts_multiple_articles():
     assert "Neither --metabook nor, --collectionpage or arguments specified" not in result.output
 
 
-def test_buildzip2_default_imagesize():
-    """Buildzip2: Default image size is 1280 when not specified."""
+@pytest.mark.integration
+def test_buildzip_default_imagesize():
+    """buildzip: Default image size is 1280 when not specified."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
     # Test without specifying imagesize - should use default
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["-o", zip_fn, "-c", ":de", "Test"]
     )
 
@@ -269,14 +271,15 @@ def test_buildzip2_default_imagesize():
     assert "Argument for --imagesize must be an integer > 0" not in result.output
 
 
-def test_buildzip2_with_valid_imagesize():
-    """Buildzip2: Valid positive imagesize is accepted."""
+@pytest.mark.integration
+def test_buildzip_with_valid_imagesize():
+    """buildzip: Valid positive imagesize is accepted."""
     runner = CliRunner()
     tmpdir = tempfile.mkdtemp()
     zip_fn = os.path.join(tmpdir, "test.zip")
 
     result = runner.invoke(
-        buildzip2.main,
+        buildzip.main,
         ["-o", zip_fn, "-c", ":de", "--imagesize", "800", "Test"]
     )
 
@@ -285,13 +288,13 @@ def test_buildzip2_with_valid_imagesize():
 
 
 # ============================================================================
-# Unit Tests for buildzip2 Components
+# Unit Tests for buildzip Components
 # ============================================================================
 
 
 def test_metabook_parser_from_string():
     """Test MetabookParser can parse JSON string."""
-    from mwlib.apps.buildzip2 import MetabookParser
+    from mwlib.apps.buildzip import MetabookParser
     from mwlib.core.metabook import Collection
 
     json_str = '{"type": "collection", "items": []}'
@@ -303,7 +306,7 @@ def test_metabook_parser_from_string():
 
 def test_metabook_parser_none_input():
     """Test MetabookParser handles None input."""
-    from mwlib.apps.buildzip2 import MetabookParser
+    from mwlib.apps.buildzip import MetabookParser
 
     result = MetabookParser.parse(None)
     assert result is None
@@ -311,7 +314,7 @@ def test_metabook_parser_none_input():
 
 def test_metabook_parser_add_articles():
     """Test adding articles to metabook."""
-    from mwlib.apps.buildzip2 import MetabookParser
+    from mwlib.apps.buildzip import MetabookParser
     from mwlib.core.metabook import Collection
 
     articles = ("Article1", "Article2")
@@ -322,7 +325,7 @@ def test_metabook_parser_add_articles():
 
 def test_options_validator_output_conflict():
     """Test validation catches posturl and getposturl conflict."""
-    from mwlib.apps.buildzip2 import OptionsValidator
+    from mwlib.apps.buildzip import OptionsValidator
 
     with pytest.raises(Exception) as exc_info:
         OptionsValidator.validate_output_options("out.zip", "http://post", 1)
@@ -332,7 +335,7 @@ def test_options_validator_output_conflict():
 
 def test_options_validator_no_output():
     """Test validation catches missing output options."""
-    from mwlib.apps.buildzip2 import OptionsValidator
+    from mwlib.apps.buildzip import OptionsValidator
 
     with pytest.raises(Exception) as exc_info:
         OptionsValidator.validate_output_options(None, None, 0)
@@ -342,7 +345,7 @@ def test_options_validator_no_output():
 
 def test_options_validator_imagesize_zero():
     """Test validation catches zero imagesize."""
-    from mwlib.apps.buildzip2 import OptionsValidator
+    from mwlib.apps.buildzip import OptionsValidator
 
     with pytest.raises(Exception) as exc_info:
         OptionsValidator.validate_imagesize(0)
@@ -352,7 +355,7 @@ def test_options_validator_imagesize_zero():
 
 def test_options_validator_imagesize_valid():
     """Test validation accepts valid imagesize."""
-    from mwlib.apps.buildzip2 import OptionsValidator
+    from mwlib.apps.buildzip import OptionsValidator
 
     # Should not raise
     OptionsValidator.validate_imagesize(1280)
@@ -360,7 +363,7 @@ def test_options_validator_imagesize_valid():
 
 def test_zip_creator_basic():
     """Test ZipCreator can create a zip file."""
-    from mwlib.apps.buildzip2 import ZipCreator
+    from mwlib.apps.buildzip import ZipCreator
     import zipfile
 
     tmpdir = tempfile.mkdtemp()
@@ -386,7 +389,7 @@ def test_zip_creator_basic():
 
 def test_build_config_immutable():
     """Test BuildConfig is immutable."""
-    from mwlib.apps.buildzip2 import BuildConfig
+    from mwlib.apps.buildzip import BuildConfig
 
     config = BuildConfig(
         output="test.zip",

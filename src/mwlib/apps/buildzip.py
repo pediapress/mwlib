@@ -1,7 +1,7 @@
-# Copyright (c) 2007-2023 PediaPress GmbH
+# Copyright (c) 2007-2026 PediaPress GmbH
 # See README.md for additional licensing information.
 
-"""mz-zip - installed via setuptools' entry_points"""
+"""mz-zip - Modern, maintainable implementation with clean architecture"""
 
 import contextlib
 import logging
@@ -12,6 +12,9 @@ import tempfile
 import time
 import webbrowser
 import zipfile
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Optional
 
 import click
 
@@ -19,7 +22,7 @@ from mwlib.apps.make_nuwiki import make_nuwiki
 from mwlib.apps.utils import create_zip_from_wiki_env, make_wiki_env_from_options
 from mwlib.core.metabook import Collection
 from mwlib.network.podclient import PODClient, podclient_from_serviceurl
-from mwlib.utils import conf, linuxmem, unorganized
+from mwlib.utils import linuxmem, unorganized
 from mwlib.utils import myjson as json
 from mwlib.utils.log import setup_console_logging
 
@@ -28,46 +31,319 @@ log = logging.getLogger(__name__)
 USE_HELP_TEXT = "Use --help for usage information."
 
 
-def _walk(root):
-    retval = []
-    for dirpath, _, files in os.walk(root):
-        retval.extend(
-            [os.path.normpath(os.path.join(dirpath, filepath)) for filepath in files]
-        )
-    retval = sorted([ret.replace("\\", "/") for ret in retval])
-    return retval
+# ============================================================================
+# Domain Models (Pure Data, No Side Effects)
+# ============================================================================
 
 
-def zip_dir(dirname, output=None, skip_ext=None):
-    """recursively zip directory and write output to zipfile.
-    @param dirname: directory to zip
-    @param output: name of zip file that gets written
-    @param skip_ext: skip files with the specified extension
-    """
-    if not output:
-        output = dirname + ".zip"
+@dataclass(frozen=True)
+class BuildConfig:
+    """Immutable configuration for zip build process."""
 
-    output = os.path.abspath(output)
-    zip_file = zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED)
-    for i in _walk(dirname):
-        if skip_ext and os.path.splitext(i)[1] == skip_ext:
-            continue
-        zip_file.write(i, i[len(dirname) + 1 :])
-    zip_file.close()
+    output: Optional[str]
+    posturl: Optional[str]
+    getposturl: int
+    keep_tmpfiles: bool
+    status_file: Optional[str]
+    config: Optional[str]
+    imagesize: int
+    metabook: Any
+    collectionpage: Optional[str]
+    noimages: bool
+    logfile: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    domain: Optional[str]
+    title: Optional[str]
+    subtitle: Optional[str]
+    editor: Optional[str]
+    script_extension: str
 
-def make_zip(
-    wiki_options=None,
-    metabook=None,
-    pod_client=None,
-    status=None,
-):
-    output = wiki_options.get("output")
-    dir_path = os.path.dirname(output)
-    tmpdir = tempfile.mkdtemp(dir=dir_path) if output else tempfile.mkdtemp()
 
-    try:
+@dataclass
+class BuildResult:
+    """Result of the build process."""
+
+    output_path: Optional[str]
+    success: bool
+    error: Optional[Exception] = None
+
+
+# ============================================================================
+# Metabook Parser (Parsing Logic Separated)
+# ============================================================================
+
+
+class MetabookParser:
+    """Parse metabook from JSON string or file."""
+
+    @staticmethod
+    def parse(metabook_input: Optional[str]) -> Optional[Collection]:
+        """Parse metabook from JSON string or file path."""
+        if not metabook_input:
+            return None
+
+        if "{" in metabook_input and "}" in metabook_input:
+            return json.loads(metabook_input)
+        else:
+            with open(metabook_input, encoding="utf-8") as f:
+                return json.load(f)
+
+    @staticmethod
+    def add_articles(metabook: Optional[Collection], article_titles: tuple) -> Collection:
+        """Add article titles to metabook (creates new if needed)."""
+        if not article_titles:
+            return metabook
+
+        result = metabook or Collection()
+        for title in article_titles:
+            result.append_article(title)
+        return result
+
+
+# ============================================================================
+# Options Validator (Pure Validation Functions)
+# ============================================================================
+
+
+class OptionsValidator:
+    """Pure validation functions for CLI options."""
+
+    @staticmethod
+    def validate_output_options(
+        output: Optional[str], posturl: Optional[str], getposturl: int
+    ) -> None:
+        """Validate output destination options.
+
+        Complexity: 3 (two if statements)
+        """
+        if posturl and getposturl:
+            raise click.ClickException(
+                "Specify either --posturl or --getposturl.\n" + USE_HELP_TEXT
+            )
+        if not posturl and not getposturl and not output:
+            raise click.ClickException(
+                "Neither --output, nor --posturl or --getposturl specified.\n" + USE_HELP_TEXT
+            )
+
+    @staticmethod
+    def validate_content_options(
+        metabook: Optional[Collection], collectionpage: Optional[str]
+    ) -> None:
+        """Validate content source options."""
+        if metabook is None and collectionpage is None:
+            raise click.ClickException(
+                "Neither --metabook nor, --collectionpage or arguments specified.\n"
+                + USE_HELP_TEXT
+            )
+
+    @staticmethod
+    def validate_imagesize(imagesize: int) -> None:
+        """Validate imagesize parameter."""
+        try:
+            size = int(imagesize)
+            if size <= 0:
+                raise ValueError()
+        except (ValueError, TypeError):
+            raise click.ClickException("Argument for --imagesize must be an integer > 0.")
+
+
+# ============================================================================
+# Temporary Directory Manager (Resource Management)
+# ============================================================================
+
+
+class TempDirManager:
+    """Context manager for temporary directory lifecycle."""
+
+    def __init__(self, output_path: Optional[str], keep_tmpfiles: bool):
+        """Initialize temp dir manager."""
+        self.output_path = output_path
+        self.keep_tmpfiles = keep_tmpfiles
+        self.tmpdir: Optional[str] = None
+
+    def __enter__(self) -> str:
+        """Create temporary directory."""
+        if self.output_path:
+            dir_path = os.path.dirname(self.output_path)
+            self.tmpdir = tempfile.mkdtemp(dir=dir_path)
+        else:
+            self.tmpdir = tempfile.mkdtemp()
+        log.info(f"created tmpdir: {self.tmpdir}")
+        return self.tmpdir
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Cleanup temporary directory."""
+        if self.tmpdir:
+            if not self.keep_tmpfiles:
+                log.info(f"removing tmpdir {self.tmpdir!r}")
+                shutil.rmtree(self.tmpdir, ignore_errors=True)
+            else:
+                log.info(f"keeping tmpdir {self.tmpdir!r}")
+
+        if sys.platform in ("linux2", "linux3"):
+            linuxmem.report()
+
+
+# ============================================================================
+# Zip Creator (Single Responsibility: Create Zip Archives)
+# ============================================================================
+
+
+class ZipCreator:
+    """Create zip archives from directories."""
+
+    @staticmethod
+    def create_zip(source_dir: str, output_path: Optional[str] = None) -> str:
+        """Create zip file from directory.
+
+        Returns: Path to created zip file
+        """
+        if output_path:
+            fd, temp_zip = tempfile.mkstemp(suffix=".zip", dir=os.path.dirname(output_path))
+        else:
+            fd, temp_zip = tempfile.mkstemp(suffix=".zip")
+
+        os.close(fd)
+
+        try:
+            ZipCreator._write_zip(source_dir, temp_zip)
+            if output_path:
+                os.rename(temp_zip, output_path)
+                return output_path
+            return temp_zip
+        except Exception:
+            unorganized.safe_unlink(temp_zip)
+            raise
+
+    @staticmethod
+    def _write_zip(source_dir: str, zip_path: str) -> None:
+        """Write directory contents to zip file."""
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for dirpath, _, files in os.walk(source_dir):
+                for filename in files:
+                    filepath = os.path.join(dirpath, filename)
+                    arcname = os.path.relpath(filepath, source_dir)
+                    zf.write(filepath, arcname.replace("\\", "/"))
+
+
+# ============================================================================
+# POD Client Factory (Separate Business Logic from Browser Launch)
+# ============================================================================
+
+
+class PodClientFactory:
+    """Factory for creating POD clients."""
+
+    @staticmethod
+    def create_client(posturl: Optional[str], getposturl: int) -> Optional[PODClient]:
+        """Create POD client based on options."""
+        if posturl:
+            return PODClient(posturl)
+        elif getposturl:
+            service_url = PodClientFactory._get_service_url(getposturl)
+            client = podclient_from_serviceurl(service_url)
+            PodClientFactory._launch_browser(client.redirecturl)
+            return client
+        return None
+
+    @staticmethod
+    def _get_service_url(getposturl: int) -> str:
+        """Get service URL based on getposturl count."""
+        if getposturl > 1:
+            return "https://test.pediapress.com/api/collections/"
+        return "https://pediapress.com/api/collections/"
+
+    @staticmethod
+    def _launch_browser(url: str) -> None:
+        """Launch browser in forked process."""
+        pid = os.fork()
+        if not pid:
+            try:
+                webbrowser.open(url)
+            finally:
+                os._exit(os.EX_OK)
+
+        time.sleep(1)
+        with contextlib.suppress(OSError):
+            os.kill(pid, 9)
+
+
+# ============================================================================
+# Zip Builder (Business Logic Orchestrator)
+# ============================================================================
+
+
+class ZipBuilder:
+    """Orchestrates the zip building process."""
+
+    def __init__(self, config: BuildConfig):
+        """Initialize builder with configuration."""
+        self.config = config
+
+    def build(self, pod_client: Optional[PODClient]) -> BuildResult:
+        """Execute the build process."""
+        try:
+            wiki_options = self._create_wiki_options()
+            env = make_wiki_env_from_options(
+                metabook=self.config.metabook, wiki_options=wiki_options
+            )
+
+            with TempDirManager(self.config.output, self.config.keep_tmpfiles) as tmpdir:
+                output_path = self._build_zip(tmpdir, env, wiki_options, pod_client)
+                return BuildResult(output_path=output_path, success=True)
+
+        except Exception as e:
+            log.exception("Build failed")
+            return BuildResult(output_path=None, success=False, error=e)
+
+    def _create_wiki_options(self) -> dict:
+        """Create wiki options dictionary from config."""
+        return {
+            "output": self.config.output,
+            "posturl": self.config.posturl,
+            "getposturl": self.config.getposturl,
+            "keep_tmpfiles": self.config.keep_tmpfiles,
+            "status_file": self.config.status_file,
+            "config": self.config.config,
+            "imagesize": self.config.imagesize,
+            "collectionpage": self.config.collectionpage,
+            "noimages": self.config.noimages,
+            "logfile": self.config.logfile,
+            "username": self.config.username,
+            "password": self.config.password,
+            "domain": self.config.domain,
+            "title": self.config.title,
+            "subtitle": self.config.subtitle,
+            "editor": self.config.editor,
+            "script_extension": self.config.script_extension,
+            "metabook": self.config.metabook,
+        }
+
+    def _build_zip(
+        self, tmpdir: str, env: Any, wiki_options: dict, pod_client: Optional[PODClient]
+    ) -> Optional[str]:
+        """Build the zip file."""
+        nuwiki_dir = os.path.join(tmpdir, "nuwiki")
+        log.info(f"creating nuwiki in {nuwiki_dir!r}")
+
+        status = create_zip_from_wiki_env(env, pod_client, wiki_options, self._make_zip_callback)
+
+        zip_path = ZipCreator.create_zip(nuwiki_dir, self.config.output)
+
+        if pod_client and status:
+            status(status="uploading", progress=0)
+            pod_client.post_zipfile(zip_path)
+
+        return zip_path
+
+    def _make_zip_callback(
+        self, wiki_options: dict, metabook: Any, pod_client: Any, status: Any
+    ) -> str:
+        """Callback for create_zip_from_wiki_env."""
+        # This is called by create_zip_from_wiki_env to create nuwiki
+        tmpdir = tempfile.mkdtemp()
         fsdir = os.path.join(tmpdir, "nuwiki")
-        log.info("creating nuwiki in %r" % fsdir)
         make_nuwiki(
             fsdir=fsdir,
             metabook=metabook,
@@ -75,34 +351,12 @@ def make_zip(
             pod_client=pod_client,
             status=status,
         )
+        return fsdir
 
-        if output:
-            file_descriptor, filename = tempfile.mkstemp(
-                suffix=".zip", dir=os.path.dirname(output)
-            )
-        else:
-            file_descriptor, filename = tempfile.mkstemp(suffix=".zip")
-        os.close(file_descriptor)
-        zip_dir(fsdir, filename)
-        if output:
-            os.rename(filename, output)
-            filename = output
-        if pod_client:
-            status(status="uploading", progress=0)
-            pod_client.post_zipfile(filename)
 
-        return filename
-
-    finally:
-        keep_tmpfiles = wiki_options.get("keep_tmpfiles")
-        if not keep_tmpfiles:
-            log.info("removing tmpdir %r" % tmpdir)
-            shutil.rmtree(tmpdir, ignore_errors=True)
-        else:
-            log.info("keeping tmpdir %r" % tmpdir)
-
-        if sys.platform in ("linux2", "linux3"):
-            linuxmem.report()
+# ============================================================================
+# CLI Entry Point (Thin Wrapper)
+# ============================================================================
 
 
 @click.command()
@@ -203,106 +457,52 @@ def main(
     script_extension,
     args,
 ):
+    """Build a zip file from Wikipedia articles."""
+    # Setup logging
     setup_console_logging(level=logging.INFO, stream=sys.stderr)
-    level = logging.getLevelName(log.getEffectiveLevel())
-    log.info(f"starting mw-zip with log level {level}")
-    if metabook:
-        if "{" in metabook and "}" in metabook:
-            metabook = json.loads(metabook)
-        else:
-            with open(metabook, encoding="utf-8") as file_path:
-                metabook = json.load(file_path)
-    for title in args:
-        if metabook is None:
-            metabook = Collection()
-        metabook.append_article(title)
-    try:
-        imagesize = int(imagesize)
-        if imagesize <= 0:
-            raise ValueError()
-    except ValueError:
-        raise click.ClickException("Argument for --imagesize must be an integer > 0.")
+    log.info(
+        f"starting mw-zip with log level {logging.getLevelName(log.getEffectiveLevel())}"
+    )
 
-    if metabook is None and collectionpage is None:
-        raise click.ClickException(
-            "Neither --metabook nor, --collectionpage or arguments specified.\n"
-            + USE_HELP_TEXT
-        )
+    # Parse and validate input
+    OptionsValidator.validate_imagesize(imagesize)
+    parsed_metabook = MetabookParser.parse(metabook)
+    parsed_metabook = MetabookParser.add_articles(parsed_metabook, args)
 
-    pod_client = _init_pod_client(posturl, getposturl, output)
+    # Validate options
+    OptionsValidator.validate_output_options(output, posturl, getposturl)
+    OptionsValidator.validate_content_options(parsed_metabook, collectionpage)
 
-    filename = None
-    status = None
-    wiki_options = {
-        "output": output,
-        "posturl": posturl,
-        "getposturl": getposturl,
-        "keep_tmpfiles": keep_tmpfiles,
-        "status_file": status_file,
-        "config": config,
-        "imagesize": imagesize,
-        "collectionpage": collectionpage,
-        "noimages": noimages,
-        "logfile": logfile,
-        "username": username,
-        "password": password,
-        "domain": domain,
-        "title": title,
-        "subtitle": subtitle,
-        "editor": editor,
-        "script_extension": script_extension,
-        "metabook": metabook,
-    }
-    try:
-        env = make_wiki_env_from_options(
-            metabook=metabook,
-            wiki_options=wiki_options,
-        )
-        status = create_zip_from_wiki_env(env, pod_client, wiki_options, make_zip)
+    # Create configuration
+    build_config = BuildConfig(
+        output=output,
+        posturl=posturl,
+        getposturl=getposturl,
+        keep_tmpfiles=keep_tmpfiles,
+        status_file=status_file,
+        config=config,
+        imagesize=imagesize,
+        metabook=parsed_metabook,
+        collectionpage=collectionpage,
+        noimages=noimages,
+        logfile=logfile,
+        username=username,
+        password=password,
+        domain=domain,
+        title=title,
+        subtitle=subtitle,
+        editor=editor,
+        script_extension=script_extension,
+    )
 
-    except Exception:
-        if status:
-            status(status="error")
-        raise
-    finally:
-        if output is None and filename:
-            log.info("removing %r" % filename)
-            unorganized.safe_unlink(filename)
+    # Build
+    pod_client = PodClientFactory.create_client(posturl, getposturl)
+    builder = ZipBuilder(build_config)
+    result = builder.build(pod_client)
 
+    if not result.success:
+        raise result.error
 
-def _init_pod_client(posturl, getposturl, output):
-    if posturl and getposturl:
-        raise click.ClickException(
-            "Specify either --posturl or --getposturl.\n" + USE_HELP_TEXT
-        )
-    if not posturl and not getposturl and not output:
-        raise click.ClickException(
-            "Neither --output, nor --posturl or --getposturl specified.\n"
-            + USE_HELP_TEXT
-        )
-    if posturl:
-        pod_client = PODClient(posturl)
-    elif getposturl:
-        if getposturl > 1:
-            service_url = "https://test.pediapress.com/api/collections/"
-        else:
-            service_url = "https://pediapress.com/api/collections/"
-
-        pod_client = podclient_from_serviceurl(service_url)
-        pid = os.fork()
-        if not pid:
-            try:
-                webbrowser.open(pod_client.redirecturl)
-            finally:
-                os._exit(os.EX_OK)  # pylint: disable=W0212
-
-        time.sleep(1)
-        with contextlib.suppress(OSError):
-            os.kill(pid, 9)
-
-    else:
-        pod_client = None
-    return pod_client
 
 if __name__ == "__main__":
     main()
