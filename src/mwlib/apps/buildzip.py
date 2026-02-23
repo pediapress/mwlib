@@ -194,7 +194,9 @@ class ZipCreator:
     """Create zip archives from directories."""
 
     @staticmethod
-    def create_zip(source_dir: str, output_path: Optional[str] = None) -> str:
+    def create_zip(
+        source_dir: str, output_path: Optional[str] = None, skip_ext: Optional[str] = None
+    ) -> str:
         """Create zip file from directory.
 
         Returns: Path to created zip file
@@ -207,7 +209,7 @@ class ZipCreator:
         os.close(fd)
 
         try:
-            ZipCreator._write_zip(source_dir, temp_zip)
+            ZipCreator._write_zip(source_dir, temp_zip, skip_ext=skip_ext)
             if output_path:
                 os.rename(temp_zip, output_path)
                 return output_path
@@ -217,14 +219,73 @@ class ZipCreator:
             raise
 
     @staticmethod
-    def _write_zip(source_dir: str, zip_path: str) -> None:
+    def _write_zip(source_dir: str, zip_path: str, skip_ext: Optional[str] = None) -> None:
         """Write directory contents to zip file."""
         with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
             for dirpath, _, files in os.walk(source_dir):
                 for filename in files:
                     filepath = os.path.join(dirpath, filename)
+                    if skip_ext and os.path.splitext(filepath)[1] == skip_ext:
+                        continue
                     arcname = os.path.relpath(filepath, source_dir)
                     zf.write(filepath, arcname.replace("\\", "/"))
+
+
+def zip_dir(dirname, output=None, skip_ext=None):
+    """Recursively zip a directory and return the written zip path."""
+    source_dir = os.path.abspath(dirname)
+    output_path = os.path.abspath(output or f"{dirname}.zip")
+    ZipCreator._write_zip(source_dir, output_path, skip_ext=skip_ext)
+    return output_path
+
+
+def make_zip(
+    output=None,
+    wiki_options=None,
+    metabook=None,
+    pod_client=None,
+    status=None,
+):
+    """Build a nuwiki directory and package it into a zip file."""
+    wiki_options = dict(wiki_options or {})
+    if output is not None:
+        wiki_options["output"] = output
+
+    output_path = wiki_options.get("output")
+    keep_tmpfiles = wiki_options.get("keep_tmpfiles", False)
+
+    with TempDirManager(output_path, keep_tmpfiles) as tmpdir:
+        fsdir = os.path.join(tmpdir, "nuwiki")
+        log.info(f"creating nuwiki in {fsdir!r}")
+        make_nuwiki(
+            fsdir=fsdir,
+            metabook=metabook,
+            wiki_options=wiki_options,
+            pod_client=pod_client,
+            status=status,
+        )
+
+        if output_path:
+            fd, temp_zip = tempfile.mkstemp(suffix=".zip", dir=os.path.dirname(output_path))
+        else:
+            fd, temp_zip = tempfile.mkstemp(suffix=".zip")
+        os.close(fd)
+
+        try:
+            zip_dir(fsdir, temp_zip)
+            filename = temp_zip
+            if output_path:
+                os.replace(temp_zip, output_path)
+                filename = output_path
+
+            if pod_client:
+                status(status="uploading", progress=0)
+                pod_client.post_zipfile(filename)
+
+            return filename
+        except Exception:
+            unorganized.safe_unlink(temp_zip)
+            raise
 
 
 # ============================================================================
