@@ -3,7 +3,7 @@
 # Copyright (c) 2007-2008 PediaPress GmbH
 # See README.txt for additional licensing information.
 
-
+import pytest
 from pygments import highlight, lexers
 from renderhelper import renderMW
 
@@ -30,6 +30,7 @@ def get_styled_text(txt):
     return txt_list
 
 
+@pytest.mark.integration
 def test_list_and_tables_3():
     # oversized table -> nested table is rendered in plain-text
     txt = f"""
@@ -69,6 +70,7 @@ def test_list_and_tables_3():
     renderMW("\n\n".join(get_styled_text(txt)), "lists_and_tables_3")
 
 
+@pytest.mark.integration
 def test_list_and_tables_2():
     # oversized table -> nested table is rendered in plain-text
     txt = f"""
@@ -217,13 +219,13 @@ def test_entity_links():
 
 
 def test_category_links():
-    """test for http://code.pediapress.com/wiki/ticket/177"""
+    """Test for http://code.pediapress.com/wiki/ticket/177 ticket."""
     txt = "[[:Category:foo bar]]"
     renderMW(txt, "links_entities")
 
 
 def test_breaking_long_sections():
-    """test for http://code.pediapress.com/wiki/ticket/177"""
+    """Test for http://code.pediapress.com/wiki/ticket/177 ticket."""
     txt = "= sect1/Bla/blub/wurst/bier&尚書•梓材&sdg/&bla/bl&b/aslkjfasdfafasFAS/fasdfasf/asdfs&asdf ="
     renderMW(txt, "breaking_long_sections")
 
