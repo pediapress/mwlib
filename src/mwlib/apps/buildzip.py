@@ -388,7 +388,16 @@ class ZipBuilder:
         nuwiki_dir = os.path.join(tmpdir, "nuwiki")
         log.info(f"creating nuwiki in {nuwiki_dir!r}")
 
-        status = create_zip_from_wiki_env(env, pod_client, wiki_options, self._make_zip_callback)
+        def build_nuwiki_to_tmpdir(wiki_options, metabook, pod_client, status):
+            make_nuwiki(
+                fsdir=nuwiki_dir,
+                metabook=metabook,
+                wiki_options=wiki_options,
+                pod_client=pod_client,
+                status=status,
+            )
+
+        status = create_zip_from_wiki_env(env, pod_client, wiki_options, build_nuwiki_to_tmpdir)
 
         zip_path = ZipCreator.create_zip(nuwiki_dir, self.config.output)
 
@@ -397,22 +406,6 @@ class ZipBuilder:
             pod_client.post_zipfile(zip_path)
 
         return zip_path
-
-    def _make_zip_callback(
-        self, wiki_options: dict, metabook: Any, pod_client: Any, status: Any
-    ) -> str:
-        """Callback for create_zip_from_wiki_env."""
-        # This is called by create_zip_from_wiki_env to create nuwiki
-        tmpdir = tempfile.mkdtemp()
-        fsdir = os.path.join(tmpdir, "nuwiki")
-        make_nuwiki(
-            fsdir=fsdir,
-            metabook=metabook,
-            wiki_options=wiki_options,
-            pod_client=pod_client,
-            status=status,
-        )
-        return fsdir
 
 
 # ============================================================================

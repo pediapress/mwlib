@@ -1,5 +1,6 @@
 import os
 import tempfile
+import zipfile
 
 import pytest
 from click.testing import CliRunner
@@ -415,3 +416,60 @@ def test_build_config_immutable():
     # Should not be able to modify
     with pytest.raises(Exception):
         config.output = "other.zip"
+
+
+def test_zip_builder_build_zip_writes_and_zips_same_nuwiki_dir(monkeypatch, tmp_path):
+    """Regression: _build_zip must zip the directory that make_nuwiki populated."""
+    from types import SimpleNamespace
+
+    from mwlib.apps.buildzip import BuildConfig, ZipBuilder
+
+    output_zip = tmp_path / "out.zip"
+    build_config = BuildConfig(
+        output=str(output_zip),
+        posturl=None,
+        getposturl=0,
+        keep_tmpfiles=False,
+        status_file=None,
+        config=None,
+        imagesize=1280,
+        metabook=object(),
+        collectionpage=None,
+        noimages=False,
+        logfile=None,
+        username=None,
+        password=None,
+        domain=None,
+        title=None,
+        subtitle=None,
+        editor=None,
+        script_extension=".php",
+    )
+    builder = ZipBuilder(build_config)
+
+    def fake_create_zip_from_wiki_env(env, pod_client, wiki_options, make_zip):
+        make_zip(
+            wiki_options=wiki_options,
+            metabook=env.metabook,
+            pod_client=pod_client,
+            status=lambda **kwargs: None,
+        )
+        return lambda **kwargs: None
+
+    def fake_make_nuwiki(fsdir, metabook, wiki_options, pod_client, status):
+        os.makedirs(fsdir, exist_ok=True)
+        with open(os.path.join(fsdir, "marker.txt"), "w", encoding="utf-8") as f:
+            f.write("ok")
+
+    monkeypatch.setattr("mwlib.apps.buildzip.create_zip_from_wiki_env", fake_create_zip_from_wiki_env)
+    monkeypatch.setattr("mwlib.apps.buildzip.make_nuwiki", fake_make_nuwiki)
+
+    env = SimpleNamespace(metabook=object())
+    tmpdir = tmp_path / "tmp"
+    tmpdir.mkdir()
+
+    zip_path = builder._build_zip(str(tmpdir), env, {}, pod_client=None)
+
+    assert zip_path == str(output_zip)
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        assert "marker.txt" in zf.namelist()
