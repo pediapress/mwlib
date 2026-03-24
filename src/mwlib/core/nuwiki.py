@@ -115,6 +115,12 @@ class NuWiki:
         else:
             self.imageinfo = DumbJsonDB(file_name, allow_pickle=allow_pickle)
 
+        file_name = os.path.join(self.path, "templates.db")
+        if os.path.exists(file_name):
+            self.templates = DumbJsonDB(file_name, allow_pickle=allow_pickle)
+        else:
+            self.templates = None
+
         self.redirects = self._loadjson("redirects.json", {})
         self.siteinfo = self._loadjson("siteinfo.json", {})
         self.nshandler = nshandling.NsHandler(self.siteinfo)
@@ -280,7 +286,7 @@ class NuWiki:
 
 
 def extract_member(zipfile, member, dstdir):
-    """Copied and adjusted from Python 2.6 stdlib zipfile.py module.
+    """Extract a single member from a zipfile to a destination directory.
 
     Extract the ZipInfo object 'member' to a physical
     file on the path targetpath.
@@ -477,13 +483,26 @@ class Adapt:
         return []
 
     def get_image_templates_and_args(self, name, wikidb=None):
+        # Check pre-extracted templates (from BigQuery) first
+        if self.nuwiki.templates is not None:
+            _, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
+            for lookup_name in [fqname, self.en_nshandler.get_fqname(partial, nshandling.NS_FILE)]:
+                try:
+                    cached = self.nuwiki.templates[lookup_name]
+                    if cached:
+                        return set(cached)
+                except (KeyError, TypeError, ValueError):
+                    pass
+
+        # Fall back to wikitext parsing
         from mwlib.parser.expander import get_templates
 
         page = self.get_image_description_page(name)
         if page is not None:
             templates = get_templates(page.rawtext)
-            from mwlib.parser.expander import find_template
             from mwlib.parser.templ.evaluate import Expander
+
+            from mwlib.parser.expander import find_template
             from mwlib.parser.templ.misc import DictDB
             from mwlib.parser.templ.parser import parse
 

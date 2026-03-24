@@ -111,7 +111,7 @@ class FsOutput:
         self.imgcount = 0
         self.nfo = None
 
-        for storage in ["authors", "html", "imageinfo"]:
+        for storage in ["authors", "html", "imageinfo", "templates"]:
             db_path = os.path.join(self.path, storage + ".db")
             if os.path.exists(db_path):
                 os.remove(db_path)
@@ -371,6 +371,28 @@ class Fetcher:
         self.imageinfo_todo = []
         self.imagedescription_todo = {}  # base path -> list
         self._nshandler = None
+
+        # BigQuery lookup for image description pages
+        self.bq_lookup = None
+        self._bq_pending = []  # (local_name, api, original_title) tuples awaiting BQ lookup
+        self._bq_batch_size = 50  # flush threshold
+        self._bq_deferred_downloads = {}  # original_title → thumburl, awaiting license check
+        self.fetch_license_checker = None
+        if conf.get("bigquery", "enabled", False, bool):
+            try:
+                from mwlib.network.bigquery_lookup import BigQueryImageLookup
+
+                self.bq_lookup = BigQueryImageLookup()
+            except Exception:
+                logger.warning("BigQuery lookup init failed, using remote API", exc_info=True)
+
+        if self.bq_lookup and self.bq_lookup.is_available:
+            from mwlib.rendering.licensechecker import LicenseChecker
+
+            # Match render-time policy: de.wikipedia.org uses whitelist, others blacklist
+            filter_type = "whitelist" if "de.wikipedia.org" in self.api.apiurl else "blacklist"
+            self.fetch_license_checker = LicenseChecker(image_db=None, filter_type=filter_type)
+            self.fetch_license_checker.read_licenses_csv()
 
         siteinfo = self.get_siteinfo_for(self.api)
         self.fsout.write_siteinfo(siteinfo)
@@ -917,11 +939,21 @@ class Fetcher:
             # FIXME: add Callback that checks correct file size
             if thumb_url.startswith("/"):
                 thumb_url = parse.urljoin(self.api.baseurl, thumb_url)
-            self.schedule_download_image(thumb_url, title)
 
             description_url = imageinfo.get("descriptionurl", "")
             if not description_url:
                 description_url = image.get("fullurl", "")
+
+            # Defer download for BigQuery-eligible domains (license check first)
+            if (
+                self.bq_lookup
+                and self.bq_lookup.is_available
+                and description_url
+                and self.bq_lookup.handles_domain(description_url)
+            ):
+                self._bq_deferred_downloads[title] = thumb_url
+            else:
+                self.schedule_download_image(thumb_url, title)
 
             if description_url and "/" in description_url:
                 path, _ = description_url.rsplit("/", 1)
@@ -983,13 +1015,151 @@ class Fetcher:
         local_names = []
         for title in titles:
             partial = title.split(":", 1)[1]
-            local_names.append(f"{nsname}:{partial}")
+            local_names.append((f"{nsname}:{partial}", title))
 
-        for block in split_blocks(local_names, api.api_request_limit):
+        # BigQuery-eligible: collect into pending batch
+        if self.bq_lookup and self.bq_lookup.is_available and self.bq_lookup.handles_domain(path):
+            for local_name, orig_title in local_names:
+                self._bq_pending.append((local_name, api, orig_title))
+            if len(self._bq_pending) >= self._bq_batch_size:
+                self._flush_bq_batch()
+            # Contributor lookup always uses remote API
+            for local_name, _ in local_names:
+                self._refcall(self.get_image_edits, local_name, api)
+            return
+
+        # Non-BigQuery path: unchanged
+        just_names = [ln for ln, _ in local_names]
+        for block in split_blocks(just_names, api.api_request_limit):
             self._refcall(self.fetch_image_page, block, api)
 
-        for title in local_names:
-            self._refcall(self.get_image_edits, title, api)
+        for local_name, _ in local_names:
+            self._refcall(self.get_image_edits, local_name, api)
+
+    def _flush_bq_batch(self):
+        """Send all pending titles to BigQuery in a single query.
+
+        Titles found in BigQuery are stored locally. Missing titles fall back
+        to the remote API. Deferred image downloads are scheduled or skipped
+        based on the license check result.
+        """
+        if not self._bq_pending:
+            return
+
+        pending = self._bq_pending
+        self._bq_pending = []
+
+        # Build mappings: local_name → api, local_name → original_title
+        # Deduplicate titles for the BigQuery query
+        api_by_local = {}
+        orig_by_local = {}
+        seen = set()
+        unique_titles = []
+        for local_name, api, orig_title in pending:
+            api_by_local[local_name] = api
+            orig_by_local[local_name] = orig_title
+            if local_name not in seen:
+                seen.add(local_name)
+                unique_titles.append(local_name)
+
+        rows, missing = self.bq_lookup.fetch_batch(unique_titles)
+
+        # Store BigQuery results + license check + deferred downloads
+        for row in rows:
+            local_name = row["name"]
+            orig_title = orig_by_local.get(local_name, local_name)
+            passes_license = self._store_bq_result(row)
+            if passes_license and orig_title in self._bq_deferred_downloads:
+                self.schedule_download_image(self._bq_deferred_downloads.pop(orig_title), orig_title)
+            elif not passes_license:
+                self._bq_deferred_downloads.pop(orig_title, None)
+                logger.info("Skipping image download for %s (license filtered)", orig_title)
+
+        # Fall back to remote API for missing titles
+        if missing:
+            by_api = {}
+            for local_name in missing:
+                api = api_by_local.get(local_name)
+                if api:
+                    by_api.setdefault(api, []).append(local_name)
+            for api, api_titles in by_api.items():
+                for block in split_blocks(api_titles, api.api_request_limit):
+                    self._refcall(self.fetch_image_page, block, api)
+            # Schedule deferred downloads for fallback titles (no license info yet)
+            for local_name in missing:
+                orig_title = orig_by_local.get(local_name, local_name)
+                if orig_title in self._bq_deferred_downloads:
+                    self.schedule_download_image(
+                        self._bq_deferred_downloads.pop(orig_title), orig_title
+                    )
+
+    def _store_bq_result(self, row) -> bool:
+        """Store a BigQuery row into fsout databases.
+
+        Returns True if the image passes the license check.
+        """
+        title = row["name"]
+
+        # Parse templates from BigQuery JSON column
+        raw_templates = row.get("templates") or []
+        # BigQuery JSON columns may be returned as a JSON string
+        if isinstance(raw_templates, str):
+            raw_templates = json.loads(raw_templates)
+        # Templates are objects like {"name": "Template:Cc-by-sa", "url": "..."}
+        # Extract just the template names, stripping the "Template:" prefix
+        template_names = []
+        for t in raw_templates:
+            if isinstance(t, dict):
+                name = t.get("name", "")
+                if name.startswith("Template:"):
+                    name = name[len("Template:"):]
+                template_names.append(name)
+            elif isinstance(t, str):
+                template_names.append(t)
+
+        # Store extracted template names in templates.db
+        if template_names:
+            self.fsout.set_db_key("templates", title, template_names)
+
+        # Early license check
+        passes_license = self._check_license_from_templates(title, template_names)
+
+        # Supplement imageinfo with dimensions and content URL
+        existing = {}
+        with contextlib.suppress(KeyError, ValueError):
+            existing = self.fsout.get_db_key("imageinfo", title)
+
+        if row.get("image_content_url"):
+            existing.setdefault("url", row["image_content_url"])
+        if row.get("image_width"):
+            existing.setdefault("width", row["image_width"])
+        if row.get("image_height"):
+            existing.setdefault("height", row["image_height"])
+        if row.get("url"):
+            existing.setdefault("descriptionurl", row["url"])
+
+        if existing:
+            self.fsout.set_db_key("imageinfo", title, existing)
+
+        return passes_license
+
+    def _check_license_from_templates(self, title: str, templates: list[str]) -> bool:
+        """Check if image should be included based on templates.
+
+        Returns True if the image passes the license filter.
+        """
+        if not self.fetch_license_checker:
+            return True  # no checker → include everything
+        lowered = [t.lower() for t in templates]
+        licenses = self.fetch_license_checker._get_licenses(lowered)
+        # Simplified check: no stats tracking (no image_db needed)
+        for lic in licenses:
+            if lic.license_type == "free":
+                return True
+            elif lic.license_type == "nonfree":
+                return self.fetch_license_checker.filter_type == "nofilter"
+        # All unknown → follow filter_type
+        return self.fetch_license_checker.filter_type in ["blacklist", "nofilter"]
 
     def get_image_edits(self, title: str, api: MwApi):
         """Get edit history for an image page.
@@ -1084,6 +1254,9 @@ class Fetcher:
 
     def finish(self):
         self._sanity_check()
+        # Flush any remaining BigQuery batch
+        if self.bq_lookup and self._bq_pending:
+            self._flush_bq_batch()
         # Process any pending authors batch
         self.lookup_contributors_for_remaining_titles()
         for api in self.titles_pending_contributor_lookup:
