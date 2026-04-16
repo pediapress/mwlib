@@ -69,7 +69,7 @@ def urlquote(url: str) -> str:
 
 
 class OtherMagic:
-    def DEFAULTSORT(self) -> str:
+    def DEFAULTSORT(self, args=None) -> str:
         """see https://en.wikipedia.org/wiki/Template:DEFAULTSORT"""
         return ""
 
