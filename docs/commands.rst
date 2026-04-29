@@ -43,7 +43,7 @@ one command.
   * A shortcut for a base URL. Currently there are the following shortcuts:
 
     - ":en" -- http://en.wikipedia.org/w/, i.e. the English Wikipedia
-    - ":de" -- http://en.wikipedia.org/w/, i.e. the German Wikipedia
+    - ":de" -- http://de.wikipedia.org/w/, i.e. the German Wikipedia
 
   * A filename of a ZIP file generated with the `the mw-zip Command`_.
   
@@ -80,8 +80,10 @@ one command.
 ``--login=USERNAME:PASSWORD[:DOMAIN]``
 
   For MediaWikis that restrict the viewing of pages, login with given USERNAME,
-  PASSWORD and optionally DOMAIN.
-  
+  PASSWORD and optionally DOMAIN. This cookie-based login is a legacy method;
+  OAuth2 (configured via the ``[oauth2]`` config section) is the preferred
+  authentication method for production use.
+
   Currently this is only supported for mwapidb, i.e. when the --config argument
   is a base URL or shortcut, or when ``type=mwapi`` in the configuration file.
 
@@ -171,56 +173,82 @@ Specific Options
 ``-p, --posturl=POSTURL``
 
   Upload the ZIP file with an HTTP POST request to the given URL.
+  (This replaces the functionality of the old ``mw-post`` command, which has
+  been removed.)
 
 ``-g , --getposturl``
 
   Retrieve the POSTURL from PediaPress and open the upload page in the web
   browser.
+  (This replaces the functionality of the old ``mw-post`` command, which has
+  been removed.)
 
 
-The ``mw-post`` Command
-=======================
+The ``wme-ingest`` Command
+==========================
 
-Send a ZIP file generated with `the mw-zip command`_ to a given or an
-automatically retrieved URL via HTTP POST request.
+Download a Wikimedia Enterprise namespace 6 snapshot and load the file
+description pages into a BigQuery table. This is used to populate the
+BigQuery-based image lookup cache (see :doc:`configuration` for the
+``[bigquery]`` section).
+
+Requires ``WME_USERNAME`` and ``WME_PASSWORD`` environment variables for
+Wikimedia Enterprise authentication.
 
 Usage
 -----
 ::
 
-  mw-post [OPTIONS]
-  
+  wme-ingest [OPTIONS]
+
 Specific Options
 ----------------
 
-``-i, --input=INPUT``
-  
-  Filename of ZIP file.
+``--list``
 
-``-p, --posturl=POSTURL``
+  List available snapshots and exit. Requires WME credentials.
 
-  Upload the ZIP file with an HTTP POST request to the given URL.
+``--download-only``
 
-``-g , --getposturl``
+  Download the snapshot tarball but skip loading into BigQuery.
 
-  Retrieve the POSTURL from PediaPress and open the upload page in the web
-  browser.
+``--streaming-insert``
 
+  Use BigQuery streaming inserts instead of the default batch load job.
+  Streaming inserts are slower and more expensive for large tables, but
+  make rows immediately queryable.
 
+``--snapshot-id=SNAPSHOT_ID``
 
-The ``mw-serve-ctl`` command
-============================
+  Snapshot identifier to download (default: ``enwiki_namespace_6``).
 
+``-i, --input=TARBALL``
 
-``--purge-cache=HOURS``
+  Path to an already-downloaded ``.tar.gz`` file. Skips the download step
+  and loads from the local file instead.
 
-  Remove all cached files in --cache-dir that haven't been touched for the
-  last HOURS hours. This is meant to be run as a cron job.
+``-o, --output=OUTPUT``
 
-``--clean-up``
+  Output path for the downloaded tarball (default: auto-generated in ``/tmp``).
 
-  Report errors for processes that have died irregularly.
+``--project=PROJECT``
 
+  Google Cloud project ID. Defaults to the ``BIGQUERY_PROJECT`` environment
+  variable, or ``pediapress-prod`` if not set.
+
+``--dataset=DATASET``
+
+  BigQuery dataset ID. Defaults to the ``BIGQUERY_DATASET`` environment
+  variable, or ``wikipedia`` if not set.
+
+``--credentials=PATH``
+
+  Path to a GCP service account JSON key file. Defaults to the
+  ``GOOGLE_APPLICATION_CREDENTIALS`` environment variable.
+
+``--batch-size=N``
+
+  Number of rows per batch for streaming inserts (default: 10000).
 
 
 .. _`MediaWiki API`: http://www.mediawiki.org/wiki/API
