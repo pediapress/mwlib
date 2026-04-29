@@ -4,6 +4,58 @@ Changelog
 
 mwlib
 ==========================
+2026-04-28 mwlib 0.18.2
+------------------------
+- Allow DEFAULTSORT to accept optional arguments
+
+2026-04-28 mwlib 0.18.1
+------------------------
+- Add WME ingestion script (wme-ingest) for loading Wikimedia Enterprise snapshots into BigQuery
+
+2026-04-28 mwlib 0.18.0
+------------------------
+- Add BigQuery-first lookup for image description pages
+- Add BigQuery configuration section and optional google-cloud-bigquery dependency
+- Add domain-scoped rate limiting in sapi.py (fetch.max_requests_per_second)
+- Improve retry/backoff handling in sapi.py and http_client.py
+- Add OAuth2 client_credentials support
+- Add HTTP/2 support via httpx
+- Require Python 3.11 or 3.12
+- Replace setup.py with pyproject.toml; use uv for package management
+- Remove buildzip2.py; unify buildzip implementation
+- Update Cython template evaluation for Python 3.11+/Cython 3.2.4
+- Mark slow rl tests with @pytest.mark.integration
+
+2023-12-15 mwlib 0.17.0.post1
+------------------------------
+- Post-release packaging fix (no functional changes)
+
+2023-12-10 mwlib 0.17.0
+------------------------
+- Complete migration to Python 3; Python 2 is no longer supported
+- Project structure refactored: source code moved to ``src/`` directory
+- Python 3 compatibility fixes throughout the codebase (parser, scanner, templates)
+- Fix ``_uscan.re`` Python 3 compatibility
+- Run ``modernize`` script across all modules
+- Code cleanup and linter integration (ruff, bandit)
+- Upgrade dependencies; switch to ``pip-compile-multi`` for requirements management
+- Add Docker Compose setup examples
+- Add Pillow 6.2.1 and update requirements
+- Fix deprecated warnings in tests
+- Fix bugs in EasyTimeline.pl
+- Migrate build system to ``pyproject.toml``
+
+2018-04-24 mwlib 0.16.1
+------------------------
+- Fix handling of missing imagelink in imagemap
+
+2018-04-24 mwlib 0.16.0
+------------------------
+- Code cleanup with autopep8
+- Add requirements file and split test requirements
+- Fix HTTPS in test URLs
+- Use named PyPI server for package uploads
+
 2016-02-18 mwlib 0.15.16
 ------------------------
 - ignore hatnote
