@@ -25,18 +25,9 @@ and libraries.
 You will also need uv, a fast Python package installer that serves as an
 alternative to pip. See :ref:`installing uv` for installation instructions.
 
-mwlib is split into multiple namespace packages, that each provide
-different functionality:
-
-mwlib
-  core functionality; provides a parser
-
-mwlib.rl
-  generates PDF files from mediawiki articles. This is what is being
-  used on wikipedia in order to generate PDF output.
-
-mwlib.zim
-  generate ZIM files from mediawiki articles
+mwlib is a single package that provides the parser, the PDF writer
+(ReportLab-based), and the ODF writer. There is no longer a separate
+``mwlib.rl`` package — the rl writer is built into mwlib.
 
 
 .. _installing uv:
@@ -82,17 +73,22 @@ Alternatively, if you've cloned the mwlib repository, you can install it using::
 
 This will use uv to install all required dependencies.
 
-Installation of mwlib.rl with uv
-==============================================
-The following command installs the mwlib.rl package::
+Optional: BigQuery support
+=============================================
+To enable BigQuery-backed image description lookup, install the optional
+dependency group::
 
-   $ uv pip install mwlib.rl
+   $ uv pip install "mwlib[bigquery]"
 
-If you want to render right-to-left texts, you must also install the
-pyfribidi package::
+This requires a GCP project and a BigQuery dataset populated with Wikimedia
+Enterprise snapshots (see the ``wme-ingest`` command and :doc:`configuration`).
+
+Optional: right-to-left text
+=============================================
+If you want to render right-to-left texts, you may also install the
+pyfribidi package (Python 3 availability may vary)::
 
    $ uv pip install pyfribidi
-
 
 .. _`test install`:
 
@@ -145,7 +141,7 @@ After that switch to a user account and run::
   export PATH=~/pp/bin:$PATH
   hash -r
   pip install uv
-  uv pip install pyfribidi mwlib mwlib.rl
+  uv pip install mwlib
 
 Install texvc::
 
