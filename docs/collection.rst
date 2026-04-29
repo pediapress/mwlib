@@ -56,38 +56,30 @@ Installation and Configuration of the Collection Extension
 
     require_once("$IP/extensions/Collection/Collection.php");
 
-If you intend to use the public render server, you're now ready to go.
+Once the extension is installed, you must configure it to point to your
+own render server (see below).
 
 
 Install and Setup a Render Server
----------------------------------
+----------------------------------
 
 Rendering and ZIP file generation is done by a server, which can run
 separately from the MediaWiki installation and can be shared by
 different MediaWikis.
 
-If you have a low-traffic MediaWiki you can use the public render
-server running at http://tools.pediapress.com/mw-serve/. In this case,
-just keep the configuration variable $wgCollectionMWServeURL (see
-below) at its default value.
+The public render server at ``http://tools.pediapress.com/mw-serve/`` is
+**no longer available**. Operators must run their own render server.
 
-Your MediaWiki must be accessible from the render server, i.e. if your
-MediaWiki is behind a firewall you cannot use the public render
-server.
-
-If you can't use the public render server, you'll have to
+You'll have to
 :ref:`install mwlib <mwlib-install>` and
 :ref:`run your own render server <mwlib-renderserver>`.
-See http://mwlib.readthedocs.org/ for more information.
 
-Finally you'll have to set ``$wgCollectionMWServeURL`` in your ``LocalSetting.php``:
+Finally you'll have to set ``$wgCollectionMWServeURL`` in your ``LocalSettings.php``:
 
 ``$wgCollectionMWServeURL`` (string)
 
-  Set this to the URL of a render server (see above).
-
-  The default is ``http://tools.pediapress.com/mw-serve/``, the
-  public render server hosted by PediaPress.
+  Set this to the URL of your render server instance. There is no longer a
+  public default server; this setting must be configured explicitly.
 
 
 Password protected wikis
@@ -133,16 +125,11 @@ people do not have to change them:
 	   'odf' => 'ODT',
        );
 
-   On the public render server tools.pediapress.com, currently the following
-   writers are available:
+   Note: the ``odf`` writer is available but unmaintained. It lacks support for
+   galleries, timelines, hiero, imagemaps, and license handling. The ``rl`` (PDF)
+   writer is the actively maintained option.
 
-   * docbook: DocBook XML
-   * odf: OpenDocument Text
-   * rl: PDF
-   * xhtml: XHTML 1.0 Transitional
-
-   If you're using your own render server, the list of available writers can be
-   listed with the following mwlib_ command::
+   The list of available writers on your render server can be queried with::
 
      $ mw-render --list-writers
 
