@@ -50,7 +50,6 @@ include setup.cfg
 include setup.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
-include src/mwlib/apps/buildzip2.py
 include src/mwlib/apps/executor.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
