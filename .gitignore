@@ -48,3 +48,6 @@ cache
 notes.txt
 launch.json
 *.php.bak
+
+# Added by upp-doctor (doctor setup)
+.claude/agent-memory/
