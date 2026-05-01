@@ -213,6 +213,52 @@ class TestHttpClientManager:
 
         assert client1 is not client2
 
+    def test_invalidate_client_drops_all_oauth_fingerprints_for_origin(
+        self, http_client_manager, mock_conf
+    ):
+        """Invalidate must close every cached OAuth client for the origin.
+
+        Cache keys include a credential fingerprint, so the client
+        cached under the *previous* fingerprint is unreachable through
+        ``_cache_key`` once the credentials have rotated. Without
+        prefix-match invalidation, those rotated-out clients leak
+        forever.
+        """
+
+        def conf_with(secret):
+            return lambda section, name, default=None, convert=None: {
+                ("oauth2", "client_id"): "id-A",
+                ("oauth2", "client_secret"): secret,
+                ("oauth2", "token_url"): "https://example.com/token",
+                ("oauth2", "enabled"): True,
+                ("http2", "enabled"): False,
+                ("http2", "auto_detect"): False,
+                ("fetch", "max_connections"): 20,
+            }.get((section, name), default)
+
+        with patch("mwlib.network.http_client.OAuth2Client") as mock_cls:
+            instances = [MagicMock(), MagicMock()]
+            mock_cls.side_effect = instances
+
+            mock_conf.get.side_effect = conf_with("secret-1")
+            http_client_manager.get_client("https://example.com", use_oauth2=True)
+
+            mock_conf.get.side_effect = conf_with("secret-2")
+            http_client_manager.get_client("https://example.com", use_oauth2=True)
+
+            # Two cached entries before invalidation…
+            assert len(http_client_manager._clients) == 2
+
+            # …and the current-cred caller invalidates BOTH.
+            http_client_manager.invalidate_client(
+                "https://example.com", use_oauth2=True, use_http2=False
+            )
+
+        assert http_client_manager._clients == {}
+        # And we close() every dropped client, not just the current-cred one.
+        for inst in instances:
+            inst.close.assert_called_once()
+
     def test_get_client_normalizes_base_url_by_origin(self, http_client_manager, mock_conf):
         """Clients from the same origin should use a normalized base_url."""
         mock_conf.get.side_effect = lambda section, name, default=None, convert=None: {
@@ -348,11 +394,13 @@ class TestHttpClientManager:
 
         # Different credentials → different cached clients.
         assert c1 is not c2
-        # The plaintext secret never lands in the cache key.
+        # The plaintext credentials never land in the cache key — the
+        # whole OAuth config is hashed into a compact ``auth=...`` field.
         keys = list(http_client_manager._clients.keys())
         assert all("secret-1" not in k for k in keys)
         assert all("secret-2" not in k for k in keys)
-        assert any("secret=" in k for k in keys)
+        assert all("id-A" not in k for k in keys)
+        assert any("auth=" in k for k in keys)
 
     # ---- Round 4: locked singleton ----
 

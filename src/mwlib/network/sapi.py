@@ -23,7 +23,7 @@ from gevent.lock import Semaphore
 from mwlib.core import authors
 from mwlib.network import api as network_api
 from mwlib.network import auth as network_auth
-from mwlib.network.http_client import HttpClientManager
+from mwlib.network.http_client import HttpClientManager, oauth2_config_fingerprint
 from mwlib.utils import conf
 
 logger = logging.getLogger(__name__)
@@ -98,11 +98,14 @@ class RateLimiter:
 
 
 class MwApi:
-    # Track domains and their token expiration timestamps
-    _token_info = {}  # Format: {domain: {'token': token, 'expires_at': timestamp}}
-    request_counter = 0
-    _rate_limiters = {}  # Format: {origin: RateLimiter}
-    _rate_limiter_rps = {}  # Format: {origin: max_rps}
+    # Token state and rate-limit state are shared across MwApi instances
+    # because two MwApis for the same wiki should reuse the same token /
+    # the same per-origin rate limiter. ``request_counter`` is per
+    # instance — see ``__init__`` — to avoid the class attribute being
+    # silently shadowed on first increment via ``self``.
+    _token_info = {}  # {token-cache-key: {token, expires_at, ...}}
+    _rate_limiters = {}  # {origin: RateLimiter}
+    _rate_limiter_rps = {}  # {origin: max_rps}
     _rate_limiter_lock = Semaphore(1)
 
     def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
@@ -138,6 +141,11 @@ class MwApi:
 
         self.edittoken = None
         self.qccount = 0
+        # Per-instance: incrementing through ``self.request_counter`` used
+        # to silently shadow the class-level default after the first call,
+        # which made the test fixture's ``MwApi.request_counter = 0`` reset
+        # ineffective for any instance that had already issued a request.
+        self.request_counter = 0
         self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)
         self.api_request_limit = conf.get("fetch", "api_request_limit", 15, int)
         self.max_connections = conf.get("fetch", "max_connections", 20, int)
@@ -367,18 +375,16 @@ class MwApi:
         return res
 
     def _oauth_token_cache_key(self):
-        """Cache key for the OAuth token in ``_token_info``.
+        """Token cache key — fingerprints the full OAuth identity.
 
-        Including the OAuth client_id and token endpoint means two
-        OAuth configurations against the same wiki (credential rotation,
-        multi-tenant runs) get separate token state instead of stepping
-        on each other's access tokens. Falls back to bare domain for
-        non-OAuth callers.
+        ``HttpClientManager`` already separates clients by credential
+        fingerprint; the token cache must match. Without the secret
+        fingerprint here, a credential rotation produces a fresh client
+        but the new client could still pick up the old client's cached
+        access token until expiry.
         """
         parsed = parse.urlparse(self.apiurl)
-        client_id = getattr(self.http_client, "client_id", "") or ""
-        token_endpoint = getattr(self.http_client, "token_endpoint", "") or ""
-        return f"{parsed.netloc}|client_id={client_id}|token_endpoint={token_endpoint}"
+        return f"{parsed.netloc}|oauth={oauth2_config_fingerprint()}"
 
     def _ensure_oauth2_token(self):
         network_auth.ensure_oauth2_token(

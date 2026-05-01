@@ -22,23 +22,28 @@ from mwlib.utils import conf
 logger = logging.getLogger(__name__)
 
 
-def _oauth2_cache_identity() -> str:
-    """Return a fingerprint of the current OAuth2 config for cache keying.
+def oauth2_config_fingerprint() -> str:
+    """Compact fingerprint of the current OAuth2 config.
 
-    Two callers asking for OAuth2 against the same origin but with
-    different ``client_id`` / ``client_secret`` / ``token_url`` must NOT
-    share a cached client — otherwise a credential rotation (or a
-    multi-tenant test suite that swaps configs) silently keeps using the
-    old client. The secret is hashed so it never lands in logs or cache
-    keys in plaintext.
+    Hashes ``client_id`` + ``client_secret`` + ``token_url`` together so
+    cache keys stay short and don't leak the raw client_id / token_url
+    into debug dumps. Two callers asking for OAuth2 against the same
+    origin but with different credentials get different fingerprints,
+    so a credential rotation produces a fresh client rather than
+    silently reusing the old one.
     """
-    client_id = conf.get("oauth2", "client_id", "")
-    client_secret = conf.get("oauth2", "client_secret", "")
-    token_url = conf.get(
-        "oauth2", "token_url", "https://meta.wikimedia.org/w/rest.php/oauth2/access_token"
+    payload = "|".join(
+        [
+            conf.get("oauth2", "client_id", ""),
+            conf.get("oauth2", "client_secret", ""),
+            conf.get(
+                "oauth2",
+                "token_url",
+                "https://meta.wikimedia.org/w/rest.php/oauth2/access_token",
+            ),
+        ]
     )
-    secret_hash = hashlib.sha256(client_secret.encode("utf-8")).hexdigest()[:16]
-    return f"client_id={client_id}|token_url={token_url}|secret={secret_hash}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
 class HttpClientManager:
@@ -81,21 +86,34 @@ class HttpClientManager:
 
     @staticmethod
     def _cache_key(origin: str, *, use_oauth2: bool, use_http2: bool) -> str:
-        """Build the cache key used by both ``get_client`` and ``invalidate_client``.
+        """Build the cache key used for looking up / inserting clients.
 
-        For OAuth2 clients the key includes a fingerprint of the
-        currently-configured credentials so that rotations create a fresh
-        client rather than reusing a stale-credential one. The secret is
-        hashed before being interpolated.
+        For OAuth2 the key includes a hashed fingerprint of the current
+        credentials so credential rotations produce a fresh client.
         """
-        auth_identity = _oauth2_cache_identity() if use_oauth2 else "standard"
+        auth_identity = oauth2_config_fingerprint() if use_oauth2 else "standard"
         return f"{origin}|oauth2={use_oauth2}|http2={use_http2}|auth={auth_identity}"
 
+    @staticmethod
+    def _cache_key_prefix(origin: str, *, use_oauth2: bool, use_http2: bool) -> str:
+        """Prefix matching every cache entry for this (origin, auth, http2) combo.
+
+        Ignores the OAuth fingerprint so callers can invalidate every
+        cached client for an origin even after credential rotation —
+        otherwise rotated-out clients would be unreachable through the
+        invalidate path.
+        """
+        return f"{origin}|oauth2={use_oauth2}|http2={use_http2}|auth="
+
     def invalidate_client(self, base_url: str, *, use_oauth2: bool, use_http2: bool) -> None:
+        """Drop every cached client matching the given (origin, auth, http2)."""
         origin = self._origin(base_url)
-        cache_key = self._cache_key(origin, use_oauth2=use_oauth2, use_http2=use_http2)
-        client = self._clients.pop(cache_key, None)
-        if client is not None:
+        prefix = self._cache_key_prefix(origin, use_oauth2=use_oauth2, use_http2=use_http2)
+        keys_to_remove = [k for k in list(self._clients) if k.startswith(prefix)]
+        for cache_key in keys_to_remove:
+            client = self._clients.pop(cache_key, None)
+            if client is None:
+                continue
             try:
                 client.close()
             except Exception:
@@ -123,14 +141,9 @@ class HttpClientManager:
         if use_oauth2 is None:
             use_oauth2 = conf.get("oauth2", "enabled", False, bool)
 
-        # Resolve OAuth2 *before* building the cache key. Falling back from
-        # OAuth2 to standard inside ``create_oauth2_client`` would otherwise
-        # leave a standard client cached under ``oauth2=True`` — and a
-        # later caller asking for OAuth2 would get that standard client
-        # back, while ``MwApi.use_oauth2`` stayed True and tried to call
-        # ``fetch_token`` on a non-OAuth2 client. By deciding here, both
-        # the cache key and the eventual ``isinstance`` check on the
-        # returned client agree.
+        # Resolve OAuth2 fallback *before* building the cache key, so a
+        # missing-creds fallback caches under ``oauth2=False`` and
+        # ``MwApi.use_oauth2`` (set from the actual client type) agrees.
         if use_oauth2:
             client_id = conf.get("oauth2", "client_id", "")
             client_secret = conf.get("oauth2", "client_secret", "")
@@ -144,10 +157,8 @@ class HttpClientManager:
         if use_http2 is None:
             use_http2 = conf.get("http2", "enabled", True, bool)
 
-        # Auto-detect HTTP/2 support if configured. Probe the origin
-        # rather than the full ``api.php?...`` URL — heavy routes can
-        # take significantly longer to HEAD, and the result is cached
-        # per-origin anyway so the probe only hits one endpoint.
+        # Probe the origin rather than the full URL — heavy routes can
+        # be slow to HEAD and the result is cached per-origin anyway.
         if use_http2 and conf.get("http2", "auto_detect", True, bool):
             use_http2 = self.detect_http2_support(self._origin(base_url))
 
@@ -159,18 +170,13 @@ class HttpClientManager:
 
         headers["User-Agent"] = getattr(conf, "user_agent", "mwlib")
 
-        # Cache key includes the base URL, the auth choice, the HTTP/2
-        # decision, and (for OAuth2) a fingerprint of the credentials so
-        # rotations don't reuse a stale-cred client.
         cache_key = self._cache_key(origin, use_oauth2=use_oauth2, use_http2=use_http2)
 
-        # Fast path: cache hit. Don't take the lock if we don't have to.
+        # Fast path: cache hit, no lock needed.
         if cache_key in self._clients:
             return self._clients[cache_key]
 
-        # Slow path: serialize creation so two callers racing on the same
-        # cache key don't end up creating duplicate clients (and leaking
-        # whichever loses the race).
+        # Slow path: lock so two callers don't both build the client.
         with self._client_lock:
             if cache_key in self._clients:
                 return self._clients[cache_key]

@@ -17,20 +17,23 @@ class TestMwApi:
 
     @pytest.fixture
     def reset_http_client_manager(self):
-        """Reset the HttpClientManager singleton before each test."""
+        """Reset shared singletons / class state before each test.
+
+        ``request_counter`` lives on the instance now, so it doesn't need
+        a class-level reset — but the cached HTTP clients, rate limiters,
+        and OAuth token state are class-shared and must be cleared.
+        """
         HttpClientManager._instance = None
         HttpClientManager._clients = {}
         MwApi._rate_limiters = {}
         MwApi._rate_limiter_rps = {}
         MwApi._token_info = {}
-        MwApi.request_counter = 0
         yield
         HttpClientManager._instance = None
         HttpClientManager._clients = {}
         MwApi._rate_limiters = {}
         MwApi._rate_limiter_rps = {}
         MwApi._token_info = {}
-        MwApi.request_counter = 0
 
     @pytest.fixture
     def mw_api(self, reset_http_client_manager):
@@ -55,7 +58,7 @@ class TestMwApi:
         httpx_mock.add_response(status_code=429, content="Too Many Requests")
         httpx_mock.add_response(status_code=200, content="test data")
 
-        # Mock time.sleep to avoid waiting during tests
+        # Mock gevent.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -77,7 +80,7 @@ class TestMwApi:
         httpx_mock.add_response(500, content="Internal Server Error")
         httpx_mock.add_response(200, content="test data")
 
-        # Mock time.sleep to avoid waiting during tests
+        # Mock gevent.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -99,7 +102,7 @@ class TestMwApi:
         httpx_mock.add_exception(httpx.ConnectError("Connection refused"))
         httpx_mock.add_response(200, content="test data")
 
-        # Mock time.sleep to avoid waiting during tests
+        # Mock gevent.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -122,7 +125,7 @@ class TestMwApi:
         httpx_mock.add_response(429, content="Too Many Requests")
         httpx_mock.add_response(429, content="Too Many Requests")
 
-        # Mock time.sleep to avoid waiting during tests
+        # Mock gevent.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -145,7 +148,7 @@ class TestMwApi:
         # Create a response for the 404 error
         httpx_mock.add_response(404, content=b"Not Found")
 
-        # Mock time.sleep to verify it's not called
+        # Mock gevent.sleep to verify it's not called
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -165,7 +168,7 @@ class TestMwApi:
         # Set up the mock to raise a general exception
         httpx_mock.add_exception(Exception("Test Exception"))
 
-        # Mock time.sleep to verify it's not called
+        # Mock gevent.sleep to verify it's not called
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -187,7 +190,7 @@ class TestMwApi:
         httpx_mock.add_response(429, content="Too Many Requests")
         httpx_mock.add_response(200, content="test data")
 
-        # Mock time.sleep to verify exponential backoff
+        # Mock gevent.sleep to verify exponential backoff
         mock_sleep = MagicMock()
 
         with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
@@ -312,6 +315,32 @@ class TestMwApi:
             assert mock_gevent_sleep.called
             mock_time_sleep.assert_not_called()
 
+    def test_request_counter_is_per_instance(self, reset_http_client_manager):
+        """Two MwApis must not share a request counter.
+
+        ``self.request_counter`` used to read the class-level default
+        until first incremented, then silently shadow it on the
+        instance. Two MwApis would race on the class attribute up to
+        their first request and then diverge. Now it's plainly
+        per-instance from construction.
+        """
+        a = MwApi("https://a.wikipedia.org/w/api.php", use_oauth2=False, use_http2=False)
+        b = MwApi("https://b.wikipedia.org/w/api.php", use_oauth2=False, use_http2=False)
+
+        # Both start at 0, both as instance attributes (no class-level shadowing).
+        assert a.request_counter == 0
+        assert b.request_counter == 0
+        assert "request_counter" in a.__dict__
+        assert "request_counter" in b.__dict__
+
+        # Mimic what _handle_request does — bump the counter — without
+        # actually firing HTTP. This is what the regression is about: the
+        # increment used to write to a class attribute on first call.
+        a.request_counter += 1
+
+        assert a.request_counter == 1
+        assert b.request_counter == 0
+
     def test_basic_auth_is_per_instance_not_on_shared_client(self, reset_http_client_manager):
         """Two MwApi instances for the same origin must not share Basic Auth.
 
@@ -371,24 +400,39 @@ class TestMwApi:
             mock_time_sleep.assert_not_called()
 
     def test_oauth_token_cache_key_includes_client_identity(self, mw_api):
-        """Different OAuth client identities yield different token cache keys.
+        """Different OAuth identities yield different token cache keys.
 
         Token state used to be keyed by domain alone — credential
         rotation or multi-tenant runs would silently reuse each other's
-        access tokens. The new key folds in client_id and token_endpoint.
+        access tokens. The new key folds in the full OAuth config
+        fingerprint (client_id + secret + token_url, hashed).
         """
-        # Inject distinct OAuth identities onto the http client mock.
-        mw_api.http_client = MagicMock()
-        mw_api.http_client.client_id = "tenant-a"
-        mw_api.http_client.token_endpoint = "https://wiki/oauth"
-        key_a = mw_api._oauth_token_cache_key()
 
-        mw_api.http_client.client_id = "tenant-b"
-        key_b = mw_api._oauth_token_cache_key()
+        def conf_with(client_id, secret):
+            return lambda section, name, default=None, convert=None: {
+                ("oauth2", "client_id"): client_id,
+                ("oauth2", "client_secret"): secret,
+                ("oauth2", "token_url"): "https://wiki/oauth",
+            }.get((section, name), default)
+
+        with patch("mwlib.network.http_client.conf") as mock_conf:
+            mock_conf.get.side_effect = conf_with("tenant-a", "secret-a")
+            key_a = mw_api._oauth_token_cache_key()
+
+            # Same client_id + token_url, different secret → still distinct.
+            mock_conf.get.side_effect = conf_with("tenant-a", "secret-b")
+            key_secret_rotated = mw_api._oauth_token_cache_key()
+
+            mock_conf.get.side_effect = conf_with("tenant-b", "secret-a")
+            key_b = mw_api._oauth_token_cache_key()
 
         assert key_a != key_b
-        assert "tenant-a" in key_a
-        assert "tenant-b" in key_b
+        # Secret rotation alone is enough to flip the key (this is the
+        # round-5 fix — the previous key only used client_id).
+        assert key_a != key_secret_rotated
+        # Plaintext credentials never end up in the key.
+        assert "tenant-a" not in key_a
+        assert "secret-a" not in key_a
 
     def test_oauth2_fallback_to_standard_disables_use_oauth2(self, reset_http_client_manager):
         """OAuth2 → standard fallback flips MwApi.use_oauth2 to False.
