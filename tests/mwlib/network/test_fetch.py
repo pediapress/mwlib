@@ -79,8 +79,7 @@ class TestFetch:
 
         # Verify that get_client was called with the correct parameters
         mock_instance.get_client.assert_called_once_with(
-            base_url="https://example.com",
-            use_http2=True
+            base_url="https://example.com", use_http2=True
         )
 
         # Verify that the client's stream method was called with the correct parameters
@@ -93,7 +92,9 @@ class TestFetch:
         with open(path, "rb") as f:
             assert f.read() == b"test data"
 
-    def test_download_to_file_http2_disabled(self, mock_http_client_manager, mock_conf, temp_files):
+    def test_download_to_file_http2_disabled(
+        self, mock_http_client_manager, mock_conf, temp_files
+    ):
         """Test download when HTTP/2 is disabled in configuration."""
         _, mock_instance, _, _ = mock_http_client_manager
         path, temp_path = temp_files
@@ -112,11 +113,12 @@ class TestFetch:
 
         # Verify that get_client was called with HTTP/2 disabled
         mock_instance.get_client.assert_called_once_with(
-            base_url="https://example.com",
-            use_http2=False
+            base_url="https://example.com", use_http2=False
         )
 
-    def test_download_to_file_http2_not_supported(self, mock_http_client_manager, mock_conf, temp_files):
+    def test_download_to_file_http2_not_supported(
+        self, mock_http_client_manager, mock_conf, temp_files
+    ):
         """Test download when HTTP/2 is not supported by the server."""
         _, mock_instance, _, _ = mock_http_client_manager
         path, temp_path = temp_files
@@ -132,11 +134,12 @@ class TestFetch:
 
         # Verify that get_client was called with HTTP/2 disabled
         mock_instance.get_client.assert_called_once_with(
-            base_url="https://example.com",
-            use_http2=False
+            base_url="https://example.com", use_http2=False
         )
 
-    def test_download_to_file_auto_detect_disabled(self, mock_http_client_manager, mock_conf, temp_files):
+    def test_download_to_file_auto_detect_disabled(
+        self, mock_http_client_manager, mock_conf, temp_files
+    ):
         """Test download when auto-detect is disabled in configuration."""
         _, mock_instance, _, _ = mock_http_client_manager
         path, temp_path = temp_files
@@ -155,30 +158,31 @@ class TestFetch:
 
         # Verify that get_client was called with HTTP/2 enabled
         mock_instance.get_client.assert_called_once_with(
-            base_url="https://example.com",
-            use_http2=True
+            base_url="https://example.com", use_http2=True
         )
 
-    def test_download_to_file_http_429_retry(self, mock_http_client_manager, mock_conf, temp_files):
+    def test_download_to_file_http_429_retry(
+        self, mock_http_client_manager, mock_conf, temp_files
+    ):
         """Test retry mechanism for HTTP 429 errors."""
         _, _, mock_client, mock_response = mock_http_client_manager
         path, temp_path = temp_files
 
         # Configure the mock to raise a 429 error on first call, then succeed
         http_error = httpx.HTTPStatusError(
-            "429 Too Many Requests",
-            request=MagicMock(),
-            response=MagicMock(status_code=429)
+            "429 Too Many Requests", request=MagicMock(), response=MagicMock(status_code=429)
         )
-        
+
         # Create a side effect that raises an error on first call, then succeeds
         mock_client.stream.side_effect = [
             MagicMock(__enter__=MagicMock(side_effect=http_error)),
-            MagicMock(__enter__=MagicMock(return_value=mock_response))
+            MagicMock(__enter__=MagicMock(return_value=mock_response)),
         ]
 
         # Call the function with retry parameters
-        download_to_file("https://example.com/file.txt", path, temp_path, max_retries=1, initial_delay=0.01)
+        download_to_file(
+            "https://example.com/file.txt", path, temp_path, max_retries=1, initial_delay=0.01
+        )
 
         # Verify that the client's stream method was called twice
         assert mock_client.stream.call_count == 2
@@ -190,9 +194,7 @@ class TestFetch:
 
         # Configure the mock to raise an HTTP error
         http_error = httpx.HTTPStatusError(
-            "404 Not Found",
-            request=MagicMock(),
-            response=MagicMock(status_code=404)
+            "404 Not Found", request=MagicMock(), response=MagicMock(status_code=404)
         )
         mock_client.stream.return_value.__enter__.side_effect = http_error
 
@@ -212,7 +214,9 @@ class TestFetch:
         with pytest.raises(Exception):
             download_to_file("https://example.com/file.txt", path, temp_path)
 
-    def test_download_to_file_applies_rate_limit(self, mock_http_client_manager, mock_conf, temp_files):
+    def test_download_to_file_applies_rate_limit(
+        self, mock_http_client_manager, mock_conf, temp_files
+    ):
         """Download requests should respect configured max_requests_per_second."""
         path, temp_path = temp_files
 
@@ -235,3 +239,128 @@ class TestFetch:
 
             mock_rate_limiter_cls.assert_called_once_with(max_calls=3, period=1.0)
             mock_rate_limiter.acquire.assert_called_once_with()
+
+
+class TestLookupContributors:
+    """Regression tests for the contributor-attribution flow.
+
+    The previous implementation accepted ``title`` but iterated the
+    pending batch instead — combined with the single-title path no
+    longer appending to that batch, every author was silently dropped.
+    """
+
+    def _make_stub(self):
+        from collections import defaultdict
+
+        from mwlib.network.fetch import Fetcher
+
+        stub = object.__new__(Fetcher)
+        stub.titles_pending_contributor_lookup = defaultdict(list)
+        stub.title_mapping = {}
+        stub.fsout = MagicMock()
+        return stub
+
+    def test_single_title_writes_authors(self):
+        stub = self._make_stub()
+        api = MagicMock()
+        inspect = MagicMock()
+        inspect.get_authors.return_value = ["Alice", "Bob"]
+        api.get_contributors.return_value = {"File:X.jpg": inspect}
+
+        stub._lookup_contributors(api, "File:X.jpg")
+
+        api.get_contributors.assert_called_once_with(["File:X.jpg"])
+        stub.fsout.set_db_key.assert_called_once_with("authors", "File:X.jpg", ["Alice", "Bob"])
+        # Single-title path must NOT touch the pending batch.
+        assert stub.titles_pending_contributor_lookup[api] == []
+
+    def test_single_title_uses_title_mapping(self):
+        """Authors are stored under the mapped (local-namespace) title.
+
+        Image titles get rewritten to the local namespace via
+        ``title_mapping``; the contributor lookup must honour that.
+        """
+        stub = self._make_stub()
+        stub.title_mapping["File:X.jpg"] = "Datei:X.jpg"
+        api = MagicMock()
+        inspect = MagicMock()
+        inspect.get_authors.return_value = ["Alice"]
+        api.get_contributors.return_value = {"File:X.jpg": inspect}
+
+        stub._lookup_contributors(api, "File:X.jpg")
+
+        stub.fsout.set_db_key.assert_called_once_with("authors", "Datei:X.jpg", ["Alice"])
+
+    def test_batch_mode_consumes_pending(self):
+        from mwlib.network.fetch import Fetcher  # noqa: F401  (used in stub)
+
+        stub = self._make_stub()
+        api = MagicMock()
+        stub.titles_pending_contributor_lookup[api] = ["File:A.jpg", "File:B.jpg"]
+        inspect_a = MagicMock()
+        inspect_a.get_authors.return_value = ["Alice"]
+        inspect_b = MagicMock()
+        inspect_b.get_authors.return_value = ["Bob"]
+        api.get_contributors.return_value = {
+            "File:A.jpg": inspect_a,
+            "File:B.jpg": inspect_b,
+        }
+
+        stub._lookup_contributors(api)
+
+        api.get_contributors.assert_called_once_with(["File:A.jpg", "File:B.jpg"])
+        # Both titles' authors written
+        keys_written = {
+            (call.args[1], tuple(call.args[2])) for call in stub.fsout.set_db_key.call_args_list
+        }
+        assert ("File:A.jpg", ("Alice",)) in keys_written
+        assert ("File:B.jpg", ("Bob",)) in keys_written
+        # Batch must be cleared so the next call doesn't re-fetch.
+        assert stub.titles_pending_contributor_lookup[api] == []
+
+    def test_redirected_titles_are_skipped(self):
+        """Titles missing from the API response are skipped silently.
+
+        E.g. when the page got redirected away — we don't want to raise
+        or write a partial entry.
+        """
+        stub = self._make_stub()
+        api = MagicMock()
+        api.get_contributors.return_value = {}  # no entry for "File:X.jpg"
+
+        stub._lookup_contributors(api, "File:X.jpg")
+
+        stub.fsout.set_db_key.assert_not_called()
+
+    def test_empty_batch_is_a_noop(self):
+        stub = self._make_stub()
+        api = MagicMock()
+
+        stub._lookup_contributors(api)
+
+        api.get_contributors.assert_not_called()
+        stub.fsout.set_db_key.assert_not_called()
+
+
+class TestFetcherInstanceState:
+    """Per-instance state mustn't leak across Fetcher instances."""
+
+    def test_pending_lookup_is_per_instance(self):
+        from collections import defaultdict
+
+        from mwlib.network.fetch import Fetcher
+
+        a = object.__new__(Fetcher)
+        a.titles_pending_contributor_lookup = defaultdict(list)
+        a.title_mapping = {}
+        b = object.__new__(Fetcher)
+        b.titles_pending_contributor_lookup = defaultdict(list)
+        b.title_mapping = {}
+
+        api = MagicMock()
+        a.titles_pending_contributor_lookup[api].append("only-on-a")
+        a.title_mapping["only-on-a"] = "mapped-a"
+
+        # Instance b must NOT see anything from a.
+        assert b.titles_pending_contributor_lookup[api] == []
+        assert b.title_mapping == {}

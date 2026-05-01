@@ -299,7 +299,9 @@ def _acquire_download_rate_limit(url):
             limiter = mwapi.RateLimiter(max_calls=max_rps, period=1.0)
             _download_rate_limiter[origin] = limiter
             _download_rate_limiter_rps[origin] = max_rps
-            logger.info(f"Download rate limiter initialized for {origin}: {max_rps} requests/second")
+            logger.info(
+                f"Download rate limiter initialized for {origin}: {max_rps} requests/second"
+            )
 
     limiter.acquire()
 
@@ -314,9 +316,6 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
 
 
 class Fetcher:
-    titles_pending_contributor_lookup = defaultdict(list)
-    title_mapping = {}
-
     def __init__(
         self,
         api,
@@ -331,6 +330,13 @@ class Fetcher:
     ):
         self.dispatch_event = gevent.event.Event()
         self.api_semaphore = Semaphore(conf.get("fetch", "api_request_limit", 5, int))
+
+        # Per-instance state. Previously these were class-level defaults
+        # (``defaultdict(list)`` and ``{}``), which leaked across Fetcher
+        # instances in the same process — concurrent or sequential fetches
+        # could see each other's titles and mappings.
+        self.titles_pending_contributor_lookup = defaultdict(list)
+        self.title_mapping = {}
 
         self.cover_image = cover_image
 
@@ -768,45 +774,40 @@ class Fetcher:
         # Reverting to looking up individual titles - at least for the time being
         self._lookup_contributors(api, title)
 
-    def _lookup_contributors(self, api: MwApi, title=None) -> None:
-        """Process the current batch of titles for author information.
+    def _lookup_contributors(self, api: MwApi, title: str | None = None) -> None:
+        """Look up authors for one title, or for the entire pending batch.
 
-        This method makes a single API request for all titles in the batch,
-        then processes the results and stores them in the database.
+        When ``title`` is given, only that title is looked up — the pending
+        batch is left untouched. When ``title`` is None, the pending batch
+        for ``api`` is consumed and cleared.
+
+        The previous version took ``title`` but iterated
+        ``titles_pending_contributor_lookup[api]`` regardless, which —
+        combined with `_add_to_titles_pending_contributor_lookup` no longer
+        appending to the batch in the single-title path — silently dropped
+        author attribution for every page.
         """
-        # Make the API request for all titles in the batch
-        if title is None:
-            title_to_authors = api.get_contributors(self.titles_pending_contributor_lookup[api])
+        if title is not None:
+            titles = [title]
         else:
-            title_to_authors = api.get_contributors([title])
+            titles = list(self.titles_pending_contributor_lookup[api])
 
-        # Process the results for each title
-        authors_dict = {}
-        title: str
-        for title in self.titles_pending_contributor_lookup[api]:
-            # Skip if the title is not in the results (e.g., if it was redirected)
-            if title not in title_to_authors:
+        if not titles:
+            return
+
+        title_to_authors = api.get_contributors(titles)
+
+        for contributor_title in titles:
+            inspect_authors = title_to_authors.get(contributor_title)
+            if inspect_authors is None:
+                # Skipped, e.g. redirected away — nothing to record.
                 continue
-
-            # Get the InspectAuthors object for this title
-            inspect_authors = title_to_authors[title]
-
-            # Get the authors for this title
             authors = inspect_authors.get_authors()
-
-            # Use the mapped title if available (for image pages)
-            db_title = title
-            if title in self.title_mapping:
-                db_title = self.title_mapping[title]
-
-            # Store the authors in the database
+            db_title = self.title_mapping.get(contributor_title, contributor_title)
             self.fsout.set_db_key("authors", db_title, authors)
 
-            # Store the authors in a dictionary for future use
-            authors_dict[title] = authors
-
-        # Clear the batch
-        self.authors_batch = []
+        if title is None:
+            self.titles_pending_contributor_lookup[api] = []
 
     def report(self):
         query_count = self.api.qccount
@@ -1070,7 +1071,9 @@ class Fetcher:
             orig_title = orig_by_local.get(local_name, local_name)
             passes_license = self._store_bq_result(row)
             if passes_license and orig_title in self._bq_deferred_downloads:
-                self.schedule_download_image(self._bq_deferred_downloads.pop(orig_title), orig_title)
+                self.schedule_download_image(
+                    self._bq_deferred_downloads.pop(orig_title), orig_title
+                )
             elif not passes_license:
                 self._bq_deferred_downloads.pop(orig_title, None)
                 logger.info("Skipping image download for %s (license filtered)", orig_title)
@@ -1112,7 +1115,7 @@ class Fetcher:
             if isinstance(t, dict):
                 name = t.get("name", "")
                 if name.startswith("Template:"):
-                    name = name[len("Template:"):]
+                    name = name[len("Template:") :]
                 template_names.append(name)
             elif isinstance(t, str):
                 template_names.append(t)
@@ -1122,7 +1125,7 @@ class Fetcher:
             self.fsout.set_db_key("templates", title, template_names)
 
         # Early license check
-        passes_license = self._check_license_from_templates(title, template_names)
+        passes_license = self._check_license_from_templates(template_names)
 
         # Supplement imageinfo with dimensions and content URL
         existing = {}
@@ -1143,23 +1146,22 @@ class Fetcher:
 
         return passes_license
 
-    def _check_license_from_templates(self, title: str, templates: list[str]) -> bool:
-        """Check if image should be included based on templates.
+    def _check_license_from_templates(self, templates: list[str]) -> bool:
+        """Decide whether an image passes the license filter at fetch time.
 
-        Returns True if the image passes the license filter.
+        Delegates the actual policy to ``LicenseChecker.license_passes_filter``
+        so this stays bit-for-bit aligned with render-time
+        ``LicenseChecker._check_licenses`` even as policy evolves. Without a
+        configured ``fetch_license_checker`` everything is included
+        unfiltered (legacy behaviour preserved).
         """
         if not self.fetch_license_checker:
-            return True  # no checker → include everything
+            return True
         lowered = [t.lower() for t in templates]
         licenses = self.fetch_license_checker._get_licenses(lowered)
-        # Simplified check: no stats tracking (no image_db needed)
-        for lic in licenses:
-            if lic.license_type == "free":
-                return True
-            elif lic.license_type == "nonfree":
-                return self.fetch_license_checker.filter_type == "nofilter"
-        # All unknown → follow filter_type
-        return self.fetch_license_checker.filter_type in ["blacklist", "nofilter"]
+        return self.fetch_license_checker.license_passes_filter(
+            licenses, self.fetch_license_checker.filter_type
+        )
 
     def get_image_edits(self, title: str, api: MwApi):
         """Get edit history for an image page.

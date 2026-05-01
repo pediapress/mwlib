@@ -60,6 +60,27 @@ class TestBigQueryImageLookup:
         assert lookup.handles_domain("https://de.wikipedia.org/wiki/File:Test.jpg") is True
         assert lookup.handles_domain("https://fr.wikipedia.org/wiki/File:Test.jpg") is False
 
+    def test_handles_domain_rejects_substring_lookalikes(self):
+        """Lookalike hostnames containing the configured domain must not match.
+
+        A naive ``domain in path`` check would accept attacker-controlled
+        hostnames that contain the configured one as a substring, leaking
+        fetches for unrelated wikis through the BigQuery path.
+        """
+        lookup = self._make_lookup(client=MagicMock())
+        # Attacker-controlled subdomain that contains the configured one
+        assert lookup.handles_domain("https://en.wikipedia.org.example.com/path") is False
+        # Hyphen prefix
+        assert lookup.handles_domain("https://evil-en.wikipedia.org/path") is False
+        # Configured host appearing in the path component of an unrelated host
+        assert lookup.handles_domain("https://other.example.com/en.wikipedia.org/x") is False
+
+    def test_handles_domain_accepts_bare_hostname(self):
+        """Callers sometimes pass just a hostname (no scheme); still match."""
+        lookup = self._make_lookup(client=MagicMock())
+        assert lookup.handles_domain("en.wikipedia.org") is True
+        assert lookup.handles_domain("commons.wikimedia.org") is False
+
     def test_fetch_batch_empty_titles(self):
         lookup = self._make_lookup(client=MagicMock())
         rows, missing = lookup.fetch_batch([])
@@ -77,8 +98,18 @@ class TestBigQueryImageLookup:
         lookup = self._make_lookup(client=MagicMock())
 
         mock_rows = [
-            {"name": "File:A.jpg", "templates": ["cc-by-sa"], "image_width": 800, "image_height": 600},
-            {"name": "File:B.jpg", "templates": ["pd-old"], "image_width": 1024, "image_height": 768},
+            {
+                "name": "File:A.jpg",
+                "templates": ["cc-by-sa"],
+                "image_width": 800,
+                "image_height": 600,
+            },
+            {
+                "name": "File:B.jpg",
+                "templates": ["pd-old"],
+                "image_width": 1024,
+                "image_height": 768,
+            },
         ]
         with patch.object(lookup, "_execute_query", return_value=(mock_rows, [])):
             rows, missing = lookup.fetch_batch(["File:A.jpg", "File:B.jpg"])
@@ -99,7 +130,9 @@ class TestBigQueryImageLookup:
     def test_fetch_batch_none_found(self):
         lookup = self._make_lookup(client=MagicMock())
 
-        with patch.object(lookup, "_execute_query", return_value=([], ["File:A.jpg", "File:B.jpg"])):
+        with patch.object(
+            lookup, "_execute_query", return_value=([], ["File:A.jpg", "File:B.jpg"])
+        ):
             rows, missing = lookup.fetch_batch(["File:A.jpg", "File:B.jpg"])
         assert rows == []
         assert missing == ["File:A.jpg", "File:B.jpg"]
@@ -113,13 +146,15 @@ class TestBigQueryImageLookup:
         assert missing == ["File:A.jpg", "File:B.jpg"]
 
     def test_config_values(self):
-        conf = FakeConf({
-            ("bigquery", "project"): "my-project",
-            ("bigquery", "dataset"): "my_dataset",
-            ("bigquery", "table"): "my_table",
-            ("bigquery", "timeout"): "60",
-            ("bigquery", "domains"): "en.wikipedia.org,de.wikipedia.org",
-        })
+        conf = FakeConf(
+            {
+                ("bigquery", "project"): "my-project",
+                ("bigquery", "dataset"): "my_dataset",
+                ("bigquery", "table"): "my_table",
+                ("bigquery", "timeout"): "60",
+                ("bigquery", "domains"): "en.wikipedia.org,de.wikipedia.org",
+            }
+        )
         lookup = self._make_lookup(conf=conf, client=MagicMock())
         assert lookup.project == "my-project"
         assert lookup.dataset == "my_dataset"
@@ -130,9 +165,92 @@ class TestBigQueryImageLookup:
     def test_execute_query_called_with_titles(self):
         lookup = self._make_lookup(client=MagicMock())
 
-        with patch.object(lookup, "_execute_query", return_value=([], ["File:Test.jpg"])) as mock_eq:
+        with patch.object(
+            lookup, "_execute_query", return_value=([], ["File:Test.jpg"])
+        ) as mock_eq:
             lookup.fetch_batch(["File:Test.jpg"])
         mock_eq.assert_called_once_with(["File:Test.jpg"])
+
+    # ---- Identifier validation (Major: SQL identifier injection) ----
+
+    def test_validate_bigquery_identifier_accepts_normal_names(self):
+        from mwlib.network.bigquery_lookup import _validate_bigquery_identifier
+
+        assert _validate_bigquery_identifier("my_dataset", "dataset") == "my_dataset"
+        assert _validate_bigquery_identifier("project-123", "project") == "project-123"
+        assert _validate_bigquery_identifier("file_pages", "table") == "file_pages"
+
+    def test_validate_bigquery_identifier_rejects_injection_attempts(self):
+        from mwlib.network.bigquery_lookup import _validate_bigquery_identifier
+
+        # Backticks would close ``table_ref`` early.
+        with pytest.raises(ValueError):
+            _validate_bigquery_identifier("foo`; DROP TABLE x; --", "table")
+        # Whitespace and SQL keywords mustn't slip through.
+        for bad in (
+            "",
+            " ",
+            "1leading_digit",
+            "with space",
+            "with;semicolon",
+            "with.dot",
+            "back`tick",
+            "quote'inject",
+        ):
+            with pytest.raises(ValueError):
+                _validate_bigquery_identifier(bad, "table")
+
+    def test_execute_query_rejects_invalid_project(self):
+        """A misconfigured project shouldn't be silently interpolated into SQL."""
+        conf = FakeConf({("bigquery", "project"): "evil`; DROP TABLE x; --"})
+        lookup = self._make_lookup(conf=conf, client=MagicMock())
+        with pytest.raises(ValueError):
+            lookup._execute_query(["File:X.jpg"])
+
+    # ---- Row-mismatch handling (Major: deferred-download leak) ----
+
+    def test_execute_query_drops_rows_not_in_request(self):
+        """Rows whose ``name`` wasn't requested are discarded.
+
+        If BigQuery ever returns a normalized name (different casing,
+        different namespace) the requested title is left in ``missing``
+        so the caller falls back to the remote API and any state keyed
+        on the original title stays reachable.
+        """
+        lookup = self._make_lookup(conf=FakeConf(), client=MagicMock())
+
+        # BigQuery returns a row with a normalized (lower-case) name; the
+        # caller asked for the title-cased version.
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [{"name": "File:example.jpg", "templates": []}]
+        lookup._client.query.return_value = mock_query_job
+
+        rows, missing = lookup._execute_query(["File:Example.JPG"])
+
+        assert rows == []  # the normalized row is discarded
+        assert missing == ["File:Example.JPG"]  # original title is missing
+
+    def test_execute_query_returns_only_exact_matches(self):
+        """Exact-match rows pass through; mismatches don't poison the result.
+
+        Mixed input must still surface the legitimate rows while routing
+        the mismatch to the remote-API fallback.
+        """
+        lookup = self._make_lookup(conf=FakeConf(), client=MagicMock())
+
+        mock_query_job = MagicMock()
+        mock_query_job.result.return_value = [
+            {"name": "File:A.jpg", "templates": []},
+            {"name": "File:b.jpg", "templates": []},  # mismatched casing — drop
+            {"name": "File:C.jpg", "templates": []},
+        ]
+        lookup._client.query.return_value = mock_query_job
+
+        requested = ["File:A.jpg", "File:B.jpg", "File:C.jpg"]
+        rows, missing = lookup._execute_query(requested)
+
+        assert {r["name"] for r in rows} == {"File:A.jpg", "File:C.jpg"}
+        assert missing == ["File:B.jpg"]
 
 
 class TestFetcherBigQueryIntegration:
@@ -158,28 +276,28 @@ class TestFetcherBigQueryIntegration:
     def test_check_license_free_passes(self):
         """Free license templates should pass the blacklist filter."""
         stub = self._make_fetcher_stub(filter_type="blacklist")
-        assert stub._check_license_from_templates("File:X.jpg", ["cc-by-sa"]) is True
+        assert stub._check_license_from_templates(["cc-by-sa"]) is True
 
     def test_check_license_nonfree_blocked_by_blacklist(self):
         """Nonfree templates should be blocked by blacklist filter."""
         stub = self._make_fetcher_stub(filter_type="blacklist")
-        assert stub._check_license_from_templates("File:X.jpg", ["non-free logo"]) is False
+        assert stub._check_license_from_templates(["non-free logo"]) is False
 
     def test_check_license_unknown_passes_blacklist(self):
         """Unknown templates should pass blacklist filter."""
         stub = self._make_fetcher_stub(filter_type="blacklist")
-        assert stub._check_license_from_templates("File:X.jpg", ["some-unknown-xyz"]) is True
+        assert stub._check_license_from_templates(["some-unknown-xyz"]) is True
 
     def test_check_license_unknown_blocked_by_whitelist(self):
         """Unknown templates should be blocked by whitelist filter."""
         stub = self._make_fetcher_stub(filter_type="whitelist")
-        assert stub._check_license_from_templates("File:X.jpg", ["some-unknown-xyz"]) is False
+        assert stub._check_license_from_templates(["some-unknown-xyz"]) is False
 
     def test_check_license_no_checker(self):
         """Without a license checker, all images pass."""
         stub = self._make_fetcher_stub()
         stub.fetch_license_checker = None
-        assert stub._check_license_from_templates("File:X.jpg", ["non-free logo"]) is True
+        assert stub._check_license_from_templates(["non-free logo"]) is True
 
     def test_store_bq_result_writes_templates(self):
         """_store_bq_result should write templates to templates.db."""
@@ -197,7 +315,9 @@ class TestFetcherBigQueryIntegration:
         result = stub._store_bq_result(row)
 
         assert result is True  # cc-by-sa is free
-        stub.fsout.set_db_key.assert_any_call("templates", "File:X.jpg", ["cc-by-sa", "information"])
+        stub.fsout.set_db_key.assert_any_call(
+            "templates", "File:X.jpg", ["cc-by-sa", "information"]
+        )
 
     def test_store_bq_result_supplements_imageinfo(self):
         """_store_bq_result should supplement imageinfo with BQ data."""

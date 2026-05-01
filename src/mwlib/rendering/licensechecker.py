@@ -17,8 +17,7 @@ except ImportError:
 
 
 class License:
-    def __init__(self, name="", display_name="",
-                 license_type=None, description=""):
+    def __init__(self, name="", display_name="", license_type=None, description=""):
         self.name = name
         self.display_name = display_name
         self.license_type = license_type  # free|nonfree|unrelated|unknown
@@ -58,8 +57,7 @@ class LicenseChecker:
         with open(file_name) as csv_file:
             for data in csv.reader(csv_file):
                 try:
-                    (name, display_name, license_type,
-                     _, license_description) = data
+                    (name, display_name, license_type, _, license_description) = data
                 except ValueError:
                     continue
                 if not name:
@@ -97,43 +95,59 @@ class LicenseChecker:
             licenses.append(lic)
         return licenses
 
-    def _check_licenses(self, licenses, imgname, stats=True):
-        if not self.image_db:
-            raise ImageDbError(
-                "No image_db passed when initializing LicenseChecker")
+    @staticmethod
+    def license_passes_filter(licenses, filter_type):
+        """Pure policy: decide whether a list of License objects passes the filter.
+
+        Pulled out so fetch-time license checking (where there's no
+        ``image_db`` and stats aren't needed) can use the exact same policy
+        as render-time. Keep this in sync with ``_check_licenses`` —
+        anything that affects the True/False decision belongs here, while
+        side effects (stats, display_name caching) stay on the instance.
+        """
         for lic in licenses:
             if lic.license_type == "free":
-                self.license_display_name[imgname] = lic.display_name
                 return True
-            elif lic.license_type == "nonfree":
-                self.license_display_name[imgname] = lic.display_name
-                return self.filter_type == "nofilter"
-        for lic in licenses:
-            if lic.license_type == "unknown" and stats:
-                urls = self.unknown_licenses.get(lic.name, set())
-                urls.add(
-                    self.image_db.get_description_url(imgname)
-                    or self.image_db.get_url(imgname)
-                    or imgname
-                )
-                self.unknown_licenses[lic.name] = urls
-        self.license_display_name[imgname] = ""
-        if self.filter_type == "whitelist":
+            if lic.license_type == "nonfree":
+                return filter_type == "nofilter"
+        if filter_type == "whitelist":
             return False
-        elif self.filter_type in ["blacklist", "nofilter"]:
-            return True
+        return filter_type in ["blacklist", "nofilter"]
+
+    def _check_licenses(self, licenses, imgname, stats=True):
+        if not self.image_db:
+            raise ImageDbError("No image_db passed when initializing LicenseChecker")
+        # Side effect: cache the display name for the first matching license
+        # (so get_license_display_name returns something useful for this image).
+        for lic in licenses:
+            if lic.license_type in ("free", "nonfree"):
+                self.license_display_name[imgname] = lic.display_name
+                break
+        else:
+            self.license_display_name[imgname] = ""
+            if stats:
+                for lic in licenses:
+                    if lic.license_type == "unknown":
+                        urls = self.unknown_licenses.get(lic.name, set())
+                        urls.add(
+                            self.image_db.get_description_url(imgname)
+                            or self.image_db.get_url(imgname)
+                            or imgname
+                        )
+                        self.unknown_licenses[lic.name] = urls
+        return self.license_passes_filter(licenses, self.filter_type)
 
     def display_image(self, imgname):
         if imgname in self.display_cache:
             return self.display_cache[imgname]
         if self.image_db is None:
             return False
-        templates = [t.lower() for t in self.image_db.get_image_templates_and_args(
-            imgname)]
+        templates = [t.lower() for t in self.image_db.get_image_templates_and_args(imgname)]
         licenses = self._get_licenses(templates)
         display_img = self._check_licenses(licenses, imgname)
-        url = self.image_db.get_description_url(imgname) or self.image_db.get_url(
-            imgname) or imgname
+        url = (
+            self.image_db.get_description_url(imgname) or self.image_db.get_url(imgname) or imgname
+        )
         if display_img:
             self.accepted_images.add(url)
         else:
@@ -153,25 +167,26 @@ class LicenseChecker:
     def free_img_ratio(self):
         num_rejected_images = len(self.rejected_images)
         num_accepted_images = len(self.accepted_images)
-        ratio = num_accepted_images / (num_accepted_images + num_rejected_images) if num_accepted_images + num_rejected_images > 0 else 1
+        ratio = (
+            num_accepted_images / (num_accepted_images + num_rejected_images)
+            if num_accepted_images + num_rejected_images > 0
+            else 1
+        )
         return ratio
 
     def dump_stats(self):
         stats = [
             "IMAGE LICENSE STATS - accepted: %d - rejected: %d --> accept ratio: %.2f"
-            % (len(self.accepted_images), len(self.rejected_images),
-               self.free_img_ratio)
+            % (len(self.accepted_images), len(self.rejected_images), self.free_img_ratio)
         ]
 
         images = set()
         for urls in self.unknown_licenses.values():
             for url in urls:
                 images.add(repr(url))
-        stats.append("Images without license information: %s" % (" ".join(
-            list(images))))
+        stats.append("Images without license information: %s" % (" ".join(list(images))))
         stats.append("##############################")
-        stats.append("Rejected Images: %s" % " ".join(
-            list(self.rejected_images)))
+        stats.append("Rejected Images: %s" % " ".join(list(self.rejected_images)))
         return "\n".join(stats)
 
     def dump_unknown_licenses(self, _dir):
@@ -204,12 +219,10 @@ class LicenseChecker:
                     seen_urls = unknown_licenses.get(lic, set())
                     seen_urls.update(set(urls))
                     unknown_licenses[lic] = seen_urls
-        sorted_licenses = [
-            (len(urls), lic, urls) for lic, urls in unknown_licenses.items()
-        ]
+        sorted_licenses = [(len(urls), lic, urls) for lic, urls in unknown_licenses.items()]
         sorted_licenses.sort(reverse=True)
         for num_urls, lic, urls in sorted_licenses:
-            img_str = "\n".join(list(list(urls)[:5])),
+            img_str = ("\n".join(list(list(urls)[:5])),)
             print(f"\nTEMPLATE: {lic} (num rejected images: {num_urls})\nIMAGES:\n{img_str}\n")
 
     def dump_license_info_content(self):
@@ -244,11 +257,9 @@ if __name__ == "__main__":
     lc = LicenseChecker()
     lc.read_licenses_csv()
 
-    STATS_DIR = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
-        "HIQ_STATSDIR")
+    STATS_DIR = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("HIQ_STATSDIR")
     if not STATS_DIR:
-        print(
-            "specify stats_dir as first arg, or set environment var HIQ_STATSIDR")
+        print("specify stats_dir as first arg, or set environment var HIQ_STATSIDR")
         sys.exit(1)
 
     lc.analyse_unknown_licenses(STATS_DIR)
