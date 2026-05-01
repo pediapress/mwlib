@@ -37,6 +37,7 @@ import hashlib
 import json
 import logging
 import os
+import shutil
 import sys
 import tarfile
 import tempfile
@@ -142,9 +143,7 @@ def get_bearer_token(username: str, password: str) -> str:
     resp.raise_for_status()
     data = resp.json()
     token = data["access_token"]
-    logger.info(
-        "Authentication successful (token expires in %ss)", data.get("expires_in")
-    )
+    logger.info("Authentication successful (token expires in %ss)", data.get("expires_in"))
     return token
 
 
@@ -169,9 +168,7 @@ def download_snapshot_streaming(
     Verifies download completeness by comparing bytes received to Content-Length.
     """
     url = f"{WME_API_BASE}/snapshots/{snapshot_id}/download"
-    logger.info(
-        "Downloading snapshot %s to %s (streaming)...", snapshot_id, output_path
-    )
+    logger.info("Downloading snapshot %s to %s (streaming)...", snapshot_id, output_path)
 
     resp = requests.get(
         url,
@@ -194,9 +191,7 @@ def download_snapshot_streaming(
             if downloaded - last_logged >= _DOWNLOAD_LOG_INTERVAL:
                 if total > 0:
                     pct = 100.0 * downloaded / total
-                    logger.info(
-                        "  %.1f%% (%d / %d MB)", pct, downloaded >> 20, total >> 20
-                    )
+                    logger.info("  %.1f%% (%d / %d MB)", pct, downloaded >> 20, total >> 20)
                 else:
                     logger.info("  %d MB downloaded", downloaded >> 20)
                 last_logged = downloaded
@@ -219,9 +214,16 @@ def download_snapshot_streaming(
 
 
 def extract_ndjson_from_tarball(tarball_path: Path) -> list[Path]:
-    """Extract all .ndjson files from a gzipped tarball.
+    """Extract all .ndjson regular-file members from a gzipped tarball.
 
     Returns a list of paths to the extracted NDJSON files.
+
+    A crafted tarball could otherwise smuggle in symlinks, hardlinks,
+    devices, or absolute / parent-traversal paths and trick ``tar.extract``
+    into writing or reading outside ``extract_dir``. We reject anything
+    that isn't a regular file up front and then stream the bytes through
+    ``shutil.copyfileobj`` rather than handing the member to
+    ``tarfile.extract``.
     """
     logger.info("Extracting NDJSON files from %s...", tarball_path)
     extract_dir = tarball_path.parent
@@ -231,15 +233,24 @@ def extract_ndjson_from_tarball(tarball_path: Path) -> list[Path]:
         if not ndjson_members:
             raise ValueError(f"No .ndjson files found in {tarball_path}")
 
-        # Path traversal guard
         for m in ndjson_members:
-            if Path(m.name).is_absolute() or ".." in Path(m.name).parts:
+            p = Path(m.name)
+            if p.is_absolute() or ".." in p.parts:
                 raise ValueError(f"Suspicious tar member path: {m.name}")
+            if not m.isfile():
+                raise ValueError(
+                    f"Refusing to extract non-regular tar member: {m.name} (type={m.type!r})"
+                )
 
         extracted = []
         for member in ndjson_members:
-            tar.extract(member, path=extract_dir)
+            src = tar.extractfile(member)
+            if src is None:
+                raise ValueError(f"Cannot extract tar member: {member.name}")
             path = extract_dir / member.name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with src, open(path, "wb") as dst:
+                shutil.copyfileobj(src, dst)
             logger.info("Extracted: %s (%d bytes)", path, member.size)
             extracted.append(path)
 
@@ -342,9 +353,7 @@ def load_ndjson_to_bigquery_streaming(
     errors_total = 0
 
     for file_idx, ndjson_path in enumerate(ndjson_paths, 1):
-        logger.info(
-            "Processing file %d/%d: %s", file_idx, len(ndjson_paths), ndjson_path
-        )
+        logger.info("Processing file %d/%d: %s", file_idx, len(ndjson_paths), ndjson_path)
         batch = []
 
         with open(ndjson_path, encoding="utf-8") as f:
@@ -361,9 +370,7 @@ def load_ndjson_to_bigquery_streaming(
                 batch.append(row)
 
                 if len(batch) >= batch_size:
-                    inserted, failed = _insert_batch_with_retry(
-                        client, table_ref, batch
-                    )
+                    inserted, failed = _insert_batch_with_retry(client, table_ref, batch)
                     total_rows += inserted
                     errors_total += failed
                     logger.info(
@@ -395,9 +402,7 @@ def load_ndjson_to_bigquery_streaming(
     return total_rows
 
 
-def _insert_batch_with_retry(
-    client, table_ref: str, batch: list[dict]
-) -> tuple[int, int]:
+def _insert_batch_with_retry(client, table_ref: str, batch: list[dict]) -> tuple[int, int]:
     """Insert a batch of rows, retrying failed rows once.
 
     Returns (inserted_count, failed_count).
@@ -461,9 +466,7 @@ def load_ndjson_to_bigquery_load_job(
     skipped_rows = 0
     try:
         total_rows = 0
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".ndjson", delete=False
-        ) as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".ndjson", delete=False) as tmp:
             tmp_path = tmp.name
             for file_idx, ndjson_path in enumerate(ndjson_paths, 1):
                 logger.info(
@@ -615,9 +618,7 @@ def main():
         username = os.environ.get("WME_USERNAME")
         password = os.environ.get("WME_PASSWORD")
         if not username or not password:
-            logger.error(
-                "WME_USERNAME and WME_PASSWORD environment variables are required"
-            )
+            logger.error("WME_USERNAME and WME_PASSWORD environment variables are required")
             sys.exit(1)
 
         token = get_bearer_token(username, password)
@@ -650,9 +651,7 @@ def main():
             file_lines = sum(1 for line in f if line.strip())
         logger.info("  %s: %d non-empty lines", ndjson_path.name, file_lines)
         line_count += file_lines
-    logger.info(
-        "Total: %d non-empty lines across %d files", line_count, len(ndjson_paths)
-    )
+    logger.info("Total: %d non-empty lines across %d files", line_count, len(ndjson_paths))
 
     # Load into BigQuery (default: batch load job, optional: streaming inserts)
     if args.streaming_insert:

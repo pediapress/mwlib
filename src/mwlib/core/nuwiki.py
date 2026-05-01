@@ -522,7 +522,17 @@ class Adapt:
     def get_contributors(self, name, wikidb=None):
         page = self.get_image_description_page(name)
         if page is None:
-            return []
+            # BigQuery-backed images skip the description-page fetch but
+            # ``Fetcher.get_image_edits`` still populates ``authors.db``
+            # with the remote contributor lookup. Read from there before
+            # falling through to an empty list, otherwise BigQuery hits
+            # would render with no attribution at all.
+            _, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
+            return (
+                self.get_authors(fqname)
+                or self.get_authors(self.en_nshandler.get_fqname(partial, nshandling.NS_FILE))
+                or []
+            )
         users = get_contributors_from_information_template(page.rawtext, page.title, self)
         if users:
             return users

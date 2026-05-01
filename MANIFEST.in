@@ -30,6 +30,7 @@ include docs/metabook.rst
 include docs/renderserver.rst
 include docs/rlwriter.rst
 include docs/writers.rst
+include feature_planning/bigquery-image-description-lookup.md
 include mediawiki/.gitkeep
 include mw-post
 include mwlib/_uscan.cc
@@ -51,6 +52,7 @@ include setup.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
 include src/mwlib/apps/executor.py
+include src/mwlib/apps/fetch_wikimedia_snapshot.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
 include src/mwlib/apps/utils.py
@@ -76,6 +78,7 @@ include src/mwlib/extensions/timeline.py
 include src/mwlib/network/__init__.py
 include src/mwlib/network/api.py
 include src/mwlib/network/auth.py
+include src/mwlib/network/bigquery_lookup.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
 include src/mwlib/network/fetch_siteinfo.py
@@ -520,6 +523,7 @@ include tests/mwlib/core/test_authors.py
 include tests/mwlib/core/test_metabook.py
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
+include tests/mwlib/network/test_bigquery_lookup.py
 include tests/mwlib/network/test_fetch.py
 include tests/mwlib/network/test_fetch_siteinfo.py
 include tests/mwlib/network/test_http_client.py

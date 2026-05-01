@@ -370,38 +370,59 @@ class TestFetcherBigQueryIntegration:
         row = {"name": "File:X.jpg", "templates": ["non-free logo"]}
         assert stub._store_bq_result(row) is False
 
-    # ---- Round 2: defensive parsing + empty-list negative cache ----
+    # ---- Round 6: malformed BQ templates fail closed ----
 
-    def test_store_bq_result_handles_malformed_templates_json(self):
-        """A single row's malformed JSON must not abort the whole batch.
+    def test_store_bq_result_raises_on_malformed_templates_json(self):
+        """Unparsable templates JSON must NOT be treated as 'no templates'.
 
-        BigQuery JSON columns can hand back a string we then ``json.loads``.
-        If the string is malformed, this used to raise inside the batch
-        flush after BigQuery had already succeeded — bypassing the
-        per-title remote-API fallback for every other row in the batch.
-        Now we treat malformed values as empty and let the normal flow
-        continue.
+        An empty templates list passes ``blacklist`` mode, so silently
+        treating corrupt data as empty would fail open and let through
+        images the remote description-page parser may have rejected.
+        Instead the row raises ``BqTemplatesError`` and the flush loop
+        reroutes the title to the remote-API fallback.
         """
-        stub = self._make_fetcher_stub()
-        stub.fsout.get_db_key.side_effect = KeyError("not found")
+        from mwlib.network.fetch import BqTemplatesError
 
+        stub = self._make_fetcher_stub()
         row = {"name": "File:X.jpg", "templates": "not-valid-json{"}
-        result = stub._store_bq_result(row)
 
-        # Returns True (no licenses, blacklist default → include).
-        assert result is True
-        # Still wrote a templates entry (empty list) — see negative-cache test.
-        stub.fsout.set_db_key.assert_any_call("templates", "File:X.jpg", [])
+        with pytest.raises(BqTemplatesError):
+            stub._store_bq_result(row)
 
-    def test_store_bq_result_handles_unexpected_templates_shape(self):
-        """A non-list, non-string templates value is also tolerated."""
+        # Nothing was persisted — the title will be redriven via the
+        # remote API by ``_flush_bq_batch``.
+        stub.fsout.set_db_key.assert_not_called()
+
+    def test_store_bq_result_raises_on_unexpected_templates_shape(self):
+        """A non-list, non-string templates value also fails closed."""
+        from mwlib.network.fetch import BqTemplatesError
+
         stub = self._make_fetcher_stub()
-        stub.fsout.get_db_key.side_effect = KeyError("not found")
-
         row = {"name": "File:X.jpg", "templates": {"unexpected": "shape"}}
-        # Must not raise.
-        stub._store_bq_result(row)
-        stub.fsout.set_db_key.assert_any_call("templates", "File:X.jpg", [])
+
+        with pytest.raises(BqTemplatesError):
+            stub._store_bq_result(row)
+        stub.fsout.set_db_key.assert_not_called()
+
+    def test_flush_bq_batch_reroutes_corrupt_row_to_fallback(self, monkeypatch):
+        """Corrupt BQ rows are added to ``missing`` so the remote API runs."""
+        stub = self._make_fetcher_stub()
+        stub.schedule_download_image = MagicMock()
+        stub._refcall = MagicMock()
+
+        api = MagicMock()
+        api.api_request_limit = 50
+        stub._bq_pending = [("File:X.jpg", api, "File:X.jpg")]
+        stub.bq_lookup.fetch_batch.return_value = (
+            [{"name": "File:X.jpg", "templates": "not-valid-json{"}],
+            [],
+        )
+
+        stub._flush_bq_batch()
+
+        # Corrupt row routed to fetch_image_page via the missing-fallback path.
+        called_funcs = {call.args[0] for call in stub._refcall.call_args_list}
+        assert stub.fetch_image_page in called_funcs
 
     def test_store_bq_result_writes_empty_list_as_negative_cache(self):
         """An empty templates list is stored, not skipped.
@@ -601,3 +622,43 @@ class TestNuWikiTemplatesDb:
 
         result = adapt.get_image_templates_and_args("File:Missing.jpg")
         assert result == []
+
+    def test_get_contributors_falls_back_to_authors_db_for_bq_images(self, tmp_path):
+        """BigQuery-backed images read attribution from authors.db.
+
+        These images have no description page on disk because the
+        BigQuery shortcut skips ``fetch_image_page``. ``get_image_edits``
+        still populates ``authors.db`` via the remote contributor lookup;
+        this fallback wires the two together so the rendered book isn't
+        attribution-empty.
+        """
+        import json as stdlib_json
+
+        from sqlitedict import SqliteDict
+
+        from mwlib.core.nuwiki import Adapt
+
+        path = self._make_nuwiki_dir(tmp_path)
+        # Seed authors.db as if Fetcher.get_image_edits had run.
+        authors_db = SqliteDict(str(tmp_path / "nuwiki" / "authors.db"), autocommit=True)
+        authors_db["File:BQOnly.jpg"] = stdlib_json.dumps(["Alice", "Bob"])
+        authors_db.close()
+
+        adapt = Adapt(path)
+        # No description page exists for this image (BQ shortcircuit)…
+        assert adapt.get_image_description_page("File:BQOnly.jpg") is None
+        # …but contributors are read from authors.db rather than [] returned.
+        assert adapt.get_contributors("File:BQOnly.jpg") == ["Alice", "Bob"]
+
+    def test_get_contributors_returns_empty_when_no_authors_either(self, tmp_path):
+        """Empty list when neither description page nor authors.db has data.
+
+        Belt-and-braces — the fallback returns ``[]`` instead of raising
+        for images we genuinely have no attribution for.
+        """
+        from mwlib.core.nuwiki import Adapt
+
+        path = self._make_nuwiki_dir(tmp_path)
+        adapt = Adapt(path)
+
+        assert adapt.get_contributors("File:Missing.jpg") == []

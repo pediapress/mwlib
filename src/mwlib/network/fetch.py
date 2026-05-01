@@ -42,6 +42,16 @@ _download_rate_limiter_rps = {}
 _download_rate_limiter_init_lock = Semaphore(1)
 
 
+class BqTemplatesError(ValueError):
+    """A BigQuery row's ``templates`` field couldn't be parsed.
+
+    The flush loop catches this and reroutes the title to the remote-API
+    fallback rather than persisting a row whose license-check input is
+    unknown — an empty template list passes ``blacklist`` mode, so
+    silently treating corrupt data as empty would fail open.
+    """
+
+
 class SharedProgress:
     status = None
     last_percent = 0.0
@@ -1005,7 +1015,6 @@ class Fetcher:
         self.fsout.write_pages(data)
 
     def handle_new_basepath(self, path):
-        api = self._get_mwapi_for_path(path)
         todo = self.imagedescription_todo[path]
         del self.imagedescription_todo[path]
 
@@ -1017,25 +1026,47 @@ class Fetcher:
         if not titles:
             return
 
-        siteinfo = self.get_siteinfo_for(api)
+        bq_eligible = (
+            self.bq_lookup and self.bq_lookup.is_available and self.bq_lookup.handles_domain(path)
+        )
 
-        ns_handler = nshandling.NsHandler(siteinfo)
-        nsname = ns_handler.get_nsname_by_number(6)
+        # Build the api / siteinfo lazily so a flaky remote can't kill a
+        # working BigQuery cache hit. If BQ would handle this path we can
+        # fall back to the EN nshandler — BigQuery snapshots are EN-keyed
+        # ("File:...") so that's the canonical name shape we need for the
+        # lookup.
+        api = None
+        nsname = None
+        try:
+            api = self._get_mwapi_for_path(path)
+            siteinfo = self.get_siteinfo_for(api)
+            nsname = nshandling.NsHandler(siteinfo).get_nsname_by_number(6)
+        except Exception:
+            if not bq_eligible:
+                raise
+            logger.warning(
+                "Remote siteinfo failed for %s; proceeding via BigQuery only",
+                path,
+                exc_info=True,
+            )
+            nsname = nshandling.get_nshandler_for_lang("en").get_nsname_by_number(6)
 
         local_names = []
         for title in titles:
             partial = title.split(":", 1)[1]
             local_names.append((f"{nsname}:{partial}", title))
 
-        # BigQuery-eligible: collect into pending batch
-        if self.bq_lookup and self.bq_lookup.is_available and self.bq_lookup.handles_domain(path):
+        if bq_eligible:
             for local_name, orig_title in local_names:
                 self._bq_pending.append((local_name, api, orig_title))
             if len(self._bq_pending) >= self._bq_batch_size:
                 self._flush_bq_batch()
-            # Contributor lookup always uses remote API
-            for local_name, _ in local_names:
-                self._refcall(self.get_image_edits, local_name, api)
+            # Contributor lookup needs the remote API. If api creation
+            # failed above we accept the loss of contributor metadata
+            # rather than dropping the BigQuery hit on the floor.
+            if api is not None:
+                for local_name, _ in local_names:
+                    self._refcall(self.get_image_edits, local_name, api)
             return
 
         # Non-BigQuery path: unchanged
@@ -1074,11 +1105,20 @@ class Fetcher:
 
         rows, missing = self.bq_lookup.fetch_batch(unique_titles)
 
-        # Store BigQuery results + license check + deferred downloads
+        # Store BigQuery results + license check + deferred downloads.
+        # Rows with unparseable templates go onto ``missing`` so the
+        # remote-API fallback applies the description-page parser
+        # instead — silently treating corrupt template data as "no
+        # templates" would fail open in blacklist mode.
         for row in rows:
             local_name = row["name"]
             orig_title = orig_by_local.get(local_name, local_name)
-            passes_license = self._store_bq_result(row)
+            try:
+                passes_license = self._store_bq_result(row)
+            except BqTemplatesError as exc:
+                logger.warning("Routing %s to remote-API fallback: %s", local_name, exc)
+                missing.append(local_name)
+                continue
             if passes_license and orig_title in self._bq_deferred_downloads:
                 self.schedule_download_image(
                     self._bq_deferred_downloads.pop(orig_title), orig_title
@@ -1148,30 +1188,28 @@ class Fetcher:
 
         BigQuery returns the column either as a Python list (for native
         REPEATED RECORD columns) or as a JSON string (for JSON columns).
-        Anything we can't parse — malformed JSON, unexpected shape — is
-        treated as "no templates" for this single row rather than raising.
-        Letting this raise would abort the whole batch flush after the
-        BigQuery query had already succeeded, bypassing the per-title
-        remote-API fallback for every other row in the batch.
+        ``None`` and ``[]`` are legitimate "no templates" signals and
+        return ``[]``.
+
+        Anything we can't parse (malformed JSON, unexpected shape) raises
+        ``BqTemplatesError``. The flush loop catches that and reroutes
+        the title to the remote-API fallback rather than treating it as
+        empty — an empty template list passes ``blacklist`` mode, so
+        silently treating corrupt data as empty would fail open and let
+        through images the remote description-page parser may have
+        rejected.
         """
         if raw_templates is None:
             return []
         if isinstance(raw_templates, str):
             try:
                 raw_templates = json.loads(raw_templates)
-            except (ValueError, TypeError):
-                logger.warning(
-                    "BigQuery returned malformed templates JSON for %s; treating as empty",
-                    title,
-                )
-                return []
+            except (ValueError, TypeError) as exc:
+                raise BqTemplatesError(f"malformed templates JSON for {title}") from exc
         if not isinstance(raw_templates, list):
-            logger.warning(
-                "BigQuery templates for %s is %s, expected list; treating as empty",
-                title,
-                type(raw_templates).__name__,
+            raise BqTemplatesError(
+                f"templates for {title} is {type(raw_templates).__name__}, expected list"
             )
-            return []
 
         # Templates are objects like {"name": "Template:Cc-by-sa", "url": "..."}.
         # Extract just the template names, stripping the "Template:" prefix.

@@ -28,6 +28,7 @@ dependencies = [
     "pyparsing",
     "python-dotenv>=1.1.1",
     "reportlab",
+    "requests",
     "roman",
     "simplejson",
     "sqlitedict",
