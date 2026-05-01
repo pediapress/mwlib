@@ -259,12 +259,19 @@ class TestHttpClientManager:
         assert any("oauth2=False" in k for k in keys)
         assert not any("oauth2=True" in k for k in keys)
 
-    def test_get_client_uses_lock_for_concurrent_creation(self, http_client_manager, mock_conf):
-        """Concurrent get_client calls produce one cached client, not duplicates.
+    def test_get_client_serializes_concurrent_creation(self, http_client_manager, mock_conf):
+        """Concurrent ``get_client`` callers must end up with one client, not two.
 
-        Two callers racing on the same cache key must serialize through
-        the lock rather than each constructing a fresh client.
+        We force the race by patching ``create_standard_client`` to wait
+        on a barrier, then spawn two threads that both miss the cache
+        and contend for the lock. The first one through must populate
+        the cache and the second must observe it — without the lock the
+        second thread would also call ``create_standard_client`` and we'd
+        cache duplicates.
         """
+        import threading
+        import time as time_mod
+
         mock_conf.get.side_effect = lambda section, name, default=None, convert=None: {
             ("oauth2", "enabled"): False,
             ("http2", "enabled"): False,
@@ -272,19 +279,104 @@ class TestHttpClientManager:
             ("fetch", "max_connections"): 20,
         }.get((section, name), default)
 
-        # Drive the lock by spinning the cache check ourselves: if the lock
-        # path is correct, only one StandardClient is constructed for the
-        # same cache key even when both threads see an empty cache before
-        # taking the lock.
+        ready = threading.Event()
+        proceed = threading.Event()
+        original_create = http_client_manager.create_standard_client
+
+        def slow_create(*args, **kwargs):
+            ready.set()
+            proceed.wait(timeout=2)
+            return original_create(*args, **kwargs)
+
+        results = []
+
+        def worker():
+            results.append(http_client_manager.get_client("https://example.com"))
+
         with patch.object(
             http_client_manager,
             "create_standard_client",
-            wraps=http_client_manager.create_standard_client,
+            side_effect=slow_create,
         ) as wrapped:
-            c1 = http_client_manager.get_client("https://example.com")
-            c2 = http_client_manager.get_client("https://example.com")
-            assert c1 is c2
-            assert wrapped.call_count == 1
+            t1 = threading.Thread(target=worker)
+            t1.start()
+            ready.wait(timeout=2)  # t1 is inside slow_create, holding the lock
+            t2 = threading.Thread(target=worker)
+            t2.start()
+            time_mod.sleep(0.05)  # let t2 enter get_client and block on the lock
+            proceed.set()
+            t1.join(timeout=2)
+            t2.join(timeout=2)
+
+        assert wrapped.call_count == 1
+        assert len(results) == 2
+        assert results[0] is results[1]
+
+    # ---- Round 4: credential fingerprint in cache key ----
+
+    def test_oauth2_clients_with_different_credentials_get_different_cache_entries(
+        self, http_client_manager, mock_conf
+    ):
+        """Rotating OAuth2 credentials must not silently reuse a stale-cred client.
+
+        Without a credential fingerprint in the cache key, two callers
+        asking for OAuth2 against the same origin with different
+        ``client_id`` / ``client_secret`` would share a cached client
+        configured with the first run's credentials.
+        """
+
+        def conf_with(secret):
+            return lambda section, name, default=None, convert=None: {
+                ("oauth2", "client_id"): "id-A",
+                ("oauth2", "client_secret"): secret,
+                ("oauth2", "token_url"): "https://example.com/token",
+                ("oauth2", "enabled"): True,
+                ("http2", "enabled"): False,
+                ("http2", "auto_detect"): False,
+                ("fetch", "max_connections"): 20,
+            }.get((section, name), default)
+
+        with patch("mwlib.network.http_client.OAuth2Client") as mock_cls:
+            mock_cls.side_effect = lambda **kwargs: MagicMock(spec=[])
+
+            mock_conf.get.side_effect = conf_with("secret-1")
+            c1 = http_client_manager.get_client("https://example.com", use_oauth2=True)
+
+            # Rotate the secret — same origin, same auth choice.
+            mock_conf.get.side_effect = conf_with("secret-2")
+            c2 = http_client_manager.get_client("https://example.com", use_oauth2=True)
+
+        # Different credentials → different cached clients.
+        assert c1 is not c2
+        # The plaintext secret never lands in the cache key.
+        keys = list(http_client_manager._clients.keys())
+        assert all("secret-1" not in k for k in keys)
+        assert all("secret-2" not in k for k in keys)
+        assert any("secret=" in k for k in keys)
+
+    # ---- Round 4: locked singleton ----
+
+    def test_get_instance_is_safe_under_concurrent_first_call(self):
+        """Two threads racing on first ``get_instance`` get the same singleton.
+
+        Without the instance lock, a thread could observe ``_instance is None``
+        between another thread's check and assignment and create a duplicate.
+        """
+        import threading
+
+        HttpClientManager._instance = None
+        results = []
+
+        def worker():
+            results.append(HttpClientManager.get_instance())
+
+        threads = [threading.Thread(target=worker) for _ in range(8)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=2)
+
+        assert all(r is results[0] for r in results)
 
 
 class TestEnsureOAuth2Token:

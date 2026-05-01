@@ -58,7 +58,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch(
                 "https://test.wikipedia.org/w/api.php?action=query", max_retries=2
@@ -80,7 +80,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch(
                 "https://test.wikipedia.org/w/api.php?action=query", max_retries=2
@@ -102,7 +102,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch(
                 "https://test.wikipedia.org/w/api.php?action=query", max_retries=2
@@ -125,7 +125,7 @@ class TestMwApi:
         # Mock time.sleep to avoid waiting during tests
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL and expect HTTPStatusError
             with pytest.raises(httpx.HTTPStatusError) as excinfo:
                 mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
@@ -148,7 +148,7 @@ class TestMwApi:
         # Mock time.sleep to verify it's not called
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL and expect HTTPStatusError
             with pytest.raises(httpx.HTTPStatusError) as excinfo:
                 mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
@@ -168,7 +168,7 @@ class TestMwApi:
         # Mock time.sleep to verify it's not called
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL and expect Exception
             with pytest.raises(Exception) as excinfo:
                 mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
@@ -190,7 +190,7 @@ class TestMwApi:
         # Mock time.sleep to verify exponential backoff
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep):
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
             # Call _fetch with a URL
             result = mw_api._fetch(
                 "https://test.wikipedia.org/w/api.php?action=query",
@@ -232,7 +232,7 @@ class TestMwApi:
         mock_sleep = MagicMock()
 
         with (
-            patch("mwlib.network.sapi.time.sleep", mock_sleep),
+            patch("mwlib.network.sapi.gevent.sleep", mock_sleep),
             patch("mwlib.network.sapi.random.uniform", return_value=2.0),
         ):
             mw_api._fetch(
@@ -261,8 +261,10 @@ class TestMwApi:
             mw_api.do_request(action="query", meta="siteinfo")
 
         assert mw_api.http_client.fetch_token.call_count == 1
-        domain = "test.wikipedia.org"
-        assert mw_api._token_info[domain]["next_retry_at"] > 1005
+        # Token state is keyed by the OAuth identity, not just domain, so
+        # two configurations against the same wiki don't share tokens.
+        token_key = mw_api._oauth_token_cache_key()
+        assert mw_api._token_info[token_key]["next_retry_at"] > 1005
 
     def test_rate_limiter_is_scoped_per_domain(self, mw_api):
         with (
@@ -345,6 +347,48 @@ class TestMwApi:
         assert b.basic_auth is not None
         assert c.basic_auth is None
         assert a.basic_auth is not b.basic_auth
+
+    def test_retry_backoff_uses_gevent_sleep(self, mw_api, httpx_mock):
+        """Retry backoff must yield to gevent, not block the hub.
+
+        ``RateLimiter.acquire`` already uses ``gevent.sleep``; retries
+        used to still go through ``time.sleep``, which would starve
+        every other greenlet during a 429 storm.
+        """
+        httpx_mock.add_response(429, content="Too Many Requests")
+        httpx_mock.add_response(200, content="ok")
+
+        with (
+            patch("mwlib.network.sapi.gevent.sleep") as mock_gevent_sleep,
+            patch("mwlib.network.sapi.time.sleep") as mock_time_sleep,
+        ):
+            mw_api._fetch(
+                "https://test.wikipedia.org/w/api.php?action=query",
+                max_retries=2,
+            )
+
+            assert mock_gevent_sleep.called
+            mock_time_sleep.assert_not_called()
+
+    def test_oauth_token_cache_key_includes_client_identity(self, mw_api):
+        """Different OAuth client identities yield different token cache keys.
+
+        Token state used to be keyed by domain alone — credential
+        rotation or multi-tenant runs would silently reuse each other's
+        access tokens. The new key folds in client_id and token_endpoint.
+        """
+        # Inject distinct OAuth identities onto the http client mock.
+        mw_api.http_client = MagicMock()
+        mw_api.http_client.client_id = "tenant-a"
+        mw_api.http_client.token_endpoint = "https://wiki/oauth"
+        key_a = mw_api._oauth_token_cache_key()
+
+        mw_api.http_client.client_id = "tenant-b"
+        key_b = mw_api._oauth_token_cache_key()
+
+        assert key_a != key_b
+        assert "tenant-a" in key_a
+        assert "tenant-b" in key_b
 
     def test_oauth2_fallback_to_standard_disables_use_oauth2(self, reset_http_client_manager):
         """OAuth2 → standard fallback flips MwApi.use_oauth2 to False.

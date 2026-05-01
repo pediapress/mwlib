@@ -8,9 +8,7 @@ import logging
 import random
 import time
 from collections import deque
-from http import cookiejar
 from urllib import parse
-from urllib.error import HTTPError, URLError
 
 try:
     import simplejson as json
@@ -226,13 +224,17 @@ class MwApi:
         return response.content
 
     def _retry_or_raise(self, *, url, error, retry_state, retry_policy):
+        # Use ``gevent.sleep`` so retry backoff cooperates with the
+        # gevent hub. ``time.sleep`` would block the entire event loop
+        # and starve every other greenlet sharing the worker — same
+        # reasoning as ``RateLimiter.acquire``.
         return network_api.retry_or_raise(
             url=url,
             error=error,
             retry_state=retry_state,
             retry_policy=retry_policy,
             logger=logger,
-            sleep_fn=time.sleep,
+            sleep_fn=gevent.sleep,
             uniform_fn=random.uniform,
         )
 
@@ -364,6 +366,20 @@ class MwApi:
         res = loads(data)
         return res
 
+    def _oauth_token_cache_key(self):
+        """Cache key for the OAuth token in ``_token_info``.
+
+        Including the OAuth client_id and token endpoint means two
+        OAuth configurations against the same wiki (credential rotation,
+        multi-tenant runs) get separate token state instead of stepping
+        on each other's access tokens. Falls back to bare domain for
+        non-OAuth callers.
+        """
+        parsed = parse.urlparse(self.apiurl)
+        client_id = getattr(self.http_client, "client_id", "") or ""
+        token_endpoint = getattr(self.http_client, "token_endpoint", "") or ""
+        return f"{parsed.netloc}|client_id={client_id}|token_endpoint={token_endpoint}"
+
     def _ensure_oauth2_token(self):
         network_auth.ensure_oauth2_token(
             enabled=self.use_oauth2,
@@ -372,6 +388,7 @@ class MwApi:
             http_client=self.http_client,
             logger=logger,
             current_time_fn=time.time,
+            cache_key=self._oauth_token_cache_key() if self.use_oauth2 else None,
         )
 
     def do_request(self, use_post=False, **kwargs):

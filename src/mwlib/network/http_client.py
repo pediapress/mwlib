@@ -6,6 +6,7 @@ This module provides a singleton HTTP client manager that handles:
 3. HTTP/2 support detection and usage
 """
 
+import hashlib
 import logging
 import threading
 import time
@@ -19,6 +20,25 @@ from httpx import Client as StandardClient
 from mwlib.utils import conf
 
 logger = logging.getLogger(__name__)
+
+
+def _oauth2_cache_identity() -> str:
+    """Return a fingerprint of the current OAuth2 config for cache keying.
+
+    Two callers asking for OAuth2 against the same origin but with
+    different ``client_id`` / ``client_secret`` / ``token_url`` must NOT
+    share a cached client — otherwise a credential rotation (or a
+    multi-tenant test suite that swaps configs) silently keeps using the
+    old client. The secret is hashed so it never lands in logs or cache
+    keys in plaintext.
+    """
+    client_id = conf.get("oauth2", "client_id", "")
+    client_secret = conf.get("oauth2", "client_secret", "")
+    token_url = conf.get(
+        "oauth2", "token_url", "https://meta.wikimedia.org/w/rest.php/oauth2/access_token"
+    )
+    secret_hash = hashlib.sha256(client_secret.encode("utf-8")).hexdigest()[:16]
+    return f"client_id={client_id}|token_url={token_url}|secret={secret_hash}"
 
 
 class HttpClientManager:
@@ -37,6 +57,7 @@ class HttpClientManager:
     # the same cache key. gevent's Semaphore would also work; threading.Lock
     # is monkey-patched under gevent and is correct under both runtimes.
     _client_lock = threading.Lock()
+    _instance_lock = threading.Lock()
     # HTTP/2 probe is a real network HEAD request — keep it short so it
     # doesn't dominate startup latency on slow networks. The result is
     # cached for ``_http2_cache_ttl_seconds`` so this only matters once
@@ -45,23 +66,34 @@ class HttpClientManager:
 
     @classmethod
     def get_instance(cls) -> "HttpClientManager":
-        """Get the singleton instance of HttpClientManager.
-
-        Returns:
-            HttpClientManager: The singleton instance.
-
-        """
+        """Get the singleton instance of HttpClientManager."""
+        # Double-checked locking: avoid the lock on the hot path, take it
+        # only when the instance might genuinely need to be created.
         if cls._instance is None:
-            cls._instance = cls()
+            with cls._instance_lock:
+                if cls._instance is None:
+                    cls._instance = cls()
         return cls._instance
 
     def _origin(self, url: str) -> str:
         p = urlparse(url)
         return f"{p.scheme}://{p.netloc}"
 
+    @staticmethod
+    def _cache_key(origin: str, *, use_oauth2: bool, use_http2: bool) -> str:
+        """Build the cache key used by both ``get_client`` and ``invalidate_client``.
+
+        For OAuth2 clients the key includes a fingerprint of the
+        currently-configured credentials so that rotations create a fresh
+        client rather than reusing a stale-credential one. The secret is
+        hashed before being interpolated.
+        """
+        auth_identity = _oauth2_cache_identity() if use_oauth2 else "standard"
+        return f"{origin}|oauth2={use_oauth2}|http2={use_http2}|auth={auth_identity}"
+
     def invalidate_client(self, base_url: str, *, use_oauth2: bool, use_http2: bool) -> None:
         origin = self._origin(base_url)
-        cache_key = f"{origin}|oauth2={use_oauth2}|http2={use_http2}"
+        cache_key = self._cache_key(origin, use_oauth2=use_oauth2, use_http2=use_http2)
         client = self._clients.pop(cache_key, None)
         if client is not None:
             try:
@@ -112,9 +144,12 @@ class HttpClientManager:
         if use_http2 is None:
             use_http2 = conf.get("http2", "enabled", True, bool)
 
-        # Auto-detect HTTP/2 support if configured
+        # Auto-detect HTTP/2 support if configured. Probe the origin
+        # rather than the full ``api.php?...`` URL — heavy routes can
+        # take significantly longer to HEAD, and the result is cached
+        # per-origin anyway so the probe only hits one endpoint.
         if use_http2 and conf.get("http2", "auto_detect", True, bool):
-            use_http2 = self.detect_http2_support(base_url)
+            use_http2 = self.detect_http2_support(self._origin(base_url))
 
         origin = self._origin(base_url)
 
@@ -124,8 +159,10 @@ class HttpClientManager:
 
         headers["User-Agent"] = getattr(conf, "user_agent", "mwlib")
 
-        # Create a cache key that includes the base URL, authentication and HTTP/2 settings
-        cache_key = f"{origin}|oauth2={use_oauth2}|http2={use_http2}"
+        # Cache key includes the base URL, the auth choice, the HTTP/2
+        # decision, and (for OAuth2) a fingerprint of the credentials so
+        # rotations don't reuse a stale-cred client.
+        cache_key = self._cache_key(origin, use_oauth2=use_oauth2, use_http2=use_http2)
 
         # Fast path: cache hit. Don't take the lock if we don't have to.
         if cache_key in self._clients:

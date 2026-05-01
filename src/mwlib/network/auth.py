@@ -70,16 +70,21 @@ def ensure_oauth2_token(
     http_client,
     logger,
     current_time_fn,
+    cache_key=None,
 ):
     """Make sure the OAuth2 client has a valid token.
 
-    The token is cached by domain in ``token_info_map``. The OAuth2 client
-    holds its own ``client.token`` attribute that authlib reads when
-    serializing the ``Authorization`` header. The two pieces of state can
-    drift apart — most obviously when the client is invalidated and
-    recreated while the per-domain cache entry is still fresh. If we
-    short-circuit on ``token_info_map`` alone, the new client would send
-    unauthenticated requests.
+    Token state is cached in ``token_info_map`` under ``cache_key``. By
+    default the key is just the API domain, but callers with multiple
+    OAuth configurations against the same wiki (credential rotation,
+    multi-tenant test runs) should pass a key that also captures
+    client identity — otherwise two distinct OAuth configs share each
+    other's access tokens.
+
+    The OAuth2 client also holds its own ``.token`` attribute that
+    authlib reads when serializing the ``Authorization`` header. That
+    state drifts from the cache when the client is invalidated and
+    recreated; reconcile rather than blindly short-circuiting.
 
     Order of operations:
     1. If the cached entry is fresh and the client already has the same
@@ -91,9 +96,9 @@ def ensure_oauth2_token(
     if not enabled:
         return
 
-    domain = get_oauth_domain(apiurl)
+    key = cache_key if cache_key is not None else get_oauth_domain(apiurl)
     current_time = current_time_fn()
-    token_info = token_info_map.get(domain, {})
+    token_info = token_info_map.get(key, {})
 
     if not token_needs_refresh(token_info, current_time):
         cached_token = token_info.get("token")
@@ -115,7 +120,7 @@ def ensure_oauth2_token(
         return
 
     fetch_and_store_oauth_token(
-        domain=domain,
+        domain=key,
         token_info=token_info,
         current_time=current_time,
         token_info_map=token_info_map,
