@@ -109,7 +109,11 @@ class BigQueryImageLookup:
             - rows: List of dicts with BigQuery row data for found titles
             - missing_titles: Titles not found in BigQuery (fall back to remote API)
 
-        On any error, returns ([], titles) so all titles fall back to the remote API.
+        Transient query/runtime errors return ``([], titles)`` so callers
+        can fall back to the remote API. Configuration validation errors
+        (``ValueError`` from ``_validate_bigquery_identifier``) are
+        re-raised — silently swallowing those would hide a deployment or
+        security problem behind a "BigQuery is just slow today" log line.
 
         """
         if not titles or not self._client:
@@ -117,6 +121,11 @@ class BigQueryImageLookup:
 
         try:
             return self._execute_query(titles)
+        except ValueError:
+            # project / dataset / table didn't pass identifier validation;
+            # let that bubble up to the operator instead of pretending
+            # BigQuery is just transiently down.
+            raise
         except Exception:
             logger.warning(
                 "BigQuery lookup failed for %d titles, falling back to remote API",

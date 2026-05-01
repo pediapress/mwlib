@@ -114,6 +114,16 @@ class LicenseChecker:
             return False
         return filter_type in ["blacklist", "nofilter"]
 
+    def decide_from_template_names(self, template_names):
+        """Public helper: license decision from a list of template name strings.
+
+        Wraps the ``_get_licenses`` lookup + ``license_passes_filter``
+        policy so callers don't need to reach into the private
+        ``_get_licenses`` to make a fetch-time decision.
+        """
+        lowered = [t.lower() for t in template_names]
+        return self.license_passes_filter(self._get_licenses(lowered), self.filter_type)
+
     def _check_licenses(self, licenses, imgname, stats=True):
         if not self.image_db:
             raise ImageDbError("No image_db passed when initializing LicenseChecker")

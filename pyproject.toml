@@ -54,15 +54,21 @@ classifiers = [
 ]
 license = "BSD-3-Clause"
 
+# Optional runtime extras users opt into with ``pip install mwlib[bigquery]``.
+# ``google-cloud-bigquery`` pulls in gRPC + a pile of Google libs; keeping it
+# out of the default install means consumers who don't run the WME-ingest
+# pipeline or BigQuery image lookup don't pay for those.
+[project.optional-dependencies]
+bigquery = [
+    "google-cloud-bigquery>=3.0",
+]
+
 [dependency-groups]
 dev = [
     "pytest",
     "pytest-httpx>=0.35.0",
     "pytest-xdist",
     "wsgi-intercept",
-]
-bigquery = [
-    "google-cloud-bigquery>=3.0",
 ]
 
 [project.urls]

@@ -405,9 +405,10 @@ class Fetcher:
         if self.bq_lookup and self.bq_lookup.is_available:
             from mwlib.rendering.licensechecker import LicenseChecker
 
-            # Match render-time policy: de.wikipedia.org uses whitelist, others blacklist
-            filter_type = "whitelist" if "de.wikipedia.org" in self.api.apiurl else "blacklist"
-            self.fetch_license_checker = LicenseChecker(image_db=None, filter_type=filter_type)
+            self.fetch_license_checker = LicenseChecker(
+                image_db=None,
+                filter_type=self._filter_type_for_apiurl(self.api.apiurl),
+            )
             self.fetch_license_checker.read_licenses_csv()
 
         siteinfo = self.get_siteinfo_for(self.api)
@@ -1127,23 +1128,45 @@ class Fetcher:
                 self._bq_deferred_downloads.pop(orig_title, None)
                 logger.info("Skipping image download for %s (license filtered)", orig_title)
 
-        # Fall back to remote API for missing titles
+        # Fall back to remote API for missing titles. Some entries may
+        # have ``api=None`` because ``handle_new_basepath`` proceeded
+        # via BigQuery after a remote-discovery failure — for those we
+        # have no way to fetch the description page, so we must NOT
+        # schedule the deferred image download either. Otherwise we'd
+        # ship an image with no license/attribution data at all.
         if missing:
             by_api = {}
+            without_api = []
             for local_name in missing:
                 api = api_by_local.get(local_name)
-                if api:
+                if api is None:
+                    without_api.append(local_name)
+                else:
                     by_api.setdefault(api, []).append(local_name)
+
             for api, api_titles in by_api.items():
                 for block in split_blocks(api_titles, api.api_request_limit):
                     self._refcall(self.fetch_image_page, block, api)
-            # Schedule deferred downloads for fallback titles (no license info yet)
-            for local_name in missing:
+
+            # Deferred downloads only for titles that DID get a fallback
+            # description-page fetch scheduled.
+            fallback_titles = {t for ts in by_api.values() for t in ts}
+            for local_name in fallback_titles:
                 orig_title = orig_by_local.get(local_name, local_name)
                 if orig_title in self._bq_deferred_downloads:
                     self.schedule_download_image(
                         self._bq_deferred_downloads.pop(orig_title), orig_title
                     )
+
+            for local_name in without_api:
+                orig_title = orig_by_local.get(local_name, local_name)
+                self._bq_deferred_downloads.pop(orig_title, None)
+                logger.warning(
+                    "Skipping %s: BigQuery missed/failed and no remote API "
+                    "fallback is available — refusing to download an image "
+                    "without license/attribution data",
+                    orig_title,
+                )
 
     def _store_bq_result(self, row) -> bool:
         """Store a BigQuery row into fsout databases.
@@ -1213,33 +1236,52 @@ class Fetcher:
 
         # Templates are objects like {"name": "Template:Cc-by-sa", "url": "..."}.
         # Extract just the template names, stripping the "Template:" prefix.
+        # Anything that doesn't look like a real template name (missing
+        # ``name``, empty string, unexpected element type) raises rather
+        # than silently dropping into ``""`` — partial template lists
+        # can pass blacklist mode and we don't want corrupt rows to get
+        # there.
         template_names: list[str] = []
         for t in raw_templates:
             if isinstance(t, dict):
-                name = t.get("name", "")
+                name = t.get("name")
+                if not isinstance(name, str) or not name:
+                    raise BqTemplatesError(f"template entry for {title} has no valid name")
                 if name.startswith("Template:"):
                     name = name[len("Template:") :]
                 template_names.append(name)
-            elif isinstance(t, str):
+                continue
+            if isinstance(t, str) and t:
                 template_names.append(t)
+                continue
+            raise BqTemplatesError(
+                f"template entry for {title} is {type(t).__name__}, expected dict or non-empty str"
+            )
         return template_names
+
+    @staticmethod
+    def _filter_type_for_apiurl(apiurl: str) -> str:
+        """Match render-time license policy for the wiki at ``apiurl``.
+
+        de.wikipedia.org runs the whitelist; everywhere else uses the
+        blacklist. The hostname is parsed and compared exactly so a
+        lookalike URL (e.g. ``de.wikipedia.org.evil.example``) can't
+        shift policy by being a substring of ``apiurl``.
+        """
+        host = (parse.urlparse(apiurl).hostname or "").lower()
+        return "whitelist" if host == "de.wikipedia.org" else "blacklist"
 
     def _check_license_from_templates(self, templates: list[str]) -> bool:
         """Decide whether an image passes the license filter at fetch time.
 
-        Delegates the actual policy to ``LicenseChecker.license_passes_filter``
-        so this stays bit-for-bit aligned with render-time
-        ``LicenseChecker._check_licenses`` even as policy evolves. Without a
-        configured ``fetch_license_checker`` everything is included
-        unfiltered (legacy behaviour preserved).
+        Delegates to ``LicenseChecker.decide_from_template_names`` so the
+        decision stays bit-for-bit aligned with render-time
+        ``LicenseChecker._check_licenses`` and we don't have to reach into
+        ``_get_licenses`` from outside the class.
         """
         if not self.fetch_license_checker:
             return True
-        lowered = [t.lower() for t in templates]
-        licenses = self.fetch_license_checker._get_licenses(lowered)
-        return self.fetch_license_checker.license_passes_filter(
-            licenses, self.fetch_license_checker.filter_type
-        )
+        return self.fetch_license_checker.decide_from_template_names(templates)
 
     def get_image_edits(self, title: str, api: MwApi):
         """Get edit history for an image page.

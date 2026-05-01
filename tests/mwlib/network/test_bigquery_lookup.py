@@ -163,6 +163,21 @@ class TestBigQueryImageLookup:
         assert rows == []
         assert missing == ["File:A.jpg", "File:B.jpg"]
 
+    def test_fetch_batch_propagates_value_error(self):
+        """Identifier-validation failures must propagate, not get swallowed.
+
+        ``_validate_bigquery_identifier`` raises ``ValueError`` for bad
+        project/dataset/table config. Falling that back to "ordinary
+        BigQuery outage" would hide a deployment or security problem.
+        """
+        lookup = self._make_lookup(client=MagicMock())
+
+        with (
+            patch.object(lookup, "_execute_query", side_effect=ValueError("bad identifier")),
+            pytest.raises(ValueError, match="bad identifier"),
+        ):
+            lookup.fetch_batch(["File:A.jpg"])
+
     def test_config_values(self):
         conf = FakeConf(
             {
@@ -317,6 +332,51 @@ class TestFetcherBigQueryIntegration:
         stub.fetch_license_checker = None
         assert stub._check_license_from_templates(["non-free logo"]) is True
 
+    def test_filter_type_for_apiurl_uses_exact_hostname(self):
+        """``de.wikipedia.org`` → whitelist, anything else → blacklist.
+
+        Done with ``urlparse(...).hostname`` comparison so a lookalike
+        URL can't flip the policy by containing the substring.
+        """
+        from mwlib.network.fetch import Fetcher
+
+        assert Fetcher._filter_type_for_apiurl("https://de.wikipedia.org/w/api.php") == "whitelist"
+        assert Fetcher._filter_type_for_apiurl("https://en.wikipedia.org/w/api.php") == "blacklist"
+        # Lookalike: substring of the netloc but NOT the hostname.
+        assert (
+            Fetcher._filter_type_for_apiurl("https://de.wikipedia.org.evil.example/w/api.php")
+            == "blacklist"
+        )
+        assert (
+            Fetcher._filter_type_for_apiurl("https://evil-de.wikipedia.org/w/api.php")
+            == "blacklist"
+        )
+        # Configured hostname appearing only in the path.
+        assert (
+            Fetcher._filter_type_for_apiurl("https://other.example/de.wikipedia.org/api.php")
+            == "blacklist"
+        )
+
+    def test_license_checker_public_helper_matches_render_policy(self):
+        """Public helper produces the same answers as fetch-time wrapper.
+
+        ``decide_from_template_names`` is the public seam — fetch-time
+        callers go through it instead of poking ``_get_licenses`` from
+        outside the class.
+        """
+        from mwlib.rendering.licensechecker import LicenseChecker
+
+        checker = LicenseChecker(image_db=None, filter_type="blacklist")
+        checker.read_licenses_csv()
+
+        assert checker.decide_from_template_names(["cc-by-sa"]) is True
+        assert checker.decide_from_template_names(["non-free logo"]) is False
+        assert checker.decide_from_template_names(["never-heard-of-this"]) is True
+
+        whitelist = LicenseChecker(image_db=None, filter_type="whitelist")
+        whitelist.read_licenses_csv()
+        assert whitelist.decide_from_template_names(["never-heard-of-this"]) is False
+
     def test_store_bq_result_writes_templates(self):
         """_store_bq_result should write templates to templates.db."""
         stub = self._make_fetcher_stub()
@@ -403,6 +463,61 @@ class TestFetcherBigQueryIntegration:
         with pytest.raises(BqTemplatesError):
             stub._store_bq_result(row)
         stub.fsout.set_db_key.assert_not_called()
+
+    # ---- Round 7: stricter element validation ----
+
+    def test_extract_template_names_rejects_dict_without_name(self):
+        from mwlib.network.fetch import BqTemplatesError, Fetcher
+
+        with pytest.raises(BqTemplatesError):
+            Fetcher._extract_bq_template_names("File:X.jpg", [{"url": "x"}])
+
+    def test_extract_template_names_rejects_dict_with_empty_name(self):
+        from mwlib.network.fetch import BqTemplatesError, Fetcher
+
+        with pytest.raises(BqTemplatesError):
+            Fetcher._extract_bq_template_names("File:X.jpg", [{"name": ""}])
+
+    def test_extract_template_names_rejects_non_dict_non_str_element(self):
+        from mwlib.network.fetch import BqTemplatesError, Fetcher
+
+        with pytest.raises(BqTemplatesError):
+            Fetcher._extract_bq_template_names("File:X.jpg", [["nested-list"]])
+
+    def test_extract_template_names_rejects_empty_string_element(self):
+        from mwlib.network.fetch import BqTemplatesError, Fetcher
+
+        with pytest.raises(BqTemplatesError):
+            Fetcher._extract_bq_template_names("File:X.jpg", [""])
+
+    # ---- Round 7: missing-without-api fails closed ----
+
+    def test_flush_bq_batch_skips_download_when_no_api_for_missing(self):
+        """No API + BQ miss → drop the deferred download.
+
+        Otherwise we'd ship an image with no license/attribution data
+        at all — a fail-open path.
+        """
+        stub = self._make_fetcher_stub()
+        stub.schedule_download_image = MagicMock()
+        stub._refcall = MagicMock()
+
+        # No API attached to the pending entry — the BQ-eligible path
+        # in handle_new_basepath fell through to BQ-only after a failed
+        # remote-API discovery.
+        stub._bq_pending = [("File:X.jpg", None, "File:X.jpg")]
+        stub._bq_deferred_downloads = {"File:X.jpg": "https://thumb/X.jpg"}
+        # BigQuery misses this title.
+        stub.bq_lookup.fetch_batch.return_value = ([], ["File:X.jpg"])
+
+        stub._flush_bq_batch()
+
+        # No image download was scheduled.
+        stub.schedule_download_image.assert_not_called()
+        # No fetch_image_page was scheduled either (no api).
+        stub._refcall.assert_not_called()
+        # And the deferred entry was dropped.
+        assert "File:X.jpg" not in stub._bq_deferred_downloads
 
     def test_flush_bq_batch_reroutes_corrupt_row_to_fallback(self, monkeypatch):
         """Corrupt BQ rows are added to ``missing`` so the remote API runs."""
