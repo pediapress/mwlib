@@ -301,9 +301,7 @@ def extract_member(zipfile, member, dstdir):
         raise RuntimeError(f"bad filename in zipfile {targetpath!r}")
 
     # Create all upper directories if necessary.
-    upperdirs = (
-        targetpath if member.filename.endswith("/") else os.path.dirname(targetpath)
-    )
+    upperdirs = targetpath if member.filename.endswith("/") else os.path.dirname(targetpath)
 
     if not os.path.isdir(upperdirs):
         os.makedirs(upperdirs)
@@ -334,8 +332,7 @@ class Adapt:
             self.was_tmpdir = True
 
         if isinstance(path_or_instance, str):
-            self.nuwiki = NuWiki(path_or_instance,
-                                 allow_pickle=not self.was_tmpdir)
+            self.nuwiki = NuWiki(path_or_instance, allow_pickle=not self.was_tmpdir)
         else:
             self.nuwiki = path_or_instance
         self.siteinfo = self.nuwiki.get_siteinfo()
@@ -399,7 +396,6 @@ class Adapt:
             return authors
 
     def get_source(self, title, revision=None):
-
         general_info = self.siteinfo["general"]
         return metabook.Source(
             name="%s (%s)" % (general_info["sitename"], general_info["lang"]),
@@ -465,8 +461,7 @@ class Adapt:
         return self.nuwiki.normalize_and_get_image_path(name)
 
     def get_image_description_page(self, name):
-        _, partial, fqname = self.nshandler.splitname(name,
-                                                      nshandling.NS_FILE)
+        _, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
         page = self.get_page(fqname)
         if page is not None:
             return page
@@ -483,16 +478,21 @@ class Adapt:
         return []
 
     def get_image_templates_and_args(self, name, wikidb=None):
-        # Check pre-extracted templates (from BigQuery) first
+        # Check pre-extracted templates (from BigQuery) first.
+        # DumbJsonDB returns None for missing keys, so a try/except KeyError
+        # is unnecessary; we just keep walking the candidate names until one
+        # matches, falling through to wikitext parsing if none do.
         if self.nuwiki.templates is not None:
             _, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
-            for lookup_name in [fqname, self.en_nshandler.get_fqname(partial, nshandling.NS_FILE)]:
-                try:
-                    cached = self.nuwiki.templates[lookup_name]
-                    if cached:
-                        return set(cached)
-                except (KeyError, TypeError, ValueError):
-                    pass
+            for lookup_name in [
+                fqname,
+                self.en_nshandler.get_fqname(partial, nshandling.NS_FILE),
+            ]:
+                cached = self.nuwiki.templates[lookup_name]
+                if cached is not None:
+                    # An empty list is a deliberate negative cache entry —
+                    # honour it and skip the wikitext-parsing fallback.
+                    return set(cached)
 
         # Fall back to wikitext parsing
         from mwlib.parser.expander import get_templates
@@ -500,9 +500,8 @@ class Adapt:
         page = self.get_image_description_page(name)
         if page is not None:
             templates = get_templates(page.rawtext)
-            from mwlib.parser.templ.evaluate import Expander
-
             from mwlib.parser.expander import find_template
+            from mwlib.parser.templ.evaluate import Expander
             from mwlib.parser.templ.misc import DictDB
             from mwlib.parser.templ.parser import parse
 
@@ -514,11 +513,7 @@ class Adapt:
                 tmpl = find_template(None, template, parsed_raw[:])
                 arg_list = tmpl[1]
                 for arg in arg_list:
-                    if (
-                        isinstance(arg, str)
-                        and len(arg) > 3
-                        and " " not in arg
-                    ):
+                    if isinstance(arg, str) and len(arg) > 3 and " " not in arg:
                         args.add(arg)
             templates.update(args)
             return templates
@@ -528,8 +523,7 @@ class Adapt:
         page = self.get_image_description_page(name)
         if page is None:
             return []
-        users = get_contributors_from_information_template(page.rawtext,
-                                                       page.title, self)
+        users = get_contributors_from_information_template(page.rawtext, page.title, self)
         if users:
             return users
         return self.get_authors(page.title)
@@ -538,9 +532,7 @@ class Adapt:
 def get_contributors_from_information_template(raw, title, wikidb):
     def get_user_links(raw):
         def is_user_link(node):
-            return (
-                isinstance(node, parser.NamespaceLink) and node.namespace == 2
-            )  # NS_USER
+            return isinstance(node, parser.NamespaceLink) and node.namespace == 2  # NS_USER
 
         result = sorted(
             {
@@ -566,9 +558,7 @@ def get_contributors_from_information_template(raw, title, wikidb):
                 return [txt]
 
         if args.args:
-            return get_user_links(
-                "\n".join([args.get(i, "") for i in range(len(args.args))])
-            )
+            return get_user_links("\n".join([args.get(i, "") for i in range(len(args.args))]))
 
         return []
 

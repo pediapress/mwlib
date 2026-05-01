@@ -501,6 +501,15 @@ class Fetcher:
         dispatch_gr = gevent.spawn(call_when, self.dispatch_event, self.dispatch)
         try:
             self.pool.join()
+            # Small batches that never reached ``_bq_batch_size`` are still
+            # sitting in ``_bq_pending`` here. Flushing them spawns new
+            # greenlets (image downloads + remote-API fallbacks) on
+            # ``self.pool``, so we have to join the pool a second time —
+            # otherwise ``finish()`` would close fsout while those
+            # greenlets were still writing to it.
+            if self.bq_lookup and self._bq_pending:
+                self._flush_bq_batch()
+                self.pool.join()
         finally:
             dispatch_gr.kill()
 
@@ -1103,26 +1112,13 @@ class Fetcher:
         """
         title = row["name"]
 
-        # Parse templates from BigQuery JSON column
-        raw_templates = row.get("templates") or []
-        # BigQuery JSON columns may be returned as a JSON string
-        if isinstance(raw_templates, str):
-            raw_templates = json.loads(raw_templates)
-        # Templates are objects like {"name": "Template:Cc-by-sa", "url": "..."}
-        # Extract just the template names, stripping the "Template:" prefix
-        template_names = []
-        for t in raw_templates:
-            if isinstance(t, dict):
-                name = t.get("name", "")
-                if name.startswith("Template:"):
-                    name = name[len("Template:") :]
-                template_names.append(name)
-            elif isinstance(t, str):
-                template_names.append(t)
+        template_names = self._extract_bq_template_names(title, row.get("templates"))
 
-        # Store extracted template names in templates.db
-        if template_names:
-            self.fsout.set_db_key("templates", title, template_names)
+        # Store an entry for every BigQuery hit, including the empty list,
+        # so render-time ``get_image_templates_and_args`` can rely on the
+        # cache and not silently fall back to wikitext parsing for an image
+        # we deliberately decided not to fetch.
+        self.fsout.set_db_key("templates", title, template_names)
 
         # Early license check
         passes_license = self._check_license_from_templates(template_names)
@@ -1146,6 +1142,50 @@ class Fetcher:
 
         return passes_license
 
+    @staticmethod
+    def _extract_bq_template_names(title: str, raw_templates) -> list[str]:
+        """Pull the ``Template:Name`` list out of a BigQuery row's templates column.
+
+        BigQuery returns the column either as a Python list (for native
+        REPEATED RECORD columns) or as a JSON string (for JSON columns).
+        Anything we can't parse — malformed JSON, unexpected shape — is
+        treated as "no templates" for this single row rather than raising.
+        Letting this raise would abort the whole batch flush after the
+        BigQuery query had already succeeded, bypassing the per-title
+        remote-API fallback for every other row in the batch.
+        """
+        if raw_templates is None:
+            return []
+        if isinstance(raw_templates, str):
+            try:
+                raw_templates = json.loads(raw_templates)
+            except (ValueError, TypeError):
+                logger.warning(
+                    "BigQuery returned malformed templates JSON for %s; treating as empty",
+                    title,
+                )
+                return []
+        if not isinstance(raw_templates, list):
+            logger.warning(
+                "BigQuery templates for %s is %s, expected list; treating as empty",
+                title,
+                type(raw_templates).__name__,
+            )
+            return []
+
+        # Templates are objects like {"name": "Template:Cc-by-sa", "url": "..."}.
+        # Extract just the template names, stripping the "Template:" prefix.
+        template_names: list[str] = []
+        for t in raw_templates:
+            if isinstance(t, dict):
+                name = t.get("name", "")
+                if name.startswith("Template:"):
+                    name = name[len("Template:") :]
+                template_names.append(name)
+            elif isinstance(t, str):
+                template_names.append(t)
+        return template_names
+
     def _check_license_from_templates(self, templates: list[str]) -> bool:
         """Decide whether an image passes the license filter at fetch time.
 
@@ -1166,13 +1206,18 @@ class Fetcher:
     def get_image_edits(self, title: str, api: MwApi):
         """Get edit history for an image page.
 
-        This method is now a wrapper around _add_to_authors_batch, which collects titles
-        for batched processing. The actual API request is made when the batch is full
-        or when explicitly flushed.
+        Adds ``title`` to the contributor-lookup batch (currently a
+        single-title path that runs the API request immediately).
+
+        Order matters: ``title_mapping`` must be populated **before**
+        ``_add_to_titles_pending_contributor_lookup`` so that
+        ``_lookup_contributors`` sees the local-namespace mapping and
+        writes ``authors`` under the local title instead of the remote
+        one.
 
         Args:
-            title (str): Title of the image page to get edit history for
-            api (MwApi): API instance to use for the request
+            title: Title of the image page to get edit history for.
+            api: API instance to use for the request.
 
         """
         local_nsname = self.nshandler.get_nsname_by_number(6)
@@ -1180,11 +1225,11 @@ class Fetcher:
         _, partial = title.split(":", 1)
         local_title = f"{local_nsname}:{partial}"
 
-        # Add the title to the batch
-        self._add_to_titles_pending_contributor_lookup(title, api)
-
-        # Map the original title to the local title for later use
+        # Map the original title to the local title FIRST, before the
+        # (immediate) contributor lookup runs.
         self.title_mapping[title] = local_title
+
+        self._add_to_titles_pending_contributor_lookup(title, api)
 
     def _get_mwapi_for_path(self, path):
         urls = mwapi.guess_api_urls(path)
@@ -1256,9 +1301,8 @@ class Fetcher:
 
     def finish(self):
         self._sanity_check()
-        # Flush any remaining BigQuery batch
-        if self.bq_lookup and self._bq_pending:
-            self._flush_bq_batch()
+        # NB: BigQuery batch flushing has already happened in ``run()`` —
+        # it spawns greenlets and so must run before the final pool.join().
         # Process any pending authors batch
         self.lookup_contributors_for_remaining_titles()
         for api in self.titles_pending_contributor_lookup:

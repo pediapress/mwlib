@@ -342,6 +342,83 @@ class TestLookupContributors:
         stub.fsout.set_db_key.assert_not_called()
 
 
+class TestFinishDoesNotFlushBQ:
+    """``finish()`` must not run the BigQuery batch flush.
+
+    The flush has been moved into ``run()`` so that the pool can be
+    joined a second time and drain greenlets the flush spawns. If
+    ``finish()`` were still flushing, those greenlets would be scheduled
+    after the last ``pool.join()`` — the original blocker we're
+    guarding against.
+    """
+
+    def test_finish_does_not_call_flush_bq_batch(self):
+        from unittest.mock import MagicMock
+
+        from mwlib.network.fetch import Fetcher
+
+        stub = object.__new__(Fetcher)
+        # Pretend there's a pending batch and a working bq_lookup; if
+        # finish() were still flushing, this would be the trigger.
+        stub.bq_lookup = MagicMock()
+        stub._bq_pending = [("File:X.jpg", MagicMock(), "File:X.jpg")]
+        stub._flush_bq_batch = MagicMock()
+        stub._sanity_check = MagicMock()
+        stub.lookup_contributors_for_remaining_titles = MagicMock()
+        stub.titles_pending_contributor_lookup = {}
+        stub.fsout = MagicMock()
+        stub.redirects = {}
+        stub.licenses = {}
+
+        stub.finish()
+
+        stub._flush_bq_batch.assert_not_called()
+        # The closing side effects we DO expect.
+        stub._sanity_check.assert_called_once()
+        stub.lookup_contributors_for_remaining_titles.assert_called_once()
+        stub.fsout.close.assert_called_once()
+
+
+class TestGetImageEditsOrdering:
+    """``get_image_edits`` must populate ``title_mapping`` before lookup.
+
+    Otherwise authors land under the remote namespace title rather than
+    the local one. The previous round only fixed ``_lookup_contributors``
+    to use the passed title; ``get_image_edits`` still ordered the
+    mapping update *after* the (immediate) contributor lookup.
+    """
+
+    def _make_stub(self):
+        from collections import defaultdict
+        from unittest.mock import MagicMock
+
+        from mwlib.network.fetch import Fetcher
+
+        stub = object.__new__(Fetcher)
+        stub.titles_pending_contributor_lookup = defaultdict(list)
+        stub.title_mapping = {}
+        stub.fsout = MagicMock()
+        # Minimal nshandler that returns the local file namespace name.
+        stub.nshandler = MagicMock()
+        stub.nshandler.get_nsname_by_number.return_value = "Datei"
+        return stub
+
+    def test_authors_stored_under_local_title(self):
+        from unittest.mock import MagicMock
+
+        stub = self._make_stub()
+        api = MagicMock()
+        inspect = MagicMock()
+        inspect.get_authors.return_value = ["Alice"]
+        api.get_contributors.return_value = {"File:X.jpg": inspect}
+
+        stub.get_image_edits("File:X.jpg", api)
+
+        # Mapping must be set; authors written under the local title.
+        assert stub.title_mapping["File:X.jpg"] == "Datei:X.jpg"
+        stub.fsout.set_db_key.assert_called_once_with("authors", "Datei:X.jpg", ["Alice"])
+
+
 class TestFetcherInstanceState:
     """Per-instance state mustn't leak across Fetcher instances."""
 

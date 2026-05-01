@@ -81,6 +81,24 @@ class TestBigQueryImageLookup:
         assert lookup.handles_domain("en.wikipedia.org") is True
         assert lookup.handles_domain("commons.wikimedia.org") is False
 
+    def test_handles_domain_normalizes_uppercase_config(self):
+        """Hostnames are case-insensitive — uppercase config must still match."""
+        conf = FakeConf({("bigquery", "domains"): "EN.Wikipedia.ORG"})
+        lookup = self._make_lookup(conf=conf, client=MagicMock())
+        assert lookup.handles_domain("https://en.wikipedia.org/wiki/File:X.jpg") is True
+        assert lookup.handles_domain("https://EN.WIKIPEDIA.ORG/wiki/File:X.jpg") is True
+
+    def test_handles_domain_strips_port_from_url(self):
+        """``urlparse(...).netloc`` includes the port; ``.hostname`` doesn't.
+
+        Without this fix, the perfectly normal ``https://en.wikipedia.org:443/x``
+        would miss the configured ``en.wikipedia.org`` set.
+        """
+        lookup = self._make_lookup(client=MagicMock())
+        assert lookup.handles_domain("https://en.wikipedia.org:443/wiki/File:X.jpg") is True
+        # Userinfo + port shouldn't fool it either.
+        assert lookup.handles_domain("https://user:pass@en.wikipedia.org:8080/x") is True
+
     def test_fetch_batch_empty_titles(self):
         lookup = self._make_lookup(client=MagicMock())
         rows, missing = lookup.fetch_batch([])
@@ -351,6 +369,73 @@ class TestFetcherBigQueryIntegration:
 
         row = {"name": "File:X.jpg", "templates": ["non-free logo"]}
         assert stub._store_bq_result(row) is False
+
+    # ---- Round 2: defensive parsing + empty-list negative cache ----
+
+    def test_store_bq_result_handles_malformed_templates_json(self):
+        """A single row's malformed JSON must not abort the whole batch.
+
+        BigQuery JSON columns can hand back a string we then ``json.loads``.
+        If the string is malformed, this used to raise inside the batch
+        flush after BigQuery had already succeeded — bypassing the
+        per-title remote-API fallback for every other row in the batch.
+        Now we treat malformed values as empty and let the normal flow
+        continue.
+        """
+        stub = self._make_fetcher_stub()
+        stub.fsout.get_db_key.side_effect = KeyError("not found")
+
+        row = {"name": "File:X.jpg", "templates": "not-valid-json{"}
+        result = stub._store_bq_result(row)
+
+        # Returns True (no licenses, blacklist default → include).
+        assert result is True
+        # Still wrote a templates entry (empty list) — see negative-cache test.
+        stub.fsout.set_db_key.assert_any_call("templates", "File:X.jpg", [])
+
+    def test_store_bq_result_handles_unexpected_templates_shape(self):
+        """A non-list, non-string templates value is also tolerated."""
+        stub = self._make_fetcher_stub()
+        stub.fsout.get_db_key.side_effect = KeyError("not found")
+
+        row = {"name": "File:X.jpg", "templates": {"unexpected": "shape"}}
+        # Must not raise.
+        stub._store_bq_result(row)
+        stub.fsout.set_db_key.assert_any_call("templates", "File:X.jpg", [])
+
+    def test_store_bq_result_writes_empty_list_as_negative_cache(self):
+        """An empty templates list is stored, not skipped.
+
+        Without this, render-time ``get_image_templates_and_args`` would
+        fall through to wikitext parsing for an image we deliberately
+        decided not to fetch — which is exactly what the BigQuery cache
+        is supposed to avoid.
+        """
+        stub = self._make_fetcher_stub()
+        stub.fsout.get_db_key.side_effect = KeyError("not found")
+
+        row = {"name": "File:NoTemplates.jpg", "templates": []}
+        stub._store_bq_result(row)
+
+        stub.fsout.set_db_key.assert_any_call("templates", "File:NoTemplates.jpg", [])
+
+    def test_extract_bq_template_names_strips_template_prefix(self):
+        from mwlib.network.fetch import Fetcher
+
+        names = Fetcher._extract_bq_template_names(
+            "File:X.jpg",
+            [
+                {"name": "Template:Cc-by-sa", "url": "..."},
+                {"name": "Information"},
+                "raw-string-name",
+            ],
+        )
+        assert names == ["Cc-by-sa", "Information", "raw-string-name"]
+
+    def test_extract_bq_template_names_handles_none(self):
+        from mwlib.network.fetch import Fetcher
+
+        assert Fetcher._extract_bq_template_names("File:X.jpg", None) == []
 
     def test_flush_bq_batch_schedules_free_downloads(self):
         """_flush_bq_batch should schedule downloads for free-licensed images."""

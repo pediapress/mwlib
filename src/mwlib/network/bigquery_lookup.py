@@ -50,8 +50,11 @@ class BigQueryImageLookup:
         self.table = conf.get("bigquery", "table", "file_pages")
         self.timeout = conf.get("bigquery", "timeout", 30, int)
 
+        # Hostnames are case-insensitive; lowercase the configured set so
+        # ``EN.Wikipedia.ORG`` in config still matches ``en.wikipedia.org``
+        # in a parsed URL.
         domains_str = conf.get("bigquery", "domains", "en.wikipedia.org")
-        self.domains = {d.strip() for d in domains_str.split(",") if d.strip()}
+        self.domains = {d.strip().lower() for d in domains_str.split(",") if d.strip()}
 
         self._client = None
         self._init_client()
@@ -80,10 +83,15 @@ class BigQueryImageLookup:
         Uses hostname-exact matching, not substring containment. A naive
         ``"en.wikipedia.org" in path`` would also match attacker-controlled
         hosts like ``en.wikipedia.org.example.com`` or unrelated query
-        strings. Anything that fails to parse as a URL is treated as a
-        bare hostname for the convenience of callers who pass either form.
+        strings. ``.hostname`` (rather than ``.netloc``) is what we want
+        because it lowercases automatically and strips both ``user:pass@``
+        and trailing ``:port`` — so ``https://en.wikipedia.org:443/x`` and
+        ``https://EN.WIKIPEDIA.ORG/x`` both resolve to the same host.
+        Anything that fails to parse as a URL is treated as a bare
+        hostname for the convenience of callers who pass either form.
         """
-        host = urlparse(path).netloc.lower()
+        parsed = urlparse(path)
+        host = parsed.hostname.lower() if parsed.hostname else ""
         if not host:
             # Caller passed a bare hostname (no scheme). Treat the whole
             # thing as the host, but still require an exact match.
