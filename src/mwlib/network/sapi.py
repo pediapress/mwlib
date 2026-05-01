@@ -17,7 +17,9 @@ try:
 except ImportError:
     import json
 
+import gevent
 import httpx
+from authlib.integrations.httpx_client import OAuth2Client
 from gevent.lock import Semaphore
 
 from mwlib.core import authors
@@ -73,7 +75,13 @@ class RateLimiter:
         self._lock = Semaphore(1)
 
     def acquire(self):
-        """Block until a request is allowed under the rate limit."""
+        """Block (cooperatively) until a request is allowed under the rate limit.
+
+        This runs inside the gevent-based fetcher; ``time.sleep`` would
+        block the entire hub and starve every other greenlet. ``gevent.sleep``
+        yields to the scheduler so unrelated requests keep flowing while
+        this caller is throttled.
+        """
         while True:
             with self._lock:
                 now = time.monotonic()
@@ -88,7 +96,7 @@ class RateLimiter:
                 # Calculate how long to wait until the oldest entry expires
                 wait_time = self._period - (now - self._timestamps[0])
 
-            time.sleep(max(wait_time, 0.01))
+            gevent.sleep(max(wait_time, 0.01))
 
 
 class MwApi:
@@ -104,7 +112,7 @@ class MwApi:
         self.baseurl = apiurl  # XXX
 
         # Determine whether to use OAuth2 and HTTP/2 from configuration if not specified
-        self.use_oauth2 = (
+        requested_oauth2 = (
             use_oauth2 if use_oauth2 is not None else conf.get("oauth2", "enabled", False, bool)
         )
         self.use_http2 = (
@@ -113,12 +121,22 @@ class MwApi:
 
         # Get HTTP client from manager
         self.http_client = HttpClientManager.get_instance().get_client(
-            self.apiurl, use_oauth2=self.use_oauth2, use_http2=self.use_http2
+            self.apiurl, use_oauth2=requested_oauth2, use_http2=self.use_http2
         )
 
-        # Set basic auth if username is provided and OAuth2 is not enabled
+        # Trust the actual client type rather than what we asked for. If
+        # OAuth2 was requested but credentials are missing, ``get_client``
+        # falls back to a standard client; ``_ensure_oauth2_token`` would
+        # otherwise call ``fetch_token`` on a non-OAuth2 client and fail.
+        self.use_oauth2 = isinstance(self.http_client, OAuth2Client)
+
+        # Basic Auth lives per-instance and is passed per request. It used
+        # to be set on the shared ``http_client.auth``, which leaked
+        # credentials across every other ``MwApi`` sharing the same origin
+        # (and would silently be overwritten by the next caller).
+        self.basic_auth = None
         if username and not self.use_oauth2:
-            self.http_client.auth = httpx.BasicAuth(username, password or "")
+            self.basic_auth = httpx.BasicAuth(username, password or "")
 
         self.edittoken = None
         self.qccount = 0
@@ -170,9 +188,7 @@ class MwApi:
                 limiter = RateLimiter(max_calls=max_rps, period=1.0)
                 MwApi._rate_limiters[origin] = limiter
                 MwApi._rate_limiter_rps[origin] = max_rps
-                logger.info(
-                    f"Rate limiter initialized for {origin}: {max_rps} requests/second"
-                )
+                logger.info(f"Rate limiter initialized for {origin}: {max_rps} requests/second")
 
         limiter.acquire()
 
@@ -198,10 +214,14 @@ class MwApi:
         return request_headers
 
     def _send_http_request(self, method, url, data, request_headers):
+        # ``auth`` is passed per-request so two MwApi instances sharing
+        # the underlying httpx client (same origin) don't clobber each
+        # other's credentials.
+        auth = self.basic_auth
         if method == "POST":
-            response = self.http_client.post(url, data=data, headers=request_headers)
+            response = self.http_client.post(url, data=data, headers=request_headers, auth=auth)
         else:
-            response = self.http_client.get(url, headers=request_headers)
+            response = self.http_client.get(url, headers=request_headers, auth=auth)
         response.raise_for_status()
         return response.content
 

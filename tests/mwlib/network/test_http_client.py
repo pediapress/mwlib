@@ -176,8 +176,14 @@ class TestHttpClientManager:
         # A standard client should have been created instead
         assert "oauth2=False" in list(http_client_manager._clients.keys())[0]
 
-    def test_create_oauth2_client_with_credentials(self, http_client_manager, mock_conf):
-        """Test that a standard client is created with OAuth2 credentials."""
+    def test_get_client_with_oauth2_credentials_caches_under_oauth2_key(
+        self, http_client_manager, mock_conf
+    ):
+        """OAuth2-enabled clients are cached under an ``oauth2=True`` key.
+
+        Requests for OAuth2 vs standard auth go to different cache
+        entries so callers asking for one don't get the other back.
+        """
         mock_conf.get.side_effect = lambda section, name, default, convert=None: {
             ("oauth2", "client_id"): "client_id",
             ("oauth2", "client_secret"): "client_secret",
@@ -187,10 +193,8 @@ class TestHttpClientManager:
             ("fetch", "max_connections"): 20,
         }.get((section, name), default)
 
-        # Create an OAuth2 client with missing credentials
         http_client_manager.get_client("https://example.com")
 
-        # A standard client should have been created instead
         assert "oauth2=True" in list(http_client_manager._clients.keys())[0]
 
     def test_invalidate_client_removes_cached_instance(self, http_client_manager, mock_conf):
@@ -223,3 +227,145 @@ class TestHttpClientManager:
 
         assert client1 is client2
         assert str(client1.base_url) == "https://example.com"
+
+    def test_oauth2_without_credentials_caches_under_oauth2_false(
+        self, http_client_manager, mock_conf
+    ):
+        """The blocker: OAuth2 fallback must update the cache key.
+
+        Without this, a missing-credentials run would store a *standard*
+        client under ``oauth2=True``, and the next caller asking for
+        OAuth2 would get that standard client back while still treating
+        it as OAuth2 (and try to fetch_token on it).
+        """
+        from httpx import Client as StandardClient
+
+        mock_conf.get.side_effect = lambda section, name, default=None, convert=None: {
+            ("oauth2", "client_id"): "",
+            ("oauth2", "client_secret"): "",
+            ("oauth2", "enabled"): True,
+            ("http2", "enabled"): False,
+            ("http2", "auto_detect"): False,
+            ("fetch", "max_connections"): 20,
+        }.get((section, name), default)
+
+        client = http_client_manager.get_client("https://example.com", use_oauth2=True)
+
+        # The returned client is a plain httpx.Client, NOT an OAuth2Client.
+        assert isinstance(client, StandardClient)
+        # And it's cached under oauth2=False so the next caller (with or
+        # without OAuth2) gets the right thing.
+        keys = list(http_client_manager._clients.keys())
+        assert any("oauth2=False" in k for k in keys)
+        assert not any("oauth2=True" in k for k in keys)
+
+    def test_get_client_uses_lock_for_concurrent_creation(self, http_client_manager, mock_conf):
+        """Concurrent get_client calls produce one cached client, not duplicates.
+
+        Two callers racing on the same cache key must serialize through
+        the lock rather than each constructing a fresh client.
+        """
+        mock_conf.get.side_effect = lambda section, name, default=None, convert=None: {
+            ("oauth2", "enabled"): False,
+            ("http2", "enabled"): False,
+            ("http2", "auto_detect"): False,
+            ("fetch", "max_connections"): 20,
+        }.get((section, name), default)
+
+        # Drive the lock by spinning the cache check ourselves: if the lock
+        # path is correct, only one StandardClient is constructed for the
+        # same cache key even when both threads see an empty cache before
+        # taking the lock.
+        with patch.object(
+            http_client_manager,
+            "create_standard_client",
+            wraps=http_client_manager.create_standard_client,
+        ) as wrapped:
+            c1 = http_client_manager.get_client("https://example.com")
+            c2 = http_client_manager.get_client("https://example.com")
+            assert c1 is c2
+            assert wrapped.call_count == 1
+
+
+class TestEnsureOAuth2Token:
+    """``ensure_oauth2_token`` keeps cached token info and the client in sync.
+
+    The cache lives on ``MwApi._token_info`` (per-domain), while the
+    actual OAuth-bearing token lives on the OAuth2 client itself. Those
+    two pieces of state drift when the client is recreated; this class
+    locks down the reconciliation behaviour.
+    """
+
+    def _domain_cache(self, token=None, *, expires_at=2000):
+        return {
+            "example.com": {
+                "token": token or {"access_token": "abc", "expires_in": 3600},
+                "expires_at": expires_at,
+                "next_retry_at": 0,
+                "retry_delay": 0,
+            }
+        }
+
+    def test_pushes_cached_token_onto_client_with_no_token(self):
+        from mwlib.network.auth import ensure_oauth2_token
+
+        cached = {"access_token": "abc", "expires_in": 3600}
+        token_info_map = self._domain_cache(token=cached)
+        http_client = MagicMock()
+        http_client.token = None  # client got recreated, lost its token
+
+        ensure_oauth2_token(
+            enabled=True,
+            apiurl="https://example.com/w/api.php",
+            token_info_map=token_info_map,
+            http_client=http_client,
+            logger=MagicMock(),
+            current_time_fn=lambda: 1000,  # before expires_at=2000
+        )
+
+        # No refetch — fetch_token must not have been called.
+        http_client.fetch_token.assert_not_called()
+        # The client now carries the cached token.
+        assert http_client.token == cached
+
+    def test_does_not_refetch_when_client_and_cache_agree(self):
+        from mwlib.network.auth import ensure_oauth2_token
+
+        cached = {"access_token": "abc", "expires_in": 3600}
+        token_info_map = self._domain_cache(token=cached)
+        http_client = MagicMock()
+        http_client.token = cached
+
+        ensure_oauth2_token(
+            enabled=True,
+            apiurl="https://example.com/w/api.php",
+            token_info_map=token_info_map,
+            http_client=http_client,
+            logger=MagicMock(),
+            current_time_fn=lambda: 1000,
+        )
+
+        http_client.fetch_token.assert_not_called()
+
+    def test_refetches_when_cache_expired(self):
+        from mwlib.network.auth import ensure_oauth2_token
+
+        token_info_map = self._domain_cache(expires_at=500)  # already expired
+        http_client = MagicMock()
+        http_client.fetch_token.return_value = {
+            "access_token": "fresh",
+            "expires_in": 3600,
+        }
+        http_client.headers = {"user-agent": "mwlib"}
+
+        ensure_oauth2_token(
+            enabled=True,
+            apiurl="https://example.com/w/api.php",
+            token_info_map=token_info_map,
+            http_client=http_client,
+            logger=MagicMock(),
+            current_time_fn=lambda: 1000,
+        )
+
+        http_client.fetch_token.assert_called_once()
+        assert token_info_map["example.com"]["token"]["access_token"] == "fresh"

@@ -55,8 +55,7 @@ def fetch_and_store_oauth_token(
     except httpx.HTTPError as exc:
         retry_delay = store_oauth_token_failure(token_info_map, domain, token_info, current_time)
         logger.error(
-            f"Failed to fetch OAuth2 token for {domain}: {exc}. "
-            f"Retrying in {retry_delay} seconds."
+            f"Failed to fetch OAuth2 token for {domain}: {exc}. Retrying in {retry_delay} seconds."
         )
         raise RuntimeError(f"Failed to fetch OAuth2 token for {domain}: {exc}") from exc
 
@@ -72,14 +71,46 @@ def ensure_oauth2_token(
     logger,
     current_time_fn,
 ):
+    """Make sure the OAuth2 client has a valid token.
+
+    The token is cached by domain in ``token_info_map``. The OAuth2 client
+    holds its own ``client.token`` attribute that authlib reads when
+    serializing the ``Authorization`` header. The two pieces of state can
+    drift apart — most obviously when the client is invalidated and
+    recreated while the per-domain cache entry is still fresh. If we
+    short-circuit on ``token_info_map`` alone, the new client would send
+    unauthenticated requests.
+
+    Order of operations:
+    1. If the cached entry is fresh and the client already has the same
+       token, return.
+    2. If the cached entry is fresh but the client is missing it, push
+       the cached token onto the client and return.
+    3. Otherwise refetch (subject to backoff).
+    """
     if not enabled:
         return
 
     domain = get_oauth_domain(apiurl)
     current_time = current_time_fn()
     token_info = token_info_map.get(domain, {})
+
     if not token_needs_refresh(token_info, current_time):
-        return
+        cached_token = token_info.get("token")
+        client_token = getattr(http_client, "token", None)
+        if cached_token is not None and client_token == cached_token:
+            return
+        if cached_token is not None:
+            try:
+                http_client.token = cached_token
+                return
+            except Exception:
+                logger.warning(
+                    "Failed to restore cached OAuth token onto client; will refetch",
+                    exc_info=True,
+                )
+                # Fall through to refetch.
+
     if not token_backoff_elapsed(token_info, current_time):
         return
 

@@ -1,22 +1,23 @@
 #!/usr/bin/env pytest
 
-"""Unit tests for mwlib.network.sapi module"""
+"""Unit tests for mwlib.network.sapi module."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
 import httpx
+import pytest
 from pytest_httpx import HTTPXMock
 
-from mwlib.network.sapi import MwApi
 from mwlib.network.http_client import HttpClientManager
+from mwlib.network.sapi import MwApi
 
 
 class TestMwApi:
-    """Tests for the MwApi class"""
+    """Tests for the MwApi class."""
 
     @pytest.fixture
     def reset_http_client_manager(self):
-        """Reset the HttpClientManager singleton before each test"""
+        """Reset the HttpClientManager singleton before each test."""
         HttpClientManager._instance = None
         HttpClientManager._clients = {}
         MwApi._rate_limiters = {}
@@ -33,11 +34,11 @@ class TestMwApi:
 
     @pytest.fixture
     def mw_api(self, reset_http_client_manager):
-        """Create a MwApi instance for testing"""
+        """Create a MwApi instance for testing."""
         return MwApi("https://test.wikipedia.org/w/api.php", use_oauth2=False)
 
     def test_fetch_success(self, mw_api, httpx_mock):
-        """Test successful fetch"""
+        """Test successful fetch."""
         httpx_mock.add_response(text="test data")
         # Call _fetch with a URL
         result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query")
@@ -48,9 +49,8 @@ class TestMwApi:
         requests = httpx_mock.get_requests()
         assert requests[0].url == "https://test.wikipedia.org/w/api.php?action=query"
 
-
     def test_fetch_http_429_retry_success(self, mw_api, httpx_mock):
-        """Test retry on HTTP 429 error with eventual success"""
+        """Test retry on HTTP 429 error with eventual success."""
         # Create a response for the 429 error
         httpx_mock.add_response(status_code=429, content="Too Many Requests")
         httpx_mock.add_response(status_code=200, content="test data")
@@ -60,7 +60,9 @@ class TestMwApi:
 
         with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
-            result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
+            result = mw_api._fetch(
+                "https://test.wikipedia.org/w/api.php?action=query", max_retries=2
+            )
 
             # Verify the result
             assert result == b"test data"
@@ -70,7 +72,7 @@ class TestMwApi:
             mock_sleep.assert_called_with(1)
 
     def test_fetch_http_500_retry_success(self, mw_api, httpx_mock):
-        """Test retry on HTTP 500 error with eventual success"""
+        """Test retry on HTTP 500 error with eventual success."""
         # Create a response for the 500 error
         httpx_mock.add_response(500, content="Internal Server Error")
         httpx_mock.add_response(200, content="test data")
@@ -80,7 +82,9 @@ class TestMwApi:
 
         with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
-            result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
+            result = mw_api._fetch(
+                "https://test.wikipedia.org/w/api.php?action=query", max_retries=2
+            )
 
             # Verify the result
             assert result == b"test data"
@@ -90,7 +94,7 @@ class TestMwApi:
             mock_sleep.assert_called_with(1)
 
     def test_fetch_url_error_retry_success(self, mw_api, httpx_mock):
-        """Test retry on RequestError with eventual success"""
+        """Test retry on RequestError with eventual success."""
         # Create a success response
         httpx_mock.add_exception(httpx.ConnectError("Connection refused"))
         httpx_mock.add_response(200, content="test data")
@@ -100,7 +104,9 @@ class TestMwApi:
 
         with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
-            result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", max_retries=2)
+            result = mw_api._fetch(
+                "https://test.wikipedia.org/w/api.php?action=query", max_retries=2
+            )
 
             # Verify the result
             assert result == b"test data"
@@ -110,7 +116,7 @@ class TestMwApi:
             mock_sleep.assert_called_with(1)
 
     def test_fetch_http_429_max_retries_exceeded(self, mw_api, httpx_mock):
-        """Test HTTP 429 error with max retries exceeded"""
+        """Test HTTP 429 error with max retries exceeded."""
         # Create a response for the 429 error
         httpx_mock.add_response(429, content="Too Many Requests")
         httpx_mock.add_response(429, content="Too Many Requests")
@@ -135,7 +141,7 @@ class TestMwApi:
             mock_sleep.assert_any_call(2)  # Second retry (1 * 2)
 
     def test_fetch_http_404_no_retry(self, mw_api, httpx_mock):
-        """Test HTTP 404 error with no retry (non-retryable error)"""
+        """Test HTTP 404 error with no retry (non-retryable error)."""
         # Create a response for the 404 error
         httpx_mock.add_response(404, content=b"Not Found")
 
@@ -155,7 +161,7 @@ class TestMwApi:
             assert not mock_sleep.called
 
     def test_fetch_other_exception_no_retry(self, mw_api, httpx_mock):
-        """Test other exception with no retry"""
+        """Test other exception with no retry."""
         # Set up the mock to raise a general exception
         httpx_mock.add_exception(Exception("Test Exception"))
 
@@ -175,7 +181,7 @@ class TestMwApi:
             assert not mock_sleep.called
 
     def test_fetch_exponential_backoff(self, mw_api, httpx_mock):
-        """Test exponential backoff with multiple retries"""
+        """Test exponential backoff with multiple retries."""
         # Create responses for the errors and success
         httpx_mock.add_response(429, content="Too Many Requests")
         httpx_mock.add_response(429, content="Too Many Requests")
@@ -186,8 +192,12 @@ class TestMwApi:
 
         with patch("mwlib.network.sapi.time.sleep", mock_sleep):
             # Call _fetch with a URL
-            result = mw_api._fetch("https://test.wikipedia.org/w/api.php?action=query", 
-                                  max_retries=3, initial_delay=2, backoff_factor=3)
+            result = mw_api._fetch(
+                "https://test.wikipedia.org/w/api.php?action=query",
+                max_retries=3,
+                initial_delay=2,
+                backoff_factor=3,
+            )
 
             # Verify the result
             assert result == b"test data"
@@ -198,7 +208,7 @@ class TestMwApi:
             mock_sleep.assert_any_call(6)  # Second retry (initial_delay * backoff_factor)
 
     def test_fetch_with_request_object(self, mw_api, httpx_mock):
-        """Test fetch with a URL string that is not a simple string"""
+        """Test fetch with a URL string that is not a simple string."""
         # Set up the mock to return a successful response
         httpx_mock.add_response(200, content="test data")
 
@@ -221,8 +231,9 @@ class TestMwApi:
 
         mock_sleep = MagicMock()
 
-        with patch("mwlib.network.sapi.time.sleep", mock_sleep), patch(
-            "mwlib.network.sapi.random.uniform", return_value=2.0
+        with (
+            patch("mwlib.network.sapi.time.sleep", mock_sleep),
+            patch("mwlib.network.sapi.random.uniform", return_value=2.0),
         ):
             mw_api._fetch(
                 "https://test.wikipedia.org/w/api.php?action=query",
@@ -241,8 +252,9 @@ class TestMwApi:
         mw_api.use_oauth2 = True
         mw_api.http_client.fetch_token = MagicMock(side_effect=httpx.ConnectError("token failed"))
 
-        with patch.object(mw_api, "_do_request", return_value={}), patch(
-            "mwlib.network.sapi.time.time", side_effect=[1000, 1000, 1005, 1005]
+        with (
+            patch.object(mw_api, "_do_request", return_value={}),
+            patch("mwlib.network.sapi.time.time", side_effect=[1000, 1000, 1005, 1005]),
         ):
             with pytest.raises(RuntimeError):
                 mw_api.do_request(action="query", meta="siteinfo")
@@ -253,9 +265,10 @@ class TestMwApi:
         assert mw_api._token_info[domain]["next_retry_at"] > 1005
 
     def test_rate_limiter_is_scoped_per_domain(self, mw_api):
-        with patch("mwlib.network.sapi.conf.get", return_value=2), patch(
-            "mwlib.network.sapi.RateLimiter"
-        ) as mock_limiter_cls:
+        with (
+            patch("mwlib.network.sapi.conf.get", return_value=2),
+            patch("mwlib.network.sapi.RateLimiter") as mock_limiter_cls,
+        ):
             limiter_a = MagicMock()
             limiter_b = MagicMock()
             mock_limiter_cls.side_effect = [limiter_a, limiter_b]
@@ -267,3 +280,100 @@ class TestMwApi:
             assert mock_limiter_cls.call_count == 2
             limiter_a.acquire.assert_called()
             limiter_b.acquire.assert_called_once_with()
+
+    def test_rate_limiter_uses_gevent_sleep(self, mw_api):
+        """``RateLimiter.acquire`` must yield to the gevent hub when throttling.
+
+        ``time.sleep`` would block the entire event loop and starve every
+        other greenlet sharing the worker; ``gevent.sleep`` cooperates with
+        the scheduler.
+        """
+        from mwlib.network.sapi import RateLimiter
+
+        rl = RateLimiter(max_calls=1, period=1.0)
+        # Burn the only slot so the next acquire has to wait.
+        rl.acquire()
+
+        with (
+            patch("mwlib.network.sapi.gevent.sleep") as mock_gevent_sleep,
+            patch("mwlib.network.sapi.time.sleep") as mock_time_sleep,
+        ):
+            # Make gevent.sleep advance the clock so the second iteration
+            # of acquire's loop sees an empty window and returns.
+            def advance_clock(_):
+                rl._timestamps.clear()
+
+            mock_gevent_sleep.side_effect = advance_clock
+
+            rl.acquire()
+
+            assert mock_gevent_sleep.called
+            mock_time_sleep.assert_not_called()
+
+    def test_basic_auth_is_per_instance_not_on_shared_client(self, reset_http_client_manager):
+        """Two MwApi instances for the same origin must not share Basic Auth.
+
+        The previous implementation set ``self.http_client.auth = ...`` on
+        the cached httpx client. Since the client is shared between every
+        MwApi for the origin, the second caller would inherit (or
+        overwrite) the first's credentials — a real security issue. Now
+        each MwApi keeps its own ``basic_auth`` and passes it per request.
+        """
+        a = MwApi(
+            "https://en.wikipedia.org/w/api.php",
+            username="alice",
+            password="secret-a",
+            use_oauth2=False,
+        )
+        b = MwApi(
+            "https://en.wikipedia.org/w/api.php",
+            username="bob",
+            password="secret-b",
+            use_oauth2=False,
+        )
+        c = MwApi(
+            "https://en.wikipedia.org/w/api.php",
+            use_oauth2=False,
+        )
+
+        # Same shared client (same origin)…
+        assert a.http_client is b.http_client is c.http_client
+        # …and the shared client was never given an auth attribute.
+        assert getattr(a.http_client, "auth", None) is None
+        # Each MwApi carries its own credentials.
+        assert a.basic_auth is not None
+        assert b.basic_auth is not None
+        assert c.basic_auth is None
+        assert a.basic_auth is not b.basic_auth
+
+    def test_oauth2_fallback_to_standard_disables_use_oauth2(self, reset_http_client_manager):
+        """OAuth2 → standard fallback flips MwApi.use_oauth2 to False.
+
+        When OAuth2 is requested but credentials are missing, the
+        manager hands back a standard httpx.Client. MwApi must recognise
+        that and stop trying to fetch OAuth tokens against it — calling
+        ``fetch_token`` on a non-OAuth2 client crashes with AttributeError.
+        """
+        with patch("mwlib.network.http_client.conf") as mock_conf:
+            mock_conf.get.side_effect = lambda section, name, default=None, convert=None: {
+                ("oauth2", "client_id"): "",
+                ("oauth2", "client_secret"): "",
+                ("http2", "enabled"): False,
+                ("http2", "auto_detect"): False,
+                ("fetch", "max_connections"): 20,
+            }.get((section, name), default)
+            mock_conf.user_agent = "mwlib test"
+
+            api = MwApi("https://example.com/w/api.php", use_oauth2=True)
+
+        # Even though we asked for OAuth2, the manager fell back to a
+        # standard client — and MwApi reflects that.
+        from authlib.integrations.httpx_client import OAuth2Client
+
+        assert api.use_oauth2 is False
+        assert not isinstance(api.http_client, OAuth2Client)
+
+        # do_request → _ensure_oauth2_token → no-op when use_oauth2 is
+        # False. The standard client doesn't even have a fetch_token
+        # method, so the previous behaviour (use_oauth2=True against a
+        # standard client) would have crashed on first request.
