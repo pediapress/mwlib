@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch Wikimedia Enterprise namespace 6 snapshot and load into BigQuery.
+"""Fetch Wikimedia Enterprise namespace snapshots and load them into BigQuery.
 
 Authentication:
     Uses WME_USERNAME / WME_PASSWORD env vars to obtain a bearer token from
@@ -9,24 +9,46 @@ BigQuery:
     Uses GOOGLE_APPLICATION_CREDENTIALS (or the service account JSON path
     passed via --credentials) for authentication.
 
+Namespaces:
+    --namespace 6 (default): NS6 file description pages → ``file_pages`` table.
+        Schema captures dimensions, license, templates, and categories — the
+        fields needed to surface cover candidates and check print eligibility.
+    --namespace 0: NS0 article HTML → ``article_pages`` table. Lean schema
+        (name, identifier, article_body_html, date_modified) sized to keep
+        BigQuery storage cost in line with what the page-count estimator
+        actually consumes. The table is provisioned by Pulumi (clustered on
+        ``name``) — this script never drops or recreates it.
+
+Disk usage:
+    NS0 EN ships as multiple multi-GB NDJSON chunks inside one tarball. Local
+    disk is capped at "tarball + one extracted NDJSON" by extracting members
+    just-in-time and deleting each one after BigQuery has loaded it. Without
+    this, peak disk would be roughly 2× the tarball size.
+
 Data handling:
-    Each run replaces all data in the target table (WRITE_TRUNCATE / drop+create).
-    This is intentional for snapshot ETL — no upsert logic is needed.
+    Each run replaces all data in the target table. The default load-job mode
+    submits one BigQuery load job per NDJSON file (WRITE_TRUNCATE on the first,
+    WRITE_APPEND afterwards) so a single multi-hundred-GB intermediate file is
+    never required. Streaming insert mode is preserved for operators who need
+    it but is significantly more expensive at scale.
 
 Usage examples:
     # List available snapshots
     python fetch_wikimedia_snapshot.py --list
 
-    # Download namespace 6 snapshot only (no BigQuery load)
-    python fetch_wikimedia_snapshot.py --download-only -o enwiki_ns6.tar.gz
-
-    # Full pipeline: download + load into BigQuery (default: batch load job)
+    # Default: download + load NS6 (file_pages)
     python fetch_wikimedia_snapshot.py --project pediapress-prod --dataset wikipedia
 
-    # Load from an already-downloaded tarball (skip download)
-    python fetch_wikimedia_snapshot.py -i /path/to/enwiki_ns6.tar.gz
+    # Download + load NS0 (article_pages, EN article HTML)
+    python fetch_wikimedia_snapshot.py --namespace 0 --project pediapress-prod
 
-    # Use streaming inserts instead of batch load job
+    # Download only — useful for inspecting a snapshot before loading
+    python fetch_wikimedia_snapshot.py --namespace 0 --download-only -o enwiki_ns0.tar.gz
+
+    # Load from an already-downloaded tarball (skip download)
+    python fetch_wikimedia_snapshot.py --namespace 0 -i /path/to/enwiki_ns0.tar.gz
+
+    # Use streaming inserts instead of batch load jobs
     python fetch_wikimedia_snapshot.py --streaming-insert --project pediapress-prod
 """
 
@@ -41,6 +63,8 @@ import shutil
 import sys
 import tarfile
 import tempfile
+from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from pathlib import Path
 
 import requests
@@ -53,13 +77,11 @@ logger = logging.getLogger(__name__)
 
 WME_AUTH_URL = "https://auth.enterprise.wikimedia.com/v1/login"
 WME_API_BASE = "https://api.enterprise.wikimedia.com/v2"
-DEFAULT_SNAPSHOT_ID = "enwiki_namespace_6"
 
-# BigQuery schema for the namespace 6 file description pages.
-# Focused on fields needed for license checking. article_body_html is omitted
+# BigQuery schema for namespace 6 file description pages.
+# Focused on fields needed for license checking. article_body html is omitted
 # to avoid storage bloat — templates and categories cover license-checking needs.
-BQ_TABLE_ID = "file_pages"
-BQ_SCHEMA = [
+NS6_SCHEMA = [
     {
         "name": "name",
         "type": "STRING",
@@ -128,8 +150,153 @@ BQ_SCHEMA = [
     },
 ]
 
+# BigQuery schema for namespace 0 article HTML.
+# Deliberately minimal: storing full Parsoid HTML for English Wikipedia is the
+# dominant cost in this dataset, so anything we don't need for the R3 page-count
+# estimator (abstract, templates, categories, version metadata, wikitext, etc.)
+# is dropped at ingest time. The table is clustered on ``name`` in Pulumi so
+# point lookups by article title don't scan the whole table.
+NS0_SCHEMA = [
+    {
+        "name": "name",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "Article title (e.g. 'Mainz')",
+    },
+    {
+        "name": "identifier",
+        "type": "INTEGER",
+        "mode": "NULLABLE",
+        "description": "MediaWiki page ID",
+    },
+    {
+        "name": "date_modified",
+        "type": "TIMESTAMP",
+        "mode": "NULLABLE",
+        "description": "Last modification timestamp (for snapshot freshness checks)",
+    },
+    {
+        "name": "article_body_html",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "Parsoid HTML body — input to the page-count estimator",
+    },
+]
+
 # Progress logging interval (bytes) during download
 _DOWNLOAD_LOG_INTERVAL = 100 * 1024 * 1024  # log every 100 MB
+
+
+def parse_ns6_row(line: str) -> dict | None:
+    """Parse a single NS6 NDJSON line into a BigQuery-compatible row."""
+    try:
+        doc = json.loads(line)
+    except json.JSONDecodeError:
+        logger.warning("Skipping malformed JSON line: %s...", line[:100])
+        return None
+
+    name = doc.get("name")
+    if not name:
+        logger.warning("Skipping row with missing 'name' field: %s...", line[:100])
+        return None
+
+    row = {
+        "name": name,
+        "identifier": doc.get("identifier"),
+        "url": doc.get("url"),
+        "date_modified": doc.get("date_modified"),
+    }
+
+    # Serialize complex fields as JSON strings for BigQuery JSON columns
+    if "license" in doc and doc["license"]:
+        row["license"] = json.dumps(doc["license"])
+    if "templates" in doc and doc["templates"]:
+        row["templates"] = json.dumps(doc["templates"])
+    if "categories" in doc and doc["categories"]:
+        row["categories"] = json.dumps(doc["categories"])
+
+    row["abstract"] = doc.get("abstract")
+
+    image = doc.get("image")
+    if image and isinstance(image, dict):
+        row["image_content_url"] = image.get("content_url")
+        row["image_width"] = image.get("width")
+        row["image_height"] = image.get("height")
+
+    return row
+
+
+def parse_ns0_row(line: str) -> dict | None:
+    """Parse a single NS0 NDJSON line into a lean BigQuery row.
+
+    Drops every field except (name, identifier, date_modified, article_body_html).
+    Rows missing ``article_body.html`` are skipped — they can't serve any R3
+    query, and storing empty placeholders just bloats a table that already
+    runs to hundreds of GB.
+    """
+    try:
+        doc = json.loads(line)
+    except json.JSONDecodeError:
+        logger.warning("Skipping malformed JSON line: %s...", line[:100])
+        return None
+
+    name = doc.get("name")
+    if not name:
+        logger.warning("Skipping row with missing 'name' field: %s...", line[:100])
+        return None
+
+    article_body = doc.get("article_body")
+    html = None
+    if isinstance(article_body, dict):
+        html = article_body.get("html")
+    if not html:
+        return None
+
+    return {
+        "name": name,
+        "identifier": doc.get("identifier"),
+        "date_modified": doc.get("date_modified"),
+        "article_body_html": html,
+    }
+
+
+@dataclass(frozen=True)
+class NamespaceConfig:
+    """Per-namespace configuration: snapshot, target table, schema, parser.
+
+    ``script_manages_table`` is True for tables this script creates and
+    recreates on each run (NS6 — the legacy behaviour, preserved to avoid
+    regressions). It is False for tables provisioned externally (NS0 —
+    declared in Pulumi); for those, the script only loads data and never
+    drops the table.
+    """
+
+    namespace: int
+    snapshot_id: str
+    table_id: str
+    schema: list[dict]
+    parser: Callable[[str], dict | None]
+    script_manages_table: bool
+
+
+NAMESPACES: dict[int, NamespaceConfig] = {
+    6: NamespaceConfig(
+        namespace=6,
+        snapshot_id="enwiki_namespace_6",
+        table_id="file_pages",
+        schema=NS6_SCHEMA,
+        parser=parse_ns6_row,
+        script_manages_table=True,
+    ),
+    0: NamespaceConfig(
+        namespace=0,
+        snapshot_id="enwiki_namespace_0",
+        table_id="article_pages",
+        schema=NS0_SCHEMA,
+        parser=parse_ns0_row,
+        script_manages_table=False,
+    ),
+}
 
 
 def get_bearer_token(username: str, password: str) -> str:
@@ -196,7 +363,6 @@ def download_snapshot_streaming(
                     logger.info("  %d MB downloaded", downloaded >> 20)
                 last_logged = downloaded
 
-    # Verify completeness
     if total > 0 and downloaded != total:
         os.unlink(output_path)
         raise RuntimeError(
@@ -213,37 +379,51 @@ def download_snapshot_streaming(
     return output_path
 
 
-def extract_ndjson_from_tarball(tarball_path: Path) -> list[Path]:
-    """Extract all .ndjson regular-file members from a gzipped tarball.
-
-    Returns a list of paths to the extracted NDJSON files.
+def _validate_tar_member(member: tarfile.TarInfo) -> None:
+    """Reject anything that isn't a regular file at a safe relative path.
 
     A crafted tarball could otherwise smuggle in symlinks, hardlinks,
-    devices, or absolute / parent-traversal paths and trick ``tar.extract``
-    into writing or reading outside ``extract_dir``. We reject anything
-    that isn't a regular file up front and then stream the bytes through
-    ``shutil.copyfileobj`` rather than handing the member to
-    ``tarfile.extract``.
+    devices, or absolute / parent-traversal paths and trick
+    ``tar.extract`` into writing or reading outside ``extract_dir``.
+    Combined with the ``shutil.copyfileobj`` extraction below, this
+    ensures we only ever materialise plain regular files at relative
+    paths under the tarball's parent directory.
     """
-    logger.info("Extracting NDJSON files from %s...", tarball_path)
+    name = member.name
+    p = Path(name)
+    if p.is_absolute() or ".." in p.parts:
+        raise ValueError(f"Suspicious tar member path: {name}")
+    if not member.isfile():
+        raise ValueError(
+            f"Refusing to extract non-regular tar member: {name} (type={member.type!r})"
+        )
+
+
+def iter_extract_ndjson(tarball_path: Path) -> Iterator[Path]:
+    """Yield each .ndjson member of the tarball, extracting just-in-time.
+
+    The previously yielded NDJSON is unlinked before the next is extracted
+    (and the last one is unlinked when the iterator finishes), so peak local
+    disk usage stays at "tarball + at most one extracted NDJSON" rather than
+    "tarball + every NDJSON". For NS0 EN this is the difference between a
+    feasible sync and one that needs a TB of free disk.
+
+    Members are validated as regular files at relative paths and then
+    streamed via ``shutil.copyfileobj`` rather than handed to
+    ``tar.extract`` — see ``_validate_tar_member``.
+    """
     extract_dir = tarball_path.parent
 
     with tarfile.open(tarball_path, "r:gz") as tar:
-        ndjson_members = [m for m in tar.getmembers() if m.name.endswith(".ndjson")]
-        if not ndjson_members:
+        members = [m for m in tar.getmembers() if m.name.endswith(".ndjson")]
+        if not members:
             raise ValueError(f"No .ndjson files found in {tarball_path}")
+        for m in members:
+            _validate_tar_member(m)
 
-        for m in ndjson_members:
-            p = Path(m.name)
-            if p.is_absolute() or ".." in p.parts:
-                raise ValueError(f"Suspicious tar member path: {m.name}")
-            if not m.isfile():
-                raise ValueError(
-                    f"Refusing to extract non-regular tar member: {m.name} (type={m.type!r})"
-                )
+        logger.info("Tarball contains %d NDJSON files; will extract one at a time", len(members))
 
-        extracted = []
-        for member in ndjson_members:
+        for idx, member in enumerate(members, 1):
             src = tar.extractfile(member)
             if src is None:
                 raise ValueError(f"Cannot extract tar member: {member.name}")
@@ -251,51 +431,16 @@ def extract_ndjson_from_tarball(tarball_path: Path) -> list[Path]:
             path.parent.mkdir(parents=True, exist_ok=True)
             with src, open(path, "wb") as dst:
                 shutil.copyfileobj(src, dst)
-            logger.info("Extracted: %s (%d bytes)", path, member.size)
-            extracted.append(path)
-
-        logger.info("Extracted %d NDJSON files", len(extracted))
-        return extracted
-
-
-def parse_ndjson_row(line: str) -> dict | None:
-    """Parse a single NDJSON line into a BigQuery-compatible row."""
-    try:
-        doc = json.loads(line)
-    except json.JSONDecodeError:
-        logger.warning("Skipping malformed JSON line: %s...", line[:100])
-        return None
-
-    name = doc.get("name")
-    if not name:
-        logger.warning("Skipping row with missing 'name' field: %s...", line[:100])
-        return None
-
-    row = {
-        "name": name,
-        "identifier": doc.get("identifier"),
-        "url": doc.get("url"),
-        "date_modified": doc.get("date_modified"),
-    }
-
-    # Serialize complex fields as JSON strings for BigQuery JSON columns
-    if "license" in doc and doc["license"]:
-        row["license"] = json.dumps(doc["license"])
-    if "templates" in doc and doc["templates"]:
-        row["templates"] = json.dumps(doc["templates"])
-    if "categories" in doc and doc["categories"]:
-        row["categories"] = json.dumps(doc["categories"])
-
-    row["abstract"] = doc.get("abstract")
-
-    # Extract image metadata
-    image = doc.get("image")
-    if image and isinstance(image, dict):
-        row["image_content_url"] = image.get("content_url")
-        row["image_width"] = image.get("width")
-        row["image_height"] = image.get("height")
-
-    return row
+            logger.info("Extracted %d/%d: %s (%d bytes)", idx, len(members), path, member.size)
+            try:
+                yield path
+            finally:
+                if path.exists():
+                    try:
+                        path.unlink()
+                        logger.info("Removed extracted NDJSON: %s", path)
+                    except OSError:
+                        logger.exception("Failed to clean up %s", path)
 
 
 def _make_bq_client(project: str, credentials_path: str | None):
@@ -309,8 +454,8 @@ def _make_bq_client(project: str, credentials_path: str | None):
     return bigquery.Client(project=project)
 
 
-def _make_bq_schema():
-    """Build a list of BigQuery SchemaField objects from BQ_SCHEMA."""
+def _make_bq_schema(schema: list[dict]):
+    """Build a list of BigQuery SchemaField objects from a schema spec."""
     from google.cloud import bigquery
 
     return [
@@ -320,86 +465,32 @@ def _make_bq_schema():
             mode=f["mode"],
             description=f.get("description", ""),
         )
-        for f in BQ_SCHEMA
+        for f in schema
     ]
 
 
-def load_ndjson_to_bigquery_streaming(
-    ndjson_paths: list[Path],
-    project: str,
-    dataset: str,
-    credentials_path: str | None = None,
-    batch_size: int = 10_000,
-) -> int:
-    """Load parsed NDJSON rows into BigQuery using the streaming insert API.
+def _prepare_table(client, table_ref: str, ns: NamespaceConfig) -> None:
+    """Ensure the destination table exists with the right schema.
 
-    Processes all NDJSON files in order. Failed rows are retried once.
-
-    Returns the total number of rows successfully loaded.
+    For script-managed namespaces (NS6) the table is recreated on every run —
+    that's the long-standing behaviour and keeps schema changes effortless.
+    For externally-managed tables (NS0 → Pulumi) the script never drops the
+    table; it just verifies it exists. ``exists_ok=True`` makes the call a
+    no-op when Pulumi has already created it, which is the production case,
+    while still letting the script bootstrap a missing table in dev.
     """
-    client = _make_bq_client(project, credentials_path)
-    table_ref = f"{project}.{dataset}.{BQ_TABLE_ID}"
-
-    schema = _make_bq_schema()
     from google.cloud import bigquery
 
+    schema = _make_bq_schema(ns.schema)
     table = bigquery.Table(table_ref, schema=schema)
-    client.delete_table(table_ref, not_found_ok=True)
-    client.create_table(table)
-    logger.info("Created BigQuery table %s", table_ref)
 
-    total_rows = 0
-    skipped_rows = 0
-    errors_total = 0
-
-    for file_idx, ndjson_path in enumerate(ndjson_paths, 1):
-        logger.info("Processing file %d/%d: %s", file_idx, len(ndjson_paths), ndjson_path)
-        batch = []
-
-        with open(ndjson_path, encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-
-                row = parse_ndjson_row(line)
-                if row is None:
-                    skipped_rows += 1
-                    continue
-
-                batch.append(row)
-
-                if len(batch) >= batch_size:
-                    inserted, failed = _insert_batch_with_retry(client, table_ref, batch)
-                    total_rows += inserted
-                    errors_total += failed
-                    logger.info(
-                        "Loaded %d rows (%d total, %d errors so far)...",
-                        inserted,
-                        total_rows,
-                        errors_total,
-                    )
-                    batch = []
-
-        # Final batch for this file
-        if batch:
-            inserted, failed = _insert_batch_with_retry(client, table_ref, batch)
-            total_rows += inserted
-            errors_total += failed
-
-    logger.info(
-        "Load complete: %d rows loaded from %d files, %d errors, %d skipped",
-        total_rows,
-        len(ndjson_paths),
-        errors_total,
-        skipped_rows,
-    )
-    if errors_total > 0:
-        logger.error(
-            "WARNING: %d rows failed to insert. The table may be incomplete.",
-            errors_total,
-        )
-    return total_rows
+    if ns.script_manages_table:
+        client.delete_table(table_ref, not_found_ok=True)
+        client.create_table(table)
+        logger.info("Created BigQuery table %s", table_ref)
+    else:
+        client.create_table(table, exists_ok=True)
+        logger.info("Using BigQuery table %s (managed externally)", table_ref)
 
 
 def _insert_batch_with_retry(client, table_ref: str, batch: list[dict]) -> tuple[int, int]:
@@ -411,7 +502,6 @@ def _insert_batch_with_retry(client, table_ref: str, batch: list[dict]) -> tuple
     if not errors:
         return len(batch), 0
 
-    # Identify which rows failed
     failed_indices = set()
     for err in errors:
         idx = err.get("index")
@@ -421,20 +511,17 @@ def _insert_batch_with_retry(client, table_ref: str, batch: list[dict]) -> tuple
             logger.warning("  Insert error: %s", detail)
 
     if not failed_indices:
-        # Can't determine which rows failed — count all as failed
         logger.warning("Insert returned %d errors but no row indices", len(errors))
         return 0, len(batch)
 
     succeeded = len(batch) - len(failed_indices)
 
-    # Retry failed rows once
     retry_batch = [batch[i] for i in sorted(failed_indices)]
     logger.info("Retrying %d failed rows...", len(retry_batch))
     retry_errors = client.insert_rows_json(table_ref, retry_batch)
     if not retry_errors:
         return len(batch), 0
 
-    # Log permanently failed rows
     permanent_failures = len(retry_errors)
     for err in retry_errors[:3]:
         logger.error("Permanent insert failure: %s", err)
@@ -442,64 +529,104 @@ def _insert_batch_with_retry(client, table_ref: str, batch: list[dict]) -> tuple
     return succeeded + (len(retry_batch) - permanent_failures), permanent_failures
 
 
-def load_ndjson_to_bigquery_load_job(
-    ndjson_paths: list[Path],
-    project: str,
-    dataset: str,
-    credentials_path: str | None = None,
-) -> int:
-    """Load NDJSON into BigQuery using a load job (better for large files).
+def _stream_one_file(
+    *,
+    client,
+    table_ref: str,
+    ndjson_path: Path,
+    parser: Callable[[str], dict | None],
+    batch_size: int,
+) -> tuple[int, int]:
+    """Stream one NDJSON file's rows into BigQuery via insert_rows_json.
 
-    Reads all NDJSON files, converts each line to our schema, writes to a
-    single temporary file, then uses a BigQuery load job with WRITE_TRUNCATE.
+    Returns (rows_inserted, rows_skipped).
+    """
+    inserted_total = 0
+    skipped = 0
+    errors_total = 0
+    batch: list[dict] = []
 
-    Returns the total number of rows loaded.
+    with open(ndjson_path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            row = parser(line)
+            if row is None:
+                skipped += 1
+                continue
+            batch.append(row)
+            if len(batch) >= batch_size:
+                inserted, failed = _insert_batch_with_retry(client, table_ref, batch)
+                inserted_total += inserted
+                errors_total += failed
+                logger.info(
+                    "  Streamed %d rows (%d total, %d errors so far)",
+                    inserted,
+                    inserted_total,
+                    errors_total,
+                )
+                batch = []
+
+    if batch:
+        inserted, failed = _insert_batch_with_retry(client, table_ref, batch)
+        inserted_total += inserted
+        errors_total += failed
+
+    if errors_total > 0:
+        logger.error(
+            "WARNING: %d rows failed to insert from %s. Table may be incomplete.",
+            errors_total,
+            ndjson_path.name,
+        )
+    return inserted_total, skipped
+
+
+def _load_one_file(
+    *,
+    client,
+    ndjson_path: Path,
+    file_idx: int,
+    table_ref: str,
+    schema,
+    parser: Callable[[str], dict | None],
+    write_disposition,
+) -> tuple[int, int]:
+    """Stream-transform one NDJSON file and submit it as a single load job.
+
+    Returns (rows_loaded, rows_skipped).
     """
     from google.cloud import bigquery
 
-    client = _make_bq_client(project, credentials_path)
-    table_ref = f"{project}.{dataset}.{BQ_TABLE_ID}"
-    schema = _make_bq_schema()
+    logger.info("Preparing NDJSON file %d: %s", file_idx, ndjson_path)
 
-    # Write transformed rows from ALL files to a single temp NDJSON file
     tmp_path = None
-    skipped_rows = 0
     try:
-        total_rows = 0
+        prepared = 0
+        skipped = 0
         with tempfile.NamedTemporaryFile(mode="w", suffix=".ndjson", delete=False) as tmp:
             tmp_path = tmp.name
-            for file_idx, ndjson_path in enumerate(ndjson_paths, 1):
-                logger.info(
-                    "Preparing file %d/%d: %s",
-                    file_idx,
-                    len(ndjson_paths),
-                    ndjson_path,
-                )
-                with open(ndjson_path, encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        row = parse_ndjson_row(line)
-                        if row is None:
-                            skipped_rows += 1
-                            continue
-                        tmp.write(json.dumps(row) + "\n")
-                        total_rows += 1
+            with open(ndjson_path, encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    row = parser(line)
+                    if row is None:
+                        skipped += 1
+                        continue
+                    tmp.write(json.dumps(row) + "\n")
+                    prepared += 1
 
-        logger.info(
-            "Prepared %d rows from %d files for BigQuery load job (%d skipped)",
-            total_rows,
-            len(ndjson_paths),
-            skipped_rows,
-        )
+        if prepared == 0:
+            logger.warning("File %d produced 0 rows after parsing; skipping load job", file_idx)
+            return 0, skipped
 
-        # Configure load job
         job_config = bigquery.LoadJobConfig(
             schema=schema,
             source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-            write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
-            max_bad_records=0,  # Fail on any bad record
+            write_disposition=write_disposition,
+            max_bad_records=0,
         )
 
         with open(tmp_path, "rb") as source:
@@ -509,37 +636,123 @@ def load_ndjson_to_bigquery_load_job(
                 job_config=job_config,
             )
 
-        logger.info("BigQuery load job started: %s", load_job.job_id)
-        load_job.result()  # Wait for completion
+        logger.info(
+            "BigQuery load job started for file %d: %s (%d rows prepared)",
+            file_idx,
+            load_job.job_id,
+            prepared,
+        )
+        load_job.result()
 
-        # Check for errors in the load job
         if load_job.errors:
             logger.error("BigQuery load job completed with errors:")
             for err in load_job.errors:
                 logger.error("  %s", err)
 
         loaded = load_job.output_rows
-        logger.info("BigQuery load job completed: %d rows loaded", loaded)
+        logger.info(
+            "Loaded %d rows from file %d (%d prepared, %d skipped)",
+            loaded,
+            file_idx,
+            prepared,
+            skipped,
+        )
 
-        if loaded != total_rows:
+        if loaded != prepared:
             logger.warning(
-                "Row count mismatch: prepared %d rows but BigQuery loaded %d. "
-                "%d rows may have been rejected.",
-                total_rows,
+                "Row count mismatch in file %d: prepared %d, BigQuery loaded %d",
+                file_idx,
+                prepared,
                 loaded,
-                total_rows - loaded,
             )
 
-        return loaded
+        return loaded, skipped
 
     finally:
         if tmp_path and Path(tmp_path).exists():
             os.unlink(tmp_path)
 
 
-def main():
+def load_tarball_to_bigquery(
+    tarball_path: Path,
+    *,
+    project: str,
+    dataset: str,
+    ns: NamespaceConfig,
+    credentials_path: str | None = None,
+    use_streaming_insert: bool = False,
+    batch_size: int = 10_000,
+) -> tuple[int, int]:
+    """Stream-extract a tarball into BigQuery, one NDJSON file at a time.
+
+    Caps local disk usage at "tarball + at most one extracted NDJSON" — the
+    iterator deletes each NDJSON immediately after the load job (or streaming
+    batch) for it has finished.
+
+    Returns ``(rows_loaded, rows_skipped)``.
+    """
+    from google.cloud import bigquery
+
+    client = _make_bq_client(project, credentials_path)
+    table_ref = f"{project}.{dataset}.{ns.table_id}"
+    _prepare_table(client, table_ref, ns)
+
+    schema = None
+    if use_streaming_insert:
+        # Streaming inserts append, so for externally managed tables we must
+        # explicitly clear the previous run's data first. ``_prepare_table``
+        # already truncated implicitly for script-managed tables (drop+create),
+        # so the TRUNCATE here is only needed for the Pulumi-managed case.
+        if not ns.script_manages_table:
+            logger.info("Truncating %s before streaming inserts", table_ref)
+            client.query(f"TRUNCATE TABLE `{table_ref}`").result()
+    else:
+        schema = _make_bq_schema(ns.schema)
+
+    total_loaded = 0
+    total_skipped = 0
+    file_idx = 0
+
+    for ndjson_path in iter_extract_ndjson(tarball_path):
+        file_idx += 1
+        if use_streaming_insert:
+            loaded, skipped = _stream_one_file(
+                client=client,
+                table_ref=table_ref,
+                ndjson_path=ndjson_path,
+                parser=ns.parser,
+                batch_size=batch_size,
+            )
+        else:
+            write_disposition = (
+                bigquery.WriteDisposition.WRITE_TRUNCATE
+                if file_idx == 1
+                else bigquery.WriteDisposition.WRITE_APPEND
+            )
+            loaded, skipped = _load_one_file(
+                client=client,
+                ndjson_path=ndjson_path,
+                file_idx=file_idx,
+                table_ref=table_ref,
+                schema=schema,
+                parser=ns.parser,
+                write_disposition=write_disposition,
+            )
+        total_loaded += loaded
+        total_skipped += skipped
+
+    logger.info(
+        "Load complete: %d rows loaded across %d files (%d skipped)",
+        total_loaded,
+        file_idx,
+        total_skipped,
+    )
+    return total_loaded, total_skipped
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Fetch Wikimedia Enterprise namespace 6 snapshot and load into BigQuery.",
+        description=("Fetch a Wikimedia Enterprise namespace snapshot and load it into BigQuery."),
     )
     parser.add_argument(
         "--list",
@@ -547,9 +760,28 @@ def main():
         help="List available snapshots and exit",
     )
     parser.add_argument(
+        "--namespace",
+        type=int,
+        choices=sorted(NAMESPACES),
+        default=6,
+        help=(
+            "Wikipedia namespace to sync. 6 = file description pages "
+            "(file_pages table). 0 = article HTML (article_pages table). "
+            "Default: 6."
+        ),
+    )
+    parser.add_argument(
         "--download-only",
         action="store_true",
         help="Download the snapshot but skip BigQuery loading",
+    )
+    parser.add_argument(
+        "--keep-tarball",
+        action="store_true",
+        help=(
+            "Keep the downloaded tarball after BigQuery loading completes "
+            "(default: delete to free disk)."
+        ),
     )
     parser.add_argument(
         "--streaming-insert",
@@ -558,8 +790,11 @@ def main():
     )
     parser.add_argument(
         "--snapshot-id",
-        default=DEFAULT_SNAPSHOT_ID,
-        help=f"Snapshot identifier (default: {DEFAULT_SNAPSHOT_ID})",
+        default=None,
+        help=(
+            "Snapshot identifier override. Defaults to the namespace-derived "
+            "snapshot (enwiki_namespace_6 / enwiki_namespace_0)."
+        ),
     )
     parser.add_argument(
         "-i",
@@ -592,10 +827,16 @@ def main():
         default=10_000,
         help="Rows per batch for streaming inserts (default: 10000)",
     )
+    return parser
 
-    args = parser.parse_args()
 
-    # Load .env if present
+def main(argv: list[str] | None = None) -> int | None:
+    parser = _build_arg_parser()
+    args = parser.parse_args(argv)
+
+    ns = NAMESPACES[args.namespace]
+    snapshot_id = args.snapshot_id or ns.snapshot_id
+
     try:
         from dotenv import load_dotenv
 
@@ -606,15 +847,17 @@ def main():
     except ImportError:
         pass
 
-    # Use existing tarball or download a new one
+    # The script can either reuse a tarball provided on disk or download a
+    # new one from WME. ``downloaded_here`` tracks whether *this* run owns
+    # the tarball — operator-supplied tarballs (-i) are never deleted.
+    downloaded_here = False
     if args.input:
-        output_path = Path(args.input)
-        if not output_path.exists():
-            logger.error("Input file not found: %s", output_path)
+        tarball_path = Path(args.input)
+        if not tarball_path.exists():
+            logger.error("Input file not found: %s", tarball_path)
             sys.exit(1)
-        logger.info("Using existing tarball: %s", output_path)
+        logger.info("Using existing tarball: %s", tarball_path)
     else:
-        # Authenticate with Wikimedia Enterprise
         username = os.environ.get("WME_USERNAME")
         password = os.environ.get("WME_PASSWORD")
         if not username or not password:
@@ -623,71 +866,50 @@ def main():
 
         token = get_bearer_token(username, password)
 
-        # --list mode
         if args.list:
             snapshots = list_snapshots(token)
             print(json.dumps(snapshots, indent=2))
-            return
+            return None
 
-        # Download snapshot
         if args.output:
-            output_path = Path(args.output)
+            tarball_path = Path(args.output)
         else:
-            output_path = Path(tempfile.mkdtemp()) / f"{args.snapshot_id}.tar.gz"
+            tarball_path = Path(tempfile.mkdtemp()) / f"{snapshot_id}.tar.gz"
 
-        download_snapshot_streaming(token, args.snapshot_id, output_path)
+        download_snapshot_streaming(token, snapshot_id, tarball_path)
+        downloaded_here = True
 
         if args.download_only:
-            logger.info("Download-only mode. Tarball saved to: %s", output_path)
-            return
+            logger.info("Download-only mode. Tarball saved to: %s", tarball_path)
+            return None
 
-    # Extract all NDJSON files
-    ndjson_paths = extract_ndjson_from_tarball(output_path)
-
-    # Count lines across all NDJSON files for reference
-    line_count = 0
-    for ndjson_path in ndjson_paths:
-        with open(ndjson_path, encoding="utf-8") as f:
-            file_lines = sum(1 for line in f if line.strip())
-        logger.info("  %s: %d non-empty lines", ndjson_path.name, file_lines)
-        line_count += file_lines
-    logger.info("Total: %d non-empty lines across %d files", line_count, len(ndjson_paths))
-
-    # Load into BigQuery (default: batch load job, optional: streaming inserts)
-    if args.streaming_insert:
-        total = load_ndjson_to_bigquery_streaming(
-            ndjson_paths,
+    try:
+        loaded, skipped = load_tarball_to_bigquery(
+            tarball_path,
             project=args.project,
             dataset=args.dataset,
+            ns=ns,
             credentials_path=args.credentials,
+            use_streaming_insert=args.streaming_insert,
             batch_size=args.batch_size,
         )
-    else:
-        total = load_ndjson_to_bigquery_load_job(
-            ndjson_paths,
-            project=args.project,
-            dataset=args.dataset,
-            credentials_path=args.credentials,
-        )
+    finally:
+        if downloaded_here and not args.keep_tarball and tarball_path.exists():
+            try:
+                tarball_path.unlink()
+                logger.info("Removed downloaded tarball: %s", tarball_path)
+            except OSError:
+                logger.exception("Failed to remove tarball %s", tarball_path)
 
     logger.info(
-        "Done! %d rows loaded into %s.%s.%s (from %d NDJSON lines in %d files)",
-        total,
+        "Done! %d rows loaded into %s.%s.%s (%d rows skipped)",
+        loaded,
         args.project,
         args.dataset,
-        BQ_TABLE_ID,
-        line_count,
-        len(ndjson_paths),
+        ns.table_id,
+        skipped,
     )
-
-    if total < line_count:
-        logger.warning(
-            "INCOMPLETE: only %d of %d lines were loaded. "
-            "Check logs above for parse errors or BigQuery insert failures.",
-            total,
-            line_count,
-        )
-        sys.exit(1)
+    return None
 
 
 if __name__ == "__main__":
