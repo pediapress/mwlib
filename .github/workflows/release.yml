@@ -27,19 +27,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Default to the tag/release ref; allow overriding via
           # workflow_dispatch input for retro-publishes.
           ref: ${{ inputs.ref || github.ref }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v6
 
       - name: Build sdist
         # Sdist only — this project has C extensions and we don't run
@@ -79,7 +79,7 @@ jobs:
       - name: Upload sdist as artifact
         # Keep a copy on the workflow run so post-mortem inspection of
         # what was published is one click away.
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -101,7 +101,7 @@ jobs:
       url: https://pypi.org/p/mwlib
     steps:
       - name: Download sdist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: sdist
           path: dist
