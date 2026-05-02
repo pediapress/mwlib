@@ -64,11 +64,17 @@ bigquery = [
 ]
 
 [dependency-groups]
+# Tests import ``google.cloud.bigquery`` (the BigQuery image lookup and the
+# WME ingest CLI both have unit tests that mock against the SDK), so a clean
+# ``uv sync`` for development needs the extra installed alongside the test
+# runner. Listed here in addition to ``[project.optional-dependencies]`` so
+# end-user installs stay slim while ``uv run pytest`` works without flags.
 dev = [
     "pytest",
     "pytest-httpx>=0.35.0",
     "pytest-xdist",
     "wsgi-intercept",
+    "google-cloud-bigquery>=3.0",
 ]
 
 [project.urls]

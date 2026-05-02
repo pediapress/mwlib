@@ -518,6 +518,7 @@ include src/qs/slave.py
 include tasks.md
 include tests/conftest.py
 include tests/mwlib/apps/test_buildzip.py
+include tests/mwlib/apps/test_fetch_wikimedia_snapshot.py
 include tests/mwlib/canthus.mb.json
 include tests/mwlib/core/test_authors.py
 include tests/mwlib/core/test_metabook.py

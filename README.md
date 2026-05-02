@@ -133,10 +133,23 @@ The data originates from the [Wikimedia Enterprise API](https://enterprise.wikim
 
 #### Prerequisites
 
-Install the optional BigQuery dependency:
+The BigQuery client (and the `wme-ingest` CLI that loads snapshots into it)
+is shipped behind the `bigquery` extra so default installs stay slim. Install
+it via the extra rather than pinning `google-cloud-bigquery` directly:
+
 ```bash
-uv pip install "google-cloud-bigquery>=3.0"
+# pip
+pip install "mwlib[bigquery]"
+
+# uv (project install)
+uv pip install "mwlib[bigquery]"
+
+# uv (developer checkout)
+uv sync --extra bigquery
 ```
+
+The `bigquery` extra is also pulled in by the `dev` dependency group, so
+`uv sync` (default groups) installs it for development and test runs.
 
 Set up GCP authentication by pointing to a service account JSON file:
 ```shell
