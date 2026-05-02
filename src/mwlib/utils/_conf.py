@@ -77,6 +77,14 @@ class ConfMod:
             "fetch": {
                 "noedits": "False",
             },
+            "bigquery": {
+                "enabled": "false",
+                "project": "",
+                "dataset": "wme_snapshots",
+                "table": "file_pages",
+                "timeout": "30",
+                "domains": "en.wikipedia.org",
+            },
         }
 
         self.config = configparser.ConfigParser()

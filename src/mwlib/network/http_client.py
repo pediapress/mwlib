@@ -6,18 +6,44 @@ This module provides a singleton HTTP client manager that handles:
 3. HTTP/2 support detection and usage
 """
 
+import hashlib
 import logging
+import threading
 import time
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union
 from urllib.parse import urlparse
 
 import httpx
-from httpx import Client as StandardClient
 from authlib.integrations.httpx_client import OAuth2Client
+from httpx import Client as StandardClient
 
 from mwlib.utils import conf
 
 logger = logging.getLogger(__name__)
+
+
+def oauth2_config_fingerprint() -> str:
+    """Compact fingerprint of the current OAuth2 config.
+
+    Hashes ``client_id`` + ``client_secret`` + ``token_url`` together so
+    cache keys stay short and don't leak the raw client_id / token_url
+    into debug dumps. Two callers asking for OAuth2 against the same
+    origin but with different credentials get different fingerprints,
+    so a credential rotation produces a fresh client rather than
+    silently reusing the old one.
+    """
+    payload = "|".join(
+        [
+            conf.get("oauth2", "client_id", ""),
+            conf.get("oauth2", "client_secret", ""),
+            conf.get(
+                "oauth2",
+                "token_url",
+                "https://meta.wikimedia.org/w/rest.php/oauth2/access_token",
+            ),
+        ]
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
 class HttpClientManager:
@@ -32,27 +58,62 @@ class HttpClientManager:
     _clients: Dict[str, Union[StandardClient, OAuth2Client]] = {}
     _http2_support_cache: Dict[str, Dict[str, float | bool]] = {}
     _http2_cache_ttl_seconds = 300
+    # Guard against two greenlets/threads creating duplicate clients for
+    # the same cache key. gevent's Semaphore would also work; threading.Lock
+    # is monkey-patched under gevent and is correct under both runtimes.
+    _client_lock = threading.Lock()
+    _instance_lock = threading.Lock()
+    # HTTP/2 probe is a real network HEAD request — keep it short so it
+    # doesn't dominate startup latency on slow networks. The result is
+    # cached for ``_http2_cache_ttl_seconds`` so this only matters once
+    # per origin.
+    _http2_probe_timeout_seconds = 2.0
 
     @classmethod
     def get_instance(cls) -> "HttpClientManager":
-        """Get the singleton instance of HttpClientManager.
-
-        Returns:
-            HttpClientManager: The singleton instance.
-        """
+        """Get the singleton instance of HttpClientManager."""
+        # Double-checked locking: avoid the lock on the hot path, take it
+        # only when the instance might genuinely need to be created.
         if cls._instance is None:
-            cls._instance = cls()
+            with cls._instance_lock:
+                if cls._instance is None:
+                    cls._instance = cls()
         return cls._instance
 
     def _origin(self, url: str) -> str:
         p = urlparse(url)
         return f"{p.scheme}://{p.netloc}"
 
+    @staticmethod
+    def _cache_key(origin: str, *, use_oauth2: bool, use_http2: bool) -> str:
+        """Build the cache key used for looking up / inserting clients.
+
+        For OAuth2 the key includes a hashed fingerprint of the current
+        credentials so credential rotations produce a fresh client.
+        """
+        auth_identity = oauth2_config_fingerprint() if use_oauth2 else "standard"
+        return f"{origin}|oauth2={use_oauth2}|http2={use_http2}|auth={auth_identity}"
+
+    @staticmethod
+    def _cache_key_prefix(origin: str, *, use_oauth2: bool, use_http2: bool) -> str:
+        """Prefix matching every cache entry for this (origin, auth, http2) combo.
+
+        Ignores the OAuth fingerprint so callers can invalidate every
+        cached client for an origin even after credential rotation —
+        otherwise rotated-out clients would be unreachable through the
+        invalidate path.
+        """
+        return f"{origin}|oauth2={use_oauth2}|http2={use_http2}|auth="
+
     def invalidate_client(self, base_url: str, *, use_oauth2: bool, use_http2: bool) -> None:
+        """Drop every cached client matching the given (origin, auth, http2)."""
         origin = self._origin(base_url)
-        cache_key = f"{origin}|oauth2={use_oauth2}|http2={use_http2}"
-        client = self._clients.pop(cache_key, None)
-        if client is not None:
+        prefix = self._cache_key_prefix(origin, use_oauth2=use_oauth2, use_http2=use_http2)
+        keys_to_remove = [k for k in list(self._clients) if k.startswith(prefix)]
+        for cache_key in keys_to_remove:
+            client = self._clients.pop(cache_key, None)
+            if client is None:
+                continue
             try:
                 client.close()
             except Exception:
@@ -74,17 +135,32 @@ class HttpClientManager:
 
         Returns:
             Union[httpx.Client, OAuth2Client]: The HTTP client.
+
         """
         # Determine whether to use OAuth2 and HTTP/2 from configuration if not specified
         if use_oauth2 is None:
             use_oauth2 = conf.get("oauth2", "enabled", False, bool)
 
+        # Resolve OAuth2 fallback *before* building the cache key, so a
+        # missing-creds fallback caches under ``oauth2=False`` and
+        # ``MwApi.use_oauth2`` (set from the actual client type) agrees.
+        if use_oauth2:
+            client_id = conf.get("oauth2", "client_id", "")
+            client_secret = conf.get("oauth2", "client_secret", "")
+            if not client_id or not client_secret:
+                logger.warning(
+                    "OAuth2 is enabled but client_id or client_secret is not set. "
+                    "Using standard client instead."
+                )
+                use_oauth2 = False
+
         if use_http2 is None:
             use_http2 = conf.get("http2", "enabled", True, bool)
 
-        # Auto-detect HTTP/2 support if configured
+        # Probe the origin rather than the full URL — heavy routes can
+        # be slow to HEAD and the result is cached per-origin anyway.
         if use_http2 and conf.get("http2", "auto_detect", True, bool):
-            use_http2 = self.detect_http2_support(base_url)
+            use_http2 = self.detect_http2_support(self._origin(base_url))
 
         origin = self._origin(base_url)
 
@@ -94,43 +170,42 @@ class HttpClientManager:
 
         headers["User-Agent"] = getattr(conf, "user_agent", "mwlib")
 
-        # Create a cache key that includes the base URL, authentication and HTTP/2 settings
-        cache_key = f"{origin}|oauth2={use_oauth2}|http2={use_http2}"
+        cache_key = self._cache_key(origin, use_oauth2=use_oauth2, use_http2=use_http2)
 
-        # Return cached client if it exists
+        # Fast path: cache hit, no lock needed.
         if cache_key in self._clients:
             return self._clients[cache_key]
 
-        # apply connection limits
-        max_conns = conf.get("fetch", "max_connections", 20, int)
-        limits = httpx.Limits(
-            max_connections=max_conns,
-            max_keepalive_connections=min(max_conns, 10),
-            keepalive_expiry=30.0,
-        )
+        # Slow path: lock so two callers don't both build the client.
+        with self._client_lock:
+            if cache_key in self._clients:
+                return self._clients[cache_key]
 
-        # Normalize client base_url to origin to match cache key
-        normalized_base_url = origin
-
-        # Create a new client with the appropriate settings
-        if use_oauth2:
-            client = self.create_oauth2_client(
-                normalized_base_url, use_http2, limits=limits, headers=headers
-            )
-        else:
-            client = self.create_standard_client(
-                normalized_base_url, use_http2, limits=limits, headers=headers
+            max_conns = conf.get("fetch", "max_connections", 20, int)
+            limits = httpx.Limits(
+                max_connections=max_conns,
+                max_keepalive_connections=min(max_conns, 10),
+                keepalive_expiry=30.0,
             )
 
-        http2_version = "HTTP/2" if use_http2 else "HTTP/1.1"
-        if use_oauth2:
-            logger.info(f"Created OAuth2 client and using {http2_version} for {base_url}")
-        else:
-            logger.info(f"Created standard client and using {http2_version} for {base_url}")
+            # Normalize client base_url to origin to match cache key
+            normalized_base_url = origin
 
-        # Cache and return the client
-        self._clients[cache_key] = client
-        return client
+            if use_oauth2:
+                client = self.create_oauth2_client(
+                    normalized_base_url, use_http2, limits=limits, headers=headers
+                )
+            else:
+                client = self.create_standard_client(
+                    normalized_base_url, use_http2, limits=limits, headers=headers
+                )
+
+            http2_version = "HTTP/2" if use_http2 else "HTTP/1.1"
+            kind = "OAuth2 client" if use_oauth2 else "standard client"
+            logger.info("Created %s using %s for %s", kind, http2_version, base_url)
+
+            self._clients[cache_key] = client
+            return client
 
     def create_oauth2_client(
         self,
@@ -138,33 +213,21 @@ class HttpClientManager:
         use_http2: bool = True,
         limits: httpx.Limits = None,
         headers: Optional[dict] = None,
-    ) -> OAuth2Client | StandardClient:
+    ) -> OAuth2Client:
         """Create an OAuth2 client for the given base URL.
 
-        Args:
-            base_url: The base URL for the client.
-            use_http2: Whether to use HTTP/2.
-            limits: httpx.Limits instance
-
-        Returns:
-            OAuth2Client: The OAuth2 client.
+        Caller is expected to have already verified that ``client_id`` and
+        ``client_secret`` are configured — ``get_client`` does this and
+        falls back to ``create_standard_client`` when they aren't, so the
+        cache key and ``MwApi.use_oauth2`` agree on the auth choice.
         """
         client_id = conf.get("oauth2", "client_id", "")
         client_secret = conf.get("oauth2", "client_secret", "")
-
         token_url = conf.get(
             "oauth2", "token_url", "https://meta.wikimedia.org/w/rest.php/oauth2/access_token"
         )
 
-        if not client_id or not client_secret:
-            logger.warning(
-                "OAuth2 is enabled but client_id or client_secret is not set. "
-                "Using standard client instead."
-            )
-            return self.create_standard_client(base_url, use_http2, limits=limits, headers=headers)
-
-        # Create an OAuth2 client with client_credentials grant
-        client = OAuth2Client(
+        return OAuth2Client(
             client_id=client_id,
             client_secret=client_secret,
             token_endpoint=token_url,
@@ -176,8 +239,6 @@ class HttpClientManager:
             limits=limits,
         )
 
-        return client
-
     def create_standard_client(
         self,
         base_url: str,
@@ -185,15 +246,7 @@ class HttpClientManager:
         limits: httpx.Limits = None,
         headers: Optional[dict] = None,
     ) -> StandardClient:
-        """Create a standard HTTP client for the given base URL.
-
-        Args:
-            base_url: The base URL for the client.
-            use_http2: Whether to use HTTP/2.
-
-        Returns:
-            httpx.Client: The standard HTTP client.
-        """
+        """Create a standard HTTP client for the given base URL."""
         client = StandardClient(
             http2=use_http2,
             timeout=httpx.Timeout(30.0),
@@ -206,9 +259,7 @@ class HttpClientManager:
         return client
 
     def detect_http2_support(self, url: str) -> bool:
-        """Detect if the server at the given URL supports HTTP/2.
-        // ... existing code ...
-        """
+        """Detect if the server at the given URL supports HTTP/2."""
         origin = self._origin(url)
         now = time.time()
         cached = self._http2_support_cache.get(origin)
@@ -216,8 +267,14 @@ class HttpClientManager:
             return bool(cached.get("supported", False))
 
         try:
-            # Create a temporary client with HTTP/2 enabled
-            with StandardClient(http2=True) as client:
+            # Create a temporary client with HTTP/2 enabled. Cap the probe
+            # timeout aggressively — this fires once per origin during
+            # client creation, so a slow server here would otherwise block
+            # every first fetch behind a 30s connect.
+            with StandardClient(
+                http2=True,
+                timeout=httpx.Timeout(self._http2_probe_timeout_seconds),
+            ) as client:
                 # Make a HEAD request to check the HTTP version
                 response = client.head(url)
                 supported = response.http_version == "HTTP/2"

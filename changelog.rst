@@ -4,6 +4,70 @@ Changelog
 
 mwlib
 ==========================
+2026-05-02 mwlib 0.18.3
+------------------------
+- ``wme-ingest`` learns ``--namespace 0`` for the article-HTML snapshot used by the page-count estimator, alongside the existing namespace-6 (file_pages) sync. Lean NS0 schema (``name`` / ``identifier`` / ``date_modified`` / ``article_body_html``) keeps BigQuery storage proportional to what the estimator actually consumes.
+- ``wme-ingest`` extracts NDJSON members one at a time into a private temp directory, capping peak local disk at "tarball + one extracted NDJSON" and avoiding overwrites of pre-existing files in the tarball's parent. Tar members are also restricted to regular files (no symlinks/hardlinks/devices).
+- ``wme-ingest`` validates ``project`` / ``dataset`` / ``table`` identifiers before they're interpolated into raw SQL.
+- BigQuery image-lookup hardening: hostname-exact domain routing, exact-match row filtering, credential-fingerprinted client cache + token cache, locked singleton + locked client cache, prefix-match ``invalidate_client``.
+- Fail-closed defaults for the BigQuery path: malformed templates rerouted to the remote-API fallback; misses or hits with no remote-API discovery drop the deferred image download (no shipping images without license/attribution data); externally-managed tables fail loudly when missing rather than silently bootstrapping.
+- ``MwApi`` Basic Auth is per-instance (no longer leaks across MwApis sharing an origin); ``RateLimiter`` and retry backoff use ``gevent.sleep`` to cooperate with the gevent hub; ``request_counter`` is per-instance.
+- ``LicenseChecker`` exposes ``decide_from_template_names`` so fetch-time and render-time license policy stay in lockstep.
+- ``nuwiki.Adapt.get_contributors`` reads ``authors.db`` when no description page is on disk (BigQuery shortcut), so BQ-backed images render with attribution.
+- Optional ``mwlib[bigquery]`` install extra; default installs stay slim. ``requests`` declared as a direct dependency.
+
+2026-04-28 mwlib 0.18.2
+------------------------
+- Allow DEFAULTSORT to accept optional arguments
+
+2026-04-28 mwlib 0.18.1
+------------------------
+- Add WME ingestion script (wme-ingest) for loading Wikimedia Enterprise snapshots into BigQuery
+
+2026-04-28 mwlib 0.18.0
+------------------------
+- Add BigQuery-first lookup for image description pages
+- Add BigQuery configuration section and optional google-cloud-bigquery dependency
+- Add domain-scoped rate limiting in sapi.py (fetch.max_requests_per_second)
+- Improve retry/backoff handling in sapi.py and http_client.py
+- Add OAuth2 client_credentials support
+- Add HTTP/2 support via httpx
+- Require Python 3.11 or 3.12
+- Replace setup.py with pyproject.toml; use uv for package management
+- Remove buildzip2.py; unify buildzip implementation
+- Update Cython template evaluation for Python 3.11+/Cython 3.2.4
+- Mark slow rl tests with @pytest.mark.integration
+
+2023-12-15 mwlib 0.17.0.post1
+------------------------------
+- Post-release packaging fix (no functional changes)
+
+2023-12-10 mwlib 0.17.0
+------------------------
+- Complete migration to Python 3; Python 2 is no longer supported
+- Project structure refactored: source code moved to ``src/`` directory
+- Python 3 compatibility fixes throughout the codebase (parser, scanner, templates)
+- Fix ``_uscan.re`` Python 3 compatibility
+- Run ``modernize`` script across all modules
+- Code cleanup and linter integration (ruff, bandit)
+- Upgrade dependencies; switch to ``pip-compile-multi`` for requirements management
+- Add Docker Compose setup examples
+- Add Pillow 6.2.1 and update requirements
+- Fix deprecated warnings in tests
+- Fix bugs in EasyTimeline.pl
+- Migrate build system to ``pyproject.toml``
+
+2018-04-24 mwlib 0.16.1
+------------------------
+- Fix handling of missing imagelink in imagemap
+
+2018-04-24 mwlib 0.16.0
+------------------------
+- Code cleanup with autopep8
+- Add requirements file and split test requirements
+- Fix HTTPS in test URLs
+- Use named PyPI server for package uploads
+
 2016-02-18 mwlib 0.15.16
 ------------------------
 - ignore hatnote

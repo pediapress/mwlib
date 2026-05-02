@@ -8,22 +8,22 @@ import logging
 import random
 import time
 from collections import deque
-from http import cookiejar
 from urllib import parse
-from urllib.error import HTTPError, URLError
 
 try:
     import simplejson as json
 except ImportError:
     import json
 
+import gevent
 import httpx
+from authlib.integrations.httpx_client import OAuth2Client
 from gevent.lock import Semaphore
 
 from mwlib.core import authors
 from mwlib.network import api as network_api
 from mwlib.network import auth as network_auth
-from mwlib.network.http_client import HttpClientManager
+from mwlib.network.http_client import HttpClientManager, oauth2_config_fingerprint
 from mwlib.utils import conf
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,13 @@ class RateLimiter:
         self._lock = Semaphore(1)
 
     def acquire(self):
-        """Block until a request is allowed under the rate limit."""
+        """Block (cooperatively) until a request is allowed under the rate limit.
+
+        This runs inside the gevent-based fetcher; ``time.sleep`` would
+        block the entire hub and starve every other greenlet. ``gevent.sleep``
+        yields to the scheduler so unrelated requests keep flowing while
+        this caller is throttled.
+        """
         while True:
             with self._lock:
                 now = time.monotonic()
@@ -88,15 +94,18 @@ class RateLimiter:
                 # Calculate how long to wait until the oldest entry expires
                 wait_time = self._period - (now - self._timestamps[0])
 
-            time.sleep(max(wait_time, 0.01))
+            gevent.sleep(max(wait_time, 0.01))
 
 
 class MwApi:
-    # Track domains and their token expiration timestamps
-    _token_info = {}  # Format: {domain: {'token': token, 'expires_at': timestamp}}
-    request_counter = 0
-    _rate_limiters = {}  # Format: {origin: RateLimiter}
-    _rate_limiter_rps = {}  # Format: {origin: max_rps}
+    # Token state and rate-limit state are shared across MwApi instances
+    # because two MwApis for the same wiki should reuse the same token /
+    # the same per-origin rate limiter. ``request_counter`` is per
+    # instance — see ``__init__`` — to avoid the class attribute being
+    # silently shadowed on first increment via ``self``.
+    _token_info = {}  # {token-cache-key: {token, expires_at, ...}}
+    _rate_limiters = {}  # {origin: RateLimiter}
+    _rate_limiter_rps = {}  # {origin: max_rps}
     _rate_limiter_lock = Semaphore(1)
 
     def __init__(self, apiurl, username=None, password=None, use_oauth2=None, use_http2=None):
@@ -104,7 +113,7 @@ class MwApi:
         self.baseurl = apiurl  # XXX
 
         # Determine whether to use OAuth2 and HTTP/2 from configuration if not specified
-        self.use_oauth2 = (
+        requested_oauth2 = (
             use_oauth2 if use_oauth2 is not None else conf.get("oauth2", "enabled", False, bool)
         )
         self.use_http2 = (
@@ -113,15 +122,30 @@ class MwApi:
 
         # Get HTTP client from manager
         self.http_client = HttpClientManager.get_instance().get_client(
-            self.apiurl, use_oauth2=self.use_oauth2, use_http2=self.use_http2
+            self.apiurl, use_oauth2=requested_oauth2, use_http2=self.use_http2
         )
 
-        # Set basic auth if username is provided and OAuth2 is not enabled
+        # Trust the actual client type rather than what we asked for. If
+        # OAuth2 was requested but credentials are missing, ``get_client``
+        # falls back to a standard client; ``_ensure_oauth2_token`` would
+        # otherwise call ``fetch_token`` on a non-OAuth2 client and fail.
+        self.use_oauth2 = isinstance(self.http_client, OAuth2Client)
+
+        # Basic Auth lives per-instance and is passed per request. It used
+        # to be set on the shared ``http_client.auth``, which leaked
+        # credentials across every other ``MwApi`` sharing the same origin
+        # (and would silently be overwritten by the next caller).
+        self.basic_auth = None
         if username and not self.use_oauth2:
-            self.http_client.auth = httpx.BasicAuth(username, password or "")
+            self.basic_auth = httpx.BasicAuth(username, password or "")
 
         self.edittoken = None
         self.qccount = 0
+        # Per-instance: incrementing through ``self.request_counter`` used
+        # to silently shadow the class-level default after the first call,
+        # which made the test fixture's ``MwApi.request_counter = 0`` reset
+        # ineffective for any instance that had already issued a request.
+        self.request_counter = 0
         self.api_result_limit = conf.get("fetch", "api_result_limit", 500, int)
         self.api_request_limit = conf.get("fetch", "api_request_limit", 15, int)
         self.max_connections = conf.get("fetch", "max_connections", 20, int)
@@ -170,9 +194,7 @@ class MwApi:
                 limiter = RateLimiter(max_calls=max_rps, period=1.0)
                 MwApi._rate_limiters[origin] = limiter
                 MwApi._rate_limiter_rps[origin] = max_rps
-                logger.info(
-                    f"Rate limiter initialized for {origin}: {max_rps} requests/second"
-                )
+                logger.info(f"Rate limiter initialized for {origin}: {max_rps} requests/second")
 
         limiter.acquire()
 
@@ -198,21 +220,29 @@ class MwApi:
         return request_headers
 
     def _send_http_request(self, method, url, data, request_headers):
+        # ``auth`` is passed per-request so two MwApi instances sharing
+        # the underlying httpx client (same origin) don't clobber each
+        # other's credentials.
+        auth = self.basic_auth
         if method == "POST":
-            response = self.http_client.post(url, data=data, headers=request_headers)
+            response = self.http_client.post(url, data=data, headers=request_headers, auth=auth)
         else:
-            response = self.http_client.get(url, headers=request_headers)
+            response = self.http_client.get(url, headers=request_headers, auth=auth)
         response.raise_for_status()
         return response.content
 
     def _retry_or_raise(self, *, url, error, retry_state, retry_policy):
+        # Use ``gevent.sleep`` so retry backoff cooperates with the
+        # gevent hub. ``time.sleep`` would block the entire event loop
+        # and starve every other greenlet sharing the worker — same
+        # reasoning as ``RateLimiter.acquire``.
         return network_api.retry_or_raise(
             url=url,
             error=error,
             retry_state=retry_state,
             retry_policy=retry_policy,
             logger=logger,
-            sleep_fn=time.sleep,
+            sleep_fn=gevent.sleep,
             uniform_fn=random.uniform,
         )
 
@@ -344,6 +374,18 @@ class MwApi:
         res = loads(data)
         return res
 
+    def _oauth_token_cache_key(self):
+        """Token cache key — fingerprints the full OAuth identity.
+
+        ``HttpClientManager`` already separates clients by credential
+        fingerprint; the token cache must match. Without the secret
+        fingerprint here, a credential rotation produces a fresh client
+        but the new client could still pick up the old client's cached
+        access token until expiry.
+        """
+        parsed = parse.urlparse(self.apiurl)
+        return f"{parsed.netloc}|oauth={oauth2_config_fingerprint()}"
+
     def _ensure_oauth2_token(self):
         network_auth.ensure_oauth2_token(
             enabled=self.use_oauth2,
@@ -352,6 +394,7 @@ class MwApi:
             http_client=self.http_client,
             logger=logger,
             current_time_fn=time.time,
+            cache_key=self._oauth_token_cache_key() if self.use_oauth2 else None,
         )
 
     def do_request(self, use_post=False, **kwargs):

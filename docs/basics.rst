@@ -4,18 +4,16 @@ Getting started
 mwlib provides a library for parsing MediaWiki articles and
 converting them to different output formats.
 
-The collection extension is a MediaWiki extensions enabling users to
+The collection extension is a MediaWiki extension enabling users to
 collect articles and generate PDF files from those.
 
-Both components are used by wikipedia's 'Print/export' feature.
-
-If you're running a low-traffic public mediawiki installation, you
-only have to install the collection extension. You'll have to use the
-public render server run by pediapress GmbH. Please read
-:doc:`collection`.
+mwlib is used by some MediaWiki installations for PDF export.
 
 If you need to run your own render server instance, you'll have to
-install mwlib and mwlib.rl first. Please read :doc:`installation`.
+install mwlib first. Please read :doc:`installation`.
+
+The Collection extension is optional and can be configured to point
+to your own render server. Please read :doc:`collection`.
 
 Contact/Need help
 ==================

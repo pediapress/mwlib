@@ -55,8 +55,7 @@ def fetch_and_store_oauth_token(
     except httpx.HTTPError as exc:
         retry_delay = store_oauth_token_failure(token_info_map, domain, token_info, current_time)
         logger.error(
-            f"Failed to fetch OAuth2 token for {domain}: {exc}. "
-            f"Retrying in {retry_delay} seconds."
+            f"Failed to fetch OAuth2 token for {domain}: {exc}. Retrying in {retry_delay} seconds."
         )
         raise RuntimeError(f"Failed to fetch OAuth2 token for {domain}: {exc}") from exc
 
@@ -71,20 +70,57 @@ def ensure_oauth2_token(
     http_client,
     logger,
     current_time_fn,
+    cache_key=None,
 ):
+    """Make sure the OAuth2 client has a valid token.
+
+    Token state is cached in ``token_info_map`` under ``cache_key``. By
+    default the key is just the API domain, but callers with multiple
+    OAuth configurations against the same wiki (credential rotation,
+    multi-tenant test runs) should pass a key that also captures
+    client identity — otherwise two distinct OAuth configs share each
+    other's access tokens.
+
+    The OAuth2 client also holds its own ``.token`` attribute that
+    authlib reads when serializing the ``Authorization`` header. That
+    state drifts from the cache when the client is invalidated and
+    recreated; reconcile rather than blindly short-circuiting.
+
+    Order of operations:
+    1. If the cached entry is fresh and the client already has the same
+       token, return.
+    2. If the cached entry is fresh but the client is missing it, push
+       the cached token onto the client and return.
+    3. Otherwise refetch (subject to backoff).
+    """
     if not enabled:
         return
 
-    domain = get_oauth_domain(apiurl)
+    key = cache_key if cache_key is not None else get_oauth_domain(apiurl)
     current_time = current_time_fn()
-    token_info = token_info_map.get(domain, {})
+    token_info = token_info_map.get(key, {})
+
     if not token_needs_refresh(token_info, current_time):
-        return
+        cached_token = token_info.get("token")
+        client_token = getattr(http_client, "token", None)
+        if cached_token is not None and client_token == cached_token:
+            return
+        if cached_token is not None:
+            try:
+                http_client.token = cached_token
+                return
+            except Exception:
+                logger.warning(
+                    "Failed to restore cached OAuth token onto client; will refetch",
+                    exc_info=True,
+                )
+                # Fall through to refetch.
+
     if not token_backoff_elapsed(token_info, current_time):
         return
 
     fetch_and_store_oauth_token(
-        domain=domain,
+        domain=key,
         token_info=token_info,
         current_time=current_time,
         token_info_map=token_info_map,

@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "Cython", "toml"]
 
 [project]
 name = "mwlib"
-version = "0.18.1"
+version = "0.18.3"
 description = "mediawiki parser and utility library"
 authors = [
     {name = "pediapress.com", email = "info@pediapress.com"}
@@ -28,6 +28,7 @@ dependencies = [
     "pyparsing",
     "python-dotenv>=1.1.1",
     "reportlab",
+    "requests",
     "roman",
     "simplejson",
     "sqlitedict",
@@ -53,12 +54,27 @@ classifiers = [
 ]
 license = "BSD-3-Clause"
 
+# Optional runtime extras users opt into with ``pip install mwlib[bigquery]``.
+# ``google-cloud-bigquery`` pulls in gRPC + a pile of Google libs; keeping it
+# out of the default install means consumers who don't run the WME-ingest
+# pipeline or BigQuery image lookup don't pay for those.
+[project.optional-dependencies]
+bigquery = [
+    "google-cloud-bigquery>=3.0",
+]
+
 [dependency-groups]
+# Tests import ``google.cloud.bigquery`` (the BigQuery image lookup and the
+# WME ingest CLI both have unit tests that mock against the SDK), so a clean
+# ``uv sync`` for development needs the extra installed alongside the test
+# runner. Listed here in addition to ``[project.optional-dependencies]`` so
+# end-user installs stay slim while ``uv run pytest`` works without flags.
 dev = [
     "pytest",
     "pytest-httpx>=0.35.0",
     "pytest-xdist",
     "wsgi-intercept",
+    "google-cloud-bigquery>=3.0",
 ]
 
 [project.urls]
@@ -75,6 +91,7 @@ mw-render = "mwlib.core.main_trampoline:mw_render_main"
 mw-version = "mwlib.utils._version:main"
 mw-zip = "mwlib.core.main_trampoline:mw_zip_main"
 postman = "mwlib.core.main_trampoline:postman_main"
+wme-ingest = "mwlib.apps.fetch_wikimedia_snapshot:main"
 
 [tool.ruff]
 force-exclude = true

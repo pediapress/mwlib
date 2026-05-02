@@ -42,6 +42,16 @@ _download_rate_limiter_rps = {}
 _download_rate_limiter_init_lock = Semaphore(1)
 
 
+class BqTemplatesError(ValueError):
+    """A BigQuery row's ``templates`` field couldn't be parsed.
+
+    The flush loop catches this and reroutes the title to the remote-API
+    fallback rather than persisting a row whose license-check input is
+    unknown — an empty template list passes ``blacklist`` mode, so
+    silently treating corrupt data as empty would fail open.
+    """
+
+
 class SharedProgress:
     status = None
     last_percent = 0.0
@@ -111,7 +121,7 @@ class FsOutput:
         self.imgcount = 0
         self.nfo = None
 
-        for storage in ["authors", "html", "imageinfo"]:
+        for storage in ["authors", "html", "imageinfo", "templates"]:
             db_path = os.path.join(self.path, storage + ".db")
             if os.path.exists(db_path):
                 os.remove(db_path)
@@ -299,7 +309,9 @@ def _acquire_download_rate_limit(url):
             limiter = mwapi.RateLimiter(max_calls=max_rps, period=1.0)
             _download_rate_limiter[origin] = limiter
             _download_rate_limiter_rps[origin] = max_rps
-            logger.info(f"Download rate limiter initialized for {origin}: {max_rps} requests/second")
+            logger.info(
+                f"Download rate limiter initialized for {origin}: {max_rps} requests/second"
+            )
 
     limiter.acquire()
 
@@ -314,9 +326,6 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
 
 
 class Fetcher:
-    titles_pending_contributor_lookup = defaultdict(list)
-    title_mapping = {}
-
     def __init__(
         self,
         api,
@@ -331,6 +340,13 @@ class Fetcher:
     ):
         self.dispatch_event = gevent.event.Event()
         self.api_semaphore = Semaphore(conf.get("fetch", "api_request_limit", 5, int))
+
+        # Per-instance state. Previously these were class-level defaults
+        # (``defaultdict(list)`` and ``{}``), which leaked across Fetcher
+        # instances in the same process — concurrent or sequential fetches
+        # could see each other's titles and mappings.
+        self.titles_pending_contributor_lookup = defaultdict(list)
+        self.title_mapping = {}
 
         self.cover_image = cover_image
 
@@ -371,6 +387,29 @@ class Fetcher:
         self.imageinfo_todo = []
         self.imagedescription_todo = {}  # base path -> list
         self._nshandler = None
+
+        # BigQuery lookup for image description pages
+        self.bq_lookup = None
+        self._bq_pending = []  # (local_name, api, original_title) tuples awaiting BQ lookup
+        self._bq_batch_size = 50  # flush threshold
+        self._bq_deferred_downloads = {}  # original_title → thumburl, awaiting license check
+        self.fetch_license_checker = None
+        if conf.get("bigquery", "enabled", False, bool):
+            try:
+                from mwlib.network.bigquery_lookup import BigQueryImageLookup
+
+                self.bq_lookup = BigQueryImageLookup()
+            except Exception:
+                logger.warning("BigQuery lookup init failed, using remote API", exc_info=True)
+
+        if self.bq_lookup and self.bq_lookup.is_available:
+            from mwlib.rendering.licensechecker import LicenseChecker
+
+            self.fetch_license_checker = LicenseChecker(
+                image_db=None,
+                filter_type=self._filter_type_for_apiurl(self.api.apiurl),
+            )
+            self.fetch_license_checker.read_licenses_csv()
 
         siteinfo = self.get_siteinfo_for(self.api)
         self.fsout.write_siteinfo(siteinfo)
@@ -473,6 +512,15 @@ class Fetcher:
         dispatch_gr = gevent.spawn(call_when, self.dispatch_event, self.dispatch)
         try:
             self.pool.join()
+            # Small batches that never reached ``_bq_batch_size`` are still
+            # sitting in ``_bq_pending`` here. Flushing them spawns new
+            # greenlets (image downloads + remote-API fallbacks) on
+            # ``self.pool``, so we have to join the pool a second time —
+            # otherwise ``finish()`` would close fsout while those
+            # greenlets were still writing to it.
+            if self.bq_lookup and self._bq_pending:
+                self._flush_bq_batch()
+                self.pool.join()
         finally:
             dispatch_gr.kill()
 
@@ -746,45 +794,40 @@ class Fetcher:
         # Reverting to looking up individual titles - at least for the time being
         self._lookup_contributors(api, title)
 
-    def _lookup_contributors(self, api: MwApi, title=None) -> None:
-        """Process the current batch of titles for author information.
+    def _lookup_contributors(self, api: MwApi, title: str | None = None) -> None:
+        """Look up authors for one title, or for the entire pending batch.
 
-        This method makes a single API request for all titles in the batch,
-        then processes the results and stores them in the database.
+        When ``title`` is given, only that title is looked up — the pending
+        batch is left untouched. When ``title`` is None, the pending batch
+        for ``api`` is consumed and cleared.
+
+        The previous version took ``title`` but iterated
+        ``titles_pending_contributor_lookup[api]`` regardless, which —
+        combined with `_add_to_titles_pending_contributor_lookup` no longer
+        appending to the batch in the single-title path — silently dropped
+        author attribution for every page.
         """
-        # Make the API request for all titles in the batch
-        if title is None:
-            title_to_authors = api.get_contributors(self.titles_pending_contributor_lookup[api])
+        if title is not None:
+            titles = [title]
         else:
-            title_to_authors = api.get_contributors([title])
+            titles = list(self.titles_pending_contributor_lookup[api])
 
-        # Process the results for each title
-        authors_dict = {}
-        title: str
-        for title in self.titles_pending_contributor_lookup[api]:
-            # Skip if the title is not in the results (e.g., if it was redirected)
-            if title not in title_to_authors:
+        if not titles:
+            return
+
+        title_to_authors = api.get_contributors(titles)
+
+        for contributor_title in titles:
+            inspect_authors = title_to_authors.get(contributor_title)
+            if inspect_authors is None:
+                # Skipped, e.g. redirected away — nothing to record.
                 continue
-
-            # Get the InspectAuthors object for this title
-            inspect_authors = title_to_authors[title]
-
-            # Get the authors for this title
             authors = inspect_authors.get_authors()
-
-            # Use the mapped title if available (for image pages)
-            db_title = title
-            if title in self.title_mapping:
-                db_title = self.title_mapping[title]
-
-            # Store the authors in the database
+            db_title = self.title_mapping.get(contributor_title, contributor_title)
             self.fsout.set_db_key("authors", db_title, authors)
 
-            # Store the authors in a dictionary for future use
-            authors_dict[title] = authors
-
-        # Clear the batch
-        self.authors_batch = []
+        if title is None:
+            self.titles_pending_contributor_lookup[api] = []
 
     def report(self):
         query_count = self.api.qccount
@@ -917,11 +960,21 @@ class Fetcher:
             # FIXME: add Callback that checks correct file size
             if thumb_url.startswith("/"):
                 thumb_url = parse.urljoin(self.api.baseurl, thumb_url)
-            self.schedule_download_image(thumb_url, title)
 
             description_url = imageinfo.get("descriptionurl", "")
             if not description_url:
                 description_url = image.get("fullurl", "")
+
+            # Defer download for BigQuery-eligible domains (license check first)
+            if (
+                self.bq_lookup
+                and self.bq_lookup.is_available
+                and description_url
+                and self.bq_lookup.handles_domain(description_url)
+            ):
+                self._bq_deferred_downloads[title] = thumb_url
+            else:
+                self.schedule_download_image(thumb_url, title)
 
             if description_url and "/" in description_url:
                 path, _ = description_url.rsplit("/", 1)
@@ -963,7 +1016,6 @@ class Fetcher:
         self.fsout.write_pages(data)
 
     def handle_new_basepath(self, path):
-        api = self._get_mwapi_for_path(path)
         todo = self.imagedescription_todo[path]
         del self.imagedescription_todo[path]
 
@@ -975,32 +1027,299 @@ class Fetcher:
         if not titles:
             return
 
-        siteinfo = self.get_siteinfo_for(api)
+        bq_eligible = (
+            self.bq_lookup and self.bq_lookup.is_available and self.bq_lookup.handles_domain(path)
+        )
 
-        ns_handler = nshandling.NsHandler(siteinfo)
-        nsname = ns_handler.get_nsname_by_number(6)
+        # Build the api / siteinfo lazily so a flaky remote can't kill a
+        # working BigQuery cache hit. If BQ would handle this path we can
+        # fall back to the EN nshandler — BigQuery snapshots are EN-keyed
+        # ("File:...") so that's the canonical name shape we need for the
+        # lookup.
+        api = None
+        nsname = None
+        try:
+            api = self._get_mwapi_for_path(path)
+            siteinfo = self.get_siteinfo_for(api)
+            nsname = nshandling.NsHandler(siteinfo).get_nsname_by_number(6)
+        except Exception:
+            if not bq_eligible:
+                raise
+            logger.warning(
+                "Remote siteinfo failed for %s; proceeding via BigQuery only",
+                path,
+                exc_info=True,
+            )
+            nsname = nshandling.get_nshandler_for_lang("en").get_nsname_by_number(6)
 
         local_names = []
         for title in titles:
             partial = title.split(":", 1)[1]
-            local_names.append(f"{nsname}:{partial}")
+            local_names.append((f"{nsname}:{partial}", title))
 
-        for block in split_blocks(local_names, api.api_request_limit):
+        if bq_eligible:
+            for local_name, orig_title in local_names:
+                self._bq_pending.append((local_name, api, orig_title))
+            if len(self._bq_pending) >= self._bq_batch_size:
+                self._flush_bq_batch()
+            # Contributor lookup needs the remote API. If api creation
+            # failed above we don't schedule it; ``_flush_bq_batch`` then
+            # fails closed for those entries (drops the deferred image
+            # download regardless of whether BigQuery had a hit), so the
+            # rendered book never includes an image with license data
+            # but no attribution.
+            if api is not None:
+                for local_name, _ in local_names:
+                    self._refcall(self.get_image_edits, local_name, api)
+            return
+
+        # Non-BigQuery path: unchanged
+        just_names = [ln for ln, _ in local_names]
+        for block in split_blocks(just_names, api.api_request_limit):
             self._refcall(self.fetch_image_page, block, api)
 
-        for title in local_names:
-            self._refcall(self.get_image_edits, title, api)
+        for local_name, _ in local_names:
+            self._refcall(self.get_image_edits, local_name, api)
+
+    def _flush_bq_batch(self):
+        """Send all pending titles to BigQuery in a single query.
+
+        Titles found in BigQuery are stored locally. Missing titles fall back
+        to the remote API. Deferred image downloads are scheduled or skipped
+        based on the license check result.
+        """
+        if not self._bq_pending:
+            return
+
+        pending = self._bq_pending
+        self._bq_pending = []
+
+        # Build mappings: local_name → api, local_name → original_title
+        # Deduplicate titles for the BigQuery query
+        api_by_local = {}
+        orig_by_local = {}
+        seen = set()
+        unique_titles = []
+        for local_name, api, orig_title in pending:
+            api_by_local[local_name] = api
+            orig_by_local[local_name] = orig_title
+            if local_name not in seen:
+                seen.add(local_name)
+                unique_titles.append(local_name)
+
+        rows, missing = self.bq_lookup.fetch_batch(unique_titles)
+
+        # Store BigQuery results + license check + deferred downloads.
+        # Rows with unparseable templates go onto ``missing`` so the
+        # remote-API fallback applies the description-page parser
+        # instead — silently treating corrupt template data as "no
+        # templates" would fail open in blacklist mode.
+        #
+        # Entries with ``api=None`` are also fail-closed: BigQuery has
+        # the license/template data, but ``handle_new_basepath``
+        # skipped ``get_image_edits`` because remote-API discovery
+        # failed. Downloading the image would produce a rendered book
+        # with no contributor attribution, so we drop the deferred
+        # download even on a clean BigQuery hit.
+        for row in rows:
+            local_name = row["name"]
+            orig_title = orig_by_local.get(local_name, local_name)
+            try:
+                passes_license = self._store_bq_result(row)
+            except BqTemplatesError as exc:
+                logger.warning("Routing %s to remote-API fallback: %s", local_name, exc)
+                missing.append(local_name)
+                continue
+
+            if api_by_local.get(local_name) is None:
+                if orig_title in self._bq_deferred_downloads:
+                    self._bq_deferred_downloads.pop(orig_title, None)
+                    logger.warning(
+                        "Skipping image download for %s: BigQuery has the row "
+                        "but contributor lookup was not scheduled (no remote "
+                        "API available) — refusing to ship an unattributed image",
+                        orig_title,
+                    )
+                continue
+
+            if passes_license and orig_title in self._bq_deferred_downloads:
+                self.schedule_download_image(
+                    self._bq_deferred_downloads.pop(orig_title), orig_title
+                )
+            elif not passes_license:
+                self._bq_deferred_downloads.pop(orig_title, None)
+                logger.info("Skipping image download for %s (license filtered)", orig_title)
+
+        # Fall back to remote API for missing titles. Some entries may
+        # have ``api=None`` because ``handle_new_basepath`` proceeded
+        # via BigQuery after a remote-discovery failure — for those we
+        # have no way to fetch the description page, so we must NOT
+        # schedule the deferred image download either. Otherwise we'd
+        # ship an image with no license/attribution data at all.
+        if missing:
+            by_api = {}
+            without_api = []
+            for local_name in missing:
+                api = api_by_local.get(local_name)
+                if api is None:
+                    without_api.append(local_name)
+                else:
+                    by_api.setdefault(api, []).append(local_name)
+
+            for api, api_titles in by_api.items():
+                for block in split_blocks(api_titles, api.api_request_limit):
+                    self._refcall(self.fetch_image_page, block, api)
+
+            # Deferred downloads only for titles that DID get a fallback
+            # description-page fetch scheduled.
+            fallback_titles = {t for ts in by_api.values() for t in ts}
+            for local_name in fallback_titles:
+                orig_title = orig_by_local.get(local_name, local_name)
+                if orig_title in self._bq_deferred_downloads:
+                    self.schedule_download_image(
+                        self._bq_deferred_downloads.pop(orig_title), orig_title
+                    )
+
+            for local_name in without_api:
+                orig_title = orig_by_local.get(local_name, local_name)
+                self._bq_deferred_downloads.pop(orig_title, None)
+                logger.warning(
+                    "Skipping %s: BigQuery missed/failed and no remote API "
+                    "fallback is available — refusing to download an image "
+                    "without license/attribution data",
+                    orig_title,
+                )
+
+    def _store_bq_result(self, row) -> bool:
+        """Store a BigQuery row into fsout databases.
+
+        Returns True if the image passes the license check.
+        """
+        title = row["name"]
+
+        template_names = self._extract_bq_template_names(title, row.get("templates"))
+
+        # Store an entry for every BigQuery hit, including the empty list,
+        # so render-time ``get_image_templates_and_args`` can rely on the
+        # cache and not silently fall back to wikitext parsing for an image
+        # we deliberately decided not to fetch.
+        self.fsout.set_db_key("templates", title, template_names)
+
+        # Early license check
+        passes_license = self._check_license_from_templates(template_names)
+
+        # Supplement imageinfo with dimensions and content URL
+        existing = {}
+        with contextlib.suppress(KeyError, ValueError):
+            existing = self.fsout.get_db_key("imageinfo", title)
+
+        if row.get("image_content_url"):
+            existing.setdefault("url", row["image_content_url"])
+        if row.get("image_width"):
+            existing.setdefault("width", row["image_width"])
+        if row.get("image_height"):
+            existing.setdefault("height", row["image_height"])
+        if row.get("url"):
+            existing.setdefault("descriptionurl", row["url"])
+
+        if existing:
+            self.fsout.set_db_key("imageinfo", title, existing)
+
+        return passes_license
+
+    @staticmethod
+    def _extract_bq_template_names(title: str, raw_templates) -> list[str]:
+        """Pull the ``Template:Name`` list out of a BigQuery row's templates column.
+
+        BigQuery returns the column either as a Python list (for native
+        REPEATED RECORD columns) or as a JSON string (for JSON columns).
+        ``None`` and ``[]`` are legitimate "no templates" signals and
+        return ``[]``.
+
+        Anything we can't parse (malformed JSON, unexpected shape) raises
+        ``BqTemplatesError``. The flush loop catches that and reroutes
+        the title to the remote-API fallback rather than treating it as
+        empty — an empty template list passes ``blacklist`` mode, so
+        silently treating corrupt data as empty would fail open and let
+        through images the remote description-page parser may have
+        rejected.
+        """
+        if raw_templates is None:
+            return []
+        if isinstance(raw_templates, str):
+            try:
+                raw_templates = json.loads(raw_templates)
+            except (ValueError, TypeError) as exc:
+                raise BqTemplatesError(f"malformed templates JSON for {title}") from exc
+        if not isinstance(raw_templates, list):
+            raise BqTemplatesError(
+                f"templates for {title} is {type(raw_templates).__name__}, expected list"
+            )
+
+        # Templates are objects like {"name": "Template:Cc-by-sa", "url": "..."}.
+        # Extract just the template names, stripping the "Template:" prefix.
+        # Anything that doesn't look like a real template name (missing
+        # ``name``, empty string, unexpected element type) raises rather
+        # than silently dropping into ``""`` — partial template lists
+        # can pass blacklist mode and we don't want corrupt rows to get
+        # there.
+        template_names: list[str] = []
+        for t in raw_templates:
+            if isinstance(t, dict):
+                name = t.get("name")
+                if not isinstance(name, str) or not name:
+                    raise BqTemplatesError(f"template entry for {title} has no valid name")
+                if name.startswith("Template:"):
+                    name = name[len("Template:") :]
+                template_names.append(name)
+                continue
+            if isinstance(t, str) and t:
+                template_names.append(t)
+                continue
+            raise BqTemplatesError(
+                f"template entry for {title} is {type(t).__name__}, expected dict or non-empty str"
+            )
+        return template_names
+
+    @staticmethod
+    def _filter_type_for_apiurl(apiurl: str) -> str:
+        """Match render-time license policy for the wiki at ``apiurl``.
+
+        de.wikipedia.org runs the whitelist; everywhere else uses the
+        blacklist. The hostname is parsed and compared exactly so a
+        lookalike URL (e.g. ``de.wikipedia.org.evil.example``) can't
+        shift policy by being a substring of ``apiurl``.
+        """
+        host = (parse.urlparse(apiurl).hostname or "").lower()
+        return "whitelist" if host == "de.wikipedia.org" else "blacklist"
+
+    def _check_license_from_templates(self, templates: list[str]) -> bool:
+        """Decide whether an image passes the license filter at fetch time.
+
+        Delegates to ``LicenseChecker.decide_from_template_names`` so the
+        decision stays bit-for-bit aligned with render-time
+        ``LicenseChecker._check_licenses`` and we don't have to reach into
+        ``_get_licenses`` from outside the class.
+        """
+        if not self.fetch_license_checker:
+            return True
+        return self.fetch_license_checker.decide_from_template_names(templates)
 
     def get_image_edits(self, title: str, api: MwApi):
         """Get edit history for an image page.
 
-        This method is now a wrapper around _add_to_authors_batch, which collects titles
-        for batched processing. The actual API request is made when the batch is full
-        or when explicitly flushed.
+        Adds ``title`` to the contributor-lookup batch (currently a
+        single-title path that runs the API request immediately).
+
+        Order matters: ``title_mapping`` must be populated **before**
+        ``_add_to_titles_pending_contributor_lookup`` so that
+        ``_lookup_contributors`` sees the local-namespace mapping and
+        writes ``authors`` under the local title instead of the remote
+        one.
 
         Args:
-            title (str): Title of the image page to get edit history for
-            api (MwApi): API instance to use for the request
+            title: Title of the image page to get edit history for.
+            api: API instance to use for the request.
 
         """
         local_nsname = self.nshandler.get_nsname_by_number(6)
@@ -1008,11 +1327,11 @@ class Fetcher:
         _, partial = title.split(":", 1)
         local_title = f"{local_nsname}:{partial}"
 
-        # Add the title to the batch
-        self._add_to_titles_pending_contributor_lookup(title, api)
-
-        # Map the original title to the local title for later use
+        # Map the original title to the local title FIRST, before the
+        # (immediate) contributor lookup runs.
         self.title_mapping[title] = local_title
+
+        self._add_to_titles_pending_contributor_lookup(title, api)
 
     def _get_mwapi_for_path(self, path):
         urls = mwapi.guess_api_urls(path)
@@ -1084,6 +1403,8 @@ class Fetcher:
 
     def finish(self):
         self._sanity_check()
+        # NB: BigQuery batch flushing has already happened in ``run()`` —
+        # it spawns greenlets and so must run before the final pool.join().
         # Process any pending authors batch
         self.lookup_contributors_for_remaining_titles()
         for api in self.titles_pending_contributor_lookup:

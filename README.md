@@ -118,6 +118,98 @@ export MWLIB_OAUTH2_CLIENT_SECRET="your_client_secret"
 export MWLIB_OAUTH2_ENABLED="True"
 ```
 
+### BigQuery Lookup for Image Description Pages
+
+mwlib can use Google BigQuery to look up image description pages (namespace 6) instead of fetching them from the remote MediaWiki API. This significantly reduces the number of API requests and bypasses Wikipedia rate limits for configured domains.
+
+The data originates from the [Wikimedia Enterprise API](https://enterprise.wikimedia.com/docs/snapshot/) snapshot endpoint, which provides Wikipedia page data as NDJSON files. These snapshots are loaded into a BigQuery table containing pre-extracted metadata: templates (used for license checking), image dimensions, content URLs, and license information.
+
+#### How it works
+
+1. During ZIP creation (`mw-zip`), image description page titles for configured domains (default: `en.wikipedia.org`) are batched and queried from BigQuery.
+2. For pages found in BigQuery, templates are stored locally and an early license check is performed — images that fail the license filter are never downloaded.
+3. Pages not found in BigQuery fall back to the remote MediaWiki API.
+4. Non-configured domains (e.g., Commons) always use the remote API.
+
+#### Prerequisites
+
+The BigQuery client (and the `wme-ingest` CLI that loads snapshots into it)
+is shipped behind the `bigquery` extra so default installs stay slim. Install
+it via the extra rather than pinning `google-cloud-bigquery` directly:
+
+```bash
+# pip
+pip install "mwlib[bigquery]"
+
+# uv (project install)
+uv pip install "mwlib[bigquery]"
+
+# uv (developer checkout)
+uv sync --extra bigquery
+```
+
+The `bigquery` extra is also pulled in by the `dev` dependency group, so
+`uv sync` (default groups) installs it for development and test runs.
+
+Set up GCP authentication by pointing to a service account JSON file:
+```shell
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+```
+
+#### BigQuery Configuration Options
+
+| Config File Option   | Environment Variable         | Default             | Description                                        |
+|----------------------|------------------------------|---------------------|----------------------------------------------------|
+| bigquery.enabled     | MWLIB_BIGQUERY_ENABLED       | false               | Master switch to enable BigQuery lookups            |
+| bigquery.project     | MWLIB_BIGQUERY_PROJECT       | _(required)_        | GCP project ID                                     |
+| bigquery.dataset     | MWLIB_BIGQUERY_DATASET       | wme_snapshots       | BigQuery dataset name                              |
+| bigquery.table       | MWLIB_BIGQUERY_TABLE         | file_pages          | BigQuery table name                                |
+| bigquery.timeout     | MWLIB_BIGQUERY_TIMEOUT       | 30                  | Query timeout in seconds                           |
+| bigquery.domains     | MWLIB_BIGQUERY_DOMAINS       | en.wikipedia.org    | Comma-separated domains to route through BigQuery  |
+
+Example environment variable configuration:
+```shell
+export MWLIB_BIGQUERY_ENABLED="true"
+export MWLIB_BIGQUERY_PROJECT="my-gcp-project"
+export MWLIB_BIGQUERY_DATASET="wikipedia"
+export MWLIB_BIGQUERY_TABLE="file_pages"
+export MWLIB_BIGQUERY_DOMAINS="en.wikipedia.org"
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+```
+
+Or in a configuration file (mwlib.ini):
+```ini
+[bigquery]
+enabled=true
+project=my-gcp-project
+dataset=wikipedia
+table=file_pages
+domains=en.wikipedia.org
+```
+
+When BigQuery is disabled or unavailable (missing credentials, network error, etc.), mwlib falls back to the remote API automatically with no change in behavior.
+
+#### Loading Data into BigQuery
+
+Use the `wme-ingest` command to download a Wikimedia Enterprise namespace 6 snapshot and load it into BigQuery:
+
+```bash
+# Full pipeline: download snapshot + load into BigQuery
+wme-ingest --project my-gcp-project --dataset wikipedia
+
+# Load from an already-downloaded tarball
+wme-ingest -i /path/to/enwiki_ns6.tar.gz --project my-gcp-project --dataset wikipedia
+
+# List available snapshots
+wme-ingest --list
+```
+
+This requires Wikimedia Enterprise API credentials:
+```shell
+export WME_USERNAME="your-username"
+export WME_PASSWORD="your-password"
+```
+
 ## Docker Compose Setup
 For users interested in setting up mwlib using Docker Compose, detailed instructions are available at [Docker Compose documentation](https://docs.docker.com/compose/).
 

@@ -76,12 +76,18 @@ attributes::
         }
     }
 
-For example the writer "odf" (defined in ``mwlib.odfwriter``) sets the
+For example the writer "odf" (defined in ``mwlib.writers.odf.writer``) sets the
 attributes to these values::
 
     writer.description = 'OpenDocument Text'
     writer.content_type = 'application/vnd.oasis.opendocument.text'
     writer.file_extension = 'odt'
+
+.. note::
+
+   The ``odf`` writer is unmaintained and incomplete. It lacks support for
+   galleries, timelines, hiero, imagemaps, and license handling. Use the
+   ``rl`` (PDF) writer for production output.
 
 and the writer "rl" from mwlib.rl (defined in `mwlib.writers.rl.writer``) sets
 the attributes to these values::
@@ -108,20 +114,12 @@ Publishing the writer
 Writers are made available as plugins using `setuptools entry points`_.
 They have a name and must belong to the entry point group "mwlib.writers".
 To publish writers in your distribution, add all included writers to the
-entry group by passing the entry_points kwarg to the call to
-``setuptools.setup()`` in your ``setup.py`` file::
+entry group in your ``pyproject.toml`` file::
 
-    setup(
-        ...
-        entry_points = {
-            'mwlib.writers': [
-                'foo = somepackage.foo:writer',
-                'bar = somepackage.barbaz:bar_writer',
-                'baz = somepackage.barbaz:baz_writer',
-            ],
-        },
-        ...
-    )
+    [project.entry-points."mwlib.writers"]
+    foo = "somepackage.foo:writer"
+    bar = "somepackage.barbaz:bar_writer"
+    baz = "somepackage.barbaz:baz_writer"
 
 
 Using writers
