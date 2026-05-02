@@ -1,0 +1,99 @@
+name: Publish to PyPI
+
+# Triggered by a published GitHub release (the canonical path) or by
+# manual dispatch (so we can retroactively publish a release that was
+# created before this workflow existed, e.g. 0.18.3).
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or commit to build (defaults to the workflow's checkout)"
+        required: false
+        default: ""
+
+# Trusted Publisher / OIDC: pypa/gh-action-pypi-publish exchanges the
+# GitHub-issued OIDC token for a short-lived PyPI upload token, so no
+# long-lived API token has to live in a GitHub secret.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Default to the tag/release ref; allow overriding via
+          # workflow_dispatch input for retro-publishes.
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Build sdist
+        # Sdist only — this project has C extensions and we don't run
+        # cibuildwheel, so a single-platform wheel would mislead pip on
+        # other platforms. Consumers build from sdist; the pre-generated
+        # .c files (committed in src/) make this fast and compiler-driven.
+        run: uv build --sdist
+
+      - name: Verify version matches the tag
+        # On a release trigger, github.ref_name is the tag (e.g. "0.18.3").
+        # Refuse to publish a sdist whose version doesn't match — guards
+        # against a forgotten pyproject.toml bump.
+        if: github.event_name == 'release'
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          # Strip an optional leading "v" so both "0.18.3" and "v0.18.3"
+          # tag styles work.
+          expected="${tag#v}"
+          actual=$(python3 -c 'import tomllib,sys; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          if [ "$expected" != "$actual" ]; then
+            echo "::error::Tag $tag does not match pyproject version $actual"
+            exit 1
+          fi
+          echo "Tag $tag matches pyproject version $actual"
+
+      - name: Upload sdist as artifact
+        # Keep a copy on the workflow run so post-mortem inspection of
+        # what was published is one click away.
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # The Trusted Publisher entry on PyPI may pin to a specific
+    # environment. Add ``environment: pypi`` here if the PyPI side
+    # requires it (Settings → Publishing → "Environment name").
+    steps:
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # No password / api token: OIDC via Trusted Publishers.
+          packages-dir: dist
+          # Keep this on for the first run so a duplicate upload (e.g.
+          # re-running the workflow after a partial failure) doesn't
+          # blow up. Once we trust the pipeline this can be flipped off.
+          skip-existing: true
