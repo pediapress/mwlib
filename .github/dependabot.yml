@@ -1,0 +1,22 @@
+version: 2
+
+# Keeps GitHub Actions up to date so the next "Node X is deprecated"
+# announcement doesn't catch a release scheduled the same week.
+#
+# - Floating major-tag actions (checkout, setup-python, setup-uv) get
+#   batched into one PR per cycle — they're routine bumps.
+# - SHA-pinned actions (artifact upload/download, the PyPI publisher)
+#   get individual PRs by default; that's correct because each one
+#   crosses the trust boundary and warrants its own review of the
+#   release notes / diff.
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      ci-actions:
+        patterns:
+          - "actions/checkout"
+          - "actions/setup-*"
+          - "astral-sh/setup-uv"

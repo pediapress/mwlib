@@ -1,5 +1,16 @@
 name: Publish to PyPI
 
+# Pinning policy:
+# - Actions inside the build → publish trust boundary (artifact transport
+#   and the publisher itself) are pinned to immutable commit SHAs. A
+#   hijacked tag on those would let an attacker swap the sdist payload
+#   or impersonate the publisher; SHA pins make every bump intentional.
+# - Other actions (checkout, language/tool setup) float on a major-version
+#   tag. Dependabot keeps them current — see ``.github/dependabot.yml``.
+# - Each Node-based action is pinned to a version whose ``action.yml``
+#   declares ``runs.using: node24`` so the workflow survives GitHub's
+#   2026-06-02 removal of the Node 20 runtime.
+#
 # Triggered by a published GitHub release (the canonical path) or by
 # manual dispatch (so we can retroactively publish a release that was
 # created before this workflow existed, e.g. 0.18.3).
@@ -27,19 +38,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Default to the tag/release ref; allow overriding via
           # workflow_dispatch input for retro-publishes.
           ref: ${{ inputs.ref || github.ref }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
 
       - name: Build sdist
         # Sdist only — this project has C extensions and we don't run
@@ -77,9 +88,12 @@ jobs:
           echo "Tag $tag matches pyproject version $actual"
 
       - name: Upload sdist as artifact
-        # Keep a copy on the workflow run so post-mortem inspection of
-        # what was published is one click away.
-        uses: actions/upload-artifact@v4
+        # Inside the trust boundary — pinned to commit SHA so a hijacked
+        # tag can't swap the sdist payload before the publisher uploads
+        # it. Keep a copy on the workflow run so post-mortem inspection
+        # of what was published is one click away.
+        # v7.0.1 (Node 24)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -101,16 +115,22 @@ jobs:
       url: https://pypi.org/p/mwlib
     steps:
       - name: Download sdist
-        uses: actions/download-artifact@v4
+        # Inside the trust boundary — see the upload-artifact pin
+        # rationale in the build job.
+        # v8.0.1 (Node 24)
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: sdist
           path: dist
 
       - name: Publish to PyPI
         # Pinned to a SHA rather than the floating ``release/v1`` branch:
-        # this action mints the OIDC->PyPI token, so a hijacked tag
-        # would mean a hijacked publisher. Bump intentionally.
-        # v1.14.0
+        # this action mints the OIDC→PyPI token, so a hijacked tag would
+        # mean a hijacked publisher. Bump intentionally.
+        #
+        # v1.14.0 — composite action (no ``runs.using: node*`` of its own;
+        # invokes Docker + Python sub-actions internally), so it's not
+        # affected by the Node 20 runner deprecation.
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
         with:
           # No password / api token: OIDC via Trusted Publishers.
