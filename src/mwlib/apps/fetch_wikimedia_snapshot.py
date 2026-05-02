@@ -411,36 +411,46 @@ def iter_extract_ndjson(tarball_path: Path) -> Iterator[Path]:
     Members are validated as regular files at relative paths and then
     streamed via ``shutil.copyfileobj`` rather than handed to
     ``tar.extract`` — see ``_validate_tar_member``.
+
+    Extraction lands in a private temporary directory rather than the
+    tarball's parent. Otherwise a member named ``existing.ndjson`` would
+    overwrite ``/path/to/existing.ndjson`` whenever the operator passes
+    ``-i /path/to/snapshot.tar.gz``, and our cleanup would then unlink
+    a file we didn't create.
     """
-    extract_dir = tarball_path.parent
+    with tempfile.TemporaryDirectory(prefix="wme-ndjson-", dir=tarball_path.parent) as tmp:
+        extract_dir = Path(tmp)
 
-    with tarfile.open(tarball_path, "r:gz") as tar:
-        members = [m for m in tar.getmembers() if m.name.endswith(".ndjson")]
-        if not members:
-            raise ValueError(f"No .ndjson files found in {tarball_path}")
-        for m in members:
-            _validate_tar_member(m)
+        with tarfile.open(tarball_path, "r:gz") as tar:
+            members = [m for m in tar.getmembers() if m.name.endswith(".ndjson")]
+            if not members:
+                raise ValueError(f"No .ndjson files found in {tarball_path}")
+            for m in members:
+                _validate_tar_member(m)
 
-        logger.info("Tarball contains %d NDJSON files; will extract one at a time", len(members))
+            logger.info(
+                "Tarball contains %d NDJSON files; will extract one at a time",
+                len(members),
+            )
 
-        for idx, member in enumerate(members, 1):
-            src = tar.extractfile(member)
-            if src is None:
-                raise ValueError(f"Cannot extract tar member: {member.name}")
-            path = extract_dir / member.name
-            path.parent.mkdir(parents=True, exist_ok=True)
-            with src, open(path, "wb") as dst:
-                shutil.copyfileobj(src, dst)
-            logger.info("Extracted %d/%d: %s (%d bytes)", idx, len(members), path, member.size)
-            try:
-                yield path
-            finally:
-                if path.exists():
-                    try:
-                        path.unlink()
-                        logger.info("Removed extracted NDJSON: %s", path)
-                    except OSError:
-                        logger.exception("Failed to clean up %s", path)
+            for idx, member in enumerate(members, 1):
+                src = tar.extractfile(member)
+                if src is None:
+                    raise ValueError(f"Cannot extract tar member: {member.name}")
+                path = extract_dir / member.name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with src, open(path, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+                logger.info("Extracted %d/%d: %s (%d bytes)", idx, len(members), path, member.size)
+                try:
+                    yield path
+                finally:
+                    if path.exists():
+                        try:
+                            path.unlink()
+                            logger.info("Removed extracted NDJSON: %s", path)
+                        except OSError:
+                            logger.exception("Failed to clean up %s", path)
 
 
 def _make_bq_client(project: str, credentials_path: str | None):
@@ -472,24 +482,36 @@ def _make_bq_schema(schema: list[dict]):
 def _prepare_table(client, table_ref: str, ns: NamespaceConfig) -> None:
     """Ensure the destination table exists with the right schema.
 
-    For script-managed namespaces (NS6) the table is recreated on every run —
-    that's the long-standing behaviour and keeps schema changes effortless.
-    For externally-managed tables (NS0 → Pulumi) the script never drops the
-    table; it just verifies it exists. ``exists_ok=True`` makes the call a
-    no-op when Pulumi has already created it, which is the production case,
-    while still letting the script bootstrap a missing table in dev.
+    For script-managed namespaces (NS6) the table is recreated on every
+    run — that's the long-standing behaviour and keeps schema changes
+    effortless.
+
+    For externally-managed tables (NS0 → Pulumi) the script must NOT
+    bootstrap the table. Pulumi is the source of truth for the
+    clustering / deletion-protection / partitioning settings; if we
+    silently created the table when missing we'd produce a stripped-down
+    table without those guarantees and the next Pulumi run would see
+    drift. Fail loudly with a pointer to the operator instead.
     """
     from google.cloud import bigquery
 
-    schema = _make_bq_schema(ns.schema)
-    table = bigquery.Table(table_ref, schema=schema)
-
     if ns.script_manages_table:
+        schema = _make_bq_schema(ns.schema)
+        table = bigquery.Table(table_ref, schema=schema)
         client.delete_table(table_ref, not_found_ok=True)
         client.create_table(table)
         logger.info("Created BigQuery table %s", table_ref)
     else:
-        client.create_table(table, exists_ok=True)
+        try:
+            client.get_table(table_ref)
+        except Exception as exc:
+            raise RuntimeError(
+                f"BigQuery table {table_ref} is externally managed (e.g. by "
+                f"Pulumi) and could not be found. Provision it before running "
+                f"the ingest — the script refuses to bootstrap a missing "
+                f"externally-managed table because doing so would silently "
+                f"drop clustering / deletion-protection settings."
+            ) from exc
         logger.info("Using BigQuery table %s (managed externally)", table_ref)
 
 
@@ -693,8 +715,19 @@ def load_tarball_to_bigquery(
     """
     from google.cloud import bigquery
 
+    from mwlib.network.bigquery_lookup import _validate_bigquery_identifier
+
     client = _make_bq_client(project, credentials_path)
-    table_ref = f"{project}.{dataset}.{ns.table_id}"
+    # ``project`` and ``dataset`` come from CLI flags / env vars and end
+    # up interpolated into the raw ``TRUNCATE TABLE`` statement below.
+    # BigQuery identifiers can't be passed as query parameters, so
+    # validate them here exactly like ``BigQueryImageLookup._execute_query``
+    # does at runtime — a backtick in either value would otherwise close
+    # ``table_ref`` early.
+    safe_project = _validate_bigquery_identifier(project, "project")
+    safe_dataset = _validate_bigquery_identifier(dataset, "dataset")
+    safe_table = _validate_bigquery_identifier(ns.table_id, "table")
+    table_ref = f"{safe_project}.{safe_dataset}.{safe_table}"
     _prepare_table(client, table_ref, ns)
 
     schema = None

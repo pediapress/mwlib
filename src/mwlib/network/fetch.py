@@ -1111,6 +1111,13 @@ class Fetcher:
         # remote-API fallback applies the description-page parser
         # instead — silently treating corrupt template data as "no
         # templates" would fail open in blacklist mode.
+        #
+        # Entries with ``api=None`` are also fail-closed: BigQuery has
+        # the license/template data, but ``handle_new_basepath``
+        # skipped ``get_image_edits`` because remote-API discovery
+        # failed. Downloading the image would produce a rendered book
+        # with no contributor attribution, so we drop the deferred
+        # download even on a clean BigQuery hit.
         for row in rows:
             local_name = row["name"]
             orig_title = orig_by_local.get(local_name, local_name)
@@ -1120,6 +1127,18 @@ class Fetcher:
                 logger.warning("Routing %s to remote-API fallback: %s", local_name, exc)
                 missing.append(local_name)
                 continue
+
+            if api_by_local.get(local_name) is None:
+                if orig_title in self._bq_deferred_downloads:
+                    self._bq_deferred_downloads.pop(orig_title, None)
+                    logger.warning(
+                        "Skipping image download for %s: BigQuery has the row "
+                        "but contributor lookup was not scheduled (no remote "
+                        "API available) — refusing to ship an unattributed image",
+                        orig_title,
+                    )
+                continue
+
             if passes_license and orig_title in self._bq_deferred_downloads:
                 self.schedule_download_image(
                     self._bq_deferred_downloads.pop(orig_title), orig_title

@@ -199,16 +199,35 @@ class TestPrepareTable:
         _, kwargs = client.create_table.call_args
         assert "exists_ok" not in kwargs
 
-    def test_ns0_does_not_drop_the_table(self):
+    def test_ns0_does_not_drop_or_create_the_table(self):
+        """NS0 is externally managed (Pulumi). Script must NOT touch it.
+
+        Bootstrapping the table here would silently drop clustering /
+        deletion-protection settings that Pulumi owns; the next Pulumi
+        run would then see drift. Read-only verification only.
+        """
         client = MagicMock()
         ns = snap.NAMESPACES[0]
         snap._prepare_table(client, "p.d.article_pages", ns)
         client.delete_table.assert_not_called()
-        # exists_ok=True so the call is a no-op when Pulumi has already
-        # provisioned the table (production), and a bootstrap when it hasn't (dev).
-        client.create_table.assert_called_once()
-        _, kwargs = client.create_table.call_args
-        assert kwargs.get("exists_ok") is True
+        client.create_table.assert_not_called()
+        # ``get_table`` is the existence probe — must be called.
+        client.get_table.assert_called_once_with("p.d.article_pages")
+
+    def test_ns0_raises_when_table_missing(self):
+        """Missing externally-managed table fails loudly.
+
+        Operator gets a clear pointer to provision the table via Pulumi
+        instead of the script silently bootstrapping a stripped-down
+        version without clustering / deletion-protection.
+        """
+        client = MagicMock()
+        client.get_table.side_effect = Exception("404 Not found: Table p.d.article_pages")
+        ns = snap.NAMESPACES[0]
+
+        with pytest.raises(RuntimeError, match="externally managed"):
+            snap._prepare_table(client, "p.d.article_pages", ns)
+        client.create_table.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -385,6 +404,33 @@ class TestIterExtractNdjson:
         with pytest.raises(ValueError, match="No .ndjson files found"):
             next(it)
 
+    def test_extracts_into_private_tempdir_not_parent(self, tmp_path):
+        """Tar members extract under a private temp dir, never the parent.
+
+        Without an isolated extract dir, ``existing.ndjson`` in the
+        tarball would land at ``tmp_path/existing.ndjson`` (which we
+        seeded ourselves) and our cleanup ``unlink`` would then delete
+        the operator's pre-existing file.
+        """
+        sibling = tmp_path / "existing.ndjson"
+        sibling.write_text("DO NOT TOUCH\n")
+
+        tarball = _make_tarball(tmp_path, {"existing.ndjson": '{"x": 1}\n'})
+
+        # Drain the iterator — the .ndjson member is yielded, then the
+        # iterator's finally block cleans it up.
+        list(snap.iter_extract_ndjson(tarball))
+
+        # The seeded sibling is untouched.
+        assert sibling.exists()
+        assert sibling.read_text() == "DO NOT TOUCH\n"
+
+        # And the temp dir is gone after iteration finishes.
+        leftover_dirs = [
+            p for p in tmp_path.iterdir() if p.is_dir() and p.name.startswith("wme-ndjson-")
+        ]
+        assert leftover_dirs == []
+
 
 # ---------------------------------------------------------------------------
 # load_tarball_to_bigquery: end-to-end load-job dispatch
@@ -464,6 +510,52 @@ class TestLoadTarballLoadJob:
             bigquery.WriteDisposition.WRITE_APPEND,
             bigquery.WriteDisposition.WRITE_APPEND,
         ]
+
+    def test_rejects_malicious_project_identifier(self, monkeypatch, tmp_path):
+        """Bad project identifiers raise before any SQL is built.
+
+        ``project`` / ``dataset`` get interpolated into the raw SQL
+        ``TRUNCATE TABLE`` statement on the streaming-insert path —
+        a backtick or whitespace there would close ``table_ref`` early.
+        """
+        self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        tarball = _make_tarball(
+            tmp_path,
+            {
+                "a.ndjson": json.dumps({"name": "Mainz", "article_body": {"html": "<p>x</p>"}})
+                + "\n"
+            },
+        )
+
+        with pytest.raises(ValueError, match="Invalid BigQuery project"):
+            snap.load_tarball_to_bigquery(
+                tarball,
+                project="evil`; DROP TABLE x; --",
+                dataset="ds",
+                ns=ns,
+                credentials_path=None,
+            )
+
+    def test_rejects_malicious_dataset_identifier(self, monkeypatch, tmp_path):
+        self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        tarball = _make_tarball(
+            tmp_path,
+            {
+                "a.ndjson": json.dumps({"name": "Mainz", "article_body": {"html": "<p>x</p>"}})
+                + "\n"
+            },
+        )
+
+        with pytest.raises(ValueError, match="Invalid BigQuery dataset"):
+            snap.load_tarball_to_bigquery(
+                tarball,
+                project="proj",
+                dataset="ds with space",
+                ns=ns,
+                credentials_path=None,
+            )
 
     def test_extracted_files_are_gone_after_load(self, monkeypatch, tmp_path):
         # The whole point of the iter-extract design: at the end of the run

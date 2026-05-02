@@ -519,6 +519,33 @@ class TestFetcherBigQueryIntegration:
         # And the deferred entry was dropped.
         assert "File:X.jpg" not in stub._bq_deferred_downloads
 
+    def test_flush_bq_batch_skips_download_when_no_api_for_bq_hit(self):
+        """No API + BQ hit → drop the deferred download too.
+
+        We have license-template data from BigQuery, but
+        ``handle_new_basepath`` skipped ``get_image_edits`` because
+        remote-API discovery failed. Downloading the image would
+        produce a rendered book with no contributor attribution, so
+        we fail closed even though the license check would have
+        passed.
+        """
+        stub = self._make_fetcher_stub()
+        stub.schedule_download_image = MagicMock()
+
+        stub._bq_pending = [("File:X.jpg", None, "File:X.jpg")]
+        stub._bq_deferred_downloads = {"File:X.jpg": "https://thumb/X.jpg"}
+        # BigQuery has the row with a free license — license check
+        # would pass, but we should still refuse to download.
+        stub.bq_lookup.fetch_batch.return_value = (
+            [{"name": "File:X.jpg", "templates": [{"name": "Template:Cc-by-sa"}]}],
+            [],
+        )
+
+        stub._flush_bq_batch()
+
+        stub.schedule_download_image.assert_not_called()
+        assert "File:X.jpg" not in stub._bq_deferred_downloads
+
     def test_flush_bq_batch_reroutes_corrupt_row_to_fallback(self, monkeypatch):
         """Corrupt BQ rows are added to ``missing`` so the remote API runs."""
         stub = self._make_fetcher_stub()
