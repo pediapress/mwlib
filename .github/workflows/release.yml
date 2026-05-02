@@ -1,0 +1,121 @@
+name: Publish to PyPI
+
+# Triggered by a published GitHub release (the canonical path) or by
+# manual dispatch (so we can retroactively publish a release that was
+# created before this workflow existed, e.g. 0.18.3).
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or commit to build (defaults to the workflow's checkout)"
+        required: false
+        default: ""
+
+# Trusted Publisher / OIDC: pypa/gh-action-pypi-publish exchanges the
+# GitHub-issued OIDC token for a short-lived PyPI upload token, so no
+# long-lived API token has to live in a GitHub secret. The id-token
+# permission is scoped to the publish job below — the build job has
+# no business minting OIDC tokens.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Default to the tag/release ref; allow overriding via
+          # workflow_dispatch input for retro-publishes.
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Build sdist
+        # Sdist only — this project has C extensions and we don't run
+        # cibuildwheel, so a single-platform wheel would mislead pip on
+        # other platforms. Consumers build from sdist; the pre-generated
+        # .c files (committed in src/) make this fast and compiler-driven.
+        run: uv build --sdist
+
+      - name: Verify version matches the tag
+        # On a release trigger, github.ref_name is the tag (e.g. "0.18.3").
+        # On workflow_dispatch with a version-shaped ref, treat it the
+        # same way — catches "typed 0.18.4 by mistake" before the
+        # irreversible PyPI upload. Non-version refs (a SHA or branch)
+        # skip the check.
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.ref != '')
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "release" ]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="${{ inputs.ref }}"
+          fi
+          # Strip an optional leading "v" so both "0.18.3" and "v0.18.3"
+          # tag styles work.
+          expected="${tag#v}"
+          if ! [[ "$expected" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9.]+)?$ ]]; then
+            echo "Ref '$tag' is not a version-shaped tag; skipping version check."
+            exit 0
+          fi
+          actual=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          if [ "$expected" != "$actual" ]; then
+            echo "::error::Tag $tag does not match pyproject version $actual"
+            exit 1
+          fi
+          echo "Tag $tag matches pyproject version $actual"
+
+      - name: Upload sdist as artifact
+        # Keep a copy on the workflow run so post-mortem inspection of
+        # what was published is one click away.
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      # OIDC token for Trusted Publishers — only the publish job needs it.
+      id-token: write
+    # The matching Trusted Publisher entry on PyPI must be configured
+    # with Environment name = "pypi". Using a GitHub Environment here
+    # also lets us add required reviewers / branch protections in
+    # Settings → Environments → pypi as a manual gate before upload.
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mwlib
+    steps:
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+      - name: Publish to PyPI
+        # Pinned to a SHA rather than the floating ``release/v1`` branch:
+        # this action mints the OIDC->PyPI token, so a hijacked tag
+        # would mean a hijacked publisher. Bump intentionally.
+        # v1.14.0
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
+        with:
+          # No password / api token: OIDC via Trusted Publishers.
+          packages-dir: dist
+          # Keep this on for the first run so a duplicate upload (e.g.
+          # re-running the workflow after a partial failure) doesn't
+          # blow up. Once we trust the pipeline this can be flipped off.
+          skip-existing: true
