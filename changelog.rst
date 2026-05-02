@@ -4,6 +4,18 @@ Changelog
 
 mwlib
 ==========================
+2026-05-02 mwlib 0.18.3
+------------------------
+- ``wme-ingest`` learns ``--namespace 0`` for the article-HTML snapshot used by the page-count estimator, alongside the existing namespace-6 (file_pages) sync. Lean NS0 schema (``name`` / ``identifier`` / ``date_modified`` / ``article_body_html``) keeps BigQuery storage proportional to what the estimator actually consumes.
+- ``wme-ingest`` extracts NDJSON members one at a time into a private temp directory, capping peak local disk at "tarball + one extracted NDJSON" and avoiding overwrites of pre-existing files in the tarball's parent. Tar members are also restricted to regular files (no symlinks/hardlinks/devices).
+- ``wme-ingest`` validates ``project`` / ``dataset`` / ``table`` identifiers before they're interpolated into raw SQL.
+- BigQuery image-lookup hardening: hostname-exact domain routing, exact-match row filtering, credential-fingerprinted client cache + token cache, locked singleton + locked client cache, prefix-match ``invalidate_client``.
+- Fail-closed defaults for the BigQuery path: malformed templates rerouted to the remote-API fallback; misses or hits with no remote-API discovery drop the deferred image download (no shipping images without license/attribution data); externally-managed tables fail loudly when missing rather than silently bootstrapping.
+- ``MwApi`` Basic Auth is per-instance (no longer leaks across MwApis sharing an origin); ``RateLimiter`` and retry backoff use ``gevent.sleep`` to cooperate with the gevent hub; ``request_counter`` is per-instance.
+- ``LicenseChecker`` exposes ``decide_from_template_names`` so fetch-time and render-time license policy stay in lockstep.
+- ``nuwiki.Adapt.get_contributors`` reads ``authors.db`` when no description page is on disk (BigQuery shortcut), so BQ-backed images render with attribution.
+- Optional ``mwlib[bigquery]`` install extra; default installs stay slim. ``requests`` declared as a direct dependency.
+
 2026-04-28 mwlib 0.18.2
 ------------------------
 - Allow DEFAULTSORT to accept optional arguments
