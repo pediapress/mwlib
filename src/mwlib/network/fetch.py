@@ -1063,8 +1063,11 @@ class Fetcher:
             if len(self._bq_pending) >= self._bq_batch_size:
                 self._flush_bq_batch()
             # Contributor lookup needs the remote API. If api creation
-            # failed above we accept the loss of contributor metadata
-            # rather than dropping the BigQuery hit on the floor.
+            # failed above we don't schedule it; ``_flush_bq_batch`` then
+            # fails closed for those entries (drops the deferred image
+            # download regardless of whether BigQuery had a hit), so the
+            # rendered book never includes an image with license data
+            # but no attribution.
             if api is not None:
                 for local_name, _ in local_names:
                     self._refcall(self.get_image_edits, local_name, api)
