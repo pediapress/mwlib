@@ -4,6 +4,17 @@ Changelog
 
 mwlib
 ==========================
+2026-05-03 mwlib 0.18.4
+------------------------
+- ``wme-ingest`` adds a chunked-snapshot path that fixes a silent data-loss bug in 0.18.3: the legacy ``/v2/snapshots/{id}/download`` endpoint only returns the *first* group for snapshots WME has split (notably EN NS0, ~419 chunks / ~200 GB), so previous runs against this endpoint produced an incomplete ``article_pages`` table. The new path enumerates all chunks via ``/v2/snapshots/{id}/chunks`` and loads each independently. Auto-detected at runtime; pass ``--no-chunked`` to force the legacy single-tarball path.
+- Per-chunk atomicity: each ~300 MB chunk is downloaded fully, verified against the listing's ``version`` (== S3 ETag), loaded into BigQuery, and only then checkpointed. Whole-chunk retry on partial reads with exponential backoff (10 s / 30 s / 90 s); hard read timeout of 300 s replaces the previous ``timeout=(30, None)`` that caused silent hangs.
+- Crash-safe resume via a small JSON state file (default: per-snapshot path under the system temp dir; override with ``--state-file PATH``). Re-running picks up where it left off, skipping already-loaded chunks. The first chunk of a fresh run uses ``WRITE_TRUNCATE``; resumed runs always ``WRITE_APPEND`` so a checkpoint never erases its own previous work.
+- Snapshot-rotation safety: if WME has re-issued the snapshot since the previous run (chunk versions differ from the saved state), the script refuses rather than silently mix versions and tells the operator to rerun with ``--fresh``.
+- Per-batch BigQuery load: each NDJSON inside a chunk is now split into ~200 MB load jobs instead of one opaque multi-GB job, giving visible progress (one log line per batch) and shrinking the retry atom. The first batch carries the operator's disposition; subsequent batches always ``WRITE_APPEND``.
+- Periodic per-MB download progress logging in ``download_chunk`` so a slow link doesn't look hung.
+- Both chunk shapes observed in the wild are accepted: ``.tar.gz`` wrapping one or more NDJSON members, and plain gzipped NDJSON. Detection is automatic; tar members are still validated as regular files at safe relative paths.
+- New CLI flags: ``--state-file PATH``, ``--fresh``, ``--no-chunked``, ``--chunk-work-dir PATH``. Existing flags (``--input``, ``--output``, ``--keep-tarball``, ``--download-only``) keep their meaning on the legacy single-tarball path.
+
 2026-05-02 mwlib 0.18.3
 ------------------------
 - ``wme-ingest`` learns ``--namespace 0`` for the article-HTML snapshot used by the page-count estimator, alongside the existing namespace-6 (file_pages) sync. Lean NS0 schema (``name`` / ``identifier`` / ``date_modified`` / ``article_body_html``) keeps BigQuery storage proportional to what the estimator actually consumes.

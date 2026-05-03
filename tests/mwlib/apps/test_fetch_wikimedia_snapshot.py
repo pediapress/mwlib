@@ -13,6 +13,8 @@ from __future__ import annotations
 import io
 import json
 import tarfile
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -654,3 +656,555 @@ class TestLoadTarballStreaming:
             call for call in client.query.call_args_list if "TRUNCATE TABLE" in call.args[0]
         ]
         assert truncate_calls == []
+
+
+# ---------------------------------------------------------------------------
+# Chunked ingest: WME /chunks API + per-chunk download/load/checkpoint
+# ---------------------------------------------------------------------------
+
+
+import gzip  # noqa: E402
+
+
+def _make_chunk_tarball(path, ndjson_name, ndjson_content):
+    """Write a tar.gz containing a single NDJSON, mirroring a WME chunk."""
+    with tarfile.open(path, "w:gz") as tar:
+        data = ndjson_content.encode("utf-8")
+        info = tarfile.TarInfo(name=ndjson_name)
+        info.size = len(data)
+        tar.addfile(info, io.BytesIO(data))
+
+
+def _make_gz_ndjson(path, ndjson_content):
+    """Write a plain gzipped NDJSON (the alternative chunk shape)."""
+    with gzip.open(path, "wb") as f:
+        f.write(ndjson_content.encode("utf-8"))
+
+
+class TestListChunks:
+    """``list_chunks`` is the dispatch decision: ≥1 chunk → chunked path."""
+
+    def test_returns_list_on_success(self, monkeypatch):
+        resp = MagicMock(status_code=200)
+        resp.json.return_value = [
+            {"identifier": "c0", "version": "v0"},
+            {"identifier": "c1", "version": "v1"},
+        ]
+        monkeypatch.setattr(snap.requests, "get", lambda *a, **kw: resp)
+
+        chunks = snap.list_chunks("token", "snap")
+        assert [c["identifier"] for c in chunks] == ["c0", "c1"]
+
+    def test_empty_list_on_404(self, monkeypatch):
+        # Snapshots without chunked support return 404 — caller falls back
+        # to the legacy single-tarball path.
+        resp = MagicMock(status_code=404)
+        monkeypatch.setattr(snap.requests, "get", lambda *a, **kw: resp)
+
+        assert snap.list_chunks("token", "snap") == []
+
+    def test_non_list_payload_treated_as_empty(self, monkeypatch):
+        # Defensive: if WME ever returns ``{}`` or an error envelope, we
+        # don't want to crash — fall back to the legacy path instead.
+        resp = MagicMock(status_code=200)
+        resp.json.return_value = {"error": "not chunked"}
+        monkeypatch.setattr(snap.requests, "get", lambda *a, **kw: resp)
+
+        assert snap.list_chunks("token", "snap") == []
+
+
+class TestDownloadChunk:
+    """Per-chunk download with whole-file retry."""
+
+    def _make_resp(self, body: bytes, etag: str = "abc123"):
+        resp = MagicMock()
+        resp.headers = {"content-length": str(len(body)), "etag": f'"{etag}"'}
+        resp.iter_content.return_value = [body]
+        resp.__enter__ = lambda self: resp
+        resp.__exit__ = lambda *a: None
+        resp.raise_for_status = MagicMock()
+        return resp
+
+    def test_writes_file_and_returns_etag(self, monkeypatch, tmp_path):
+        resp = self._make_resp(b"hello chunk")
+        monkeypatch.setattr(snap.requests, "get", lambda *a, **kw: resp)
+
+        out = tmp_path / "c0"
+        etag = snap.download_chunk("token", "snap", "c0", out, retries=1)
+        assert etag == "abc123"
+        assert out.read_bytes() == b"hello chunk"
+
+    def test_retries_on_short_read(self, monkeypatch, tmp_path):
+        # First attempt advertises 100 bytes but yields 5 — that's a
+        # partial transfer (network drop); we should retry rather than
+        # silently load a truncated chunk.
+        bad_resp = MagicMock()
+        bad_resp.headers = {"content-length": "100", "etag": '"x"'}
+        bad_resp.iter_content.return_value = [b"short"]
+        bad_resp.__enter__ = lambda self: bad_resp
+        bad_resp.__exit__ = lambda *a: None
+        bad_resp.raise_for_status = MagicMock()
+
+        good_resp = self._make_resp(b"complete payload", etag="finalEtag")
+
+        responses = iter([bad_resp, good_resp])
+        monkeypatch.setattr(snap.requests, "get", lambda *a, **kw: next(responses))
+        monkeypatch.setattr(snap.time, "sleep", lambda s: None)  # don't actually wait
+
+        out = tmp_path / "c0"
+        etag = snap.download_chunk("token", "snap", "c0", out, retries=2)
+        assert etag == "finalEtag"
+        assert out.read_bytes() == b"complete payload"
+
+    def test_raises_after_exhausted_retries(self, monkeypatch, tmp_path):
+        bad_resp = MagicMock()
+        bad_resp.headers = {"content-length": "10", "etag": '"x"'}
+        bad_resp.iter_content.return_value = [b"x"]
+        bad_resp.__enter__ = lambda self: bad_resp
+        bad_resp.__exit__ = lambda *a: None
+        bad_resp.raise_for_status = MagicMock()
+        monkeypatch.setattr(snap.requests, "get", lambda *a, **kw: bad_resp)
+        monkeypatch.setattr(snap.time, "sleep", lambda s: None)
+
+        with pytest.raises(OSError, match="short read"):
+            snap.download_chunk("token", "snap", "c0", tmp_path / "c0", retries=2)
+        # Failed downloads are unlinked so a subsequent run doesn't try to
+        # use the partial file.
+        assert not (tmp_path / "c0").exists()
+
+
+class TestChunkLoadState:
+    def test_round_trip(self, tmp_path):
+        state = snap.ChunkLoadState.new("snap_x")
+        state.chunks_loaded["c0"] = "v0"
+        state.chunks_loaded["c1"] = "v1"
+        path = tmp_path / "state.json"
+        state.save(path)
+
+        roundtrip = snap.ChunkLoadState.load(path)
+        assert roundtrip.run_id == state.run_id
+        assert roundtrip.snapshot == "snap_x"
+        assert roundtrip.chunks_loaded == {"c0": "v0", "c1": "v1"}
+
+    def test_save_is_atomic(self, tmp_path):
+        # The temp file must not survive a successful save — otherwise
+        # accumulating ``.tmp`` files across runs is a leak.
+        state = snap.ChunkLoadState.new("snap")
+        path = tmp_path / "state.json"
+        state.save(path)
+
+        assert path.exists()
+        leftover = list(tmp_path.glob("*.tmp"))
+        assert leftover == []
+
+
+class TestIterChunkNdjson:
+    def test_handles_targz_chunk(self, tmp_path):
+        chunk = tmp_path / "c0"
+        _make_chunk_tarball(chunk, "a.ndjson", '{"name": "Mainz"}\n')
+        seen = []
+        for path in snap._iter_chunk_ndjson(chunk):
+            seen.append(path.read_text())
+        assert seen == ['{"name": "Mainz"}\n']
+
+    def test_handles_gzipped_ndjson_chunk(self, tmp_path):
+        chunk = tmp_path / "c0"
+        _make_gz_ndjson(chunk, '{"name": "Berlin"}\n')
+        seen = []
+        for path in snap._iter_chunk_ndjson(chunk):
+            seen.append(path.read_text())
+        assert seen == ['{"name": "Berlin"}\n']
+
+
+class TestLoadChunkedToBigquery:
+    """The chunked orchestrator: dispatch, dispositions, resume, drift."""
+
+    def _setup_client(self, monkeypatch):
+        client = MagicMock()
+        load_job = MagicMock()
+        load_job.errors = None
+        load_job.output_rows = 1
+        load_job.job_id = "job-1"
+        client.load_table_from_file.return_value = load_job
+        monkeypatch.setattr(snap, "_make_bq_client", lambda *a, **kw: client)
+        return client
+
+    def _stub_download_chunk(self, monkeypatch, tmp_path, content_for):
+        """Fake ``download_chunk``.
+
+        Writes a tar.gz with the given NDJSON content into the requested
+        output_path. Returns the input map.
+        """
+        def fake_download(token, snapshot_id, chunk_id, output_path, retries=3):
+            _make_chunk_tarball(output_path, f"{chunk_id}.ndjson", content_for[chunk_id])
+            return f"etag-{chunk_id}"
+        monkeypatch.setattr(snap, "download_chunk", fake_download)
+
+    def test_first_chunk_truncates_rest_append(self, monkeypatch, tmp_path):
+        from google.cloud import bigquery
+
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [
+            {"identifier": "c0", "version": "etag-c0"},
+            {"identifier": "c1", "version": "etag-c1"},
+            {"identifier": "c2", "version": "etag-c2"},
+        ]
+        rows = {
+            cid: json.dumps(
+                {"name": cid, "identifier": i, "article_body": {"html": "<p>x</p>"}}
+            )
+            + "\n"
+            for i, cid in enumerate([c["identifier"] for c in chunks])
+        }
+        self._stub_download_chunk(monkeypatch, tmp_path, rows)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=tmp_path / "state.json",
+            fresh=False,
+        )
+
+        assert client.load_table_from_file.call_count == 3
+        dispositions = [
+            call.kwargs["job_config"].write_disposition
+            for call in client.load_table_from_file.call_args_list
+        ]
+        assert dispositions == [
+            bigquery.WriteDisposition.WRITE_TRUNCATE,
+            bigquery.WriteDisposition.WRITE_APPEND,
+            bigquery.WriteDisposition.WRITE_APPEND,
+        ]
+
+    def test_resume_skips_already_loaded_and_appends_rest(self, monkeypatch, tmp_path):
+        # Pre-populate state as if a previous run loaded c0 and c1; this
+        # invocation should fetch only c2 and use WRITE_APPEND (NEVER
+        # WRITE_TRUNCATE on a resume — that would erase the previous
+        # run's work).
+        from google.cloud import bigquery
+
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [
+            {"identifier": "c0", "version": "etag-c0"},
+            {"identifier": "c1", "version": "etag-c1"},
+            {"identifier": "c2", "version": "etag-c2"},
+        ]
+        rows = {
+            "c2": json.dumps({"name": "c2", "article_body": {"html": "<p>x</p>"}}) + "\n",
+        }
+        self._stub_download_chunk(monkeypatch, tmp_path, rows)
+
+        prev_state = snap.ChunkLoadState.new(ns.snapshot_id)
+        prev_state.chunks_loaded = {"c0": "etag-c0", "c1": "etag-c1"}
+        state_path = tmp_path / "state.json"
+        prev_state.save(state_path)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=state_path,
+            fresh=False,
+        )
+
+        # Only c2 was loaded.
+        assert client.load_table_from_file.call_count == 1
+        # And it was an APPEND — resumes never truncate.
+        disp = client.load_table_from_file.call_args.kwargs["job_config"].write_disposition
+        assert disp == bigquery.WriteDisposition.WRITE_APPEND
+
+    def test_version_drift_raises(self, monkeypatch, tmp_path):
+        # If WME re-issues a snapshot, every chunk gets a new version
+        # hash. We must refuse rather than mix old and new data.
+        self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+
+        prev_state = snap.ChunkLoadState.new(ns.snapshot_id)
+        prev_state.chunks_loaded = {"c0": "OLD-version-hash"}
+        state_path = tmp_path / "state.json"
+        prev_state.save(state_path)
+
+        chunks_now = [{"identifier": "c0", "version": "NEW-version-hash"}]
+        with pytest.raises(RuntimeError, match="re-issued"):
+            snap.load_chunked_to_bigquery(
+                token="token",
+                chunks=chunks_now,
+                project="proj",
+                dataset="ds",
+                ns=ns,
+                credentials_path=None,
+                state_path=state_path,
+                fresh=False,
+            )
+
+    def test_fresh_flag_clears_state_and_truncates(self, monkeypatch, tmp_path):
+        from google.cloud import bigquery
+
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+
+        # Pre-existing state pointing at a previous run.
+        prev_state = snap.ChunkLoadState.new(ns.snapshot_id)
+        prev_state.chunks_loaded = {"c0": "old", "c1": "old"}
+        state_path = tmp_path / "state.json"
+        prev_state.save(state_path)
+
+        chunks = [{"identifier": "c0", "version": "new"}]
+        rows = {
+            "c0": json.dumps({"name": "c0", "article_body": {"html": "<p>x</p>"}}) + "\n",
+        }
+        self._stub_download_chunk(monkeypatch, tmp_path, rows)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=state_path,
+            fresh=True,
+        )
+
+        # --fresh ignores the saved state, so c0 loads with WRITE_TRUNCATE
+        # even though the saved state listed it as previously-loaded.
+        disp = client.load_table_from_file.call_args.kwargs["job_config"].write_disposition
+        assert disp == bigquery.WriteDisposition.WRITE_TRUNCATE
+
+    def test_state_cleared_on_full_success(self, monkeypatch, tmp_path):
+        # Once every chunk has loaded, the state file should be deleted
+        # so the next invocation starts fresh by default.
+        self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [{"identifier": "c0", "version": "v0"}]
+        rows = {
+            "c0": json.dumps({"name": "c0", "article_body": {"html": "<p>x</p>"}}) + "\n",
+        }
+        self._stub_download_chunk(monkeypatch, tmp_path, rows)
+
+        state_path = tmp_path / "state.json"
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=state_path,
+            fresh=False,
+        )
+        assert not state_path.exists()
+
+    def test_state_persisted_after_each_chunk(self, monkeypatch, tmp_path):
+        # The crash-safety property: after a chunk's BQ load returns, the
+        # state file must already record it before the next chunk starts
+        # downloading. We verify by patching ``download_chunk`` to read
+        # the saved state at call time — the *N+1*-th call must see
+        # ``c_N`` already in chunks_loaded.
+        self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [
+            {"identifier": "c0", "version": "v0"},
+            {"identifier": "c1", "version": "v1"},
+            {"identifier": "c2", "version": "v2"},
+        ]
+        rows = {
+            cid: json.dumps({"name": cid, "article_body": {"html": "<p>x</p>"}}) + "\n"
+            for cid in [c["identifier"] for c in chunks]
+        }
+        state_path = tmp_path / "state.json"
+        seen_state_at_call: list[dict[str, str]] = []
+
+        def fake_download(token, snapshot_id, chunk_id, output_path, retries=3):
+            if state_path.exists():
+                seen_state_at_call.append(
+                    dict(snap.ChunkLoadState.load(state_path).chunks_loaded)
+                )
+            else:
+                seen_state_at_call.append({})
+            _make_chunk_tarball(output_path, f"{chunk_id}.ndjson", rows[chunk_id])
+            return f"etag-{chunk_id}"
+
+        monkeypatch.setattr(snap, "download_chunk", fake_download)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=state_path,
+            fresh=False,
+        )
+
+        # When c1 starts downloading, c0 must already be checkpointed.
+        # When c2 starts, c0 and c1 must both be checkpointed.
+        assert seen_state_at_call[0] == {}
+        assert "c0" in seen_state_at_call[1]
+        assert "c0" in seen_state_at_call[2] and "c1" in seen_state_at_call[2]
+
+
+class TestLoadOneFileBatching:
+    """A multi-GB NDJSON should split into several smaller load jobs.
+
+    The source files in EN NS0 are ~2 GB each — submitting that as a
+    single load job blocks the operator on a silent multi-minute
+    ``job.result()`` poll. ``_load_one_file`` now slices the input at
+    ``batch_max_bytes`` so the operator sees one log line per batch.
+    """
+
+    def _setup_client(self, monkeypatch):
+        client = MagicMock()
+        # Each fake load job claims to have loaded the rows it was given.
+        # The test asserts on call_count and per-call dispositions.
+        def _make_job(*a, **kw):
+            job = MagicMock()
+            job.errors = None
+            # We can't know rows-per-call from inside _make_job without
+            # opening the temp file, so just return 1 — totals aren't
+            # what's being tested here.
+            job.output_rows = 1
+            job.job_id = "job"
+            return job
+        client.load_table_from_file.side_effect = _make_job
+        monkeypatch.setattr(snap, "_make_bq_client", lambda *a, **kw: client)
+        return client
+
+    def _ndjson_with_rows(self, tmp_path, n: int):
+        """Write an NS0-shaped NDJSON with ``n`` rows.
+
+        Each row's HTML body is padded so a small ``batch_max_bytes``
+        reliably splits into multiple batches.
+        """
+        path = tmp_path / "input.ndjson"
+        # ~10 KB per row of HTML so 100 rows ≈ 1 MB of source.
+        padding = "x" * 10_000
+        with open(path, "w") as f:
+            for i in range(n):
+                f.write(
+                    json.dumps(
+                        {
+                            "name": f"Article-{i}",
+                            "identifier": i,
+                            "article_body": {"html": f"<p>{padding}</p>"},
+                        }
+                    )
+                    + "\n"
+                )
+        return path
+
+    def test_large_input_splits_into_multiple_load_jobs(self, monkeypatch, tmp_path):
+        from google.cloud import bigquery
+
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        path = self._ndjson_with_rows(tmp_path, 500)  # ~5 MB transformed
+
+        snap._load_one_file(
+            client=client,
+            ndjson_path=path,
+            file_idx=1,
+            table_ref="proj.ds.t",
+            schema=snap._make_bq_schema(ns.schema),
+            parser=ns.parser,
+            write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+            batch_max_bytes=1 * 1024 * 1024,  # 1 MB cap → expect ≥3 batches
+        )
+
+        # ≥3 load jobs (5 MB / 1 MB), first one TRUNCATE, rest APPEND.
+        # The first batch carries the operator's disposition; subsequent
+        # batches must NEVER WRITE_TRUNCATE — that would erase rows the
+        # earlier batch in the same source just loaded.
+        assert client.load_table_from_file.call_count >= 3
+        dispositions = [
+            call.kwargs["job_config"].write_disposition
+            for call in client.load_table_from_file.call_args_list
+        ]
+        assert dispositions[0] == bigquery.WriteDisposition.WRITE_TRUNCATE
+        assert all(
+            d == bigquery.WriteDisposition.WRITE_APPEND for d in dispositions[1:]
+        ), dispositions
+
+    def test_small_input_stays_single_batch(self, monkeypatch, tmp_path):
+        # Sanity: an input that fits inside batch_max_bytes still produces
+        # exactly one load job — the existing single-NDJSON test cases
+        # rely on this.
+        from google.cloud import bigquery
+
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        path = self._ndjson_with_rows(tmp_path, 5)  # tiny
+
+        snap._load_one_file(
+            client=client,
+            ndjson_path=path,
+            file_idx=1,
+            table_ref="proj.ds.t",
+            schema=snap._make_bq_schema(ns.schema),
+            parser=ns.parser,
+            write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+        )
+
+        assert client.load_table_from_file.call_count == 1
+        disp = client.load_table_from_file.call_args.kwargs["job_config"].write_disposition
+        assert disp == bigquery.WriteDisposition.WRITE_TRUNCATE
+
+    def test_batch_files_unlinked_after_load(self, monkeypatch, tmp_path):
+        # Each transformed batch lands in tempfile.NamedTemporaryFile;
+        # the function must unlink them after each batch's load returns,
+        # not at the end. Otherwise peak disk grows linearly with input.
+        self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        path = self._ndjson_with_rows(tmp_path, 200)
+
+        before = set(Path(tempfile.gettempdir()).glob("*.ndjson"))
+        snap._load_one_file(
+            client=MagicMock(load_table_from_file=MagicMock(
+                return_value=MagicMock(errors=None, output_rows=1, job_id="j")
+            )),
+            ndjson_path=path,
+            file_idx=1,
+            table_ref="proj.ds.t",
+            schema=None,
+            parser=ns.parser,
+            write_disposition="WRITE_TRUNCATE",
+            batch_max_bytes=512 * 1024,  # tiny cap → many batches
+        )
+        after = set(Path(tempfile.gettempdir()).glob("*.ndjson"))
+        # The set may have unrelated entries from other tests, but no NEW
+        # .ndjson should have been left behind by this run.
+        leaked = after - before
+        assert leaked == set(), f"leaked batch files: {leaked}"
+
+
+class TestArgParserChunkedFlags:
+    def test_fresh_flag(self):
+        args = snap._build_arg_parser().parse_args(["--fresh"])
+        assert args.fresh is True
+
+    def test_no_chunked_flag(self):
+        args = snap._build_arg_parser().parse_args(["--no-chunked"])
+        assert args.no_chunked is True
+
+    def test_state_file_flag(self):
+        args = snap._build_arg_parser().parse_args(["--state-file", "/tmp/my-state.json"])
+        assert args.state_file == "/tmp/my-state.json"
+
+    def test_default_state_file_is_per_snapshot(self):
+        # Two namespaces resolve to two distinct default state-file paths
+        # so concurrent NS6 + NS0 runs don't clobber each other.
+        p6 = snap._default_state_path("enwiki_namespace_6")
+        p0 = snap._default_state_path("enwiki_namespace_0")
+        assert p6 != p0
+        assert "enwiki_namespace_6" in str(p6)
+        assert "enwiki_namespace_0" in str(p0)

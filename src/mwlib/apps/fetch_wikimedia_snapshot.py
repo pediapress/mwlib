@@ -19,31 +19,52 @@ Namespaces:
         actually consumes. The table is provisioned by Pulumi (clustered on
         ``name``) — this script never drops or recreates it.
 
-Disk usage:
-    NS0 EN ships as multiple multi-GB NDJSON chunks inside one tarball. Local
-    disk is capped at "tarball + one extracted NDJSON" by extracting members
-    just-in-time and deleting each one after BigQuery has loaded it. Without
-    this, peak disk would be roughly 2× the tarball size.
+Transport:
+    The script auto-detects which transport WME exposes for the snapshot:
+
+    1. **Chunked** (preferred). Snapshots whose ``/v2/snapshots/{id}/chunks``
+       endpoint returns ≥1 chunk are pulled chunk-by-chunk. Each chunk is
+       a small (~300 MB) atomic unit downloaded to disk, verified against
+       the listing's ``version`` (== S3 ETag), loaded into BigQuery, and
+       checkpointed into a JSON state file. A crash mid-run is resumable;
+       a re-issued snapshot is detected by version drift and refused (the
+       operator must rerun with ``--fresh``). EN NS0 is split into ~700
+       chunks and **only** the chunked path produces a complete table —
+       the legacy single-tarball ``/download`` returns just the first
+       chunk-group, ~70% of the data.
+
+    2. **Single tarball** (legacy fallback). Snapshots without a chunks
+       endpoint, or runs invoked with ``--no-chunked``, download one
+       multi-GB tarball, then iterate its NDJSON members in a
+       just-in-time extract loop. Peak disk is "tarball + one extracted
+       NDJSON". No resume; a TCP drop restarts the whole download.
 
 Data handling:
     Each run replaces all data in the target table. The default load-job mode
-    submits one BigQuery load job per NDJSON file (WRITE_TRUNCATE on the first,
-    WRITE_APPEND afterwards) so a single multi-hundred-GB intermediate file is
-    never required. Streaming insert mode is preserved for operators who need
-    it but is significantly more expensive at scale.
+    submits one BigQuery load job per NDJSON file (WRITE_TRUNCATE on the first
+    chunk of a fresh run, WRITE_APPEND afterwards), so a single
+    multi-hundred-GB intermediate file is never required. Resumed chunked
+    runs always WRITE_APPEND. Streaming insert mode is preserved for
+    operators who need it but is significantly more expensive at scale.
 
 Usage examples:
     # List available snapshots
     python fetch_wikimedia_snapshot.py --list
 
-    # Default: download + load NS6 (file_pages)
+    # Default: chunked load of NS6 (file_pages) — auto-detected
     python fetch_wikimedia_snapshot.py --project pediapress-prod --dataset wikipedia
 
-    # Download + load NS0 (article_pages, EN article HTML)
+    # Chunked load of NS0 (article_pages, EN article HTML, ~700 chunks)
     python fetch_wikimedia_snapshot.py --namespace 0 --project pediapress-prod
 
-    # Download only — useful for inspecting a snapshot before loading
-    python fetch_wikimedia_snapshot.py --namespace 0 --download-only -o enwiki_ns0.tar.gz
+    # Resume a chunked run after a crash — picks up from the saved state
+    python fetch_wikimedia_snapshot.py --namespace 0 --project pediapress-prod
+
+    # Force-restart a chunked run from scratch (truncates the table)
+    python fetch_wikimedia_snapshot.py --namespace 0 --fresh
+
+    # Disable chunked path; use the legacy single-tarball /download endpoint
+    python fetch_wikimedia_snapshot.py --namespace 6 --no-chunked
 
     # Load from an already-downloaded tarball (skip download)
     python fetch_wikimedia_snapshot.py --namespace 0 -i /path/to/enwiki_ns0.tar.gz
@@ -55,6 +76,8 @@ Usage examples:
 from __future__ import annotations
 
 import argparse
+import contextlib
+import gzip
 import hashlib
 import json
 import logging
@@ -63,8 +86,11 @@ import shutil
 import sys
 import tarfile
 import tempfile
+import time
+import uuid
 from collections.abc import Callable, Iterator
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -453,6 +479,432 @@ def iter_extract_ndjson(tarball_path: Path) -> Iterator[Path]:
                             logger.exception("Failed to clean up %s", path)
 
 
+# ---------------------------------------------------------------------------
+# Chunked ingest (WME /chunks API)
+#
+# Large snapshots (notably EN NS0, ~700 chunks at ~300 MB each) are exposed by
+# WME as individually-downloadable chunks under
+#     GET /v2/snapshots/{id}/chunks
+#     GET /v2/snapshots/{id}/chunks/{chunk_id}/download
+#
+# The legacy ``/download`` endpoint only returns the first chunk-group of such
+# snapshots, which silently produces an *incomplete* table. The chunked path
+# below replaces that for any snapshot whose ``/chunks`` listing returns at
+# least one entry, and adds three properties the single-tarball path lacks:
+#
+#   1. **Per-chunk atomicity** — each chunk is downloaded fully (~30 s),
+#      verified against the listing's ``version`` (== S3 ETag), loaded into
+#      BigQuery, and only then checkpointed. A network drop or BigQuery error
+#      mid-chunk loses ~30 s of work, never the whole table.
+#   2. **Crash-safe resume** — a tiny JSON state file on disk records which
+#      chunk versions have already loaded. Re-running the script picks up
+#      where it left off, skipping completed chunks. Single-chunk reruns are
+#      ``WRITE_APPEND``; only the first chunk of a brand-new run truncates.
+#   3. **Snapshot-rotation safety** — if WME has re-issued the snapshot
+#      since the previous run (every chunk's ``version`` differs from the
+#      saved one) we refuse to silently mix versions and tell the operator
+#      to rerun with ``--fresh``.
+# ---------------------------------------------------------------------------
+
+# Read timeout per chunk (in seconds). Each chunk is ~300 MB; at 11 MB/s
+# transatlantic that's ~30 s, so 5 minutes is a generous "the connection
+# has clearly stalled" cutoff. The single-tarball path uses ``timeout=(30,
+# 300)`` for the same reason.
+_CHUNK_HTTP_TIMEOUT = (30, 300)
+_CHUNK_DOWNLOAD_RETRIES = 3
+_CHUNK_RETRY_BACKOFF_BASE_SECONDS = 10
+
+
+def list_chunks(token: str, snapshot_id: str) -> list[dict]:
+    """List chunk metadata for a snapshot via the WME ``/chunks`` endpoint.
+
+    Returns the raw list of dicts (each carries ``identifier``, ``version``,
+    ``size``, ``date_modified``, …). Returns an empty list for snapshots
+    that don't expose chunks — the caller should fall back to the
+    single-tarball path in that case.
+    """
+    resp = requests.get(
+        f"{WME_API_BASE}/snapshots/{snapshot_id}/chunks",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=30,
+    )
+    if resp.status_code == 404:
+        return []
+    resp.raise_for_status()
+    payload = resp.json()
+    if not isinstance(payload, list):
+        return []
+    return payload
+
+
+def download_chunk(
+    token: str,
+    snapshot_id: str,
+    chunk_id: str,
+    output_path: Path,
+    *,
+    retries: int = _CHUNK_DOWNLOAD_RETRIES,
+) -> str:
+    """Download a single chunk to ``output_path`` with retry-on-failure.
+
+    Each attempt is a fresh whole-file GET — no byte-range resume within a
+    chunk. Chunks are small enough (~300 MB / ~30 s) that whole-file retry
+    is cheaper than the bookkeeping of a partial-chunk resume.
+
+    Returns the response ``ETag`` (which WME populates with the chunk's
+    content hash; matches the listing's ``version`` field).
+    """
+    url = f"{WME_API_BASE}/snapshots/{snapshot_id}/chunks/{chunk_id}/download"
+    last_exc: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            with requests.get(
+                url,
+                headers={"Authorization": f"Bearer {token}"},
+                stream=True,
+                timeout=_CHUNK_HTTP_TIMEOUT,
+            ) as resp:
+                resp.raise_for_status()
+                expected = int(resp.headers.get("content-length", 0))
+                etag = resp.headers.get("etag", "").strip('"')
+                received = 0
+                last_logged = 0
+                with open(output_path, "wb") as f:
+                    for piece in resp.iter_content(chunk_size=8 * 1024 * 1024):
+                        f.write(piece)
+                        received += len(piece)
+                        # Periodic progress so a slow link doesn't look hung.
+                        # Cross-Atlantic single-stream downloads sit around
+                        # ~10 MB/s; without this the operator sees nothing
+                        # for ~30 s per 300 MB chunk.
+                        if received - last_logged >= _DOWNLOAD_LOG_INTERVAL:
+                            if expected:
+                                pct = 100.0 * received / expected
+                                logger.info(
+                                    "    %s: %.1f%% (%d / %d MB)",
+                                    chunk_id,
+                                    pct,
+                                    received >> 20,
+                                    expected >> 20,
+                                )
+                            else:
+                                logger.info(
+                                    "    %s: %d MB downloaded",
+                                    chunk_id,
+                                    received >> 20,
+                                )
+                            last_logged = received
+                if expected and received != expected:
+                    raise OSError(
+                        f"chunk {chunk_id}: short read "
+                        f"({received} of {expected} bytes)"
+                    )
+                return etag
+        except (requests.RequestException, OSError) as exc:
+            last_exc = exc
+            if output_path.exists():
+                with contextlib.suppress(OSError):
+                    output_path.unlink()
+            if attempt < retries:
+                wait = _CHUNK_RETRY_BACKOFF_BASE_SECONDS * (3 ** (attempt - 1))
+                logger.warning(
+                    "chunk %s attempt %d/%d failed: %s — retry in %ds",
+                    chunk_id,
+                    attempt,
+                    retries,
+                    exc,
+                    wait,
+                )
+                time.sleep(wait)
+    assert last_exc is not None  # for mypy; loop guarantees it's set
+    raise last_exc
+
+
+@dataclass
+class ChunkLoadState:
+    """Resume-state for a chunked ingest run.
+
+    Tracks which chunk versions have already been loaded into BigQuery so a
+    rerun can skip them. Persisted to ``state_path`` after every successful
+    chunk load — the file is the durable record of partial progress.
+
+    Mismatched ``snapshot`` between state and current run is a hard error:
+    the operator either hit the wrong CLI args or the state file is stale.
+    A re-issued snapshot (same id, every chunk's ``version`` changed) is
+    also caught at chunk-iteration time so we never mix old and new data.
+    """
+
+    run_id: str
+    snapshot: str
+    started_at: str
+    chunks_loaded: dict[str, str] = field(default_factory=dict)
+
+    @classmethod
+    def new(cls, snapshot_id: str) -> ChunkLoadState:
+        return cls(
+            run_id=str(uuid.uuid4()),
+            snapshot=snapshot_id,
+            started_at=datetime.now(timezone.utc).isoformat(),
+        )
+
+    @classmethod
+    def load(cls, path: Path) -> ChunkLoadState:
+        return cls(**json.loads(path.read_text(encoding="utf-8")))
+
+    def save(self, path: Path) -> None:
+        # Atomic write: write to a sibling tempfile then rename. Avoids
+        # leaving a half-written state on disk if the process is killed
+        # between the open() and the final flush.
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(json.dumps(asdict(self), indent=2), encoding="utf-8")
+        tmp.replace(path)
+
+
+def _default_state_path(snapshot_id: str) -> Path:
+    """State-file path used when ``--state-file`` isn't passed.
+
+    Lives under the system temp dir, keyed by snapshot id so concurrent
+    runs for different namespaces (NS6 / NS0) don't clobber each other.
+    """
+    return Path(tempfile.gettempdir()) / f"wme-ingest-{snapshot_id}.state.json"
+
+
+def _iter_chunk_ndjson(chunk_path: Path) -> Iterator[Path]:
+    """Yield NDJSON file path(s) extracted from a downloaded chunk.
+
+    Each WME chunk is either a gzipped NDJSON (most common) or a tar.gz
+    wrapping one or more NDJSON members (matches the legacy single-tarball
+    layout). Both shapes appear in the wild depending on the namespace and
+    the snapshot generation, so detect by trying tarfile first and falling
+    back to a plain gzip stream.
+
+    The yielded NDJSON file lives in a ``TemporaryDirectory`` rooted next
+    to the chunk and is deleted after the consumer finishes with it.
+    """
+    with tempfile.TemporaryDirectory(prefix="wme-chunk-", dir=chunk_path.parent) as tmp:
+        extract_dir = Path(tmp)
+        try:
+            with tarfile.open(chunk_path, "r:gz") as tar:
+                members = [m for m in tar.getmembers() if m.name.endswith(".ndjson")]
+                for m in members:
+                    _validate_tar_member(m)
+                if not members:
+                    raise ValueError(
+                        f"chunk {chunk_path.name}: tar contains no .ndjson members"
+                    )
+                for member in members:
+                    src = tar.extractfile(member)
+                    if src is None:
+                        raise ValueError(
+                            f"chunk {chunk_path.name}: cannot extract {member.name}"
+                        )
+                    out = extract_dir / member.name
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    with src, open(out, "wb") as dst:
+                        shutil.copyfileobj(src, dst)
+                    try:
+                        yield out
+                    finally:
+                        if out.exists():
+                            out.unlink()
+                return
+        except tarfile.ReadError:
+            pass
+
+        # Not a tarball — assume gzipped NDJSON.
+        out = extract_dir / f"{chunk_path.stem}.ndjson"
+        with gzip.open(chunk_path, "rb") as src, open(out, "wb") as dst:
+            shutil.copyfileobj(src, dst)
+        try:
+            yield out
+        finally:
+            if out.exists():
+                out.unlink()
+
+
+def load_chunked_to_bigquery(
+    *,
+    token: str,
+    chunks: list[dict],
+    project: str,
+    dataset: str,
+    ns: NamespaceConfig,
+    credentials_path: str | None,
+    state_path: Path,
+    fresh: bool,
+    work_dir: Path | None = None,
+    use_streaming_insert: bool = False,
+    batch_size: int = 10_000,
+) -> tuple[int, int]:
+    """Iterate WME chunks, downloading and BigQuery-loading each atomically.
+
+    The first chunk of a fresh run triggers ``WRITE_TRUNCATE`` (or an
+    explicit table truncate for the streaming-insert path) to wipe any
+    previous snapshot. Every subsequent chunk — including those loaded by
+    a resumed run — uses ``WRITE_APPEND``.
+
+    Returns ``(rows_loaded, rows_skipped)`` aggregated across all chunks
+    actually processed in this invocation. Chunks skipped because they
+    were already loaded in a previous run aren't counted (their rows were
+    counted by the previous run).
+    """
+    from google.cloud import bigquery
+
+    from mwlib.network.bigquery_lookup import _validate_bigquery_identifier
+
+    client = _make_bq_client(project, credentials_path)
+    safe_project = _validate_bigquery_identifier(project, "project")
+    safe_dataset = _validate_bigquery_identifier(dataset, "dataset")
+    safe_table = _validate_bigquery_identifier(ns.table_id, "table")
+    table_ref = f"{safe_project}.{safe_dataset}.{safe_table}"
+
+    if fresh and state_path.exists():
+        state_path.unlink()
+        logger.info("--fresh: removed previous state %s", state_path)
+
+    if state_path.exists():
+        state = ChunkLoadState.load(state_path)
+        if state.snapshot != ns.snapshot_id:
+            raise RuntimeError(
+                f"state file {state_path} is for snapshot "
+                f"{state.snapshot!r} but this run targets "
+                f"{ns.snapshot_id!r}; pick a different --state-file or "
+                f"rerun with --fresh"
+            )
+        logger.info(
+            "resuming run %s: %d/%d chunks already loaded",
+            state.run_id,
+            len(state.chunks_loaded),
+            len(chunks),
+        )
+    else:
+        state = ChunkLoadState.new(ns.snapshot_id)
+        logger.info("starting new run %s (%d chunks)", state.run_id, len(chunks))
+
+    # Detect snapshot-rotation: any saved chunk whose id reappears in the
+    # current listing with a different version means WME has re-issued the
+    # snapshot. Refuse rather than silently mix versions across runs.
+    by_id = {c["identifier"]: c for c in chunks}
+    drift = [
+        (cid, ver, by_id[cid]["version"])
+        for cid, ver in state.chunks_loaded.items()
+        if cid in by_id and by_id[cid]["version"] != ver
+    ]
+    if drift:
+        sample = drift[:3]
+        raise RuntimeError(
+            f"snapshot {ns.snapshot_id!r} appears to have been re-issued: "
+            f"{len(drift)} chunk(s) now offer a different version than the "
+            f"saved state. Examples: {sample}. "
+            f"Rerun with --fresh to start over against the new snapshot."
+        )
+
+    # Prepare the table only on a fresh run. Resumed runs assume the table
+    # is already populated by the previous invocation.
+    starting_fresh = not state.chunks_loaded
+    if starting_fresh:
+        _prepare_table(client, table_ref, ns)
+
+    schema = None
+    if use_streaming_insert:
+        if starting_fresh and not ns.script_manages_table:
+            logger.info("Truncating %s before streaming inserts", table_ref)
+            client.query(f"TRUNCATE TABLE `{table_ref}`").result()
+    else:
+        schema = _make_bq_schema(ns.schema)
+
+    work_dir = Path(work_dir) if work_dir else Path(tempfile.mkdtemp(prefix="wme-chunks-"))
+    work_dir.mkdir(parents=True, exist_ok=True)
+    logger.info("chunk work dir: %s", work_dir)
+
+    total_loaded = 0
+    total_skipped = 0
+    chunks_processed = 0
+    for i, chunk in enumerate(chunks, 1):
+        cid = chunk["identifier"]
+        version = chunk["version"]
+        if state.chunks_loaded.get(cid) == version:
+            logger.info("[%d/%d] skip already-loaded %s", i, len(chunks), cid)
+            continue
+
+        logger.info("[%d/%d] download %s (%s MB)", i, len(chunks), cid,
+                    chunk.get("size", {}).get("value", "?"))
+        chunk_path = work_dir / cid
+        try:
+            etag = download_chunk(token, ns.snapshot_id, cid, chunk_path)
+            if etag and etag != version:
+                logger.warning(
+                    "chunk %s ETag %r differs from listing version %r — "
+                    "proceeding (chunks API is the authoritative listing)",
+                    cid,
+                    etag,
+                    version,
+                )
+
+            # WRITE_TRUNCATE only on the very first chunk of a fresh run.
+            # Resumed runs and all subsequent chunks always WRITE_APPEND.
+            is_first_load = chunks_processed == 0 and starting_fresh
+            for ndjson_path in _iter_chunk_ndjson(chunk_path):
+                if use_streaming_insert:
+                    loaded, skipped = _stream_one_file(
+                        client=client,
+                        table_ref=table_ref,
+                        ndjson_path=ndjson_path,
+                        parser=ns.parser,
+                        batch_size=batch_size,
+                    )
+                else:
+                    write_disposition = (
+                        bigquery.WriteDisposition.WRITE_TRUNCATE
+                        if is_first_load
+                        else bigquery.WriteDisposition.WRITE_APPEND
+                    )
+                    loaded, skipped = _load_one_file(
+                        client=client,
+                        ndjson_path=ndjson_path,
+                        file_idx=i,
+                        table_ref=table_ref,
+                        schema=schema,
+                        parser=ns.parser,
+                        write_disposition=write_disposition,
+                    )
+                total_loaded += loaded
+                total_skipped += skipped
+                # If a chunk has multiple NDJSON members (rare), all but
+                # the first must append even within a fresh-run first chunk.
+                is_first_load = False
+        finally:
+            if chunk_path.exists():
+                try:
+                    chunk_path.unlink()
+                except OSError:
+                    logger.exception("failed to unlink %s", chunk_path)
+
+        state.chunks_loaded[cid] = version
+        state.save(state_path)
+        chunks_processed += 1
+
+    logger.info(
+        "Chunked load complete: %d chunks processed in this run, "
+        "%d skipped (already loaded by prior run), "
+        "%d rows loaded, %d rows skipped",
+        chunks_processed,
+        len(chunks) - chunks_processed,
+        total_loaded,
+        total_skipped,
+    )
+
+    # Successful end-to-end run: drop the state file so the next invocation
+    # starts fresh by default. (If the operator wants to keep it as an
+    # audit trail, they can copy it before running.)
+    if len(state.chunks_loaded) >= len(chunks) and state_path.exists():
+        state_path.unlink()
+        logger.info("All chunks loaded; cleared state file %s", state_path)
+
+    return total_loaded, total_skipped
+
+
 def _make_bq_client(project: str, credentials_path: str | None):
     """Create a BigQuery client with optional service account credentials."""
     from google.cloud import bigquery
@@ -604,6 +1056,73 @@ def _stream_one_file(
     return inserted_total, skipped
 
 
+# Default cap on transformed bytes per BigQuery load job. ~2 GB NDJSON
+# inputs (one chunk's worth of EN NS0 article HTML) are split into ~10
+# load jobs of roughly this size each so the operator sees per-batch
+# progress instead of one opaque ``job.result()`` poll for many minutes.
+# Each batch is also a smaller atomic unit on retry.
+_DEFAULT_LOAD_BATCH_BYTES = 200 * 1024 * 1024
+
+
+def _submit_batch_load_job(
+    *,
+    client,
+    table_ref: str,
+    batch_path: Path,
+    schema,
+    write_disposition,
+    file_idx: int,
+    batch_idx: int,
+    rows_in_batch: int,
+    bytes_in_batch: int,
+) -> int:
+    """Submit one BigQuery load job for a transformed-NDJSON batch file.
+
+    Returns the BigQuery-reported ``output_rows``. Caller is responsible
+    for unlinking ``batch_path``.
+    """
+    from google.cloud import bigquery
+
+    job_config = bigquery.LoadJobConfig(
+        schema=schema,
+        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+        write_disposition=write_disposition,
+        max_bad_records=0,
+    )
+    with open(batch_path, "rb") as source:
+        load_job = client.load_table_from_file(source, table_ref, job_config=job_config)
+    logger.info(
+        "BQ load: file %d batch %d started (%s rows=%d, %d MB, disposition=%s)",
+        file_idx,
+        batch_idx,
+        load_job.job_id,
+        rows_in_batch,
+        bytes_in_batch >> 20,
+        write_disposition,
+    )
+    load_job.result()
+    if load_job.errors:
+        logger.error("BigQuery load job completed with errors:")
+        for err in load_job.errors:
+            logger.error("  %s", err)
+    loaded = load_job.output_rows
+    logger.info(
+        "BQ load: file %d batch %d loaded %d rows",
+        file_idx,
+        batch_idx,
+        loaded,
+    )
+    if loaded != rows_in_batch:
+        logger.warning(
+            "Row count mismatch in file %d batch %d: prepared %d, BigQuery loaded %d",
+            file_idx,
+            batch_idx,
+            rows_in_batch,
+            loaded,
+        )
+    return loaded
+
+
 def _load_one_file(
     *,
     client,
@@ -613,23 +1132,42 @@ def _load_one_file(
     schema,
     parser: Callable[[str], dict | None],
     write_disposition,
+    batch_max_bytes: int = _DEFAULT_LOAD_BATCH_BYTES,
 ) -> tuple[int, int]:
-    """Stream-transform one NDJSON file and submit it as a single load job.
+    """Stream-transform one NDJSON file into BigQuery as one or more load jobs.
 
-    Returns (rows_loaded, rows_skipped).
+    A single source NDJSON can be ~2 GB (one chunk's worth of EN NS0
+    article HTML). Submitting that as one load job blocks the operator
+    on a silent multi-minute ``job.result()`` poll. Splitting it into
+    ``batch_max_bytes``-sized pieces gives a visible log line per batch
+    and shrinks the retry atom to a few minutes' work.
+
+    The first batch uses ``write_disposition``; subsequent batches always
+    WRITE_APPEND so a single source file isn't repeatedly truncating
+    away its own previously-loaded rows.
+
+    Returns ``(rows_loaded, rows_skipped)`` aggregated across all batches.
     """
     from google.cloud import bigquery
 
     logger.info("Preparing NDJSON file %d: %s", file_idx, ndjson_path)
 
-    tmp_path = None
-    try:
-        prepared = 0
-        skipped = 0
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".ndjson", delete=False) as tmp:
-            tmp_path = tmp.name
-            with open(ndjson_path, encoding="utf-8") as f:
-                for line in f:
+    skipped = 0
+    total_loaded = 0
+    batch_idx = 0
+
+    with open(ndjson_path, encoding="utf-8") as src:
+        while True:
+            # ``delete=False`` keeps the file alive after the ``with``
+            # block exits so the load job can re-open it for reading.
+            # Cleanup happens in the ``finally`` below.
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".ndjson", delete=False, encoding="utf-8"
+            ) as tmp:
+                tmp_path = Path(tmp.name)
+                rows_in_batch = 0
+                bytes_in_batch = 0
+                for line in src:
                     line = line.strip()
                     if not line:
                         continue
@@ -637,62 +1175,45 @@ def _load_one_file(
                     if row is None:
                         skipped += 1
                         continue
-                    tmp.write(json.dumps(row) + "\n")
-                    prepared += 1
+                    payload = json.dumps(row) + "\n"
+                    tmp.write(payload)
+                    bytes_in_batch += len(payload.encode("utf-8"))
+                    rows_in_batch += 1
+                    if bytes_in_batch >= batch_max_bytes:
+                        break
+            try:
+                if rows_in_batch == 0:
+                    if batch_idx == 0:
+                        logger.warning(
+                            "File %d produced 0 rows after parsing; skipping load job",
+                            file_idx,
+                        )
+                    return total_loaded, skipped
 
-        if prepared == 0:
-            logger.warning("File %d produced 0 rows after parsing; skipping load job", file_idx)
-            return 0, skipped
+                batch_idx += 1
+                disposition = (
+                    write_disposition
+                    if batch_idx == 1
+                    else bigquery.WriteDisposition.WRITE_APPEND
+                )
+                total_loaded += _submit_batch_load_job(
+                    client=client,
+                    table_ref=table_ref,
+                    batch_path=tmp_path,
+                    schema=schema,
+                    write_disposition=disposition,
+                    file_idx=file_idx,
+                    batch_idx=batch_idx,
+                    rows_in_batch=rows_in_batch,
+                    bytes_in_batch=bytes_in_batch,
+                )
 
-        job_config = bigquery.LoadJobConfig(
-            schema=schema,
-            source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
-            write_disposition=write_disposition,
-            max_bad_records=0,
-        )
-
-        with open(tmp_path, "rb") as source:
-            load_job = client.load_table_from_file(
-                source,
-                table_ref,
-                job_config=job_config,
-            )
-
-        logger.info(
-            "BigQuery load job started for file %d: %s (%d rows prepared)",
-            file_idx,
-            load_job.job_id,
-            prepared,
-        )
-        load_job.result()
-
-        if load_job.errors:
-            logger.error("BigQuery load job completed with errors:")
-            for err in load_job.errors:
-                logger.error("  %s", err)
-
-        loaded = load_job.output_rows
-        logger.info(
-            "Loaded %d rows from file %d (%d prepared, %d skipped)",
-            loaded,
-            file_idx,
-            prepared,
-            skipped,
-        )
-
-        if loaded != prepared:
-            logger.warning(
-                "Row count mismatch in file %d: prepared %d, BigQuery loaded %d",
-                file_idx,
-                prepared,
-                loaded,
-            )
-
-        return loaded, skipped
-
-    finally:
-        if tmp_path and Path(tmp_path).exists():
-            os.unlink(tmp_path)
+                if bytes_in_batch < batch_max_bytes:
+                    # Inner loop ended due to source exhaustion, not size cap.
+                    return total_loaded, skipped
+            finally:
+                if tmp_path.exists():
+                    tmp_path.unlink()
 
 
 def load_tarball_to_bigquery(
@@ -860,6 +1381,45 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=10_000,
         help="Rows per batch for streaming inserts (default: 10000)",
     )
+    parser.add_argument(
+        "--state-file",
+        default=None,
+        help=(
+            "Path to the chunked-ingest state file (default: auto under "
+            "the system temp dir, keyed by snapshot id). Resume picks up "
+            "from this file; --fresh ignores it."
+        ),
+    )
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help=(
+            "Ignore any existing state file and start a new run from "
+            "chunk 0 (truncates the destination table). Required when "
+            "WME has re-issued the snapshot since the previous run."
+        ),
+    )
+    parser.add_argument(
+        "--no-chunked",
+        action="store_true",
+        help=(
+            "Disable the chunked-ingest path even if the snapshot exposes "
+            "/chunks; falls back to downloading a single tarball via the "
+            "legacy /download endpoint. Provided as an escape hatch — "
+            "note that for snapshots WME has split (notably EN NS0), the "
+            "single-tarball path returns only the first group and "
+            "produces an *incomplete* table."
+        ),
+    )
+    parser.add_argument(
+        "--chunk-work-dir",
+        default=None,
+        help=(
+            "Working directory for downloaded chunks (default: a fresh "
+            "tempdir per run). Each chunk is unlinked after its load "
+            "finishes; peak disk is ~1 chunk (~300 MB)."
+        ),
+    )
     return parser
 
 
@@ -880,41 +1440,113 @@ def main(argv: list[str] | None = None) -> int | None:
     except ImportError:
         pass
 
-    # The script can either reuse a tarball provided on disk or download a
-    # new one from WME. ``downloaded_here`` tracks whether *this* run owns
-    # the tarball — operator-supplied tarballs (-i) are never deleted.
-    downloaded_here = False
+    # Operator-supplied tarball (--input) bypasses both the chunked path
+    # and the network entirely.
     if args.input:
         tarball_path = Path(args.input)
         if not tarball_path.exists():
             logger.error("Input file not found: %s", tarball_path)
             sys.exit(1)
         logger.info("Using existing tarball: %s", tarball_path)
-    else:
-        username = os.environ.get("WME_USERNAME")
-        password = os.environ.get("WME_PASSWORD")
-        if not username or not password:
-            logger.error("WME_USERNAME and WME_PASSWORD environment variables are required")
-            sys.exit(1)
 
-        token = get_bearer_token(username, password)
+        loaded, skipped = load_tarball_to_bigquery(
+            tarball_path,
+            project=args.project,
+            dataset=args.dataset,
+            ns=ns,
+            credentials_path=args.credentials,
+            use_streaming_insert=args.streaming_insert,
+            batch_size=args.batch_size,
+        )
+        logger.info(
+            "Done! %d rows loaded into %s.%s.%s (%d rows skipped)",
+            loaded,
+            args.project,
+            args.dataset,
+            ns.table_id,
+            skipped,
+        )
+        return None
 
-        if args.list:
-            snapshots = list_snapshots(token)
-            print(json.dumps(snapshots, indent=2))
-            return None
+    username = os.environ.get("WME_USERNAME")
+    password = os.environ.get("WME_PASSWORD")
+    if not username or not password:
+        logger.error("WME_USERNAME and WME_PASSWORD environment variables are required")
+        sys.exit(1)
 
-        if args.output:
-            tarball_path = Path(args.output)
-        else:
-            tarball_path = Path(tempfile.mkdtemp()) / f"{snapshot_id}.tar.gz"
+    token = get_bearer_token(username, password)
 
-        download_snapshot_streaming(token, snapshot_id, tarball_path)
-        downloaded_here = True
+    if args.list:
+        snapshots = list_snapshots(token)
+        print(json.dumps(snapshots, indent=2))
+        return None
 
+    # Try the chunked path first unless the operator has explicitly disabled
+    # it. Snapshots without a chunks endpoint fall through to the legacy
+    # single-tarball path. Important: for EN NS0 the chunks endpoint
+    # *exists* and is the only complete listing — the legacy /download
+    # silently returns just the first chunk-group (~70% of the data).
+    chunks: list[dict] = []
+    if not args.no_chunked:
+        chunks = list_chunks(token, snapshot_id)
+        logger.info(
+            "Snapshot %s exposes %d chunks via /chunks API",
+            snapshot_id,
+            len(chunks),
+        )
+
+    if chunks:
         if args.download_only:
-            logger.info("Download-only mode. Tarball saved to: %s", tarball_path)
+            logger.warning(
+                "--download-only is a no-op for chunked ingest (chunks are "
+                "downloaded just-in-time and unlinked after their load); "
+                "use --no-chunked --download-only to fetch the legacy "
+                "single tarball instead."
+            )
             return None
+
+        state_path = (
+            Path(args.state_file)
+            if args.state_file
+            else _default_state_path(snapshot_id)
+        )
+        work_dir = Path(args.chunk_work_dir) if args.chunk_work_dir else None
+        loaded, skipped = load_chunked_to_bigquery(
+            token=token,
+            chunks=chunks,
+            project=args.project,
+            dataset=args.dataset,
+            ns=ns,
+            credentials_path=args.credentials,
+            state_path=state_path,
+            fresh=args.fresh,
+            work_dir=work_dir,
+            use_streaming_insert=args.streaming_insert,
+            batch_size=args.batch_size,
+        )
+        logger.info(
+            "Done! %d rows loaded into %s.%s.%s (%d rows skipped)",
+            loaded,
+            args.project,
+            args.dataset,
+            ns.table_id,
+            skipped,
+        )
+        return None
+
+    # Legacy single-tarball path. Reached only when --no-chunked is set or
+    # the snapshot's /chunks endpoint returned nothing.
+    if args.output:
+        tarball_path = Path(args.output)
+    else:
+        tarball_path = Path(tempfile.mkdtemp()) / f"{snapshot_id}.tar.gz"
+
+    download_snapshot_streaming(token, snapshot_id, tarball_path)
+    downloaded_here = True
+
+    if args.download_only:
+        logger.info("Download-only mode. Tarball saved to: %s", tarball_path)
+        return None
 
     try:
         loaded, skipped = load_tarball_to_bigquery(

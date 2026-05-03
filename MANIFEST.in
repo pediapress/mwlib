@@ -1,4 +1,6 @@
 include .dockerignore
+include .github/dependabot.yml
+include .github/workflows/release.yml
 include .vscode/settings.json
 include MANIFEST.in
 include README.md
