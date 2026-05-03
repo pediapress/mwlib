@@ -954,15 +954,30 @@ def _prepare_table(client, table_ref: str, ns: NamespaceConfig) -> None:
         client.create_table(table)
         logger.info("Created BigQuery table %s", table_ref)
     else:
+        # ``get_table`` returns a 404 if the table truly doesn't exist and a
+        # 403 if it exists but the calling SA lacks ``bigquery.tables.get``.
+        # The two diagnoses lead the operator to very different fixes
+        # (provision via Pulumi vs. grant IAM), so distinguish them.
+        from google.api_core.exceptions import Forbidden, NotFound
+
         try:
             client.get_table(table_ref)
-        except Exception as exc:
+        except NotFound as exc:
             raise RuntimeError(
                 f"BigQuery table {table_ref} is externally managed (e.g. by "
-                f"Pulumi) and could not be found. Provision it before running "
-                f"the ingest — the script refuses to bootstrap a missing "
+                f"Pulumi) and was not found. Provision it before running the "
+                f"ingest — the script refuses to bootstrap a missing "
                 f"externally-managed table because doing so would silently "
                 f"drop clustering / deletion-protection settings."
+            ) from exc
+        except Forbidden as exc:
+            raise RuntimeError(
+                f"BigQuery table {table_ref} exists but the calling service "
+                f"account is denied ``bigquery.tables.get``. Grant "
+                f"``roles/bigquery.dataEditor`` on the dataset (and "
+                f"``roles/bigquery.jobUser`` at project level) to whichever "
+                f"SA the worker uses — typically the one mounted at "
+                f"``BIGQUERY_CREDENTIALS`` / ``GOOGLE_APPLICATION_CREDENTIALS``."
             ) from exc
         logger.info("Using BigQuery table %s (managed externally)", table_ref)
 

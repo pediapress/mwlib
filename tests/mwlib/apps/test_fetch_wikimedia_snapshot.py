@@ -223,11 +223,33 @@ class TestPrepareTable:
         instead of the script silently bootstrapping a stripped-down
         version without clustering / deletion-protection.
         """
+        from google.api_core.exceptions import NotFound
+
         client = MagicMock()
-        client.get_table.side_effect = Exception("404 Not found: Table p.d.article_pages")
+        client.get_table.side_effect = NotFound("Table p.d.article_pages")
         ns = snap.NAMESPACES[0]
 
-        with pytest.raises(RuntimeError, match="externally managed"):
+        with pytest.raises(RuntimeError, match="not found"):
+            snap._prepare_table(client, "p.d.article_pages", ns)
+        client.create_table.assert_not_called()
+
+    def test_ns0_raises_with_iam_pointer_on_403(self):
+        """A 403 ``Forbidden`` reads as a permission gap, not a missing table.
+
+        BigQuery returns ``Permission bigquery.tables.get denied (or it may
+        not exist)`` ambiguously for both 403 and 404 at the message level.
+        We distinguish at the exception class level so the operator gets
+        steered to ``roles/bigquery.dataEditor`` instead of being told to
+        re-provision via Pulumi (which would fail with a "table already
+        exists" error and leave them more confused).
+        """
+        from google.api_core.exceptions import Forbidden
+
+        client = MagicMock()
+        client.get_table.side_effect = Forbidden("Permission denied")
+        ns = snap.NAMESPACES[0]
+
+        with pytest.raises(RuntimeError, match="dataEditor"):
             snap._prepare_table(client, "p.d.article_pages", ns)
         client.create_table.assert_not_called()
 
