@@ -71,6 +71,22 @@ lint.per-file-ignores."src/mwlib/apps/fetch_wikimedia_snapshot.py" = [
     "PLR0913", # too many arguments (load-job helpers)
     "PLR0915", # too many statements (CLI orchestrator)
 ]
+# Template-magic dispatch. Function names like ``TITLEPARTS`` / ``IFERROR``
+# match MediaWiki magic-word names by design — the dispatcher maps
+# ``{{TITLEPARTS:…}}`` to ``ParserFunctions.TITLEPARTS`` by string match —
+# so renaming for PEP-8 would break wiki templates. The rest of the rules
+# below cover legacy patterns (lazy imports, unnecessary assigns, f-string
+# preferences) in a file that pre-dates the modern ruff config.
+lint.per-file-ignores."src/mwlib/parser/templ/magics.py" = [
+    "N802",    # function name should be lowercase (MediaWiki magic-word convention)
+    "N805",    # first method arg name (legacy classmethod-as-function patterns)
+    "RET504",  # unnecessary assignment before return
+    "PLR2004", # magic values in comparisons
+    "PLC0415", # lazy imports
+    "UP031",   # `.format()` vs f-string
+    "RUF012",  # mutable class attribute should be ClassVar
+    "G004",    # f-string in logging call
+]
 
 # Extend the selected rules
 lint.extend-select = []

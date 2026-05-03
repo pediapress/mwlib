@@ -16,7 +16,7 @@ import logging
 import re
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 from urllib.parse import quote, quote_plus, urljoin, urlparse
 
 from mwlib.parser import expr
@@ -416,12 +416,7 @@ class StringMagic:
 
         fill_str = args[2] or "0"
         return (
-            "".join(
-                [
-                    fill_str[i % len(fill_str)]
-                    for i in range(width - len(original_string))
-                ]
-            )
+            "".join([fill_str[i % len(fill_str)] for i in range(width - len(original_string))])
             + original_string
         )
 
@@ -467,8 +462,7 @@ class ParserFunctions:
 
         if exists:
             return args[1]
-        else:
-            return args[2]
+        return args[2]
 
     def EXPR(self, expression_list):
         import math
@@ -503,8 +497,7 @@ class ParserFunctions:
 
         if evaluation_result:
             return expression_list[1]
-        else:
-            return expression_list[2]
+        return expression_list[2]
 
     def TITLEPARTS(self, args):
         title = args[0]
@@ -535,8 +528,7 @@ class ParserFunctions:
 
         if if_error_rx.search(val):
             return bad
-        else:
-            return good
+        return good
 
 
 for foo_name in dir(ParserFunctions):
@@ -675,8 +667,8 @@ def _populate_dummy():
     magic_resolver = MagicResolver()
 
     def get_dummy(name):
-        def resolve():
-            log.warn(f"using dummy resolver for {name}")
+        def resolve(self, args):
+            log.warning(f"using dummy resolver for {name}")
             return ""
 
         return resolve

@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2026-05-03 mwlib 0.18.6
+------------------------
+- Fix ``TypeError`` in ``parser/templ/magics.py`` dummy resolver: ``_populate_dummy``'s placeholder function now accepts ``(self, args)`` to match the calling convention of other ``MagicResolver`` handlers, instead of being a zero-arg function that crashed every time a wiki template invoked an unimplemented magic word. Render-blocking on any wiki using a magic word that hadn't been wired into mwlib's resolver registry.
+- Per-file-ignore added for ``parser/templ/magics.py`` covering MediaWiki magic-word naming (``N802``) and other legacy patterns the new strict ruff config flags but that aren't safe to refactor in a point release.
+
 2026-05-03 mwlib 0.18.5
 ------------------------
 - ``wme-ingest`` now prefers ``BIGQUERY_CREDENTIALS`` over ``GOOGLE_APPLICATION_CREDENTIALS`` for the ``--credentials`` default, mirroring the runtime BigQuery lookup. Workers mounting a dedicated BigQuery SA at ``/run/secrets/bigquery_credentials`` no longer silently fall through to the general ``GOOGLE_APPLICATION_CREDENTIALS`` SA when invoked without an explicit ``--credentials`` flag.
