@@ -3,10 +3,10 @@ requires = ["setuptools", "wheel", "Cython", "toml"]
 
 [project]
 name = "mwlib"
-version = "0.18.4"
+version = "0.18.5"
 description = "mediawiki parser and utility library"
 authors = [
-    {name = "pediapress.com", email = "info@pediapress.com"}
+    { name = "pediapress.com", email = "info@pediapress.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.11, <3.13"
@@ -101,33 +101,32 @@ output-format = "concise"
 line-length = 99
 
 
-
 [tool.ruff.lint]
 select = [
-#  "A",      # flake8-comprehensions
-#  "ANN",    # flake8-annotations
-#  "B",      # flake8-bugbear
-#  "C4",     # flake8-executable
-  "C90",    # mccabe (complexity)
-  "D",      # pydocstyle
-  "E",      # pycodestyle error
-#  "EXE",    # flake8-executable
-  "F",      # pyflakes
-#  "G",      # flake8-logging-format
-  "I",      # isort
-#  "ISC",    # flake8-implicit-str-concat
-#  "N",      # pep8-naming
-#  "PGH004", # disalloy blanket noqa
-#  "PIE",    # flake8-pie
-#  "PL",     # pylint
-#  "PT",     # flake8-pytest-style
-#  "Q",      # flake8-quotes
-#  "RET",    # flake8-return
-#  "RUF",    # Ruff-specific rules
-  "SIM",    # flake8-simplify
-  "TID",    # flake8-tidy-imports
-#  "UP",     # pyupgrade
-#  "W",      # pycodestyle warning
+    #  "A",      # flake8-comprehensions
+    #  "ANN",    # flake8-annotations
+    #  "B",      # flake8-bugbear
+    #  "C4",     # flake8-executable
+    "C90", # mccabe (complexity)
+    "D",   # pydocstyle
+    "E",   # pycodestyle error
+    #  "EXE",    # flake8-executable
+    "F", # pyflakes
+    #  "G",      # flake8-logging-format
+    "I", # isort
+    #  "ISC",    # flake8-implicit-str-concat
+    #  "N",      # pep8-naming
+    #  "PGH004", # disalloy blanket noqa
+    #  "PIE",    # flake8-pie
+    #  "PL",     # pylint
+    #  "PT",     # flake8-pytest-style
+    #  "Q",      # flake8-quotes
+    #  "RET",    # flake8-return
+    #  "RUF",    # Ruff-specific rules
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    #  "UP",     # pyupgrade
+    #  "W",      # pycodestyle warning
 ]
 #extend-select = ["C4", "I", "SIM", "TCH", "UP", "W"]
 ignore = ["C408", "D10", "D203", "D213", "E501", "F401", "F403", "F405", "G004"]

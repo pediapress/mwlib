@@ -6,8 +6,11 @@ Authentication:
     the Wikimedia Enterprise auth endpoint.
 
 BigQuery:
-    Uses GOOGLE_APPLICATION_CREDENTIALS (or the service account JSON path
-    passed via --credentials) for authentication.
+    Uses ``BIGQUERY_CREDENTIALS`` (preferred) or ``GOOGLE_APPLICATION_CREDENTIALS``
+    (fallback) — or the service-account JSON path passed via ``--credentials``
+    — for authentication. The active SA's email is logged at INFO when the
+    BigQuery client is constructed so 403 errors can be diagnosed without
+    guessing which identity the request was signed with.
 
 Namespaces:
     --namespace 6 (default): NS6 file description pages → ``file_pages`` table.
@@ -90,7 +93,7 @@ import time
 import uuid
 from collections.abc import Callable, Iterator
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
@@ -103,6 +106,7 @@ logger = logging.getLogger(__name__)
 
 WME_AUTH_URL = "https://auth.enterprise.wikimedia.com/v1/login"
 WME_API_BASE = "https://api.enterprise.wikimedia.com/v2"
+_HTTP_NOT_FOUND = 404
 
 # BigQuery schema for namespace 6 file description pages.
 # Focused on fields needed for license checking. article_body html is omitted
@@ -234,11 +238,11 @@ def parse_ns6_row(line: str) -> dict | None:
     }
 
     # Serialize complex fields as JSON strings for BigQuery JSON columns
-    if "license" in doc and doc["license"]:
+    if doc.get("license"):
         row["license"] = json.dumps(doc["license"])
-    if "templates" in doc and doc["templates"]:
+    if doc.get("templates"):
         row["templates"] = json.dumps(doc["templates"])
-    if "categories" in doc and doc["categories"]:
+    if doc.get("categories"):
         row["categories"] = json.dumps(doc["categories"])
 
     row["abstract"] = doc.get("abstract")
@@ -528,7 +532,7 @@ def list_chunks(token: str, snapshot_id: str) -> list[dict]:
         headers={"Authorization": f"Bearer {token}"},
         timeout=30,
     )
-    if resp.status_code == 404:
+    if resp.status_code == _HTTP_NOT_FOUND:
         return []
     resp.raise_for_status()
     payload = resp.json()
@@ -595,10 +599,7 @@ def download_chunk(
                                 )
                             last_logged = received
                 if expected and received != expected:
-                    raise OSError(
-                        f"chunk {chunk_id}: short read "
-                        f"({received} of {expected} bytes)"
-                    )
+                    raise OSError(f"chunk {chunk_id}: short read ({received} of {expected} bytes)")
                 return etag
         except (requests.RequestException, OSError) as exc:
             last_exc = exc
@@ -644,7 +645,7 @@ class ChunkLoadState:
         return cls(
             run_id=str(uuid.uuid4()),
             snapshot=snapshot_id,
-            started_at=datetime.now(timezone.utc).isoformat(),
+            started_at=datetime.now(UTC).isoformat(),
         )
 
     @classmethod
@@ -690,15 +691,11 @@ def _iter_chunk_ndjson(chunk_path: Path) -> Iterator[Path]:
                 for m in members:
                     _validate_tar_member(m)
                 if not members:
-                    raise ValueError(
-                        f"chunk {chunk_path.name}: tar contains no .ndjson members"
-                    )
+                    raise ValueError(f"chunk {chunk_path.name}: tar contains no .ndjson members")
                 for member in members:
                     src = tar.extractfile(member)
                     if src is None:
-                        raise ValueError(
-                            f"chunk {chunk_path.name}: cannot extract {member.name}"
-                        )
+                        raise ValueError(f"chunk {chunk_path.name}: cannot extract {member.name}")
                     out = extract_dir / member.name
                     out.parent.mkdir(parents=True, exist_ok=True)
                     with src, open(out, "wb") as dst:
@@ -828,8 +825,13 @@ def load_chunked_to_bigquery(
             logger.info("[%d/%d] skip already-loaded %s", i, len(chunks), cid)
             continue
 
-        logger.info("[%d/%d] download %s (%s MB)", i, len(chunks), cid,
-                    chunk.get("size", {}).get("value", "?"))
+        logger.info(
+            "[%d/%d] download %s (%s MB)",
+            i,
+            len(chunks),
+            cid,
+            chunk.get("size", {}).get("value", "?"),
+        )
         chunk_path = work_dir / cid
         try:
             etag = download_chunk(token, ns.snapshot_id, cid, chunk_path)
@@ -906,14 +908,38 @@ def load_chunked_to_bigquery(
 
 
 def _make_bq_client(project: str, credentials_path: str | None):
-    """Create a BigQuery client with optional service account credentials."""
+    """Create a BigQuery client with optional service account credentials.
+
+    Logs the active service-account email at INFO so the operator can tell
+    at a glance which SA is talking to BigQuery — IAM 403s look identical
+    whether the wrong SA is loaded or the right SA lacks a binding, and
+    knowing which SA the request is signed with cuts the diagnosis from
+    a guessing game to a one-line check.
+    """
     from google.cloud import bigquery
     from google.oauth2 import service_account
 
     if credentials_path:
         creds = service_account.Credentials.from_service_account_file(credentials_path)
+        logger.info(
+            "BigQuery client authenticating as %s (from %s)",
+            creds.service_account_email,
+            credentials_path,
+        )
         return bigquery.Client(project=project, credentials=creds)
-    return bigquery.Client(project=project)
+
+    # No explicit credentials path — google-auth's default chain (env vars,
+    # gcloud user creds, GCE metadata server, …). Log whatever it picks so
+    # the operator isn't left wondering which identity ended up in play.
+    import google.auth
+
+    creds, _ = google.auth.default()
+    sa_email = getattr(creds, "service_account_email", None)
+    logger.info(
+        "BigQuery client authenticating via google-auth default chain (%s)",
+        sa_email or f"non-SA credentials of type {type(creds).__name__}",
+    )
+    return bigquery.Client(project=project, credentials=creds)
 
 
 def _make_bq_schema(schema: list[dict]):
@@ -1036,8 +1062,8 @@ def _stream_one_file(
     batch: list[dict] = []
 
     with open(ndjson_path, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
+        for raw_line in f:
+            line = raw_line.strip()
             if not line:
                 continue
             row = parser(line)
@@ -1182,8 +1208,8 @@ def _load_one_file(
                 tmp_path = Path(tmp.name)
                 rows_in_batch = 0
                 bytes_in_batch = 0
-                for line in src:
-                    line = line.strip()
+                for raw_line in src:
+                    line = raw_line.strip()
                     if not line:
                         continue
                     row = parser(line)
@@ -1207,9 +1233,7 @@ def _load_one_file(
 
                 batch_idx += 1
                 disposition = (
-                    write_disposition
-                    if batch_idx == 1
-                    else bigquery.WriteDisposition.WRITE_APPEND
+                    write_disposition if batch_idx == 1 else bigquery.WriteDisposition.WRITE_APPEND
                 )
                 total_loaded += _submit_batch_load_job(
                     client=client,
@@ -1387,8 +1411,17 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--credentials",
-        default=os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"),
-        help="Path to GCP service account JSON (default: GOOGLE_APPLICATION_CREDENTIALS env)",
+        default=(
+            os.environ.get("BIGQUERY_CREDENTIALS")
+            or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+        ),
+        help=(
+            "Path to GCP service account JSON. Defaults to BIGQUERY_CREDENTIALS "
+            "if set, otherwise GOOGLE_APPLICATION_CREDENTIALS — same precedence "
+            "the runtime BigQuery lookup uses, so a worker mounting a dedicated "
+            "BigQuery SA at /run/secrets/bigquery_credentials gets used by the "
+            "ingest CLI without an explicit --credentials flag."
+        ),
     )
     parser.add_argument(
         "--batch-size",
@@ -1520,11 +1553,7 @@ def main(argv: list[str] | None = None) -> int | None:
             )
             return None
 
-        state_path = (
-            Path(args.state_file)
-            if args.state_file
-            else _default_state_path(snapshot_id)
-        )
+        state_path = Path(args.state_file) if args.state_file else _default_state_path(snapshot_id)
         work_dir = Path(args.chunk_work_dir) if args.chunk_work_dir else None
         loaded, skipped = load_chunked_to_bigquery(
             token=token,

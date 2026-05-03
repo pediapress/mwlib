@@ -59,6 +59,18 @@ lint.pep8-naming.classmethod-decorators = [
 lint.per-file-ignores."**/migrations/*.py" = [
     "N806",
 ] # ignore variable in function should be lowercase
+# WME ingest CLI uses lazy imports for ``google-cloud-bigquery`` (declared as
+# an *optional* extra in pyproject.toml under ``mwlib[bigquery]``) so the
+# default install stays slim. Top-level imports would force the heavy
+# Google/gRPC stack on every consumer. The complexity warnings reflect a
+# real CLI orchestrator that's been deliberately kept linear; refactoring is
+# out of scope for the chunked-ingest work.
+lint.per-file-ignores."src/mwlib/apps/fetch_wikimedia_snapshot.py" = [
+    "PLC0415", # `import` should be at the top-level (lazy optional-dep imports)
+    "PLR0912", # too many branches (CLI orchestrator)
+    "PLR0913", # too many arguments (load-job helpers)
+    "PLR0915", # too many statements (CLI orchestrator)
+]
 
 # Extend the selected rules
 lint.extend-select = []

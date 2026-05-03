@@ -1,6 +1,8 @@
 include .dockerignore
 include .github/dependabot.yml
 include .github/workflows/release.yml
+include .pre-commit-config.yaml
+include .taplo.toml
 include .vscode/settings.json
 include MANIFEST.in
 include README.md
@@ -39,6 +41,7 @@ include mwlib/_uscan.cc
 include nginx/default.conf
 include pyproject.toml
 include pytest.ini
+include ruff.toml
 include sandbox/anywikisampler.py
 include sandbox/bigswitch.py
 include sandbox/citeweb.py

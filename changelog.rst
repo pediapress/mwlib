@@ -4,6 +4,11 @@ Changelog
 
 mwlib
 ==========================
+2026-05-03 mwlib 0.18.5
+------------------------
+- ``wme-ingest`` now prefers ``BIGQUERY_CREDENTIALS`` over ``GOOGLE_APPLICATION_CREDENTIALS`` for the ``--credentials`` default, mirroring the runtime BigQuery lookup. Workers mounting a dedicated BigQuery SA at ``/run/secrets/bigquery_credentials`` no longer silently fall through to the general ``GOOGLE_APPLICATION_CREDENTIALS`` SA when invoked without an explicit ``--credentials`` flag.
+- ``_make_bq_client`` logs the active SA's ``service_account_email`` at INFO when the BigQuery client is constructed. Disambiguates "wrong SA loaded" from "right SA, missing IAM" — both surface as identical 403s otherwise.
+
 2026-05-03 mwlib 0.18.4
 ------------------------
 - ``wme-ingest`` adds a chunked-snapshot path that fixes a silent data-loss bug in 0.18.3: the legacy ``/v2/snapshots/{id}/download`` endpoint only returns the *first* group for snapshots WME has split (notably EN NS0, ~419 chunks / ~200 GB), so previous runs against this endpoint produced an incomplete ``article_pages`` table. The new path enumerates all chunks via ``/v2/snapshots/{id}/chunks`` and loads each independently. Auto-detected at runtime; pass ``--no-chunked`` to force the legacy single-tarball path.
