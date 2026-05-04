@@ -77,6 +77,14 @@ lint.per-file-ignores."src/mwlib/apps/fetch_wikimedia_snapshot.py" = [
 # so renaming for PEP-8 would break wiki templates. The rest of the rules
 # below cover legacy patterns (lazy imports, unnecessary assigns, f-string
 # preferences) in a file that pre-dates the modern ruff config.
+# Tests — magic values in assertions and lazy imports for SDK-specific
+# bigquery enums are conventional test patterns; the regex-pattern
+# pickiness in ``RUF043`` doesn't matter for plain-substring matches.
+lint.per-file-ignores."tests/mwlib/apps/test_fetch_wikimedia_snapshot.py" = [
+    "PLC0415", # `import` should be at the top-level (lazy SDK imports)
+    "PLR2004", # magic value in comparison (intentional in test asserts)
+    "RUF043",  # ``match=`` pattern with metacharacters (substring matches)
+]
 lint.per-file-ignores."src/mwlib/parser/templ/magics.py" = [
     "N802",    # function name should be lowercase (MediaWiki magic-word convention)
     "N805",    # first method arg name (legacy classmethod-as-function patterns)

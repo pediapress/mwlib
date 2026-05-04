@@ -848,6 +848,13 @@ class TestLoadChunkedToBigquery:
         load_job.output_rows = 1
         load_job.job_id = "job-1"
         client.load_table_from_file.return_value = load_job
+        # The MERGE swap at the end of a chunked run goes through
+        # ``client.query()``. Mock it the same way as load jobs so tests
+        # don't trip the "MERGE job completed with errors" path.
+        merge_job = MagicMock()
+        merge_job.errors = None
+        merge_job.num_dml_affected_rows = 1
+        client.query.return_value = merge_job
         monkeypatch.setattr(snap, "_make_bq_client", lambda *a, **kw: client)
         return client
 
@@ -857,9 +864,11 @@ class TestLoadChunkedToBigquery:
         Writes a tar.gz with the given NDJSON content into the requested
         output_path. Returns the input map.
         """
+
         def fake_download(token, snapshot_id, chunk_id, output_path, retries=3):
             _make_chunk_tarball(output_path, f"{chunk_id}.ndjson", content_for[chunk_id])
             return f"etag-{chunk_id}"
+
         monkeypatch.setattr(snap, "download_chunk", fake_download)
 
     def test_first_chunk_truncates_rest_append(self, monkeypatch, tmp_path):
@@ -873,9 +882,7 @@ class TestLoadChunkedToBigquery:
             {"identifier": "c2", "version": "etag-c2"},
         ]
         rows = {
-            cid: json.dumps(
-                {"name": cid, "identifier": i, "article_body": {"html": "<p>x</p>"}}
-            )
+            cid: json.dumps({"name": cid, "identifier": i, "article_body": {"html": "<p>x</p>"}})
             + "\n"
             for i, cid in enumerate([c["identifier"] for c in chunks])
         }
@@ -1048,9 +1055,7 @@ class TestLoadChunkedToBigquery:
 
         def fake_download(token, snapshot_id, chunk_id, output_path, retries=3):
             if state_path.exists():
-                seen_state_at_call.append(
-                    dict(snap.ChunkLoadState.load(state_path).chunks_loaded)
-                )
+                seen_state_at_call.append(dict(snap.ChunkLoadState.load(state_path).chunks_loaded))
             else:
                 seen_state_at_call.append({})
             _make_chunk_tarball(output_path, f"{chunk_id}.ndjson", rows[chunk_id])
@@ -1073,7 +1078,107 @@ class TestLoadChunkedToBigquery:
         # When c2 starts, c0 and c1 must both be checkpointed.
         assert seen_state_at_call[0] == {}
         assert "c0" in seen_state_at_call[1]
-        assert "c0" in seen_state_at_call[2] and "c1" in seen_state_at_call[2]
+        assert "c0" in seen_state_at_call[2]
+        assert "c1" in seen_state_at_call[2]
+
+    def test_loads_go_to_staging_table_not_destination(self, monkeypatch, tmp_path):
+        # The whole point of staging+swap is that the destination table
+        # is never written to during chunk loads — readers see the
+        # previous snapshot throughout the refresh window. Verify by
+        # checking every load_table_from_file call's table_ref argument.
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [{"identifier": "c0", "version": "v0"}]
+        rows = {
+            "c0": json.dumps({"name": "c0", "article_body": {"html": "<p>x</p>"}}) + "\n",
+        }
+        self._stub_download_chunk(monkeypatch, tmp_path, rows)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=tmp_path / "state.json",
+            fresh=False,
+        )
+
+        # Every load_table_from_file call's second positional arg is the
+        # table_ref. They should *all* point at the staging table, never
+        # at the destination ``article_pages``.
+        for call in client.load_table_from_file.call_args_list:
+            table_ref = call.args[1] if len(call.args) > 1 else call.kwargs.get("destination")
+            assert table_ref == "proj.ds.article_pages_staging", (
+                f"chunk load went to {table_ref!r}, expected staging"
+            )
+
+    def test_merge_swap_runs_after_all_chunks_loaded(self, monkeypatch, tmp_path):
+        # The MERGE swap should fire exactly once at the end, with both
+        # the source (staging) and target (destination) tables in the
+        # SQL. ``client.query()`` is the entry point for the MERGE.
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [
+            {"identifier": "c0", "version": "v0"},
+            {"identifier": "c1", "version": "v1"},
+        ]
+        rows = {
+            cid: json.dumps({"name": cid, "article_body": {"html": "<p>x</p>"}}) + "\n"
+            for cid in [c["identifier"] for c in chunks]
+        }
+        self._stub_download_chunk(monkeypatch, tmp_path, rows)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=tmp_path / "state.json",
+            fresh=False,
+        )
+
+        # Exactly one query (the MERGE) should have run. Streaming-insert
+        # path would TRUNCATE via query() but we're not on that path.
+        assert client.query.call_count == 1
+        merge_sql = client.query.call_args.args[0]
+        assert "MERGE" in merge_sql
+        assert "proj.ds.article_pages" in merge_sql  # target
+        assert "proj.ds.article_pages_staging" in merge_sql  # source
+        assert "WHEN NOT MATCHED BY SOURCE THEN DELETE" in merge_sql
+
+    def test_swap_skipped_when_already_done_on_resume(self, monkeypatch, tmp_path):
+        # State.swap_done == True means a previous run completed the
+        # MERGE but died before clearing the state file. Re-running
+        # must not redo the MERGE (cheap but unnecessary, and would log
+        # confusing "0 rows affected" output).
+        client = self._setup_client(monkeypatch)
+        ns = snap.NAMESPACES[0]
+        chunks = [{"identifier": "c0", "version": "v0"}]
+
+        prev_state = snap.ChunkLoadState.new(ns.snapshot_id)
+        prev_state.chunks_loaded = {"c0": "v0"}
+        prev_state.swap_done = True
+        state_path = tmp_path / "state.json"
+        prev_state.save(state_path)
+
+        snap.load_chunked_to_bigquery(
+            token="token",
+            chunks=chunks,
+            project="proj",
+            dataset="ds",
+            ns=ns,
+            credentials_path=None,
+            state_path=state_path,
+            fresh=False,
+        )
+
+        client.query.assert_not_called()
+        # State file cleared because run is fully complete.
+        assert not state_path.exists()
 
 
 class TestLoadOneFileBatching:
@@ -1087,6 +1192,7 @@ class TestLoadOneFileBatching:
 
     def _setup_client(self, monkeypatch):
         client = MagicMock()
+
         # Each fake load job claims to have loaded the rows it was given.
         # The test asserts on call_count and per-call dispositions.
         def _make_job(*a, **kw):
@@ -1098,6 +1204,7 @@ class TestLoadOneFileBatching:
             job.output_rows = 1
             job.job_id = "job"
             return job
+
         client.load_table_from_file.side_effect = _make_job
         monkeypatch.setattr(snap, "_make_bq_client", lambda *a, **kw: client)
         return client
@@ -1153,9 +1260,9 @@ class TestLoadOneFileBatching:
             for call in client.load_table_from_file.call_args_list
         ]
         assert dispositions[0] == bigquery.WriteDisposition.WRITE_TRUNCATE
-        assert all(
-            d == bigquery.WriteDisposition.WRITE_APPEND for d in dispositions[1:]
-        ), dispositions
+        assert all(d == bigquery.WriteDisposition.WRITE_APPEND for d in dispositions[1:]), (
+            dispositions
+        )
 
     def test_small_input_stays_single_batch(self, monkeypatch, tmp_path):
         # Sanity: an input that fits inside batch_max_bytes still produces
@@ -1191,9 +1298,11 @@ class TestLoadOneFileBatching:
 
         before = set(Path(tempfile.gettempdir()).glob("*.ndjson"))
         snap._load_one_file(
-            client=MagicMock(load_table_from_file=MagicMock(
-                return_value=MagicMock(errors=None, output_rows=1, job_id="j")
-            )),
+            client=MagicMock(
+                load_table_from_file=MagicMock(
+                    return_value=MagicMock(errors=None, output_rows=1, job_id="j")
+                )
+            ),
             ndjson_path=path,
             file_idx=1,
             table_ref="proj.ds.t",

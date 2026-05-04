@@ -4,6 +4,14 @@ Changelog
 
 mwlib
 ==========================
+2026-05-04 mwlib 0.18.7
+------------------------
+- ``wme-ingest`` now uses a two-stage staging+swap pattern instead of TRUNCATE-then-APPEND directly on the destination table. Chunks load into a per-namespace staging table (e.g. ``article_pages_staging``); after every chunk is loaded, a single atomic ``MERGE`` statement replaces the destination's contents. Readers querying the destination see the *previous* snapshot's data throughout the multi-hour refresh window, then transition atomically to the new snapshot — no "table empty during refresh" gap. Pulumi-managed properties on the destination (clustering, deletion_protection) stay intact because the table is never dropped or recreated. The state file gains a ``swap_done`` flag so a run that crashes between "all chunks loaded" and "MERGE complete" resumes by running just the swap.
+- ``wme-ingest`` now issues one BigQuery load job per chunk instead of one per ~200 MB sub-batch within a chunk. The previous default produced ~10 jobs/chunk × 419 chunks = ~4,200 jobs per EN NS0 refresh, which trips BigQuery's hard 1,500-load-jobs-per-table-per-day quota. One job per chunk = 419 jobs/refresh, ~4× under the ceiling. Default ``_DEFAULT_LOAD_BATCH_BYTES`` raised from 200 MB to 4 GB.
+- Side benefit: chunks are now atomic units. The previous batched mode could leave a partially-loaded chunk in BigQuery if the daily quota was exceeded mid-chunk; on resume the whole chunk re-loaded and those rows duplicated (every batch is ``WRITE_APPEND``, no per-batch checkpoint). One job per chunk = either the chunk's rows are in BQ or none are. Combined with the staging+swap above, a partial-chunk failure now corrupts only staging (which the next first-chunk WRITE_TRUNCATE wipes anyway), never the live destination.
+- Long-running load jobs now log a heartbeat every 30 s while polling, so a 2 GB chunk's load doesn't appear silent for the multi-minute window between "started" and "loaded N rows".
+- ``urllib3`` is pinned to INFO level inside ``wme-ingest``. ``job.result()`` polls BigQuery every second or two for every load job, so during a multi-hour refresh the previous DEBUG default produced tens of thousands of HTTP-request log lines that drowned the script's actual progress output. Request failures (``WARNING`` and above) remain visible.
+
 2026-05-03 mwlib 0.18.6
 ------------------------
 - Fix ``TypeError`` in ``parser/templ/magics.py`` dummy resolver: ``_populate_dummy``'s placeholder function now accepts ``(self, args)`` to match the calling convention of other ``MagicResolver`` handlers, instead of being a zero-arg function that crashed every time a wiki template invoked an unimplemented magic word. Render-blocking on any wiki using a magic word that hadn't been wired into mwlib's resolver registry.

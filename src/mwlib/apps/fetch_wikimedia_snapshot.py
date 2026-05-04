@@ -102,6 +102,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
 )
+# Silence urllib3's per-request DEBUG line. ``job.result()`` polls
+# BigQuery every second or two for the duration of every load job —
+# during a multi-hour EN NS0 refresh that's tens of thousands of
+# debug lines that drown the script's actual progress logs. The
+# request-failure path remains visible at WARNING and above.
+logging.getLogger("urllib3").setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 WME_AUTH_URL = "https://auth.enterprise.wikimedia.com/v1/login"
@@ -639,6 +645,12 @@ class ChunkLoadState:
     snapshot: str
     started_at: str
     chunks_loaded: dict[str, str] = field(default_factory=dict)
+    # ``swap_done`` is the second-stage flag: chunks load into a staging
+    # table, then a single MERGE atomically replaces the destination
+    # table's contents. A run that crashes between "all chunks loaded"
+    # and "MERGE complete" resumes by running just the swap, not by
+    # re-loading data. ``False`` (or absent) means swap still pending.
+    swap_done: bool = False
 
     @classmethod
     def new(cls, snapshot_id: str) -> ChunkLoadState:
@@ -736,10 +748,27 @@ def load_chunked_to_bigquery(
 ) -> tuple[int, int]:
     """Iterate WME chunks, downloading and BigQuery-loading each atomically.
 
-    The first chunk of a fresh run triggers ``WRITE_TRUNCATE`` (or an
-    explicit table truncate for the streaming-insert path) to wipe any
-    previous snapshot. Every subsequent chunk — including those loaded by
-    a resumed run — uses ``WRITE_APPEND``.
+    Two-stage load to keep the destination table queryable throughout the
+    refresh window:
+
+    1. Each chunk loads into a per-namespace **staging** table (e.g.
+       ``article_pages_staging``). The first chunk of a fresh run uses
+       ``WRITE_TRUNCATE`` to wipe any leftover staging from a previous
+       failed run; subsequent chunks ``WRITE_APPEND`` into staging. The
+       destination table is *not* touched during this phase, so readers
+       continue to see the previous snapshot's data.
+
+    2. After every chunk is in staging, a single atomic ``MERGE``
+       statement replaces the destination table's contents in one shot —
+       readers transition from "old snapshot" to "new snapshot" with no
+       window of partial or missing data. The ``MERGE`` UPSERTs rows
+       present in staging and DELETEs target rows whose key isn't in
+       staging (full snapshot replacement semantics).
+
+    Crash-safe: a run that dies between "all chunks loaded" and "MERGE
+    complete" resumes by running just the MERGE on the next invocation
+    (no re-loading). The state file's ``swap_done`` flag distinguishes
+    "still loading chunks" from "loaded, just need the swap".
 
     Returns ``(rows_loaded, rows_skipped)`` aggregated across all chunks
     actually processed in this invocation. Chunks skipped because they
@@ -754,7 +783,11 @@ def load_chunked_to_bigquery(
     safe_project = _validate_bigquery_identifier(project, "project")
     safe_dataset = _validate_bigquery_identifier(dataset, "dataset")
     safe_table = _validate_bigquery_identifier(ns.table_id, "table")
+    safe_staging_table = _validate_bigquery_identifier(
+        f"{ns.table_id}{_STAGING_TABLE_SUFFIX}", "staging table"
+    )
     table_ref = f"{safe_project}.{safe_dataset}.{safe_table}"
+    staging_ref = f"{safe_project}.{safe_dataset}.{safe_staging_table}"
 
     if fresh and state_path.exists():
         state_path.unlink()
@@ -797,14 +830,21 @@ def load_chunked_to_bigquery(
             f"Rerun with --fresh to start over against the new snapshot."
         )
 
-    # Prepare the table only on a fresh run. Resumed runs assume the table
-    # is already populated by the previous invocation.
+    # Verify the destination table exists. We never drop/recreate it
+    # during a refresh — the staging+swap pattern keeps it queryable
+    # the whole time, and Pulumi-managed properties on it stay intact.
     starting_fresh = not state.chunks_loaded
     if starting_fresh:
         _prepare_table(client, table_ref, ns)
 
     schema = None
     if use_streaming_insert:
+        # The streaming-insert path doesn't go through staging — it's a
+        # legacy code path for operators who explicitly opt in, and
+        # streaming inserts to a staging table followed by a MERGE
+        # double-counts the cost. For now, --streaming-insert preserves
+        # the old TRUNCATE+APPEND-on-target semantics. If you need
+        # zero-downtime *and* streaming, file an issue.
         if starting_fresh and not ns.script_manages_table:
             logger.info("Truncating %s before streaming inserts", table_ref)
             client.query(f"TRUNCATE TABLE `{table_ref}`").result()
@@ -844,11 +884,21 @@ def load_chunked_to_bigquery(
                     version,
                 )
 
-            # WRITE_TRUNCATE only on the very first chunk of a fresh run.
-            # Resumed runs and all subsequent chunks always WRITE_APPEND.
+            # WRITE_TRUNCATE on the very first chunk of a fresh run, on
+            # the *staging* table — wipes any leftover staging from a
+            # previous failed run before populating it from chunk 0.
+            # Subsequent chunks (and all chunks of a resumed run, since
+            # staging already holds the resumed state) WRITE_APPEND.
+            # Either way the destination ``table_ref`` is *not* touched
+            # during this phase; readers continue to see the pre-refresh
+            # snapshot.
             is_first_load = chunks_processed == 0 and starting_fresh
             for ndjson_path in _iter_chunk_ndjson(chunk_path):
                 if use_streaming_insert:
+                    # Legacy path — streaming inserts go straight to the
+                    # destination, not through staging. See the
+                    # ``starting_fresh and not ns.script_manages_table``
+                    # comment above for the rationale.
                     loaded, skipped = _stream_one_file(
                         client=client,
                         table_ref=table_ref,
@@ -866,7 +916,7 @@ def load_chunked_to_bigquery(
                         client=client,
                         ndjson_path=ndjson_path,
                         file_idx=i,
-                        table_ref=table_ref,
+                        table_ref=staging_ref,
                         schema=schema,
                         parser=ns.parser,
                         write_disposition=write_disposition,
@@ -888,7 +938,7 @@ def load_chunked_to_bigquery(
         chunks_processed += 1
 
     logger.info(
-        "Chunked load complete: %d chunks processed in this run, "
+        "Chunked load complete (staging): %d chunks processed in this run, "
         "%d skipped (already loaded by prior run), "
         "%d rows loaded, %d rows skipped",
         chunks_processed,
@@ -897,12 +947,41 @@ def load_chunked_to_bigquery(
         total_skipped,
     )
 
+    all_chunks_loaded = len(state.chunks_loaded) >= len(chunks)
+
+    # Atomic MERGE swap: replace destination contents from staging in
+    # one statement, then drop staging. Skipped on the streaming-insert
+    # path (which loads directly to the destination — no staging exists).
+    # Skipped if a previous run already swapped (state.swap_done) — that
+    # can happen if the run died after the swap but before the state
+    # file was cleaned up; the MERGE would be a no-op against an empty
+    # already-dropped staging table anyway, but skipping is cheaper.
+    if all_chunks_loaded and not use_streaming_insert and not state.swap_done:
+        _swap_staging_into_target(
+            client,
+            target_ref=table_ref,
+            staging_ref=staging_ref,
+            schema=ns.schema,
+        )
+        state.swap_done = True
+        state.save(state_path)
+        # Drop staging now that it's served its purpose. Best-effort:
+        # a failure here leaves an orphan staging table that the next
+        # run's WRITE_TRUNCATE on first chunk will recycle anyway, so
+        # no need to fail the whole ingest over it.
+        try:
+            client.delete_table(staging_ref, not_found_ok=True)
+            logger.info("Dropped staging table %s", staging_ref)
+        except Exception:
+            logger.exception("Failed to drop staging table %s; continuing", staging_ref)
+
     # Successful end-to-end run: drop the state file so the next invocation
     # starts fresh by default. (If the operator wants to keep it as an
     # audit trail, they can copy it before running.)
-    if len(state.chunks_loaded) >= len(chunks) and state_path.exists():
+    run_complete = all_chunks_loaded and (use_streaming_insert or state.swap_done)
+    if run_complete and state_path.exists():
         state_path.unlink()
-        logger.info("All chunks loaded; cleared state file %s", state_path)
+        logger.info("All chunks loaded and swapped; cleared state file %s", state_path)
 
     return total_loaded, total_skipped
 
@@ -1008,6 +1087,64 @@ def _prepare_table(client, table_ref: str, ns: NamespaceConfig) -> None:
         logger.info("Using BigQuery table %s (managed externally)", table_ref)
 
 
+def _swap_staging_into_target(
+    client,
+    *,
+    target_ref: str,
+    staging_ref: str,
+    schema: list[dict],
+    primary_key: str = "name",
+) -> None:
+    """Atomically replace ``target_ref`` contents with ``staging_ref`` via MERGE.
+
+    Single-statement MERGE handles UPSERT (rows present in both / staging
+    only) and DELETE (rows in target whose key isn't in staging). BigQuery
+    treats MERGE as atomic — readers querying ``target_ref`` during the
+    swap see either the pre-swap state or the post-swap state, never a
+    partial mix and never a "table not found" error. Pulumi-managed
+    properties on ``target_ref`` (clustering, deletion_protection) are
+    untouched because the table itself is never dropped or recreated.
+
+    ``primary_key`` is the column used as the join key. Defaults to
+    ``"name"`` — matches both ``article_pages`` (article title) and
+    ``file_pages`` (``File:…`` page title), the only namespaces this
+    script handles today. If a future namespace is keyed differently the
+    caller should pass the right column.
+    """
+    columns = [f["name"] for f in schema]
+    if primary_key not in columns:
+        raise ValueError(f"primary_key {primary_key!r} not in schema columns {columns!r}")
+    non_key_cols = [c for c in columns if c != primary_key]
+
+    # Build the MERGE statement. The table identifiers come from
+    # ``_validate_bigquery_identifier`` upstream, and column names come
+    # from a hard-coded schema dict — both are safe against injection.
+    set_clause = (
+        ", ".join(f"{c} = S.{c}" for c in non_key_cols) or f"{primary_key} = S.{primary_key}"
+    )
+    insert_cols = ", ".join(columns)
+    insert_vals = ", ".join(f"S.{c}" for c in columns)
+
+    merge_sql = f"""
+    MERGE `{target_ref}` T
+    USING `{staging_ref}` S
+    ON T.{primary_key} = S.{primary_key}
+    WHEN MATCHED THEN UPDATE SET {set_clause}
+    WHEN NOT MATCHED BY TARGET THEN INSERT ({insert_cols}) VALUES ({insert_vals})
+    WHEN NOT MATCHED BY SOURCE THEN DELETE
+    """
+    logger.info("Atomic MERGE swap: %s <- %s", target_ref, staging_ref)
+    job = client.query(merge_sql)
+    job.result()
+    if job.errors:
+        logger.error("MERGE job completed with errors:")
+        for err in job.errors:
+            logger.error("  %s", err)
+        raise RuntimeError(f"MERGE swap into {target_ref} failed; see logs above")
+    affected = getattr(job, "num_dml_affected_rows", None)
+    logger.info("Atomic MERGE swap complete: %s rows affected in %s", affected, target_ref)
+
+
 def _insert_batch_with_retry(client, table_ref: str, batch: list[dict]) -> tuple[int, int]:
     """Insert a batch of rows, retrying failed rows once.
 
@@ -1097,12 +1234,39 @@ def _stream_one_file(
     return inserted_total, skipped
 
 
-# Default cap on transformed bytes per BigQuery load job. ~2 GB NDJSON
-# inputs (one chunk's worth of EN NS0 article HTML) are split into ~10
-# load jobs of roughly this size each so the operator sees per-batch
-# progress instead of one opaque ``job.result()`` poll for many minutes.
-# Each batch is also a smaller atomic unit on retry.
-_DEFAULT_LOAD_BATCH_BYTES = 200 * 1024 * 1024
+# Default cap on transformed bytes per BigQuery load job. Sized so a
+# typical chunk's transformed NDJSON (~2 GB for EN NS0 article HTML)
+# becomes a single load job, which matters for two reasons:
+#
+# 1. **BigQuery quota.** The "load jobs per table per day" hard limit
+#    is 1,500. A 419-chunk EN NS0 refresh splitting each chunk into
+#    ~10 batches at the previous 200 MB cap would issue ~4,200 jobs
+#    against ``article_pages`` and trip the quota mid-refresh.
+#    One job per chunk -> 419 jobs/refresh, well under the ceiling.
+#
+# 2. **Atomicity.** ``WRITE_APPEND`` semantics mean a chunk that's
+#    mid-load when something fails (quota hit, network blip, BQ 5xx)
+#    leaves partially-loaded batches behind; on resume the whole chunk
+#    re-loads and those rows are duplicated. One job per chunk = either
+#    the whole chunk's rows are in BQ or none are, with no
+#    re-load-on-retry duplication.
+#
+# Operators with smaller datasets or who specifically want fine-grained
+# load-job retries can override per call site; this is just the default.
+_DEFAULT_LOAD_BATCH_BYTES = 4 * 1024 * 1024 * 1024
+
+# Interval (seconds) between progress logs while polling a load job that
+# hasn't finished yet. The default ``job.result()`` blocks silently with
+# its own backoff schedule; for the multi-minute waits a 2 GB chunk's
+# load can take, we want a heartbeat in the log instead.
+_LOAD_JOB_POLL_INTERVAL = 30
+
+# Suffix appended to the destination table name to derive the staging
+# table that chunks land in during a refresh. The staging table is
+# wiped at the start of a fresh run, populated chunk-by-chunk, then
+# its contents are MERGE-swapped into the destination atomically. Kept
+# in the same dataset so a single set of IAM grants covers both.
+_STAGING_TABLE_SUFFIX = "_staging"
 
 
 def _submit_batch_load_job(
@@ -1132,6 +1296,7 @@ def _submit_batch_load_job(
     )
     with open(batch_path, "rb") as source:
         load_job = client.load_table_from_file(source, table_ref, job_config=job_config)
+    started_at = time.monotonic()
     logger.info(
         "BQ load: file %d batch %d started (%s rows=%d, %d MB, disposition=%s)",
         file_idx,
@@ -1141,6 +1306,23 @@ def _submit_batch_load_job(
         bytes_in_batch >> 20,
         write_disposition,
     )
+
+    # Block on completion, but log a heartbeat every poll interval so the
+    # operator can tell a slow-but-progressing load apart from a stalled
+    # job. ``add_done_callback`` would be cleaner but doesn't fire until
+    # ``.result()`` is called anyway, so a plain poll loop is simpler.
+    while not load_job.done(retry=None):
+        elapsed = time.monotonic() - started_at
+        logger.info(
+            "BQ load: file %d batch %d still running (state=%s, %.0fs elapsed)",
+            file_idx,
+            batch_idx,
+            getattr(load_job, "state", "?"),
+            elapsed,
+        )
+        time.sleep(_LOAD_JOB_POLL_INTERVAL)
+    # ``done()`` returning True doesn't necessarily reload error state;
+    # ``result()`` does, and re-raises any exception the job recorded.
     load_job.result()
     if load_job.errors:
         logger.error("BigQuery load job completed with errors:")
