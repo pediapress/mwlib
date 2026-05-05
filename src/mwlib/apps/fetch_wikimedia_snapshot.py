@@ -1144,6 +1144,30 @@ def _prepare_table(client, table_ref: str, ns: NamespaceConfig) -> None:
         logger.info("Using BigQuery table %s (managed externally)", table_ref)
 
 
+def _require_dedup_column(client, staging_ref: str) -> None:
+    """Fail fast if the staging table predates the 0.18.8 dedup column.
+
+    A 0.18.7 run that loaded all chunks but died before the swap leaves
+    a state file with ``swap_done = False`` and a staging table whose
+    schema lacks ``version_identifier``. Re-running on 0.18.8 would then
+    skip the (already-loaded) chunk reloads, fall through to the swap,
+    and BigQuery would reject the QUALIFY/ORDER BY with a vague
+    ``Unrecognized name: version_identifier``. Raise with a directive to
+    rerun with ``--fresh`` instead.
+    """
+    table = client.get_table(staging_ref)
+    column_names = {f.name for f in table.schema}
+    if _VERSION_IDENT_FIELD["name"] not in column_names:
+        raise RuntimeError(
+            f"Staging table {staging_ref} predates the 0.18.8 dedup "
+            f"column ({_VERSION_IDENT_FIELD['name']!r}). This usually "
+            f"means a state file from a 0.18.7 run is being resumed. "
+            f"Rerun with --fresh to repopulate staging with the new "
+            f"schema; the previous run's downloaded chunks will be "
+            f"re-fetched from WME."
+        )
+
+
 def _swap_staging_into_target(
     client,
     *,
@@ -1185,6 +1209,14 @@ def _swap_staging_into_target(
     if primary_key not in columns:
         raise ValueError(f"primary_key {primary_key!r} not in schema columns {columns!r}")
     non_key_cols = [c for c in columns if c != primary_key]
+
+    # Pre-flight: a staging table loaded by 0.18.7 has no
+    # ``version_identifier`` column, so the QUALIFY clause below would
+    # blow up with ``Unrecognized name: version_identifier`` and leave
+    # the operator with a cryptic BigQuery error and a state file they
+    # don't know how to recover from. Detect that case and emit an
+    # actionable message pointing at ``--fresh``.
+    _require_dedup_column(client, staging_ref)
 
     # Build the MERGE statement. The table identifiers come from
     # ``_validate_bigquery_identifier`` upstream, and column names come

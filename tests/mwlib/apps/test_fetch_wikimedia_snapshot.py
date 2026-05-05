@@ -860,6 +860,17 @@ class TestLoadChunkedToBigquery:
         merge_job.errors = None
         merge_job.num_dml_affected_rows = 1
         client.query.return_value = merge_job
+        # The swap pre-flight (``_require_dedup_column``) probes staging
+        # schema via ``client.get_table().schema``. Mock it to include
+        # the dedup column so the swap proceeds; an upgrade-resume test
+        # constructs its own client with the column missing.
+        staging_table = MagicMock()
+        staging_table.schema = [MagicMock(name=f["name"]) for f in snap._make_staging_schema([])]
+        # ``MagicMock(name=...)`` doesn't actually set ``.name`` (it
+        # names the mock instead); set it explicitly.
+        for f, sf in zip(staging_table.schema, snap._make_staging_schema([]), strict=True):
+            f.name = sf["name"]
+        client.get_table.return_value = staging_table
         monkeypatch.setattr(snap, "_make_bq_client", lambda *a, **kw: client)
         return client
 
@@ -1338,12 +1349,26 @@ class TestSwapStagingIntoTarget:
     target row`` and aborted the entire ingest at the very last step.
     """
 
-    def _make_client(self):
+    def _make_client(self, staging_has_dedup_column: bool = True):
         client = MagicMock()
         merge_job = MagicMock()
         merge_job.errors = None
         merge_job.num_dml_affected_rows = 7
         client.query.return_value = merge_job
+        # ``_require_dedup_column`` probes staging schema before the
+        # MERGE; default to "modern" staging (with version_identifier).
+        # Tests that simulate a 0.18.7 in-flight resume flip the flag.
+        staging_table = MagicMock()
+        cols = [f["name"] for f in snap.NS0_SCHEMA]
+        if staging_has_dedup_column:
+            cols.append(snap._VERSION_IDENT_FIELD["name"])
+        fields = []
+        for col in cols:
+            fld = MagicMock()
+            fld.name = col
+            fields.append(fld)
+        staging_table.schema = fields
+        client.get_table.return_value = staging_table
         return client
 
     def test_dedupes_staging_by_version_identifier(self):
@@ -1393,6 +1418,22 @@ class TestSwapStagingIntoTarget:
                 schema=snap.NS0_SCHEMA,
                 primary_key="nope",
             )
+
+    def test_aborts_with_directive_when_staging_predates_dedup_column(self):
+        # A 0.18.7 in-flight resume has a staging table without
+        # ``version_identifier``. The QUALIFY/ORDER BY would otherwise
+        # error with a vague "Unrecognized name" — we want a clear
+        # message pointing at ``--fresh``.
+        client = self._make_client(staging_has_dedup_column=False)
+        with pytest.raises(RuntimeError, match="--fresh"):
+            snap._swap_staging_into_target(
+                client,
+                target_ref="p.d.article_pages",
+                staging_ref="p.d.article_pages_staging",
+                schema=snap.NS0_SCHEMA,
+            )
+        # Pre-flight must short-circuit before the MERGE is submitted.
+        client.query.assert_not_called()
 
 
 class TestStagingSchema:
