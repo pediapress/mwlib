@@ -108,11 +108,16 @@ class TestParseNs0Row:
 
         row = snap.parse_ns0_row(line)
 
+        # ``version_identifier`` is the staging-only dedup field — picked
+        # up from the source's nested ``version.identifier``. The full
+        # ``version`` object itself must still be dropped (storage cost
+        # reasons, see ``forbidden`` below).
         assert row == {
             "name": "Mainz",
             "identifier": 99,
             "date_modified": "2025-01-01T00:00:00Z",
             "article_body_html": "<p>Mainz is a city.</p>",
+            "version_identifier": 12345,
         }
         # Critical for storage cost — none of these may leak into the row
         for forbidden in (
@@ -1149,6 +1154,12 @@ class TestLoadChunkedToBigquery:
         assert "proj.ds.article_pages" in merge_sql  # target
         assert "proj.ds.article_pages_staging" in merge_sql  # source
         assert "WHEN NOT MATCHED BY SOURCE THEN DELETE" in merge_sql
+        # Snapshots may legitimately carry duplicate articles; staging
+        # gets deduped by ``version_identifier`` inside the USING clause
+        # so the MERGE doesn't trip "must match at most one source row".
+        assert "ROW_NUMBER" in merge_sql
+        assert "PARTITION BY name" in merge_sql
+        assert "version_identifier DESC NULLS LAST" in merge_sql
 
     def test_swap_skipped_when_already_done_on_resume(self, monkeypatch, tmp_path):
         # State.swap_done == True means a previous run completed the
@@ -1316,6 +1327,89 @@ class TestLoadOneFileBatching:
         # .ndjson should have been left behind by this run.
         leaked = after - before
         assert leaked == set(), f"leaked batch files: {leaked}"
+
+
+class TestSwapStagingIntoTarget:
+    """The MERGE swap must survive duplicate articles in staging.
+
+    Wikimedia Enterprise snapshots can ship a small number (<1%) of
+    duplicate articles. Until the dedup-in-USING change, the MERGE
+    raised ``UPDATE/MERGE must match at most one source row for each
+    target row`` and aborted the entire ingest at the very last step.
+    """
+
+    def _make_client(self):
+        client = MagicMock()
+        merge_job = MagicMock()
+        merge_job.errors = None
+        merge_job.num_dml_affected_rows = 7
+        client.query.return_value = merge_job
+        return client
+
+    def test_dedupes_staging_by_version_identifier(self):
+        client = self._make_client()
+        snap._swap_staging_into_target(
+            client,
+            target_ref="p.d.article_pages",
+            staging_ref="p.d.article_pages_staging",
+            schema=snap.NS0_SCHEMA,
+        )
+
+        sql = client.query.call_args.args[0]
+        # Pick latest revision per primary key inside the USING clause.
+        assert "ROW_NUMBER()" in sql
+        assert "PARTITION BY name" in sql
+        assert "ORDER BY version_identifier DESC NULLS LAST" in sql
+        # ``version_identifier`` must NOT appear in the destination
+        # column list — it's staging-only.
+        insert_section = sql[sql.index("INSERT (") :]
+        assert "version_identifier" not in insert_section
+
+    def test_targets_the_destination_via_merge(self):
+        # Sanity: still a MERGE with the right target / source / DELETE
+        # semantics. Guards against an accidental rewrite to a
+        # non-atomic TRUNCATE+INSERT, which would expose readers to an
+        # empty article_pages mid-swap.
+        client = self._make_client()
+        snap._swap_staging_into_target(
+            client,
+            target_ref="p.d.article_pages",
+            staging_ref="p.d.article_pages_staging",
+            schema=snap.NS0_SCHEMA,
+        )
+
+        sql = client.query.call_args.args[0]
+        assert "MERGE `p.d.article_pages` T" in sql
+        assert "`p.d.article_pages_staging`" in sql
+        assert "WHEN NOT MATCHED BY SOURCE THEN DELETE" in sql
+
+    def test_rejects_unknown_primary_key(self):
+        client = self._make_client()
+        with pytest.raises(ValueError, match="primary_key"):
+            snap._swap_staging_into_target(
+                client,
+                target_ref="p.d.article_pages",
+                staging_ref="p.d.article_pages_staging",
+                schema=snap.NS0_SCHEMA,
+                primary_key="nope",
+            )
+
+
+class TestStagingSchema:
+    def test_staging_schema_appends_version_identifier(self):
+        # Destination schema (NS0) must stay minimal — Pulumi owns it
+        # and adding columns there is a separate, deliberate operation.
+        # The dedup column lives only on staging.
+        dest_cols = {f["name"] for f in snap.NS0_SCHEMA}
+        assert "version_identifier" not in dest_cols
+
+        staging_cols = {f["name"] for f in snap._make_staging_schema(snap.NS0_SCHEMA)}
+        assert staging_cols == dest_cols | {"version_identifier"}
+
+        staging_schema = snap._make_staging_schema(snap.NS0_SCHEMA)
+        ver_field = next(f for f in staging_schema if f["name"] == "version_identifier")
+        assert ver_field["type"] == "INTEGER"
+        assert ver_field["mode"] == "NULLABLE"
 
 
 class TestArgParserChunkedFlags:

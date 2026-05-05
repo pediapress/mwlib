@@ -219,6 +219,47 @@ NS0_SCHEMA = [
     },
 ]
 
+# Extra column added to the **staging** table only. Wikimedia Enterprise
+# warns that a snapshot may carry duplicate articles ("< 1%") and asks
+# consumers to keep the row with the highest ``version.identifier`` per
+# title. We surface that revision id as a typed column on staging so the
+# MERGE swap can pick the latest row per primary key. The destination
+# table (Pulumi-managed for NS0) deliberately does *not* carry this
+# column — it would change the externally-managed schema for no
+# downstream benefit. The MERGE INSERT/UPDATE column lists only mention
+# destination columns, so the field never leaks past the swap.
+_VERSION_IDENT_FIELD = {
+    "name": "version_identifier",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": (
+        "Per-revision MediaWiki revision id from the snapshot's "
+        "``version.identifier`` field. Staging-only; used to pick the "
+        "latest row when WME ships duplicate articles in a snapshot."
+    ),
+}
+
+
+def _make_staging_schema(ns_schema: list[dict]) -> list[dict]:
+    """Destination schema + the staging-only ``version_identifier`` column."""
+    return [*ns_schema, _VERSION_IDENT_FIELD]
+
+
+def _extract_version_identifier(doc: dict) -> int | None:
+    """Pull ``doc.version.identifier`` if present and well-typed.
+
+    Wikimedia Enterprise's NDJSON nests the revision id under a
+    ``version`` object. Older or malformed records may omit it; treat
+    that as ``None`` so the dedup at swap time still places real
+    revisions ahead of unknown ones (``ORDER BY ... DESC NULLS LAST``).
+    """
+    version = doc.get("version")
+    if not isinstance(version, dict):
+        return None
+    ident = version.get("identifier")
+    return ident if isinstance(ident, int) else None
+
+
 # Progress logging interval (bytes) during download
 _DOWNLOAD_LOG_INTERVAL = 100 * 1024 * 1024  # log every 100 MB
 
@@ -259,6 +300,14 @@ def parse_ns6_row(line: str) -> dict | None:
         row["image_width"] = image.get("width")
         row["image_height"] = image.get("height")
 
+    # Staging-only field used by the swap MERGE to pick the latest row
+    # per ``name`` when a snapshot contains duplicate articles. Stripped
+    # by the streaming-insert and tarball-load paths (they target the
+    # destination table, which doesn't carry this column).
+    version_id = _extract_version_identifier(doc)
+    if version_id is not None:
+        row["version_identifier"] = version_id
+
     return row
 
 
@@ -288,12 +337,17 @@ def parse_ns0_row(line: str) -> dict | None:
     if not html:
         return None
 
-    return {
+    row = {
         "name": name,
         "identifier": doc.get("identifier"),
         "date_modified": doc.get("date_modified"),
         "article_body_html": html,
     }
+    # See the matching note in ``parse_ns6_row``. Staging-only.
+    version_id = _extract_version_identifier(doc)
+    if version_id is not None:
+        row["version_identifier"] = version_id
+    return row
 
 
 @dataclass(frozen=True)
@@ -849,7 +903,10 @@ def load_chunked_to_bigquery(
             logger.info("Truncating %s before streaming inserts", table_ref)
             client.query(f"TRUNCATE TABLE `{table_ref}`").result()
     else:
-        schema = _make_bq_schema(ns.schema)
+        # Staging carries an extra ``version_identifier`` column that the
+        # swap MERGE uses to dedupe rows with the same primary key
+        # (Wikimedia Enterprise documents <1% duplicates in a snapshot).
+        schema = _make_bq_schema(_make_staging_schema(ns.schema))
 
     work_dir = Path(work_dir) if work_dir else Path(tempfile.mkdtemp(prefix="wme-chunks-"))
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -1105,6 +1162,19 @@ def _swap_staging_into_target(
     properties on ``target_ref`` (clustering, deletion_protection) are
     untouched because the table itself is never dropped or recreated.
 
+    Staging may legitimately hold more than one row per primary key:
+    Wikimedia Enterprise warns that a snapshot can contain a small number
+    of duplicate articles ("< 1%") and asks consumers to keep the row
+    with the highest ``version.identifier``. The USING clause therefore
+    wraps staging in a ``QUALIFY ROW_NUMBER()`` window that picks the
+    latest revision per key — without it, BigQuery raises
+    ``UPDATE/MERGE must match at most one source row for each target row``.
+
+    Article *deletions* are handled by the ``WHEN NOT MATCHED BY SOURCE
+    THEN DELETE`` clause: per the WME docs, deleted articles are pruned
+    from the next snapshot, so an article that disappears between two
+    runs naturally drops from the destination on the next swap.
+
     ``primary_key`` is the column used as the join key. Defaults to
     ``"name"`` — matches both ``article_pages`` (article title) and
     ``file_pages`` (``File:…`` page title), the only namespaces this
@@ -1119,15 +1189,30 @@ def _swap_staging_into_target(
     # Build the MERGE statement. The table identifiers come from
     # ``_validate_bigquery_identifier`` upstream, and column names come
     # from a hard-coded schema dict — both are safe against injection.
+    #
+    # The SELECT inside USING lists *only* destination columns so the
+    # staging-only ``version_identifier`` never reaches the destination
+    # table. ORDER BY references it directly because BigQuery allows the
+    # window's ORDER BY to mention any column from the underlying table,
+    # not just those in the SELECT list.
+    select_cols = ", ".join(columns)
     set_clause = (
         ", ".join(f"{c} = S.{c}" for c in non_key_cols) or f"{primary_key} = S.{primary_key}"
     )
     insert_cols = ", ".join(columns)
     insert_vals = ", ".join(f"S.{c}" for c in columns)
+    dedup_col = _VERSION_IDENT_FIELD["name"]
 
     merge_sql = f"""
     MERGE `{target_ref}` T
-    USING `{staging_ref}` S
+    USING (
+      SELECT {select_cols}
+      FROM `{staging_ref}`
+      QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY {primary_key}
+        ORDER BY {dedup_col} DESC NULLS LAST
+      ) = 1
+    ) S
     ON T.{primary_key} = S.{primary_key}
     WHEN MATCHED THEN UPDATE SET {set_clause}
     WHEN NOT MATCHED BY TARGET THEN INSERT ({insert_cols}) VALUES ({insert_vals})
@@ -1207,6 +1292,11 @@ def _stream_one_file(
             if row is None:
                 skipped += 1
                 continue
+            # ``insert_rows_json`` validates against the live destination
+            # schema, which doesn't carry the staging-only dedup column.
+            # Strip it so streaming inserts don't fail with "no such
+            # field: version_identifier".
+            row.pop("version_identifier", None)
             batch.append(row)
             if len(batch) >= batch_size:
                 inserted, failed = _insert_batch_with_retry(client, table_ref, batch)
@@ -1293,6 +1383,13 @@ def _submit_batch_load_job(
         source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
         write_disposition=write_disposition,
         max_bad_records=0,
+        # Parsers emit ``version_identifier`` so the chunked staging path
+        # can dedupe at swap time. Loads that target a destination table
+        # without that column (legacy tarball path, NS6) would otherwise
+        # fail row validation. We control all column names emitted by
+        # the parsers, so silently dropping unknowns is safe — there is
+        # no third party feeding rows in.
+        ignore_unknown_values=True,
     )
     with open(batch_path, "rb") as source:
         load_job = client.load_table_from_file(source, table_ref, job_config=job_config)
