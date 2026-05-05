@@ -1,0 +1,641 @@
+# Changelog
+
+All notable changes to mwlib are recorded here, newest first. Each release header carries the publication date and the released version. PyPI: <https://pypi.org/project/mwlib/>.
+
+## 2026-05-05 mwlib 0.18.8
+
+- Fix `wme-ingest` MERGE swap aborting with `UPDATE/MERGE must match at most one source row for each target row` when the snapshot contains duplicate articles. Wikimedia Enterprise documents that snapshots may carry a small number (<1%) of duplicate articles and asks consumers to keep the row with the highest `version.identifier`. Parsers now extract that revision id into a staging-only `version_identifier` column, and `_swap_staging_into_target` wraps staging in a `QUALIFY ROW_NUMBER() OVER (PARTITION BY <pk> ORDER BY version_identifier DESC NULLS LAST) = 1` subquery before the MERGE so duplicates collapse to the latest revision. The destination table's schema is unchanged — the dedup column lives only on staging, so Pulumi-managed schemas (`article_pages`) need no migration.
+- Streaming-insert and legacy tarball-load paths transparently drop the new field (`ignore_unknown_values=True` on load jobs; `pop` before `insert_rows_json`) so the destination table they target — which doesn't carry the dedup column — still loads cleanly.
+- Article *deletions* continue to be handled by the existing `WHEN NOT MATCHED BY SOURCE THEN DELETE` clause: per the WME docs, deleted articles are pruned from the next snapshot, so an article that disappears between two runs naturally drops from the destination on the next swap. No parser-side deletion filter was added — the snapshot has no documented per-row deletion marker on the article itself.
+- Upgrade safeguard: `_swap_staging_into_target` runs a pre-flight (`_require_dedup_column`) before the MERGE that fails fast with an actionable message if the staging table predates the new dedup column. A 0.18.7 run that loaded all chunks but died before the swap leaves a state file with `swap_done = False` and a staging table without `version_identifier`; resuming on 0.18.8 would otherwise crash deep inside BigQuery with a vague `Unrecognized name` error. The new check tells the operator to rerun with `--fresh`.
+- Deterministic dedup across re-runs: the ROW_NUMBER ORDER BY now includes `date_modified DESC NULLS LAST` and `identifier DESC NULLS LAST` as stable tiebreakers, guarded against missing columns. Two staging rows tied on `version_identifier` (NULL on older snapshots, or a delete+recreate that reuses the rev id) used to get an undefined winner based on physical storage order; now a crash-and-resume reproduces the same result.
+- `_extract_version_identifier` rejects `bool` values explicitly. `isinstance(True, int)` is `True` in Python, so a malformed snapshot record carrying `"identifier": true` would otherwise rank alongside genuine rev id 1.
+
+**Upgrading.** If you have a `wme-ingest` run that was interrupted on 0.18.7 between "all chunks loaded" and "MERGE complete" (state file shows `swap_done: false`), rerun with `--fresh` so staging is repopulated under the new schema. A clean run from a fresh state file needs no special handling.
+
+## 2026-05-04 mwlib 0.18.7
+
+- `wme-ingest` now uses a two-stage staging+swap pattern instead of TRUNCATE-then-APPEND directly on the destination table. Chunks load into a per-namespace staging table (e.g. `article_pages_staging`); after every chunk is loaded, a single atomic `MERGE` statement replaces the destination's contents. Readers querying the destination see the *previous* snapshot's data throughout the multi-hour refresh window, then transition atomically to the new snapshot — no "table empty during refresh" gap. Pulumi-managed properties on the destination (clustering, deletion_protection) stay intact because the table is never dropped or recreated. The state file gains a `swap_done` flag so a run that crashes between "all chunks loaded" and "MERGE complete" resumes by running just the swap.
+- `wme-ingest` now issues one BigQuery load job per chunk instead of one per ~200 MB sub-batch within a chunk. The previous default produced ~10 jobs/chunk × 419 chunks = ~4,200 jobs per EN NS0 refresh, which trips BigQuery's hard 1,500-load-jobs-per-table-per-day quota. One job per chunk = 419 jobs/refresh, ~4× under the ceiling. Default `_DEFAULT_LOAD_BATCH_BYTES` raised from 200 MB to 4 GB.
+- Side benefit: chunks are now atomic units. The previous batched mode could leave a partially-loaded chunk in BigQuery if the daily quota was exceeded mid-chunk; on resume the whole chunk re-loaded and those rows duplicated (every batch is `WRITE_APPEND`, no per-batch checkpoint). One job per chunk = either the chunk's rows are in BQ or none are. Combined with the staging+swap above, a partial-chunk failure now corrupts only staging (which the next first-chunk WRITE_TRUNCATE wipes anyway), never the live destination.
+- Long-running load jobs now log a heartbeat every 30 s while polling, so a 2 GB chunk's load doesn't appear silent for the multi-minute window between "started" and "loaded N rows".
+- `urllib3` is pinned to INFO level inside `wme-ingest`. `job.result()` polls BigQuery every second or two for every load job, so during a multi-hour refresh the previous DEBUG default produced tens of thousands of HTTP-request log lines that drowned the script's actual progress output. Request failures (`WARNING` and above) remain visible.
+
+## 2026-05-03 mwlib 0.18.6
+
+- Fix `TypeError` in `parser/templ/magics.py` dummy resolver: `_populate_dummy`'s placeholder function now accepts `(self, args)` to match the calling convention of other `MagicResolver` handlers, instead of being a zero-arg function that crashed every time a wiki template invoked an unimplemented magic word. Render-blocking on any wiki using a magic word that hadn't been wired into mwlib's resolver registry.
+- Per-file-ignore added for `parser/templ/magics.py` covering MediaWiki magic-word naming (`N802`) and other legacy patterns the new strict ruff config flags but that aren't safe to refactor in a point release.
+
+## 2026-05-03 mwlib 0.18.5
+
+- `wme-ingest` now prefers `BIGQUERY_CREDENTIALS` over `GOOGLE_APPLICATION_CREDENTIALS` for the `--credentials` default, mirroring the runtime BigQuery lookup. Workers mounting a dedicated BigQuery SA at `/run/secrets/bigquery_credentials` no longer silently fall through to the general `GOOGLE_APPLICATION_CREDENTIALS` SA when invoked without an explicit `--credentials` flag.
+- `_make_bq_client` logs the active SA's `service_account_email` at INFO when the BigQuery client is constructed. Disambiguates "wrong SA loaded" from "right SA, missing IAM" — both surface as identical 403s otherwise.
+
+## 2026-05-03 mwlib 0.18.4
+
+- `wme-ingest` adds a chunked-snapshot path that fixes a silent data-loss bug in 0.18.3: the legacy `/v2/snapshots/{id}/download` endpoint only returns the *first* group for snapshots WME has split (notably EN NS0, ~419 chunks / ~200 GB), so previous runs against this endpoint produced an incomplete `article_pages` table. The new path enumerates all chunks via `/v2/snapshots/{id}/chunks` and loads each independently. Auto-detected at runtime; pass `--no-chunked` to force the legacy single-tarball path.
+- Per-chunk atomicity: each ~300 MB chunk is downloaded fully, verified against the listing's `version` (== S3 ETag), loaded into BigQuery, and only then checkpointed. Whole-chunk retry on partial reads with exponential backoff (10 s / 30 s / 90 s); hard read timeout of 300 s replaces the previous `timeout=(30, None)` that caused silent hangs.
+- Crash-safe resume via a small JSON state file (default: per-snapshot path under the system temp dir; override with `--state-file PATH`). Re-running picks up where it left off, skipping already-loaded chunks. The first chunk of a fresh run uses `WRITE_TRUNCATE`; resumed runs always `WRITE_APPEND` so a checkpoint never erases its own previous work.
+- Snapshot-rotation safety: if WME has re-issued the snapshot since the previous run (chunk versions differ from the saved state), the script refuses rather than silently mix versions and tells the operator to rerun with `--fresh`.
+- Per-batch BigQuery load: each NDJSON inside a chunk is now split into ~200 MB load jobs instead of one opaque multi-GB job, giving visible progress (one log line per batch) and shrinking the retry atom. The first batch carries the operator's disposition; subsequent batches always `WRITE_APPEND`.
+- Periodic per-MB download progress logging in `download_chunk` so a slow link doesn't look hung.
+- Both chunk shapes observed in the wild are accepted: `.tar.gz` wrapping one or more NDJSON members, and plain gzipped NDJSON. Detection is automatic; tar members are still validated as regular files at safe relative paths.
+- New CLI flags: `--state-file PATH`, `--fresh`, `--no-chunked`, `--chunk-work-dir PATH`. Existing flags (`--input`, `--output`, `--keep-tarball`, `--download-only`) keep their meaning on the legacy single-tarball path.
+
+## 2026-05-02 mwlib 0.18.3
+
+- `wme-ingest` learns `--namespace 0` for the article-HTML snapshot used by the page-count estimator, alongside the existing namespace-6 (file_pages) sync. Lean NS0 schema (`name` / `identifier` / `date_modified` / `article_body_html`) keeps BigQuery storage proportional to what the estimator actually consumes.
+- `wme-ingest` extracts NDJSON members one at a time into a private temp directory, capping peak local disk at "tarball + one extracted NDJSON" and avoiding overwrites of pre-existing files in the tarball's parent. Tar members are also restricted to regular files (no symlinks/hardlinks/devices).
+- `wme-ingest` validates `project` / `dataset` / `table` identifiers before they're interpolated into raw SQL.
+- BigQuery image-lookup hardening: hostname-exact domain routing, exact-match row filtering, credential-fingerprinted client cache + token cache, locked singleton + locked client cache, prefix-match `invalidate_client`.
+- Fail-closed defaults for the BigQuery path: malformed templates rerouted to the remote-API fallback; misses or hits with no remote-API discovery drop the deferred image download (no shipping images without license/attribution data); externally-managed tables fail loudly when missing rather than silently bootstrapping.
+- `MwApi` Basic Auth is per-instance (no longer leaks across MwApis sharing an origin); `RateLimiter` and retry backoff use `gevent.sleep` to cooperate with the gevent hub; `request_counter` is per-instance.
+- `LicenseChecker` exposes `decide_from_template_names` so fetch-time and render-time license policy stay in lockstep.
+- `nuwiki.Adapt.get_contributors` reads `authors.db` when no description page is on disk (BigQuery shortcut), so BQ-backed images render with attribution.
+- Optional `mwlib[bigquery]` install extra; default installs stay slim. `requests` declared as a direct dependency.
+
+## 2026-04-28 mwlib 0.18.2
+
+- Allow DEFAULTSORT to accept optional arguments
+
+## 2026-04-28 mwlib 0.18.1
+
+- Add WME ingestion script (wme-ingest) for loading Wikimedia Enterprise snapshots into BigQuery
+
+## 2026-04-28 mwlib 0.18.0
+
+- Add BigQuery-first lookup for image description pages
+- Add BigQuery configuration section and optional google-cloud-bigquery dependency
+- Add domain-scoped rate limiting in sapi.py (fetch.max_requests_per_second)
+- Improve retry/backoff handling in sapi.py and http_client.py
+- Add OAuth2 client_credentials support
+- Add HTTP/2 support via httpx
+- Require Python 3.11 or 3.12
+- Replace setup.py with pyproject.toml; use uv for package management
+- Remove buildzip2.py; unify buildzip implementation
+- Update Cython template evaluation for Python 3.11+/Cython 3.2.4
+- Mark slow rl tests with @pytest.mark.integration
+- Reorganize the codebase into well-defined packages: `mwlib/core/`, `mwlib/parser/`, `mwlib/network/`, `mwlib/rendering/`, `mwlib/writers/`, `mwlib/utils/`, `mwlib/extensions/`, `mwlib/apps/`. Standardize import paths to match.
+- Introduce `main_trampoline.py` for CLI entry points, replacing monkey patching in `mwlib.apps` initialization.
+- Add `HttpClientManager` singleton with HTTP/2 auto-detection and connection-pool management; batch contributor lookups for efficiency.
+- `buildzip` consolidates the legacy `buildzip2`; add `skip_ext` filtering and raise the default thumbnail size to 1280px to match Wikipedia's largest thumbnail.
+- RlWriter improvements: consistent attribute naming for figure dimensions, RTL alignment fix in `text_style`/`heading_style`, refactored `pdfstyles`.
+- Apply ruff across the codebase (C90, D, E, F, I, SIM rules); standardize logging levels.
+- New unit tests for `fetch_siteinfo`, `download_to_file`, `HttpClientManager`, OAuth2 token handling, and rate limiting; mark slow RL writer tests `@pytest.mark.integration` (excluded from default runs).
+
+**Upgrading.** mwlib 0.18.0 requires Python 3.11 or 3.12. Update any direct imports from `mwlib.*` to the new package paths (e.g., `mwlib.nuwiki` → `mwlib.core.nuwiki`).
+
+## 2023-12-15 mwlib 0.17.0.post1
+
+- Post-release packaging fix (no functional changes)
+
+## 2023-12-10 mwlib 0.17.0
+
+- Complete migration to Python 3; Python 2 is no longer supported
+- Project structure refactored: source code moved to `src/` directory
+- Python 3 compatibility fixes throughout the codebase (parser, scanner, templates)
+- Fix `_uscan.re` Python 3 compatibility
+- Run `modernize` script across all modules
+- Code cleanup and linter integration (ruff, bandit)
+- Upgrade dependencies; switch to `pip-compile-multi` for requirements management
+- Add Docker Compose setup examples
+- Add Pillow 6.2.1 and update requirements
+- Fix deprecated warnings in tests
+- Fix bugs in EasyTimeline.pl
+- Migrate build system to `pyproject.toml`
+
+## 2018-04-24 mwlib 0.16.1
+
+- Fix handling of missing imagelink in imagemap
+
+## 2018-04-24 mwlib 0.16.0
+
+- Code cleanup with autopep8
+- Add requirements file and split test requirements
+- Fix HTTPS in test URLs
+- Use named PyPI server for package uploads
+
+## 2016-02-18 mwlib 0.15.16
+
+- ignore hatnote
+- implement TIME Tag extension for wp.fr
+
+## 2014-02-19 mwlib 0.15.15
+
+- catch IOError when reading image sizes
+- prevent race conditions in rlwriter.toc by using a tmp directory
+
+## 2014-01-13 mwlib 0.15.14
+
+- set user agent from environment variable MWLIB_USER_AGENT
+
+## 2014-01-09 mwlib 0.15.13
+
+- add --disable-all-writers argument to nserve
+- add note about professional support
+- adapt bot filtering a bit
+
+## 2013-11-11 mwlib 0.15.12
+
+- workaround 'first run' tox issue
+- fix tests with new wsgi_intercept 0.6 and require that version
+- Match IPv6 addresses as anonymous users
+- handle \_\_NOGLOSSARY\_\_ magicword
+- Fix #37
+
+## 2013-08-09 mwlib 0.15.11
+
+- fix possible problems on solaris containers in init_tmp_cleaner
+- don't waste people's lifetime in init_tmp_cleaner
+- fix xnet tests
+- use os.urandom in utils.uid
+- generate junitxml files
+- remove empty reference nodes
+
+## 2013-07-04 mwlib 0.15.10
+
+- add some tests for purge_cache
+- don't step into nested directories in purge_cache
+- catch errors while examining directory in purge_cache
+- only log error if it's not ENOENT in purge_cache
+- Add --serve-files-address parameter to nslave.
+- make make-manifest useable as pre-commit hook
+- is_good_baseurl(): eliminate some false positives
+
+## 2013-07-02 mwlib 0.15.9
+
+- set timeout for makezip in postman
+- remove more template blacklisting/template exclusion handling code
+- get rid of template blacklisting/print templates in nslave and postman
+- mention that template blacklisting and print templates do not work anymore.
+- use tox 1.5's whitelist_externals in order to suppress warnings
+- fix imports in test_nserve.py and move it to tests directory
+
+## 2013-04-23 mwlib 0.15.8
+
+- do not install pil in tox testenv
+- install Pillow
+- also fetch used images when fetching 'redirected revisions'
+
+## 2013-04-23 mwlib 0.15.7
+
+- remove explicitly positioned nodes regardless of nesting level. fix bug where children were skipped and not removed
+
+## 2013-03-26 mwlib 0.15.6
+
+- fix redirect handling when fetching by articles by revision
+
+## 2013-03-26 mwlib 0.15.5
+
+- fix redirect handling
+
+## 2013-03-26 mwlib 0.15.4
+
+- fix missing img attribute translation
+- remove duplicate coordinates
+
+## 2013-03-12 mwlib 0.15.3
+
+- fix nserve, nslave, postman
+
+## 2013-03-12 mwlib 0.15.2
+
+- use post request when posting text to action=expandtemplates
+
+## 2013-03-12 mwlib 0.15.1
+
+- fix mw-serve-ctl
+
+## 2013-03-12 mwlib 0.15.0
+
+> [!NOTE]
+> you'll have to adapt your start scripts, some programs have been renamed!
+
+> [!NOTE]
+> Unfortunately the 'template blacklisting' and 'print templates' functionality had to be removed in order to support the scribunto extension. The documentation has not been updated and may still mention those features.
+
+- nslave.py, nserve.py, postman.py have been renamed to nslave, nserve and postman
+- require python 2.6, python 2.5 isn't supported anymore
+- fetch expanded articles
+- force pyparsing < 2
+- remove open street maps used in wikivoyage - they can't be rendered currently
+- fix for missing revid attribute
+- fix and improve wikivoyage tagextensions
+- allow item lists in div
+- transform single-col, single-row table into div, even if it is an "infobox"
+- tweak region lists for wikivoyage
+- fix bug for article <http://en.wikivoyage.org/wiki/Africa> (and possibly more from wikivoyage)
+- quick hack to expand the {{REVISIONID}}
+
+## 2012-12-04 mwlib 0.14.3
+
+- prefer UTF-8 locales for use in formatnum
+
+## 2012-12-03 mwlib 0.14.2
+
+- remove byte order mark (bom) in <span id="do_request">do_request</span>
+- return unicode from formatnum
+- improve table border code
+- add noprint css class "rellink"
+
+## 2012-09-24 mwlib 0.14.1
+
+- implement locale aware formatnum
+- implement wikipedia's braindamaged scientific notation
+- adapt single col splitting heuristics of treecleaner
+
+## 2012-06-18 mwlib 0.14.0
+
+- get rid of the <span id="version">Version</span> class, up version to 0.14.0
+- install scripts via plain old distutils instead of "console_scripts" entry point
+- remove cdbwiki
+- remove mwlib.xfail, use pytest.mark.xfail instead
+- expect setuptools or distribute to be installed
+- remove some problematic dependencies in PP_MAINTAINER mode
+
+## 2012-06-18 mwlib 0.13.11
+
+- skip checkpil if PP_MAINTAINER is set
+- relax simplejson requirement a bit
+- fix content disposition header when filenames contain commas
+- make it easier to test the content disposition logic
+
+## 2012-06-17 mwlib 0.13.10
+
+- fix handling of filenames with spaces
+
+## 2012-06-17 mwlib 0.13.9
+
+- use filenames derived from content for downloads
+- synchronize documentation with MediaWiki
+
+## 2012-06-11 mwlib 0.13.8
+
+- do not embed apipkg anymore
+- make sure temp files are removed even if mw-render is killed
+
+## 2012-05-08 mwlib 0.13.7
+
+- unconditionally require simplejson
+- workaround a inspect module bug
+- fix pypi url used by tox
+- improve transformSingleColTables in treecleaner
+- expose DumpParser's redirect-ignoring functionality as an optional boolean command-line flag to mw-buildcdb
+
+## 2012-03-07 mwlib 0.13.6
+
+- make mw-zip -gg post test.pediapress.com
+- implement protocol relative urls in named links
+
+## 2012-02-29 mwlib 0.13.5
+
+- simplify the brain-damaged iferror_rx regular expression, fixes #10
+- support syntaxhighlight nodes
+
+## 2012-02-15 mwlib 0.13.4
+
+- require qserve >= 0.2.7 in order to be compatible with the latest gevent
+- move our custom argument parser to mwlib
+- prefer simplejson to json
+- allow nserve to listen on a specific interface with -i/--interface
+- fix styleutils: limit rgb values to \[0,1\]
+- remove mw-watch in setup.py
+
+## 2012-01-12 release 0.13.3
+
+- fix pagename when expanding <pages> tag
+- handle the case where NAMESPACE is called as a template
+- get rid of lxml warnings
+
+## 2012-01-11 release 0.13.2
+
+- add support for adding spacing for cjk text
+- add initial support for the pages tag
+- protect page-break info from removal in divs and spans
+
+## 2011-12-13 release 0.13.1
+
+- replaced mw-serve with nserve.py
+- removed CGI support
+- removed lots of obsolete code
+- updated documentation, available online at <http://mwlib.readthedocs.org>
+
+## 2011-10-24 release 0.12.17
+
+- handle siteinfo without "magicwords" key in templ.parser
+- use gevent instead of twisted in mw-zip/mw-render
+- show memory usage in mw-zip
+- use sqlite3dmb to store html
+- fix directionality of math nodes for RTL documents
+
+## 2011-08-31 release 0.12.16
+
+- remove xhtmlwriter
+- remove docbookwriter
+- fix_wikipedia_siteinfo for kdb, ltg and xmf
+- remove zipwiki
+- implement safesubst
+- match noinclude and onlyinclude tags with whitespace
+- bail out when running setup.py with an unsupported python version
+
+## 2011-08-12 release 0.12.15
+
+- require lxml.
+- dont switch fonts for direction switch chars lrm/rlm
+- set teletype style by css
+- fix rtl direction check bug
+- quick fix in order to support the kbd tag.
+- fix switch statements with localized #default case.
+- dont remove direction switching nodes
+- resolve aliases when expanding templates.
+- support localized parser functions.
+- make tests work with latest py.test 2.1.
+- add support for css direction switching
+- Code and Var nodes now use teletype style
+- be more verbose when collection params can not be retrieved
+- fix subpage links (bugzilla #28055)
+- fix for <https://bugzilla.wikimedia.org/show_bug.cgi?id=29354>
+- dont die on treecleaner errors
+- remove paragraphs from galleries
+- add license templates
+- get rid of some more parsing calls
+- cache img display info in licensehandler
+- speed up getting template args (for licensehandling)
+- always show full text of contributors of images
+- fix for getAllDisplayText
+- add nofilter to licensehandling
+- make licensechecker less fragile to bad config format
+- improve image license handling
+- improve stats for licensechecker
+- add custom element to metabook
+- dont throw away collapsible boxes. fixes: #935
+- decrease api_request_limit
+- limit max. simultaneous img downloads to 15
+- moar categories. less whitespace. untangle revision/category fetching
+- increase standard resolution of images
+- fix getting html with revisions
+- clean up after fixNesting
+- fetch extension images
+- prevent adding same api url twice
+- retry failed img downloads
+- workaround for missing descriptionurl
+- fix: descriptionurl returned from api seems be "false" sometimes.
+- fix for #925. make syntaxhighlighting work again
+- fix for #755
+- support older mediawikis
+- add lower bound on word splitting hints
+- mwlib.refine: parse <caption> tags inside tables
+- be more generous when trying to detect see also
+- fix for "See Also "Section removal
+- fix #905: remove See also sections.
+- remove edit links
+- magics.py: handle second argument to fullurl magic function.
+- convert tiff images to png
+- fix for infobox detection
+- handle Abbreviation node in xhtmlwriter
+- add Abbreviation node
+- improve table splitting
+
+## 2010-10-29 release 0.12.14
+
+- magics.py: fix NS magic function.
+- refine/core.py: do not parse links if link target would contain newlines.
+- setup.py: require lockfile==0.8.
+- add xr formatting in #time
+- replace mwlib.async with qserve package.
+- move fontswitcher to writer dir
+- remove collapsible elements
+- fix for #830
+- move gallery nodes out of tables.
+- handle overflow:auto crap
+- fix for reference handling
+- better handling for references nodes.
+- fix for ReferenceLists
+- fix whitespace handling and implicit newlines in template arguments. fixes <http://code.pediapress.com/wiki/ticket/877>.
+- Add support for more PageMagic as per <http://meta.wikimedia.org/wiki/Help:Magic_words>
+- Fix PageMagic to consider page as argument
+- fetch parsed html from mediawiki and store it as parsed_html.json. We store the raw result from mediawiki since it's not clear what's really needed.
+- make mwapi work for non query actions.
+
+## 2010-7-16 release 0.12.13
+
+- omit passwords from error file
+- make login work with latest mediawiki.
+- use content_type, not content-type in metabooks
+- filter crap from ref node names
+- try to set GDFONTPATH to some sane value. call EasyTimeline with font argument.
+- do not scale easytimeline images after rendering rather scale then in EasyTimeline.pl
+- update EasyTimeline to 1.13
+- another fix for nested references
+- fix for broken tables
+- make #IFEXIST handle images
+- add treecleaner method to avoid large cells
+- fix img alignment
+- fix nesting of section with same level
+- do not let tablemode get negative.
+- fix #815
+- call fix_wikipedia_siteinfo based on contents of server (instead of sitename)
+- workaround for broken interwikimap. fixes #807
+- handle the case, where the <br> ends up in a new paragraph. fixes #804
+- move the poem tag implementation to mwlib.refine.core and make it expand templates
+- add #ifeq node. fixes #800
+- fix for images with spaces in file extensions
+- fix and test for #795
+- pull tables out of DefinitionDescriptions
+- add getVerticalAlign to styleutils
+- remove tables from image captions
+- remove --clean-cache option to mw-serve
+- allow floats as --purge-cache argument
+- workaround for buggy lockfile module.
+- implement DISPLAYTITLE
+- generate higher resolution timelines
+- handle abbr and hiero tags
+- make sure print_template_pattern is written to nfo.json, when getting it as part of the collection params
+- relax odfpy requirement a bit
+- make hash-mark only links work again
+- remove empty images
+
+## 2009-12-16 release 0.12.12
+
+- dont remove sections containing only images.
+- improve handling of galleries
+- fix use of uninitialized last variable
+- do not 'split' links when expanding templates
+- quick workaround for <http://code.pediapress.com/wiki/ticket/754>
+
+## 2009-12-8 release 0.12.11
+
+- *beware* python 2.4 is not supported anymore
+- parse paragraphs before spans
+- parse named urls before links.
+- fix urllinks inside links
+- fix named urls inside double brackets
+- avoid splitting up Reference nodes.
+- parse lines/lists before span.
+- add getScripts method. improve rtl compat. for fontswitching
+- do not replace uniq strings with their content when preprocessing gallery tags. fixes e.g. ref tags inside gallery tags.
+- run template expansion for each line in gallery tags
+- handle mhr, ace, ckb, mwl interwiki links
+- add clearStyles method
+- add another condition to avoid single col tables in border-boxes
+- refactor node style handling
+- remove fixInfoBoxes from treecleaner
+- fix for identifiying image license information
+- handle closing ul/ol tags inside enumerations
+- correctly determine text alignment of node.
+- fix for image only table check
+- add code for simple rpc servers/clients based on the gevent library.
+- add flag for split itemlists
+- do not blacklist articles
+- add upper limit for font sizes
+
+## 2009-10-20 release 0.12.10
+
+- fix race condition when fetching siteinfo
+- introduce flag to suppress automatic escaping when cleaning text
+- sent error mails only once
+- add 'pageby', 'uml', 'graphviz', 'categorytree', 'summary' to list of tags to ignore
+
+## 2009-10-13 release 0.12.9
+
+- fix #709
+- allow higher resolution in math formulas
+- fetch collection parameters and use them (template exclusion category,...)
+- fix #699
+- fix <ref> inside table caption
+- refactor filequeue
+- adjust table splitting parameter
+- move invisible, named references out of table nodes
+- fix late #if
+- fix bug with inputboxes
+- fix parsing of collection pages: titles/subtitles may but do not need to have spaces
+- use new default license URL
+- fix race condition in mw-serve/mw-watch
+
+## 2009-9-25 release 0.12.8
+
+- fix argument handling in mw-serve Previously it had been possible to overwrite any file by passing arguments containing newlines to mw-serve.
+
+## 2009-9-23 release 0.12.7
+
+- ensure that files extracted from zip files end up in the destination directory.
+
+## 2009-9-15 release 0.12.6
+
+- fix for reference nodes
+- allow most characters in urls
+- fix for setting content-length in response
+- fix problem with blacklisted templates creating preformatted nodes (#630)
+- do not split preformatted nodes on non-empty whitespace only lines
+- do not create preformatted nodes inside li tags
+- pull garbage out of table rows. fix #17.
+- dont remove empty spans if an explicit size is given.
+- uncomment fix_wikipedia_siteinfo and add pnb as interwiki link
+- remove mwxml writer.
+- add mw-version program
+
+## 2009-9-8 release 0.12.5
+
+- fix missing page case in get_page when looking for redirects
+- some minor bugfixes
+
+## 2009-8-25 release 0.12.3
+
+- better compatibility with older mediawiki installations
+
+## 2009-8-18 release 0.12.2
+
+- fix status callbacks to pod partner
+
+## 2009-8-17 release 0.12.1
+
+- added mw-client and mw-check-service
+- mw-serve-ctl can now send report mails
+- fixes for race conditions in mwlib.filequeue (mw-watch)
+- lots of other improvements...
+
+## 2009-5-6 release 0.11.2
+
+- fixes
+
+## 2009-5-5 release 0.11.1
+
+- merge of the nuwiki branch: better, faster resource fetching with twisted_api, new ZIP file format with nuwiki
+
+## 2009-4-21 release 0.10.4
+
+- fix chapter handling
+- fix bad #tag params
+
+## 2009-4-17 release 0.10.3
+
+- fix issue with self-closing tags
+- fix issue with "disappearing" table rows
+
+## 2009-4-15 release 0.10.2
+
+- fix for get_url() method in zipwiki
+
+## 2009-4-9 release 0.10.1
+
+- the parser has been completely rewritten (mwlib.refine)
+- fix bug in recorddb.py: do not overwrite articles
+- removed mwapidb.WikiDB.getTemplatesForArticle() which was broken and wasn't used.
+
+## 2009-3-5 release 0.9.13
+
+- normalize template names when checking against blacklist
+- make NAMESPACE magic work for non-main namespaces
+- make NS template work
+
+## 2009-03-02 release 0.9.12
+
+- fix template expansion bug with non self-closing ref tags containing equal signs
+
+## 2009-2-25 release 0.9.11
+
+- added --print-template-pattern
+- fix bug in LOCALURLE with non-ascii characters (#473)
+- fix 'upright' image modifier handling (#459)
+- allow star inside URLs (#483)
+- allow whitespace in image width modifiers (#475)
+
+## 2009-2-19 release 0.9.10
+
+- do not call check() in zipcreator: better some missing articles than an error message
+
+## 2009-2-18 release 0.9.8
+
+- localize image modifiers
+- fix bug in serve with forced rendering
+- fix bug in writerbase when no URL is returned
+- return only unqiue image contributors, sorted
+- #expr with whitespace only argument now returns the empty string instead of marking the result as an error.
+- added mw-serve-ctl command line tool (#447)
+- mwapidb: omit title in URLs with oldid
+- mwapidb: added getTemplatesForArticle()
+- zipcreator: check articles and sources to prevent broken ZIP files
+- mwapidb: do query continuation to find out all authors (#420)
+- serve: use a deterministic checksum for metabooks (#451)
+
+## 2009-2-9 release 0.9.7
+
+- fix bug in #expr parsing
+- fix bug in localised namespace handling/#ifexist
+- fix bug in redirect handling together with specific revision in mwapidb
+
+## 2009-2-3 release 0.9.6
+
+- mwapidb: return authors alphabetically sorted (#420)
+- zipcreator: fixed classname from DummyScheduler to DummyJobScheduler; this bug broke the --no-threads option
+- serve: if rendering is forced, don't re-use ZIP file (#432)
+- options: remove default value "Print" from --print-template-prefix
+- mapidb: expand local* functions, add them to source dictionary
+- expander: fix memory leak in template parser (#439)
+- expander: better noinclude, includeonly handling (#426)
+- expander: #iferror now uses a regular expression (#435)
+- expander: workaround dateutils bug (resulting in a TypeError: unsupported operand type(s) for +=: 'NoneType' and 'int')
+
+## 2009-1-26 release 0.9.5
+
+- initial release

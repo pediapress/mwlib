@@ -9,8 +9,7 @@ include README.md
 include README_docker_compose_setup.md
 include README_running_locally.md
 include README_setup_local_mediawiki_and_install_dump.md
-include RELEASES.md
-include changelog.rst
+include CHANGELOG.md
 include cmd.txt
 include docker-compose-initial-setup.yml
 include docker-compose-only-mediawiki.yml
