@@ -252,11 +252,18 @@ def _extract_version_identifier(doc: dict) -> int | None:
     ``version`` object. Older or malformed records may omit it; treat
     that as ``None`` so the dedup at swap time still places real
     revisions ahead of unknown ones (``ORDER BY ... DESC NULLS LAST``).
+
+    Reject ``bool`` values explicitly: ``isinstance(True, int)`` is
+    ``True`` in Python (bool is a subclass of int), so a malformed
+    record carrying ``"identifier": true`` would otherwise slip through
+    as ``1`` and rank the row alongside genuine rev id 1.
     """
     version = doc.get("version")
     if not isinstance(version, dict):
         return None
     ident = version.get("identifier")
+    if isinstance(ident, bool):
+        return None
     return ident if isinstance(ident, int) else None
 
 

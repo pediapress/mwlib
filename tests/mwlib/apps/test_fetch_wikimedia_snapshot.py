@@ -79,6 +79,41 @@ class TestParseNs6Row:
 # ---------------------------------------------------------------------------
 
 
+class TestExtractVersionIdentifier:
+    """Edge cases for the staging-only ``version_identifier`` extractor.
+
+    The helper is now load-bearing: a wrong return value either drops
+    the dedup signal (NULL) or, worse, ranks a malformed row ahead of
+    a real one. Cover the cases that aren't exercised by the parser
+    tests' happy path.
+    """
+
+    @pytest.mark.parametrize(
+        ("doc", "expected"),
+        [
+            # Happy path — typed int.
+            ({"version": {"identifier": 12345}}, 12345),
+            # Missing version field altogether.
+            ({}, None),
+            # ``version`` present but not a dict.
+            ({"version": None}, None),
+            ({"version": "v1"}, None),
+            ({"version": [1, 2, 3]}, None),
+            # ``version`` is a dict but missing ``identifier``.
+            ({"version": {"comment": "edit"}}, None),
+            # Wrong type for ``identifier``.
+            ({"version": {"identifier": "12345"}}, None),
+            ({"version": {"identifier": 12345.0}}, None),
+            ({"version": {"identifier": None}}, None),
+            # ``bool`` is a subclass of int — must NOT slip through as 0/1.
+            ({"version": {"identifier": True}}, None),
+            ({"version": {"identifier": False}}, None),
+        ],
+    )
+    def test_returns_int_or_none(self, doc, expected):
+        assert snap._extract_version_identifier(doc) == expected
+
+
 class TestParseNs0Row:
     def test_keeps_only_lean_schema_fields(self):
         # WME NS0 records carry many fields we explicitly do not want to
