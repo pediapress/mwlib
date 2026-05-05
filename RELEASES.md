@@ -1,3 +1,28 @@
+# Release Notes for mwlib 0.18.8
+
+## What's New in 0.18.8
+
+### `wme-ingest` MERGE Swap Reliability
+
+- **Duplicate-article tolerance:** The atomic `MERGE` swap that replaces `article_pages` from staging used to abort a fresh EN NS0 ingest with `UPDATE/MERGE must match at most one source row for each target row` whenever the snapshot shipped duplicate articles for the same title. Wikimedia Enterprise documents that snapshots may carry up to ~1% duplicates and asks consumers to keep the row with the highest `version.identifier`. The MERGE now wraps staging in a `QUALIFY ROW_NUMBER() OVER (PARTITION BY name ORDER BY version_identifier DESC NULLS LAST)` subquery before the join, so duplicates collapse to the latest revision per article.
+- **Destination schema unchanged:** The new `version_identifier` field lives only on the staging table. Pulumi-managed schemas (`article_pages`, `file_pages`) need no migration. Streaming-insert and legacy tarball-load paths transparently drop the field.
+- **Article deletions:** No change required — the existing `WHEN NOT MATCHED BY SOURCE THEN DELETE` clause already implements WME's recommended approach (deleted articles drop out of the next snapshot, which removes them from the destination on the next swap).
+
+### Operator Safeguards
+
+- **Pre-flight check on swap:** A run that loaded all chunks under 0.18.7 but died before `swap_done = True` left a state file pointing at a staging table without `version_identifier`. Resuming on 0.18.8 now fails fast with an actionable message naming the column and directing the operator to rerun with `--fresh`, instead of crashing inside BigQuery with a vague `Unrecognized name`.
+- **Reproducible dedup across re-runs:** The `ROW_NUMBER` ordering now includes `date_modified` then `identifier` as stable tiebreakers (both `DESC NULLS LAST`). Two staging rows tied on `version_identifier` (NULL on older snapshots, or a delete+recreate that reuses a rev id) used to get an undefined winner based on physical storage order; a crash-and-resume now reproduces the same result.
+
+### Defensive Parsing
+
+- **Bool rejected in `version.identifier`:** Python's `isinstance(True, int)` is `True` (bool is a subclass of int), so a malformed snapshot record carrying `"identifier": true` would otherwise have ranked alongside genuine rev id 1 in the dedup ORDER BY. Now explicitly excluded.
+
+## Upgrading to 0.18.8
+
+If you have a `wme-ingest` run that was interrupted on 0.18.7 between "all chunks loaded" and "MERGE complete" (state file shows `swap_done: false`), rerun with `--fresh` so staging is repopulated under the new schema. A clean run from a fresh state file needs no special handling.
+
+---
+
 # Release Notes for mwlib 0.18.2
 
 ## What's New in 0.18.2
