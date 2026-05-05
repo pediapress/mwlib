@@ -1235,6 +1235,25 @@ def _swap_staging_into_target(
     insert_vals = ", ".join(f"S.{c}" for c in columns)
     dedup_col = _VERSION_IDENT_FIELD["name"]
 
+    # Stable secondary sort. ``version_identifier`` is the primary
+    # signal but two staging rows for the same key can tie on it
+    # (legitimate cases: same snapshot pulled twice into staging via a
+    # WME re-issue; older snapshot generations with a NULL revision id;
+    # a delete+recreate that reuses the rev id). Without a tiebreaker,
+    # ROW_NUMBER picks based on physical storage order — reproducible
+    # within a job, but not across re-runs of the same swap, so a
+    # crash-and-resume could land on a different "winner" than the
+    # original. Fall back to ``date_modified`` then ``identifier``,
+    # both DESC-NULLS-LAST so a row with real data always beats a row
+    # missing the field. Only include columns the destination schema
+    # actually has — a future namespace lacking either column won't
+    # silently break the SQL.
+    secondary_tiebreakers = [c for c in ("date_modified", "identifier") if c in columns]
+    order_terms = [f"{dedup_col} DESC NULLS LAST"] + [
+        f"{c} DESC NULLS LAST" for c in secondary_tiebreakers
+    ]
+    order_clause = ",\n        ".join(order_terms)
+
     merge_sql = f"""
     MERGE `{target_ref}` T
     USING (
@@ -1242,7 +1261,7 @@ def _swap_staging_into_target(
       FROM `{staging_ref}`
       QUALIFY ROW_NUMBER() OVER (
         PARTITION BY {primary_key}
-        ORDER BY {dedup_col} DESC NULLS LAST
+        ORDER BY {order_clause}
       ) = 1
     ) S
     ON T.{primary_key} = S.{primary_key}

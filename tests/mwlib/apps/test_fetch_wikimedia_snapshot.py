@@ -1384,11 +1384,52 @@ class TestSwapStagingIntoTarget:
         # Pick latest revision per primary key inside the USING clause.
         assert "ROW_NUMBER()" in sql
         assert "PARTITION BY name" in sql
-        assert "ORDER BY version_identifier DESC NULLS LAST" in sql
+        # Primary sort: highest version wins.
+        assert "version_identifier DESC NULLS LAST" in sql
+        # Stable tiebreakers: when version_identifier is NULL or tied
+        # across duplicate rows, fall back to date_modified then
+        # identifier so re-running the swap is deterministic.
+        assert "date_modified DESC NULLS LAST" in sql
+        assert "identifier DESC NULLS LAST" in sql
         # ``version_identifier`` must NOT appear in the destination
         # column list — it's staging-only.
         insert_section = sql[sql.index("INSERT (") :]
         assert "version_identifier" not in insert_section
+
+    def test_omits_tiebreaker_when_destination_lacks_the_column(self):
+        # A future namespace whose destination schema doesn't carry
+        # ``date_modified`` (or ``identifier``) must not have those
+        # column names interpolated into the ORDER BY — that would
+        # silently produce SQL that BigQuery rejects.
+        client = self._make_client()
+        minimal_schema = [{"name": "name", "type": "STRING", "mode": "REQUIRED"}]
+        # Mock staging schema for a minimal-namespace case.
+        staging_table = MagicMock()
+        fields = []
+        for col in ("name", snap._VERSION_IDENT_FIELD["name"]):
+            fld = MagicMock()
+            fld.name = col
+            fields.append(fld)
+        staging_table.schema = fields
+        client.get_table.return_value = staging_table
+
+        snap._swap_staging_into_target(
+            client,
+            target_ref="p.d.minimal",
+            staging_ref="p.d.minimal_staging",
+            schema=minimal_schema,
+        )
+        sql = client.query.call_args.args[0]
+        assert "version_identifier DESC NULLS LAST" in sql
+        assert "date_modified" not in sql
+        # ``identifier`` is the page id column, not the dedup column.
+        # The minimal schema has no ``identifier`` column, so the
+        # ORDER BY should only contain the dedup column. Comma-split
+        # to avoid a false positive on the ``identifier`` substring of
+        # ``version_identifier``.
+        order_section = sql[sql.index("ORDER BY") : sql.index(") = 1")]
+        order_terms = [t.strip() for t in order_section.removeprefix("ORDER BY").split(",")]
+        assert order_terms == ["version_identifier DESC NULLS LAST"]
 
     def test_targets_the_destination_via_merge(self):
         # Sanity: still a MERGE with the right target / source / DELETE
