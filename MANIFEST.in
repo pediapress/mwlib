@@ -4,12 +4,12 @@ include .github/workflows/release.yml
 include .pre-commit-config.yaml
 include .taplo.toml
 include .vscode/settings.json
+include CHANGELOG.md
 include MANIFEST.in
 include README.md
 include README_docker_compose_setup.md
 include README_running_locally.md
 include README_setup_local_mediawiki_and_install_dump.md
-include CHANGELOG.md
 include cmd.txt
 include docker-compose-initial-setup.yml
 include docker-compose-only-mediawiki.yml

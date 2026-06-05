@@ -74,6 +74,32 @@ class TestMwApi:
             # Verify that sleep was called with the initial delay
             mock_sleep.assert_called_with(1)
 
+    def test_maxlag_injected_on_query(self, mw_api, httpx_mock):
+        """``maxlag`` is added to read queries so the server can ask us to back
+        off before it hard-rate-limits us."""
+        httpx_mock.add_response(json={"query": {}})
+
+        mw_api.do_request(action="query", meta="siteinfo")
+
+        assert mw_api.maxlag == 5
+        assert "maxlag=5" in str(httpx_mock.get_requests()[0].url)
+
+    def test_maxlag_error_is_retried_then_succeeds(self, mw_api, httpx_mock):
+        """A maxlag refusal is transient — back off and retry instead of
+        failing the fetch."""
+        httpx_mock.add_response(
+            json={"error": {"code": "maxlag", "info": "Waiting for a database server"}}
+        )
+        httpx_mock.add_response(json={"query": {"pages": {}}})
+
+        mock_sleep = MagicMock()
+        with patch("mwlib.network.sapi.gevent.sleep", mock_sleep):
+            result = mw_api.do_request(action="query", meta="siteinfo")
+
+        assert result == {"pages": {}}
+        assert mock_sleep.called
+        assert len(httpx_mock.get_requests()) == 2
+
     def test_fetch_http_500_retry_success(self, mw_api, httpx_mock):
         """Test retry on HTTP 500 error with eventual success."""
         # Create a response for the 500 error

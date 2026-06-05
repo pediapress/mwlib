@@ -151,6 +151,14 @@ class MwApi:
         self.max_connections = conf.get("fetch", "max_connections", 20, int)
         self.max_retry_count = conf.get("fetch", "max_retry_count", 2, int)
         self.rvlimit = conf.get("fetch", "rvlimit", 500, int)
+        # ``maxlag`` asks MediaWiki to refuse work (with an ``error.code ==
+        # "maxlag"`` response) when its replicas are lagging, instead of letting
+        # us pile on and get hard-rate-limited (HTTP 429). 0 disables it.
+        # See https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+        self.maxlag = conf.get("fetch", "maxlag", 5, int)
+        self.retry_initial_delay = conf.get("fetch", "retry_initial_delay", 0.5, float)
+        self.retry_backoff_factor = conf.get("fetch", "retry_backoff_factor", 2.0, float)
+        self.retry_max_delay = conf.get("fetch", "retry_max_delay", 20.0, float)
         self.limit_fetch_semaphore = None
 
     def report(self):
@@ -398,6 +406,12 @@ class MwApi:
         )
 
     def do_request(self, use_post=False, **kwargs):
+        # Ask the server to back off while its replicas are lagging rather than
+        # hammering it into a 429. Only on read queries, and never override an
+        # explicit caller value.
+        if self.maxlag > 0 and kwargs.get("action") == "query" and "maxlag" not in kwargs:
+            kwargs["maxlag"] = self.maxlag
+
         sem = self.limit_fetch_semaphore
         if sem is not None:
             sem.acquire()
@@ -420,15 +434,35 @@ class MwApi:
         logger.debug(
             f"Request #{self.request_counter}: ACTION:{kwargs.get('action')} PROP:{kwargs.get('prop')}"
         )
-        response_data = self._request(**kwargs)
-        # Convert bytes to string if necessary
-        if isinstance(response_data, bytes):
-            response_data = response_data.decode("utf-8")
-        data = loads(response_data)
-        error = data.get("error")
-        if error:
-            self._handle_error(error, kwargs)
-        return data
+
+        maxlag_retries = 0
+        delay = self.retry_initial_delay
+        while True:
+            response_data = self._request(**kwargs)
+            # Convert bytes to string if necessary
+            if isinstance(response_data, bytes):
+                response_data = response_data.decode("utf-8")
+            data = loads(response_data)
+            error = data.get("error")
+            if error:
+                # A maxlag refusal is transient — the server is lagging, not
+                # rejecting us. Back off and retry instead of failing the fetch.
+                if error.get("code") == "maxlag" and maxlag_retries < self.max_retry_count:
+                    maxlag_retries += 1
+                    wait = min(delay, self.retry_max_delay)
+                    logger.warning(
+                        "maxlag: %s replicas lagging, retry %d/%d in %.1fs (%s)",
+                        self.apiurl,
+                        maxlag_retries,
+                        self.max_retry_count,
+                        wait,
+                        error.get("info", ""),
+                    )
+                    gevent.sleep(wait)
+                    delay *= self.retry_backoff_factor
+                    continue
+                self._handle_error(error, kwargs)
+            return data
 
     def _merge_data(self, retval, action, data):
         merge_data(retval, data[action])
