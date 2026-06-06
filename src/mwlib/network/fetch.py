@@ -111,22 +111,80 @@ class SharedProgress:
 
 
 class FsOutput:
-    def __init__(self, path):
+    def __init__(self, path, resume=False):
+        """Create (or, with ``resume``, reopen) a nuwiki output directory.
+
+        Normally an existing output path is an error — a fresh fetch must start
+        clean. With ``resume=True`` an existing directory is reused instead:
+        already-downloaded images, the per-storage sqlite databases and the
+        revisions file are kept, so a fetch that was interrupted (rate limit,
+        time limit) can continue where it left off rather than re-downloading
+        everything. ``resume=True`` on a non-existent path is just a fresh fetch.
+        """
         self.path = os.path.abspath(path)
-        if os.path.exists(self.path):
+        self.resume = bool(resume) and os.path.exists(self.path)
+        if os.path.exists(self.path) and not resume:
             raise ValueError(f"output path exists: {self.path}")
-        os.makedirs(os.path.join(self.path, "images"))
-        self.revfile = open(os.path.join(self.path, "revisions-1.txt"), "w", encoding="utf8")  # noqa: SIM115
+        os.makedirs(os.path.join(self.path, "images"), exist_ok=self.resume)
+        rev_mode = "a" if self.resume else "w"
+        self.revfile = open(  # noqa: SIM115
+            os.path.join(self.path, "revisions-1.txt"), rev_mode, encoding="utf8"
+        )
         self.seen = {}
         self.imgcount = 0
         self.nfo = None
 
         for storage in ["authors", "html", "imageinfo", "templates"]:
             db_path = os.path.join(self.path, storage + ".db")
-            if os.path.exists(db_path):
+            # On a fresh fetch, drop any stale db; on resume, keep it so the
+            # already-fetched html/imageinfo/authors/templates are reused.
+            if os.path.exists(db_path) and not self.resume:
                 os.remove(db_path)
             database = SqliteDict(db_path, autocommit=True)
             setattr(self, storage, database)
+
+        if self.resume:
+            self._load_seen_from_revfile()
+
+    def _load_seen_from_revfile(self):
+        """Repopulate ``self.seen`` from an existing revisions file.
+
+        ``_extract_revisions`` skips revisions whose revid/title are already in
+        ``self.seen``. On resume we must seed it from what is already on disk,
+        otherwise revisions would be appended a second time and ``revisions-1.txt``
+        would gain duplicate ``--page--`` blocks.
+        """
+        rev_path = os.path.join(self.path, "revisions-1.txt")
+        try:
+            with open(rev_path, encoding="utf8") as rev_file:
+                content = rev_file.read()
+        except OSError:
+            return
+        for block in content.split("\n --page-- ")[1:]:
+            header = block.split("\n", 1)[0]
+            try:
+                rev = json.loads(header)
+            except ValueError:
+                continue
+            revid = rev.get("revid")
+            title = rev.get("title")
+            if revid is not None:
+                self.seen[revid] = rev
+            if title is not None:
+                self.seen[title] = rev
+
+    @staticmethod
+    def image_already_downloaded(path):
+        """Return True if a completed image already exists at ``path``.
+
+        Downloads stream to a temp file and are renamed onto the final path
+        only once complete, so a non-empty file at ``path`` is a finished
+        download and can be skipped on resume.
+        """
+        try:
+            return os.path.getsize(path) > 0
+        except OSError:
+            return False
 
     def open_rev_file_for_reading(self):
         self.revfile = open(os.path.join(self.path, "revisions-1.txt"), encoding="utf8")  # noqa: SIM115
@@ -154,6 +212,23 @@ class FsOutput:
             self.dump_json(nfo=self.nfo)
         self.revfile.close()
         self.revfile = None
+
+    def close_databases(self):
+        """Close all sqlitedict databases, stopping their writer threads.
+
+        Each SqliteDict runs a background writer thread that keeps an open
+        connection to its ``*.db`` file. On a clean finish these are closed via
+        ``write_authors``/``write_html`` and friends; on an interrupted fetch
+        the caller deletes ``self.path``, and a still-running writer thread then
+        tries to commit to an unlinked file and raises
+        ``sqlite3.OperationalError: attempt to write a readonly database``.
+        Closing them here makes the threads stop before the directory goes away.
+        """
+        for storage in ("authors", "html", "imageinfo", "templates"):
+            database = getattr(self, storage, None)
+            if database is not None:
+                with contextlib.suppress(Exception):
+                    database.close()
 
     def get_imagepath(self, title):
         path = os.path.join(self.path, "images", f"{unorganized.fs_escape(title)}")
@@ -521,6 +596,20 @@ class Fetcher:
             if self.bq_lookup and self._bq_pending:
                 self._flush_bq_batch()
                 self.pool.join()
+        except BaseException:
+            # The fetch was interrupted (e.g. a Celery soft time limit or a
+            # rate-limit abort on a large collection). Synchronously kill the
+            # still-running download/refcall greenlets and stop the sqlitedict
+            # writer threads before the exception reaches the caller — otherwise
+            # the caller tears down ``fsdir`` while these workers are still
+            # alive, and they crash trying to write into the deleted directory
+            # (FileNotFoundError on image temp files, "attempt to write a
+            # readonly database" on the unlinked *.db files).
+            self.image_download_pool.kill()
+            self.pool.kill()
+            self.refcall_pool.kill()
+            self.fsout.close_databases()
+            raise
         finally:
             dispatch_gr.kill()
 
@@ -914,6 +1003,12 @@ class Fetcher:
 
     def _download_image(self, url, title):
         path = self.fsout.get_imagepath(title)
+        if self.fsout.image_already_downloaded(path):
+            # Resume: a previous (interrupted) attempt already fetched this
+            # image. Skip the download — images are the bulk of a large fetch's
+            # wall-clock, so this is what makes a resumed fetch finish quickly.
+            logger.debug("skipping already-downloaded image: %s", path)
+            return
         temp_path = (path + "\xb7").encode("utf-8")
         greenlet_task = self.image_download_pool.spawn(download_to_file, url, path, temp_path)
         self.pool.add(greenlet_task)

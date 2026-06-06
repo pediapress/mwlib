@@ -441,3 +441,126 @@ class TestFetcherInstanceState:
         # Instance b must NOT see anything from a.
         assert b.titles_pending_contributor_lookup[api] == []
         assert b.title_mapping == {}
+
+
+class TestFsOutputResume:
+    """Resumable fetch reopen behaviour.
+
+    An interrupted attempt must be able to reopen its output directory and skip
+    work already on disk (images, dbs, revisions) instead of restarting.
+    """
+
+    def test_fresh_output_refuses_existing_dir(self, tmp_path):
+        base = str(tmp_path / "nuwiki")
+        fetch.FsOutput(base).close()
+        # A second fresh FsOutput on the same path is an error.
+        with pytest.raises(ValueError, match="output path exists"):
+            fetch.FsOutput(base)
+
+    def test_resume_reopens_existing_dir(self, tmp_path):
+        base = str(tmp_path / "nuwiki")
+        first = fetch.FsOutput(base)
+        first.set_db_key("html", "Page", {"a": 1})
+        first.close()
+
+        # Resume must not raise and must preserve the existing db contents.
+        resumed = fetch.FsOutput(base, resume=True)
+        assert resumed.resume is True
+        assert resumed.get_db_key("html", "Page") == {"a": 1}
+        resumed.close()
+
+    def test_resume_on_missing_path_is_fresh(self, tmp_path):
+        base = str(tmp_path / "does-not-exist-yet")
+        out = fetch.FsOutput(base, resume=True)
+        # No existing dir → behaves as a fresh fetch, not a resume.
+        assert out.resume is False
+        assert os.path.isdir(os.path.join(base, "images"))
+        out.close()
+
+    def test_resume_keeps_downloaded_images(self, tmp_path):
+        base = str(tmp_path / "nuwiki")
+        out = fetch.FsOutput(base)
+        out.close()
+        img = os.path.join(base, "images", "File-existing.jpg")
+        with open(img, "wb") as fh:
+            fh.write(b"JPEGDATA")
+        # Reopening with resume must leave the image untouched.
+        fetch.FsOutput(base, resume=True).close()
+        assert os.path.exists(img)
+        with open(img, "rb") as fh:
+            assert fh.read() == b"JPEGDATA"
+
+    def test_resume_loads_seen_from_revfile(self, tmp_path):
+        base = str(tmp_path / "nuwiki")
+        out = fetch.FsOutput(base)
+        # Write a revision block in the same format _extract_revisions uses.
+        import mwlib.utils.myjson as mwjson
+
+        rev = {"title": "Mainz", "ns": 0, "revid": 12345}
+        out.revfile.write("\n --page-- %s\n" % mwjson.dumps(rev, sort_keys=True))
+        out.revfile.write("body text")
+        out.close()
+
+        resumed = fetch.FsOutput(base, resume=True)
+        # Both the revid and the title must be marked seen so the revision
+        # isn't appended a second time on resume.
+        assert 12345 in resumed.seen
+        assert "Mainz" in resumed.seen
+        resumed.close()
+
+
+class TestImageAlreadyDownloaded:
+    def test_true_for_nonempty_file(self, tmp_path):
+        p = str(tmp_path / "img.jpg")
+        with open(p, "wb") as fh:
+            fh.write(b"x")
+        assert fetch.FsOutput.image_already_downloaded(p) is True
+
+    def test_false_for_missing_file(self, tmp_path):
+        assert fetch.FsOutput.image_already_downloaded(str(tmp_path / "nope.jpg")) is False
+
+    def test_false_for_empty_file(self, tmp_path):
+        p = str(tmp_path / "empty.jpg")
+        open(p, "wb").close()
+        assert fetch.FsOutput.image_already_downloaded(p) is False
+
+
+class TestDownloadImageSkipsExisting:
+    """Resume skips re-downloading images already on disk.
+
+    ``_download_image`` must not re-spawn a download for an image a prior
+    attempt already fetched — this is what makes a resumed fetch fast.
+    """
+
+    def _stub_with_fsout(self, base, resume=False):
+        from mwlib.network.fetch import Fetcher
+
+        stub = object.__new__(Fetcher)
+        stub.fsout = fetch.FsOutput(base, resume=resume)
+        stub.image_download_pool = MagicMock()
+        stub.pool = MagicMock()
+        return stub
+
+    def test_skips_existing_image(self, tmp_path):
+        base = str(tmp_path / "nuwiki")
+        stub = self._stub_with_fsout(base)
+        title = "File:Existing.jpg"
+        path = stub.fsout.get_imagepath(title)
+        with open(path, "wb") as fh:
+            fh.write(b"already-here")
+
+        stub._download_image("http://example/img.jpg", title)
+
+        stub.image_download_pool.spawn.assert_not_called()
+        stub.pool.add.assert_not_called()
+        stub.fsout.close()
+
+    def test_downloads_missing_image(self, tmp_path):
+        base = str(tmp_path / "nuwiki")
+        stub = self._stub_with_fsout(base)
+
+        stub._download_image("http://example/img.jpg", "File:Missing.jpg")
+
+        stub.image_download_pool.spawn.assert_called_once()
+        stub.pool.add.assert_called_once()
+        stub.fsout.close()

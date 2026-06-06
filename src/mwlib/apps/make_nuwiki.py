@@ -84,7 +84,7 @@ class StartFetcher:
         self.password = options.get("password")
         self.domain = options.get("domain")
 
-        self.fsout = fetch.FsOutput(self.fsdir)
+        self.fsout = fetch.FsOutput(self.fsdir, resume=getattr(self, "resume", False))
 
     def fetch_collectionpage(self, api):
         collection_page = self.wiki_options.get("collection_page")
@@ -212,8 +212,9 @@ def make_nuwiki(
     wiki_options,
     pod_client,
     status,
+    resume=False,
 ):
-    logger.info("making nuwiki")
+    logger.info("making nuwiki (resume=%s)", resume)
     id2wiki = get_id_wikis(metabook)
 
     is_multiwiki = len(id2wiki) > 1
@@ -246,6 +247,7 @@ def make_nuwiki(
                 wiki_options=wiki_options,
                 pod_client=pod_client,
                 status=status,
+                resume=resume,
             )
         )
 
