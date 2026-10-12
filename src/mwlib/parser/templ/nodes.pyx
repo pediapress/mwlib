@@ -114,7 +114,9 @@ class SwitchNode(Node):
             self._store_key(key, value, fast, unresolved)
 
         if no_key_seen:
-            self._store_key("#default", no_key_seen[-1], fast, unresolved)
+            # setup.py compiles with wraparound=False, so a negative index is an
+            # unchecked read before the list's item array, not "the last item".
+            self._store_key("#default", no_key_seen[len(no_key_seen) - 1], fast, unresolved)
 
         self.unresolved = tuple(unresolved)
         self.fast = fast
