@@ -2,6 +2,16 @@
 
 All notable changes to mwlib are recorded here, newest first. Each release header carries the publication date and the released version. PyPI: <https://pypi.org/project/mwlib/>.
 
+## Unreleased
+
+- **BigQuery removed; image description pages come from a local SQLite file store.** `mwlib.network.file_store` (`FileStore`, `FileStoreImageLookup`) replaces `mwlib.network.bigquery_lookup`; `Fetcher` keeps the same lookup flow (batched lookup, early license check, deferred downloads, remote-API fallback on a miss) and a missing or unreadable store falls back to the remote API.
+- **Config change.** The `[bigquery]` section and `MWLIB_BIGQUERY_*` variables are gone. Set `[filestore] path` (or `MWLIB_FILESTORE_PATH`) to enable the lookup; `domains` keeps its default of `en.wikipedia.org`. The lookup is off while `path` is empty.
+- **`wme-ingest` replaced by `mw-file-store`.** It builds the SQLite store straight from the WME NS6 chunked snapshot — chunk-version manifest (an unchanged snapshot is not re-downloaded), flock against concurrent builds, `quick_check`, minimum-rows and maximum-shrink validation, atomic rename. Needs only `WME_USERNAME` / `WME_PASSWORD`.
+- The `bigquery` extra and the `google-cloud-bigquery` dependency are removed.
+- `Fetcher` internals renamed accordingly (`bq_lookup` → `image_lookup`, `BqTemplatesError` → `TemplatesError`, `_flush_bq_batch` → `_flush_lookup_batch`, …).
+
+**Upgrading.** Build a store with `mw-file-store --path <file>` and set `MWLIB_FILESTORE_PATH` for every process that runs `mw-zip` / `make_nuwiki`; drop `MWLIB_BIGQUERY_*` and BigQuery credentials from those environments.
+
 ## 2026-05-05 mwlib 0.18.8
 
 - Fix `wme-ingest` MERGE swap aborting with `UPDATE/MERGE must match at most one source row for each target row` when the snapshot contains duplicate articles. Wikimedia Enterprise documents that snapshots may carry a small number (<1%) of duplicate articles and asks consumers to keep the row with the highest `version.identifier`. Parsers now extract that revision id into a staging-only `version_identifier` column, and `_swap_staging_into_target` wraps staging in a `QUALIFY ROW_NUMBER() OVER (PARTITION BY <pk> ORDER BY version_identifier DESC NULLS LAST) = 1` subquery before the MERGE so duplicates collapse to the latest revision. The destination table's schema is unchanged — the dedup column lives only on staging, so Pulumi-managed schemas (`article_pages`) need no migration.

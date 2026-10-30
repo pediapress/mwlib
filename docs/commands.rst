@@ -184,71 +184,38 @@ Specific Options
   been removed.)
 
 
-The ``wme-ingest`` Command
-==========================
+The ``mw-file-store`` Command
+=============================
 
-Download a Wikimedia Enterprise namespace 6 snapshot and load the file
-description pages into a BigQuery table. This is used to populate the
-BigQuery-based image lookup cache (see :doc:`configuration` for the
-``[bigquery]`` section).
+Download the Wikimedia Enterprise namespace 6 snapshot and build the local
+SQLite file store of file description pages. The store backs the image
+description lookup used by ``mw-zip`` (see :doc:`configuration` for the
+``[filestore]`` section).
 
 Requires ``WME_USERNAME`` and ``WME_PASSWORD`` environment variables for
 Wikimedia Enterprise authentication.
+
+The build is atomic: the new file is validated and then renamed over the
+live one. A snapshot that has not changed since the last build is not
+downloaded again.
 
 Usage
 -----
 ::
 
-  wme-ingest [OPTIONS]
+  mw-file-store [--path=PATH] [--fresh]
 
 Specific Options
 ----------------
 
-``--list``
+``--path=PATH``
 
-  List available snapshots and exit. Requires WME credentials.
+  Store file to build. Defaults to the ``MWLIB_FILESTORE_PATH`` environment
+  variable.
 
-``--download-only``
+``--fresh``
 
-  Download the snapshot tarball but skip loading into BigQuery.
-
-``--streaming-insert``
-
-  Use BigQuery streaming inserts instead of the default batch load job.
-  Streaming inserts are slower and more expensive for large tables, but
-  make rows immediately queryable.
-
-``--snapshot-id=SNAPSHOT_ID``
-
-  Snapshot identifier to download (default: ``enwiki_namespace_6``).
-
-``-i, --input=TARBALL``
-
-  Path to an already-downloaded ``.tar.gz`` file. Skips the download step
-  and loads from the local file instead.
-
-``-o, --output=OUTPUT``
-
-  Output path for the downloaded tarball (default: auto-generated in ``/tmp``).
-
-``--project=PROJECT``
-
-  Google Cloud project ID. Defaults to the ``BIGQUERY_PROJECT`` environment
-  variable, or ``pediapress-prod`` if not set.
-
-``--dataset=DATASET``
-
-  BigQuery dataset ID. Defaults to the ``BIGQUERY_DATASET`` environment
-  variable, or ``wikipedia`` if not set.
-
-``--credentials=PATH``
-
-  Path to a GCP service account JSON key file. Defaults to the
-  ``GOOGLE_APPLICATION_CREDENTIALS`` environment variable.
-
-``--batch-size=N``
-
-  Number of rows per batch for streaming inserts (default: 10000).
+  Rebuild even if the snapshot is unchanged.
 
 
 .. _`MediaWiki API`: http://www.mediawiki.org/wiki/API

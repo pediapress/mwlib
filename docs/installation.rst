@@ -73,16 +73,6 @@ Alternatively, if you've cloned the mwlib repository, you can install it using::
 
 This will use uv to install all required dependencies.
 
-Optional: BigQuery support
-=============================================
-To enable BigQuery-backed image description lookup, install the optional
-dependency group::
-
-   $ uv pip install "mwlib[bigquery]"
-
-This requires a GCP project and a BigQuery dataset populated with Wikimedia
-Enterprise snapshots (see the ``wme-ingest`` command and :doc:`configuration`).
-
 Optional: right-to-left text
 =============================================
 If you want to render right-to-left texts, you may also install the

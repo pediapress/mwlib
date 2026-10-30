@@ -39,22 +39,10 @@ The following special environment variables are used directly (without the
 ``MWLIB_`` prefix):
 
 ``WME_USERNAME``
-  Wikimedia Enterprise API username (used by ``wme-ingest``).
+  Wikimedia Enterprise API username (used by ``mw-file-store``).
 
 ``WME_PASSWORD``
-  Wikimedia Enterprise API password (used by ``wme-ingest``).
-
-``GOOGLE_APPLICATION_CREDENTIALS``
-  Path to a GCP service account JSON key file. Used by BigQuery lookup and
-  ``wme-ingest`` when no ``--credentials`` argument is given.
-
-``BIGQUERY_PROJECT``
-  Default Google Cloud project ID for ``wme-ingest`` (overridden by
-  ``--project``).
-
-``BIGQUERY_DATASET``
-  Default BigQuery dataset ID for ``wme-ingest`` (overridden by
-  ``--dataset``).
+  Wikimedia Enterprise API password (used by ``mw-file-store``).
 
 ``PORT``
   Port for the nserve render server to listen on.
@@ -168,54 +156,26 @@ rvlimit
 
   Type: Integer
 
-bigquery Section
-----------------
+filestore Section
+-----------------
 
-The ``[bigquery]`` section enables a BigQuery-backed lookup for File namespace
-description pages. When enabled, mwlib queries a pre-populated BigQuery table
-(sourced from Wikimedia Enterprise snapshots) instead of making remote API
-calls for each image. This can significantly speed up rendering of
-image-heavy articles.
+The ``[filestore]`` section enables a SQLite-backed lookup for File namespace
+description pages. When a store is configured, mwlib reads the pre-built file
+(sourced from Wikimedia Enterprise snapshots by ``mw-file-store``) instead of
+making remote API calls for each image. This can significantly speed up
+rendering of image-heavy articles. A missing or unreadable file falls back to
+the normal API.
 
-The optional ``google-cloud-bigquery`` dependency must be installed::
+path
+  Path of the SQLite store file. The lookup is off when empty.
 
-    uv pip install "mwlib[bigquery]"
-
-GCP authentication uses ``GOOGLE_APPLICATION_CREDENTIALS`` or Application
-Default Credentials.
-
-enabled
-  Whether to use BigQuery for image description lookups.
-
-  Default: false
-
-  Type: Boolean (yes/true/on/1 for True, no/false/off/0 for False)
-
-project
-  Google Cloud project ID containing the BigQuery dataset.
-
-  Default: "" (required when enabled)
-
-dataset
-  BigQuery dataset ID.
-
-  Default: "wme_snapshots"
-
-table
-  BigQuery table name.
-
-  Default: "file_pages"
-
-timeout
-  Query timeout in seconds.
-
-  Default: 30
-
-  Type: Integer
+  Default: ""
 
 domains
-  Comma-separated list of wiki domains for which BigQuery lookup is used.
-  Queries for other domains fall back to the normal API.
+  Comma-separated list of wiki domains for which the file store is used.
+  Queries for other domains fall back to the normal API. The store is keyed
+  by English ``File:`` titles, so only list wikis whose File namespace is
+  called ``File``.
 
   Default: "en.wikipedia.org"
 
@@ -244,10 +204,6 @@ Here's an example configuration file::
     max_requests_per_second = 5
     max_retry_count = 3
 
-    [bigquery]
-    enabled = yes
-    project = my-gcp-project
-    dataset = wme_snapshots
-    table = file_pages
-    timeout = 30
+    [filestore]
+    path = /data/file_pages.sqlite
     domains = en.wikipedia.org
