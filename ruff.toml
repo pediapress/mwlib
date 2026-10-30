@@ -85,6 +85,13 @@ lint.per-file-ignores."tests/mwlib/apps/test_fetch_wikimedia_snapshot.py" = [
     "PLR2004", # magic value in comparison (intentional in test asserts)
     "RUF043",  # ``match=`` pattern with metacharacters (substring matches)
 ]
+# Build orchestration for the file store: ``build_file_store`` / ``_build`` take
+# the chunk source callbacks and paths as explicit arguments so the build can be
+# driven by tests with fakes; bundling them would only hide that.
+lint.per-file-ignores."src/mwlib/apps/file_store_builder.py" = [
+    "PLR0913", # too many arguments
+    "PLR0917", # too many positional arguments
+]
 lint.per-file-ignores."src/mwlib/parser/templ/magics.py" = [
     "N802",    # function name should be lowercase (MediaWiki magic-word convention)
     "N805",    # first method arg name (legacy classmethod-as-function patterns)
