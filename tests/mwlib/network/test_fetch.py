@@ -2,13 +2,18 @@
 
 import os
 import tempfile
+from collections import defaultdict
 from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
 
+import mwlib.utils.myjson as mwjson
 from mwlib.network import fetch
-from mwlib.network.fetch import download_to_file
+from mwlib.network.fetch import Fetcher, download_to_file
+
+EXPECTED_STREAM_CALLS = 2  # initial attempt plus one retry
+MAINZ_REVID = 12345
 
 
 @pytest.fixture
@@ -39,7 +44,7 @@ def mock_conf():
     """Fixture that mocks the conf module."""
     with patch("mwlib.network.fetch.conf") as mock_conf:
         # Set default configuration values
-        mock_conf.get.side_effect = lambda section, name, default, bool: {
+        mock_conf.get.side_effect = lambda section, name, default, _type: {
             ("http2", "enabled"): True,
             ("http2", "auto_detect"): True,
         }.get((section, name), default)
@@ -100,7 +105,7 @@ class TestFetch:
         path, temp_path = temp_files
 
         # Configure the mock to indicate that HTTP/2 is disabled in configuration
-        mock_conf.get.side_effect = lambda section, name, default, bool: {
+        mock_conf.get.side_effect = lambda section, name, default, _type: {
             ("http2", "enabled"): False,
             ("http2", "auto_detect"): True,
         }.get((section, name), default)
@@ -145,7 +150,7 @@ class TestFetch:
         path, temp_path = temp_files
 
         # Configure the mock to indicate that auto-detect is disabled in configuration
-        mock_conf.get.side_effect = lambda section, name, default, bool: {
+        mock_conf.get.side_effect = lambda section, name, default, _type: {
             ("http2", "enabled"): True,
             ("http2", "auto_detect"): False,
         }.get((section, name), default)
@@ -185,7 +190,7 @@ class TestFetch:
         )
 
         # Verify that the client's stream method was called twice
-        assert mock_client.stream.call_count == 2
+        assert mock_client.stream.call_count == EXPECTED_STREAM_CALLS
 
     def test_download_to_file_http_error(self, mock_http_client_manager, mock_conf, temp_files):
         """Test handling of HTTP errors."""
@@ -211,7 +216,7 @@ class TestFetch:
         mock_client.stream.return_value.__enter__.side_effect = Exception("Test error")
 
         # Call the function and expect an exception
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Test error"):
             download_to_file("https://example.com/file.txt", path, temp_path)
 
     def test_download_to_file_applies_rate_limit(
@@ -228,7 +233,7 @@ class TestFetch:
         """Rate limiter should be built from conf.get(fetch, max_requests_per_second)."""
         fetch._download_rate_limiter = {}
         fetch._download_rate_limiter_rps = {}
-        mock_conf.get.side_effect = lambda section, name, default, bool: {
+        mock_conf.get.side_effect = lambda section, name, default, _type: {
             ("fetch", "max_requests_per_second"): 3,
         }.get((section, name), default)
 
@@ -250,10 +255,6 @@ class TestLookupContributors:
     """
 
     def _make_stub(self):
-        from collections import defaultdict
-
-        from mwlib.network.fetch import Fetcher
-
         stub = object.__new__(Fetcher)
         stub.titles_pending_contributor_lookup = defaultdict(list)
         stub.title_mapping = {}
@@ -292,8 +293,6 @@ class TestLookupContributors:
         stub.fsout.set_db_key.assert_called_once_with("authors", "Datei:X.jpg", ["Alice"])
 
     def test_batch_mode_consumes_pending(self):
-        from mwlib.network.fetch import Fetcher  # noqa: F401  (used in stub)
-
         stub = self._make_stub()
         api = MagicMock()
         stub.titles_pending_contributor_lookup[api] = ["File:A.jpg", "File:B.jpg"]
@@ -353,10 +352,6 @@ class TestFinishDoesNotFlushBQ:
     """
 
     def test_finish_does_not_call_flush_bq_batch(self):
-        from unittest.mock import MagicMock
-
-        from mwlib.network.fetch import Fetcher
-
         stub = object.__new__(Fetcher)
         # Pretend there's a pending batch and a working bq_lookup; if
         # finish() were still flushing, this would be the trigger.
@@ -389,11 +384,6 @@ class TestGetImageEditsOrdering:
     """
 
     def _make_stub(self):
-        from collections import defaultdict
-        from unittest.mock import MagicMock
-
-        from mwlib.network.fetch import Fetcher
-
         stub = object.__new__(Fetcher)
         stub.titles_pending_contributor_lookup = defaultdict(list)
         stub.title_mapping = {}
@@ -404,8 +394,6 @@ class TestGetImageEditsOrdering:
         return stub
 
     def test_authors_stored_under_local_title(self):
-        from unittest.mock import MagicMock
-
         stub = self._make_stub()
         api = MagicMock()
         inspect = MagicMock()
@@ -423,10 +411,6 @@ class TestFetcherInstanceState:
     """Per-instance state mustn't leak across Fetcher instances."""
 
     def test_pending_lookup_is_per_instance(self):
-        from collections import defaultdict
-
-        from mwlib.network.fetch import Fetcher
-
         a = object.__new__(Fetcher)
         a.titles_pending_contributor_lookup = defaultdict(list)
         a.title_mapping = {}
@@ -494,17 +478,15 @@ class TestFsOutputResume:
         base = str(tmp_path / "nuwiki")
         out = fetch.FsOutput(base)
         # Write a revision block in the same format _extract_revisions uses.
-        import mwlib.utils.myjson as mwjson
-
-        rev = {"title": "Mainz", "ns": 0, "revid": 12345}
-        out.revfile.write("\n --page-- %s\n" % mwjson.dumps(rev, sort_keys=True))
+        rev = {"title": "Mainz", "ns": 0, "revid": MAINZ_REVID}
+        out.revfile.write(f"\n --page-- {mwjson.dumps(rev, sort_keys=True)}\n")
         out.revfile.write("body text")
         out.close()
 
         resumed = fetch.FsOutput(base, resume=True)
         # Both the revid and the title must be marked seen so the revision
         # isn't appended a second time on resume.
-        assert 12345 in resumed.seen
+        assert MAINZ_REVID in resumed.seen
         assert "Mainz" in resumed.seen
         resumed.close()
 
@@ -533,8 +515,6 @@ class TestDownloadImageSkipsExisting:
     """
 
     def _stub_with_fsout(self, base, resume=False):
-        from mwlib.network.fetch import Fetcher
-
         stub = object.__new__(Fetcher)
         stub.fsout = fetch.FsOutput(base, resume=resume)
         stub.image_download_pool = MagicMock()

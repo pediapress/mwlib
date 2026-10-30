@@ -13,8 +13,7 @@ import time
 import traceback
 from collections import defaultdict
 from hashlib import sha1
-from urllib import parse, request
-from urllib.error import HTTPError
+from urllib import parse
 
 import gevent
 import gevent.event
@@ -40,6 +39,9 @@ logger = logging.getLogger(__name__)
 _download_rate_limiter = {}
 _download_rate_limiter_rps = {}
 _download_rate_limiter_init_lock = Semaphore(1)
+
+_PROGRESS_ESTIMATE_THRESHOLD = 50
+_PROGRESS_RAMP_SECONDS = 60.0
 
 
 class BqTemplatesError(ValueError):
@@ -67,23 +69,22 @@ class SharedProgress:
         if not total:
             total = 1
 
-        percent = done / 5.0 if total < 50 else 100.0 * done / total
+        percent = done / 5.0 if total < _PROGRESS_ESTIMATE_THRESHOLD else 100.0 * done / total
 
         percent = round(percent, 3)
 
         needed = time.time() - self.stime
-        if needed < 60.0:
-            percent *= needed / 60.0
+        if needed < _PROGRESS_RAMP_SECONDS:
+            percent *= needed / _PROGRESS_RAMP_SECONDS
 
-        if percent <= self.last_percent:
-            percent = self.last_percent
+        percent = max(self.last_percent, percent)
 
         self.last_percent = percent
 
         if isatty and isatty():
             msg = f"{done} of {total}, {percent:.2f}%, {needed:.2f} seconds,"
             if sys.platform in ("linux2", "linux3"):
-                msg += " %.1f MB mem used" % linuxmem.resident()
+                msg += f" {linuxmem.resident():.1f} MB mem used"
             sys.stdout.write("\x1b[K" + msg + "\r")
             sys.stdout.flush()
 
@@ -264,7 +265,7 @@ class FsOutput:
         if revid is not None:
             rev["revid"] = revid
 
-        header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
+        header = f"\n --page-- {json.dumps(rev, sort_keys=True)}\n"
         self.revfile.write(header)
         self.revfile.write(txt)
         self.seen[title] = rev
@@ -292,7 +293,7 @@ class FsOutput:
                         rev["revid"] = revid
                     self.seen[title] = rev
 
-                    header = "\n --page-- %s\n" % json.dumps(rev, sort_keys=True)
+                    header = f"\n --page-- {json.dumps(rev, sort_keys=True)}\n"
                     self.revfile.write(header)
                     self.revfile.write(txt)
 
@@ -370,7 +371,6 @@ def _download_with_retries(client, url, path, temp_path, retry_policy):
 
 
 def _acquire_download_rate_limit(url):
-    global _download_rate_limiter, _download_rate_limiter_rps
     max_rps = conf.get("fetch", "max_requests_per_second", 1, int)
     if max_rps <= 0:
         return
@@ -385,15 +385,17 @@ def _acquire_download_rate_limit(url):
             _download_rate_limiter[origin] = limiter
             _download_rate_limiter_rps[origin] = max_rps
             logger.info(
-                f"Download rate limiter initialized for {origin}: {max_rps} requests/second"
+                "Download rate limiter initialized for %s: %s requests/second", origin, max_rps
             )
 
     limiter.acquire()
 
 
-def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backoff_factor=2):
+def download_to_file(  # noqa: PLR0913  # public signature, keyword defaults
+    url, path, temp_path, max_retries=0, initial_delay=1, backoff_factor=2
+):
     """Download a file from a URL to a local path with exponential backoff for HTTP 429 errors."""
-    logger.debug(f"Starting download: {url}")
+    logger.debug("Starting download: %s", url)
     client = _get_download_client(url)
     retry_policy = _build_download_retry_policy(max_retries, initial_delay, backoff_factor)
     _acquire_download_rate_limit(url)
@@ -401,7 +403,7 @@ def download_to_file(url, path, temp_path, max_retries=0, initial_delay=1, backo
 
 
 class Fetcher:
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0915  # legacy constructor; public signature
         self,
         api,
         fsout,
@@ -471,14 +473,18 @@ class Fetcher:
         self.fetch_license_checker = None
         if conf.get("bigquery", "enabled", False, bool):
             try:
-                from mwlib.network.bigquery_lookup import BigQueryImageLookup
+                from mwlib.network.bigquery_lookup import (  # noqa: PLC0415  # optional heavy dependency
+                    BigQueryImageLookup,
+                )
 
                 self.bq_lookup = BigQueryImageLookup()
             except Exception:
                 logger.warning("BigQuery lookup init failed, using remote API", exc_info=True)
 
         if self.bq_lookup and self.bq_lookup.is_available:
-            from mwlib.rendering.licensechecker import LicenseChecker
+            from mwlib.rendering.licensechecker import (  # noqa: PLC0415  # avoid import cycle
+                LicenseChecker,
+            )
 
             self.fetch_license_checker = LicenseChecker(
                 image_db=None,
@@ -538,15 +544,13 @@ class Fetcher:
         parameters = DEPRECATED_ALBUM_INFOBOX_PARAMS
         escaped_parameters = [re.escape(param) for param in parameters]
         delete_pattern = r"^\|\s*(?:" + "|".join(escaped_parameters) + r")\s*=\s*.*\n"
-        text = re.sub(delete_pattern, "", text, flags=re.MULTILINE)
-
-        return text
+        return re.sub(delete_pattern, "", text, flags=re.MULTILINE)
 
     def expand_templates_from_revid(self, revid):
         res = self.api.do_request(
             action="query", prop="revisions", rvprop="content", revids=str(revid)
         )
-        page = list(res["pages"].values())[0]
+        page = next(iter(res["pages"].values()))
 
         title = page["title"]
         text = page["revisions"][0]["*"]
@@ -570,7 +574,7 @@ class Fetcher:
     def expand_templates_from_title(self, title):
         nsnum, _, _ = self.nshandler.splitname(title)
 
-        text = "{{:%s}}" % title if nsnum == 0 else "{{%s}}" % title
+        text = f"{{{{:{title}}}}}" if nsnum == 0 else f"{{{{{title}}}}}"
 
         # produces deprecated output format, might have to add prop param and handle output
         # check https://commons.wikimedia.org/w/api.php?action=help&modules=expandtemplates
@@ -675,6 +679,7 @@ class Fetcher:
         result = [r for r in self.revisions if r.get("title") == title or r.get("revid") == title]
         if result:
             return result[0]["text"]
+        return None
 
     def calculate_hash_from_timeline_content(self, timeline_content):
         return sha1(timeline_content.encode("utf-8")).hexdigest()
@@ -688,8 +693,7 @@ class Fetcher:
         identifier = f"{height}x{width}x{latitude}x{longitude}x{zoom}"
         digest = sha1()
         digest.update(identifier.encode("utf8"))
-        ident = digest.hexdigest()
-        return ident
+        return digest.hexdigest()
 
     def find_timeline_tags_from_rev_content(self, content):
         if not content:
@@ -1176,7 +1180,7 @@ class Fetcher:
         for local_name, _ in local_names:
             self._refcall(self.get_image_edits, local_name, api)
 
-    def _flush_bq_batch(self):
+    def _flush_bq_batch(self):  # noqa: PLR0912  # legacy batch flush, kept as one unit
         """Send all pending titles to BigQuery in a single query.
 
         Titles found in BigQuery are stored locally. Missing titles fall back
@@ -1503,13 +1507,13 @@ class Fetcher:
         # Process any pending authors batch
         self.lookup_contributors_for_remaining_titles()
         for api in self.titles_pending_contributor_lookup:
-            logger.info(f"did {api.request_counter} requests to {api.baseurl}")
+            logger.info("did %s requests to %s", api.request_counter, api.baseurl)
         self.fsout.write_redirects(self.redirects)
         self.fsout.write_licenses(self.licenses)
         self.fsout.close()
 
     def _refcall(self, fun, *args, **kw):
-        """Increment refcount, schedule call of fun and decrement refcount after fun has finished."""
+        """Increment refcount, schedule fun and decrement refcount once fun has finished."""
         self.count_total += 1
         self.report()
         return self._refcall_noinc(fun, *args, **kw)
@@ -1529,5 +1533,4 @@ class Fetcher:
 
 def pages_from_metabook(meta_book):
     articles = meta_book.get_articles()
-    pages = [(article.title, article.revision) for article in articles]
-    return pages
+    return [(article.title, article.revision) for article in articles]

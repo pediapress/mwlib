@@ -10,6 +10,8 @@ load_dotenv(find_dotenv())
 
 logger = logging.getLogger("mwlib.utils.conf")
 
+_ENV_KEY_PARTS = 2  # MWLIB_<SECTION>_<OPTION>
+
 
 class ConfigSection:
     """Wrapper for a config section to allow attribute-style access to options."""
@@ -97,7 +99,7 @@ class ConfMod:
             "mwlib.ini",  # Local directory config
         ]
         found_files = self.config.read(config_files)
-        logger.debug(f"found {len(found_files)} config files: {found_files}")
+        logger.debug("found %d config files: %s", len(found_files), found_files)
 
         # Override with environment variables
         self._load_from_env()
@@ -113,7 +115,7 @@ class ConfMod:
         for key, value in os.environ.items():
             if key.startswith(prefix):
                 parts = key[len(prefix) :].lower().split("_", 1)
-                if len(parts) == 2:
+                if len(parts) == _ENV_KEY_PARTS:
                     section, option = parts
                     if section == "default":
                         section = "DEFAULT"
@@ -126,12 +128,11 @@ class ConfMod:
         try:
             if type_ is bool:
                 return self.config.getboolean(section, option)
-            elif type_ is int:
+            if type_ is int:
                 return self.config.getint(section, option)
-            elif type_ is float:
+            if type_ is float:
                 return self.config.getfloat(section, option)
-            else:
-                return self.config.get(section, option)
+            return self.config.get(section, option)
         except (configparser.NoSectionError, configparser.NoOptionError):
             return fallback
 

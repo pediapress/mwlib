@@ -1,6 +1,7 @@
 # Copyright (c) 2007-2009 PediaPress GmbH
 # See README.rst for additional licensing information.
 
+import errno
 import logging
 import os
 import shutil
@@ -18,12 +19,15 @@ from mwlib.core.authors import get_authors
 from mwlib.parser import advtree
 from mwlib.parser.expander import Expander, find_template, get_template_args, get_templates
 from mwlib.parser.refine import uparser
+from mwlib.parser.templ.misc import DictDB
 from mwlib.parser.templ.parser import parse
 from mwlib.utils import myjson as json
 from mwlib.utils import unorganized
 from mwlib.utils.unorganized import python2sort
 
 log = logging.getLogger(__name__)
+
+_MIN_TEMPLATE_ARG_LEN = 3
 
 
 class Page:
@@ -49,15 +53,13 @@ class DumbJsonDB:
         val = self.database.get(key, "")
         if val:
             return json.loads(val)
-        else:
-            return None
+        return None
 
     def get(self, key, default=None):
         res = self[key]
         if res is None:
             return default
-        else:
-            return res
+        return res
 
     def items(self):
         return list(self.database.items())
@@ -86,7 +88,7 @@ class NuWiki:
             try:
                 os.makedirs(directory_path)
             except OSError as exc:
-                if exc.errno != 17:  # file exists
+                if exc.errno != errno.EEXIST:
                     raise
 
         self.excluded = {x.get("title") for x in self._loadjson("excluded.json", [])}
@@ -154,7 +156,7 @@ class NuWiki:
             if not os.path.exists(file_name):
                 break
             count += 1
-            log.info(f"reading {file_name}")
+            log.info("reading %s", file_name)
             with open(self._pathjoin(file_name), "rb") as f:
                 file_content = str(f.read(), "utf-8")
             pages = file_content.split("\n --page-- ")
@@ -174,7 +176,7 @@ class NuWiki:
 
         tmp = list(self.revisions.items())
         python2sort(tmp, reverse=True)
-        for revid, page in tmp:
+        for _revid, page in tmp:
             title = page.title
             if title not in self.revisions:
                 self.revisions[title] = page
@@ -207,8 +209,7 @@ class NuWiki:
         return self.revisions.get(name) or self.revisions.get(oldname)
 
     def get_page(self, name, revision=None):
-        retval = self._get_page(name, revision=revision)
-        return retval
+        return self._get_page(name, revision=revision)
 
     def normalize_and_get_page(self, name, defaultns):
         fqname = self.nshandler.get_fqname(name, defaultns=defaultns)
@@ -218,9 +219,9 @@ class NuWiki:
         if not isinstance(name, str):
             raise ValueError("name must be a string")
         name = urllib.parse.unquote(str(name))
-        namespace, partial, fqname = self.nshandler.splitname(name, defaultns=6)
-        if namespace != 6:
-            return
+        namespace, partial, fqname = self.nshandler.splitname(name, defaultns=nshandling.NS_FILE)
+        if namespace != nshandling.NS_FILE:
+            return None
 
         if "/" in fqname:
             return None
@@ -235,7 +236,7 @@ class NuWiki:
             path = self._pathjoin("images", unorganized.fs_escape(canonical_fqname))
             if not self._exists(path):
                 # Last resort: try other variations
-                log.debug(f"Image not found: {fqname} or {canonical_fqname}")
+                log.debug("Image not found: %s or %s", fqname, canonical_fqname)
                 return None
 
         hex_digest = sha256(canonical_fqname.encode("utf-8")).hexdigest()
@@ -249,33 +250,31 @@ class NuWiki:
         safe_path = self._pathjoin("images", "safe", hex_digest)
         log.debug(safe_path)
         if not os.path.exists(safe_path):
-            log.debug("no such file: %s" % safe_path)
+            log.debug("no such file: %s", safe_path)
             try:
                 link_target = os.path.join("..", unorganized.fs_escape(canonical_fqname))
                 log.debug(link_target)
                 os.symlink(link_target, safe_path)
             except OSError as exc:
-                if exc.errno != 17:  # File exists
+                if exc.errno != errno.EEXIST:
                     raise
-        assert os.path.islink(safe_path), "symlink failed: %s" % safe_path
-        assert os.path.exists(safe_path), "file does not exist: %s" % safe_path
-        assert os.path.getsize(safe_path) > 0, "symlink failed: %s" % safe_path
+        assert os.path.islink(safe_path), f"symlink failed: {safe_path}"
+        assert os.path.exists(safe_path), f"file does not exist: {safe_path}"
+        assert os.path.getsize(safe_path) > 0, f"symlink failed: {safe_path}"
         return safe_path
 
     def get_data(self, name):
         return self._loadjson(name + ".json")
 
     def articles(self):
-        res = sorted({p.title for p in self.revisions.values() if p.ns == 0})
-        return res
+        return sorted({p.title for p in self.revisions.values() if p.ns == 0})
 
     def select(self, start, end):
         res = set()
         for paragraph in self.revisions.values():
             if start <= paragraph.title <= end:
                 res.add(paragraph.title)
-        res = sorted(res)
-        return res
+        return sorted(res)
 
     def extract_html(self, parsed_html):
         html = {}
@@ -292,7 +291,7 @@ def extract_member(zipfile, member, dstdir):
     file on the path targetpath.
     """
     if not dstdir.endswith(os.path.sep):
-        raise ValueError("Bad destination directory: %r - / missing at end" % dstdir)
+        raise ValueError(f"Bad destination directory: {dstdir!r} - / missing at end")
 
     file_name = member.filename
     targetpath = os.path.normpath(os.path.join(dstdir, file_name))
@@ -341,8 +340,8 @@ class Adapt:
     def __getattr__(self, name):
         try:
             return getattr(self.nuwiki, name)
-        except AttributeError:
-            raise AttributeError()
+        except AttributeError as exc:
+            raise AttributeError() from exc
 
     def __getstate__(self):
         return self.__dict__
@@ -356,14 +355,12 @@ class Adapt:
             base_url += "/"
         script_extension = self.nfo.get("script_extension") or ".php"
 
-        index_url_prefix = "%sindex%s?" % (base_url, script_extension)
+        index_url_prefix = f"{base_url}index{script_extension}?"
         if revision is not None:
-            return index_url_prefix + "oldid=%s" % revision
-        else:
-            fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
-            return index_url_prefix + "title=%s" % urllib.parse.quote(
-                fqtitle.replace(" ", "_").encode("utf-8"), safe=":/@"
-            )
+            return index_url_prefix + f"oldid={revision}"
+        fqtitle = self.nshandler.get_fqname(name, defaultns=defaultns)
+        quoted_title = urllib.parse.quote(fqtitle.replace(" ", "_").encode("utf-8"), safe=":/@")
+        return index_url_prefix + f"title={quoted_title}"
 
     def get_description_url(self, name):
         return self.get_url(name, defaultns=nshandling.NS_FILE)
@@ -379,26 +376,22 @@ class Adapt:
 
     def _get_authors(self, fqname):
         if getattr(self.nuwiki, "authors", None) is not None:
-            authors = self.nuwiki.authors[fqname]
-            return authors
-        else:
-            if self.edits is None:
-                edits = self.edits = {}
-                for edit in self.nuwiki.get_data("edits") or []:
-                    try:
-                        edits[edit["title"]] = edit.get("revisions")
-                    except KeyError:
-                        continue
+            return self.nuwiki.authors[fqname]
+        if self.edits is None:
+            edits = self.edits = {}
+            for edit in self.nuwiki.get_data("edits") or []:
+                try:
+                    edits[edit["title"]] = edit.get("revisions")
+                except KeyError:
+                    continue
 
-            revisions = self.edits.get(fqname, [])
-            authors = get_authors(revisions)
-
-            return authors
+        revisions = self.edits.get(fqname, [])
+        return get_authors(revisions)
 
     def get_source(self, title, revision=None):
         general_info = self.siteinfo["general"]
         return metabook.Source(
-            name="%s (%s)" % (general_info["sitename"], general_info["lang"]),
+            name=f"{general_info['sitename']} ({general_info['lang']})",
             url=general_info["base"],
             language=general_info["lang"],
             base_url=self.nfo["base_url"],
@@ -408,8 +401,7 @@ class Adapt:
     def get_html(self, title, revision=None):
         if revision:
             return self.nuwiki.html.get(revision, {})
-        else:
-            return self.nuwiki.html.get(title, {})
+        return self.nuwiki.html.get(title, {})
 
     def get_parsed_article(self, title, revision=None):
         if revision:
@@ -436,25 +428,23 @@ class Adapt:
         )
 
     def get_licenses(self):
-        from mwlib.core import metabook
-
         licenses = self.nuwiki.get_data("licenses") or []
         res = []
-        for license in licenses:
-            if isinstance(license, dict):
+        for license_ in licenses:
+            if isinstance(license_, dict):
                 res.append(
                     metabook.License(
-                        title=license["title"], wikitext=license["wikitext"], _wiki=self
+                        title=license_["title"], wikitext=license_["wikitext"], _wiki=self
                     )
                 )
-            elif isinstance(license, metabook.License):
-                res.append(license)
-                license._wiki = self
+            elif isinstance(license_, metabook.License):
+                res.append(license_)
+                license_._wiki = self
         return res
 
     def clear(self):
         if self.was_tmpdir and os.path.exists(self.nuwiki.path):
-            print("removing %r" % self.nuwiki.path)
+            print(f"removing {self.nuwiki.path!r}")
             shutil.rmtree(self.nuwiki.path, ignore_errors=True)
 
     def get_disk_path(self, name, size=None):
@@ -469,12 +459,10 @@ class Adapt:
         return self.get_page(fqname)
 
     def get_image_templates(self, name, wikidb=None):
-        from mwlib.parser.expander import get_templates
-
         page = self.get_image_description_page(name)
         if page is not None:
             return get_templates(page.rawtext)
-        log.error("no such image: %r" % name)
+        log.error("no such image: %r", name)
         return []
 
     def get_image_templates_and_args(self, name, wikidb=None):
@@ -495,15 +483,9 @@ class Adapt:
                     return set(cached)
 
         # Fall back to wikitext parsing
-        from mwlib.parser.expander import get_templates
-
         page = self.get_image_description_page(name)
         if page is not None:
             templates = get_templates(page.rawtext)
-            from mwlib.parser.expander import find_template
-            from mwlib.parser.templ.evaluate import Expander
-            from mwlib.parser.templ.misc import DictDB
-            from mwlib.parser.templ.parser import parse
 
             args = set()
             exp = Expander("", wikidb=DictDB())
@@ -513,7 +495,11 @@ class Adapt:
                 tmpl = find_template(None, template, parsed_raw[:])
                 arg_list = tmpl[1]
                 for arg in arg_list:
-                    if isinstance(arg, str) and len(arg) > 3 and " " not in arg:
+                    if (
+                        isinstance(arg, str)
+                        and len(arg) > _MIN_TEMPLATE_ARG_LEN
+                        and " " not in arg
+                    ):
                         args.add(arg)
             templates.update(args)
             return templates
@@ -542,9 +528,9 @@ class Adapt:
 def get_contributors_from_information_template(raw, title, wikidb):
     def get_user_links(raw):
         def is_user_link(node):
-            return isinstance(node, parser.NamespaceLink) and node.namespace == 2  # NS_USER
+            return isinstance(node, parser.NamespaceLink) and node.namespace == nshandling.NS_USER
 
-        result = sorted(
+        return sorted(
             {
                 u.target
                 for u in uparser.parse_string(
@@ -554,7 +540,6 @@ def get_contributors_from_information_template(raw, title, wikidb):
                 ).filter(is_user_link)
             }
         )
-        return result
 
     def get_authors_from_template_args(template):
         args = get_template_args(template, expander)
