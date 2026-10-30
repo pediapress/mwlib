@@ -2,15 +2,19 @@
 
 All notable changes to mwlib are recorded here, newest first. Each release header carries the publication date and the released version. PyPI: <https://pypi.org/project/mwlib/>.
 
-## Unreleased
+## 2026-10-30 mwlib 0.19.0
 
 - **BigQuery removed; image description pages come from a local SQLite file store.** `mwlib.network.file_store` (`FileStore`, `FileStoreImageLookup`) replaces `mwlib.network.bigquery_lookup`; `Fetcher` keeps the same lookup flow (batched lookup, early license check, deferred downloads, remote-API fallback on a miss) and a missing or unreadable store falls back to the remote API.
 - **Config change.** The `[bigquery]` section and `MWLIB_BIGQUERY_*` variables are gone. Set `[filestore] path` (or `MWLIB_FILESTORE_PATH`) to enable the lookup; `domains` keeps its default of `en.wikipedia.org`. The lookup is off while `path` is empty.
 - **`wme-ingest` replaced by `mw-file-store`.** It builds the SQLite store straight from the WME NS6 chunked snapshot — chunk-version manifest (an unchanged snapshot is not re-downloaded), flock against concurrent builds, `quick_check`, minimum-rows and maximum-shrink validation, atomic rename. Needs only `WME_USERNAME` / `WME_PASSWORD`.
+- `mw-file-store` accepts `--min-rows` and `--max-shrink` to adjust the safety checks that refuse a suspiciously small new store, writes chunk files under local names (not the remote chunk identifier), fsyncs the new file before the atomic rename, and exits 1 with a logged error (not a traceback) when a build is refused.
+- Whether the store is usable is decided once when a `Fetcher` starts, so image-download deferral and the license checker cannot disagree mid-fetch; a store that disappears later just makes lookups miss and the remote API takes over.
+- `[filestore] domains` must only list wikis whose File namespace is called `File`: the store is keyed by English `File:` titles.
 - The `bigquery` extra and the `google-cloud-bigquery` dependency are removed.
+- Internal: ruff findings cleared in `network/fetch.py`, `core/nuwiki.py` and `utils/_conf.py` with no behaviour change (the unused `urllib.request` / `HTTPError` imports are gone from `fetch.py`).
 - `Fetcher` internals renamed accordingly (`bq_lookup` → `image_lookup`, `BqTemplatesError` → `TemplatesError`, `_flush_bq_batch` → `_flush_lookup_batch`, …).
 
-**Upgrading.** Build a store with `mw-file-store --path <file>` and set `MWLIB_FILESTORE_PATH` for every process that runs `mw-zip` / `make_nuwiki`; drop `MWLIB_BIGQUERY_*` and BigQuery credentials from those environments.
+**Upgrading (breaking).** `wme-ingest`, the `bigquery` extra and the `[bigquery]` config are gone. Build a store with `mw-file-store --path <file>` and set `MWLIB_FILESTORE_PATH` for every process that runs `mw-zip` / `make_nuwiki`; drop `MWLIB_BIGQUERY_*` and BigQuery credentials from those environments.
 
 ## 2026-05-05 mwlib 0.18.8
 
