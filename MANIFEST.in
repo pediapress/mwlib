@@ -55,7 +55,7 @@ include setup.py
 include src/mwlib/apps/__init__.py
 include src/mwlib/apps/buildzip.py
 include src/mwlib/apps/executor.py
-include src/mwlib/apps/fetch_wikimedia_snapshot.py
+include src/mwlib/apps/file_store_builder.py
 include src/mwlib/apps/make_nuwiki.py
 include src/mwlib/apps/render.py
 include src/mwlib/apps/utils.py
@@ -81,10 +81,10 @@ include src/mwlib/extensions/timeline.py
 include src/mwlib/network/__init__.py
 include src/mwlib/network/api.py
 include src/mwlib/network/auth.py
-include src/mwlib/network/bigquery_lookup.py
 include src/mwlib/network/client.py
 include src/mwlib/network/fetch.py
 include src/mwlib/network/fetch_siteinfo.py
+include src/mwlib/network/file_store.py
 include src/mwlib/network/http_client.py
 include src/mwlib/network/infobox.py
 include src/mwlib/network/known_sites/siteinfo-de.json
@@ -105,6 +105,7 @@ include src/mwlib/network/sapi.py
 include src/mwlib/network/siteinfo.py
 include src/mwlib/network/transport.py
 include src/mwlib/network/trustedrevs.py
+include src/mwlib/network/wme.py
 include src/mwlib/network/workflow.py
 include src/mwlib/parser/__init__.py
 include src/mwlib/parser/advtree.py
@@ -521,15 +522,16 @@ include src/qs/slave.py
 include tasks.md
 include tests/conftest.py
 include tests/mwlib/apps/test_buildzip.py
-include tests/mwlib/apps/test_fetch_wikimedia_snapshot.py
+include tests/mwlib/apps/test_file_store_builder.py
 include tests/mwlib/canthus.mb.json
 include tests/mwlib/core/test_authors.py
 include tests/mwlib/core/test_metabook.py
 include tests/mwlib/kolumne.mb.json
 include tests/mwlib/memeater.py
-include tests/mwlib/network/test_bigquery_lookup.py
 include tests/mwlib/network/test_fetch.py
+include tests/mwlib/network/test_fetch_image_lookup.py
 include tests/mwlib/network/test_fetch_siteinfo.py
+include tests/mwlib/network/test_file_store.py
 include tests/mwlib/network/test_http_client.py
 include tests/mwlib/network/test_sapi.py
 include tests/mwlib/rl/renderhelper.py
