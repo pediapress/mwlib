@@ -59,32 +59,12 @@ lint.pep8-naming.classmethod-decorators = [
 lint.per-file-ignores."**/migrations/*.py" = [
     "N806",
 ] # ignore variable in function should be lowercase
-# WME ingest CLI uses lazy imports for ``google-cloud-bigquery`` (declared as
-# an *optional* extra in pyproject.toml under ``mwlib[bigquery]``) so the
-# default install stays slim. Top-level imports would force the heavy
-# Google/gRPC stack on every consumer. The complexity warnings reflect a
-# real CLI orchestrator that's been deliberately kept linear; refactoring is
-# out of scope for the chunked-ingest work.
-lint.per-file-ignores."src/mwlib/apps/fetch_wikimedia_snapshot.py" = [
-    "PLC0415", # `import` should be at the top-level (lazy optional-dep imports)
-    "PLR0912", # too many branches (CLI orchestrator)
-    "PLR0913", # too many arguments (load-job helpers)
-    "PLR0915", # too many statements (CLI orchestrator)
-]
 # Template-magic dispatch. Function names like ``TITLEPARTS`` / ``IFERROR``
 # match MediaWiki magic-word names by design — the dispatcher maps
 # ``{{TITLEPARTS:…}}`` to ``ParserFunctions.TITLEPARTS`` by string match —
 # so renaming for PEP-8 would break wiki templates. The rest of the rules
 # below cover legacy patterns (lazy imports, unnecessary assigns, f-string
 # preferences) in a file that pre-dates the modern ruff config.
-# Tests — magic values in assertions and lazy imports for SDK-specific
-# bigquery enums are conventional test patterns; the regex-pattern
-# pickiness in ``RUF043`` doesn't matter for plain-substring matches.
-lint.per-file-ignores."tests/mwlib/apps/test_fetch_wikimedia_snapshot.py" = [
-    "PLC0415", # `import` should be at the top-level (lazy SDK imports)
-    "PLR2004", # magic value in comparison (intentional in test asserts)
-    "RUF043",  # ``match=`` pattern with metacharacters (substring matches)
-]
 # Build orchestration for the file store: ``build_file_store`` / ``_build`` take
 # the chunk source callbacks and paths as explicit arguments so the build can be
 # driven by tests with fakes; bundling them would only hide that.

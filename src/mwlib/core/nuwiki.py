@@ -466,7 +466,7 @@ class Adapt:
         return []
 
     def get_image_templates_and_args(self, name, wikidb=None):
-        # Check pre-extracted templates (from BigQuery) first.
+        # Check pre-extracted templates (from the file store) first.
         # DumbJsonDB returns None for missing keys, so a try/except KeyError
         # is unnecessary; we just keep walking the candidate names until one
         # matches, falling through to wikitext parsing if none do.
@@ -508,10 +508,10 @@ class Adapt:
     def get_contributors(self, name, wikidb=None):
         page = self.get_image_description_page(name)
         if page is None:
-            # BigQuery-backed images skip the description-page fetch but
+            # File-store-backed images skip the description-page fetch but
             # ``Fetcher.get_image_edits`` still populates ``authors.db``
             # with the remote contributor lookup. Read from there before
-            # falling through to an empty list, otherwise BigQuery hits
+            # falling through to an empty list, otherwise file store hits
             # would render with no attribution at all.
             _, partial, fqname = self.nshandler.splitname(name, nshandling.NS_FILE)
             return (

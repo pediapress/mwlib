@@ -28,6 +28,7 @@ from mwlib.core import nshandling
 from mwlib.network import sapi as mwapi
 from mwlib.network import transport as network_transport
 from mwlib.network import workflow as network_workflow
+from mwlib.network.file_store import FileStoreImageLookup
 from mwlib.network.http_client import HttpClientManager
 from mwlib.network.infobox import DEPRECATED_ALBUM_INFOBOX_PARAMS
 from mwlib.network.sapi import MwApi
@@ -44,8 +45,8 @@ _PROGRESS_ESTIMATE_THRESHOLD = 50
 _PROGRESS_RAMP_SECONDS = 60.0
 
 
-class BqTemplatesError(ValueError):
-    """A BigQuery row's ``templates`` field couldn't be parsed.
+class TemplatesError(ValueError):
+    """A file store row's ``templates`` field couldn't be parsed.
 
     The flush loop catches this and reroutes the title to the remote-API
     fallback rather than persisting a row whose license-check input is
@@ -465,23 +466,20 @@ class Fetcher:
         self.imagedescription_todo = {}  # base path -> list
         self._nshandler = None
 
-        # BigQuery lookup for image description pages
-        self.bq_lookup = None
-        self._bq_pending = []  # (local_name, api, original_title) tuples awaiting BQ lookup
-        self._bq_batch_size = 50  # flush threshold
-        self._bq_deferred_downloads = {}  # original_title → thumburl, awaiting license check
+        # File store lookup for image description pages
+        self.image_lookup = None
+        # (local_name, api, original_title) tuples awaiting store lookup
+        self._lookup_pending = []
+        self._lookup_batch_size = 50  # flush threshold
+        self._deferred_downloads = {}  # original_title → thumburl, awaiting license check
         self.fetch_license_checker = None
-        if conf.get("bigquery", "enabled", False, bool):
+        if conf.get("filestore", "path", ""):
             try:
-                from mwlib.network.bigquery_lookup import (  # noqa: PLC0415  # optional heavy dependency
-                    BigQueryImageLookup,
-                )
-
-                self.bq_lookup = BigQueryImageLookup()
+                self.image_lookup = FileStoreImageLookup()
             except Exception:
-                logger.warning("BigQuery lookup init failed, using remote API", exc_info=True)
+                logger.warning("File store lookup init failed, using remote API", exc_info=True)
 
-        if self.bq_lookup and self.bq_lookup.is_available:
+        if self.image_lookup and self.image_lookup.is_available:
             from mwlib.rendering.licensechecker import (  # noqa: PLC0415  # avoid import cycle
                 LicenseChecker,
             )
@@ -591,14 +589,14 @@ class Fetcher:
         dispatch_gr = gevent.spawn(call_when, self.dispatch_event, self.dispatch)
         try:
             self.pool.join()
-            # Small batches that never reached ``_bq_batch_size`` are still
-            # sitting in ``_bq_pending`` here. Flushing them spawns new
+            # Small batches that never reached ``_lookup_batch_size`` are still
+            # sitting in ``_lookup_pending`` here. Flushing them spawns new
             # greenlets (image downloads + remote-API fallbacks) on
             # ``self.pool``, so we have to join the pool a second time —
             # otherwise ``finish()`` would close fsout while those
             # greenlets were still writing to it.
-            if self.bq_lookup and self._bq_pending:
-                self._flush_bq_batch()
+            if self.image_lookup and self._lookup_pending:
+                self._flush_lookup_batch()
                 self.pool.join()
         except BaseException:
             # The fetch was interrupted (e.g. a Celery soft time limit or a
@@ -1064,14 +1062,14 @@ class Fetcher:
             if not description_url:
                 description_url = image.get("fullurl", "")
 
-            # Defer download for BigQuery-eligible domains (license check first)
+            # Defer download for store-eligible domains (license check first)
             if (
-                self.bq_lookup
-                and self.bq_lookup.is_available
+                self.image_lookup
+                and self.image_lookup.is_available
                 and description_url
-                and self.bq_lookup.handles_domain(description_url)
+                and self.image_lookup.handles_domain(description_url)
             ):
-                self._bq_deferred_downloads[title] = thumb_url
+                self._deferred_downloads[title] = thumb_url
             else:
                 self.schedule_download_image(thumb_url, title)
 
@@ -1126,13 +1124,15 @@ class Fetcher:
         if not titles:
             return
 
-        bq_eligible = (
-            self.bq_lookup and self.bq_lookup.is_available and self.bq_lookup.handles_domain(path)
+        lookup_eligible = (
+            self.image_lookup
+            and self.image_lookup.is_available
+            and self.image_lookup.handles_domain(path)
         )
 
         # Build the api / siteinfo lazily so a flaky remote can't kill a
-        # working BigQuery cache hit. If BQ would handle this path we can
-        # fall back to the EN nshandler — BigQuery snapshots are EN-keyed
+        # working file store hit. If the store would handle this path we can
+        # fall back to the EN nshandler — the store is EN-keyed
         # ("File:...") so that's the canonical name shape we need for the
         # lookup.
         api = None
@@ -1142,10 +1142,10 @@ class Fetcher:
             siteinfo = self.get_siteinfo_for(api)
             nsname = nshandling.NsHandler(siteinfo).get_nsname_by_number(6)
         except Exception:
-            if not bq_eligible:
+            if not lookup_eligible:
                 raise
             logger.warning(
-                "Remote siteinfo failed for %s; proceeding via BigQuery only",
+                "Remote siteinfo failed for %s; proceeding via the file store only",
                 path,
                 exc_info=True,
             )
@@ -1156,15 +1156,15 @@ class Fetcher:
             partial = title.split(":", 1)[1]
             local_names.append((f"{nsname}:{partial}", title))
 
-        if bq_eligible:
+        if lookup_eligible:
             for local_name, orig_title in local_names:
-                self._bq_pending.append((local_name, api, orig_title))
-            if len(self._bq_pending) >= self._bq_batch_size:
-                self._flush_bq_batch()
+                self._lookup_pending.append((local_name, api, orig_title))
+            if len(self._lookup_pending) >= self._lookup_batch_size:
+                self._flush_lookup_batch()
             # Contributor lookup needs the remote API. If api creation
-            # failed above we don't schedule it; ``_flush_bq_batch`` then
+            # failed above we don't schedule it; ``_flush_lookup_batch`` then
             # fails closed for those entries (drops the deferred image
-            # download regardless of whether BigQuery had a hit), so the
+            # download regardless of whether the store had a hit), so the
             # rendered book never includes an image with license data
             # but no attribution.
             if api is not None:
@@ -1172,7 +1172,7 @@ class Fetcher:
                     self._refcall(self.get_image_edits, local_name, api)
             return
 
-        # Non-BigQuery path: unchanged
+        # Non-store path: unchanged
         just_names = [ln for ln, _ in local_names]
         for block in split_blocks(just_names, api.api_request_limit):
             self._refcall(self.fetch_image_page, block, api)
@@ -1180,21 +1180,21 @@ class Fetcher:
         for local_name, _ in local_names:
             self._refcall(self.get_image_edits, local_name, api)
 
-    def _flush_bq_batch(self):  # noqa: PLR0912  # legacy batch flush, kept as one unit
-        """Send all pending titles to BigQuery in a single query.
+    def _flush_lookup_batch(self):  # noqa: PLR0912  # legacy batch flush, kept as one unit
+        """Look up all pending titles in the file store in one batch.
 
-        Titles found in BigQuery are stored locally. Missing titles fall back
+        Titles found in the store are stored locally. Missing titles fall back
         to the remote API. Deferred image downloads are scheduled or skipped
         based on the license check result.
         """
-        if not self._bq_pending:
+        if not self._lookup_pending:
             return
 
-        pending = self._bq_pending
-        self._bq_pending = []
+        pending = self._lookup_pending
+        self._lookup_pending = []
 
         # Build mappings: local_name → api, local_name → original_title
-        # Deduplicate titles for the BigQuery query
+        # Deduplicate titles for the store query
         api_by_local = {}
         orig_by_local = {}
         seen = set()
@@ -1206,52 +1206,50 @@ class Fetcher:
                 seen.add(local_name)
                 unique_titles.append(local_name)
 
-        rows, missing = self.bq_lookup.fetch_batch(unique_titles)
+        rows, missing = self.image_lookup.fetch_batch(unique_titles)
 
-        # Store BigQuery results + license check + deferred downloads.
+        # Store file store results + license check + deferred downloads.
         # Rows with unparseable templates go onto ``missing`` so the
         # remote-API fallback applies the description-page parser
         # instead — silently treating corrupt template data as "no
         # templates" would fail open in blacklist mode.
         #
-        # Entries with ``api=None`` are also fail-closed: BigQuery has
+        # Entries with ``api=None`` are also fail-closed: the store has
         # the license/template data, but ``handle_new_basepath``
         # skipped ``get_image_edits`` because remote-API discovery
         # failed. Downloading the image would produce a rendered book
         # with no contributor attribution, so we drop the deferred
-        # download even on a clean BigQuery hit.
+        # download even on a clean store hit.
         for row in rows:
             local_name = row["name"]
             orig_title = orig_by_local.get(local_name, local_name)
             try:
-                passes_license = self._store_bq_result(row)
-            except BqTemplatesError as exc:
+                passes_license = self._store_lookup_result(row)
+            except TemplatesError as exc:
                 logger.warning("Routing %s to remote-API fallback: %s", local_name, exc)
                 missing.append(local_name)
                 continue
 
             if api_by_local.get(local_name) is None:
-                if orig_title in self._bq_deferred_downloads:
-                    self._bq_deferred_downloads.pop(orig_title, None)
+                if orig_title in self._deferred_downloads:
+                    self._deferred_downloads.pop(orig_title, None)
                     logger.warning(
-                        "Skipping image download for %s: BigQuery has the row "
+                        "Skipping image download for %s: the file store has the row "
                         "but contributor lookup was not scheduled (no remote "
                         "API available) — refusing to ship an unattributed image",
                         orig_title,
                     )
                 continue
 
-            if passes_license and orig_title in self._bq_deferred_downloads:
-                self.schedule_download_image(
-                    self._bq_deferred_downloads.pop(orig_title), orig_title
-                )
+            if passes_license and orig_title in self._deferred_downloads:
+                self.schedule_download_image(self._deferred_downloads.pop(orig_title), orig_title)
             elif not passes_license:
-                self._bq_deferred_downloads.pop(orig_title, None)
+                self._deferred_downloads.pop(orig_title, None)
                 logger.info("Skipping image download for %s (license filtered)", orig_title)
 
         # Fall back to remote API for missing titles. Some entries may
         # have ``api=None`` because ``handle_new_basepath`` proceeded
-        # via BigQuery after a remote-discovery failure — for those we
+        # via the file store after a remote-discovery failure — for those we
         # have no way to fetch the description page, so we must NOT
         # schedule the deferred image download either. Otherwise we'd
         # ship an image with no license/attribution data at all.
@@ -1274,31 +1272,31 @@ class Fetcher:
             fallback_titles = {t for ts in by_api.values() for t in ts}
             for local_name in fallback_titles:
                 orig_title = orig_by_local.get(local_name, local_name)
-                if orig_title in self._bq_deferred_downloads:
+                if orig_title in self._deferred_downloads:
                     self.schedule_download_image(
-                        self._bq_deferred_downloads.pop(orig_title), orig_title
+                        self._deferred_downloads.pop(orig_title), orig_title
                     )
 
             for local_name in without_api:
                 orig_title = orig_by_local.get(local_name, local_name)
-                self._bq_deferred_downloads.pop(orig_title, None)
+                self._deferred_downloads.pop(orig_title, None)
                 logger.warning(
-                    "Skipping %s: BigQuery missed/failed and no remote API "
+                    "Skipping %s: file store missed/failed and no remote API "
                     "fallback is available — refusing to download an image "
                     "without license/attribution data",
                     orig_title,
                 )
 
-    def _store_bq_result(self, row) -> bool:
-        """Store a BigQuery row into fsout databases.
+    def _store_lookup_result(self, row) -> bool:
+        """Store a file store row into fsout databases.
 
         Returns True if the image passes the license check.
         """
         title = row["name"]
 
-        template_names = self._extract_bq_template_names(title, row.get("templates"))
+        template_names = self._extract_template_names(title, row.get("templates"))
 
-        # Store an entry for every BigQuery hit, including the empty list,
+        # Store an entry for every file store hit, including the empty list,
         # so render-time ``get_image_templates_and_args`` can rely on the
         # cache and not silently fall back to wikitext parsing for an image
         # we deliberately decided not to fetch.
@@ -1327,16 +1325,16 @@ class Fetcher:
         return passes_license
 
     @staticmethod
-    def _extract_bq_template_names(title: str, raw_templates) -> list[str]:
-        """Pull the ``Template:Name`` list out of a BigQuery row's templates column.
+    def _extract_template_names(title: str, raw_templates) -> list[str]:
+        """Pull the ``Template:Name`` list out of a file store row's templates column.
 
-        BigQuery returns the column either as a Python list (for native
-        REPEATED RECORD columns) or as a JSON string (for JSON columns).
+        The store holds the column as JSON text; an already-decoded list is
+        accepted too.
         ``None`` and ``[]`` are legitimate "no templates" signals and
         return ``[]``.
 
         Anything we can't parse (malformed JSON, unexpected shape) raises
-        ``BqTemplatesError``. The flush loop catches that and reroutes
+        ``TemplatesError``. The flush loop catches that and reroutes
         the title to the remote-API fallback rather than treating it as
         empty — an empty template list passes ``blacklist`` mode, so
         silently treating corrupt data as empty would fail open and let
@@ -1349,9 +1347,9 @@ class Fetcher:
             try:
                 raw_templates = json.loads(raw_templates)
             except (ValueError, TypeError) as exc:
-                raise BqTemplatesError(f"malformed templates JSON for {title}") from exc
+                raise TemplatesError(f"malformed templates JSON for {title}") from exc
         if not isinstance(raw_templates, list):
-            raise BqTemplatesError(
+            raise TemplatesError(
                 f"templates for {title} is {type(raw_templates).__name__}, expected list"
             )
 
@@ -1367,7 +1365,7 @@ class Fetcher:
             if isinstance(t, dict):
                 name = t.get("name")
                 if not isinstance(name, str) or not name:
-                    raise BqTemplatesError(f"template entry for {title} has no valid name")
+                    raise TemplatesError(f"template entry for {title} has no valid name")
                 if name.startswith("Template:"):
                     name = name[len("Template:") :]
                 template_names.append(name)
@@ -1375,7 +1373,7 @@ class Fetcher:
             if isinstance(t, str) and t:
                 template_names.append(t)
                 continue
-            raise BqTemplatesError(
+            raise TemplatesError(
                 f"template entry for {title} is {type(t).__name__}, expected dict or non-empty str"
             )
         return template_names
@@ -1502,7 +1500,7 @@ class Fetcher:
 
     def finish(self):
         self._sanity_check()
-        # NB: BigQuery batch flushing has already happened in ``run()`` —
+        # NB: lookup batch flushing has already happened in ``run()`` —
         # it spawns greenlets and so must run before the final pool.join().
         # Process any pending authors batch
         self.lookup_contributors_for_remaining_titles()

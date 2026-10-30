@@ -341,8 +341,8 @@ class TestLookupContributors:
         stub.fsout.set_db_key.assert_not_called()
 
 
-class TestFinishDoesNotFlushBQ:
-    """``finish()`` must not run the BigQuery batch flush.
+class TestFinishDoesNotFlushLookup:
+    """``finish()`` must not run the file store batch flush.
 
     The flush has been moved into ``run()`` so that the pool can be
     joined a second time and drain greenlets the flush spawns. If
@@ -351,13 +351,13 @@ class TestFinishDoesNotFlushBQ:
     guarding against.
     """
 
-    def test_finish_does_not_call_flush_bq_batch(self):
+    def test_finish_does_not_call_flush_lookup_batch(self):
         stub = object.__new__(Fetcher)
-        # Pretend there's a pending batch and a working bq_lookup; if
+        # Pretend there's a pending batch and a working image_lookup; if
         # finish() were still flushing, this would be the trigger.
-        stub.bq_lookup = MagicMock()
-        stub._bq_pending = [("File:X.jpg", MagicMock(), "File:X.jpg")]
-        stub._flush_bq_batch = MagicMock()
+        stub.image_lookup = MagicMock()
+        stub._lookup_pending = [("File:X.jpg", MagicMock(), "File:X.jpg")]
+        stub._flush_lookup_batch = MagicMock()
         stub._sanity_check = MagicMock()
         stub.lookup_contributors_for_remaining_titles = MagicMock()
         stub.titles_pending_contributor_lookup = {}
@@ -367,7 +367,7 @@ class TestFinishDoesNotFlushBQ:
 
         stub.finish()
 
-        stub._flush_bq_batch.assert_not_called()
+        stub._flush_lookup_batch.assert_not_called()
         # The closing side effects we DO expect.
         stub._sanity_check.assert_called_once()
         stub.lookup_contributors_for_remaining_titles.assert_called_once()

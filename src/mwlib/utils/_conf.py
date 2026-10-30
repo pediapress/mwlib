@@ -79,12 +79,8 @@ class ConfMod:
             "fetch": {
                 "noedits": "False",
             },
-            "bigquery": {
-                "enabled": "false",
-                "project": "",
-                "dataset": "wme_snapshots",
-                "table": "file_pages",
-                "timeout": "30",
+            "filestore": {
+                "path": "",
                 "domains": "en.wikipedia.org",
             },
         }

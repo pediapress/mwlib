@@ -33,7 +33,6 @@ include docs/metabook.rst
 include docs/renderserver.rst
 include docs/rlwriter.rst
 include docs/writers.rst
-include feature_planning/bigquery-image-description-lookup.md
 include mediawiki/.gitkeep
 include mw-post
 include mwlib/_uscan.cc
